@@ -1385,8 +1385,7 @@
     "table": "Table",
     "gallery": "Card",
     "key": "Primary Key",
-    "select": "Select",
-    "tag": "Tag"
+    "select": "Select"
   },
   "_kernel": {
     "0": "Query notebook failed",

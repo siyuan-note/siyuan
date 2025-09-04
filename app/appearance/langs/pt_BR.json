@@ -1385,8 +1385,7 @@
     "table": "Tabela",
     "gallery": "Cartão",
     "key": "Chave Primária",
-    "select": "Selecionar",
-    "tag": "Etiqueta"
+    "select": "Selecionar"
   },
   "_kernel": {
     "0": "Falha ao consultar o bloco de notas",

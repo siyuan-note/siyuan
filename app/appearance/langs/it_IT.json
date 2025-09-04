@@ -1385,8 +1385,7 @@
     "table": "Tabella",
     "gallery": "Scheda",
     "key": "Chiave primaria",
-    "select": "Seleziona",
-    "tag": "Etichetta"
+    "select": "Seleziona"
   },
   "_kernel": {
     "0": "Query del taccuino fallita",

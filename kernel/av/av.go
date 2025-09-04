@@ -634,15 +634,6 @@ func (av *AttributeView) GetKey(keyID string) (ret *Key, err error) {
 	return
 }
 
-func (av *AttributeView) GetKeyByNameType(keyName string, typ KeyType) (ret []*Key) {
-	for _, kv := range av.KeyValues {
-		if kv.Key.Name == keyName && kv.Key.Type == typ {
-			ret = append(ret, kv.Key)
-		}
-	}
-	return
-}
-
 func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
 	for _, kv := range av.KeyValues {
 		if KeyTypeBlock == kv.Key.Type {

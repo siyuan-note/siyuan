@@ -1385,8 +1385,7 @@
     "table": "Tabla",
     "gallery": "Tarjeta",
     "key": "Clave principal",
-    "select": "Selección",
-    "tag": "Etiqueta"
+    "select": "Selección"
   },
   "_kernel": {
     "0": "Consulta al cuaderno de notas fallido",

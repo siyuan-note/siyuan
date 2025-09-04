@@ -1385,8 +1385,7 @@
     "table": "Tabela",
     "gallery": "Karta",
     "key": "Klucz główny",
-    "select": "Wybierz",
-    "tag": "Tag"
+    "select": "Wybierz"
   },
   "_kernel": {
     "0": "Nie udało się zapytać o notes",

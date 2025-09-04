@@ -3152,6 +3152,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 
 	if !isDetached {
 		bindBlockAv0(tx, avID, node, tree)
+		fillTags(attrView, view, addingItemID, node)
 	}
 
 	// 在所有视图上添加项目
@@ -3195,6 +3196,68 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func fillTags(attrView *av.AttributeView, view *av.View, addingItemID string, node *ast.Node) {
+	// 如果节点上存在标签则将添加标签字段
+
+	var tags []string
+	if ast.NodeDocument == node.Type {
+		if docTagsVal := node.IALAttr("tags"); 0 < len(docTagsVal) {
+			docTags := strings.Split(docTagsVal, ",")
+			for _, t := range docTags {
+				tags = append(tags, t)
+			}
+		}
+	} else {
+		nodeTags := node.ChildrenByType(ast.NodeTextMark)
+		for _, t := range nodeTags {
+			tags = append(tags, t.TextMarkTextContent)
+		}
+	}
+
+	keyName := av.GetAttributeViewI18n("tag")
+	tagKeys := attrView.GetKeyByNameType(keyName, av.KeyTypeMSelect)
+	tagKeyID := ast.NewNodeID()
+	if 1 > len(tagKeys) {
+		blockKey := attrView.GetBlockKey()
+		addAttributeViewKey(attrView, view, av.KeyTypeMSelect, tagKeyID, keyName, "", blockKey.ID)
+	} else {
+		tagKeyID = tagKeys[0].ID
+	}
+
+	if tagKeyValues, _ := attrView.GetKeyValues(tagKeyID); nil != tagKeyValues {
+		val := tagKeyValues.GetValue(addingItemID)
+		if nil == val {
+			val = av.GetAttributeViewDefaultValue(ast.NewNodeID(), tagKeyID, addingItemID, av.KeyTypeMSelect)
+			for _, tag := range tags {
+				val.MSelect = append(val.MSelect, &av.ValueSelect{Content: tag, Color: fmt.Sprintf("%d", 1+rand.Intn(14))})
+			}
+			tagKeyValues.Values = append(tagKeyValues.Values, val)
+		} else {
+			for _, t := range tags {
+				exist := false
+				for _, v := range val.MSelect {
+					if v.Content == t {
+						exist = true
+						break
+					}
+				}
+				if !exist {
+					val.MSelect = append(val.MSelect, &av.ValueSelect{Content: t, Color: fmt.Sprintf("%d", 1+rand.Intn(14))})
+				}
+			}
+		}
+
+		for _, valOpt := range val.MSelect {
+			if opt := tagKeyValues.Key.GetOption(valOpt.Content); nil == opt {
+				opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+				tagKeyValues.Key.Options = append(tagKeyValues.Key.Options, opt)
+			} else {
+				valOpt.Color = opt.Color
+			}
+		}
+	}
 }
 
 func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string) {
@@ -3966,70 +4029,73 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 		return
 	}
 
-	keyTyp := av.KeyType(keyType)
-	switch keyTyp {
+	addAttributeViewKey(attrView, currentView, av.KeyType(keyType), keyID, keyName, keyIcon, previousKeyID)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func addAttributeViewKey(attrView *av.AttributeView, view *av.View, keyType av.KeyType, keyID, keyName, keyIcon, previousKeyID string) {
+	switch keyType {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
 		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 
-		key := av.NewKey(keyID, keyName, keyIcon, keyTyp)
-		if av.KeyTypeRollup == keyTyp {
+		key := av.NewKey(keyID, keyName, keyIcon, keyType)
+		if av.KeyTypeRollup == keyType {
 			key.Rollup = &av.Rollup{Calc: &av.RollupCalc{Operator: av.CalcOperatorNone}}
 		}
 
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
-		for _, view := range attrView.Views {
+		for _, v := range attrView.Views {
 			newField := &av.BaseField{ID: key.ID}
-			if nil != view.Table {
-				newField.Wrap = view.Table.WrapField
+			if nil != v.Table {
+				newField.Wrap = v.Table.WrapField
 
 				if "" == previousKeyID {
-					if av.LayoutTypeGallery == currentView.LayoutType {
+					if av.LayoutTypeGallery == view.LayoutType {
 						// 如果当前视图是卡片视图则添加到最后
-						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
+						v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{BaseField: newField})
 					} else {
-						view.Table.Columns = append([]*av.ViewTableColumn{{BaseField: newField}}, view.Table.Columns...)
+						v.Table.Columns = append([]*av.ViewTableColumn{{BaseField: newField}}, v.Table.Columns...)
 					}
 				} else {
 					added := false
-					for i, column := range view.Table.Columns {
+					for i, column := range v.Table.Columns {
 						if column.ID == previousKeyID {
-							view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{BaseField: newField}}, view.Table.Columns[i+1:]...)...)
+							v.Table.Columns = append(v.Table.Columns[:i+1], append([]*av.ViewTableColumn{{BaseField: newField}}, v.Table.Columns[i+1:]...)...)
 							added = true
 							break
 						}
 					}
 					if !added {
-						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
+						v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{BaseField: newField})
 					}
 				}
 			}
 
-			if nil != view.Gallery {
-				newField.Wrap = view.Gallery.WrapField
+			if nil != v.Gallery {
+				newField.Wrap = v.Gallery.WrapField
 
 				if "" == previousKeyID {
-					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
+					v.Gallery.CardFields = append(v.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
 				} else {
 					added := false
-					for i, field := range view.Gallery.CardFields {
+					for i, field := range v.Gallery.CardFields {
 						if field.ID == previousKeyID {
-							view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{BaseField: newField}}, view.Gallery.CardFields[i+1:]...)...)
+							v.Gallery.CardFields = append(v.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{BaseField: newField}}, v.Gallery.CardFields[i+1:]...)...)
 							added = true
 							break
 						}
 					}
 					if !added {
-						view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
+						v.Gallery.CardFields = append(v.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
 					}
 				}
 			}
 		}
 	}
-
-	err = av.SaveAttributeView(attrView)
-	return
 }
 
 func (tx *Transaction) doUpdateAttrViewColTemplate(operation *Operation) (ret *TxErr) {

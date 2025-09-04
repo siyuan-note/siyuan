@@ -1385,7 +1385,8 @@
     "table": "Tabelle",
     "gallery": "Karte",
     "key": "Primärschlüssel",
-    "select": "Auswählen"
+    "select": "Auswählen",
+    "tag": "Tag"
   },
   "_kernel": {
     "0": "Abfrage des Notizbuchs fehlgeschlagen",

@@ -1385,7 +1385,8 @@
     "table": "Tableau",
     "gallery": "Carte",
     "key": "Clé primaire",
-    "select": "Sélectionner"
+    "select": "Sélectionner",
+    "tag": "Étiquette"
   },
   "_kernel": {
     "0": "Échec du cahier de requêtes",

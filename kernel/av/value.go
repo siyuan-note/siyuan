@@ -673,7 +673,7 @@ func Round(val float64, precision int) float64 {
 
 type ValueSelect struct {
 	Content string `json:"content"`
-	Color   string `json:"color"`
+	Color   string `json:"color"` // 1-14
 }
 
 func MSelectExistOption(mSelect []*ValueSelect, opt string) bool {

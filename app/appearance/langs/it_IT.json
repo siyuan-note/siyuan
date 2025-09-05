@@ -1121,7 +1121,7 @@
   "fileTree3": "Nessuna conferma richiesta durante l'eliminazione dei documenti",
   "fileTree4": "Se non abilitato, ogni volta che elimini un documento verrà visualizzata una finestra di conferma",
   "fileTree5": "Percorso di salvataggio dei nuovi documenti creati con riferimento",
-  "fileTree6": "Quando usi <code class='fn__code'>((</code>, il percorso di salvataggio del nuovo documento (ad esempio, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "Quando usi <code class='fn__code'>((</code> o <code class='fn__code'>[[</code>, il percorso di salvataggio del nuovo documento (ad esempio, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Apri nella scheda corrente",
   "fileTree8": "La scheda del documento appena aperta sostituirà la scheda non modificata",
   "fileTree9": "Chiudi tutte le schede all'avvio",

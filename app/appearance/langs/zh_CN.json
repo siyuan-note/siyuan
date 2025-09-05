@@ -1121,7 +1121,7 @@
   "fileTree3": "删除文档时不需要确认",
   "fileTree4": "不启用时每次删除文档都会弹出确认框",
   "fileTree5": "块引新建文档存放位置",
-  "fileTree6": "使用 <code class='fn__code'>((</code> 时新建文档的存放路径（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>）",
+  "fileTree6": "使用 <code class='fn__code'>((</code> 或 <code class='fn__code'>[[</code> 时新建文档的存放路径（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>）",
   "fileTree7": "在当前页签中打开",
   "fileTree8": "新打开的文档页签将会替换没有修改过的页签",
   "fileTree9": "启动时关闭所有页签",

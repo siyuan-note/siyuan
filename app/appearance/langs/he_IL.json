@@ -1121,7 +1121,7 @@
   "fileTree3": "אין צורך באישור בעת מחיקת מסמכים",
   "fileTree4": "אם לא הופק, תופיע תיבת אישור בכל פעם שמחקים מסמך",
   "fileTree5": "מיקום שמירת מסמך להפניה",
-  "fileTree6": "בעת השימוש <code class='fn__code'>((</code>, מסלול השמירה של המסמך החדש (למשל, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>)",
+  "fileTree6": "בעת השימוש <code class='fn__code'>((</code> או <code class='fn__code'>[[</code>, מסלול השמירה של המסמך החדש (למשל, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}</code>)",
   "fileTree7": "פתח בטאב הנוכחי",
   "fileTree8": "טאב המסמך הנפתח החדש יחליף את הטאב הלא משתנה",
   "fileTree9": "סגור את כל הטאבים בעת אתחול",

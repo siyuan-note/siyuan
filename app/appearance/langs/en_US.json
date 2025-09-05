@@ -1121,7 +1121,7 @@
   "fileTree3": "No confirmation required when deleting documents",
   "fileTree4": "If not enabled, a confirmation box will pop up every time you delete a document",
   "fileTree5": "Ref create doc save location",
-  "fileTree6": "When using <code class='fn__code'>((</code>, the save path of the new document (for example, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "When using <code class='fn__code'>((</code> or <code class='fn__code'>[[</code>, the save path of the new document (for example, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Open in the current tab",
   "fileTree8": "The newly opened document tab will replace the unmodified tab",
   "fileTree9": "Close all tabs at startup",

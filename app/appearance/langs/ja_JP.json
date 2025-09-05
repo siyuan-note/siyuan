@@ -1121,7 +1121,7 @@
   "fileTree3": "ドキュメントを削除するときに確認しない",
   "fileTree4": "ドキュメントを削除するときに確認ボックスを表示しません",
   "fileTree5": "参照の保存場所",
-  "fileTree6": "<code class='fn__code'>((</code> を使用した時の参照の保存パス (例: <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "<code class='fn__code'>((</code> または <code class='fn__code'>[[</code> を使用した時の参照の保存パス (例: <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "現在のタブで開く",
   "fileTree8": "新しく開いたドキュメントのタブが未変更のタブを置き換えます",
   "fileTree9": "起動時にすべてのタブを閉じる",

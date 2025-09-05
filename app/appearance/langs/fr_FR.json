@@ -1121,7 +1121,7 @@
   "fileTree3": "Aucune confirmation requise lors de la suppression de documents",
   "fileTree4": "Si non activé, une boîte de confirmation apparaîtra à chaque fois que vous supprimerez un document",
   "fileTree5": "Référence créer doc enregistrer emplacement",
-  "fileTree6": "Lors de l'utilisation de <code class='fn__code'>((</code>, le chemin d'enregistrement du nouveau document (par exemple, <code class='fn__code'>/dossier1/{{now | date \"20060102150405\"}}/</code>).",
+  "fileTree6": "Lors de l'utilisation de <code class='fn__code'>((</code> ou <code class='fn__code'>[[</code>, le chemin d'enregistrement du nouveau document (par exemple, <code class='fn__code'>/dossier1/{{now | date \"20060102150405\"}}/</code>).",
   "fileTree7": "Ouvrir dans l'Onglet actuel",
   "fileTree8": "L'onglet du document nouvellement ouvert remplacera l'Onglet non modifié.",
   "fileTree9": "Fermer tous les onglets au démarrage",

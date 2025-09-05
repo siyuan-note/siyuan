@@ -1121,7 +1121,7 @@
   "fileTree3": "刪除文檔時不需要確認",
   "fileTree4": "不啟用時每次刪除文檔都會彈出確認框",
   "fileTree5": "塊引新建文檔存放位置",
-  "fileTree6": "使用 <code class='fn__code'>((</code> 時新建文檔的存放路徑（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>）",
+  "fileTree6": "使用 <code class='fn__code'>((</code> 或 <code class='fn__code'>[[</code> 時新建文檔的存放路徑（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>）",
   "fileTree7": "在當前分頁中打開",
   "fileTree8": "新打開的文檔分頁將會替換沒有修改過的分頁",
   "fileTree9": "啟動時關閉所有分頁",

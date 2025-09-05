@@ -1121,7 +1121,7 @@
   "fileTree3": "Nenhuma confirmação necessária ao excluir documentos",
   "fileTree4": "Se não estiver ativado, uma caixa de confirmação aparecerá toda vez que você excluir um documento",
   "fileTree5": "Local de salvamento do documento criado por Ref",
-  "fileTree6": "Ao usar <code class='fn__code'>((</code>, o caminho de salvamento do novo documento (por exemplo, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "Ao usar <code class='fn__code'>((</code> ou <code class='fn__code'>[[</code>, o caminho de salvamento do novo documento (por exemplo, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Abrir na aba atual",
   "fileTree8": "A nova aba de documento substituirá a aba não modificada",
   "fileTree9": "Fechar todas as abas na inicialização",

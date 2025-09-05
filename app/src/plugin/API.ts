@@ -236,7 +236,14 @@ const getActiveEditor = (wndActive = true) => {
     if (!editor && !wndActive) {
         let activeTime = 0;
         allEditor.forEach(item => {
-            const headerElement = item.protyle.model?.parent.headElement;
+            let headerElement = item.protyle.model?.parent.headElement;
+            if (!headerElement && item.protyle.element.getBoundingClientRect().height > 0) {
+                const tabBodyElement = item.protyle.element.parentElement.parentElement.parentElement;
+                const tabId = tabBodyElement.getAttribute("data-id");
+                if (tabBodyElement.classList.contains("fn__flex-1") && tabId) {
+                    headerElement = document.querySelector(`.layout-tab-bar .item[data-id="${tabId}"]`);
+                }
+            }
             if (headerElement) {
                 if (headerElement.classList.contains("item--focus") && parseInt(headerElement.dataset.activetime) > activeTime) {
                     activeTime = parseInt(headerElement.dataset.activetime);

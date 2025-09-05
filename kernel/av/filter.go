@@ -80,7 +80,7 @@ const (
 type FilterQuantifier string
 
 const (
-	FilterQuantifierUndefined FilterQuantifier = ""
+	FilterQuantifierUndefined FilterQuantifier = "" // 等同于 Any
 	FilterQuantifierAny       FilterQuantifier = "Any"
 	FilterQuantifierAll       FilterQuantifier = "All"
 	FilterQuantifierNone      FilterQuantifier = "None"

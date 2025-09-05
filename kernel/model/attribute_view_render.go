@@ -111,7 +111,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	// 如果存在分组的话渲染分组视图
 
 	for _, groupView := range view.Groups {
-		switch groupView.GetGroupValue() {
+		groupView.Name = groupView.GetGroupValue()
+		switch groupView.Name {
 		case groupValueDefault:
 			groupView.Name = fmt.Sprintf(Conf.language(264), groupKey.Name)
 		case groupValueNotInRange:
@@ -130,8 +131,6 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			groupView.Name = fmt.Sprintf(Conf.language(263), 7)
 		case groupValueNext30Days:
 			groupView.Name = fmt.Sprintf(Conf.language(263), 30)
-		default:
-			groupView.Name = groupView.GetGroupValue()
 		}
 	}
 

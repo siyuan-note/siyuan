@@ -85,8 +85,7 @@ export const setFilter = async (options: {
     const blockID = options.blockElement.getAttribute("data-node-id");
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const selectElement = menu.element.querySelector(".b3-select") as HTMLSelectElement;
-        if (!selectElement || !selectElement.value) {
+        if (!operationElement || !operationElement.value) {
             return;
         }
         const newFilter: IAVFilter = {
@@ -94,7 +93,7 @@ export const setFilter = async (options: {
             value: {
                 type: options.filter.value.type
             },
-            operator: selectElement.value as TAVFilterOperator
+            operator: operationElement.value as TAVFilterOperator
         };
         let hasMatch = false;
         let newValue;
@@ -156,6 +155,7 @@ export const setFilter = async (options: {
                 },
                 type: "rollup"
             };
+            newFilter.quantifier = (menu.element.querySelector('.b3-select[data-type="quantifier"]') as HTMLSelectElement).value;
         } else {
             newFilter.value = newValue;
         }
@@ -349,10 +349,21 @@ export const setFilter = async (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
     }
+    if (options.filter.value.type === "rollup") {
+        menu.addItem({
+            iconHTML: "",
+            type: "readonly",
+            label: ` <select style="margin: 4px 0" class="b3-select fn__size200" data-type="quantifier">
+    <option value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
+    <option value="All">${window.siyuan.languages.filterQuantifierAll}</option>
+    <option value="None">${window.siyuan.languages.filterQuantifierNone}</option>
+</select>`
+        });
+    }
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
+        label: `<select style="margin: 4px 0" class="b3-select fn__size200" data-type="operation">${selectHTML}</select>`
     });
     if (filterValue.type === "select" || filterValue.type === "mSelect") {
         if (colData.options?.length > 0) {
@@ -519,9 +530,9 @@ export const setFilter = async (options: {
             }
         }
     });
-    const selectElement = (menu.element.querySelector(".b3-select") as HTMLSelectElement);
-    selectElement.addEventListener("change", () => {
-        toggleEmpty(selectElement, selectElement.value, filterValue.type);
+    const operationElement = (menu.element.querySelector('.b3-select[data-type="operation"]') as HTMLSelectElement);
+    operationElement.addEventListener("change", () => {
+        toggleEmpty(operationElement, operationElement.value, filterValue.type);
     });
     const dateTypeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
     dateTypeElement?.addEventListener("change", () => {
@@ -570,7 +581,7 @@ export const setFilter = async (options: {
             });
         });
     }
-    toggleEmpty(selectElement, selectElement.value, filterValue.type);
+    toggleEmpty(operationElement, operationElement.value, filterValue.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElements.length > 0) {
         textElements[0].select();

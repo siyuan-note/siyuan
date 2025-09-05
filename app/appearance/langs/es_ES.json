@@ -1121,7 +1121,7 @@
   "fileTree3": "No se requiere confirmación al borrar documentos",
   "fileTree4": "Si no se activa, aparecerá un cuadro de confirmación cada vez que se elimine un documento",
   "fileTree5": "Ref crear ubicación de guardado de documentos",
-  "fileTree6": "Al utilizar <code class='fn__code'>((</code>, la ruta de guardado del nuevo documento (por ejemplo, <code class='fn__code'>/carpeta1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "Al utilizar <code class='fn__code'>((</code> o <code class='fn__code'>[[</code>, la ruta de guardado del nuevo documento (por ejemplo, <code class='fn__code'>/carpeta1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Abrir en la pestaña actual",
   "fileTree8": "La pestaña del documento recién abierto sustituirá a la pestaña no modificada",
   "fileTree9": "Cerrar todas las pestañas al inicio",

@@ -1121,7 +1121,7 @@
   "fileTree3": "Nie wymaga potwierdzenia przy usuwaniu dokumentów",
   "fileTree4": "Jeśli nie jest włączone, okno potwierdzenia pojawi się za każdym razem, gdy usuniesz dokument",
   "fileTree5": "Ref stworzone miejsce zapisu dokumentu",
-  "fileTree6": "Kiedy używasz <code class='fn__code'>((</code>, ścieżka zapisu nowego dokumentu (na przykład <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "Kiedy używasz <code class='fn__code'>((</code> lub <code class='fn__code'>[[</code>, ścieżka zapisu nowego dokumentu (na przykład <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Otwórz w bieżącej zakładce",
   "fileTree8": "Nowa otwarta zakładka dokumentu zastąpi niezmodyfikowaną zakładkę",
   "fileTree9": "Zamknij wszystkie zakładki przy uruchamianiu",

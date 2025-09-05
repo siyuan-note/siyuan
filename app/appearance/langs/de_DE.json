@@ -1121,7 +1121,7 @@
   "fileTree3": "Keine Bestätigung erforderlich beim Löschen von Dokumenten",
   "fileTree4": "Wenn nicht aktiviert, wird jedes Mal ein Bestätigungsfeld angezeigt, wenn Sie ein Dokument löschen",
   "fileTree5": "Referenz erstellt Doc-Speicherort",
-  "fileTree6": "Beim Verwenden von <code class='fn__code'>((</code> der Speicherpfad des neuen Dokuments (z.B. <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
+  "fileTree6": "Beim Verwenden von <code class='fn__code'>((</code> oder <code class='fn__code'>[[</code> der Speicherpfad des neuen Dokuments (z.B. <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Im aktuellen Tab öffnen",
   "fileTree8": "Der neu geöffnete Dokumenten-Tab ersetzt den nicht modifizierten Tab",
   "fileTree9": "Alle Tabs beim Start schließen",

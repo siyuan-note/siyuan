@@ -354,9 +354,9 @@ export const setFilter = async (options: {
             iconHTML: "",
             type: "readonly",
             label: ` <select style="margin: 4px 0" class="b3-select fn__size200" data-type="quantifier">
-    <option value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
-    <option value="All">${window.siyuan.languages.filterQuantifierAll}</option>
-    <option value="None">${window.siyuan.languages.filterQuantifierNone}</option>
+    <option ${(options.filter.quantifier === "" || options.filter.quantifier === "Any") ? "selected" : ""} value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
+    <option ${"All" === options.filter.quantifier ? "selected" : ""} value="All">${window.siyuan.languages.filterQuantifierAll}</option>
+    <option ${"None" === options.filter.quantifier ? "selected" : ""} value="None">${window.siyuan.languages.filterQuantifierNone}</option>
 </select>`
         });
     }

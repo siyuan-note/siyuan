@@ -282,6 +282,7 @@ export class WYSIWYG {
             }
             let html = "";
             let textPlain = "";
+            let isInCodeBlock = false;
             if (selectElements.length > 0) {
                 const isRefText = selectElements[0].getAttribute("data-reftext") === "true";
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
@@ -427,7 +428,7 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
-                        html = textPlain;
+                        isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
                         textPlain = tempElement.textContent.endsWith("\n") ? tempElement.textContent.replace(/\n$/, "") : tempElement.textContent;
@@ -444,6 +445,10 @@ export class WYSIWYG {
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
+
+            if (isInCodeBlock) {
+                return;
+            }
 
             // 设置 text/siyuan 数据
             enableLuteMarkdownSyntax(protyle);
@@ -1758,6 +1763,7 @@ export class WYSIWYG {
             }
             let html = "";
             let textPlain = "";
+            let isInCodeBlock = false;
             if (selectElements.length > 0) {
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
@@ -1919,6 +1925,7 @@ export class WYSIWYG {
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
                     textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                    isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321
                 if (!nodeElement.classList.contains("table")) {
@@ -1949,6 +1956,10 @@ export class WYSIWYG {
             }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
+
+            if (isInCodeBlock) {
+                return;
+            }
 
             // 设置 text/siyuan 数据
             enableLuteMarkdownSyntax(protyle);

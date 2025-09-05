@@ -18,9 +18,9 @@ export const getDateHTML = (cellElements: HTMLElement[]) => {
     let value2 = "";
     if (cellValue.isNotEmpty2) {
         value2 = dayjs(cellValue.content2).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
-        const year = value.split("-")[0];
-        if (year.length !== 4) {
-            value = new Array(4 - year.length).fill(0).join("") + value;
+        const year2 = value2.split("-")[0];
+        if (year2.length !== 4) {
+            value2 = new Array(4 - year2.length).fill(0).join("") + value;
         }
     } else if (cellValue.hasEndDate) {
         value2 = dayjs(currentDate).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
@@ -94,6 +94,8 @@ export const bindDateEvent = (options: {
         }
     });
     inputElements[3].addEventListener("change", () => {
+        inputElements[0].value = "";
+        inputElements[1].value = "";
         if (inputElements[3].checked) {
             inputElements[0].setAttribute("type", "datetime-local");
             inputElements[1].setAttribute("type", "datetime-local");

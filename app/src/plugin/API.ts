@@ -238,7 +238,7 @@ const getActiveEditor = (wndActive = true) => {
         allEditor.forEach(item => {
             let headerElement = item.protyle.model?.parent.headElement;
             if (!headerElement && item.protyle.element.getBoundingClientRect().height > 0) {
-                const tabBodyElement = item.protyle.element.parentElement.parentElement.parentElement;
+                const tabBodyElement = item.protyle.element.closest(".fn__flex-1[data-id]");
                 const tabId = tabBodyElement.getAttribute("data-id");
                 if (tabBodyElement.classList.contains("fn__flex-1") && tabId) {
                     headerElement = document.querySelector(`.layout-tab-bar .item[data-id="${tabId}"]`);

@@ -222,6 +222,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getBlockRelevantIDs", model.CheckAuth, getBlockRelevantIDs)
 	ginServer.Handle("POST", "/api/block/getBlockTreeInfos", model.CheckAuth, getBlockTreeInfos)
 	ginServer.Handle("POST", "/api/block/checkBlockRef", model.CheckAuth, checkBlockRef)
+	ginServer.Handle("POST", "/api/block/appendHeadingChildren", model.CheckAuth, appendHeadingChildren)
 
 	ginServer.Handle("POST", "/api/file/getFile", model.CheckAuth, getFile)
 	ginServer.Handle("POST", "/api/file/putFile", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, putFile)

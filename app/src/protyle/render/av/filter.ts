@@ -649,18 +649,27 @@ export const getFiltersHTML = (data: IAV) => {
         fields.find((item) => {
             if (item.id === filter.column && item.type === filter.value.type) {
                 let filterText = "";
+                if (item.type === "rollup") {
+                    if (filter.quantifier === "" || filter.quantifier === "Any") {
+                        filterText = window.siyuan.languages.filterQuantifierAny + " ";
+                    } else if (filter.quantifier === "All") {
+                        filterText = window.siyuan.languages.filterQuantifierAll + " ";
+                    } else if (filter.quantifier === "None") {
+                        filterText = window.siyuan.languages.filterQuantifierNone + " ";
+                    }
+                }
                 const filterValue = item.type === "rollup" ? (filter.value.rollup?.contents?.length > 0 ? filter.value.rollup.contents[0] : {type: "rollup"} as IAVCellValue) : filter.value;
                 if (filter.operator === "Is empty") {
-                    filterText = ": " + window.siyuan.languages.filterOperatorIsEmpty;
+                    filterText = ": " + filterText + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {
-                    filterText = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
+                    filterText = ": " + filterText + window.siyuan.languages.filterOperatorIsNotEmpty;
                 } else if (filter.operator === "Is false") {
                     if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
-                        filterText = ": " + window.siyuan.languages.unchecked;
+                        filterText = ": " + filterText + window.siyuan.languages.unchecked;
                     }
                 } else if (filter.operator === "Is true") {
                     if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
-                        filterText = ": " + window.siyuan.languages.checked;
+                        filterText = ": " + filterText + window.siyuan.languages.checked;
                     }
                 } else if (["created", "updated", "date"].includes(filterValue.type)) {
                     let dateValue = "";
@@ -684,15 +693,15 @@ export const getFiltersHTML = (data: IAV) => {
                     }
                     if (dateValue) {
                         if (filter.operator === "Is between" && dateValue2) {
-                            filterText = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
                         } else if ("=" === filter.operator) {
-                            filterText = `: ${dateValue}`;
+                            filterText = `: ${filterText}${dateValue}`;
                         } else if ([">", "<"].includes(filter.operator)) {
-                            filterText = ` ${filter.operator} ${dateValue}`;
+                            filterText = ` ${filterText}${filter.operator} ${dateValue}`;
                         } else if (">=" === filter.operator) {
-                            filterText = ` ≥ ${dateValue}`;
+                            filterText = ` ${filterText}≥ ${dateValue}`;
                         } else if ("<=" === filter.operator) {
-                            filterText = ` ≤ ${dateValue}`;
+                            filterText = ` ${filterText}≤ ${dateValue}`;
                         }
                     }
                 } else if (["mSelect", "select"].includes(filterValue.type) && filterValue.mSelect?.length > 0) {
@@ -704,41 +713,41 @@ export const getFiltersHTML = (data: IAV) => {
                         }
                     });
                     if ("Contains" === filter.operator) {
-                        filterText = `: ${selectContent}`;
+                        filterText = `: ${filterText}${selectContent}`;
                     } else if (filter.operator === "Does not contains") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
                     } else if (filter.operator === "=") {
-                        filterText = `: ${selectContent}`;
+                        filterText = `: ${filterText}${selectContent}`;
                     } else if (filter.operator === "!=") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
                     }
                 } else if (filterValue.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
-                        filterText = ` ${filter.operator} ${filterValue.number.content}`;
+                        filterText = ` ${filterText}${filter.operator} ${filterValue.number.content}`;
                     } else if (">=" === filter.operator) {
-                        filterText = ` ≥ ${filterValue.number.content}`;
+                        filterText = ` ${filterText}≥ ${filterValue.number.content}`;
                     } else if ("<=" === filter.operator) {
-                        filterText = ` ≤ ${filterValue.number.content}`;
+                        filterText = ` ${filterText}≤ ${filterValue.number.content}`;
                     }
                 } else if (["text", "block", "url", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
                     const content = filterValue[filterValue.type as "text"].content || filterValue.relation?.blockIDs[0] || "";
                     if (content) {
                         if (["=", "Contains"].includes(filter.operator)) {
-                            filterText = `: ${content}`;
+                            filterText = `: ${filterText}${content}`;
                         } else if (filter.operator === "Does not contains") {
-                            filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
                         } else if (filter.operator === "!=") {
-                            filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${content}`;
                         } else if ("Starts with" === filter.operator) {
-                            filterText = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
                         } else if ("Ends with" === filter.operator) {
-                            filterText = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
                         } else if ([">", "<"].includes(filter.operator)) {
-                            filterText = ` ${filter.operator} ${content}`;
+                            filterText = ` ${filterText}${filter.operator} ${content}`;
                         } else if (">=" === filter.operator) {
-                            filterText = ` ≥ ${content}`;
+                            filterText = ` ${filterText}≥ ${content}`;
                         } else if ("<=" === filter.operator) {
-                            filterText = ` ≤ ${content}`;
+                            filterText = ` ${filterText}≤ ${content}`;
                         }
                     }
                 }

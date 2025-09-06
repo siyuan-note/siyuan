@@ -108,7 +108,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 } else {
                     foldPreviousId = "";
                 }
-                // // https://github.com/siyuan-note/siyuan/issues/4422
+                // https://github.com/siyuan-note/siyuan/issues/4422
                 topElement.firstElementChild.removeAttribute("contenteditable");
                 topElement.remove();
             } else {

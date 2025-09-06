@@ -213,7 +213,7 @@ func getHeadingChildrenDOM(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	removeFoldAttr := false
+	removeFoldAttr := true
 	if nil != arg["removeFoldAttr"] {
 		removeFoldAttr = arg["removeFoldAttr"].(bool)
 	}

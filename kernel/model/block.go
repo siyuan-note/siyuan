@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -629,7 +630,35 @@ func GetHeadingChildrenIDs(id string) (ret []string) {
 	return
 }
 
-func GetHeadingChildrenDOM(id string) (ret string) {
+func AppendHeadingChildren(id, childrenDOM string) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	heading := treenode.GetNodeInTree(tree, id)
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return
+	}
+
+	luteEngine := util.NewLute()
+	subTree := luteEngine.BlockDOM2Tree(childrenDOM)
+	var nodes []*ast.Node
+	for n := subTree.Root.FirstChild; nil != n; n = n.Next {
+		nodes = append(nodes, n)
+	}
+
+	slices.Reverse(nodes)
+	for _, n := range nodes {
+		heading.InsertAfter(n)
+	}
+
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
+		return
+	}
+}
+
+func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
@@ -643,20 +672,26 @@ func GetHeadingChildrenDOM(id string) (ret string) {
 	children := treenode.HeadingChildren(heading)
 	nodes = append(nodes, children...)
 
-	// 取消折叠 https://github.com/siyuan-note/siyuan/issues/13232#issuecomment-2535955152
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
 				return ast.WalkContinue
 			}
 
-			n.RemoveIALAttr("heading-fold")
-			n.RemoveIALAttr("fold")
+			if removeFoldAttr {
+				n.RemoveIALAttr("heading-fold")
+				n.RemoveIALAttr("fold")
+			}
 			return ast.WalkContinue
 		})
+
+		child.SetIALAttr("parent-heading", id)
 	}
-	heading.RemoveIALAttr("fold")
-	heading.RemoveIALAttr("heading-fold")
+
+	if removeFoldAttr {
+		heading.RemoveIALAttr("fold")
+		heading.RemoveIALAttr("heading-fold")
+	}
 
 	luteEngine := util.NewLute()
 	ret = renderBlockDOMByNodes(nodes, luteEngine)

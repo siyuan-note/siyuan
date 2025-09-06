@@ -189,6 +189,20 @@ func getHeadingChildrenIDs(c *gin.Context) {
 	ret.Data = ids
 }
 
+func appendHeadingChildren(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	childrenDOM := arg["childrenDOM"].(string)
+	model.AppendHeadingChildren(id, childrenDOM)
+}
+
 func getHeadingChildrenDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -199,7 +213,11 @@ func getHeadingChildrenDOM(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	dom := model.GetHeadingChildrenDOM(id)
+	removeFoldAttr := true
+	if nil != arg["removeFoldAttr"] {
+		removeFoldAttr = arg["removeFoldAttr"].(bool)
+	}
+	dom := model.GetHeadingChildrenDOM(id, removeFoldAttr)
 	ret.Data = dom
 }
 

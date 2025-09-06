@@ -66,9 +66,9 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard, encodeBase64} from "../util/compatibility";
+import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard, encodeBase64, writeText} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {clearTableCell, isIncludeCell, setTableAlign} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
@@ -256,7 +256,7 @@ export class WYSIWYG {
     }
 
     private bindCommonEvent(protyle: IProtyle) {
-        this.element.addEventListener("copy", (event: ClipboardEvent & { target: HTMLElement }) => {
+        this.element.addEventListener("copy", async (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             // https://github.com/siyuan-note/siyuan/issues/4600
             if (event.target.tagName === "PROTYLE-HTML" || event.target.localName === "input") {
@@ -283,6 +283,7 @@ export class WYSIWYG {
             let html = "";
             let textPlain = "";
             let isInCodeBlock = false;
+            let needClipboardWrite = false;
             if (selectElements.length > 0) {
                 const isRefText = selectElements[0].getAttribute("data-reftext") === "true";
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
@@ -294,14 +295,24 @@ export class WYSIWYG {
                         html = selectElements[0].parentElement.outerHTML;
                     }
                 } else {
-                    selectElements.forEach((item: HTMLElement, index) => {
+                    for (let i = 0; i < selectElements.length; i++) {
+                        const item = selectElements[i] as HTMLElement;
                         // 复制列表项中的块会变为复制列表项，因此不能使用 getTopAloneElement https://github.com/siyuan-note/siyuan/issues/8925
-                        if (isRefText && index === 0) {
+                        if (isRefText && i === 0) {
                             html += getTextStar(item) + "\n\n";
                         } else {
-                            html += removeEmbed(item);
+                            if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                                needClipboardWrite = true;
+                                const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
+                                    id: item.getAttribute("data-node-id"),
+                                    removeFoldAttr: false
+                                });
+                                html += response.data;
+                            } else {
+                                html += removeEmbed(item);
+                            }
                         }
-                    });
+                    }
                 }
                 if (isRefText) {
                     selectElements[0].removeAttribute("data-reftext");
@@ -381,6 +392,8 @@ export class WYSIWYG {
                     if (matchHeading) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
                         tempElement.append(headingElement.cloneNode(true));
+                        // https://github.com/siyuan-note/siyuan/issues/13232
+                        headingElement.removeAttribute("fold");
                     } else if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                         // 复制行内元素 https://github.com/siyuan-note/insider/issues/191
                         tempElement.append(range.startContainer.parentElement.cloneNode(true));
@@ -446,18 +459,25 @@ export class WYSIWYG {
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
 
-            if (isInCodeBlock) {
-                return;
+            if (!isInCodeBlock) {
+                enableLuteMarkdownSyntax(protyle);
+                const textSiyuan = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+                event.clipboardData.setData("text/siyuan", textSiyuan);
+                restoreLuteMarkdownSyntax(protyle);
+                // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                event.clipboardData.setData("text/html", textHTML);
+                if (needClipboardWrite) {
+                    try {
+                        await navigator.clipboard.write([new ClipboardItem({
+                            ["text/plain"]: textPlain,
+                            ["text/html"]: textHTML,
+                        })]);
+                    } catch (e) {
+                        console.log("Copy write clipboard error:", e);
+                    }
+                }
             }
-
-            // 设置 text/siyuan 数据
-            enableLuteMarkdownSyntax(protyle);
-            const siyuanHTML = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
-            event.clipboardData.setData("text/siyuan", siyuanHTML);
-            restoreLuteMarkdownSyntax(protyle);
-
-            // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-            event.clipboardData.setData("text/html", `<!--data-siyuan='${encodeBase64(siyuanHTML)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
@@ -1725,7 +1745,7 @@ export class WYSIWYG {
             }
         });
 
-        this.element.addEventListener("cut", (event: ClipboardEvent & { target: HTMLElement }) => {
+        this.element.addEventListener("cut", async (event: ClipboardEvent & { target: HTMLElement }) => {
             window.siyuan.ctrlIsPressed = false; // https://github.com/siyuan-note/siyuan/issues/6373
             if (protyle.disabled) {
                 return;
@@ -1764,20 +1784,25 @@ export class WYSIWYG {
             let html = "";
             let textPlain = "";
             let isInCodeBlock = false;
+            let needClipboardWrite = false;
             if (selectElements.length > 0) {
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
                     selectElements[0].parentElement.childElementCount - 1 === selectElements.length) {
                     html = selectElements[0].parentElement.outerHTML;
                 } else {
-                    selectElements.forEach(item => {
+                    for (let i = 0; i < selectElements.length; i++) {
+                        const item = selectElements[i];
                         const topElement = getTopAloneElement(item);
                         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-                            html += removeEmbed(topElement).replace('fold="1"', "");
+                            needClipboardWrite = true;
+                            const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {id: item.getAttribute("data-node-id")});
+                            html += response.data;
+                            setFold(protyle, topElement, undefined, true);
                         } else {
                             html += removeEmbed(topElement);
                         }
-                    });
+                    }
                     if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
                         html = `<div data-subtype="${selectElements[0].getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${html}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
                     }
@@ -1957,18 +1982,25 @@ export class WYSIWYG {
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
 
-            if (isInCodeBlock) {
-                return;
+            if (!isInCodeBlock) {
+                enableLuteMarkdownSyntax(protyle);
+                const textSiyuan = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+                restoreLuteMarkdownSyntax(protyle);
+                event.clipboardData.setData("text/siyuan", textSiyuan);
+                // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                event.clipboardData.setData("text/html", textHTML);
+                if (needClipboardWrite) {
+                    try {
+                        await navigator.clipboard.write([new ClipboardItem({
+                            ["text/plain"]: textPlain,
+                            ["text/html"]: textHTML,
+                        })]);
+                    } catch (e) {
+                        console.log("Cut write clipboard error:", e);
+                    }
+                }
             }
-
-            // 设置 text/siyuan 数据
-            enableLuteMarkdownSyntax(protyle);
-            const siyuanHTML = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
-            event.clipboardData.setData("text/siyuan", siyuanHTML);
-            restoreLuteMarkdownSyntax(protyle);
-
-            // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-            event.clipboardData.setData("text/html", `<!--data-siyuan='${encodeBase64(siyuanHTML)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
         });
 
         let beforeContextmenuRange: Range;

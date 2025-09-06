@@ -199,8 +199,8 @@ func appendHeadingChildren(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	dom := arg["dom"].(string)
-	model.AppendHeadingChildren(id, dom)
+	childrenDOM := arg["childrenDOM"].(string)
+	model.AppendHeadingChildren(id, childrenDOM)
 }
 
 func getHeadingChildrenDOM(c *gin.Context) {

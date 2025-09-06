@@ -463,10 +463,13 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             foldHeadingId = item.getAttribute("data-node-id");
             return true;
         }
-        if (foldHeadingId && item.getAttribute("parent-heading") === foldHeadingId) {
+        if (foldHeadingId && item.getAttribute("parent-heading")) {
             foldHTML += item.outerHTML;
         }
     });
+    if (foldHeadingId && foldHTML) {
+        fetchPost("/api/block/appendHeadingChildren", {id: foldHeadingId, dom: foldHTML});
+    }
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         if (item.getAttribute("parent-heading")) {
             return;

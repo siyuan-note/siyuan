@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
-import {getLocalFiles, readText} from "./compatibility";
+import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {getEditorRange} from "./selection";
 import {blockRender} from "../render/blockRender";
@@ -287,6 +287,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     // 复制标题及其下方块使用 writeText，需将 textPlain 转换为 textHTML
     if (textPlain.endsWith(Constants.ZWSP) && !textHTML && !siyuanHTML) {
         siyuanHTML = textPlain.substr(0, textPlain.length - 1);
+    }
+    // 复制/剪切折叠标题需获取 siyuanHTML
+    if (textHTML && textPlain && !siyuanHTML) {
+        const textObj = getTextSiyuanFromTextHTML(textHTML);
+        siyuanHTML = textObj.textSiyuan;
+        textHTML = textObj.textHtml;
     }
     // 剪切复制中首位包含空格或仅有空格 https://github.com/siyuan-note/siyuan/issues/5667
     if (!siyuanHTML) {

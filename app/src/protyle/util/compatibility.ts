@@ -23,24 +23,30 @@ export const encodeBase64 = (text: string): string => {
     }
 };
 
-const getSiyuanHTML = (text: IClipboardData) => {
-    const siyuanMatch = text.textHTML.match(/<!--data-siyuan='([^']+)'-->/);
+export const getTextSiyuanFromTextHTML = (html: string) => {
+    const siyuanMatch = html.match(/<!--data-siyuan='([^']+)'-->/);
+    let textSiyuan = "";
+    let textHtml = html;
     if (siyuanMatch) {
         try {
             if (typeof Buffer !== "undefined") {
                 const decodedBytes = Buffer.from(siyuanMatch[1], "base64");
-                text.siyuanHTML = decodedBytes.toString("utf8");
+                textSiyuan = decodedBytes.toString("utf8");
             } else {
                 const decoder = new TextDecoder();
                 const bytes = Uint8Array.from(atob(siyuanMatch[1]), char => char.charCodeAt(0));
-                text.siyuanHTML = decoder.decode(bytes);
+                textSiyuan = decoder.decode(bytes);
             }
             // 移除注释节点，保持原有的 text/html 内容
-            text.textHTML = text.textHTML.replace(/<!--data-siyuan='[^']+'-->/, "");
+            textHtml = html.replace(/<!--data-siyuan='[^']+'-->/, "");
         } catch (e) {
             console.log("Failed to decode siyuan data from HTML comment:", e);
         }
     }
+    return {
+        textSiyuan,
+        textHtml
+    };
 };
 
 export const openByMobile = (uri: string) => {
@@ -124,7 +130,9 @@ export const readClipboard = async () => {
             if (item.types.includes("text/html")) {
                 const blob = await item.getType("text/html");
                 text.textHTML = await blob.text();
-                getSiyuanHTML(text);
+                const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+                text.textHTML = textObj.textHtml;
+                text.siyuanHTML = textObj.textSiyuan;
             }
             if (item.types.includes("text/plain")) {
                 const blob = await item.getType("text/plain");
@@ -145,11 +153,15 @@ export const readClipboard = async () => {
         if (isInAndroid()) {
             text.textPlain = window.JSAndroid.readClipboard();
             text.textHTML = window.JSAndroid.readHTMLClipboard();
-            getSiyuanHTML(text);
+            const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+            text.textHTML = textObj.textHtml;
+            text.siyuanHTML = textObj.textSiyuan;
         } else if (isInHarmony()) {
             text.textPlain = window.JSHarmony.readClipboard();
             text.textHTML = window.JSHarmony.readHTMLClipboard();
-            getSiyuanHTML(text);
+            const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+            text.textHTML = textObj.textHtml;
+            text.siyuanHTML = textObj.textSiyuan;
         }
         return text;
     }

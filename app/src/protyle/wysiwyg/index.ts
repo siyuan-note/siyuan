@@ -1798,7 +1798,6 @@ export class WYSIWYG {
                             needClipboardWrite = true;
                             const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {id: item.getAttribute("data-node-id")});
                             html += response.data;
-                            setFold(protyle, topElement, undefined, true);
                         } else {
                             html += removeEmbed(topElement);
                         }

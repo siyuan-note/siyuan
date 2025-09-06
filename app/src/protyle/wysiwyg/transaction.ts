@@ -754,6 +754,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "insert") {
+        if (operation.context?.ignoreProcess === "true") {
+            return;
+        }
         const cursorElements = [];
         if (operation.previousID) {
             const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);

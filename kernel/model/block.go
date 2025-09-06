@@ -672,7 +672,6 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 	children := treenode.HeadingChildren(heading)
 	nodes = append(nodes, children...)
 
-	// 取消折叠 https://github.com/siyuan-note/siyuan/issues/13232#issuecomment-2535955152
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
@@ -685,6 +684,8 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 			}
 			return ast.WalkContinue
 		})
+
+		child.SetIALAttr("parent-heading", id)
 	}
 
 	if removeFoldAttr {

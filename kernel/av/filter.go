@@ -193,19 +193,8 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
 			for _, content := range value.Rollup.Contents {
-				switch filter.Operator {
-				case FilterOperatorContains:
-					if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-						return true
-					}
-				case FilterOperatorDoesNotContain:
-					if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-						return false
-					}
-				default:
-					if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-						return true
-					}
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+					return true
 				}
 			}
 		case FilterQuantifierAll:

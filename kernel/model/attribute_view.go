@@ -1094,7 +1094,9 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 		return
 	}
 
-	newAv.Name = oldAv.Name + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
+	if "" != newAv.Name {
+		newAv.Name = oldAv.Name + " (Duplicated " + time.Now().Format("2006-01-02 15:04:05") + ")"
+	}
 
 	for _, keyValues := range newAv.KeyValues {
 		if nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {

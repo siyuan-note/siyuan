@@ -692,6 +692,10 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
+	if !isContainer {
+		slices.Reverse(toInserts)
+	}
+
 	for i := 0; i < len(toInserts); i++ {
 		toInsert := toInserts[i]
 		if isContainer {
@@ -720,6 +724,9 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		} else {
 			node.InsertAfter(toInsert)
 		}
+
+		createdUpdated(toInsert)
+		tx.nodes[toInsert.ID] = toInsert
 	}
 
 	createdUpdated(insertedNode)

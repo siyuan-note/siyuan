@@ -18,9 +18,9 @@ export const getDateHTML = (cellElements: HTMLElement[]) => {
     let value2 = "";
     if (cellValue.isNotEmpty2) {
         value2 = dayjs(cellValue.content2).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
-        const year2 = value2.split("-")[0];
-        if (year2.length !== 4) {
-            value2 = new Array(4 - year2.length).fill(0).join("") + value;
+        const year = value2.split("-")[0];
+        if (year.length !== 4) {
+            value2 = new Array(4 - year.length).fill(0).join("") + value2;
         }
     } else if (cellValue.hasEndDate) {
         value2 = dayjs(currentDate).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");

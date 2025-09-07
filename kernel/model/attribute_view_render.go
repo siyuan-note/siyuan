@@ -475,7 +475,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 			return
 		}
 
-		attrView = &av.AttributeView{}
+		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return
@@ -518,7 +518,7 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 			return
 		}
 
-		attrView = &av.AttributeView{}
+		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return

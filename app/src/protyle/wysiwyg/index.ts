@@ -1796,7 +1796,10 @@ export class WYSIWYG {
                         const topElement = getTopAloneElement(item);
                         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                             needClipboardWrite = true;
-                            const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {id: item.getAttribute("data-node-id")});
+                            const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
+                                id: item.getAttribute("data-node-id"),
+                                removeFoldAttr: false
+                            });
                             html += response.data;
                         } else {
                             html += removeEmbed(topElement);

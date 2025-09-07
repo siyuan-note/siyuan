@@ -1255,11 +1255,19 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 					node.FirstChild.InsertAfter(remain)
 				}
 			} else {
-				for i := len(remains) - 1; 0 <= i; i-- {
-					remain := remains[i]
-					node.PrependChild(remain)
+				if !node.IsContainerBlock() {
+					for i := len(remains) - 1; 0 <= i; i-- {
+						remain := remains[i]
+						node.InsertAfter(remain)
+					}
+					node.InsertAfter(insertedNode)
+				} else {
+					for i := len(remains) - 1; 0 <= i; i-- {
+						remain := remains[i]
+						node.PrependChild(remain)
+					}
+					node.PrependChild(insertedNode)
 				}
-				node.PrependChild(insertedNode)
 			}
 		}
 	}

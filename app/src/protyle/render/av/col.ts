@@ -192,11 +192,7 @@ export const getEditHTML = (options: {
     <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>
 </label>`;
     if (colData.type !== "block") {
-        html += `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
-    <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
-    <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
-</button>
-<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
+        html += `<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
@@ -877,8 +873,88 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 });
             }
         });
-        menu.addSeparator({id: "separator_2"});
     }
+    const isPin = cellElement.dataset.pin === "true";
+    menu.addItem({
+        id: isPin ? "unfreezeCol" : "freezeCol",
+        icon: isPin ? "iconUnpin" : "iconPin",
+        label: isPin ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,
+        click() {
+            transaction(protyle, [{
+                action: "setAttrViewColPin",
+                id: colId,
+                avID,
+                data: !isPin,
+                blockID
+            }], [{
+                action: "setAttrViewColPin",
+                id: colId,
+                avID,
+                data: isPin,
+                blockID
+            }]);
+            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
+        }
+    });
+    if (type !== "block") {
+        menu.addItem({
+            id: "hide",
+            icon: "iconEyeoff",
+            label: window.siyuan.languages.hide,
+            click() {
+                transaction(protyle, [{
+                    action: "setAttrViewColHidden",
+                    id: colId,
+                    avID,
+                    data: true,
+                    blockID
+                }], [{
+                    action: "setAttrViewColHidden",
+                    id: colId,
+                    avID,
+                    data: false,
+                    blockID
+                }]);
+            }
+        });
+    }
+    menu.addItem({
+        icon: "iconRefresh",
+        label: window.siyuan.languages.syncColWidth,
+        click() {
+            transaction(protyle, [{
+                action: "syncAttrViewTableColWidth",
+                keyID: colId,
+                avID,
+                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+            }]);
+        }
+    });
+    menu.addItem({
+        icon: "iconSoftWrap",
+        label: `<label class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+<input type="checkbox" class="b3-switch b3-switch--menu"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
+        bind(element) {
+            const wrapElement = element.querySelector(".b3-switch") as HTMLInputElement;
+            wrapElement.addEventListener("change", () => {
+                transaction(protyle, [{
+                    action: "setAttrViewColWrap",
+                    id: colId,
+                    avID,
+                    data: wrapElement.checked,
+                    blockID
+                }], [{
+                    action: "setAttrViewColWrap",
+                    id: colId,
+                    avID,
+                    data: !wrapElement.checked,
+                    blockID
+                }]);
+                menu.close();
+            });
+        }
+    });
+    menu.addSeparator({id: "separator_2"});
     menu.addItem({
         id: "insertColumnLeft",
         icon: "iconInsertLeft",
@@ -911,62 +987,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 y: addRect.bottom,
                 h: addRect.height
             });
-        }
-    });
-    if (type !== "block") {
-        menu.addItem({
-            id: "hide",
-            icon: "iconEyeoff",
-            label: window.siyuan.languages.hide,
-            click() {
-                transaction(protyle, [{
-                    action: "setAttrViewColHidden",
-                    id: colId,
-                    avID,
-                    data: true,
-                    blockID
-                }], [{
-                    action: "setAttrViewColHidden",
-                    id: colId,
-                    avID,
-                    data: false,
-                    blockID
-                }]);
-            }
-        });
-    }
-    const isPin = cellElement.dataset.pin === "true";
-    menu.addItem({
-        id: isPin ? "unfreezeCol" : "freezeCol",
-        icon: isPin ? "iconUnpin" : "iconPin",
-        label: isPin ? window.siyuan.languages.unfreezeCol : window.siyuan.languages.freezeCol,
-        click() {
-            transaction(protyle, [{
-                action: "setAttrViewColPin",
-                id: colId,
-                avID,
-                data: !isPin,
-                blockID
-            }], [{
-                action: "setAttrViewColPin",
-                id: colId,
-                avID,
-                data: isPin,
-                blockID
-            }]);
-            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
-        }
-    });
-    menu.addItem({
-        icon: "iconRefresh",
-        label: window.siyuan.languages.syncColWidth,
-        click() {
-            transaction(protyle, [{
-                action: "syncAttrViewTableColWidth",
-                keyID: colId,
-                avID,
-                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-            }]);
         }
     });
     if (type !== "block") {
@@ -1006,9 +1026,11 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField
-        .replace("${x}", colData.key.name || window.siyuan.languages._kernel[272])
-        .replace("${y}", relResponse.data.av.name || window.siyuan.languages._kernel[267])
-        .replace("${z}", relResponse.data.av.keyValues.find((item: {key: {id: string}}) => item.key.id === colData.key.relation.backKeyID).key.name || window.siyuan.languages._kernel[272])}
+                                .replace("${x}", colData.key.name || window.siyuan.languages._kernel[272])
+                                .replace("${y}", relResponse.data.av.name || window.siyuan.languages._kernel[267])
+                                .replace("${z}", relResponse.data.av.keyValues.find((item: {
+                                    key: { id: string }
+                                }) => item.key.id === colData.key.relation.backKeyID).key.name || window.siyuan.languages._kernel[272])}
     <div class="fn__hr--b"></div>
     <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.removeBothRelationField}</button>
     <div class="fn__hr"></div>

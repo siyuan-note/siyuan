@@ -83,6 +83,7 @@ export const setFilter = async (options: {
         rectTarget = options.protyle.wysiwyg.element.querySelector(`[data-col-id="${options.target.dataset.colId}"]`).getBoundingClientRect();
     }
     const blockID = options.blockElement.getAttribute("data-node-id");
+    let operationElement: HTMLSelectElement = undefined;
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
         if (!operationElement || !operationElement.value) {
@@ -211,6 +212,7 @@ export const setFilter = async (options: {
     if (colData.type === "rollup") {
         if (!colData.rollup || !colData.rollup.relationKeyID || !colData.rollup.keyID) {
             showMessage(window.siyuan.languages.plsChoose);
+            document.querySelector(".av__panel")?.remove();
             openMenuPanel({
                 protyle: options.protyle,
                 blockElement: options.blockElement,
@@ -530,8 +532,8 @@ export const setFilter = async (options: {
             }
         }
     });
-    const operationElement = (menu.element.querySelector('.b3-select[data-type="operation"]') as HTMLSelectElement);
-    operationElement.addEventListener("change", () => {
+    operationElement = (menu.element.querySelector('.b3-select[data-type="operation"]') as HTMLSelectElement);
+    operationElement?.addEventListener("change", () => {
         toggleEmpty(operationElement, operationElement.value, filterValue.type);
     });
     const dateTypeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;

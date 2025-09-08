@@ -649,7 +649,6 @@ export class MobileFiles extends Model {
             path: liElement.getAttribute("data-path"),
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
-                showMessage(window.siyuan.languages.emptyContent);
                 newFile({
                     app: this.app,
                     notebookId,

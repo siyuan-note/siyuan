@@ -1160,7 +1160,6 @@ data-type="navigation-root" data-path="/">
                     useSavePath: false,
                     listDocTree: true,
                 });
-                showMessage(window.siyuan.languages.emptyContent);
                 return;
             }
             this.onLsHTML(response.data);

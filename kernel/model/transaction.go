@@ -587,19 +587,19 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
 	}
-	var remains []*ast.Node
-	for remain := insertedNode.Next; nil != remain; remain = remain.Next {
-		if ast.NodeKramdownBlockIAL != remain.Type {
-			if "" == remain.ID {
-				remain.ID = ast.NewNodeID()
-				remain.SetIALAttr("id", remain.ID)
-			}
-			remains = append(remains, remain)
-		}
-	}
 	if "" == insertedNode.ID {
 		insertedNode.ID = ast.NewNodeID()
 		insertedNode.SetIALAttr("id", insertedNode.ID)
+	}
+	var toInserts []*ast.Node
+	for toInsert := insertedNode; nil != toInsert; toInsert = toInsert.Next {
+		if ast.NodeKramdownBlockIAL != toInsert.Type {
+			if "" == toInsert.ID {
+				toInsert.ID = ast.NewNodeID()
+				toInsert.SetIALAttr("id", toInsert.ID)
+			}
+			toInserts = append(toInserts, toInsert)
+		}
 	}
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
@@ -608,31 +608,45 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
-	for i := len(remains) - 1; 0 <= i; i-- {
-		remain := remains[i]
+	slices.Reverse(toInserts)
+
+	for _, toInsert := range toInserts {
 		if isContainer {
-			if ast.NodeListItem == node.Type && 3 == node.ListData.Typ {
-				node.FirstChild.InsertAfter(remain)
+			if ast.NodeList == node.Type {
+				// 列表下只能挂列表项，所以这里需要分情况处理
+				if ast.NodeList == toInsert.Type {
+					var childLis []*ast.Node
+					for childLi := toInsert.FirstChild; nil != childLi; childLi = childLi.Next {
+						childLis = append(childLis, childLi)
+					}
+					for i := len(childLis) - 1; -1 < i; i-- {
+						node.PrependChild(childLis[i])
+					}
+				} else {
+					newLiID := ast.NewNodeID()
+					newLi := &ast.Node{ID: newLiID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: node.ListData.Typ}}
+					newLi.SetIALAttr("id", newLiID)
+					node.PrependChild(newLi)
+					newLi.AppendChild(toInsert)
+				}
 			} else if ast.NodeSuperBlock == node.Type {
-				node.FirstChild.Next.InsertAfter(remain)
+				layout := node.ChildByType(ast.NodeSuperBlockLayoutMarker)
+				if nil != layout {
+					layout.InsertAfter(toInsert)
+				} else {
+					node.FirstChild.InsertAfter(toInsert)
+				}
 			} else {
-				node.PrependChild(remain)
+				node.PrependChild(toInsert)
 			}
 		} else {
-			node.InsertAfter(remain)
+			node.InsertAfter(toInsert)
 		}
+
+		createdUpdated(toInsert)
+		tx.nodes[toInsert.ID] = toInsert
 	}
-	if isContainer {
-		if ast.NodeListItem == node.Type && 3 == node.ListData.Typ {
-			node.FirstChild.InsertAfter(insertedNode)
-		} else if ast.NodeSuperBlock == node.Type {
-			node.FirstChild.Next.InsertAfter(insertedNode)
-		} else {
-			node.PrependChild(insertedNode)
-		}
-	} else {
-		node.InsertAfter(insertedNode)
-	}
+
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 	if err = tx.writeTree(tree); err != nil {
@@ -695,9 +709,14 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	if !isContainer {
 		slices.Reverse(toInserts)
 	}
+	var lastChildBelowHeading *ast.Node
+	if ast.NodeHeading == node.Type {
+		if children := treenode.HeadingChildren(node); 0 < len(children) {
+			lastChildBelowHeading = children[len(children)-1]
+		}
+	}
 
-	for i := 0; i < len(toInserts); i++ {
-		toInsert := toInserts[i]
+	for _, toInsert := range toInserts {
 		if isContainer {
 			if ast.NodeList == node.Type {
 				// 列表下只能挂列表项，所以这里需要分情况处理 https://github.com/siyuan-note/siyuan/issues/9955
@@ -722,7 +741,15 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 				node.AppendChild(toInsert)
 			}
 		} else {
-			node.InsertAfter(toInsert)
+			if ast.NodeHeading == node.Type {
+				if nil != lastChildBelowHeading {
+					lastChildBelowHeading.InsertAfter(toInsert)
+				} else {
+					node.InsertAfter(toInsert)
+				}
+			} else {
+				node.InsertAfter(toInsert)
+			}
 		}
 
 		createdUpdated(toInsert)

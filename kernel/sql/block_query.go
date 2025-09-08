@@ -69,8 +69,8 @@ func queryBlockHashes(rootID string) (ret map[string]string) {
 	return
 }
 
-func QueryRootBlockByCondition(condition string) (ret []*Block) {
-	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition + " ORDER BY box DESC,lv ASC LIMIT 128"
+func QueryRootBlockByCondition(condition string, limit int) (ret []*Block) {
+	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition + " ORDER BY box DESC,lv ASC LIMIT " + strconv.Itoa(limit)
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)

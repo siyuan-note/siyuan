@@ -187,7 +187,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 			}
 		}
 
-		rootBlocks = sql.QueryRootBlockByCondition(condition)
+		rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
 	} else {
 		for _, box := range boxes {
 			if flashcard {

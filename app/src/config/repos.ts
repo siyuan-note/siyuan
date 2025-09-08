@@ -6,7 +6,6 @@ import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
 import {openByMobile} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {isKernelInMobile} from "../util/functions";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {

@@ -1,5 +1,5 @@
-const isNormalItem = (currentHintElement: HTMLElement, className: string) => {
-    return !currentHintElement.classList.contains(className) || currentHintElement.getBoundingClientRect().height === 0;
+export const isAbnormalItem = (currentHintElement: HTMLElement, className: string) => {
+    return !currentHintElement || !currentHintElement.classList.contains(className) || currentHintElement.getBoundingClientRect().height === 0;
 };
 
 export const upDownHint = (listElement: Element, event: KeyboardEvent, classActiveName = "b3-list-item--focus", defaultElement?: Element) => {
@@ -19,13 +19,13 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
         currentHintElement.classList.remove(classActiveName);
 
         currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
-        while (currentHintElement && isNormalItem(currentHintElement, className)) {
+        while (isAbnormalItem(currentHintElement, className)) {
             currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
         }
 
         if (!currentHintElement) {
             currentHintElement = listElement.children[0] as HTMLElement;
-            while (currentHintElement && isNormalItem(currentHintElement, className)) {
+            while (isAbnormalItem(currentHintElement, className)) {
                 currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
             }
         }
@@ -44,7 +44,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
         currentHintElement.classList.remove(classActiveName);
 
         currentHintElement = currentHintElement.previousElementSibling as HTMLElement;
-        while (currentHintElement && isNormalItem(currentHintElement, className)) {
+        while (isAbnormalItem(currentHintElement, className)) {
             currentHintElement = currentHintElement.previousElementSibling as HTMLElement;
         }
 
@@ -70,7 +70,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
         event.stopPropagation();
         currentHintElement.classList.remove(classActiveName);
         currentHintElement = listElement.children[0] as HTMLElement;
-        while (currentHintElement && isNormalItem(currentHintElement, className)) {
+        while (isAbnormalItem(currentHintElement, className)) {
             currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
         }
         if (!currentHintElement) {
@@ -84,7 +84,7 @@ export const upDownHint = (listElement: Element, event: KeyboardEvent, classActi
         event.stopPropagation();
         currentHintElement.classList.remove(classActiveName);
         currentHintElement = listElement.children[listElement.children.length - 1] as HTMLElement;
-        while (currentHintElement && isNormalItem(currentHintElement, className)) {
+        while (isAbnormalItem(currentHintElement, className)) {
             currentHintElement = currentHintElement.previousElementSibling as HTMLElement;
         }
         if (!currentHintElement) {

@@ -31,6 +31,7 @@ import {
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {uploadFiles} from "../upload";
+import {isAbnormalItem} from "../../util/upDownHint";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
@@ -290,6 +291,14 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             /// #endif
         }
         this.element.scrollTop = 0;
+        let currentHintElement = this.element.querySelector(".b3-list-item--focus") as HTMLElement;
+        if (isAbnormalItem(currentHintElement, "b3-list-item")) {
+            currentHintElement.classList.remove("b3-list-item--focus");
+            do {
+                currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
+            } while (isAbnormalItem(currentHintElement, "b3-list-item"));
+            currentHintElement?.classList.add("b3-list-item--focus");
+        }
         this.bindUploadEvent(protyle, this.element);
         if (this.source !== "hint") {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;

@@ -1,6 +1,6 @@
 import {Tab} from "../layout/Tab";
 import {Custom} from "../layout/dock/Custom";
-import {bindCardEvent, genCardHTML} from "./openCard";
+import {bindCardEvent, genCardHTML, initCardComponent} from "./openCard";
 import {fetchPost} from "../util/fetch";
 import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
@@ -37,7 +37,7 @@ export const newCardModel = (options: {
         });
     };
 
-    const renderCardsAndBindEvents = async (element: HTMLElement, data: any, cardsData: ICardData, index?: number) => {
+    const renderCardsAndBindEvents = async (element: HTMLElement, data: any, cardsData: ICardData, index?: number, isUpdate?: boolean) => {
         element.innerHTML = genCardHTML({
             id: data.id,
             cardType: data.cardType,
@@ -45,7 +45,7 @@ export const newCardModel = (options: {
             isTab: true,
         });
 
-        editor = await bindCardEvent({
+        const cardOptions = {
             app: options.app,
             element: element,
             id: data.id,
@@ -53,7 +53,14 @@ export const newCardModel = (options: {
             cardType: data.cardType,
             cardsData,
             index,
-        });
+        };
+
+        if (isUpdate) {
+            const initResult = await initCardComponent(cardOptions);
+            editor = initResult.editor;
+        } else {
+            editor = await bindCardEvent(cardOptions);
+        }
 
         customObj.editors.push(editor);
     };
@@ -91,7 +98,7 @@ export const newCardModel = (options: {
         },
         async update() {
             const cardsData = await fetchCardsData();
-            await renderCardsAndBindEvents(this.element, this.data, cardsData);
+            await renderCardsAndBindEvents(this.element, this.data, cardsData ,undefined, true);
         }
     });
     customObj.element.addEventListener("click", () => {

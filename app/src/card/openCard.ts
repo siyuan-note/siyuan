@@ -227,7 +227,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
 
 };
 
-export const bindCardEvent = async (options: {
+export const initCardComponent = async (options: {
     app: App,
     element: Element,
     title?: string,
@@ -303,6 +303,33 @@ export const bindCardEvent = async (options: {
     };
 
     countElement.innerHTML = genCardCount(options.cardsData, index);
+    
+    return {
+        editor,
+        index,
+        actionElements,
+        countElement,
+        filterElement,
+        fetchNewRound
+    };
+};
+
+export const bindCardEvent = async (options: {
+    app: App,
+    element: Element,
+    title?: string,
+    cardsData: ICardData
+    cardType: TCardType,
+    id?: string,
+    dialog?: Dialog,
+    index?: number
+}) => {
+    // 初始化卡片组件
+    const initResult = await initCardComponent(options);
+    const { editor, actionElements, countElement, filterElement, fetchNewRound } = initResult;
+    let index = initResult.index;
+    
+    // 绑定点击事件
     options.element.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";

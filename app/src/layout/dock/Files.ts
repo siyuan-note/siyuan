@@ -1153,6 +1153,13 @@ data-type="navigation-root" data-path="/">
             path: liElement.getAttribute("data-path"),
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
+                newFile({
+                    app: this.app,
+                    notebookId,
+                    currentPath: "/",
+                    useSavePath: false,
+                    listDocTree: true,
+                });
                 showMessage(window.siyuan.languages.emptyContent);
                 return;
             }

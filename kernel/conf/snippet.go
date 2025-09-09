@@ -29,9 +29,10 @@ func NewSnpt() *Snpt {
 }
 
 type Snippet struct {
-	ID      string `json:"id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"` // js/css
-	Enabled bool   `json:"enabled"`
-	Content string `json:"content"`
+	ID                string `json:"id"`
+	Name              string `json:"name"`
+	Type              string `json:"type"` // js/css
+	Enabled           bool   `json:"enabled"`
+	DisabledInPublish bool   `json:"disabledInPublish"`
+	Content           string `json:"content"`
 }

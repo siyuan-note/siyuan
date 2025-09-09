@@ -197,7 +197,7 @@ const genSnippet = (options: ISnippet) => {
     <div class="fn__flex">
         <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
         <div class="fn__space"></div>
-        <label class="fn__flex">
+        <label class="fn__flex${window.siyuan.config.publish.enable ? "" : " fn__none"}">
             <input data-type="disabledInPublish" type="checkbox" class="b3-switch fn__flex-center" ${options.disabledInPublish ? "" : " checked"}>
             <div class="fn__space"></div>
             <span class="fn__flex-center">${window.siyuan.languages.publishService}</span>

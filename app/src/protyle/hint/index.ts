@@ -31,7 +31,6 @@ import {
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
 import {uploadFiles} from "../upload";
-import {isAbnormalItem} from "../../util/upDownHint";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif

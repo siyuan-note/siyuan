@@ -386,10 +386,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
 
             if (types.includes("block-ref")) {
-                protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
                     color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
                 });
+                if (refElement[0]) {
+                    protyle.toolbar.range.selectNodeContents(refElement[0]);
+                }
                 return;
             }
             if (types.includes("a")) {
@@ -508,12 +511,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             if (linkElement) {
                 const selectText = range.toString();
-                const aElements =  protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                const aElements = protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
                     color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${selectText || linkElement.textContent}`
                 });
                 if (!selectText) {
-                    if(aElements[0].lastChild) {
+                    if (aElements[0].lastChild) {
                         // https://github.com/siyuan-note/siyuan/issues/15801
                         range.setEnd(aElements[0].lastChild, aElements[0].lastChild.textContent.length);
                     }
@@ -546,11 +549,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (range.toString() !== "") {
                 const firstLine = textPlain.split("\n")[0];
                 if (isDynamicRef(textPlain)) {
-                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                    const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         // range 不能 escape，否则 https://github.com/siyuan-note/siyuan/issues/8359
                         color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
                     });
+                    if (refElement[0]) {
+                        protyle.toolbar.range.selectNodeContents(refElement[0]);
+                    }
                     return;
                 } else if (isFileAnnotation(firstLine)) {
                     protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {

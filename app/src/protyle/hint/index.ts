@@ -559,16 +559,12 @@ ${genHintItemHTML(item)}
                 }, response => {
                     // https://github.com/siyuan-note/siyuan/issues/10133
                     protyle.toolbar.range = range;
-                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                    const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
-                    if (protyle.toolbar.range.endContainer.nodeType === 1 &&
-                        protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
-                        const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
-                        if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
-                            setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
-                        }
+                    if (refElement[0]) {
+                        protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
                     }
                     protyle.toolbar.range.collapse(false);
                 });
@@ -600,16 +596,12 @@ ${genHintItemHTML(item)}
                     tempElement.innerText = dynamicTexts[1];
                 }
             }
-            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+            const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
             });
-            if (protyle.toolbar.range.endContainer.nodeType === 1 &&
-                protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
-                const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
-                if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
-                    setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
-                }
+            if (refElement[0]) {
+                protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
             }
             protyle.toolbar.range.collapse(false);
             return;

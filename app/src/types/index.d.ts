@@ -369,6 +369,7 @@ interface ISnippet {
     type: string;
     enabled: boolean;
     content: string;
+    disabledInPublish: boolean;
 }
 
 interface IInbox {

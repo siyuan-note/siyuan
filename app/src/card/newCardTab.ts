@@ -38,6 +38,11 @@ export const newCardModel = (options: {
     };
 
     const renderCardsAndBindEvents = async (element: HTMLElement, data: any, cardsData: ICardData, index?: number, isUpdate?: boolean) => {
+        customObj.editors.forEach(editor => {
+            editor.destroy();
+        });
+        customObj.editors.length = 0;
+
         element.innerHTML = genCardHTML({
             id: data.id,
             cardType: data.cardType,

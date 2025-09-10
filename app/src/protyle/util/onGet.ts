@@ -370,6 +370,7 @@ export const disabledProtyle = (protyle: IProtyle) => {
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);
+        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("data-subtype", "lock");
         const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
         if (undoElement && !undoElement.classList.contains("fn__none")) {
             undoElement.classList.add("fn__none");
@@ -428,6 +429,7 @@ export const enableProtyle = (protyle: IProtyle) => {
     if (protyle.breadcrumb) {
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");
         protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.cancelTempUnlock : window.siyuan.languages.lockEdit);
+        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("data-subtype", "unlock");
         const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
         if (undoElement && undoElement.classList.contains("fn__none")) {
             undoElement.classList.remove("fn__none");

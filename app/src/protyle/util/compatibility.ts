@@ -1,8 +1,8 @@
-import {focusByRange} from "./selection";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {Constants} from "../../constants";
+import { focusByRange } from "./selection";
+import { fetchPost, fetchSyncPost } from "../../util/fetch";
+import { Constants } from "../../constants";
 /// #if !BROWSER
-import {clipboard} from "electron";
+import { clipboard } from "electron";
 /// #endif
 
 export const encodeBase64 = (text: string): string => {
@@ -123,7 +123,7 @@ export const getLocalFiles = async () => {
 /// #endif
 
 export const readClipboard = async () => {
-    const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
+    const text: IClipboardData = { textPlain: "", textHTML: "", siyuanHTML: "" };
     try {
         const clipboardContents = await navigator.clipboard.read();
         for (const item of clipboardContents) {
@@ -140,7 +140,7 @@ export const readClipboard = async () => {
             }
             if (item.types.includes("image/png")) {
                 const blob = await item.getType("image/png");
-                text.files = [new File([blob], "image.png", {type: "image/png", lastModified: Date.now()})];
+                text.files = [new File([blob], "image.png", { type: "image/png", lastModified: Date.now() })];
             }
         }
         /// #if !BROWSER
@@ -381,7 +381,7 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGIN_DOCKS] = {};  // { pluginName: {dockId: IPluginDockTab}}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
-        defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};
+        defaultStorage[Constants.LOCAL_OUTLINE] = { keepExpand: true, expand: {} };
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {
@@ -401,7 +401,7 @@ export const getLocalStorage = (cb: () => void) => {
             icon: "0",
             widget: "0",
         };
-        defaultStorage[Constants.LOCAL_EXPORTWORD] = {removeAssets: false, mergeSubdocs: false};
+        defaultStorage[Constants.LOCAL_EXPORTWORD] = { removeAssets: false, mergeSubdocs: false };
         defaultStorage[Constants.LOCAL_EXPORTPDF] = {
             landscape: false,
             marginType: "0",
@@ -457,15 +457,15 @@ export const getLocalStorage = (cb: () => void) => {
             replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
-        defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
+        defaultStorage[Constants.LOCAL_MOVE_PATH] = { keys: [], k: "" };
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
-            Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
-            Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
-            Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
-            Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
-            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH].forEach((key) => {
+        Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
+        Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
+        Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
+        Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
+        Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
+        Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

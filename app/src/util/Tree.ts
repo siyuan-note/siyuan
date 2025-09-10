@@ -1,10 +1,10 @@
-import {getIconByType} from "../editor/getIcon";
-import {isMobile} from "./functions";
-import {mathRender} from "../protyle/render/mathRender";
-import {unicode2Emoji} from "../emoji";
-import {Constants} from "../constants";
-import {escapeAriaLabel} from "./escape";
-import {hasClosestByTag} from "../protyle/util/hasClosest";
+import { getIconByType } from "../editor/getIcon";
+import { isMobile } from "./functions";
+import { mathRender } from "../protyle/render/mathRender";
+import { unicode2Emoji } from "../emoji";
+import { Constants } from "../constants";
+import { escapeAriaLabel } from "./escape";
+import { hasClosestByTag } from "../protyle/util/hasClosest";
 
 export class Tree {
     public element: HTMLElement;
@@ -18,6 +18,7 @@ export class Tree {
     private shiftClick: (element: HTMLElement) => void;
     private altClick: (element: HTMLElement) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
+    public onToggleChange: () => void;
 
     constructor(options: {
         element: HTMLElement,
@@ -30,6 +31,7 @@ export class Tree {
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
+        onToggleChange?: () => void
     }) {
         this.click = options.click;
         this.ctrlClick = options.ctrlClick;
@@ -37,6 +39,7 @@ export class Tree {
         this.shiftClick = options.shiftClick;
         this.rightClick = options.rightClick;
         this.toggleClick = options.toggleClick;
+        this.onToggleChange = options.onToggleChange;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
@@ -219,6 +222,10 @@ data-def-path="${item.defPath}">
                 if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
                     this.toggleBlocks(target.parentElement);
                     this.setCurrent(target.parentElement);
+                    // 触发折叠状态变化事件
+                    if (this.onToggleChange) {
+                        this.onToggleChange();
+                    }
                     event.preventDefault();
                     break;
                 }

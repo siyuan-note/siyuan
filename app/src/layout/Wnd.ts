@@ -30,6 +30,7 @@ import {Search} from "../search";
 import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
+import {fetchPost} from "../util/fetch";
 import {getAllModels} from "./getAll";
 import {clearCounter} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
@@ -555,6 +556,9 @@ export class Wnd {
             }
             // focusin 触发前，layout__wnd--active 和 tab 已设置，需在调用里面更新
             if (update) {
+                // 更新文档浏览时间
+                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: currentTab.model.editor.protyle.block.rootID});
+                
                 updatePanelByEditor({
                     protyle: currentTab.model.editor.protyle,
                     focus: true,

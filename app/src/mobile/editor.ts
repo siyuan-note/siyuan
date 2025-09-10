@@ -52,6 +52,9 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             showMessage(data.msg);
             return;
         }
+        
+        // 更新文档浏览时间
+        fetchPost("/api/storage/updateRecentDocViewTime", {rootID: data.data.rootID});
         const protyleOptions: IProtyleOptions = {
             blockId: id,
             rootId: data.data.rootID,

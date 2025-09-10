@@ -180,3 +180,21 @@ func getLocalStorage(c *gin.Context) {
 	data := model.GetLocalStorage()
 	ret.Data = data
 }
+
+func updateRecentDocViewTime(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	err := model.UpdateRecentDocViewTime(rootID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

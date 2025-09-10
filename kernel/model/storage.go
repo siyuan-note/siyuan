@@ -21,7 +21,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
@@ -32,9 +34,10 @@ import (
 )
 
 type RecentDoc struct {
-	RootID string `json:"rootID"`
-	Icon   string `json:"icon"`
-	Title  string `json:"title"`
+	RootID     string `json:"rootID"`
+	Icon       string `json:"icon"`
+	Title      string `json:"title"`
+	ViewedAt   int64  `json:"viewedAt"` // 添加浏览时间字段
 }
 
 var recentDocLock = sync.Mutex{}
@@ -65,9 +68,10 @@ func RemoveRecentDoc(ids []string) {
 
 func setRecentDocByTree(tree *parse.Tree) {
 	recentDoc := &RecentDoc{
-		RootID: tree.Root.ID,
-		Icon:   tree.Root.IALAttr("icon"),
-		Title:  tree.Root.IALAttr("title"),
+		RootID:   tree.Root.ID,
+		Icon:     tree.Root.IALAttr("icon"),
+		Title:    tree.Root.IALAttr("title"),
+		ViewedAt: time.Now().Unix(), // 使用当前时间作为浏览时间
 	}
 
 	recentDocLock.Lock()
@@ -92,6 +96,37 @@ func setRecentDocByTree(tree *parse.Tree) {
 
 	err = setRecentDocs(recentDocs)
 	return
+}
+
+// 新增函数：更新文档浏览时间
+func UpdateRecentDocViewTime(rootID string) error {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs()
+	if err != nil {
+		return err
+	}
+
+	// 查找文档并更新浏览时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.ViewedAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		// 按浏览时间降序排序
+		sort.Slice(recentDocs, func(i, j int) bool {
+			return recentDocs[i].ViewedAt > recentDocs[j].ViewedAt
+		})
+		err = setRecentDocs(recentDocs)
+	}
+
+	return err
 }
 
 func GetRecentDocs() (ret []*RecentDoc, err error) {
@@ -154,6 +189,22 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 			notExists = append(notExists, doc.RootID)
 		}
 	}
+	
+	// 按浏览时间降序排序，如果ViewedAt为0则使用文档创建时间
+	sort.Slice(ret, func(i, j int) bool {
+		if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
+			// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
+			return ret[i].RootID > ret[j].RootID
+		}
+		if ret[i].ViewedAt == 0 {
+			return false // 没有浏览时间的排在后面
+		}
+		if ret[j].ViewedAt == 0 {
+			return true // 有浏览时间的排在前面
+		}
+		return ret[i].ViewedAt > ret[j].ViewedAt
+	})
+	
 	if 0 < len(notExists) {
 		setRecentDocs(ret)
 	}

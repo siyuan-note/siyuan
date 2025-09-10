@@ -1,10 +1,10 @@
-import { getIconByType } from "../editor/getIcon";
-import { isMobile } from "./functions";
-import { mathRender } from "../protyle/render/mathRender";
-import { unicode2Emoji } from "../emoji";
-import { Constants } from "../constants";
-import { escapeAriaLabel } from "./escape";
-import { hasClosestByTag } from "../protyle/util/hasClosest";
+import {getIconByType} from "../editor/getIcon";
+import {isMobile} from "./functions";
+import {mathRender} from "../protyle/render/mathRender";
+import {unicode2Emoji} from "../emoji";
+import {Constants} from "../constants";
+import {escapeAriaLabel} from "./escape";
+import {hasClosestByTag} from "../protyle/util/hasClosest";
 
 export class Tree {
     public element: HTMLElement;

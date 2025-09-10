@@ -10,6 +10,7 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
         const id = item.getAttribute("data-node-id");
         if (id) {
             srcs.push({
+                itemID: Lute.NewNodeID(),
                 id,
                 isDetached: false
             });
@@ -18,10 +19,12 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
     if (srcs.length > 0) {
         openSearchAV("", fileLiElements[0] as HTMLElement, (listItemElement) => {
             const avID = listItemElement.dataset.avId;
+            const viewID = listItemElement.dataset.viewId;
             transaction(undefined, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: viewID ? false : true,
+                viewID,
                 avID,
-                ignoreFillFilter: true,
                 srcs,
                 blockID: listItemElement.dataset.blockId
             }, {
@@ -37,11 +40,14 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
     if ((range && protyle.title?.editElement?.contains(range.startContainer)) || type === "title") {
         openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
             const avID = listItemElement.dataset.avId;
+            const viewID = listItemElement.dataset.viewId;
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: viewID ? false : true,
+                viewID,
                 avID,
-                ignoreFillFilter: true,
                 srcs: [{
+                    itemID: Lute.NewNodeID(),
                     id: protyle.block.rootID,
                     isDetached: false
                 }],
@@ -83,15 +89,18 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             ids.forEach(item => {
                 srcIDs.push(item);
                 srcs.push({
+                    itemID: Lute.NewNodeID(),
                     id: item,
                     isDetached: false
                 });
             });
             const avID = listItemElement.dataset.avId;
+            const viewID = listItemElement.dataset.viewId;
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: viewID ? false : true,
+                viewID,
                 avID,
-                ignoreFillFilter: true,
                 srcs,
                 blockID: listItemElement.dataset.blockId
             }, {

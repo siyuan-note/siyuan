@@ -59,7 +59,12 @@ func copyStdMarkdown(c *gin.Context) {
 		adjustHeadingLevel = arg["adjustHeadingLevel"].(bool)
 	}
 
-	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel)
+	imgTag := false
+	if nil != arg["imgTag"] {
+		imgTag = arg["imgTag"].(bool)
+	}
+
+	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
 }
 
 func html2BlockDOM(c *gin.Context) {

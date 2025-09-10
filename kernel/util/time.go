@@ -26,6 +26,12 @@ import (
 	"github.com/88250/go-humanize"
 )
 
+func GetTodayStart() (ret time.Time) {
+	ret = time.Now()
+	ret = time.Date(ret.Year(), ret.Month(), ret.Day(), 0, 0, 0, 0, time.Local)
+	return
+}
+
 // Weekday returns the day of the week specified by date.
 // Sunday=0, Monday=1, ..., Saturday=6.
 func Weekday(date time.Time) int {
@@ -54,6 +60,37 @@ func WeekdayCN2(date time.Time) string {
 func ISOWeek(date time.Time) int {
 	_, week := date.ISOWeek()
 	return week
+}
+
+// ISOYear returns the ISO 8601 year in which date occurs.
+func ISOYear(date time.Time) int {
+	year, _ := date.ISOWeek()
+	return year
+}
+
+// ISOMonth returns the month in which the first day of the ISO 8601 week of date occurs.
+func ISOMonth(date time.Time) int {
+	weekday := int(date.Weekday())
+	if weekday == 0 {
+		weekday = 7
+	}
+
+	daysToMonday := weekday - 1
+	monday := date.AddDate(0, 0, -daysToMonday)
+	return int(monday.Month())
+}
+
+// ISOWeekDate returns the date of the specified day of the week in the ISO 8601 week of date.
+// day: Monday=1, ..., Sunday=7.
+func ISOWeekDate(day int, date time.Time) time.Time {
+	weekday := int(date.Weekday())
+	if weekday == 0 {
+		weekday = 7
+	}
+
+	daysToMonday := weekday - 1
+	monday := date.AddDate(0, 0, -daysToMonday)
+	return monday.AddDate(0, 0, day-1)
 }
 
 func Millisecond2Time(t int64) time.Time {

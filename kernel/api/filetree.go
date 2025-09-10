@@ -128,7 +128,7 @@ func listDocTree(c *gin.Context) {
 			doctree = append(doctree, parent)
 
 			subPath := filepath.Join(root, entry.Name())
-			if err = walkDocTree(subPath, parent, &ids); err != nil {
+			if err = walkDocTree(subPath, parent, ids); err != nil {
 				ret.Code = -1
 				ret.Msg = err.Error()
 				return
@@ -152,7 +152,7 @@ type DocFile struct {
 	Children []*DocFile `json:"children,omitempty"`
 }
 
-func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
+func walkDocTree(p string, docFile *DocFile, ids map[string]bool) (err error) {
 	dir, err := os.ReadDir(p)
 	if err != nil {
 		return
@@ -169,7 +169,7 @@ func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
 			}
 
 			parent := &DocFile{ID: entry.Name()}
-			(*ids)[parent.ID] = true
+			ids[parent.ID] = true
 			docFile.Children = append(docFile.Children, parent)
 
 			subPath := filepath.Join(p, entry.Name())
@@ -178,10 +178,10 @@ func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
 			}
 		} else {
 			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
-			if !(*ids)[doc.ID] {
+			if !ids[doc.ID] {
 				docFile.Children = append(docFile.Children, doc)
 			}
-			(*ids)[doc.ID] = true
+			ids[doc.ID] = true
 		}
 	}
 	return
@@ -219,13 +219,6 @@ func removeIndexes(c *gin.Context) {
 		paths = append(paths, p.(string))
 	}
 	model.RemoveIndexes(paths)
-}
-
-func refreshFiletree(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	model.FullReindex()
 }
 
 func doc2Heading(c *gin.Context) {
@@ -548,15 +541,26 @@ func moveDocsByID(c *gin.Context) {
 	}
 	fromPaths = gulu.Str.RemoveDuplicatedElem(fromPaths)
 
+	var box *model.Box
 	toTree, err := model.LoadTreeByBlockID(toID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
+		box = model.Conf.Box(toID)
+		if nil == box {
+			ret.Code = -1
+			ret.Msg = "can't found box or tree by id [" + toID + "]"
+			ret.Data = map[string]interface{}{"closeTimeout": 7000}
+			return
+		}
 	}
-	toNotebook := toTree.Box
-	toPath := toTree.Path
+
+	var toNotebook, toPath string
+	if nil != toTree {
+		toNotebook = toTree.Box
+		toPath = toTree.Path
+	} else if nil != box {
+		toNotebook = box.ID
+		toPath = "/"
+	}
 	callback := arg["callback"]
 	err = model.MoveDocs(fromPaths, toNotebook, toPath, callback)
 	if err != nil {

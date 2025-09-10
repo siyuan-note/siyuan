@@ -85,6 +85,31 @@ func GetHeadingFold(nodes []*ast.Node) (ret []*ast.Node) {
 	return
 }
 
+func IsUnderFoldedHeading(node *ast.Node) bool {
+	currentLevel := 7
+	if ast.NodeHeading == node.Type {
+		currentLevel = node.HeadingLevel
+	}
+	for n := node.Previous; nil != n; n = n.Previous {
+		if ast.NodeHeading == n.Type {
+			if n.HeadingLevel >= currentLevel {
+				break
+			}
+			currentLevel = n.HeadingLevel
+
+			if "1" == n.IALAttr("fold") {
+				if ast.NodeHeading != node.Type {
+					return true
+				}
+				if n.HeadingLevel > node.HeadingLevel {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 	start := heading.Next
 	if nil == start {

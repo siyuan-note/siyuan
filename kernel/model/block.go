@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -61,6 +62,7 @@ type Block struct {
 	Children []*Block          `json:"children"`
 	Depth    int               `json:"depth"`
 	Count    int               `json:"count"`
+	RefCount int               `json:"refCount"`
 	Sort     int               `json:"sort"`
 	Created  string            `json:"created"`
 	Updated  string            `json:"updated"`
@@ -275,6 +277,42 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 					next = flb.ID
 				}
 			}
+		}
+	}
+	return
+}
+
+func GetBlockRelevantIDs(id string) (parentID, previousID, nextID string, err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if nil != node.Parent {
+		parentID = node.Parent.ID
+	}
+	if nil != node.Previous {
+		previous := node.Previous
+		if ast.NodeKramdownBlockIAL == previous.Type {
+			previous = previous.Previous
+		}
+		if nil != previous {
+			previousID = previous.ID
+		}
+	}
+	if nil != node.Next {
+		next := node.Next
+		if ast.NodeKramdownBlockIAL == next.Type {
+			next = next.Next
+		}
+		if nil != next {
+			nextID = next.ID
 		}
 	}
 	return
@@ -592,7 +630,35 @@ func GetHeadingChildrenIDs(id string) (ret []string) {
 	return
 }
 
-func GetHeadingChildrenDOM(id string) (ret string) {
+func AppendHeadingChildren(id, childrenDOM string) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	heading := treenode.GetNodeInTree(tree, id)
+	if nil == heading || ast.NodeHeading != heading.Type {
+		return
+	}
+
+	luteEngine := util.NewLute()
+	subTree := luteEngine.BlockDOM2Tree(childrenDOM)
+	var nodes []*ast.Node
+	for n := subTree.Root.FirstChild; nil != n; n = n.Next {
+		nodes = append(nodes, n)
+	}
+
+	slices.Reverse(nodes)
+	for _, n := range nodes {
+		heading.InsertAfter(n)
+	}
+
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
+		return
+	}
+}
+
+func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
@@ -606,20 +672,26 @@ func GetHeadingChildrenDOM(id string) (ret string) {
 	children := treenode.HeadingChildren(heading)
 	nodes = append(nodes, children...)
 
-	// 取消折叠 https://github.com/siyuan-note/siyuan/issues/13232#issuecomment-2535955152
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
 				return ast.WalkContinue
 			}
 
-			n.RemoveIALAttr("heading-fold")
-			n.RemoveIALAttr("fold")
+			if removeFoldAttr {
+				n.RemoveIALAttr("heading-fold")
+				n.RemoveIALAttr("fold")
+			}
 			return ast.WalkContinue
 		})
+
+		child.SetIALAttr("parent-heading", id)
 	}
-	heading.RemoveIALAttr("fold")
-	heading.RemoveIALAttr("heading-fold")
+
+	if removeFoldAttr {
+		heading.RemoveIALAttr("fold")
+		heading.RemoveIALAttr("heading-fold")
+	}
 
 	luteEngine := util.NewLute()
 	ret = renderBlockDOMByNodes(nodes, luteEngine)
@@ -687,13 +759,8 @@ func GetBlockDOM(id string) (ret string) {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return
-	}
-	node := treenode.GetNodeInTree(tree, id)
-	luteEngine := NewLute()
-	ret = luteEngine.RenderNodeBlockDOM(node)
+	doms := GetBlockDOMs([]string{id})
+	ret = doms[id]
 	return
 }
 
@@ -732,6 +799,9 @@ func GetBlockKramdown(id, mode string) (ret string) {
 	root.PrependChild(node)
 	luteEngine := NewLute()
 	if "md" == mode {
+		// `/api/block/getBlockKramdown` link/image URLs are no longer encoded with spaces https://github.com/siyuan-note/siyuan/issues/15611
+		luteEngine.SetPreventEncodeLinkSpace(true)
+
 		ret = treenode.ExportNodeStdMd(root, luteEngine)
 	} else {
 		tree.Root = root

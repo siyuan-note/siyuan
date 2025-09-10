@@ -11,6 +11,8 @@ export class Options {
         render: {
             background: false,
             title: false,
+            titleShowTop: false,
+            hideTitleOnZoom: false,
             gutter: true,
             scroll: false,
             breadcrumb: true,

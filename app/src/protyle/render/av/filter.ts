@@ -75,17 +75,18 @@ export const setFilter = async (options: {
     protyle: IProtyle,
     data: IAV,
     target: HTMLElement,
-    blockElement: Element
+    blockElement: Element,
+    empty: boolean
 }) => {
     let rectTarget = options.target.getBoundingClientRect();
     if (rectTarget.height === 0) {
         rectTarget = options.protyle.wysiwyg.element.querySelector(`[data-col-id="${options.target.dataset.colId}"]`).getBoundingClientRect();
     }
     const blockID = options.blockElement.getAttribute("data-node-id");
+    let operationElement: HTMLSelectElement = undefined;
     const menu = new Menu("set-filter-" + options.filter.column, () => {
         const oldFilters = JSON.parse(JSON.stringify(options.data.view.filters));
-        const selectElement = menu.element.querySelector(".b3-select") as HTMLSelectElement;
-        if (!selectElement || !selectElement.value) {
+        if (!operationElement || !operationElement.value) {
             return;
         }
         const newFilter: IAVFilter = {
@@ -93,7 +94,7 @@ export const setFilter = async (options: {
             value: {
                 type: options.filter.value.type
             },
-            operator: selectElement.value as TAVFilterOperator
+            operator: operationElement.value as TAVFilterOperator
         };
         let hasMatch = false;
         let newValue;
@@ -131,8 +132,8 @@ export const setFilter = async (options: {
                 newValue = genCellValue(filterValue.type, {
                     isNotEmpty2: textElements[2].value !== "",
                     isNotEmpty: textElements[0].value !== "",
-                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
-                    content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : null,
+                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : 0,
+                    content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : 0,
                     hasEndDate: newFilter.operator === "Is between",
                     isNotTime: true,
                 });
@@ -155,6 +156,7 @@ export const setFilter = async (options: {
                 },
                 type: "rollup"
             };
+            newFilter.quantifier = (menu.element.querySelector('.b3-select[data-type="quantifier"]') as HTMLSelectElement).value;
         } else {
             newFilter.value = newValue;
         }
@@ -175,7 +177,7 @@ export const setFilter = async (options: {
                 return true;
             }
         });
-        if (isSame || !hasMatch) {
+        if (!options.empty && (isSame || !hasMatch)) {
             return;
         }
         transaction(options.protyle, [{
@@ -210,6 +212,7 @@ export const setFilter = async (options: {
     if (colData.type === "rollup") {
         if (!colData.rollup || !colData.rollup.relationKeyID || !colData.rollup.keyID) {
             showMessage(window.siyuan.languages.plsChoose);
+            document.querySelector(".av__panel")?.remove();
             openMenuPanel({
                 protyle: options.protyle,
                 blockElement: options.blockElement,
@@ -218,33 +221,46 @@ export const setFilter = async (options: {
             });
             return;
         }
-        let targetAVId = "";
-        fields.find((column) => {
-            if (column.id === colData.rollup.relationKeyID) {
-                targetAVId = column.relation.avID;
-                return true;
+        if (colData.rollup.calc?.operator && colData.rollup.calc.operator !== "Range") {
+            if (["Count all", "Count empty", "Count not empty", "Count values", "Count unique values", "Percent empty",
+                "Percent not empty", "Percent unique values", "Percent checked", "Percent unchecked", "Sum", "Average", "Median",
+                "Min", "Max"].includes(colData.rollup.calc.operator)) {
+                filterValue.type = "number";
+            } else if (["Checked", "Unchecked"].includes(colData.rollup.calc.operator)) {
+                filterValue.type = "checkbox";
+            } else if (["Earliest", "Latest"].includes(colData.rollup.calc.operator)) {
+                filterValue.type = "date";
             }
-        });
-        const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
-        response.data.av.keyValues.find((item: {
-            key: {
-                id: string,
-                name: string,
-                type: TAVCol,
-                options: {
-                    name: string,
-                    color: string,
-                }[]
-            }
-        }) => {
-            if (item.key.id === colData.rollup.keyID) {
-                filterValue.type = item.key.type;
-                if (item.key.type === "select") {
-                    colData.options = item.key.options;
+        } else {
+            let targetAVId = "";
+            fields.find((column) => {
+                if (column.id === colData.rollup.relationKeyID) {
+                    targetAVId = column.relation.avID;
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
+            const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
+            response.data.av.keyValues.find((item: {
+                key: {
+                    id: string,
+                    name: string,
+                    type: TAVCol,
+                    options: {
+                        name: string,
+                        color: string,
+                    }[]
+                }
+            }) => {
+                if (item.key.id === colData.rollup.keyID) {
+                    filterValue.type = item.key.type;
+                    if (item.key.type === "select") {
+                        colData.options = item.key.options;
+                    }
+                    return true;
+                }
+            });
+        }
+
         options.data.view.filters.find(item => {
             if (item.column === colData.id && item.value.type === "rollup") {
                 if (!item.value.rollup || !item.value.rollup.contents || item.value.rollup.contents.length === 0) {
@@ -335,10 +351,21 @@ export const setFilter = async (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
     }
+    if (options.filter.value.type === "rollup") {
+        menu.addItem({
+            iconHTML: "",
+            type: "readonly",
+            label: ` <select style="margin: 4px 0" class="b3-select fn__size200" data-type="quantifier">
+    <option ${(options.filter.quantifier === "" || options.filter.quantifier === "Any") ? "selected" : ""} value="Any">${window.siyuan.languages.filterQuantifierAny}</option>
+    <option ${"All" === options.filter.quantifier ? "selected" : ""} value="All">${window.siyuan.languages.filterQuantifierAll}</option>
+    <option ${"None" === options.filter.quantifier ? "selected" : ""} value="None">${window.siyuan.languages.filterQuantifierNone}</option>
+</select>`
+        });
+    }
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<select style="margin: 4px 0" class="b3-select fn__size200">${selectHTML}</select>`
+        label: `<select style="margin: 4px 0" class="b3-select fn__size200" data-type="operation">${selectHTML}</select>`
     });
     if (filterValue.type === "select" || filterValue.type === "mSelect") {
         if (colData.options?.length > 0) {
@@ -505,9 +532,9 @@ export const setFilter = async (options: {
             }
         }
     });
-    const selectElement = (menu.element.querySelector(".b3-select") as HTMLSelectElement);
-    selectElement.addEventListener("change", () => {
-        toggleEmpty(selectElement, selectElement.value, filterValue.type);
+    operationElement = (menu.element.querySelector('.b3-select[data-type="operation"]') as HTMLSelectElement);
+    operationElement?.addEventListener("change", () => {
+        toggleEmpty(operationElement, operationElement.value, filterValue.type);
     });
     const dateTypeElement = menu.element.querySelector('.b3-select[data-type="dateType"]') as HTMLSelectElement;
     dateTypeElement?.addEventListener("change", () => {
@@ -556,7 +583,7 @@ export const setFilter = async (options: {
             });
         });
     }
-    toggleEmpty(selectElement, selectElement.value, filterValue.type);
+    toggleEmpty(operationElement, operationElement.value, filterValue.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
     if (textElements.length > 0) {
         textElements[0].select();
@@ -598,6 +625,7 @@ export const addFilter = (options: {
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({
+                        empty: true,
                         filter,
                         protyle: options.protyle,
                         data: options.data,
@@ -623,18 +651,27 @@ export const getFiltersHTML = (data: IAV) => {
         fields.find((item) => {
             if (item.id === filter.column && item.type === filter.value.type) {
                 let filterText = "";
+                if (item.type === "rollup") {
+                    if (filter.quantifier === "" || filter.quantifier === "Any") {
+                        filterText = window.siyuan.languages.filterQuantifierAny + " ";
+                    } else if (filter.quantifier === "All") {
+                        filterText = window.siyuan.languages.filterQuantifierAll + " ";
+                    } else if (filter.quantifier === "None") {
+                        filterText = window.siyuan.languages.filterQuantifierNone + " ";
+                    }
+                }
                 const filterValue = item.type === "rollup" ? (filter.value.rollup?.contents?.length > 0 ? filter.value.rollup.contents[0] : {type: "rollup"} as IAVCellValue) : filter.value;
                 if (filter.operator === "Is empty") {
-                    filterText = ": " + window.siyuan.languages.filterOperatorIsEmpty;
+                    filterText = ": " + filterText + window.siyuan.languages.filterOperatorIsEmpty;
                 } else if (filter.operator === "Is not empty") {
-                    filterText = ": " + window.siyuan.languages.filterOperatorIsNotEmpty;
+                    filterText = ": " + filterText + window.siyuan.languages.filterOperatorIsNotEmpty;
                 } else if (filter.operator === "Is false") {
                     if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
-                        filterText = ": " + window.siyuan.languages.unchecked;
+                        filterText = ": " + filterText + window.siyuan.languages.unchecked;
                     }
                 } else if (filter.operator === "Is true") {
                     if (filterValue.type !== "checkbox" || typeof filterValue.checkbox.checked === "boolean") {
-                        filterText = ": " + window.siyuan.languages.checked;
+                        filterText = ": " + filterText + window.siyuan.languages.checked;
                     }
                 } else if (["created", "updated", "date"].includes(filterValue.type)) {
                     let dateValue = "";
@@ -648,21 +685,25 @@ export const getFiltersHTML = (data: IAV) => {
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                         }
-                    } else if (filterValue && filterValue[filterValue.type as "date"]?.content) {
-                        dateValue = dayjs(filterValue[filterValue.type as "date"].content).format("YYYY-MM-DD");
-                        dateValue2 = dayjs(filterValue[filterValue.type as "date"].content2).format("YYYY-MM-DD");
+                    } else if (filterValue) {
+                        if (filterValue[filterValue.type as "date"]?.content) {
+                            dateValue = dayjs(filterValue[filterValue.type as "date"].content).format("YYYY-MM-DD");
+                        }
+                        if (filterValue && filterValue[filterValue.type as "date"]?.content2) {
+                            dateValue2 = dayjs(filterValue[filterValue.type as "date"].content2).format("YYYY-MM-DD");
+                        }
                     }
                     if (dateValue) {
-                        if (filter.operator === "Is between") {
-                            filterText = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
+                        if (filter.operator === "Is between" && dateValue2) {
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
                         } else if ("=" === filter.operator) {
-                            filterText = `: ${dateValue}`;
+                            filterText = `: ${filterText}${dateValue}`;
                         } else if ([">", "<"].includes(filter.operator)) {
-                            filterText = ` ${filter.operator} ${dateValue}`;
+                            filterText = ` ${filterText}${filter.operator} ${dateValue}`;
                         } else if (">=" === filter.operator) {
-                            filterText = ` ≥ ${dateValue}`;
+                            filterText = ` ${filterText}≥ ${dateValue}`;
                         } else if ("<=" === filter.operator) {
-                            filterText = ` ≤ ${dateValue}`;
+                            filterText = ` ${filterText}≤ ${dateValue}`;
                         }
                     }
                 } else if (["mSelect", "select"].includes(filterValue.type) && filterValue.mSelect?.length > 0) {
@@ -674,41 +715,42 @@ export const getFiltersHTML = (data: IAV) => {
                         }
                     });
                     if ("Contains" === filter.operator) {
-                        filterText = `: ${selectContent}`;
+                        filterText = `: ${filterText}${selectContent}`;
                     } else if (filter.operator === "Does not contains") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
                     } else if (filter.operator === "=") {
-                        filterText = `: ${selectContent}`;
+                        filterText = `: ${filterText}${selectContent}`;
                     } else if (filter.operator === "!=") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
                     }
                 } else if (filterValue.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
-                        filterText = ` ${filter.operator} ${filterValue.number.content}`;
+                        filterText = ` ${filterText}${filter.operator} ${filterValue.number.content}`;
                     } else if (">=" === filter.operator) {
-                        filterText = ` ≥ ${filterValue.number.content}`;
+                        filterText = ` ${filterText}≥ ${filterValue.number.content}`;
                     } else if ("<=" === filter.operator) {
-                        filterText = ` ≤ ${filterValue.number.content}`;
+                        filterText = ` ${filterText}≤ ${filterValue.number.content}`;
                     }
                 } else if (["text", "block", "url", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
-                    const content = filterValue[filterValue.type as "text"].content ||
-                        filterValue.relation?.blockIDs[0] || "";
-                    if (["=", "Contains"].includes(filter.operator)) {
-                        filterText = `: ${content}`;
-                    } else if (filter.operator === "Does not contains") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
-                    } else if (filter.operator === "!=") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
-                    } else if ("Starts with" === filter.operator) {
-                        filterText = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
-                    } else if ("Ends with" === filter.operator) {
-                        filterText = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
-                    } else if ([">", "<"].includes(filter.operator)) {
-                        filterText = ` ${filter.operator} ${content}`;
-                    } else if (">=" === filter.operator) {
-                        filterText = ` ≥ ${content}`;
-                    } else if ("<=" === filter.operator) {
-                        filterText = ` ≤ ${content}`;
+                    const content = filterValue[filterValue.type as "text"].content || filterValue.relation?.blockIDs[0] || "";
+                    if (content) {
+                        if (["=", "Contains"].includes(filter.operator)) {
+                            filterText = `: ${filterText}${content}`;
+                        } else if (filter.operator === "Does not contains") {
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
+                        } else if (filter.operator === "!=") {
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${content}`;
+                        } else if ("Starts with" === filter.operator) {
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
+                        } else if ("Ends with" === filter.operator) {
+                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                        } else if ([">", "<"].includes(filter.operator)) {
+                            filterText = ` ${filterText}${filter.operator} ${content}`;
+                        } else if (">=" === filter.operator) {
+                            filterText = ` ${filterText}≥ ${content}`;
+                        } else if ("<=" === filter.operator) {
+                            filterText = ` ${filterText}≤ ${content}`;
+                        }
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterText ? " b3-chip--primary" : ""}">
@@ -743,7 +785,7 @@ ${html}
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
 </button>
-<button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeFilters">
+<button class="b3-menu__item b3-menu__item--warning${html ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.removeFilters}</span>
 </button>

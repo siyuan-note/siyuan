@@ -102,7 +102,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to enter the publishing service settings panel."
+									"Data": "​ to enter the publish service settings panel."
 								}
 							]
 						}
@@ -252,7 +252,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "If access control is required for the publishing service:"
+									"Data": "If access control is required for the publish service:"
 								}
 							]
 						},
@@ -333,7 +333,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "When enabled, the publishing service will use the "
+													"Data": "When enabled, the publish service will use the "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -482,7 +482,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After enabling the publishing service, visitors can browse the content of the entire workspace."
+									"Data": "After enabling the publish service, visitors can browse the content of the entire workspace."
 								}
 							]
 						}

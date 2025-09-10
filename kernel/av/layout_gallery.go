@@ -167,6 +167,10 @@ func (gallery *Gallery) SetItems(items []Item) {
 	}
 }
 
+func (gallery *Gallery) CountItems() int {
+	return len(gallery.Cards)
+}
+
 func (gallery *Gallery) GetFields() (ret []Field) {
 	ret = []Field{}
 	for _, field := range gallery.Fields {
@@ -182,6 +186,15 @@ func (gallery *Gallery) GetField(id string) (ret Field, fieldIndex int) {
 		}
 	}
 	return nil, -1
+}
+
+func (gallery *Gallery) GetValue(itemID, keyID string) (ret *Value) {
+	for _, card := range gallery.Cards {
+		if card.ID == itemID {
+			return card.GetValue(keyID)
+		}
+	}
+	return nil
 }
 
 func (gallery *Gallery) GetType() LayoutType {

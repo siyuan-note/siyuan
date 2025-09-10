@@ -363,7 +363,7 @@ ${padHTML}
                     click() {
                         if (!needSubscribe()) {
                             confirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
-                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.id});
                             });
                         }
                     }
@@ -444,10 +444,14 @@ ${padHTML}
                         setEditMode(protyle, "wysiwyg");
                         protyle.scroll.lastScrollTop = 0;
                         fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.parentID,
-                            size: window.siyuan.config.editor.dynamicLoadBlocks,
+                            id: protyle.block.id,
+                            size: protyle.block.id === protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
                         }, getResponse => {
-                            onGet({data: getResponse, protyle});
+                            onGet({
+                                data: getResponse,
+                                protyle,
+                                action: protyle.block.id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]
+                            });
                         });
                         /// #if !MOBILE
                         saveLayout();

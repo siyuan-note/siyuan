@@ -4,6 +4,9 @@ echo 'use ".\scripts\win-build.bat" instead of "win-build.bat"'
 echo 'Building UI'
 cd app
 call pnpm install
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 call pnpm run build
 if errorlevel 1 (
     exit /b %errorlevel%

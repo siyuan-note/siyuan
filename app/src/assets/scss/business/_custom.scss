@@ -28,6 +28,14 @@
     &[data-type="select"] {
       padding-left: 6px;
     }
+
+    span.b3-menu__avemoji {
+      line-height: 26px;
+
+      img {
+        margin-top: 6px;
+      }
+    }
   }
 
   &__avheader {

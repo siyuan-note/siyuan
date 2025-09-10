@@ -33,7 +33,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 文档树
         getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4", "fileTree5",
             "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
-            "fileTree16", "fileTree17", "fileTree21"]),
+            "fileTree16", "fileTree17", "fileTree18", "fileTree19", "fileTree20", "fileTree21", "fileTree22", "fileTree23"]),
 
         // 闪卡
         getLang(["riffCard", "flashcardNewCardLimit", "flashcardNewCardLimitTip", "flashcardReviewCardLimit",
@@ -101,8 +101,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "systemLog", "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export",
             "downloadLatestVer", "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
             "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip",
-            "dataRepoPurge", "dataRepoPurgeTip", "dataRepoAutoPurgeIndexRetentionDays",
-            "dataRepoAutoPurgeRetentionIndexesDaily"]),
+            "dataRepoPurge", "dataRepoPurgeTip", "dataRepoAutoPurgeIndexRetentionDays", "dataRepoAutoPurgeRetentionIndexesDaily",
+            "vacuumDataIndex", "vacuumDataIndexTip", "rebuildDataIndex", "rebuildDataIndexTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     /// #if !BROWSER

@@ -31,7 +31,7 @@ export const initBlockPopover = (app: App) => {
         if (aElement) {
             let tooltipClass = "";
             let tip = aElement.getAttribute("aria-label") || "";
-            if (aElement.classList.contains("av__cell")) {
+            if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
                     const desc = aElement.getAttribute("data-desc");
@@ -49,6 +49,7 @@ export const initBlockPopover = (app: App) => {
                             tooltipClass = "href";
                         }
                     }
+                    tip = "";
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (aElement.scrollWidth > aElement.clientWidth + 2) {
@@ -308,7 +309,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                             }
                         });
                         if (hasToolbar) {
-                           break;
+                            break;
                         }
                         item.destroy();
                     }

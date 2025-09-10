@@ -1227,7 +1227,16 @@ export class Toolbar {
         window.siyuan.menus.menu.remove();
         this.range = getEditorRange(nodeElement);
         let html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>`;
-        const hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+
+        const eventDetail = {languages: hljsLanguages};
+        if (protyle.app && protyle.app.plugins) {
+            protyle.app.plugins.forEach((plugin: any) => {
+                plugin.eventBus.emit("code-language-update", eventDetail);
+            });
+        }
+
+        hljsLanguages = eventDetail.languages;
         hljsLanguages.forEach((item, index) => {
             html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
         });
@@ -1264,23 +1273,34 @@ export class Toolbar {
             let html = "";
             // sort
             let matchInput = false;
-            matchLanguages.sort((a, b) => {
-                if (a.startsWith(lowerCaseValue) && b.startsWith(lowerCaseValue)) {
-                    if (a.length < b.length) {
+            if (lowerCaseValue) {
+                matchLanguages.sort((a, b) => {
+                    if (a.startsWith(lowerCaseValue) && b.startsWith(lowerCaseValue)) {
+                        if (a.length < b.length) {
+                            return -1;
+                        } else if (a.length === b.length) {
+                            return 0;
+                        } else {
+                            return 1;
+                        }
+                    } else if (a.startsWith(lowerCaseValue)) {
                         return -1;
-                    } else if (a.length === b.length) {
-                        return 0;
-                    } else {
+                    } else if (b.startsWith(lowerCaseValue)) {
                         return 1;
+                    } else {
+                        return 0;
                     }
-                } else if (a.startsWith(lowerCaseValue)) {
-                    return -1;
-                } else if (b.startsWith(lowerCaseValue)) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }).forEach((item) => {
+                });
+            }
+
+            const eventDetail = {languages: matchLanguages};
+            if (protyle.app && protyle.app.plugins) {
+                protyle.app.plugins.forEach((plugin: any) => {
+                    plugin.eventBus.emit("code-language-update", eventDetail);
+                });
+            }
+
+            matchLanguages.forEach((item) => {
                 if (inputElement.value === item) {
                     matchInput = true;
                 }
@@ -1291,10 +1311,10 @@ export class Toolbar {
             }
             html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;
-            if (listElement.firstElementChild.nextElementSibling) {
-                listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
+            if (listElement.childElementCount > 2 && !matchInput && inputElement.value.trim()) {
+                listElement.firstElementChild.nextElementSibling.nextElementSibling.classList.add("b3-list-item--focus");
             } else {
-                listElement.firstElementChild.classList.add("b3-list-item--focus");
+                listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
             }
             event.stopPropagation();
         });
@@ -1744,15 +1764,26 @@ ${item.name}
         }
     }
 
-    private updateLanguage(languageElement: HTMLElement[], protyle: IProtyle, selectedLang: string) {
+    private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
+
+        if (protyle.app && protyle.app.plugins) {
+            protyle.app.plugins.forEach((plugin: any) => {
+                plugin.eventBus.emit("code-language-change", {
+                    language: currentLang,
+                    languageElements,
+                    protyle: protyle
+                });
+            });
+        }
+
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;
             setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
         }
         const doOperations: IOperation[] = [];
         const undoOperations: IOperation[] = [];
-        languageElement.forEach(item => {
+        languageElements.forEach(item => {
             const nodeElement = hasClosestBlock(item);
             if (nodeElement) {
                 const id = nodeElement.getAttribute("data-node-id");

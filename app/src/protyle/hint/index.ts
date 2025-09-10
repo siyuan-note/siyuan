@@ -6,7 +6,7 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition, setLastNodeRange
+    getSelectionPosition,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath, newFile} from "../../util/newFile";
@@ -439,7 +439,7 @@ ${genHintItemHTML(item)}
             if (!rowElement) {
                 return;
             }
-            const previousID = cellElement.dataset.blockId;
+            const previousID = rowElement.dataset.id;
             const avID = nodeElement.getAttribute("data-av-id");
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
@@ -559,16 +559,12 @@ ${genHintItemHTML(item)}
                 }, response => {
                     // https://github.com/siyuan-note/siyuan/issues/10133
                     protyle.toolbar.range = range;
-                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                    const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
-                    if (protyle.toolbar.range.endContainer.nodeType === 1 &&
-                        protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
-                        const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
-                        if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
-                            setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
-                        }
+                    if (refElement[0]) {
+                        protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
                     }
                     protyle.toolbar.range.collapse(false);
                 });
@@ -600,16 +596,12 @@ ${genHintItemHTML(item)}
                     tempElement.innerText = dynamicTexts[1];
                 }
             }
-            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+            const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
             });
-            if (protyle.toolbar.range.endContainer.nodeType === 1 &&
-                protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
-                const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
-                if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
-                    setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
-                }
+            if (refElement[0]) {
+                protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
             }
             protyle.toolbar.range.collapse(false);
             return;
@@ -727,7 +719,7 @@ ${genHintItemHTML(item)}
                 focusByRange(range);
                 this.genEmojiHTML(protyle);
                 return;
-            } else if (value.indexOf("style") > -1) {
+            } else if (value.startsWith("style")) {
                 range.deleteContents();
                 this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
@@ -858,7 +850,11 @@ ${genHintItemHTML(item)}
                     focusBlock(nodeElement);
                 } else if (nodeElement.classList.contains("av")) {
                     avRender(nodeElement, protyle, () => {
-                        (nodeElement.querySelector(".av__title") as HTMLInputElement).focus();
+                        const titleHTMLElement = nodeElement.querySelector(".av__title") as HTMLInputElement;
+                        titleHTMLElement.focus();
+                        range.setStart(titleHTMLElement, 0);
+                        range.collapse(true);
+                        focusByRange(range);
                     });
                 } else {
                     focusByWbr(nodeElement, range);

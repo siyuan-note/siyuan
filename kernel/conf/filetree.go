@@ -33,6 +33,7 @@ type FileTree struct {
 	RemoveDocWithoutConfirm bool   `json:"removeDocWithoutConfirm"` // 删除文档时是否不需要确认
 	CloseTabsOnStart        bool   `json:"closeTabsOnStart"`        // 启动时关闭所有页签
 	UseSingleLineSave       bool   `json:"useSingleLineSave"`       // 使用单行保存文档 .sy 和属性视图 .json
+	LargeFileWarningSize    int    `json:"largeFileWarningSize"`    // 大文件警告大小（单位：MB）
 
 	Sort int `json:"sort"` // 排序方式
 }
@@ -47,5 +48,6 @@ func NewFileTree() *FileTree {
 		AllowCreateDeeper:      false,
 		CloseTabsOnStart:       false,
 		UseSingleLineSave:      util.UseSingleLineSave,
+		LargeFileWarningSize:   util.LargeFileWarningSize,
 	}
 }

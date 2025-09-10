@@ -1,6 +1,6 @@
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
-import {upDownHint} from "../../../util/upDownHint";
+import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeGreat, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
@@ -9,9 +9,20 @@ import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 import * as dayjs from "dayjs";
-import {getFieldsByData} from "./view";
+import {getFieldsByData, getViewName} from "./view";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
+import {isMobile} from "../../../util/functions";
+
+interface IAVItem {
+    avID: string;
+    avName: string;
+    blockID: string;
+    hPath: string;
+    viewName: string;
+    viewID: string;
+    viewLayout: string;
+}
 
 const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {
@@ -19,21 +30,32 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
         excludes: (excludes && avId) ? [avId] : undefined
     }, (response) => {
         let html = "";
-        response.data.results.forEach((item: {
-            avID: string
-            avName: string
-            blockID: string
-            hPath: string
-        }, index: number) => {
+        response.data.results.forEach((item: IAVItem & { children: IAVItem[] }, index: number) => {
+            const hasChildren = item.children && item.children.length > 0 && excludes;
             html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl${excludes ? "" : " fn__none"}" style="height:auto;align-self: stretch;margin: 4px 0;">
+        <svg class="b3-list-item__arrow">${hasChildren ? '<use xlink:href="#iconRight"></use>' : ""}</svg>
+    </span>
+    <span class="fn__space--small"></span>
     <div class="b3-list-item--two fn__flex-1">
         <div class="b3-list-item__first">
-            <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages.title)}</span>
+            <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages._kernel[267])}</span>
         </div>
         <div class="b3-list-item__meta b3-list-item__showall">${escapeGreat(item.hPath)}</div>
     </div>
     <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
 </div>`;
+            if (hasChildren) {
+                html += '<div class="fn__none">';
+                item.children.forEach((subItem) => {
+                    const viewDefaultName = getViewName(subItem.viewLayout);
+                    html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}">
+<span class="b3-list-item__text">${escapeHtml(subItem.avName || window.siyuan.languages._kernel[267])}</span> 
+<span class="b3-list-item__meta">${escapeHtml(subItem.viewName)}${viewDefaultName === subItem.viewName ? "" : " - " + viewDefaultName}</span>
+</div>`;
+                });
+                html += "</div>";
+            }
         });
         element.innerHTML = html;
         if (cb) {
@@ -58,7 +80,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter">
+        label: `<div class="fn__flex-column b3-menu__filter"${isMobile() ? "" : ' style="width: 50vw"'} >
     <input class="b3-text-field fn__flex-shrink"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
@@ -72,10 +94,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 if (event.isComposing) {
                     return;
                 }
-                const currentElement = upDownHint(listElement, event);
-                if (currentElement) {
-                    event.stopPropagation();
-                }
+                UDLRHint(listElement, event);
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();
@@ -99,15 +118,31 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 genSearchList(listElement, inputElement.value, avId, excludes);
             });
             element.lastElementChild.addEventListener("click", (event) => {
-                const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-                if (listItemElement) {
-                    event.stopPropagation();
-                    if (cb) {
-                        cb(listItemElement);
-                    } else {
-                        setDatabase(avId, target, listItemElement);
+                let clickTarget = event.target as HTMLElement;
+                while (clickTarget && !clickTarget.classList.contains("b3-list")) {
+                    if (clickTarget.classList.contains("b3-list-item__toggle")) {
+                        if (clickTarget.firstElementChild.classList.contains("b3-list-item__arrow--open")) {
+                            clickTarget.firstElementChild.classList.remove("b3-list-item__arrow--open");
+                            clickTarget.parentElement.nextElementSibling.classList.add("fn__none");
+                        } else {
+                            clickTarget.firstElementChild.classList.add("b3-list-item__arrow--open");
+                            clickTarget.parentElement.nextElementSibling.classList.remove("fn__none");
+                        }
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (clickTarget.classList.contains("b3-list-item")) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (cb) {
+                            cb(clickTarget);
+                        } else {
+                            setDatabase(avId, target, clickTarget);
+                        }
+                        window.siyuan.menus.menu.remove();
+                        break;
                     }
-                    window.siyuan.menus.menu.remove();
+                    clickTarget = clickTarget.parentElement;
                 }
             });
             genSearchList(listElement, "", avId, excludes, () => {
@@ -214,25 +249,33 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 };
 
-const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string, className?: string) => {
-    if (type === "selected") {
+const genSelectItemHTML = (options: {
+    type: "selected" | "empty" | "unselect",
+    id?: string,
+    isDetached?: boolean,
+    text?: string,
+    className?: string,
+    rowId?: string,
+    newName?: string
+}) => {
+    if (options.type === "selected") {
         return `<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-<span class="b3-menu__label fn__ellipsis ${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
+<span class="b3-menu__label fn__ellipsis ${options.isDetached ? "" : " popover__block"}" ${options.isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${options.id}">${options.text}</span>
 <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>`;
     }
-    if (type === "empty") {
-        if (id) {
+    if (options.type === "empty") {
+        if (options.newName) {
             return `<button class="b3-menu__item" data-type="setRelationCell">
-    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", text).replace("${y}", id)}</span>
+    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", options.text).replace("${y}", options.newName)}</span>
 </button>`;
         }
         return `<button class="b3-menu__item">
     <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
 </button>`;
     }
-    if (type == "unselect") {
-        return `<button data-id="${id}" class="${className || "b3-menu__item ariaLabel"}" data-position="west" data-type="setRelationCell">
-    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
+    if (options.type == "unselect") {
+        return `<button data-row-id="${options.rowId}" class="${options.className || "b3-menu__item ariaLabel"}" data-position="west" data-type="setRelationCell">
+    <span class="b3-menu__label fn__ellipsis${options.isDetached ? "" : " popover__block"}" ${options.isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${options.id}">${options.text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
 </button>`;
     }
@@ -249,20 +292,35 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         const hasIds: string[] = [];
         cellElement.querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
             const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-            hasIds.push(item.dataset.id);
-            selectHTML += `<button data-id="${item.dataset.id}" data-position="west" data-type="setRelationCell" 
+            hasIds.push(relationItem.dataset.rowId);
+            selectHTML += `<button data-row-id="${relationItem.dataset.rowId}" data-position="west" data-type="setRelationCell" 
 class="b3-menu__item ariaLabel${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" 
-draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled))}</button>`;
+draggable="true">${genSelectItemHTML({
+                type: "selected",
+                id: item.dataset.id,
+                isDetached: !item.classList.contains("av__celltext--ref"),
+                text: Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled)
+            })}</button>`;
         });
         cells.forEach((item) => {
-            if (!hasIds.includes(item.block.id)) {
-                html += genSelectItemHTML("unselect", item.block.id, item.isDetached, Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled));
+            if (!hasIds.includes(item.blockID)) {
+                html += genSelectItemHTML({
+                    type: "unselect",
+                    rowId: item.blockID,
+                    id: item.block.id,
+                    isDetached: item.isDetached,
+                    text: Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)
+                });
             }
         });
         menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html}
-${keyword ? genSelectItemHTML("empty", Lute.EscapeHTMLStr(keyword), undefined, menuElement.querySelector(".popover__block").outerHTML) : (html ? "" : genSelectItemHTML("empty"))}`;
+${keyword ? genSelectItemHTML({
+            type: "empty",
+            newName: Lute.EscapeHTMLStr(keyword),
+            text: menuElement.querySelector(".popover__block").outerHTML
+        }) : (html ? "" : genSelectItemHTML({type: "empty"}))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     });
 };
@@ -283,18 +341,29 @@ export const bindRelationEvent = (options: {
         const hasIds: string[] = [];
         options.cellElements[0].querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
             const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-            hasIds.push(item.dataset.id);
-            selectHTML += `<button data-id="${item.dataset.id}" data-position="west" data-type="setRelationCell" class="b3-menu__item ariaLabel" 
-draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled))}</button>`;
+            hasIds.push(relationItem.dataset.rowId);
+            selectHTML += `<button data-row-id="${relationItem.dataset.rowId}" data-position="west" data-type="setRelationCell" class="b3-menu__item ariaLabel" 
+draggable="true">${genSelectItemHTML({
+                type: "selected",
+                id: item.dataset.id,
+                isDetached: !item.classList.contains("av__celltext--ref"),
+                text: Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled)
+            })}</button>`;
         });
         cells.forEach((item) => {
-            if (!hasIds.includes(item.block.id)) {
-                html += genSelectItemHTML("unselect", item.block.id, item.isDetached, Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled));
+            if (!hasIds.includes(item.blockID)) {
+                html += genSelectItemHTML({
+                    type: "unselect",
+                    rowId: item.blockID,
+                    id: item.block.id,
+                    isDetached: item.isDetached,
+                    text: Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)
+                });
             }
         });
         options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
-${html || genSelectItemHTML("empty")}`;
+${html || genSelectItemHTML({type: "empty"})}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
         setPosition(options.menuElement, cellRect.left, cellRect.bottom, cellRect.height);
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
@@ -376,45 +445,60 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
 
     const newValue: IAVCellRelationValue = {blockIDs: [], contents: []};
     menuElement.querySelectorAll('[draggable="true"]').forEach(item => {
-        const id = item.getAttribute("data-id");
-        newValue.blockIDs.push(id);
+        const rowId = item.getAttribute("data-row-id");
+        const blockPopElement = item.querySelector(".b3-menu__label");
+        newValue.blockIDs.push(rowId);
         newValue.contents.push({
             type: "block",
             block: {
-                id,
-                content: item.querySelector(".b3-menu__label").textContent
+                id: blockPopElement.getAttribute("data-id"),
+                content: blockPopElement.textContent
             },
-            isDetached: !item.querySelector(".popover__block")
+            isDetached: !blockPopElement.classList.contains("popover__block")
         });
     });
     if (target.classList.contains("b3-menu__item")) {
-        const targetId = target.getAttribute("data-id");
+        const rowId = target.getAttribute("data-row-id");
+        const id = target.querySelector(".b3-menu__label").getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");
         const searchValue = menuElement.querySelector("input").value;
         if (target.getAttribute("draggable")) {
-            if (!separatorElement.nextElementSibling.getAttribute("data-id") && !searchValue) {
+            if (!separatorElement.nextElementSibling.getAttribute("data-row-id") && !searchValue) {
                 separatorElement.nextElementSibling.remove();
             }
-            const removeIndex = newValue.blockIDs.indexOf(targetId);
+            const removeIndex = newValue.blockIDs.indexOf(rowId);
             newValue.blockIDs.splice(removeIndex, 1);
             newValue.contents.splice(removeIndex, 1);
             separatorElement.after(target);
-            target.outerHTML = genSelectItemHTML("unselect", targetId, !target.querySelector(".popover__block"), Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent), target.className);
-        } else if (targetId) {
-            newValue.blockIDs.push(targetId);
+            target.outerHTML = genSelectItemHTML({
+                type: "unselect",
+                rowId,
+                id,
+                isDetached: !target.querySelector(".popover__block"),
+                text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent),
+                className: target.className
+            });
+        } else if (rowId) {
+            newValue.blockIDs.push(rowId);
             newValue.contents.push({
                 type: "block",
                 block: {
-                    id: targetId,
+                    id,
                     content: target.firstElementChild.textContent
                 },
                 isDetached: !target.firstElementChild.getAttribute("style")
             });
             separatorElement.before(target);
-            target.outerHTML = `<button data-id="${targetId}" data-position="west" data-type="setRelationCell" class="${target.className}" 
-draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent))}</button>`;
+            target.outerHTML = `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" class="${target.className}" 
+draggable="true">${genSelectItemHTML({
+                type: "selected",
+                rowId,
+                id,
+                isDetached: !target.querySelector(".popover__block"),
+                text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent)
+            })}</button>`;
             if (!separatorElement.nextElementSibling) {
-                separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
+                separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML({type: "empty"}));
             }
         } else {
             const blockID = target.querySelector(".popover__block").getAttribute("data-id");
@@ -423,10 +507,10 @@ draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector
             const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
-                ignoreFillFilter: true,
                 avID: menuElement.firstElementChild.getAttribute("data-av-id"),
                 srcs: [{
-                    id: rowId,
+                    itemID: rowId,
+                    id: Lute.NewNodeID(),
                     isDetached: true,
                     content
                 }],
@@ -441,13 +525,17 @@ draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector
             newValue.contents.push({
                 type: "block",
                 block: {
-                    id: rowId,
                     content
                 },
                 isDetached: true
             });
-            separatorElement.insertAdjacentHTML("beforebegin", `<button data-id="${rowId}" data-position="west" data-type="setRelationCell" 
-class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML("selected", rowId, true, Lute.EscapeHTMLStr(content))}</button>`);
+            separatorElement.insertAdjacentHTML("beforebegin", `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" 
+class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
+                type: "selected",
+                rowId,
+                isDetached: true,
+                text: Lute.EscapeHTMLStr(content)
+            })}</button>`);
         }
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);

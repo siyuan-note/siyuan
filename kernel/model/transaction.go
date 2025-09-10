@@ -277,8 +277,6 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doHideAttrViewName(op)
 			case "setAttrViewColDate":
 				ret = tx.doSetAttrViewColDate(op)
-			case "unbindAttrViewBlock":
-				ret = tx.doUnbindAttrViewBlock(op)
 			case "duplicateAttrViewKey":
 				ret = tx.doDuplicateAttrViewKey(op)
 			case "setAttrViewCoverFrom":
@@ -289,7 +287,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewCardSize(op)
 			case "setAttrViewFitImage":
 				ret = tx.doSetAttrViewFitImage(op)
-			case "setDisplayFieldName":
+			case "setAttrViewDisplayFieldName":
 				ret = tx.doSetAttrViewDisplayFieldName(op)
 			case "setAttrViewShowIcon":
 				ret = tx.doSetAttrViewShowIcon(op)
@@ -305,6 +303,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewGroup(op)
 			case "hideAttrViewGroup":
 				ret = tx.doHideAttrViewGroup(op)
+			case "hideAttrViewAllGroups":
+				ret = tx.doHideAttrViewAllGroups(op)
 			case "foldAttrViewGroup":
 				ret = tx.doFoldAttrViewGroup(op)
 			case "syncAttrViewTableColWidth":
@@ -587,19 +587,19 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	if nil == insertedNode {
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
 	}
-	var remains []*ast.Node
-	for remain := insertedNode.Next; nil != remain; remain = remain.Next {
-		if ast.NodeKramdownBlockIAL != remain.Type {
-			if "" == remain.ID {
-				remain.ID = ast.NewNodeID()
-				remain.SetIALAttr("id", remain.ID)
-			}
-			remains = append(remains, remain)
-		}
-	}
 	if "" == insertedNode.ID {
 		insertedNode.ID = ast.NewNodeID()
 		insertedNode.SetIALAttr("id", insertedNode.ID)
+	}
+	var toInserts []*ast.Node
+	for toInsert := insertedNode; nil != toInsert; toInsert = toInsert.Next {
+		if ast.NodeKramdownBlockIAL != toInsert.Type {
+			if "" == toInsert.ID {
+				toInsert.ID = ast.NewNodeID()
+				toInsert.SetIALAttr("id", toInsert.ID)
+			}
+			toInserts = append(toInserts, toInsert)
+		}
 	}
 
 	node := treenode.GetNodeInTree(tree, operation.ParentID)
@@ -608,31 +608,45 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
-	for i := len(remains) - 1; 0 <= i; i-- {
-		remain := remains[i]
+	slices.Reverse(toInserts)
+
+	for _, toInsert := range toInserts {
 		if isContainer {
-			if ast.NodeListItem == node.Type && 3 == node.ListData.Typ {
-				node.FirstChild.InsertAfter(remain)
+			if ast.NodeList == node.Type {
+				// 列表下只能挂列表项，所以这里需要分情况处理
+				if ast.NodeList == toInsert.Type {
+					var childLis []*ast.Node
+					for childLi := toInsert.FirstChild; nil != childLi; childLi = childLi.Next {
+						childLis = append(childLis, childLi)
+					}
+					for i := len(childLis) - 1; -1 < i; i-- {
+						node.PrependChild(childLis[i])
+					}
+				} else {
+					newLiID := ast.NewNodeID()
+					newLi := &ast.Node{ID: newLiID, Type: ast.NodeListItem, ListData: &ast.ListData{Typ: node.ListData.Typ}}
+					newLi.SetIALAttr("id", newLiID)
+					node.PrependChild(newLi)
+					newLi.AppendChild(toInsert)
+				}
 			} else if ast.NodeSuperBlock == node.Type {
-				node.FirstChild.Next.InsertAfter(remain)
+				layout := node.ChildByType(ast.NodeSuperBlockLayoutMarker)
+				if nil != layout {
+					layout.InsertAfter(toInsert)
+				} else {
+					node.FirstChild.InsertAfter(toInsert)
+				}
 			} else {
-				node.PrependChild(remain)
+				node.PrependChild(toInsert)
 			}
 		} else {
-			node.InsertAfter(remain)
+			node.InsertAfter(toInsert)
 		}
+
+		createdUpdated(toInsert)
+		tx.nodes[toInsert.ID] = toInsert
 	}
-	if isContainer {
-		if ast.NodeListItem == node.Type && 3 == node.ListData.Typ {
-			node.FirstChild.InsertAfter(insertedNode)
-		} else if ast.NodeSuperBlock == node.Type {
-			node.FirstChild.Next.InsertAfter(insertedNode)
-		} else {
-			node.PrependChild(insertedNode)
-		}
-	} else {
-		node.InsertAfter(insertedNode)
-	}
+
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 	if err = tx.writeTree(tree); err != nil {
@@ -692,8 +706,17 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ParentID}
 	}
 	isContainer := node.IsContainerBlock()
-	for i := 0; i < len(toInserts); i++ {
-		toInsert := toInserts[i]
+	if !isContainer {
+		slices.Reverse(toInserts)
+	}
+	var lastChildBelowHeading *ast.Node
+	if ast.NodeHeading == node.Type {
+		if children := treenode.HeadingChildren(node); 0 < len(children) {
+			lastChildBelowHeading = children[len(children)-1]
+		}
+	}
+
+	for _, toInsert := range toInserts {
 		if isContainer {
 			if ast.NodeList == node.Type {
 				// 列表下只能挂列表项，所以这里需要分情况处理 https://github.com/siyuan-note/siyuan/issues/9955
@@ -718,8 +741,19 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 				node.AppendChild(toInsert)
 			}
 		} else {
-			node.InsertAfter(toInsert)
+			if ast.NodeHeading == node.Type {
+				if nil != lastChildBelowHeading {
+					lastChildBelowHeading.InsertAfter(toInsert)
+				} else {
+					node.InsertAfter(toInsert)
+				}
+			} else {
+				node.InsertAfter(toInsert)
+			}
 		}
+
+		createdUpdated(toInsert)
+		tx.nodes[toInsert.ID] = toInsert
 	}
 
 	createdUpdated(insertedNode)
@@ -961,10 +995,8 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
 		}
 
-		nodeTreeID := nodeTree.ID
 		for _, tree := range trees {
-			self := nodeTreeID == tree.ID
-			if !self {
+			if nodeTree.ID != tree.ID {
 				indexWriteTreeUpsertQueue(tree)
 			}
 		}
@@ -1008,7 +1040,7 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 			}
 
 			if changedAv {
-				regenAttrViewViewGroups(attrView, "force")
+				regenAttrViewGroups(attrView)
 				av.SaveAttributeView(attrView)
 				changedAvIDs = append(changedAvIDs, avID)
 			}
@@ -1099,7 +1131,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 			AddAttributeViewBlock(tx, []map[string]interface{}{{
 				"id":         insertedNode.ID,
 				"isDetached": false,
-			}}, avID, "", "", previousID, false)
+			}}, avID, "", "", "", previousID, false, map[string]interface{}{})
 			ReloadAttrView(avID)
 		}
 
@@ -1222,6 +1254,12 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(remain)
 		}
 		node.InsertAfter(insertedNode)
+
+		if treenode.IsUnderFoldedHeading(insertedNode) {
+			// 保持在标题下的折叠状态
+			insertedNode.SetIALAttr("fold", "1")
+			insertedNode.SetIALAttr("heading-fold", "1")
+		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1244,11 +1282,19 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 					node.FirstChild.InsertAfter(remain)
 				}
 			} else {
-				for i := len(remains) - 1; 0 <= i; i-- {
-					remain := remains[i]
-					node.PrependChild(remain)
+				if !node.IsContainerBlock() {
+					for i := len(remains) - 1; 0 <= i; i-- {
+						remain := remains[i]
+						node.InsertAfter(remain)
+					}
+					node.InsertAfter(insertedNode)
+				} else {
+					for i := len(remains) - 1; 0 <= i; i-- {
+						remain := remains[i]
+						node.PrependChild(remain)
+					}
+					node.PrependChild(insertedNode)
 				}
-				node.PrependChild(insertedNode)
 			}
 		}
 	}
@@ -1278,7 +1324,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,
-		}}, avID, "", "", previousID, false)
+		}}, avID, "", "", "", previousID, false, map[string]interface{}{})
 		ReloadAttrView(avID)
 	}
 
@@ -1455,9 +1501,20 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		updatedNode.Tokens = []byte(strings.Join(newLines, "\n"))
 	}
 
+	removedNodes := getRemovedNodes(oldNode, updatedNode)
+	for _, n := range removedNodes {
+		syncDelete2AvBlock(n, tree, tx)
+	}
+
 	// 替换为新节点
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
+
+	if treenode.IsUnderFoldedHeading(updatedNode) {
+		// 保持在标题下的折叠状态
+		updatedNode.SetIALAttr("fold", "1")
+		updatedNode.SetIALAttr("heading-fold", "1")
+	}
 
 	createdUpdated(updatedNode)
 
@@ -1505,6 +1562,30 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 		return ast.WalkContinue
 	})
 	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
+	return
+}
+
+func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {
+	oldNodes := map[string]*ast.Node{}
+	ast.Walk(oldNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+		oldNodes[n.ID] = n
+		return ast.WalkContinue
+	})
+	ast.Walk(newNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+		if _, ok := oldNodes[n.ID]; ok {
+			delete(oldNodes, n.ID)
+		}
+		return ast.WalkContinue
+	})
+	for _, n := range oldNodes {
+		ret = append(ret, n)
+	}
 	return
 }
 
@@ -1557,7 +1638,7 @@ func upsertAvBlockRel(node *ast.Node) {
 		for _, avID := range affectedAvIDs {
 			attrView, _ := av.ParseAttributeView(avID)
 			if nil != attrView {
-				regenAttrViewViewGroups(attrView, "force")
+				regenAttrViewGroups(attrView)
 				av.SaveAttributeView(attrView)
 			}
 
@@ -1700,22 +1781,25 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
-	AvID                string                   `json:"avID"`              // 属性视图 ID
-	SrcIDs              []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
-	Srcs                []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
-	IsDetached          bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
-	IgnoreFillFilterVal bool                     `json:"ignoreFillFilter"`  // 用于标识是否忽略填充筛选值
-	Name                string                   `json:"name"`              // 属性视图列名
-	Typ                 string                   `json:"type"`              // 属性视图列类型
-	Format              string                   `json:"format"`            // 属性视图列格式化
-	KeyID               string                   `json:"keyID"`             // 属性视图字段 ID
-	RowID               string                   `json:"rowID"`             // 属性视图行 ID
-	IsTwoWay            bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
-	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
-	RemoveDest          bool                     `json:"removeDest"`        // 属性视图删除关联目标
-	Layout              av.LayoutType            `json:"layout"`            // 属性视图布局类型
-	GroupID             string                   `json:"groupID"`           // 属性视图分组视图 ID
-	TargetGroupID       string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
+	AvID              string                   `json:"avID"`              // 属性视图 ID
+	SrcIDs            []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
+	Srcs              []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
+	IsDetached        bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
+	Name              string                   `json:"name"`              // 属性视图列名
+	Typ               string                   `json:"type"`              // 属性视图列类型
+	Format            string                   `json:"format"`            // 属性视图列格式化
+	KeyID             string                   `json:"keyID"`             // 属性视图字段 ID
+	RowID             string                   `json:"rowID"`             // 属性视图行 ID
+	IsTwoWay          bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
+	BackRelationKeyID string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
+	RemoveDest        bool                     `json:"removeDest"`        // 属性视图删除关联目标
+	Layout            av.LayoutType            `json:"layout"`            // 属性视图布局类型
+	GroupID           string                   `json:"groupID"`           // 属性视图分组视图 ID
+	TargetGroupID     string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
+	ViewID            string                   `json:"viewID"`            // 属性视图视图 ID
+	IgnoreDefaultFill bool                     `json:"ignoreDefaultFill"` // 是否忽略默认填充
+
+	Context map[string]interface{} `json:"context"` // 上下文信息
 }
 
 type Transaction struct {

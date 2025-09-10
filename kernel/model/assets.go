@@ -148,7 +148,7 @@ func DocAssets(rootID string) (ret []string, err error) {
 		return
 	}
 
-	ret = assetsLinkDestsInTree(tree)
+	ret = getAssetsLinkDests(tree.Root)
 	return
 }
 
@@ -201,7 +201,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				name := filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = "network-asset-" + name
-				name = util.AssetName(name)
+				name = util.AssetName(name, ast.NewNodeID())
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.Copy(u, writePath); err != nil {
 					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
@@ -303,7 +303,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 						name += ext
 					}
 				}
-				name = util.AssetName(name)
+				name = util.AssetName(name, ast.NewNodeID())
 				name = "network-asset-" + name
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); err != nil {
@@ -469,19 +469,32 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
-func UploadAssets2Cloud(rootID string) (count int, err error) {
+func UploadAssets2Cloud(id string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
 	}
 
-	assets := assetsLinkDestsInTree(tree)
-	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
-	assets = append(assets, embedAssets...)
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	nodes := []*ast.Node{node}
+	if ast.NodeHeading == node.Type {
+		nodes = append(nodes, treenode.HeadingChildren(node)...)
+	}
+
+	var assets []string
+	for _, n := range nodes {
+		assets = append(assets, getAssetsLinkDests(n)...)
+		assets = append(assets, getQueryEmbedNodesAssetsLinkDests(n)...)
+	}
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if err != nil {
@@ -711,7 +724,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	defer util.PushClearProgress()
 
 	newName = strings.TrimSpace(newName)
-	newName = util.FilterFileName(newName)
+	newName = util.FilterUploadFileName(newName)
 	if path.Base(oldPath) == newName {
 		return
 	}
@@ -724,7 +737,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 
-	newName = util.AssetName(newName + filepath.Ext(oldPath))
+	newName = util.AssetName(newName+filepath.Ext(oldPath), ast.NewNodeID())
 	parentDir := path.Dir(oldPath)
 	newPath = path.Join(parentDir, newName)
 	oldAbsPath, getErr := GetAssetAbsPath(oldPath)
@@ -864,7 +877,7 @@ func UnusedAssets() (ret []string) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range assetsLinkDestsInTree(tree) {
+				for _, d := range getAssetsLinkDests(tree.Root) {
 					dests[d] = true
 				}
 
@@ -1027,7 +1040,7 @@ func MissingAssets() (ret []string) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range assetsLinkDestsInTree(tree) {
+				for _, d := range getAssetsLinkDests(tree.Root) {
 					dests[d] = true
 				}
 
@@ -1108,11 +1121,11 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
+func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 	// The images in the embed blocks are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/10042
 
 	ret = []string{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockQueryEmbedScript != n.Type {
 			return ast.WalkContinue
 		}
@@ -1131,7 +1144,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 				continue
 			}
 
-			ret = append(ret, assetsLinkDestsInNode(embedNode)...)
+			ret = append(ret, getAssetsLinkDests(embedNode)...)
 		}
 		return ast.WalkContinue
 	})
@@ -1139,12 +1152,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
-	ret = assetsLinkDestsInNode(tree.Root)
-	return
-}
-
-func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
+func getAssetsLinkDests(node *ast.Node) (ret []string) {
 	ret = []string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {

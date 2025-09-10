@@ -62,33 +62,31 @@ export const openSnippets = () => {
 <div class="fn__flex-1" style="overflow:auto;padding: 16px 24px">
     <div>
         <div class="fn__flex">
-            <div class="fn__flex-1"></div>
-            <div class="b3-form__icon">
+            <div class="b3-form__icon fn__flex-1">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input data-type="css" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input">
+                <input data-type="css" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input fn__block">
             </div>
             <div class="fn__space"></div>
             <span aria-label="${window.siyuan.languages.addAttr} CSS" id="addCodeSnippetCSS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <input data-action="toggleCSS" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledCSS ? " checked" : ""}>
+            <input data-action="toggleCSS" class="b3-switch fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledCSS ? " checked" : ""}>
         </div>
         ${cssHTML}
     </div>
     <div class="fn__none">
         <div class="fn__flex">
-            <div class="fn__flex-1"></div>
-             <div class="b3-form__icon">
+             <div class="b3-form__icon fn__flex-1">
                 <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                <input data-type="js" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input">
+                <input data-type="js" data-action="search" type="text" placeholder="${window.siyuan.languages.search}" class="b3-text-field b3-form__icon-input fn__block">
             </div>
             <div class="fn__space"></div>
             <span aria-label="${window.siyuan.languages.addAttr} JS" id="addCodeSnippetJS" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <input data-action="toggleJS" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledJS ? " checked" : ""}>
+            <input data-action="toggleJS" class="b3-switch fn__flex-center" type="checkbox"${window.siyuan.config.snippet.enabledJS ? " checked" : ""}>
         </div>
         ${jsHTML}
     </div>
@@ -120,7 +118,8 @@ export const openSnippets = () => {
                         type: target.id === "addCodeSnippetCSS" ? "css" : "js",
                         name: "",
                         content: "",
-                        enabled: false
+                        enabled: false,
+                        disabledInPublish: false,
                     }));
                     event.stopPropagation();
                     event.preventDefault();
@@ -195,13 +194,19 @@ const genSnippet = (options: ISnippet) => {
     <div class="fn__hr--b"></div>
     <div class="fn__flex">
         <input type="text" class="fn__size200 b3-text-field" placeholder="${window.siyuan.languages.title}">
+        <div class="fn__space"></div>
+        <label class="fn__flex${window.siyuan.config.publish.enable ? "" : " fn__none"}">
+            <input data-type="disabledInPublish" type="checkbox" class="b3-switch fn__flex-center" ${options.disabledInPublish ? "" : " checked"}>
+            <div class="fn__space"></div>
+            <span class="fn__flex-center">${window.siyuan.languages.publishService}</span>
+        </label>
         <div class="fn__flex-1"></div>
         <div class="fn__space"></div>
         <span aria-label="${window.siyuan.languages.remove}" data-action="remove" class="b3-tooltips b3-tooltips__sw block__icon block__icon--show">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
         <div class="fn__space"></div>
-        <input data-type="snippet" class="b3-switch b3-switch--side fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
+        <input data-type="snippet" class="b3-switch fn__flex-center" type="checkbox"${options.enabled ? " checked" : ""}>
     </div>
     <div class="fn__hr"></div>
     <textarea class="fn__block b3-text-field" placeholder="${window.siyuan.languages.codeSnippet}" style="resize: vertical;font-family:var(--b3-font-family-code)" spellcheck="false"></textarea>
@@ -229,11 +234,12 @@ const setSnippet = (dialog: Dialog, oldSnippets: ISnippet[], removeIds: string[]
     const snippets: ISnippet[] = [];
     dialog.element.querySelectorAll("[data-id]").forEach((item) => {
         snippets.push({
+            disabledInPublish: !(item.querySelector('.b3-switch[data-type="disabledInPublish"]') as HTMLInputElement).checked,
             id: item.getAttribute("data-id"),
             name: item.querySelector("input").value,
             type: item.getAttribute("data-type"),
             content: item.querySelector("textarea").value,
-            enabled: (item.querySelector(".b3-switch") as HTMLInputElement).checked
+            enabled: (item.querySelector('.b3-switch[data-type="snippet"]') as HTMLInputElement).checked
         });
     });
     if (objEquals(oldSnippets, snippets) &&

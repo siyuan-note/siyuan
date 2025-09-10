@@ -59,6 +59,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             render: {
                 scroll: true,
                 title: true,
+                titleShowTop: true,
                 background: true,
                 gutter: true,
             },

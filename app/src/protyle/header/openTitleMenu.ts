@@ -6,6 +6,8 @@ import {updateHotkeyTip} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import * as path from "path";
+/// #else
+import {openMobileFileById} from "../../mobile/editor";
 /// #endif
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
@@ -42,7 +44,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu([protyle.block.rootID])
+            submenu: copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID)
         }).element);
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
@@ -214,22 +216,24 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             transferBlockRef(protyle.block.rootID);
         }
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
-        /// #if !MOBILE
         if (!protyle.model) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
                 click() {
+                    /// #if !MOBILE
                     openFileById({
                         app: protyle.app,
                         id: protyle.block.id,
                         action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_CONTEXT],
                     });
+                    /// #else
+                    openMobileFileById(protyle.app, protyle.block.id, protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT]);
+                    /// #endif
                 }
             }).element);
         }
-        /// #endif
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openByNewWindow",

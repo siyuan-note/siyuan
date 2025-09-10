@@ -50,6 +50,13 @@ func CreateBox(name string) (id string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
+	boxes, _ := ListNotebooks()
+	for i, b := range boxes {
+		c := b.GetConf()
+		c.Sort = i + 1
+		b.SaveConf(c)
+	}
+
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)
@@ -196,6 +203,12 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			return
 		}
 
+		boxes, _ := ListNotebooks()
+		var sort int
+		if len(boxes) > 0 {
+			sort = boxes[0].Sort - 1
+		}
+
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {
 			return
@@ -211,6 +224,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		if box := Conf.Box(boxID); nil != box {
 			boxConf := box.GetConf()
 			boxConf.Closed = true
+			boxConf.Sort = sort
 			box.SaveConf(boxConf)
 		}
 

@@ -141,6 +141,10 @@ func (table *Table) SetItems(items []Item) {
 	}
 }
 
+func (table *Table) CountItems() int {
+	return len(table.Rows)
+}
+
 func (table *Table) GetFields() (ret []Field) {
 	ret = []Field{}
 	for _, column := range table.Columns {
@@ -156,6 +160,15 @@ func (table *Table) GetField(id string) (ret Field, fieldIndex int) {
 		}
 	}
 	return nil, -1
+}
+
+func (table *Table) GetValue(itemID, keyID string) (ret *Value) {
+	for _, row := range table.Rows {
+		if row.ID == itemID {
+			return row.GetValue(keyID)
+		}
+	}
+	return nil
 }
 
 func (*Table) GetType() LayoutType {

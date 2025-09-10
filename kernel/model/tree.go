@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -42,7 +43,7 @@ import (
 func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	tree.ID = ast.NewNodeID()
 	tree.Root.ID = tree.ID
-
+	title := tree.Root.IALAttr("title")
 	if "" != titleSuffix {
 		if t, parseErr := time.Parse("20060102150405", util.TimeFromID(tree.ID)); nil == parseErr {
 			titleSuffix += " " + t.Format("2006-01-02 15:04:05")
@@ -51,9 +52,12 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 		}
 		titleSuffix = "(" + titleSuffix + ")"
 		titleSuffix = " " + titleSuffix
+		if Conf.language(16) == title {
+			titleSuffix = ""
+		}
 	}
 	tree.Root.SetIALAttr("id", tree.ID)
-	tree.Root.SetIALAttr("title", tree.Root.IALAttr("title")+titleSuffix)
+	tree.Root.SetIALAttr("title", title+titleSuffix)
 	tree.Root.RemoveIALAttr("scroll")
 	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
 	tree.Path = p
@@ -162,7 +166,7 @@ func loadTree(localPath string, luteEngine *lute.Lute) (ret *parse.Tree, err err
 		return
 	}
 
-	ret, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	ret, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json to tree [%s] failed: %s", localPath, err)
 		return

@@ -23,7 +23,7 @@ import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getSearch} from "../../../util/functions";
+import {getSearch, isMobile} from "../../../util/functions";
 /// #if !MOBILE
 import {openAsset} from "../../../editor/util";
 /// #endif
@@ -51,7 +51,7 @@ import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
     bindGroupsEvent, bindGroupsNumber,
     getGroupsHTML,
-    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex,
+    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex, getPageSize,
     goGroupsDate,
     goGroupsSort,
     setGroupMethod
@@ -76,10 +76,12 @@ export const openMenuPanel = (options: {
         return;
     }
     const avID = options.blockElement.getAttribute("data-av-id");
+    const avPageSize = getPageSize(options.blockElement);
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
-        pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
+        pageSize: avPageSize.unGroupPageSize,
+        groupPaging: avPageSize.groupPageSize,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
         avPanelElement = document.querySelector(".av__panel");
@@ -110,6 +112,9 @@ export const openMenuPanel = (options: {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
             if (options.editData) {
+                if (typeof options.editData.colData.wrap === "undefined") {
+                    options.editData.colData.wrap = data.view.wrapField;
+                }
                 if (options.editData.previousID) {
                     fields.find((item, index) => {
                         if (item.id === options.editData.previousID) {
@@ -143,9 +148,9 @@ export const openMenuPanel = (options: {
             }
         }
 
-        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex}">
+        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu">${html}</div>
+    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;
@@ -415,7 +420,7 @@ export const openMenuPanel = (options: {
                 const contents: IAVCellValue[] = [];
                 targetElement.parentElement.querySelectorAll(".fn__grab").forEach(item => {
                     const dateElement = item.nextElementSibling as HTMLElement;
-                    blockIDs.push(dateElement.dataset.id);
+                    blockIDs.push(dateElement.parentElement.dataset.rowId);
                     contents.push({
                         isDetached: !dateElement.style.color,
                         type: "block",
@@ -752,6 +757,7 @@ export const openMenuPanel = (options: {
                     data.view.filters.find((item: IAVFilter) => {
                         if (item.column === target.parentElement.parentElement.dataset.id && item.value.type === target.parentElement.parentElement.dataset.filterType) {
                             setFilter({
+                                empty: false,
                                 filter: item,
                                 protyle: options.protyle,
                                 data,
@@ -1192,16 +1198,21 @@ export const openMenuPanel = (options: {
                     const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay;
                     if (isCustomAttr || isTwoWay) {
                         const dialog = new Dialog({
-                            title: isTwoWay ? window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value) : window.siyuan.languages.deleteOpConfirm,
+                            title: isTwoWay ? window.siyuan.languages.removeColConfirm : window.siyuan.languages.deleteOpConfirm,
                             content: `<div class="b3-dialog__content">
-    ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField.replace("${x}", menuElement.querySelector('.b3-menu__item[data-type="goSearchAV"] .b3-menu__accelerator').textContent) : window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value)}
+    ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField
+                    .replace("${x}", menuElement.querySelector("input").value || window.siyuan.languages._kernel[272])
+                    .replace("${y}", menuElement.querySelector('.b3-menu__item[data-type="goSearchAV"] .b3-menu__accelerator').textContent)
+                    .replace("${z}", (menuElement.querySelector('input[data-type="colName"]') as HTMLInputElement).value || window.siyuan.languages._kernel[272])
+                : window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value || window.siyuan.languages._kernel[272])}
     <div class="fn__hr--b"></div>
-    <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.delete}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="delete">${isTwoWay ? window.siyuan.languages.removeBothRelationField : window.siyuan.languages.delete}</button>
     <div class="fn__hr"></div>
     <button class="fn__block b3-button b3-button--remove${isTwoWay ? "" : " fn__none"}" data-action="keep-relation">${window.siyuan.languages.removeButKeepRelationField}</button>
     <div class="fn__hr"></div>
     <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
+                            width: "520px",
                         });
                         dialog.element.addEventListener("click", (dialogEvent) => {
                             let target = dialogEvent.target as HTMLElement;
@@ -1512,13 +1523,17 @@ export const openMenuPanel = (options: {
                         await closeCB();
                     }
                     closeCB = undefined;
-                    menuElement.innerHTML = getGroupsHTML(fields, data.view);
-                    bindGroupsEvent({
-                        protyle: options.protyle,
-                        menuElement: menuElement,
-                        blockElement: options.blockElement,
-                        data
-                    });
+                    if ((data.view.group && data.view.group.field) || target.classList.contains("block__icon")) {
+                        menuElement.innerHTML = getGroupsHTML(fields, data.view);
+                        bindGroupsEvent({
+                            protyle: options.protyle,
+                            menuElement: menuElement,
+                            blockElement: options.blockElement,
+                            data
+                        });
+                    } else {
+                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
@@ -1549,13 +1564,20 @@ export const openMenuPanel = (options: {
                     const isHide = useElement.getAttribute("xlink:href") !== "#iconEye";
                     useElement.setAttribute("xlink:href", isHide ? "#iconEye" : "#iconEyeoff");
                     let oldGroupHidden;
-                    data.view.groups.find((item) => {
+                    let showCount = 0;
+                    data.view.groups.forEach((item) => {
                         if (item.id === target.dataset.id) {
                             oldGroupHidden = item.groupHidden;
-                            item.groupHidden = isHide ? 2 : 0;
-                            return true;
+                            item.groupHidden = isHide ? 0 : 2;
+                        }
+                        if (item.groupHidden === 0) {
+                            showCount++;
                         }
                     });
+                    target.parentElement.classList[isHide ? "remove" : "add"]("b3-menu__item--hidden");
+                    menuElement.querySelector('[data-type="hideGroups"]').innerHTML = `${window.siyuan.languages[showCount === 0 ? "showAll" : "hideAll"]}
+<span class="fn__space"></span>
+<svg><use xlink:href="#iconEye${showCount === 0 ? "" : "off"}"></use></svg>`;
                     transaction(options.protyle, [{
                         action: "hideAttrViewGroup",
                         avID: data.id,
@@ -1568,6 +1590,32 @@ export const openMenuPanel = (options: {
                         blockID,
                         id: target.dataset.id,
                         data: oldGroupHidden
+                    }]);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "hideGroups") {
+                    window.siyuan.menus.menu.remove();
+                    const isShow = target.querySelector("use").getAttribute("xlink:href") === "#iconEyeoff";
+                    target.innerHTML = `${window.siyuan.languages[isShow ? "showAll" : "hideAll"]}
+<span class="fn__space"></span>
+<svg><use xlink:href="#iconEye${isShow ? "" : "off"}"></use></svg>`;
+                    data.view.groups.forEach((item) => {
+                        item.groupHidden = isShow ? 2 : 0;
+                        const itemElement = target.parentElement.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"]`);
+                        itemElement.classList[isShow ? "add" : "remove"]("b3-menu__item--hidden");
+                        itemElement.querySelector(".b3-menu__action use")?.setAttribute("xlink:href", `#iconEye${isShow ? "off" : ""}`);
+                    });
+                    transaction(options.protyle, [{
+                        action: "hideAttrViewAllGroups",
+                        avID: data.id,
+                        blockID,
+                        data: isShow,
+                    }], [{
+                        action: "hideAttrViewAllGroups",
+                        avID: data.id,
+                        blockID,
+                        data: !isShow
                     }]);
                     event.preventDefault();
                     event.stopPropagation();

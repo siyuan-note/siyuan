@@ -64,10 +64,12 @@ type BaseInstance struct {
 	ShowIcon         bool          `json:"showIcon"`         // 是否显示字段图标
 	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
 
-	Groups      []Viewable `json:"groups,omitempty"`    // 分组实例列表
-	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则和结果
-	GroupFolded bool       `json:"groupFolded"`         // 分组是否折叠
-	GroupHidden int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	GroupKey    *Key       `json:"groupKey,omitempty"`   // 分组字段
+	GroupValue  *Value     `json:"groupValue,omitempty"` // 分组值
+	Groups      []Viewable `json:"groups,omitempty"`     // 分组实例列表
+	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`  // 分组计算规则和结果
+	GroupFolded bool       `json:"groupFolded"`          // 分组是否折叠
+	GroupHidden int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
@@ -89,6 +91,8 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		Filters:          view.Filters,
 		Sorts:            view.Sorts,
 		Group:            view.Group,
+		GroupKey:         view.GroupKey,
+		GroupValue:       view.GroupVal,
 		GroupCalc:        view.GroupCalc,
 		GroupFolded:      view.GroupFolded,
 		GroupHidden:      view.GroupHidden,
@@ -119,6 +123,10 @@ func (baseInstance *BaseInstance) GetGroupCalc() *GroupCalc {
 
 func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
 	baseInstance.GroupFolded = folded
+}
+
+func (baseInstance *BaseInstance) GetGroupHidden() int {
+	return baseInstance.GroupHidden
 }
 
 func (baseInstance *BaseInstance) SetGroupHidden(hidden int) {
@@ -180,11 +188,17 @@ type Collection interface {
 	// SetItems 设置集合中的项目。
 	SetItems(items []Item)
 
+	// CountItems 返回集合中的项目数量。
+	CountItems() int
+
 	// GetFields 返回集合的所有字段。
 	GetFields() []Field
 
 	// GetField 返回指定 ID 的字段。
 	GetField(id string) (ret Field, fieldIndex int)
+
+	// GetValue 返回指定项目 ID 和键 ID 的字段值。
+	GetValue(itemID, keyID string) (ret *Value)
 
 	// GetSorts 返回集合的排序规则。
 	GetSorts() []*ViewSort

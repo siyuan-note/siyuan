@@ -20,7 +20,11 @@ export const ai = {
 <div class="b3-label">
     ${window.siyuan.languages.apiTimeout}
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>     
+    <div class="fn__flex">
+        <input class="b3-text-field fn__flex-1" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">s</span>
+    </div>
     <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
 </div>
 <div class="b3-label">
@@ -98,7 +102,11 @@ export const ai = {
         <div class="b3-label__text">${window.siyuan.languages.apiTimeoutTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
+    <div class="fn__size200 fn__flex-center fn__flex">
+        <input class="b3-text-field fn__flex-1" type="number" step="1" min="5" max="600" id="apiTimeout" value="${window.siyuan.config.ai.openAI.apiTimeout}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">s</span>
+    </div>
 </div>
 <div class="fn__flex b3-label">
     <div class="fn__flex-1">

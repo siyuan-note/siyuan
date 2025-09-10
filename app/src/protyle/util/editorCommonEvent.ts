@@ -864,11 +864,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
                     if (blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return;
+                        const bodyElements = blockElement.querySelectorAll(".av__body");
+                        if (bodyElements.length === 1) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        }
                     }
-                    target.classList.add("av__gallery-item--select");
+                    if (!target.classList.contains("av__gallery-item--select")) {
+                        blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                            item.classList.remove("av__gallery-item--select");
+                        });
+                        target.classList.add("av__gallery-item--select");
+                    }
                     const ghostElement = document.createElement("div");
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
                     const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
@@ -896,11 +908,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
-                        selectIds.push(item.getAttribute("data-id"));
+                        const bodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
+                        const groupId = bodyElement.getAttribute("data-group-id");
+                        selectIds.push(item.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
                     });
-                    if (selectIds.length === 0) {
-                        selectIds.push(target.getAttribute("data-id"));
-                    }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         ghostElement.outerHTML);
                 }
@@ -1023,6 +1034,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const id = item.getAttribute("data-node-id");
                     sourceIds.push(id);
                     srcs.push({
+                        itemID: Lute.NewNodeID(),
                         id,
                         isDetached: false,
                     });
@@ -1092,16 +1104,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 行内拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item && undoPreviousId !== previousID) {
-                                    const groupID = blockElement.querySelector(`.av__row[data-id="${item}"]`).parentElement.getAttribute("data-group-id");
+                                const items = item.split("@");
+                                const id = items[0];
+                                const groupID = items[1] || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                                if (previousID !== id && undoPreviousId !== previousID || (
+                                    (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
+                                )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID,
                                         targetGroupID,
@@ -1110,7 +1126,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID: undoPreviousId,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID: targetGroupID,
                                         targetGroupID: groupID,
@@ -1120,7 +1136,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-                            const groupID = targetElement.parentElement.getAttribute("data-group-id");
+                            const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                            const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
@@ -1166,16 +1183,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // gallery item 内部拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
                             const targetGroupID = targetElement.parentElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item && undoPreviousId !== previousID) {
-                                    const groupID = blockElement.querySelector(`.av__gallery-item[data-id="${item}"]`).parentElement.parentElement.getAttribute("data-group-id");
+                                const items = item.split("@");
+                                const id = items[0];
+                                const groupID = items[1] || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body[data-group-id="${groupID}"] .av__gallery-item[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                                if (previousID !== item && undoPreviousId !== previousID || (
+                                    (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
+                                )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID,
                                         targetGroupID,
@@ -1184,7 +1205,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID: undoPreviousId,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID: targetGroupID,
                                         targetGroupID: groupID,
@@ -1194,13 +1215,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            const bodyElement = hasClosestByClassName(targetElement, "av__body");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcs,
                                 blockID: blockElement.dataset.nodeId,
-                                groupID: targetElement.parentElement.getAttribute("data-group-id")
+                                groupID: bodyElement && bodyElement.getAttribute("data-group-id")
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1310,9 +1332,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                         const srcs: IOperationSrcs[] = [];
-                        const groupID = targetElement.parentElement.getAttribute("data-group-id");
+                        const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                        const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({
+                                itemID: Lute.NewNodeID(),
                                 id,
                                 isDetached: false,
                             });
@@ -1394,6 +1418,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
             }
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
+            event.preventDefault();
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             // https://github.com/siyuan-note/siyuan/issues/9544
             const avElement = hasClosestByClassName(event.target, "av");
@@ -1485,6 +1510,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        const gutterTypes = gutterType ? gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP) : [];
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
             const targetAssetElement = hasClosestBlock(event.target);
@@ -1556,7 +1582,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
             }
         } else if (targetElement && targetElement.classList.contains("list")) {
-            if (gutterType && gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)[0] !== "nodelistitem") {
+            if (gutterTypes[0] !== "nodelistitem") {
                 targetElement = hasClosestBlock(document.elementFromPoint(event.clientX, event.clientY - 6));
             } else {
                 targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 6), "li");
@@ -1575,24 +1601,66 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeViewRowMenu${Constants.ZWSP}`.toLowerCase())) {
-            // 行只能拖拽当前 av 中
             if ((!targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__row--util")) ||
                 (window.siyuan.dragElement && !window.siyuan.dragElement.contains(targetElement))) {
+                // 行只能拖拽当前 av 中
                 targetElement = false;
+            } else {
+                const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                if (bodyElement) {
+                    const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
+                    const groupID = bodyElement.getAttribute("data-group-id");
+                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 排序只能夸组拖拽
+                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
+                    gutterTypes[2].split(",").find(item => {
+                        const sourceGroupID = item ? item.split("@")[1] : "";
+                        if (sourceGroupID !== groupID && isTCU) {
+                            targetElement = false;
+                            return true;
+                        }
+                        if (sourceGroupID === groupID && hasSort) {
+                            targetElement = false;
+                            return true;
+                        }
+                    });
+                }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
-            // gallery item 只能拖拽当前 av 中
             const containerElement = hasClosestByClassName(event.target, "av__container");
             if (targetElement.classList.contains("av") || !containerElement ||
                 !containerElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
+                // gallery item 只能拖拽当前 av 中
                 targetElement = false;
-                editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__left", "dragover__right");
-                });
+            } else {
+                const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                if (bodyElement) {
+                    const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
+                    const groupID = bodyElement.getAttribute("data-group-id");
+                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 排序只能夸组拖拽
+                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
+                    gutterTypes[2].split(",").find(item => {
+                        const sourceGroupID = item ? item.split("@")[1] : "";
+                        if (sourceGroupID !== groupID && isTCU) {
+                            targetElement = false;
+                            return true;
+                        }
+                        if (sourceGroupID === groupID && hasSort) {
+                            targetElement = false;
+                            return true;
+                        }
+                    });
+                }
             }
         }
 
         if (!targetElement) {
+            editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right");
+            });
             return;
         }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&
@@ -1707,13 +1775,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             disabledPosition = "";
             // gutter 文档内拖拽限制
             // 排除自己及子孙
-            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "col" && targetElement.getAttribute("data-id") === gutterTypes[2]) {
                 // 表头不能拖到自己上
                 clearDragoverElement(dragoverElement);
                 return;
             }
-            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2] === targetElement.getAttribute("data-id")) {
+            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2].split("@")[0] === targetElement.getAttribute("data-id")) {
                 // 行不能拖到自己上
                 clearDragoverElement(dragoverElement);
                 return;

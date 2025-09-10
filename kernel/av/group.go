@@ -49,7 +49,8 @@ type GroupRange struct {
 type GroupOrder int
 
 const (
-	GroupOrderAsc  = iota // 升序
-	GroupOrderDesc        // 降序
-	GroupOrderMan         // 手动排序
+	GroupOrderAsc          = iota // 升序
+	GroupOrderDesc                // 降序
+	GroupOrderMan                 // 手动排序
+	GroupOrderSelectOption        // 同选择的选项排序（仅单选和多选字段适用） https://github.com/siyuan-note/siyuan/issues/15500
 )

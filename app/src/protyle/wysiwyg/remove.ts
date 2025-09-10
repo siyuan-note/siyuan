@@ -12,7 +12,7 @@ import {
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
-import {setFold, zoomOut} from "../../menus/protyle";
+import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
@@ -23,6 +23,7 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {Backlink} from "../../layout/dock/Backlink";
+import {fetchSyncPost} from "../../util/fetch";
 
 export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
     protyle.observerLoad?.disconnect();
@@ -32,7 +33,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     if (selectElements?.length > 0) {
         const deletes: IOperation[] = [];
         const inserts: IOperation[] = [];
-        let sideElement;
+        let sideElement: Element | boolean;
         let sideIsNext = false;
         if (type === "Backspace") {
             sideElement = selectElements[0].previousElementSibling;
@@ -52,7 +53,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         let topParentElement: Element;
         hideElements(["select"], protyle);
         let foldPreviousId: string;
-        selectElements.find((item: HTMLElement) => {
+        for (let i = 0; i < selectElements.length; i++) {
+            const item = selectElements[i];
             const topElement = getTopAloneElement(item);
             topParentElement = topElement.parentElement;
             const id = topElement.getAttribute("data-node-id");
@@ -79,19 +81,23 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 sideIsNext = false;
             }
             if (topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") === "1") {
-                // https://github.com/siyuan-note/siyuan/issues/2188
-                setFold(protyle, topElement, undefined, true);
+                const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
+                    id: topElement.getAttribute("data-node-id"),
+                });
+                deletes.push(...foldTransaction.data.doOperations.slice(1));
                 let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
                 if (typeof foldPreviousId !== "undefined") {
                     previousID = foldPreviousId;
                 }
-                inserts.push({
-                    action: "insert",
-                    data: topElement.outerHTML,
-                    id,
-                    previousID: previousID,
-                    parentID: topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                foldTransaction.data.undoOperations.forEach((operationItem: IOperation, index: number) => {
+                    operationItem.previousID = previousID;
+                    if (index > 0) {
+                        operationItem.context = {
+                            ignoreProcess: "true"
+                        };
+                    }
                 });
+                inserts.push(...foldTransaction.data.undoOperations);
                 // 折叠块和非折叠块同时删除时撤销异常 https://github.com/siyuan-note/siyuan/issues/11312
                 let foldPreviousElement = getPreviousBlock(topElement);
                 while (foldPreviousElement && foldPreviousElement.childElementCount === 3) {
@@ -104,15 +110,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4422
                 topElement.firstElementChild.removeAttribute("contenteditable");
-                // 在折叠标题后输入文字，然后全选删除再撤销会重建索引。因此不能删除折叠标题后新输入的输入折叠标题下的内容
-                const nextElement = topElement.nextElementSibling;
-                if (nextElement) {
-                    const nextType = nextElement.getAttribute("data-type");
-                    if (nextType !== "NodeHeading" ||
-                        (nextType === "NodeHeading" && nextElement.getAttribute("data-subtype") > topElement.getAttribute("data-subtype"))) {
-                        return true;
-                    }
-                }
+                topElement.remove();
             } else {
                 let data = topElement.outerHTML;    // 不能 spin ，否则 li 会变为 list
                 if (topElement.classList.contains("render-node") || topElement.querySelector("div.render-node")) {
@@ -136,7 +134,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }
                 topElement.remove();
             }
-        });
+        }
         if (sideElement) {
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
                 setTimeout(() => {
@@ -164,11 +162,11 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 // https://github.com/siyuan-note/siyuan/issues/10389
                 // https://github.com/siyuan-note/siyuan/issues/10899
                 if (type !== "Backspace" && sideIsNext) {
-                    focusBlock(sideElement);
+                    focusBlock(sideElement as Element);
                 } else {
-                    focusBlock(sideElement, undefined, false);
+                    focusBlock(sideElement as Element, undefined, false);
                 }
-                scrollCenter(protyle, sideElement);
+                scrollCenter(protyle, sideElement as Element);
                 if (listElement) {
                     inserts.push({
                         action: "update",
@@ -453,6 +451,23 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         range.selectNodeContents(previousLastEditElement);
         range.collapse(false);
         range.insertNode(leftNodes);
+        const previousHTML = previousLastEditElement.innerHTML.trimStart();
+        const previousText = previousLastEditElement.textContent.trimStart();
+        // https://github.com/siyuan-note/siyuan/issues/15554
+        if (previousHTML.startsWith("```") || previousHTML.startsWith("···") || previousHTML.startsWith("~~~") ||
+            (previousHTML.indexOf("\n```") > -1 && previousText.indexOf("\n```") > -1) ||
+            (previousHTML.indexOf("\n~~~") > -1 && previousText.indexOf("\n~~~") > -1) ||
+            (previousHTML.indexOf("\n···") > -1 && previousText.indexOf("\n···") > -1)) {
+            if (previousHTML.indexOf("\n") === -1 && previousHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+                // ```test` 不处理，正常渲染为段落块
+            } else {
+                let replaceNewHTML = previousLastEditElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+                if (!replaceNewHTML.endsWith("\n```")) {
+                    replaceNewHTML += "\n```";
+                }
+                previousLastEditElement.innerHTML = replaceNewHTML;
+            }
+        }
         // 图片前删除到上一个文字块时，图片前有 zwsp
         previousLastElement.outerHTML = protyle.lute.SpinBlockDOM(previousLastElement.outerHTML);
         mathRender(getPreviousBlock(removeElement) as HTMLElement);

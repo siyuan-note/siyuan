@@ -64,7 +64,7 @@ declare namespace Config {
          */
         openHelp: boolean;
         /**
-         * Publishing service
+         * Publish service
          * 发布服务
          */
         publish: IPublish;
@@ -643,6 +643,10 @@ declare namespace Config {
          * Whether to save the content of the .sy file as a single-line JSON object
          */
         useSingleLineSave: boolean;
+        /**
+         * The .sy and database .json files larger than this value will prompt a warning (unit: MB)
+         */
+        largeFileWarningSize: number;
     }
 
     /**
@@ -1074,29 +1078,29 @@ declare namespace Config {
     export type TLogLevel = "off" | "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 
     /**
-     * Publishing service
+     * Publish service
      */
     export interface IPublish {
         /**
-         * Whether to open the publishing service
+         * Whether to open the publish service
          */
         enable: boolean;
         /**
-         * The basic authentication settings of publishing service
+         * The basic authentication settings of publish service
          */
         auth: IPublishAuth;
         /**
-         * Port on which the publishing service listens
+         * Port on which the publish service listens
          */
         port: number;
     }
 
     /**
-     * Publishing service authentication settings
+     * Publish service authentication settings
      */
     export interface IPublishAuth {
         /**
-         * Whether to enable basic authentication for publishing services
+         * Whether to enable basic authentication for publish services
          */
         enable: boolean;
         /**

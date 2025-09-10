@@ -85,7 +85,7 @@ const getSnippetCSS = () => {
     let snippetCSS = "";
     document.querySelectorAll("style").forEach((item) => {
         if (item.id.startsWith("snippet")) {
-            snippetCSS += item.innerHTML;
+            snippetCSS += item.outerHTML;
         }
     });
     return snippetCSS;
@@ -111,7 +111,6 @@ const renderPDF = async (id: string) => {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
@@ -182,8 +181,8 @@ const renderPDF = async (id: string) => {
         }
         ${await setInlineStyle(false)}
         ${await getPluginStyle()}
-        ${getSnippetCSS()}
     </style>
+    ${getSnippetCSS()}
 </head>
 <body style="-webkit-print-color-adjust: exact;">
 <div id="action">
@@ -663,7 +662,6 @@ const onExport = async (data: IWebSocketData, filePath: string, exportOption: IE
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="baseStyle" href="stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
@@ -676,8 +674,8 @@ const onExport = async (data: IWebSocketData, filePath: string, exportOption: IE
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
         ${await setInlineStyle(false)}
         ${await getPluginStyle()}
-        ${getSnippetCSS()}
     </style>
+    ${getSnippetCSS()}
 </head>
 <body>
 <div class="${["htmlmd", "word"].includes(exportOption.type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" 

@@ -19,6 +19,7 @@ package av
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -41,6 +42,8 @@ type AttributeView struct {
 	KeyIDs    []string     `json:"keyIDs"`    // 属性视图属性键 ID，用于排序
 	ViewID    string       `json:"viewID"`    // 当前视图 ID
 	Views     []*View      `json:"views"`     // 视图
+
+	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
 }
 
 // KeyValues 描述了属性视图属性键值列表的结构。
@@ -74,6 +77,20 @@ func GetKeyBlockValue(blockKeyValues []*KeyValues) (ret *Value) {
 		if KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
 			ret = kv.Values[0]
 			break
+		}
+	}
+	return
+}
+
+func GetValue(keyValues []*KeyValues, keyID, itemID string) (ret *Value) {
+	for _, kv := range keyValues {
+		if kv.Key.ID == keyID {
+			for _, v := range kv.Values {
+				if v.BlockID == itemID {
+					ret = v
+					return
+				}
+			}
 		}
 	}
 	return
@@ -192,18 +209,28 @@ type View struct {
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
-	Group        *ViewGroup `json:"group,omitempty"`      // 分组规则
-	GroupUpdated int64      `json:"groupUpdated"`         // 分组规则更新时间戳
-	Groups       []*View    `json:"groups,omitempty"`     // 分组视图列表
-	GroupItemIDs []string   `json:"groupItemIds"`         // 分组项目 ID 列表，用于维护分组中的所有项目
-	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"`  // 分组计算规则
-	GroupValue   string     `json:"groupValue,omitempty"` // 分组值
-	GroupFolded  bool       `json:"groupFolded"`          // 分组是否折叠
-	GroupHidden  int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
+	GroupCreated int64      `json:"groupCreated"`        // 分组生成时间戳
+	Groups       []*View    `json:"groups,omitempty"`    // 分组视图列表
+	GroupItemIDs []string   `json:"groupItemIds"`        // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则
+	GroupKey     *Key       `json:"groupKey,omitempty"`  // 分组字段
+	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
+	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
+	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
 }
 
-// GetGroup 获取指定分组 ID 的分组视图。
-func (view *View) GetGroup(groupID string) *View {
+// GetGroupValue 获取分组视图的分组值。
+func (view *View) GetGroupValue() string {
+	if nil == view.GroupVal {
+		return ""
+	}
+	return view.GroupVal.String(false)
+}
+
+// GetGroupByID 获取指定分组 ID 的分组视图。
+func (view *View) GetGroupByID(groupID string) *View {
 	if nil == view.Groups {
 		return nil
 	}
@@ -213,6 +240,32 @@ func (view *View) GetGroup(groupID string) *View {
 		}
 	}
 	return nil
+}
+
+// GetGroupByGroupValue 获取指定分组值的分组视图。
+func (view *View) GetGroupByGroupValue(groupVal string) *View {
+	if nil == view.Groups {
+		return nil
+	}
+	for _, group := range view.Groups {
+		if group.GetGroupValue() == groupVal {
+			return group
+		}
+	}
+	return nil
+}
+
+// RemoveGroupByID 从分组视图列表中移除指定 ID 的分组视图。
+func (view *View) RemoveGroupByID(groupID string) {
+	if nil == view.Groups {
+		return
+	}
+	for i, group := range view.Groups {
+		if group.ID == groupID {
+			view.Groups = append(view.Groups[:i], view.Groups[i+1:]...)
+			return
+		}
+	}
 }
 
 // GetGroupKey 获取分组视图的分组字段。
@@ -314,6 +367,10 @@ type Viewable interface {
 	// SetGroupFolded 设置分组是否折叠。
 	SetGroupFolded(folded bool)
 
+	// GetGroupHidden 获取分组是否隐藏。
+	// hidden 0：显示，1：空白隐藏，2：手动隐藏
+	GetGroupHidden() int
+
 	// SetGroupHidden 设置分组是否隐藏。
 	// hidden 0：显示，1：空白隐藏，2：手动隐藏
 	SetGroupHidden(hidden int)
@@ -373,7 +430,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 		return
 	}
 
-	ret = &AttributeView{}
+	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
 			mapAv := map[string]interface{}{}
@@ -489,6 +546,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 		return
 	}
+
+	if util.ExceedLargeFileWarningSize(len(data)) {
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)
+		util.PushErrMsg(msg, 7000)
+	}
 	return
 }
 
@@ -525,27 +587,33 @@ func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 	return
 }
 
-func (av *AttributeView) ExistBlock(blockID string) bool {
-	for _, kv := range av.KeyValues {
-		if KeyTypeBlock != kv.Key.Type {
-			continue
+func (av *AttributeView) ExistBoundBlock(nodeID string) bool {
+	for _, blockVal := range av.GetBlockKeyValues().Values {
+		if blockVal.Block.ID == nodeID {
+			return true
 		}
-
-		for _, v := range kv.Values {
-			if v.BlockID == blockID {
-				return true
-			}
-		}
-		return false
 	}
 	return false
 }
 
-func (av *AttributeView) GetValue(keyID, blockID string) (ret *Value) {
+func (av *AttributeView) GetBlockValueByBoundID(nodeID string) *Value {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if v.Block.ID == nodeID {
+					return v
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (av *AttributeView) GetValue(keyID, itemID string) (ret *Value) {
 	for _, kv := range av.KeyValues {
 		if kv.Key.ID == keyID {
 			for _, v := range kv.Values {
-				if v.BlockID == blockID {
+				if v.BlockID == itemID {
 					ret = v
 					return
 				}
@@ -571,6 +639,20 @@ func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
 		if KeyTypeBlock == kv.Key.Type {
 			ret = kv
 			return
+		}
+	}
+	return
+}
+
+func (av *AttributeView) GetBlockValue(itemID string) (ret *Value) {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
+			for _, v := range kv.Values {
+				if v.BlockID == itemID {
+					ret = v
+					return
+				}
+			}
 		}
 	}
 	return

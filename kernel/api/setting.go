@@ -418,6 +418,7 @@ func setFiletree(c *gin.Context) {
 	model.Conf.Save()
 
 	util.UseSingleLineSave = model.Conf.FileTree.UseSingleLineSave
+	util.LargeFileWarningSize = model.Conf.FileTree.LargeFileWarningSize
 
 	ret.Data = model.Conf.FileTree
 }

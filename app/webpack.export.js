@@ -10,7 +10,7 @@ module.exports = (env, argv) => {
     return {
         mode: argv.mode || "development",
         watch: argv.mode !== "production",
-        devtool: argv.mode !== "production" ? "cheap-source-map" : false,
+        devtool: argv.mode !== "production" ? "eval-source-map" : false,
         output: {
             publicPath: "auto",
             filename: "[name].js",

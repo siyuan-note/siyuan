@@ -59,16 +59,17 @@ type TOperation =
     | "setAttrViewShowIcon"
     | "setAttrViewWrapField"
     | "setAttrViewColDate"
-    | "unbindAttrViewBlock"
     | "setAttrViewViewDesc"
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
     | "setAttrViewGroup"
     | "removeAttrViewGroup"
+    | "hideAttrViewAllGroups"
     | "syncAttrViewTableColWidth"
     | "hideAttrViewGroup"
     | "sortAttrViewGroup"
     | "foldAttrViewGroup"
+    | "setAttrViewDisplayFieldName"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -81,10 +82,11 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "paste" |
     "input-search" |
     "loaded-protyle-dynamic" | "loaded-protyle-static" |
-    "switch-protyle" |
+    "switch-protyle" | "switch-protyle-mode" |
     "destroy-protyle" |
     "lock-screen" |
-    "mobile-keyboard-show" | "mobile-keyboard-hide"
+    "mobile-keyboard-show" | "mobile-keyboard-hide" |
+    "code-language-update" | "code-language-change"
 type TAVView = "table" | "gallery"
 type TAVCol =
     "text"
@@ -272,6 +274,7 @@ interface IClipboardData {
     textPlain?: string,
     siyuanHTML?: string,
     files?: File[],
+    localFiles?: string[]
 }
 
 interface IRefDefs {
@@ -366,6 +369,7 @@ interface ISnippet {
     type: string;
     enabled: boolean;
     content: string;
+    disabledInPublish: boolean;
 }
 
 interface IInbox {
@@ -530,6 +534,7 @@ interface ISiyuan {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
+    context?: IObject,
     blockID?: string,
     isTwoWay?: boolean, // 是否双向关联
     backRelationKeyID?: string, // 双向关联的目标关联列 ID
@@ -543,9 +548,10 @@ interface IOperation {
     retData?: any
     nextID?: string // insert 专享
     isDetached?: boolean // insertAttrViewBlock 专享
-    ignoreFillFilter?: boolean // insertAttrViewBlock 专享
     srcIDs?: string[] // removeAttrViewBlock 专享
     srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
+    ignoreDefaultFill?: boolean // insertAttrViewBlock 专享
+    viewID?: string // insertAttrViewBlock 专享
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享
@@ -557,6 +563,7 @@ interface IOperation {
 }
 
 interface IOperationSrcs {
+    itemID: string,
     id: string,
     content?: string,
     isDetached: boolean
@@ -766,6 +773,7 @@ interface IBlock {
     children?: IBlock[]
     length?: number
     ial: IObject
+    refCount?: number
 }
 
 interface IRiffCard {
@@ -864,6 +872,8 @@ interface IAVView {
     sorts: IAVSort[],
     groups: IAVView[]
     group: IAVGroup
+    groupKey: IAVColumn
+    groupValue: IAVCellValue
 }
 
 interface IAVTable extends IAVView {
@@ -877,6 +887,7 @@ interface IAVGallery extends IAVView {
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;
+    displayFieldName: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
     desc: string
@@ -887,6 +898,7 @@ interface IAVGallery extends IAVView {
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
+    quantifier?: string,
     value: IAVCellValue,
     relativeDate?: relativeDate
     relativeDate2?: relativeDate
@@ -907,7 +919,7 @@ interface IAVGroup {
         numStep: number  // 数字范围步长 100
     }
     hideEmpty?: boolean
-    order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2
+    order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2, 按选项排序: 3
 }
 
 interface IAVSort {
@@ -964,6 +976,7 @@ interface IAVCell {
 interface IAVCellValue {
     keyID?: string,
     id?: string,
+    blockID?: string // 为 row id
     type: TAVCol,
     isDetached?: boolean,
     text?: {

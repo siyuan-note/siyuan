@@ -7,7 +7,7 @@
 		"id": "20230405155631-leo4vc6",
 		"title": "性能优化",
 		"type": "doc",
-		"updated": "20240420104842"
+		"updated": "20250825114628"
 	},
 	"Children": [
 		{
@@ -375,7 +375,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230405171407-ltaakx8",
-				"updated": "20230405171419"
+				"updated": "20250825114421"
 			},
 			"Children": [
 				{
@@ -631,6 +631,62 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250825114421-fq73tbi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20250825114421-fq73tbi",
+				"updated": "20250825114628"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "优化索引"
+				}
+			]
+		},
+		{
+			"ID": "20250825114436-jm8dekc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250825114436-jm8dekc",
+				"updated": "20250825114628"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建议定期执行优化索引 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "关于"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "优化索引"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
 				}
 			]
 		}

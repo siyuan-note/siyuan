@@ -6,7 +6,7 @@ import {isMobile, isWindow} from "../util/functions";
 import {Custom} from "../layout/dock/Custom";
 import {getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
-import {setPanelFocus} from "../layout/util";
+import {resizeTopBar, setPanelFocus} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 ///#else
 import {MobileCustom} from "../mobile/dock/MobileCustom";
@@ -155,8 +155,19 @@ export class Plugin {
     }
 
     public addIcons(svg: string) {
-        document.body.insertAdjacentHTML("afterbegin", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+        const svgElement = document.querySelector(`svg[data-name="${this.name}"] defs`);
+        if (svgElement) {
+            svgElement.insertAdjacentHTML("afterbegin", svg);
+        } else {
+            const lastSvgElement = document.querySelector("body > svg:last-of-type");
+            if (lastSvgElement) {
+                lastSvgElement.insertAdjacentHTML("afterend", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>${svg}</defs></svg>`);
+            } else {
+                document.body.insertAdjacentHTML("afterbegin", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+<defs>${svg}</defs></svg>`);
+            }
+        }
     }
 
     public addTopBar(options: {
@@ -183,6 +194,17 @@ export class Plugin {
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);
             iconElement.setAttribute("data-location", options.position || "right");
+            resizeTopBar();
+        }
+        if (isMobile() && window.siyuan.storage) {
+            if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
+                document.querySelector("#menuAbout")?.after(iconElement);
+            }
+        } else if (!isWindow() && window.siyuan.storage) {
+            if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
+                iconElement.classList.add("fn__none");
+            }
+            document.querySelector("#" + (iconElement.getAttribute("data-location") === "right" ? "barPlugins" : "drag"))?.before(iconElement);
         }
         this.topBarIcons.push(iconElement);
         return iconElement;
@@ -195,6 +217,14 @@ export class Plugin {
         /// #if !MOBILE
         options.element.setAttribute("data-location", options.position || "right");
         this.statusBarIcons.push(options.element);
+        const statusElement = document.getElementById("status");
+        if (statusElement) {
+            if (options.element.getAttribute("data-location") === "right") {
+                statusElement.insertAdjacentElement("beforeend", options.element);
+            } else {
+                statusElement.insertAdjacentElement("afterbegin", options.element);
+            }
+        }
         return options.element;
         /// #endif
     }
@@ -203,7 +233,7 @@ export class Plugin {
         if (!this.setting) {
             return;
         }
-        this.setting.open(this.name);
+        this.setting.open(this.displayName || this.name);
     }
 
     public loadData(storageName: string) {

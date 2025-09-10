@@ -41,9 +41,6 @@ func GetSrcAvIDs(destAvID string) []string {
 	if nil == srcAvIDs {
 		return nil
 	}
-
-	// 排除自己
-	srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID)
 	return srcAvIDs
 }
 

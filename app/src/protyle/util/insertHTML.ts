@@ -19,6 +19,7 @@ import {updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
 import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
+import {getFieldIdByCellElement} from "../render/av/row";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -111,7 +112,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const selectCellElement = blockElement.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
                 const sourceId = contenteditableElement.firstElementChild.getAttribute("data-id");
-                const previousID = selectCellElement.dataset.blockId;
+                const previousID = getFieldIdByCellElement(selectCellElement, blockElement.getAttribute("data-av-type") as TAVView);
                 transaction(protyle, [{
                     action: "replaceAttrViewBlock",
                     avID,
@@ -307,12 +308,18 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
         // 代码块需保持至少一个 \n https://github.com/siyuan-note/siyuan/pull/13271#issuecomment-2502672155
+        let codeBlockIsEmpty = false;
         if (isNodeCodeBlock && editableElement.textContent === "") {
-            html += "\n";
+            codeBlockIsEmpty = true;
         }
         range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
         range.collapse(false);
         range.insertNode(document.createElement("wbr"));
+        if (codeBlockIsEmpty) {
+            // 代码块为空添加的 \n 需放在最后 https://github.com/siyuan-note/siyuan/issues/15399
+            range.collapse(false);
+            range.insertNode(document.createTextNode("\n"));
+        }
         if (isNodeCodeBlock) {
             blockElement.querySelector('[data-render="true"]')?.removeAttribute("data-render");
             highlightRender(blockElement);
@@ -383,16 +390,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         isBlock = false;
         block2text = true;
     }
-    if (!isBlock && tempElement && tempElement.content.childElementCount === 1) {
-        // 通过右键粘贴包含属性的块需保留整个块 https://github.com/siyuan-note/siyuan/issues/15268
-        for (let i = 0; i < tempElement.content.firstElementChild.attributes.length; i++) {
-            const attribute = tempElement.content.firstElementChild.attributes[i];
-            if (["memo", "name", "alias", "bookmark"].includes(attribute.name) || attribute.name.startsWith("custom-")) {
-                isBlock = true;
-                break;
-            }
-        }
-    }
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
         if (tempElement.content.firstChild.nodeType === 3 || block2text ||
@@ -449,12 +446,33 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             insertBefore = true;
         }
     }
-    (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).forEach((item) => {
-        // https://github.com/siyuan-note/siyuan/issues/13232
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            item.removeAttribute("fold");
-        }
+    // https://github.com/siyuan-note/siyuan/issues/15768
+    if (tempElement.content.firstChild.nodeType === 3 || (tempElement.content.firstChild.nodeType === 1 && tempElement.content.firstElementChild.tagName !== "DIV")) {
+        tempElement.innerHTML = protyle.lute.SpinBlockDOM(tempElement.innerHTML);
+    }
+    // let foldHeadingId = "";
+    // let foldHTML = "";
+    // 粘贴内容中包含折叠的子节点需后端插入到原节点中
+    // Array.from(tempElement.content.children).forEach((item) => {
+    //     if (!item.getAttribute("parent-heading") && foldHeadingId && foldHTML) {
+    //         fetchPost("/api/block/appendHeadingChildren", {id: foldHeadingId, dom: foldHTML});
+    //         foldHeadingId = "";
+    //         foldHTML = "";
+    //     }
+    //     if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+    //         foldHeadingId = item.getAttribute("data-node-id");
+    //         return true;
+    //     }
+    //     if (foldHeadingId && item.getAttribute("parent-heading")) {
+    //         foldHTML += item.outerHTML;
+    //     }
+    // });
+    // if (foldHeadingId && foldHTML) {
+    //     fetchPost("/api/block/appendHeadingChildren", {id: foldHeadingId, dom: foldHTML});
+    // }
+    (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
+        const hasParentHeading = item.getAttribute("parent-heading");
         if (addId === id) {
             doOperation.push({
                 action: "update",
@@ -479,10 +497,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 liElement.append(item);
                 item = liElement;
             }
+            item.removeAttribute("parent-heading");
             doOperation.push({
                 action: "insert",
                 data: item.outerHTML,
                 id: addId,
+                context: {ignoreProcess: hasParentHeading ? "true" : "false"},
                 nextID: insertBefore ? id : undefined,
                 previousID: insertBefore ? undefined : id
             });
@@ -491,10 +511,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 id: addId,
             });
         }
-        if (insertBefore) {
-            blockElement.before(item);
-        } else {
-            blockElement.after(item);
+        if (!hasParentHeading) {
+            if (insertBefore) {
+                blockElement.before(item);
+            } else {
+                blockElement.after(item);
+            }
         }
         if (!lastElement) {
             lastElement = item;

@@ -7,6 +7,25 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {Menu} from "../../../plugin/Menu";
 import {objEquals} from "../../../util/functions";
 
+export const getPageSize = (blockElement: Element) => {
+    const groupPageSize: {
+        [key: string]: {
+            pageSize: number
+        }
+    } = {};
+    let unGroupPageSize: number;
+    blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        const id = item.dataset.groupId;
+        const pageSize = parseInt(item.dataset.pageSize);
+        if (id) {
+            groupPageSize[id] = {pageSize};
+        } else if (!unGroupPageSize) {
+            unGroupPageSize = pageSize;
+        }
+    });
+    return {groupPageSize, unGroupPageSize};
+};
+
 export const setGroupMethod = async (options: {
     protyle: IProtyle;
     fieldId: string;
@@ -48,7 +67,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     const selectHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
     let html = `<button class="b3-menu__item" data-type="setGroupMethod">
     <div class="b3-menu__label">${window.siyuan.languages.calcOperatorNone}</div>
-    ${group ? "" : selectHTML}
+    ${(!group || !group.field) ? selectHTML : ""}
 </button>`;
     columns.forEach(item => {
         if (["rollup", "mAsset", "lineNumber"].includes(item.type)) {
@@ -64,7 +83,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goGroups">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="${(!group || !group.field) ? "go-config" : "goGroups"}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.groupMethod}</span>
@@ -83,6 +102,8 @@ export const getLanguageByIndex = (index: number, type: "sort" | "date") => {
                 return window.siyuan.languages.desc;
             case 2:
                 return window.siyuan.languages.customSort;
+            case 3:
+                return window.siyuan.languages.sortBySelectOption;
             default:
                 return "";
         }
@@ -114,9 +135,13 @@ export const getGroupsNumberHTML = (group: IAVGroup) => {
     </button>
     <button class="b3-menu__separator"></button>
     <div class="b3-menu__item" data-type="nobg">
-        <div>
+        <div class="fn__block">
             <div class="b3-menu__labels">${window.siyuan.languages.groupRange}</div>
-            <input data-type="avGroupRange" class="b3-text-field fn__size96" value="${group?.range?.numStart || 0}"> - <input class="b3-text-field fn__size96" value="${group?.range?.numEnd || 1000}">
+            <div class="fn__flex">
+                <input data-type="avGroupRange" class="b3-text-field fn__flex-1" value="${group?.range?.numStart || 0}">
+                <span class="fn__space"></span>-<span class="fn__space"></span>
+                <input class="b3-text-field fn__flex-1" value="${group?.range?.numEnd || 1000}">            
+            </div>
             <div class="fn__hr"></div>
             <div class="b3-menu__labels">${window.siyuan.languages.groupStep}</div>
             <input class="b3-text-field fn__block" value="${group?.range?.numStep || 100}">
@@ -159,19 +184,43 @@ export const bindGroupsNumber = (options: {
 export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     let html = "";
     let column: IAVColumn;
-    if (view.group && view.group.field && view.groups) {
+    if (view.group && view.group.field) {
         let groupHTML = "";
         column = columns.find(item => item.id === view.group.field);
-        if (view.groups.length > 0) {
-            groupHTML = '<button class="b3-menu__separator"></button>';
+        if (view.groups?.length > 0) {
             const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
+            let showCount = 0;
             view.groups.forEach(item => {
-                groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
+                if (item.groupHidden === 0) {
+                    showCount++;
+                }
+                let titleHTML = `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`;
+                if (item.groupValue?.mSelect?.length > 0) {
+                    titleHTML = `<div class="fn__flex-1">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">
+            <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
+        </span>
+    </div>`;
+                } else if (item.groupValue?.type == "checkbox") {
+                    titleHTML = `<div class="b3-menu__label fn__flex">
+<svg class="b3-menu__icon"><use xlink:href="#icon${item.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg> ${column.name || ""}
+</div>`;
+                }
+                groupHTML += `<button class="b3-menu__item${item.groupHidden === 0 ? "" : " b3-menu__item--hidden"}" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
     ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
-    <div class="b3-menu__label fn__flex">${item.name || ""}</div>
+    ${titleHTML}
     <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });
+            groupHTML = `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="nobg">
+    <span class="b3-menu__label"></span>
+    <span class="block__icon" data-type="hideGroups">
+        ${window.siyuan.languages[showCount === 0 ? "showAll" : "hideAll"]}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEye${showCount === 0 ? "" : "off"}"></use></svg>
+    </span>
+</button>` + groupHTML;
         }
         html = `<button class="b3-menu__item${["date", "updated", "created"].includes(column.type) ? "" : " fn__none"}" data-type="goGroupsDate">
     <span class="b3-menu__label">${window.siyuan.languages.date}</span>
@@ -308,7 +357,9 @@ export const goGroupsSort = (options: {
     }
     const blockID = options.blockElement.getAttribute("data-node-id");
     const column = getFieldsByData(options.data).find(item => item.id === options.data.view.group.field);
-    (["created", "date", "created", "updated"].includes(column.type) ? [0, 1] : [2, 0, 1]).forEach((item) => {
+    (["created", "date", "created", "updated"].includes(column.type) ? [0, 1] : (
+        ["mSelect", "select"].includes(column.type) ? [3, 2, 0, 1] : [2, 0, 1]
+    )).forEach((item) => {
         const label = getLanguageByIndex(item, "sort");
         menu.addItem({
             iconHTML: "",

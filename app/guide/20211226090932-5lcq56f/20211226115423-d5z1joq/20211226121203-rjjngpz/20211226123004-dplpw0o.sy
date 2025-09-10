@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20250331163725"
+		"updated": "20250828155154"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20250331163725"
+				"updated": "20250828155154"
 			},
 			"Children": [
 				{
@@ -208,7 +208,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20250331163725"
+				"updated": "20250828155154"
 			},
 			"Children": [
 				{
@@ -414,7 +414,7 @@
 					},
 					"Properties": {
 						"id": "20211226123024-e42d7xq",
-						"updated": "20250331163725"
+						"updated": "20250801152535"
 					},
 					"Children": [
 						{
@@ -436,7 +436,19 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢資料庫，返回值為 blocks 列表"
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 blocks "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
 								}
 							]
 						},
@@ -447,7 +459,7 @@
 							"Properties": {
 								"id": "20241213215519-mfgruqs",
 								"style": "line-height: 22px;",
-								"updated": "20250331163725"
+								"updated": "20250801152535"
 							},
 							"Children": [
 								{
@@ -455,11 +467,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -478,7 +491,7 @@
 					},
 					"Properties": {
 						"id": "20250331163425-s5u08ng",
-						"updated": "20250331163515"
+						"updated": "20250801152542"
 					},
 					"Children": [
 						{
@@ -500,7 +513,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於根據塊 ID 查詢資料庫，傳回值為 block"
+									"Data": "​：函數用於根據塊 ID 查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，傳回值為 block"
 								}
 							]
 						},
@@ -510,7 +531,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20250331163435-irjmxt9",
-								"updated": "20250331163452"
+								"updated": "20250801152542"
 							},
 							"Children": [
 								{
@@ -518,11 +539,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{getBlock \"20250331163425-s5u08ng\"}\n"
+									"Data": ".action{ getBlock \"20250331163425-s5u08ng\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -541,7 +563,7 @@
 					},
 					"Properties": {
 						"id": "20211226123024-69kddle",
-						"updated": "20241224162821"
+						"updated": "20250801152548"
 					},
 					"Children": [
 						{
@@ -563,7 +585,19 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢資料庫，返回值為 spans 列表"
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 spans "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
 								}
 							]
 						},
@@ -574,7 +608,7 @@
 							"Properties": {
 								"id": "20241213215524-9an3khb",
 								"style": "line-height: 22px;",
-								"updated": "20241224162821"
+								"updated": "20250801152548"
 							},
 							"Children": [
 								{
@@ -582,11 +616,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": " .action{querySpans \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
+									"Data": ".action{ querySpans \"SELECT * FROM spans LIMIT ?\" \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -605,7 +640,7 @@
 					},
 					"Properties": {
 						"id": "20241213214930-4votv1n",
-						"updated": "20241213214930"
+						"updated": "20250801152554"
 					},
 					"Children": [
 						{
@@ -627,7 +662,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於查詢資料庫，傳回值為結果集"
+									"Data": "​：函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，傳回值為結果集"
 								}
 							]
 						},
@@ -638,7 +681,7 @@
 							"Properties": {
 								"id": "20241213215530-f2iwrjz",
 								"style": "line-height: 22px;",
-								"updated": "20241213215530"
+								"updated": "20250801152554"
 							},
 							"Children": [
 								{
@@ -646,11 +689,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": " .action{querySQL \"SELECT * FROM refs LIMIT 3\"}\n"
+									"Data": ".action{ querySQL \"SELECT * FROM refs LIMIT 3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -669,7 +713,7 @@
 					},
 					"Properties": {
 						"id": "20241212102019-gassjqt",
-						"updated": "20241213215707"
+						"updated": "20250801152602"
 					},
 					"Children": [
 						{
@@ -702,7 +746,7 @@
 							"Properties": {
 								"id": "20241213215707-lxpmd6b",
 								"style": "line-height: 22px;",
-								"updated": "20241213215707"
+								"updated": "20250801152602"
 							},
 							"Children": [
 								{
@@ -710,11 +754,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}\n"
+									"Data": ".action{ (statBlock .id).RuneCount }\n.action{ (statBlock .id).WordCount }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1178,7 +1223,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162753-tde2ifs",
-								"updated": "20240308162753"
+								"updated": "20250828154943"
 							},
 							"Children": [
 								{
@@ -1192,7 +1237,136 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回第幾週"
+									"Data": "​：此函數用於傳回目前週"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154909-wxnydc5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154909-wxnydc5",
+						"updated": "20250828154909"
+					},
+					"Children": [
+						{
+							"ID": "20250828154909-3grwety",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154909-3grwety",
+								"updated": "20250828154910"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前月份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154911-8n67tvc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154911-8n67tvc",
+						"updated": "20250828154911"
+					},
+					"Children": [
+						{
+							"ID": "20250828154911-bb7z59o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154911-bb7z59o",
+								"updated": "20250828154916"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前年份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154949-xhbwn4e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154949-xhbwn4e",
+						"updated": "20250828155154"
+					},
+					"Children": [
+						{
+							"ID": "20250828154949-5lcfpbs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154949-5lcfpbs",
+								"updated": "20250828155154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回指定週幾的日期 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，例如傳回本週四的日期 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1401,7 +1575,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-yrgnp4o",
-				"updated": "20211225221841"
+				"updated": "20250801152721"
 			},
 			"Children": [
 				{
@@ -1416,7 +1590,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20211226123024-s56q5uh",
-				"updated": "20211225221841"
+				"updated": "20250801152721"
 			},
 			"Children": [
 				{
@@ -1425,15 +1599,11 @@
 				},
 				{
 					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "cGxhaW50ZXh0"
+					"CodeBlockInfo": "dGVtcGxhdGU="
 				},
 				{
-					"ID": "20220307092237-cf60m2o",
 					"Type": "NodeCodeBlockCode",
-					"Data": ".action{$before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24)}\n\n.action{$after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24)}\n今天是 `.action{now | date \"2006-01-02\"}`。\n\n* 距離 `2020-02-19` 已經過去 `.action{$before}` 天\n* 距離 `2048-02-19` 還剩 `.action{$after}` 天\n",
-					"Properties": {
-						"id": "20220307092237-cf60m2o"
-					}
+					"Data": ".action{ $before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24) }\n.action{ $after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24) }\n今天是 `.action{ now | date \"2006-01-02\" }`。\n\n* 距離 `2020-02-19` 已經過去 `.action{ $before }` 天\n* 距離 `2048-02-19` 還剩 `.action{ $after }` 天\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

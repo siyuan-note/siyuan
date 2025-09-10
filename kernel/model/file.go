@@ -187,7 +187,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 			}
 		}
 
-		rootBlocks = sql.QueryRootBlockByCondition(condition)
+		rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
 	} else {
 		for _, box := range boxes {
 			if flashcard {
@@ -967,8 +967,13 @@ func DuplicateDoc(tree *parse.Tree) {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
+	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
 	createTreeTx(tree)
+	box := Conf.Box(tree.Box)
+	if nil != box {
+		box.addSort(previousPath, tree.ID)
+	}
 	FlushTxQueue()
 
 	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
@@ -986,7 +991,7 @@ func DuplicateDoc(tree *parse.Tree) {
 			AddAttributeViewBlock(nil, []map[string]interface{}{{
 				"id":         n.ID,
 				"isDetached": false,
-			}}, avID, "", "", "", false)
+			}}, avID, "", "", "", "", false, map[string]interface{}{})
 			ReloadAttrView(avID)
 		}
 		return ast.WalkContinue
@@ -1019,7 +1024,11 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	}
 
 	FlushTxQueue()
-	ChangeFileTreeSort(box.ID, sorts)
+	if 0 < len(sorts) {
+		ChangeFileTreeSort(box.ID, sorts)
+	} else {
+		box.addMinSort(path.Dir(tree.Path), tree.ID)
+	}
 	return
 }
 

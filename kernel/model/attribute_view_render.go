@@ -97,14 +97,14 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	if isGroupByDate(view) {
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
-			regenAttrViewGroups(attrView)
+			genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
 			av.SaveAttributeView(attrView)
 		}
 	}
 
 	// 如果是按模板分组则需要重新生成分组
 	if isGroupByTemplate(attrView, view) {
-		regenAttrViewGroups(attrView)
+		genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
 		av.SaveAttributeView(attrView)
 	}
 

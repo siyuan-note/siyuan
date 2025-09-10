@@ -473,6 +473,8 @@ func moveTree(tree *parse.Tree) {
 
 	box := Conf.Box(tree.Box)
 	box.renameSubTrees(tree)
+
+	refreshDocInfo(tree)
 }
 
 func (box *Box) renameSubTrees(tree *parse.Tree) {

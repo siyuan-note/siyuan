@@ -14,12 +14,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {
-    isNotCtrl,
-    isOnlyMeta,
-    setStorageVal,
-    updateHotkeyAfterTip
-} from "../../protyle/util/compatibility";
+import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
     hasClosestByAttribute,
@@ -1019,7 +1014,7 @@ data-type="navigation-root" data-path="/">
         } else {
             const parentElement = this.element.querySelector(`ul[data-url="${response.data.fromNotebook}"] li[data-path="${pathPosix().dirname(response.data.fromPath)}.sy"]`) as HTMLElement;
             if (parentElement && parentElement.getAttribute("data-count") === "1") {
-                parentElement.querySelector(".b3-list-item__toggle").classList.add(".fn__hidden");
+                parentElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
                 parentElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             }
         }

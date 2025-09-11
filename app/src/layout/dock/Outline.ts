@@ -25,6 +25,7 @@ export class Outline extends Model {
     public type: "pin" | "local";
     public blockId: string;
     public isPreview: boolean;
+    public resetLevelDisplay: () => void;
 
     constructor(options: {
         app: App,
@@ -111,7 +112,7 @@ export class Outline extends Model {
             <div class="outline-level-dot" data-level="5" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="6" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
         </div>
-        <span class="outline-level-text" style="min-width: 40px; text-align: right;">1${window.siyuan.languages.outlineLevel}</span>
+        <span class="outline-level-text" style="min-width: 40px; text-align: right;"></span>
     </div>
 </div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
@@ -177,6 +178,10 @@ export class Outline extends Model {
                             expandIds: expandIds
                         }
                     });
+                }
+                // 重置层级显示状态
+                if (this.resetLevelDisplay) {
+                    this.resetLevelDisplay();
                 }
             }
         });
@@ -330,6 +335,11 @@ export class Outline extends Model {
         if (this.tree.onToggleChange) {
             this.tree.onToggleChange();
         }
+        
+        // 重置层级显示状态
+        if (this.resetLevelDisplay) {
+            this.resetLevelDisplay();
+        }
     }
 
     /**
@@ -376,7 +386,6 @@ export class Outline extends Model {
         const levelControlElement = this.headerElement.parentElement.children[2] as HTMLElement;
         const dots = levelControlElement.querySelectorAll(".outline-level-dot") as NodeListOf<HTMLElement>;
         const levelText = levelControlElement.querySelector(".outline-level-text") as HTMLElement;
-        let currentLevel = 1; // 默认选中第一级
 
         // 添加滑条样式
         if (!document.getElementById("outline-slider-style")) {
@@ -408,10 +417,10 @@ export class Outline extends Model {
 
         // 更新层级文本和点的状态
         const updateLevelDisplay = (level: number) => {
-            currentLevel = level;
-            
             // 更新文本显示
-            if (level === 6) {
+            if (level === 0) {
+                levelText.textContent = ""; // 默认状态下不显示文字
+            } else if (level === 6) {
                 levelText.textContent = window.siyuan.languages.outlineExpandAll;
             } else {
                 levelText.textContent = `${level}${window.siyuan.languages.outlineLevel}`;
@@ -420,12 +429,17 @@ export class Outline extends Model {
             // 更新点的状态
             dots.forEach((dot, index) => {
                 const dotLevel = index + 1;
-                if (dotLevel <= level) {
+                if (level > 0 && dotLevel <= level) {
                     dot.classList.add("active");
                 } else {
                     dot.classList.remove("active");
                 }
             });
+        };
+
+        // 重置层级显示（用于文档切换或其他操作后重置）
+        this.resetLevelDisplay = () => {
+            updateLevelDisplay(0);
         };
 
         // 为每个点添加点击事件
@@ -437,8 +451,8 @@ export class Outline extends Model {
             });
         });
 
-        // 初始化显示
-        updateLevelDisplay(currentLevel);
+        // 初始化显示 - 默认不显示层级
+        updateLevelDisplay(0);
     }
 
     /**
@@ -811,6 +825,11 @@ export class Outline extends Model {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
+        
+        // 重置层级显示状态
+        if (this.resetLevelDisplay) {
+            this.resetLevelDisplay();
+        }
         
         // 根据是否有大纲内容决定是否显示层级控制
         const hasOutlineContent = data.data && data.data.length > 0;

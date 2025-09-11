@@ -142,6 +142,16 @@ export class Outline extends Model {
                     zoomIn: true,
                 });
             },
+            altClick: (element: HTMLElement, event?: MouseEvent) => {
+                // 检查是否点击的是标题层级图标
+                if (event && event.target) {
+                    const target = event.target as HTMLElement;
+                    const graphicElement = target.closest(".b3-list-item__graphic.popover__block");
+                    if (graphicElement) {
+                        this.collapseSameLevel(element);
+                    }
+                }
+            },
             onToggleChange: () => {
                 // 实时保存折叠状态变化
                 if (!this.isPreview) {
@@ -244,6 +254,103 @@ export class Outline extends Model {
                 });
             }
         });
+    }
+
+    /**
+     * 切换同层级的所有标题的展开/折叠状态（如果有子标题的话）
+     * @param element 当前点击的元素
+     */
+    private collapseSameLevel(element: HTMLElement) {
+        if (!element) {
+            return;
+        }
+
+        // 获取当前元素的层级深度
+        const currentLevel = this.getElementLevel(element);
+        
+        // 找到所有同层级的元素
+        const sameLevelElements = this.getSameLevelElements(currentLevel);
+        
+        // 过滤出有子元素的项
+        const elementsWithChildren = sameLevelElements.filter(item => 
+            item.nextElementSibling && item.nextElementSibling.tagName === "UL"
+        );
+        
+        if (elementsWithChildren.length === 0) {
+            return;
+        }
+        
+        // 检查当前状态：如果大部分元素是展开的，则执行折叠；否则执行展开
+        let expandedCount = 0;
+        elementsWithChildren.forEach(item => {
+            const arrowElement = item.querySelector(".b3-list-item__arrow");
+            if (arrowElement && arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                expandedCount++;
+            }
+        });
+        
+        // 如果超过一半的元素是展开的，则折叠所有；否则展开所有
+        const shouldCollapse = expandedCount > elementsWithChildren.length / 2;
+        
+        elementsWithChildren.forEach(item => {
+            const arrowElement = item.querySelector(".b3-list-item__arrow");
+            
+            if (shouldCollapse) {
+                // 折叠
+                if (arrowElement && arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                    arrowElement.classList.remove("b3-list-item__arrow--open");
+                    item.nextElementSibling.classList.add("fn__none");
+                }
+            } else {
+                // 展开
+                if (arrowElement && !arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                    arrowElement.classList.add("b3-list-item__arrow--open");
+                    item.nextElementSibling.classList.remove("fn__none");
+                }
+            }
+        });
+
+        // 触发折叠状态变化事件，保存状态
+        if (this.tree.onToggleChange) {
+            this.tree.onToggleChange();
+        }
+    }
+
+    /**
+     * 获取元素在大纲中的层级深度
+     * @param element li元素
+     * @returns 层级深度（从0开始）
+     */
+    private getElementLevel(element: HTMLElement): number {
+        let level = 0;
+        let parent = element.parentElement;
+        
+        while (parent && !parent.classList.contains("fn__flex-1")) {
+            if (parent.tagName === "UL" && !parent.classList.contains("b3-list")) {
+                level++;
+            }
+            parent = parent.parentElement;
+        }
+        
+        return level;
+    }
+
+    /**
+     * 获取所有同层级的元素
+     * @param level 目标层级
+     * @returns 同层级的li元素数组
+     */
+    private getSameLevelElements(level: number): HTMLElement[] {
+        const allListItems = this.element.querySelectorAll("li.b3-list-item");
+        const sameLevelElements: HTMLElement[] = [];
+        
+        allListItems.forEach(item => {
+            if (this.getElementLevel(item as HTMLElement) === level) {
+                sameLevelElements.push(item as HTMLElement);
+            }
+        });
+        
+        return sameLevelElements;
     }
 
     private bindSort() {

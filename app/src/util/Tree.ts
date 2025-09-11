@@ -16,7 +16,7 @@ export class Tree {
     private ctrlClick: (element: HTMLElement) => void;
     private toggleClick: (element: Element) => void;
     private shiftClick: (element: HTMLElement) => void;
-    private altClick: (element: HTMLElement) => void;
+    private altClick: (element: HTMLElement, event?: MouseEvent) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
     public onToggleChange: () => void;
 
@@ -27,7 +27,7 @@ export class Tree {
         topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement): void
-        altClick?(element: HTMLElement): void
+        altClick?(element: HTMLElement, event?: MouseEvent): void
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
@@ -244,7 +244,7 @@ data-def-path="${item.defPath}">
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {
                             this.ctrlClick(target);
                         } else if (this.altClick && window.siyuan.altIsPressed) {
-                            this.altClick(target);
+                            this.altClick(target, event);
                         } else if (this.shiftClick && window.siyuan.shiftIsPressed) {
                             this.shiftClick(target);
                         } else if (this.click) {

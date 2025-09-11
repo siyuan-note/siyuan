@@ -102,7 +102,7 @@ func setRecentDocByTree(tree *parse.Tree) {
 	return
 }
 
-// 新增函数：更新文档打开时间（只在第一次从文档树加载到页签时调用）
+// 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) error {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
@@ -129,7 +129,7 @@ func UpdateRecentDocOpenTime(rootID string) error {
 	return err
 }
 
-// 新增函数：更新文档浏览时间
+// 更新文档浏览时间
 func UpdateRecentDocViewTime(rootID string) error {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
@@ -160,7 +160,7 @@ func UpdateRecentDocViewTime(rootID string) error {
 	return err
 }
 
-// 新增函数：更新文档关闭时间
+// 更新文档关闭时间
 func UpdateRecentDocCloseTime(rootID string) error {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()

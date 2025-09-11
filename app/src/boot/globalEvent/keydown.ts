@@ -1529,7 +1529,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (matchHotKey("⇧⌘T", event)) {
-        console.log((window as any).siyuan.closedTabs);
         if ((window as any).siyuan.closedTabs && (window as any).siyuan.closedTabs.length > 0) {
             const closedTab = (window as any).siyuan.closedTabs.pop();
             openFileById({

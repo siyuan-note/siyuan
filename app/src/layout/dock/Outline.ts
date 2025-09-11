@@ -99,11 +99,25 @@ export class Outline extends Model {
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="b3-list-item fn__none"></div>
+<div class="outline-level-control" style="padding: 8px 12px; border-bottom: 1px solid var(--b3-border-color); display: none; ">
+    <div style="display: flex; align-items: center; font-size: 12px; color: var(--b3-theme-on-surface-light);">
+        <span style="margin-right: 8px; min-width: 60px;">展开层级:</span>
+        <div class="outline-level-dots" style="flex: 1; margin: 0 8px; position: relative; height: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div class="outline-level-line" style="position: absolute; top: 50%; left: 8px; right: 8px; height: 2px; background: var(--b3-theme-on-surface-light); transform: translateY(-50%);"></div>
+            <div class="outline-level-dot active" data-level="1" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-primary); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+            <div class="outline-level-dot" data-level="2" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+            <div class="outline-level-dot" data-level="3" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+            <div class="outline-level-dot" data-level="4" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+            <div class="outline-level-dot" data-level="5" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+        </div>
+        <span class="outline-level-text" style="min-width: 40px; text-align: right;">1级</span>
+    </div>
+</div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
-        this.element = options.tab.panelElement.lastElementChild as HTMLElement;
+        this.element = options.tab.panelElement.children[3] as HTMLElement; // 更新为第四个子元素（大纲内容）
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
         this.tree = new Tree({
-            element: options.tab.panelElement.lastElementChild as HTMLElement,
+            element: options.tab.panelElement.children[3] as HTMLElement, // 使用第四个子元素作为树容器
             data: null,
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
@@ -236,6 +250,7 @@ export class Outline extends Model {
             }
         });
         this.bindSort();
+        this.initLevelControl(); // 初始化层级控制
 
         fetchPost("/api/outline/getDocOutline", {
             id: this.blockId,
@@ -351,6 +366,129 @@ export class Outline extends Model {
         });
         
         return sameLevelElements;
+    }
+
+    /**
+     * 初始化层级控制滑条
+     */
+    private initLevelControl() {
+        const levelControlElement = this.headerElement.parentElement.children[2] as HTMLElement;
+        const dots = levelControlElement.querySelectorAll(".outline-level-dot") as NodeListOf<HTMLElement>;
+        const levelText = levelControlElement.querySelector(".outline-level-text") as HTMLElement;
+        let currentLevel = 1; // 默认选中第一级
+
+        // 添加滑条样式
+        if (!document.getElementById("outline-slider-style")) {
+            const style = document.createElement("style");
+            style.id = "outline-slider-style";
+            style.textContent = `
+                .outline-level-dots {
+                    justify-content: space-between;
+                }
+                .outline-level-dot {
+                    transition: all 0.2s ease;
+                    position: relative;
+                }
+                .outline-level-dot:hover {
+                    transform: scale(1.1);
+                }
+                .outline-level-dot.active {
+                    background: var(--b3-theme-primary) !important;
+                }
+                .outline-level-dot:not(.active) {
+                    background: var(--b3-theme-on-surface-light) !important;
+                }
+                .outline-level-line {
+                    background: var(--b3-border-color) !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // 更新层级文本和点的状态
+        const updateLevelDisplay = (level: number) => {
+            currentLevel = level;
+            
+            // 更新文本显示
+            if (level === 5) {
+                levelText.textContent = "全部";
+            } else {
+                levelText.textContent = `${level}级`;
+            }
+            
+            // 更新点的状态
+            dots.forEach((dot, index) => {
+                const dotLevel = index + 1;
+                if (dotLevel <= level) {
+                    dot.classList.add("active");
+                } else {
+                    dot.classList.remove("active");
+                }
+            });
+        };
+
+        // 为每个点添加点击事件
+        dots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+                const level = parseInt(dot.getAttribute("data-level"));
+                updateLevelDisplay(level);
+                this.expandToLevel(level);
+            });
+        });
+
+        // 初始化显示
+        updateLevelDisplay(currentLevel);
+    }
+
+    /**
+     * 展开到指定层级
+     * @param targetLevel 目标层级，1-5级，5级表示全部展开
+     */
+    private expandToLevel(targetLevel: number) {
+        if (targetLevel >= 5) {
+            // 全部展开
+            this.tree.expandAll();
+        } else {
+            // 展开到指定层级
+            const allListItems = this.element.querySelectorAll("li.b3-list-item");
+            
+            allListItems.forEach(item => {
+                const elementLevel = this.getElementLevel(item as HTMLElement);
+                const arrowElement = item.querySelector(".b3-list-item__arrow");
+                
+                if (item.nextElementSibling && item.nextElementSibling.tagName === "UL" && arrowElement) {
+                    // 新的层级映射：1级对应原来的0级，2级对应原来的1级，以此类推
+                    const adjustedTargetLevel = targetLevel - 1;
+                    
+                    if (elementLevel < adjustedTargetLevel) {
+                        // 当前层级小于目标层级，展开
+                        arrowElement.classList.add("b3-list-item__arrow--open");
+                        item.nextElementSibling.classList.remove("fn__none");
+                    } else {
+                        // 当前层级大于等于目标层级，折叠
+                        arrowElement.classList.remove("b3-list-item__arrow--open");
+                        item.nextElementSibling.classList.add("fn__none");
+                    }
+                }
+            });
+        }
+
+        // 保存状态
+        if (this.tree.onToggleChange) {
+            this.tree.onToggleChange();
+        }
+    }
+
+    /**
+     * 显示或隐藏层级控制
+     */
+    public toggleLevelControl(show: boolean) {
+        const levelControlElement = this.headerElement.parentElement.children[2] as HTMLElement;
+        if (show) {
+            levelControlElement.style.display = "block";
+        } else {
+            levelControlElement.style.display = "none";
+        }
     }
 
     private bindSort() {
@@ -522,11 +660,18 @@ export class Outline extends Model {
 <span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
                 docTitleElement.setAttribute("title", ial.title);
                 docTitleElement.classList.remove("fn__none");
+                // 显示层级控制
+                this.toggleLevelControl(true);
             } else {
                 docTitleElement.classList.add("fn__none");
+                // 隐藏层级控制
+                this.toggleLevelControl(false);
             }
         } else {
             docTitleElement.classList.add("fn__none");
+            // 对于local类型，根据是否有大纲内容决定是否显示层级控制
+            const hasOutlineContent = this.element.querySelector("li.b3-list-item");
+            this.toggleLevelControl(!!hasOutlineContent);
         }
     }
 
@@ -665,6 +810,10 @@ export class Outline extends Model {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
+        
+        // 根据是否有大纲内容决定是否显示层级控制
+        const hasOutlineContent = data.data && data.data.length > 0;
+        this.toggleLevelControl(hasOutlineContent);
         
         // 从新的持久化存储恢复折叠状态
         if (!this.isPreview) {

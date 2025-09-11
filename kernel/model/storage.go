@@ -37,6 +37,11 @@ type RecentDoc struct {
 	Title  string `json:"title"`
 }
 
+type OutlineDoc struct {
+	DocID string                 `json:"docID"`
+	Data  map[string]interface{} `json:"data"`
+}
+
 var recentDocLock = sync.Mutex{}
 
 func RemoveRecentDoc(ids []string) {
@@ -410,6 +415,102 @@ func GetOutlineStorage(docID string) (ret map[string]interface{}, err error) {
 	defer outlineStorageLock.Unlock()
 
 	ret = map[string]interface{}{}
+	outlineDocs, err := getOutlineDocs()
+	if err != nil {
+		return
+	}
+
+	for _, doc := range outlineDocs {
+		if doc.DocID == docID {
+			ret = doc.Data
+			break
+		}
+	}
+	return
+}
+
+func SetOutlineStorage(docID string, val interface{}) (err error) {
+	outlineStorageLock.Lock()
+	defer outlineStorageLock.Unlock()
+
+	outlineDoc := &OutlineDoc{
+		DocID: docID,
+		Data:  make(map[string]interface{}),
+	}
+	
+	if valMap, ok := val.(map[string]interface{}); ok {
+		outlineDoc.Data = valMap
+	}
+
+	outlineDocs, err := getOutlineDocs()
+	if err != nil {
+		return
+	}
+
+	// 如果文档已存在，先移除旧的
+	for i, doc := range outlineDocs {
+		if doc.DocID == docID {
+			outlineDocs = append(outlineDocs[:i], outlineDocs[i+1:]...)
+			break
+		}
+	}
+
+	// 将新的文档信息添加到最前面
+	outlineDocs = append([]*OutlineDoc{outlineDoc}, outlineDocs...)
+	
+	// 限制为1000个文档
+	if 1000 < len(outlineDocs) {
+		outlineDocs = outlineDocs[:1000]
+	}
+
+	err = setOutlineDocs(outlineDocs)
+	return
+}
+
+func RemoveOutlineStorage(docID string) (err error) {
+	outlineStorageLock.Lock()
+	defer outlineStorageLock.Unlock()
+
+	outlineDocs, err := getOutlineDocs()
+	if err != nil {
+		return
+	}
+
+	for i, doc := range outlineDocs {
+		if doc.DocID == docID {
+			outlineDocs = append(outlineDocs[:i], outlineDocs[i+1:]...)
+			break
+		}
+	}
+
+	err = setOutlineDocs(outlineDocs)
+	return
+}
+
+func setOutlineDocs(outlineDocs []*OutlineDoc) (err error) {
+	dirPath := filepath.Join(util.DataDir, "storage")
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
+		logging.LogErrorf("create storage [outline] dir failed: %s", err)
+		return
+	}
+
+	data, err := gulu.JSON.MarshalIndentJSON(outlineDocs, "", "  ")
+	if err != nil {
+		logging.LogErrorf("marshal storage [outline] failed: %s", err)
+		return
+	}
+
+	lsPath := filepath.Join(dirPath, "outline.json")
+	err = filelock.WriteFile(lsPath, data)
+	if err != nil {
+		logging.LogErrorf("write storage [outline] failed: %s", err)
+		return
+	}
+	return
+}
+
+func getOutlineDocs() (ret []*OutlineDoc, err error) {
+	ret = []*OutlineDoc{}
 	dataPath := filepath.Join(util.DataDir, "storage/outline.json")
 	if !filelock.IsExist(dataPath) {
 		return
@@ -421,95 +522,8 @@ func GetOutlineStorage(docID string) (ret map[string]interface{}, err error) {
 		return
 	}
 
-	var allOutlines map[string]interface{}
-	if err = gulu.JSON.UnmarshalJSON(data, &allOutlines); err != nil {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal storage [outline] failed: %s", err)
-		return
-	}
-
-	if docData, exists := allOutlines[docID]; exists {
-		if docMap, ok := docData.(map[string]interface{}); ok {
-			ret = docMap
-		}
-	}
-	return
-}
-
-func SetOutlineStorage(docID string, val interface{}) (err error) {
-	outlineStorageLock.Lock()
-	defer outlineStorageLock.Unlock()
-
-	dirPath := filepath.Join(util.DataDir, "storage")
-	if err = os.MkdirAll(dirPath, 0755); err != nil {
-		logging.LogErrorf("create storage [outline] dir failed: %s", err)
-		return
-	}
-
-	dataPath := filepath.Join(dirPath, "outline.json")
-	var allOutlines map[string]interface{}
-	if filelock.IsExist(dataPath) {
-		var data []byte
-		data, err = filelock.ReadFile(dataPath)
-		if err != nil {
-			logging.LogErrorf("read storage [outline] failed: %s", err)
-			return
-		}
-		if err = gulu.JSON.UnmarshalJSON(data, &allOutlines); err != nil {
-			logging.LogErrorf("unmarshal storage [outline] failed: %s", err)
-			return
-		}
-	} else {
-		allOutlines = make(map[string]interface{})
-	}
-
-	allOutlines[docID] = val
-
-	data, err := gulu.JSON.MarshalJSON(allOutlines)
-	if err != nil {
-		logging.LogErrorf("marshal storage [outline] failed: %s", err)
-		return
-	}
-
-	err = filelock.WriteFile(dataPath, data)
-	if err != nil {
-		logging.LogErrorf("write storage [outline] failed: %s", err)
-		return
-	}
-	return
-}
-
-func RemoveOutlineStorage(docID string) (err error) {
-	outlineStorageLock.Lock()
-	defer outlineStorageLock.Unlock()
-
-	dirPath := filepath.Join(util.DataDir, "storage")
-	dataPath := filepath.Join(dirPath, "outline.json")
-	if !filelock.IsExist(dataPath) {
-		return
-	}
-
-	var allOutlines map[string]interface{}
-	data, err := filelock.ReadFile(dataPath)
-	if err != nil {
-		logging.LogErrorf("read storage [outline] failed: %s", err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &allOutlines); err != nil {
-		logging.LogErrorf("unmarshal storage [outline] failed: %s", err)
-		return
-	}
-
-	delete(allOutlines, docID)
-
-	data, err = gulu.JSON.MarshalJSON(allOutlines)
-	if err != nil {
-		logging.LogErrorf("marshal storage [outline] failed: %s", err)
-		return
-	}
-
-	err = filelock.WriteFile(dataPath, data)
-	if err != nil {
-		logging.LogErrorf("write storage [outline] failed: %s", err)
 		return
 	}
 	return

@@ -787,6 +787,12 @@ export class Wnd {
                     saveScroll(item.model.editor.protyle);
                     // 更新文档关闭时间
                     fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
+                    if (!(window as any).siyuan.closedTabs) {
+                        (window as any).siyuan.closedTabs = [];
+                    }
+                    (window as any).siyuan.closedTabs.push({
+                        id: item.model.editor.protyle.block.rootID
+                    });
                 }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);

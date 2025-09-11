@@ -1335,6 +1335,8 @@
   "uploadError": "upload error",
   "uploading": "Uploading...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "Recently Viewed",
+  "recentClosed": "Recently Closed",
   "_label": "English",
   "_time": {
     "albl": "ago",

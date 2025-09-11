@@ -1335,6 +1335,8 @@
   "uploadError": "خطأ في الرفع",
   "uploading": "يتم الرفع...",
   "wysiwyg": "‫ما تراه هو ما تحصل عليه (WYSIWYG)‬",
+  "recentViewed": "تم عرضها مؤخراً",
+  "recentClosed": "تم إغلاقها مؤخراً",
   "_label": "العربية",
   "_time": {
     "albl": "من قبل",

@@ -1335,6 +1335,8 @@
   "uploadError": "erreur de transfert",
   "uploading": "Transfert en cours",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "Récemment consulté",
+  "recentClosed": "Récemment fermé",
   "_label": "Français",
   "_time": {
     "albl": "Précédemment",

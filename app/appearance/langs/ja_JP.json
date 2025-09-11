@@ -1335,6 +1335,8 @@
   "uploadError": "アップロードエラー",
   "uploading": "アップロード中...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "最近閲覧",
+  "recentClosed": "最近閉じる",
   "_label": "日本語",
   "_time": {
     "albl": "前",

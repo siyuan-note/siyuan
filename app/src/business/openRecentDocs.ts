@@ -10,7 +10,7 @@ import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 
-const getHTML = async (data: { rootID: string, icon: string, title: string, viewedAt?: number, closedAt?: number, updated?: number }[], element: Element, key?: string, sortBy: "viewedAt" | "closedAt" | "updated" = "viewedAt") => {
+const getHTML = async (data: { rootID: string, icon: string, title: string, viewedAt?: number, closedAt?: number, openAt?: number, updated?: number }[], element: Element, key?: string, sortBy: "viewedAt" | "closedAt" | "openAt" | "updated" = "viewedAt") => {
     let tabHtml = "";
     let index = 0;
     
@@ -101,9 +101,10 @@ export const openRecentDocs = () => {
 </div>
 <div class="fn__flex-center fn__ml8">
     <select class="b3-select fn__size200" id="recentDocsSort">
-        <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
-        <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
-        <option value="updated">${window.siyuan.languages.recentModified}</option>
+    <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
+    <option value="updated">${window.siyuan.languages.recentModified}</option>
+    <option value="openAt">${window.siyuan.languages.recentOpened}</option>
+    <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
     </select>
 </div>
 </div>`,
@@ -121,13 +122,13 @@ export const openRecentDocs = () => {
         const searchElement = dialog.element.querySelector("input");
         searchElement.focus();
         searchElement.addEventListener("compositionend", () => {
-            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "updated");
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt" | "updated");
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "updated");
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt" | "updated");
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_RECENTDOCS);
         dialog.element.addEventListener("click", (event) => {
@@ -174,7 +175,7 @@ export const openRecentDocs = () => {
                 });
             } else {
                 fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
-                    getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt");
+                    getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt");
                 });
             }
         });

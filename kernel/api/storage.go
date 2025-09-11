@@ -29,10 +29,15 @@ func getRecentDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
 	// 获取排序参数
-	sortBy := c.Query("sortBy")
-	if sortBy == "" {
-		sortBy = "viewedAt" // 默认按浏览时间排序
+	sortBy := "viewedAt" // 默认按浏览时间排序
+	if arg["sortBy"] != nil {
+		sortBy = arg["sortBy"].(string)
 	}
 
 	data, err := model.GetRecentDocs(sortBy)
@@ -205,6 +210,24 @@ func updateRecentDocViewTime(c *gin.Context) {
 	}
 }
 
+
+func updateRecentDocOpenTime(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	err := model.UpdateRecentDocOpenTime(rootID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
 
 func updateRecentDocCloseTime(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

@@ -636,6 +636,12 @@ export class Wnd {
         if (tab.callback) {
             tab.callback(tab);
         }
+        
+        // 当文档第一次加载到页签时更新 openAt 时间
+        if (tab.model instanceof Editor && tab.model.editor?.protyle?.block?.rootID) {
+            fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: tab.model.editor.protyle.block.rootID});
+        }
+        
         // 移除 centerLayout 中的 empty
         if (this.parent.type === "center" && this.children.length === 2 && !this.children[0].headElement) {
             this.removeTab(this.children[0].id);

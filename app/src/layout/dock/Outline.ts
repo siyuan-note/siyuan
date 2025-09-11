@@ -1,22 +1,22 @@
-import {Tab} from "../Tab";
-import {Model} from "../Model";
-import {Tree} from "../../util/Tree";
-import {getInstanceById, setPanelFocus} from "../util";
-import {getDockByType} from "../tabUtil";
-import {fetchPost} from "../../util/fetch";
-import {getAllModels} from "../getAll";
-import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
-import {setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
-import {openFileById} from "../../editor/util";
-import {Constants} from "../../constants";
-import {escapeHtml} from "../../util/escape";
-import {unicode2Emoji} from "../../emoji";
-import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
-import {App} from "../../index";
-import {checkFold} from "../../util/noRelyPCFunction";
-import {transaction} from "../../protyle/wysiwyg/transaction";
-import {goHome} from "../../protyle/wysiwyg/commonHotkey";
-import {Editor} from "../../editor";
+import { Tab } from "../Tab";
+import { Model } from "../Model";
+import { Tree } from "../../util/Tree";
+import { getInstanceById, setPanelFocus } from "../util";
+import { getDockByType } from "../tabUtil";
+import { fetchPost } from "../../util/fetch";
+import { getAllModels } from "../getAll";
+import { hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName } from "../../protyle/util/hasClosest";
+import { setStorageVal, updateHotkeyAfterTip } from "../../protyle/util/compatibility";
+import { openFileById } from "../../editor/util";
+import { Constants } from "../../constants";
+import { escapeHtml } from "../../util/escape";
+import { unicode2Emoji } from "../../emoji";
+import { getPreviousBlock } from "../../protyle/wysiwyg/getBlock";
+import { App } from "../../index";
+import { checkFold } from "../../util/noRelyPCFunction";
+import { transaction } from "../../protyle/wysiwyg/transaction";
+import { goHome } from "../../protyle/wysiwyg/commonHotkey";
+import { Editor } from "../../editor";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -25,7 +25,8 @@ export class Outline extends Model {
     public type: "pin" | "local";
     public blockId: string;
     public isPreview: boolean;
-    public resetLevelDisplay: () => void;
+    public resetLevelDisplay: (force?: boolean) => void;
+    private isUserLevelControlActive = false; // 标记用户是否主动使用了层级控制
 
     constructor(options: {
         app: App,
@@ -39,7 +40,7 @@ export class Outline extends Model {
             id: options.tab.id,
             callback() {
                 if (this.type === "local") {
-                    fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
+                    fetchPost("/api/block/checkBlockExist", { id: this.blockId }, existResponse => {
                         if (!existResponse.data) {
                             this.parent.parent.removeTab(this.parent.id);
                         }
@@ -64,7 +65,7 @@ export class Outline extends Model {
                             break;
                         case "unmount":
                             if (this.type === "local") {
-                                fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
+                                fetchPost("/api/block/checkBlockExist", { id: this.blockId }, existResponse => {
                                     if (!existResponse.data) {
                                         this.parent.parent.removeTab(this.parent.id);
                                     }
@@ -105,7 +106,7 @@ export class Outline extends Model {
         <span style="margin-right: 8px; min-width: 60px;">${window.siyuan.languages.outlineExpandLevel}:</span>
         <div class="outline-level-dots" style="flex: 1; margin: 0 8px; position: relative; height: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div class="outline-level-line" style="position: absolute; top: 50%; left: 8px; right: 8px; height: 2px; background: var(--b3-theme-on-surface-light); transform: translateY(-50%);"></div>
-            <div class="outline-level-dot active" data-level="1" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-primary); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+            <div class="outline-level-dot" data-level="1" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="2" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="3" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="4" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
@@ -179,8 +180,8 @@ export class Outline extends Model {
                         }
                     });
                 }
-                // 重置层级显示状态
-                if (this.resetLevelDisplay) {
+                // 只在非用户主动层级控制操作时重置层级显示状态
+                if (this.resetLevelDisplay && !this.isUserLevelControlActive) {
                     this.resetLevelDisplay();
                 }
             }
@@ -198,23 +199,23 @@ export class Outline extends Model {
             }
             if (iconElement.classList.contains("block__icon--active")) {
                 iconElement.classList.remove("block__icon--active");
-                    window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = false;
-                } else {
-                    iconElement.classList.add("block__icon--active");
-                    window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = true;
-                    this.tree.expandAll();
+                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = false;
+            } else {
+                iconElement.classList.add("block__icon--active");
+                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = true;
+                this.tree.expandAll();
+            }
+
+            // 保存keepExpand状态到localStorage
+            setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
+
+            // 同时保存当前文档的展开状态到新的存储
+            fetchPost("/api/storage/setOutlineStorage", {
+                docID: this.blockId,
+                val: {
+                    expandIds: this.tree.getExpandIds()
                 }
-    
-                // 保存keepExpand状态到localStorage
-                setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
-                
-                // 同时保存当前文档的展开状态到新的存储
-                fetchPost("/api/storage/setOutlineStorage", {
-                    docID: this.blockId,
-                    val: {
-                        expandIds: this.tree.getExpandIds()
-                    }
-                });
+            });
         });
         options.tab.panelElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -288,19 +289,19 @@ export class Outline extends Model {
 
         // 获取当前元素的层级深度
         const currentLevel = this.getElementLevel(element);
-        
+
         // 找到所有同层级的元素
         const sameLevelElements = this.getSameLevelElements(currentLevel);
-        
+
         // 过滤出有子元素的项
-        const elementsWithChildren = sameLevelElements.filter(item => 
+        const elementsWithChildren = sameLevelElements.filter(item =>
             item.nextElementSibling && item.nextElementSibling.tagName === "UL"
         );
-        
+
         if (elementsWithChildren.length === 0) {
             return;
         }
-        
+
         // 检查当前状态：如果大部分元素是展开的，则执行折叠；否则执行展开
         let expandedCount = 0;
         elementsWithChildren.forEach(item => {
@@ -309,13 +310,13 @@ export class Outline extends Model {
                 expandedCount++;
             }
         });
-        
+
         // 如果超过一半的元素是展开的，则折叠所有；否则展开所有
         const shouldCollapse = expandedCount > elementsWithChildren.length / 2;
-        
+
         elementsWithChildren.forEach(item => {
             const arrowElement = item.querySelector(".b3-list-item__arrow");
-            
+
             if (shouldCollapse) {
                 // 折叠
                 if (arrowElement && arrowElement.classList.contains("b3-list-item__arrow--open")) {
@@ -335,9 +336,9 @@ export class Outline extends Model {
         if (this.tree.onToggleChange) {
             this.tree.onToggleChange();
         }
-        
-        // 重置层级显示状态
-        if (this.resetLevelDisplay) {
+
+        // 只在非用户主动层级控制操作时重置层级显示状态
+        if (this.resetLevelDisplay && !this.isUserLevelControlActive) {
             this.resetLevelDisplay();
         }
     }
@@ -350,14 +351,14 @@ export class Outline extends Model {
     private getElementLevel(element: HTMLElement): number {
         let level = 0;
         let parent = element.parentElement;
-        
+
         while (parent && !parent.classList.contains("fn__flex-1")) {
             if (parent.tagName === "UL" && !parent.classList.contains("b3-list")) {
                 level++;
             }
             parent = parent.parentElement;
         }
-        
+
         return level;
     }
 
@@ -369,13 +370,13 @@ export class Outline extends Model {
     private getSameLevelElements(level: number): HTMLElement[] {
         const allListItems = this.element.querySelectorAll("li.b3-list-item");
         const sameLevelElements: HTMLElement[] = [];
-        
+
         allListItems.forEach(item => {
             if (this.getElementLevel(item as HTMLElement) === level) {
                 sameLevelElements.push(item as HTMLElement);
             }
         });
-        
+
         return sameLevelElements;
     }
 
@@ -402,10 +403,10 @@ export class Outline extends Model {
                 .outline-level-dot:hover {
                     transform: scale(1.1);
                 }
-                .outline-level-dot.active {
+                .outline-level-control .outline-level-dot.active {
                     background: var(--b3-theme-primary) !important;
                 }
-                .outline-level-dot:not(.active) {
+                .outline-level-control .outline-level-dot:not(.active) {
                     background: var(--b3-theme-on-surface-light) !important;
                 }
                 .outline-level-line {
@@ -425,29 +426,39 @@ export class Outline extends Model {
             } else {
                 levelText.textContent = `${level}${window.siyuan.languages.outlineLevel}`;
             }
-            
-            // 更新点的状态
+
+            // 更新点的状态：点击的点及其前面的点都变为 active 状态
             dots.forEach((dot, index) => {
                 const dotLevel = index + 1;
+                // 先移除所有的active类，确保状态重置
+                dot.classList.remove("active");
+                // 然后为符合条件的点添加active类
                 if (level > 0 && dotLevel <= level) {
                     dot.classList.add("active");
-                } else {
-                    dot.classList.remove("active");
                 }
             });
         };
 
         // 重置层级显示（用于文档切换或其他操作后重置）
-        this.resetLevelDisplay = () => {
-            updateLevelDisplay(0);
+        this.resetLevelDisplay = (force = false) => {
+            // 如果是强制重置，或者用户没有主动使用层级控制，则执行重置
+            if (force || !this.isUserLevelControlActive) {
+                updateLevelDisplay(0);
+            }
         };
 
         // 为每个点添加点击事件
         dots.forEach((dot) => {
             dot.addEventListener("click", () => {
                 const level = parseInt(dot.getAttribute("data-level"));
+                // 标记用户主动使用层级控制
+                this.isUserLevelControlActive = true;
                 updateLevelDisplay(level);
                 this.expandToLevel(level);
+                // 在展开完成后重置标志
+                setTimeout(() => {
+                    this.isUserLevelControlActive = false;
+                }, 100);
             });
         });
 
@@ -466,15 +477,15 @@ export class Outline extends Model {
         } else {
             // 展开到指定层级
             const allListItems = this.element.querySelectorAll("li.b3-list-item");
-            
+
             allListItems.forEach(item => {
                 const elementLevel = this.getElementLevel(item as HTMLElement);
                 const arrowElement = item.querySelector(".b3-list-item__arrow");
-                
+
                 if (item.nextElementSibling && item.nextElementSibling.tagName === "UL" && arrowElement) {
                     // 新的层级映射：1级对应原来的0级，2级对应原来的1级，以此类推
                     const adjustedTargetLevel = targetLevel - 1;
-                    
+
                     if (elementLevel < adjustedTargetLevel) {
                         // 当前层级小于目标层级，展开
                         arrowElement.classList.add("b3-list-item__arrow--open");
@@ -623,10 +634,10 @@ export class Outline extends Model {
                     }
                     if (hasChange) {
                         this.element.setAttribute("data-loading", "true");
-                        
+
                         // 保存拖拽前的折叠状态
                         const expandIdsBeforeDrag = this.tree.getExpandIds();
-                        
+
                         transaction(editor, [{
                             action: "moveOutlineHeading",
                             id: item.dataset.nodeId,
@@ -638,7 +649,7 @@ export class Outline extends Model {
                             previousID: undoPreviousID,
                             parentID: undoParentID,
                         }]);
-                        
+
                         // 拖拽操作完成后恢复折叠状态
                         setTimeout(() => {
                             fetchPost("/api/storage/setOutlineStorage", {
@@ -648,7 +659,7 @@ export class Outline extends Model {
                                 }
                             });
                         }, 300);
-                        
+
                         // https://github.com/siyuan-note/siyuan/issues/10828#issuecomment-2044099675
                         editor.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"] [contenteditable="true"][spellcheck]').forEach(item => {
                             item.setAttribute("contenteditable", "false");
@@ -820,21 +831,21 @@ export class Outline extends Model {
                 }
             });
         }
-        
+
         if (typeof callbackId !== "undefined") {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
-        
-        // 重置层级显示状态
+
+        // 强制重置层级显示状态（文档切换时）
         if (this.resetLevelDisplay) {
-            this.resetLevelDisplay();
+            this.resetLevelDisplay(true);
         }
-        
+
         // 根据是否有大纲内容决定是否显示层级控制
         const hasOutlineContent = data.data && data.data.length > 0;
         this.toggleLevelControl(hasOutlineContent);
-        
+
         // 从新的持久化存储恢复折叠状态
         if (!this.isPreview) {
             fetchPost("/api/storage/getOutlineStorage", {
@@ -855,7 +866,7 @@ export class Outline extends Model {
                 }
             });
         }
-        
+
         if (this.isPreview) {
             this.tree.element.querySelectorAll(".popover__block").forEach(item => {
                 item.classList.remove("popover__block");

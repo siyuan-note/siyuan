@@ -458,9 +458,9 @@ func SetOutlineStorage(docID string, val interface{}) (err error) {
 	// 将新的文档信息添加到最前面
 	outlineDocs = append([]*OutlineDoc{outlineDoc}, outlineDocs...)
 	
-	// 限制为1000个文档
-	if 1000 < len(outlineDocs) {
-		outlineDocs = outlineDocs[:1000]
+	// 限制为2000个文档
+	if 2000 < len(outlineDocs) {
+		outlineDocs = outlineDocs[:2000]
 	}
 
 	err = setOutlineDocs(outlineDocs)

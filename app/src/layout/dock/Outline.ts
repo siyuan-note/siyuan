@@ -101,7 +101,7 @@ export class Outline extends Model {
 <div class="b3-list-item fn__none"></div>
 <div class="outline-level-control" style="padding: 8px 12px; border-bottom: 1px solid var(--b3-border-color); display: none; ">
     <div style="display: flex; align-items: center; font-size: 12px; color: var(--b3-theme-on-surface-light);">
-        <span style="margin-right: 8px; min-width: 60px;">展开层级:</span>
+        <span style="margin-right: 8px; min-width: 60px;">${window.siyuan.languages.outlineExpandLevel}:</span>
         <div class="outline-level-dots" style="flex: 1; margin: 0 8px; position: relative; height: 20px; display: flex; align-items: center; justify-content: space-between;">
             <div class="outline-level-line" style="position: absolute; top: 50%; left: 8px; right: 8px; height: 2px; background: var(--b3-theme-on-surface-light); transform: translateY(-50%);"></div>
             <div class="outline-level-dot active" data-level="1" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-primary); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
@@ -109,8 +109,9 @@ export class Outline extends Model {
             <div class="outline-level-dot" data-level="3" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="4" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="5" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
+            <div class="outline-level-dot" data-level="6" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
         </div>
-        <span class="outline-level-text" style="min-width: 40px; text-align: right;">1级</span>
+        <span class="outline-level-text" style="min-width: 40px; text-align: right;">1${window.siyuan.languages.outlineLevel}</span>
     </div>
 </div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
@@ -410,10 +411,10 @@ export class Outline extends Model {
             currentLevel = level;
             
             // 更新文本显示
-            if (level === 5) {
-                levelText.textContent = "全部";
+            if (level === 6) {
+                levelText.textContent = window.siyuan.languages.outlineExpandAll;
             } else {
-                levelText.textContent = `${level}级`;
+                levelText.textContent = `${level}${window.siyuan.languages.outlineLevel}`;
             }
             
             // 更新点的状态
@@ -442,10 +443,10 @@ export class Outline extends Model {
 
     /**
      * 展开到指定层级
-     * @param targetLevel 目标层级，1-5级，5级表示全部展开
+     * @param targetLevel 目标层级，1-6级，6级表示全部展开
      */
     private expandToLevel(targetLevel: number) {
-        if (targetLevel >= 5) {
+        if (targetLevel >= 6) {
             // 全部展开
             this.tree.expandAll();
         } else {

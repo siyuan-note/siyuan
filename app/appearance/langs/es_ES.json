@@ -1337,6 +1337,7 @@
   "wysiwyg": "WYSIWYG",
   "recentViewed": "Visto recientemente",
   "recentClosed": "Cerrado recientemente",
+  "recentModified": "Modificado recientemente",
   "_label": "Español",
   "_time": {
     "albl": "hace",

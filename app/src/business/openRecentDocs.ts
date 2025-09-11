@@ -10,7 +10,7 @@ import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 
-const getHTML = async (data: { rootID: string, icon: string, title: string, viewedAt?: number, closedAt?: number }[], element: Element, key?: string, sortBy: "viewedAt" | "closedAt" = "viewedAt") => {
+const getHTML = async (data: { rootID: string, icon: string, title: string, viewedAt?: number, closedAt?: number, updated?: number }[], element: Element, key?: string, sortBy: "viewedAt" | "closedAt" | "updated" = "viewedAt") => {
     let tabHtml = "";
     let index = 0;
     
@@ -103,6 +103,7 @@ export const openRecentDocs = () => {
     <select class="b3-select fn__size200" id="recentDocsSort">
         <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
         <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
+        <option value="updated">${window.siyuan.languages.recentModified}</option>
     </select>
 </div>
 </div>`,
@@ -120,13 +121,13 @@ export const openRecentDocs = () => {
         const searchElement = dialog.element.querySelector("input");
         searchElement.focus();
         searchElement.addEventListener("compositionend", () => {
-            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt");
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "updated");
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt");
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "updated");
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_RECENTDOCS);
         dialog.element.addEventListener("click", (event) => {
@@ -144,9 +145,38 @@ export const openRecentDocs = () => {
         const sortSelect = dialog.element.querySelector("#recentDocsSort") as HTMLSelectElement;
         sortSelect.addEventListener("change", () => {
             // 重新调用API获取排序后的数据
-            fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
-                getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt");
-            });
+            if (sortSelect.value === "updated") {
+                // 使用SQL查询获取最近修改的文档
+                const data = {
+                    stmt: "SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC LIMIT 33"
+                };
+                fetchSyncPost("/api/query/sql", data).then((sqlResponse) => {
+                    if (sqlResponse.data && sqlResponse.data.length > 0) {
+                        // 转换SQL查询结果格式
+                        const recentModifiedDocs = sqlResponse.data.map((block: any) => {
+                            // 从ial中解析icon
+                            let icon = "";
+                            if (block.ial) {
+                                const iconMatch = block.ial.match(/icon="([^"]*)"/);
+                                if (iconMatch) {
+                                    icon = iconMatch[1];
+                                }
+                            }
+                            return {
+                                rootID: block.id,
+                                icon: icon,
+                                title: block.content,
+                                updated: block.updated
+                            };
+                        });
+                        getHTML(recentModifiedDocs, dialog.element, searchElement.value, "updated");
+                    }
+                });
+            } else {
+                fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
+                    getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt");
+                });
+            }
         });
         
         getHTML(response.data, dialog.element);

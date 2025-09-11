@@ -494,7 +494,7 @@ func setOutlineDocs(outlineDocs []*OutlineDoc) (err error) {
 		return
 	}
 
-	data, err := gulu.JSON.MarshalIndentJSON(outlineDocs, "", "  ")
+	data, err := gulu.JSON.MarshalJSON(outlineDocs)
 	if err != nil {
 		logging.LogErrorf("marshal storage [outline] failed: %s", err)
 		return

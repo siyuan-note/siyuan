@@ -492,9 +492,39 @@ export class Outline extends Model {
         // 获取当前真正的标题ID
         this.getCurrentHeadingId((currentHeadingId) => {
             if (currentHeadingId) {
-                this.expandToHeadingById(currentHeadingId);
+                this.expandToHeadingByIdSmart(currentHeadingId);
             }
         });
+    }
+
+    /**
+     * 智能展开到指定标题ID，保持兄弟分支的原有状态
+     */
+    private expandToHeadingByIdSmart(headingId: string) {
+        // 确保目标标题在大纲中可见
+        this.ensureHeadingVisibleSmart(headingId);
+        
+        // 设置为当前焦点（这会触发自动展开）
+        this.setCurrentById(headingId);
+    }
+
+    /**
+     * 智能确保指定标题在大纲中可见（展开其所有父级路径，但保持兄弟分支状态）
+     */
+    private ensureHeadingVisibleSmart(headingId: string) {
+        const targetElement = this.element.querySelector(`.b3-list-item[data-node-id="${headingId}"]`) as HTMLElement;
+        if (targetElement) {
+            this.expandPathToElement(targetElement);
+            
+            // 额外检查：确保目标元素真的可见
+            setTimeout(() => {
+                const checkElement = this.element.querySelector(`.b3-list-item[data-node-id="${headingId}"]`) as HTMLElement;
+                if (checkElement && checkElement.offsetParent === null) {
+                    // 如果元素仍然不可见，再次尝试展开路径
+                    this.expandPathToElement(checkElement);
+                }
+            }, 50);
+        }
     }
 
     /**
@@ -578,27 +608,53 @@ export class Outline extends Model {
     }
 
     /**
-     * 展开到指定元素的路径
+     * 展开到指定元素的路径，智能处理兄弟分支的折叠状态
      */
     private expandPathToElement(element: HTMLElement) {
-        let current = element;
+        if (!element) {
+            return;
+        }
+
+        // 收集所有需要展开的ul元素路径，以及它们的折叠状态
+        const pathToExpand: Array<{ul: HTMLElement, wasCollapsed: boolean, parentLi: HTMLElement}> = [];
+        let current = element.parentElement; // 从父级ul开始
+
         while (current && !current.classList.contains("fn__flex-1")) {
-            if (current.classList.contains("b3-list-item")) {
-                // 展开父级元素
-                const parentUl = current.parentElement;
-                if (parentUl && parentUl.tagName === "UL" && !parentUl.classList.contains("b3-list")) {
-                    parentUl.classList.remove("fn__none");
-                    const parentLi = parentUl.previousElementSibling as HTMLElement;
-                    if (parentLi && parentLi.classList.contains("b3-list-item")) {
-                        const arrowElement = parentLi.querySelector(".b3-list-item__arrow");
-                        if (arrowElement) {
-                            arrowElement.classList.add("b3-list-item__arrow--open");
-                        }
-                    }
-                }
+            if (current.tagName === "UL" && !current.classList.contains("b3-list")) {
+                // 这是一个可折叠的ul元素
+                const parentLi = current.previousElementSibling as HTMLElement;
+                const wasCollapsed = current.classList.contains("fn__none");
+                
+                pathToExpand.push({
+                    ul: current,
+                    wasCollapsed: wasCollapsed,
+                    parentLi: parentLi
+                });
             }
             current = current.parentElement;
         }
+
+        // 从最外层开始展开，确保每一层都能正确展开
+        pathToExpand.reverse().forEach((pathItem, index) => {
+            const { ul, wasCollapsed, parentLi } = pathItem;
+            
+            if (ul.classList.contains("fn__none")) {
+                ul.classList.remove("fn__none");
+                
+                // 设置箭头状态
+                if (parentLi && parentLi.classList.contains("b3-list-item")) {
+                    const arrowElement = parentLi.querySelector(".b3-list-item__arrow");
+                    if (arrowElement && !arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                        arrowElement.classList.add("b3-list-item__arrow--open");
+                    }
+                }
+            }
+
+            // 如果这个节点原本是折叠的，需要折叠其他分支
+            if (wasCollapsed && parentLi) {
+                this.collapseSiblingsExceptPath(parentLi, pathToExpand.slice(index + 1));
+            }
+        });
         
         // 保存展开状态
         if (!this.isPreview) {
@@ -608,6 +664,48 @@ export class Outline extends Model {
                     expandIds: this.tree.getExpandIds()
                 }
             });
+        }
+    }
+
+    /**
+     * 折叠指定li下的所有兄弟分支，除了通往目标的路径
+     * @param parentLi 父级li元素
+     * @param targetPath 目标路径上的ul元素列表
+     */
+    private collapseSiblingsExceptPath(parentLi: HTMLElement, targetPath: Array<{ul: HTMLElement, wasCollapsed: boolean, parentLi: HTMLElement}>) {
+        // 获取父li下的直接ul子元素
+        const directChildUl = parentLi.nextElementSibling;
+        if (!directChildUl || directChildUl.tagName !== "UL") {
+            return;
+        }
+
+        // 获取目标路径上的下一个ul（如果存在）
+        const nextTargetUl = targetPath.length > 0 ? targetPath[0].ul : null;
+
+        // 遍历所有直接子li元素
+        const childLiElements = directChildUl.children;
+        for (let i = 0; i < childLiElements.length; i++) {
+            const childLi = childLiElements[i] as HTMLElement;
+            if (!childLi.classList.contains("b3-list-item")) {
+                continue;
+            }
+
+            // 获取这个li的子ul
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                // 如果这个ul不是目标路径上的ul，则折叠它
+                if (childUl !== nextTargetUl) {
+                    if (!childUl.classList.contains("fn__none")) {
+                        childUl.classList.add("fn__none");
+                        
+                        // 更新箭头状态
+                        const arrowElement = childLi.querySelector(".b3-list-item__arrow");
+                        if (arrowElement && arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                            arrowElement.classList.remove("b3-list-item__arrow--open");
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -951,19 +1049,43 @@ export class Outline extends Model {
         
         // 如果启用了保持当前标题展开功能，先确保目标标题可见
         if (window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
-            this.ensureHeadingVisible(id);
+            this.ensureHeadingVisibleSmart(id);
         }
         
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
-        while (currentElement && currentElement.clientHeight === 0) {
-            currentElement = currentElement.parentElement.previousElementSibling as HTMLElement;
-        }
-        if (currentElement) {
-            currentElement.classList.add("b3-list-item--focus");
+        
+        // 如果元素仍然不可见，尝试多次查找和展开
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        const trySetCurrent = () => {
+            currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
             
-            const elementRect = this.element.getBoundingClientRect();
-            this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
-        }
+            while (currentElement && currentElement.clientHeight === 0 && retryCount < maxRetries) {
+                // 如果启用了保持当前标题展开功能，再次尝试展开路径
+                if (window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
+                    this.expandPathToElement(currentElement);
+                }
+                currentElement = currentElement.parentElement?.previousElementSibling as HTMLElement;
+                retryCount++;
+            }
+            
+            if (currentElement) {
+                currentElement.classList.add("b3-list-item--focus");
+                
+                const elementRect = this.element.getBoundingClientRect();
+                this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
+            } else if (retryCount < maxRetries && window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
+                // 如果还没找到元素且启用了展开功能，延迟重试
+                setTimeout(() => {
+                    retryCount++;
+                    this.ensureHeadingVisibleSmart(id);
+                    setTimeout(trySetCurrent, 50);
+                }, 50);
+            }
+        };
+        
+        trySetCurrent();
     }
 
     public update(data: IWebSocketData, callbackId?: string) {

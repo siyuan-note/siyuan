@@ -496,7 +496,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
             } else if (target.id === "searchInclude") {
                 event.stopPropagation();
                 event.preventDefault();
-                if (["", "disabled"].includes(target.getAttribute("disabled"))) {
+                if (target.hasAttribute("disabled")) {
                     return;
                 }
                 const svgElement = target.firstElementChild;

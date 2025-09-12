@@ -106,7 +106,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         </span>
         <span class="fn__space"></span>
         <span data-position="9south" id="searchInclude" ${enableIncludeChild ? "" : "disabled"} aria-label="${window.siyuan.languages.includeChildDoc}" class="block__icon block__icon--show ariaLabel">
-            <svg${includeChild ? ' class="ft__primary"' : ""}><use xlink:href="#iconCopy"></use></svg>
+            <svg${includeChild ? ' class="ft__primary"' : ""}><use xlink:href="#iconInclude"></use></svg>
         </span>
         <span class="fn__space"></span>
         <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon block__icon--show ariaLabel" data-position="9south">
@@ -494,6 +494,11 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchInclude") {
+                event.stopPropagation();
+                event.preventDefault();
+                if (["", "disabled"].includes(target.getAttribute("disabled"))) {
+                    return;
+                }
                 const svgElement = target.firstElementChild;
                 svgElement.classList.toggle("ft__primary");
                 if (!svgElement.classList.contains("ft__primary")) {
@@ -511,8 +516,6 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 }
                 config.page = 1;
                 inputEvent(element, config, edit, true);
-                event.stopPropagation();
-                event.preventDefault();
                 break;
             } else if (target.id === "searchReplace") {
                 // ctrl+P 不需要保存

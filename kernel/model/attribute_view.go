@@ -101,7 +101,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	if 1 > len(view.Filters) && nil == view.Group {
+	if 1 > len(view.Filters) && !view.IsGroupView() {
 		// 没有过滤条件也没有分组条件时忽略
 		return
 	}
@@ -128,7 +128,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
-	if 1 > len(view.Filters) && nil == view.Group {
+	if 1 > len(view.Filters) && !view.IsGroupView() {
 		// 没有过滤条件也没有分组条件时忽略
 		return
 	}
@@ -533,7 +533,7 @@ func foldAttrViewGroup(avID, blockID, groupID string, folded bool) (err error) {
 		return err
 	}
 
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -1032,7 +1032,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			v.IsDetached = true
 			v.CreatedAt = now
 			v.UpdatedAt = now
-
+			v.IsRenderAutoFill = false
 			keyValues.Values = append(keyValues.Values, v)
 
 			if av.KeyTypeSelect == v.Type || av.KeyTypeMSelect == v.Type {
@@ -1725,7 +1725,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 }
 
 func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -1969,7 +1969,7 @@ type GroupState struct {
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
 	groupStates = map[string]*GroupState{}
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -2329,6 +2329,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 							destVal.Relation = &av.ValueRelation{}
 						}
 						destVal.UpdatedAt = now
+						destVal.IsRenderAutoFill = false
 					}
 					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
 					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
@@ -3145,12 +3146,19 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
 	for _, keyValues := range attrView.KeyValues {
 		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-			if nil == keyValues.GetValue(addingItemID) { // 避免覆盖已有值（可能前面已经通过过滤或者分组条件填充了值）
+			val := keyValues.GetValue(addingItemID)
+			if nil == val { // 避免覆盖已有值（可能前面已经通过过滤或者分组条件填充了值）
 				dateVal := &av.Value{
 					ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
 					Date: &av.ValueDate{Content: now, IsNotEmpty: true},
 				}
 				keyValues.Values = append(keyValues.Values, dateVal)
+			} else {
+				if val.IsRenderAutoFill {
+					val.CreatedAt, val.UpdatedAt = now, now+1000
+					val.Date.Content, val.Date.IsNotEmpty = now, true
+					val.IsRenderAutoFill = false
+				}
 			}
 		}
 	}
@@ -3230,11 +3238,13 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 
 		existingVal := keyValues.GetValue(addingItemID)
 		if nil == existingVal {
+			newValue.IsRenderAutoFill = false
 			keyValues.Values = append(keyValues.Values, newValue)
 		} else {
 			newValueRaw := newValue.GetValByType(keyValues.Key.Type)
 			if av.KeyTypeBlock != existingVal.Type || (av.KeyTypeBlock == existingVal.Type && existingVal.IsDetached) {
 				// 非主键的值直接覆盖，主键的值只覆盖非绑定块
+				existingVal.IsRenderAutoFill = false
 				existingVal.SetValByType(keyValues.Key.Type, newValueRaw)
 			}
 		}

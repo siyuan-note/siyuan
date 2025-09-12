@@ -57,6 +57,8 @@ type Value struct {
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
+
+	IsRenderAutoFill bool `json:"-"` // 标识是否是渲染阶段自动填充的值，保存数据的时候要删掉
 }
 
 func (value *Value) SetUpdatedAt(mills int64) {

@@ -117,7 +117,6 @@ export class Outline extends Model {
             <div class="outline-level-dot" data-level="5" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
             <div class="outline-level-dot" data-level="6" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
         </div>
-        <span class="outline-level-text" style="min-width: 40px; text-align: right;"></span>
     </div>
 </div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
@@ -405,7 +404,6 @@ export class Outline extends Model {
     private initLevelControl() {
         const levelControlElement = this.headerElement.parentElement.children[2] as HTMLElement;
         const dots = levelControlElement.querySelectorAll(".outline-level-dot") as NodeListOf<HTMLElement>;
-        const levelText = levelControlElement.querySelector(".outline-level-text") as HTMLElement;
 
         // 添加滑条样式
         if (!document.getElementById("outline-slider-style")) {
@@ -437,15 +435,6 @@ export class Outline extends Model {
 
         // 更新层级文本和点的状态
         const updateLevelDisplay = (level: number) => {
-            // 更新文本显示
-            if (level === 0) {
-                levelText.textContent = ""; // 默认状态下不显示文字
-            } else if (level === 6) {
-                levelText.textContent = window.siyuan.languages.outlineExpandAll;
-            } else {
-                levelText.textContent = `${level}${window.siyuan.languages.outlineLevel}`;
-            }
-
             // 更新点的状态：点击的点及其前面的点都变为 active 状态
             dots.forEach((dot, index) => {
                 const dotLevel = index + 1;

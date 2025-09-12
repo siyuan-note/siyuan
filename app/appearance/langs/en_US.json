@@ -101,8 +101,6 @@
   "doubleClick": "Double Click",
   "click": "Click",
   "outlineExpandLevel": "Expand level",
-  "outlineLevel": "level",
-  "outlineExpandAll": "All",
   "allowHTMLBLockScript": "Allow execution of scripts within HTML blocks",
   "allowHTMLBLockScriptTip": "When enabled, the script in the HTML block will not be sanitized, Please be aware of the potential risk of XSS attacks",
   "autoLaunchMode0": "Do not launch automatically",

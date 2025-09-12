@@ -82,8 +82,6 @@
   "publishServicePortTip": "הפעל את שירות הפרסום באמצעות מספר הפורט שנבחר. אם קובע ל <code class='fn__code'>0</code>, פורט אקראי ייחשב.",
   "publishServiceAddresses": "כתובות גישה לשירות",
   "outlineExpandLevel": "רמת הרחבה",
-  "outlineLevel": "רמה",
-  "outlineExpandAll": "הכל",
   "expandAll": "הרחב הכל",
   "outlineKeepCurrentExpand": "שמור כותרת נוכחית מורחבת",
   "publishServiceAddressesTip": "כתובות רשת אפשריות לגישה לשירות הפרסום.",

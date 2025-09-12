@@ -110,8 +110,6 @@
   "editorMarkdownInlineStrikethrough": "Markdown 行級刪除線語法",
   "editorMarkdownInlineStrikethroughTip": "啟用後將支持 <code class='fn__code'>~~foo~~</code> 行級刪除線語法輸入",
   "outlineExpandLevel": "展開層級",
-  "outlineLevel": "級",
-  "outlineExpandAll": "全部",
   "expandAll": "全部展開",
   "outlineKeepCurrentExpand": "保持當前標題展開",
   "editorMarkdownInlineSup": "Markdown 行級上標語法",

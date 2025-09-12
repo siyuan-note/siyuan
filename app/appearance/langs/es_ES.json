@@ -72,8 +72,6 @@
   "pageCountAndHistoryCount": "Total ${x} páginas, ${y} historias",
   "visitCommunityShare": "Visitar la comunidad compartida",
   "outlineExpandLevel": "Nivel de expansión",
-  "outlineLevel": "nivel",
-  "outlineExpandAll": "Todos",
   "clearContextSucc": "Se ha borrado el contexto",
   "emptyMobilePlaceholder": "Grabar algo",
   "emptyPlaceholder": "Escribe algo, ' / ' para los comandos",

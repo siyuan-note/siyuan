@@ -70,8 +70,6 @@
   "jumpToPage": "Salta alla pagina specificata: 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Totale ${x} pagine, ${y} snapshot",
   "outlineExpandLevel": "Livello di espansione",
-  "outlineLevel": "livello",
-  "outlineExpandAll": "Tutto",
   "expandAll": "Espandi tutto",
   "outlineKeepCurrentExpand": "Mantieni espanso il titolo corrente",
   "pageCountAndHistoryCount": "Totale ${x} pagine, ${y} cronologie",

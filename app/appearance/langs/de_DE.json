@@ -72,8 +72,6 @@
   "pageCountAndHistoryCount": "Insgesamt ${x} Seiten, ${y} Historien",
   "visitCommunityShare": "Besuchen Sie die Community-Sharing",
   "outlineExpandLevel": "Expansionsebene",
-  "outlineLevel": "Ebene",
-  "outlineExpandAll": "Alle",
   "clearContextSucc": "Der Kontext wurde gelöscht",
   "emptyMobilePlaceholder": "Etwas aufzeichnen",
   "emptyPlaceholder": "Etwas schreiben, ' / ' für Befehle",

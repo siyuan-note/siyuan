@@ -176,17 +176,6 @@ export class MobileFiles extends Model {
                     event.stopPropagation();
                     event.preventDefault();
                     break;
-                } else if (type === "remove") {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                        `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.querySelector(".b3-list-item__text").textContent)}</b>?`, () => {
-                            fetchPost("/api/notebook/removeNotebook", {
-                                notebook: target.getAttribute("data-url"),
-                                callback: Constants.CB_MOUNT_REMOVE
-                            });
-                        }, undefined, true);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
                 } else if (type === "open") {
                     fetchPost("/api/notebook/openNotebook", {
                         notebook: target.getAttribute("data-url")
@@ -309,14 +298,14 @@ export class MobileFiles extends Model {
     private genNotebook(item: INotebook) {
         const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
         if (item.closed) {
-            return `<li data-type="open" data-url="${item.id}" class="b3-list-item">
+            return `<li data-url="${item.id}" class="b3-list-item">
     <span class="b3-list-item__toggle fn__hidden">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
-    <span data-type="remove" data-url="${item.id}" class="b3-list-item__action${(window.siyuan.config.readonly) ? " fn__none" : ""}">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>
+    <span data-type="open" data-url="${item.id}" class="b3-list-item__action${(window.siyuan.config.readonly) ? " fn__none" : ""}">
+        <svg><use xlink:href="#iconOpen"></use></svg>
     </span>
 </li>`;
         } else {

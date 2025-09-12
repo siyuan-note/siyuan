@@ -177,7 +177,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 }
 
 func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -343,14 +343,14 @@ func sortGroupsBySelectOption(view *av.View, groupKey *av.Key) {
 }
 
 func isGroupByDate(view *av.View) bool {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return false
 	}
 	return av.GroupMethodDateDay == view.Group.Method || av.GroupMethodDateWeek == view.Group.Method || av.GroupMethodDateMonth == view.Group.Method || av.GroupMethodDateYear == view.Group.Method || av.GroupMethodDateRelative == view.Group.Method
 }
 
 func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return false
 	}
 

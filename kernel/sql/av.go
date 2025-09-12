@@ -624,6 +624,7 @@ func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collec
 				}
 			}
 			if !exist {
+				val.IsRenderAutoFill = true
 				keyValues.Values = append(keyValues.Values, val)
 			}
 		}

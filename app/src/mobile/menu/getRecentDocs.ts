@@ -8,7 +8,7 @@ import {openMobileFileById} from "../editor";
 import {App} from "../../index";
 
 export const getRecentDocs = (app: App) => {
-    fetchPost("/api/storage/getRecentDocs", {}, (response) => {
+    fetchPost("/api/storage/getRecentDocs", {sortBy: "viewedAt"}, (response) => {
         let html = "";
         response.data.forEach((item: any, index: number) => {
             html += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">

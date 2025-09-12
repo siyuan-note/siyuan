@@ -56,6 +56,10 @@ export const openFileById = async (options: {
         showMessage(response.msg);
         return;
     }
+    
+    // 更新文档浏览时间
+    fetchPost("/api/storage/updateRecentDocViewTime", {rootID: response.data.rootID});
+    
     return openFile({
         app: options.app,
         fileName: response.data.rootTitle,

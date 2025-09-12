@@ -761,6 +761,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .custom-attr > [data-av-id="${avID}"]`) as HTMLElement;
                 if (attrElement) {
                     // 更新属性面板
+                    attrElement.removeAttribute("data-rendering");
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                 } else {
                     if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {

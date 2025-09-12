@@ -73,6 +73,8 @@
   "outlineExpandLevel": "Nível de expansão",
   "outlineLevel": "nível",
   "outlineExpandAll": "Todos",
+  "expandAll": "Expandir tudo",
+  "outlineKeepCurrentExpand": "Manter título atual expandido",
   "visitCommunityShare": "Visitar compartilhamento da comunidade",
   "clearContextSucc": "O contexto foi limpo",
   "emptyMobilePlaceholder": "Registrar algo",

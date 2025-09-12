@@ -100,6 +100,8 @@
   "outlineExpandLevel": "展開レベル",
   "outlineLevel": "レベル",
   "outlineExpandAll": "すべて",
+  "expandAll": "すべて展開",
+  "outlineKeepCurrentExpand": "現在の見出しを展開し続ける",
   "enterKey": "入力",
   "doubleClick": "ダブルクリック",
   "click": "クリック",

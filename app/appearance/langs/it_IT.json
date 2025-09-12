@@ -72,6 +72,8 @@
   "outlineExpandLevel": "Livello di espansione",
   "outlineLevel": "livello",
   "outlineExpandAll": "Tutto",
+  "expandAll": "Espandi tutto",
+  "outlineKeepCurrentExpand": "Mantieni espanso il titolo corrente",
   "pageCountAndHistoryCount": "Totale ${x} pagine, ${y} cronologie",
   "visitCommunityShare": "Visita la condivisione della comunità",
   "clearContextSucc": "Il contesto è stato cancellato",

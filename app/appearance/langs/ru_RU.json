@@ -74,6 +74,8 @@
   "outlineExpandLevel": "Уровень развертывания",
   "outlineLevel": "уровень",
   "outlineExpandAll": "Все",
+  "expandAll": "Развернуть все",
+  "outlineKeepCurrentExpand": "Сохранять текущий заголовок развернутым",
   "clearContextSucc": "Контекст очищен",
   "emptyMobilePlaceholder": "Запишите что-нибудь",
   "emptyPlaceholder": "Напишите что-нибудь, ' / ' для команд",

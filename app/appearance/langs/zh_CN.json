@@ -113,6 +113,8 @@
   "outlineExpandLevel": "展开层级",
   "outlineLevel": "级",
   "outlineExpandAll": "全部",
+  "expandAll": "全部展开",
+  "outlineKeepCurrentExpand": "保持当前标题展开",
   "editorMarkdownInlineSupTip": "启用后将支持 <code class='fn__code'>^foo^</code> 行级上标语法输入",
   "editorMarkdownInlineSub": "Markdown 行级下标语法",
   "editorMarkdownInlineSubTip": "启用后将支持 <code class='fn__code'>~foo~</code> 行级下标语法输入",

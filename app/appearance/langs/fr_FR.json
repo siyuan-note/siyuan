@@ -69,6 +69,8 @@
   "outlineExpandLevel": "Niveau d'expansion",
   "outlineLevel": "niveau",
   "outlineExpandAll": "Tout",
+  "expandAll": "Tout développer",
+  "outlineKeepCurrentExpand": "Maintenir le titre actuel développé",
   "importConfTip": "Après l'importation, les paramètres actuels seront écrasés et l'application sera automatiquement fermée. Veuillez la redémarrer manuellement",
   "jumpToPage": "Aller à la page spécifiée : 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Total de ${x} pages, ${y} instantanés",

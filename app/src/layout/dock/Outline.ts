@@ -90,8 +90,12 @@ export class Outline extends Model {
         <svg class="block__logoicon"><use xlink:href="#iconAlignCenter"></use></svg>${window.siyuan.languages.outline}
     </div>
     <span class="fn__flex-1 fn__space"></span>
-    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw${window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepExpand ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.stickOpen}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
+    <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconExpand"></use></svg>
+    </span>
+    <span class="fn__space"></span>
+    <span data-type="keepCurrentExpand" class="block__icon b3-tooltips b3-tooltips__sw${window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand || "保持当前标题展开"}">
+        <svg><use xlink:href="#iconFocus"></use></svg>
     </span>
     <span class="fn__space"></span>
     <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
@@ -190,32 +194,47 @@ export class Outline extends Model {
         options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.tree.collapseAll();
         });
-        options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", (event: MouseEvent & {
+        
+        // 普通的全部展开按钮
+        options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", () => {
+            this.tree.expandAll();
+            // 保存展开状态
+            if (!this.isPreview) {
+                fetchPost("/api/storage/setOutlineStorage", {
+                    docID: this.blockId,
+                    val: {
+                        expandIds: this.tree.getExpandIds()
+                    }
+                });
+            }
+        });
+        
+        // 保持当前标题展开功能
+        options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
             target: Element
         }) => {
             const iconElement = hasClosestByClassName(event.target, "block__icon");
             if (!iconElement) {
                 return;
             }
+            
+            // 确保存储对象存在
+            if (!window.siyuan.storage[Constants.LOCAL_OUTLINE]) {
+                window.siyuan.storage[Constants.LOCAL_OUTLINE] = {};
+            }
+            
             if (iconElement.classList.contains("block__icon--active")) {
                 iconElement.classList.remove("block__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = false;
+                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = false;
             } else {
                 iconElement.classList.add("block__icon--active");
-                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = true;
-                this.tree.expandAll();
+                window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = true;
+                // 立即展开到真正的当前标题
+                this.expandToCurrentHeading();
             }
 
-            // 保存keepExpand状态到localStorage
+            // 保存keepCurrentExpand状态到localStorage
             setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
-
-            // 同时保存当前文档的展开状态到新的存储
-            fetchPost("/api/storage/setOutlineStorage", {
-                docID: this.blockId,
-                val: {
-                    expandIds: this.tree.getExpandIds()
-                }
-            });
         });
         options.tab.panelElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -270,7 +289,7 @@ export class Outline extends Model {
                     docID: this.blockId
                 }, storageResponse => {
                     const storageData = storageResponse.data;
-                    if (storageData && storageData.expandIds && !this.headerElement.querySelector('[data-type="expand"]').classList.contains("block__icon--active")) {
+                    if (storageData && storageData.expandIds) {
                         this.tree.setExpandIds(storageData.expandIds);
                     }
                 });
@@ -464,6 +483,132 @@ export class Outline extends Model {
 
         // 初始化显示 - 默认不显示层级
         updateLevelDisplay(0);
+    }
+
+    /**
+     * 展开到当前标题路径
+     */
+    private expandToCurrentHeading() {
+        // 获取当前真正的标题ID
+        this.getCurrentHeadingId((currentHeadingId) => {
+            if (currentHeadingId) {
+                this.expandToHeadingById(currentHeadingId);
+            }
+        });
+    }
+
+    /**
+     * 获取当前真正的标题ID
+     */
+    private getCurrentHeadingId(callback: (id: string) => void) {
+        // 首先尝试从编辑器获取当前光标位置的块
+        let currentBlockId: string = null;
+        
+        getAllModels().editor.find(editItem => {
+            if (editItem.editor.protyle.block.rootID === this.blockId) {
+                const selection = getSelection();
+                if (selection.rangeCount > 0) {
+                    const blockElement = hasClosestBlock(selection.getRangeAt(0).startContainer);
+                    if (blockElement) {
+                        currentBlockId = blockElement.getAttribute("data-node-id");
+                        return true;
+                    }
+                }
+            }
+        });
+
+        if (currentBlockId) {
+            // 如果当前块就是标题，直接使用
+            const currentBlockElement = document.querySelector(`[data-node-id="${currentBlockId}"]`);
+            if (currentBlockElement && currentBlockElement.getAttribute("data-type") === "NodeHeading") {
+                callback(currentBlockId);
+                return;
+            }
+
+            // 如果当前块不是标题，查找前面最近的标题
+            let previousElement = getPreviousBlock(currentBlockElement as HTMLElement);
+            while (previousElement) {
+                if (previousElement.getAttribute("data-type") === "NodeHeading") {
+                    callback(previousElement.getAttribute("data-node-id"));
+                    return;
+                }
+                previousElement = getPreviousBlock(previousElement);
+            }
+
+            // 如果没有找到前面的标题，通过API获取面包屑
+            fetchPost("/api/block/getBlockBreadcrumb", {
+                id: currentBlockId,
+                excludeTypes: []
+            }, (response) => {
+                const headingItem = response.data.reverse().find((item: IBreadcrumb) => {
+                    return item.type === "NodeHeading";
+                });
+                if (headingItem) {
+                    callback(headingItem.id);
+                }
+            });
+        } else {
+            // 如果无法获取当前块，使用现有的focus元素
+            const currentElement = this.element.querySelector(".b3-list-item--focus");
+            if (currentElement) {
+                callback(currentElement.getAttribute("data-node-id"));
+            }
+        }
+    }
+
+    /**
+     * 展开到指定标题ID
+     */
+    private expandToHeadingById(headingId: string) {
+        // 确保目标标题在大纲中可见
+        this.ensureHeadingVisible(headingId);
+        
+        // 设置为当前焦点（这会触发自动展开）
+        this.setCurrentById(headingId);
+    }
+
+    /**
+     * 确保指定标题在大纲中可见（展开其所有父级路径）
+     */
+    private ensureHeadingVisible(headingId: string) {
+        const targetElement = this.element.querySelector(`.b3-list-item[data-node-id="${headingId}"]`) as HTMLElement;
+        if (targetElement) {
+            this.expandPathToElement(targetElement);
+        }
+    }
+
+    /**
+     * 展开到指定元素的路径
+     */
+    private expandPathToElement(element: HTMLElement) {
+        let current = element;
+        while (current && !current.classList.contains("fn__flex-1")) {
+            if (current.classList.contains("b3-list-item")) {
+                // 展开父级元素
+                const parentUl = current.parentElement;
+                if (parentUl && parentUl.tagName === "UL" && !parentUl.classList.contains("b3-list")) {
+                    parentUl.classList.remove("fn__none");
+                    const parentLi = parentUl.previousElementSibling as HTMLElement;
+                    if (parentLi && parentLi.classList.contains("b3-list-item")) {
+                        const arrowElement = parentLi.querySelector(".b3-list-item__arrow");
+                        if (arrowElement) {
+                            arrowElement.classList.add("b3-list-item__arrow--open");
+                        }
+                    }
+                }
+            }
+            current = current.parentElement;
+        }
+        
+        // 保存展开状态
+        if (!this.isPreview) {
+            fetchPost("/api/storage/setOutlineStorage", {
+                docID: this.blockId,
+                val: {
+                    expandIds: this.tree.getExpandIds()
+                }
+            });
+        }
     }
 
     /**
@@ -803,12 +948,19 @@ export class Outline extends Model {
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
         });
+        
+        // 如果启用了保持当前标题展开功能，先确保目标标题可见
+        if (window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
+            this.ensureHeadingVisible(id);
+        }
+        
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
         while (currentElement && currentElement.clientHeight === 0) {
             currentElement = currentElement.parentElement.previousElementSibling as HTMLElement;
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
+            
             const elementRect = this.element.getBoundingClientRect();
             this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
         }
@@ -852,7 +1004,7 @@ export class Outline extends Model {
                 docID: this.blockId
             }, storageResponse => {
                 const storageData = storageResponse.data;
-                if (storageData && storageData.expandIds && !this.headerElement.querySelector('[data-type="expand"]').classList.contains("block__icon--active")) {
+                if (storageData && storageData.expandIds) {
                     this.tree.setExpandIds(storageData.expandIds);
                 } else {
                     this.tree.expandAll();

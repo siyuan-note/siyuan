@@ -84,6 +84,8 @@
   "outlineExpandLevel": "רמת הרחבה",
   "outlineLevel": "רמה",
   "outlineExpandAll": "הכל",
+  "expandAll": "הרחב הכל",
+  "outlineKeepCurrentExpand": "שמור כותרת נוכחית מורחבת",
   "publishServiceAddressesTip": "כתובות רשת אפשריות לגישה לשירות הפרסום.",
   "publishServiceAuth": "אימות בסיסי לשירות",
   "publishServiceAuthTip": "כאשר השירות מופעל, נדרש אימות לגישה לשירות הפרסום.",

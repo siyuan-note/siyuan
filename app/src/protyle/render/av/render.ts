@@ -282,7 +282,7 @@ const renderGroupTable = (options: ITableOptions) => {
 };
 
 const afterRenderTable = (options: ITableOptions) => {
-    if (options.blockElement.getAttribute("data-need-focus") === 'true') {
+    if (options.blockElement.getAttribute("data-need-focus") === "true") {
         focusBlock(options.blockElement);
         options.blockElement.removeAttribute("data-need-focus");
     }

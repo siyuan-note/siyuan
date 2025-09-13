@@ -9,7 +9,6 @@ import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {newFile} from "../../util/newFile";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";

@@ -154,7 +154,7 @@ const afterRenderGallery = (options: ITableOptions) => {
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
     }
-    if (options.blockElement.getAttribute("data-need-focus") === 'true') {
+    if (options.blockElement.getAttribute("data-need-focus") === "true") {
         focusBlock(options.blockElement);
         options.blockElement.removeAttribute("data-need-focus");
     }

@@ -13,7 +13,6 @@ import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
-import {confirmDialog} from "../../dialog/confirmDialog";
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {

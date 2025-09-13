@@ -71,6 +71,7 @@
   "pageCountAndSnapshotCount": "‫إجمالي ${x} صفحة/صفحات و ${y} لقطة/لقطات‬",
   "pageCountAndHistoryCount": "‫إجمالي ${x} صفحة/صفحات و ${y} سجل/سجلات‬",
   "visitCommunityShare": "زيارة مشاركة المجتمع",
+  "outlineExpandLevel": "مستوى التوسيع",
   "clearContextSucc": "تمت إزالة السياق",
   "emptyMobilePlaceholder": "سجل شيئا",
   "emptyPlaceholder": "اكتب شيئًا، أو اضغط ' / ' لعرض الأوامر",

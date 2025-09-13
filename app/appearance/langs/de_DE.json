@@ -71,6 +71,7 @@
   "pageCountAndSnapshotCount": "Insgesamt ${x} Seiten, ${y} Schnappschüsse",
   "pageCountAndHistoryCount": "Insgesamt ${x} Seiten, ${y} Historien",
   "visitCommunityShare": "Besuchen Sie die Community-Sharing",
+  "outlineExpandLevel": "Expansionsebene",
   "clearContextSucc": "Der Kontext wurde gelöscht",
   "emptyMobilePlaceholder": "Etwas aufzeichnen",
   "emptyPlaceholder": "Etwas schreiben, ' / ' für Befehle",

@@ -16,8 +16,9 @@ export class Tree {
     private ctrlClick: (element: HTMLElement) => void;
     private toggleClick: (element: Element) => void;
     private shiftClick: (element: HTMLElement) => void;
-    private altClick: (element: HTMLElement) => void;
+    private altClick: (element: HTMLElement, event?: MouseEvent) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
+    public onToggleChange: () => void;
 
     constructor(options: {
         element: HTMLElement,
@@ -26,10 +27,11 @@ export class Tree {
         topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement): void
-        altClick?(element: HTMLElement): void
+        altClick?(element: HTMLElement, event?: MouseEvent): void
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
+        onToggleChange?: () => void
     }) {
         this.click = options.click;
         this.ctrlClick = options.ctrlClick;
@@ -37,6 +39,7 @@ export class Tree {
         this.shiftClick = options.shiftClick;
         this.rightClick = options.rightClick;
         this.toggleClick = options.toggleClick;
+        this.onToggleChange = options.onToggleChange;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
@@ -219,6 +222,10 @@ data-def-path="${item.defPath}">
                 if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
                     this.toggleBlocks(target.parentElement);
                     this.setCurrent(target.parentElement);
+                    // 触发折叠状态变化事件
+                    if (this.onToggleChange) {
+                        this.onToggleChange();
+                    }
                     event.preventDefault();
                     break;
                 }
@@ -237,7 +244,7 @@ data-def-path="${item.defPath}">
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {
                             this.ctrlClick(target);
                         } else if (this.altClick && window.siyuan.altIsPressed) {
-                            this.altClick(target);
+                            this.altClick(target, event);
                         } else if (this.shiftClick && window.siyuan.shiftIsPressed) {
                             this.shiftClick(target);
                         } else if (this.click) {

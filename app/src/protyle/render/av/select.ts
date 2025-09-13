@@ -59,7 +59,7 @@ const filterSelectHTML = (key: string, options: {
         <span class="fn__ellipsis">${escapeHtml(key)}</span>
     </span>
 </div>
-<span class="b3-menu__accelerator">${window.siyuan.languages.enterKey}</span>
+<span class="b3-menu__accelerator b3-menu__accelerator--hotkey">${window.siyuan.languages.enterKey}</span>
 </button>${html}`;
     } else if (html.indexOf("b3-menu__item--current") === -1) {
         html = html.replace('class="b3-menu__item"', 'class="b3-menu__item b3-menu__item--current"');

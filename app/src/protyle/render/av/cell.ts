@@ -863,6 +863,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             doOperations.push(...operations.doOperations);
             undoOperations.push(...operations.undoOperations);
         }
+        // formattedContent 在单元格渲染时没有用到，需对比保持一致
+        if (type === "date") {
+            cellValue.date.formattedContent=  oldValue.date.formattedContent ;
+        }
         if (objEquals(cellValue, oldValue)) {
             return;
         }

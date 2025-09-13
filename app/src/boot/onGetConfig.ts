@@ -84,6 +84,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             adjustLayout();
             resizeTabs();
             resizeTopBar();
+            window.siyuan.menus.menu.resetPosition();
             firstResize = true;
         }, 200);
     });

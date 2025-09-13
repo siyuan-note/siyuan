@@ -1201,7 +1201,7 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	}
 }
 
-func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (ret *Value) {
+func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, keyDateAutoFill bool) (ret *Value) {
 	if "" == valueID {
 		valueID = ast.NewNodeID()
 	}
@@ -1227,7 +1227,7 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (
 	case KeyTypeNumber:
 		ret.Number = &ValueNumber{}
 	case KeyTypeDate:
-		ret.Date = &ValueDate{IsNotTime: true}
+		ret.Date = &ValueDate{IsNotTime: !keyDateAutoFill}
 	case KeyTypeSelect:
 		ret.MSelect = []*ValueSelect{}
 	case KeyTypeMSelect:

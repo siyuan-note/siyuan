@@ -233,7 +233,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 					}
 				}
 			} else {
-				newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type)
+				newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type, false)
 				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 			}
 		}
@@ -278,7 +278,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 	if nil == nearItem && !filterKeyIDs[groupKey.ID] {
 		// 没有临近项并且分组字段和过滤字段不同时，使用分组值
-		newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type)
+		newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type, false)
 		if av.KeyTypeText == groupView.GroupVal.Type {
 			content := groupView.GroupVal.Text.Content
 			switch newValue.Type {
@@ -1535,7 +1535,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 				keyValues = append(keyValues, kValues)
 			} else {
 				// 如果没有值，那么就补一个默认值
-				kValues.Values = append(kValues.Values, av.GetAttributeViewDefaultValue(itemID[:14]+ast.NewNodeID()[14:], kv.Key.ID, itemID, kv.Key.Type))
+				kValues.Values = append(kValues.Values, av.GetAttributeViewDefaultValue(itemID[:14]+ast.NewNodeID()[14:], kv.Key.ID, itemID, kv.Key.Type, false))
 				keyValues = append(keyValues, kValues)
 			}
 		}
@@ -1651,7 +1651,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 					ial = map[string]string{}
 				}
 				if nil == kv.Values[0].Template {
-					kv.Values[0] = av.GetAttributeViewDefaultValue(kv.Values[0].ID, kv.Key.ID, nodeID, kv.Key.Type)
+					kv.Values[0] = av.GetAttributeViewDefaultValue(kv.Values[0].ID, kv.Key.ID, nodeID, kv.Key.Type, false)
 				}
 
 				var renderErr error
@@ -3156,7 +3156,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 			} else {
 				if val.IsRenderAutoFill {
 					val.CreatedAt, val.UpdatedAt = now, now+1000
-					val.Date.Content, val.Date.IsNotEmpty = now, true
+					val.Date.Content, val.Date.IsNotEmpty, val.Date.IsNotTime = now, true, false
 					val.IsRenderAutoFill = false
 				}
 			}

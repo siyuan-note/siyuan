@@ -314,7 +314,7 @@ func filterNotFoundAttrViewItems(keyValuesMap map[string][]*av.KeyValues) {
 	}
 }
 
-func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string, fieldNumberFormat av.NumberFormat, fieldTemplate string) {
+func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string, fieldNumberFormat av.NumberFormat, fieldTemplate string, fieldDateAutoFill bool) {
 	switch baseValue.ValueType {
 	case av.KeyTypeNumber: // 格式化数字
 		if nil != baseValue.Value && nil != baseValue.Value.Number && baseValue.Value.Number.IsNotEmpty {
@@ -330,7 +330,7 @@ func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string,
 	}
 
 	if nil == baseValue.Value {
-		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType)
+		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType, fieldDateAutoFill)
 	} else {
 		FillAttributeViewNilValue(baseValue.Value, baseValue.ValueType)
 	}

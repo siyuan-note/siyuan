@@ -282,6 +282,10 @@ const renderGroupTable = (options: ITableOptions) => {
 };
 
 const afterRenderTable = (options: ITableOptions) => {
+    if (options.blockElement.getAttribute("data-need-focus") === 'true') {
+        focusBlock(options.blockElement);
+        options.blockElement.removeAttribute("data-need-focus");
+    }
     options.blockElement.setAttribute("data-render", "true");
     options.blockElement.querySelector(".av__scroll").scrollLeft = options.resetData.left;
     options.blockElement.style.alignSelf = options.resetData.alignSelf;

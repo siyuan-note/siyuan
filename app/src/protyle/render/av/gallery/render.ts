@@ -154,6 +154,10 @@ const afterRenderGallery = (options: ITableOptions) => {
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
     }
+    if (options.blockElement.getAttribute("data-need-focus") === 'true') {
+        focusBlock(options.blockElement);
+        options.blockElement.removeAttribute("data-need-focus");
+    }
     options.blockElement.setAttribute("data-render", "true");
     if (options.resetData.alignSelf) {
         options.blockElement.style.alignSelf = options.resetData.alignSelf;

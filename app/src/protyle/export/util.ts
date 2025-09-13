@@ -80,6 +80,9 @@ export const exportImage = (id: string) => {
                 objectElement.remove();
             }
         }
+        previewElement.querySelectorAll(".protyle-linenumber__rows span").forEach((item, index) => {
+            item.textContent = (index + 1).toString();
+        });
         setTimeout(() => {
             addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(async () => {
                 let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));

@@ -2,7 +2,7 @@ import * as dayjs from "dayjs";
 import {genCellValueByElement, updateCellsValue} from "./cell";
 
 export const getDateHTML = (cellElements: HTMLElement[]) => {
-    const cellValue =  genCellValueByElement("date", cellElements[0]).date;
+    const cellValue = genCellValueByElement("date", cellElements[0]).date;
     const isNotTime = cellValue.isNotTime;
     let value = "";
     const currentDate = new Date().getTime();
@@ -64,9 +64,9 @@ export const bindDateEvent = (options: {
             }
             if (event.key === "Enter") {
                 updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
-                    content: getFullYearTime(inputElements[0].dataset.value),
+                    content: getFullYearTime(inputElements[0].dataset.value) || 0,
                     isNotEmpty: inputElements[0].value !== "",
-                    content2: getFullYearTime(inputElements[1].dataset.value),
+                    content2: getFullYearTime(inputElements[1].dataset.value) || 0,
                     isNotEmpty2: inputElements[1].value !== "",
                     hasEndDate: inputElements[2].checked,
                     isNotTime: !inputElements[3].checked,
@@ -114,9 +114,9 @@ export const bindDateEvent = (options: {
     });
     return () => {
         updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
-            content: getFullYearTime(inputElements[0].dataset.value),
+            content: getFullYearTime(inputElements[0].dataset.value) || 0,
             isNotEmpty: inputElements[0].value !== "",
-            content2: getFullYearTime(inputElements[1].dataset.value),
+            content2: getFullYearTime(inputElements[1].dataset.value) || 0,
             isNotEmpty2: inputElements[1].value !== "",
             hasEndDate: inputElements[2].checked,
             isNotTime: !inputElements[3].checked,

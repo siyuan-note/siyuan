@@ -207,7 +207,18 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("contextmenu", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.tagName === "LI" && this.rightClick) {
+                if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
+                    // 右键点击toggle时，展开所有子标题
+                    this.expandAllChildren(target.parentElement);
+                    this.setCurrent(target.parentElement);
+                    // 触发折叠状态变化事件
+                    if (this.onToggleChange) {
+                        this.onToggleChange();
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.tagName === "LI" && this.rightClick) {
                     this.rightClick(target, event);
                     event.preventDefault();
                     event.stopPropagation();
@@ -276,6 +287,40 @@ data-def-path="${item.defPath}">
             }
             window.siyuan.dragElement = undefined;
         });
+    }
+
+    public expandAllChildren(liElement: Element) {
+        if (!liElement || !liElement.nextElementSibling) {
+            return;
+        }
+        
+        // 先展开当前元素
+        const svgElement = liElement.firstElementChild.firstElementChild;
+        if (!svgElement.classList.contains("b3-list-item__arrow--open")) {
+            svgElement.classList.add("b3-list-item__arrow--open");
+            liElement.nextElementSibling.classList.remove("fn__none");
+            if (liElement.nextElementSibling.nextElementSibling && liElement.nextElementSibling.nextElementSibling.tagName === "UL") {
+                liElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
+            }
+        }
+        
+        // 递归展开所有子元素
+        const childrenUL = liElement.nextElementSibling;
+        if (childrenUL && childrenUL.tagName === "UL") {
+            childrenUL.querySelectorAll("li").forEach(childLi => {
+                const childToggle = childLi.querySelector(".b3-list-item__toggle:not(.fn__hidden)");
+                if (childToggle && childLi.nextElementSibling) {
+                    const childSvg = childToggle.firstElementChild;
+                    if (childSvg && !childSvg.classList.contains("b3-list-item__arrow--open")) {
+                        childSvg.classList.add("b3-list-item__arrow--open");
+                        childLi.nextElementSibling.classList.remove("fn__none");
+                        if (childLi.nextElementSibling.nextElementSibling && childLi.nextElementSibling.nextElementSibling.tagName === "UL") {
+                            childLi.nextElementSibling.nextElementSibling.classList.remove("fn__none");
+                        }
+                    }
+                }
+            });
+        }
     }
 
     public expandAll() {

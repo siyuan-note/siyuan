@@ -234,6 +234,22 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 				next = flb.ID
 			}
 		}
+
+		if "" == previous && "" == next && nil != current {
+			parent = current.ID
+			if nil != current.Previous {
+				previous = current.Previous.ID
+				if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
+					previous = flb.ID
+				}
+			}
+			if nil != current.Next {
+				next = current.Next.ID
+				if flb := treenode.FirstChildBlock(current.Next); nil != flb {
+					next = flb.ID
+				}
+			}
+		}
 		return
 	}
 

@@ -13,13 +13,7 @@ import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {
-    isNotCtrl,
-    isOnlyMeta,
-    setStorageVal,
-    updateHotkeyAfterTip
-} from "../../protyle/util/compatibility";
+import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
     hasClosestByAttribute,
@@ -174,18 +168,6 @@ export class Files extends Model {
                         svgElement.classList.add("b3-list-item__arrow--open");
                         this.closeElement.lastElementChild.classList.remove("fn__none");
                     }
-                    window.siyuan.menus.menu.remove();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                } else if (type === "remove") {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                        `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(target.parentElement.querySelector(".b3-list-item__text").textContent)}</b>?`, () => {
-                            fetchPost("/api/notebook/removeNotebook", {
-                                notebook: target.getAttribute("data-url"),
-                                callback: Constants.CB_MOUNT_REMOVE
-                            });
-                        }, undefined, true);
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
@@ -813,14 +795,14 @@ export class Files extends Model {
     private genNotebook(item: INotebook) {
         const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
         if (item.closed) {
-            return `<li data-type="open" data-url="${item.id}" class="b3-list-item b3-list-item--hide-action">
+            return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__toggle fn__hidden">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
-    <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
-    <span data-type="remove" data-url="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.delete}">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>
+    <span class="b3-list-item__text" style="cursor: default;">${escapeHtml(item.name)}</span>
+    <span data-type="open" data-url="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
+        <svg><use xlink:href="#iconOpen"></use></svg>
     </span>
 </li>`;
         } else {
@@ -1005,9 +987,12 @@ data-type="navigation-root" data-path="/">
             }
             if (sourceElement.parentElement.childElementCount === 1) {
                 if (sourceElement.parentElement.previousElementSibling) {
-                    sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
-                    sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
-                    const emojiElement = sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__icon");
+                    const parentLiElement = sourceElement.parentElement.previousElementSibling;
+                    if (parentLiElement.getAttribute("data-type") !== "navigation-root") {
+                        parentLiElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
+                    }
+                    parentLiElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
+                    const emojiElement = parentLiElement.querySelector(".b3-list-item__icon");
                     if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
                         emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);
                     }
@@ -1015,6 +1000,12 @@ data-type="navigation-root" data-path="/">
                 sourceElement.parentElement.remove();
             } else {
                 sourceElement.remove();
+            }
+        } else {
+            const parentElement = this.element.querySelector(`ul[data-url="${response.data.fromNotebook}"] li[data-path="${pathPosix().dirname(response.data.fromPath)}.sy"]`) as HTMLElement;
+            if (parentElement && parentElement.getAttribute("data-count") === "1") {
+                parentElement.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
+                parentElement.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
             }
         }
         const newElement = this.element.querySelector(`[data-url="${response.data.toNotebook}"] li[data-path="${response.data.toPath}"]`) as HTMLElement;

@@ -57,6 +57,8 @@ type Value struct {
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
+
+	IsRenderAutoFill bool `json:"-"` // 标识是否是渲染阶段自动填充的值，保存数据的时候要删掉
 }
 
 func (value *Value) SetUpdatedAt(mills int64) {
@@ -1199,7 +1201,7 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	}
 }
 
-func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (ret *Value) {
+func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, keyDateAutoFill bool) (ret *Value) {
 	if "" == valueID {
 		valueID = ast.NewNodeID()
 	}
@@ -1225,7 +1227,7 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (
 	case KeyTypeNumber:
 		ret.Number = &ValueNumber{}
 	case KeyTypeDate:
-		ret.Date = &ValueDate{IsNotTime: true}
+		ret.Date = &ValueDate{IsNotTime: !keyDateAutoFill}
 	case KeyTypeSelect:
 		ret.MSelect = []*ValueSelect{}
 	case KeyTypeMSelect:

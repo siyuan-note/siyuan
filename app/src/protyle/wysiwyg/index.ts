@@ -1741,7 +1741,7 @@ export class WYSIWYG {
             }
             const range = getSelection().getRangeAt(0);
             if (this.element === range.startContainer || this.element.contains(range.startContainer)) {
-                protyle.toolbar.range = range;
+                protyle.toolbar.range = range.cloneRange();
             }
         });
 

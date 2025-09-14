@@ -933,7 +933,7 @@ func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
 		return
 	}
 	sql.UpsertTreeQueue(tree)
-	refreshDocInfo(tree, size)
+	refreshDocInfoWithSize(tree, size)
 	return
 }
 
@@ -959,7 +959,7 @@ func renameWriteJSONQueue(tree *parse.Tree) (err error) {
 	}
 	sql.RenameTreeQueue(tree)
 	treenode.UpsertBlockTree(tree)
-	refreshDocInfo(tree, size)
+	refreshDocInfoWithSize(tree, size)
 	return
 }
 
@@ -1371,6 +1371,8 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		return
 	}
 
+	fromParentTree := loadParentTree(tree)
+
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
@@ -1489,6 +1491,8 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	}
 	evt.Callback = callback
 	util.PushEvent(evt)
+
+	refreshDocInfo(fromParentTree)
 	return
 }
 

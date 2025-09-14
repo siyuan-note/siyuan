@@ -610,6 +610,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
                 range.setStart(cursorElement.firstChild, 0);
                 setRange = true;
             } else {
+                element.setAttribute("data-need-focus", "true");
                 return false;
             }
             /// #else

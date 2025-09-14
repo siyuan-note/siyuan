@@ -97,14 +97,14 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	if isGroupByDate(view) {
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
-			regenAttrViewGroups(attrView)
+			genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
 			av.SaveAttributeView(attrView)
 		}
 	}
 
 	// 如果是按模板分组则需要重新生成分组
 	if isGroupByTemplate(attrView, view) {
-		regenAttrViewGroups(attrView)
+		genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
 		av.SaveAttributeView(attrView)
 	}
 
@@ -177,7 +177,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 }
 
 func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -343,14 +343,14 @@ func sortGroupsBySelectOption(view *av.View, groupKey *av.Key) {
 }
 
 func isGroupByDate(view *av.View) bool {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return false
 	}
 	return av.GroupMethodDateDay == view.Group.Method || av.GroupMethodDateWeek == view.Group.Method || av.GroupMethodDateMonth == view.Group.Method || av.GroupMethodDateYear == view.Group.Method || av.GroupMethodDateRelative == view.Group.Method
 }
 
 func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
-	if nil == view.Group {
+	if !view.IsGroupView() {
 		return false
 	}
 
@@ -486,7 +486,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	return
 }
 
-func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
 	if nil != parseErr {
 		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
@@ -525,6 +525,6 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging)
 	return
 }

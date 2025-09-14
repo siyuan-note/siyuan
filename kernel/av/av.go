@@ -221,6 +221,10 @@ type View struct {
 	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
 }
 
+func (view *View) IsGroupView() bool {
+	return nil != view.Group && "" != view.Group.Field
+}
+
 // GetGroupValue 获取分组视图的分组值。
 func (view *View) GetGroupValue() string {
 	if nil == view.GroupVal {
@@ -270,7 +274,7 @@ func (view *View) RemoveGroupByID(groupID string) {
 
 // GetGroupKey 获取分组视图的分组字段。
 func (view *View) GetGroupKey(attrView *AttributeView) (ret *Key) {
-	if nil == view.Group || "" == view.Group.Field {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -295,6 +299,7 @@ type LayoutType string
 const (
 	LayoutTypeTable   LayoutType = "table"   // 属性视图类型 - 表格
 	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 卡片
+	LayoutTypeKanban  LayoutType = "kanban"  // 属性视图类型 - 看板
 )
 
 const (
@@ -527,6 +532,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		// 分页大小
 		if 1 > view.PageSize {
 			view.PageSize = ViewDefaultPageSize
+		}
+	}
+
+	// 清理渲染回填值
+	for _, kv := range av.KeyValues {
+		for i := len(kv.Values) - 1; i >= 0; i-- {
+			if kv.Values[i].IsRenderAutoFill {
+				kv.Values = append(kv.Values[:i], kv.Values[i+1:]...)
+			}
 		}
 	}
 

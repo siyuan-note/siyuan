@@ -282,6 +282,10 @@ const renderGroupTable = (options: ITableOptions) => {
 };
 
 const afterRenderTable = (options: ITableOptions) => {
+    if (options.blockElement.getAttribute("data-need-focus") === "true") {
+        focusBlock(options.blockElement);
+        options.blockElement.removeAttribute("data-need-focus");
+    }
     options.blockElement.setAttribute("data-render", "true");
     options.blockElement.querySelector(".av__scroll").scrollLeft = options.resetData.left;
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
@@ -761,6 +765,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .custom-attr > [data-av-id="${avID}"]`) as HTMLElement;
                 if (attrElement) {
                     // 更新属性面板
+                    attrElement.removeAttribute("data-rendering");
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                 } else {
                     if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {

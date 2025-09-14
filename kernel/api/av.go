@@ -675,7 +675,41 @@ func renderHistoryAttributeView(c *gin.Context) {
 
 	id := arg["id"].(string)
 	created := arg["created"].(string)
-	view, attrView, err := model.RenderHistoryAttributeView(id, created)
+	blockIDArg := arg["blockID"]
+	var blockID string
+	if nil != blockIDArg {
+		blockID = blockIDArg.(string)
+	}
+	viewIDArg := arg["viewID"]
+	var viewID string
+	if nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
+	page := 1
+	pageArg := arg["page"]
+	if nil != pageArg {
+		page = int(pageArg.(float64))
+	}
+
+	pageSize := -1
+	pageSizeArg := arg["pageSize"]
+	if nil != pageSizeArg {
+		pageSize = int(pageSizeArg.(float64))
+	}
+
+	query := ""
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
+	groupPaging := map[string]interface{}{}
+	groupPagingArg := arg["groupPaging"]
+	if nil != groupPagingArg {
+		groupPaging = groupPagingArg.(map[string]interface{})
+	}
+
+	view, attrView, err := model.RenderHistoryAttributeView(blockID, id, viewID, query, page, pageSize, groupPaging, created)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

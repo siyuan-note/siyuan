@@ -39,7 +39,7 @@ import {
     openViewMenu
 } from "./view";
 import {focusBlock} from "../../util/selection";
-import {setPageSize} from "./row";
+import {getFieldIdByCellElement, setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
@@ -157,7 +157,18 @@ export const openMenuPanel = (options: {
         const menuElement = avPanelElement.lastElementChild as HTMLElement;
         let tabRect = options.blockElement.querySelector(`.av__views, .av__row[data-col-id="${options.colId}"] > .block__logo`)?.getBoundingClientRect();
         if (["select", "date", "asset", "relation", "rollup"].includes(options.type)) {
-            const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
+            let lastElement = options.cellElements[options.cellElements.length - 1];
+            if (!options.blockElement.contains(lastElement)) {
+                // https://github.com/siyuan-note/siyuan/issues/15839
+                const rowID = getFieldIdByCellElement(lastElement, data.viewType);
+                if (data.viewType === "table") {
+                    lastElement = options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${lastElement.dataset.colId}"]`);
+                } else {
+                    lastElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${lastElement.dataset.fieldId}"]`);
+                }
+            }
+            const cellRect = (lastElement || options.cellElements[options.cellElements.length - 1]).getBoundingClientRect();
+
             if (options.type === "select") {
                 bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
             } else if (options.type === "date") {
@@ -1201,10 +1212,10 @@ export const openMenuPanel = (options: {
                             title: isTwoWay ? window.siyuan.languages.removeColConfirm : window.siyuan.languages.deleteOpConfirm,
                             content: `<div class="b3-dialog__content">
     ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField
-                    .replace("${x}", menuElement.querySelector("input").value || window.siyuan.languages._kernel[272])
-                    .replace("${y}", menuElement.querySelector('.b3-menu__item[data-type="goSearchAV"] .b3-menu__accelerator').textContent)
-                    .replace("${z}", (menuElement.querySelector('input[data-type="colName"]') as HTMLInputElement).value || window.siyuan.languages._kernel[272])
-                : window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value || window.siyuan.languages._kernel[272])}
+                                    .replace("${x}", menuElement.querySelector("input").value || window.siyuan.languages._kernel[272])
+                                    .replace("${y}", menuElement.querySelector('.b3-menu__item[data-type="goSearchAV"] .b3-menu__accelerator').textContent)
+                                    .replace("${z}", (menuElement.querySelector('input[data-type="colName"]') as HTMLInputElement).value || window.siyuan.languages._kernel[272])
+                                : window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value || window.siyuan.languages._kernel[272])}
     <div class="fn__hr--b"></div>
     <button class="fn__block b3-button b3-button--remove" data-action="delete">${isTwoWay ? window.siyuan.languages.removeBothRelationField : window.siyuan.languages.delete}</button>
     <div class="fn__hr"></div>

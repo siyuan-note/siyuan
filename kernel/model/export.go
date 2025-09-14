@@ -2271,11 +2271,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 		switch blockRefMode {
 		case 2: // 锚文本块链
-			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
+			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
 			blockRefLink.KramdownIAL = n.KramdownIAL
-			if n.IsTextMarkType("inline-memo") {
+			if "block-ref" != n.TextMarkType { // 除了块引还有其他元素 https://github.com/siyuan-note/siyuan/issues/15698
+				blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "a"))
 				blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-				blockRefLink.TextMarkType = "a inline-memo"
 			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
@@ -2291,11 +2291,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				}
 			} else {
 				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
-				if n.IsTextMarkType("inline-memo") {
+				if "block-ref" != n.TextMarkType {
 					blockRefLink.Type = ast.NodeTextMark
-					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-					blockRefLink.TextMarkType = "inline-memo"
+					blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", ""))
 					blockRefLink.TextMarkTextContent = linkText
+					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 				}
 			}
 			n.InsertBefore(blockRefLink)
@@ -2315,13 +2315,13 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			}
 
 			text := &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
-			n.InsertBefore(text)
-			if n.IsTextMarkType("inline-memo") {
+			if "block-ref" != n.TextMarkType {
 				text.Type = ast.NodeTextMark
-				text.TextMarkType = "inline-memo"
+				text.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", ""))
 				text.TextMarkTextContent = linkText
 				text.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			}
+			n.InsertBefore(text)
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
 		}

@@ -96,7 +96,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			}
 			tableRow.ID = rowID
 
-			fillAttributeViewBaseValue(tableCell.BaseValue, col.ID, rowID, col.NumberFormat, col.Template)
+			filedDateAutoFill := false
+			if nil != col.Date {
+				filedDateAutoFill = col.Date.AutoFillNow
+			}
+			fillAttributeViewBaseValue(tableCell.BaseValue, col.ID, rowID, col.NumberFormat, col.Template, filedDateAutoFill)
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)

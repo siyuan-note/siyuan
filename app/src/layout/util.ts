@@ -750,7 +750,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
-            action: typeof json.action === "string" ? [json.action] : json.action,
+            action: typeof json.action === "string" ? [json.action, Constants.CB_GET_FOCUS] : json.action.concat(Constants.CB_GET_FOCUS),
         });
     }
     return model;

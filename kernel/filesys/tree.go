@@ -206,6 +206,12 @@ func DocIAL(absPath string) (ret map[string]string) {
 	return
 }
 
+func TreeSize(tree *parse.Tree) (size uint64) {
+	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
+	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
+	return uint64(len(renderer.Render()))
+}
+
 func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	data, filePath, err := prepareWriteTree(tree)
 	if err != nil {

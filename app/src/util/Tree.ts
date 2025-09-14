@@ -294,33 +294,79 @@ data-def-path="${item.defPath}">
             return;
         }
         
-        // 先展开当前元素
+        // 获取当前项的子列表
+        const nextElement = liElement.nextElementSibling;
+        if (!nextElement || nextElement.tagName !== "UL") {
+            return;
+        }
+        
+        // 检查子元素的展开状态，如果所有子元素都已展开，则折叠；否则展开所有
+        const areAllChildrenExpanded = this.areAllChildrenExpanded(nextElement);
+        
+        // 确保当前元素保持展开状态
         const svgElement = liElement.firstElementChild.firstElementChild;
         if (!svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.add("b3-list-item__arrow--open");
-            liElement.nextElementSibling.classList.remove("fn__none");
-            if (liElement.nextElementSibling.nextElementSibling && liElement.nextElementSibling.nextElementSibling.tagName === "UL") {
-                liElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
+            nextElement.classList.remove("fn__none");
+            if (nextElement.nextElementSibling && nextElement.nextElementSibling.tagName === "UL") {
+                nextElement.nextElementSibling.classList.remove("fn__none");
             }
         }
         
-        // 递归展开所有子元素
-        const childrenUL = liElement.nextElementSibling;
-        if (childrenUL && childrenUL.tagName === "UL") {
-            childrenUL.querySelectorAll("li").forEach(childLi => {
-                const childToggle = childLi.querySelector(".b3-list-item__toggle:not(.fn__hidden)");
-                if (childToggle && childLi.nextElementSibling) {
-                    const childSvg = childToggle.firstElementChild;
-                    if (childSvg && !childSvg.classList.contains("b3-list-item__arrow--open")) {
-                        childSvg.classList.add("b3-list-item__arrow--open");
-                        childLi.nextElementSibling.classList.remove("fn__none");
-                        if (childLi.nextElementSibling.nextElementSibling && childLi.nextElementSibling.nextElementSibling.tagName === "UL") {
-                            childLi.nextElementSibling.nextElementSibling.classList.remove("fn__none");
-                        }
-                    }
-                }
-            });
+        if (areAllChildrenExpanded) {
+            // 折叠所有子元素，但保持当前元素展开
+            this.collapseAllChildren(nextElement);
+        } else {
+            // 展开所有子元素
+            this.expandAllChildrenRecursive(nextElement);
         }
+    }
+
+    private areAllChildrenExpanded(ulElement: Element): boolean {
+        const childItems = ulElement.querySelectorAll(":scope > li");
+        for (const childLi of childItems) {
+            const arrow = childLi.querySelector(".b3-list-item__arrow");
+            if (arrow && !arrow.classList.contains("b3-list-item__arrow--open")) {
+                return false;
+            }
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                if (!this.areAllChildrenExpanded(childUl)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private expandAllChildrenRecursive(ulElement: Element) {
+        ulElement.classList.remove("fn__none");
+        const childItems = ulElement.querySelectorAll(":scope > li");
+        childItems.forEach(childLi => {
+            const arrow = childLi.querySelector(".b3-list-item__arrow");
+            if (arrow) {
+                arrow.classList.add("b3-list-item__arrow--open");
+            }
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                this.expandAllChildrenRecursive(childUl);
+            }
+        });
+    }
+
+    private collapseAllChildren(ulElement: Element) {
+        const childItems = ulElement.querySelectorAll(":scope > li");
+        childItems.forEach(childLi => {
+            const arrow = childLi.querySelector(".b3-list-item__arrow");
+            if (arrow) {
+                arrow.classList.remove("b3-list-item__arrow--open");
+            }
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                childUl.classList.add("fn__none");
+                this.collapseAllChildren(childUl);
+            }
+        });
     }
 
     public expandAll() {

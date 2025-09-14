@@ -1398,7 +1398,8 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 			}
 
 			node = treenode.GetNodeInTree(tree, bID)
-			if nil == node || "" == node.AttributeViewID {
+			if nil == node || "" == node.AttributeViewID || ast.NodeAttributeView != node.Type {
+				node = nil
 				continue
 			}
 

@@ -56,15 +56,24 @@ type ViewKanbanField struct {
 type Kanban struct {
 	*BaseInstance
 
-	Fields    []*KanbanField `json:"fields"`   // 卡片字段
-	Cards     []*KanbanCard  `json:"cards"`    // 卡片
-	CardCount int            `json:"rowCount"` // 总卡片数
+	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源
+	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
+	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
+	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
+	Fields              []*KanbanField  `json:"fields"`                        // 卡片字段
+	Cards               []*KanbanCard   `json:"cards"`                         // 卡片
+	CardCount           int             `json:"rowCount"`                      // 总卡片数
 }
 
 // KanbanCard 描述了看板实例卡片的结构。
 type KanbanCard struct {
 	ID     string              `json:"id"`     // 卡片 ID
 	Values []*KanbanFieldValue `json:"values"` // 卡片字段值
+
+	CoverURL     string `json:"coverURL"`     // 卡片封面超链接
+	CoverContent string `json:"coverContent"` // 卡片封面文本内容
 }
 
 // KanbanField 描述了看板实例字段的结构。

@@ -72,6 +72,8 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 			groupView.Table.Columns = view.Table.Columns
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = view.Gallery.CardFields
+		case av.LayoutTypeKanban:
+			groupView.Kanban.Fields = view.Kanban.Fields
 		}
 	}
 
@@ -102,6 +104,8 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 		ret = RenderAttributeViewTable(attrView, view, query, depth, cachedAttrViews)
 	case av.LayoutTypeGallery:
 		ret = RenderAttributeViewGallery(attrView, view, query, depth, cachedAttrViews)
+	case av.LayoutTypeKanban:
+		ret = RenderAttributeViewKanban(attrView, view, query, depth, cachedAttrViews)
 	}
 	return
 }
@@ -778,6 +782,16 @@ func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID 
 		for i, cardField := range view.Gallery.CardFields {
 			if cardField.ID == missingKeyID {
 				view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)
+				changed = true
+				break
+			}
+		}
+	}
+
+	if nil != view.Kanban {
+		for i, kanbanField := range view.Kanban.Fields {
+			if kanbanField.ID == missingKeyID {
+				view.Kanban.Fields = append(view.Kanban.Fields[:i], view.Kanban.Fields[i+1:]...)
 				changed = true
 				break
 			}

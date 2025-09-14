@@ -3454,6 +3454,11 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 		for _, field := range view.Gallery.CardFields {
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 		}
+	case av.LayoutTypeKanban:
+		view.Table = av.NewLayoutTable()
+		for _, field := range view.Kanban.Fields {
+			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+		}
 	}
 
 	depth := 1

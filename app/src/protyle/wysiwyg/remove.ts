@@ -300,6 +300,14 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
     if (blockType === "NodeHeading") {
+        if ((blockElement.previousElementSibling &&
+                blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+                blockElement.previousElementSibling.getAttribute("fold") === "1") ||
+            (blockElement.getAttribute("data-type") === "NodeHeading" &&
+                blockElement.getAttribute("fold") === "1")) {
+            focusBlock(blockElement.previousElementSibling, undefined, false);
+            return;
+        }
         turnsIntoTransaction({
             protyle: protyle,
             selectsElement: [blockElement],

@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Mostrar ícones de entradas",
   "wrapAllFields": "Quebrar automaticamente os campos",
   "gallery": "Cartão",
+  "kanban": "Kanban",
   "newTag": "Nova tag",
   "pleaseWait": "Por favor, aguarde...",
   "reconnectPrompt": "Após alternar aplicativos, levará algum tempo para restaurar a operação do kernel SiYuan. Por favor, aguarde alguns segundos ou clique no botão \"Tentar novamente\"",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Tabela",
     "gallery": "Cartão",
+    "kanban": "Kanban",
     "key": "Chave Primária",
     "select": "Selecionar"
   },

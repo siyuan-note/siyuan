@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Eintragssymbole anzeigen",
   "wrapAllFields": "Felder automatisch umbrechen",
   "gallery": "Karte",
+  "kanban": "Kanban",
   "newTag": "Neuer Tag",
   "pleaseWait": "Bitte warten...",
   "reconnectPrompt": "Nach dem Wechseln der Anwendungen dauert es einige Zeit, bis der Betrieb des SiYuan-Kernels wiederhergestellt ist. Bitte warten Sie einige Sekunden oder klicken Sie auf die Schaltfläche „Erneut versuchen“",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Tabelle",
     "gallery": "Karte",
+    "kanban": "Kanban",
     "key": "Primärschlüssel",
     "select": "Auswählen"
   },

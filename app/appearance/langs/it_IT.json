@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Mostra icone delle voci",
   "wrapAllFields": "Avvolgi automaticamente i campi",
   "gallery": "Scheda",
+  "kanban": "Kanban",
   "newTag": "Nuova etichetta",
   "pleaseWait": "Attendere prego...",
   "reconnectPrompt": "Dopo aver cambiato applicazione, ci vorrà un po' di tempo per ripristinare il funzionamento del kernel SiYuan. Attendere qualche secondo o fare clic sul pulsante \"Riprova\"",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Tabella",
     "gallery": "Scheda",
+    "kanban": "Kanban",
     "key": "Chiave primaria",
     "select": "Seleziona"
   },

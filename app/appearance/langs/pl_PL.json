@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Pokaż ikony wpisów",
   "wrapAllFields": "Automatyczne zawijanie pól",
   "gallery": "Karta",
+  "kanban": "Kanban",
   "newTag": "Nowy tag",
   "pleaseWait": "Proszę czekać...",
   "reconnectPrompt": "Po przełączeniu aplikacji ponowne uruchomienie jądra SiYuan może zająć trochę czasu. Proszę poczekać kilka sekund lub kliknąć przycisk „Ponów próbę”",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Tabela",
     "gallery": "Karta",
+    "kanban": "Kanban",
     "key": "Klucz główny",
     "select": "Wybierz"
   },

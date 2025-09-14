@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Show entry icons",
   "wrapAllFields": "Auto-wrap fields",
   "gallery": "Card",
+  "kanban": "Kanban",
   "newTag": "New tag",
   "pleaseWait": "Please wait...",
   "reconnectPrompt": "After switching applications, it will take some time to restore the SiYuan kernel operation. Please wait a few seconds or click the \"Retry\" button",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Table",
     "gallery": "Card",
+    "kanban": "Kanban",
     "key": "Primary Key",
     "select": "Select"
   },

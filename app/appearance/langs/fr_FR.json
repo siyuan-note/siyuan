@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Afficher les icônes des entrées",
   "wrapAllFields": "Retour automatique des champs",
   "gallery": "Carte",
+  "kanban": "Kanban",
   "newTag": "Nouvelle étiquette",
   "pleaseWait": "Veuillez patienter...",
   "reconnectPrompt": "Après avoir changé d'application, il faudra un certain temps pour rétablir le fonctionnement du noyau SiYuan. Veuillez patienter quelques secondes ou cliquer sur le bouton « Réessayer »",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Tableau",
     "gallery": "Carte",
+    "kanban": "Kanban",
     "key": "Clé primaire",
     "select": "Sélectionner"
   },

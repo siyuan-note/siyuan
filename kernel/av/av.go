@@ -207,6 +207,7 @@ type View struct {
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
+	Kanban           *LayoutKanban  `json:"kanban,omitempty"`  // 看板布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
 	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
@@ -306,8 +307,8 @@ const (
 	ViewDefaultPageSize = 50 // 视图默认分页大小
 )
 
-func NewTableView() (ret *View) {
-	ret = &View{
+func NewTableView() *View {
+	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("table"),
 		Filters:    []*ViewFilter{},
@@ -316,7 +317,6 @@ func NewTableView() (ret *View) {
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
 	}
-	return
 }
 
 func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKey *Key) {
@@ -339,7 +339,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 }
 
 func NewGalleryView() (ret *View) {
-	ret = &View{
+	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("gallery"),
 		Filters:    []*ViewFilter{},
@@ -348,7 +348,18 @@ func NewGalleryView() (ret *View) {
 		LayoutType: LayoutTypeGallery,
 		Gallery:    NewLayoutGallery(),
 	}
-	return
+}
+
+func NewKanbanView() (ret *View) {
+	return &View{
+		ID:         ast.NewNodeID(),
+		Name:       GetAttributeViewI18n("kanban"),
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
+		PageSize:   ViewDefaultPageSize,
+		LayoutType: LayoutTypeKanban,
+		Kanban:     NewLayoutKanban(),
+	}
 }
 
 // Viewable 描述了视图的接口。

@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "Mostrar íconos de entradas",
   "wrapAllFields": "Ajuste automático de campos",
   "gallery": "Tarjeta",
+  "kanban": "Kanban",
   "newTag": "Nueva etiqueta",
   "pleaseWait": "Por favor, espere...",
   "reconnectPrompt": "Después de cambiar de aplicación, tomará algún tiempo restaurar el funcionamiento del núcleo de SiYuan. Espere unos segundos o haga clic en el botón \"Reintentar\"",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "Tabla",
     "gallery": "Tarjeta",
+    "kanban": "Kanban",
     "key": "Clave principal",
     "select": "Selección"
   },

@@ -36,6 +36,7 @@
   "showAllEntriesIcons": "显示条目图标",
   "wrapAllFields": "字段自动换行",
   "gallery": "卡片",
+  "kanban": "看板",
   "newTag": "新建标签",
   "pleaseWait": "请稍等片刻...",
   "reconnectPrompt": "切换应用后再次进入需要一些时间恢复思源内核运行，请稍等几秒或者点击“重试”按钮",
@@ -1387,6 +1388,7 @@
   "_attrView": {
     "table": "表格",
     "gallery": "卡片",
+    "kanban": "看板",
     "key": "主键",
     "select": "单选"
   },

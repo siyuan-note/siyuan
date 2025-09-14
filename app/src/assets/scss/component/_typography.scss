@@ -607,6 +607,7 @@
     & > span {
       pointer-events: none;
       display: block;
+      color: var(--b3-theme-on-surface);
 
       &:not(:empty)::before {
         content: "";
@@ -615,7 +616,6 @@
       &::before {
         counter-increment: linenumber;
         content: counter(linenumber);
-        color: var(--b3-theme-on-surface);
         display: block;
         text-align: right;
         white-space: nowrap;

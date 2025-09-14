@@ -1339,6 +1339,10 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 			continue
 		}
 
+		if gulu.Str.Contains(id, excludeAvIDs) {
+			continue
+		}
+
 		if nil == avBlockRels[id] {
 			continue
 		}

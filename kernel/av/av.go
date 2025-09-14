@@ -766,6 +766,11 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
 			}
+		case LayoutTypeKanban:
+			view.Kanban.ID = ast.NewNodeID()
+			for _, field := range view.Kanban.Fields {
+				field.ID = keyIDMap[field.ID]
+			}
 		}
 		view.ItemIDs = []string{}
 	}

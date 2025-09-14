@@ -24,7 +24,7 @@ import (
 type LayoutKanban struct {
 	*BaseLayout
 
-	GroupFields []*ViewKanbanField `json:"field"` // 字段
+	Fields []*ViewKanbanField `json:"fields"` // 字段
 }
 
 func NewLayoutKanban() *LayoutKanban {

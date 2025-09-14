@@ -53,6 +53,17 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Gallery.CardSize = view.Gallery.CardSize
 		groupView.Gallery.FitImage = view.Gallery.FitImage
 		groupView.Gallery.DisplayFieldName = view.Gallery.DisplayFieldName
+	case av.LayoutTypeKanban:
+		err = copier.CopyWithOption(&groupView.Kanban.Fields, &view.Kanban.Fields, copier.Option{DeepCopy: true})
+		groupView.Kanban.ShowIcon = view.Kanban.ShowIcon
+		groupView.Kanban.WrapField = view.Kanban.WrapField
+
+		groupView.Kanban.CoverFrom = view.Kanban.CoverFrom
+		groupView.Kanban.CoverFromAssetKeyID = view.Kanban.CoverFromAssetKeyID
+		groupView.Kanban.CardAspectRatio = view.Kanban.CardAspectRatio
+		groupView.Kanban.CardSize = view.Kanban.CardSize
+		groupView.Kanban.FitImage = view.Kanban.FitImage
+		groupView.Kanban.DisplayFieldName = view.Kanban.DisplayFieldName
 	}
 	if nil != err {
 		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)

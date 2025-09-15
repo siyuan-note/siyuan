@@ -173,20 +173,21 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const targetId = targetElement.getAttribute("data-node-id");
     let tempTargetElement = targetElement;
     let ignoreInsert = "";
+    const targetPreviousId = targetElement.previousElementSibling?.getAttribute("data-node-id");
     if (position === "afterend" &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
-        ignoreInsert = targetElement.getAttribute("data-subtype");
+        ignoreInsert = targetElement.getAttribute("data-subtype").replace("h", "");
     } else if (position === "beforebegin" && targetElement.previousElementSibling &&
         targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
         targetElement.previousElementSibling.getAttribute("fold") === "1") {
-        ignoreInsert = targetElement.getAttribute("data-subtype");
+        ignoreInsert = targetElement.getAttribute("data-subtype").replace("h", "");
     }
     if (ignoreInsert) {
         let breakIgnore = false;
         sourceElements.forEach(item => {
             if (item.getAttribute("data-type") === "NodeHeading" &&
-                parseInt(item.getAttribute("data-subtype")) >= parseInt(ignoreInsert)) {
+                parseInt(item.getAttribute("data-subtype").replace("h", "")) >= parseInt(ignoreInsert)) {
                 breakIgnore = true;
             }
             if (!breakIgnore) {
@@ -254,7 +255,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 },
                 id: copyId,
                 data: copyElement.outerHTML,
-                previousID: position === "afterend" ? targetId : (!needInset ? targetElement : copyElement).previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
+                previousID: position === "afterend" ? targetId : (!needInset ? targetPreviousId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
                 parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
             });
         } else {
@@ -267,7 +268,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     ignoreProcess: (!needInset).toString(),
                 },
                 id,
-                previousID: position === "afterend" ? targetId : (!needInset ? targetElement : item).previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
+                previousID: position === "afterend" ? targetId : (!needInset ? targetPreviousId : item.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
                 parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
             });
         }
@@ -287,10 +288,11 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     for (let j = 0; j < copyFoldHeadingIds.length; j++) {
         const childrenItem = copyFoldHeadingIds[j];
         const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem});
+        responseTransaction.data.doOperations.splice(0, 1);
+        responseTransaction.data.undoOperations.splice(0, 1);
         doOperations.push(...responseTransaction.data.doOperations);
         undoOperations.push(...responseTransaction.data.undoOperations);
     }
-    // debugger
     return {
         ignoreInsert: ignoreInsert ? true : false,
         doOperations,

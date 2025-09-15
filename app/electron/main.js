@@ -607,7 +607,7 @@ const initKernel = (workspace, port, lang) => {
                     resolve(false);
                     return;
                 }
-                await sleep(200);
+                await sleep(500);
             }
         }
 

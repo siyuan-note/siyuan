@@ -214,6 +214,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/setBlockReminder", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setBlockReminder)
 	ginServer.Handle("POST", "/api/block/getHeadingLevelTransaction", model.CheckAuth, getHeadingLevelTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingDeleteTransaction", model.CheckAuth, getHeadingDeleteTransaction)
+	ginServer.Handle("POST", "/api/block/getHeadingInsertTransaction", model.CheckAuth, getHeadingInsertTransaction)
 	ginServer.Handle("POST", "/api/block/getHeadingChildrenIDs", model.CheckAuth, getHeadingChildrenIDs)
 	ginServer.Handle("POST", "/api/block/getHeadingChildrenDOM", model.CheckAuth, getHeadingChildrenDOM)
 	ginServer.Handle("POST", "/api/block/swapBlockRef", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, swapBlockRef)
@@ -447,7 +448,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/searchAttributeView", model.CheckAuth, model.CheckReadonly, searchAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeView", model.CheckAuth, model.CheckReadonly, getAttributeView)
 	ginServer.Handle("POST", "/api/av/searchAttributeViewRelationKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewRelationKey)
-	ginServer.Handle("POST", "/api/av/searchAttributeViewNonRelationKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewNonRelationKey)
+	ginServer.Handle("POST", "/api/av/searchAttributeViewNonRelationKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewNonRelationKey) // 请勿使用，该端点计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15727
+	ginServer.Handle("POST", "/api/av/searchAttributeViewRollupDestKeys", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, searchAttributeViewRollupDestKeys)
 	ginServer.Handle("POST", "/api/av/getAttributeViewFilterSort", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewFilterSort)
 	ginServer.Handle("POST", "/api/av/addAttributeViewKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addAttributeViewKey)
 	ginServer.Handle("POST", "/api/av/removeAttributeViewKey", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeAttributeViewKey)

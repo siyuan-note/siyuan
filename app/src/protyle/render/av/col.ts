@@ -937,6 +937,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         bind(element) {
             const wrapElement = element.querySelector(".b3-switch") as HTMLInputElement;
             wrapElement.addEventListener("change", () => {
+                cellElement.dataset.wrap = wrapElement.checked.toString();
                 transaction(protyle, [{
                     action: "setAttrViewColWrap",
                     id: colId,

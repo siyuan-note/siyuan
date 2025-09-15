@@ -169,7 +169,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let topSourceElement;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    const copyFoldHeadingIds: string[] = [];
+    const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
     const targetId = targetElement.getAttribute("data-node-id");
     let tempTargetElement = targetElement;
     let ignoreInsert = "";
@@ -207,16 +207,19 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 topSourceElement = targetElement;
             }
         }
+        const copyNewId = Lute.NewNodeID();
         if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            copyFoldHeadingIds.push(id);
+            copyFoldHeadingIds.push({
+                newId: copyNewId,
+                oldId: id
+            });
         }
-        let copyId;
+
         let copyElement;
         if (isCopy) {
-            copyId = Lute.NewNodeID();
             undoOperations.push({
                 action: "delete",
-                id: copyId,
+                id: copyNewId,
             });
         } else {
             undoOperations.push({
@@ -239,7 +242,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         if (isCopy) {
             item.removeAttribute("data-remove");
             copyElement = item.cloneNode(true) as HTMLElement;
-            copyElement.setAttribute("data-node-id", copyId);
+            copyElement.setAttribute("data-node-id", copyNewId);
             copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
                 const newId = Lute.NewNodeID();
                 e.setAttribute("data-node-id", newId);
@@ -253,7 +256,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 context: {
                     ignoreProcess: (!needInset).toString(),
                 },
-                id: copyId,
+                id: copyNewId,
                 data: copyElement.outerHTML,
                 previousID: position === "afterend" ? targetId : (!needInset ? targetPreviousId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
                 parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
@@ -287,8 +290,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     undoOperations.reverse();
     for (let j = 0; j < copyFoldHeadingIds.length; j++) {
         const childrenItem = copyFoldHeadingIds[j];
-        const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem});
+        const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
         responseTransaction.data.doOperations.splice(0, 1);
+        responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
         responseTransaction.data.undoOperations.splice(0, 1);
         doOperations.push(...responseTransaction.data.doOperations);
         undoOperations.push(...responseTransaction.data.undoOperations);
@@ -417,7 +421,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             id: newSourceId,
         });
     } else {
-        const foldHeadingIds: { id: string, parentID: string }[] = [];
+        const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
         let afterPreviousID;
         sourceElements.reverse().forEach((item, index) => {
             const id = item.getAttribute("data-node-id");
@@ -434,8 +438,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
             if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                 if (isCopy) {
-                    item.removeAttribute("fold");
-                    foldHeadingIds.push({id, parentID});
+                    copyFoldHeadingIds.push({oldId: id, newId: copyId});
                 }
                 hasFoldHeading = true;
             }
@@ -484,29 +487,17 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
         });
         undoOperations.reverse();
-        for (let j = 0; j < foldHeadingIds.length; j++) {
-            const childrenItem = foldHeadingIds[j];
-            const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
-            headingIds.data.reverse().forEach((headingId: string) => {
-                undoOperations.push({
-                    action: "move",
-                    id: headingId,
-                    previousID: childrenItem.id,
-                    parentID: childrenItem.parentID,
-                });
-            });
+        for (let j = 0; j < copyFoldHeadingIds.length; j++) {
+            const childrenItem = copyFoldHeadingIds[j];
+            const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
+            responseTransaction.data.doOperations.splice(0, 1);
+            responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
+            responseTransaction.data.undoOperations.splice(0, 1);
+            doOperations.push(...responseTransaction.data.doOperations);
+            undoOperations.push(...responseTransaction.data.undoOperations);
             if (j === 0) {
-                afterPreviousID = headingIds.data[0];
+                afterPreviousID = copyFoldHeadingIds[0].newId;
             }
-            undoOperations.push({
-                action: "foldHeading",
-                id: childrenItem.id,
-                data: "remove"
-            });
-            doOperations.push({
-                action: "unfoldHeading",
-                id: childrenItem.id,
-            });
         }
         if (isBottom) {
             sbElement.insertAdjacentElement("afterbegin", targetElement);
@@ -645,7 +636,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 level: "row"
             });
         }
-        if ((sourceElements.length > 1 || hasFoldHeading)) {
+        if (sourceElements.length > 1 || hasFoldHeading) {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: sourceElements.reverse(),

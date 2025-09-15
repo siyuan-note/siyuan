@@ -567,6 +567,24 @@ func searchAttributeViewNonRelationKey(c *gin.Context) {
 	}
 }
 
+func searchAttributeViewRollupDestKeys(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyword := arg["keyword"].(string)
+
+	rollupDestKeys := model.SearchAttributeViewRollupDestKeys(avID, keyword)
+	ret.Data = map[string]interface{}{
+		"keys": rollupDestKeys,
+	}
+}
+
 func searchAttributeViewRelationKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

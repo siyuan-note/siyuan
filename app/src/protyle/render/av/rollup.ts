@@ -81,7 +81,7 @@ const genSearchList = (element: Element, keyword: string, avId: string, isRelati
         showMessage(window.siyuan.languages.selectRelation);
         return;
     }
-    fetchPost(isRelation ? "/api/av/searchAttributeViewRelationKey" : "/api/av/searchAttributeViewNonRelationKey", {
+    fetchPost(isRelation ? "/api/av/searchAttributeViewRelationKey" : "/api/av/searchAttributeViewRollupDestKeys", {
         avID: avId,
         keyword
     }, (response) => {

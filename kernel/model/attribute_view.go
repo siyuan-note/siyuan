@@ -1311,6 +1311,26 @@ func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
 	return
 }
 
+func SearchAttributeViewRollupDestKeys(avID, keyword string) (ret []*av.Key) {
+	waitForSyncingStorages()
+
+	ret = []*av.Key{}
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeRollup != keyValues.Key.Type && av.KeyTypeLineNumber != keyValues.Key.Type {
+			if strings.Contains(strings.ToLower(keyValues.Key.Name), strings.ToLower(keyword)) {
+				ret = append(ret, keyValues.Key)
+			}
+		}
+	}
+	return
+}
+
 func SearchAttributeViewRelationKey(avID, keyword string) (ret []*av.Key) {
 	waitForSyncingStorages()
 
@@ -1592,8 +1612,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 先渲染主键、创建时间、更新时间
-
+		// 渲染主键、创建时间、更新时间
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
 			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
@@ -1627,8 +1646,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 再渲染关联和汇总
-
+		// 渲染关联和汇总
 		rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
@@ -1685,7 +1703,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 最后渲染模板
+		// 渲染模板
 		templateKeys, _ := sql.GetTemplateKeysByResolutionOrder(attrView)
 		var renderTemplateErr error
 		for _, templateKey := range templateKeys {

@@ -628,6 +628,46 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 	return
 }
 
+func GetHeadingInsertTransaction(id string) (transaction *Transaction, err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = errors.New(fmt.Sprintf(Conf.Language(15), id))
+		return
+	}
+
+	if ast.NodeHeading != node.Type {
+		return
+	}
+
+	var nodes []*ast.Node
+	nodes = append(nodes, node)
+	nodes = append(nodes, treenode.HeadingChildren(node)...)
+
+	transaction = &Transaction{}
+	luteEngine := util.NewLute()
+	for _, n := range nodes {
+		n.ID = ast.NewNodeID()
+		n.SetIALAttr("id", n.ID)
+
+		op := &Operation{}
+		op.ID = n.ID
+		op.Action = "insert"
+		op.Data = luteEngine.RenderNodeBlockDOM(n)
+		transaction.DoOperations = append(transaction.DoOperations, op)
+
+		op = &Operation{}
+		op.ID = n.ID
+		op.Action = "delete"
+		transaction.UndoOperations = append(transaction.UndoOperations, op)
+	}
+	return
+}
+
 func GetHeadingChildrenIDs(id string) (ret []string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {

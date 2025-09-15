@@ -654,7 +654,7 @@ func GetHeadingInsertTransaction(id string) (transaction *Transaction, err error
 		n.ID = ast.NewNodeID()
 		n.SetIALAttr("id", n.ID)
 
-		op := &Operation{}
+		op := &Operation{Context: map[string]any{"ignoreProcess": "true"}}
 		op.ID = n.ID
 		op.Action = "insert"
 		op.Data = luteEngine.RenderNodeBlockDOM(n)

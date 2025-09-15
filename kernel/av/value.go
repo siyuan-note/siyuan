@@ -834,6 +834,17 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 
 	switch calc.Operator {
 	case CalcOperatorNone:
+	case CalcOperatorUniqueValues:
+		var newContents []*Value
+		uniqueValues := map[string]bool{}
+		for _, v := range r.Contents {
+			key := v.String(true)
+			if !uniqueValues[key] {
+				uniqueValues[key] = true
+				newContents = append(newContents, v)
+			}
+		}
+		r.Contents = newContents
 	case CalcOperatorCountAll:
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountValues:

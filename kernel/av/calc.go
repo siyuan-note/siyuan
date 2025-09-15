@@ -33,6 +33,7 @@ type CalcOperator string
 
 const (
 	CalcOperatorNone                CalcOperator = ""
+	CalcOperatorUniqueValues        CalcOperator = "Unique values"
 	CalcOperatorCountAll            CalcOperator = "Count all"
 	CalcOperatorCountValues         CalcOperator = "Count values"
 	CalcOperatorCountUniqueValues   CalcOperator = "Count unique values"

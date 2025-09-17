@@ -542,9 +542,7 @@ ${genHintItemHTML(item)}
 
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
-            if (isIPhone()) {
-                focusByRange(range);
-            }
+            focusByRange(range);
         }
         // 新建文件
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {

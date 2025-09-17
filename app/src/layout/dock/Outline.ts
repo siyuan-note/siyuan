@@ -1233,6 +1233,17 @@ export class Outline extends Model {
 
         const kwLower = kw.toLowerCase();
 
+        const showAllDescendants = (ul: Element) => {
+            if (!ul) return;
+            (ul as HTMLElement).style.display = "";
+            ul.querySelectorAll("li.b3-list-item").forEach(li => {
+                (li as HTMLElement).style.display = "";
+            });
+            ul.querySelectorAll("ul").forEach(u => {
+                (u as HTMLElement).style.display = "";
+            });
+        };
+
         const processUL = (ul: Element): boolean => {
             let anyMatched = false;
             const children = ul.querySelectorAll(":scope > li.b3-list-item");
@@ -1241,16 +1252,32 @@ export class Outline extends Model {
                 const textContent = (textEl?.textContent || "").trim().toLowerCase();
                 const selfMatch = textContent.includes(kwLower);
                 const next = (li as HTMLElement).nextElementSibling;
+                if (selfMatch) {
+                    // 父标题命中：自身与所有子标题全部显示
+                    (li as HTMLElement).style.display = "";
+                    if (next && next.tagName === "UL") {
+                        showAllDescendants(next);
+                    }
+                    anyMatched = true;
+                    return;
+                }
+                // 父标题未命中，则递归判断子级是否有命中
                 let childMatch = false;
                 if (next && next.tagName === "UL") {
                     childMatch = processUL(next);
                 }
-                const show = selfMatch || childMatch;
-                (li as HTMLElement).style.display = show ? "" : "none";
-                if (next && next.tagName === "UL") {
-                    (next as HTMLElement).style.display = show ? "" : "none";
+                if (childMatch) {
+                    (li as HTMLElement).style.display = "";
+                    if (next && next.tagName === "UL") {
+                        (next as HTMLElement).style.display = "";
+                    }
+                    anyMatched = true;
+                } else {
+                    (li as HTMLElement).style.display = "none";
+                    if (next && next.tagName === "UL") {
+                        (next as HTMLElement).style.display = "none";
+                    }
                 }
-                if (show) anyMatched = true;
             });
             return anyMatched;
         };

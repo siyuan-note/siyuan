@@ -1224,68 +1224,107 @@ export class Outline extends Model {
                 this.preFilterExpandIds = [];
             }
         }
-        // 展开所有，确保能显示所有匹配项
-        this.tree.expandAll();
 
         // 递归过滤 DOM
         const rootUL = this.element.querySelector("ul.b3-list");
         if (!rootUL) return;
 
         const kwLower = kw.toLowerCase();
+        const matchedItems = new Set<HTMLElement>(); // 记录所有命中的标题
 
-        const showAllDescendants = (ul: Element) => {
-            if (!ul) return;
-            (ul as HTMLElement).style.display = "";
+        // 第一遍：收集所有命中的项目
+        const collectMatches = (ul: Element) => {
             ul.querySelectorAll("li.b3-list-item").forEach(li => {
-                (li as HTMLElement).style.display = "";
-            });
-            ul.querySelectorAll("ul").forEach(u => {
-                (u as HTMLElement).style.display = "";
+                const textEl = (li as HTMLElement).querySelector(".b3-list-item__text") as HTMLElement;
+                const textContent = (textEl?.textContent || "").trim().toLowerCase();
+                if (textContent.includes(kwLower)) {
+                    matchedItems.add(li as HTMLElement);
+                }
             });
         };
+        collectMatches(rootUL);
 
-        const processUL = (ul: Element): boolean => {
-            let anyMatched = false;
+        // 展开所有命中项的父级路径
+        matchedItems.forEach(matchedLi => {
+            this.expandPathToElement(matchedLi);
+        });
+
+        const processUL = (ul: Element): { hasMatch: boolean, hasChildMatch: boolean } => {
+            let hasMatch = false;
+            let hasChildMatch = false;
             const children = ul.querySelectorAll(":scope > li.b3-list-item");
+            
             children.forEach((li) => {
                 const textEl = (li as HTMLElement).querySelector(".b3-list-item__text") as HTMLElement;
                 const textContent = (textEl?.textContent || "").trim().toLowerCase();
                 const selfMatch = textContent.includes(kwLower);
                 const next = (li as HTMLElement).nextElementSibling;
-                if (selfMatch) {
-                    // 父标题命中：自身与所有子标题全部显示
-                    (li as HTMLElement).style.display = "";
-                    if (next && next.tagName === "UL") {
-                        showAllDescendants(next);
-                    }
-                    anyMatched = true;
-                    return;
-                }
-                // 父标题未命中，则递归判断子级是否有命中
-                let childMatch = false;
+                
+                let childResult = { hasMatch: false, hasChildMatch: false };
                 if (next && next.tagName === "UL") {
-                    childMatch = processUL(next);
+                    childResult = processUL(next);
                 }
-                if (childMatch) {
+                
+                if (selfMatch) {
+                    // 当前标题命中
                     (li as HTMLElement).style.display = "";
+                    hasMatch = true;
+                    
                     if (next && next.tagName === "UL") {
                         (next as HTMLElement).style.display = "";
+                        
+                        if (childResult.hasMatch || childResult.hasChildMatch) {
+                            // 子项也有命中，保持展开状态，但隐藏未命中的子项由子级处理
+                            const arrow = li.querySelector(".b3-list-item__arrow");
+                            if (arrow) {
+                                arrow.classList.add("b3-list-item__arrow--open");
+                            }
+                        } else {
+                            // 子项无命中，折叠所有子项但保持可展开
+                            const arrow = li.querySelector(".b3-list-item__arrow");
+                            if (arrow) {
+                                arrow.classList.remove("b3-list-item__arrow--open");
+                            }
+                            // 折叠但不完全隐藏，保持子项可访问性
+                            next.classList.add("fn__none");
+                            // 确保所有子项内容保持可见状态，用户可以手动展开查看
+                            next.querySelectorAll("li.b3-list-item").forEach(childLi => {
+                                (childLi as HTMLElement).style.display = "";
+                            });
+                            next.querySelectorAll("ul").forEach(childUl => {
+                                (childUl as HTMLElement).style.display = "";
+                                // 移除子ul的fn__none，保证嵌套结构的可访问性
+                                childUl.classList.remove("fn__none");
+                            });
+                        }
                     }
-                    anyMatched = true;
+                } else if (childResult.hasMatch || childResult.hasChildMatch) {
+                    // 当前标题未命中，但子级有命中
+                    (li as HTMLElement).style.display = "";
+                    hasChildMatch = true;
+                    
+                    if (next && next.tagName === "UL") {
+                        (next as HTMLElement).style.display = "";
+                        // 展开以显示命中的子项
+                        const arrow = li.querySelector(".b3-list-item__arrow");
+                        if (arrow) {
+                            arrow.classList.add("b3-list-item__arrow--open");
+                        }
+                    }
                 } else {
+                    // 当前标题和子级都未命中，隐藏
                     (li as HTMLElement).style.display = "none";
                     if (next && next.tagName === "UL") {
                         (next as HTMLElement).style.display = "none";
                     }
                 }
             });
-            return anyMatched;
+            
+            return { hasMatch, hasChildMatch };
         };
 
         processUL(rootUL);
-    }
-
-    /**
+    }    /**
      * 清除大纲筛选并恢复展开状态
      */
     private clearFilter() {

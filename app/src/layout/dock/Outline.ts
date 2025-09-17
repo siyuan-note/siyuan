@@ -27,6 +27,10 @@ export class Outline extends Model {
     public isPreview: boolean;
     public resetLevelDisplay: (force?: boolean) => void;
     private isUserLevelControlActive = false; // 标记用户是否主动使用了层级控制
+    // 筛选相关
+    private searchInput: HTMLInputElement;
+    private searchKeyword = "";
+    private preFilterExpandIds: string[] | null = null;
 
     constructor(options: {
         app: App,
@@ -90,6 +94,9 @@ export class Outline extends Model {
         <svg class="block__logoicon"><use xlink:href="#iconAlignCenter"></use></svg>${window.siyuan.languages.outline}
     </div>
     <span class="fn__flex-1 fn__space"></span>
+    <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
+    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <span class="fn__space"></span>
     <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconExpand"></use></svg>
     </span>
@@ -122,6 +129,45 @@ export class Outline extends Model {
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
         this.element = options.tab.panelElement.children[3] as HTMLElement; // 更新为第四个子元素（大纲内容）
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
+        // 绑定筛选输入框交互，参考 Backlink.ts
+        this.searchInput = this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
+        if (this.searchInput) {
+            this.searchInput.addEventListener("blur", (event: KeyboardEvent) => {
+                const inputElement = event.target as HTMLInputElement;
+                inputElement.classList.add("fn__none");
+                const filterIconElement = inputElement.nextElementSibling as HTMLElement; // search 图标
+                const val = inputElement.value.trim();
+                if (val) {
+                    filterIconElement.classList.add("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + val);
+                } else {
+                    filterIconElement.classList.remove("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+                    // 若之前有筛选，且清空，则恢复
+                    if (this.searchKeyword) {
+                        this.clearFilter();
+                    }
+                }
+            });
+            this.searchInput.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (!event.isComposing && event.key === "Enter") {
+                    const kw = this.searchInput.value.trim();
+                    if (kw) {
+                        this.applyFilter(kw);
+                    } else {
+                        this.clearFilter();
+                    }
+                }
+            });
+            this.searchInput.addEventListener("input", (event: KeyboardEvent) => {
+                const inputElement = event.target as HTMLInputElement;
+                if (inputElement.value === "") {
+                    inputElement.classList.remove("search__input--block");
+                } else {
+                    inputElement.classList.add("search__input--block");
+                }
+            });
+        }
         this.tree = new Tree({
             element: options.tab.panelElement.children[3] as HTMLElement, // 使用第四个子元素作为树容器
             data: null,
@@ -245,6 +291,13 @@ export class Outline extends Model {
                         case "min":
                             getDockByType("outline").toggleModel("outline", false, true);
                             break;
+                        case "search":
+                            // 显示输入框并选中
+                            if (this.searchInput) {
+                                this.searchInput.classList.remove("fn__none");
+                                this.searchInput.select();
+                            }
+                            break;
                     }
                     break;
                 } else if (this.blockId && (target === this.headerElement.nextElementSibling || target.classList.contains("block__icons"))) {
@@ -290,6 +343,10 @@ export class Outline extends Model {
                     const storageData = storageResponse.data;
                     if (storageData && storageData.expandIds) {
                         this.tree.setExpandIds(storageData.expandIds);
+                    }
+                    // 若存在筛选关键词，初始化后应用一次筛选
+                    if (this.searchKeyword) {
+                        this.applyFilter(this.searchKeyword);
                     }
                 });
             }
@@ -1127,6 +1184,10 @@ export class Outline extends Model {
                         }
                     });
                 }
+                // 若当前存在筛选词，更新后重新应用筛选
+                if (this.searchKeyword) {
+                    this.applyFilter(this.searchKeyword);
+                }
             });
         }
 
@@ -1143,5 +1204,79 @@ export class Outline extends Model {
             }
         }
         this.element.removeAttribute("data-loading");
+    }
+
+    /**
+     * 应用大纲筛选
+     */
+    private applyFilter(keyword: string) {
+        const kw = keyword.trim();
+        if (!kw) {
+            this.clearFilter();
+            return;
+        }
+        this.searchKeyword = kw;
+        // 首次筛选时记录折叠状态
+        if (!this.preFilterExpandIds) {
+            try {
+                this.preFilterExpandIds = this.tree.getExpandIds();
+            } catch (e) {
+                this.preFilterExpandIds = [];
+            }
+        }
+        // 展开所有，确保能显示所有匹配项
+        this.tree.expandAll();
+
+        // 递归过滤 DOM
+        const rootUL = this.element.querySelector("ul.b3-list");
+        if (!rootUL) return;
+
+        const kwLower = kw.toLowerCase();
+
+        const processUL = (ul: Element): boolean => {
+            let anyMatched = false;
+            const children = ul.querySelectorAll(":scope > li.b3-list-item");
+            children.forEach((li) => {
+                const textEl = (li as HTMLElement).querySelector(".b3-list-item__text") as HTMLElement;
+                const textContent = (textEl?.textContent || "").trim().toLowerCase();
+                const selfMatch = textContent.includes(kwLower);
+                const next = (li as HTMLElement).nextElementSibling;
+                let childMatch = false;
+                if (next && next.tagName === "UL") {
+                    childMatch = processUL(next);
+                }
+                const show = selfMatch || childMatch;
+                (li as HTMLElement).style.display = show ? "" : "none";
+                if (next && next.tagName === "UL") {
+                    (next as HTMLElement).style.display = show ? "" : "none";
+                }
+                if (show) anyMatched = true;
+            });
+            return anyMatched;
+        };
+
+        processUL(rootUL);
+    }
+
+    /**
+     * 清除大纲筛选并恢复展开状态
+     */
+    private clearFilter() {
+        this.searchKeyword = "";
+        // 还原 display
+        this.element.querySelectorAll("li.b3-list-item, .fn__flex-1 ul").forEach((el) => {
+            (el as HTMLElement).style.display = "";
+        });
+        // 恢复折叠状态
+        if (this.preFilterExpandIds) {
+            this.tree.setExpandIds(this.preFilterExpandIds);
+        }
+        this.preFilterExpandIds = null;
+        // 复位图标状态
+        const filterIconElement = this.headerElement.querySelector('[data-type="search"]') as HTMLElement;
+        if (filterIconElement) {
+            filterIconElement.classList.remove("block__icon--active");
+            filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+        }
     }
 }

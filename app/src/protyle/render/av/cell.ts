@@ -993,14 +993,20 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         }
         text += "</div>";
     } else if (cellValue.type === "rollup") {
+        let rollupType;
         cellValue?.rollup?.contents?.forEach((item) => {
-            const rollupText = ["template", "select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type) : renderRollup(item, showIcon);
+            const rollupText = ["template", "select", "mSelect", "mAsset", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type) : renderRollup(item, showIcon);
             if (rollupText) {
-                text += rollupText + ", ";
+                text += rollupText + (item.type === "checkbox" ? "" : ", ");
             }
+            rollupType = item.type;
         });
-        if (text && text.endsWith(", ")) {
-            text = text.substring(0, text.length - 2);
+        if (text) {
+            if (rollupType === "checkbox") {
+                text = `<div class="fn__flex">${text}</div>`;
+            } else if (text.endsWith(", ")) {
+                text = text.substring(0, text.length - 2);
+            }
         }
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item, index) => {
@@ -1050,6 +1056,8 @@ const renderRollup = (cellValue: IAVCellValue, showIcon: boolean) => {
         }
     } else if (cellValue.type === "number") {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
+    } else if (cellValue.type === "checkbox") {
+        text += `<svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg><span class="fn__space"></span>`;
     } else if (["date", "updated", "created"].includes(cellValue.type)) {
         const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         if (dataValue.formattedContent) {

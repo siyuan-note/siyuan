@@ -808,6 +808,11 @@ func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relati
 		}
 
 		if nil == destVal {
+			if KeyTypeCheckbox == destKey.Type {
+				// 没有编辑过复选框的时候没有值，没有值等同于未选中，所以这里补一个未选中的值 https://github.com/siyuan-note/siyuan/issues/15858
+				defaultVal := GetAttributeViewDefaultValue(ast.NewNodeID(), destKey.ID, blockID, destKey.Type, false)
+				r.Contents = append(r.Contents, defaultVal)
+			}
 			continue
 		}
 

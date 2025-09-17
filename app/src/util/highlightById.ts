@@ -51,11 +51,19 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
                 brElement.remove();
                 return;
             }
-            // undo 时禁止数据库滚动
-            if (blockElement.classList.contains("av") && blockElement.dataset.render === "true" && (
-                blockElement.querySelector(".av__row--header")?.getAttribute("style")?.indexOf("transform") > -1 ||
-                blockElement.querySelector(".av__row--footer")?.getAttribute("style")?.indexOf("transform") > -1
-            )) {
+
+            if (blockElement.classList.contains("av") && blockElement.dataset.render === "true") {
+                // undo 时禁止数据库滚动
+                if (blockElement.querySelector(".av__row--header")?.getAttribute("style")?.indexOf("transform") > -1 ||
+                    blockElement.querySelector(".av__row--footer")?.getAttribute("style")?.indexOf("transform") > -1) {
+                    return;
+                }
+                const activeElement = blockElement.querySelector(".av__cell--select, .av__row--select, .av__gallery-item--select");
+                if (activeElement) {
+                    activeElement.scrollIntoView({block: "nearest", behavior});
+                } else {
+                    blockElement.scrollIntoView({block: "nearest", behavior});
+                }
                 return;
             }
             // 撤销时 br 插入删除会导致 rang 被修改 https://github.com/siyuan-note/siyuan/issues/12679

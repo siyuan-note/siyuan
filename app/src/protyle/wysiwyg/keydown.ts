@@ -914,7 +914,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
                         if (!nodeElement.classList.contains("code-block") ||
-                            (nodeElement.classList.contains("code-block") && editElement.textContent == "\n")
+                            (nodeElement.classList.contains("code-block") &&
+                                (editElement.textContent == "\n" || nodeElement.parentElement.classList.contains("li")))
                         ) {
                             removeBlock(protyle, nodeElement, range, "Backspace");
                         }

@@ -103,6 +103,10 @@ func existFont(family string, fonts []*Font) bool {
 func parseTTCFontFamily(fontPath string) (ret []string) {
 	defer logging.Recover()
 
+	if strings.Contains(fontPath, "Alibaba") {
+		logging.LogInfo(fontPath)
+	}
+
 	data, err := os.ReadFile(fontPath)
 	if err != nil {
 		//logging.LogErrorf("read font file [%s] failed: %s", fontPath, err)
@@ -121,15 +125,23 @@ func parseTTCFontFamily(fontPath string) (ret []string) {
 			continue
 		}
 
-		family, _ := font.Name(nil, ttc.NameIDFamily)
-		if "" == family {
-			family, _ = font.Name(nil, ttc.NameIDTypographicFamily)
-		}
+		family, _ := font.Name(nil, ttc.NameIDFull)
 		family = strings.TrimSpace(family)
-		if "" == family || strings.HasPrefix(family, ".") {
-			continue
+		if "" != family && !strings.HasPrefix(family, ".") {
+			ret = append(ret, family)
 		}
-		ret = append(ret, family)
+
+		family, _ := font.Name(nil, ttc.NameIDFamily)
+		family = strings.TrimSpace(family)
+		if "" != family && !strings.HasPrefix(family, ".") {
+			ret = append(ret, family)
+		}
+
+		family, _ = font.Name(nil, ttc.NameIDTypographicFamily)
+		family = strings.TrimSpace(family)
+		if "" != family && !strings.HasPrefix(family, ".") {
+			ret = append(ret, family)
+		}
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return

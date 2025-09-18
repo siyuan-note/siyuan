@@ -177,11 +177,11 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     if (position === "afterend" &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
-        ignoreInsert = targetElement.getAttribute("data-subtype").replace("h", "");
+        ignoreInsert = targetElement.getAttribute("data-subtype")?.replace("h", "");
     } else if (position === "beforebegin" && targetElement.previousElementSibling &&
         targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
         targetElement.previousElementSibling.getAttribute("fold") === "1") {
-        ignoreInsert = targetElement.getAttribute("data-subtype").replace("h", "");
+        ignoreInsert = targetElement.getAttribute("data-subtype")?.replace("h", "");
     }
     if (ignoreInsert) {
         let breakIgnore = false;

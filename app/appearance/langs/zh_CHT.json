@@ -177,6 +177,7 @@
   "thisDatabase": "目前資料庫",
   "relatedTo": "關聯至",
   "relation": "關聯",
+  "relatedItems": "已關聯條目",
   "rollup": "匯總",
   "rollupProperty": "總計欄位",
   "rollupCalc": "彙總方式",

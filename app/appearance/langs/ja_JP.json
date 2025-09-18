@@ -177,6 +177,7 @@
   "thisDatabase": "現在のデータベース",
   "relatedTo": "関連付け",
   "relation": "関連",
+  "relatedItems": "関連項目",
   "rollup": "集計",
   "rollupProperty": "属性",
   "rollupCalc": "計算方法",

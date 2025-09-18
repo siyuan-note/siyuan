@@ -177,6 +177,7 @@
   "thisDatabase": "قاعدة البيانات هذه",
   "relatedTo": "الربط بـ",
   "relation": "ربط",
+  "relatedItems": "العناصر المرتبطة",
   "rollup": "القيمة المحتسبة",
   "rollupProperty": "الخاصية",
   "rollupCalc": "الحساب بـ",

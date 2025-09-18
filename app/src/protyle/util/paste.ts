@@ -473,7 +473,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             const textHTMLLowercase = textHTML.toLowerCase();
             if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br")) &&
                 (0 > textHTMLLowercase.indexOf("class=\"katex") && 0 > textHTMLLowercase.indexOf("class=\"math") &&
-                    0 > textHTMLLowercase.indexOf("</a>") && 0 > textHTMLLowercase.indexOf("</img>") &&
+                    0 > textHTMLLowercase.indexOf("</a>") && 0 > textHTMLLowercase.indexOf("</img>") && 0 > textHTMLLowercase.indexOf("</code>") &&
                     0 > textHTMLLowercase.indexOf("</b>") && 0 > textHTMLLowercase.indexOf("</strong>") &&
                     0 > textHTMLLowercase.indexOf("</i>") && 0 > textHTMLLowercase.indexOf("</em>") &&
                     0 > textHTMLLowercase.indexOf("</ol>") && 0 > textHTMLLowercase.indexOf("</ul>") &&

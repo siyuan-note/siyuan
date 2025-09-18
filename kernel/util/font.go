@@ -103,10 +103,6 @@ func existFont(family string, fonts []*Font) bool {
 func parseTTCFontFamily(fontPath string) (ret []string) {
 	defer logging.Recover()
 
-	if strings.Contains(fontPath, "Alibaba") {
-		logging.LogInfo(fontPath)
-	}
-
 	data, err := os.ReadFile(fontPath)
 	if err != nil {
 		//logging.LogErrorf("read font file [%s] failed: %s", fontPath, err)
@@ -131,7 +127,7 @@ func parseTTCFontFamily(fontPath string) (ret []string) {
 			ret = append(ret, family)
 		}
 
-		family, _ := font.Name(nil, ttc.NameIDFamily)
+		family, _ = font.Name(nil, ttc.NameIDFamily)
 		family = strings.TrimSpace(family)
 		if "" != family && !strings.HasPrefix(family, ".") {
 			ret = append(ret, family)
@@ -162,35 +158,38 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 		return
 	}
 
+	if strings.Contains(fontPath, "04") {
+		logging.LogInfo(fontPath)
+	}
+
 	t, err := font.NameTable()
 	if err != nil {
 		logging.LogErrorf("get font [%s] name table failed: %s", fontPath, err)
 		return
 	}
 
+	var family, subfamily string
 	for _, e := range t.List() {
-		if sfnt.NameFontFamily != e.NameID && sfnt.NamePreferredFamily != e.NameID {
-			continue
-		}
-
-		if sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID {
+		if sfnt.NameFontFamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
 			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-			if err != nil {
-				return ""
+			if err == nil {
+				family = strings.TrimSpace(string(v))
 			}
-			val := string(v)
-			if sfnt.NameFontFamily == e.NameID && "" != val {
-				ret = val
-			}
-			if sfnt.NamePreferredFamily == e.NameID && "" != val {
-				ret = val
+		}
+		if sfnt.NameFontSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
+			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+			if err == nil {
+				subfamily = strings.TrimSpace(string(v))
 			}
 		}
 	}
 
-	ret = strings.TrimSpace(ret)
-	if strings.HasPrefix(ret, ".") {
-		return ""
+	if family != "" && !strings.HasPrefix(family, ".") {
+		if subfamily != "" && !strings.Contains(subfamily, "<") && !strings.EqualFold(subfamily, "Regular") {
+			ret = family + " " + subfamily // 例如 "PingFang SC Bold"
+		} else {
+			ret = family
+		}
 	}
 	return
 }

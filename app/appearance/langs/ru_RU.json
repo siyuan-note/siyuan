@@ -177,6 +177,7 @@
   "thisDatabase": "Эта база данных",
   "relatedTo": "Связано с",
   "relation": "Связь",
+  "relatedItems": "Связанные элементы",
   "rollup": "Свод",
   "rollupProperty": "Свойство",
   "rollupCalc": "Вычислить",

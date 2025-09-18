@@ -13,6 +13,8 @@ import {getFieldsByData, getViewName} from "./view";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {isMobile} from "../../../util/functions";
+import {showMessage} from "../../../dialog/message";
+import {writeText} from "../../util/compatibility";
 
 interface IAVItem {
     avID: string;
@@ -249,6 +251,19 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 };
 
+const genRelatedItemsHeader = (hasRelatedItems: boolean) => {
+    if (!hasRelatedItems) {
+        return "";
+    }
+    return `<div style="padding: 4px 2px;">
+    <span class="b3-menu__label">${window.siyuan.languages.relatedItems || "已关联条目"}</span>
+    <span class="fn__flex-1"></span>
+    <button class="b3-button b3-button--small" data-type="copyRelatedItems" title="${window.siyuan.languages.copy}" style="padding: 4px 4px;">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </button>
+</div>`;
+};
+
 const genSelectItemHTML = (options: {
     type: "selected" | "empty" | "unselect",
     id?: string,
@@ -313,7 +328,8 @@ draggable="true">${genSelectItemHTML({
                 });
             }
         });
-        menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
+        const hasRelatedItems = selectHTML.trim() !== "";
+        menuElement.querySelector(".b3-menu__items").innerHTML = `${genRelatedItemsHeader(hasRelatedItems)}${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html}
 ${keyword ? genSelectItemHTML({
@@ -361,7 +377,8 @@ draggable="true">${genSelectItemHTML({
                 });
             }
         });
-        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
+        const hasRelatedItems = selectHTML.trim() !== "";
+        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${genRelatedItemsHeader(hasRelatedItems)}${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML({type: "empty"})}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
@@ -396,6 +413,48 @@ ${html || genSelectItemHTML({type: "empty"})}`;
             event.stopPropagation();
             filterItem(options.menuElement, options.cellElements[0], inputElement.value);
         });
+        
+        // 添加复制按钮的点击事件
+        const copyRelatedItemsHandler = (event: Event) => {
+            const target = event.target as HTMLElement;
+            if (target.closest('[data-type="copyRelatedItems"]')) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const relationItems = options.cellElements[0].querySelectorAll(".av__cell--relation");
+                const blockRefs: string[] = [];
+                
+                relationItems.forEach((relationItem: HTMLElement) => {
+                    const item = relationItem.querySelector(".av__celltext") as HTMLElement;
+                    if (item) {
+                        const text = item.textContent || window.siyuan.languages.untitled;
+                        if (item.dataset.id) {
+                            // 有 ID 的条目，生成块引用
+                            const blockRef = `((${item.dataset.id} "${text}"))`;
+                            blockRefs.push(blockRef);
+                        } else {
+                            // 没有 ID 的条目，直接使用纯文本
+                            blockRefs.push(text);
+                        }
+                    }
+                });
+                
+                if (blockRefs.length > 0) {
+                    let copyText: string;
+                    if (blockRefs.length === 1) {
+                        // 单个条目，直接复制
+                        copyText = blockRefs[0];
+                    } else {
+                        // 多个条目，复制为列表
+                        copyText = blockRefs.map(ref => `- ${ref}`).join("\n");
+                    }
+                    writeText(copyText);
+                    showMessage(window.siyuan.languages.copied || "已复制");
+                }
+            }
+        };
+        
+        listElement.addEventListener("click", copyRelatedItemsHandler);
     });
 };
 

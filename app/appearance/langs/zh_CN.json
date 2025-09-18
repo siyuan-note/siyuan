@@ -177,6 +177,7 @@
   "thisDatabase": "当前数据库",
   "relatedTo": "关联至",
   "relation": "关联",
+  "relatedItems": "已关联条目",
   "rollup": "汇总",
   "rollupProperty": "汇总字段",
   "rollupCalc": "汇总方式",

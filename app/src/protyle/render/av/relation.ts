@@ -251,17 +251,15 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 };
 
-const genRelatedItemsHeader = (hasRelatedItems: boolean) => {
-    if (!hasRelatedItems) {
-        return "";
+const updateCopyRelatedItems = (menuElement: Element) => {
+    const inputElement = menuElement.querySelector(".b3-form__icona .b3-text-field");
+    if (menuElement.querySelector(".b3-menu__icon.fn__grab")) {
+        inputElement.nextElementSibling.classList.remove("fn__none");
+        inputElement.classList.add("b3-form__icona-input");
+    } else {
+        inputElement.nextElementSibling.classList.add("fn__none");
+        inputElement.classList.remove("b3-form__icona-input");
     }
-    return `<div style="padding: 4px 2px;">
-    <span class="b3-menu__label">${window.siyuan.languages.relatedItems || "已关联条目"}</span>
-    <span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--small" data-type="copyRelatedItems" title="${window.siyuan.languages.copy}" style="padding: 4px 4px;">
-        <svg><use xlink:href="#iconCopy"></use></svg>
-    </button>
-</div>`;
 };
 
 const genSelectItemHTML = (options: {
@@ -328,8 +326,7 @@ draggable="true">${genSelectItemHTML({
                 });
             }
         });
-        const hasRelatedItems = selectHTML.trim() !== "";
-        menuElement.querySelector(".b3-menu__items").innerHTML = `${genRelatedItemsHeader(hasRelatedItems)}${selectHTML}
+        menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html}
 ${keyword ? genSelectItemHTML({
@@ -338,6 +335,7 @@ ${keyword ? genSelectItemHTML({
             text: menuElement.querySelector(".popover__block").outerHTML
         }) : (html ? "" : genSelectItemHTML({type: "empty"}))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
+        updateCopyRelatedItems(menuElement);
     });
 };
 
@@ -377,8 +375,7 @@ draggable="true">${genSelectItemHTML({
                 });
             }
         });
-        const hasRelatedItems = selectHTML.trim() !== "";
-        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${genRelatedItemsHeader(hasRelatedItems)}${selectHTML}
+        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML({type: "empty"})}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
@@ -386,7 +383,7 @@ ${html || genSelectItemHTML({type: "empty"})}`;
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         const inputElement = options.menuElement.querySelector("input");
         inputElement.focus();
-        const databaseName = inputElement.parentElement.querySelector(".popover__block");
+        const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
         databaseName.innerHTML = Lute.EscapeHTMLStr(response.data.name);
         databaseName.setAttribute("data-id", response.data.blockIDs[0]);
         const listElement = options.menuElement.querySelector(".b3-menu__items");
@@ -413,48 +410,26 @@ ${html || genSelectItemHTML({type: "empty"})}`;
             event.stopPropagation();
             filterItem(options.menuElement, options.cellElements[0], inputElement.value);
         });
-        
-        // 添加复制按钮的点击事件
-        const copyRelatedItemsHandler = (event: Event) => {
-            const target = event.target as HTMLElement;
-            if (target.closest('[data-type="copyRelatedItems"]')) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                const relationItems = options.cellElements[0].querySelectorAll(".av__cell--relation");
-                const blockRefs: string[] = [];
-                
-                relationItems.forEach((relationItem: HTMLElement) => {
-                    const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-                    if (item) {
-                        const text = item.textContent || window.siyuan.languages.untitled;
-                        if (item.dataset.id) {
-                            // 有 ID 的条目，生成块引用
-                            const blockRef = `((${item.dataset.id} "${text}"))`;
-                            blockRefs.push(blockRef);
-                        } else {
-                            // 没有 ID 的条目，直接使用纯文本
-                            blockRefs.push(text);
-                        }
-                    }
-                });
-                
-                if (blockRefs.length > 0) {
-                    let copyText: string;
-                    if (blockRefs.length === 1) {
-                        // 单个条目，直接复制
-                        copyText = blockRefs[0];
-                    } else {
-                        // 多个条目，复制为列表
-                        copyText = blockRefs.map(ref => `- ${ref}`).join("\n");
-                    }
-                    writeText(copyText);
-                    showMessage(window.siyuan.languages.copied || "已复制");
+        updateCopyRelatedItems(options.menuElement)
+        options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
+            let copyText = "";
+            const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
+            selectedElements.forEach((item: HTMLElement) => {
+                if (selectedElements.length > 1) {
+                    copyText += "* ";
                 }
+                const textElement = item.querySelector(".b3-menu__label") as HTMLElement;
+                if (!textElement.dataset.id || textElement.dataset.id === "undefined") {
+                    copyText += textElement.textContent + "\n";
+                } else {
+                    copyText += `((${textElement.dataset.id} "${textElement.textContent}"))\n`;
+                }
+            });
+            if (copyText) {
+                writeText(copyText.trimEnd());
+                showMessage(window.siyuan.languages.copied);
             }
-        };
-        
-        listElement.addEventListener("click", copyRelatedItemsHandler);
+        });
     });
 };
 
@@ -469,9 +444,12 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
 <div class="b3-menu__item" data-type="nobg">
-    <input class="b3-text-field fn__flex-1"/>
+    <div class="b3-form__icona">
+        <input class="b3-text-field fn__flex-1 b3-form__icona-input fn__size200"/>
+        <svg class="b3-form__icona-icon ariaLabel" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
+    </div>
     <span class="fn__space"></span>
-    <span style="color: var(--b3-protyle-inline-blockref-color);" data-id="" class="popover__block fn__pointer"></span>
+    <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
 </div>
 <div class="fn__hr"></div>
 <div class="b3-menu__items">
@@ -598,4 +576,5 @@ class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
         }
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
+    updateCopyRelatedItems(menuElement);
 };

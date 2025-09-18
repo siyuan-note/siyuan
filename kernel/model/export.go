@@ -2273,10 +2273,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		case 2: // 锚文本块链
 			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
 			blockRefLink.KramdownIAL = n.KramdownIAL
-			if "block-ref" != n.TextMarkType { // 除了块引还有其他元素 https://github.com/siyuan-note/siyuan/issues/15698
-				blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "a"))
-				blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-			}
+			// 除了块引还有其他元素 https://github.com/siyuan-note/siyuan/issues/15698
+			blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "a"))
+			blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本

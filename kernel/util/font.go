@@ -158,10 +158,6 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 		return
 	}
 
-	if strings.Contains(fontPath, "04") {
-		logging.LogInfo(fontPath)
-	}
-
 	t, err := font.NameTable()
 	if err != nil {
 		logging.LogErrorf("get font [%s] name table failed: %s", fontPath, err)

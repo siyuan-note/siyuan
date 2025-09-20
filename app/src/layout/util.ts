@@ -744,13 +744,20 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             });
         }
     } else if (json.instance === "Editor") {
+        if (json.rootId === json.blockId && json.action) {
+            if (typeof json.action === "string") {
+                json.action = json.action.replace(Constants.CB_GET_ALL, "");
+            } else if (typeof json.action === "object" && Array.isArray(json.action)) {
+                json.action = json.action.filter((item: string) => item !== Constants.CB_GET_ALL);
+            }
+        }
         model = new Editor({
             app,
             tab,
             rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
-            action: typeof json.action === "string" ? [json.action, Constants.CB_GET_FOCUS] : json.action.concat(Constants.CB_GET_FOCUS),
+            action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
         });
     }
     return model;

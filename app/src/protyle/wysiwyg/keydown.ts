@@ -860,7 +860,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 const nextBlockElement = hasClosestBlock(nextRange.startContainer);
                                 if (nextBlockElement &&
                                     (!nextBlockElement.classList.contains("code-block") ||
-                                        (nextBlockElement.classList.contains("code-block") && getContenteditableElement(nextBlockElement).textContent == "\n"))
+                                        (nextBlockElement.classList.contains("code-block") &&
+                                            (getContenteditableElement(nextBlockElement).textContent == "\n") || nextBlockElement.parentElement.classList.contains("li")))
                                 ) {
                                     // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
                                     cloneRange.insertNode(document.createElement("wbr"));

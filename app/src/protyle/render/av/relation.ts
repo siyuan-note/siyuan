@@ -252,13 +252,13 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
 };
 
 const updateCopyRelatedItems = (menuElement: Element) => {
-    const inputElement = menuElement.querySelector(".b3-form__icona .b3-text-field");
+    const inputElement = menuElement.querySelector(".b3-form__icona .b3-text-field") as HTMLInputElement;
     if (menuElement.querySelector(".b3-menu__icon.fn__grab")) {
         inputElement.nextElementSibling.classList.remove("fn__none");
-        inputElement.classList.add("b3-form__icona-input");
+        inputElement.style.paddingRight = "26px";
     } else {
         inputElement.nextElementSibling.classList.add("fn__none");
-        inputElement.classList.remove("b3-form__icona-input");
+        inputElement.style.paddingRight = "";
     }
 };
 
@@ -326,13 +326,14 @@ draggable="true">${genSelectItemHTML({
                 });
             }
         });
+        const refElement = menuElement.querySelector(".popover__block");
         menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html}
 ${keyword ? genSelectItemHTML({
             type: "empty",
             newName: Lute.EscapeHTMLStr(keyword),
-            text: menuElement.querySelector(".popover__block").outerHTML
+            text: `<span style="color: var(--b3-protyle-inline-blockref-color);" data-id="${refElement.getAttribute("data-id")}">${refElement.textContent}</span>`,
         }) : (html ? "" : genSelectItemHTML({type: "empty"}))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         updateCopyRelatedItems(menuElement);
@@ -410,7 +411,7 @@ ${html || genSelectItemHTML({type: "empty"})}`;
             event.stopPropagation();
             filterItem(options.menuElement, options.cellElements[0], inputElement.value);
         });
-        updateCopyRelatedItems(options.menuElement)
+        updateCopyRelatedItems(options.menuElement);
         options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
             let copyText = "";
             const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
@@ -444,9 +445,9 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
 <div class="b3-menu__item" data-type="nobg">
-    <div class="b3-form__icona">
-        <input class="b3-text-field fn__flex-1 b3-form__icona-input fn__size200"/>
-        <svg class="b3-form__icona-icon ariaLabel" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
+    <div class="b3-form__icona fn__flex-1">
+        <input class="b3-text-field fn__block" style="min-width: 190px"/>
+        <svg class="b3-form__icona-icon ariaLabel fn__none" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
     </div>
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>

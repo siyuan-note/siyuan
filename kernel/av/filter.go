@@ -258,7 +258,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Name) ||
+					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) ||
 						filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
 						return true
 					}
@@ -272,7 +272,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if !filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Name) &&
+					if !filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) &&
 						!filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
 						return false
 					}
@@ -287,7 +287,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Name) ||
+					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) ||
 						filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
 						return false
 					}

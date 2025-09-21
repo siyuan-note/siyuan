@@ -140,7 +140,7 @@ export const setFilter = async (options: {
                 newFilter.relativeDate = null;
                 newFilter.relativeDate2 = null;
             }
-        } else if (["text", "url", "block", "email", "phone", "template", "relation", "number"].includes(filterValue.type)) {
+        } else if (["text", "mAsset", "url", "block", "email", "phone", "template", "relation", "number"].includes(filterValue.type)) {
             newValue = genCellValue(filterValue.type, textElements[0].value);
         } else if (filterValue.type === "checkbox") {
             newValue = genCellValue(filterValue.type, {
@@ -429,6 +429,8 @@ export const setFilter = async (options: {
         if (filterValue) {
             if (filterValue.type === "relation") {
                 value = filterValue.relation.blockIDs[0] || "";
+            } else if (filterValue.type === "mAsset") {
+                value = filterValue.mAsset[0]?.content || "";
             } else {
                 value = filterValue[filterValue.type as "text"].content || "";
             }
@@ -732,8 +734,15 @@ export const getFiltersHTML = (data: IAV) => {
                     } else if ("<=" === filter.operator) {
                         filterText = ` ${filterText}≤ ${filterValue.number.content}`;
                     }
-                } else if (["text", "block", "url", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
-                    const content = filterValue[filterValue.type as "text"].content || filterValue.relation?.blockIDs[0] || "";
+                } else if (["text", "block", "url", "mAsset", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
+                    let content: string;
+                    if (filterValue.type === "relation") {
+                        content = filterValue.relation.blockIDs[0] || "";
+                    } else if (filterValue.type === "mAsset") {
+                        content = filterValue.mAsset[0]?.content || "";
+                    } else {
+                        content = filterValue[filterValue.type as "text"].content || "";
+                    }
                     if (content) {
                         if (["=", "Contains"].includes(filter.operator)) {
                             filterText = `: ${filterText}${content}`;

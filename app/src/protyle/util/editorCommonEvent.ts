@@ -1352,7 +1352,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < ids.length; i++) {
                     if (ids.length > 1) {
-                        html += "* ";
+                        html += "- ";
                     }
                     const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
                     html += `((${ids[i]} '${response.data}'))`;

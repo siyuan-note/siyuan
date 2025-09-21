@@ -702,7 +702,7 @@ type ValuePhone struct {
 type AssetType string
 
 const (
-	AssetTypeFile  = "file"
+	AssetTypeFile  = "file" // 链接也使用文件类型
 	AssetTypeImage = "image"
 )
 

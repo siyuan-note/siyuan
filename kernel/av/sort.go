@@ -27,7 +27,7 @@ import (
 
 // ViewSort 描述了视图排序规则的结构。
 type ViewSort struct {
-	Column string    `json:"column"` // 列（字段）ID
+	Column string    `json:"column"` // 字段（列）ID
 	Order  SortOrder `json:"order"`  // 排序顺序
 }
 

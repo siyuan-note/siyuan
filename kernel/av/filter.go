@@ -26,7 +26,7 @@ import (
 
 // ViewFilter 描述了视图过滤规则的结构。
 type ViewFilter struct {
-	Column        string           `json:"column"`                  // 列（字段）ID
+	Column        string           `json:"column"`                  // 字段（列）ID
 	Qualifier     FilterQuantifier `json:"quantifier,omitempty"`    // 量词
 	Operator      FilterOperator   `json:"operator"`                // 操作符
 	Value         *Value           `json:"value"`                   // 过滤值
@@ -153,10 +153,9 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		return !value.IsEmpty()
 	}
 
+	// 单独处理汇总
 	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type &&
 		nil != filter.Value.Rollup && 0 < len(filter.Value.Rollup.Contents) {
-		// 单独处理汇总类型的比较
-
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
@@ -214,10 +213,9 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		}
 	}
 
+	// 单独处理关联
 	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
 		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) {
-		// 单独处理关联类型的比较
-
 		for _, relationValue := range value.Relation.Contents {
 			filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: filter.Value.Relation.BlockIDs[0]}}
 
@@ -245,6 +243,61 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			return true
 		default:
 			return false
+		}
+	}
+
+	// 单独处理资源
+	if nil != value.MAsset && KeyTypeMAsset == value.Type && nil != filter.Value && KeyTypeMAsset == filter.Value.Type && 0 < len(filter.Value.MAsset) {
+		key, _ := attrView.GetKey(value.KeyID)
+		if nil == key {
+			return false
+		}
+
+		switch filter.Qualifier {
+		case FilterQuantifierUndefined, FilterQuantifierAny:
+			for _, asset := range value.MAsset {
+				switch asset.Type {
+				case AssetTypeFile:
+					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Name) ||
+						filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						return true
+					}
+				case AssetTypeImage:
+					if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						return true
+					}
+				}
+			}
+		case FilterQuantifierAll:
+			for _, asset := range value.MAsset {
+				switch asset.Type {
+				case AssetTypeFile:
+					if !filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Name) &&
+						!filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						return false
+					}
+				case AssetTypeImage:
+					if !filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						return false
+					}
+				}
+			}
+			return true
+		case FilterQuantifierNone:
+			for _, asset := range value.MAsset {
+				switch asset.Type {
+				case AssetTypeFile:
+					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Name) ||
+						filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						return false
+					}
+				case AssetTypeImage:
+					if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						return false
+					}
+				}
+			}
+			return true
 		}
 	}
 	return value.filter(filter.Value, filter.RelativeDate, filter.RelativeDate2, filter.Operator)

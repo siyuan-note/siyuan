@@ -20,7 +20,7 @@ export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["checkbox"].includes(type)) {
         return "Is false";
     }
-    if (["rollup", "relation", "rollup", "text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
+    if (["rollup", "relation", "mAsset", "text", "mSelect", "url", "block", "email", "phone", "template"].includes(type)) {
         return "Contains";
     }
 };
@@ -288,6 +288,7 @@ export const setFilter = async (options: {
             }
             break;
         case "block":
+        case "mAsset":
         case "text":
         case "url":
         case "phone":
@@ -351,7 +352,7 @@ export const setFilter = async (options: {
 <option ${"Is not empty" === options.filter.operator ? "selected" : ""} value="Is not empty">${window.siyuan.languages.filterOperatorIsNotEmpty}</option>`;
             break;
     }
-    if (options.filter.value.type === "rollup") {
+    if (["rollup", "mAsset"].includes(options.filter.value.type)) {
         menu.addItem({
             iconHTML: "",
             type: "readonly",
@@ -423,7 +424,7 @@ export const setFilter = async (options: {
                 }
             });
         });
-    } else if (["text", "url", "block", "email", "phone", "template", "relation"].includes(filterValue.type)) {
+    } else if (["text", "url", "block", "mAsset", "email", "phone", "template", "relation"].includes(filterValue.type)) {
         let value = "";
         if (filterValue) {
             if (filterValue.type === "relation") {
@@ -609,7 +610,7 @@ export const addFilter = (options: {
             }
         });
         // 该列是行号类型列，则不允许添加到过滤器
-        if (!filter && column.type !== "mAsset" && column.type !== "lineNumber") {
+        if (!filter && column.type !== "lineNumber") {
             menu.addItem({
                 label: column.name,
                 iconHTML: column.icon ? unicode2Emoji(column.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`,
@@ -651,7 +652,7 @@ export const getFiltersHTML = (data: IAV) => {
         fields.find((item) => {
             if (item.id === filter.column && item.type === filter.value.type) {
                 let filterText = "";
-                if (item.type === "rollup") {
+                if (["rollup", "mAsset"].includes(item.type)) {
                     if (filter.quantifier === "" || filter.quantifier === "Any") {
                         filterText = window.siyuan.languages.filterQuantifierAny + " ";
                     } else if (filter.quantifier === "All") {

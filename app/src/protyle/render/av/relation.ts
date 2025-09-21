@@ -333,7 +333,7 @@ ${html}
 ${keyword ? genSelectItemHTML({
             type: "empty",
             newName: Lute.EscapeHTMLStr(keyword),
-            text: `<span style="color: var(--b3-protyle-inline-blockref-color);" data-id="${refElement.getAttribute("data-id")}">${refElement.textContent}</span>`,
+            text: `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block" data-id="${refElement.getAttribute("data-id")}">${refElement.textContent}</span>`,
         }) : (html ? "" : genSelectItemHTML({type: "empty"}))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         updateCopyRelatedItems(menuElement);

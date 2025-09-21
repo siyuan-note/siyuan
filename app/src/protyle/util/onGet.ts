@@ -166,7 +166,7 @@ const setHTML = (options: {
             removeElements.forEach(item => {
                 item.remove();
             });
-            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop);
+            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
             hideElements(["toolbar"], protyle);
         }

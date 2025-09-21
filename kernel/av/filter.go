@@ -26,7 +26,7 @@ import (
 
 // ViewFilter 描述了视图过滤规则的结构。
 type ViewFilter struct {
-	Column        string           `json:"column"`                  // 列（字段）ID
+	Column        string           `json:"column"`                  // 字段（列）ID
 	Qualifier     FilterQuantifier `json:"quantifier,omitempty"`    // 量词
 	Operator      FilterOperator   `json:"operator"`                // 操作符
 	Value         *Value           `json:"value"`                   // 过滤值

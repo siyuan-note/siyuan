@@ -417,7 +417,7 @@ ${html || genSelectItemHTML({type: "empty"})}`;
             const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
             selectedElements.forEach((item: HTMLElement) => {
                 if (selectedElements.length > 1) {
-                    copyText += "* ";
+                    copyText += "- ";
                 }
                 const textElement = item.querySelector(".b3-menu__label") as HTMLElement;
                 if (!textElement.dataset.id || textElement.dataset.id === "undefined") {

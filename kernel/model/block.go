@@ -741,7 +741,11 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 			return ast.WalkContinue
 		})
 
-		child.SetIALAttr("parent-heading", id)
+		if removeFoldAttr {
+			child.RemoveIALAttr("parent-heading")
+		} else {
+			child.SetIALAttr("parent-heading", id)
+		}
 	}
 
 	if removeFoldAttr {

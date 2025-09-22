@@ -10,7 +10,7 @@ import {
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath, newFile} from "../../util/newFile";
-import {upDownHint} from "../../util/upDownHint";
+import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
@@ -290,6 +290,14 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             /// #endif
         }
         this.element.scrollTop = 0;
+        let currentHintElement = this.element.querySelector(".b3-list-item--focus") as HTMLElement;
+        if (isAbnormalItem(currentHintElement, "b3-list-item")) {
+            currentHintElement.classList.remove("b3-list-item--focus");
+            do {
+                currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
+            } while (isAbnormalItem(currentHintElement, "b3-list-item"));
+            currentHintElement?.classList.add("b3-list-item--focus");
+        }
         this.bindUploadEvent(protyle, this.element);
         if (this.source !== "hint") {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;

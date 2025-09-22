@@ -287,9 +287,15 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) ||
-						filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
-						return false
+					if "" != strings.TrimSpace(asset.Name) {
+						if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) {
+							return false
+						}
+					}
+					if "" != strings.TrimSpace(asset.Content) {
+						if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+							return false
+						}
 					}
 				case AssetTypeImage:
 					if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {

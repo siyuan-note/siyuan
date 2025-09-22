@@ -156,9 +156,11 @@ export const setFilter = async (options: {
                 },
                 type: "rollup"
             };
-            newFilter.quantifier = (menu.element.querySelector('.b3-select[data-type="quantifier"]') as HTMLSelectElement).value;
         } else {
             newFilter.value = newValue;
+        }
+        if (["rollup", "mAsset"].includes(options.filter.value.type)) {
+            newFilter.quantifier = (menu.element.querySelector('.b3-select[data-type="quantifier"]') as HTMLSelectElement).value;
         }
         let isSame = false;
         options.data.view.filters.find((filter, index) => {

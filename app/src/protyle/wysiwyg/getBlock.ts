@@ -78,6 +78,16 @@ export const getContenteditableElement = (element: Element) => {
 };
 
 export const isNotEditBlock = (element: Element) => {
+    if (element.classList.contains("sb")) {
+        let hasEditable = false;
+        Array.from(element.querySelectorAll("[data-node-id]")).find(item => {
+            if (!isNotEditBlock(item)) {
+                hasEditable = true;
+                return true;
+            }
+        });
+        return !hasEditable;
+    }
     return ["NodeBlockQueryEmbed", "NodeThematicBreak", "NodeMathBlock", "NodeHTMLBlock", "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio"].includes(element.getAttribute("data-type")) ||
         (element.getAttribute("data-type") === "NodeCodeBlock" && element.classList.contains("render-node"));
 };

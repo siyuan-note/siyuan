@@ -34,9 +34,8 @@ export const genRenderFrame = (renderElement: Element) => {
 };
 
 export const processClonePHElement = (item: Element) => {
-    if (item.getAttribute("data-type") === "NodeHTMLBlock") {
-        const phElement = item.querySelector("protyle-html");
+    item.querySelectorAll("protyle-html").forEach((phElement) => {
         phElement.setAttribute("data-content", Lute.UnEscapeHTMLStr(phElement.getAttribute("data-content")));
-    }
+    });
     return item;
 };

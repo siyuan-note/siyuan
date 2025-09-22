@@ -20,6 +20,7 @@ import {input} from "../wysiwyg/input";
 import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
 import {getFieldIdByCellElement} from "../render/av/row";
+import {processClonePHElement} from "../render/util";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -492,6 +493,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
         }
         if (!hasParentHeading) {
+            processClonePHElement(item);
             if (insertBefore) {
                 blockElement.before(item);
             } else {

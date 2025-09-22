@@ -67,9 +67,11 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             !protyle.wysiwyg.element.firstElementChild) {
             return;
         }
-
-        if (protyle.scroll.lastScrollTop - element.scrollTop > 0) {
-            // up
+        if (protyle.scroll.lastScrollTop > element.scrollTop) {
+            if (element.scrollTop === 0) {
+                // 使用鼠标拖拽滚动条中无法准确获取 scrollTop，在此忽略
+                return;
+            }
             if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
                 // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418

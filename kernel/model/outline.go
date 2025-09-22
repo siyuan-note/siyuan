@@ -90,9 +90,8 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 
 		for _, h := range headingChildren {
-			if h.ID == targetNode.ID {
-				// 目标节点是当前标题的子节点，不需要移动
-				return
+			if h.ID == targetNode.ID { // 目标节点是当前标题的子节点
+				targetNode = heading.Previous
 			}
 		}
 

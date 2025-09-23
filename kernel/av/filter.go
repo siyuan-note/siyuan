@@ -154,8 +154,11 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 	}
 
 	// 单独处理汇总
-	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type &&
-		nil != filter.Value.Rollup && 0 < len(filter.Value.Rollup.Contents) {
+	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type && nil != filter.Value.Rollup {
+		if 1 > len(filter.Value.Rollup.Contents) {
+			return true
+		}
+
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
@@ -214,8 +217,11 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 	}
 
 	// 单独处理关联
-	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter.Value && KeyTypeRelation == filter.Value.Type &&
-		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) {
+	if nil != value.Relation && KeyTypeRelation == value.Type && nil != filter.Value && KeyTypeRelation == filter.Value.Type && nil != filter.Value.Relation {
+		if 1 > len(filter.Value.Relation.BlockIDs) {
+			return true
+		}
+
 		for _, relationValue := range value.Relation.Contents {
 			filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: filter.Value.Relation.BlockIDs[0]}}
 

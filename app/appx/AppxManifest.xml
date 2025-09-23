@@ -9,7 +9,7 @@
     <Identity Name="89C2A984.SiYuan"
               ProcessorArchitecture="x64"
               Publisher="CN=087C656E-C1D9-42D8-8807-CED45A74FC0F"
-              Version="3.3.2.0"/>
+              Version="3.3.3.0"/>
     <Properties>
         <DisplayName>SiYuan</DisplayName>
         <PublisherDisplayName>云南链滴科技有限公司</PublisherDisplayName>
@@ -34,9 +34,7 @@
                     Square150x150Logo="assets\Square150x150Logo.png"
                     Square44x44Logo="assets\Square44x44Logo.png"
                     Description="Refactor your thinking">
-
                 <uap:DefaultTile Wide310x150Logo="assets\Wide310x150Logo.png"/>
-
             </uap:VisualElements>
 
             <Extensions>

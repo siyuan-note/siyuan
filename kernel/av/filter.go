@@ -542,7 +542,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 			}
 		}
 	case KeyTypeRelation:
-		if nil != value.Relation && nil != other && nil != other.Relation {
+		if nil != value.Relation && 0 < len(value.Relation.Contents) && nil != other && nil != other.Relation && 0 < len(other.Relation.Contents) {
 			return filterTextContent(operator, value.Relation.Contents[0].Block.Content, other.Relation.Contents[0].Block.Content)
 		}
 	}

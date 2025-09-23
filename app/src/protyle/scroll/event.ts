@@ -95,6 +95,11 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         } else if ((element.scrollTop > element.scrollHeight - element.clientHeight * 1.8) &&
             protyle.wysiwyg.element.lastElementChild &&
             protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
+            if (element.scrollTop > protyle.scroll.lastScrollTop * 2) {
+                // 使用鼠标拖拽滚动条时导致加载需进行矫正
+                element.scrollTop = protyle.scroll.lastScrollTop;
+                return;
+            }
             protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
             fetchPost("/api/filetree/getDoc", {
                 id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),

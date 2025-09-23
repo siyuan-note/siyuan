@@ -225,8 +225,8 @@ export const setFilter = async (options: {
         }
         if (colData.rollup.calc?.operator && colData.rollup.calc.operator !== "Range") {
             if (["Count all", "Count empty", "Count not empty", "Count values", "Count unique values", "Percent empty",
-                "Percent not empty", "Percent unique values", "Percent checked", "Percent unchecked", "Sum", "Average", "Median",
-                "Min", "Max"].includes(colData.rollup.calc.operator)) {
+                "Percent not empty", "Percent unique values", "Unique values", "Percent checked", "Percent unchecked",
+                "Sum", "Average", "Median", "Min", "Max"].includes(colData.rollup.calc.operator)) {
                 filterValue.type = "number";
             } else if (["Checked", "Unchecked"].includes(colData.rollup.calc.operator)) {
                 filterValue.type = "checkbox";

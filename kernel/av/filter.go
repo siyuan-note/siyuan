@@ -253,7 +253,11 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 	}
 
 	// 单独处理资源
-	if nil != value.MAsset && KeyTypeMAsset == value.Type && nil != filter.Value && KeyTypeMAsset == filter.Value.Type && 0 < len(filter.Value.MAsset) {
+	if nil != value.MAsset && KeyTypeMAsset == value.Type && nil != filter.Value && KeyTypeMAsset == filter.Value.Type {
+		if 1 > len(filter.Value.MAsset) {
+			return true
+		}
+
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false

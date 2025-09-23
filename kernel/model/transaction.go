@@ -1255,10 +1255,16 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 		node.InsertAfter(insertedNode)
 
-		if treenode.IsUnderFoldedHeading(insertedNode) {
-			// 保持在标题下的折叠状态
-			insertedNode.SetIALAttr("fold", "1")
-			insertedNode.SetIALAttr("heading-fold", "1")
+		if parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode); nil != parentFoldedHeading {
+			ast.Walk(insertedNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				n.SetIALAttr("fold", "1")
+				n.SetIALAttr("heading-fold", "1")
+				return ast.WalkContinue
+			})
 		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
@@ -1510,14 +1516,23 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	if treenode.IsUnderFoldedHeading(updatedNode) {
-		// 保持在标题下的折叠状态
-		updatedNode.SetIALAttr("fold", "1")
-		updatedNode.SetIALAttr("heading-fold", "1")
+	parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
+	if nil != parentFoldedHeading {
+		children := treenode.HeadingChildren(parentFoldedHeading)
+		for _, child := range children {
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				n.SetIALAttr("fold", "1")
+				n.SetIALAttr("heading-fold", "1")
+				return ast.WalkContinue
+			})
+		}
 	}
 
 	createdUpdated(updatedNode)
-
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
@@ -1543,6 +1558,14 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 				}
 			}
 		}
+	}
+
+	if oldNode.HeadingLevel != updatedNode.HeadingLevel {
+		// 编辑折叠标题下方块，并且这个块的标题层级发生了变化（比如从 H2 变为 H3 或者从标题块变成段落块），则刷新所有编辑器以保持一致性
+		go func() {
+			tx.WaitForCommit()
+			ReloadProtyle(tree.ID)
+		}()
 	}
 	return
 }

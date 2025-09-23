@@ -541,6 +541,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return !value.Checkbox.Checked
 			}
 		}
+	case KeyTypeRelation:
+		if nil != value.Relation && nil != other && nil != other.Relation {
+			return filterTextContent(operator, value.Relation.Contents[0].Block.Content, other.Relation.Contents[0].Block.Content)
+		}
 	}
 	return false
 }

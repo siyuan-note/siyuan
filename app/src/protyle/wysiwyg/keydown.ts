@@ -833,11 +833,25 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const position = getSelectionOffset(editElement, protyle.wysiwyg.element, range);
                 if (event.key === "Delete" || matchHotKey("⌃D", event)) {
-                    // 图片后为空格，在空格后删除 https://github.com/siyuan-note/siyuan/issues/13949
                     if (range.startOffset === 0 && range.startContainer.textContent.length === 1) {
+                        // 图片后为空格，在空格后删除 https://github.com/siyuan-note/siyuan/issues/13949
                         const rangePreviousElement = hasPreviousSibling(range.startContainer) as HTMLElement;
                         const rangeNextElement = hasNextSibling(range.startContainer) as HTMLElement;
                         if (rangePreviousElement && rangePreviousElement.nodeType === 1 && rangePreviousElement.classList.contains("img") &&
+                            rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img")) {
+                            const wbrElement = document.createElement("wbr");
+                            range.insertNode(wbrElement);
+                            const oldHTML = nodeElement.outerHTML;
+                            wbrElement.nextSibling.textContent = Constants.ZWSP;
+                            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                            focusByWbr(nodeElement, range);
+                            event.preventDefault();
+                            return;
+                        }
+                        // 图片前有一个字符，在字符后删除 https://github.com/siyuan-note/siyuan/issues/15911
+                        if (position.start === 0 &&
+                            range.startContainer.textContent !== Constants.ZWSP &&  // 如果为 zwsp 需前移光标
+                            !rangePreviousElement &&
                             rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img")) {
                             const wbrElement = document.createElement("wbr");
                             range.insertNode(wbrElement);

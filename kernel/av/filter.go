@@ -541,10 +541,11 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return !value.Checkbox.Checked
 			}
 		}
-	case KeyTypeRelation:
+	case KeyTypeRelation: // 过滤汇总字段，并且汇总目标是关联字段时才会进入该分支
 		if nil != value.Relation && 0 < len(value.Relation.Contents) && nil != value.Relation.Contents[0].Block &&
-			nil != other && nil != other.Relation && 0 < len(other.Relation.Contents) && nil != other.Relation.Contents[0].Block {
-			return filterTextContent(operator, value.Relation.Contents[0].Block.Content, other.Relation.Contents[0].Block.Content)
+			nil != other && nil != other.Relation && 0 < len(other.Relation.BlockIDs) {
+			filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: other.Relation.BlockIDs[0]}}
+			return filterTextContent(operator, value.Relation.Contents[0].Block.Content, filterValue.Block.Content)
 		}
 	}
 	return false

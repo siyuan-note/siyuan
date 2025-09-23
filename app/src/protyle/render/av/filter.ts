@@ -210,7 +210,7 @@ export const setFilter = async (options: {
             return true;
         }
     });
-    let filterValue = JSON.parse(JSON.stringify(options.filter.value));
+    let filterValue: IAVCellValue = JSON.parse(JSON.stringify(options.filter.value));
     if (colData.type === "rollup") {
         if (!colData.rollup || !colData.rollup.relationKeyID || !colData.rollup.keyID) {
             showMessage(window.siyuan.languages.plsChoose);
@@ -223,9 +223,9 @@ export const setFilter = async (options: {
             });
             return;
         }
-        if (colData.rollup.calc?.operator && colData.rollup.calc.operator !== "Range") {
+        if (colData.rollup.calc?.operator && ["Range", "Unique values"].includes(colData.rollup.calc.operator)) {
             if (["Count all", "Count empty", "Count not empty", "Count values", "Count unique values", "Percent empty",
-                "Percent not empty", "Percent unique values", "Unique values", "Percent checked", "Percent unchecked",
+                "Percent not empty", "Percent unique values", "Percent checked", "Percent unchecked",
                 "Sum", "Average", "Median", "Min", "Max"].includes(colData.rollup.calc.operator)) {
                 filterValue.type = "number";
             } else if (["Checked", "Unchecked"].includes(colData.rollup.calc.operator)) {
@@ -266,8 +266,9 @@ export const setFilter = async (options: {
         options.data.view.filters.find(item => {
             if (item.column === colData.id && item.value.type === "rollup") {
                 if (!item.value.rollup || !item.value.rollup.contents || item.value.rollup.contents.length === 0) {
+                    const colType = filterValue.type === "select" ? "mSelect" : filterValue.type;
                     filterValue = {
-                        [filterValue.type]: genCellValue(filterValue.type, filterValue.type === "checkbox" ? {checked: undefined} : ""),
+                        [colType]: genCellValue(filterValue.type, filterValue.type === "checkbox" ? {checked: undefined} : "")[colType as "text"],
                         type: filterValue.type
                     };
                 } else {

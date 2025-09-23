@@ -552,6 +552,10 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const avMaskElement = document.querySelector(".av__mask");
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
+        const style = getComputedStyle(cellElements[0]);
+        inputElement.style.fontSize = style.fontSize;
+        inputElement.style.lineHeight = style.lineHeight;
+        inputElement.style.fontFamily = style.fontFamily;
         if (["text", "email", "phone", "block", "template"].includes(type)) {
             inputElement.value = cellElements[0].querySelector(".av__celltext")?.textContent || "";
         }

@@ -17,6 +17,7 @@ import { checkFold } from "../../util/noRelyPCFunction";
 import { transaction } from "../../protyle/wysiwyg/transaction";
 import { goHome } from "../../protyle/wysiwyg/commonHotkey";
 import { Editor } from "../../editor";
+import { Menu } from "../../plugin/Menu";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -25,8 +26,6 @@ export class Outline extends Model {
     public type: "pin" | "local";
     public blockId: string;
     public isPreview: boolean;
-    public resetLevelDisplay: (force?: boolean) => void;
-    private isUserLevelControlActive = false; // 标记用户是否主动使用了层级控制
     // 筛选相关
     private searchInput: HTMLInputElement;
     private searchKeyword = "";
@@ -105,6 +104,10 @@ export class Outline extends Model {
         <svg><use xlink:href="#iconFocus"></use></svg>
     </span>
     <span class="fn__space"></span>
+    <span data-type="expandLevel" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="展开层级">
+        <svg><use xlink:href="#iconList"></use></svg>
+    </span>
+    <span class="fn__space"></span>
     <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
@@ -112,22 +115,8 @@ export class Outline extends Model {
     <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="b3-list-item fn__none"></div>
-<div class="outline-level-control" style="padding: 8px 12px; border-bottom: 1px solid var(--b3-border-color); display: none; ">
-    <div style="display: flex; align-items: center; font-size: 12px; color: var(--b3-theme-on-surface-light);">
-        <span style="margin-right: 8px; min-width: 60px;">${window.siyuan.languages.outlineExpandLevel}:</span>
-        <div class="outline-level-dots" style="flex: 1; margin: 0 8px; position: relative; height: 20px; display: flex; align-items: center; justify-content: space-between;">
-            <div class="outline-level-line" style="position: absolute; top: 50%; left: 8px; right: 8px; height: 2px; background: var(--b3-theme-on-surface-light); transform: translateY(-50%);"></div>
-            <div class="outline-level-dot" data-level="1" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
-            <div class="outline-level-dot" data-level="2" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
-            <div class="outline-level-dot" data-level="3" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
-            <div class="outline-level-dot" data-level="4" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
-            <div class="outline-level-dot" data-level="5" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
-            <div class="outline-level-dot" data-level="6" style="position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--b3-theme-on-surface-light); cursor: pointer; z-index: 1; border: 2px solid var(--b3-theme-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);"></div>
-        </div>
-    </div>
-</div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
-        this.element = options.tab.panelElement.children[3] as HTMLElement; // 更新为第四个子元素（大纲内容）
+        this.element = options.tab.panelElement.children[2] as HTMLElement; // 更新为第三个子元素（大纲内容）
         this.headerElement = options.tab.panelElement.firstElementChild as HTMLElement;
         // 绑定筛选输入框交互，参考 Backlink.ts
         this.searchInput = this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
@@ -169,7 +158,7 @@ export class Outline extends Model {
             });
         }
         this.tree = new Tree({
-            element: options.tab.panelElement.children[3] as HTMLElement, // 使用第四个子元素作为树容器
+            element: options.tab.panelElement.children[2] as HTMLElement, // 使用第三个子元素作为树容器
             data: null,
             click: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
@@ -228,10 +217,6 @@ export class Outline extends Model {
                             expandIds: expandIds
                         }
                     });
-                }
-                // 只在非用户主动层级控制操作时重置层级显示状态
-                if (this.resetLevelDisplay && !this.isUserLevelControlActive) {
-                    this.resetLevelDisplay();
                 }
             }
         });
@@ -298,6 +283,9 @@ export class Outline extends Model {
                                 this.searchInput.select();
                             }
                             break;
+                        case "expandLevel":
+                            this.showExpandLevelMenu(event);
+                            break;
                     }
                     break;
                 } else if (this.blockId && (target === this.headerElement.nextElementSibling || target.classList.contains("block__icons"))) {
@@ -328,7 +316,6 @@ export class Outline extends Model {
             }
         });
         this.bindSort();
-        this.initLevelControl(); // 初始化层级控制
 
         fetchPost("/api/outline/getDocOutline", {
             id: this.blockId,
@@ -411,11 +398,6 @@ export class Outline extends Model {
         if (this.tree.onToggleChange) {
             this.tree.onToggleChange();
         }
-
-        // 只在非用户主动层级控制操作时重置层级显示状态
-        if (this.resetLevelDisplay && !this.isUserLevelControlActive) {
-            this.resetLevelDisplay();
-        }
     }
 
     /**
@@ -453,82 +435,6 @@ export class Outline extends Model {
         });
 
         return sameLevelElements;
-    }
-
-    /**
-     * 初始化层级控制滑条
-     */
-    private initLevelControl() {
-        const levelControlElement = this.headerElement.parentElement.children[2] as HTMLElement;
-        const dots = levelControlElement.querySelectorAll(".outline-level-dot") as NodeListOf<HTMLElement>;
-
-        // 添加滑条样式
-        if (!document.getElementById("outline-slider-style")) {
-            const style = document.createElement("style");
-            style.id = "outline-slider-style";
-            style.textContent = `
-                .outline-level-dots {
-                    justify-content: space-between;
-                }
-                .outline-level-dot {
-                    transition: all 0.2s ease;
-                    position: relative;
-                }
-                .outline-level-dot:hover {
-                    transform: scale(1.1);
-                }
-                .outline-level-control .outline-level-dot.active {
-                    background: var(--b3-theme-primary) !important;
-                }
-                .outline-level-control .outline-level-dot:not(.active) {
-                    background: var(--b3-theme-on-surface-light) !important;
-                }
-                .outline-level-line {
-                    background: var(--b3-border-color) !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // 更新层级文本和点的状态
-        const updateLevelDisplay = (level: number) => {
-            // 更新点的状态：点击的点及其前面的点都变为 active 状态
-            dots.forEach((dot, index) => {
-                const dotLevel = index + 1;
-                // 先移除所有的active类，确保状态重置
-                dot.classList.remove("active");
-                // 然后为符合条件的点添加active类
-                if (level > 0 && dotLevel <= level) {
-                    dot.classList.add("active");
-                }
-            });
-        };
-
-        // 重置层级显示（用于文档切换或其他操作后重置）
-        this.resetLevelDisplay = (force = false) => {
-            // 如果是强制重置，或者用户没有主动使用层级控制，则执行重置
-            if (force || !this.isUserLevelControlActive) {
-                updateLevelDisplay(0);
-            }
-        };
-
-        // 为每个点添加点击事件
-        dots.forEach((dot) => {
-            dot.addEventListener("click", () => {
-                const level = parseInt(dot.getAttribute("data-level"));
-                // 标记用户主动使用层级控制
-                this.isUserLevelControlActive = true;
-                updateLevelDisplay(level);
-                this.expandToLevel(level);
-                // 在展开完成后重置标志
-                setTimeout(() => {
-                    this.isUserLevelControlActive = false;
-                }, 100);
-            });
-        });
-
-        // 初始化显示 - 默认不显示层级
-        updateLevelDisplay(0);
     }
 
     /**
@@ -795,15 +701,20 @@ export class Outline extends Model {
     }
 
     /**
-     * 显示或隐藏层级控制
+     * 显示展开层级菜单
      */
-    public toggleLevelControl(show: boolean) {
-        const levelControlElement = this.headerElement.parentElement.children[2] as HTMLElement;
-        if (show) {
-            levelControlElement.style.display = "block";
-        } else {
-            levelControlElement.style.display = "none";
+    private showExpandLevelMenu(event: MouseEvent) {
+        const menu = new Menu("outlineExpandLevel");
+        for (let i = 1; i <= 6; i++) {
+            menu.addItem({
+                label: window.siyuan.languages[`heading${i}`],
+                click: () => this.expandToLevel(i)
+            });
         }
+        menu.open({
+            x: event.clientX,
+            y: event.clientY
+        });
     }
 
     private bindSort() {
@@ -975,18 +886,11 @@ export class Outline extends Model {
 <span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
                 docTitleElement.setAttribute("title", ial.title);
                 docTitleElement.classList.remove("fn__none");
-                // 显示层级控制
-                this.toggleLevelControl(true);
             } else {
                 docTitleElement.classList.add("fn__none");
-                // 隐藏层级控制
-                this.toggleLevelControl(false);
             }
         } else {
             docTitleElement.classList.add("fn__none");
-            // 对于local类型，根据是否有大纲内容决定是否显示层级控制
-            const hasOutlineContent = this.element.querySelector("li.b3-list-item");
-            this.toggleLevelControl(!!hasOutlineContent);
         }
     }
 
@@ -1156,15 +1060,6 @@ export class Outline extends Model {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
-
-        // 强制重置层级显示状态（文档切换时）
-        if (this.resetLevelDisplay) {
-            this.resetLevelDisplay(true);
-        }
-
-        // 根据是否有大纲内容决定是否显示层级控制
-        const hasOutlineContent = data.data && data.data.length > 0;
-        this.toggleLevelControl(hasOutlineContent);
 
         // 从新的持久化存储恢复折叠状态
         if (!this.isPreview) {

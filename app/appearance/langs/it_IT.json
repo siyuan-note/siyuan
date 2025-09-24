@@ -128,6 +128,7 @@
   "unbindBlock": "Scollega blocco",
   "showTitle": "Mostra titolo del database",
   "fillCreated": "Compilazione automatica del tempo di creazione",
+  "fillSpecificTime": "Compila l'orario specifico di default",
   "removeCard": "Rimuovi flashcard",
   "updateLayout": "Aggiorna layout",
   "dndFolderTip": "Nota che ${x} inserisce solo il collegamento file:// e non copia il file",

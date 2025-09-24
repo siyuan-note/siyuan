@@ -128,6 +128,7 @@
   "unbindBlock": "Desvincular bloque",
   "showTitle": "Mostrar título de la base de datos",
   "fillCreated": "Hora de creación del relleno predeterminado",
+  "fillSpecificTime": "Rellenar hora específica por defecto",
   "removeCard": "Eliminar tarjeta flash",
   "updateLayout": "Actualizar diseño",
   "dndFolderTip": "Tenga en cuenta que ${x} solo inserta el hipervínculo file:// y no copia el archivo",

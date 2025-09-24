@@ -128,6 +128,7 @@
   "unbindBlock": "ブロックのバインドを解除",
   "showTitle": "データベースのタイトルを表示",
   "fillCreated": "デフォルトで作成時間を入力",
+  "fillSpecificTime": "デフォルトで具体的な時間を入力",
   "removeCard": "フラッシュカードを削除",
   "updateLayout": "レイアウトを更新",
   "dndFolderTip": "${x} は file:// 形式のハイパーリンクを挿入するだけでファイルはコピーされないので注意してください",

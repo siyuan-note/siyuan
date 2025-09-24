@@ -275,8 +275,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doUpdateAttrViewColRollup(op)
 			case "hideAttrViewName":
 				ret = tx.doHideAttrViewName(op)
-			case "setAttrViewColDate":
-				ret = tx.doSetAttrViewColDate(op)
+			case "setAttrViewColDateFillCreated":
+				ret = tx.doSetAttrViewColDateFillCreated(op)
+			case "setAttrViewColDateFillSpecificTime":
+				ret = tx.doSetAttrViewColDateFillSpecificTime(op)
 			case "duplicateAttrViewKey":
 				ret = tx.doDuplicateAttrViewKey(op)
 			case "setAttrViewCoverFrom":

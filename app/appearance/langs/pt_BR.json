@@ -128,6 +128,7 @@
   "unbindBlock": "Desvincular bloco",
   "showTitle": "Mostrar título do banco de dados",
   "fillCreated": "Preencher automaticamente a hora de criação",
+  "fillSpecificTime": "Preencher horário específico por padrão",
   "removeCard": "Remover cartão de memorização",
   "updateLayout": "Atualizar layout",
   "dndFolderTip": "Observe que ${x} apenas insere o hiperlink file:// e não copia o arquivo",

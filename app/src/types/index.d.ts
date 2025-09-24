@@ -58,7 +58,8 @@ type TOperation =
     | "setAttrViewFitImage"
     | "setAttrViewShowIcon"
     | "setAttrViewWrapField"
-    | "setAttrViewColDate"
+    | "setAttrViewColDateFillCreated"
+    | "setAttrViewColDateFillSpecificTime"
     | "setAttrViewViewDesc"
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
@@ -942,6 +943,7 @@ interface IAVColumn {
     calc: IAVCalc,
     date?: {
         autoFillNow: boolean,
+        fillSpecificTime: boolean,
     }
     // 选项列表
     options?: {

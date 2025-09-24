@@ -2147,15 +2147,15 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	return
 }
 
-func (tx *Transaction) doSetAttrViewColDate(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewColDate(operation)
+func (tx *Transaction) doSetAttrViewColDateFillCreated(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColDateFillCreated(operation)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func setAttributeViewColDate(operation *Operation) (err error) {
+func setAttributeViewColDateFillCreated(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if err != nil {
 		return
@@ -2172,7 +2172,35 @@ func setAttributeViewColDate(operation *Operation) (err error) {
 	}
 
 	key.Date.AutoFillNow = operation.Data.(bool)
+	err = av.SaveAttributeView(attrView)
+	return
+}
 
+func (tx *Transaction) doSetAttrViewColDateFillSpecificTime(operation *Operation) (ret *TxErr) {
+	err := setAttrViewColDateFillSpecificTime(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewColDateFillSpecificTime(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	keyID := operation.ID
+	key, _ := attrView.GetKey(keyID)
+	if nil == key || av.KeyTypeDate != key.Type {
+		return
+	}
+
+	if nil == key.Date {
+		key.Date = &av.Date{}
+	}
+
+	key.Date.FillSpecificTime = operation.Data.(bool)
 	err = av.SaveAttributeView(attrView)
 	return
 }

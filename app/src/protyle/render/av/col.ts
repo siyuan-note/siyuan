@@ -182,6 +182,11 @@ export const getEditHTML = (options: {
     <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
+</label>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.fillSpecificTime}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
 </label>`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
@@ -439,14 +444,31 @@ export const bindEditEvent = (options: {
         fillCreatedElement.addEventListener("change", () => {
             transaction(options.protyle, [{
                 avID,
-                action: "setAttrViewColDate",
+                action: "setAttrViewColDateFillCreated",
                 id: colId,
                 data: fillCreatedElement.checked
             }], [{
                 avID,
-                action: "setAttrViewColDate",
+                action: "setAttrViewColDateFillCreated",
                 id: colId,
                 data: !fillCreatedElement.checked
+            }]);
+        });
+    }
+
+    const fillSpecificTimeElement = options.menuElement.querySelector('[data-type="fillSpecificTime"]') as HTMLInputElement;
+    if (fillSpecificTimeElement) {
+        fillSpecificTimeElement.addEventListener("change", () => {
+            transaction(options.protyle, [{
+                avID,
+                action: "setAttrViewColDateFillSpecificTime",
+                id: colId,
+                data: fillSpecificTimeElement.checked
+            }], [{
+                avID,
+                action: "setAttrViewColDateFillSpecificTime",
+                id: colId,
+                data: !fillSpecificTimeElement.checked
             }]);
         });
     }

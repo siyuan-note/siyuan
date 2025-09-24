@@ -128,6 +128,7 @@
   "unbindBlock": "取消綁定塊",
   "showTitle": "顯示資料庫標題",
   "fillCreated": "預設填滿創建時間",
+  "fillSpecificTime": "預設填入具體時間",
   "removeCard": "移除閃卡",
   "updateLayout": "更新版面配置",
   "dndFolderTip": "請注意 ${x} 僅插入 file:// 超鏈接，不複製檔案",

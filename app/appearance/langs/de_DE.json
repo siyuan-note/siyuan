@@ -128,6 +128,7 @@
   "unbindBlock": "Block entkoppeln",
   "showTitle": "Datenbanktitel anzeigen",
   "fillCreated": "Standardfüllzeit erstellen",
+  "fillSpecificTime": "Standardmäßig bestimmte Zeit ausfüllen",
   "removeCard": "Karte entfernen",
   "updateLayout": "Layout aktualisieren",
   "dndFolderTip": "Bitte beachten Sie, dass ${x} nur den file:// Hyperlink einfügt und die Datei nicht kopiert.",

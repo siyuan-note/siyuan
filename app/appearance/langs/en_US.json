@@ -128,6 +128,7 @@
   "unbindBlock": "Unbind block",
   "showTitle": "Show database title",
   "fillCreated": "Default fill created time",
+  "fillSpecificTime": "Default fill specific time",
   "removeCard": "Remove flashcard",
   "updateLayout": "Update layout",
   "dndFolderTip": "Please note that ${x} only inserts the file:// hyperlink and does not copy the file",

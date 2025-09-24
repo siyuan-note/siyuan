@@ -128,6 +128,7 @@
   "unbindBlock": "שחרר בלוק",
   "showTitle": "הצג כותרת מסד נתונים",
   "fillCreated": "מלא את זמן היצירה ברירת מחדל",
+  "fillSpecificTime": "מילוי זמן מסוים כברירת מחדל",
   "removeCard": "הסר כרטיסון",
   "updateLayout": "עדכן עימוד",
   "dndFolderTip": "שים לב כי ${x} ניחש את ה-hyperlink file:// ואינו מעתיק את הקובץ",

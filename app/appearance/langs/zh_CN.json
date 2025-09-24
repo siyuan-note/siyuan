@@ -128,6 +128,7 @@
   "unbindBlock": "取消绑定块",
   "showTitle": "显示数据库标题",
   "fillCreated": "默认填充创建时间",
+  "fillSpecificTime": "默认填充具体时间",
   "removeCard": "移除闪卡",
   "updateLayout": "更新布局",
   "dndFolderTip": "请注意 ${x} 仅插入 file:// 超链接，不复制文件",

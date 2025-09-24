@@ -168,7 +168,8 @@ func (k *Key) GetOption(name string) (ret *SelectOption) {
 }
 
 type Date struct {
-	AutoFillNow bool `json:"autoFillNow"` // 是否自动填充当前时间 The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
+	AutoFillNow      bool `json:"autoFillNow"`      // 是否自动填充当前时间 The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
+	FillSpecificTime bool `json:"fillSpecificTime"` // 是否填充具体时间 Add `Default fill specific time` switch to database date field https://github.com/siyuan-note/siyuan/issues/12089
 }
 
 type Rollup struct {

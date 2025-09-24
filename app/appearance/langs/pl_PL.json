@@ -128,6 +128,7 @@
   "unbindBlock": "Odłącz blok",
   "showTitle": "Pokaż tytuł bazy danych",
   "fillCreated": "Domyślnie wypełnij czas utworzenia",
+  "fillSpecificTime": "Domyślnie wypełnij konkretny czas",
   "removeCard": "Usuń fiszkę",
   "updateLayout": "Zaktualizuj układ",
   "dndFolderTip": "Proszę pamiętać, że ${x} tylko wstawia link file:// i nie kopiuje pliku",

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20250529111304"
+		"updated": "20250924164911"
 	},
 	"Children": [
 		{
@@ -9104,7 +9104,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-8191vgw",
-				"updated": "20250115155758"
+				"updated": "20250924164911"
 			},
 			"Children": [
 				{
@@ -9124,7 +9124,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-v6as45b",
-				"updated": "20250115155758"
+				"updated": "20250924164911"
 			},
 			"Children": [
 				{
@@ -9233,7 +9233,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用塊"
+									"Data": "塊引用"
 								}
 							]
 						},
@@ -9280,7 +9280,43 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "需選中內容"
+									"Data": "需選中內容；預設使用靜態錨文本，在候選列表中按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "點擊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 會使用動態錨文本"
 								}
 							]
 						}

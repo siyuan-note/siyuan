@@ -291,11 +291,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         }
         this.element.scrollTop = 0;
         let currentHintElement = this.element.querySelector(".b3-list-item--focus") as HTMLElement;
-        if (isAbnormalItem(currentHintElement, "b3-list-item")) {
+        while (isAbnormalItem(currentHintElement, "b3-list-item")) {
             currentHintElement.classList.remove("b3-list-item--focus");
-            do {
-                currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
-            } while (isAbnormalItem(currentHintElement, "b3-list-item"));
+            currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
             currentHintElement?.classList.add("b3-list-item--focus");
         }
         this.bindUploadEvent(protyle, this.element);

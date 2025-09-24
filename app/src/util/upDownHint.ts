@@ -1,5 +1,5 @@
 export const isAbnormalItem = (currentHintElement: HTMLElement, className: string) => {
-    return !currentHintElement || !currentHintElement.classList.contains(className) || currentHintElement.getBoundingClientRect().height === 0;
+    return currentHintElement && (!currentHintElement.classList.contains(className) || currentHintElement.getBoundingClientRect().height === 0);
 };
 
 export const upDownHint = (listElement: Element, event: KeyboardEvent, classActiveName = "b3-list-item--focus", defaultElement?: Element) => {

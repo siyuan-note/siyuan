@@ -223,7 +223,7 @@ export const setFilter = async (options: {
             });
             return;
         }
-        if (colData.rollup.calc?.operator && ["Range", "Unique values"].includes(colData.rollup.calc.operator)) {
+        if (colData.rollup.calc?.operator && !["Range", "Unique values"].includes(colData.rollup.calc.operator)) {
             if (["Count all", "Count empty", "Count not empty", "Count values", "Count unique values", "Percent empty",
                 "Percent not empty", "Percent unique values", "Percent checked", "Percent unchecked",
                 "Sum", "Average", "Median", "Min", "Max"].includes(colData.rollup.calc.operator)) {

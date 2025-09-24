@@ -9,6 +9,7 @@ import { hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName } from
 import { setStorageVal, updateHotkeyAfterTip } from "../../protyle/util/compatibility";
 import { openFileById } from "../../editor/util";
 import { Constants } from "../../constants";
+import { MenuItem } from "../../menus/Menu";
 import { escapeHtml } from "../../util/escape";
 import { unicode2Emoji } from "../../emoji";
 import { getPreviousBlock } from "../../protyle/wysiwyg/getBlock";
@@ -17,7 +18,6 @@ import { checkFold } from "../../util/noRelyPCFunction";
 import { transaction } from "../../protyle/wysiwyg/transaction";
 import { goHome } from "../../protyle/wysiwyg/commonHotkey";
 import { Editor } from "../../editor";
-import { Menu } from "../../plugin/Menu";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -224,7 +224,7 @@ export class Outline extends Model {
         options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.tree.collapseAll();
         });
-        
+
         // 普通的全部展开按钮
         options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", () => {
             this.tree.expandAll();
@@ -238,7 +238,7 @@ export class Outline extends Model {
                 });
             }
         });
-        
+
         // 保持当前标题展开功能
         options.tab.panelElement.querySelector('[data-type="keepCurrentExpand"]').addEventListener("click", (event: MouseEvent & {
             target: Element
@@ -247,12 +247,12 @@ export class Outline extends Model {
             if (!iconElement) {
                 return;
             }
-            
+
             // 确保存储对象存在
             if (!window.siyuan.storage[Constants.LOCAL_OUTLINE]) {
                 window.siyuan.storage[Constants.LOCAL_OUTLINE] = {};
             }
-            
+
             if (iconElement.classList.contains("block__icon--active")) {
                 iconElement.classList.remove("block__icon--active");
                 window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand = false;
@@ -285,6 +285,8 @@ export class Outline extends Model {
                             break;
                         case "expandLevel":
                             this.showExpandLevelMenu(event);
+                            event.preventDefault();
+                            event.stopPropagation();
                             break;
                     }
                     break;
@@ -455,7 +457,7 @@ export class Outline extends Model {
     private expandToHeadingByIdSmart(headingId: string) {
         // 确保目标标题在大纲中可见
         this.ensureHeadingVisibleSmart(headingId);
-        
+
         // 设置为当前焦点（这会触发自动展开）
         this.setCurrentById(headingId);
     }
@@ -467,7 +469,7 @@ export class Outline extends Model {
         const targetElement = this.element.querySelector(`.b3-list-item[data-node-id="${headingId}"]`) as HTMLElement;
         if (targetElement) {
             this.expandPathToElement(targetElement);
-            
+
             // 额外检查：确保目标元素真的可见
             setTimeout(() => {
                 const checkElement = this.element.querySelector(`.b3-list-item[data-node-id="${headingId}"]`) as HTMLElement;
@@ -485,7 +487,7 @@ export class Outline extends Model {
     private getCurrentHeadingId(callback: (id: string) => void) {
         // 首先尝试从编辑器获取当前光标位置的块
         let currentBlockId: string = null;
-        
+
         getAllModels().editor.find(editItem => {
             if (editItem.editor.protyle.block.rootID === this.blockId) {
                 const selection = getSelection();
@@ -544,7 +546,7 @@ export class Outline extends Model {
     private expandToHeadingById(headingId: string) {
         // 确保目标标题在大纲中可见
         this.ensureHeadingVisible(headingId);
-        
+
         // 设置为当前焦点（这会触发自动展开）
         this.setCurrentById(headingId);
     }
@@ -568,7 +570,7 @@ export class Outline extends Model {
         }
 
         // 收集所有需要展开的ul元素路径，以及它们的折叠状态
-        const pathToExpand: Array<{ul: HTMLElement, wasCollapsed: boolean, parentLi: HTMLElement}> = [];
+        const pathToExpand: Array<{ ul: HTMLElement, wasCollapsed: boolean, parentLi: HTMLElement }> = [];
         let current = element.parentElement; // 从父级ul开始
 
         while (current && !current.classList.contains("fn__flex-1")) {
@@ -576,7 +578,7 @@ export class Outline extends Model {
                 // 这是一个可折叠的ul元素
                 const parentLi = current.previousElementSibling as HTMLElement;
                 const wasCollapsed = current.classList.contains("fn__none");
-                
+
                 pathToExpand.push({
                     ul: current,
                     wasCollapsed: wasCollapsed,
@@ -589,10 +591,10 @@ export class Outline extends Model {
         // 从最外层开始展开，确保每一层都能正确展开
         pathToExpand.reverse().forEach((pathItem, index) => {
             const { ul, wasCollapsed, parentLi } = pathItem;
-            
+
             if (ul.classList.contains("fn__none")) {
                 ul.classList.remove("fn__none");
-                
+
                 // 设置箭头状态
                 if (parentLi && parentLi.classList.contains("b3-list-item")) {
                     const arrowElement = parentLi.querySelector(".b3-list-item__arrow");
@@ -607,7 +609,7 @@ export class Outline extends Model {
                 this.collapseSiblingsExceptPath(parentLi, pathToExpand.slice(index + 1));
             }
         });
-        
+
         // 保存展开状态
         if (!this.isPreview) {
             fetchPost("/api/storage/setOutlineStorage", {
@@ -624,7 +626,7 @@ export class Outline extends Model {
      * @param parentLi 父级li元素
      * @param targetPath 目标路径上的ul元素列表
      */
-    private collapseSiblingsExceptPath(parentLi: HTMLElement, targetPath: Array<{ul: HTMLElement, wasCollapsed: boolean, parentLi: HTMLElement}>) {
+    private collapseSiblingsExceptPath(parentLi: HTMLElement, targetPath: Array<{ ul: HTMLElement, wasCollapsed: boolean, parentLi: HTMLElement }>) {
         // 获取父li下的直接ul子元素
         const directChildUl = parentLi.nextElementSibling;
         if (!directChildUl || directChildUl.tagName !== "UL") {
@@ -649,7 +651,7 @@ export class Outline extends Model {
                 if (childUl !== nextTargetUl) {
                     if (!childUl.classList.contains("fn__none")) {
                         childUl.classList.add("fn__none");
-                        
+
                         // 更新箭头状态
                         const arrowElement = childLi.querySelector(".b3-list-item__arrow");
                         if (arrowElement && arrowElement.classList.contains("b3-list-item__arrow--open")) {
@@ -704,17 +706,18 @@ export class Outline extends Model {
      * 显示展开层级菜单
      */
     private showExpandLevelMenu(event: MouseEvent) {
-        const menu = new Menu("outlineExpandLevel");
+        window.siyuan.menus.menu.remove();
         for (let i = 1; i <= 6; i++) {
-            menu.addItem({
-                label: window.siyuan.languages[`heading${i}`],
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages[`heading${i}`] || `${i}级标题`,
                 click: () => this.expandToLevel(i)
-            });
+            }).element);
         }
-        menu.open({
+        window.siyuan.menus.menu.popup({
             x: event.clientX,
             y: event.clientY
         });
+        return window.siyuan.menus.menu;
     }
 
     private bindSort() {
@@ -996,21 +999,21 @@ export class Outline extends Model {
         this.element.querySelectorAll(".b3-list-item.b3-list-item--focus").forEach(item => {
             item.classList.remove("b3-list-item--focus");
         });
-        
+
         // 如果启用了保持当前标题展开功能，先确保目标标题可见
         if (window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
             this.ensureHeadingVisibleSmart(id);
         }
-        
+
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
-        
+
         // 如果元素仍然不可见，尝试多次查找和展开
         let retryCount = 0;
         const maxRetries = 3;
-        
+
         const trySetCurrent = () => {
             currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
-            
+
             while (currentElement && currentElement.clientHeight === 0 && retryCount < maxRetries) {
                 // 如果启用了保持当前标题展开功能，再次尝试展开路径
                 if (window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
@@ -1019,10 +1022,10 @@ export class Outline extends Model {
                 currentElement = currentElement.parentElement?.previousElementSibling as HTMLElement;
                 retryCount++;
             }
-            
+
             if (currentElement) {
                 currentElement.classList.add("b3-list-item--focus");
-                
+
                 const elementRect = this.element.getBoundingClientRect();
                 this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
             } else if (retryCount < maxRetries && window.siyuan.storage[Constants.LOCAL_OUTLINE]?.keepCurrentExpand) {
@@ -1034,7 +1037,7 @@ export class Outline extends Model {
                 }, 50);
             }
         };
-        
+
         trySetCurrent();
     }
 
@@ -1148,26 +1151,26 @@ export class Outline extends Model {
             let hasMatch = false;
             let hasChildMatch = false;
             const children = ul.querySelectorAll(":scope > li.b3-list-item");
-            
+
             children.forEach((li) => {
                 const textEl = (li as HTMLElement).querySelector(".b3-list-item__text") as HTMLElement;
                 const textContent = (textEl?.textContent || "").trim().toLowerCase();
                 const selfMatch = textContent.includes(kwLower);
                 const next = (li as HTMLElement).nextElementSibling;
-                
+
                 let childResult = { hasMatch: false, hasChildMatch: false };
                 if (next && next.tagName === "UL") {
                     childResult = processUL(next);
                 }
-                
+
                 if (selfMatch) {
                     // 当前标题命中
                     (li as HTMLElement).style.display = "";
                     hasMatch = true;
-                    
+
                     if (next && next.tagName === "UL") {
                         (next as HTMLElement).style.display = "";
-                        
+
                         if (childResult.hasMatch || childResult.hasChildMatch) {
                             // 子项也有命中，保持展开状态，但隐藏未命中的子项由子级处理
                             const arrow = li.querySelector(".b3-list-item__arrow");
@@ -1197,7 +1200,7 @@ export class Outline extends Model {
                     // 当前标题未命中，但子级有命中
                     (li as HTMLElement).style.display = "";
                     hasChildMatch = true;
-                    
+
                     if (next && next.tagName === "UL") {
                         (next as HTMLElement).style.display = "";
                         // 展开以显示命中的子项
@@ -1214,7 +1217,7 @@ export class Outline extends Model {
                     }
                 }
             });
-            
+
             return { hasMatch, hasChildMatch };
         };
 

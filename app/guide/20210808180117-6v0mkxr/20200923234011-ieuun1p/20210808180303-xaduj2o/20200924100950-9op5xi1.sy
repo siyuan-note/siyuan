@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20250529111226"
+		"updated": "20250924165043"
 	},
 	"Children": [
 		{
@@ -9049,7 +9049,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-d0mxz1p",
-				"updated": "20250115160840"
+				"updated": "20250924165043"
 			},
 			"Children": [
 				{
@@ -9073,7 +9073,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-v6ksqnu",
-				"updated": "20250115160840"
+				"updated": "20250924165043"
 			},
 			"Children": [
 				{
@@ -9233,7 +9233,43 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Must select content"
+									"Data": "Requires selecting content; by default uses static anchor text. Press "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ or "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Click"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the candidate list to use dynamic anchor text"
 								}
 							]
 						}

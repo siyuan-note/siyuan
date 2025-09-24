@@ -94,6 +94,9 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 				targetNode = heading.Previous
 			}
 		}
+		if targetNode.ID == heading.ID {
+			targetNode = heading.Previous
+		}
 
 		diffLevel := heading.HeadingLevel - previousHeading.HeadingLevel
 		heading.HeadingLevel = previousHeading.HeadingLevel

@@ -251,7 +251,7 @@ func getEmbedBlock(c *gin.Context) {
 	for _, includeID := range includeIDsArg {
 		includeIDs = append(includeIDs, includeID.(string))
 	}
-	headingMode := 0 // 0：带标题下方块
+	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
 	headingModeArg := arg["headingMode"]
 	if nil != headingModeArg {
 		headingMode = int(headingModeArg.(float64))
@@ -304,7 +304,7 @@ func searchEmbedBlock(c *gin.Context) {
 	for _, excludeID := range excludeIDsArg {
 		excludeIDs = append(excludeIDs, excludeID.(string))
 	}
-	headingMode := 0 // 0：带标题下方块
+	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
 	headingModeArg := arg["headingMode"]
 	if nil != headingModeArg {
 		headingMode = int(headingModeArg.(float64))

@@ -196,103 +196,56 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		return
 	}
 
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
+	current := treenode.GetNodeInTree(tree, id)
+	if nil == current || !current.IsBlock() {
+		return
+	}
+	parentBlock := treenode.ParentBlock(current)
+	if nil == parentBlock {
 		return
 	}
 
-	if !node.IsBlock() {
-		return
+	parent = parentBlock.ID
+	if flb := treenode.FirstChildBlock(parentBlock); nil != flb {
+		parent = flb.ID
 	}
 
-	parentListCount := 0
-	var parentListItem, current *ast.Node
-	for p := node.Parent; nil != p; p = p.Parent {
-		if ast.NodeListItem == p.Type {
-			parentListCount++
-			if 1 < parentListCount {
-				parentListItem = p
-				break
-			}
-			current = p.Parent
-		}
-	}
+	if ast.NodeDocument == parentBlock.Type {
+		parent = parentBlock.ID
 
-	if nil != parentListItem {
-		parent = parentListItem.ID
-
-		if parentListItem.Previous != nil {
-			previous = parentListItem.Previous.ID
-			if flb := treenode.FirstChildBlock(parentListItem.Previous); nil != flb {
+		if nil != current.Previous && current.Previous.IsBlock() {
+			previous = current.Previous.ID
+			if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
 				previous = flb.ID
 			}
 		}
 
-		if parentListItem.Next != nil {
-			next = parentListItem.Next.ID
-			if flb := treenode.FirstChildBlock(parentListItem.Next); nil != flb {
+		if nil != current.Next && current.Next.IsBlock() {
+			next = current.Next.ID
+			if flb := treenode.FirstChildBlock(current.Next); nil != flb {
 				next = flb.ID
-			}
-		}
-
-		if "" == previous && "" == next && nil != current {
-			parent = current.ID
-			if nil != current.Previous {
-				previous = current.Previous.ID
-				if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
-					previous = flb.ID
-				}
-			}
-			if nil != current.Next {
-				next = current.Next.ID
-				if flb := treenode.FirstChildBlock(current.Next); nil != flb {
-					next = flb.ID
-				}
 			}
 		}
 		return
 	}
 
-	if nil == current {
-		current = node
-	}
-
-	if nil != current.Parent && current.Parent.IsBlock() {
-		parent = current.Parent.ID
-		if flb := treenode.FirstChildBlock(current.Parent); nil != flb {
-			parent = flb.ID
+	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
+		if nil != parentBlock.Previous && parentBlock.Previous.IsBlock() {
+			previous = parentBlock.Previous.ID
+			if flb := treenode.FirstChildBlock(parentBlock.Previous); nil != flb {
+				previous = flb.ID
+			}
+			break
 		}
-
-		if ast.NodeDocument == current.Parent.Type {
-			parent = current.Parent.ID
-
-			if nil != current.Previous && current.Previous.IsBlock() {
-				previous = current.Previous.ID
-				if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
-					previous = flb.ID
-				}
+	}
+	parentBlock = treenode.ParentBlock(current)
+	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
+		if nil != parentBlock.Next && parentBlock.Next.IsBlock() {
+			next = parentBlock.Next.ID
+			if flb := treenode.FirstChildBlock(parentBlock.Next); nil != flb {
+				next = flb.ID
 			}
-
-			if nil != current.Next && current.Next.IsBlock() {
-				next = current.Next.ID
-				if flb := treenode.FirstChildBlock(current.Next); nil != flb {
-					next = flb.ID
-				}
-			}
-		} else {
-			if nil != current.Parent.Previous && current.Parent.Previous.IsBlock() {
-				previous = current.Parent.Previous.ID
-				if flb := treenode.FirstChildBlock(current.Parent.Previous); nil != flb {
-					previous = flb.ID
-				}
-			}
-
-			if nil != current.Parent.Next && current.Parent.Next.IsBlock() {
-				next = current.Parent.Next.ID
-				if flb := treenode.FirstChildBlock(current.Parent.Next); nil != flb {
-					next = flb.ID
-				}
-			}
+			break
 		}
 	}
 	return
@@ -1058,16 +1011,40 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	for _, n := range unlinks {
 		n.Unlink()
 	}
-	nodes = append(nodes, def)
-	if 0 == headingMode && ast.NodeHeading == def.Type && "1" != def.IALAttr("fold") {
-		children := treenode.HeadingChildren(def)
-		for _, c := range children {
-			if "1" == c.IALAttr("heading-fold") {
-				// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
-				continue
+	// headingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
+	if ast.NodeHeading == def.Type {
+		if 1 == headingMode {
+			// 仅显示标题
+			nodes = append(nodes, def)
+		} else if 2 == headingMode {
+			// 仅显示标题下方的块（去除标题）
+			if "1" != def.IALAttr("fold") {
+				children := treenode.HeadingChildren(def)
+				for _, c := range children {
+					if "1" == c.IALAttr("heading-fold") {
+						// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+						continue
+					}
+					nodes = append(nodes, c)
+				}
 			}
-			nodes = append(nodes, c)
+		} else {
+			// 0: 显示标题与下方的块
+			nodes = append(nodes, def)
+			if "1" != def.IALAttr("fold") {
+				children := treenode.HeadingChildren(def)
+				for _, c := range children {
+					if "1" == c.IALAttr("heading-fold") {
+						// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+						continue
+					}
+					nodes = append(nodes, c)
+				}
+			}
 		}
+	} else {
+		// 非标题块，直接添加
+		nodes = append(nodes, def)
 	}
 
 	b := treenode.GetBlockTree(def.ID)
@@ -1095,7 +1072,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	if breadcrumb {
-		blockPaths = buildBlockBreadcrumb(def, nil, true)
+		blockPaths = buildBlockBreadcrumb(def, nil, true, headingMode)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

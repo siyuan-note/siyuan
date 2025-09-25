@@ -95,7 +95,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         } else if ((element.scrollTop > element.scrollHeight - element.clientHeight * 1.8) &&
             protyle.wysiwyg.element.lastElementChild &&
             protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
-            if (element.scrollTop > 768 && element.scrollTop > protyle.scroll.lastScrollTop * 2) {
+            if (protyle.scroll.lastScrollTop > 768 && element.scrollTop > protyle.scroll.lastScrollTop * 2) {
                 // 使用鼠标拖拽滚动条时导致加载需进行矫正
                 element.scrollTop = protyle.scroll.lastScrollTop;
                 return;

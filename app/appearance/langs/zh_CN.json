@@ -1,4 +1,5 @@
 {
+  "jumpTo": "跳转到",
   "vacuumDataIndex": "优化索引",
   "vacuumDataIndexTip": "校验数据索引，释放存储空间并提升索引性能",
   "rebuildDataIndex": "重建索引",

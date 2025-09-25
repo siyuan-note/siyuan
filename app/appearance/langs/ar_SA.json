@@ -1,4 +1,5 @@
 {
+  "jumpTo": "انتقل إلى",
   "vacuumDataIndex": "تحسين الفهرس",
   "vacuumDataIndexTip": "تحقق من فهرس البيانات، وحرر مساحة التخزين وحسّن أداء الفهرس",
   "rebuildDataIndex": "إعادة بناء الفهرس",

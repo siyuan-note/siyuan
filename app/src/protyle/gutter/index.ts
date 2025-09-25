@@ -884,7 +884,6 @@ export class Gutter {
                 id: "quickMakeCard",
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-                iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 icon: "iconRiffCard",
                 click() {
                     quickMakeCard(protyle, selectsElement);
@@ -1944,7 +1943,6 @@ export class Gutter {
                 icon: "iconRiffCard",
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-                iconHTML: '<svg class="b3-menu__icon" style="color:var(--b3-theme-primary)"><use xlink:href="#iconRiffCard"></use></svg>',
                 click() {
                     quickMakeCard(protyle, [nodeElement]);
                 }

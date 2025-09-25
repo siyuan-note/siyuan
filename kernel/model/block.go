@@ -206,10 +206,6 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	}
 
 	parent = parentBlock.ID
-	if flb := treenode.FirstChildBlock(parentBlock); nil != flb {
-		parent = flb.ID
-	}
-
 	if ast.NodeDocument == parentBlock.Type {
 		parent = parentBlock.ID
 

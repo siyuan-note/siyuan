@@ -202,9 +202,15 @@ interface Window {
             strict: (errorCode: string) => "ignore" | "warn";
         }): string;
     };
+    zenuml: object,
     mermaid: {
         initialize(options: any): void,
-        render(id: string, text: string): { svg: string }
+        render(id: string, text: string): { svg: string },
+        registerExternalDiagrams(ex: object[]): void,
+        registerIconPacks(options: {
+            name: string,
+            loader(): Promise<Response>
+        }[]): void
     };
     plantumlEncoder: {
         encode(options: string): string,

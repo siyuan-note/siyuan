@@ -196,78 +196,22 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		return
 	}
 
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
+	current := treenode.GetNodeInTree(tree, id)
+	if nil == current || !current.IsBlock() {
+		return
+	}
+	parentBlock := treenode.ParentBlock(current)
+	if nil == parentBlock {
 		return
 	}
 
-	if !node.IsBlock() {
-		return
-	}
-
-	parentListCount := 0
-	var parentListItem, current *ast.Node
-	for p := node.Parent; nil != p; p = p.Parent {
-		if ast.NodeListItem == p.Type {
-			parentListCount++
-			if 1 < parentListCount {
-				parentListItem = p
-				break
-			}
-			current = p.Parent
-		}
-	}
-
-	if nil != parentListItem {
-		parent = parentListItem.ID
-
-		if parentListItem.Previous != nil {
-			previous = parentListItem.Previous.ID
-			if flb := treenode.FirstChildBlock(parentListItem.Previous); nil != flb {
-				previous = flb.ID
-			}
-		}
-
-		if parentListItem.Next != nil {
-			next = parentListItem.Next.ID
-			if flb := treenode.FirstChildBlock(parentListItem.Next); nil != flb {
-				next = flb.ID
-			}
-		}
-
-		if "" == previous && "" == next && nil != current {
-			parent = current.ID
-			if nil != current.Previous {
-				previous = current.Previous.ID
-				if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
-					previous = flb.ID
-				}
-			}
-			if nil != current.Next {
-				next = current.Next.ID
-				if flb := treenode.FirstChildBlock(current.Next); nil != flb {
-					next = flb.ID
-				}
-			}
-		}
-		return
-	}
-
-	if nil == current {
-		current = node
-	}
-
-	if nil == current.Parent || !current.Parent.IsBlock() {
-		return
-	}
-
-	parent = current.Parent.ID
-	if flb := treenode.FirstChildBlock(current.Parent); nil != flb {
+	parent = parentBlock.ID
+	if flb := treenode.FirstChildBlock(parentBlock); nil != flb {
 		parent = flb.ID
 	}
 
-	if ast.NodeDocument == current.Parent.Type {
-		parent = current.Parent.ID
+	if ast.NodeDocument == parentBlock.Type {
+		parent = parentBlock.ID
 
 		if nil != current.Previous && current.Previous.IsBlock() {
 			previous = current.Previous.ID
@@ -285,7 +229,6 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		return
 	}
 
-	parentBlock := treenode.ParentBlock(current)
 	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
 		if nil != parentBlock.Previous && parentBlock.Previous.IsBlock() {
 			previous = parentBlock.Previous.ID

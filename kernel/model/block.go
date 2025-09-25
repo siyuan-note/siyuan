@@ -1058,7 +1058,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	for _, n := range unlinks {
 		n.Unlink()
 	}
-	// headingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块（默认）
+	// headingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
 	if ast.NodeHeading == def.Type {
 		if 1 == headingMode {
 			// 仅显示标题

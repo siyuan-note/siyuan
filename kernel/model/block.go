@@ -257,42 +257,52 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		current = node
 	}
 
-	if nil != current.Parent && current.Parent.IsBlock() {
+	if nil == current.Parent || !current.Parent.IsBlock() {
+		return
+	}
+
+	parent = current.Parent.ID
+	if flb := treenode.FirstChildBlock(current.Parent); nil != flb {
+		parent = flb.ID
+	}
+
+	if ast.NodeDocument == current.Parent.Type {
 		parent = current.Parent.ID
-		if flb := treenode.FirstChildBlock(current.Parent); nil != flb {
-			parent = flb.ID
+
+		if nil != current.Previous && current.Previous.IsBlock() {
+			previous = current.Previous.ID
+			if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
+				previous = flb.ID
+			}
 		}
 
-		if ast.NodeDocument == current.Parent.Type {
-			parent = current.Parent.ID
+		if nil != current.Next && current.Next.IsBlock() {
+			next = current.Next.ID
+			if flb := treenode.FirstChildBlock(current.Next); nil != flb {
+				next = flb.ID
+			}
+		}
+		return
+	}
 
-			if nil != current.Previous && current.Previous.IsBlock() {
-				previous = current.Previous.ID
-				if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
-					previous = flb.ID
-				}
+	parentBlock := treenode.ParentBlock(current)
+	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
+		if nil != parentBlock.Previous && parentBlock.Previous.IsBlock() {
+			previous = parentBlock.Previous.ID
+			if flb := treenode.FirstChildBlock(parentBlock.Previous); nil != flb {
+				previous = flb.ID
 			}
-
-			if nil != current.Next && current.Next.IsBlock() {
-				next = current.Next.ID
-				if flb := treenode.FirstChildBlock(current.Next); nil != flb {
-					next = flb.ID
-				}
+			break
+		}
+	}
+	parentBlock = treenode.ParentBlock(current)
+	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
+		if nil != parentBlock.Next && parentBlock.Next.IsBlock() {
+			next = parentBlock.Next.ID
+			if flb := treenode.FirstChildBlock(parentBlock.Next); nil != flb {
+				next = flb.ID
 			}
-		} else {
-			if nil != current.Parent.Previous && current.Parent.Previous.IsBlock() {
-				previous = current.Parent.Previous.ID
-				if flb := treenode.FirstChildBlock(current.Parent.Previous); nil != flb {
-					previous = flb.ID
-				}
-			}
-
-			if nil != current.Parent.Next && current.Parent.Next.IsBlock() {
-				next = current.Parent.Next.ID
-				if flb := treenode.FirstChildBlock(current.Parent.Next); nil != flb {
-					next = flb.ID
-				}
-			}
+			break
 		}
 	}
 	return

@@ -1,4 +1,5 @@
 {
+  "jumpTo": "Springe zu",
   "vacuumDataIndex": "Index optimieren",
   "vacuumDataIndexTip": "Datenindex prüfen, Speicherplatz freigeben und Indexleistung verbessern",
   "rebuildDataIndex": "Index neu erstellen",

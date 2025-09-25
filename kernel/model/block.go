@@ -1058,16 +1058,40 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	for _, n := range unlinks {
 		n.Unlink()
 	}
-	nodes = append(nodes, def)
-	if 0 == headingMode && ast.NodeHeading == def.Type && "1" != def.IALAttr("fold") {
-		children := treenode.HeadingChildren(def)
-		for _, c := range children {
-			if "1" == c.IALAttr("heading-fold") {
-				// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
-				continue
+	// headingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块（默认）
+	if ast.NodeHeading == def.Type {
+		if 1 == headingMode {
+			// 仅显示标题
+			nodes = append(nodes, def)
+		} else if 2 == headingMode {
+			// 仅显示标题下方的块（去除标题）
+			if "1" != def.IALAttr("fold") {
+				children := treenode.HeadingChildren(def)
+				for _, c := range children {
+					if "1" == c.IALAttr("heading-fold") {
+						// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+						continue
+					}
+					nodes = append(nodes, c)
+				}
 			}
-			nodes = append(nodes, c)
+		} else {
+			// 0: 显示标题与下方的块
+			nodes = append(nodes, def)
+			if "1" != def.IALAttr("fold") {
+				children := treenode.HeadingChildren(def)
+				for _, c := range children {
+					if "1" == c.IALAttr("heading-fold") {
+						// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+						continue
+					}
+					nodes = append(nodes, c)
+				}
+			}
 		}
+	} else {
+		// 非标题块，直接添加
+		nodes = append(nodes, def)
 	}
 
 	b := treenode.GetBlockTree(def.ID)
@@ -1095,7 +1119,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	if breadcrumb {
-		blockPaths = buildBlockBreadcrumb(def, nil, true)
+		blockPaths = buildBlockBreadcrumb(def, nil, true, headingMode)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

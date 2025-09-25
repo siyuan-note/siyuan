@@ -495,7 +495,7 @@ func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, e
 	return
 }
 
-func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bool) (ret []*BlockPath) {
+func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bool, headingMode ...int) (ret []*BlockPath) {
 	ret = []*BlockPath{}
 	if nil == node {
 		return
@@ -503,6 +503,12 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 	box := Conf.Box(node.Box)
 	if nil == box {
 		return
+	}
+
+	// 默认 headingMode 为 0
+	mode := 0
+	if len(headingMode) > 0 {
+		mode = headingMode[0]
 	}
 
 	headingLevel := 16
@@ -564,8 +570,13 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			}
 		} else {
 			if ast.NodeDocument != parent.Type {
-				// 在嵌入块中隐藏最后一个非文档路径的面包屑中的文本 Hide text in breadcrumb of last non-document path in embed block https://github.com/siyuan-note/siyuan/issues/13866
-				name = ""
+				// 当headingMode=2（仅显示标题下方的块）且当前节点是标题时，保留标题名称
+				if 2 == mode && ast.NodeHeading == parent.Type && parent == node {
+					// 保留标题名称，不清空
+				} else {
+					// 在嵌入块中隐藏最后一个非文档路径的面包屑中的文本 Hide text in breadcrumb of last non-document path in embed block https://github.com/siyuan-note/siyuan/issues/13866
+					name = ""
+				}
 			}
 		}
 

@@ -493,6 +493,20 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
         }
         if (!hasParentHeading) {
+            const rendersElement = [];
+            if (item.classList.contains("render-node") && item.getAttribute("data-type") === "NodeCodeBlock") {
+                rendersElement.push(item);
+            } else {
+                rendersElement.push(...item.querySelectorAll('.render-node[data-type="NodeCodeBlock"]'));
+            }
+            rendersElement.forEach((renderItem) => {
+                renderItem.querySelector(".protyle-icons")?.remove();
+                const spinElement = renderItem.querySelector('[spin="1"]');
+                if (spinElement) {
+                    spinElement.innerHTML = "";
+                }
+                renderItem.removeAttribute("data-render");
+            });
             processClonePHElement(item);
             if (insertBefore) {
                 blockElement.before(item);

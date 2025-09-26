@@ -709,13 +709,15 @@ export class Outline extends Model {
         window.siyuan.menus.menu.remove();
         for (let i = 1; i <= 6; i++) {
             window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages[`heading${i}`] || `${i}级标题`,
+                icon: `iconH${i}`,
+                label: window.siyuan.languages[`heading${i}`],
                 click: () => this.expandToLevel(i)
             }).element);
         }
         window.siyuan.menus.menu.popup({
-            x: event.clientX,
-            y: event.clientY
+            x: event.clientX-11,
+            y: event.clientY+11,
+            w: 12
         });
         return window.siyuan.menus.menu;
     }

@@ -1365,6 +1365,15 @@ export class Outline extends Model {
             click: () => this.insertHeadingAfter(element)
         }).element);
 
+        // 添加子标题
+        if (currentLevel < 6) { // 只有当前级别小于6时才能添加子标题
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconAdd",
+                label: "添加子标题",
+                click: () => this.addChildHeading(element)
+            }).element);
+        }
+
         window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
 
 
@@ -1859,5 +1868,36 @@ export class Outline extends Model {
                 });
             }
         };
+    }
+
+    /**
+     * 添加子标题
+     */
+    private addChildHeading(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        if (!id) {
+            return;
+        }
+
+        const currentLevel = this.getHeadingLevel(element);
+        const childLevel = Math.min(currentLevel + 1, 6); // 子标题级别比当前标题高一级，最大到H6
+        const headingPrefix = "#".repeat(childLevel) + " ";
+
+        // 使用当前标题作为父标题，在其内部添加子标题
+        fetchPost("/api/block/appendBlock", {
+            data: headingPrefix,
+            dataType: "markdown",
+            parentID: id
+        }, (response) => {
+            if (response.code === 0 && response.data && response.data.length > 0) {
+                // 插入成功后，聚焦到新插入的标题
+                const newId = response.data[0].doOperations[0].id;
+                openFileById({
+                    app: this.app,
+                    id: newId,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
+                });
+            }
+        });
     }
 }

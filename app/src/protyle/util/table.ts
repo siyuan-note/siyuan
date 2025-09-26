@@ -6,7 +6,7 @@ import {isNotCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
-import {hasPreviousSibling} from "../wysiwyg/getBlock";
+import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
@@ -369,6 +369,15 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     const nodeElement = hasClosestBlock(range.startContainer) as HTMLTableElement;
     if (!cellElement || !nodeElement) {
         return false;
+    }
+
+    if (event.key === "Backspace" && range.toString() === "") {
+        const previousElement = hasPreviousSibling(range.startContainer) as Element;
+        if (range.startOffset === 1 && previousElement.nodeType === 1 && previousElement.tagName === "BR" &&
+            range.startContainer.textContent.length === 1 && !hasNextSibling(range.startContainer)) {
+            previousElement.insertAdjacentHTML("beforebegin", "<br>");
+            return false;
+        }
     }
 
     // shift+enter 软换行

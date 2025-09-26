@@ -600,7 +600,7 @@
   "katexMacrosTip": "请使用 JSON 对象格式（<code class='fn__code'>{}</code>）来包裹宏定义，例如 <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "系统日志中保存了程序运行记录，通过导出系统日志发送给开发者可以更好地帮助开发者诊断程序问题",
   "systemLog": "系统日志",
-  "syncConfGuide1": "初始化同步密钥",
+  "syncConfGuide1": "初始化数据仓库密钥",
   "syncConfGuide2": "该密钥用于数据同步端到端加密<br>密钥基于你输入的密码生成，请务必牢记密码",
   "syncConfGuide3": "云端同步目录用于存放当前工作空间对应的加密数据，默认名称为 <code>main</code>。如果你只有一个工作空间需要同步，直接使用 <code>main</code> 即可",
   "syncConfGuide4": "立即同步？",

@@ -600,7 +600,7 @@
   "katexMacrosTip": "Bitte verwenden Sie das JSON-Objektformat (<code class='fn__code'>{}</code>), um Makrodefinitionen einzufassen, z.B. <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Programmlaufzeithistorien sind im Systemprotokoll gespeichert. Durch den Export des Systemprotokolls und das Senden an Entwickler können Probleme besser diagnostiziert werden.",
   "systemLog": "Systemprotokoll",
-  "syncConfGuide1": "Initialisieren Sie den Synchronisierungsschlüssel",
+  "syncConfGuide1": "Daten-Repo-Schlüssel initialisieren",
   "syncConfGuide2": "Dieser Schlüssel wird für die End-to-End-Verschlüsselung der Daten-Synchronisation verwendet<br>Der Schlüssel wird basierend auf dem von Ihnen eingegebenen Passwort generiert, bitte merken Sie sich das Passwort.",
   "syncConfGuide3": "Das Cloud-Synchronisationsverzeichnis wird verwendet, um die verschlüsselten Daten zu speichern, die mit dem aktuellen Arbeitsbereich übereinstimmen. Der Standardname ist <code>main</code>. Wenn Sie nur einen Arbeitsbereich haben, um ihn zu synchronisieren, verwenden Sie einfach <code>main</code>.",
   "syncConfGuide4": "Jetzt synchronisieren?",

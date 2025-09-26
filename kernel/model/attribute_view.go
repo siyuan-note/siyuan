@@ -4795,9 +4795,6 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			val.Date.Content = 0
 			val.Date.FormattedContent = ""
 		}
-		if nil != key.Date {
-			val.Date.IsNotTime = !key.Date.FillSpecificTime
-		}
 	} else if av.KeyTypeSelect == val.Type || av.KeyTypeMSelect == val.Type {
 		if nil != key && 0 < len(val.MSelect) {
 			var tmp []*av.ValueSelect

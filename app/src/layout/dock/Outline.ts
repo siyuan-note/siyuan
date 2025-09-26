@@ -15,9 +15,11 @@ import { unicode2Emoji } from "../../emoji";
 import { getPreviousBlock } from "../../protyle/wysiwyg/getBlock";
 import { App } from "../../index";
 import { checkFold } from "../../util/noRelyPCFunction";
-import { transaction } from "../../protyle/wysiwyg/transaction";
+import { transaction, turnsIntoTransaction } from "../../protyle/wysiwyg/transaction";
 import { goHome } from "../../protyle/wysiwyg/commonHotkey";
 import { Editor } from "../../editor";
+import { writeText, isInAndroid, isInHarmony } from "../../protyle/util/compatibility";
+import { mathRender } from "../../protyle/render/mathRender";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -207,6 +209,12 @@ export class Outline extends Model {
                     }
                 }
             },
+            rightClick: (element: HTMLElement, event: MouseEvent) => {
+                // 右键菜单
+                event.preventDefault();
+                event.stopPropagation();
+                this.showContextMenu(element, event);
+            },
             onToggleChange: () => {
                 // 实时保存折叠状态变化
                 if (!this.isPreview) {
@@ -343,7 +351,7 @@ export class Outline extends Model {
     }
 
     /**
-     * 切换同层级的所有标题的展开/折叠状态（如果有子标题的话）
+     * 切换同层级的所有标题的展开/折叠状态（基于标题级别而不是DOM层级）
      * @param element 当前点击的元素
      */
     private collapseSameLevel(element: HTMLElement) {
@@ -351,11 +359,22 @@ export class Outline extends Model {
             return;
         }
 
-        // 获取当前元素的层级深度
-        const currentLevel = this.getElementLevel(element);
+        // 获取当前元素的标题级别
+        const currentHeadingLevel = this.getHeadingLevel(element);
+        if (currentHeadingLevel === 0) {
+            return; // 如果不是有效的标题，直接返回
+        }
 
-        // 找到所有同层级的元素
-        const sameLevelElements = this.getSameLevelElements(currentLevel);
+        // 获取所有相同标题级别的元素
+        const allListItems = this.element.querySelectorAll("li.b3-list-item");
+        const sameLevelElements: HTMLElement[] = [];
+
+        allListItems.forEach(item => {
+            const headingLevel = this.getHeadingLevel(item as HTMLElement);
+            if (headingLevel === currentHeadingLevel) {
+                sameLevelElements.push(item as HTMLElement);
+            }
+        });
 
         // 过滤出有子元素的项
         const elementsWithChildren = sameLevelElements.filter(item =>
@@ -1261,5 +1280,584 @@ export class Outline extends Model {
             filterIconElement.classList.remove("block__icon--active");
             filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
         }
+    }
+
+    /**
+     * 显示右键菜单
+     */
+    private showContextMenu(element: HTMLElement, event: MouseEvent) {
+        if (this.isPreview) {
+            return; // 预览模式下不显示右键菜单
+        }
+
+        const id = element.getAttribute("data-node-id");
+        const subtype = element.getAttribute("data-subtype");
+        if (!id || !subtype) {
+            return;
+        }
+
+        const currentLevel = this.getHeadingLevel(element);
+        
+        window.siyuan.menus.menu.remove();
+
+        // 升级
+        if (currentLevel > 1) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconUp",
+                label: "升级",
+                click: () => this.upgradeHeading(element)
+            }).element);
+        }
+
+        // 降级
+        if (currentLevel < 6) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconDown", 
+                label: "降级",
+                click: () => this.downgradeHeading(element)
+            }).element);
+        }
+
+        // 带子标题转换
+        const headingSubMenu = [];
+        if (currentLevel !== 1) {
+            headingSubMenu.push(this.genHeadingTransform(id, 1));
+        }
+        if (currentLevel !== 2) {
+            headingSubMenu.push(this.genHeadingTransform(id, 2));
+        }
+        if (currentLevel !== 3) {
+            headingSubMenu.push(this.genHeadingTransform(id, 3));
+        }
+        if (currentLevel !== 4) {
+            headingSubMenu.push(this.genHeadingTransform(id, 4));
+        }
+        if (currentLevel !== 5) {
+            headingSubMenu.push(this.genHeadingTransform(id, 5));
+        }
+        if (currentLevel !== 6) {
+            headingSubMenu.push(this.genHeadingTransform(id, 6));
+        }
+
+        if (headingSubMenu.length > 0) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "tWithSubtitle",
+                type: "submenu",
+                icon: "iconRefresh",
+                label: window.siyuan.languages.tWithSubtitle,
+                submenu: headingSubMenu
+            }).element);
+        }
+
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+
+        // 在前面插入同级标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconBefore",
+            label: "在前面插入同级标题",
+            click: () => this.insertHeadingBefore(element)
+        }).element);
+
+        // 在后面插入同级标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconAfter",
+            label: "在后面插入同级标题", 
+            click: () => this.insertHeadingAfter(element)
+        }).element);
+
+        window.siyuan.menus.menu.append(new MenuItem({ type: "separator" }).element);
+
+
+        // 复制带子标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconCopy",
+            label: `${window.siyuan.languages.copy} ${window.siyuan.languages.headings1}`,
+            click: () => this.copyHeadingWithChildren(element)
+        }).element);
+
+        // 剪切带子标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconCut",
+            label: `${window.siyuan.languages.cut} ${window.siyuan.languages.headings1}`,
+            click: () => this.cutHeadingWithChildren(element)
+        }).element);
+
+
+        // 删除
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconTrashcan",
+            label: `${window.siyuan.languages.delete} ${window.siyuan.languages.headings1}`,
+            click: () => this.deleteHeading(element)
+        }).element);
+
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+
+        // 展开子标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconExpand",
+            label: "展开子标题",
+            click: () => this.expandChildren(element)
+        }).element);
+
+        // 折叠子标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconContract",
+            label: "折叠子标题",
+            click: () => this.collapseChildren(element)
+        }).element);
+
+        // 展开同级标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconExpand",
+            label: "展开同级标题",
+            click: () => this.expandSameLevel(element)
+        }).element);
+
+        // 折叠同级标题
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconContract", 
+            label: "折叠同级标题",
+            click: () => this.collapseSameLevel(element)
+        }).element);
+
+        // 全部折叠
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconContract",
+            label: "全部折叠",
+            click: () => this.tree.collapseAll()
+        }).element);
+
+        // 全部展开
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconExpand",
+            label: "全部展开", 
+            click: () => {
+                this.tree.expandAll();
+                if (!this.isPreview) {
+                    fetchPost("/api/storage/setOutlineStorage", {
+                        docID: this.blockId,
+                        val: {
+                            expandIds: this.tree.getExpandIds()
+                        }
+                    });
+                }
+            }
+        }).element);
+
+        window.siyuan.menus.menu.popup({
+            x: event.clientX,
+            y: event.clientY
+        });
+    }
+
+    /**
+     * 升级标题
+     */
+    private upgradeHeading(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        const currentLevel = this.getHeadingLevel(element);
+        
+        if (currentLevel <= 1) {
+            return;
+        }
+
+        // 找到编辑器实例和文档中的标题元素
+        let editor: any;
+        let blockElement: HTMLElement;
+        getAllModels().editor.find(editItem => {
+            if (editItem.editor.protyle.block.rootID === this.blockId) {
+                editor = editItem.editor.protyle;
+                blockElement = editor.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+                return true;
+            }
+        });
+
+        if (!editor || !blockElement) {
+            return;
+        }
+
+        // 使用turnsIntoTransaction来变更标题级别
+        turnsIntoTransaction({
+            protyle: editor,
+            selectsElement: [blockElement],
+            type: "Blocks2Hs",
+            level: currentLevel - 1
+        });
+    }
+
+    /**
+     * 降级标题
+     */
+    private downgradeHeading(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        const currentLevel = this.getHeadingLevel(element);
+        
+        if (currentLevel >= 6) {
+            return;
+        }
+
+        // 找到编辑器实例和文档中的标题元素
+        let editor: any;
+        let blockElement: HTMLElement;
+        getAllModels().editor.find(editItem => {
+            if (editItem.editor.protyle.block.rootID === this.blockId) {
+                editor = editItem.editor.protyle;
+                blockElement = editor.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+                return true;
+            }
+        });
+
+        if (!editor || !blockElement) {
+            return;
+        }
+
+        // 使用turnsIntoTransaction来变更标题级别
+        turnsIntoTransaction({
+            protyle: editor,
+            selectsElement: [blockElement],
+            type: "Blocks2Hs",
+            level: currentLevel + 1
+        });
+    }
+
+    /**
+     * 在前面插入同级标题
+     */
+    private insertHeadingBefore(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        const currentLevel = this.getHeadingLevel(element);
+        const headingPrefix = "#".repeat(currentLevel) + " ";
+
+        fetchPost("/api/block/insertBlock", {
+            data: headingPrefix,
+            dataType: "markdown",
+            nextID: id
+        }, (response) => {
+            if (response.code === 0) {
+                // 插入成功后，可以选择聚焦到新插入的标题
+                const newId = response.data[0].doOperations[0].id;
+                openFileById({
+                    app: this.app,
+                    id: newId,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
+                });
+            }
+        });
+    }
+
+    /**
+     * 在后面插入同级标题
+     */
+    private insertHeadingAfter(element: HTMLElement) {
+        const currentLevel = this.getHeadingLevel(element);
+        const headingPrefix = "#".repeat(currentLevel) + " ";
+
+        // 获取父节点ID，如果当前标题是顶级标题，使用文档根ID
+        const parentElement = element.parentElement;
+        let parentID = this.blockId; // 默认为文档根ID
+        
+        if (parentElement && parentElement.tagName === "UL") {
+            const parentLi = parentElement.previousElementSibling;
+            if (parentLi && parentLi.classList.contains("b3-list-item")) {
+                parentID = parentLi.getAttribute("data-node-id");
+            }
+        }
+
+        fetchPost("/api/block/appendBlock", {
+            data: headingPrefix,
+            dataType: "markdown", 
+            parentID: parentID
+        }, (response) => {
+            if (response.code === 0) {
+                // 插入成功后，可以选择聚焦到新插入的标题
+                const newId = response.data[0].doOperations[0].id;
+                openFileById({
+                    app: this.app,
+                    id: newId,
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
+                });
+            }
+        });
+    }
+
+    /**
+     * 删除标题
+     */
+    private deleteHeading(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        
+        // 找到编辑器实例
+        let editor: any;
+        getAllModels().editor.find(editItem => {
+            if (editItem.editor.protyle.block.rootID === this.blockId) {
+                editor = editItem.editor.protyle;
+                return true;
+            }
+        });
+
+        if (!editor) {
+            return;
+        }
+
+        fetchPost("/api/block/getHeadingDeleteTransaction", {
+            id: id,
+        }, (response) => {
+            response.data.doOperations.forEach((operation: any) => {
+                editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                    itemElement.remove();
+                });
+            });
+            transaction(editor, response.data.doOperations, response.data.undoOperations);
+        });
+    }
+
+    /**
+     * 展开子标题
+     */
+    private expandChildren(element: HTMLElement) {
+        const nextElement = element.nextElementSibling;
+        if (nextElement && nextElement.tagName === "UL") {
+            const arrowElement = element.querySelector(".b3-list-item__arrow");
+            if (arrowElement) {
+                arrowElement.classList.add("b3-list-item__arrow--open");
+                nextElement.classList.remove("fn__none");
+                
+                // 递归展开所有子元素
+                const expandAllChildren = (ul: Element) => {
+                    ul.querySelectorAll(":scope > li.b3-list-item").forEach(li => {
+                        const childUl = li.nextElementSibling;
+                        if (childUl && childUl.tagName === "UL") {
+                            const childArrow = li.querySelector(".b3-list-item__arrow");
+                            if (childArrow) {
+                                childArrow.classList.add("b3-list-item__arrow--open");
+                                childUl.classList.remove("fn__none");
+                                expandAllChildren(childUl);
+                            }
+                        }
+                    });
+                };
+                expandAllChildren(nextElement);
+
+                // 保存展开状态
+                if (this.tree.onToggleChange) {
+                    this.tree.onToggleChange();
+                }
+            }
+        }
+    }
+
+    /**
+     * 折叠子标题
+     */
+    private collapseChildren(element: HTMLElement) {
+        const nextElement = element.nextElementSibling;
+        if (nextElement && nextElement.tagName === "UL") {
+            const arrowElement = element.querySelector(".b3-list-item__arrow");
+            if (arrowElement) {
+                arrowElement.classList.remove("b3-list-item__arrow--open");
+                nextElement.classList.add("fn__none");
+
+                // 保存折叠状态
+                if (this.tree.onToggleChange) {
+                    this.tree.onToggleChange();
+                }
+            }
+        }
+    }
+
+    /**
+     * 展开同级标题 - 基于标题级别而不是DOM层级
+     */
+    private expandSameLevel(element: HTMLElement) {
+        const currentHeadingLevel = this.getHeadingLevel(element);
+        if (currentHeadingLevel === 0) {
+            return; // 如果不是有效的标题，直接返回
+        }
+
+        // 获取所有相同标题级别的元素
+        const allListItems = this.element.querySelectorAll("li.b3-list-item");
+        const sameLevelElements: HTMLElement[] = [];
+
+        allListItems.forEach(item => {
+            const headingLevel = this.getHeadingLevel(item as HTMLElement);
+            if (headingLevel === currentHeadingLevel) {
+                sameLevelElements.push(item as HTMLElement);
+            }
+        });
+
+        // 检查当前状态：如果大部分同级标题是展开的，则折叠；否则展开
+        let expandedCount = 0;
+        const elementsWithChildren = sameLevelElements.filter(item => {
+            const nextElement = item.nextElementSibling;
+            return nextElement && nextElement.tagName === "UL";
+        });
+
+        elementsWithChildren.forEach(item => {
+            const arrowElement = item.querySelector(".b3-list-item__arrow");
+            if (arrowElement && arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                expandedCount++;
+            }
+        });
+
+        // 如果超过一半的元素是展开的，则折叠所有；否则展开所有
+        const shouldExpand = expandedCount <= elementsWithChildren.length / 2;
+
+        elementsWithChildren.forEach(item => {
+            const nextElement = item.nextElementSibling;
+            const arrowElement = item.querySelector(".b3-list-item__arrow");
+            
+            if (arrowElement && nextElement && nextElement.tagName === "UL") {
+                if (shouldExpand) {
+                    // 展开
+                    if (!arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                        arrowElement.classList.add("b3-list-item__arrow--open");
+                        nextElement.classList.remove("fn__none");
+                    }
+                } else {
+                    // 折叠
+                    if (arrowElement.classList.contains("b3-list-item__arrow--open")) {
+                        arrowElement.classList.remove("b3-list-item__arrow--open");
+                        nextElement.classList.add("fn__none");
+                    }
+                }
+            }
+        });
+
+        // 保存展开状态
+        if (this.tree.onToggleChange) {
+            this.tree.onToggleChange();
+        }
+    }
+
+    /**
+     * 复制标题带子标题
+     */
+    private copyHeadingWithChildren(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        if (!id) {
+            return;
+        }
+
+        // 找到编辑器实例
+        let editor: any;
+        getAllModels().editor.find(editItem => {
+            if (editItem.editor.protyle.block.rootID === this.blockId) {
+                editor = editItem.editor.protyle;
+                return true;
+            }
+        });
+
+        if (!editor) {
+            return;
+        }
+
+        fetchPost("/api/block/getHeadingChildrenDOM", {
+            id: id, 
+            removeFoldAttr: false
+        }, (response) => {
+            if (isInAndroid()) {
+                window.JSAndroid.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+            } else if (isInHarmony()) {
+                window.JSHarmony.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+            } else {
+                writeText(response.data + Constants.ZWSP);
+            }
+        });
+    }
+
+    /**
+     * 剪切标题带子标题
+     */
+    private cutHeadingWithChildren(element: HTMLElement) {
+        const id = element.getAttribute("data-node-id");
+        if (!id) {
+            return;
+        }
+
+        // 找到编辑器实例
+        let editor: any;
+        getAllModels().editor.find(editItem => {
+            if (editItem.editor.protyle.block.rootID === this.blockId) {
+                editor = editItem.editor.protyle;
+                return true;
+            }
+        });
+
+        if (!editor) {
+            return;
+        }
+
+        fetchPost("/api/block/getHeadingChildrenDOM", {
+            id: id, 
+            removeFoldAttr: false
+        }, (response) => {
+            if (isInAndroid()) {
+                window.JSAndroid.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+            } else if (isInHarmony()) {
+                window.JSHarmony.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+            } else {
+                writeText(response.data + Constants.ZWSP);
+            }
+            
+            // 复制完成后删除标题及其子标题
+            fetchPost("/api/block/getHeadingDeleteTransaction", {
+                id: id,
+            }, (response) => {
+                response.data.doOperations.forEach((operation: any) => {
+                    editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                        itemElement.remove();
+                    });
+                });
+                transaction(editor, response.data.doOperations, response.data.undoOperations);
+            });
+        });
+    }
+
+    /**
+     * 生成标题级别转换菜单项
+     */
+    private genHeadingTransform(id: string, level: number) {
+        return {
+            id: "heading" + level,
+            iconHTML: "",
+            icon: "iconHeading" + level,
+            label: window.siyuan.languages["heading" + level],
+            click: () => {
+                // 找到编辑器实例
+                let editor: any;
+                getAllModels().editor.find(editItem => {
+                    if (editItem.editor.protyle.block.rootID === this.blockId) {
+                        editor = editItem.editor.protyle;
+                        return true;
+                    }
+                });
+
+                if (!editor) {
+                    return;
+                }
+
+                fetchPost("/api/block/getHeadingLevelTransaction", {
+                    id,
+                    level
+                }, (response) => {
+                    response.data.doOperations.forEach((operation: any, index: number) => {
+                        editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                            itemElement.outerHTML = operation.data;
+                        });
+                        // 使用 outer 后元素需要重新查询
+                        editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                            mathRender(itemElement);
+                        });
+                        if (index === 0) {
+                            const focusElement = editor.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
+                            if (focusElement) {
+                                focusElement.scrollIntoView({behavior: "smooth", block: "center"});
+                            }
+                        }
+                    });
+                    transaction(editor, response.data.doOperations, response.data.undoOperations);
+                });
+            }
+        };
     }
 }

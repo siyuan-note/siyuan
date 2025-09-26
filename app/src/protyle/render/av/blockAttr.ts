@@ -573,3 +573,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
         target = target.parentElement;
     }
 };
+
+export const isCustomAttr = (cellElement: Element) => {
+    return !!cellElement.getAttribute("data-av-id");
+};

@@ -1828,7 +1828,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "insertBefore",
                 icon: "iconBefore",
-                label: window.siyuan.languages["insert-before"],
+                label: window.siyuan.languages.insertBefore,
                 accelerator: window.siyuan.config.keymap.editor.general.insertBefore.custom,
                 click() {
                     hideElements(["select"], protyle);
@@ -1839,7 +1839,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "insertAfter",
                 icon: "iconAfter",
-                label: window.siyuan.languages["insert-after"],
+                label: window.siyuan.languages.insertAfter,
                 accelerator: window.siyuan.config.keymap.editor.general.insertAfter.custom,
                 click() {
                     hideElements(["select"], protyle);

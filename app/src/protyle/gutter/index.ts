@@ -827,14 +827,13 @@ export class Gutter {
                 });
             }
         }).element);
-        const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                addEditorToDatabase(protyle, range);
+                addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1354,14 +1353,13 @@ export class Gutter {
                     });
                 }
             }).element);
-            const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "addToDatabase",
                 icon: "iconDatabase",
                 label: window.siyuan.languages.addToDatabase,
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 click: () => {
-                    addEditorToDatabase(protyle, range);
+                    addEditorToDatabase(protyle, getEditorRange(nodeElement));
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

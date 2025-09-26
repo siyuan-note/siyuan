@@ -274,8 +274,11 @@
 .protyle-background {
   position: relative;
 
-  &:not(.protyle-background--enable) .protyle-background__img .protyle-icons {
-    display: none;
+  &:not(.protyle-background--enable) {
+    .protyle-background__img .protyle-icons,
+    .b3-chips__doctag .b3-chip__close {
+      display: none;
+    }
   }
 
   &--enable {

@@ -664,31 +664,48 @@ export class Outline extends Model {
     }
 
     /**
-     * 展开到指定层级
-     * @param targetLevel 目标层级，1-6级，6级表示全部展开
+     * 获取标题元素的实际标题级别（H1=1, H2=2, 等等）
+     * @param element li元素
+     * @returns 标题级别（1-6）
+     */
+    private getHeadingLevel(element: HTMLElement): number {
+        const subtype = element.getAttribute("data-subtype");
+        if (!subtype) {
+            return 0;
+        }
+
+        // 从data-subtype属性中提取标题级别（h1=1, h2=2, h3=3, 等等）
+        const match = subtype.match(/^h(\d+)$/);
+        if (match) {
+            return parseInt(match[1], 10);
+        }
+        
+        return 0;
+    }
+
+    /**
+     * 展开到指定标题级别
+     * @param targetLevel 目标标题级别，1-6级（H1-H6），6级表示全部展开
      */
     private expandToLevel(targetLevel: number) {
         if (targetLevel >= 6) {
             // 全部展开
             this.tree.expandAll();
         } else {
-            // 展开到指定层级
+            // 展开到指定标题级别
             const allListItems = this.element.querySelectorAll("li.b3-list-item");
 
             allListItems.forEach(item => {
-                const elementLevel = this.getElementLevel(item as HTMLElement);
+                const headingLevel = this.getHeadingLevel(item as HTMLElement);
                 const arrowElement = item.querySelector(".b3-list-item__arrow");
 
                 if (item.nextElementSibling && item.nextElementSibling.tagName === "UL" && arrowElement) {
-                    // 新的层级映射：1级对应原来的0级，2级对应原来的1级，以此类推
-                    const adjustedTargetLevel = targetLevel - 1;
-
-                    if (elementLevel < adjustedTargetLevel) {
-                        // 当前层级小于目标层级，展开
+                    if (headingLevel > 0 && headingLevel < targetLevel) {
+                        // 当前标题级别小于目标级别，展开
                         arrowElement.classList.add("b3-list-item__arrow--open");
                         item.nextElementSibling.classList.remove("fn__none");
-                    } else {
-                        // 当前层级大于等于目标层级，折叠
+                    } else if (headingLevel >= targetLevel) {
+                        // 当前标题级别大于等于目标级别，折叠
                         arrowElement.classList.remove("b3-list-item__arrow--open");
                         item.nextElementSibling.classList.add("fn__none");
                     }

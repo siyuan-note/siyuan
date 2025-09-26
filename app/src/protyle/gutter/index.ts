@@ -1626,39 +1626,61 @@ export class Gutter {
                     }
                 }, {
                     id: "headingEmbedMode",
-                    label: `<div class="fn__flex" style="margin-bottom: 4px">
-                        <span>${window.siyuan.languages.headingEmbedMode}</span>
-                        <span class="fn__space fn__flex-1"></span>
-                        <select class="b3-select fn__flex-center" style="margin-left: 8px;">
-                            <option value="0"${nodeElement.getAttribute("custom-heading-mode") === "0" ? " selected" : ""}>${window.siyuan.languages.showHeadingWithBlocks}</option>
-                            <option value="1"${nodeElement.getAttribute("custom-heading-mode") === "1" ? " selected" : ""}>${window.siyuan.languages.showHeadingOnlyTitle}</option>
-                            <option value="2"${nodeElement.getAttribute("custom-heading-mode") === "2" ? " selected" : ""}>${window.siyuan.languages.showHeadingOnlyBlocks}</option>
-                            <option value=""${!nodeElement.getAttribute("custom-heading-mode") ? " selected" : ""}>${window.siyuan.languages.default}</option>
-                        </select>
-                    </div>`,
-                    bind(element) {
-                        element.addEventListener("change", () => {
-                            const selectElement = element.querySelector("select") as HTMLSelectElement;
-                            const value = selectElement.value;
-                            if (value === "") {
-                                // 默认设置，清空 custom-heading-mode 属性
-                                nodeElement.removeAttribute("custom-heading-mode");
-                                fetchPost("/api/attr/setBlockAttrs", {
-                                    id,
-                                    attrs: {"custom-heading-mode": ""}
-                                });
-                            } else {
-                                nodeElement.setAttribute("custom-heading-mode", value);
-                                fetchPost("/api/attr/setBlockAttrs", {
-                                    id,
-                                    attrs: {"custom-heading-mode": value}
-                                });
-                            }
+                    label: window.siyuan.languages.headingEmbedMode,
+                    type: "submenu",
+                    submenu: [{
+                        label: window.siyuan.languages.showHeadingWithBlocks,
+                        iconHTML: "",
+                        checked: nodeElement.getAttribute("custom-heading-mode") === "0",
+                        click() {
+                            nodeElement.setAttribute("custom-heading-mode", "0");
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {"custom-heading-mode": "0"}
+                            });
                             nodeElement.removeAttribute("data-render");
                             blockRender(protyle, nodeElement);
-                            window.siyuan.menus.menu.remove();
-                        });
-                    }
+                        }
+                    }, {
+                        label: window.siyuan.languages.showHeadingOnlyTitle,
+                        iconHTML: "",
+                        checked: nodeElement.getAttribute("custom-heading-mode") === "1",
+                        click() {
+                            nodeElement.setAttribute("custom-heading-mode", "1");
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {"custom-heading-mode": "1"}
+                            });
+                            nodeElement.removeAttribute("data-render");
+                            blockRender(protyle, nodeElement);
+                        }
+                    }, {
+                        label: window.siyuan.languages.showHeadingWithBlocks,
+                        iconHTML: "",
+                        checked: nodeElement.getAttribute("custom-heading-mode") === "2",
+                        click() {
+                            nodeElement.setAttribute("custom-heading-mode", "2");
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {"custom-heading-mode": "2"}
+                            });
+                            nodeElement.removeAttribute("data-render");
+                            blockRender(protyle, nodeElement);
+                        }
+                    }, {
+                        label: window.siyuan.languages.default,
+                        iconHTML: "",
+                        checked: !nodeElement.getAttribute("custom-heading-mode"),
+                        click() {
+                            nodeElement.setAttribute("custom-heading-mode", "0");
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {"custom-heading-mode": ""}
+                            });
+                            nodeElement.removeAttribute("data-render");
+                            blockRender(protyle, nodeElement);
+                        }
+                    }]
                 }]
             }).element);
         } else if (type === "NodeHeading" && !protyle.disabled) {

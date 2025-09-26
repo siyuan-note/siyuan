@@ -1890,6 +1890,26 @@ export class Outline extends Model {
             parentID: id
         }, (response) => {
             if (response.code === 0 && response.data && response.data.length > 0) {
+                // 确保父标题保持展开状态
+                const parentLi = element.parentElement;
+                if (parentLi && parentLi.classList.contains("b3-list-item")) {
+                    // 移除折叠类，确保父标题展开
+                    parentLi.classList.remove("b3-list-item--hide-children");
+                    
+                    // 展开父标题的箭头图标
+                    const arrowElement = parentLi.querySelector(".b3-list-item__arrow");
+                    if (arrowElement) {
+                        arrowElement.classList.remove("b3-list-item__arrow--open");
+                        arrowElement.classList.add("b3-list-item__arrow--open");
+                    }
+                    
+                    // 显示子列表
+                    const childUl = parentLi.querySelector("ul");
+                    if (childUl) {
+                        childUl.style.display = "";
+                    }
+                }
+                
                 // 插入成功后，聚焦到新插入的标题
                 const newId = response.data[0].doOperations[0].id;
                 openFileById({
@@ -1897,6 +1917,11 @@ export class Outline extends Model {
                     id: newId,
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
                 });
+                
+                // 保存展开状态
+                if (this.tree.onToggleChange) {
+                    this.tree.onToggleChange();
+                }
             }
         });
     }

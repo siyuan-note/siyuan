@@ -761,6 +761,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     return;
                 }
             }
+            const hasGhost = item.querySelector('[data-type="ghost"]');
             avRender(item, protyle, () => {
                 const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .custom-attr > [data-av-id="${avID}"]`) as HTMLElement;
                 if (attrElement) {
@@ -791,7 +792,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 }
                                 if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
                                     popCellElement.querySelector(".av__celltext").textContent === "" &&
-                                    popCellElement.getBoundingClientRect().height !== 0) {
+                                    popCellElement.getBoundingClientRect().height !== 0 && hasGhost) {
                                     popTextCell(protyle, [popCellElement], "block");
                                 }
                             }

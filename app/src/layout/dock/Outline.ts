@@ -1890,23 +1890,20 @@ export class Outline extends Model {
             parentID: id
         }, (response) => {
             if (response.code === 0 && response.data && response.data.length > 0) {
-                // 确保父标题保持展开状态
-                const parentLi = element.parentElement;
-                if (parentLi && parentLi.classList.contains("b3-list-item")) {
-                    // 移除折叠类，确保父标题展开
-                    parentLi.classList.remove("b3-list-item--hide-children");
+                // 确保父标题保持展开状态 - 使用expandIds方式
+                const currentExpandIds = this.tree.getExpandIds();
+                if (!currentExpandIds.includes(id)) {
+                    currentExpandIds.push(id);
+                    this.tree.setExpandIds(currentExpandIds);
                     
-                    // 展开父标题的箭头图标
-                    const arrowElement = parentLi.querySelector(".b3-list-item__arrow");
-                    if (arrowElement) {
-                        arrowElement.classList.remove("b3-list-item__arrow--open");
-                        arrowElement.classList.add("b3-list-item__arrow--open");
-                    }
-                    
-                    // 显示子列表
-                    const childUl = parentLi.querySelector("ul");
-                    if (childUl) {
-                        childUl.style.display = "";
+                    // 保存展开状态到持久化存储
+                    if (!this.isPreview) {
+                        fetchPost("/api/storage/setOutlineStorage", {
+                            docID: this.blockId,
+                            val: {
+                                expandIds: currentExpandIds
+                            }
+                        });
                     }
                 }
                 
@@ -1917,11 +1914,6 @@ export class Outline extends Model {
                     id: newId,
                     action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
                 });
-                
-                // 保存展开状态
-                if (this.tree.onToggleChange) {
-                    this.tree.onToggleChange();
-                }
             }
         });
     }

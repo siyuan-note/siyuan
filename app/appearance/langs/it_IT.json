@@ -600,7 +600,7 @@
   "katexMacrosTip": "Si prega di utilizzare il formato oggetto JSON (<code class='fn__code'>{}</code>) per racchiudere le definizioni delle macro, ad esempio <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "I registri di esecuzione del programma sono salvati nel registro di sistema. Esportando il registro di sistema e inviandolo agli sviluppatori, è possibile aiutarli meglio a diagnosticare i problemi del programma",
   "systemLog": "Registro di sistema",
-  "syncConfGuide1": "Inizializza chiave di sincronizzazione",
+  "syncConfGuide1": "Inizializza chiave del repository dati",
   "syncConfGuide2": "Questa chiave è utilizzata per la crittografia end-to-end dei dati di sincronizzazione<br>La chiave è generata in base alla password che inserisci, ricordati la password",
   "syncConfGuide3": "La directory di sincronizzazione cloud è utilizzata per memorizzare i dati crittografati corrispondenti all'attuale area di lavoro. Il nome predefinito è <code>main</code>. Se hai solo un'area di lavoro da sincronizzare, usa direttamente <code>main</code>",
   "syncConfGuide4": "Sincronizzare ora?",

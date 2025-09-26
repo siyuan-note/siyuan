@@ -1429,17 +1429,10 @@ export class Outline extends Model {
             click: () => this.collapseSameLevel(element)
         }).element);
 
-        // 全部折叠
-        window.siyuan.menus.menu.append(new MenuItem({
-            icon: "iconContract",
-            label: "全部折叠",
-            click: () => this.tree.collapseAll()
-        }).element);
-
         // 全部展开
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconExpand",
-            label: "全部展开", 
+            label: "全部展开",
             click: () => {
                 this.tree.expandAll();
                 if (!this.isPreview) {
@@ -1451,6 +1444,13 @@ export class Outline extends Model {
                     });
                 }
             }
+        }).element);
+
+        // 全部折叠
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconContract",
+            label: "全部折叠",
+            click: () => this.tree.collapseAll()
         }).element);
 
         window.siyuan.menus.menu.popup({

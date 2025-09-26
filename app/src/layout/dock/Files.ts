@@ -390,7 +390,7 @@ export class Files extends Model {
                                             target.removeAttribute("data-opening");
                                         }
                                     });
-                                } else if (event.altKey && !isNotCtrl(event) && !event.shiftKey) {
+                                } else if (!event.altKey && isNotCtrl(event) && event.shiftKey) {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),

@@ -679,7 +679,7 @@ export class Outline extends Model {
         if (match) {
             return parseInt(match[1], 10);
         }
-        
+
         return 0;
     }
 
@@ -732,8 +732,8 @@ export class Outline extends Model {
             }).element);
         }
         window.siyuan.menus.menu.popup({
-            x: event.clientX-11,
-            y: event.clientY+11,
+            x: event.clientX - 11,
+            y: event.clientY + 11,
             w: 12
         });
         return window.siyuan.menus.menu;

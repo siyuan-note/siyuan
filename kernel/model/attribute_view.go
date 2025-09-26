@@ -1556,9 +1556,11 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 	for _, avID := range avIDs {
 		attrView := cachedAttrViews[avID]
 		if nil == attrView {
-			attrView, _ = av.ParseAttributeView(avID)
+			var err error
+			attrView, err = av.ParseAttributeView(avID)
 			if nil == attrView {
-				return
+				logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+				continue
 			}
 			cachedAttrViews[avID] = attrView
 		}

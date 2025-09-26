@@ -600,7 +600,7 @@
   "katexMacrosTip": "Proszę używać formatu obiektu JSON (<code class='fn__code'>{}</code>) do opakowania definicji makr, np. <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Rekordy działania programu są zapisywane w dzienniku systemowym. Eksportując dziennik systemowy i przesyłając go programistom, można lepiej pomóc w diagnozowaniu problemów z programem",
   "systemLog": "Dziennik systemowy",
-  "syncConfGuide1": "Zainicjować klucz synchronizacji",
+  "syncConfGuide1": "Zainicjować klucz repozytorium danych",
   "syncConfGuide2": "Ten klucz jest używany do szyfrowania end-to-end synchronizacji danych<br>Klucz jest generowany na podstawie hasła, które wprowadzasz, proszę zapamiętać hasło",
   "syncConfGuide3": "Katalog synchronizacji w chmurze jest używany do przechowywania zaszyfrowanych danych odpowiadających bieżącemu obszarowi roboczemu. Domyślna nazwa to <code>main</code>. Jeśli masz tylko jeden obszar roboczy do synchronizacji, użyj <code>main</code> bezpośrednio",
   "syncConfGuide4": "Synchronizować teraz?",

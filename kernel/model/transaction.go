@@ -439,6 +439,25 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			return
 		}
 
+		if 0 < len(headingChildren) {
+			// 折叠标题再编辑形成外层列表（前面加上 * ）时，前端给的 tx 序列会形成死循环，在这里解开
+			// Nested lists cause hang after collapsing headings https://github.com/siyuan-note/siyuan/issues/15943
+			lastChild := headingChildren[len(headingChildren)-1]
+			if "1" == lastChild.IALAttr("heading-fold") && ast.NodeList == lastChild.Type &&
+				nil != lastChild.FirstChild && nil != lastChild.FirstChild.FirstChild && lastChild.FirstChild.FirstChild.ID == targetPreviousID {
+				ast.Walk(lastChild, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering || !n.IsBlock() {
+						return ast.WalkContinue
+					}
+
+					n.RemoveIALAttr("heading-fold")
+					n.RemoveIALAttr("fold")
+					return ast.WalkContinue
+				})
+				headingChildren = headingChildren[:len(headingChildren)-1]
+			}
+		}
+
 		for i := len(headingChildren) - 1; -1 < i; i-- {
 			c := headingChildren[i]
 			targetNode.InsertAfter(c)

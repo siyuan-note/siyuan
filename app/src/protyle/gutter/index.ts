@@ -1632,6 +1632,7 @@ export class Gutter {
                     label: window.siyuan.languages.headingEmbedMode,
                     type: "submenu",
                     submenu: [{
+                        id: "showHeadingWithBlocks",
                         label: window.siyuan.languages.showHeadingWithBlocks,
                         iconHTML: "",
                         checked: nodeElement.getAttribute("custom-heading-mode") === "0",
@@ -1645,6 +1646,7 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                         }
                     }, {
+                        id: "showHeadingOnlyTitle",
                         label: window.siyuan.languages.showHeadingOnlyTitle,
                         iconHTML: "",
                         checked: nodeElement.getAttribute("custom-heading-mode") === "1",
@@ -1658,6 +1660,7 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                         }
                     }, {
+                        id: "showHeadingWithBlocks",
                         label: window.siyuan.languages.showHeadingWithBlocks,
                         iconHTML: "",
                         checked: nodeElement.getAttribute("custom-heading-mode") === "2",
@@ -1671,6 +1674,7 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                         }
                     }, {
+                        id: "default",
                         label: window.siyuan.languages.default,
                         iconHTML: "",
                         checked: !nodeElement.getAttribute("custom-heading-mode"),
@@ -1878,6 +1882,7 @@ export class Gutter {
             }
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "jumpTo",
             type: "submenu",
             label: window.siyuan.languages.jumpTo,
             submenu: [{

@@ -239,7 +239,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         blockId: "",
         render: {
             gutter: true,
-            breadcrumbDocName: true
+            breadcrumbDocName: true,
+            title: true
         },
     });
     edit.resize();
@@ -247,7 +248,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         blockId: "",
         render: {
             gutter: true,
-            breadcrumbDocName: true
+            breadcrumbDocName: true,
+            title: true
         },
     });
     unRefEdit.resize();

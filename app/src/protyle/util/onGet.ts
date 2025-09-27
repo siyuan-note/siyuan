@@ -91,6 +91,17 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             afterCB: options.afterCB,
         }, options.protyle);
+        
+        // 如果需要渲染标题且包含 CB_GET_HTML，需要获取文档信息来更新标题
+        if (options.protyle.options.render.title && options.action.includes(Constants.CB_GET_HTML)) {
+            fetchPost("/api/block/getDocInfo", {
+                id: options.protyle.block.rootID
+            }, (response) => {
+                options.protyle.title.element.removeAttribute("data-render");
+                options.protyle.title.render(options.protyle, response);
+            });
+        }
+        
         removeLoading(options.protyle);
         return;
     }

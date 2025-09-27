@@ -37,7 +37,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     }
                     try {
                         if (!renderElement.lastElementChild || renderElement.childElementCount === 1) {
-                            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div style="height:420px" contenteditable="false"></div>`;
+                            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div style="height:${e.style.height || "420px"}" contenteditable="false"></div>`;
                         }
                         const chartInstance = window.echarts.getInstanceById(renderElement.lastElementChild?.getAttribute("_echarts_instance_"));
                         const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));

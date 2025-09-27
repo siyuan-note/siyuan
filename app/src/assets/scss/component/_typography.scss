@@ -345,10 +345,11 @@
   [data-subtype="echarts"],
   [data-subtype="mindmap"] {
     z-index: 1;
+    height: 420px;
+    box-sizing: border-box;
 
     & > div:not(.protyle-icons):not(.protyle-attr) {
       overflow: hidden;
-      height: 420px;
     }
   }
 

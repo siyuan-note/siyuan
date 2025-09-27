@@ -362,11 +362,11 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__space"></span>
                 <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.custom}</span>
                 <span class="fn__space--small"></span>
-                <input type="text" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.content}">
+                <input type="text" class="b3-text-field fn__flex-1" value="">
                 <span class="fn__space"></span>
             </div>
             <div>
-                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${dynamicCurrentObj.content}&id=${id}">
+                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${encodeURIComponent(dynamicCurrentObj.content)}&id=${id}">
             </div>
         </div>
     </div>
@@ -685,6 +685,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             }
         });
     });
+    dynamicTextElements[1].value = dynamicCurrentObj.content;
     dynamicTextElements[1].addEventListener("input", () => {
         const url = new URLSearchParams(dynamicTextImgElement.getAttribute("src").replace(dynamicURL, ""));
         url.set("content", dynamicTextElements[1].value);

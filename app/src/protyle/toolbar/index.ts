@@ -250,7 +250,10 @@ export class Toolbar {
                 rangeTypes = rangeTypes.concat((item.getAttribute("data-type") || "").split(" "));
             }
         });
-        const rangeStartNextSibling = hasNextSibling(this.range.startContainer);
+        let rangeStartNextSibling = hasNextSibling(this.range.startContainer);
+        while (rangeStartNextSibling && rangeStartNextSibling.nodeType === 1 && (rangeStartNextSibling as HTMLElement).tagName === "BR") {
+            rangeStartNextSibling = hasNextSibling(rangeStartNextSibling);
+        }
         const isSameNode = this.range.startContainer === this.range.endContainer ||
             (rangeStartNextSibling && rangeStartNextSibling === this.range.endContainer &&
                 this.range.startContainer.parentElement === this.range.endContainer.parentElement);

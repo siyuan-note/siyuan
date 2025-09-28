@@ -1394,13 +1394,18 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "clearDate") {
+                    const colData = fields.find((item: IAVColumn) => {
+                        if (item.id === options.cellElements[0].getAttribute("data-col-id")) {
+                            return true;
+                        }
+                    });
                     updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
                         isNotEmpty2: false,
                         isNotEmpty: false,
                         content: null,
                         content2: null,
                         hasEndDate: false,
-                        isNotTime: true,
+                        isNotTime: !colData.date.fillSpecificTime,
                     }, options.cellElements);
                     avPanelElement.remove();
                     event.preventDefault();

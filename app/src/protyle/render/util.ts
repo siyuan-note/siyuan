@@ -1,7 +1,7 @@
 import {isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
-export const genIconHTML = (element?: false | HTMLElement) => {
+export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "more"]) => {
     let enable = true;
     if (element) {
         const readonly = element.getAttribute("data-readonly");
@@ -11,10 +11,18 @@ export const genIconHTML = (element?: false | HTMLElement) => {
             return '<div class="protyle-icons"></div>';
         }
     }
-    return `<div class="protyle-icons">
+    if (actions.length === 3) {
+        return `<div class="protyle-icons">
+    <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-icon--first protyle-action__reload"><svg><use xlink:href="#iconRefresh"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.edit}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit${enable ? "" : " fn__none"}"><svg><use xlink:href="#iconEdit"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
+</div>`;
+    } else {
+        return `<div class="protyle-icons">
     <span aria-label="${window.siyuan.languages.edit}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-icon--first protyle-action__edit${enable ? "" : " fn__none"}"><svg><use xlink:href="#iconEdit"></use></svg></span>
     <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last${enable ? "" : " protyle-icon--first"}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div>`;
+    }
 };
 
 export const genRenderFrame = (renderElement: Element) => {

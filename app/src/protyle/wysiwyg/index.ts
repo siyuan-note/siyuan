@@ -100,6 +100,7 @@ import {globalClickHideMenu} from "../../boot/globalEvent/click";
 import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clearSelect";
+import {chartRender} from "../render/chartRender";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2815,6 +2816,12 @@ export class WYSIWYG {
                 if (embedReloadElement) {
                     embedReloadElement.removeAttribute("data-render");
                     blockRender(protyle, embedReloadElement);
+                } else {
+                    const blockElement = hasClosestBlock(reloadElement);
+                    if (blockElement && blockElement.getAttribute("data-subtype") === "echarts") {
+                        blockElement.removeAttribute("data-render");
+                        chartRender(blockElement);
+                    }
                 }
                 event.stopPropagation();
                 event.preventDefault();

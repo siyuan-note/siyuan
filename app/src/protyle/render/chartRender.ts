@@ -28,7 +28,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                         return;
                     }
                     if (!e.firstElementChild.classList.contains("protyle-icons")) {
-                        e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
+                        e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement, ["refresh", "edit", "more"]));
                     }
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     if (!e.getAttribute("data-content")) {
@@ -41,8 +41,11 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                         }
                         const chartInstance = window.echarts.getInstanceById(renderElement.lastElementChild?.getAttribute("_echarts_instance_"));
                         const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
-                        if (chartInstance && chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
-                            chartInstance.clear();
+                        if (chartInstance) {
+                            if (chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
+                                chartInstance.clear();
+                            }
+                            chartInstance?.resize();
                         }
                         window.echarts.init(renderElement.lastElementChild, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                     } catch (error) {

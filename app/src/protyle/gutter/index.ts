@@ -772,29 +772,21 @@ export class Gutter {
                 }
                 document.execCommand("copy");
             }
-        }, {
-            id: "duplicate",
-            iconHTML: "",
-            label: window.siyuan.languages.duplicate,
-            accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
-            disabled: protyle.disabled,
-            click() {
-                duplicateBlock(selectsElement, protyle);
-            }
         }]);
-        copyMenu.splice(4, 1, {
-            id: "copyHPath",
-            iconHTML: "",
-            label: window.siyuan.languages.copyHPath,
-            accelerator: window.siyuan.config.keymap.editor.general.copyHPath.custom,
-            click: () => {
-                copyTextByType([selectsElement[0].getAttribute("data-node-id")], "hPath");
-                focusBlock(selectsElement[0]);
-            }
-        });
         const copyTextRefMenu = this.genCopyTextRef(selectsElement);
         if (copyTextRefMenu) {
             copyMenu.splice(7, 0, copyTextRefMenu);
+        }
+        if (!protyle.disabled) {
+            copyMenu.push({
+                id: "duplicate",
+                iconHTML: "",
+                label: window.siyuan.languages.duplicate,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
+                click() {
+                    duplicateBlock(selectsElement, protyle);
+                }
+            });
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",
@@ -1291,16 +1283,11 @@ export class Gutter {
                 }
                 document.execCommand("copy");
             }
-        }, {
-            id: type === "NodeAttributeView" ? "duplicateMirror" : "duplicate",
-            iconHTML: "",
-            label: type === "NodeAttributeView" ? window.siyuan.languages.duplicateMirror : window.siyuan.languages.duplicate,
-            accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
-            disabled: protyle.disabled,
-            click() {
-                duplicateBlock([nodeElement], protyle);
-            }
         }]);
+        const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
+        if (copyTextRefMenu) {
+            copyMenu.splice(7, 0, copyTextRefMenu);
+        }
         if (type === "NodeAttributeView") {
             copyMenu.splice(6, 0, {
                 iconHTML: "",
@@ -1309,20 +1296,36 @@ export class Gutter {
                     writeText(nodeElement.getAttribute("data-av-id"));
                 }
             });
+            if (!protyle.disabled) {
+                copyMenu.push({
+                    id: "duplicateMirror",
+                    iconHTML: "",
+                    label: window.siyuan.languages.duplicateMirror,
+                    accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
+                    click() {
+                        duplicateBlock([nodeElement], protyle);
+                    }
+                });
+                copyMenu.push({
+                    id: "duplicateCompletely",
+                    iconHTML: "",
+                    label: window.siyuan.languages.duplicateCompletely,
+                    accelerator: window.siyuan.config.keymap.editor.general.duplicateCompletely.custom,
+                    click() {
+                        duplicateCompletely(protyle, nodeElement as HTMLElement);
+                    }
+                });
+            }
+        } else if (!protyle.disabled) {
             copyMenu.push({
-                id: "duplicateCompletely",
+                id: "duplicate",
                 iconHTML: "",
-                label: window.siyuan.languages.duplicateCompletely,
-                accelerator: window.siyuan.config.keymap.editor.general.duplicateCompletely.custom,
-                disabled: protyle.disabled,
+                label: window.siyuan.languages.duplicate,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 click() {
-                    duplicateCompletely(protyle, nodeElement as HTMLElement);
+                    duplicateBlock([nodeElement], protyle);
                 }
             });
-        }
-        const copyTextRefMenu = this.genCopyTextRef([nodeElement]);
-        if (copyTextRefMenu) {
-            copyMenu.splice(7, 0, copyTextRefMenu);
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",

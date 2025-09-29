@@ -912,7 +912,10 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		node.Next.Unlink()
 	}
 
+	next := node.Next
 	node.Unlink()
+	unfoldParentFoldedHeading(next)
+
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true
 		for _, op := range tx.DoOperations {
@@ -1276,17 +1279,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 		node.InsertAfter(insertedNode)
 
-		if parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode); nil != parentFoldedHeading {
-			ast.Walk(insertedNode, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.SetIALAttr("fold", "1")
-				n.SetIALAttr("heading-fold", "1")
-				return ast.WalkContinue
-			})
-		}
+		unfoldParentFoldedHeading(insertedNode)
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1537,22 +1530,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
-	if nil != parentFoldedHeading {
-		children := treenode.HeadingChildren(parentFoldedHeading)
-		for _, child := range children {
-			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.SetIALAttr("fold", "1")
-				n.SetIALAttr("heading-fold", "1")
-				return ast.WalkContinue
-			})
-		}
-	}
-
+	unfoldParentFoldedHeading(updatedNode)
 	createdUpdated(updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); err != nil {
@@ -1581,6 +1559,25 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		}
 	}
 	return
+}
+
+func unfoldParentFoldedHeading(node *ast.Node) {
+	if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
+		children := treenode.HeadingChildren(parentFoldedHeading)
+		for _, child := range children {
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				n.RemoveIALAttr("fold")
+				n.RemoveIALAttr("heading-fold")
+				return ast.WalkContinue
+			})
+		}
+		parentFoldedHeading.RemoveIALAttr("fold")
+		parentFoldedHeading.RemoveIALAttr("heading-fold")
+	}
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

@@ -86,6 +86,10 @@ func GetHeadingFold(nodes []*ast.Node) (ret []*ast.Node) {
 }
 
 func GetParentFoldedHeading(node *ast.Node) (parentFoldedHeading *ast.Node) {
+	if nil == node {
+		return
+	}
+
 	currentLevel := 7
 	if ast.NodeHeading == node.Type {
 		currentLevel = node.HeadingLevel

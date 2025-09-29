@@ -1671,6 +1671,8 @@
     "269": "Este bloco já foi adicionado ao banco de dados [%s]",
     "270": "Otimizando o índice de dados, por favor aguarde...",
     "271": "Otimização do índice de dados concluída, [%s] de espaço liberado",
-    "272": "Campo sem nome"
+    "272": "Campo sem nome",
+    "273": "Não crie o espaço de trabalho na raiz da partição, crie uma nova pasta para o espaço de trabalho",
+    "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho"
   }
 }

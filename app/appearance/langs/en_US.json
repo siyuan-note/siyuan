@@ -1671,6 +1671,8 @@
     "269": "This block has already been added to the database [%s]",
     "270": "Optimizing data index, please wait...",
     "271": "Data index optimization completed, [%s] disk space freed",
-    "272": "Unnamed field"
+    "272": "Unnamed field",
+    "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
+    "274": "This folder contains other files, please create a new folder as the workspace"
   }
 }

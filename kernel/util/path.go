@@ -383,8 +383,8 @@ func IsWorkspaceDir(dir string) bool {
 	return strings.Contains(string(data), "kernelVersion")
 }
 
-// IsRootPath checks if the given path is a root path.
-func IsRootPath(path string) bool {
+// IsPartitionRootPath checks if the given path is a partition root path.
+func IsPartitionRootPath(path string) bool {
 	if path == "" {
 		return false
 	}

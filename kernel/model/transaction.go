@@ -906,30 +906,16 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
 
-	if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
-		children := treenode.HeadingChildren(parentFoldedHeading)
-		for _, child := range children {
-			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.RemoveIALAttr("fold")
-				n.RemoveIALAttr("heading-fold")
-				return ast.WalkContinue
-			})
-		}
-		parentFoldedHeading.RemoveIALAttr("fold")
-		parentFoldedHeading.RemoveIALAttr("heading-fold")
-	}
-
 	parent := node.Parent
 	if nil != node.Next && ast.NodeKramdownBlockIAL == node.Next.Type && bytes.Contains(node.Next.Tokens, []byte(node.ID)) {
 		// 列表块撤销状态异常 https://github.com/siyuan-note/siyuan/issues/3985
 		node.Next.Unlink()
 	}
 
+	next := node.Next
 	node.Unlink()
+	unfoldParentFoldedHeading(next)
+
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true
 		for _, op := range tx.DoOperations {
@@ -1293,19 +1279,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 		node.InsertAfter(insertedNode)
 
-		if parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode); nil != parentFoldedHeading {
-			ast.Walk(insertedNode, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.RemoveIALAttr("fold")
-				n.RemoveIALAttr("heading-fold")
-				return ast.WalkContinue
-			})
-			parentFoldedHeading.RemoveIALAttr("fold")
-			parentFoldedHeading.RemoveIALAttr("heading-fold")
-		}
+		unfoldParentFoldedHeading(insertedNode)
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1556,23 +1530,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	if parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode); nil != parentFoldedHeading {
-		children := treenode.HeadingChildren(parentFoldedHeading)
-		for _, child := range children {
-			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.RemoveIALAttr("fold")
-				n.RemoveIALAttr("heading-fold")
-				return ast.WalkContinue
-			})
-		}
-		parentFoldedHeading.RemoveIALAttr("fold")
-		parentFoldedHeading.RemoveIALAttr("heading-fold")
-	}
-
+	unfoldParentFoldedHeading(updatedNode)
 	createdUpdated(updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); err != nil {
@@ -1601,6 +1559,25 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		}
 	}
 	return
+}
+
+func unfoldParentFoldedHeading(node *ast.Node) {
+	if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
+		children := treenode.HeadingChildren(parentFoldedHeading)
+		for _, child := range children {
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				n.RemoveIALAttr("fold")
+				n.RemoveIALAttr("heading-fold")
+				return ast.WalkContinue
+			})
+		}
+		parentFoldedHeading.RemoveIALAttr("fold")
+		parentFoldedHeading.RemoveIALAttr("heading-fold")
+	}
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

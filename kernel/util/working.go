@@ -471,6 +471,16 @@ func initMime() {
 
 	mime.AddExtensionType(".md", "text/markdown")
 	mime.AddExtensionType(".markdown", "text/markdown")
+
+	// 添加常用的图片格式
+	mime.AddExtensionType(".png", "image/png")
+	mime.AddExtensionType(".jpg", "image/jpeg")
+	mime.AddExtensionType(".jpeg", "image/jpeg")
+	mime.AddExtensionType(".gif", "image/gif")
+	mime.AddExtensionType(".bmp", "image/bmp")
+	mime.AddExtensionType(".tiff", "image/tiff")
+	mime.AddExtensionType(".webp", "image/webp")
+	mime.AddExtensionType(".ico", "image/x-icon")
 }
 
 func GetDataAssetsAbsPath() (ret string) {

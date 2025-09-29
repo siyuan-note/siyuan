@@ -251,7 +251,7 @@ export const initEditor = () => {
     ${window.siyuan.languages.historyRetentionDays} 
     <a href="javascript:void(0)" id="clearHistory">${window.siyuan.languages.clearHistory}</a>
     <span class="fn__hr"></span>
-    <input class="b3-text-field fn__block" id="historyRetentionDays" type="number" min="0" value="${window.siyuan.config.editor.historyRetentionDays}"/>
+    <input class="b3-text-field fn__block" id="historyRetentionDays" type="number" min="1" max="3650" value="${window.siyuan.config.editor.historyRetentionDays}"/>
     <div class="b3-label__text">${window.siyuan.languages.historyRetentionDaysTip}</div>
 </div>
 <div class="b3-label">

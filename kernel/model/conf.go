@@ -260,6 +260,9 @@ func InitConf() {
 	if 1 > Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 30
 	}
+	if 3650 < Conf.Editor.HistoryRetentionDays {
+		Conf.Editor.HistoryRetentionDays = 3650
+	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}

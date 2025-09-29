@@ -172,7 +172,19 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 				family = strings.TrimSpace(string(v))
 			}
 		}
+		if sfnt.NamePreferredFamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
+			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+			if err == nil {
+				family = strings.TrimSpace(string(v))
+			}
+		}
 		if sfnt.NameFontSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
+			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+			if err == nil {
+				subfamily = strings.TrimSpace(string(v))
+			}
+		}
+		if sfnt.NamePreferredSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
 			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
 			if err == nil {
 				subfamily = strings.TrimSpace(string(v))
@@ -180,12 +192,15 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 		}
 	}
 
-	if family != "" && !strings.HasPrefix(family, ".") {
-		if subfamily != "" && !strings.Contains(subfamily, "<") && !strings.EqualFold(subfamily, "Regular") {
-			ret = family + " " + subfamily // 例如 "PingFang SC Bold"
-		} else {
-			ret = family
-		}
-	}
+	//if family != "" && !strings.HasPrefix(family, ".") {
+	//	if subfamily != "" && !strings.Contains(subfamily, "<") && !strings.EqualFold(subfamily, "Regular") {
+	//		ret = family + "(" + subfamily + ")"
+	//	} else {
+	//		ret = family
+	//	}
+	//}
+	// TODO: 字重加载方案
+	_ = subfamily
+	ret = family
 	return
 }

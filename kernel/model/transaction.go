@@ -1577,6 +1577,13 @@ func unfoldParentFoldedHeading(node *ast.Node) {
 		}
 		parentFoldedHeading.RemoveIALAttr("fold")
 		parentFoldedHeading.RemoveIALAttr("heading-fold")
+
+		evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+		evt.Data = []*Transaction{{
+			DoOperations:   []*Operation{{Action: "unfoldHeading", ID: parentFoldedHeading.ID}},
+			UndoOperations: []*Operation{{Action: "foldHeading", ID: parentFoldedHeading.ID}},
+		}}
+		util.PushEvent(evt)
 	}
 }
 

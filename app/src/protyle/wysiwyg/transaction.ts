@@ -1026,15 +1026,11 @@ export const turnsIntoTransaction = (options: {
             selectsElement = [options.nodeElement];
         }
         let isContinue = false;
-        let hasEmbedBlock = false;
         let isList = false;
         selectsElement.find((item, index) => {
             if (item.classList.contains("li")) {
                 isList = true;
                 return true;
-            }
-            if (item.classList.contains("bq") || item.classList.contains("sb") || item.classList.contains("p")) {
-                hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&
                 item.nextElementSibling === selectsElement[index + 1]) {
@@ -1044,7 +1040,7 @@ export const turnsIntoTransaction = (options: {
                 return true;
             }
         });
-        if (isList || (hasEmbedBlock && options.type === "Blocks2Ps")) {
+        if (isList) {
             return;
         }
         if (selectsElement.length === 1 && options.type === "Blocks2Hs" &&

@@ -1671,6 +1671,8 @@
     "269": "Ten blok został już dodany do bazy danych [%s]",
     "270": "Optymalizacja indeksu danych, proszę czekać...",
     "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku",
-    "272": "Nienazwane pole"
+    "272": "Nienazwane pole",
+    "273": "Nie twórz przestrzeni roboczej w katalogu głównym partycji, utwórz nowy folder jako przestrzeń roboczą",
+    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą"
   }
 }

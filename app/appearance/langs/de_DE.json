@@ -1671,6 +1671,8 @@
     "269": "Dieser Block wurde bereits zur Datenbank [%s] hinzugefügt",
     "270": "Datenindex wird optimiert, bitte warten...",
     "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben",
-    "272": "Unbenanntes Feld"
+    "272": "Unbenanntes Feld",
+    "273": "Erstellen Sie den Arbeitsbereich nicht im Stammverzeichnis der Partition, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
+    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich"
   }
 }

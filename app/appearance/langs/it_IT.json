@@ -1671,6 +1671,8 @@
     "269": "Questo blocco è già stato aggiunto al database [%s]",
     "270": "Ottimizzazione dell'indice dei dati in corso, attendere prego...",
     "271": "Ottimizzazione dell'indice dei dati completata, liberati [%s] di spazio su disco",
-    "272": "Campo senza nome"
+    "272": "Campo senza nome",
+    "273": "Non creare lo spazio di lavoro nella directory radice della partizione, crea una nuova cartella come spazio di lavoro",
+    "274": "Questa cartella contiene altri file, crea una nuova cartella come spazio di lavoro"
   }
 }

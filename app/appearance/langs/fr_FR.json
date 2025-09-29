@@ -1671,6 +1671,8 @@
     "269": "Ce bloc a déjà été ajouté à la base de données [%s]",
     "270": "Optimisation de l'index des données en cours, veuillez patienter...",
     "271": "Optimisation de l'index des données terminée, [%s] d'espace disque libéré",
-    "272": "Champ sans nom"
+    "272": "Champ sans nom",
+    "273": "Ne créez pas l’espace de travail à la racine de la partition, créez un nouveau dossier comme espace de travail",
+    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail"
   }
 }

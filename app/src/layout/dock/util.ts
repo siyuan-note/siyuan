@@ -3,11 +3,13 @@ import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
 import {fixWndFlex1, getInstanceById, getWndByLayout, saveLayout, switchWnd} from "../util";
-import {resizeTabs} from "../tabUtil";
+import {getDockByType, resizeTabs} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";
 import {Wnd} from "../Wnd";
 import {fetchSyncPost} from "../../util/fetch";
+import {Files} from "./Files";
+import {Editor} from "../../editor";
 
 export const openBacklink = async (options: {
     app: App,
@@ -233,4 +235,24 @@ export const clearOBG = () => {
         item.blockId = "";
         item.render(undefined);
     });
+};
+
+export const selectOpenTab = async () => {
+    const dockFile = getDockByType("file");
+    if (!dockFile) {
+        return false;
+    }
+    const files = dockFile.data.file as Files;
+    const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
+        document.querySelector("ul.layout-tab-bar > .item--focus");
+    if (element) {
+        const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
+        if (tab && tab.model instanceof Editor) {
+            tab.model.editor.protyle.wysiwyg.element.blur();
+            tab.model.editor.protyle.title.editElement.blur();
+            await files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
+            files.lastSelectedElement = files.element.querySelector(".b3-list-item--focus");
+        }
+    }
+    dockFile.toggleModel("file", true);
 };

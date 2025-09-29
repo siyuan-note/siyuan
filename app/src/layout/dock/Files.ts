@@ -28,13 +28,14 @@ import {refreshFileTree} from "../../dialog/processSystem";
 import {ipcRenderer} from "electron";
 /// #endif
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
+import {selectOpenTab} from "./util";
 
 export class Files extends Model {
     public element: HTMLElement;
     public parent: Tab;
-    private actionsElement: HTMLElement;
     public closeElement: HTMLElement;
-    private lastClickedFileItem: HTMLElement = null;
+    public lastSelectedElement: Element = null;
+    private actionsElement: HTMLElement;
 
     constructor(options: { tab: Tab, app: App }) {
         super({
@@ -209,23 +210,7 @@ export class Files extends Model {
                     window.siyuan.menus.menu.remove();
                     break;
                 } else if (type === "focus") {
-                    let element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") as HTMLElement;
-                    if (!element) {
-                        document.querySelectorAll("ul.layout-tab-bar > .item--focus").forEach((item: HTMLElement, index) => {
-                            if (index === 0) {
-                                element = item;
-                            } else if (item.dataset.activetime > element.dataset.activetime) {
-                                element = item;
-                            }
-                        });
-                    }
-
-                    if (element) {
-                        const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
-                        if (tab && tab.model instanceof Editor) {
-                            this.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
-                        }
-                    }
+                    selectOpenTab();
                     event.preventDefault();
                     break;
                 } else if (type === "more") {
@@ -334,47 +319,37 @@ export class Files extends Model {
                     } else if (target.tagName === "LI") {
                         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
                             target.classList.toggle("b3-list-item--focus");
-                        } else if (event.shiftKey && !event.altKey && !isOnlyMeta(event) && target.getAttribute("data-type") === "navigation-file") {
+                            this.lastSelectedElement = target;
+                        } else if (event.shiftKey && !event.altKey && isNotCtrl(event)) {
                             // Shift+click 多选文档
-                            event.preventDefault();
-                            event.stopPropagation();
-
-                            if (!this.lastClickedFileItem) {
-                                this.lastClickedFileItem = target;
-                                this.setCurrent(target, false);
-                                return;
+                            if (!this.lastSelectedElement) {
+                                this.lastSelectedElement = this.element.querySelector(".b3-list-item--focus")||
+                                    this.element.querySelector(".b3-list-item");
                             }
+                            this.element.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                                item.classList.remove("b3-list-item--focus");
+                            });
 
                             // 获取所有文档项
-                            const allFiles = Array.from(this.element.querySelectorAll('li[data-type="navigation-file"]'));
+                            const allFiles = Array.from(this.element.querySelectorAll("li.b3-list-item"));
 
                             // 获取起始和结束索引
-                            const startIndex = allFiles.indexOf(this.lastClickedFileItem);
+                            const startIndex = allFiles.indexOf(this.lastSelectedElement);
                             const endIndex = allFiles.indexOf(target);
-
-                            if (startIndex === -1 || endIndex === -1) return;
 
                             // 确定选择范围
                             const start = Math.min(startIndex, endIndex);
-                            const end = Math.max(startIndex, endIndex);
-
-                            // 清除现有选择
-                            allFiles.forEach(file => {
-                                (file as HTMLElement).classList.remove("b3-list-item--focus");
-                            });
+                            const end = Math.max(startIndex, endIndex)
 
                             // 添加新选择
                             for (let i = start; i <= end; i++) {
                                 (allFiles[i] as HTMLElement).classList.add("b3-list-item--focus");
                             }
-
-                            needFocus = false;
-                            return;
                         } else {
+                            this.lastSelectedElement = target;
                             this.setCurrent(target, false);
                             if (target.getAttribute("data-type") === "navigation-file") {
                                 // 更新最后点击的文档项
-                                this.lastClickedFileItem = target;
                                 needFocus = false;
                                 if (target.getAttribute("data-opening")) {
                                     return;

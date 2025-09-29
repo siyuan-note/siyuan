@@ -52,17 +52,19 @@ func checkWorkspaceDir(c *gin.Context) {
 	}
 
 	// 检查路径是否包含其他文件
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf("read dir [%s] failed: %s", path, err)
-		return
-	}
-	if 0 < len(entries) {
-		ret.Code = -1
-		ret.Msg = model.Conf.Language(274)
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
+	if !util.IsWorkspaceDir(path) {
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("read dir [%s] failed: %s", path, err)
+			return
+		}
+		if 0 < len(entries) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(274)
+			ret.Data = map[string]interface{}{"closeTimeout": 7000}
+			return
+		}
 	}
 
 	if isInvalidWorkspacePath(path) {

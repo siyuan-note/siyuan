@@ -338,36 +338,36 @@ export class Files extends Model {
                             // Shift+click 多选文档
                             event.preventDefault();
                             event.stopPropagation();
-                            
+
                             if (!this.lastClickedFileItem) {
                                 this.lastClickedFileItem = target;
                                 this.setCurrent(target, false);
                                 return;
                             }
-                            
+
                             // 获取所有文档项
                             const allFiles = Array.from(this.element.querySelectorAll('li[data-type="navigation-file"]'));
-                            
+
                             // 获取起始和结束索引
                             const startIndex = allFiles.indexOf(this.lastClickedFileItem);
                             const endIndex = allFiles.indexOf(target);
-                            
+
                             if (startIndex === -1 || endIndex === -1) return;
-                            
+
                             // 确定选择范围
                             const start = Math.min(startIndex, endIndex);
                             const end = Math.max(startIndex, endIndex);
-                            
+
                             // 清除现有选择
                             allFiles.forEach(file => {
                                 (file as HTMLElement).classList.remove("b3-list-item--focus");
                             });
-                            
+
                             // 添加新选择
                             for (let i = start; i <= end; i++) {
                                 (allFiles[i] as HTMLElement).classList.add("b3-list-item--focus");
                             }
-                            
+
                             needFocus = false;
                             return;
                         } else {
@@ -390,7 +390,7 @@ export class Files extends Model {
                                             target.removeAttribute("data-opening");
                                         }
                                     });
-                                } else if (!event.altKey && !isNotCtrl(event) && event.shiftKey) {
+                                } else if (!event.altKey && isOnlyMeta(event) && event.shiftKey) {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),

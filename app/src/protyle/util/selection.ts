@@ -194,7 +194,7 @@ export const getEditorRange = (element: Element): Range => {
     return range;
 };
 
-export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
+export const getSelectionPosition = (nodeElement: Element, range?: Range, toolbarWidth?: number) => {
     if (!range) {
         range = getEditorRange(nodeElement);
     }
@@ -261,8 +261,16 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
     } else {
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
         if (range.toString()) {
-            return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
-                left: rects[rects.length - 1].left,
+            const selection = window.getSelection();
+            // 判断选择方向
+            const isBackward = selection && "direction" in selection ?
+                (selection as { direction: "forward" | "backward" | "none" }).direction === "backward"
+                : range.startContainer === selection?.focusNode && range.startOffset === selection?.focusOffset;
+            return {
+                // 向左选择：使用第一个矩形的左边界；向右选择：使用最后一个矩形的右边界
+                // 减去工具栏宽度的1/4：将工具栏中不太常用的按钮往右偏一点
+                left: (isBackward ? rects[0].left : rects[rects.length - 1].right) - (toolbarWidth || 0) / 4,
+                // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
                 top: rects[0].top
             };
         } else {

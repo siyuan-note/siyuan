@@ -164,12 +164,12 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
-        const rangePosition = getSelectionPosition(nodeElement, range);
         this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
+        const rangePosition = getSelectionPosition(nodeElement, range, this.element.clientWidth);
         const y = rangePosition.top - this.toolbarHeight - 4;
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
-        setPosition(this.element, rangePosition.left - 52, Math.max(y, protyle.element.getBoundingClientRect().top + 30));
+        setPosition(this.element, rangePosition.left, Math.max(y, protyle.element.getBoundingClientRect().top + 30));
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });

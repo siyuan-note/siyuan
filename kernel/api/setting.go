@@ -310,7 +310,7 @@ func setEditor(c *gin.Context) {
 	}
 
 	if 1 > editor.HistoryRetentionDays {
-		editor.HistoryRetentionDays = 1
+		editor.HistoryRetentionDays = 30
 	}
 	if 3650 < editor.HistoryRetentionDays {
 		editor.HistoryRetentionDays = 3650

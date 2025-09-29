@@ -906,6 +906,23 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
 
+	if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
+		children := treenode.HeadingChildren(parentFoldedHeading)
+		for _, child := range children {
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				n.RemoveIALAttr("fold")
+				n.RemoveIALAttr("heading-fold")
+				return ast.WalkContinue
+			})
+		}
+		parentFoldedHeading.RemoveIALAttr("fold")
+		parentFoldedHeading.RemoveIALAttr("heading-fold")
+	}
+
 	parent := node.Parent
 	if nil != node.Next && ast.NodeKramdownBlockIAL == node.Next.Type && bytes.Contains(node.Next.Tokens, []byte(node.ID)) {
 		// 列表块撤销状态异常 https://github.com/siyuan-note/siyuan/issues/3985
@@ -1282,10 +1299,12 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 					return ast.WalkContinue
 				}
 
-				n.SetIALAttr("fold", "1")
-				n.SetIALAttr("heading-fold", "1")
+				n.RemoveIALAttr("fold")
+				n.RemoveIALAttr("heading-fold")
 				return ast.WalkContinue
 			})
+			parentFoldedHeading.RemoveIALAttr("fold")
+			parentFoldedHeading.RemoveIALAttr("heading-fold")
 		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
@@ -1537,8 +1556,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
-	if nil != parentFoldedHeading {
+	if parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode); nil != parentFoldedHeading {
 		children := treenode.HeadingChildren(parentFoldedHeading)
 		for _, child := range children {
 			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1546,11 +1564,13 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 					return ast.WalkContinue
 				}
 
-				n.SetIALAttr("fold", "1")
-				n.SetIALAttr("heading-fold", "1")
+				n.RemoveIALAttr("fold")
+				n.RemoveIALAttr("heading-fold")
 				return ast.WalkContinue
 			})
 		}
+		parentFoldedHeading.RemoveIALAttr("fold")
+		parentFoldedHeading.RemoveIALAttr("heading-fold")
 	}
 
 	createdUpdated(updatedNode)

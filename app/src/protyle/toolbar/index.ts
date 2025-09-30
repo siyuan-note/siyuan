@@ -303,18 +303,20 @@ export class Toolbar {
             if (this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
                 needWrapTarget = this.range.startContainer.parentElement;
             }
+            const startPreviousSibling = hasPreviousSibling(this.range.startContainer);
+            const endNextSibling = hasNextSibling(this.range.endContainer);
             if ((
                     this.range.startOffset !== 0 ||
                     // https://github.com/siyuan-note/siyuan/issues/14869
-                    (this.range.startOffset === 0 &&
-                        (this.range.startContainer.previousSibling?.nodeType === 3 || (this.range.startContainer.previousSibling as HTMLElement)?.tagName === "BR") &&
+                    (this.range.startOffset === 0 && startPreviousSibling &&
+                        (startPreviousSibling.nodeType === 3 || (startPreviousSibling as HTMLElement).tagName === "BR") &&
                         this.range.startContainer.previousSibling.parentElement === this.range.startContainer.parentElement)
                 ) && (
                     this.range.endOffset !== this.range.endContainer.textContent.length ||
                     // https://github.com/siyuan-note/siyuan/issues/14869#issuecomment-2911553387
                     (
-                        this.range.endOffset === this.range.endContainer.textContent.length &&
-                        (this.range.endContainer.nextSibling?.nodeType === 3 || (this.range.endContainer.nextSibling as HTMLElement)?.tagName === "BR") &&
+                        this.range.endOffset === this.range.endContainer.textContent.length && endNextSibling &&
+                        (endNextSibling.nodeType === 3 || (endNextSibling as HTMLElement).tagName === "BR") &&
                         this.range.endContainer.nextSibling.parentElement === this.range.endContainer.parentElement
                     )
                 ) &&
@@ -376,7 +378,7 @@ export class Toolbar {
                 }
             }
             if (emptyNode && emptyNode.nodeType !== 3 && emptyNode.textContent.replace(Constants.ZWSP, "") === "" &&
-                !["TD", "TH"].includes(emptyNode.tagName)) {
+                !["TD", "TH", "BR"].includes(emptyNode.tagName)) {
                 emptyNode.remove();
             }
         }

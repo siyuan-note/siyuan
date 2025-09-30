@@ -712,7 +712,8 @@ export class Toolbar {
                         } else {
                             // 测试不存在 https://ld246.com/article/1664454663564 情况，故移除引用合并限制
                             // 搜索结果引用被高亮隔断需进行合并 https://github.com/siyuan-note/siyuan/issues/7588
-                            currentNode.textContent = previousElement.textContent + currentNode.textContent;
+                            // textContent：防止赋值后 \n 转换为 br 导致后续 this.range.setStart 报错；innerText：获取 br 的 \n， https://github.com/siyuan-note/siyuan/issues/15968
+                            currentNode.textContent = previousElement.innerText + currentNode.innerText;
                             // 如果为备注时，合并备注内容
                             if (currentType.includes("inline-memo")) {
                                 currentNode.setAttribute("data-inline-memo-content", (previousElement.getAttribute("data-inline-memo-content") || "") +

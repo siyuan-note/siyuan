@@ -240,7 +240,7 @@ func getAttributeViewKeysByID(c *gin.Context) {
 	keyIDsArg := arg["keyIDs"].([]interface{})
 	var keyIDs []string
 	for _, v := range keyIDsArg {
-		keyIDs = append(keyIDs, v.(string
+		keyIDs = append(keyIDs, v.(string))
 	}
 	ret.Data = model.GetAttributeViewKeysByID(avID, keyIDs...)
 }

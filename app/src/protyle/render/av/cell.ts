@@ -869,8 +869,9 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         if (type === "date") {
             if (!(value && typeof value === "object" && typeof value.isNotTime === "boolean")) {
                 const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID: avID, keyIDs: [colId]});
-
-                cellValue.date.isNotTime = true;
+                if (response.data[0].date) {
+                    cellValue.date.isNotTime = !response.data[0].date.fillSpecificTime;
+                }
             }
             cellValue.date.formattedContent = oldValue.date.formattedContent;
         }

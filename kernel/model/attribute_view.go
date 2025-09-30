@@ -1179,7 +1179,7 @@ func DuplicateDatabaseBlock(avID string) (newAvID, newBlockID string, err error)
 	return
 }
 
-func GetAttributeViewKeysByAvID(avID string) (ret []*av.Key) {
+func GetAttributeViewKeysByID(avID string, keyIDs ...string) (ret []*av.Key) {
 	ret = []*av.Key{}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -1188,9 +1188,21 @@ func GetAttributeViewKeysByAvID(avID string) (ret []*av.Key) {
 		return
 	}
 
+	if 1 > len(keyIDs) {
+		for _, keyValues := range attrView.KeyValues {
+			key := keyValues.Key
+			ret = append(ret, key)
+		}
+		return
+	}
+
 	for _, keyValues := range attrView.KeyValues {
 		key := keyValues.Key
-		ret = append(ret, key)
+		for _, keyID := range keyIDs {
+			if key.ID == keyID {
+				ret = append(ret, key)
+			}
+		}
 	}
 	return ret
 }

@@ -225,7 +225,24 @@ func getAttributeViewKeysByAvID(c *gin.Context) {
 		return
 	}
 	avID := arg["avID"].(string)
-	ret.Data = model.GetAttributeViewKeysByAvID(avID)
+	ret.Data = model.GetAttributeViewKeysByID(avID)
+}
+
+func getAttributeViewKeysByID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	avID := arg["avID"].(string)
+	keyIDsArg := arg["keyIDs"].([]interface{})
+	var keyIDs []string
+	for _, v := range keyIDsArg {
+		keyIDs = append(keyIDs, v.(string
+	}
+	ret.Data = model.GetAttributeViewKeysByID(avID, keyIDs...)
 }
 
 func getMirrorDatabaseBlocks(c *gin.Context) {

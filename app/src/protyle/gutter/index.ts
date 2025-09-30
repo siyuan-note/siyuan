@@ -2,7 +2,8 @@ import {
     hasClosestBlock,
     hasClosestByClassName,
     hasClosestByTag,
-    hasTopClosestByClassName, isInAVBlock,
+    hasTopClosestByClassName,
+    isInAVBlock,
     isInEmbedBlock
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
@@ -60,7 +61,6 @@ import {processClonePHElement} from "../render/util";
 import {openFileById} from "../../editor/util";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
-import {copyTextByType} from "../toolbar/util";
 import {clearSelect} from "../util/clearSelect";
 
 export class Gutter {

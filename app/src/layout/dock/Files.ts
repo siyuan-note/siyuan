@@ -322,9 +322,14 @@ export class Files extends Model {
                             this.lastSelectedElement = target;
                         } else if (event.shiftKey && !event.altKey && isNotCtrl(event)) {
                             // Shift+click 多选文档
+                            if (!document.contains(this.lastSelectedElement)) {
+                                this.lastSelectedElement = null;
+                            }
                             if (!this.lastSelectedElement) {
-                                this.lastSelectedElement = this.element.querySelector(".b3-list-item--focus")||
-                                    this.element.querySelector(".b3-list-item");
+                                this.lastSelectedElement = this.element.querySelector(".b3-list-item--focus");
+                            }
+                            if (!this.lastSelectedElement) {
+                                this.lastSelectedElement = target.parentElement.firstElementChild;
                             }
                             this.element.querySelectorAll(".b3-list-item--focus").forEach(item => {
                                 item.classList.remove("b3-list-item--focus");
@@ -339,7 +344,7 @@ export class Files extends Model {
 
                             // 确定选择范围
                             const start = Math.min(startIndex, endIndex);
-                            const end = Math.max(startIndex, endIndex)
+                            const end = Math.max(startIndex, endIndex);
 
                             // 添加新选择
                             for (let i = start; i <= end; i++) {

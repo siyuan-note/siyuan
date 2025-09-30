@@ -1405,7 +1405,7 @@ export const openMenuPanel = (options: {
                         content: null,
                         content2: null,
                         hasEndDate: false,
-                        isNotTime: !colData.date.fillSpecificTime,
+                        isNotTime: colData.date ? !colData.date.fillSpecificTime : true,
                     }, options.cellElements);
                     avPanelElement.remove();
                     event.preventDefault();

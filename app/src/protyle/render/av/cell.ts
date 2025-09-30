@@ -4,7 +4,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {updateAttrViewCellAnimation} from "./action";
 import {isNotCtrl} from "../../util/compatibility";
 import {isDynamicRef, objEquals} from "../../../util/functions";
-import {fetchPost} from "../../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {focusBlock, focusByRange} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
@@ -705,8 +705,8 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     });
 };
 
-export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
-                                 cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false) => {
+export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLElement, value?: any,
+                                       cElements?: HTMLElement[], columns?: IAVColumn[], html?: string, getOperations = false) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
 
@@ -729,7 +729,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     }
     const isCustomAttr = hasClosestByClassName(cellElements[0], "custom-attr");
     const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
-    cellElements.forEach((item: HTMLElement, elementIndex) => {
+    for (let elementIndex = 0; elementIndex < cellElements.length; elementIndex++) {
+        let item = cellElements[elementIndex] as HTMLElement;
         const rowID = getFieldIdByCellElement(item, viewType);
         if (!rowID) {
             return;
@@ -866,6 +867,11 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         }
         // formattedContent 在单元格渲染时没有用到，需对比保持一致
         if (type === "date") {
+            if (!(value && typeof value === "object" && typeof value.isNotTime === "boolean")) {
+                const response = await fetchSyncPost("/api/av/getAttributeViewKeysByID", {avID: avID, keyIDs: [colId]});
+
+                cellValue.date.isNotTime = true;
+            }
             cellValue.date.formattedContent = oldValue.date.formattedContent;
         }
         if (objEquals(cellValue, oldValue)) {
@@ -894,7 +900,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
-    });
+    }
     if (getOperations) {
         return {doOperations, undoOperations};
     }

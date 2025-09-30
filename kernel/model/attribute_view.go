@@ -1116,6 +1116,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 		}
 	}
 
+	regenAttrViewGroups(attrView)
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return

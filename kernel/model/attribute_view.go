@@ -2206,16 +2206,26 @@ func setAttrViewColDateFillSpecificTime(operation *Operation) (err error) {
 	}
 
 	keyID := operation.ID
-	key, _ := attrView.GetKey(keyID)
-	if nil == key || av.KeyTypeDate != key.Type {
+	dateValues, _ := attrView.GetKeyValues(keyID)
+	if nil == dateValues || av.KeyTypeDate != dateValues.Key.Type {
 		return
 	}
 
-	if nil == key.Date {
-		key.Date = &av.Date{}
+	if nil == dateValues.Key.Date {
+		dateValues.Key.Date = &av.Date{}
 	}
 
-	key.Date.FillSpecificTime = operation.Data.(bool)
+	dateValues.Key.Date.FillSpecificTime = operation.Data.(bool)
+	for _, v := range dateValues.Values {
+		if !v.IsEmpty() {
+			continue
+		}
+		if nil == v.Date {
+			v.Date = &av.ValueDate{}
+		}
+		v.Date.IsNotTime = !dateValues.Key.Date.FillSpecificTime
+	}
+
 	err = av.SaveAttributeView(attrView)
 	return
 }

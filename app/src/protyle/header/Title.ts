@@ -351,7 +351,7 @@ export class Title {
     }
 
     public render(protyle: IProtyle, response: IWebSocketData) {
-        if (this.element.getAttribute("data-render") === "true") {
+        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
             return false;
         }
         if (protyle.options.render.hideTitleOnZoom) {

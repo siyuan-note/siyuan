@@ -1118,7 +1118,7 @@ export const getArticle = (options: {
                     updateReadonly: true,
                     data: getResponse,
                     protyle: options.edit.protyle,
-                    action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
+                    action: zoomIn ? [Constants.CB_GET_ALL] : [],
                 });
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();

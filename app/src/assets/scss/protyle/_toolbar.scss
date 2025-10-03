@@ -6,7 +6,10 @@
     box-shadow: var(--b3-point-shadow);
     border-radius: var(--b3-border-radius);
     display: flex;
-    transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms;
+
+    &__transition {
+      transition: top .15s cubic-bezier(0, 0, .2, 1) 0ms;
+    }
 
     &__item {
       color: var(--b3-theme-on-surface);

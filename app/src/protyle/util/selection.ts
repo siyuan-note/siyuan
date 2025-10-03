@@ -266,12 +266,17 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, toolba
             const isBackward = selection && "direction" in selection ?
                 (selection as { direction: "forward" | "backward" | "none" }).direction === "backward"
                 : range.startContainer === selection?.focusNode && range.startOffset === selection?.focusOffset;
+            // 检查是否有多个垂直位置不同的矩形
+            const hasMultipleVerticalRects = rects.length > 1 && Array.from(rects).some((rect: DOMRect) => rect.top !== rects[0].top);
+            const isToolbarAtBottom = hasMultipleVerticalRects && !isBackward;
+
             return {
                 // 向左选择：使用第一个矩形的左边界；向右选择：使用最后一个矩形的右边界
                 // 减去工具栏宽度的1/4：将工具栏中不太常用的按钮往右偏一点
                 left: (isBackward ? rects[0].left : rects[rects.length - 1].right) - (toolbarWidth || 0) / 4,
-                // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
-                top: rects[0].top
+                // 如果向右选择时有多个垂直位置不同的矩形：使用最后一个矩形的下边界；否则使用第一个矩形的上边界
+                top: isToolbarAtBottom ? rects[rects.length - 1].bottom : rects[0].top,
+                isToolbarAtBottom: isToolbarAtBottom,
             };
         } else {
             return {    // 代码块首 https://github.com/siyuan-note/siyuan/issues/13113

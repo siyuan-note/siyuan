@@ -10,6 +10,7 @@ import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {Constants} from "../../constants";
 
 export class Tag extends Model {
     private openNodes: string[];
@@ -185,6 +186,7 @@ export class Tag extends Model {
         element.classList.add("fn__rotate");
         fetchPost("/api/tag/getTag", {
             sort: window.siyuan.config.tag.sort,
+            app: Constants.SIYUAN_APPID,
             ignoreMaxListHint
         }, response => {
             if (this.openNodes) {

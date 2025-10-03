@@ -417,7 +417,7 @@
 }
 
 table[contenteditable="false"] + .protyle-action__table > .table__resize {
-  display: none;
+  display: none !important;
 }
 
 table + .protyle-action__table {

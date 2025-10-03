@@ -1075,7 +1075,11 @@ func listDocsByPath(c *gin.Context) {
 		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
 		ignoreMaxListHintArg := arg["ignoreMaxListHint"]
 		if nil == ignoreMaxListHintArg || !ignoreMaxListHintArg.(bool) {
-			util.PushMsg(fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			var app string
+			if nil != arg["app"] {
+				app = arg["app"].(string)
+			}
+			util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
 		}
 	}
 

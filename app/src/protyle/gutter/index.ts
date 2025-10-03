@@ -795,82 +795,84 @@ export class Gutter {
             type: "submenu",
             submenu: copyMenu,
         }).element);
-        if (protyle.disabled) {
-            return;
-        }
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "cut",
-            label: window.siyuan.languages.cut,
-            accelerator: "⌘X",
-            icon: "iconCut",
-            click: () => {
-                focusBlock(selectsElement[0]);
-                document.execCommand("cut");
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "move",
-            label: window.siyuan.languages.move,
-            accelerator: window.siyuan.config.keymap.general.move.custom,
-            icon: "iconMove",
-            click: () => {
-                movePathTo((toPath) => {
-                    hintMoveBlock(toPath[0], selectsElement, protyle);
-                });
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "addToDatabase",
-            label: window.siyuan.languages.addToDatabase,
-            accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
-            icon: "iconDatabase",
-            click: () => {
-                addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
-            }
-        }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "delete",
-            label: window.siyuan.languages.delete,
-            icon: "iconTrashcan",
-            accelerator: "⌫",
-            click: () => {
-                protyle.breadcrumb?.hide();
-                removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "Backspace");
-            }
-        }).element);
+        if (!protyle.disabled) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "cut",
+                label: window.siyuan.languages.cut,
+                accelerator: "⌘X",
+                icon: "iconCut",
+                click: () => {
+                    focusBlock(selectsElement[0]);
+                    document.execCommand("cut");
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "move",
+                label: window.siyuan.languages.move,
+                accelerator: window.siyuan.config.keymap.general.move.custom,
+                icon: "iconMove",
+                click: () => {
+                    movePathTo((toPath) => {
+                        hintMoveBlock(toPath[0], selectsElement, protyle);
+                    });
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "addToDatabase",
+                label: window.siyuan.languages.addToDatabase,
+                accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
+                icon: "iconDatabase",
+                click: () => {
+                    addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "delete",
+                label: window.siyuan.languages.delete,
+                icon: "iconTrashcan",
+                accelerator: "⌫",
+                click: () => {
+                    protyle.breadcrumb?.hide();
+                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "Backspace");
+                }
+            }).element);
 
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_appearance", type: "separator"}).element);
-        const appearanceElement = new MenuItem({
-            id: "appearance",
-            label: window.siyuan.languages.appearance,
-            icon: "iconFont",
-            accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
-            click: () => {
-                /// #if MOBILE
-                this.showMobileAppearance(protyle);
-                /// #else
-                protyle.toolbar.element.classList.add("fn__none");
-                protyle.toolbar.subElement.innerHTML = "";
-                protyle.toolbar.subElement.style.width = "";
-                protyle.toolbar.subElement.style.padding = "";
-                protyle.toolbar.subElement.append(appearanceMenu(protyle, selectsElement));
-                protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
-                protyle.toolbar.subElement.classList.remove("fn__none");
-                protyle.toolbar.subElementCloseCB = undefined;
-                const position = selectsElement[0].getBoundingClientRect();
-                setPosition(protyle.toolbar.subElement, position.left, position.top);
-                /// #endif
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_appearance", type: "separator"}).element);
+            const appearanceElement = new MenuItem({
+                id: "appearance",
+                label: window.siyuan.languages.appearance,
+                icon: "iconFont",
+                accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,
+                click: () => {
+                    /// #if MOBILE
+                    this.showMobileAppearance(protyle);
+                    /// #else
+                    protyle.toolbar.element.classList.add("fn__none");
+                    protyle.toolbar.subElement.innerHTML = "";
+                    protyle.toolbar.subElement.style.width = "";
+                    protyle.toolbar.subElement.style.padding = "";
+                    protyle.toolbar.subElement.append(appearanceMenu(protyle, selectsElement));
+                    protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
+                    protyle.toolbar.subElement.classList.remove("fn__none");
+                    protyle.toolbar.subElementCloseCB = undefined;
+                    const position = selectsElement[0].getBoundingClientRect();
+                    setPosition(protyle.toolbar.subElement, position.left, position.top);
+                    /// #endif
+                }
+            }).element;
+            window.siyuan.menus.menu.append(appearanceElement);
+            if (!isMobile()) {
+                appearanceElement.lastElementChild.classList.add("b3-menu__submenu--row");
             }
-        }).element;
-        window.siyuan.menus.menu.append(appearanceElement);
-        if (!isMobile()) {
-            appearanceElement.lastElementChild.classList.add("b3-menu__submenu--row");
+            this.genAlign(selectsElement, protyle);
+            this.genWidths(selectsElement, protyle);
+            // this.genHeights(selectsElement, protyle);
         }
-        this.genAlign(selectsElement, protyle);
-        this.genWidths(selectsElement, protyle);
-        // this.genHeights(selectsElement, protyle);
         if (!window.siyuan.config.readonly) {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_quickMakeCard", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "separator_quickMakeCard",
+                type: "separator"
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "quickMakeCard",
                 label: window.siyuan.languages.quickMakeCard,

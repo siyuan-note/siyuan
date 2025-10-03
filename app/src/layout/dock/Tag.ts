@@ -174,17 +174,18 @@ export class Tag extends Model {
                 target = target.parentElement;
             }
         });
-        this.update();
+        this.update(false);
     }
 
-    public update() {
+    public update(ignoreMaxListHint = true) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (element.classList.contains("fn__rotate")) {
             return;
         }
         element.classList.add("fn__rotate");
         fetchPost("/api/tag/getTag", {
-            sort: window.siyuan.config.tag.sort
+            sort: window.siyuan.config.tag.sort,
+            ignoreMaxListHint
         }, response => {
             if (this.openNodes) {
                 this.openNodes = this.tree.getExpandIds();

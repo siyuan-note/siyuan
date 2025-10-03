@@ -24,6 +24,8 @@ import {openAssetNewWindow} from "../window/openNewWindow";
 import {escapeHtml} from "../util/escape";
 import {copyTextByType} from "../protyle/toolbar/util";
 import {hideElements} from "../protyle/ui/hideElements";
+import {Protyle} from "../protyle";
+import {getAllEditor} from "../layout/getAll";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -160,6 +162,20 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     let notifyHTML = "";
     let hasAV = false;
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
+    let ghostProtyle: Protyle;
+    if (!protyle) {
+        getAllEditor().find(item => {
+            if (attrs.id === item.protyle.block.rootID) {
+                protyle = item.protyle;
+                return true;
+            }
+        });
+        if (!protyle) {
+            ghostProtyle = new Protyle(window.siyuan.ws.app, document.createElement('div'), {
+                blockId: attrs.id,
+            });
+        }
+    }
     Object.keys(attrs).forEach(item => {
         if (Constants.CUSTOM_RIFF_DECKS === item || item.startsWith("custom-sy-")) {
             return;
@@ -247,6 +263,8 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             focusByRange(range);
             if (protyle) {
                 hideElements(["select"], protyle);
+            } else {
+                ghostProtyle.destroy();
             }
         }
     });
@@ -266,8 +284,8 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                 target.classList.add("item--focus");
                 dialog.element.querySelectorAll(".custom-attr").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
-                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "" && protyle) {
-                            renderAVAttribute(item, attrs.id, protyle);
+                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "") {
+                            renderAVAttribute(item, attrs.id, protyle || ghostProtyle.protyle);
                         }
                         item.classList.remove("fn__none");
                     } else {
@@ -370,7 +388,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     }
 };
 
-export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?: IProtyle) => {
+export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle: IProtyle) => {
     if (nodeElement.getAttribute("data-type") === "NodeThematicBreak") {
         return;
     }
@@ -448,7 +466,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             }
         }
     }];
-    
+
     if (stdMarkdownId) {
         menuItems.push({
             id: "copyMarkdown",
@@ -472,7 +490,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             }
         });
     }
-    
+
     return menuItems;
 };
 

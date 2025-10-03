@@ -912,9 +912,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		node.Next.Unlink()
 	}
 
-	next := node.Next
 	node.Unlink()
-	unfoldParentFoldedHeading(next)
 
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true
@@ -1279,7 +1277,8 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 		node.InsertAfter(insertedNode)
 
-		unfoldParentFoldedHeading(insertedNode)
+		parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode)
+		unfoldHeading(parentFoldedHeading)
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1526,11 +1525,20 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		syncDelete2AvBlock(n, tree, tx)
 	}
 
-	// 替换为新节点
+	var needUnfoldParentHeading bool
+	if 0 < oldNode.HeadingLevel && (0 == updatedNode.HeadingLevel || oldNode.HeadingLevel < updatedNode.HeadingLevel) {
+		// 将不属于折叠标题的块移动到折叠标题下方，需要展开折叠标题
+		needUnfoldParentHeading = true
+	}
+
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	unfoldParentFoldedHeading(updatedNode)
+	if needUnfoldParentHeading {
+		parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
+		unfoldHeading(parentFoldedHeading)
+	}
+
 	createdUpdated(updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); err != nil {
@@ -1561,30 +1569,36 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func unfoldParentFoldedHeading(node *ast.Node) {
-	if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
-		children := treenode.HeadingChildren(parentFoldedHeading)
-		for _, child := range children {
-			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.RemoveIALAttr("fold")
-				n.RemoveIALAttr("heading-fold")
-				return ast.WalkContinue
-			})
-		}
-		parentFoldedHeading.RemoveIALAttr("fold")
-		parentFoldedHeading.RemoveIALAttr("heading-fold")
-
-		evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
-		evt.Data = []*Transaction{{
-			DoOperations:   []*Operation{{Action: "unfoldHeading", ID: parentFoldedHeading.ID}},
-			UndoOperations: []*Operation{{Action: "foldHeading", ID: parentFoldedHeading.ID}},
-		}}
-		util.PushEvent(evt)
+func unfoldHeading(heading *ast.Node) {
+	if nil == heading {
+		return
 	}
+
+	children := treenode.HeadingChildren(heading)
+	for _, child := range children {
+		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			n.RemoveIALAttr("fold")
+			n.RemoveIALAttr("heading-fold")
+			return ast.WalkContinue
+		})
+	}
+	heading.RemoveIALAttr("fold")
+	heading.RemoveIALAttr("heading-fold")
+
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+	evt.Data = []*Transaction{{
+		DoOperations:   []*Operation{{Action: "unfoldHeading", ID: heading.ID}},
+		UndoOperations: []*Operation{{Action: "foldHeading", ID: heading.ID}},
+	}}
+
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		util.PushEvent(evt)
+	}()
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

@@ -266,9 +266,11 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, toolba
             const isBackward = selection && "direction" in selection ?
                 (selection as { direction: "forward" | "backward" | "none" }).direction === "backward"
                 : range.startContainer === selection?.focusNode && range.startOffset === selection?.focusOffset;
-            // 检查是否有多个垂直位置不同的矩形
-            const hasMultipleVerticalRects = rects.length > 1 && Array.from(rects).some((rect: DOMRect) => rect.top !== rects[0].top);
-            const isToolbarAtBottom = hasMultipleVerticalRects && !isBackward;
+            let isToolbarAtBottom = false;
+            if (!isBackward) {
+                // 检查是否有多个垂直位置不同的矩形
+                isToolbarAtBottom = rects.length > 1 && Array.from(rects).some((rect: DOMRect) => rect.top !== rects[0].top);
+            }
 
             return {
                 // 向左选择：使用第一个矩形的左边界；向右选择：使用最后一个矩形的右边界

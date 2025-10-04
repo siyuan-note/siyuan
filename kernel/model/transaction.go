@@ -1604,10 +1604,7 @@ func unfoldHeading(heading *ast.Node) {
 		UndoOperations: []*Operation{{Action: "foldHeading", ID: heading.ID}},
 	}}
 
-	go func() {
-		time.Sleep(500 * time.Millisecond)
-		util.PushEvent(evt)
-	}()
+	util.PushEvent(evt)
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

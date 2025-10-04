@@ -50,7 +50,8 @@ func getTag(c *gin.Context) {
 		ignoreMaxListHint = ignoreMaxListHintArg.(bool)
 	}
 
-	ret.Data = model.BuildTags(ignoreMaxListHint)
+	app := arg["app"].(string)
+	ret.Data = model.BuildTags(ignoreMaxListHint, app)
 }
 
 func renameTag(c *gin.Context) {

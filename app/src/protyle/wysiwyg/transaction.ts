@@ -1057,10 +1057,6 @@ export const turnsIntoTransaction = (options: {
     const undoOperations: IOperation[] = [];
     let previousId: string;
     selectsElement.forEach((item, index) => {
-        if ((options.type === "Blocks2Ps" || options.type === "Blocks2Hs") &&
-            item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            setFold(options.protyle, item, undefined, undefined, false);
-        }
         item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");

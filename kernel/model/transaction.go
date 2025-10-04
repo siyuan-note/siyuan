@@ -1598,8 +1598,9 @@ func unfoldHeading(heading *ast.Node) {
 	heading.RemoveIALAttr("heading-fold")
 
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+	fillBlockRefCount(children)
 	evt.Data = []*Transaction{{
-		DoOperations:   []*Operation{{Action: "unfoldHeading", ID: heading.ID}},
+		DoOperations:   []*Operation{{Action: "unfoldHeading", ID: heading.ID, RetData: renderBlockDOMByNodes(children, NewLute())}},
 		UndoOperations: []*Operation{{Action: "foldHeading", ID: heading.ID}},
 	}}
 

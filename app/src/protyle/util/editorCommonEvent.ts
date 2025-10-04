@@ -148,8 +148,10 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         action: "delete",
         id: newSourceId,
     });
-    doOperations.push(...foldData.doOperations);
-    undoOperations.push(...foldData.undoOperations);
+    if (foldData) {
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
+    }
     return {
         doOperations,
         undoOperations,
@@ -255,8 +257,10 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations.push(...responseTransaction.data.doOperations);
         undoOperations.push(...responseTransaction.data.undoOperations);
     }
-    doOperations.push(...foldData.doOperations);
-    undoOperations.push(...foldData.undoOperations);
+    if (foldData) {
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
+    }
     return {
         doOperations,
         undoOperations,

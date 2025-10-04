@@ -1525,17 +1525,25 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		syncDelete2AvBlock(n, tree, tx)
 	}
 
-	var needUnfoldParentHeading bool
-	if 0 < oldNode.HeadingLevel && (0 == updatedNode.HeadingLevel || oldNode.HeadingLevel < updatedNode.HeadingLevel) {
-		// 将不属于折叠标题的块移动到折叠标题下方，需要展开折叠标题
-		needUnfoldParentHeading = true
+	// 将不属于折叠标题的块移动到折叠标题下方，需要展开折叠标题
+	needUnfoldParentHeading := 0 < oldNode.HeadingLevel && (0 == updatedNode.HeadingLevel || oldNode.HeadingLevel < updatedNode.HeadingLevel)
+
+	parentFoldedHeading := treenode.GetParentFoldedHeading(oldNode)
+	// 将原先折叠标题下的块提升为与折叠标题同级或更高一级的标题时，需要在折叠标题后插入该提升后的标题块（只需要推送界面插入）
+	if needInsertAfterParentHeading := nil != parentFoldedHeading && 0 != updatedNode.HeadingLevel && updatedNode.HeadingLevel <= parentFoldedHeading.HeadingLevel; needInsertAfterParentHeading {
+		evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+		evt.Data = []*Transaction{{
+			DoOperations:   []*Operation{{Action: "insert", ID: updatedNode.ID, PreviousID: parentFoldedHeading.ID, Data: data}},
+			UndoOperations: []*Operation{{Action: "delete", ID: updatedNode.ID}},
+		}}
+		util.PushEvent(evt)
 	}
 
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
 	if needUnfoldParentHeading {
-		parentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
+		parentFoldedHeading = treenode.GetParentFoldedHeading(updatedNode)
 		unfoldHeading(parentFoldedHeading)
 	}
 
@@ -1590,8 +1598,9 @@ func unfoldHeading(heading *ast.Node) {
 	heading.RemoveIALAttr("heading-fold")
 
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+	fillBlockRefCount(children)
 	evt.Data = []*Transaction{{
-		DoOperations:   []*Operation{{Action: "unfoldHeading", ID: heading.ID}},
+		DoOperations:   []*Operation{{Action: "unfoldHeading", ID: heading.ID, RetData: renderBlockDOMByNodes(children, NewLute())}},
 		UndoOperations: []*Operation{{Action: "foldHeading", ID: heading.ID}},
 	}}
 

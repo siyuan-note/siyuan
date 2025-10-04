@@ -698,7 +698,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             }
         } else if (updateElements.length > 0) {
             const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
-            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
+            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID && !protyle.block.showAll) {
                 protyle.wysiwyg.element.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                 hasFind = true;
             } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
@@ -800,7 +800,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             });
         } else {
             const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
-            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
+            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID && !protyle.block.showAll) {
                 protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", operation.data);
                 cursorElements.push(protyle.wysiwyg.element.firstElementChild);
             } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {

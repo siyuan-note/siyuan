@@ -27,7 +27,7 @@ import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
-import {zoomOut} from "../../menus/protyle";
+import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
@@ -44,25 +44,20 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
     const newSourceId = newSourceElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    let ignoreInsert = false;
+    let foldData;
     if (isBottom &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
-        ignoreInsert = true;
+        foldData = setFold(protyle, targetElement, true, false, false, true);
     } else if (!isBottom && targetElement.previousElementSibling &&
         targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
         targetElement.previousElementSibling.getAttribute("fold") === "1") {
-        ignoreInsert = true;
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
     }
-    if (!ignoreInsert) {
-        targetElement.insertAdjacentElement(isBottom ? "afterend" : "beforebegin", newSourceElement);
-    }
+    targetElement.insertAdjacentElement(isBottom ? "afterend" : "beforebegin", newSourceElement);
     if (isBottom) {
         doOperations.push({
             action: "insert",
-            context: {
-                ignoreProcess: ignoreInsert.toString(),
-            },
             data: newSourceElement.outerHTML,
             id: newSourceId,
             previousID: targetId,
@@ -70,9 +65,6 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
     } else {
         doOperations.push({
             action: "insert",
-            context: {
-                ignoreProcess: ignoreInsert.toString(),
-            },
             data: newSourceElement.outerHTML,
             id: newSourceId,
             nextID: targetId,
@@ -156,8 +148,9 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         action: "delete",
         id: newSourceId,
     });
+    doOperations.push(...foldData.doOperations);
+    undoOperations.push(...foldData.undoOperations);
     return {
-        ignoreInsert,
         doOperations,
         undoOperations,
         topSourceElement,
@@ -172,28 +165,15 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
     const targetId = targetElement.getAttribute("data-node-id");
     let tempTargetElement = targetElement;
-    let ignoreInsert = "";
-    const targetPreviousId = targetElement.previousElementSibling?.getAttribute("data-node-id");
+    let foldData;
     if (position === "afterend" &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
-        ignoreInsert = targetElement.getAttribute("data-subtype")?.replace("h", "");
+        foldData = setFold(protyle, targetElement, true, false, false, true);
     } else if (position === "beforebegin" && targetElement.previousElementSibling &&
         targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
         targetElement.previousElementSibling.getAttribute("fold") === "1") {
-        ignoreInsert = targetElement.getAttribute("data-subtype")?.replace("h", "");
-    }
-    if (ignoreInsert) {
-        let breakIgnore = false;
-        sourceElements.forEach(item => {
-            if (item.getAttribute("data-type") === "NodeHeading" &&
-                parseInt(item.getAttribute("data-subtype").replace("h", "")) >= parseInt(ignoreInsert)) {
-                breakIgnore = true;
-            }
-            if (!breakIgnore) {
-                item.setAttribute("data-remove", "true");
-            }
-        });
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
     }
     sourceElements.reverse().forEach((item, index) => {
         const id = item.getAttribute("data-node-id");
@@ -236,11 +216,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 sameElement.remove();
             }
         }
-
-        const needInset = !ignoreInsert || (ignoreInsert && !item.hasAttribute("data-remove"));
-
         if (isCopy) {
-            item.removeAttribute("data-remove");
             copyElement = item.cloneNode(true) as HTMLElement;
             copyElement.setAttribute("data-node-id", copyNewId);
             copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
@@ -248,30 +224,20 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 e.setAttribute("data-node-id", newId);
                 e.setAttribute("updated", newId.split("-")[0]);
             });
-            if (needInset) {
-                tempTargetElement.insertAdjacentElement(position, copyElement);
-            }
+            tempTargetElement.insertAdjacentElement(position, copyElement);
             doOperations.push({
                 action: "insert",
-                context: {
-                    ignoreProcess: (!needInset).toString(),
-                },
                 id: copyNewId,
                 data: copyElement.outerHTML,
-                previousID: position === "afterend" ? targetId : (!needInset ? targetPreviousId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                previousID: position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
                 parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
             });
         } else {
-            if (needInset) {
-                tempTargetElement.insertAdjacentElement(position, item);
-            }
+            tempTargetElement.insertAdjacentElement(position, item);
             doOperations.push({
                 action: "move",
-                context: {
-                    ignoreProcess: (!needInset).toString(),
-                },
                 id,
-                previousID: position === "afterend" ? targetId : (!needInset ? targetPreviousId : item.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                previousID: position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
                 parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
             });
         }
@@ -279,14 +245,6 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             tempTargetElement = isCopy ? copyElement : item;
         }
     });
-    if (ignoreInsert) {
-        // 不能在上一个循环中移除，否则会影响位置的判断和 tempTargetElement
-        sourceElements.forEach(item => {
-            if (item.hasAttribute("data-remove")) {
-                item.remove();
-            }
-        });
-    }
     undoOperations.reverse();
     for (let j = 0; j < copyFoldHeadingIds.length; j++) {
         const childrenItem = copyFoldHeadingIds[j];
@@ -297,8 +255,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations.push(...responseTransaction.data.doOperations);
         undoOperations.push(...responseTransaction.data.undoOperations);
     }
+    doOperations.push(...foldData.doOperations);
+    undoOperations.push(...foldData.undoOperations);
     return {
-        ignoreInsert: ignoreInsert ? true : false,
         doOperations,
         undoOperations,
         topSourceElement,
@@ -663,7 +622,6 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         newSourceElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`);
     }
     let topSourceElement: Element;
-    let ignoreInsert = false;
     let oldSourceParentElement = sourceElements[0].parentElement;
     if (isBottom) {
         if (newSourceElement) {
@@ -671,13 +629,11 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             doOperations.push(...moveToResult.doOperations);
             undoOperations.push(...moveToResult.undoOperations);
             topSourceElement = moveToResult.topSourceElement;
-            ignoreInsert = moveToResult.ignoreInsert;
         } else {
             const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameDoc, "afterend", isCopy);
             doOperations.push(...moveToResult.doOperations);
             undoOperations.push(...moveToResult.undoOperations);
             topSourceElement = moveToResult.topSourceElement;
-            ignoreInsert = moveToResult.ignoreInsert;
         }
     } else {
         if (newSourceElement) {
@@ -685,13 +641,11 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             doOperations.push(...moveToResult.doOperations);
             undoOperations.push(...moveToResult.undoOperations);
             topSourceElement = moveToResult.topSourceElement;
-            ignoreInsert = moveToResult.ignoreInsert;
         } else {
             const moveToResult = await moveTo(protyle, sourceElements, targetElement, isSameDoc, "beforebegin", isCopy);
             doOperations.push(...moveToResult.doOperations);
             undoOperations.push(...moveToResult.undoOperations);
             topSourceElement = moveToResult.topSourceElement;
-            ignoreInsert = moveToResult.ignoreInsert;
         }
     }
     if (targetElement.getAttribute("data-type") === "NodeListItem" && targetElement.getAttribute("data-subtype") === "o") {
@@ -829,7 +783,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         /// #endif
     }
     if (isSameDoc || isCopy) {
-        transaction(protyle, doOperations, ignoreInsert ? undefined : undoOperations);
+        transaction(protyle, doOperations, undoOperations);
     } else {
         // 跨文档或插入折叠标题下不支持撤销
         transaction(protyle, doOperations);

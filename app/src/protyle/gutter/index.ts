@@ -253,7 +253,7 @@ export class Gutter {
                     transaction(protyle, doOperations, undoOperations);
                     buttonElement.removeAttribute("disabled");
                 } else {
-                    const foldStatus = setFold(protyle, foldElement);
+                    const foldStatus = setFold(protyle, foldElement).fold;
                     if (foldStatus === 1) {
                         (buttonElement.firstElementChild as HTMLElement).style.transform = "";
                     } else if (foldStatus === 0) {
@@ -396,7 +396,7 @@ export class Gutter {
                     });
                     transaction(protyle, doOperations, undoOperations);
                 } else {
-                    const hasFold = setFold(protyle, foldElement);
+                    const hasFold = setFold(protyle, foldElement).fold;
                     const foldArrowElement = buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement;
                     if (hasFold !== -1 && foldArrowElement) {
                         foldArrowElement.style.transform = hasFold === 0 ? "rotate(90deg)" : "";

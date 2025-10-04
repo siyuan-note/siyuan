@@ -276,8 +276,13 @@
 
   &:not(.protyle-background--enable) {
     .protyle-background__img .protyle-icons,
-    .b3-chips__doctag .b3-chip__close {
+    .b3-chips__doctag .b3-chip__close,
+    .protyle-background__action {
       display: none;
+    }
+
+    .protyle-background__icon {
+      cursor: default;
     }
   }
 

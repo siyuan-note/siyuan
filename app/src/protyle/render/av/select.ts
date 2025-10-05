@@ -185,14 +185,12 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         fields.find(column => {
             if (column.id === colId) {
                 // 重名不进行更新 https://github.com/siyuan-note/siyuan/issues/13554
-                let hasName = false;
-                column.options.find((item) => {
-                    if (item.name === inputElement.value) {
-                        hasName = true;
+                const sameItem = column.options.find((item) => {
+                    if (item.name === inputElement.value && item.desc === descElement.value) {
                         return true;
                     }
                 });
-                if (!hasName) {
+                if (!sameItem) {
                     column.options.find((item) => {
                         if (item.name === name) {
                             item.name = inputElement.value;
@@ -531,7 +529,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             }
         });
     }
-    const colId = getColId( cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
+    const colId = getColId(cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
     let colData: IAVColumn;
     const fields = getFieldsByData(data);
     fields.find((item: IAVColumn) => {
@@ -654,7 +652,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
             cellValues.push(genCellValueByElement(isCustomAttr ? item.dataset.type as TAVCol : getTypeByCellElement(item), item));
         });
     }
-    const colId = getColId(cellElements[0],blockElement.getAttribute("data-av-type") as TAVView);
+    const colId = getColId(cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
     const colData = fields.find(item => {
         if (item.id === colId) {
             return item;

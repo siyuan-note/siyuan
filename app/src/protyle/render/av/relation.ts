@@ -445,14 +445,13 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
 <div class="b3-menu__item" data-type="nobg">
-    <div class="b3-form__icona fn__flex-1">
+    <div class="b3-form__icona fn__flex-1" style="overflow: visible">
         <input class="b3-text-field fn__block" style="min-width: 190px"/>
         <svg class="b3-form__icona-icon ariaLabel fn__none" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
     </div>
     <span class="fn__space"></span>
     <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
 </div>
-<div class="fn__hr"></div>
 <div class="b3-menu__items">
     <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
 </div>`;

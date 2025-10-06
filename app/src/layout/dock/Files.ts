@@ -1104,6 +1104,9 @@ data-type="navigation-root" data-path="/">
             return;
         }
         const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
+        if (!liElement) {
+            return;
+        }
         if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
             // 文件展开时，刷新
             liElement.nextElementSibling.remove();

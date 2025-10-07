@@ -98,7 +98,8 @@ export class Menu {
         }
         const menuRect = menuElement.getBoundingClientRect();
         const itemsMenuRect = itemsMenuElement.getBoundingClientRect();
-        const availableHeight = (window.innerHeight - menuRect.top) - (menuRect.height - itemsMenuRect.height);
+        // 加 1px 是为了避免在特定情况下渲染出不应存在的滚动条而做的兼容处理
+        const availableHeight = (window.innerHeight - menuRect.top) - (menuRect.height - itemsMenuRect.height) + 1;
         itemsMenuElement.style.maxHeight = Math.max(availableHeight, 0) + "px";
     }
 

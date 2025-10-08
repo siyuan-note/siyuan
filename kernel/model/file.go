@@ -1068,6 +1068,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	SetBlockAttrs(retID, nameValues)
 
 	FlushTxQueue()
+	box.addMinSort(path.Dir(hPath), retID)
 	return
 }
 

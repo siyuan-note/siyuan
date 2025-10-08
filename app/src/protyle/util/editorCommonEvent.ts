@@ -1807,12 +1807,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 clearDragoverElement(dragoverElement);
                 return;
             }
-            if (gutterTypes[0] === "nodelistitem" &&
-                gutterTypes[1] !== targetElement.getAttribute("data-subtype") &&
-                "NodeListItem" === targetElement.getAttribute("data-type")) {
-                // 排除类型不同的列表项
-                clearDragoverElement(dragoverElement);
-                return;
+            if (gutterTypes[0] === "nodelistitem" && "NodeListItem" === targetElement.getAttribute("data-type")) {
+                if (gutterTypes[1] !== targetElement.getAttribute("data-subtype")) {
+                    // 排除类型不同的列表项
+                    clearDragoverElement(dragoverElement);
+                    return;
+                }
+                // 选中非列表不能拖拽到列表中 https://github.com/siyuan-note/siyuan/issues/13822
+                const notLiItem = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).find((item: HTMLElement) => {
+                    if (!item.classList.contains("li")) {
+                        return true;
+                    }
+                });
+                if (notLiItem) {
+                    clearDragoverElement(dragoverElement);
+                    return;
+                }
             }
             if (gutterTypes[0] !== "nodelistitem" && targetElement.getAttribute("data-type") === "NodeListItem") {
                 // 非列表项不能拖入列表项周围

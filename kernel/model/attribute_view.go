@@ -95,7 +95,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	view := attrView.GetView(viewID)
+	view, _ := attrView.GetCurrentView(viewID)
 	if nil == view {
 		logging.LogErrorf("view [%s] not found in attribute view [%s]", viewID, avID)
 		return

@@ -77,7 +77,10 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
-	viewID := arg["viewID"].(string)
+	var viewID string
+	if viewIDArg := arg["viewID"]; nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
 	var groupID string
 	if groupIDArg := arg["groupID"]; nil != groupIDArg {
 		groupID = groupIDArg.(string)

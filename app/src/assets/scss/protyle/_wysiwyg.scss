@@ -604,10 +604,16 @@
   &--attr .protyle-attr {
     opacity: 1;
 
-    & > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
-      cursor: pointer;
-      @include mixin.text-clamp(1);
-      max-width: 25vw;
+    & > div {
+      &.protyle-attr--memo {
+        cursor: pointer;
+      }
+
+      &:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
+        cursor: pointer;
+        @include mixin.text-clamp(1);
+        max-width: 25vw;
+      }
     }
   }
 

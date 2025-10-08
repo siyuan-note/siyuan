@@ -381,7 +381,7 @@ export class Title {
             nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.alias)}</div>`;
         }
         if (response.data.ial.memo) {
-            nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+            nodeAttrHTML += `<div class="protyle-attr--memo ariaLabel" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
         }
         if (response.data.ial["custom-avs"]) {
             let avTitle = "";

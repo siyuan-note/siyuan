@@ -100,7 +100,7 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
-        let clipText = await readText();
+        let clipText = await readText() || "";
         // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
         clipText = clipText.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
 
@@ -150,7 +150,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     /// #endif
     if (localFiles.length === 0) {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
-        let textPlain = await readText();
+        let textPlain = await readText() || "";
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
             if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {

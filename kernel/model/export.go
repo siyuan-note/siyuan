@@ -2288,24 +2288,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本
-			var blockRefLink *ast.Node
-			if 0 < len(n.KramdownIAL) {
-				blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
-				blockRefLink.KramdownIAL = n.KramdownIAL
-
-				if n.IsTextMarkType("inline-memo") {
-					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-					blockRefLink.TextMarkType = "text inline-memo"
-				}
-			} else {
-				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
-				if "block-ref" != n.TextMarkType {
-					blockRefLink.Type = ast.NodeTextMark
-					blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", ""))
-					blockRefLink.TextMarkTextContent = linkText
-					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-				}
-			}
+			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "")), TextMarkTextContent: linkText}
+			blockRefLink.KramdownIAL = n.KramdownIAL
+			blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 4: // 脚注+锚点哈希
@@ -2999,7 +2984,7 @@ func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, treeCache map[strin
 		}
 
 		if treenode.IsBlockLink(n) {
-			n.TextMarkType = "block-ref"
+			n.TextMarkType = strings.TrimSpace(strings.TrimPrefix(n.TextMarkType, "a") + " block-ref")
 			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
 			n.TextMarkBlockRefSubtype = "s"
 

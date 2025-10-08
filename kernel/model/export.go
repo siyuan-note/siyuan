@@ -2283,8 +2283,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		case 2: // 锚文本块链
 			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
 			blockRefLink.KramdownIAL = n.KramdownIAL
-			// 除了块引还有其他元素 https://github.com/siyuan-note/siyuan/issues/15698
-			blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "a"))
+			blockRefLink.TextMarkType = "a " + n.TextMarkType
 			blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
@@ -2333,11 +2332,6 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.InsertBefore(text)
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
-		}
-
-		if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
-			// 引用加排版标记（比如颜色）重叠时丢弃后面的排版属性节点
-			unlinks = append(unlinks, n.Next)
 		}
 		return ast.WalkSkipChildren
 	})

@@ -1015,6 +1015,8 @@ export const turnsIntoTransaction = (options: {
     isContinue?: boolean,
     range?: Range
 }) => {
+    // https://github.com/siyuan-note/siyuan/issues/14505
+    options.protyle.observerLoad.disconnect();
     let selectsElement: Element[] = options.selectsElement;
     let range: Range;
     // 通过快捷键触发

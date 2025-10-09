@@ -12,8 +12,6 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
-import {isPaidUser} from "../../util/needSubscribe";
-import {getCloudURL} from "../../config/util/about";
 import {getFrontend} from "../../util/functions";
 
 const getPluginStyle = async () => {
@@ -269,7 +267,6 @@ const renderPDF = async (id: string) => {
             </div>
             <span class="fn__hr"></span>
             <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
-            <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL(""))}</div>
         </label>
     </div>
     <div class="fn__flex" style="padding: 0 16px">
@@ -477,12 +474,6 @@ const renderPDF = async (id: string) => {
             refreshPreview();
         });
         const  watermarkElement = actionElement.querySelector('#watermark');
-        watermarkElement.addEventListener('change', () => {
-            if (watermarkElement.checked && ${!isPaidUser()}) {
-                watermarkElement.nextElementSibling.style.display = "";
-                watermarkElement.checked = false;
-            }
-        });
         const refreshPreview = () => {
             previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {

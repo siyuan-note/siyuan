@@ -100,7 +100,7 @@ func GetParentFoldedHeading(node *ast.Node) (parentFoldedHeading *ast.Node) {
 		}
 
 		if n.HeadingLevel >= currentLevel {
-			break
+			continue
 		}
 		currentLevel = n.HeadingLevel
 

@@ -20,6 +20,7 @@ import {countBlockWord} from "../../layout/status";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 import {processClonePHElement} from "../render/util";
+import {scrollCenter} from "../../util/highlightById";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -1395,8 +1396,14 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
-            protyle.contentElement.scrollTop = scrollTop;
-            protyle.scroll.lastScrollTop = scrollTop;
+            if (operation.context.focusId) {
+                const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.context.focusId}"]`);
+                focusBlock(focusElement);
+                scrollCenter(protyle, focusElement, false);
+            } else {
+                protyle.contentElement.scrollTop = scrollTop;
+                protyle.scroll.lastScrollTop = scrollTop;
+            }
             return;
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {

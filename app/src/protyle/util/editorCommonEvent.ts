@@ -149,6 +149,9 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         id: newSourceId,
     });
     if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
         doOperations.push(...foldData.doOperations);
         undoOperations.push(...foldData.undoOperations);
     }
@@ -258,6 +261,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         undoOperations.push(...responseTransaction.data.undoOperations);
     }
     if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
         doOperations.push(...foldData.doOperations);
         undoOperations.push(...foldData.undoOperations);
     }

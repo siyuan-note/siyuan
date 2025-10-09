@@ -2040,7 +2040,7 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 	}
 
 	refCount := sql.QueryRootChildrenRefCount(tree.ID)
-	if !Conf.Export.MarkdownYFM && 5 > len(tree.Root.KramdownIAL) && 1 > len(refCount) {
+	if !Conf.Export.MarkdownYFM && treenode.ContainOnlyDefaultIAL(tree) && 1 > len(refCount) {
 		for c := tree.Root.FirstChild; nil != c; c = c.Next {
 			if ast.NodeParagraph == c.Type {
 				isEmpty = nil == c.FirstChild

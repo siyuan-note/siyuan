@@ -540,7 +540,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             } else if (key === "alias") {
                 aliasHTML = `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
             } else if (key === "memo") {
-                memoHTML = `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+                memoHTML = `<div class="protyle-attr--memo ariaLabel" aria-label="${escapeHTML}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
             } else if (key === "custom-avs" && data.new["av-names"]) {
                 avHTML = `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${data.new["av-names"]}</div>`;
             }

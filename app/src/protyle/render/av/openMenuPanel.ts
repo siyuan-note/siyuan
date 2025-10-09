@@ -1395,7 +1395,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "clearDate") {
                     const colData = fields.find((item: IAVColumn) => {
-                        if (item.id === options.cellElements[0].getAttribute("data-col-id")) {
+                        if (item.id === getColId(options.cellElements[0], data.viewType)) {
                             return true;
                         }
                     });

@@ -438,7 +438,7 @@ const renderPDF = async (id: string) => {
               codeLigatures: ${window.siyuan.config.editor.codeLigatures},
               plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
               codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-              katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+              katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
             }
           },
           languages: {copy:"${window.siyuan.languages.copy}"}
@@ -694,7 +694,7 @@ id="preview">${data.data.content}</div>
           codeLigatures: ${window.siyuan.config.editor.codeLigatures},
           plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
           codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-          katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+          katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
         }
       },
       languages: {copy:"${window.siyuan.languages.copy}"}

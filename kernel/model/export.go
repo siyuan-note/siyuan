@@ -1110,10 +1110,6 @@ func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 		return
 	}
 
-	if !IsPaidUser() {
-		return
-	}
-
 	mode := "text"
 	if gulu.File.IsExist(str) {
 		if ".pdf" == strings.ToLower(filepath.Ext(str)) {

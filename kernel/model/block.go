@@ -1075,3 +1075,23 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 	return
 }
+
+func FilterBlocksByPublishIgnore(ignoreBlocks []*sql.Block, blocks []*Block) (ret []*Block) {
+	ret = []*Block{}
+	for _, block := range blocks {
+		if CheckPathVisibleByPublishIgnoreBlocks(block.Box, block.Path, ignoreBlocks) {
+			ret = append(ret, block)
+		}
+	}
+	return
+}
+
+func FilterSQLBlocksByPublishIgnore(ignoreBlocks []*sql.Block, blocks []*sql.Block) (ret []*sql.Block) {
+	ret = []*sql.Block{}
+	for _, block := range blocks {
+		if CheckPathVisibleByPublishIgnoreBlocks(block.Box, block.Path, ignoreBlocks) {
+			ret = append(ret, block)
+		}
+	}
+	return
+}

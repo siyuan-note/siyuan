@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "Cuentas de autenticación",
   "publishServiceAuthAccountsTip": "Lista de cuentas de autenticación básica. Después de activar la autenticación básica, los visitantes deberán ingresar el nombre de usuario y la contraseña de la lista para ver el contenido publicado",
   "publishServiceAuthAccountAdd": "Agregar cuenta",
+  "publishVisible": "Publicación visible",
   "copyMirror": "Copiar espejo",
   "duplicateMirror": "Espejo duplicado",
   "duplicateCompletely": "Duplicar completamente",

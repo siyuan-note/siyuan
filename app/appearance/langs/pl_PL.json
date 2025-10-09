@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "Autoryzowane konta",
   "publishServiceAuthAccountsTip": "Lista kont autoryzacji podstawowej. Odwiedzający muszą wpisać nazwę użytkownika i hasło z tej listy, aby zobaczyć opublikowaną zawartość.",
   "publishServiceAuthAccountAdd": "Dodaj konto",
+  "publishVisible": "Opublikowane widoczne",
   "copyMirror": "Kopiuj lustro",
   "duplicateMirror": "Duplikuj lustro",
   "duplicateCompletely": "Duplikuj całkowicie",

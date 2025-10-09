@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "الحسابات المصادقة",
   "publishServiceAuthAccountsTip": "قائمة حسابات المصادقة الأساسية. يحتاج الزوار إلى إدخال اسم المستخدم وكلمة المرور من هذه القائمة لعرض المحتوى المنشور.",
   "publishServiceAuthAccountAdd": "إضافة حساب",
+  "publishVisible": "المنشور مرئي",
   "copyMirror": "نسخ المرآة",
   "duplicateMirror": "تكرار المرآة",
   "duplicateCompletely": "تكرار بالكامل",

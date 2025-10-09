@@ -1151,3 +1151,110 @@ func subscribeConfEvents() {
 		Conf.Save()
 	})
 }
+
+func FilterConfByPublishIgnore(ignoreBlocks []*sql.Block, appConf *AppConf) (ret *AppConf) {
+	ret = appConf
+	if appConf == nil {
+		return
+	}
+
+	appConf.UILayout = FilterUILayoutByPublishIgnore(ignoreBlocks, appConf.UILayout)
+	return
+}
+
+func FilterUILayoutByPublishIgnore(ignoreBlocks []*sql.Block, uiLayout *conf.UILayout) (ret *conf.UILayout) {
+	ret = uiLayout
+	if uiLayout == nil {
+		return
+	}
+
+	layout, ok := (*uiLayout)["layout"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	layout = filterLayoutItemByPublishIgnore(ignoreBlocks, layout)
+	(*ret)["layout"] = layout
+	return
+}
+
+func filterLayoutItemByPublishIgnore(ignoreBlocks []*sql.Block, item map[string]interface{}) (ret map[string]interface{}) {
+	ret = item
+	if (item == nil) {
+		return
+	}
+
+	instanceItem, exists := item["instance"]
+	if !exists {
+		return
+	}
+	instance := instanceItem.(string)
+	if instance == "Tab" {
+		childrenItem, exists := item["children"]
+		if !exists {
+			return
+		}
+		children := childrenItem.(map[string]interface{})
+		if children == nil {
+			return
+		}
+		rootId := children["rootId"].(string)
+		block := sql.GetBlock(rootId)
+		if block == nil {
+			return
+		}
+		if !CheckPathVisibleByPublishIgnoreBlocks(block.Box, block.Path, ignoreBlocks) {
+			ret = nil
+		}
+	} else {
+		childrenItem, exists := item["children"]
+		if !exists {
+			return
+		}
+		children := childrenItem.([]interface{})
+		if children == nil {
+			return
+		}
+		newChildren := []interface{}{}
+		updateTabs := false
+		for _, childItem := range children {
+			child := childItem.(map[string]interface{})
+			if child == nil {
+				return
+			}
+			child = filterLayoutItemByPublishIgnore(ignoreBlocks, child)
+			if child != nil {
+				newChildren = append(newChildren, child)
+			} else {
+				updateTabs = true
+			}
+		}
+		if updateTabs {
+			hasActive := false
+			activeTimes := []int64{}
+			for _, childItem := range newChildren {
+				child := childItem.(map[string]interface{})
+				activeTimeStr := child["activeTime"].(string)
+				var activeTime int64
+				if len(activeTimeStr) > 0 {
+					activeTime, _ = strconv.ParseInt(activeTimeStr, 10, 64)
+				}
+				activeTimes = append(activeTimes, activeTime)
+				if active, exists := child["active"]; exists && active.(bool) {
+					hasActive = true
+				}
+			}
+			if !hasActive && len(activeTimes) > 0 {
+				// 如果原本激活的tab刚好被去掉了，就选择日期最新的一个tab激活
+				maxIndex := 0
+				for i, activeTime := range activeTimes {
+					if activeTime > activeTimes[maxIndex] {
+						maxIndex = i
+					}
+				}
+				newChildren[maxIndex].(map[string]interface{})["active"] = true
+			}
+		}
+		ret["children"] = newChildren
+	}
+	return
+}

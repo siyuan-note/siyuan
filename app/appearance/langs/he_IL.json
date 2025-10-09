@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "חשבונות מאומתים",
   "publishServiceAuthAccountsTip": "רשימת חשבונות אימות בסיסי. צופים זקוקים להזין את שם המשתמש והסיסמה מהרשימה הזו כדי לראות את התוכן המפורסם.",
   "publishServiceAuthAccountAdd": "הוסף חשבון",
+  "publishVisible": "הפרסום גלוי",
   "copyMirror": "העתק מראה",
   "duplicateMirror": "שכפל מראה",
   "duplicateCompletely": "שכפל לחלוטין",

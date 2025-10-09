@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "认证账户",
   "publishServiceAuthAccountsTip": "Basic 认证账户列表。访问者输入列表中的用户名与密码后才能查看发布的内容",
   "publishServiceAuthAccountAdd": "添加账户",
+  "publishVisible": "发布可见",
   "copyMirror": "复制镜像",
   "duplicateMirror": "复制为镜像副本",
   "duplicateCompletely": "复制为完整副本",

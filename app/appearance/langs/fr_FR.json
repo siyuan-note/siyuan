@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "Comptes d'authentification",
   "publishServiceAuthAccountsTip": "Liste des comptes d'authentification Basic. Lorsque l'authentification Basic est activée, les visiteurs doivent entrer un nom d'utilisateur et un mot de passe figurant dans cette liste pour consulter le contenu publié.",
   "publishServiceAuthAccountAdd": "Ajouter un compte",
+  "publishVisible": "Publication visible",
   "copyMirror": "Copier le miroir",
   "duplicateMirror": "Miroir en double",
   "duplicateCompletely": "Dupliquer complètement",

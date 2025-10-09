@@ -408,6 +408,10 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	blocks := model.RecentUpdatedBlocks()
+	if model.IsReadOnlyRoleContext(c) {
+		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		blocks = model.FilterBlocksByPublishIgnore(ignoreBlocks, blocks)
+	}
 	ret.Data = blocks
 }
 
@@ -523,6 +527,10 @@ func getRefIDs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	refDefs, originalRefBlockIDs := model.GetBlockRefs(id)
+	if model.IsReadOnlyRoleContext(c) {
+		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishIgnore(ignoreBlocks, refDefs)
+	}
 	ret.Data = map[string]any{
 		"refDefs":             refDefs,
 		"originalRefBlockIDs": originalRefBlockIDs,

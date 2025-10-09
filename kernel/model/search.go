@@ -2269,6 +2269,141 @@ func getRefSearchIgnoreLines() (ret []string) {
 	return
 }
 
+var (
+	publishIgnoreLastModified int64
+	publishIgnore             []string
+	publishIgnoreLock         = sync.Mutex{}
+)
+
+func GetPublishIgnoreIDs() (ret []string) {
+	ret = []string{}
+	now := time.Now().UnixMilli()
+	if now - publishIgnoreLastModified < 30*1000 {
+		return publishIgnore
+	}
+
+	publishIgnoreLock.Lock()
+	defer publishIgnoreLock.Unlock()
+
+	publishIgnoreLastModified = now
+
+	publishIgnorePath := filepath.Join(util.DataDir, ".siyuan", "publishignore")
+	err := os.MkdirAll(filepath.Dir(publishIgnorePath), 0755)
+	if err != nil {
+		return
+	}
+	if !gulu.File.IsExist(publishIgnorePath) {
+		if err = gulu.File.WriteFileSafer(publishIgnorePath, nil, 0644); err != nil {
+			logging.LogErrorf("create publishignore [%s] failed: %s", publishIgnorePath, err)
+			return
+		}
+	}
+	data, err := os.ReadFile(publishIgnorePath)
+	if err != nil {
+		logging.LogErrorf("read publishignore [%s] failed: %s", publishIgnorePath, err)
+		return
+	}
+	dataStr := string(data)
+	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
+	ret = strings.Split(dataStr, "\n")
+	publishIgnore = []string{}
+	for _, line := range ret {
+		line = strings.TrimSpace(line)
+		if "" != line {
+			publishIgnore = append(publishIgnore, line)
+		}
+	}
+	publishIgnore = gulu.Str.RemoveDuplicatedElem(publishIgnore)
+	ret = publishIgnore
+	return
+}
+
+func SetPublishIgnoreIDs(ignoreIDs []string) (err error) {
+	now := time.Now().UnixMilli()
+	publishIgnoreLock.Lock()
+	defer publishIgnoreLock.Unlock()
+	publishIgnoreLastModified = now
+	publishIgnore = ignoreIDs
+
+	publishIgnorePath := filepath.Join(util.DataDir, ".siyuan", "publishignore")
+	err = os.MkdirAll(filepath.Dir(publishIgnorePath), 0755)
+	if err != nil {
+		msg := fmt.Sprintf("create dir for publishignore [%s] failed: %s", publishIgnorePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	dataStr := strings.Join(publishIgnore, "\n")
+	err = gulu.File.WriteFileSafer(publishIgnorePath, []byte(dataStr), 0644)
+	if err != nil {
+		msg := fmt.Sprintf("write publishignore [%s] failed: %s", publishIgnorePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
+}
+
+func GetPublishIgnoreBlocks() (ignoreBlocks []*sql.Block) { 
+	ignoreIDs := GetPublishIgnoreIDs()
+	ignoreBlocks = sql.GetBlocks(ignoreIDs);
+	boxes, listNotebookErr := ListNotebooks()
+	foundUnknownID := false
+	for i, ignoreID := range ignoreIDs {
+		if ignoreBlocks[i] == nil {
+			if listNotebookErr != nil {
+				// 如果获取笔记本的时候出错，就暂时将所有未确定的块都当成是笔记本
+				ignoreBlocks[i] = &sql.Block{ID: ignoreID, Box: ignoreID, Path: "/"}
+			} else {
+				// 否则只标记确定的笔记本
+				for _, box := range boxes {
+					if box.ID == ignoreID {
+						ignoreBlocks[i] = &sql.Block{ID: ignoreID, Box: ignoreID, Path: "/"}
+						break
+					}
+				}
+				if ignoreBlocks[i] == nil {
+					foundUnknownID = true
+				}
+			}
+			
+		}
+	}
+	if foundUnknownID {
+		// 清除未知的块并保存
+		tempIgnoreBlocks := []*sql.Block{}
+		tempIgnoreIDs := []string{}
+		for i, ignoreBlock := range ignoreBlocks {
+			if ignoreBlock != nil {
+				tempIgnoreBlocks = append(tempIgnoreBlocks, ignoreBlock)
+				tempIgnoreIDs = append(tempIgnoreIDs, ignoreIDs[i])
+			}
+		}
+		ignoreBlocks = tempIgnoreBlocks
+		SetPublishIgnoreIDs(tempIgnoreIDs)
+	}
+	return
+}
+
+func CheckPathVisibleByPublishIgnoreBlocks(box string, path string, ignoreBlocks []*sql.Block) bool {
+	for _, ignoreBlock := range ignoreBlocks {
+		if ignoreBlock.Box == box && ("/" == ignoreBlock.Path || strings.HasPrefix(path, strings.TrimSuffix(ignoreBlock.Path, ".sy"))) {
+			return false
+		}
+	}
+	return true
+}
+
+func CheckIDInPublishIgnoreIDs(ID string, ignoreIDs []string) bool {
+	for _, ignoreID := range ignoreIDs {
+		if ID == ignoreID {
+			return true
+		}
+	}
+	return false
+}
+
 func filterQueryInvisibleChars(query string) string {
 	query = strings.ReplaceAll(query, "　", "_@full_width_space@_")
 	query = strings.ReplaceAll(query, "\t", "_@tab@_")

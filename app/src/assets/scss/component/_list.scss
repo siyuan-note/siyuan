@@ -292,6 +292,16 @@
       }
     }
 
+    &__switch {
+      margin-right: 4px;
+      transition: var(--b3-transition);
+      flex-shrink: 0;
+      border-radius: var(--b3-border-radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .counter {
       cursor: pointer;
 

@@ -419,3 +419,39 @@ func buildTags(root Tags, labels []string, depth int) Tags {
 	root[i].tags = buildTags(root[i].tags, labels[1:], depth)
 	return root
 }
+
+func FilterTagsByPublishIgnore(ignoreBlocks []*sql.Block, tags *Tags) (ret *Tags) {
+	spans := sql.QueryTagSpans("")
+	labelCounts := make(map[string]int)
+	for _, span := range spans {
+		if CheckPathVisibleByPublishIgnoreBlocks(span.Box, span.Path, ignoreBlocks) {
+			label := util.UnescapeHTML(span.Content)
+			labelCounts[label] += 1
+		}
+	}
+
+	ret = &Tags{}
+	for _, tag := range *tags {
+		tag := reassignTagCounts(tag, labelCounts)
+		if tag != nil {
+			*ret = append(*ret, tag)
+		}
+	}
+	return
+}
+
+func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
+	var newChildren Tags
+	for _, child := range tag.Children {
+		child = reassignTagCounts(child, counts)
+		if child != nil {
+			newChildren = append(newChildren, child)
+		}
+	}
+	tag.Children = newChildren
+	tag.Count = counts[tag.Label]
+	if tag.Children == nil && tag.Count == 0 {
+		return nil
+	}
+	return tag
+}

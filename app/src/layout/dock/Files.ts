@@ -28,6 +28,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
 import {selectOpenTab} from "./util";
+import { publish } from "../../config/publish";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -122,6 +123,10 @@ export class Files extends Model {
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
+    <div data-type="publish-visible" class="b3-tooltips b3-tooltips__sw block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.publishVisible}">
+        <svg><use xlink:href="#iconEye"></use></svg>
+    </div>
+    <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
     <div data-type="more" class="b3-tooltips b3-tooltips__sw block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </div> 
@@ -197,6 +202,17 @@ export class Files extends Model {
             });
             window.siyuan.storage[Constants.LOCAL_FILESPATHS] = [];
             setStorageVal(Constants.LOCAL_FILESPATHS, []);
+        });
+        this.actionsElement.querySelector('[data-type="publish-visible"]').addEventListener("click", () => {
+            const publishVisibleElement = this.actionsElement.querySelector('[data-type="publish-visible"]');
+            publishVisibleElement.toggleAttribute("edit");
+            const editingPublishVisible = publishVisibleElement.hasAttribute("edit");
+            this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+                item.classList.toggle("fn__none", editingPublishVisible);
+            });
+            this.element.querySelectorAll('.b3-list-item__switch[data-type="publish-visible"]').forEach(item => {
+                item.classList.toggle("fn__none", !editingPublishVisible);
+            });
         });
         this.actionsElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -279,6 +295,14 @@ export class Files extends Model {
                         event.preventDefault();
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
+                        break;
+                    } else if (isNotCtrl(event) && target.classList.contains("b3-switch") && target.parentElement.classList.contains('b3-list-item__switch') && target.parentElement.getAttribute("data-type") == "publish-visible") {
+                        const visible = (target as HTMLInputElement).checked;
+                        let targetId = target.parentElement.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.parentElement.getAttribute("data-url");
+                        fetchPost("/api/filetree/setPublishVisible", {
+                            id: targetId,
+                            visible: visible
+                        });
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__action")) {
                         const type = target.getAttribute("data-type");
@@ -811,13 +835,16 @@ export class Files extends Model {
     }
 
     private genNotebook(item: INotebook) {
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        const editingPublishVisible = this.actionsElement.querySelector('[data-type="publish-visible"]').hasAttribute("edit");
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishVisible ? ' fn__none' : ''}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishVisible ? '' : ' fn__none'}" data-type="publish-visible" aria-label="${window.siyuan.languages.publishVisible}"><input type="checkbox" class="b3-switch" checked></span>`
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__toggle fn__hidden">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
+    ${switchHTML}
     <span class="b3-list-item__text" style="cursor: default;">${escapeHtml(item.name)}</span>
     <span data-type="open" data-url="${item.id}" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.openBy}">
         <svg><use xlink:href="#iconOpen"></use></svg>
@@ -832,6 +859,7 @@ data-type="navigation-root" data-path="/">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
+    ${switchHTML}
     <span class="b3-list-item__text ariaLabel" data-position="parentE">${escapeHtml(item.name)}</span>
     <span data-type="more-root" class="b3-list-item__action b3-tooltips b3-tooltips__w${(window.siyuan.config.readonly) ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
@@ -869,6 +897,7 @@ data-type="navigation-root" data-path="/">
                 this.selectItem(item.notebookId, openPath, undefined, false, false);
             });
         });
+        this.refreshPublishVisibleSwitchs();
         if (!init) {
             return;
         }
@@ -1071,6 +1100,7 @@ data-type="navigation-root" data-path="/">
             if (typeof scrollTop === "number") {
                 this.element.scroll({top: scrollTop, behavior: "smooth"});
             }
+            this.refreshPublishVisibleSwitchs();
             return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
@@ -1088,6 +1118,7 @@ data-type="navigation-root" data-path="/">
                 }
             }, 120);
         }, 2);
+        this.refreshPublishVisibleSwitchs();
     }
 
     private async onLsSelect(data: {
@@ -1219,6 +1250,7 @@ data-type="navigation-root" data-path="/">
             });
             liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }
+        this.refreshPublishVisibleSwitchs();
         return liElement;
     }
 
@@ -1268,6 +1300,7 @@ data-type="navigation-root" data-path="/">
         }
         const ariaLabel = this.genDocAriaLabel(item, escapeAriaLabel);
         const paddingLeft = (item.path.split("/").length - 1) * 18;
+        const editingPublishVisible = this.actionsElement.querySelector('[data-type="publish-visible"]').hasAttribute("edit");
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 
@@ -1275,7 +1308,10 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishVisible ? ' fn__none' : ''}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishVisible ? '' : ' fn__none'}" data-type="publish-visible" aria-label="${window.siyuan.languages.publishVisible}">
+        <input type="checkbox" class="b3-switch" checked>
+    </span>
     <span class="b3-list-item__text ariaLabel" data-position="parentE"
 aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
@@ -1336,5 +1372,26 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
             }).element);
         }
         return window.siyuan.menus.menu;
+    }
+
+    private refreshPublishVisibleSwitchs() {
+        if (window.siyuan.config.readonly) {
+            return;
+        }
+
+        let ids: string[] = [];
+        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")))
+        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")))
+        fetchPost("/api/filetree/getPublishVisible", {
+            ids: ids
+        }, response => {
+            Object.entries(response.data.visibles as Record<string, boolean>).forEach(([id, visible]) => {
+                const element = this.element.querySelector(`[data-url="${id}"]`) || this.element.querySelector(`[data-node-id="${id}"]`)
+                if (element) {
+                    const switchElement = element.querySelector(`[data-type="publish-visible"] input`) as HTMLInputElement;
+                    switchElement.checked = visible;
+                }
+            });
+        })
     }
 }

@@ -701,3 +701,29 @@ func query2Stmt(queryStr string) (ret string) {
 	ret = buf.String()
 	return
 }
+
+func FilterGraphByPublishIgnore(ignoreBlocks []*sql.Block, nodes []*GraphNode, links []*GraphLink) (retNodes []*GraphNode, retLinks []*GraphLink) {
+	retNodes = []*GraphNode{}
+	retLinks = []*GraphLink{}
+	ignoreNodeIDs := []string{}
+	for _, node := range nodes {
+		if CheckPathVisibleByPublishIgnoreBlocks(node.Box, node.Path, ignoreBlocks) {
+			retNodes = append(retNodes, node)
+		} else {
+			ignoreNodeIDs = append(ignoreNodeIDs, node.ID)
+		}
+	}
+	for _, link := range links {
+		ignore := false
+		for _, ignoreNodeID := range ignoreNodeIDs {
+			if ignoreNodeID == link.From || ignoreNodeID == link.To {
+				ignore = true
+				break
+			}
+		}
+		if !ignore {
+			retLinks = append(retLinks, link)
+		}
+	}
+	return
+}

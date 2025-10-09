@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "認證帳戶",
   "publishServiceAuthAccountsTip": "Basic 認證帳戶列表。啟用 Basic 認證後訪問者輸入列表中的用戶名與密碼後才能查看發布的內容",
   "publishServiceAuthAccountAdd": "添加帳戶",
+  "publishVisible": "發布可見",
   "copyMirror": "複製鏡像",
   "duplicateMirror": "複製為鏡像副本",
   "duplicateCompletely": "複製為完整副本",

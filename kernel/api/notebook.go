@@ -419,6 +419,22 @@ func lsNotebooks(c *gin.Context) {
 		if err != nil {
 			return
 		}
+		if model.IsReadOnlyRoleContext(c) {
+			ignoreIDs := model.GetPublishIgnoreIDs()
+			tempNotebooks := []*model.Box{}
+			for _, notebook := range notebooks {
+				// 筛除关闭的笔记本
+				if notebook.Closed {
+					continue
+				}
+				// 筛除发布不可见的笔记本
+				if model.CheckIDInPublishIgnoreIDs(notebook.ID, ignoreIDs) {
+					continue
+				}
+				tempNotebooks = append(tempNotebooks, notebook)
+			}
+			notebooks = tempNotebooks
+		}
 	}
 
 	ret.Data = map[string]interface{}{

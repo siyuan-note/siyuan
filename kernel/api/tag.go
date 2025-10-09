@@ -43,7 +43,12 @@ func getTag(c *gin.Context) {
 	model.Conf.Tag.Sort = sortMode
 	model.Conf.Save()
 
-	ret.Data = model.BuildTags()
+	tags := model.BuildTags()
+	if model.IsReadOnlyRoleContext(c) {
+		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		tags = model.FilterTagsByPublishIgnore(ignoreBlocks, tags)
+	}
+	ret.Data = tags	
 }
 
 func renameTag(c *gin.Context) {

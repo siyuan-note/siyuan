@@ -1071,6 +1071,17 @@ func listDocsByPath(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	// 过滤掉发布不可见的文件
+	if model.IsReadOnlyRoleContext(c) {
+		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		tempFiles := []*model.File{}
+		for _, file := range files {
+			if model.CheckPathVisibleByPublishIgnoreBlocks(notebook, file.Path, ignoreBlocks) {
+				tempFiles = append(tempFiles, file)
+			}
+		}
+		files = tempFiles
+	}
 	if maxListCount < totals {
 		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
 		ignoreMaxListHintArg := arg["ignoreMaxListHint"]
@@ -1208,4 +1219,59 @@ func pushCreate(box *model.Box, p string, arg map[string]interface{}) {
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
+}
+
+func setPublishVisible(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	ignoreIDs := model.GetPublishIgnoreIDs()
+	ID := arg["id"].(string)
+	visible := arg["visible"].(bool)
+
+	foundIndex := -1
+	for i, ignoreID := range ignoreIDs {
+		if ID == ignoreID {
+			foundIndex = i
+			break
+		}
+	}
+	if foundIndex != -1 && visible {
+		ignoreIDs = append(ignoreIDs[:foundIndex], ignoreIDs[foundIndex+1:]...)
+		model.SetPublishIgnoreIDs(ignoreIDs)
+	} else if foundIndex == -1 && !visible {
+		ignoreIDs = append(ignoreIDs, ID)
+		model.SetPublishIgnoreIDs(ignoreIDs)
+	}
+}
+
+func getPublishVisible(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var IDs []string
+	for _, ID := range arg["ids"].([]interface{}) {
+		IDs = append(IDs, ID.(string))
+	}
+	
+	ignoreIDs := model.GetPublishIgnoreIDs()
+	
+	visibleMap := make(map[string]bool)
+	for _, ID := range IDs {
+		visibleMap[ID] = !model.CheckIDInPublishIgnoreIDs(ID, ignoreIDs)
+	}
+
+	ret.Data = map[string]any{
+		"visibles": visibleMap,
+	}
 }

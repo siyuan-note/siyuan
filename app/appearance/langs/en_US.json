@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "Authenticated accounts",
   "publishServiceAuthAccountsTip": "List of Basic authentication accounts. Visitors need to enter the username and password from this list to view the published content.",
   "publishServiceAuthAccountAdd": "Add account",
+  "publishVisible": "Publish visible",
   "copyMirror": "Copy mirror",
   "duplicateMirror": "Duplicate mirror",
   "duplicateCompletely": "Duplicate completely",

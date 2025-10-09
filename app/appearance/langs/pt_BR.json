@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "Contas autenticadas",
   "publishServiceAuthAccountsTip": "Lista de contas de autenticação básica. Os visitantes precisam inserir o nome de usuário e senha desta lista para visualizar o conteúdo publicado.",
   "publishServiceAuthAccountAdd": "Adicionar conta",
+  "publishVisible": "Publicação visível",
   "copyMirror": "Copiar espelho",
   "duplicateMirror": "Duplicar espelho",
   "duplicateCompletely": "Duplicar completamente",

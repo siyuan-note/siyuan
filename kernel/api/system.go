@@ -540,6 +540,11 @@ func getConf(c *gin.Context) {
 		model.HideConfSecret(maskedConf)
 	}
 
+	if model.IsReadOnlyRoleContext(c) {
+		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		maskedConf = model.FilterConfByPublishIgnore(ignoreBlocks, maskedConf)
+	}
+
 	ret.Data = map[string]interface{}{
 		"conf":      maskedConf,
 		"start":     !util.IsUILoaded,

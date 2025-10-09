@@ -89,6 +89,7 @@
   "publishServiceAuthAccounts": "Аутентифицированные учетные записи",
   "publishServiceAuthAccountsTip": "Список учетных записей базовой аутентификации. Посетители должны ввести имя пользователя и пароль из этого списка для просмотра опубликованного содержимого.",
   "publishServiceAuthAccountAdd": "Добавить учетную запись",
+  "publishVisible": "Публикация видима",
   "copyMirror": "Копировать зеркало",
   "duplicateMirror": "Дублировать зеркало",
   "duplicateCompletely": "Дублировать полностью",

@@ -451,18 +451,18 @@ export const setFilter = async (options: {
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200"><div class="protyle-hint b3-list b3-list--background fn__none"></div>`,
+            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200"><div style="position:fixed" class="protyle-hint b3-list b3-list--background fn__none"></div>`,
             bind(element) {
                 const inputElement = element.querySelector("input");
-                const listElement = inputElement.nextElementSibling;
+                const listElement = inputElement.nextElementSibling as HTMLElement;
                 const renderList = () => {
                     fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
-                        id: options.data.id,
+                        id: colData.relation.avID,
                         keyword: inputElement.value,
                     }, response => {
                         let html = "";
                         (response.data.rows.values as IAVCellValue[] || []).forEach((item, index) => {
-                            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.block.content}</div>`;
+                            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.block.content || window.siyuan.languages.untitled}</div>`;
                         });
                         listElement.innerHTML = html;
                         if (html === "") {
@@ -470,6 +470,8 @@ export const setFilter = async (options: {
                         } else {
                             listElement.classList.remove("fn__none");
                         }
+                        const inputRect = inputElement.getBoundingClientRect();
+                        setPosition(listElement, inputRect.left, inputRect.bottom + 4, inputRect.height + 4);
                     });
                 };
                 inputElement.addEventListener("input", (event: KeyboardEvent) => {
@@ -650,10 +652,6 @@ export const setFilter = async (options: {
     }
     toggleEmpty(operationElement, operationElement.value, filterValue.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
-    if (filterValue.type === "relation") {
-        const inputRect = textElements[0].getBoundingClientRect();
-        textElements[0].nextElementSibling.setAttribute("style", `position:fixed;top:${inputRect.bottom}px;left:${inputRect.left}px`);
-    }
     if (textElements.length > 0) {
         textElements[0].select();
     }

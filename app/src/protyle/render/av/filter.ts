@@ -431,7 +431,9 @@ export const setFilter = async (options: {
         let value = "";
         if (filterValue) {
             if (filterValue.type === "mAsset") {
-                value = filterValue.mAsset[0]?.content || "";
+                if (filterValue.mAsset) {
+                    value = filterValue.mAsset[0]?.content || "";
+                }
             } else {
                 value = filterValue[filterValue.type as "text"].content || "";
             }

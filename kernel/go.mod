@@ -73,7 +73,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20250705151800-55b8f293f342
 	github.com/xuri/excelize/v2 v2.9.0
 	golang.org/x/image v0.32.0
-	golang.org/x/mobile v0.0.0-20250911085028-6912353760cf
+	golang.org/x/mobile v0.0.0-20251009145931-8baca8bf4eeb
 	golang.org/x/mod v0.29.0
 	golang.org/x/net v0.46.0
 	golang.org/x/sys v0.37.0

@@ -102,17 +102,22 @@ func ListNotebooks() (ret []*Box, err error) {
 			continue
 		}
 
-		if !ast.IsNodeIDPattern(dir.Name()) {
+		id := dir.Name()
+		if !ast.IsNodeIDPattern(id) {
 			continue
 		}
 
 		boxConf := conf.NewBoxConf()
-		boxDirPath := filepath.Join(util.DataDir, dir.Name())
+		boxDirPath := filepath.Join(util.DataDir, id)
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		isExistConf := filelock.IsExist(boxConfPath)
 		if !isExistConf {
-			// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
-			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+			if !IsUserGuide(id) {
+				// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
+				logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+			} else {
+				continue
+			}
 		} else {
 			data, readErr := filelock.ReadFile(boxConfPath)
 			if nil != readErr {
@@ -126,7 +131,6 @@ func ListNotebooks() (ret []*Box, err error) {
 			}
 		}
 
-		id := dir.Name()
 		icon := boxConf.Icon
 		if strings.Contains(icon, ".") { // 说明是自定义图标
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034

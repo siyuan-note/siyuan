@@ -2162,9 +2162,11 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 							href = "#" + defID
 						}
 					}
-					href = strings.TrimPrefix(href, currentDocDir)
+					newHref := strings.TrimPrefix(href, currentDocDir)
+					if !strings.HasPrefix(newHref, ".md") {
+						href = newHref
+					}
 					href = util.FilterFilePath(href)
-					href = strings.TrimPrefix(href, "/")
 					blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: href}
 					blockRefLink.KramdownIAL = n.KramdownIAL
 					n.InsertBefore(blockRefLink)

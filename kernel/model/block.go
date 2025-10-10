@@ -786,6 +786,11 @@ func GetBlockDOMs(ids []string) (ret map[string]string) {
 		if nil == node {
 			continue
 		}
+
+		if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
+			node.SetIALAttr("parent-heading", parentFoldedHeading.ID)
+		}
+
 		ret[id] = luteEngine.RenderNodeBlockDOM(node)
 	}
 	return

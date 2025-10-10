@@ -146,11 +146,13 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		return true
 	}
 
-	switch filter.Operator {
-	case FilterOperatorIsEmpty:
-		return value.IsEmpty()
-	case FilterOperatorIsNotEmpty:
-		return !value.IsEmpty()
+	if "" == filter.Qualifier {
+		switch filter.Operator {
+		case FilterOperatorIsEmpty:
+			return value.IsEmpty()
+		case FilterOperatorIsNotEmpty:
+			return !value.IsEmpty()
+		}
 	}
 
 	// 单独处理汇总
@@ -194,12 +196,30 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
+			if len(value.Rollup.Contents) < len(relVal.Relation.Contents) { // 说明汇总的目标字段存在空值
+				if FilterOperatorIsEmpty == filter.Operator {
+					return true
+				} else if FilterOperatorIsNotEmpty == filter.Operator {
+					return false
+				}
+			}
+
 			for _, content := range value.Rollup.Contents {
 				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
 					return true
 				}
 			}
 		case FilterQuantifierAll:
+			if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if FilterOperatorIsEmpty == filter.Operator {
+					if 1 > len(value.Rollup.Contents) {
+						return true
+					}
+				} else if FilterOperatorIsNotEmpty == filter.Operator {
+					return false
+				}
+			}
+
 			for _, content := range value.Rollup.Contents {
 				if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
 					return false
@@ -207,6 +227,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 			return true
 		case FilterQuantifierNone:
+			if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+				if FilterOperatorIsEmpty == filter.Operator {
+					return false
+				} else if FilterOperatorIsNotEmpty == filter.Operator {
+					return true
+				}
+			}
+
 			for _, content := range value.Rollup.Contents {
 				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
 					return false
@@ -265,6 +293,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
+			if 1 > len(value.MAsset) { // 说明资源字段为空
+				if FilterOperatorIsEmpty == filter.Operator {
+					return true
+				} else if FilterOperatorIsNotEmpty == filter.Operator {
+					return false
+				}
+			}
+
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
@@ -279,6 +315,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 			}
 		case FilterQuantifierAll:
+			if 1 > len(value.MAsset) {
+				if FilterOperatorIsEmpty == filter.Operator {
+					return true
+				} else if FilterOperatorIsNotEmpty == filter.Operator {
+					return false
+				}
+			}
+
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
@@ -294,6 +338,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 			return true
 		case FilterQuantifierNone:
+			if 1 > len(value.MAsset) {
+				if FilterOperatorIsEmpty == filter.Operator {
+					return false
+				} else if FilterOperatorIsNotEmpty == filter.Operator {
+					return true
+				}
+			}
+
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:

@@ -1065,7 +1065,7 @@ export const turnsIntoTransaction = (options: {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId: string;
-    selectsElement.forEach((item, index) => {
+    selectsElement.forEach((item: HTMLElement, index) => {
         item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
@@ -1075,7 +1075,7 @@ export const turnsIntoTransaction = (options: {
         const tempElement = document.createElement("template");
         if (!options.isContinue) {
             // @ts-ignore
-            const newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
+            let newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
             tempElement.innerHTML = newHTML;
 
             if (!tempElement.content.querySelector(`[data-node-id="${id}"]`)) {
@@ -1110,6 +1110,15 @@ export const turnsIntoTransaction = (options: {
                     previousId = undefined;
                 }
             } else {
+                let foldData;
+                if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
+                    tempElement.content.firstElementChild.getAttribute("data-subtype") !== item.dataset.subtype) {
+                    foldData = setFold(options.protyle, item, undefined, undefined, false, true);
+                    newHTML = newHTML.replace(' fold="1"', "");
+                }
+                if (foldData && foldData.doOperations?.length > 0) {
+                    doOperations.push(...foldData.doOperations);
+                }
                 undoOperations.push({
                     action: "update",
                     id,
@@ -1120,6 +1129,9 @@ export const turnsIntoTransaction = (options: {
                     id,
                     data: newHTML
                 });
+                if (foldData && foldData.undoOperations?.length > 0) {
+                    undoOperations.push(...foldData.undoOperations);
+                }
             }
             item.outerHTML = newHTML;
         } else {

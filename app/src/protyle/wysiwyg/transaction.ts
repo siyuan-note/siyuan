@@ -1396,7 +1396,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
-            if (operation.context.focusId) {
+            if (operation.context?.focusId) {
                 const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.context.focusId}"]`);
                 focusBlock(focusElement);
                 scrollCenter(protyle, focusElement, false);

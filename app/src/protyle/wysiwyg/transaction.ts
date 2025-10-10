@@ -242,6 +242,9 @@ const promiseTransaction = () => {
                 //         blockRender(protyle, item);
                 //     }
                 // });
+                protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+                    item.remove();
+                });
             }
         });
 
@@ -851,6 +854,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             } else if (wbrElement) {
                 wbrElement.remove();
             }
+        });
+        protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+            item.remove();
         });
         return;
     }

@@ -299,9 +299,11 @@ export class Files extends Model {
                     } else if (isNotCtrl(event) && target.classList.contains("b3-switch") && target.parentElement.classList.contains('b3-list-item__switch') && target.parentElement.getAttribute("data-type") == "publish-visible") {
                         const visible = (target as HTMLInputElement).checked;
                         let targetId = target.parentElement.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.parentElement.getAttribute("data-url");
-                        fetchPost("/api/filetree/setPublishVisible", {
+                        fetchPost("/api/filetree/setPublishAccess", {
                             id: targetId,
-                            visible: visible
+                            visible: visible,
+                            password: "",
+                            disable: false,
                         });
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__action")) {
@@ -1389,14 +1391,14 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
         let ids: string[] = [];
         this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")))
         this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")))
-        fetchPost("/api/filetree/getPublishVisible", {
+        fetchPost("/api/filetree/getPublishAccess", {
             ids: ids
         }, response => {
-            Object.entries(response.data.visibles as Record<string, boolean>).forEach(([id, visible]) => {
-                const element = this.element.querySelector(`[data-url="${id}"]`) || this.element.querySelector(`[data-node-id="${id}"]`)
+            response.data.publishAccess.forEach((item : { id: string, visible: boolean, password: string, disable: boolean }) => {
+                const element = this.element.querySelector(`[data-url="${item.id}"]`) || this.element.querySelector(`[data-node-id="${item.id}"]`)
                 if (element) {
                     const switchElement = element.querySelector(`[data-type="publish-visible"] input`) as HTMLInputElement;
-                    switchElement.checked = visible;
+                    switchElement.checked = item.visible;
                 }
             });
         })

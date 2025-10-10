@@ -31,10 +31,10 @@ func getBookmark(c *gin.Context) {
 
 	bookmarks := model.BuildBookmark()
 	if model.IsReadOnlyRoleContext(c) {
-		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		invisibleBlocks := model.GetPublishInvisibleBlocks()
 		tempBookmarks := &model.Bookmarks{}
 		for _, bookmark := range *bookmarks {
-			bookmark.Blocks = model.FilterBlocksByPublishIgnore(ignoreBlocks, bookmark.Blocks)
+			bookmark.Blocks = model.FilterBlocksByPublishInvisible(invisibleBlocks, bookmark.Blocks)
 			bookmark.Count = len(bookmark.Blocks)
 			if bookmark.Count > 0 {
 				*tempBookmarks = append(*tempBookmarks, bookmark)

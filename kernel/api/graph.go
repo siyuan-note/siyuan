@@ -82,8 +82,8 @@ func getGraph(c *gin.Context) {
 
 	boxID, nodes, links := model.BuildGraph(query)
 	if model.IsReadOnlyRoleContext(c) {
-		ignoreBlocks := model.GetPublishIgnoreBlocks()
-		nodes, links = model.FilterGraphByPublishIgnore(ignoreBlocks, nodes, links)
+		invisibleBlocks := model.GetPublishInvisibleBlocks()
+		nodes, links = model.FilterGraphByPublishInvisible(invisibleBlocks, nodes, links)
 	}
 	ret.Data = map[string]interface{}{
 		"nodes": nodes,
@@ -132,8 +132,8 @@ func getLocalGraph(c *gin.Context) {
 
 	boxID, nodes, links := model.BuildTreeGraph(id, keyword)
 	if model.IsReadOnlyRoleContext(c) {
-		ignoreBlocks := model.GetPublishIgnoreBlocks()
-		nodes, links = model.FilterGraphByPublishIgnore(ignoreBlocks, nodes, links)
+		invisibleBlocks := model.GetPublishInvisibleBlocks()
+		nodes, links = model.FilterGraphByPublishInvisible(invisibleBlocks, nodes, links)
 	}
 	ret.Data = map[string]interface{}{
 		"id":    id,

@@ -420,7 +420,7 @@ func lsNotebooks(c *gin.Context) {
 			return
 		}
 		if model.IsReadOnlyRoleContext(c) {
-			ignoreIDs := model.GetPublishIgnoreIDs()
+			publishAccess := model.GetPublishAccess()
 			tempNotebooks := []*model.Box{}
 			for _, notebook := range notebooks {
 				// 筛除关闭的笔记本
@@ -428,7 +428,16 @@ func lsNotebooks(c *gin.Context) {
 					continue
 				}
 				// 筛除发布不可见的笔记本
-				if model.CheckIDInPublishIgnoreIDs(notebook.ID, ignoreIDs) {
+				invisible := false
+				for _, item := range publishAccess {
+					if item.ID == notebook.ID {
+						if !item.Visible {
+							invisible = true
+						}
+						break
+					}
+				}
+				if invisible {
 					continue
 				}
 				tempNotebooks = append(tempNotebooks, notebook)

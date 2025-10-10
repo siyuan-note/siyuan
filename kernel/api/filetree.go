@@ -1078,10 +1078,10 @@ func listDocsByPath(c *gin.Context) {
 	}
 	// 过滤掉发布不可见的文件
 	if model.IsReadOnlyRoleContext(c) {
-		ignoreBlocks := model.GetPublishIgnoreBlocks()
+		invisibleBlocks := model.GetPublishInvisibleBlocks()
 		tempFiles := []*model.File{}
 		for _, file := range files {
-			if model.CheckPathVisibleByPublishIgnoreBlocks(notebook, file.Path, ignoreBlocks) {
+			if model.CheckPathVisibleByPublishInvisibleBlocks(notebook, file.Path, invisibleBlocks) {
 				tempFiles = append(tempFiles, file)
 			}
 		}
@@ -1230,7 +1230,7 @@ func pushCreate(box *model.Box, p string, arg map[string]interface{}) {
 	util.PushEvent(evt)
 }
 
-func setPublishVisible(c *gin.Context) {
+func setPublishAccess(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -1239,27 +1239,42 @@ func setPublishVisible(c *gin.Context) {
 		return
 	}
 
-	ignoreIDs := model.GetPublishIgnoreIDs()
+	publishAccess := model.GetPublishAccess()
 	ID := arg["id"].(string)
 	visible := arg["visible"].(bool)
+	password := arg["password"].(string)
+	disable := arg["disable"].(bool)
 
 	foundIndex := -1
-	for i, ignoreID := range ignoreIDs {
-		if ID == ignoreID {
+	for i, item := range publishAccess {
+		if ID == item.ID {
 			foundIndex = i
 			break
 		}
 	}
-	if foundIndex != -1 && visible {
-		ignoreIDs = append(ignoreIDs[:foundIndex], ignoreIDs[foundIndex+1:]...)
-		model.SetPublishIgnoreIDs(ignoreIDs)
-	} else if foundIndex == -1 && !visible {
-		ignoreIDs = append(ignoreIDs, ID)
-		model.SetPublishIgnoreIDs(ignoreIDs)
+	if foundIndex != -1 {
+		if visible && len(password) == 0 && !disable {
+			publishAccess = append(publishAccess[:foundIndex], publishAccess[foundIndex+1:]...)
+		} else {
+			publishAccess[foundIndex].Visible = visible
+			publishAccess[foundIndex].Password = password
+			publishAccess[foundIndex].Disable = disable
+		}
+		model.SetPublishAccess(publishAccess)
+	} else if foundIndex == -1 {
+		if !visible || len(password) != 0 || disable {
+			publishAccess = append(publishAccess, &model.PublishAccessItem{
+				ID:          ID,
+				Visible:     visible,
+				Password:    password,
+				Disable:     disable,
+			})
+			model.SetPublishAccess(publishAccess)
+		}
 	}
 }
 
-func getPublishVisible(c *gin.Context) {
+func getPublishAccess(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -1273,14 +1288,28 @@ func getPublishVisible(c *gin.Context) {
 		IDs = append(IDs, ID.(string))
 	}
 	
-	ignoreIDs := model.GetPublishIgnoreIDs()
-	
-	visibleMap := make(map[string]bool)
+	publishAccess := model.GetPublishAccess()
+	maskedPublishAccess := model.PublishAccess{}
 	for _, ID := range IDs {
-		visibleMap[ID] = !model.CheckIDInPublishIgnoreIDs(ID, ignoreIDs)
+		found := false
+		for _, item := range publishAccess {
+			if item.ID == ID {
+				found = true
+				maskedPublishAccess = append(maskedPublishAccess, item)
+				break
+			}
+		}
+		if !found {
+			maskedPublishAccess = append(maskedPublishAccess, &model.PublishAccessItem{
+				ID:          ID,
+				Visible:     true,
+				Password:    "",
+				Disable:     false,
+			})
+		}
 	}
 
 	ret.Data = map[string]any{
-		"visibles": visibleMap,
+		"publishAccess": maskedPublishAccess,
 	}
 }

@@ -366,8 +366,8 @@ func fullTextSearchBlock(c *gin.Context) {
 	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchBlockArgs(arg)
 	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
 	if model.IsReadOnlyRoleContext(c) {
-		ignoreBlocks := model.GetPublishIgnoreBlocks()
-		blocks = model.FilterBlocksByPublishIgnore(ignoreBlocks, blocks)
+		invisibleBlocks := model.GetPublishInvisibleBlocks()
+		blocks = model.FilterBlocksByPublishInvisible(invisibleBlocks, blocks)
 	}
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,

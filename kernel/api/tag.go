@@ -51,11 +51,11 @@ func getTag(c *gin.Context) {
 	}
 
 	app := arg["app"].(string)
-	tags = model.BuildTags(ignoreMaxListHint, app)
+	tags := model.BuildTags(ignoreMaxListHint, app)
 	
 	if model.IsReadOnlyRoleContext(c) {
-		ignoreBlocks := model.GetPublishIgnoreBlocks()
-		tags = model.FilterTagsByPublishIgnore(ignoreBlocks, tags)
+		invisibleBlocks := model.GetPublishInvisibleBlocks()
+		tags = model.FilterTagsByPublishInvisible(invisibleBlocks, tags)
 	}
 	ret.Data = tags
 }

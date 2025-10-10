@@ -2269,139 +2269,153 @@ func getRefSearchIgnoreLines() (ret []string) {
 	return
 }
 
+type PublishAccessItem struct {
+	ID          string     `json:"id"`
+	Visible     bool       `json:"visible"`   // 是否发布可见
+	Password    string     `json:"password"`  // 密码，为空字符串时表示无密码
+	Disable     bool       `json:"disable"`   // 是否禁止发布
+}
+
+type PublishAccess []*PublishAccessItem
+
 var (
-	publishIgnoreLastModified int64
-	publishIgnore             []string
-	publishIgnoreLock         = sync.Mutex{}
+	publishAccessLastModified int64
+	publishAccess             PublishAccess
+	publishAccessLock         = sync.Mutex{}
 )
 
-func GetPublishIgnoreIDs() (ret []string) {
-	ret = []string{}
+func GetPublishAccess() (ret PublishAccess) {
+	ret = PublishAccess{}
 	now := time.Now().UnixMilli()
-	if now - publishIgnoreLastModified < 30*1000 {
-		return publishIgnore
+	if now - publishAccessLastModified < 30*1000 {
+		return publishAccess
 	}
 
-	publishIgnoreLock.Lock()
-	defer publishIgnoreLock.Unlock()
+	publishAccessLock.Lock()
+	defer publishAccessLock.Unlock()
 
-	publishIgnoreLastModified = now
+	publishAccessLastModified = now
 
-	publishIgnorePath := filepath.Join(util.DataDir, ".siyuan", "publishignore")
-	err := os.MkdirAll(filepath.Dir(publishIgnorePath), 0755)
+	publishAccessPath := filepath.Join(util.DataDir, ".siyuan", "publishAccess.json")
+	err := os.MkdirAll(filepath.Dir(publishAccessPath), 0755)
 	if err != nil {
 		return
 	}
-	if !gulu.File.IsExist(publishIgnorePath) {
-		if err = gulu.File.WriteFileSafer(publishIgnorePath, nil, 0644); err != nil {
-			logging.LogErrorf("create publishignore [%s] failed: %s", publishIgnorePath, err)
+	if !gulu.File.IsExist(publishAccessPath) {
+		if err = gulu.File.WriteFileSafer(publishAccessPath, []byte("[]"), 0644); err != nil {
+			logging.LogErrorf("create publishAccess.json [%s] failed: %s", publishAccessPath, err)
 			return
 		}
 	}
-	data, err := os.ReadFile(publishIgnorePath)
+	data, err := os.ReadFile(publishAccessPath)
 	if err != nil {
-		logging.LogErrorf("read publishignore [%s] failed: %s", publishIgnorePath, err)
+		logging.LogErrorf("read publishAccess.json [%s] failed: %s", publishAccessPath, err)
 		return
 	}
-	dataStr := string(data)
-	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
-	ret = strings.Split(dataStr, "\n")
-	publishIgnore = []string{}
-	for _, line := range ret {
-		line = strings.TrimSpace(line)
-		if "" != line {
-			publishIgnore = append(publishIgnore, line)
+	if err = gulu.JSON.UnmarshalJSON(data, &publishAccess); err != nil {
+		logging.LogWarnf("unmarshal publishAccess.json failed: %s", err)
+		return
+	}
+	ret = publishAccess
+	return
+}
+
+func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
+	now := time.Now().UnixMilli()
+	publishAccessLock.Lock()
+	defer publishAccessLock.Unlock()
+	publishAccessLastModified = now
+	publishAccess = inputPublishAccess
+
+	publishAccessPath := filepath.Join(util.DataDir, ".siyuan", "publishAccess.json")
+	err = os.MkdirAll(filepath.Dir(publishAccessPath), 0755)
+	if err != nil {
+		msg := fmt.Sprintf("create dir for publishAccess.json [%s] failed: %s", publishAccessPath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	
+	data, err := gulu.JSON.MarshalJSON(inputPublishAccess)
+	if err != nil {
+		logging.LogErrorf("marshal publishAccess.json [%s] failed: %s", publishAccessPath, err)
+		return
+	}
+
+	err = gulu.File.WriteFileSafer(publishAccessPath, data, 0644)
+	if err != nil {
+		msg := fmt.Sprintf("write publishAccess.json [%s] failed: %s", publishAccessPath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
+}
+
+func GetPublishInvisibleBlocks() (invisibleBlocks []*sql.Block) { 
+	publishAccess := GetPublishAccess()
+	
+	invisibleIDs := []string{}
+	for _, item := range publishAccess {
+		if !item.Visible  {
+			invisibleIDs = append(invisibleIDs, item.ID)
 		}
 	}
-	publishIgnore = gulu.Str.RemoveDuplicatedElem(publishIgnore)
-	ret = publishIgnore
-	return
-}
 
-func SetPublishIgnoreIDs(ignoreIDs []string) (err error) {
-	now := time.Now().UnixMilli()
-	publishIgnoreLock.Lock()
-	defer publishIgnoreLock.Unlock()
-	publishIgnoreLastModified = now
-	publishIgnore = ignoreIDs
-
-	publishIgnorePath := filepath.Join(util.DataDir, ".siyuan", "publishignore")
-	err = os.MkdirAll(filepath.Dir(publishIgnorePath), 0755)
-	if err != nil {
-		msg := fmt.Sprintf("create dir for publishignore [%s] failed: %s", publishIgnorePath, err)
-		logging.LogErrorf(msg)
-		err = errors.New(msg)
-		return
-	}
-
-	dataStr := strings.Join(publishIgnore, "\n")
-	err = gulu.File.WriteFileSafer(publishIgnorePath, []byte(dataStr), 0644)
-	if err != nil {
-		msg := fmt.Sprintf("write publishignore [%s] failed: %s", publishIgnorePath, err)
-		logging.LogErrorf(msg)
-		err = errors.New(msg)
-		return
-	}
-	return
-}
-
-func GetPublishIgnoreBlocks() (ignoreBlocks []*sql.Block) { 
-	ignoreIDs := GetPublishIgnoreIDs()
-	ignoreBlocks = sql.GetBlocks(ignoreIDs);
+	invisibleBlocks = sql.GetBlocks(invisibleIDs)
 	boxes, listNotebookErr := ListNotebooks()
 	foundUnknownID := false
-	for i, ignoreID := range ignoreIDs {
-		if ignoreBlocks[i] == nil {
+	for i, invisibleID := range invisibleIDs {
+		if invisibleBlocks[i] == nil {
 			if listNotebookErr != nil {
 				// 如果获取笔记本的时候出错，就暂时将所有未确定的块都当成是笔记本
-				ignoreBlocks[i] = &sql.Block{ID: ignoreID, Box: ignoreID, Path: "/"}
+				invisibleBlocks[i] = &sql.Block{ID: invisibleID, Box: invisibleID, Path: "/"}
 			} else {
 				// 否则只标记确定的笔记本
 				for _, box := range boxes {
-					if box.ID == ignoreID {
-						ignoreBlocks[i] = &sql.Block{ID: ignoreID, Box: ignoreID, Path: "/"}
+					if box.ID == invisibleID {
+						invisibleBlocks[i] = &sql.Block{ID: invisibleID, Box: invisibleID, Path: "/"}
 						break
 					}
 				}
-				if ignoreBlocks[i] == nil {
+				if invisibleBlocks[i] == nil {
 					foundUnknownID = true
 				}
 			}
-			
 		}
 	}
 	if foundUnknownID {
 		// 清除未知的块并保存
-		tempIgnoreBlocks := []*sql.Block{}
-		tempIgnoreIDs := []string{}
-		for i, ignoreBlock := range ignoreBlocks {
-			if ignoreBlock != nil {
-				tempIgnoreBlocks = append(tempIgnoreBlocks, ignoreBlock)
-				tempIgnoreIDs = append(tempIgnoreIDs, ignoreIDs[i])
+		tempInvisibleBlocks := []*sql.Block{}
+		removedIDs := []string{}
+		for i, invisibleBlock := range invisibleBlocks {
+			if invisibleBlock != nil {
+				tempInvisibleBlocks = append(tempInvisibleBlocks, invisibleBlock)
+			} else {
+				removedIDs = append(removedIDs, invisibleIDs[i])
 			}
 		}
-		ignoreBlocks = tempIgnoreBlocks
-		SetPublishIgnoreIDs(tempIgnoreIDs)
+		invisibleBlocks = tempInvisibleBlocks
+		tempPublishAccess := PublishAccess{}
+		for _, item := range publishAccess {
+			for _, removedID := range removedIDs {
+				if item.ID != removedID {
+					tempPublishAccess = append(tempPublishAccess, item)
+				}
+			}
+		}
+		SetPublishAccess(tempPublishAccess)
 	}
 	return
 }
 
-func CheckPathVisibleByPublishIgnoreBlocks(box string, path string, ignoreBlocks []*sql.Block) bool {
-	for _, ignoreBlock := range ignoreBlocks {
-		if ignoreBlock.Box == box && ("/" == ignoreBlock.Path || strings.HasPrefix(path, strings.TrimSuffix(ignoreBlock.Path, ".sy"))) {
+func CheckPathVisibleByPublishInvisibleBlocks(box string, path string, invisibleBlocks []*sql.Block) bool {
+	for _, invisibleBlock := range invisibleBlocks {
+		if invisibleBlock.Box == box && ("/" == invisibleBlock.Path || strings.HasPrefix(path, strings.TrimSuffix(invisibleBlock.Path, ".sy"))) {
 			return false
 		}
 	}
 	return true
-}
-
-func CheckIDInPublishIgnoreIDs(ID string, ignoreIDs []string) bool {
-	for _, ignoreID := range ignoreIDs {
-		if ID == ignoreID {
-			return true
-		}
-	}
-	return false
 }
 
 func filterQueryInvisibleChars(query string) string {

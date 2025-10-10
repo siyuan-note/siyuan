@@ -1153,17 +1153,17 @@ func subscribeConfEvents() {
 	})
 }
 
-func FilterConfByPublishIgnore(ignoreBlocks []*sql.Block, appConf *AppConf) (ret *AppConf) {
+func FilterConfByPublishInvisible(invisibleBlocks []*sql.Block, appConf *AppConf) (ret *AppConf) {
 	ret = appConf
 	if appConf == nil {
 		return
 	}
 
-	appConf.UILayout = FilterUILayoutByPublishIgnore(ignoreBlocks, appConf.UILayout)
+	appConf.UILayout = FilterUILayoutByPublishInvisible(invisibleBlocks, appConf.UILayout)
 	return
 }
 
-func FilterUILayoutByPublishIgnore(ignoreBlocks []*sql.Block, uiLayout *conf.UILayout) (ret *conf.UILayout) {
+func FilterUILayoutByPublishInvisible(invisibleBlocks []*sql.Block, uiLayout *conf.UILayout) (ret *conf.UILayout) {
 	ret = uiLayout
 	if uiLayout == nil {
 		return
@@ -1173,12 +1173,12 @@ func FilterUILayoutByPublishIgnore(ignoreBlocks []*sql.Block, uiLayout *conf.UIL
 	if !ok {
 		return
 	}
-	layout = filterLayoutItemByPublishIgnore(ignoreBlocks, layout)
+	layout = filterLayoutItemByPublishInvisible(invisibleBlocks, layout)
 	(*ret)["layout"] = layout
 	return
 }
 
-func filterLayoutItemByPublishIgnore(ignoreBlocks []*sql.Block, item map[string]interface{}) (ret map[string]interface{}) {
+func filterLayoutItemByPublishInvisible(invisibleBlocks []*sql.Block, item map[string]interface{}) (ret map[string]interface{}) {
 	ret = item
 	if (item == nil) {
 		return
@@ -1198,12 +1198,16 @@ func filterLayoutItemByPublishIgnore(ignoreBlocks []*sql.Block, item map[string]
 		if children == nil {
 			return
 		}
+		rootIdItem, exists := children["rootId"]
+		if rootIdItem == nil {
+			return
+		}
 		rootId := children["rootId"].(string)
 		block := sql.GetBlock(rootId)
 		if block == nil {
 			return
 		}
-		if !CheckPathVisibleByPublishIgnoreBlocks(block.Box, block.Path, ignoreBlocks) {
+		if !CheckPathVisibleByPublishInvisibleBlocks(block.Box, block.Path, invisibleBlocks) {
 			ret = nil
 		}
 	} else {
@@ -1222,7 +1226,7 @@ func filterLayoutItemByPublishIgnore(ignoreBlocks []*sql.Block, item map[string]
 			if child == nil {
 				return
 			}
-			child = filterLayoutItemByPublishIgnore(ignoreBlocks, child)
+			child = filterLayoutItemByPublishInvisible(invisibleBlocks, child)
 			if child != nil {
 				newChildren = append(newChildren, child)
 			} else {

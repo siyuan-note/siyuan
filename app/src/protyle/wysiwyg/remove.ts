@@ -12,7 +12,7 @@ import {
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
-import {zoomOut} from "../../menus/protyle";
+import {setFold, zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
@@ -300,13 +300,14 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
     if (blockType === "NodeHeading") {
-        if ((blockElement.previousElementSibling &&
-                blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-                blockElement.previousElementSibling.getAttribute("fold") === "1") ||
-            (blockElement.getAttribute("data-type") === "NodeHeading" &&
-                blockElement.getAttribute("fold") === "1")) {
-            focusBlock(blockElement.previousElementSibling, undefined, false);
-            return;
+        if (blockElement.previousElementSibling &&
+            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+            blockElement.previousElementSibling.getAttribute("fold") === "1") {
+            setFold(protyle, blockElement.previousElementSibling, true, false, false);
+        }
+        if (blockElement.getAttribute("data-type") === "NodeHeading" &&
+            blockElement.getAttribute("fold") === "1") {
+            setFold(protyle, blockElement, true, false, false);
         }
         turnsIntoTransaction({
             protyle: protyle,

@@ -775,6 +775,7 @@ export class Files extends Model {
                             fetchPost("/api/filetree/listDocsByPath", {
                                 notebook: toURL,
                                 path: toDir === "/" ? "/" : toDir + ".sy",
+                                app: Constants.SIYUAN_APPID,
                             }, response => {
                                 if (response.data.path === "/" && response.data.files.length === 0) {
                                     showMessage(window.siyuan.languages.emptyContent);
@@ -1134,6 +1135,9 @@ data-type="navigation-root" data-path="/">
             return;
         }
         const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
+        if (!liElement) {
+            return;
+        }
         if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
             // 文件展开时，刷新
             liElement.nextElementSibling.remove();
@@ -1154,7 +1158,8 @@ data-type="navigation-root" data-path="/">
             } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
                 const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                     notebook: data.box,
-                    path: item.path
+                    path: item.path,
+                    app: Constants.SIYUAN_APPID,
                 });
                 newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
             }
@@ -1191,6 +1196,7 @@ data-type="navigation-root" data-path="/">
         fetchPost("/api/filetree/listDocsByPath", {
             notebook: notebookId,
             path: liElement.getAttribute("data-path"),
+            app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
                 newFile({
@@ -1246,7 +1252,8 @@ data-type="navigation-root" data-path="/">
         } else {
             const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                 notebook: notebookId,
-                path: currentPath
+                path: currentPath,
+                app: Constants.SIYUAN_APPID,
             });
             liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }

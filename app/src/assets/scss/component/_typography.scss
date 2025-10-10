@@ -60,6 +60,7 @@
   }
 
   em,
+  a[data-type~="em"],
   span[data-type~="em"] {
     font-style: italic;
     color: var(--b3-protyle-inline-em-color);
@@ -72,6 +73,7 @@
   }
 
   strong,
+  a[data-type~="strong"],
   span[data-type~="strong"] {
     font-weight: bold;
     color: var(--b3-protyle-inline-strong-color);

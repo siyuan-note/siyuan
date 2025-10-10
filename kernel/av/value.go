@@ -534,34 +534,34 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatPercent:
 		s := fmt.Sprintf("%.2f", content*100)
 		return strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
-	case NumberFormatUSD:
+	case NumberFormatUSD, "usDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("$%.2f", content)
-	case NumberFormatCNY:
+	case NumberFormatCNY, "yuan":
 		p := message.NewPrinter(language.Chinese)
 		return p.Sprintf("CN¥%.2f", content)
-	case NumberFormatEUR:
+	case NumberFormatEUR, "euro":
 		p := message.NewPrinter(language.German)
 		return p.Sprintf("€%.2f", content)
-	case NumberFormatGBP:
+	case NumberFormatGBP, "pound":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("£%.2f", content)
-	case NumberFormatJPY:
+	case NumberFormatJPY, "yen":
 		p := message.NewPrinter(language.Japanese)
 		return p.Sprintf("¥%.0f", content)
-	case NumberFormatRUB:
+	case NumberFormatRUB, "ruble":
 		p := message.NewPrinter(language.Russian)
 		return p.Sprintf("₽%.2f", content)
-	case NumberFormatINR:
+	case NumberFormatINR, "rupee":
 		p := message.NewPrinter(language.Hindi)
 		return p.Sprintf("₹%.2f", content)
-	case NumberFormatKRW:
+	case NumberFormatKRW, "won":
 		p := message.NewPrinter(language.Korean)
 		return p.Sprintf("₩%.0f", content)
-	case NumberFormatCAD:
+	case NumberFormatCAD, "canadianDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("CA$%.2f", content)
-	case NumberFormatCHF:
+	case NumberFormatCHF, "franc":
 		p := message.NewPrinter(language.French)
 		return p.Sprintf("CHF%.2f", content)
 	case NumberFormatTHB:

@@ -98,7 +98,9 @@ export const readText = () => {
     } else if (isInHarmony()) {
         return window.JSHarmony.readClipboard();
     }
-    return navigator.clipboard.readText();
+    return navigator.clipboard.readText().catch((err) => {
+        alert(err);
+    }) || "";
 };
 
 /// #if !BROWSER

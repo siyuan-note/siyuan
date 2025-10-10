@@ -8,7 +8,7 @@ import {genCellValue} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {openMenuPanel} from "./openMenuPanel";
-import {fetchSyncPost} from "../../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import {upDownHint} from "../../../util/upDownHint";
 import {getFieldsByData} from "./view";
@@ -427,13 +427,13 @@ export const setFilter = async (options: {
                 }
             });
         });
-    } else if (["text", "url", "block", "mAsset", "email", "phone", "template", "relation"].includes(filterValue.type)) {
+    } else if (["text", "url", "block", "mAsset", "email", "phone", "template"].includes(filterValue.type)) {
         let value = "";
         if (filterValue) {
-            if (filterValue.type === "relation") {
-                value = filterValue.relation.blockIDs[0] || "";
-            } else if (filterValue.type === "mAsset") {
-                value = filterValue.mAsset[0]?.content || "";
+            if (filterValue.type === "mAsset") {
+                if (filterValue.mAsset) {
+                    value = filterValue.mAsset[0]?.content || "";
+                }
             } else {
                 value = filterValue[filterValue.type as "text"].content || "";
             }
@@ -442,6 +442,67 @@ export const setFilter = async (options: {
             iconHTML: "",
             type: "readonly",
             label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200">`
+        });
+    } else if (filterValue.type === "relation") {
+        let value = "";
+        if (filterValue) {
+            value = filterValue.relation.blockIDs[0] || "";
+        }
+        menu.addItem({
+            iconHTML: "",
+            type: "readonly",
+            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200"><div style="position:fixed" class="protyle-hint b3-list b3-list--background fn__none"></div>`,
+            bind(element) {
+                const inputElement = element.querySelector("input");
+                const listElement = inputElement.nextElementSibling as HTMLElement;
+                const renderList = () => {
+                    fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
+                        id: colData.relation.avID,
+                        keyword: inputElement.value,
+                    }, response => {
+                        let html = "";
+                        (response.data.rows.values as IAVCellValue[] || []).forEach((item, index) => {
+                            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.block.content || window.siyuan.languages.untitled}</div>`;
+                        });
+                        listElement.innerHTML = html;
+                        if (html === "") {
+                            listElement.classList.add("fn__none");
+                        } else {
+                            listElement.classList.remove("fn__none");
+                        }
+                        const inputRect = inputElement.getBoundingClientRect();
+                        setPosition(listElement, inputRect.left, inputRect.bottom + 4, inputRect.height + 4);
+                    });
+                };
+                inputElement.addEventListener("input", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    renderList();
+                });
+                inputElement.addEventListener("compositionend", () => {
+                    renderList();
+                });
+                inputElement.addEventListener("keydown", (event) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    if (event.key !== "Enter" && listElement.innerHTML !== "") {
+                        listElement.classList.remove("fn__none");
+                    }
+                    upDownHint(listElement, event);
+                    if (event.key === "Enter") {
+                        if (listElement.classList.contains("fn__none")) {
+                            menu.close();
+                        } else {
+                            inputElement.value = listElement.querySelector(".b3-list-item--focus").textContent.replace(/\n/g, " ");
+                            listElement.classList.add("fn__none");
+                        }
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                });
+            }
         });
     } else if (filterValue.type === "number") {
         menu.addItem({
@@ -575,7 +636,7 @@ export const setFilter = async (options: {
     });
 
     const textElements: NodeListOf<HTMLInputElement> = menu.element.querySelectorAll(".b3-text-field");
-    if (filterValue.type !== "select" && filterValue.type !== "mSelect") {
+    if (!["relation", "select", "mSelect"].includes(filterValue.type)) {
         textElements.forEach(item => {
             item.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {

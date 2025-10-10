@@ -43,12 +43,21 @@ func getTag(c *gin.Context) {
 	model.Conf.Tag.Sort = sortMode
 	model.Conf.Save()
 
-	tags := model.BuildTags()
+	// API `getTag` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/16000
+	ignoreMaxListHint := false
+	ignoreMaxListHintArg := arg["ignoreMaxListHint"]
+	if nil != ignoreMaxListHintArg {
+		ignoreMaxListHint = ignoreMaxListHintArg.(bool)
+	}
+
+	app := arg["app"].(string)
+	tags = model.BuildTags(ignoreMaxListHint, app)
+	
 	if model.IsReadOnlyRoleContext(c) {
 		ignoreBlocks := model.GetPublishIgnoreBlocks()
 		tags = model.FilterTagsByPublishIgnore(ignoreBlocks, tags)
 	}
-	ret.Data = tags	
+	ret.Data = tags
 }
 
 func renameTag(c *gin.Context) {

@@ -161,10 +161,8 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 updateReadonly: true,
                 data: response,
                 protyle,
-                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
-                    protyle.title.element.removeAttribute("data-render");
-                    protyle.title.render(protyle, docResponse);
                     let hasHide = false;
                     if (!window.siyuan.config.flashcard.superBlock &&
                         !window.siyuan.config.flashcard.heading &&

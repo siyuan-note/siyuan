@@ -555,4 +555,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         wbrElement.remove();
     }
     transaction(protyle, doOperation, undoOperation);
+    // 复制容器块中包含折叠标题块
+    protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+        item.remove();
+    });
 };

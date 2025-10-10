@@ -95,7 +95,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	view := attrView.GetView(viewID)
+	view, _ := attrView.GetCurrentView(viewID)
 	if nil == view {
 		logging.LogErrorf("view [%s] not found in attribute view [%s]", viewID, avID)
 		return
@@ -567,6 +567,7 @@ func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
 		logging.LogErrorf("marshal operation data failed: %s", err)
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
+
 	group := &av.ViewGroup{}
 	if err = gulu.JSON.UnmarshalJSON(data, &group); nil != err {
 		logging.LogErrorf("unmarshal operation data failed: %s", err)
@@ -590,6 +591,14 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
+	setAttributeViewGroup(attrView, view, group)
+
+	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(avID)
+	return
+}
+
+func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.ViewGroup) {
 	var oldHideEmpty, firstInit, changeGroupField bool
 	if nil != view.Group {
 		oldHideEmpty = view.Group.HideEmpty
@@ -646,10 +655,6 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			g.GroupSort = i
 		}
 	}
-
-	err = av.SaveAttributeView(attrView)
-	ReloadAttrView(avID)
-	return
 }
 
 func (tx *Transaction) doSetAttrViewCardAspectRatio(operation *Operation) (ret *TxErr) {
@@ -777,6 +782,10 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
 			}
 		}
+
+		preferredGroupKey := getKanbanPreferredGroupKey(attrView)
+		group := &av.ViewGroup{Field: preferredGroupKey.ID}
+		setAttributeViewGroup(attrView, view, group)
 	}
 
 	view.LayoutType = newLayout
@@ -1950,7 +1959,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
 				// 未来 30 天之后的按月分组
 				if contentTime.Before(todayStart.AddDate(0, 0, -30)) {
-					groupVal = contentTime.Format("2006-01") // 开头的数字用于排序，下同
+					groupVal = contentTime.Format("2006-01") // 开头的数字用于排序
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -7)) {
 					groupVal = groupValueLast30Days
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -1)) {
@@ -2842,11 +2851,19 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 			for _, col := range firstView.Table.Columns {
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: col.ID}})
 			}
+		case av.LayoutTypeGallery:
+			for _, field := range firstView.Gallery.CardFields {
+				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
+			}
 		case av.LayoutTypeKanban:
 			for _, field := range firstView.Kanban.Fields {
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
 			}
 		}
+
+		preferredGroupKey := getKanbanPreferredGroupKey(attrView)
+		group := &av.ViewGroup{Field: preferredGroupKey.ID}
+		setAttributeViewGroup(attrView, view, group)
 	default:
 		err = av.ErrWrongLayoutType
 		logging.LogErrorf("wrong layout type [%s] for attribute view [%s]", layout, avID)
@@ -2876,6 +2893,19 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return
+	}
+	return
+}
+
+func getKanbanPreferredGroupKey(attrView *av.AttributeView) (ret *av.Key) {
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeSelect == kv.Key.Type {
+			ret = kv.Key
+			break
+		}
+	}
+	if nil == ret {
+		ret = attrView.GetBlockKey()
 	}
 	return
 }

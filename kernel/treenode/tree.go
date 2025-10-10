@@ -125,3 +125,7 @@ func NewParagraph(id string) (ret *ast.Node) {
 func NewSpanAnchor(id string) (ret *ast.Node) {
 	return &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + id + "\" style=\"display: none;\"></span>")}
 }
+
+func ContainOnlyDefaultIAL(tree *parse.Tree) bool {
+	return 5 > len(tree.Root.KramdownIAL)
+}

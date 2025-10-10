@@ -114,11 +114,11 @@ func listDocTree(c *gin.Context) {
 
 	ids := map[string]bool{}
 	for _, entry := range dir {
-		if entry.IsDir() {
-			if strings.HasPrefix(entry.Name(), ".") {
-				continue
-			}
+		if strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
 
+		if entry.IsDir() {
 			if !ast.IsNodeIDPattern(entry.Name()) {
 				continue
 			}
@@ -134,7 +134,12 @@ func listDocTree(c *gin.Context) {
 				return
 			}
 		} else {
-			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
+			id := strings.TrimSuffix(entry.Name(), ".sy")
+			if !ast.IsNodeIDPattern(id) {
+				continue
+			}
+
+			doc := &DocFile{ID: id}
 			if !ids[doc.ID] {
 				doctree = append(doctree, doc)
 			}
@@ -1086,7 +1091,11 @@ func listDocsByPath(c *gin.Context) {
 		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
 		ignoreMaxListHintArg := arg["ignoreMaxListHint"]
 		if nil == ignoreMaxListHintArg || !ignoreMaxListHintArg.(bool) {
-			util.PushMsg(fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			var app string
+			if nil != arg["app"] {
+				app = arg["app"].(string)
+			}
+			util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
 		}
 	}
 

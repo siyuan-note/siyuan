@@ -35,6 +35,8 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             try {
                 if (!renderElement.lastElementChild || renderElement.childElementCount === 1) {
                     renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div style="height:${e.style.height || "420px"}" contenteditable="false"></div>`;
+                } else {
+                    renderElement.lastElementChild.classList.remove("ft__error");
                 }
                 window.echarts.init(renderElement.lastElementChild, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
                     width,
@@ -81,7 +83,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 });
             } catch (error) {
                 window.echarts.dispose(renderElement.lastElementChild);
-                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">Mindmap render error: <br>${error}</div>`;
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" style="height:${e.style.height || "420px"}" contenteditable="false">Mindmap render error: <br>${error}</div>`;
             }
             e.setAttribute("data-render", "true");
         });

@@ -914,7 +914,9 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 
 	next := node.Next
 	node.Unlink()
-	unfoldParentFoldedHeading(next)
+
+	parentFoldedHeading := treenode.GetParentFoldedHeading(next)
+	unfoldHeading(parentFoldedHeading)
 
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true
@@ -1279,7 +1281,8 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 		node.InsertAfter(insertedNode)
 
-		unfoldParentFoldedHeading(insertedNode)
+		parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode)
+		unfoldHeading(parentFoldedHeading)
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1526,11 +1529,30 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		syncDelete2AvBlock(n, tree, tx)
 	}
 
-	// 替换为新节点
+	// 将不属于折叠标题的块移动到折叠标题下方，需要展开折叠标题
+	needUnfoldParentHeading := 0 < oldNode.HeadingLevel && (0 == updatedNode.HeadingLevel || oldNode.HeadingLevel < updatedNode.HeadingLevel)
+
+	oldParentFoldedHeading := treenode.GetParentFoldedHeading(oldNode)
+	// 将原先折叠标题下的块提升为与折叠标题同级或更高一级的标题时，需要在折叠标题后插入该提升后的标题块（只需要推送界面插入）
+	if needInsertAfterParentHeading := nil != oldParentFoldedHeading && 0 != updatedNode.HeadingLevel && updatedNode.HeadingLevel <= oldParentFoldedHeading.HeadingLevel; needInsertAfterParentHeading {
+		evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+		evt.Data = []*Transaction{{
+			DoOperations:   []*Operation{{Action: "insert", ID: updatedNode.ID, PreviousID: oldParentFoldedHeading.ID, Data: data}},
+			UndoOperations: []*Operation{{Action: "delete", ID: updatedNode.ID}},
+		}}
+		util.PushEvent(evt)
+	}
+
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	unfoldParentFoldedHeading(updatedNode)
+	if needUnfoldParentHeading {
+		newParentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
+		if nil == oldParentFoldedHeading || (nil != newParentFoldedHeading && oldParentFoldedHeading.ID != newParentFoldedHeading.ID) {
+			unfoldHeading(newParentFoldedHeading)
+		}
+	}
+
 	createdUpdated(updatedNode)
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); err != nil {
@@ -1561,30 +1583,34 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func unfoldParentFoldedHeading(node *ast.Node) {
-	if parentFoldedHeading := treenode.GetParentFoldedHeading(node); nil != parentFoldedHeading {
-		children := treenode.HeadingChildren(parentFoldedHeading)
-		for _, child := range children {
-			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !n.IsBlock() {
-					return ast.WalkContinue
-				}
-
-				n.RemoveIALAttr("fold")
-				n.RemoveIALAttr("heading-fold")
-				return ast.WalkContinue
-			})
-		}
-		parentFoldedHeading.RemoveIALAttr("fold")
-		parentFoldedHeading.RemoveIALAttr("heading-fold")
-
-		evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
-		evt.Data = []*Transaction{{
-			DoOperations:   []*Operation{{Action: "unfoldHeading", ID: parentFoldedHeading.ID}},
-			UndoOperations: []*Operation{{Action: "foldHeading", ID: parentFoldedHeading.ID}},
-		}}
-		util.PushEvent(evt)
+func unfoldHeading(heading *ast.Node) {
+	if nil == heading {
+		return
 	}
+
+	children := treenode.HeadingChildren(heading)
+	for _, child := range children {
+		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			n.RemoveIALAttr("fold")
+			n.RemoveIALAttr("heading-fold")
+			return ast.WalkContinue
+		})
+	}
+	heading.RemoveIALAttr("fold")
+	heading.RemoveIALAttr("heading-fold")
+
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+	fillBlockRefCount(children)
+	evt.Data = []*Transaction{{
+		DoOperations:   []*Operation{{Action: "unfoldHeading", ID: heading.ID, RetData: renderBlockDOMByNodes(children, NewLute())}},
+		UndoOperations: []*Operation{{Action: "foldHeading", ID: heading.ID}},
+	}}
+
+	util.PushEvent(evt)
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

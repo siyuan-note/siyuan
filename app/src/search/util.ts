@@ -135,7 +135,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>
-            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
+            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
         <div class="block__icons">
             <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9south">
@@ -239,7 +239,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         blockId: "",
         render: {
             gutter: true,
-            breadcrumbDocName: true
+            breadcrumbDocName: true,
+            title: true
         },
     });
     edit.resize();
@@ -247,7 +248,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         blockId: "",
         render: {
             gutter: true,
-            breadcrumbDocName: true
+            breadcrumbDocName: true,
+            title: true
         },
     });
     unRefEdit.resize();
@@ -1116,7 +1118,7 @@ export const getArticle = (options: {
                     updateReadonly: true,
                     data: getResponse,
                     protyle: options.edit.protyle,
-                    action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
+                    action: zoomIn ? [Constants.CB_GET_ALL] : [],
                 });
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();

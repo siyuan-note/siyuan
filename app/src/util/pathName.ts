@@ -607,6 +607,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         notebook: notebookId,
         path: liElement.getAttribute("data-path"),
         flashcard,
+        app: Constants.SIYUAN_APPID,
     }, response => {
         if (response.data.files.length === 0) {
             showMessage(window.siyuan.languages.emptyContent);

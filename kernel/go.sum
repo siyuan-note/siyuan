@@ -261,8 +261,8 @@ github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYW
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid/v2 v2.3.0 h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y=
 github.com/klauspost/cpuid/v2 v2.3.0/go.mod h1:hqwkgyIinND0mEev00jJYCxPNVRVXFQeu1XKlok6oO0=
-github.com/klippa-app/go-pdfium v1.17.1 h1:MHwLKO79WSBmucuTSIXoU4Q/a1Dt1N7CfGsICO8a2Ss=
-github.com/klippa-app/go-pdfium v1.17.1/go.mod h1:CmBY7jK42ibAwMh50aSCWQYId7LEzTuQcqFXfPd/oFQ=
+github.com/klippa-app/go-pdfium v1.17.2 h1:vlaF4b+4Uw7GtpkVzysgfEy00/1v1nFgb7uO3HgaS60=
+github.com/klippa-app/go-pdfium v1.17.2/go.mod h1:Esq2YX5JCdA+UHzMNPEmV62rqbgvIiNUj8s+EZfgHpM=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.0/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=

@@ -43,7 +43,7 @@ require (
 	github.com/imroc/req/v3 v3.55.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
-	github.com/klippa-app/go-pdfium v1.17.1
+	github.com/klippa-app/go-pdfium v1.17.2
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
@@ -157,8 +157,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo/v2 v2.25.3 // indirect
-	github.com/onsi/gomega v1.38.2 // indirect
 	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

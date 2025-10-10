@@ -3364,7 +3364,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 			} else {
 				if val.IsRenderAutoFill {
 					val.CreatedAt, val.UpdatedAt = now, now+1000
-					val.Date.Content, val.Date.IsNotEmpty, val.Date.IsNotTime = now, true, false
+					val.Date.Content, val.Date.IsNotEmpty, val.Date.IsNotTime = now, true, !keyValues.Key.Date.FillSpecificTime
 					val.IsRenderAutoFill = false
 				}
 			}

@@ -733,7 +733,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         let item = cellElements[elementIndex] as HTMLElement;
         const rowID = getFieldIdByCellElement(item, viewType);
         if (!rowID) {
-            return;
+            break;
         }
         if (!nodeElement.contains(item)) {
             if (viewType === "table") {
@@ -746,11 +746,11 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
 
         if (!item) {
             // 兼容新增行后台隐藏
-            return;
+            break;
         }
         const type = getTypeByCellElement(item) || item.dataset.type as TAVCol;
         if (["created", "updated", "template", "rollup"].includes(type)) {
-            return;
+            break;
         }
         const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
         const colId = getColId(item, viewType);
@@ -794,7 +794,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                     name = value;
                 }
                 if (!link && !name && !imgSrc) {
-                    return;
+                    break;
                 }
                 if (imgSrc) {
                     // 支持解析 ![]() https://github.com/siyuan-note/siyuan/issues/11487
@@ -858,7 +858,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         cellValue.id = cellId;
         if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
             (cellValue.type === "relation" && typeof cellValue.relation === "string")) {
-            return;
+            break;
         }
         if (columns && (type === "select" || type === "mSelect")) {
             const operations = mergeAddOption(columns.find(e => e.id === colId), cellValue, avID);
@@ -876,7 +876,7 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             cellValue.date.formattedContent = oldValue.date.formattedContent;
         }
         if (objEquals(cellValue, oldValue)) {
-            return;
+            break;
         }
 
         doOperations.push({

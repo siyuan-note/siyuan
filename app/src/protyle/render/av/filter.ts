@@ -502,6 +502,12 @@ export const setFilter = async (options: {
                         event.stopPropagation();
                     }
                 });
+                listElement.addEventListener("click", (event) => {
+                    if (hasClosestByClassName(event.target as Element, "b3-list-item")) {
+                        inputElement.value = listElement.querySelector(".b3-list-item--focus").textContent.replace(/\n/g, " ");
+                        listElement.classList.add("fn__none");
+                    }
+                });
             }
         });
     } else if (filterValue.type === "number") {

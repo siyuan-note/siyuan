@@ -2109,6 +2109,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	}
 
 	currentDocDir := path.Dir(tree.HPath)
+	currentDocDir = util.FilterFilePath(currentDocDir)
 
 	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

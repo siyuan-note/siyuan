@@ -157,10 +157,6 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 	// 单独处理汇总
 	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type && nil != filter.Value.Rollup {
-		if 1 > len(filter.Value.Rollup.Contents) {
-			return true
-		}
-
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
@@ -200,8 +196,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				if FilterOperatorIsEmpty == filter.Operator {
 					return true
 				} else if FilterOperatorIsNotEmpty == filter.Operator {
-					return false
+					if 0 < len(value.Rollup.Contents) {
+						return true
+					}
 				}
+			}
+
+			if 1 > len(filter.Value.Rollup.Contents) {
+				return true
 			}
 
 			for _, content := range value.Rollup.Contents {
@@ -220,6 +222,10 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 			}
 
+			if 1 > len(filter.Value.Rollup.Contents) {
+				return true
+			}
+
 			for _, content := range value.Rollup.Contents {
 				if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
 					return false
@@ -233,6 +239,10 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				} else if FilterOperatorIsNotEmpty == filter.Operator {
 					return true
 				}
+			}
+
+			if 1 > len(filter.Value.Rollup.Contents) {
+				return true
 			}
 
 			for _, content := range value.Rollup.Contents {
@@ -282,13 +292,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 	// 单独处理资源
 	if nil != value.MAsset && KeyTypeMAsset == value.Type && nil != filter.Value && KeyTypeMAsset == filter.Value.Type {
-		if 1 > len(filter.Value.MAsset) {
-			return true
-		}
-
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
+		}
+
+		var filterContent string
+		if 1 <= len(filter.Value.MAsset) {
+			filterContent = filter.Value.MAsset[0].Content
 		}
 
 		switch filter.Qualifier {
@@ -304,12 +315,12 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) ||
-						filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+					if filterTextContent(filter.Operator, asset.Name, filterContent) ||
+						filterTextContent(filter.Operator, asset.Content, filterContent) {
 						return true
 					}
 				case AssetTypeImage:
-					if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+					if filterTextContent(filter.Operator, asset.Content, filterContent) {
 						return true
 					}
 				}
@@ -326,12 +337,12 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if !filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) &&
-						!filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+					if !filterTextContent(filter.Operator, asset.Name, filterContent) &&
+						!filterTextContent(filter.Operator, asset.Content, filterContent) {
 						return false
 					}
 				case AssetTypeImage:
-					if !filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+					if !filterTextContent(filter.Operator, asset.Content, filterContent) {
 						return false
 					}
 				}
@@ -350,17 +361,17 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				switch asset.Type {
 				case AssetTypeFile:
 					if "" != strings.TrimSpace(asset.Name) {
-						if filterTextContent(filter.Operator, asset.Name, filter.Value.MAsset[0].Content) {
+						if filterTextContent(filter.Operator, asset.Name, filterContent) {
 							return false
 						}
 					}
 					if "" != strings.TrimSpace(asset.Content) {
-						if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+						if filterTextContent(filter.Operator, asset.Content, filterContent) {
 							return false
 						}
 					}
 				case AssetTypeImage:
-					if filterTextContent(filter.Operator, asset.Content, filter.Value.MAsset[0].Content) {
+					if filterTextContent(filter.Operator, asset.Content, filterContent) {
 						return false
 					}
 				}

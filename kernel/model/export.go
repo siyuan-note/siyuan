@@ -2109,6 +2109,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	}
 
 	currentDocDir := path.Dir(tree.HPath)
+	currentDocDir = util.FilterFilePath(currentDocDir)
 
 	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2162,11 +2163,19 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 							href = "#" + defID
 						}
 					}
-					newHref := strings.TrimPrefix(href, currentDocDir)
-					if !strings.HasPrefix(newHref, ".md") {
-						href = newHref
-					}
+
+					sameDir := path.Dir(href) == currentDocDir
 					href = util.FilterFilePath(href)
+					if !sameDir {
+						var relErr error
+						href, relErr = filepath.Rel(currentDocDir, href)
+						if nil != relErr {
+							logging.LogWarnf("get relative path from [%s] to [%s] failed: %s", currentDocDir, href, relErr)
+						}
+						href = filepath.ToSlash(href)
+					} else {
+						href = strings.TrimPrefix(href, currentDocDir+"/")
+					}
 					blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: href}
 					blockRefLink.KramdownIAL = n.KramdownIAL
 					n.InsertBefore(blockRefLink)

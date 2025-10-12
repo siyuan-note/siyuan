@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "剪貼簿權限被拒絕，請在瀏覽器地址欄允許訪問剪貼簿後再試",
   "jumpTo": "跳轉到",
   "vacuumDataIndex": "優化索引",
   "vacuumDataIndexTip": "校驗資料索引，釋放儲存空間並提升索引效能",

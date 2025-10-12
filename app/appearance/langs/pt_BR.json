@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Permissão da área de transferência negada. Permita o acesso à área de transferência na barra de endereço do navegador e tente novamente.",
   "jumpTo": "Ir para",
   "vacuumDataIndex": "Otimizar índice",
   "vacuumDataIndexTip": "Verifique o índice de dados, libere espaço e melhore o desempenho do índice",

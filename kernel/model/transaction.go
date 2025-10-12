@@ -1280,9 +1280,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(remain)
 		}
 		node.InsertAfter(insertedNode)
-
-		parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode)
-		unfoldHeading(parentFoldedHeading)
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {

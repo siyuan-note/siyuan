@@ -912,11 +912,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		node.Next.Unlink()
 	}
 
-	next := node.Next
 	node.Unlink()
-
-	parentFoldedHeading := treenode.GetParentFoldedHeading(next)
-	unfoldHeading(parentFoldedHeading)
 
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true

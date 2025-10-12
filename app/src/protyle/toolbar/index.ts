@@ -164,17 +164,15 @@ export class Toolbar {
             this.element.classList.add("fn__none");
             return;
         }
-        this.element.classList.remove("fn__none", "protyle-toolbar__transition");
-        
+        const rangePosition = getSelectionPosition(nodeElement, range, true);
+        this.element.classList.remove("fn__none");
         this.toolbarHeight = this.element.clientHeight;
-        const rangePosition = getSelectionPosition(nodeElement, range, this.element.clientWidth);
-        const y = rangePosition.isToolbarAtBottom ?
+        const y = rangePosition.isBottom ?
             Math.min(rangePosition.top + 4, protyle.element.getBoundingClientRect().bottom - this.toolbarHeight) :
             Math.max(rangePosition.top - this.toolbarHeight - 4, protyle.element.getBoundingClientRect().top + 30);
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
-        setPosition(this.element, rangePosition.left, y);
+        setPosition(this.element, rangePosition.left - this.element.clientWidth / 4, y);
 
-        this.element.classList.add("protyle-toolbar__transition");
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });

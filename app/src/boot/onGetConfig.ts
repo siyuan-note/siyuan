@@ -7,6 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
 import {onWindowsMsg} from "../window/onWindowsMsg";
+import {initFocusFix} from "../protyle/util/compatibility";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -68,6 +69,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initBar(app);
     initStatus();
     initWindow(app);
+    /// #if !BROWSER
+    initFocusFix();
+    /// #endif
     appearance.onSetAppearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();

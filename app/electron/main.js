@@ -866,6 +866,13 @@ app.whenReady().then(() => {
             event.sender.send("siyuan-event", "leave-full-screen");
         });
     });
+    ipcMain.on("siyuan-focus-fix", (event) => {
+        const currentWindow = getWindowByContentId(event.sender.id);
+        if (currentWindow && process.platform === "win32") {
+            currentWindow.blur();
+            currentWindow.focus();
+        }
+    });
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;
         let webContentsId = event.sender.id;

@@ -8,6 +8,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
     setTimeout(() => {
         protyle.highlight.markHL.clear();
         protyle.highlight.mark.clear();
+        protyle.highlight.rangeIndex = 0;
         protyle.highlight.ranges = [];
         let isSetHL = false;
         let hlBlockElement: Element;
@@ -20,12 +21,16 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
             });
         }
 
+        if (!hlBlockElement && hlId === protyle.block.rootID && protyle.title && !protyle.title.element.classList.contains("fn__none")) {
+            hlBlockElement = protyle.title.element;
+        }
+
         // 准备一个数组来保存所有文本节点
         const textNodes: Node[] = [];
         const textNodesSize: number[] = [];
         let currentSize = 0;
 
-        const treeWalker = document.createTreeWalker(protyle.wysiwyg.element, NodeFilter.SHOW_TEXT);
+        const treeWalker = document.createTreeWalker(protyle.contentElement, NodeFilter.SHOW_TEXT);
         let currentNode = treeWalker.nextNode();
         while (currentNode) {
             textNodes.push(currentNode);
@@ -34,7 +39,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
             currentNode = treeWalker.nextNode();
         }
 
-        const text = protyle.wysiwyg.element.textContent;
+        const text = protyle.contentElement.textContent;
         const rangeIndexes: { range: Range, startIndex: number, isCurrent: boolean }[] = [];
         if (keys && keys.length > 0) {
             keys.forEach(key => {

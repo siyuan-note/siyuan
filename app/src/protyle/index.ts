@@ -90,8 +90,8 @@ export class Protyle {
         if (isSupportCSSHL()) {
             const styleId = genUUID();
             this.protyle.highlight.styleElement.dataset.uuid = styleId;
-            this.protyle.highlight.styleElement.textContent = `.protyle-wysiwyg::highlight(search-mark-${styleId}) {background-color: var(--b3-highlight-background);color: var(--b3-highlight-color);}
-  .protyle-wysiwyg::highlight(search-mark-hl-${styleId}) {color: var(--b3-highlight-color);background-color: var(--b3-highlight-current-background)}`;
+            this.protyle.highlight.styleElement.textContent = `.protyle-content::highlight(search-mark-${styleId}) {background-color: var(--b3-highlight-background);color: var(--b3-highlight-color);}
+  .protyle-content::highlight(search-mark-hl-${styleId}) {color: var(--b3-highlight-color);background-color: var(--b3-highlight-current-background)}`;
         }
 
         this.protyle.hint = new Hint(this.protyle);

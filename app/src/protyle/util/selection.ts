@@ -262,19 +262,71 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
         if (range.toString()) {
             if (useDirect) {
-                const selection = window.getSelection();
-                // 判断选择方向
-                const isBackward = (selection && "direction" in selection && selection.direction !== "none") ?
-                    selection.direction === "backward"
-                    : range.startContainer === selection?.focusNode && range.startOffset === selection?.focusOffset;
-                const isBottom = !isBackward && rects[0].top !== rects[rects.length - 1].top;
-                return {
-                    // 向左选择：使用第一个矩形的左边界；向右选择：使用最后一个矩形的右边界
-                    left: isBackward ? rects[0].left : rects[rects.length - 1].right,
-                    // 如果向右选择时有多个垂直位置不同的矩形：使用最后一个矩形的下边界；否则使用第一个矩形的上边界
-                    top: isBottom ? rects[rects.length - 1].bottom : rects[0].top,
-                    isBottom
-                };
+                if (window.siyuan.coordinates) {
+                    // 使用全局鼠标位置来计算工具栏位置
+                    const rectsArray = Array.from(rects);
+                    // 鼠标位置
+                    const mouseX = window.siyuan.coordinates.clientX;
+                    const mouseY = window.siyuan.coordinates.clientY;
+                    // 计算选择区域的外边界
+                    const minLeft = Math.min(...rectsArray.map(rect => rect.left));
+                    const maxRight = Math.max(...rectsArray.map(rect => rect.right));
+                    const minTop = Math.min(...rectsArray.map(rect => rect.top));
+                    const maxBottom = Math.max(...rectsArray.map(rect => rect.bottom));
+                    // 选择位置只能出现在最外层边界：最上方或最下方
+                    let positionX: number;
+                    let positionY: number;
+                    let isBottom: boolean;
+                    // 检查是否只选中一行文本（所有矩形的垂直位置相同）
+                    const isSingleLine = rectsArray.every(rect => rect.top === minTop);
+                    if (isSingleLine) {
+                        // 单行文本：始终在上方显示
+                        positionY = minTop;
+                        isBottom = false;
+                    } else {
+                        // 多行文本：根据鼠标位置决定选择位置出现在上方还是下方
+                        const mouseRelativeToTop = mouseY - minTop;
+                        const mouseRelativeToBottom = maxBottom - mouseY;
+                        if (mouseRelativeToTop < mouseRelativeToBottom) {
+                            // 鼠标更接近上边界，选择位置出现在上方
+                            positionY = minTop;
+                            isBottom = false;
+                        } else {
+                            // 鼠标更接近下边界，选择位置出现在下方
+                            positionY = maxBottom;
+                            isBottom = true;
+                        }
+                    }
+                    // 在水平方向上，让选择位置尽可能接近鼠标位置，但限制在文本范围内
+                    if (mouseX < minLeft) {
+                        positionX = minLeft;
+                    } else if (mouseX > maxRight) {
+                        positionX = maxRight;
+                    } else {
+                        positionX = mouseX;
+                    }
+
+                    return {
+                        left: positionX,
+                        top: positionY,
+                        isBottom,
+                    };
+                } else {
+                    // 回退到根据选中文本方向判断工具栏位置
+                    const selection = window.getSelection();
+                    // 判断选择方向
+                    const isBackward = (selection && "direction" in selection && selection.direction !== "none") ?
+                        selection.direction === "backward"
+                        : range.startContainer === selection?.focusNode && range.startOffset === selection?.focusOffset;
+                    const isBottom = !isBackward && rects[0].top !== rects[rects.length - 1].top;
+                    return {
+                        // 向左选择：使用第一个矩形的左边界；向右选择：使用最后一个矩形的右边界
+                        left: isBackward ? rects[0].left : rects[rects.length - 1].right,
+                        // 如果向右选择时有多个垂直位置不同的矩形：使用最后一个矩形的下边界；否则使用第一个矩形的上边界
+                        top: isBottom ? rects[rects.length - 1].bottom : rects[0].top,
+                        isBottom
+                    };
+                }
             } else {
                 return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
                     left: rects[rects.length - 1].left,

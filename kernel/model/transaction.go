@@ -912,11 +912,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		node.Next.Unlink()
 	}
 
-	next := node.Next
 	node.Unlink()
-
-	parentFoldedHeading := treenode.GetParentFoldedHeading(next)
-	unfoldHeading(parentFoldedHeading)
 
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true
@@ -1281,8 +1277,15 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 		node.InsertAfter(insertedNode)
 
-		parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode)
-		unfoldHeading(parentFoldedHeading)
+		keepFold := false
+		if nil != operation.Context && nil != operation.Context["keepFold"] {
+			keepFoldArg := operation.Context["keepFold"]
+			keepFold = keepFoldArg.(bool)
+		}
+		if !keepFold {
+			parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode)
+			unfoldHeading(parentFoldedHeading)
+		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {

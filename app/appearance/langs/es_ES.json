@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Permiso del portapapeles denegado. Permite el acceso al portapapeles en la barra de direcciones del navegador y vuelve a intentarlo.",
   "jumpTo": "Ir a",
   "vacuumDataIndex": "Optimizar índice",
   "vacuumDataIndexTip": "Verifique el índice de datos, libere espacio y mejore el rendimiento del índice",

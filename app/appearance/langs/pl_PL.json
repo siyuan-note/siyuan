@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Odmowa dostępu do schowka. Zezwól na dostęp do schowka w pasku adresu przeglądarki, a następnie spróbuj ponownie.",
   "jumpTo": "Przejdź do",
   "vacuumDataIndex": "Optymalizuj indeks",
   "vacuumDataIndexTip": "Sprawdź indeks danych, zwolnij miejsce i popraw wydajność indeksu",

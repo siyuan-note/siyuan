@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Permission du presse-papiers refusée. Veuillez autoriser l'accès au presse-papiers dans la barre d'adresse du navigateur, puis réessayez.",
   "jumpTo": "Aller à",
   "vacuumDataIndex": "Optimiser l'index",
   "vacuumDataIndexTip": "Vérifiez l'index des données, libérez de l'espace et améliorez les performances de l'index",

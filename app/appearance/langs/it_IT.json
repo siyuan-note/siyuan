@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Autorizzazione agli appunti negata. Consenti l'accesso agli appunti dalla barra degli indirizzi del browser e riprova.",
   "jumpTo": "Vai a",
   "vacuumDataIndex": "Ottimizza indice",
   "vacuumDataIndexTip": "Verifica l'indice dei dati, libera spazio e migliora le prestazioni dell'indice",

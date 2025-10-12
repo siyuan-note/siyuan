@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Clipboard permission denied. Please allow clipboard access in the browser address bar and try again.",
   "jumpTo": "Jump to",
   "vacuumDataIndex": "Optimize Index",
   "vacuumDataIndexTip": "Check data index, free up storage, and improve index performance",

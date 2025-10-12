@@ -1,4 +1,5 @@
 {
+  "clipboardPermissionDenied": "Zwischenablage-Berechtigung verweigert. Bitte erlauben Sie den Zugriff auf die Zwischenablage in der Adressleiste des Browsers und versuchen Sie es erneut.",
   "jumpTo": "Springe zu",
   "vacuumDataIndex": "Index optimieren",
   "vacuumDataIndexTip": "Datenindex prüfen, Speicherplatz freigeben und Indexleistung verbessern",

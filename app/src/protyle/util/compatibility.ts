@@ -98,8 +98,8 @@ export const readText = () => {
     } else if (isInHarmony()) {
         return window.JSHarmony.readClipboard();
     }
-    return navigator.clipboard.readText().catch((err) => {
-        alert(err);
+    return navigator.clipboard.readText().catch(() => {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
     }) || "";
 };
 

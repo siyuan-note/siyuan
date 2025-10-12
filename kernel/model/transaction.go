@@ -1276,6 +1276,16 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(remain)
 		}
 		node.InsertAfter(insertedNode)
+
+		keepFold := false
+		if nil != operation.Context && nil != operation.Context["keepFold"] {
+			keepFoldArg := operation.Context["keepFold"]
+			keepFold = keepFoldArg.(bool)
+		}
+		if !keepFold {
+			parentFoldedHeading := treenode.GetParentFoldedHeading(insertedNode)
+			unfoldHeading(parentFoldedHeading)
+		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {

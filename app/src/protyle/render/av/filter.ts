@@ -456,6 +456,9 @@ export const setFilter = async (options: {
                 const inputElement = element.querySelector("input");
                 const listElement = inputElement.nextElementSibling as HTMLElement;
                 const renderList = () => {
+                    if (!colData.relation || !colData.relation.avID) {
+                        return;
+                    }
                     fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
                         id: colData.relation.avID,
                         keyword: inputElement.value,
@@ -503,8 +506,9 @@ export const setFilter = async (options: {
                     }
                 });
                 listElement.addEventListener("click", (event) => {
-                    if (hasClosestByClassName(event.target as Element, "b3-list-item")) {
-                        inputElement.value = listElement.querySelector(".b3-list-item--focus").textContent.replace(/\n/g, " ");
+                    const itemElement = hasClosestByClassName(event.target as Element, "b3-list-item");
+                    if (itemElement) {
+                        inputElement.value = itemElement.textContent.replace(/\n/g, " ");
                         listElement.classList.add("fn__none");
                     }
                 });

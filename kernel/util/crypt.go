@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/sha256"
 	"encoding/hex"
 
 	"github.com/siyuan-note/logging"
@@ -75,4 +76,10 @@ func AESDecrypt(cryptStr string) []byte {
 func pkcs5Trimming(encrypt []byte) []byte {
 	padding := encrypt[len(encrypt)-1]
 	return encrypt[:len(encrypt)-int(padding)]
+}
+
+func SHA256Hash(data []byte) string {
+	hash := sha256.New()
+	hash.Write(data)
+	return hex.EncodeToString(hash.Sum(nil))
 }

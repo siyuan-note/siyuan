@@ -89,7 +89,17 @@
   "publishServiceAuthAccounts": "Autoryzowane konta",
   "publishServiceAuthAccountsTip": "Lista kont autoryzacji podstawowej. Odwiedzający muszą wpisać nazwę użytkownika i hasło z tej listy, aby zobaczyć opublikowaną zawartość.",
   "publishServiceAuthAccountAdd": "Dodaj konto",
-  "publishVisible": "Opublikowane widoczne",
+  "publishAccess": "Kontrola dostępu do publikacji",
+  "publishAccessPublic": "Publiczny",
+  "publishAccessProtected": "Chroniony",
+  "publishAccessHidden": "Ukryty",
+  "publishAccessPrivate": "Prywatny",
+  "publishAccessForbidden": "Zabroniony",
+  "publishAccessPublicComment": "Pełny dostęp publiczny",
+  "publishAccessProtectedComment": "Widoczny publicznie, wymaga hasła do dostępu",
+  "publishAccessHiddenComment": "Nie jest widoczny publicznie, można uzyskać do niego bezpośredni dostęp",
+  "publishAccessPrivateComment": "Nie jest widoczny publicznie, wymaga hasła do dostępu",
+  "publishAccessForbiddenComment": "Dostęp zabroniony",
   "copyMirror": "Kopiuj lustro",
   "duplicateMirror": "Duplikuj lustro",
   "duplicateCompletely": "Duplikuj całkowicie",
@@ -1674,6 +1684,9 @@
     "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku",
     "272": "Nienazwane pole",
     "273": "Nie twórz przestrzeni roboczej w katalogu głównym partycji, utwórz nowy folder jako przestrzeń roboczą",
-    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą"
+    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą",
+    "275": "Hasło",
+    "276": "Dostęp zabroniony",
+    "277": "Hasło jest nieprawidłowe"
   }
 }

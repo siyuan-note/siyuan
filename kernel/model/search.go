@@ -2386,26 +2386,31 @@ func GetPublishInvisibleBlocks() (invisibleBlocks []*sql.Block) {
 	}
 	if foundUnknownID {
 		// 清除未知的块并保存
-		tempInvisibleBlocks := []*sql.Block{}
-		removedIDs := []string{}
-		for i, invisibleBlock := range invisibleBlocks {
-			if invisibleBlock != nil {
-				tempInvisibleBlocks = append(tempInvisibleBlocks, invisibleBlock)
-			} else {
-				removedIDs = append(removedIDs, invisibleIDs[i])
-			}
-		}
-		invisibleBlocks = tempInvisibleBlocks
-		tempPublishAccess := PublishAccess{}
-		for _, item := range publishAccess {
-			for _, removedID := range removedIDs {
-				if item.ID != removedID {
-					tempPublishAccess = append(tempPublishAccess, item)
-				}
-			}
-		}
-		SetPublishAccess(tempPublishAccess)
+		purgePublishAccess()
 	}
+	return
+}
+
+func purgePublishAccess() {
+	publishAccess := GetPublishAccess()
+	IDs := []string{}
+	for _, item := range publishAccess {
+		IDs = append(IDs, item.ID)
+	}
+
+	blocks := sql.GetBlocks(IDs)
+	_, err := ListNotebooks()
+	if err != nil {
+		return
+	}
+
+	tempPublishAccess := PublishAccess{}
+	for i, block := range blocks {
+		if block != nil {
+			tempPublishAccess = append(tempPublishAccess, publishAccess[i])
+		}
+	}
+	SetPublishAccess(tempPublishAccess)
 	return
 }
 

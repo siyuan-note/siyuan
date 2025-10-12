@@ -89,7 +89,17 @@
   "publishServiceAuthAccounts": "الحسابات المصادقة",
   "publishServiceAuthAccountsTip": "قائمة حسابات المصادقة الأساسية. يحتاج الزوار إلى إدخال اسم المستخدم وكلمة المرور من هذه القائمة لعرض المحتوى المنشور.",
   "publishServiceAuthAccountAdd": "إضافة حساب",
-  "publishVisible": "المنشور مرئي",
+  "publishAccess": "التحكم في الوصول للنشر",
+  "publishAccessPublic": "عام",
+  "publishAccessProtected": "محمي",
+  "publishAccessHidden": "مخفي",
+  "publishAccessPrivate": "خاص",
+  "publishAccessForbidden": "محظور",
+  "publishAccessPublicComment": "الوصول العام الكامل",
+  "publishAccessProtectedComment": "مرئي للعامة، يتطلب كلمة مرور للوصول",
+  "publishAccessHiddenComment": "غير مرئي للعامة، يمكن الوصول مباشرة",
+  "publishAccessPrivateComment": "غير مرئي للعامة، يتطلب كلمة مرور للوصول",
+  "publishAccessForbiddenComment": "الوصول محظور",
   "copyMirror": "نسخ المرآة",
   "duplicateMirror": "تكرار المرآة",
   "duplicateCompletely": "تكرار بالكامل",
@@ -1674,6 +1684,9 @@
     "271": "اكتملت عملية تحسين فهرس البيانات، تم تحرير [%s] من مساحة القرص",
     "272": "حقل غير مسمى",
     "273": "لا تقم بإنشاء مساحة العمل في مسار جذر القسم، يرجى إنشاء مجلد جديد كمساحة عمل",
-    "274": "يحتوي هذا المجلد على ملفات أخرى، يرجى إنشاء مجلد جديد كمساحة عمل"
+    "274": "يحتوي هذا المجلد على ملفات أخرى، يرجى إنشاء مجلد جديد كمساحة عمل",
+    "275": "كلمة المرور",
+    "276": "الوصول ممنوع",
+    "277": "كلمة المرور غير صحيحة"
   }
 }

@@ -89,7 +89,17 @@
   "publishServiceAuthAccounts": "חשבונות מאומתים",
   "publishServiceAuthAccountsTip": "רשימת חשבונות אימות בסיסי. צופים זקוקים להזין את שם המשתמש והסיסמה מהרשימה הזו כדי לראות את התוכן המפורסם.",
   "publishServiceAuthAccountAdd": "הוסף חשבון",
-  "publishVisible": "הפרסום גלוי",
+  "publishAccess": "בקרת גישה להפצה",
+  "publishAccessPublic": "ציבורי",
+  "publishAccessProtected": "מוגן",
+  "publishAccessHidden": "מוסתר",
+  "publishAccessPrivate": "פרטי",
+  "publishAccessForbidden": "אסור",
+  "publishAccessPublicComment": "גישה ציבורית מלאה",
+  "publishAccessProtectedComment": "גלוי לציבור, דורש סיסמה לגישה",
+  "publishAccessHiddenComment": "לא גלוי לציבור, ניתן לגישה ישירה",
+  "publishAccessPrivateComment": "לא גלוי לציבור, דורש סיסמה לגישה",
+  "publishAccessForbiddenComment": "גישת אסורה",
   "copyMirror": "העתק מראה",
   "duplicateMirror": "שכפל מראה",
   "duplicateCompletely": "שכפל לחלוטין",
@@ -1674,6 +1684,9 @@
     "271": "אופטימיזציית אינדקס הנתונים הושלמה, שוחררו [%s] שטח דיסק",
     "272": "שדה ללא שם",
     "273": "אל תיצור סביבת עבודה בנתיב השורש של המחיצה, צור תיקיה חדשה כסביבת עבודה",
-    "274": "התיקיה הזו מכילה קבצים נוספים, צור תיקיה חדשה כסביבת עבודה"
+    "274": "התיקיה הזו מכילה קבצים נוספים, צור תיקיה חדשה כסביבת עבודה",
+    "275": "סיסמה",
+    "276": "הגישה אסורה",
+    "277": "הסיסמה שגויה"
   }
 }

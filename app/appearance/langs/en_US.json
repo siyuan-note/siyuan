@@ -89,7 +89,17 @@
   "publishServiceAuthAccounts": "Authenticated accounts",
   "publishServiceAuthAccountsTip": "List of Basic authentication accounts. Visitors need to enter the username and password from this list to view the published content.",
   "publishServiceAuthAccountAdd": "Add account",
-  "publishVisible": "Publish visible",
+  "publishAccess": "Publish Access Control",
+  "publishAccessPublic": "Public",
+  "publishAccessProtected": "Protected",
+  "publishAccessHidden": "Hidden",
+  "publishAccessPrivate": "Private",
+  "publishAccessForbidden": "Forbidden",
+  "publishAccessPublicComment": "Fully public access",
+  "publishAccessProtectedComment": "Publicly visible, requires password to access",
+  "publishAccessHiddenComment": "Not publicly visible, can be accessed directly",
+  "publishAccessPrivateComment": "Not publicly visible, requires password to access",
+  "publishAccessForbiddenComment": "Access forbidden",
   "copyMirror": "Copy mirror",
   "duplicateMirror": "Duplicate mirror",
   "duplicateCompletely": "Duplicate completely",
@@ -1674,6 +1684,9 @@
     "271": "Data index optimization completed, [%s] disk space freed",
     "272": "Unnamed field",
     "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
-    "274": "This folder contains other files, please create a new folder as the workspace"
+    "274": "This folder contains other files, please create a new folder as the workspace",
+    "275": "Password",
+    "276": "Access denied",
+    "277": "Password is incorrect"
   }
 }

@@ -1193,6 +1193,78 @@ func getDoc(c *gin.Context) {
 	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
 	isSyncing := model.IsSyncingFile(rootID)
 
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+
+		// 密码访问
+		currentPath := docPath
+		password := ""
+		passwordID := ""
+		for currentPath != "/" && password == "" {
+			currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
+			for _, accessItem := range publishAccess {
+				if accessItem.ID == currentID {
+					password = accessItem.Password
+					passwordID = accessItem.ID
+					break
+				}
+			}
+			currentPath = path.Dir(currentPath)
+		}
+		if password == "" {
+			for _, accessItem := range publishAccess {
+				if accessItem.ID == boxID {
+					password = accessItem.Password
+					passwordID = accessItem.ID
+					break
+				}
+			}
+		}
+		if password != "" {
+			authCookie, err := c.Request.Cookie("publish-auth-" + passwordID)
+			if err != nil || authCookie.Value != util.SHA256Hash([]byte(passwordID + password)) {
+				passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🔒</span>
+	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center;">
+		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
+		<input class="b3-form__icon-input b3-text-field fn__block" placeholder="%s" style="padding-right:25px !important;">
+		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
+	</label>
+</div>`
+				content = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
+			}
+		}
+
+		// 禁止访问
+		currentPath = docPath
+		disable := false
+		for currentPath != "/" && !disable {
+			currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
+			for _, accessItem := range publishAccess {
+				if accessItem.ID == currentID {
+					disable = accessItem.Disable
+					break
+				}
+			}
+			currentPath = path.Dir(currentPath)
+		}
+		if !disable {
+			for _, accessItem := range publishAccess {
+				if accessItem.ID == boxID {
+					disable = accessItem.Disable
+					break
+				}
+			}
+		}
+		if disable {
+			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px; line-height:1.2;">🚫</span>
+	<span style="font-size:2em;">%s</span>
+</div>`
+			content = fmt.Sprintf(forbiddenHTML, rootID, model.Conf.Language(276))
+		}
+	}
+
 	ret.Data = map[string]interface{}{
 		"id":               id,
 		"mode":             mode,
@@ -1311,5 +1383,39 @@ func getPublishAccess(c *gin.Context) {
 
 	ret.Data = map[string]any{
 		"publishAccess": maskedPublishAccess,
+	}
+}
+
+func authFilePublishAccess(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	ID := arg["id"].(string)
+	if util.InvalidIDPattern(ID, ret) {
+		return
+	}
+	password := arg["password"].(string)
+
+	
+	publishAccess := model.GetPublishAccess()
+	for _, item := range publishAccess {
+		if item.ID == ID {
+			if item.Password == password {
+				authCookie := util.SHA256Hash([]byte(ID + password))
+				http.SetCookie(c.Writer, &http.Cookie{
+					Name: "publish-auth-" + ID,
+					Value: authCookie,
+					MaxAge: 5 * 60,
+				})
+			} else {
+				ret.Msg = model.Conf.Language(277)
+			}
+			break
+		}
 	}
 }

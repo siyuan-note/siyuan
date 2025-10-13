@@ -2,7 +2,7 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByClassName, hasClosestByTag,
-    hasTopClosestByClassName
+    hasTopClosestByClassName, isInEmbedBlock
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
@@ -2431,6 +2431,22 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
     }
     menus.push(...removeMenus);
     return {menus, removeMenus, insertMenus, otherMenus, other2Menus};
+};
+
+export const setFoldById = (data: {
+    id: string,
+    currentNodeID: string,
+}, protyle: IProtyle) => {
+    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.id}"]`)).find((item: Element) => {
+        if (!isInEmbedBlock(item)) {
+            const operations = setFold(protyle, item, true, false, true, true);
+            operations.doOperations[0].context = {
+                focusId: data.currentNodeID,
+            };
+            transaction(protyle, operations.doOperations, operations.undoOperations);
+            return true;
+        }
+    });
 };
 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean,

@@ -47,7 +47,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
-import {zoomOut} from "../menus/protyle";
+import {setFoldById, zoomOut} from "../menus/protyle";
 
 export class Protyle {
 
@@ -156,6 +156,9 @@ export class Protyle {
                             if (data.data === this.protyle.block.rootID) {
                                 addLoading(this.protyle, data.msg);
                             }
+                            break;
+                        case "unfoldHeading":
+                            setFoldById(data.data, this.protyle);
                             break;
                         case "transactions":
                             this.onTransaction(data);

@@ -149,7 +149,8 @@ export const getEditorRange = (element: Element): Range => {
                     }
                 }
                 // 移动端获取有偏差 https://github.com/siyuan-note/siyuan/issues/15998
-                if (getContenteditableElement(range.startContainer as Element)) {
+                if ((range.startContainer as Element).getAttribute("contenteditable") !== "true" &&
+                    getContenteditableElement(range.startContainer as Element)) {
                     const blockElement = hasClosestBlock(range.startContainer);
                     if (blockElement) {
                         const focusRange = focusBlock(blockElement);

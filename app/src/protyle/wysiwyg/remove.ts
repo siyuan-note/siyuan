@@ -52,7 +52,6 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
-        let foldPreviousId: string;
         for (let i = 0; i < selectElements.length; i++) {
             const item = selectElements[i];
             const topElement = getTopAloneElement(item);
@@ -85,10 +84,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     id: topElement.getAttribute("data-node-id"),
                 });
                 deletes.push(...foldTransaction.data.doOperations.slice(1));
-                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
-                if (typeof foldPreviousId !== "undefined") {
-                    previousID = foldPreviousId;
-                }
+                const previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
                 foldTransaction.data.undoOperations.forEach((operationItem: IOperation, index: number) => {
                     operationItem.previousID = previousID;
                     if (index > 0) {
@@ -98,16 +94,6 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     }
                 });
                 inserts.push(...foldTransaction.data.undoOperations);
-                // 折叠块和非折叠块同时删除时撤销异常 https://github.com/siyuan-note/siyuan/issues/11312
-                let foldPreviousElement = getPreviousBlock(topElement);
-                while (foldPreviousElement && foldPreviousElement.childElementCount === 3) {
-                    foldPreviousElement = getPreviousBlock(foldPreviousElement);
-                }
-                if (foldPreviousElement) {
-                    foldPreviousId = foldPreviousElement.getAttribute("data-node-id");
-                } else {
-                    foldPreviousId = "";
-                }
                 // https://github.com/siyuan-note/siyuan/issues/4422
                 topElement.firstElementChild.removeAttribute("contenteditable");
                 topElement.remove();
@@ -117,8 +103,18 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     data = protyle.lute.SpinBlockDOM(topElement.outerHTML);  // 防止图表撤销问题
                 }
                 let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
-                if (typeof foldPreviousId !== "undefined") {
-                    previousID = foldPreviousId;
+                if (topElement.previousElementSibling && topElement.nextElementSibling && topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") !== "1" &&
+                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.previousElementSibling.getAttribute("fold") === "1" &&
+                    (topElement.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
+                        (topElement.nextElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.nextElementSibling.getAttribute("data-subtype") < topElement.getAttribute("data-subtype"))
+                    )) {
+                    const unfoldOperations = setFold(protyle, topElement.previousElementSibling, true, false, false, true);
+                    deletes.push(...unfoldOperations.doOperations);
+                    inserts.push(...unfoldOperations.undoOperations);
+                    const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
+                        id: topElement.previousElementSibling.getAttribute("data-node-id"),
+                    });
+                    previousID = foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id;
                 }
                 inserts.push({
                     action: "insert",

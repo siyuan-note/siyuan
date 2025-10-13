@@ -306,7 +306,7 @@ export class WYSIWYG {
                     if (isRefText) {
                         html += getTextStar(item) + "\n\n";
                     } else {
-                        let itemHTML = ""
+                        let itemHTML = "";
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
                         }

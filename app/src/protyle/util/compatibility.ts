@@ -127,7 +127,12 @@ export const getLocalFiles = async () => {
 export const readClipboard = async () => {
     const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
     try {
-        const clipboardContents = await navigator.clipboard.read();
+        const clipboardContents = await navigator.clipboard.read().catch(() => {
+            alert(window.siyuan.languages.clipboardPermissionDenied);
+        });
+        if (!clipboardContents) {
+            return text;
+        }
         for (const item of clipboardContents) {
             if (item.types.includes("text/html")) {
                 const blob = await item.getType("text/html");

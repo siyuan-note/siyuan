@@ -1542,7 +1542,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	if needUnfoldParentHeading {
 		newParentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
 		if nil == oldParentFoldedHeading || (nil != newParentFoldedHeading && oldParentFoldedHeading.ID != newParentFoldedHeading.ID) {
-			unfoldHeading(newParentFoldedHeading)
+			unfoldHeading(newParentFoldedHeading, updatedNode)
 		}
 	}
 
@@ -1576,7 +1576,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func unfoldHeading(heading *ast.Node) {
+func unfoldHeading(heading, currentNode *ast.Node) {
 	if nil == heading {
 		return
 	}
@@ -1596,7 +1596,7 @@ func unfoldHeading(heading *ast.Node) {
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
 
-	util.BroadcastByType("protyle", "unfoldHeading", 0, "", map[string]interface{}{"id": heading.ID})
+	util.BroadcastByType("protyle", "unfoldHeading", 0, "", map[string]interface{}{"id": heading.ID, "currentNodeID": currentNode.ID})
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

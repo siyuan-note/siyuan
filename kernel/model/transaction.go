@@ -1596,9 +1596,7 @@ func unfoldHeading(heading *ast.Node) {
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
 
-	evt := util.NewCmdResult("unfoldHeading", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{"id": heading.ID}
-	util.PushEvent(evt)
+	util.BroadcastByType("protyle", "unfoldHeading", 0, "", map[string]interface{}{"id": heading.ID})
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

@@ -1095,7 +1095,9 @@ export const getArticle = (options: {
             if (articleId !== options.id) {
                 return;
             }
-            options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
+            if (options.edit.protyle.options.render.title) {
+                options.edit.protyle.title.render(options.edit.protyle, response);
+            }
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
                 query: options.value || null,
@@ -1118,7 +1120,7 @@ export const getArticle = (options: {
                     updateReadonly: true,
                     data: getResponse,
                     protyle: options.edit.protyle,
-                    action: zoomIn ? [Constants.CB_GET_ALL] : [],
+                    action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                 });
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();

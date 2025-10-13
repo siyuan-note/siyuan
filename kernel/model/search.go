@@ -2352,33 +2352,29 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 	return
 }
 
-func GetPublishInvisibleBlocks() (invisibleBlocks []*sql.Block) { 
-	publishAccess := GetPublishAccess()
-	
-	invisibleIDs := []string{}
-	for _, item := range publishAccess {
-		if !item.Visible  {
-			invisibleIDs = append(invisibleIDs, item.ID)
-		}
+func GetPublishAccessBlocks(inputPublishAccess PublishAccess) (blocks []*sql.Block) {
+	IDs := []string{}
+	for _, item := range inputPublishAccess {
+		IDs = append(IDs, item.ID)
 	}
 
-	invisibleBlocks = sql.GetBlocks(invisibleIDs)
+	blocks = sql.GetBlocks(IDs)
 	boxes, listNotebookErr := ListNotebooks()
 	foundUnknownID := false
-	for i, invisibleID := range invisibleIDs {
-		if invisibleBlocks[i] == nil {
+	for i, ID := range IDs {
+		if blocks[i] == nil {
 			if listNotebookErr != nil {
 				// 如果获取笔记本的时候出错，就暂时将所有未确定的块都当成是笔记本
-				invisibleBlocks[i] = &sql.Block{ID: invisibleID, Box: invisibleID, Path: "/"}
+				blocks[i] = &sql.Block{ID: ID, Box: ID, Path: "/"}
 			} else {
 				// 否则只标记确定的笔记本
 				for _, box := range boxes {
-					if box.ID == invisibleID {
-						invisibleBlocks[i] = &sql.Block{ID: invisibleID, Box: invisibleID, Path: "/"}
+					if box.ID == ID {
+						blocks[i] = &sql.Block{ID: ID, Box: ID, Path: "/"}
 						break
 					}
 				}
-				if invisibleBlocks[i] == nil {
+				if blocks[i] == nil {
 					foundUnknownID = true
 				}
 			}
@@ -2388,6 +2384,26 @@ func GetPublishInvisibleBlocks() (invisibleBlocks []*sql.Block) {
 		// 清除未知的块并保存
 		purgePublishAccess()
 	}
+	return
+}
+
+func GetPublishInvisibleBlocks() (invisibleBlocks []*sql.Block) { 
+	publishAccess := GetPublishAccess()
+	
+	invisiblePublishAccess := PublishAccess{}
+	for _, item := range publishAccess {
+		if !item.Visible  {
+			invisiblePublishAccess = append(invisiblePublishAccess, item)
+		}
+	}
+
+	invisibleBlocks = GetPublishAccessBlocks(invisiblePublishAccess)
+	return
+}
+
+func GetAllPublishAccessBlocks() (blocks []*sql.Block) {
+	publishAccess := GetPublishAccess()
+	blocks = GetPublishAccessBlocks(publishAccess)
 	return
 }
 

@@ -1195,74 +1195,7 @@ func getDoc(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-
-		// 密码访问
-		currentPath := docPath
-		password := ""
-		passwordID := ""
-		for currentPath != "/" && password == "" {
-			currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
-			for _, accessItem := range publishAccess {
-				if accessItem.ID == currentID {
-					password = accessItem.Password
-					passwordID = accessItem.ID
-					break
-				}
-			}
-			currentPath = path.Dir(currentPath)
-		}
-		if password == "" {
-			for _, accessItem := range publishAccess {
-				if accessItem.ID == boxID {
-					password = accessItem.Password
-					passwordID = accessItem.ID
-					break
-				}
-			}
-		}
-		if password != "" {
-			authCookie, err := c.Request.Cookie("publish-auth-" + passwordID)
-			if err != nil || authCookie.Value != util.SHA256Hash([]byte(passwordID + password)) {
-				passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🔒</span>
-	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center;">
-		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
-		<input class="b3-form__icon-input b3-text-field fn__block" placeholder="%s" style="padding-right:25px !important;">
-		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
-	</label>
-</div>`
-				content = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
-			}
-		}
-
-		// 禁止访问
-		currentPath = docPath
-		disable := false
-		for currentPath != "/" && !disable {
-			currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
-			for _, accessItem := range publishAccess {
-				if accessItem.ID == currentID {
-					disable = accessItem.Disable
-					break
-				}
-			}
-			currentPath = path.Dir(currentPath)
-		}
-		if !disable {
-			for _, accessItem := range publishAccess {
-				if accessItem.ID == boxID {
-					disable = accessItem.Disable
-					break
-				}
-			}
-		}
-		if disable {
-			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px; line-height:1.2;">🚫</span>
-	<span style="font-size:2em;">%s</span>
-</div>`
-			content = fmt.Sprintf(forbiddenHTML, rootID, model.Conf.Language(276))
-		}
+		content = FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content)
 	}
 
 	ret.Data = map[string]interface{}{
@@ -1418,4 +1351,80 @@ func authFilePublishAccess(c *gin.Context) {
 			break
 		}
 	}
+}
+
+func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, box string, docPath string, content string) (ret string) {
+	ret = content
+	
+	// 密码访问
+	currentPath := docPath
+	password := ""
+	passwordID := ""
+	for currentPath != "/" && password == "" {
+		currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
+		for _, accessItem := range publishAccess {
+			if accessItem.ID == currentID {
+				password = accessItem.Password
+				passwordID = accessItem.ID
+				break
+			}
+		}
+		currentPath = path.Dir(currentPath)
+	}
+	if password == "" {
+		for _, accessItem := range publishAccess {
+			if accessItem.ID == box {
+				password = accessItem.Password
+				passwordID = accessItem.ID
+				break
+			}
+		}
+	}
+	if password != "" {
+		authCookie, err := c.Request.Cookie("publish-auth-" + passwordID)
+		if err != nil || authCookie.Value != util.SHA256Hash([]byte(passwordID + password)) {
+			passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🔒</span>
+	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center; margin: 0 auto 0 auto; max-width:230px;">
+		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
+		<input class="b3-form__icon-input b3-text-field fn__block" placeholder="%s" style="padding-right:25px !important;">
+		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
+	</label>
+</div>`
+			ret = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
+		}
+	}
+
+	// 禁止访问
+	currentPath = docPath
+	forbiddenID := ""
+	disable := false
+	for currentPath != "/" && !disable {
+		currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
+		for _, accessItem := range publishAccess {
+			if accessItem.ID == currentID {
+				disable = accessItem.Disable
+				forbiddenID = accessItem.ID
+				break
+			}
+		}
+		currentPath = path.Dir(currentPath)
+	}
+	if !disable {
+		for _, accessItem := range publishAccess {
+			if accessItem.ID == box {
+				disable = accessItem.Disable
+				forbiddenID = accessItem.ID
+				break
+			}
+		}
+	}
+	if disable {
+		forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px; line-height:1.2;">🚫</span>
+	<span style="font-size:2em;">%s</span>
+</div>`
+		ret = fmt.Sprintf(forbiddenHTML, forbiddenID, model.Conf.Language(276))
+	}
+	return
 }

@@ -5,7 +5,7 @@ import {
     hasPreviousSibling,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -140,12 +140,23 @@ export const getEditorRange = (element: Element): Range => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {
-            // 有时候点击编辑器头部需要矫正到第一个块中
-            if (range.toString() === "" && range.startContainer.nodeType === 1 && range.startOffset === 0 &&
-                (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
-                const focusRange = focusBlock(range.startContainer.firstChild as Element);
-                if (focusRange) {
-                    return focusRange;
+            if (range.toString() === "" && range.startContainer.nodeType === 1) {
+                // 有时候点击编辑器头部需要矫正到第一个块中
+                if (range.startOffset === 0 && (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
+                    const focusRange = focusBlock(range.startContainer.firstChild as Element);
+                    if (focusRange) {
+                        return focusRange;
+                    }
+                }
+                // 移动端获取有偏差 https://github.com/siyuan-note/siyuan/issues/15998
+                if (getContenteditableElement(range.startContainer as Element)) {
+                    const blockElement = hasClosestBlock(range.startContainer);
+                    if (blockElement) {
+                        const focusRange = focusBlock(blockElement);
+                        if (focusRange) {
+                            return focusRange;
+                        }
+                    }
                 }
             }
             return range;

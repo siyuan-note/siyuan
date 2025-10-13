@@ -542,11 +542,12 @@ export const initKeyboardToolbar = () => {
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
         if (slashBtnElement && !slashBtnElement.getAttribute("data-type")) {
             const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
-            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
-            if (dataValue !== Constants.ZWSP + 3) {
-                event.preventDefault();
-                event.stopPropagation();
+            if (dataValue === Constants.ZWSP + 3) {
+                return;
             }
+            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
+            event.preventDefault();
+            event.stopPropagation();
             if (slashBtnElement.getAttribute("data-focus") === "true") {
                 focusByRange(protyle.toolbar.range);
             }

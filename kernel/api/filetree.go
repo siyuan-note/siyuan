@@ -103,6 +103,7 @@ func listDocTree(c *gin.Context) {
 	}
 
 	p := arg["path"].(string)
+	p = strings.TrimSuffix(p, ".sy")
 	var doctree []*DocFile
 	root := filepath.Join(util.WorkspaceDir, "data", notebook, p)
 	dir, err := os.ReadDir(root)

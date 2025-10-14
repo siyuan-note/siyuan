@@ -233,7 +233,7 @@ export const bindCardEvent = async (options: {
     cardType: TCardType,
     id?: string,
     dialog?: Dialog,
-    index?: number
+    index?: number,
 }) => {
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
         fullscreen(options.element.querySelector(".card__main"),
@@ -301,7 +301,7 @@ export const bindCardEvent = async (options: {
     };
 
     countElement.innerHTML = genCardCount(options.cardsData, index);
-    options.element.addEventListener("click", (event: MouseEvent) => {
+    options.element.firstChild.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";
         const currentCard = options.cardsData.cards[index];

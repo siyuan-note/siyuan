@@ -171,7 +171,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             }
         });
         if (!protyle) {
-            ghostProtyle = new Protyle(window.siyuan.ws.app, document.createElement('div'), {
+            ghostProtyle = new Protyle(window.siyuan.ws.app, document.createElement("div"), {
                 blockId: attrs.id,
             });
         }

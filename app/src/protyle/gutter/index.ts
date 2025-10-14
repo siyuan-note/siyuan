@@ -1674,8 +1674,8 @@ export class Gutter {
                             blockRender(protyle, nodeElement);
                         }
                     }, {
-                        id: "showHeadingWithBlocks",
-                        label: window.siyuan.languages.showHeadingWithBlocks,
+                        id: "showHeadingOnlyBlocks",
+                        label: window.siyuan.languages.showHeadingOnlyBlocks,
                         iconHTML: "",
                         checked: nodeElement.getAttribute("custom-heading-mode") === "2",
                         click() {

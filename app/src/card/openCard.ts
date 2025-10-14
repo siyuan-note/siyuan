@@ -225,7 +225,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
 
 };
 
-export const bindCardEvent = async (options: {
+export const initCardComponent = async (options: {
     app: App,
     element: Element,
     title?: string,
@@ -301,6 +301,33 @@ export const bindCardEvent = async (options: {
     };
 
     countElement.innerHTML = genCardCount(options.cardsData, index);
+    
+    return {
+        editor,
+        index,
+        actionElements,
+        countElement,
+        filterElement,
+        fetchNewRound
+    };
+};
+
+export const bindCardEvent = async (options: {
+    app: App,
+    element: Element,
+    title?: string,
+    cardsData: ICardData
+    cardType: TCardType,
+    id?: string,
+    dialog?: Dialog,
+    index?: number
+}) => {
+    // 初始化卡片组件
+    const initResult = await initCardComponent(options);
+    const { editor, actionElements, countElement, filterElement, fetchNewRound } = initResult;
+    let index = initResult.index;
+    
+    // 绑定点击事件
     options.element.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";
@@ -490,6 +517,29 @@ export const bindCardEvent = async (options: {
             if (sticktabElement) {
                 const stickMenu = new Menu();
                 stickMenu.addItem({
+                    id: "openInNewTab",
+                    icon: "iconOpen",
+                    label: window.siyuan.languages.openInNewTab,
+                    click() {
+                        openFile({
+                            app: options.app,
+                            custom: {
+                                icon: "iconRiffCard",
+                                title: window.siyuan.languages.spaceRepetition,
+                                data: {
+                                    cardsData: options.cardsData,
+                                    index,
+                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                    id: docId,
+                                    title: options.title
+                                },
+                                id: "siyuan-card"
+                            },
+                        });
+                        options.dialog.destroy();
+                    }
+                });
+                stickMenu.addItem({
                     id: "insertRight",
                     icon: "iconLayoutRight",
                     label: window.siyuan.languages.insertRight,
@@ -527,6 +577,8 @@ export const bindCardEvent = async (options: {
                                 "instance": "Custom",
                                 "customModelType": "siyuan-card",
                                 "customModelData": {
+                                    "cardsData": options.cardsData,
+                                    "index": index,
                                     "cardType": filterElement.getAttribute("data-cardtype"),
                                     "id": docId,
                                     "title": options.title

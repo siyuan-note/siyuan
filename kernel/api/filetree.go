@@ -1348,6 +1348,7 @@ func authFilePublishAccess(c *gin.Context) {
 					Name: "publish-auth-" + ID,
 					Value: authCookie,
 					MaxAge: 5 * 60,
+					Path: "/",
 				})
 			} else {
 				ret.Msg = model.Conf.Language(277)

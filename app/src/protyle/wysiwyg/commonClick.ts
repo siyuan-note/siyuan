@@ -5,10 +5,6 @@ import {openGlobalSearch} from "../../search/util";
 /// #endif
 import {isMobile} from "../../util/functions";
 import {isOnlyMeta} from "../util/compatibility";
-import {fetchPost} from "../../util/fetch";
-import { reloadProtyle } from "../util/reload";
-import { showMessage } from "../../dialog/message";
-import { publish } from "../../config/publish";
 
 export const commonClick = (event: MouseEvent & {
     target: HTMLElement
@@ -91,26 +87,5 @@ export const commonClick = (event: MouseEvent & {
         }
         event.stopPropagation();
         return true;
-    }
-
-    if (window.siyuan.config.readonly) {
-        const publishAccessPasswordButtonElement = hasClosestByClassName(event.target, "publish-access-block--password-button");
-        if (publishAccessPasswordButtonElement) {
-            const passwordID = publishAccessPasswordButtonElement.parentElement.parentElement.getAttribute("data-node-id");
-            const password = publishAccessPasswordButtonElement.parentElement.querySelector("input").value;
-            fetchPost("/api/filetree/authFilePublishAccess", {
-                id: passwordID,
-                password: password
-            }, (response) => {
-                if (response.msg) {
-                    showMessage(response.msg);
-                } else {
-                    reloadProtyle(protyle, true);
-                }
-            });
-            
-            event.stopPropagation();
-            return true;
-        }
     }
 };

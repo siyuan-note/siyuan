@@ -201,6 +201,11 @@ func indexBox(boxID string) {
 			continue
 		}
 
+		if !ast.IsNodeIDPattern(strings.TrimSuffix(file.name, ".sy")) {
+			// 不以块 ID 命名的 .sy 文件不应该被加载到思源中 https://github.com/siyuan-note/siyuan/issues/16089
+			continue
+		}
+
 		waitGroup.Add(1)
 		invokeErr := p.Invoke(file)
 		if nil != invokeErr {

@@ -1198,7 +1198,7 @@ func getDoc(c *gin.Context) {
 		newContent := FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content)
 		if newContent != content {
 			content = newContent
-			eof = true
+			scroll = false  // 避免长页面可通过滚动无限刷出多个锁
 		}
 	}
 

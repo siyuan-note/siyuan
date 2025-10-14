@@ -1195,7 +1195,11 @@ func getDoc(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		content = FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content)
+		newContent := FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content)
+		if newContent != content {
+			content = newContent
+			eof = true
+		}
 	}
 
 	ret.Data = map[string]interface{}{

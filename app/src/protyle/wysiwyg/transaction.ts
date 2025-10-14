@@ -760,7 +760,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         return;
     }
-    if (operation.action === "insert") {
+    if (operation.action === "insert" && !window.siyuan.config.readonly) {
         if (operation.context?.ignoreProcess === "true") {
             return;
         }

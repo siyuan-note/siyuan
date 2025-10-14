@@ -335,7 +335,7 @@ export const bindCardEvent = async (options: {
                 return;
             }
             const moreElement = hasClosestByAttribute(target, "data-type", "more");
-            if (moreElement) {
+            if (moreElement && currentCard) {
                 event.stopPropagation();
                 event.preventDefault();
                 if (filterElement.getAttribute("data-cardtype") === "all" && filterElement.getAttribute("data-id")) {
@@ -874,6 +874,7 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
+    countElement.parentElement.querySelector('[data-type="more"]').classList.add("fn__none");
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {

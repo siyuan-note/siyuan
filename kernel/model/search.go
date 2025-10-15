@@ -2384,6 +2384,12 @@ func PurgePublishAccess() {
 	if err != nil {
 		return
 	}
+	// 必须在所有笔记本都打开的情况下才能执行清除工作，否则会把关闭的笔记本里文档的发布访问控制状态清除
+	for _, box := range boxes {
+		if box.Closed {
+			return
+		}
+	}
 
 	tempPublishAccess := PublishAccess{}
 	for i, block := range blocks {

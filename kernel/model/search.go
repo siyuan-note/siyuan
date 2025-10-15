@@ -2352,13 +2352,23 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 	return
 }
 
-func GetInvisiblePublishAccess() (invisiblePublishAccess PublishAccess) { 
+func GetInvisiblePublishAccess() (outputPublishAccess PublishAccess) { 
 	publishAccess := GetPublishAccess()
-	
-	invisiblePublishAccess = PublishAccess{}
+	outputPublishAccess = PublishAccess{}
 	for _, item := range publishAccess {
 		if !item.Visible  {
-			invisiblePublishAccess = append(invisiblePublishAccess, item)
+			outputPublishAccess = append(outputPublishAccess, item)
+		}
+	}
+	return
+}
+
+func GetDisablePublishAccess() (outputPublishAccess PublishAccess) { 
+	publishAccess := GetPublishAccess()
+	outputPublishAccess = PublishAccess{}
+	for _, item := range publishAccess {
+		if item.Disable  {
+			outputPublishAccess = append(outputPublishAccess, item)
 		}
 	}
 	return

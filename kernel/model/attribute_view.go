@@ -5575,3 +5575,24 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 		av.BatchUpsertBlockRel(avNodes)
 	}
 }
+
+func FilterBlockAttributeViewKeysByPublishIgnore(publishIgnore PublishAccess, blockAttributeViewKeys []*BlockAttributeViewKeys) (ret []*BlockAttributeViewKeys) {
+	ret = []*BlockAttributeViewKeys{}
+	for _, blockAttributeViewKey := range blockAttributeViewKeys {
+		accessable := false
+		blocks := sql.GetBlocks(blockAttributeViewKey.BlockIDs)
+		for _, block := range blocks {
+			if block == nil {
+				continue
+			}
+			if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				accessable = true
+				break
+			}
+		}
+		if accessable {
+			ret = append(ret, blockAttributeViewKey)
+		}
+	}
+	return
+}

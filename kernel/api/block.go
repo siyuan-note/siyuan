@@ -376,6 +376,10 @@ func getDocInfo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishIgnore := model.GetDisablePublishAccess()
+		info = model.FilterBlockInfoByPublishIgnore(publishIgnore, info)
+	}
 	ret.Data = info
 }
 

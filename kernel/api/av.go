@@ -909,6 +909,10 @@ func getAttributeViewKeys(c *gin.Context) {
 
 	id := arg["id"].(string)
 	blockAttributeViewKeys := model.GetBlockAttributeViewKeys(id)
+	if model.IsReadOnlyRoleContext(c) {
+		publishIgnore := model.GetDisablePublishAccess()
+		blockAttributeViewKeys = model.FilterBlockAttributeViewKeysByPublishIgnore(publishIgnore, blockAttributeViewKeys)
+	}
 	ret.Data = blockAttributeViewKeys
 }
 

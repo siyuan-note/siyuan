@@ -352,15 +352,15 @@ export class Title {
     }
 
     public render(protyle: IProtyle, response: IWebSocketData) {
-        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
-            return false;
-        }
         if (protyle.options.render.hideTitleOnZoom) {
             if (protyle.block.showAll) {
                 this.element.classList.add("fn__none");
             } else {
                 this.element.classList.remove("fn__none");
             }
+        }
+        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
+            return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
         if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {

@@ -65,7 +65,7 @@ export const onGet = (options: {
     options.protyle.block.parentID = options.data.data.parentID;
     options.protyle.block.parent2ID = options.data.data.parent2ID;
     options.protyle.block.rootID = options.data.data.rootID;
-    options.protyle.block.showAll = false;
+    options.protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     options.protyle.block.mode = options.data.data.mode;
     options.protyle.block.blockCount = options.data.data.blockCount;
     options.protyle.block.scroll = options.data.data.scroll;
@@ -143,8 +143,6 @@ const setHTML = (options: {
         }
     });
     options.content = doc.body.innerHTML;
-
-    protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;
     if (options.action.includes(Constants.CB_GET_APPEND)) {

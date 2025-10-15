@@ -409,8 +409,8 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 
 	blocks := model.RecentUpdatedBlocks()
 	if model.IsReadOnlyRoleContext(c) {
-		invisibleBlocks := model.GetPublishInvisibleBlocks()
-		blocks = model.FilterBlocksByPublishInvisible(invisibleBlocks, blocks)
+		publishIgnore := model.GetInvisiblePublishAccess()
+		blocks = model.FilterBlocksByPublishIgnore(publishIgnore, blocks)
 	}
 	ret.Data = blocks
 }
@@ -528,8 +528,8 @@ func getRefIDs(c *gin.Context) {
 	id := arg["id"].(string)
 	refDefs, originalRefBlockIDs := model.GetBlockRefs(id)
 	if model.IsReadOnlyRoleContext(c) {
-		invisibleBlocks := model.GetPublishInvisibleBlocks()
-		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishInvisible(invisibleBlocks, refDefs)
+		publishIgnore := model.GetInvisiblePublishAccess()
+		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishIgnore(publishIgnore, refDefs)
 	}
 	ret.Data = map[string]any{
 		"refDefs":             refDefs,

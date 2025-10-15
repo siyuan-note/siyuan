@@ -1153,17 +1153,17 @@ func subscribeConfEvents() {
 	})
 }
 
-func FilterConfByPublishInvisible(invisibleBlocks []*sql.Block, appConf *AppConf) (ret *AppConf) {
+func FilterConfByPublishIgnore(publishIgnore PublishAccess, appConf *AppConf) (ret *AppConf) {
 	ret = appConf
 	if appConf == nil {
 		return
 	}
 
-	appConf.UILayout = FilterUILayoutByPublishInvisible(invisibleBlocks, appConf.UILayout)
+	appConf.UILayout = FilterUILayoutByPublishIgnore(publishIgnore, appConf.UILayout)
 	return
 }
 
-func FilterUILayoutByPublishInvisible(invisibleBlocks []*sql.Block, uiLayout *conf.UILayout) (ret *conf.UILayout) {
+func FilterUILayoutByPublishIgnore(publishIgnore PublishAccess, uiLayout *conf.UILayout) (ret *conf.UILayout) {
 	ret = uiLayout
 	if uiLayout == nil {
 		return
@@ -1173,12 +1173,12 @@ func FilterUILayoutByPublishInvisible(invisibleBlocks []*sql.Block, uiLayout *co
 	if !ok {
 		return
 	}
-	layout = filterLayoutItemByPublishInvisible(invisibleBlocks, layout)
+	layout = filterLayoutItemByPublishIgnore(publishIgnore, layout)
 	(*ret)["layout"] = layout
 	return
 }
 
-func filterLayoutItemByPublishInvisible(invisibleBlocks []*sql.Block, item map[string]interface{}) (ret map[string]interface{}) {
+func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[string]interface{}) (ret map[string]interface{}) {
 	ret = item
 	if (item == nil) {
 		return
@@ -1207,7 +1207,7 @@ func filterLayoutItemByPublishInvisible(invisibleBlocks []*sql.Block, item map[s
 		if block == nil {
 			return
 		}
-		if !CheckPathVisibleByPublishInvisibleBlocks(block.Box, block.Path, invisibleBlocks) {
+		if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
 			ret = nil
 		}
 	} else {
@@ -1226,7 +1226,7 @@ func filterLayoutItemByPublishInvisible(invisibleBlocks []*sql.Block, item map[s
 			if child == nil {
 				return
 			}
-			child = filterLayoutItemByPublishInvisible(invisibleBlocks, child)
+			child = filterLayoutItemByPublishIgnore(publishIgnore, child)
 			if child != nil {
 				newChildren = append(newChildren, child)
 			} else {

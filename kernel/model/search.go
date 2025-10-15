@@ -2352,62 +2352,19 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 	return
 }
 
-func GetPublishAccessBlocks(inputPublishAccess PublishAccess) (blocks []*sql.Block) {
-	IDs := []string{}
-	for _, item := range inputPublishAccess {
-		IDs = append(IDs, item.ID)
-	}
-
-	blocks = sql.GetBlocks(IDs)
-	boxes, listNotebookErr := ListNotebooks()
-	foundUnknownID := false
-	for i, ID := range IDs {
-		if blocks[i] == nil {
-			if listNotebookErr != nil {
-				// 如果获取笔记本的时候出错，就暂时将所有未确定的块都当成是笔记本
-				blocks[i] = &sql.Block{ID: ID, Box: ID, Path: "/"}
-			} else {
-				// 否则只标记确定的笔记本
-				for _, box := range boxes {
-					if box.ID == ID {
-						blocks[i] = &sql.Block{ID: ID, Box: ID, Path: "/"}
-						break
-					}
-				}
-				if blocks[i] == nil {
-					foundUnknownID = true
-				}
-			}
-		}
-	}
-	if foundUnknownID {
-		// 清除未知的块并保存
-		purgePublishAccess()
-	}
-	return
-}
-
-func GetPublishInvisibleBlocks() (invisibleBlocks []*sql.Block) { 
+func GetInvisiblePublishAccess() (invisiblePublishAccess PublishAccess) { 
 	publishAccess := GetPublishAccess()
 	
-	invisiblePublishAccess := PublishAccess{}
+	invisiblePublishAccess = PublishAccess{}
 	for _, item := range publishAccess {
 		if !item.Visible  {
 			invisiblePublishAccess = append(invisiblePublishAccess, item)
 		}
 	}
-
-	invisibleBlocks = GetPublishAccessBlocks(invisiblePublishAccess)
 	return
 }
 
-func GetAllPublishAccessBlocks() (blocks []*sql.Block) {
-	publishAccess := GetPublishAccess()
-	blocks = GetPublishAccessBlocks(publishAccess)
-	return
-}
-
-func purgePublishAccess() {
+func PurgePublishAccess() {
 	publishAccess := GetPublishAccess()
 	IDs := []string{}
 	for _, item := range publishAccess {
@@ -2415,7 +2372,7 @@ func purgePublishAccess() {
 	}
 
 	blocks := sql.GetBlocks(IDs)
-	_, err := ListNotebooks()
+	boxes, err := ListNotebooks()
 	if err != nil {
 		return
 	}
@@ -2424,16 +2381,31 @@ func purgePublishAccess() {
 	for i, block := range blocks {
 		if block != nil {
 			tempPublishAccess = append(tempPublishAccess, publishAccess[i])
+		} else {
+			for _, box := range boxes {
+				if box.ID == publishAccess[i].ID {
+					tempPublishAccess = append(tempPublishAccess, publishAccess[i])
+					break
+				}
+			}
 		}
 	}
 	SetPublishAccess(tempPublishAccess)
 	return
 }
 
-func CheckPathVisibleByPublishInvisibleBlocks(box string, path string, invisibleBlocks []*sql.Block) bool {
-	for _, invisibleBlock := range invisibleBlocks {
-		if invisibleBlock.Box == box && ("/" == invisibleBlock.Path || strings.HasPrefix(path, strings.TrimSuffix(invisibleBlock.Path, ".sy"))) {
-			return false
+func CheckPathAccessableByPublishIgnore(box string, path string, publishIgnore PublishAccess) bool {
+	if path == "/" {
+		for _, item := range publishIgnore {
+			if item.ID == box {
+				return false
+			}
+		}
+	} else {
+		for _, item := range publishIgnore {
+			if strings.Contains(path, item.ID) {
+				return false
+			}
 		}
 	}
 	return true

@@ -999,7 +999,7 @@ func buildDefsAndRefs(condition string) (defBlocks []*Block) {
 	return
 }
 
-func FilterPathsByPublishInvisible(invisibleBlocks []*sql.Block, paths []*Path) (ret []*Path) {
+func FilterPathsByPublishIgnore(publishIgnore PublishAccess, paths []*Path) (ret []*Path) {
 	ret = []*Path{}
 	IDs := []string{}
 	IDtoPathIndexMap := make(map[string]int)
@@ -1011,7 +1011,7 @@ func FilterPathsByPublishInvisible(invisibleBlocks []*sql.Block, paths []*Path) 
 	for _, block := range blocks {
 		pathIndex := IDtoPathIndexMap[block.ID]
 		path := paths[pathIndex]
-		if CheckPathVisibleByPublishInvisibleBlocks(block.Box, block.Path, invisibleBlocks) {
+		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
 			ret = append(ret, path)
 		}
 	}

@@ -420,11 +420,11 @@ func buildTags(root Tags, labels []string, depth int) Tags {
 	return root
 }
 
-func FilterTagsByPublishInvisible(invisibleBlocks []*sql.Block, tags *Tags) (ret *Tags) {
+func FilterTagsByPublishIgnore(publishIgnore PublishAccess, tags *Tags) (ret *Tags) {
 	spans := sql.QueryTagSpans("")
 	labelCounts := make(map[string]int)
 	for _, span := range spans {
-		if CheckPathVisibleByPublishInvisibleBlocks(span.Box, span.Path, invisibleBlocks) {
+		if CheckPathAccessableByPublishIgnore(span.Box, span.Path, publishIgnore) {
 			label := util.UnescapeHTML(span.Content)
 			labelCounts[label] += 1
 		}

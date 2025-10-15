@@ -702,12 +702,12 @@ func query2Stmt(queryStr string) (ret string) {
 	return
 }
 
-func FilterGraphByPublishInvisible(invisibleBlocks []*sql.Block, nodes []*GraphNode, links []*GraphLink) (retNodes []*GraphNode, retLinks []*GraphLink) {
+func FilterGraphByPublishIgnore(publishIgnore PublishAccess, nodes []*GraphNode, links []*GraphLink) (retNodes []*GraphNode, retLinks []*GraphLink) {
 	retNodes = []*GraphNode{}
 	retLinks = []*GraphLink{}
 	ignoreNodeIDs := []string{}
 	for _, node := range nodes {
-		if CheckPathVisibleByPublishInvisibleBlocks(node.Box, node.Path, invisibleBlocks) {
+		if CheckPathAccessableByPublishIgnore(node.Box, node.Path, publishIgnore) {
 			retNodes = append(retNodes, node)
 		} else {
 			ignoreNodeIDs = append(ignoreNodeIDs, node.ID)

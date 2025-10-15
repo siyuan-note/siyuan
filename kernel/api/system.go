@@ -541,8 +541,8 @@ func getConf(c *gin.Context) {
 	}
 
 	if model.IsReadOnlyRoleContext(c) {
-		invisibleBlocks := model.GetPublishInvisibleBlocks()
-		maskedConf = model.FilterConfByPublishInvisible(invisibleBlocks, maskedConf)
+		publishIgnore := model.GetInvisiblePublishAccess()
+		maskedConf = model.FilterConfByPublishIgnore(publishIgnore, maskedConf)
 	}
 
 	ret.Data = map[string]interface{}{

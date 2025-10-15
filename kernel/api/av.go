@@ -995,15 +995,17 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess
 				if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
 					row = nil
 				}
-				if passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess); password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
-					row = nil
-				}
 			}
 			if row != nil {
 				filteredRows = append(filteredRows, row)
 			}
 		}
 		table.Rows = filteredRows
+		if table.Groups != nil {
+			for i, viewable := range table.Groups {
+				table.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
+			}
+		}
 	case av.LayoutTypeGallery:
 		gallery := ret.(*av.Gallery)
 		filteredCards := []*av.GalleryCard{}
@@ -1030,15 +1032,17 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess
 				if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
 					card = nil
 				}
-				if passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess); password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
-					card = nil
-				}
 			}
 			if card != nil {
 				filteredCards = append(filteredCards, card)
 			}
 		}
 		gallery.Cards = filteredCards
+		if gallery.Groups != nil {
+			for i, viewable := range gallery.Groups {
+				gallery.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
+			}
+		}
 	// TODO: 适配看板视图
 	}
 	return

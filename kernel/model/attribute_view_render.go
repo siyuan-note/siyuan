@@ -522,9 +522,11 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	historyDir := matches[0]
 	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if !gulu.File.IsExist(avJSONPath) {
+		logging.LogWarnf("attribute view [%s] not found in history data [%s], use current data instead", avID, historyDir)
 		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
 	}
 	if !gulu.File.IsExist(avJSONPath) {
+		logging.LogWarnf("attribute view [%s] not found in current data", avID)
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := os.ReadFile(avJSONPath)

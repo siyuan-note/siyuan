@@ -223,6 +223,7 @@
     "mathBlock": "公式塊",
     "htmlBlock": "HTML 塊"
   },
+  "copyAHref": "複製連結位址",
   "selected": "已選擇",
   "loadMore": "載入更多",
   "tempUnlock": "暫時解鎖",

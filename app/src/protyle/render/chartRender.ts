@@ -28,7 +28,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                         return;
                     }
                     if (!e.firstElementChild.classList.contains("protyle-icons")) {
-                        e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
+                        e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement, ["refresh", "edit", "more"]));
                     }
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     if (!e.getAttribute("data-content")) {
@@ -37,17 +37,22 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     }
                     try {
                         if (!renderElement.lastElementChild || renderElement.childElementCount === 1) {
-                            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div style="height:420px" contenteditable="false"></div>`;
+                            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div style="height:${e.style.height || "420px"}" contenteditable="false"></div>`;
+                        } else {
+                            renderElement.lastElementChild.classList.remove("ft__error");
                         }
                         const chartInstance = window.echarts.getInstanceById(renderElement.lastElementChild?.getAttribute("_echarts_instance_"));
                         const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
-                        if (chartInstance && chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
-                            chartInstance.clear();
+                        if (chartInstance) {
+                            if (chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
+                                chartInstance.clear();
+                            }
+                            chartInstance?.resize();
                         }
                         window.echarts.init(renderElement.lastElementChild, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                     } catch (error) {
                         window.echarts.dispose(renderElement.lastElementChild);
-                        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">echarts render error: <br>${error}</div>`;
+                        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" style="height:${e.style.height || "420px"}" contenteditable="false">echarts render error: <br>${error}</div>`;
                     }
                     e.setAttribute("data-render", "true");
                 });

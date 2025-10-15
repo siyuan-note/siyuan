@@ -182,6 +182,7 @@ export class BlockPanel {
                     scroll: true,
                     gutter: true,
                     breadcrumbDocName: true,
+                    title: response.data.rootID === this.refDefs[index].refID, // 如果块是文档，显示文档标题
                 },
                 typewriterMode: false,
                 after: (editor) => {

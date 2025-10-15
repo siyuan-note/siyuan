@@ -18,7 +18,6 @@ import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
-import {updateReadonly as updateReadonlyMethod} from "../breadcrumb/action";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 
@@ -66,7 +65,7 @@ export const onGet = (options: {
     options.protyle.block.parentID = options.data.data.parentID;
     options.protyle.block.parent2ID = options.data.data.parent2ID;
     options.protyle.block.rootID = options.data.data.rootID;
-    options.protyle.block.showAll = false;
+    options.protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     options.protyle.block.mode = options.data.data.mode;
     options.protyle.block.blockCount = options.data.data.blockCount;
     options.protyle.block.scroll = options.data.data.scroll;
@@ -144,8 +143,6 @@ const setHTML = (options: {
         }
     });
     options.content = doc.body.innerHTML;
-
-    protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;
     if (options.action.includes(Constants.CB_GET_APPEND)) {
@@ -166,7 +163,7 @@ const setHTML = (options: {
             removeElements.forEach(item => {
                 item.remove();
             });
-            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop);
+            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
             hideElements(["toolbar"], protyle);
         }
@@ -245,9 +242,10 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        setReadonlyByConfig(protyle, updateReadonly);
-        if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly) {
-            updateReadonlyMethod(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
+        if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
+            enableProtyle(protyle);
+        } else {
+            setReadonlyByConfig(protyle, updateReadonly);
         }
     }
 

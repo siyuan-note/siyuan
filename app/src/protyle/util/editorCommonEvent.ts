@@ -27,7 +27,7 @@ import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
-import {zoomOut} from "../../menus/protyle";
+import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
@@ -44,6 +44,16 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
     const newSourceId = newSourceElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    let foldData;
+    if (isBottom &&
+        targetElement.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement, true, false, false, true);
+    } else if (!isBottom && targetElement.previousElementSibling &&
+        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.previousElementSibling.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
+    }
     targetElement.insertAdjacentElement(isBottom ? "afterend" : "beforebegin", newSourceElement);
     if (isBottom) {
         doOperations.push({
@@ -138,6 +148,13 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         action: "delete",
         id: newSourceId,
     });
+    if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
+    }
     return {
         doOperations,
         undoOperations,
@@ -150,9 +167,19 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let topSourceElement;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    const foldHeadingIds: { id: string, parentID: string }[] = [];
+    const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
     const targetId = targetElement.getAttribute("data-node-id");
     let tempTargetElement = targetElement;
+    let foldData;
+    if (position === "afterend" &&
+        targetElement.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement, true, false, false, true);
+    } else if (position === "beforebegin" && targetElement.previousElementSibling &&
+        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.previousElementSibling.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
+    }
     sourceElements.reverse().forEach((item, index) => {
         const id = item.getAttribute("data-node-id");
         const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
@@ -165,17 +192,19 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 topSourceElement = targetElement;
             }
         }
+        const copyNewId = Lute.NewNodeID();
         if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            item.removeAttribute("fold");
-            foldHeadingIds.push({id, parentID});
+            copyFoldHeadingIds.push({
+                newId: copyNewId,
+                oldId: id
+            });
         }
-        let copyId;
+
         let copyElement;
         if (isCopy) {
-            copyId = Lute.NewNodeID();
             undoOperations.push({
                 action: "delete",
-                id: copyId,
+                id: copyNewId,
             });
         } else {
             undoOperations.push({
@@ -192,10 +221,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 sameElement.remove();
             }
         }
-
         if (isCopy) {
             copyElement = item.cloneNode(true) as HTMLElement;
-            copyElement.setAttribute("data-node-id", copyId);
+            copyElement.setAttribute("data-node-id", copyNewId);
             copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
                 const newId = Lute.NewNodeID();
                 e.setAttribute("data-node-id", newId);
@@ -204,7 +232,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             tempTargetElement.insertAdjacentElement(position, copyElement);
             doOperations.push({
                 action: "insert",
-                id: copyId,
+                id: copyNewId,
                 data: copyElement.outerHTML,
                 previousID: position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
                 parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
@@ -223,26 +251,21 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
     });
     undoOperations.reverse();
-    for (let j = 0; j < foldHeadingIds.length; j++) {
-        const childrenItem = foldHeadingIds[j];
-        const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
-        headingIds.data.reverse().forEach((headingId: string) => {
-            undoOperations.push({
-                action: "move",
-                id: headingId,
-                previousID: childrenItem.id,
-                parentID: childrenItem.parentID,
-            });
-        });
-        undoOperations.push({
-            action: "foldHeading",
-            id: childrenItem.id,
-            data: "remove"
-        });
-        doOperations.push({
-            action: "unfoldHeading",
-            id: childrenItem.id,
-        });
+    for (let j = 0; j < copyFoldHeadingIds.length; j++) {
+        const childrenItem = copyFoldHeadingIds[j];
+        const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
+        responseTransaction.data.doOperations.splice(0, 1);
+        responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
+        responseTransaction.data.undoOperations.splice(0, 1);
+        doOperations.push(...responseTransaction.data.doOperations);
+        undoOperations.push(...responseTransaction.data.undoOperations);
+    }
+    if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
     }
     return {
         doOperations,
@@ -367,7 +390,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             id: newSourceId,
         });
     } else {
-        const foldHeadingIds: { id: string, parentID: string }[] = [];
+        const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
         let afterPreviousID;
         sourceElements.reverse().forEach((item, index) => {
             const id = item.getAttribute("data-node-id");
@@ -384,8 +407,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
             if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                 if (isCopy) {
-                    item.removeAttribute("fold");
-                    foldHeadingIds.push({id, parentID});
+                    copyFoldHeadingIds.push({oldId: id, newId: copyId});
                 }
                 hasFoldHeading = true;
             }
@@ -434,29 +456,17 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
         });
         undoOperations.reverse();
-        for (let j = 0; j < foldHeadingIds.length; j++) {
-            const childrenItem = foldHeadingIds[j];
-            const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
-            headingIds.data.reverse().forEach((headingId: string) => {
-                undoOperations.push({
-                    action: "move",
-                    id: headingId,
-                    previousID: childrenItem.id,
-                    parentID: childrenItem.parentID,
-                });
-            });
+        for (let j = 0; j < copyFoldHeadingIds.length; j++) {
+            const childrenItem = copyFoldHeadingIds[j];
+            const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
+            responseTransaction.data.doOperations.splice(0, 1);
+            responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
+            responseTransaction.data.undoOperations.splice(0, 1);
+            doOperations.push(...responseTransaction.data.doOperations);
+            undoOperations.push(...responseTransaction.data.undoOperations);
             if (j === 0) {
-                afterPreviousID = headingIds.data[0];
+                afterPreviousID = copyFoldHeadingIds[0].newId;
             }
-            undoOperations.push({
-                action: "foldHeading",
-                id: childrenItem.id,
-                data: "remove"
-            });
-            doOperations.push({
-                action: "unfoldHeading",
-                id: childrenItem.id,
-            });
         }
         if (isBottom) {
             sbElement.insertAdjacentElement("afterbegin", targetElement);
@@ -595,7 +605,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 level: "row"
             });
         }
-        if ((sourceElements.length > 1 || hasFoldHeading)) {
+        if (sourceElements.length > 1 || hasFoldHeading) {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: sourceElements.reverse(),
@@ -785,7 +795,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {
-        // 跨文档不支持撤销
+        // 跨文档或插入折叠标题下不支持撤销
         transaction(protyle, doOperations);
     }
     let hasFoldHeading = false;
@@ -805,7 +815,11 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             level: "row"
         });
     }
-    focusBlock(sourceElements[0]);
+    if (document.contains(sourceElements[0])) {
+        focusBlock(sourceElements[0]);
+    } else {
+        focusBlock(targetElement);
+    }
 };
 
 export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
@@ -1302,7 +1316,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < ids.length; i++) {
                     if (ids.length > 1) {
-                        html += "* ";
+                        html += "- ";
                     }
                     const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
                     html += `((${ids[i]} '${response.data}'))`;
@@ -1799,12 +1813,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 clearDragoverElement(dragoverElement);
                 return;
             }
-            if (gutterTypes[0] === "nodelistitem" &&
-                gutterTypes[1] !== targetElement.getAttribute("data-subtype") &&
-                "NodeListItem" === targetElement.getAttribute("data-type")) {
-                // 排除类型不同的列表项
-                clearDragoverElement(dragoverElement);
-                return;
+            if (gutterTypes[0] === "nodelistitem" && "NodeListItem" === targetElement.getAttribute("data-type")) {
+                if (gutterTypes[1] !== targetElement.getAttribute("data-subtype")) {
+                    // 排除类型不同的列表项
+                    clearDragoverElement(dragoverElement);
+                    return;
+                }
+                // 选中非列表不能拖拽到列表中 https://github.com/siyuan-note/siyuan/issues/13822
+                const notLiItem = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).find((item: HTMLElement) => {
+                    if (!item.classList.contains("li")) {
+                        return true;
+                    }
+                });
+                if (notLiItem) {
+                    clearDragoverElement(dragoverElement);
+                    return;
+                }
             }
             if (gutterTypes[0] !== "nodelistitem" && targetElement.getAttribute("data-type") === "NodeListItem") {
                 // 非列表项不能拖入列表项周围

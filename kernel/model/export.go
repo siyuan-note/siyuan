@@ -1110,10 +1110,6 @@ func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 		return
 	}
 
-	if !IsPaidUser() {
-		return
-	}
-
 	mode := "text"
 	if gulu.File.IsExist(str) {
 		if ".pdf" == strings.ToLower(filepath.Ext(str)) {
@@ -1657,8 +1653,8 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	baseFolderName = path.Join(dir, name)
 	box := Conf.Box(boxID)
 
-	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)
-	if err := os.MkdirAll(exportFolder, 0755); err != nil {
+	exportDir := filepath.Join(util.TempDir, "export", baseFolderName)
+	if err := os.MkdirAll(exportDir, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
@@ -1709,7 +1705,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 
 		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
-		writePath = filepath.Join(exportFolder, writePath)
+		writePath = filepath.Join(exportDir, writePath)
 		writeFolder := filepath.Dir(writePath)
 		if mkdirErr := os.MkdirAll(writeFolder, 0755); nil != mkdirErr {
 			logging.LogErrorf("create export temp folder [%s] failed: %s", writeFolder, mkdirErr)
@@ -1735,7 +1731,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 
 		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
-		writePath = filepath.Join(exportFolder, treeID+".sy")
+		writePath = filepath.Join(exportDir, treeID+".sy")
 		if writeErr := os.WriteFile(writePath, data, 0644); nil != writeErr {
 			logging.LogErrorf("write export file [%s] failed: %s", writePath, writeErr)
 			continue
@@ -1785,7 +1781,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				continue
 			}
 
-			destPath := filepath.Join(exportFolder, asset)
+			destPath := filepath.Join(exportDir, asset)
 			assetErr := filelock.Copy(srcPath, destPath)
 			if nil != assetErr {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, assetErr)
@@ -1809,7 +1805,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		emojis := emojisInTree(tree)
 		for _, emoji := range emojis {
 			from := filepath.Join(util.DataDir, emoji)
-			to := filepath.Join(exportFolder, emoji)
+			to := filepath.Join(exportDir, emoji)
 			if copyErr := filelock.Copy(from, to); copyErr != nil {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, copyErr)
 			}
@@ -1817,65 +1813,31 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 
 	// 导出数据库 Attribute View export https://github.com/siyuan-note/siyuan/issues/8710
-	exportStorageAvDir := filepath.Join(exportFolder, "storage", "av")
+	exportStorageAvDir := filepath.Join(exportDir, "storage", "av")
+	var avIDs []string
 	for _, tree := range trees {
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
+			if !entering || !n.IsBlock() {
 				return ast.WalkContinue
 			}
 
-			if ast.NodeAttributeView != n.Type {
-				return ast.WalkContinue
+			if ast.NodeAttributeView == n.Type {
+				avIDs = append(avIDs, n.AttributeViewID)
 			}
-
-			avID := n.AttributeViewID
-			avJSONPath := av.GetAttributeViewDataPath(avID)
-			if !filelock.IsExist(avJSONPath) {
-				return ast.WalkContinue
+			avs := n.IALAttr(av.NodeAttrNameAvs)
+			for _, avID := range strings.Split(avs, ",") {
+				avIDs = append(avIDs, strings.TrimSpace(avID))
 			}
-
-			if copyErr := filelock.Copy(avJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
-				logging.LogErrorf("copy av json failed: %s", copyErr)
-			}
-
-			attrView, err := av.ParseAttributeView(avID)
-			if err != nil {
-				logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-				return ast.WalkContinue
-			}
-
-			for _, keyValues := range attrView.KeyValues {
-				switch keyValues.Key.Type {
-				case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
-					for _, value := range keyValues.Values {
-						for _, asset := range value.MAsset {
-							if !util.IsAssetLinkDest([]byte(asset.Content)) {
-								continue
-							}
-
-							destPath := filepath.Join(exportFolder, asset.Content)
-							srcPath := assetPathMap[asset.Content]
-							if "" == srcPath {
-								logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
-								continue
-							}
-
-							if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
-								logging.LogErrorf("copy asset failed: %s", copyErr)
-							}
-						}
-					}
-				}
-			}
-
-			// 级联导出关联列关联的数据库
-			exportRelationAvs(avID, exportStorageAvDir)
 			return ast.WalkContinue
 		})
 	}
+	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
+	for _, avID := range avIDs {
+		exportAv(avID, exportStorageAvDir, exportDir, assetPathMap)
+	}
 
 	// 导出闪卡 Export related flashcard data when exporting .sy.zip https://github.com/siyuan-note/siyuan/issues/9372
-	exportStorageRiffDir := filepath.Join(exportFolder, "storage", "riff")
+	exportStorageRiffDir := filepath.Join(exportDir, "storage", "riff")
 	deck, loadErr := riff.LoadDeck(exportStorageRiffDir, builtinDeckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
 	if nil != loadErr {
 		logging.LogErrorf("load deck [%s] failed: %s", name, loadErr)
@@ -1924,7 +1886,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				logging.LogErrorf("marshal sort conf failed: %s", sortErr)
 			}
 			if 0 < len(sortData) {
-				confDir := filepath.Join(exportFolder, ".siyuan")
+				confDir := filepath.Join(exportDir, ".siyuan")
 				if mkdirErr := os.MkdirAll(confDir, 0755); nil != mkdirErr {
 					logging.LogErrorf("create export conf folder [%s] failed: %s", confDir, mkdirErr)
 				} else {
@@ -1937,10 +1899,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 	}
 
-	zipPath = exportFolder + ".sy.zip"
+	zipPath = exportDir + ".sy.zip"
 	zip, err := gulu.Zip.Create(zipPath)
 	if err != nil {
-		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
+		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, err)
 		return ""
 	}
 
@@ -1948,8 +1910,8 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(253), filename))
 	}
 
-	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
-		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
+	if err = zip.AddDirectory(baseFolderName, exportDir, zipCallback); err != nil {
+		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, err)
 		return ""
 	}
 
@@ -1957,9 +1919,53 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		logging.LogErrorf("close export .sy.zip failed: %s", err)
 	}
 
-	os.RemoveAll(exportFolder)
+	os.RemoveAll(exportDir)
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	return
+}
+
+func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
+	avJSONPath := av.GetAttributeViewDataPath(avID)
+	if !filelock.IsExist(avJSONPath) {
+		return
+	}
+
+	if copyErr := filelock.Copy(avJSONPath, filepath.Join(exportStorageAvDir, avID+".json")); nil != copyErr {
+		logging.LogErrorf("copy av json failed: %s", copyErr)
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		switch keyValues.Key.Type {
+		case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
+			for _, value := range keyValues.Values {
+				for _, asset := range value.MAsset {
+					if !util.IsAssetLinkDest([]byte(asset.Content)) {
+						continue
+					}
+
+					destPath := filepath.Join(exportFolder, asset.Content)
+					srcPath := assetPathMap[asset.Content]
+					if "" == srcPath {
+						logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
+						continue
+					}
+
+					if copyErr := filelock.Copy(srcPath, destPath); nil != copyErr {
+						logging.LogErrorf("copy asset failed: %s", copyErr)
+					}
+				}
+			}
+		}
+	}
+
+	// 级联导出关联列关联的数据库
+	exportRelationAvs(avID, exportStorageAvDir)
 }
 
 func exportRelationAvs(avID, exportStorageAvDir string) {
@@ -2029,15 +2035,18 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		return
 	}
 
-	for c := tree.Root.FirstChild; nil != c; c = c.Next {
-		if ast.NodeParagraph == c.Type {
-			isEmpty = nil == c.FirstChild
-			if !isEmpty {
+	refCount := sql.QueryRootChildrenRefCount(tree.ID)
+	if !Conf.Export.MarkdownYFM && treenode.ContainOnlyDefaultIAL(tree) && 1 > len(refCount) {
+		for c := tree.Root.FirstChild; nil != c; c = c.Next {
+			if ast.NodeParagraph == c.Type {
+				isEmpty = nil == c.FirstChild
+				if !isEmpty {
+					break
+				}
+			} else {
+				isEmpty = false
 				break
 			}
-		} else {
-			isEmpty = false
-			break
 		}
 	}
 
@@ -2100,6 +2109,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	}
 
 	currentDocDir := path.Dir(tree.HPath)
+	currentDocDir = util.FilterFilePath(currentDocDir)
 
 	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2153,9 +2163,19 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 							href = "#" + defID
 						}
 					}
-					href = strings.TrimPrefix(href, currentDocDir)
+
+					sameDir := path.Dir(href) == currentDocDir
 					href = util.FilterFilePath(href)
-					href = strings.TrimPrefix(href, "/")
+					if !sameDir {
+						var relErr error
+						href, relErr = filepath.Rel(currentDocDir, href)
+						if nil != relErr {
+							logging.LogWarnf("get relative path from [%s] to [%s] failed: %s", currentDocDir, href, relErr)
+						}
+						href = filepath.ToSlash(href)
+					} else {
+						href = strings.TrimPrefix(href, currentDocDir+"/")
+					}
 					blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: href}
 					blockRefLink.KramdownIAL = n.KramdownIAL
 					n.InsertBefore(blockRefLink)
@@ -2273,37 +2293,20 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		case 2: // 锚文本块链
 			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
 			blockRefLink.KramdownIAL = n.KramdownIAL
-			if "block-ref" != n.TextMarkType { // 除了块引还有其他元素 https://github.com/siyuan-note/siyuan/issues/15698
-				blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "a"))
-				blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-			}
+			blockRefLink.TextMarkType = "a " + n.TextMarkType
+			blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本
-			var blockRefLink *ast.Node
-			if 0 < len(n.KramdownIAL) {
-				blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
-				blockRefLink.KramdownIAL = n.KramdownIAL
-
-				if n.IsTextMarkType("inline-memo") {
-					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-					blockRefLink.TextMarkType = "text inline-memo"
-				}
-			} else {
-				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
-				if "block-ref" != n.TextMarkType {
-					blockRefLink.Type = ast.NodeTextMark
-					blockRefLink.TextMarkType = strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", ""))
-					blockRefLink.TextMarkTextContent = linkText
-					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
-				}
-			}
+			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: strings.TrimSpace(strings.ReplaceAll(n.TextMarkType, "block-ref", "")), TextMarkTextContent: linkText}
+			blockRefLink.KramdownIAL = n.KramdownIAL
+			blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 4: // 脚注+锚点哈希
 			if currentTreeNodeIDs[defID] {
 				// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
-				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "block-ref", "a")
+				n.TextMarkType = "a " + n.TextMarkType
 				n.TextMarkTextContent = linkText
 				n.TextMarkAHref = "#" + defID
 				return ast.WalkContinue
@@ -2324,11 +2327,6 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.InsertBefore(text)
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
-		}
-
-		if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
-			// 引用加排版标记（比如颜色）重叠时丢弃后面的排版属性节点
-			unlinks = append(unlinks, n.Next)
 		}
 		return ast.WalkSkipChildren
 	})
@@ -2996,7 +2994,7 @@ func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, treeCache map[strin
 		}
 
 		if treenode.IsBlockLink(n) {
-			n.TextMarkType = "block-ref"
+			n.TextMarkType = strings.TrimSpace(strings.TrimPrefix(n.TextMarkType, "a") + " block-ref")
 			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
 			n.TextMarkBlockRefSubtype = "s"
 
@@ -3452,6 +3450,11 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 	case av.LayoutTypeGallery:
 		view.Table = av.NewLayoutTable()
 		for _, field := range view.Gallery.CardFields {
+			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
+		}
+	case av.LayoutTypeKanban:
+		view.Table = av.NewLayoutTable()
+		for _, field := range view.Kanban.Fields {
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 		}
 	}

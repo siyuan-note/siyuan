@@ -246,9 +246,9 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("#### " + Lute.Caret, "iconH4", window.siyuan.languages.heading4, "true")}
     ${getSlashItem("##### " + Lute.Caret, "iconH5", window.siyuan.languages.heading5, "true")}
     ${getSlashItem("###### " + Lute.Caret, "iconH6", window.siyuan.languages.heading6, "true")}
-    ${getSlashItem("* " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
+    ${getSlashItem("- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
-    ${getSlashItem("* [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
     ${getSlashItem("```", "iconCode", window.siyuan.languages.code, "true")}
     ${getSlashItem(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, "iconTable", window.siyuan.languages.table, "true")}
@@ -542,11 +542,12 @@ export const initKeyboardToolbar = () => {
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
         if (slashBtnElement && !slashBtnElement.getAttribute("data-type")) {
             const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
-            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
-            if (dataValue !== Constants.ZWSP + 3) {
-                event.preventDefault();
-                event.stopPropagation();
+            if (dataValue === Constants.ZWSP + 3) {
+                return;
             }
+            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
+            event.preventDefault();
+            event.stopPropagation();
             if (slashBtnElement.getAttribute("data-focus") === "true") {
                 focusByRange(protyle.toolbar.range);
             }

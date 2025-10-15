@@ -1,5 +1,5 @@
 import {matchHotKey} from "../util/hotKey";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMac, writeText} from "../util/compatibility";
 import {focusBlock, getSelectionOffset, setFirstNodeRange, setLastNodeRange,} from "../util/selection";
 import {getContenteditableElement, getNextBlock} from "./getBlock";
@@ -253,7 +253,7 @@ export const getStartEndElement = (selectElements: NodeListOf<Element> | Element
     };
 };
 
-export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
+export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle) => {
     let focusElement: Element;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
@@ -262,12 +262,22 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
         nodeElements[nodeElements.length - 1].getAttribute("data-subtype") === "o") {
         starIndex = parseInt(nodeElements[nodeElements.length - 1].getAttribute("data-marker"), 10);
     }
-    nodeElements.reverse().forEach((item, index) => {
-        const tempElement = item.cloneNode(true) as HTMLElement;
-        if (index === 0) {
+    const foldHeadingIds = [];
+    for (let index = nodeElements.length - 1; index >= 0; --index) {
+        const item = nodeElements[index];
+        let tempElement = item.cloneNode(true) as HTMLElement;
+        const newId = Lute.NewNodeID();
+        if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
+            const response = await fetchSyncPost("/api/block/getBlockDOM", {
+                id: item.getAttribute("data-node-id"),
+            });
+            const foldTempElement = document.createElement("template");
+            foldTempElement.innerHTML = response.data.dom;
+            tempElement = foldTempElement.content.firstElementChild as HTMLElement;
+        }
+        if (index === nodeElements.length - 1) {
             focusElement = tempElement;
         }
-        const newId = Lute.NewNodeID();
         tempElement.setAttribute("data-node-id", newId);
         tempElement.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
         tempElement.classList.remove("protyle-wysiwyg--hl");
@@ -285,7 +295,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
         });
         item.classList.remove("protyle-wysiwyg--select");
         if (typeof starIndex === "number") {
-            const orderIndex = starIndex + (nodeElements.length - index);
+            const orderIndex = starIndex + index + 1;
             tempElement.setAttribute("data-marker", (orderIndex) + ".");
             tempElement.querySelector(".protyle-action--order").textContent = (orderIndex) + ".";
         }
@@ -300,6 +310,42 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             action: "delete",
             id: newId,
         });
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            foldHeadingIds.push({oldId: item.getAttribute("data-node-id"), newId});
+            const responseHTML = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {id: item.getAttribute("data-node-id")});
+            const foldElement = document.createElement("template");
+            foldElement.innerHTML = responseHTML.data;
+            Array.from(foldElement.content.children).reverse().forEach((childItem: HTMLElement, childIndex) => {
+                if (childIndex === foldElement.content.children.length - 1) {
+                    return;
+                }
+                childItem.querySelectorAll("[data-node-id]").forEach(subItem => {
+                    subItem.setAttribute("data-node-id", Lute.NewNodeID());
+                    subItem.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
+                    subItem.removeAttribute("refcount");
+                });
+                const newChildId = Lute.NewNodeID();
+                childItem.setAttribute("data-node-id", newChildId);
+                childItem.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
+                childItem.removeAttribute("refcount");
+                doOperations.push({
+                    context: {
+                        ignoreProcess: "true"
+                    },
+                    action: "insert",
+                    data: childItem.outerHTML,
+                    id: newChildId,
+                    previousID: newId,
+                });
+                undoOperations.push({
+                    action: "delete",
+                    id: newChildId,
+                });
+            });
+        }
+    }
+    protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+        item.remove();
     });
     if (typeof starIndex === "number") {
         let nextElement = focusElement.nextElementSibling;

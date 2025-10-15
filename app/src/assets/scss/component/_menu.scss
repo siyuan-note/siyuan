@@ -375,6 +375,7 @@
     position: fixed;
     box-shadow: var(--b3-dialog-shadow);
     z-index: 1;
+    cursor: default;
   }
 
   &__accelerator {

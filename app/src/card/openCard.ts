@@ -161,10 +161,8 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 updateReadonly: true,
                 data: response,
                 protyle,
-                action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
-                    protyle.title.element.removeAttribute("data-render");
-                    protyle.title.render(protyle, docResponse);
                     let hasHide = false;
                     if (!window.siyuan.config.flashcard.superBlock &&
                         !window.siyuan.config.flashcard.heading &&
@@ -235,7 +233,7 @@ export const bindCardEvent = async (options: {
     cardType: TCardType,
     id?: string,
     dialog?: Dialog,
-    index?: number
+    index?: number,
 }) => {
     if (window.siyuan.storage[Constants.LOCAL_FLASHCARD].fullscreen) {
         fullscreen(options.element.querySelector(".card__main"),
@@ -303,7 +301,7 @@ export const bindCardEvent = async (options: {
     };
 
     countElement.innerHTML = genCardCount(options.cardsData, index);
-    options.element.addEventListener("click", (event: MouseEvent) => {
+    options.element.firstChild.addEventListener("click", (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         let type = "";
         const currentCard = options.cardsData.cards[index];
@@ -337,7 +335,7 @@ export const bindCardEvent = async (options: {
                 return;
             }
             const moreElement = hasClosestByAttribute(target, "data-type", "more");
-            if (moreElement) {
+            if (moreElement && currentCard) {
                 event.stopPropagation();
                 event.preventDefault();
                 if (filterElement.getAttribute("data-cardtype") === "all" && filterElement.getAttribute("data-id")) {
@@ -492,6 +490,29 @@ export const bindCardEvent = async (options: {
             if (sticktabElement) {
                 const stickMenu = new Menu();
                 stickMenu.addItem({
+                    id: "openInNewTab",
+                    icon: "iconOpen",
+                    label: window.siyuan.languages.openInNewTab,
+                    click() {
+                        openFile({
+                            app: options.app,
+                            custom: {
+                                icon: "iconRiffCard",
+                                title: window.siyuan.languages.spaceRepetition,
+                                data: {
+                                    cardsData: options.cardsData,
+                                    index,
+                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                    id: docId,
+                                    title: options.title
+                                },
+                                id: "siyuan-card"
+                            },
+                        });
+                        options.dialog.destroy();
+                    }
+                });
+                stickMenu.addItem({
                     id: "insertRight",
                     icon: "iconLayoutRight",
                     label: window.siyuan.languages.insertRight,
@@ -529,6 +550,8 @@ export const bindCardEvent = async (options: {
                                 "instance": "Custom",
                                 "customModelType": "siyuan-card",
                                 "customModelData": {
+                                    "cardsData": options.cardsData,
+                                    "index": index,
                                     "cardType": filterElement.getAttribute("data-cardtype"),
                                     "id": docId,
                                     "title": options.title
@@ -851,6 +874,7 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
+    countElement.parentElement.querySelector('[data-type="more"]').classList.add("fn__none");
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {

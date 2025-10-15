@@ -98,7 +98,9 @@ export const readText = () => {
     } else if (isInHarmony()) {
         return window.JSHarmony.readClipboard();
     }
-    return navigator.clipboard.readText();
+    return navigator.clipboard.readText().catch(() => {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
+    }) || "";
 };
 
 /// #if !BROWSER
@@ -125,7 +127,12 @@ export const getLocalFiles = async () => {
 export const readClipboard = async () => {
     const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
     try {
-        const clipboardContents = await navigator.clipboard.read();
+        const clipboardContents = await navigator.clipboard.read().catch(() => {
+            alert(window.siyuan.languages.clipboardPermissionDenied);
+        });
+        if (!clipboardContents) {
+            return text;
+        }
         for (const item of clipboardContents) {
             if (item.types.includes("text/html")) {
                 const blob = await item.getType("text/html");
@@ -381,7 +388,7 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGIN_DOCKS] = {};  // { pluginName: {dockId: IPluginDockTab}}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
-        defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};
+        defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true, expand: {}};
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {

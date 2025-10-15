@@ -20,6 +20,7 @@ import {input} from "../wysiwyg/input";
 import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
 import {getFieldIdByCellElement} from "../render/av/row";
+import {processClonePHElement} from "../render/util";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -40,7 +41,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         });
     }
     const avID = blockElement.dataset.avId;
-    fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, (response) => {
+    fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, async (response) => {
         const columns: IAVColumn[] = response.data;
         const cellElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
         if (values && Array.isArray(values) && values.length > 0) {
@@ -60,17 +61,18 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const id = blockElement.dataset.nodeId;
             let currentRowElement: Element;
             const firstColIndex = cellElements[0].getAttribute("data-col-id");
-            values.find(rowItem => {
+            for (let i = 0; i < values.length; i++) {
                 if (!currentRowElement) {
                     currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                 } else {
                     currentRowElement = currentRowElement.nextElementSibling;
                 }
                 if (!currentRowElement.classList.contains("av__row")) {
-                    return true;
+                    break;
                 }
                 let cellElement: HTMLElement;
-                rowItem.find(cellValue => {
+                for (let j = 0; j < values[i].length; j++) {
+                    const cellValue = values[i][j];
                     if (!cellElement) {
                         cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                     } else {
@@ -81,16 +83,16 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         }
                     }
                     if (!cellElement.classList.contains("av__cell")) {
-                        return true;
+                        break;
                     }
-                    const operations = updateCellsValue(protyle, blockElement as HTMLElement,
+                    const operations = await updateCellsValue(protyle, blockElement as HTMLElement,
                         cellValue, [cellElement], columns, html, true);
                     if (operations.doOperations.length > 0) {
                         doOperations.push(...operations.doOperations);
                         undoOperations.push(...operations.undoOperations);
                     }
-                });
-            });
+                }
+            }
             if (doOperations.length > 0) {
                 doOperations.push({
                     action: "doUpdateUpdated",
@@ -161,17 +163,17 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 const doOperations: IOperation[] = [];
                 const undoOperations: IOperation[] = [];
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
-                textJSON.forEach((rowValue) => {
+                for (let i = 0; i < textJSON.length; i++) {
                     if (!currentRowElement) {
                         currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                     } else {
                         currentRowElement = currentRowElement.nextElementSibling;
                     }
                     if (!currentRowElement.classList.contains("av__row")) {
-                        return true;
+                        break;
                     }
                     let cellElement: HTMLElement;
-                    rowValue.forEach((cellValue) => {
+                    for (let j = 0; j < textJSON[i].length; j++) {
                         if (!cellElement) {
                             cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                         } else {
@@ -182,15 +184,16 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                             }
                         }
                         if (!cellElement.classList.contains("av__cell")) {
-                            return true;
+                            break;
                         }
-                        const operations = updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, html, true);
+                        const cellValue = textJSON[i][j];
+                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, html, true);
                         if (operations.doOperations.length > 0) {
                             doOperations.push(...operations.doOperations);
                             undoOperations.push(...operations.undoOperations);
                         }
-                    });
-                });
+                    }
+                }
                 if (doOperations.length > 0) {
                     const id = blockElement.getAttribute("data-node-id");
                     doOperations.push({
@@ -450,26 +453,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (tempElement.content.firstChild.nodeType === 3 || (tempElement.content.firstChild.nodeType === 1 && tempElement.content.firstElementChild.tagName !== "DIV")) {
         tempElement.innerHTML = protyle.lute.SpinBlockDOM(tempElement.innerHTML);
     }
-    // let foldHeadingId = "";
-    // let foldHTML = "";
-    // 粘贴内容中包含折叠的子节点需后端插入到原节点中
-    // Array.from(tempElement.content.children).forEach((item) => {
-    //     if (!item.getAttribute("parent-heading") && foldHeadingId && foldHTML) {
-    //         fetchPost("/api/block/appendHeadingChildren", {id: foldHeadingId, dom: foldHTML});
-    //         foldHeadingId = "";
-    //         foldHTML = "";
-    //     }
-    //     if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-    //         foldHeadingId = item.getAttribute("data-node-id");
-    //         return true;
-    //     }
-    //     if (foldHeadingId && item.getAttribute("parent-heading")) {
-    //         foldHTML += item.outerHTML;
-    //     }
-    // });
-    // if (foldHeadingId && foldHTML) {
-    //     fetchPost("/api/block/appendHeadingChildren", {id: foldHeadingId, dom: foldHTML});
-    // }
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).find((item) => {
         let addId = item.getAttribute("data-node-id");
         const hasParentHeading = item.getAttribute("parent-heading");
@@ -512,6 +495,21 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
         }
         if (!hasParentHeading) {
+            const rendersElement = [];
+            if (item.classList.contains("render-node") && item.getAttribute("data-type") === "NodeCodeBlock") {
+                rendersElement.push(item);
+            } else {
+                rendersElement.push(...item.querySelectorAll('.render-node[data-type="NodeCodeBlock"]'));
+            }
+            rendersElement.forEach((renderItem) => {
+                renderItem.querySelector(".protyle-icons")?.remove();
+                const spinElement = renderItem.querySelector('[spin="1"]');
+                if (spinElement) {
+                    spinElement.innerHTML = "";
+                }
+                renderItem.removeAttribute("data-render");
+            });
+            processClonePHElement(item);
             if (insertBefore) {
                 blockElement.before(item);
             } else {
@@ -559,4 +557,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         wbrElement.remove();
     }
     transaction(protyle, doOperation, undoOperation);
+    // 复制容器块中包含折叠标题块
+    protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+        item.remove();
+    });
 };

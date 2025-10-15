@@ -163,6 +163,16 @@ func PushMsg(msg string, timeout int) (msgId string) {
 	return
 }
 
+func PushMsgWithApp(app, msg string, timeout int) (msgId string) {
+	msgId = gulu.Rand.String(7)
+	if "" == app {
+		BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
+		return
+	}
+	BroadcastByTypeAndApp("main", app, "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
+	return
+}
+
 func PushErrMsg(msg string, timeout int) (msgId string) {
 	msgId = gulu.Rand.String(7)
 	BroadcastByType("main", "msg", -1, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})

@@ -309,6 +309,13 @@ func setEditor(c *gin.Context) {
 		editor.KaTexMacros = "{}"
 	}
 
+	if 1 > editor.HistoryRetentionDays {
+		editor.HistoryRetentionDays = 30
+	}
+	if 3650 < editor.HistoryRetentionDays {
+		editor.HistoryRetentionDays = 3650
+	}
+
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude

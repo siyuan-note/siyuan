@@ -5,7 +5,7 @@ import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
-import {genAVValueHTML} from "./blockAttr";
+import {genAVValueHTML, isCustomAttr} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import * as dayjs from "dayjs";
@@ -185,14 +185,12 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         fields.find(column => {
             if (column.id === colId) {
                 // 重名不进行更新 https://github.com/siyuan-note/siyuan/issues/13554
-                let hasName = false;
-                column.options.find((item) => {
-                    if (item.name === inputElement.value) {
-                        hasName = true;
+                const sameItem = column.options.find((item) => {
+                    if (item.name === inputElement.value && item.desc === descElement.value) {
                         return true;
                     }
                 });
-                if (!hasName) {
+                if (!sameItem) {
                     column.options.find((item) => {
                         if (item.name === name) {
                             item.name = inputElement.value;
@@ -213,7 +211,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         } else {
             cellElements.forEach((cellElement: HTMLElement, index) => {
                 const rowID = getFieldIdByCellElement(cellElement, viewType);
-                if (viewType === "table") {
+                if (viewType === "table" || isCustomAttr) {
                     cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                         blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                 } else {
@@ -331,7 +329,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     cellElements.forEach((cellElement: HTMLElement, index) => {
                         const rowID = getFieldIdByCellElement(cellElement, viewType);
-                        if (viewType === "table") {
+                        if (viewType === "table" || isCustomAttr) {
                             cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
                                 blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
                         } else {
@@ -523,7 +521,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     if (!nodeElement) {
         cellElements.forEach((item, index) => {
             const rowID = getFieldIdByCellElement(item, data.viewType);
-            if (data.viewType === "table") {
+            if (data.viewType === "table" || isCustomAttr(item)) {
                 cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
             } else {
@@ -531,7 +529,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             }
         });
     }
-    const colId = getColId( cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
+    const colId = getColId(cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
     let colData: IAVColumn;
     const fields = getFieldsByData(data);
     fields.find((item: IAVColumn) => {
@@ -654,7 +652,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
             cellValues.push(genCellValueByElement(isCustomAttr ? item.dataset.type as TAVCol : getTypeByCellElement(item), item));
         });
     }
-    const colId = getColId(cellElements[0],blockElement.getAttribute("data-av-type") as TAVView);
+    const colId = getColId(cellElements[0], blockElement.getAttribute("data-av-type") as TAVView);
     const colData = fields.find(item => {
         if (item.id === colId) {
             return item;

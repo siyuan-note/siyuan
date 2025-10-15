@@ -3,7 +3,7 @@ import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transac
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
-import {moveToPrevious} from "./remove";
+import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {setFold} from "../../menus/protyle";
 
@@ -219,6 +219,10 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
 
 export const breakList = (protyle: IProtyle, blockElement: Element, range: Range) => {
     const listItemElement = blockElement.parentElement;
+    if (!listItemElement.previousElementSibling) {
+        removeBlock(protyle, blockElement, range, "Backspace");
+        return;
+    }
     const listItemId = listItemElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];

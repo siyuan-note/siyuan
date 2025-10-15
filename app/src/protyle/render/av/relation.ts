@@ -13,6 +13,8 @@ import {getFieldsByData, getViewName} from "./view";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {isMobile} from "../../../util/functions";
+import {showMessage} from "../../../dialog/message";
+import {writeText} from "../../util/compatibility";
 
 interface IAVItem {
     avID: string;
@@ -249,6 +251,17 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 };
 
+const updateCopyRelatedItems = (menuElement: Element) => {
+    const inputElement = menuElement.querySelector(".b3-form__icona .b3-text-field") as HTMLInputElement;
+    if (menuElement.querySelector(".b3-menu__icon.fn__grab")) {
+        inputElement.nextElementSibling.classList.remove("fn__none");
+        inputElement.style.paddingRight = "26px";
+    } else {
+        inputElement.nextElementSibling.classList.add("fn__none");
+        inputElement.style.paddingRight = "";
+    }
+};
+
 const genSelectItemHTML = (options: {
     type: "selected" | "empty" | "unselect",
     id?: string,
@@ -313,15 +326,17 @@ draggable="true">${genSelectItemHTML({
                 });
             }
         });
+        const refElement = menuElement.querySelector(".popover__block");
         menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html}
 ${keyword ? genSelectItemHTML({
             type: "empty",
             newName: Lute.EscapeHTMLStr(keyword),
-            text: menuElement.querySelector(".popover__block").outerHTML
+            text: `<span style="color: var(--b3-protyle-inline-blockref-color);" class="popover__block" data-id="${refElement.getAttribute("data-id")}">${refElement.textContent}</span>`,
         }) : (html ? "" : genSelectItemHTML({type: "empty"}))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
+        updateCopyRelatedItems(menuElement);
     });
 };
 
@@ -369,7 +384,7 @@ ${html || genSelectItemHTML({type: "empty"})}`;
         options.menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
         const inputElement = options.menuElement.querySelector("input");
         inputElement.focus();
-        const databaseName = inputElement.parentElement.querySelector(".popover__block");
+        const databaseName = inputElement.parentElement.parentElement.querySelector(".popover__block");
         databaseName.innerHTML = Lute.EscapeHTMLStr(response.data.name);
         databaseName.setAttribute("data-id", response.data.blockIDs[0]);
         const listElement = options.menuElement.querySelector(".b3-menu__items");
@@ -396,6 +411,26 @@ ${html || genSelectItemHTML({type: "empty"})}`;
             event.stopPropagation();
             filterItem(options.menuElement, options.cellElements[0], inputElement.value);
         });
+        updateCopyRelatedItems(options.menuElement);
+        options.menuElement.querySelector('[data-type="copyRelatedItems"]').addEventListener("click", () => {
+            let copyText = "";
+            const selectedElements = options.menuElement.querySelectorAll('.b3-menu__item[draggable="true"]');
+            selectedElements.forEach((item: HTMLElement) => {
+                if (selectedElements.length > 1) {
+                    copyText += "- ";
+                }
+                const textElement = item.querySelector(".b3-menu__label") as HTMLElement;
+                if (!textElement.dataset.id || textElement.dataset.id === "undefined") {
+                    copyText += textElement.textContent + "\n";
+                } else {
+                    copyText += `((${textElement.dataset.id} "${textElement.textContent}"))\n`;
+                }
+            });
+            if (copyText) {
+                writeText(copyText.trimEnd());
+                showMessage(window.siyuan.languages.copied);
+            }
+        });
     });
 };
 
@@ -410,11 +445,13 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     if (colRelationData && colRelationData.avID) {
         return `<div data-av-id="${colRelationData.avID}" class="fn__flex-column">
 <div class="b3-menu__item" data-type="nobg">
-    <input class="b3-text-field fn__flex-1"/>
+    <div class="b3-form__icona fn__flex-1" style="overflow: visible">
+        <input class="b3-text-field fn__block" style="min-width: 190px"/>
+        <svg class="b3-form__icona-icon ariaLabel fn__none" data-position="north" data-type="copyRelatedItems" aria-label="${window.siyuan.languages.copy} ${window.siyuan.languages.relatedItems}"><use xlink:href="#iconCopy"></use></svg>
+    </div>
     <span class="fn__space"></span>
-    <span style="color: var(--b3-protyle-inline-blockref-color);" data-id="" class="popover__block fn__pointer"></span>
+    <span style="color: var(--b3-protyle-inline-blockref-color);max-width: 200px" data-id="" class="popover__block fn__pointer fn__ellipsis"></span>
 </div>
-<div class="fn__hr"></div>
 <div class="b3-menu__items">
     <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
 </div>`;
@@ -539,4 +576,5 @@ class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
         }
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
+    updateCopyRelatedItems(menuElement);
 };

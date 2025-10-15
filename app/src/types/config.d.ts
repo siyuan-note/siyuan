@@ -400,6 +400,13 @@ declare namespace Config {
          */
         embedBlockBreadcrumb: boolean;
         /**
+         * Heading embed mode for embedded blocks
+         * - `0`: Show title with blocks below (default)
+         * - `1`: Show only title
+         * - `2`: Show only blocks below title
+         */
+        headingEmbedMode: number;
+        /**
          * Common emoji icons
          */
         emoji: string[];

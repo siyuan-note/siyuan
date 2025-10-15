@@ -131,6 +131,20 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         blockID,
         target: calcElement
     });
+    if (panelData?.data && type !== "checkbox") {
+        // 汇总字段汇总方式中才有“显示唯一值”选项 Add "Show unique values" to the calculation of the database rollup field https://github.com/siyuan-note/siyuan/issues/15852
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Unique values",
+            data: panelData?.data,
+            blockID,
+            target: calcElement
+        });
+    }
     calcItem({
         menu,
         protyle,
@@ -488,6 +502,8 @@ export const getNameByOperator = (operator: string, isRollup: boolean) => {
         case undefined:
         case "":
             return isRollup ? window.siyuan.languages.original : window.siyuan.languages.calcOperatorNone;
+        case "Unique values": // 仅汇总字段的汇总方式在使用
+            return window.siyuan.languages.uniqueValues;
         case "Count all":
             return window.siyuan.languages.calcOperatorCountAll;
         case "Count values":

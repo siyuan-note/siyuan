@@ -129,7 +129,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${group.groupValue.text?.content}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
         }
     });
     if (options.renderAll) {

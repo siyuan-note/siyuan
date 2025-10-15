@@ -20,6 +20,7 @@ import {countBlockWord} from "../../layout/status";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 import {processClonePHElement} from "../render/util";
+import {scrollCenter} from "../../util/highlightById";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -241,6 +242,9 @@ const promiseTransaction = () => {
                 //         blockRender(protyle, item);
                 //     }
                 // });
+                protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+                    item.remove();
+                });
             }
         });
 
@@ -540,7 +544,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             } else if (key === "alias") {
                 aliasHTML = `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${escapeHTML}</div>`;
             } else if (key === "memo") {
-                memoHTML = `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${escapeHTML}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+                memoHTML = `<div class="protyle-attr--memo ariaLabel" aria-label="${escapeHTML}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
             } else if (key === "custom-avs" && data.new["av-names"]) {
                 avHTML = `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${data.new["av-names"]}</div>`;
             }
@@ -643,6 +647,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "move") {
+        if (operation.context?.ignoreProcess === "true") {
+            return;
+        }
         /// #if !MOBILE
         if (updateElements.length === 0) {
             // 打开两个相同的文档 A、A1，从 A 拖拽块 B 到 A1，在后续 ws 处理中，无法获取到拖拽出去的 B
@@ -695,7 +702,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             }
         } else if (updateElements.length > 0) {
             const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
-            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
+            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID && !protyle.block.showAll) {
                 protyle.wysiwyg.element.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                 hasFind = true;
             } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
@@ -797,7 +804,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             });
         } else {
             const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
-            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
+            if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID && !protyle.block.showAll) {
                 protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", operation.data);
                 cursorElements.push(protyle.wysiwyg.element.firstElementChild);
             } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
@@ -848,6 +855,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 wbrElement.remove();
             }
         });
+        protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
+            item.remove();
+        });
         return;
     }
     if (operation.action === "append") {
@@ -868,7 +878,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "setAttrViewBlockView", "setAttrViewCardSize", "setAttrViewCardAspectRatio", "hideAttrViewName", "setAttrViewShowIcon",
         "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
         "foldAttrViewGroup", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName",
-        "insertAttrViewBlock"].includes(operation.action)) {
+        "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime"].includes(operation.action)) {
         // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
         if (!isUndo) {
             refreshAV(protyle, operation);
@@ -1012,6 +1022,8 @@ export const turnsIntoTransaction = (options: {
     isContinue?: boolean,
     range?: Range
 }) => {
+    // https://github.com/siyuan-note/siyuan/issues/14505
+    options.protyle.observerLoad?.disconnect();
     let selectsElement: Element[] = options.selectsElement;
     let range: Range;
     // 通过快捷键触发
@@ -1023,15 +1035,11 @@ export const turnsIntoTransaction = (options: {
             selectsElement = [options.nodeElement];
         }
         let isContinue = false;
-        let hasEmbedBlock = false;
         let isList = false;
         selectsElement.find((item, index) => {
             if (item.classList.contains("li")) {
                 isList = true;
                 return true;
-            }
-            if (item.classList.contains("bq") || item.classList.contains("sb") || item.classList.contains("p")) {
-                hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&
                 item.nextElementSibling === selectsElement[index + 1]) {
@@ -1041,7 +1049,7 @@ export const turnsIntoTransaction = (options: {
                 return true;
             }
         });
-        if (isList || (hasEmbedBlock && options.type === "Blocks2Ps")) {
+        if (isList) {
             return;
         }
         if (selectsElement.length === 1 && options.type === "Blocks2Hs" &&
@@ -1057,11 +1065,7 @@ export const turnsIntoTransaction = (options: {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId: string;
-    selectsElement.forEach((item, index) => {
-        if ((options.type === "Blocks2Ps" || options.type === "Blocks2Hs") &&
-            item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            setFold(options.protyle, item, undefined, undefined, false);
-        }
+    selectsElement.forEach((item: HTMLElement, index) => {
         item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
@@ -1071,7 +1075,7 @@ export const turnsIntoTransaction = (options: {
         const tempElement = document.createElement("template");
         if (!options.isContinue) {
             // @ts-ignore
-            const newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
+            let newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
             tempElement.innerHTML = newHTML;
 
             if (!tempElement.content.querySelector(`[data-node-id="${id}"]`)) {
@@ -1106,6 +1110,15 @@ export const turnsIntoTransaction = (options: {
                     previousId = undefined;
                 }
             } else {
+                let foldData;
+                if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
+                    tempElement.content.firstElementChild.getAttribute("data-subtype") !== item.dataset.subtype) {
+                    foldData = setFold(options.protyle, item, undefined, undefined, false, true);
+                    newHTML = newHTML.replace(' fold="1"', "");
+                }
+                if (foldData && foldData.doOperations?.length > 0) {
+                    doOperations.push(...foldData.doOperations);
+                }
                 undoOperations.push({
                     action: "update",
                     id,
@@ -1116,6 +1129,9 @@ export const turnsIntoTransaction = (options: {
                     id,
                     data: newHTML
                 });
+                if (foldData && foldData.undoOperations?.length > 0) {
+                    undoOperations.push(...foldData.undoOperations);
+                }
             }
             item.outerHTML = newHTML;
         } else {
@@ -1398,8 +1414,14 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
-            protyle.contentElement.scrollTop = scrollTop;
-            protyle.scroll.lastScrollTop = scrollTop;
+            if (operation.context?.focusId) {
+                const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.context.focusId}"]`);
+                focusBlock(focusElement);
+                scrollCenter(protyle, focusElement, false);
+            } else {
+                protyle.contentElement.scrollTop = scrollTop;
+                protyle.scroll.lastScrollTop = scrollTop;
+            }
             return;
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {

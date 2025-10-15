@@ -188,6 +188,8 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
         });
         cb();
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
 };
@@ -223,6 +225,8 @@ export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             config.replaceTypes[item.getAttribute("data-type") as keyof (typeof config.replaceTypes)] = item.checked;
         });
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
 };

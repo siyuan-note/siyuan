@@ -313,11 +313,7 @@ const getArticle = (edit: Protyle, id: string) => {
                 updateReadonly: true,
                 data: getResponse,
                 protyle: edit.protyle,
-                action: getResponse.data.rootID === getResponse.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
-                afterCB() {
-                    edit.protyle.title.element.removeAttribute("data-render");
-                    edit.protyle.title.render(edit.protyle, response);
-                }
+                action: getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
             });
         });
     });

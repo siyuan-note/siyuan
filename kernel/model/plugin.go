@@ -157,10 +157,6 @@ func loadCode(petal *Petal) {
 			if !foundPreferredLang {
 				if foundEnUS {
 					preferredLang = "en_US.json"
-					if "zh_CHT" == Conf.Lang && foundZhCN {
-						// Improve marketplace package for traditional Chinese https://github.com/siyuan-note/siyuan/issues/8342
-						preferredLang = "zh_CN.json"
-					}
 				} else if foundZhCN {
 					preferredLang = "zh_CN.json"
 				} else {

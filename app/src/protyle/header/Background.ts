@@ -206,9 +206,6 @@ export class Background {
             });
         });
         this.element.addEventListener(getEventName(), (event) => {
-            if (protyle.disabled) {
-                return;
-            }
             let target = event.target as HTMLElement;
             hideElements(["gutter"], protyle);
 
@@ -224,7 +221,7 @@ export class Background {
                     // 点击题头图菜单无法消失
                     window.siyuan.menus.menu.remove();
                     break;
-                } else if (type === "position") {
+                } else if (type === "position" && !protyle.disabled) {
                     const iconElements = this.element.firstElementChild.querySelectorAll(".protyle-icons");
                     iconElements[0].classList.add("fn__none");
                     iconElements[1].classList.remove("fn__none");
@@ -252,7 +249,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "open-emoji") {
+                } else if (type === "open-emoji" && !protyle.disabled) {
                     const rect = this.iconElement.getBoundingClientRect();
                     openEmojiPanel(protyle.block.rootID, "doc", {
                         x: rect.left,
@@ -263,7 +260,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "show-random") {
+                } else if (type === "show-random" && !protyle.disabled) {
                     let html = "";
                     bgs.forEach((item: string, index: number) => {
                         html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card b3-card--wrap"></div>`;
@@ -290,7 +287,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "random") {
+                } else if (type === "random" && !protyle.disabled) {
                     this.ial["title-img"] = bgs[getRandom(0, bgs.length - 1)];
                     this.render(this.ial, protyle.block.rootID);
                     fetchPost("/api/attr/setBlockAttrs", {
@@ -300,7 +297,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "asset") {
+                } else if (type === "asset" && !protyle.disabled) {
                     const rect = target.getBoundingClientRect();
                     assetMenu(protyle, {
                         x: target.parentElement.getBoundingClientRect().right,
@@ -320,7 +317,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "remove") {
+                } else if (type === "remove" && !protyle.disabled) {
                     delete this.ial["title-img"];
                     this.render(this.ial, protyle.block.rootID);
                     fetchPost("/api/attr/setBlockAttrs", {
@@ -330,7 +327,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "icon") {
+                } else if (type === "icon" && !protyle.disabled) {
                     const emoji = getRandomEmoji();
                     if (emoji) {
                         updateFileTreeEmoji(emoji, protyle.block.rootID);
@@ -354,12 +351,12 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "tag") {
+                } else if (type === "tag" && !protyle.disabled) {
                     this.openTag(protyle, target);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "link") {
+                } else if (type === "link" && !protyle.disabled) {
                     const dialog = new Dialog({
                         title: window.siyuan.languages.link,
                         width: isMobile() ? "92vw" : "520px",
@@ -407,7 +404,7 @@ export class Background {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
-                } else if (type === "remove-tag") {
+                } else if (type === "remove-tag" && !protyle.disabled) {
                     target.parentElement.remove();
                     this.removeTag(protyle);
                     event.preventDefault();

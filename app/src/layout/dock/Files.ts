@@ -1,14 +1,13 @@
 import {escapeAriaLabel, escapeGreat, escapeHtml} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {getInstanceById, setPanelFocus} from "../util";
+import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFile} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
-import {Editor} from "../../editor";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
@@ -28,12 +27,14 @@ import {refreshFileTree} from "../../dialog/processSystem";
 import {ipcRenderer} from "electron";
 /// #endif
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
+import {selectOpenTab} from "./util";
 
 export class Files extends Model {
     public element: HTMLElement;
     public parent: Tab;
-    private actionsElement: HTMLElement;
     public closeElement: HTMLElement;
+    public lastSelectedElement: Element = null;
+    private actionsElement: HTMLElement;
 
     constructor(options: { tab: Tab, app: App }) {
         super({
@@ -208,23 +209,7 @@ export class Files extends Model {
                     window.siyuan.menus.menu.remove();
                     break;
                 } else if (type === "focus") {
-                    let element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") as HTMLElement;
-                    if (!element) {
-                        document.querySelectorAll("ul.layout-tab-bar > .item--focus").forEach((item: HTMLElement, index) => {
-                            if (index === 0) {
-                                element = item;
-                            } else if (item.dataset.activetime > element.dataset.activetime) {
-                                element = item;
-                            }
-                        });
-                    }
-
-                    if (element) {
-                        const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
-                        if (tab && tab.model instanceof Editor) {
-                            this.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
-                        }
-                    }
+                    selectOpenTab();
                     event.preventDefault();
                     break;
                 } else if (type === "more") {
@@ -333,9 +318,42 @@ export class Files extends Model {
                     } else if (target.tagName === "LI") {
                         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
                             target.classList.toggle("b3-list-item--focus");
+                            this.lastSelectedElement = target;
+                        } else if (event.shiftKey && !event.altKey && isNotCtrl(event)) {
+                            // Shift+click 多选文档
+                            if (!document.contains(this.lastSelectedElement)) {
+                                this.lastSelectedElement = null;
+                            }
+                            if (!this.lastSelectedElement) {
+                                this.lastSelectedElement = this.element.querySelector(".b3-list-item--focus");
+                            }
+                            if (!this.lastSelectedElement) {
+                                this.lastSelectedElement = target.parentElement.firstElementChild;
+                            }
+                            this.element.querySelectorAll(".b3-list-item--focus").forEach(item => {
+                                item.classList.remove("b3-list-item--focus");
+                            });
+
+                            // 获取所有文档项
+                            const allFiles = Array.from(this.element.querySelectorAll("li.b3-list-item"));
+
+                            // 获取起始和结束索引
+                            const startIndex = allFiles.indexOf(this.lastSelectedElement);
+                            const endIndex = allFiles.indexOf(target);
+
+                            // 确定选择范围
+                            const start = Math.min(startIndex, endIndex);
+                            const end = Math.max(startIndex, endIndex);
+
+                            // 添加新选择
+                            for (let i = start; i <= end; i++) {
+                                (allFiles[i] as HTMLElement).classList.add("b3-list-item--focus");
+                            }
                         } else {
+                            this.lastSelectedElement = target;
                             this.setCurrent(target, false);
                             if (target.getAttribute("data-type") === "navigation-file") {
+                                // 更新最后点击的文档项
                                 needFocus = false;
                                 if (target.getAttribute("data-opening")) {
                                     return;
@@ -351,7 +369,7 @@ export class Files extends Model {
                                             target.removeAttribute("data-opening");
                                         }
                                     });
-                                } else if (!event.altKey && isNotCtrl(event) && event.shiftKey) {
+                                } else if (!event.altKey && isOnlyMeta(event) && event.shiftKey) {
                                     openFileById({
                                         app: options.app,
                                         id: target.getAttribute("data-node-id"),
@@ -733,6 +751,7 @@ export class Files extends Model {
                             fetchPost("/api/filetree/listDocsByPath", {
                                 notebook: toURL,
                                 path: toDir === "/" ? "/" : toDir + ".sy",
+                                app: Constants.SIYUAN_APPID,
                             }, response => {
                                 if (response.data.path === "/" && response.data.files.length === 0) {
                                     showMessage(window.siyuan.languages.emptyContent);
@@ -1085,6 +1104,9 @@ data-type="navigation-root" data-path="/">
             return;
         }
         const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
+        if (!liElement) {
+            return;
+        }
         if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
             // 文件展开时，刷新
             liElement.nextElementSibling.remove();
@@ -1105,7 +1127,8 @@ data-type="navigation-root" data-path="/">
             } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
                 const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                     notebook: data.box,
-                    path: item.path
+                    path: item.path,
+                    app: Constants.SIYUAN_APPID,
                 });
                 newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
             }
@@ -1142,6 +1165,7 @@ data-type="navigation-root" data-path="/">
         fetchPost("/api/filetree/listDocsByPath", {
             notebook: notebookId,
             path: liElement.getAttribute("data-path"),
+            app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
                 newFile({
@@ -1197,7 +1221,8 @@ data-type="navigation-root" data-path="/">
         } else {
             const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                 notebook: notebookId,
-                path: currentPath
+                path: currentPath,
+                app: Constants.SIYUAN_APPID,
             });
             liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }

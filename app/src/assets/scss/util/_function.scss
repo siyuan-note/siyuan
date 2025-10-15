@@ -20,6 +20,12 @@
       display: inline-block;
       flex-shrink: 0;
     }
+
+    &--5 {
+      width: 5px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
   }
 
   &__hr {

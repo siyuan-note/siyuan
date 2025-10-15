@@ -394,7 +394,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             let text = "";
             rowElements.forEach((item, i) => {
                 if (rowElements.length > 1) {
-                    text += "* ";
+                    text += "- ";
                 }
                 text += item.querySelector('.av__cell[data-dtype="block"] .av__celltext').textContent.trim();
                 if (ids.length > 1 && i !== ids.length - 1) {
@@ -421,7 +421,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         content = `((${id} '${cellElement.querySelector(".av__celltext").textContent.replace(/[\n]+/g, " ")}'))`;
                     }
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
@@ -438,7 +438,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
@@ -460,7 +460,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
@@ -490,7 +490,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         content = `[${cellElement.querySelector(".av__celltext").textContent.replace(/[\n]+/g, " ")}](siyuan://blocks/${id})`;
                     }
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
@@ -517,7 +517,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     }
 
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
@@ -534,7 +534,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {

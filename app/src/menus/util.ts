@@ -67,7 +67,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         id: "insertBottom",
         icon: "iconLayoutBottom",
         label: window.siyuan.languages.insertBottom,
-        accelerator: ids.length === 1 ? "⇧" + window.siyuan.languages.click : "",
+        accelerator: ids.length === 1 ? "⇧⌘" + window.siyuan.languages.click : "",
         click: () => {
             if (notebookId) {
                 openFileById({

@@ -1077,6 +1077,18 @@ func listDocsByPath(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	// 过滤掉发布不可见的文件
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		tempFiles := []*model.File{}
+		for _, file := range files {
+			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishIgnore) {
+				tempFiles = append(tempFiles, file)
+			}
+		}
+		files = tempFiles
+	}
 	if maxListCount < totals {
 		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
 		ignoreMaxListHintArg := arg["ignoreMaxListHint"]
@@ -1183,6 +1195,15 @@ func getDoc(c *gin.Context) {
 	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
 	isSyncing := model.IsSyncingFile(rootID)
 
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		newContent := FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
+		if newContent != content {
+			content = newContent
+			scroll = false  // 避免长页面可通过滚动无限刷出多个锁
+		}
+	}
+
 	ret.Data = map[string]interface{}{
 		"id":               id,
 		"mode":             mode,
@@ -1218,4 +1239,167 @@ func pushCreate(box *model.Box, p string, arg map[string]interface{}) {
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
+}
+
+func setPublishAccess(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	publishAccess := model.GetPublishAccess()
+	ID := arg["id"].(string)
+	visible := arg["visible"].(bool)
+	password := arg["password"].(string)
+	disable := arg["disable"].(bool)
+
+	foundIndex := -1
+	for i, item := range publishAccess {
+		if ID == item.ID {
+			foundIndex = i
+			break
+		}
+	}
+	if foundIndex != -1 {
+		if visible && len(password) == 0 && !disable {
+			publishAccess = append(publishAccess[:foundIndex], publishAccess[foundIndex+1:]...)
+		} else {
+			publishAccess[foundIndex].Visible = visible
+			publishAccess[foundIndex].Password = password
+			publishAccess[foundIndex].Disable = disable
+		}
+		model.SetPublishAccess(publishAccess)
+	} else if foundIndex == -1 {
+		if !visible || len(password) != 0 || disable {
+			publishAccess = append(publishAccess, &model.PublishAccessItem{
+				ID:          ID,
+				Visible:     visible,
+				Password:    password,
+				Disable:     disable,
+			})
+			model.SetPublishAccess(publishAccess)
+		}
+	}
+	model.PurgePublishAccess()
+}
+
+func getPublishAccess(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var IDs []string
+	for _, ID := range arg["ids"].([]interface{}) {
+		IDs = append(IDs, ID.(string))
+	}
+	
+	publishAccess := model.GetPublishAccess()
+	maskedPublishAccess := model.PublishAccess{}
+	for _, ID := range IDs {
+		found := false
+		for _, item := range publishAccess {
+			if item.ID == ID {
+				found = true
+				maskedPublishAccess = append(maskedPublishAccess, item)
+				break
+			}
+		}
+		if !found {
+			maskedPublishAccess = append(maskedPublishAccess, &model.PublishAccessItem{
+				ID:          ID,
+				Visible:     true,
+				Password:    "",
+				Disable:     false,
+			})
+		}
+	}
+
+	ret.Data = map[string]any{
+		"publishAccess": maskedPublishAccess,
+	}
+}
+
+func authFilePublishAccess(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	ID := arg["id"].(string)
+	if util.InvalidIDPattern(ID, ret) {
+		return
+	}
+	password := arg["password"].(string)
+
+	
+	publishAccess := model.GetPublishAccess()
+	for _, item := range publishAccess {
+		if item.ID == ID {
+			if item.Password == password {
+				model.SetPublishAuthCookie(c, ID, password)
+			} else {
+				ret.Msg = model.Conf.Language(277)
+			}
+			break
+		}
+	}
+}
+
+func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, box string, docPath string, content string, onlyIcon bool) (ret string) {
+	ret = content
+	
+	// 密码访问
+	passwordID, password := model.GetPathPasswordByPublishAccess(box, docPath, publishAccess)
+	if password != "" {
+		if !model.CheckPublishAuthCookie(c, passwordID, password) {
+			if onlyIcon {
+				passwordHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🔒</span>
+</div>`
+				ret = fmt.Sprintf(passwordHTML, passwordID)
+			} else {
+				passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🔒</span>
+	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center; margin: 0 auto 0 auto; max-width:230px;">
+		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
+		<input class="b3-form__icon-input b3-text-field fn__block" placeholder="%s" style="padding-right:25px !important;">
+		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
+	</label>
+</div>`
+				ret = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
+			}
+		}
+	}
+
+	// 禁止访问
+	ID := box
+	if docPath != "/" {
+		ID = strings.TrimSuffix(path.Base(docPath), ".sy")
+	}
+	publishIgnore := model.GetDisablePublishAccess(publishAccess)
+	if !model.CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) {
+		if onlyIcon {
+			forbiddenHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🚫</span>
+</div>`
+			ret = fmt.Sprintf(forbiddenHTML, ID)
+		} else {
+			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px; line-height:1.2;">🚫</span>
+	<span style="font-size:2em;">%s</span>
+</div>`
+			ret = fmt.Sprintf(forbiddenHTML, ID, model.Conf.Language(276))
+		}
+	}
+	return
 }

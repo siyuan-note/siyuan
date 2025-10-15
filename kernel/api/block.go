@@ -26,6 +26,9 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -376,6 +379,10 @@ func getDocInfo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		info = FilterBlockInfoByPublishAccess(c, publishAccess, info)
+	}
 	ret.Data = info
 }
 
@@ -408,6 +415,11 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	blocks := model.RecentUpdatedBlocks()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		blocks = model.FilterBlocksByPublishIgnore(publishIgnore, blocks)
+	}
 	ret.Data = blocks
 }
 
@@ -523,6 +535,11 @@ func getRefIDs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	refDefs, originalRefBlockIDs := model.GetBlockRefs(id)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishIgnore(publishIgnore, refDefs)
+	}
 	ret.Data = map[string]any{
 		"refDefs":             refDefs,
 		"originalRefBlockIDs": originalRefBlockIDs,
@@ -813,4 +830,39 @@ func getTailChildBlocks(c *gin.Context) {
 	}
 
 	ret.Data = model.GetTailChildBlocks(id, n)
+}
+
+func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, info *model.BlockInfo) (ret *model.BlockInfo) {
+	ret = info
+	if info == nil {
+		return
+	}
+
+	publishIgnore := model.GetDisablePublishAccess(publishAccess)
+	filteredAttrViews := []*model.AttrView{}
+	avIDs := []string{}
+	for _, attrView := range info.AttrViews {
+		avBlocksAccessable := false
+		if attrView.ID != "" {
+			avBlockIDs := treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
+			avBlocks := sql.GetBlocks(avBlockIDs)
+			for _, avBlock := range avBlocks {
+				if avBlock == nil {
+					continue
+				}
+				passwordID, password := model.GetPathPasswordByPublishAccess(avBlock.Box, avBlock.Path, publishAccess);
+				if (passwordID == "" || model.CheckPublishAuthCookie(c, passwordID, password)) && model.CheckPathAccessableByPublishIgnore(avBlock.Box, avBlock.Path, publishIgnore) {
+					avBlocksAccessable = true
+					break
+				}
+			}
+		}
+		if avBlocksAccessable {
+			filteredAttrViews = append(filteredAttrViews, attrView)
+			avIDs = append(avIDs, attrView.ID)
+		}
+	}
+	ret.AttrViews = filteredAttrViews
+	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
+	return
 }

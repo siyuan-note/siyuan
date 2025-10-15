@@ -180,3 +180,59 @@ func getLocalStorage(c *gin.Context) {
 	data := model.GetLocalStorage()
 	ret.Data = data
 }
+
+func getOutlineStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	docID := arg["docID"].(string)
+	data, err := model.GetOutlineStorage(docID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = data
+}
+
+func setOutlineStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	docID := arg["docID"].(string)
+	val := arg["val"].(interface{})
+	err := model.SetOutlineStorage(docID, val)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func removeOutlineStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	docID := arg["docID"].(string)
+	err := model.RemoveOutlineStorage(docID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

@@ -16,8 +16,9 @@ export class Tree {
     private ctrlClick: (element: HTMLElement) => void;
     private toggleClick: (element: Element) => void;
     private shiftClick: (element: HTMLElement) => void;
-    private altClick: (element: HTMLElement) => void;
+    private altClick: (element: HTMLElement, event?: MouseEvent) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
+    public onToggleChange: () => void;
 
     constructor(options: {
         element: HTMLElement,
@@ -26,10 +27,11 @@ export class Tree {
         topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
         ctrlClick?(element: HTMLElement): void
-        altClick?(element: HTMLElement): void
+        altClick?(element: HTMLElement, event?: MouseEvent): void
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
+        onToggleChange?: () => void
     }) {
         this.click = options.click;
         this.ctrlClick = options.ctrlClick;
@@ -37,6 +39,7 @@ export class Tree {
         this.shiftClick = options.shiftClick;
         this.rightClick = options.rightClick;
         this.toggleClick = options.toggleClick;
+        this.onToggleChange = options.onToggleChange;
         this.element = options.element;
         this.blockExtHTML = options.blockExtHTML;
         this.topExtHTML = options.topExtHTML;
@@ -204,7 +207,18 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("contextmenu", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.tagName === "LI" && this.rightClick) {
+                if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
+                    // 右键点击toggle时，展开所有子标题
+                    this.expandAllChildren(target.parentElement);
+                    this.setCurrent(target.parentElement);
+                    // 触发折叠状态变化事件
+                    if (this.onToggleChange) {
+                        this.onToggleChange();
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (target.tagName === "LI" && this.rightClick) {
                     this.rightClick(target, event);
                     event.preventDefault();
                     event.stopPropagation();
@@ -219,6 +233,10 @@ data-def-path="${item.defPath}">
                 if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
                     this.toggleBlocks(target.parentElement);
                     this.setCurrent(target.parentElement);
+                    // 触发折叠状态变化事件
+                    if (this.onToggleChange) {
+                        this.onToggleChange();
+                    }
                     event.preventDefault();
                     break;
                 }
@@ -237,7 +255,7 @@ data-def-path="${item.defPath}">
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {
                             this.ctrlClick(target);
                         } else if (this.altClick && window.siyuan.altIsPressed) {
-                            this.altClick(target);
+                            this.altClick(target, event);
                         } else if (this.shiftClick && window.siyuan.shiftIsPressed) {
                             this.shiftClick(target);
                         } else if (this.click) {
@@ -268,6 +286,86 @@ data-def-path="${item.defPath}">
                 liElement.style.opacity = "1";
             }
             window.siyuan.dragElement = undefined;
+        });
+    }
+
+    public expandAllChildren(liElement: Element) {
+        if (!liElement || !liElement.nextElementSibling) {
+            return;
+        }
+        
+        // 获取当前项的子列表
+        const nextElement = liElement.nextElementSibling;
+        if (!nextElement || nextElement.tagName !== "UL") {
+            return;
+        }
+        
+        // 检查子元素的展开状态，如果所有子元素都已展开，则折叠；否则展开所有
+        const areAllChildrenExpanded = this.areAllChildrenExpanded(nextElement);
+        
+        // 确保当前元素保持展开状态
+        const svgElement = liElement.firstElementChild.firstElementChild;
+        if (!svgElement.classList.contains("b3-list-item__arrow--open")) {
+            svgElement.classList.add("b3-list-item__arrow--open");
+            nextElement.classList.remove("fn__none");
+            if (nextElement.nextElementSibling && nextElement.nextElementSibling.tagName === "UL") {
+                nextElement.nextElementSibling.classList.remove("fn__none");
+            }
+        }
+        
+        if (areAllChildrenExpanded) {
+            // 折叠所有子元素，但保持当前元素展开
+            this.collapseAllChildren(nextElement);
+        } else {
+            // 展开所有子元素
+            this.expandAllChildrenRecursive(nextElement);
+        }
+    }
+
+    private areAllChildrenExpanded(ulElement: Element): boolean {
+        const childItems = ulElement.querySelectorAll(":scope > li");
+        for (const childLi of childItems) {
+            const arrow = childLi.querySelector(".b3-list-item__arrow");
+            if (arrow && !arrow.classList.contains("b3-list-item__arrow--open")) {
+                return false;
+            }
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                if (!this.areAllChildrenExpanded(childUl)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private expandAllChildrenRecursive(ulElement: Element) {
+        ulElement.classList.remove("fn__none");
+        const childItems = ulElement.querySelectorAll(":scope > li");
+        childItems.forEach(childLi => {
+            const arrow = childLi.querySelector(".b3-list-item__arrow");
+            if (arrow) {
+                arrow.classList.add("b3-list-item__arrow--open");
+            }
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                this.expandAllChildrenRecursive(childUl);
+            }
+        });
+    }
+
+    private collapseAllChildren(ulElement: Element) {
+        const childItems = ulElement.querySelectorAll(":scope > li");
+        childItems.forEach(childLi => {
+            const arrow = childLi.querySelector(".b3-list-item__arrow");
+            if (arrow) {
+                arrow.classList.remove("b3-list-item__arrow--open");
+            }
+            const childUl = childLi.nextElementSibling;
+            if (childUl && childUl.tagName === "UL") {
+                childUl.classList.add("fn__none");
+                this.collapseAllChildren(childUl);
+            }
         });
     }
 

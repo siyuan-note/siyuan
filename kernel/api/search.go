@@ -496,7 +496,7 @@ func parseSearchAssetContentArgs(arg map[string]interface{}) (page, pageSize int
 func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, embedBlocks []*model.EmbedBlock) (ret []*model.EmbedBlock) { 
 	ret = []*model.EmbedBlock{}
 	for _, embedBlock := range embedBlocks {
-		embedBlock.Block.Content = FilterContentByPublishAccess(c, publishAccess, embedBlock.Block.Box, embedBlock.Block.Path, embedBlock.Block.Content)
+		embedBlock.Block.Content = FilterContentByPublishAccess(c, publishAccess, embedBlock.Block.Box, embedBlock.Block.Path, embedBlock.Block.Content, false)
 		ret = append(ret, embedBlock)
 	}
 	return

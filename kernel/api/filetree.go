@@ -1195,7 +1195,7 @@ func getDoc(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		newContent := FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content)
+		newContent := FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
 		if newContent != content {
 			content = newContent
 			scroll = false  // 避免长页面可通过滚动无限刷出多个锁
@@ -1358,7 +1358,7 @@ func authFilePublishAccess(c *gin.Context) {
 	}
 }
 
-func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, box string, docPath string, content string) (ret string) {
+func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, box string, docPath string, content string, onlyIcon bool) (ret string) {
 	ret = content
 	
 	// 密码访问
@@ -1388,7 +1388,13 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAcc
 	if password != "" {
 		authCookie, err := c.Request.Cookie("publish-auth-" + passwordID)
 		if err != nil || authCookie.Value != util.SHA256Hash([]byte(passwordID + password)) {
-			passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+			if onlyIcon {
+				passwordHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🔒</span>
+</div>`
+				ret = fmt.Sprintf(passwordHTML, passwordID)
+			} else {
+				passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
 	<span style="font-size:100px;">🔒</span>
 	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center; margin: 0 auto 0 auto; max-width:230px;">
 		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
@@ -1396,7 +1402,8 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAcc
 		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
 	</label>
 </div>`
-			ret = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
+				ret = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
+			}
 		}
 	}
 
@@ -1425,11 +1432,18 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAcc
 		}
 	}
 	if disable {
-		forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+		if onlyIcon {
+			forbiddenHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
+	<span style="font-size:100px;">🚫</span>
+</div>`
+			ret = fmt.Sprintf(forbiddenHTML, forbiddenID)
+		} else {
+			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
 	<span style="font-size:100px; line-height:1.2;">🚫</span>
 	<span style="font-size:2em;">%s</span>
 </div>`
-		ret = fmt.Sprintf(forbiddenHTML, forbiddenID, model.Conf.Language(276))
+			ret = fmt.Sprintf(forbiddenHTML, forbiddenID, model.Conf.Language(276))
+		}
 	}
 	return
 }

@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -169,7 +170,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil)
+	ret = renderAttrView(c, blockID, avID, "", "", 1, -1, nil)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -192,7 +193,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil)
+	ret = renderAttrView(c, blockID, avID, "", "", 1, -1, nil)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -821,11 +822,11 @@ func renderAttributeView(c *gin.Context) {
 		groupPaging = groupPagingArg.(map[string]interface{})
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging)
+	ret = renderAttrView(c, blockID, id, viewID, query, page, pageSize, groupPaging)
 	c.JSON(http.StatusOK, ret)
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (ret *gulu.Result) {
+func renderAttrView(c *gin.Context, blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
 	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging)
 	if err != nil {
@@ -847,6 +848,11 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		}
 
 		views = append(views, view)
+	}
+
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		view = FilterViewByPublishAccess(c, publishAccess, view)
 	}
 
 	ret.Data = map[string]interface{}{
@@ -959,4 +965,33 @@ func batchSetAttributeViewBlockAttrs(c *gin.Context) {
 	}
 
 	model.ReloadAttrView(avID)
+}
+
+func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, viewable av.Viewable) (ret av.Viewable) {
+	ret = viewable
+
+	switch viewable.GetType() {
+	case av.LayoutTypeGallery:
+		gallery := viewable.(*av.Gallery)
+		for _, card := range gallery.Cards {
+			// 默认第一个属性是文档块
+			var block *sql.Block
+			if len(card.Values) > 0 {
+				if card.Values[0].Value.Block != nil {
+					id := card.Values[0].Value.Block.ID
+					if id != "" {
+						block = sql.GetBlock(id)
+					}
+				}
+			}
+			if block != nil {
+				newCoverContent := FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, card.CoverContent, true)
+				if card.CoverContent != newCoverContent {
+					card.CoverContent = newCoverContent
+					card.CoverURL = ""
+				}
+			}
+		}
+	}
+	return
 }

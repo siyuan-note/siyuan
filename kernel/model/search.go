@@ -2352,10 +2352,9 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 	return
 }
 
-func GetInvisiblePublishAccess() (outputPublishAccess PublishAccess) { 
-	publishAccess := GetPublishAccess()
+func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
 	outputPublishAccess = PublishAccess{}
-	for _, item := range publishAccess {
+	for _, item := range inputPublishAccess {
 		if !item.Visible  {
 			outputPublishAccess = append(outputPublishAccess, item)
 		}
@@ -2363,10 +2362,9 @@ func GetInvisiblePublishAccess() (outputPublishAccess PublishAccess) {
 	return
 }
 
-func GetDisablePublishAccess() (outputPublishAccess PublishAccess) { 
-	publishAccess := GetPublishAccess()
+func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
 	outputPublishAccess = PublishAccess{}
-	for _, item := range publishAccess {
+	for _, item := range inputPublishAccess {
 		if item.Disable  {
 			outputPublishAccess = append(outputPublishAccess, item)
 		}
@@ -2405,20 +2403,39 @@ func PurgePublishAccess() {
 }
 
 func CheckPathAccessableByPublishIgnore(box string, path string, publishIgnore PublishAccess) bool {
-	if path == "/" {
-		for _, item := range publishIgnore {
-			if item.ID == box {
-				return false
-			}
-		}
-	} else {
-		for _, item := range publishIgnore {
-			if strings.Contains(path, item.ID) {
-				return false
-			}
+	for _, item := range publishIgnore {
+		if item.ID == box || strings.Contains(path, item.ID) {
+			return false
 		}
 	}
 	return true
+}
+
+func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess PublishAccess) (passwordID string, password string) {
+	currentPath := blockPath
+	password = ""
+	passwordID = ""
+	for currentPath != "/" && password == "" {
+		currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
+		for _, accessItem := range publishAccess {
+			if accessItem.ID == currentID {
+				password = accessItem.Password
+				passwordID = accessItem.ID
+				break
+			}
+		}
+		currentPath = path.Dir(currentPath)
+	}
+	if password == "" {
+		for _, accessItem := range publishAccess {
+			if accessItem.ID == box {
+				password = accessItem.Password
+				passwordID = accessItem.ID
+				break
+			}
+		}
+	}
+	return
 }
 
 func filterQueryInvisibleChars(query string) string {

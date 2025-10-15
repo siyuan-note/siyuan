@@ -541,7 +541,8 @@ func getConf(c *gin.Context) {
 	}
 
 	if model.IsReadOnlyRoleContext(c) {
-		publishIgnore := model.GetInvisiblePublishAccess()
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		maskedConf = model.FilterConfByPublishIgnore(publishIgnore, maskedConf)
 	}
 

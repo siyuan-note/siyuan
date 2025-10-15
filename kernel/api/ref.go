@@ -126,7 +126,8 @@ func getBacklink2(c *gin.Context) {
 	}
 	boxID, backlinks, backmentions, linkRefsCount, mentionsCount := model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort, containChildren)
 	if model.IsReadOnlyRoleContext(c) {
-		publishIgnore := model.GetInvisiblePublishAccess()
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		backlinks = model.FilterPathsByPublishIgnore(publishIgnore, backlinks)
 		backmentions = model.FilterPathsByPublishIgnore(publishIgnore, backmentions)
 	}

@@ -1078,7 +1078,8 @@ func listDocsByPath(c *gin.Context) {
 	}
 	// 过滤掉发布不可见的文件
 	if model.IsReadOnlyRoleContext(c) {
-		publishIgnore := model.GetInvisiblePublishAccess()
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		tempFiles := []*model.File{}
 		for _, file := range files {
 			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishIgnore) {
@@ -1344,13 +1345,7 @@ func authFilePublishAccess(c *gin.Context) {
 	for _, item := range publishAccess {
 		if item.ID == ID {
 			if item.Password == password {
-				authCookie := util.SHA256Hash([]byte(ID + password))
-				http.SetCookie(c.Writer, &http.Cookie{
-					Name: "publish-auth-" + ID,
-					Value: authCookie,
-					MaxAge: 5 * 60,
-					Path: "/",
-				})
+				model.SetPublishAuthCookie(c, ID, password)
 			} else {
 				ret.Msg = model.Conf.Language(277)
 			}
@@ -1363,32 +1358,9 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAcc
 	ret = content
 	
 	// 密码访问
-	currentPath := docPath
-	password := ""
-	passwordID := ""
-	for currentPath != "/" && password == "" {
-		currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
-		for _, accessItem := range publishAccess {
-			if accessItem.ID == currentID {
-				password = accessItem.Password
-				passwordID = accessItem.ID
-				break
-			}
-		}
-		currentPath = path.Dir(currentPath)
-	}
-	if password == "" {
-		for _, accessItem := range publishAccess {
-			if accessItem.ID == box {
-				password = accessItem.Password
-				passwordID = accessItem.ID
-				break
-			}
-		}
-	}
+	passwordID, password := model.GetPathPasswordByPublishAccess(box, docPath, publishAccess)
 	if password != "" {
-		authCookie, err := c.Request.Cookie("publish-auth-" + passwordID)
-		if err != nil || authCookie.Value != util.SHA256Hash([]byte(passwordID + password)) {
+		if !model.CheckPublishAuthCookie(c, passwordID, password) {
 			if onlyIcon {
 				passwordHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
 	<span style="font-size:100px;">🔒</span>
@@ -1409,41 +1381,23 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAcc
 	}
 
 	// 禁止访问
-	currentPath = docPath
-	forbiddenID := ""
-	disable := false
-	for currentPath != "/" && !disable {
-		currentID := strings.TrimSuffix(path.Base(currentPath), ".sy")
-		for _, accessItem := range publishAccess {
-			if accessItem.ID == currentID {
-				disable = accessItem.Disable
-				forbiddenID = accessItem.ID
-				break
-			}
-		}
-		currentPath = path.Dir(currentPath)
+	ID := box
+	if docPath != "/" {
+		ID = strings.TrimSuffix(path.Base(docPath), ".sy")
 	}
-	if !disable {
-		for _, accessItem := range publishAccess {
-			if accessItem.ID == box {
-				disable = accessItem.Disable
-				forbiddenID = accessItem.ID
-				break
-			}
-		}
-	}
-	if disable {
+	publishIgnore := model.GetDisablePublishAccess(publishAccess)
+	if !model.CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) {
 		if onlyIcon {
 			forbiddenHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
 	<span style="font-size:100px;">🚫</span>
 </div>`
-			ret = fmt.Sprintf(forbiddenHTML, forbiddenID)
+			ret = fmt.Sprintf(forbiddenHTML, ID)
 		} else {
 			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
 	<span style="font-size:100px; line-height:1.2;">🚫</span>
 	<span style="font-size:2em;">%s</span>
 </div>`
-			ret = fmt.Sprintf(forbiddenHTML, forbiddenID, model.Conf.Language(276))
+			ret = fmt.Sprintf(forbiddenHTML, ID, model.Conf.Language(276))
 		}
 	}
 	return

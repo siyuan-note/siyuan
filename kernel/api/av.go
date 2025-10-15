@@ -852,8 +852,7 @@ func renderAttrView(c *gin.Context, blockID, avID, viewID, query string, page, p
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetDisablePublishAccess()
-		view = FilterViewByPublishAccess(c, publishAccess, publishIgnore, view)
+		view = FilterViewByPublishAccess(c, publishAccess, view)
 	}
 
 	ret.Data = map[string]interface{}{
@@ -911,8 +910,8 @@ func getAttributeViewKeys(c *gin.Context) {
 	id := arg["id"].(string)
 	blockAttributeViewKeys := model.GetBlockAttributeViewKeys(id)
 	if model.IsReadOnlyRoleContext(c) {
-		publishIgnore := model.GetDisablePublishAccess()
-		blockAttributeViewKeys = model.FilterBlockAttributeViewKeysByPublishIgnore(publishIgnore, blockAttributeViewKeys)
+		publishAccess := model.GetPublishAccess()
+		blockAttributeViewKeys = FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKeys)
 	}
 	ret.Data = blockAttributeViewKeys
 }
@@ -972,8 +971,9 @@ func batchSetAttributeViewBlockAttrs(c *gin.Context) {
 	model.ReloadAttrView(avID)
 }
 
-func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, publishIgnore model.PublishAccess, viewable av.Viewable) (ret av.Viewable) {
+func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, viewable av.Viewable) (ret av.Viewable) {
 	ret = viewable
+	publishIgnore := model.GetDisablePublishAccess(publishAccess)
 
 	switch ret.GetType() {
 	case av.LayoutTypeTable:
@@ -993,6 +993,9 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess
 			if block != nil {
 				// 不显示禁止文档
 				if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+					row = nil
+				}
+				if passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess); password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
 					row = nil
 				}
 			}
@@ -1027,6 +1030,9 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess
 				if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
 					card = nil
 				}
+				if passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess); password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
+					card = nil
+				}
 			}
 			if card != nil {
 				filteredCards = append(filteredCards, card)
@@ -1034,6 +1040,29 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess
 		}
 		gallery.Cards = filteredCards
 	// TODO: 适配看板视图
+	}
+	return
+}
+
+func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, blockAttributeViewKeys []*model.BlockAttributeViewKeys) (ret []*model.BlockAttributeViewKeys) {
+	publishIgnore := model.GetDisablePublishAccess(publishAccess)
+	ret = []*model.BlockAttributeViewKeys{}
+	for _, blockAttributeViewKey := range blockAttributeViewKeys {
+		accessable := false
+		blocks := sql.GetBlocks(blockAttributeViewKey.BlockIDs)
+		for _, block := range blocks {
+			if block == nil {
+				continue
+			}
+			passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+			if (password == "" || model.CheckPublishAuthCookie(c, passwordID, password)) && model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				accessable = true
+				break
+			}
+		}
+		if accessable {
+			ret = append(ret, blockAttributeViewKey)
+		}
 	}
 	return
 }

@@ -723,36 +723,3 @@ func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDef
 	originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
 	return
 }
-
-func FilterBlockInfoByPublishIgnore(publishIgnore PublishAccess, info *BlockInfo) (ret *BlockInfo) {
-	ret = info
-	if info == nil {
-		return
-	}
-
-	filteredAttrViews := []*AttrView{}
-	avIDs := []string{}
-	for _, attrView := range info.AttrViews {
-		avBlocksAccessable := false
-		if attrView.ID != "" {
-			avBlockIDs := treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
-			avBlocks := sql.GetBlocks(avBlockIDs)
-			for _, avBlock := range avBlocks {
-				if avBlock == nil {
-					continue
-				}
-				if CheckPathAccessableByPublishIgnore(avBlock.Box, avBlock.Path, publishIgnore) {
-					avBlocksAccessable = true
-					break
-				}
-			}
-		}
-		if avBlocksAccessable {
-			filteredAttrViews = append(filteredAttrViews, attrView)
-			avIDs = append(avIDs, attrView.ID)
-		}
-	}
-	ret.AttrViews = filteredAttrViews
-	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
-	return
-}

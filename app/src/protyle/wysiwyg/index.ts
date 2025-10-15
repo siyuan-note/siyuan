@@ -2787,6 +2787,7 @@ export class WYSIWYG {
                             showMessage(response.msg);
                         } else {
                             reloadProtyle(protyle, true);
+                            getAllModels().outline.forEach(item => { item.reload(); });
                         }
                     });
                     

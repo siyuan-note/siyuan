@@ -851,7 +851,7 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess model.PublishA
 					continue
 				}
 				passwordID, password := model.GetPathPasswordByPublishAccess(avBlock.Box, avBlock.Path, publishAccess);
-				if (passwordID == "" || model.CheckPublishAuthCookie(c, passwordID, password)) && model.CheckPathAccessableByPublishIgnore(avBlock.Box, avBlock.Path, publishIgnore) {
+				if (password == "" || model.CheckPublishAuthCookie(c, passwordID, password)) && model.CheckPathAccessableByPublishIgnore(avBlock.Box, avBlock.Path, publishIgnore) {
 					avBlocksAccessable = true
 					break
 				}
@@ -864,5 +864,16 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess model.PublishA
 	}
 	ret.AttrViews = filteredAttrViews
 	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
+
+	block := sql.GetBlock(info.RootID)
+	if block != nil {
+		passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess);
+		if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+			ret.IAL["name"] = ""
+			ret.IAL["alias"] = ""
+			ret.IAL["memo"] = ""
+			ret.IAL["bookmark"] = ""
+		}
+	}
 	return
 }

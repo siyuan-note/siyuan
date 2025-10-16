@@ -131,17 +131,6 @@ func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishA
 	return
 }
 
-func GetPublicNotAccessablePublishAccess(c *gin.Context, inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
-	// 获取非可见或未解锁的发布权限
-	outputPublishAccess = PublishAccess{}
-	for _, item := range inputPublishAccess {
-		if !item.Visible || !CheckPublishAuthCookie(c, item.ID, item.Password) {
-			outputPublishAccess = append(outputPublishAccess, item)
-		}
-	}
-	return
-}
-
 func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
 	outputPublishAccess = PublishAccess{}
 	for _, item := range inputPublishAccess {
@@ -446,9 +435,12 @@ func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess PublishAcces
 	return
 }
 
-func FilterPathsByPublishIgnore(publishIgnore PublishAccess, paths []*Path) (ret []*Path) {
+func FilterPathsByPublishAccess(c *gin.Context, publishAccess PublishAccess, paths []*Path) (ret []*Path) {
 	ret = []*Path{}
 	IDs := []string{}
+
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+
 	IDtoPathIndexMap := make(map[string]int)
 	for i, path := range paths {
 		IDs = append(IDs, path.ID)
@@ -458,7 +450,8 @@ func FilterPathsByPublishIgnore(publishIgnore PublishAccess, paths []*Path) (ret
 	for _, block := range blocks {
 		pathIndex := IDtoPathIndexMap[block.ID]
 		path := paths[pathIndex]
-		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			ret = append(ret, path)
 		}
 	}

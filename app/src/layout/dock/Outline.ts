@@ -673,7 +673,7 @@ export class Outline extends Model {
     }
 
     public saveExpendIds() {
-        if (!this.isPreview) {
+        if (!this.isPreview && this.type === "pin") {
             fetchPost("/api/storage/setOutlineStorage", {
                 docID: this.blockId,
                 val: {

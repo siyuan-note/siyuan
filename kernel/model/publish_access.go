@@ -690,3 +690,49 @@ func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
 	}
 	return tag
 }
+
+func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage map[string]interface{}) (ret map[string]interface{}) {
+	ret = localStorage
+	// 清空搜索历史记录
+	searchKeysItem := ret["local-searchkeys"]
+	if searchKeysItem != nil {
+		searchKeys := searchKeysItem.(map[string]interface{})
+		if searchKeys != nil {
+			searchKeys["keys"] = []string{}
+		}
+	}
+	searchAssetItem := ret["local-searchasset"]
+	if searchAssetItem != nil {
+		searchAsset := searchAssetItem.(map[string]interface{})
+		if searchAsset != nil {
+			searchAsset["k"] = ""
+			searchAsset["keys"] = []string{}
+		}
+	}
+	return
+}
+
+func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetContent []*AssetContent) (ret []*AssetContent) {
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	validAssets := []string{}
+	blocks := sql.GetAllRootBlocks()
+	for _, block := range blocks {
+		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+			assets, err := DocAssets(block.ID)
+			if err == nil {
+				validAssets = append(validAssets, assets...)
+			}
+		}
+	}
+
+	ret = []*AssetContent{}
+	for _, asset := range assetContent {
+		for _, validAsset := range validAssets {
+			if validAsset == asset.Path {
+				ret = append(ret, asset)
+			}
+		}
+	}
+	return
+}

@@ -178,5 +178,9 @@ func getLocalStorage(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	data := model.GetLocalStorage()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+	}
 	ret.Data = data
 }

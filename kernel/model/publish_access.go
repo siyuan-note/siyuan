@@ -458,10 +458,14 @@ func FilterPathsByPublishAccess(c *gin.Context, publishAccess PublishAccess, pat
 	return
 }
 
-func FilterBlocksByPublishIgnore(publishIgnore PublishAccess, blocks []*Block) (ret []*Block) {
+func FilterBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, blocks []*Block) (ret []*Block) {
 	ret = []*Block{}
+
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+
 	for _, block := range blocks {
-		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (c == nil || password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			ret = append(ret, block)
 		}
 	}

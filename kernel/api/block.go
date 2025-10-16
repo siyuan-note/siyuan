@@ -414,8 +414,7 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 	blocks := model.RecentUpdatedBlocks()
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
-		blocks = model.FilterBlocksByPublishIgnore(publishIgnore, blocks)
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
 	ret.Data = blocks
 }

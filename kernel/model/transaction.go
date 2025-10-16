@@ -1054,6 +1054,10 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 			}
 
 			for i, blockValue := range blockValues.Values {
+				if nil == blockValue.Block {
+					continue
+				}
+
 				if blockValue.Block.ID == n.ID {
 					blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
 					changedAv = true

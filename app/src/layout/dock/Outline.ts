@@ -325,17 +325,6 @@ export class Outline extends Model {
             preview: this.isPreview
         }, response => {
             this.update(response);
-            // 初始化时从新的存储恢复折叠状态
-            if (!this.isPreview) {
-                fetchPost("/api/storage/getOutlineStorage", {
-                    docID: this.blockId
-                }, storageResponse => {
-                    const storageData = storageResponse.data;
-                    if (storageData && storageData.expandIds) {
-                        this.tree.setExpandIds(storageData.expandIds);
-                    }
-                });
-            }
         });
     }
 
@@ -633,10 +622,6 @@ export class Outline extends Model {
             currentId = currentElement.getAttribute("data-node-id");
         }
         const scrollTop = this.element.scrollTop;
-
-        // 保存当前文档的折叠状态到新的持久化存储
-        this.saveExpendIds();
-
         if (typeof callbackId !== "undefined") {
             this.blockId = callbackId;
         }

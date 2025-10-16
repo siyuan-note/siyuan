@@ -1769,8 +1769,8 @@ export class Gutter {
                         }
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
-                        }, (response) => {
-                            response.data.doOperations.forEach((operation: IOperation) => {
+                        }, (deleteResponse) => {
+                            deleteResponse.data.doOperations.forEach((operation: IOperation) => {
                                 protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();
                                 });
@@ -1779,19 +1779,19 @@ export class Gutter {
                                 const newID = Lute.NewNodeID();
                                 const emptyElement = genEmptyElement(false, false, newID);
                                 protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-                                response.data.doOperations.push({
+                                deleteResponse.data.doOperations.push({
                                     action: "insert",
                                     data: emptyElement.outerHTML,
                                     id: newID,
                                     parentID: protyle.block.parentID
                                 });
-                                response.data.undoOperations.push({
+                                deleteResponse.data.undoOperations.push({
                                     action: "delete",
                                     id: newID,
                                 });
                                 focusBlock(emptyElement);
                             }
-                            transaction(protyle, response.data.doOperations, response.data.undoOperations);
+                            transaction(protyle, deleteResponse.data.doOperations, deleteResponse.data.undoOperations);
                         });
                     });
                 }

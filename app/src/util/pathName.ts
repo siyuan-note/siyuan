@@ -162,7 +162,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     const dialog = new Dialog({
         title: `<div style="padding: 8px;">
     ${title || window.siyuan.languages.move}
-    <div style="max-height: 16px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>
+    <div style="max-height: 16px;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>
 </div>`,
         content: `<div class="b3-form__icon" style="margin: 8px">
     <span data-menu="true" class="b3-form__icon-list fn__a b3-tooltips b3-tooltips__s" aria-label="${updateHotkeyTip("⌥↓")}">

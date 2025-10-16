@@ -1588,7 +1588,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
     if (protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copyAHref",
-            label: window.siyuan.languages.copy + " " + window.siyuan.languages.replaceTypes.aHref,
+            label: window.siyuan.languages.copyAHref,
             icon: "iconLink",
             click() {
                 writeText(linkAddress);

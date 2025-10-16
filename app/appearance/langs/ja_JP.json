@@ -223,6 +223,7 @@
     "mathBlock": "数式ブロック",
     "htmlBlock": "HTMLブロック"
   },
+  "copyAHref": "リンクの URL をコピー",
   "selected": "選択済み",
   "loadMore": "さらに読み込む",
   "tempUnlock": "一時的にロック解除",

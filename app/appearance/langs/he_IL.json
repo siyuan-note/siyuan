@@ -203,7 +203,7 @@
     "imgSrc": "קישור לתמונה",
     "aText": "טקסט עוגן לייב",
     "aTitle": "כותרת הקישור",
-    "aHref": "קישור",
+    "aHref": "כתובת URL",
     "code": "קוד פנימי",
     "em": "מוטה",
     "strong": "מודגש",
@@ -223,6 +223,7 @@
     "mathBlock": "בלוק מתמטיקה",
     "htmlBlock": "בלוק HTML"
   },
+  "copyAHref": "העתק כתובת URL של קישור",
   "selected": "נבחר",
   "loadMore": "טען עוד",
   "tempUnlock": "שחרור זמני",

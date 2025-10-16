@@ -233,16 +233,14 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 			return true
 		case FilterQuantifierNone:
-			if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
-				if FilterOperatorIsEmpty == filter.Operator {
+			if FilterOperatorIsEmpty == filter.Operator {
+				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) || 1 > len(value.Rollup.Contents) {
 					return false
-				} else if FilterOperatorIsNotEmpty == filter.Operator {
+				}
+			} else if FilterOperatorIsNotEmpty == filter.Operator {
+				if 1 > len(value.Rollup.Contents) {
 					return true
 				}
-			}
-
-			if 1 > len(filter.Value.Rollup.Contents) {
-				return true
 			}
 
 			for _, content := range value.Rollup.Contents {
@@ -304,12 +302,28 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
-			if 1 > len(value.MAsset) { // 说明资源字段为空
-				if FilterOperatorIsEmpty == filter.Operator {
+			if FilterOperatorIsEmpty == filter.Operator {
+				if 1 > len(value.MAsset) {
 					return true
-				} else if FilterOperatorIsNotEmpty == filter.Operator {
+				}
+
+				for _, asset := range value.MAsset {
+					if "" == strings.TrimSpace(asset.Content) {
+						return true
+					}
+				}
+				return false
+			} else if FilterOperatorIsNotEmpty == filter.Operator {
+				if 1 > len(value.MAsset) {
 					return false
 				}
+
+				for _, asset := range value.MAsset {
+					if "" != strings.TrimSpace(asset.Content) {
+						return true
+					}
+				}
+				return false
 			}
 
 			for _, asset := range value.MAsset {
@@ -326,12 +340,28 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 			}
 		case FilterQuantifierAll:
-			if 1 > len(value.MAsset) {
-				if FilterOperatorIsEmpty == filter.Operator {
+			if FilterOperatorIsEmpty == filter.Operator {
+				if 1 > len(value.MAsset) {
 					return true
-				} else if FilterOperatorIsNotEmpty == filter.Operator {
+				}
+
+				for _, asset := range value.MAsset {
+					if "" != strings.TrimSpace(asset.Content) {
+						return false
+					}
+				}
+				return true
+			} else if FilterOperatorIsNotEmpty == filter.Operator {
+				if 1 > len(value.MAsset) {
 					return false
 				}
+
+				for _, asset := range value.MAsset {
+					if "" == strings.TrimSpace(asset.Content) {
+						return false
+					}
+				}
+				return true
 			}
 
 			for _, asset := range value.MAsset {
@@ -349,26 +379,38 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			}
 			return true
 		case FilterQuantifierNone:
-			if 1 > len(value.MAsset) {
-				if FilterOperatorIsEmpty == filter.Operator {
-					return false
-				} else if FilterOperatorIsNotEmpty == filter.Operator {
+			if FilterOperatorIsEmpty == filter.Operator {
+				if 1 > len(value.MAsset) {
 					return true
 				}
+
+				for _, asset := range value.MAsset {
+					if "" == strings.TrimSpace(asset.Content) {
+						return false
+					}
+				}
+				return true
+			} else if FilterOperatorIsNotEmpty == filter.Operator {
+				if 1 > len(value.MAsset) {
+					return false
+				}
+
+				for _, asset := range value.MAsset {
+					if "" != strings.TrimSpace(asset.Content) {
+						return false
+					}
+				}
+				return true
 			}
 
 			for _, asset := range value.MAsset {
 				switch asset.Type {
 				case AssetTypeFile:
-					if "" != strings.TrimSpace(asset.Name) {
-						if filterTextContent(filter.Operator, asset.Name, filterContent) {
-							return false
-						}
+					if filterTextContent(filter.Operator, asset.Name, filterContent) {
+						return false
 					}
-					if "" != strings.TrimSpace(asset.Content) {
-						if filterTextContent(filter.Operator, asset.Content, filterContent) {
-							return false
-						}
+					if filterTextContent(filter.Operator, asset.Content, filterContent) {
+						return false
 					}
 				case AssetTypeImage:
 					if filterTextContent(filter.Operator, asset.Content, filterContent) {

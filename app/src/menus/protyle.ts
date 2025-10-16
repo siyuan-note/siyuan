@@ -1,8 +1,10 @@
 import {
     hasClosestBlock,
     hasClosestByAttribute,
-    hasClosestByClassName, hasClosestByTag,
-    hasTopClosestByClassName, isInEmbedBlock
+    hasClosestByClassName,
+    hasClosestByTag,
+    hasTopClosestByClassName,
+    isInEmbedBlock
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
@@ -24,13 +26,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {
-    copyPlainText,
-    readClipboard,
-    setStorageVal,
-    updateHotkeyTip,
-    writeText
-} from "../protyle/util/compatibility";
+import {copyPlainText, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -1087,6 +1083,10 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     const imgElement = assetElement.querySelector("img");
     const titleElement = assetElement.querySelector(".protyle-action__title span") as HTMLElement;
     const html = nodeElement.outerHTML;
+    let src = imgElement.getAttribute("src");
+    if (!src) {
+        src = ""
+    }
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "imageUrlAndTitleAndTooltipText",
@@ -1098,7 +1098,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div><textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea><div class="fn__hr"></div><div class="fn__flex">
+</div><textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field">${src}</textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.title}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">

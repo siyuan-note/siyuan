@@ -953,7 +953,7 @@ export class Outline extends Model {
             label: window.siyuan.languages.insertSameLevelHeadingBefore,
             click: () => {
                 fetchPost("/api/block/insertBlock", {
-                    data: "#".repeat(this.getHeadingLevel(element)) + " ",
+                    data: "#".repeat(currentLevel) + " ",
                     dataType: "markdown",
                     nextID: id
                 }, (response) => {
@@ -975,7 +975,7 @@ export class Outline extends Model {
                     id,
                 }, (deleteResponse) => {
                     fetchPost("/api/block/insertBlock", {
-                        data: "#".repeat(this.getHeadingLevel(element)) + " ",
+                        data: "#".repeat(currentLevel) + " ",
                         dataType: "markdown",
                         previousID: deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id
                     }, (response) => {
@@ -995,18 +995,30 @@ export class Outline extends Model {
                 icon: "iconAdd",
                 label: window.siyuan.languages.addChildHeading,
                 click: () => {
-                    fetchPost("/api/block/prependBlock", {
-                        data: "#".repeat(Math.min(this.getHeadingLevel(element) + 1, 6)) + " ",
-                        dataType: "markdown",
-                        parentID: id
-                    }, (response) => {
-                        if (response.code === 0 && response.data && response.data.length > 0) {
-                            openFileById({
-                                app: this.app,
-                                id: response.data[0].doOperations[0].id,
-                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
-                            });
-                        }
+                    fetchPost("/api/block/getHeadingDeleteTransaction", {
+                        id,
+                    }, (deleteResponse) => {
+                        let previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
+                        deleteResponse.data.undoOperations.find((operationsItem: IOperation, index: number) => {
+                            const startIndex = operationsItem.data.indexOf(' data-subtype="h');
+                            if (startIndex > -1 && startIndex < 260 && parseInt(operationsItem.data.substring(startIndex + 16, startIndex + 17)) === currentLevel + 1) {
+                                previousID = deleteResponse.data.undoOperations[index - 1].id;
+                                return true;
+                            }
+                        });
+                        fetchPost("/api/block/insertBlock", {
+                            data: "#".repeat(Math.min(currentLevel + 1, 6)) + " ",
+                            dataType: "markdown",
+                            previousID,
+                        }, (response) => {
+                            if (response.code === 0 && response.data && response.data.length > 0) {
+                                openFileById({
+                                    app: this.app,
+                                    id: response.data[0].doOperations[0].id,
+                                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
+                                });
+                            }
+                        });
                     });
                 }
             }).element);

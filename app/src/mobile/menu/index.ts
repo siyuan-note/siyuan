@@ -120,7 +120,7 @@ export const initRightMenu = (app: App) => {
     <div id="menuSync" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
         <svg class="b3-menu__icon"><use xlink:href="#iconCloud"></use></svg><span class="b3-menu__label">${window.siyuan.languages.cloud}</span>
     </div>
-    <div class="b3-menu__item" id="menuAbout">
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAbout">
         <svg class="b3-menu__icon"><use xlink:href="#iconInfo"></use></svg><span class="b3-menu__label">${window.siyuan.languages.about}</span>
     </div>
     <div class="b3-menu__item" id="menuPlugin">

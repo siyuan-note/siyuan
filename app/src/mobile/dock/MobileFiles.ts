@@ -4,6 +4,7 @@ import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
+import {getPublishAccessOption, getPublishAccessOptionByLevel, openPublishAccessDialog} from "../../dialog/publishAccessDialog";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
@@ -92,6 +93,7 @@ export class MobileFiles extends Model {
     <svg data-type="refresh" class="toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
     <svg data-type="focus" class="toolbar__icon"><use xlink:href="#iconFocus"></use></svg>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
+    <svg data-type="publish-access" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconEye"></use></svg>
     <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
 <div class="fn__flex-1"></div>
@@ -144,6 +146,39 @@ export class MobileFiles extends Model {
                         }
                     });
                     event.preventDefault();
+                    break;
+                } else if (type === "publish-access") {
+                    if (target.classList.contains("b3-list-item__switch")) {
+                        // 文档/笔记本前的按钮
+                        let targetId = target.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.getAttribute("data-url");
+                        const rect = target.getBoundingClientRect();
+                        openPublishAccessDialog(targetId, {
+                            x: rect.left,
+                            y: rect.bottom,
+                            h: rect.height,
+                            w: rect.width,
+                        }, (access: { id: string, visible: boolean, password: string, disable: boolean, iconHTML: string }) => {
+                            target.innerHTML = access.iconHTML;
+                            fetchPost("/api/filetree/setPublishAccess", {
+                                id: access.id,
+                                visible: access.visible,
+                                password: access.password,
+                                disable: access.disable,
+                            });
+                        });
+                    } else {
+                        // 顶部栏中的按钮
+                        target.classList.toggle("block__icon--active")
+                        const editingPublishAccess = target.classList.contains("block__icon--active");
+                        this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+                            item.classList.toggle("fn__none", editingPublishAccess);
+                        });
+                        this.element.querySelectorAll('.b3-list-item__switch[data-type="publish-access"]').forEach(item => {
+                            item.classList.toggle("fn__none", !editingPublishAccess);
+                        });
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
                     break;
                 } else if (type === "sort") {
                     this.genSort();
@@ -295,13 +330,16 @@ export class MobileFiles extends Model {
     }
 
     private genNotebook(item: INotebook) {
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? ' fn__none' : ''}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item">
     <span class="b3-list-item__toggle fn__hidden">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
+    ${switchHTML}
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
     <span data-type="open" data-url="${item.id}" class="b3-list-item__action${(window.siyuan.config.readonly) ? " fn__none" : ""}">
         <svg><use xlink:href="#iconOpen"></use></svg>
@@ -314,6 +352,7 @@ export class MobileFiles extends Model {
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${emojiHTML}
+    ${switchHTML}
     <span class="b3-list-item__text${item.closed ? " ft__on-surface" : ""}">${escapeHtml(item.name)}</span>
     <span data-type="more-root" class="b3-list-item__action${(window.siyuan.config.readonly || item.closed) ? " fn__none" : ""}">
         <svg><use xlink:href="#iconMore"></use></svg>
@@ -351,6 +390,7 @@ export class MobileFiles extends Model {
                 this.selectItem(item.notebookId, openPath, undefined, false, false);
             });
         });
+        this.refreshPublishAccessSwitchs();
         if (!init) {
             return;
         }
@@ -554,6 +594,7 @@ export class MobileFiles extends Model {
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;
+            this.refreshPublishAccessSwitchs();
             return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
@@ -568,6 +609,7 @@ export class MobileFiles extends Model {
                 });
             }, 120);
         }, 2);
+        this.refreshPublishAccessSwitchs();
     }
 
     private async onLsSelect(data: {
@@ -702,6 +744,7 @@ export class MobileFiles extends Model {
             });
             liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }
+        this.refreshPublishAccessSwitchs();
         return liElement;
     }
 
@@ -745,12 +788,14 @@ export class MobileFiles extends Model {
         if (item.count && item.count > 0) {
             countHTML = `<span class="counter">${item.count}</span>`;
         }
+        const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-type="navigation-file" 
 class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 1) * 20}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__icon"${editingPublishAccess ? ' fn__none' : ''}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__switch${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
@@ -761,4 +806,25 @@ class="b3-list-item" data-path="${item.path}">
     ${countHTML}
 </li>`;
     };
+
+    private refreshPublishAccessSwitchs() {
+        if (window.siyuan.config.readonly) {
+            return;
+        }
+
+        let ids: string[] = [];
+        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")))
+        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")))
+        fetchPost("/api/filetree/getPublishAccess", {
+            ids: ids
+        }, response => {
+            response.data.publishAccess.forEach((item : { id: string, visible: boolean, password: string, disable: boolean }) => {
+                const element = this.element.querySelector(`[data-url="${item.id}"]`) || this.element.querySelector(`[data-node-id="${item.id}"]`)
+                if (element) {
+                    const publishAccessElement = element.querySelector(`[data-type="publish-access"]`) as HTMLElement;
+                    publishAccessElement.innerHTML = getPublishAccessOption(item.visible, item.password, item.disable).iconHTML;
+                }
+            });
+        })
+    }
 }

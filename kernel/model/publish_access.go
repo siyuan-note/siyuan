@@ -131,6 +131,17 @@ func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishA
 	return
 }
 
+func GetPublicNotAccessablePublishAccess(c *gin.Context, inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
+	// 获取非可见或未解锁的发布权限
+	outputPublishAccess = PublishAccess{}
+	for _, item := range inputPublishAccess {
+		if !item.Visible || !CheckPublishAuthCookie(c, item.ID, item.Password) {
+			outputPublishAccess = append(outputPublishAccess, item)
+		}
+	}
+	return
+}
+
 func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
 	outputPublishAccess = PublishAccess{}
 	for _, item := range inputPublishAccess {
@@ -218,7 +229,7 @@ func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name: "publish-auth-" + ID,
 		Value: authCookie,
-		MaxAge: 5 * 60,
+		MaxAge: 24 * 60 * 60,
 		Path: "/",
 	})
 }

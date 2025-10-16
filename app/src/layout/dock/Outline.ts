@@ -199,16 +199,38 @@ export class Outline extends Model {
             },
             rightClick: (element: HTMLElement, event: MouseEvent) => {
                 this.showContextMenu(element, event);
+            },
+            toggleClick:(liElement) => {
+                if (!liElement.nextElementSibling) {
+                    return;
+                }
+                const svgElement = liElement.firstElementChild.firstElementChild;
+                if (svgElement.classList.contains("b3-list-item__arrow--open")) {
+                    svgElement.classList.remove("b3-list-item__arrow--open");
+                    liElement.nextElementSibling.classList.add("fn__none");
+                    if (liElement.nextElementSibling.nextElementSibling && liElement.nextElementSibling.nextElementSibling.tagName === "UL") {
+                        liElement.nextElementSibling.nextElementSibling.classList.add("fn__none");
+                    }
+                } else {
+                    svgElement.classList.add("b3-list-item__arrow--open");
+                    liElement.nextElementSibling.classList.remove("fn__none");
+                    if (liElement.nextElementSibling.nextElementSibling && liElement.nextElementSibling.nextElementSibling.tagName === "UL") {
+                        liElement.nextElementSibling.nextElementSibling.classList.remove("fn__none");
+                    }
+                }
+                this.saveExpendIds();
             }
         });
         // 为了快捷键的 dispatch
         options.tab.panelElement.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.tree.collapseAll();
+            this.saveExpendIds();
         });
 
         // 普通的全部展开按钮
         options.tab.panelElement.querySelector('[data-type="expand"]').addEventListener("click", () => {
             this.tree.expandAll();
+            this.saveExpendIds();
         });
 
         // 保持当前标题展开功能
@@ -591,6 +613,7 @@ export class Outline extends Model {
                 ulElement.previousElementSibling.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
                 ulElement = ulElement.parentElement;
             }
+            this.saveExpendIds();
         } else {
             while (currentElement && currentElement.clientHeight === 0) {
                 currentElement = currentElement.parentElement.previousElementSibling as HTMLElement;
@@ -609,25 +632,22 @@ export class Outline extends Model {
         if (currentElement) {
             currentId = currentElement.getAttribute("data-node-id");
         }
+        const scrollTop = this.element.scrollTop;
 
         // 保存当前文档的折叠状态到新的持久化存储
-        if (!this.isPreview) {
-            const currentExpandIds = this.tree.getExpandIds();
-            fetchPost("/api/storage/setOutlineStorage", {
-                docID: this.blockId,
-                val: {
-                    expandIds: currentExpandIds
-                }
-            });
-        }
+        this.saveExpendIds();
 
         if (typeof callbackId !== "undefined") {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
 
-        // 从新的持久化存储恢复折叠状态
-        if (!this.isPreview) {
+        if (this.isPreview) {
+            this.tree.element.querySelectorAll(".popover__block").forEach(item => {
+                item.classList.remove("popover__block");
+            });
+            this.element.scrollTop = scrollTop;
+        } else {
             fetchPost("/api/storage/getOutlineStorage", {
                 docID: this.blockId
             }, storageResponse => {
@@ -640,15 +660,9 @@ export class Outline extends Model {
                 if ((this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value) {
                     this.setFilter();
                 }
+                this.element.scrollTop = scrollTop;
             });
         }
-
-        if (this.isPreview) {
-            this.tree.element.querySelectorAll(".popover__block").forEach(item => {
-                item.classList.remove("popover__block");
-            });
-        }
-
         if (currentId) {
             currentElement = this.element.querySelector(`[data-node-id="${currentId}"]`);
             if (currentElement) {
@@ -782,6 +796,7 @@ export class Outline extends Model {
                 }
             });
         }
+        this.saveExpendIds();
     }
 
     /**
@@ -833,6 +848,7 @@ export class Outline extends Model {
                 }
             }
         });
+        this.saveExpendIds();
     }
 
     private collapseChildren(element: HTMLElement, expand?: boolean) {
@@ -855,6 +871,7 @@ export class Outline extends Model {
             arrowElement.classList.remove("b3-list-item__arrow--open");
             nextElement.classList.add("fn__none");
         }
+        this.saveExpendIds();
     }
 
     /**
@@ -1152,6 +1169,7 @@ export class Outline extends Model {
             label: window.siyuan.languages.expandAll,
             click: () => {
                 this.tree.expandAll();
+                this.saveExpendIds();
             }
         }).element);
 
@@ -1159,7 +1177,10 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconContract",
             label: window.siyuan.languages.foldAll,
-            click: () => this.tree.collapseAll()
+            click: () => {
+                this.tree.collapseAll();
+                this.saveExpendIds();
+            }
         }).element);
 
         window.siyuan.menus.menu.popup({

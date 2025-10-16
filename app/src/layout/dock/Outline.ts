@@ -200,7 +200,7 @@ export class Outline extends Model {
             rightClick: (element: HTMLElement, event: MouseEvent) => {
                 this.showContextMenu(element, event);
             },
-            toggleClick:(liElement) => {
+            toggleClick: (liElement) => {
                 if (!liElement.nextElementSibling) {
                     return;
                 }
@@ -971,7 +971,7 @@ export class Outline extends Model {
                 fetchPost("/api/block/insertBlock", {
                     data: "#".repeat(this.getHeadingLevel(element)) + " ",
                     dataType: "markdown",
-                    nextID: element.getAttribute("data-node-id")
+                    nextID: id
                 }, (response) => {
                     openFileById({
                         app: this.app,
@@ -987,15 +987,19 @@ export class Outline extends Model {
             icon: "iconAfter",
             label: window.siyuan.languages.insertSameLevelHeadingAfter,
             click: () => {
-                fetchPost("/api/block/insertBlock", {
-                    data: "#".repeat(this.getHeadingLevel(element)) + " ",
-                    dataType: "markdown",
-                    previousID: element.getAttribute("data-node-id")
-                }, (response) => {
-                    openFileById({
-                        app: this.app,
-                        id: response.data[0].doOperations[0].id,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]
+                fetchPost("/api/block/getHeadingDeleteTransaction", {
+                    id,
+                }, (deleteResponse) => {
+                    fetchPost("/api/block/insertBlock", {
+                        data: "#".repeat(this.getHeadingLevel(element)) + " ",
+                        dataType: "markdown",
+                        previousID: deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id
+                    }, (response) => {
+                        openFileById({
+                            app: this.app,
+                            id: response.data[0].doOperations[0].id,
+                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]
+                        });
                     });
                 });
             }
@@ -1010,7 +1014,7 @@ export class Outline extends Model {
                     fetchPost("/api/block/prependBlock", {
                         data: "#".repeat(Math.min(this.getHeadingLevel(element) + 1, 6)) + " ",
                         dataType: "markdown",
-                        parentID: element.getAttribute("data-node-id")
+                        parentID: id
                     }, (response) => {
                         if (response.code === 0 && response.data && response.data.length > 0) {
                             openFileById({

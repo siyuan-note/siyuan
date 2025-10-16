@@ -80,6 +80,13 @@ export const onGet = (options: {
     if (options.protyle.options.render.title && options.protyle.title.element.getAttribute("data-render") !== "true") {
         // 文档A的大纲，关闭文档A后，点击大纲无法渲染头部
     } else if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE) || options.action.includes(Constants.CB_GET_HTML)) {
+        if (options.protyle.options.render.title && options.protyle.options.render.hideTitleOnZoom) {
+            if (options.protyle.block.showAll) {
+                options.protyle.title.element.classList.add("fn__none");
+            } else {
+                options.protyle.title.element.classList.remove("fn__none");
+            }
+        }
         // 防止动态加载加载过多的内容
         setHTML({
             content: options.data.data.content,

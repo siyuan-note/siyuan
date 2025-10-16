@@ -736,3 +736,18 @@ func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAcce
 	}
 	return
 }
+
+func FilterRecentDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess, recentDocs []*RecentDoc) (ret []*RecentDoc) {
+	ret = []*RecentDoc{}
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
+	for _, recentDoc := range recentDocs {
+		block := sql.GetBlock(recentDoc.RootID)
+		if block != nil {
+			passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+			if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (passwordID == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+				ret = append(ret, recentDoc)
+			}
+		}
+	}
+	return
+}

@@ -35,6 +35,10 @@ func getRecentDocs(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		data = model.FilterRecentDocsByPublishAccess(c, publishAccess, data)
+	}
 	ret.Data = data
 }
 

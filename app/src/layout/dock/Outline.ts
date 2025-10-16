@@ -20,6 +20,8 @@ import {goHome} from "../../protyle/wysiwyg/commonHotkey";
 import {Editor} from "../../editor";
 import {writeText, isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
 import {mathRender} from "../../protyle/render/mathRender";
+import {genEmptyElement} from "../../block/util";
+import {focusBlock} from "../../protyle/util/selection";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -862,23 +864,24 @@ export class Outline extends Model {
         if (this.isPreview) {
             return; // 预览模式下不显示右键菜单
         }
-
-        const id = element.getAttribute("data-node-id");
-        const subtype = element.getAttribute("data-subtype");
-        if (!id || !subtype) {
-            return;
-        }
-
         const currentLevel = this.getHeadingLevel(element);
-
         window.siyuan.menus.menu.remove();
-
         // 升级
         if (currentLevel > 1) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconUp",
                 label: window.siyuan.languages.upgrade,
-                click: () => this.upgradeHeading(element)
+                click: () => {
+                    const data = this.getProtyleAndBlockElement(element);
+                    if (data) {
+                        turnsIntoTransaction({
+                            protyle: data.protyle,
+                            selectsElement: [data.blockElement],
+                            type: "Blocks2Hs",
+                            level: currentLevel - 1
+                        });
+                    }
+                }
             }).element);
         }
 
@@ -887,11 +890,30 @@ export class Outline extends Model {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconDown",
                 label: window.siyuan.languages.downgrade,
-                click: () => this.downgradeHeading(element)
+                click: () => {
+                    const data = this.getProtyleAndBlockElement(element);
+                    if (data) {
+                        turnsIntoTransaction({
+                            protyle: data.protyle,
+                            selectsElement: [data.blockElement],
+                            type: "Blocks2Hs",
+                            level: currentLevel + 1
+                        });
+                    }
+                }
             }).element);
         }
 
         // 带子标题转换
+        const id = element.getAttribute("data-node-id");
+        checkFold(id, (zoomIn) => {
+            openFileById({
+                app: this.app,
+                id,
+                action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
+            });
+        });
+        this.setCurrentById(id);
         const headingSubMenu = [];
         if (currentLevel !== 1) {
             headingSubMenu.push(this.genHeadingTransform(id, 1));
@@ -928,14 +950,38 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconBefore",
             label: window.siyuan.languages.insertSameLevelHeadingBefore,
-            click: () => this.insertHeadingBefore(element)
+            click: () => {
+                fetchPost("/api/block/insertBlock", {
+                    data: "#".repeat(this.getHeadingLevel(element)) + " ",
+                    dataType: "markdown",
+                    nextID: element.getAttribute("data-node-id")
+                }, (response) => {
+                    openFileById({
+                        app: this.app,
+                        id: response.data[0].doOperations[0].id,
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]
+                    });
+                });
+            }
         }).element);
 
         // 在后面插入同级标题
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAfter",
             label: window.siyuan.languages.insertSameLevelHeadingAfter,
-            click: () => this.insertHeadingAfter(element)
+            click: () => {
+                fetchPost("/api/block/insertBlock", {
+                    data: "#".repeat(this.getHeadingLevel(element)) + " ",
+                    dataType: "markdown",
+                    previousID: element.getAttribute("data-node-id")
+                }, (response) => {
+                    openFileById({
+                        app: this.app,
+                        id: response.data[0].doOperations[0].id,
+                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]
+                    });
+                });
+            }
         }).element);
 
         // 添加子标题
@@ -943,7 +989,21 @@ export class Outline extends Model {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconAdd",
                 label: window.siyuan.languages.addChildHeading,
-                click: () => this.addChildHeading(element)
+                click: () => {
+                    fetchPost("/api/block/prependBlock", {
+                        data: "#".repeat(Math.min(this.getHeadingLevel(element) + 1, 6)) + " ",
+                        dataType: "markdown",
+                        parentID: element.getAttribute("data-node-id")
+                    }, (response) => {
+                        if (response.code === 0 && response.data && response.data.length > 0) {
+                            openFileById({
+                                app: this.app,
+                                id: response.data[0].doOperations[0].id,
+                                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
+                            });
+                        }
+                    });
+                }
             }).element);
         }
 
@@ -953,22 +1013,103 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCopy",
             label: `${window.siyuan.languages.copy} ${window.siyuan.languages.headings1}`,
-            click: () => this.copyHeadingWithChildren(element)
+            click: () => {
+                const data = this.getProtyleAndBlockElement(element);
+                fetchPost("/api/block/getHeadingChildrenDOM", {
+                    id,
+                    removeFoldAttr: data.blockElement.getAttribute("fold") !== "1"
+                }, (response) => {
+                    if (isInAndroid()) {
+                        window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                    } else if (isInHarmony()) {
+                        window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                    } else {
+                        writeText(response.data + Constants.ZWSP);
+                    }
+                });
+            }
         }).element);
 
         // 剪切带子标题
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCut",
             label: `${window.siyuan.languages.cut} ${window.siyuan.languages.headings1}`,
-            click: () => this.cutHeadingWithChildren(element)
+            click: () => {
+                const data = this.getProtyleAndBlockElement(element);
+                fetchPost("/api/block/getHeadingChildrenDOM", {
+                    id,
+                    removeFoldAttr: data.blockElement.getAttribute("fold") !== "1"
+                }, (response) => {
+                    if (isInAndroid()) {
+                        window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                    } else if (isInHarmony()) {
+                        window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                    } else {
+                        writeText(response.data + Constants.ZWSP);
+                    }
+                    fetchPost("/api/block/getHeadingDeleteTransaction", {
+                        id,
+                    }, (deleteResponse) => {
+                        deleteResponse.data.doOperations.forEach((operation: IOperation) => {
+                            data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                                itemElement.remove();
+                            });
+                        });
+                        if (data.protyle.wysiwyg.element.childElementCount === 0) {
+                            const newID = Lute.NewNodeID();
+                            const emptyElement = genEmptyElement(false, false, newID);
+                            data.protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
+                            deleteResponse.data.doOperations.push({
+                                action: "insert",
+                                data: emptyElement.outerHTML,
+                                id: newID,
+                                parentID: data.protyle.block.parentID
+                            });
+                            deleteResponse.data.undoOperations.push({
+                                action: "delete",
+                                id: newID,
+                            });
+                            focusBlock(emptyElement);
+                        }
+                        transaction(data.protyle, deleteResponse.data.doOperations, deleteResponse.data.undoOperations);
+                    });
+                });
+            }
         }).element);
-
 
         // 删除
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconTrashcan",
             label: `${window.siyuan.languages.delete} ${window.siyuan.languages.headings1}`,
-            click: () => this.deleteHeading(element)
+            click: () => {
+                const data = this.getProtyleAndBlockElement(element);
+                fetchPost("/api/block/getHeadingDeleteTransaction", {
+                    id,
+                }, (response) => {
+                    response.data.doOperations.forEach((operation: IOperation) => {
+                        data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                            itemElement.remove();
+                        });
+                    });
+                    if (data.protyle.wysiwyg.element.childElementCount === 0) {
+                        const newID = Lute.NewNodeID();
+                        const emptyElement = genEmptyElement(false, false, newID);
+                        data.protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
+                        response.data.doOperations.push({
+                            action: "insert",
+                            data: emptyElement.outerHTML,
+                            id: newID,
+                            parentID: data.protyle.block.parentID
+                        });
+                        response.data.undoOperations.push({
+                            action: "delete",
+                            id: newID,
+                        });
+                        focusBlock(emptyElement);
+                    }
+                    transaction(data.protyle, response.data.doOperations, response.data.undoOperations);
+                });
+            }
         }).element);
 
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1027,249 +1168,24 @@ export class Outline extends Model {
         });
     }
 
-    /**
-     * 升级标题
-     */
-    private upgradeHeading(element: HTMLElement) {
+    private getProtyleAndBlockElement(element: HTMLElement) {
         const id = element.getAttribute("data-node-id");
-        const currentLevel = this.getHeadingLevel(element);
-
-        if (currentLevel <= 1) {
-            return;
-        }
-
-        // 找到编辑器实例和文档中的标题元素
-        let editor: any;
+        let protyle: IProtyle;
         let blockElement: HTMLElement;
         getAllModels().editor.find(editItem => {
             if (editItem.editor.protyle.block.rootID === this.blockId) {
-                editor = editItem.editor.protyle;
-                blockElement = editor.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+                protyle = editItem.editor.protyle;
+                blockElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
                 return true;
             }
         });
 
-        if (!editor || !blockElement) {
+        if (!protyle || !blockElement) {
             return;
         }
-
-        // 使用turnsIntoTransaction来变更标题级别
-        turnsIntoTransaction({
-            protyle: editor,
-            selectsElement: [blockElement],
-            type: "Blocks2Hs",
-            level: currentLevel - 1
-        });
-    }
-
-    /**
-     * 降级标题
-     */
-    private downgradeHeading(element: HTMLElement) {
-        const id = element.getAttribute("data-node-id");
-        const currentLevel = this.getHeadingLevel(element);
-
-        if (currentLevel >= 6) {
-            return;
-        }
-
-        // 找到编辑器实例和文档中的标题元素
-        let editor: any;
-        let blockElement: HTMLElement;
-        getAllModels().editor.find(editItem => {
-            if (editItem.editor.protyle.block.rootID === this.blockId) {
-                editor = editItem.editor.protyle;
-                blockElement = editor.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                return true;
-            }
-        });
-
-        if (!editor || !blockElement) {
-            return;
-        }
-
-        // 使用turnsIntoTransaction来变更标题级别
-        turnsIntoTransaction({
-            protyle: editor,
-            selectsElement: [blockElement],
-            type: "Blocks2Hs",
-            level: currentLevel + 1
-        });
-    }
-
-    /**
-     * 在前面插入同级标题
-     */
-    private insertHeadingBefore(element: HTMLElement) {
-        const id = element.getAttribute("data-node-id");
-        const currentLevel = this.getHeadingLevel(element);
-        const headingPrefix = "#".repeat(currentLevel) + " ";
-
-        fetchPost("/api/block/insertBlock", {
-            data: headingPrefix,
-            dataType: "markdown",
-            nextID: id
-        }, (response) => {
-            if (response.code === 0) {
-                // 插入成功后，可以选择聚焦到新插入的标题
-                const newId = response.data[0].doOperations[0].id;
-                openFileById({
-                    app: this.app,
-                    id: newId,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
-                });
-            }
-        });
-    }
-
-    /**
-     * 在后面插入同级标题
-     */
-    private insertHeadingAfter(element: HTMLElement) {
-        const currentLevel = this.getHeadingLevel(element);
-        const headingPrefix = "#".repeat(currentLevel) + " ";
-
-        // 获取父节点ID，如果当前标题是顶级标题，使用文档根ID
-        const parentElement = element.parentElement;
-        let parentID = this.blockId; // 默认为文档根ID
-
-        if (parentElement && parentElement.tagName === "UL") {
-            const parentLi = parentElement.previousElementSibling;
-            if (parentLi && parentLi.classList.contains("b3-list-item")) {
-                parentID = parentLi.getAttribute("data-node-id");
-            }
-        }
-
-        fetchPost("/api/block/appendBlock", {
-            data: headingPrefix,
-            dataType: "markdown",
-            parentID: parentID
-        }, (response) => {
-            if (response.code === 0) {
-                // 插入成功后，可以选择聚焦到新插入的标题
-                const newId = response.data[0].doOperations[0].id;
-                openFileById({
-                    app: this.app,
-                    id: newId,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
-                });
-            }
-        });
-    }
-
-    /**
-     * 删除标题
-     */
-    private deleteHeading(element: HTMLElement) {
-        const id = element.getAttribute("data-node-id");
-
-        // 找到编辑器实例
-        let editor: any;
-        getAllModels().editor.find(editItem => {
-            if (editItem.editor.protyle.block.rootID === this.blockId) {
-                editor = editItem.editor.protyle;
-                return true;
-            }
-        });
-
-        if (!editor) {
-            return;
-        }
-
-        fetchPost("/api/block/getHeadingDeleteTransaction", {
-            id: id,
-        }, (response) => {
-            response.data.doOperations.forEach((operation: any) => {
-                editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
-                    itemElement.remove();
-                });
-            });
-            transaction(editor, response.data.doOperations, response.data.undoOperations);
-        });
-    }
-
-    /**
-     * 复制标题带子标题
-     */
-    private copyHeadingWithChildren(element: HTMLElement) {
-        const id = element.getAttribute("data-node-id");
-        if (!id) {
-            return;
-        }
-
-        // 找到编辑器实例
-        let editor: any;
-        getAllModels().editor.find(editItem => {
-            if (editItem.editor.protyle.block.rootID === this.blockId) {
-                editor = editItem.editor.protyle;
-                return true;
-            }
-        });
-
-        if (!editor) {
-            return;
-        }
-
-        fetchPost("/api/block/getHeadingChildrenDOM", {
-            id: id,
-            removeFoldAttr: false
-        }, (response) => {
-            if (isInAndroid()) {
-                window.JSAndroid.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-            } else if (isInHarmony()) {
-                window.JSHarmony.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-            } else {
-                writeText(response.data + Constants.ZWSP);
-            }
-        });
-    }
-
-    /**
-     * 剪切标题带子标题
-     */
-    private cutHeadingWithChildren(element: HTMLElement) {
-        const id = element.getAttribute("data-node-id");
-        if (!id) {
-            return;
-        }
-
-        // 找到编辑器实例
-        let editor: any;
-        getAllModels().editor.find(editItem => {
-            if (editItem.editor.protyle.block.rootID === this.blockId) {
-                editor = editItem.editor.protyle;
-                return true;
-            }
-        });
-
-        if (!editor) {
-            return;
-        }
-
-        fetchPost("/api/block/getHeadingChildrenDOM", {
-            id: id,
-            removeFoldAttr: false
-        }, (response) => {
-            if (isInAndroid()) {
-                window.JSAndroid.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-            } else if (isInHarmony()) {
-                window.JSHarmony.writeHTMLClipboard(editor.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-            } else {
-                writeText(response.data + Constants.ZWSP);
-            }
-
-            // 复制完成后删除标题及其子标题
-            fetchPost("/api/block/getHeadingDeleteTransaction", {
-                id: id,
-            }, (response) => {
-                response.data.doOperations.forEach((operation: any) => {
-                    editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
-                        itemElement.remove();
-                    });
-                });
-                transaction(editor, response.data.doOperations, response.data.undoOperations);
-            });
-        });
+        return {
+            protyle, blockElement
+        };
     }
 
     /**
@@ -1282,16 +1198,15 @@ export class Outline extends Model {
             icon: "iconHeading" + level,
             label: window.siyuan.languages["heading" + level],
             click: () => {
-                // 找到编辑器实例
-                let editor: any;
+                let protyle: IProtyle;
                 getAllModels().editor.find(editItem => {
                     if (editItem.editor.protyle.block.rootID === this.blockId) {
-                        editor = editItem.editor.protyle;
+                        protyle = editItem.editor.protyle;
                         return true;
                     }
                 });
 
-                if (!editor) {
+                if (!protyle) {
                     return;
                 }
 
@@ -1300,71 +1215,23 @@ export class Outline extends Model {
                     level
                 }, (response) => {
                     response.data.doOperations.forEach((operation: any, index: number) => {
-                        editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             itemElement.outerHTML = operation.data;
                         });
                         // 使用 outer 后元素需要重新查询
-                        editor.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
+                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             mathRender(itemElement);
                         });
                         if (index === 0) {
-                            const focusElement = editor.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
+                            const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
                             if (focusElement) {
                                 focusElement.scrollIntoView({behavior: "smooth", block: "center"});
                             }
                         }
                     });
-                    transaction(editor, response.data.doOperations, response.data.undoOperations);
+                    transaction(protyle, response.data.doOperations, response.data.undoOperations);
                 });
             }
         };
-    }
-
-    /**
-     * 添加子标题
-     */
-    private addChildHeading(element: HTMLElement) {
-        const id = element.getAttribute("data-node-id");
-        if (!id) {
-            return;
-        }
-
-        const currentLevel = this.getHeadingLevel(element);
-        const childLevel = Math.min(currentLevel + 1, 6); // 子标题级别比当前标题高一级，最大到H6
-        const headingPrefix = "#".repeat(childLevel) + " ";
-
-        // 使用当前标题作为父标题，在其内部添加子标题
-        fetchPost("/api/block/appendBlock", {
-            data: headingPrefix,
-            dataType: "markdown",
-            parentID: id
-        }, (response) => {
-            if (response.code === 0 && response.data && response.data.length > 0) {
-                // 确保父标题保持展开状态 - 使用expandIds方式
-                const currentExpandIds = this.tree.getExpandIds();
-                if (!currentExpandIds.includes(id)) {
-                    currentExpandIds.push(id);
-                    this.tree.setExpandIds(currentExpandIds);
-
-                    // 保存展开状态到持久化存储
-                    if (!this.isPreview) {
-                        fetchPost("/api/storage/setOutlineStorage", {
-                            docID: this.blockId,
-                            val: {
-                                expandIds: currentExpandIds
-                            }
-                        });
-                    }
-                }
-
-                // 插入成功后，聚焦到新插入的标题
-                const newId = response.data[0].doOperations[0].id;
-                openFileById({
-                    app: this.app,
-                    id: newId,
-                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
-                });
-            }
-        });
     }
 }

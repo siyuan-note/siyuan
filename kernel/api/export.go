@@ -651,7 +651,7 @@ func exportPreview(c *gin.Context) {
 		block := sql.GetBlock(id)
 		if block != nil {
 			publishAccess := model.GetPublishAccess()
-			stdHTML = FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, stdHTML, true)
+			stdHTML = model.FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, stdHTML, true)
 		}
 	}
 	ret.Data = map[string]interface{}{

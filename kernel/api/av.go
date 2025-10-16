@@ -23,7 +23,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -852,7 +851,7 @@ func renderAttrView(c *gin.Context, blockID, avID, viewID, query string, page, p
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		view = FilterViewByPublishAccess(c, publishAccess, view)
+		view = model.FilterViewByPublishAccess(c, publishAccess, view)
 	}
 
 	ret.Data = map[string]interface{}{
@@ -911,7 +910,7 @@ func getAttributeViewKeys(c *gin.Context) {
 	blockAttributeViewKeys := model.GetBlockAttributeViewKeys(id)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		blockAttributeViewKeys = FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKeys)
+		blockAttributeViewKeys = model.FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKeys)
 	}
 	ret.Data = blockAttributeViewKeys
 }
@@ -969,104 +968,4 @@ func batchSetAttributeViewBlockAttrs(c *gin.Context) {
 	}
 
 	model.ReloadAttrView(avID)
-}
-
-func FilterViewByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, viewable av.Viewable) (ret av.Viewable) {
-	ret = viewable
-	publishIgnore := model.GetDisablePublishAccess(publishAccess)
-
-	switch ret.GetType() {
-	case av.LayoutTypeTable:
-		table := ret.(*av.Table)
-		filteredRows := []*av.TableRow{}
-		for _, row := range table.Rows { 
-			// 默认第一个属性是文档块
-			var block *sql.Block
-			if len(row.Cells) > 0 {
-				if row.Cells[0].Value.Block != nil {
-					id := row.Cells[0].Value.Block.ID
-					if id != "" {
-						block = sql.GetBlock(id)
-					}
-				}
-			}
-			if block != nil {
-				// 不显示禁止文档
-				if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
-					row = nil
-				}
-			}
-			if row != nil {
-				filteredRows = append(filteredRows, row)
-			}
-		}
-		table.Rows = filteredRows
-		if table.Groups != nil {
-			for i, viewable := range table.Groups {
-				table.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
-			}
-		}
-	case av.LayoutTypeGallery:
-		gallery := ret.(*av.Gallery)
-		filteredCards := []*av.GalleryCard{}
-		for _, card := range gallery.Cards {
-			// 默认第一个属性是文档块
-			var block *sql.Block
-			if len(card.Values) > 0 {
-				if card.Values[0].Value.Block != nil {
-					id := card.Values[0].Value.Block.ID
-					if id != "" {
-						block = sql.GetBlock(id)
-					}
-				}
-			}
-			if block != nil {
-				// 替换封面
-				newCoverContent := FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, card.CoverContent, true)
-				if card.CoverContent != newCoverContent {
-					card.CoverContent = newCoverContent
-					card.CoverURL = ""
-				}
-
-				// 不显示禁止文档
-				if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
-					card = nil
-				}
-			}
-			if card != nil {
-				filteredCards = append(filteredCards, card)
-			}
-		}
-		gallery.Cards = filteredCards
-		if gallery.Groups != nil {
-			for i, viewable := range gallery.Groups {
-				gallery.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
-			}
-		}
-	// TODO: 适配看板视图
-	}
-	return
-}
-
-func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, blockAttributeViewKeys []*model.BlockAttributeViewKeys) (ret []*model.BlockAttributeViewKeys) {
-	publishIgnore := model.GetDisablePublishAccess(publishAccess)
-	ret = []*model.BlockAttributeViewKeys{}
-	for _, blockAttributeViewKey := range blockAttributeViewKeys {
-		accessable := false
-		blocks := sql.GetBlocks(blockAttributeViewKey.BlockIDs)
-		for _, block := range blocks {
-			if block == nil {
-				continue
-			}
-			passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-			if (password == "" || model.CheckPublishAuthCookie(c, passwordID, password)) && model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
-				accessable = true
-				break
-			}
-		}
-		if accessable {
-			ret = append(ret, blockAttributeViewKey)
-		}
-	}
-	return
 }

@@ -26,9 +26,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -381,7 +378,7 @@ func getDocInfo(c *gin.Context) {
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		info = FilterBlockInfoByPublishAccess(c, publishAccess, info)
+		info = model.FilterBlockInfoByPublishAccess(c, publishAccess, info)
 	}
 	ret.Data = info
 }
@@ -830,50 +827,4 @@ func getTailChildBlocks(c *gin.Context) {
 	}
 
 	ret.Data = model.GetTailChildBlocks(id, n)
-}
-
-func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, info *model.BlockInfo) (ret *model.BlockInfo) {
-	ret = info
-	if info == nil {
-		return
-	}
-
-	publishIgnore := model.GetDisablePublishAccess(publishAccess)
-	filteredAttrViews := []*model.AttrView{}
-	avIDs := []string{}
-	for _, attrView := range info.AttrViews {
-		avBlocksAccessable := false
-		if attrView.ID != "" {
-			avBlockIDs := treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
-			avBlocks := sql.GetBlocks(avBlockIDs)
-			for _, avBlock := range avBlocks {
-				if avBlock == nil {
-					continue
-				}
-				passwordID, password := model.GetPathPasswordByPublishAccess(avBlock.Box, avBlock.Path, publishAccess);
-				if (password == "" || model.CheckPublishAuthCookie(c, passwordID, password)) && model.CheckPathAccessableByPublishIgnore(avBlock.Box, avBlock.Path, publishIgnore) {
-					avBlocksAccessable = true
-					break
-				}
-			}
-		}
-		if avBlocksAccessable {
-			filteredAttrViews = append(filteredAttrViews, attrView)
-			avIDs = append(avIDs, attrView.ID)
-		}
-	}
-	ret.AttrViews = filteredAttrViews
-	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
-
-	block := sql.GetBlock(info.RootID)
-	if block != nil {
-		passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess);
-		if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
-			ret.IAL["name"] = ""
-			ret.IAL["alias"] = ""
-			ret.IAL["memo"] = ""
-			ret.IAL["bookmark"] = ""
-		}
-	}
-	return
 }

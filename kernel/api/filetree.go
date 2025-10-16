@@ -1196,7 +1196,7 @@ func getDoc(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		newContent := FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
+		newContent := model.FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
 		if newContent != content {
 			content = newContent
 			scroll = false  // 避免长页面可通过滚动无限刷出多个锁
@@ -1352,53 +1352,4 @@ func authFilePublishAccess(c *gin.Context) {
 			break
 		}
 	}
-}
-
-func FilterContentByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, box string, docPath string, content string, onlyIcon bool) (ret string) {
-	ret = content
-	
-	// 密码访问
-	passwordID, password := model.GetPathPasswordByPublishAccess(box, docPath, publishAccess)
-	if password != "" {
-		if !model.CheckPublishAuthCookie(c, passwordID, password) {
-			if onlyIcon {
-				passwordHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🔒</span>
-</div>`
-				ret = fmt.Sprintf(passwordHTML, passwordID)
-			} else {
-				passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🔒</span>
-	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center; margin: 0 auto 0 auto; max-width:230px;">
-		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
-		<input class="b3-form__icon-input b3-text-field fn__block" placeholder="%s" style="padding-right:25px !important;">
-		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
-	</label>
-</div>`
-				ret = fmt.Sprintf(passwordHTML, passwordID, model.Conf.Language(275))
-			}
-		}
-	}
-
-	// 禁止访问
-	ID := box
-	if docPath != "/" {
-		ID = strings.TrimSuffix(path.Base(docPath), ".sy")
-	}
-	publishIgnore := model.GetDisablePublishAccess(publishAccess)
-	if !model.CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) {
-		if onlyIcon {
-			forbiddenHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🚫</span>
-</div>`
-			ret = fmt.Sprintf(forbiddenHTML, ID)
-		} else {
-			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px; line-height:1.2;">🚫</span>
-	<span style="font-size:2em;">%s</span>
-</div>`
-			ret = fmt.Sprintf(forbiddenHTML, ID, model.Conf.Language(276))
-		}
-	}
-	return
 }

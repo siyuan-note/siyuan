@@ -687,39 +687,3 @@ func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[stri
 	}
 	return
 }
-
-func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDefs) (retRefDefs []*RefDefs, originalRefBlockIDs map[string]string) {
-	retRefDefs = []*RefDefs{}
-	IDs := []string{}
-	for _, refDef := range refDefs {
-		IDs = append(IDs, refDef.RefID)
-		IDs = append(IDs, refDef.DefIDs...)
-	}
-	IDs = gulu.Str.RemoveDuplicatedElem(IDs)
-	blocks := sql.GetBlocks(IDs)
-	blocks = FilterSQLBlocksByPublishIgnore(publishIgnore, blocks)
-	visibles := make(map[string]bool)
-	for _, ID := range IDs {
-		visibles[ID] = false
-	}
-	for _, block := range blocks {
-		visibles[block.ID] = true
-	}
-	for _, refDef := range refDefs {
-		if !visibles[refDef.RefID] {
-			continue
-		}
-		newDefIDs := []string{}
-		for i, defID := range refDef.DefIDs {
-			if visibles[defID] {
-				newDefIDs = append(newDefIDs, refDef.DefIDs[i])
-			}
-		}
-		refDef.DefIDs = newDefIDs
-		if len(refDef.DefIDs) > 0 {
-			retRefDefs = append(retRefDefs, refDef)
-		}
-	}
-	originalRefBlockIDs = buildBacklinkListItemRefs(retRefDefs)
-	return
-}

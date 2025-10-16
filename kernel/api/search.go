@@ -313,7 +313,7 @@ func searchEmbedBlock(c *gin.Context) {
 	blocks := model.SearchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		blocks = FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
+		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
 	}
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
@@ -489,15 +489,6 @@ func parseSearchAssetContentArgs(arg map[string]interface{}) (page, pageSize int
 	orderByArg := arg["orderBy"]
 	if nil != orderByArg {
 		orderBy = int(orderByArg.(float64))
-	}
-	return
-}
-
-func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess model.PublishAccess, embedBlocks []*model.EmbedBlock) (ret []*model.EmbedBlock) { 
-	ret = []*model.EmbedBlock{}
-	for _, embedBlock := range embedBlocks {
-		embedBlock.Block.Content = FilterContentByPublishAccess(c, publishAccess, embedBlock.Block.Box, embedBlock.Block.Path, embedBlock.Block.Content, false)
-		ret = append(ret, embedBlock)
 	}
 	return
 }

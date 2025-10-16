@@ -26,6 +26,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -210,6 +211,21 @@ func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess 
 		}
 	}
 	return
+}
+
+func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
+	authCookie := util.SHA256Hash([]byte(ID + password))
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name: "publish-auth-" + ID,
+		Value: authCookie,
+		MaxAge: 5 * 60,
+		Path: "/",
+	})
+}
+
+func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
+	authCookie, err := c.Request.Cookie("publish-auth-" + ID)
+	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID + password))
 }
 
 func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, viewable av.Viewable) (ret av.Viewable) {

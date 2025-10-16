@@ -16,12 +16,7 @@
 
 package model
 
-import (
-	"net/http"
-	
-	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/siyuan/kernel/util"
-)
+import "github.com/gin-gonic/gin"
 
 type Role uint
 
@@ -66,19 +61,4 @@ func IsAdminRoleContext(c *gin.Context) bool {
 
 func IsReadOnlyRoleContext(c *gin.Context) bool {
 	return IsReadOnlyRole(GetGinContextRole(c))
-}
-
-func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
-	authCookie := util.SHA256Hash([]byte(ID + password))
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name: "publish-auth-" + ID,
-		Value: authCookie,
-		MaxAge: 5 * 60,
-		Path: "/",
-	})
-}
-
-func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
-	authCookie, err := c.Request.Cookie("publish-auth-" + ID)
-	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID + password))
 }

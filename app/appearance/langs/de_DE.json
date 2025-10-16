@@ -203,7 +203,7 @@
     "imgSrc": "Bildlink",
     "aText": "Link-Ankertext",
     "aTitle": "Linktitel",
-    "aHref": "Linklink",
+    "aHref": "Link-URL",
     "code": "Inline-Code",
     "em": "Kursiv",
     "strong": "Fett",
@@ -223,6 +223,7 @@
     "mathBlock": "Formelblock",
     "htmlBlock": "HTML-Block"
   },
+  "copyAHref": "Link-URL kopieren",
   "selected": "Ausgewählt",
   "loadMore": "Mehr laden",
   "tempUnlock": "Temporär entsperren",

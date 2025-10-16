@@ -223,6 +223,7 @@
     "mathBlock": "Blocco di formule",
     "htmlBlock": "Blocco HTML"
   },
+  "copyAHref": "Copia URL del collegamento",
   "selected": "Selezionato",
   "loadMore": "Carica di più",
   "tempUnlock": "Sblocca temporaneamente",

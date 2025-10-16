@@ -673,11 +673,11 @@ export class Outline extends Model {
      */
     private setFilter() {
         // 还原 display
-        this.element.querySelectorAll("li.b3-list-item").forEach((item: HTMLElement) => {
+        this.element.querySelectorAll('li.b3-list-item[style$="display: none;"]').forEach((item: HTMLElement) => {
             item.style.display = "";
         });
         this.element.querySelectorAll("ul.fn__none").forEach((item) => {
-            item.classList.remove("fn__none");
+            item.previousElementSibling.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
         });
         const keyword = (this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value.toLowerCase();
         if (keyword) {
@@ -685,7 +685,6 @@ export class Outline extends Model {
             if (!this.preFilterExpandIds) {
                 this.preFilterExpandIds = this.tree.getExpandIds();
             }
-
             const processUL = (ul: Element) => {
                 let hasMatch = false;
                 let hasChildMatch = false;
@@ -708,13 +707,13 @@ export class Outline extends Model {
                         if (nextUlElement) {
                             nextUlElement.classList.remove("fn__none");
                             if (childResult.hasMatch || childResult.hasChildMatch) {
-                                // 子项也有命中，保持展开状态，但隐藏未命中的子项由子级处理
+                                // 子项也有命中
                                 arrowElement.classList.add("b3-list-item__arrow--open");
                                 nextUlElement.classList.remove("fn__none");
                             } else {
-                                // 子项无命中，折叠所有子项但保持可展开
+                                // 子项无命中，折叠所有子项
                                 arrowElement.classList.remove("b3-list-item__arrow--open");
-                                // 折叠但不完全隐藏，保持子项可访问性
+                                arrowElement.parentElement.classList.add("fn__hidden");
                                 nextUlElement.classList.add("fn__none");
                             }
                         }

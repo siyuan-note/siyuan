@@ -21,7 +21,7 @@ import {Editor} from "../../editor";
 import {writeText, isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
 import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
-import {focusBlock} from "../../protyle/util/selection";
+import {focusBlock, focusByWbr} from "../../protyle/util/selection";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -952,17 +952,22 @@ export class Outline extends Model {
             icon: "iconBefore",
             label: window.siyuan.languages.insertSameLevelHeadingBefore,
             click: () => {
-                fetchPost("/api/block/insertBlock", {
-                    data: "#".repeat(currentLevel) + " ",
-                    dataType: "markdown",
-                    nextID: id
-                }, (response) => {
-                    openFileById({
-                        app: this.app,
-                        id: response.data[0].doOperations[0].id,
-                        action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]
-                    });
-                });
+                const data = this.getProtyleAndBlockElement(element);
+                const newId = Lute.NewNodeID();
+                const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                transaction(data.protyle, [{
+                    action: "insert",
+                    data: html,
+                    id: newId,
+                    previousID: data.blockElement.previousElementSibling?.getAttribute("data-node-id"),
+                    parentID: data.blockElement.parentElement.getAttribute("data-node-id") || data.protyle.block.parentID,
+                }], [{
+                    action: "delete",
+                    id: newId
+                }]);
+                data.blockElement.insertAdjacentHTML("beforebegin", html);
+                data.blockElement.previousElementSibling.scrollIntoView();
+                focusByWbr(data.blockElement.previousElementSibling, document.createRange());
             }
         }).element);
 
@@ -974,17 +979,26 @@ export class Outline extends Model {
                 fetchPost("/api/block/getHeadingDeleteTransaction", {
                     id,
                 }, (deleteResponse) => {
-                    fetchPost("/api/block/insertBlock", {
-                        data: "#".repeat(currentLevel) + " ",
-                        dataType: "markdown",
-                        previousID: deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id
-                    }, (response) => {
-                        openFileById({
-                            app: this.app,
-                            id: response.data[0].doOperations[0].id,
-                            action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]
-                        });
-                    });
+                    const data = this.getProtyleAndBlockElement(element);
+                    const previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
+
+                    const newId = Lute.NewNodeID();
+                    const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                    transaction(data.protyle, [{
+                        action: "insert",
+                        data: html,
+                        id: newId,
+                        previousID,
+                    }], [{
+                        action: "delete",
+                        id: newId
+                    }]);
+                    const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
+                    if (previousElement) {
+                        previousElement.insertAdjacentHTML("afterend", html);
+                        previousElement.nextElementSibling.scrollIntoView();
+                        focusByWbr(previousElement.nextElementSibling, document.createRange());
+                    }
                 });
             }
         }).element);
@@ -1006,19 +1020,26 @@ export class Outline extends Model {
                                 return true;
                             }
                         });
-                        fetchPost("/api/block/insertBlock", {
-                            data: "#".repeat(Math.min(currentLevel + 1, 6)) + " ",
-                            dataType: "markdown",
+
+
+                        const data = this.getProtyleAndBlockElement(element);
+                        const newId = Lute.NewNodeID();
+                        const html = `<div data-subtype="h${currentLevel + 1}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel + 1}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                        transaction(data.protyle, [{
+                            action: "insert",
+                            data: html,
+                            id: newId,
                             previousID,
-                        }, (response) => {
-                            if (response.code === 0 && response.data && response.data.length > 0) {
-                                openFileById({
-                                    app: this.app,
-                                    id: response.data[0].doOperations[0].id,
-                                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE]
-                                });
-                            }
-                        });
+                        }], [{
+                            action: "delete",
+                            id: newId
+                        }]);
+                        const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
+                        if (previousElement) {
+                            previousElement.insertAdjacentHTML("afterend", html);
+                            previousElement.nextElementSibling.scrollIntoView();
+                            focusByWbr(previousElement.nextElementSibling, document.createRange());
+                        }
                     });
                 }
             }).element);

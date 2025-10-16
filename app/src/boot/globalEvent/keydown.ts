@@ -1335,7 +1335,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         syncGuide(app);
         return;
     }
-    if (matchHotKey(window.siyuan.config.keymap.general.commandPanel.custom, event)) {
+    if (!window.siyuan.config.readonly && matchHotKey(window.siyuan.config.keymap.general.commandPanel.custom, event)) {
         event.preventDefault();
         commandPanel(app);
         return;

@@ -1135,7 +1135,7 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconExpand",
             label: window.siyuan.languages.expandChildHeading,
-            accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.click,
+            accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.clickArrow,
             click: () => this.collapseChildren(element, true)
         }).element);
 
@@ -1143,7 +1143,7 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconContract",
             label: window.siyuan.languages.foldChildHeading,
-            accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.click,
+            accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.clickArrow,
             click: () => this.collapseChildren(element, false)
         }).element);
 
@@ -1151,7 +1151,7 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconExpand",
             label: window.siyuan.languages.expandSameLevelHeading,
-            accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.click,
+            accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.clickArrow,
             click: () => this.collapseSameLevel(element, true)
         }).element);
 
@@ -1159,7 +1159,7 @@ export class Outline extends Model {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconContract",
             label: window.siyuan.languages.foldSameLevelHeading,
-            accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.click,
+            accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.clickArrow,
             click: () => this.collapseSameLevel(element, false)
         }).element);
 

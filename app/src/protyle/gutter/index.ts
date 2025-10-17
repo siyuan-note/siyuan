@@ -929,6 +929,7 @@ export class Gutter {
         const id = buttonElement.getAttribute("data-node-id");
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
         if (selectsElement.length > 1) {
+            window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BLOCK_MULTI);
             const match = Array.from(selectsElement).find(item => {
                 if (id === item.getAttribute("data-node-id")) {
                     return true;
@@ -937,6 +938,8 @@ export class Gutter {
             if (match) {
                 return this.renderMultipleMenu(protyle, Array.from(selectsElement));
             }
+        } else {
+            window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BLOCK_SINGLE);
         }
 
         let nodeElement: Element;

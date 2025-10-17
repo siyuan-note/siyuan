@@ -233,11 +233,18 @@ export abstract class Constants {
     public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
     public static readonly MENU_DOCK_MOBILE = "dockMobileMenu"; // 移动端侧栏插件选项菜单
 
+    public static readonly MENU_BLOCK_SINGLE = "block-single"; // 单选块菜单
+    public static readonly MENU_BLOCK_MULTI = "block-multi"; // 多选块菜单
     public static readonly MENU_TITLE = "titleMenu"; // 文档块菜单
+    public static readonly MENU_TITLE_PROTYLE = "title-protyle"; // 在 Protyle 触发的文档块菜单
+    public static readonly MENU_TITLE_BREADCRUMB = "title-breadcrumb"; // 在面包屑触发的文档块菜单
     public static readonly MENU_BREADCRUMB_MORE = "breadcrumbMore"; // 面包屑更多菜单
     public static readonly MENU_BREADCRUMB_MOBILE_PATH = "breadcrumb-mobile-path"; // 移动端面包屑菜单
 
-    public static readonly MENU_DOC_TREE_MORE = "docTreeMore"; // 侧栏文档树文档的更多菜单
+    public static readonly MENU_DOC_TREE_MORE = "docTreeMore"; // 侧栏文档树右键菜单
+    public static readonly MENU_DOC_TREE_MORE_NOTEBOOK = "docTreeMore-notebook"; // 侧栏文档树右键菜单，单个笔记本
+    public static readonly MENU_DOC_TREE_MORE_DOC = "docTreeMore-doc"; // 侧栏文档树右键菜单，单个文档
+    public static readonly MENU_DOC_TREE_MORE_DOCS = "docTreeMore-docs"; // 侧栏文档树右键菜单，多个文档
     public static readonly MENU_TAG = "tagMenu"; // 侧栏标签菜单
     public static readonly MENU_BOOKMARK = "bookmarkMenu"; // 侧栏书签菜单
     public static readonly MENU_OUTLINE_CONTEXT = "outline-context"; // 大纲标题右键菜单
@@ -267,7 +274,7 @@ export abstract class Constants {
     public static readonly MENU_MOVE_PATH_HISTORY = "move-path-history"; // 移动文档窗口搜索历史菜单
 
     public static readonly MENU_BACKGROUND_ASSET = "background-asset"; // 资源文件选择器菜单
-    public static readonly MENU_AI = "ai"; // 块AI菜单
+    public static readonly MENU_AI = "ai"; // 块 AI 菜单
     public static readonly MENU_TAB_LIST = "tabList"; // 页签切换菜单
 
     // timeout

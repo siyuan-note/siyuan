@@ -623,6 +623,12 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 				}
 				newChildren[maxIndex].(map[string]interface{})["active"] = true
 			}
+			if len(newChildren) == 0 {
+				child := make(map[string]interface{})
+				child["instance"] = "Tab"
+				child["children"] = make(map[string]interface{})
+				newChildren = append(newChildren, child)
+			}
 		}
 		ret["children"] = newChildren
 	}
@@ -693,6 +699,7 @@ func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
 
 func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage map[string]interface{}) (ret map[string]interface{}) {
 	ret = localStorage
+	publishIgnore := GetInvisiblePublishAccess(publishAccess)
 	// 清空搜索历史记录
 	searchKeysItem := ret["local-searchkeys"]
 	if searchKeysItem != nil {
@@ -707,6 +714,22 @@ func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage
 		if searchAsset != nil {
 			searchAsset["k"] = ""
 			searchAsset["keys"] = []string{}
+		}
+	}
+	docInfoItem := ret["local-docinfo"]
+	if docInfoItem != nil {
+		docInfo := docInfoItem.(map[string]interface{})
+		if docInfo != nil {
+			idItem := docInfo["id"]
+			if idItem != nil {
+				id := idItem.(string)
+				block := sql.GetBlock(id)
+				if block != nil {
+					if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+						docInfo["id"] = ""
+					}
+				}
+			}
 		}
 	}
 	return

@@ -259,7 +259,7 @@ export abstract class Constants {
     public static readonly MENU_AV_COL_FORMAT_NUMBER = "av-col-format-number"; // 数据库数字字段格式化菜单
     public static readonly MENU_AV_GROUP_DATE = "avGroupDate"; // 数据库日期字段分组菜单的日期菜单
     public static readonly MENU_AV_GROUP_SORT = "avGroupSort"; // 数据库日期字段分组菜单的排序菜单
-    public static readonly MENU_AV_ASSET_EDIT = "av-asset-edit"; // 数据库资源字段链接菜单
+    public static readonly MENU_AV_ASSET_EDIT = "av-asset-edit"; // 数据库资源字段链接或资源文件菜单
     public static readonly MENU_AV_CALC = "av-calc"; // 数据库计算菜单
     public static readonly MENU_AV_PAGE_SIZE = "av-page-size"; // 数据库条目数菜单
 
@@ -275,7 +275,16 @@ export abstract class Constants {
 
     public static readonly MENU_BACKGROUND_ASSET = "background-asset"; // 资源文件选择器菜单
     public static readonly MENU_AI = "ai"; // 块 AI 菜单
+    public static readonly MENU_TAB = "tab"; // 页签右键菜单
     public static readonly MENU_TAB_LIST = "tabList"; // 页签切换菜单
+
+    public static readonly MENU_INLINE_CONTEXT = "inline-context"; // 文本右键菜单
+    public static readonly MENU_INLINE_IMG = "inline-img"; // 图片元素菜单
+    public static readonly MENU_INLINE_FILE_ANNOTATION_REF = "inline-file-annotation-ref"; // PDF 标注元素菜单
+    public static readonly MENU_INLINE_REF = "inline-block-ref"; // 块引用元素菜单
+    public static readonly MENU_INLINE_A = "inline-a"; // 超链接元素菜单
+    public static readonly MENU_INLINE_TAG = "inline-tag"; // 行级标签元素菜单
+    public static readonly MENU_INLINE_MATH = "inline-math"; // 行级公式元素菜单
 
     // timeout
     public static readonly TIMEOUT_OPENDIALOG = 50;

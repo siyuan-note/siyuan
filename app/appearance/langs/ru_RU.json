@@ -231,6 +231,8 @@
   "cancelTempUnlock": "Отменить временную разблокировку",
   "addFilter": "Добавить фильтр",
   "removeFilters": "Очистить фильтр",
+  "addSort": "Добавить сортировку",
+  "removeSorts": "Очистить сортировку",
   "checked": "Отмечено",
   "unchecked": "Не отмечено",
   "percentChecked": "Процент отмеченных",

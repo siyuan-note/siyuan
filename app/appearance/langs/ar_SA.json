@@ -231,6 +231,8 @@
   "cancelTempUnlock": "إلغاء القفل المؤقت",
   "addFilter": "إضافة عامل تصفية",
   "removeFilters": "مسح عامل تصفية",
+  "addSort": "إضافة ترتيب",
+  "removeSorts": "مسح الترتيب",
   "checked": "مكتمل",
   "unchecked": "غير مكتمل",
   "percentChecked": "نسبة المكتمل",

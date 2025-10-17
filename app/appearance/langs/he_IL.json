@@ -231,6 +231,8 @@
   "cancelTempUnlock": "בטל שחרור זמני",
   "addFilter": "הוסף מסנן",
   "removeFilters": "נקה מסננים",
+  "addSort": "הוסף מיון",
+  "removeSorts": "נקה מיון",
   "checked": "נבדק",
   "unchecked": "לא נבדק",
   "percentChecked": "אחוז נבדק",

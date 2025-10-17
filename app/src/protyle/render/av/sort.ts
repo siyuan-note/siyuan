@@ -131,11 +131,11 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
 ${html}
 <button class="b3-menu__item${sorts.length === columns.length ? " fn__none" : ""}" data-type="addSort">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.new}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.addSort}</span>
 </button>
 <button class="b3-menu__item b3-menu__item--warning${html ? "" : " fn__none"}" data-type="removeSorts">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.removeSorts}</span>
 </button>
 </div>`;
 };

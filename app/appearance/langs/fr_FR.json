@@ -231,6 +231,8 @@
   "cancelTempUnlock": "Annuler le déverrouillage temporaire",
   "addFilter": "Ajouter un filtre",
   "removeFilters": "Effacer le filtre",
+  "addSort": "Ajouter un tri",
+  "removeSorts": "Effacer le tri",
   "checked": "Coché",
   "unchecked": "Décoché",
   "percentChecked": "Pourcentage vérifié",

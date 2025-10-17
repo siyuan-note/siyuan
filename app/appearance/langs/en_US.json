@@ -231,6 +231,8 @@
   "cancelTempUnlock": "Cancel temporary unlock",
   "addFilter": "Add filter",
   "removeFilters": "Clear filter",
+  "addSort": "Add sort",
+  "removeSorts": "Clear sort",
   "checked": "Checked",
   "unchecked": "Unchecked",
   "percentChecked": "Percent checked",

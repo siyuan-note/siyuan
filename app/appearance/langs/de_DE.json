@@ -231,6 +231,8 @@
   "cancelTempUnlock": "Temporäres Entsperren abbrechen",
   "addFilter": "Filter hinzufügen",
   "removeFilters": "Filter zurücksetzen",
+  "addSort": "Sortierung hinzufügen",
+  "removeSorts": "Sortierung zurücksetzen",
   "checked": "Überprüft",
   "unchecked": "Nicht überprüft",
   "percentChecked": "Prozent geprüft",

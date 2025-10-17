@@ -224,6 +224,10 @@ export abstract class Constants {
     public static readonly DIALOG_OPENWORKSPACE = "dialog-openworkspace"; // 打开工作空间
     public static readonly DIALOG_SAVEWORKSPACE = "dialog-saveworkspace"; // 保存工作空间
 
+    // menu
+    public static readonly MENU_OUTLINE_CONTEXT = "outlineContextMenu"; // 大纲标题右键菜单
+    public static readonly MENU_OUTLINE_EXPAND_LEVEL = "outlineExpandLevelMenu"; // 大纲展开层级菜单
+
     // timeout
     public static readonly TIMEOUT_OPENDIALOG = 50;
     public static readonly TIMEOUT_DBLCLICK = 190;

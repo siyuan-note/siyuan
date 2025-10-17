@@ -272,7 +272,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === inputElement.value)) {
             return;
         }
-        const menu = new Menu("move-path-history");
+        const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
         if (menu.isOpen) {
             return;
         }
@@ -364,7 +364,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             toggleMovePathHistory();
             return;
         }
-        if (window.siyuan.menus.menu.element.getAttribute("data-name") === "move-path-history") {
+        if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_MOVE_PATH_HISTORY) {
             return;
         }
         const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;

@@ -95,7 +95,7 @@ const renderAssetList = (element: Element, k: string, position: IPosition, exts:
 };
 
 export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (url: string, name: string) => void, exts?: string[]) => {
-    const menu = new Menu("background-asset");
+    const menu = new Menu(Constants.MENU_BACKGROUND_ASSET);
     if (menu.isOpen) {
         return;
     }

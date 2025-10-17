@@ -4,6 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
 import {unicode2Emoji} from "../../../emoji";
 import {getFieldsByData} from "./view";
+import {Constants} from "../../../constants";
 
 export const addSort = (options: {
     data: IAV,
@@ -14,7 +15,7 @@ export const addSort = (options: {
     protyle: IProtyle,
     blockID: string,
 }) => {
-    const menu = new Menu("av-add-sort");
+    const menu = new Menu(Constants.MENU_AV_ADD_SORT);
     const fields = getFieldsByData(options.data);
     fields.forEach((column) => {
         let hasSort = false;

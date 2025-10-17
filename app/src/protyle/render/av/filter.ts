@@ -12,6 +12,7 @@ import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import {upDownHint} from "../../../util/upDownHint";
 import {getFieldsByData} from "./view";
+import {Constants} from "../../../constants";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["select", "number", "date", "created", "updated"].includes(type)) {
@@ -676,7 +677,7 @@ export const addFilter = (options: {
     protyle: IProtyle
     blockElement: Element
 }) => {
-    const menu = new Menu("av-add-filter");
+    const menu = new Menu(Constants.MENU_AV_ADD_FILTER);
     getFieldsByData(options.data).forEach((column) => {
         let filter: IAVFilter;
         options.data.view.filters.find((item) => {

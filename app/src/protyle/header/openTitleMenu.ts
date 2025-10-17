@@ -29,7 +29,7 @@ import {hasTopClosestByClassName} from "../util/hasClosest";
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "titleMenu") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
         window.siyuan.menus.menu.remove();
         return;
     }
@@ -37,7 +37,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         id: protyle.block.rootID
     }, (response) => {
         window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.setAttribute("data-name", "titleMenu");
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TITLE);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",
             label: window.siyuan.languages.copy,

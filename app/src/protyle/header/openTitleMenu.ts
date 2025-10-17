@@ -129,6 +129,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     }
                 }).element);
             }
+            const isCardMade = !!response.data.ial[Constants.CUSTOM_RIFF_DECKS];
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
@@ -151,9 +152,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     });
                 }
             }, {
-                id: "quickMakeCard",
+                id: isCardMade ? "removeCard" : "quickMakeCard",
                 iconHTML: "",
-                label: window.siyuan.languages.quickMakeCard,
+                label: isCardMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 click: () => {
                     let titleElement = protyle.title?.element;

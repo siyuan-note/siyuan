@@ -30,7 +30,7 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gabriel-vasile/mimetype v1.4.10
-	github.com/gin-contrib/gzip v1.2.4
+	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-contrib/sse v1.1.0
 	github.com/gin-gonic/gin v1.11.0

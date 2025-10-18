@@ -3,6 +3,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {clipboard} from "electron";
+import {ipcRenderer} from "electron";
 /// #endif
 
 export const encodeBase64 = (text: string): string => {
@@ -512,3 +513,38 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
         }
     });
 };
+
+/// #if !BROWSER
+export const initFocusFix = () => {
+    if (!isWindows()) {
+        return;
+    }
+    const originalAlert = window.alert;
+    const originalConfirm = window.confirm;
+    const fixFocusAfterDialog = () => {
+        ipcRenderer.send("siyuan-focus-fix");
+    };
+    window.alert = function(message: string) {
+        try {
+            const result = originalAlert.call(this, message);
+            fixFocusAfterDialog();
+            return result;
+        } catch (error) {
+            console.error("alert error:", error);
+            fixFocusAfterDialog();
+            return undefined;
+        }
+    };
+    window.confirm = function(message: string) {
+        try {
+            const result = originalConfirm.call(this, message);
+            fixFocusAfterDialog();
+            return result;
+        } catch (error) {
+            console.error("confirm error:", error);
+            fixFocusAfterDialog();
+            return false;
+        }
+    };
+};
+/// #endif

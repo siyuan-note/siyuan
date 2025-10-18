@@ -258,9 +258,10 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let starIndex: number;
-    if (nodeElements[nodeElements.length - 1].classList.contains("li") &&
-        nodeElements[nodeElements.length - 1].getAttribute("data-subtype") === "o") {
-        starIndex = parseInt(nodeElements[nodeElements.length - 1].getAttribute("data-marker"), 10);
+    const lastElement = nodeElements[nodeElements.length - 1];
+    if (lastElement.classList.contains("li") &&
+        lastElement.getAttribute("data-subtype") === "o") {
+        starIndex = parseInt(lastElement.getAttribute("data-marker"), 10);
     }
     const foldHeadingIds = [];
     for (let index = nodeElements.length - 1; index >= 0; --index) {
@@ -299,12 +300,12 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             tempElement.setAttribute("data-marker", (orderIndex) + ".");
             tempElement.querySelector(".protyle-action--order").textContent = (orderIndex) + ".";
         }
-        nodeElements[0].after(processClonePHElement(tempElement));
+        lastElement.after(processClonePHElement(tempElement));
         doOperations.push({
             action: "insert",
             data: tempElement.outerHTML,
             id: newId,
-            previousID: nodeElements[0].getAttribute("data-node-id"),
+            previousID: lastElement.getAttribute("data-node-id"),
         });
         undoOperations.push({
             action: "delete",

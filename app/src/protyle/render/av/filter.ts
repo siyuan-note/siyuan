@@ -784,22 +784,29 @@ export const getFiltersHTML = (data: IAV) => {
                             filterText = ` ${filterText}≤ ${dateValue}`;
                         }
                     }
-                } else if (["mSelect", "select"].includes(filterValue.type) && filterValue.mSelect?.length > 0) {
+                } else if (["mSelect", "select"].includes(filterValue.type)) {
                     let selectContent = "";
-                    filterValue.mSelect.forEach((item, index) => {
-                        selectContent += item.content;
-                        if (index !== filterValue.mSelect.length - 1) {
-                            selectContent += ", ";
+                    if (filterValue.mSelect?.length > 0) {
+                        filterValue.mSelect.forEach((item, index) => {
+                            selectContent += item.content;
+                            if (index !== filterValue.mSelect.length - 1) {
+                                selectContent += ", ";
+                            }
+                        });
+                        if (selectContent) {
+                            if ("Contains" === filter.operator) {
+                                filterText = `: ${filterText}${selectContent}`;
+                            } else if (filter.operator === "Does not contains") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                            } else if (filter.operator === "=") {
+                                filterText = `: ${filterText}${selectContent}`;
+                            } else if (filter.operator === "!=") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                            }
                         }
-                    });
-                    if ("Contains" === filter.operator) {
-                        filterText = `: ${filterText}${selectContent}`;
-                    } else if (filter.operator === "Does not contains") {
-                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
-                    } else if (filter.operator === "=") {
-                        filterText = `: ${filterText}${selectContent}`;
-                    } else if (filter.operator === "!=") {
-                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                    }
+                    if (!selectContent && ["rollup", "mAsset"].includes(item.type) && !["Is empty", "Is not empty"].includes(filter.operator)) {
+                        filterText = "";
                     }
                 } else if (filterValue.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {

@@ -809,33 +809,38 @@ export const getFiltersHTML = (data: IAV) => {
                     } else if ("<=" === filter.operator) {
                         filterText = ` ${filterText}≤ ${filterValue.number.content}`;
                     }
-                } else if (["text", "block", "url", "mAsset", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
+                } else if (["text", "block", "url", "mAsset", "phone", "email", "relation", "template"].includes(filterValue.type)) {
                     let content: string;
-                    if (filterValue.type === "relation") {
-                        content = filterValue.relation.blockIDs[0] || "";
-                    } else if (filterValue.type === "mAsset") {
-                        content = filterValue.mAsset[0]?.content || "";
-                    } else {
-                        content = filterValue[filterValue.type as "text"].content || "";
-                    }
-                    if (content) {
-                        if (["=", "Contains"].includes(filter.operator)) {
-                            filterText = `: ${filterText}${content}`;
-                        } else if (filter.operator === "Does not contains") {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
-                        } else if (filter.operator === "!=") {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${content}`;
-                        } else if ("Starts with" === filter.operator) {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
-                        } else if ("Ends with" === filter.operator) {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
-                        } else if ([">", "<"].includes(filter.operator)) {
-                            filterText = ` ${filterText}${filter.operator} ${content}`;
-                        } else if (">=" === filter.operator) {
-                            filterText = ` ${filterText}≥ ${content}`;
-                        } else if ("<=" === filter.operator) {
-                            filterText = ` ${filterText}≤ ${content}`;
+                    if (filterValue[filterValue.type as "text"]) {
+                        if (filterValue.type === "relation") {
+                            content = filterValue.relation.blockIDs[0] || "";
+                        } else if (filterValue.type === "mAsset") {
+                            content = filterValue.mAsset[0]?.content || "";
+                        } else {
+                            content = filterValue[filterValue.type as "text"].content || "";
                         }
+                        if (content) {
+                            if (["=", "Contains"].includes(filter.operator)) {
+                                filterText = `: ${filterText}${content}`;
+                            } else if (filter.operator === "Does not contains") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
+                            } else if (filter.operator === "!=") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${content}`;
+                            } else if ("Starts with" === filter.operator) {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
+                            } else if ("Ends with" === filter.operator) {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                            } else if ([">", "<"].includes(filter.operator)) {
+                                filterText = ` ${filterText}${filter.operator} ${content}`;
+                            } else if (">=" === filter.operator) {
+                                filterText = ` ${filterText}≥ ${content}`;
+                            } else if ("<=" === filter.operator) {
+                                filterText = ` ${filterText}≤ ${content}`;
+                            }
+                        }
+                    }
+                    if (!content && ["rollup", "mAsset"].includes(item.type) && !["Is empty", "Is not empty"].includes(filter.operator)) {
+                        filterText = "";
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterText ? " b3-chip--primary" : ""}">

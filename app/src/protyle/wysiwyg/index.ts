@@ -307,9 +307,6 @@ export class WYSIWYG {
                         html += getTextStar(item) + "\n\n";
                     } else {
                         let itemHTML = "";
-                        if (item.getAttribute("data-type") === "NodeListItem") {
-                            listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
-                        }
                         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                             needClipboardWrite = true;
                             const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
@@ -326,12 +323,18 @@ export class WYSIWYG {
                         } else {
                             itemHTML = removeEmbed(item);
                         }
-                        if (listHTML && (i === selectElements.length - 1 ||
-                            selectElements[i + 1].getAttribute("data-type") !== "NodeListItem" ||
-                            selectElements[i + 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype")
-                        )) {
-                            html += `${listHTML}${itemHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
-                            listHTML = "";
+                        if (item.getAttribute("data-type") === "NodeListItem") {
+                            if (!listHTML) {
+                                listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
+                            }
+                            listHTML += itemHTML;
+                            if (i === selectElements.length - 1 ||
+                                selectElements[i + 1].getAttribute("data-type") !== "NodeListItem" ||
+                                selectElements[i + 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype")
+                            ) {
+                                html += `${listHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                                listHTML = "";
+                            }
                         } else {
                             html += itemHTML;
                         }
@@ -1826,9 +1829,6 @@ export class WYSIWYG {
                 for (let i = 0; i < selectElements.length; i++) {
                     const item = getTopAloneElement(selectElements[i]);
                     let itemHTML = "";
-                    if (item.getAttribute("data-type") === "NodeListItem") {
-                        listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
-                    }
                     if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                         needClipboardWrite = true;
                         const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
@@ -1845,12 +1845,18 @@ export class WYSIWYG {
                     } else {
                         itemHTML = removeEmbed(item);
                     }
-                    if (listHTML && (i === selectElements.length - 1 ||
-                        selectElements[i + 1].getAttribute("data-type") !== "NodeListItem" ||
-                        selectElements[i + 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype")
-                    )) {
-                        html += `${listHTML}${itemHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
-                        listHTML = "";
+                    if (item.getAttribute("data-type") === "NodeListItem") {
+                        if (!listHTML) {
+                            listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
+                        }
+                        listHTML += itemHTML;
+                        if (i === selectElements.length - 1 ||
+                            selectElements[i + 1].getAttribute("data-type") !== "NodeListItem" ||
+                            selectElements[i + 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype")
+                        ) {
+                            html += `${listHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                            listHTML = "";
+                        }
                     } else {
                         html += itemHTML;
                     }

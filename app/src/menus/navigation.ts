@@ -32,6 +32,7 @@ import {openByMobile} from "../protyle/util/compatibility";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
+    window.siyuan.menus.menu.element.setAttribute("data-subname", Constants.MENU_DOC_TREE_MORE_DOCS);
     const fileItemElement = Array.from(selectItemElements).find(item => {
         if (item.getAttribute("data-type") === "navigation-file") {
             return true;
@@ -187,6 +188,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
 
 export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return window.siyuan.menus.menu;
@@ -202,6 +204,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus");
     if (selectItemElements.length > 1) {
         return initMultiMenu(selectItemElements, app);
+    } else {
+        window.siyuan.menus.menu.element.setAttribute("data-subname", Constants.MENU_DOC_TREE_MORE_NOTEBOOK);
     }
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
@@ -417,6 +421,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
 
 export const initFileMenu = (app: App, notebookId: string, pathString: string, liElement: Element) => {
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return window.siyuan.menus.menu;
@@ -706,7 +711,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             separatorPosition: "top",
         });
     }
-    window.siyuan.menus.menu.element.setAttribute("data-name", "docTreeMore");
+    window.siyuan.menus.menu.element.setAttribute("data-subname", Constants.MENU_DOC_TREE_MORE_DOC);
     return window.siyuan.menus.menu;
 };
 

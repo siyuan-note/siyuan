@@ -96,7 +96,7 @@ ${padHTML}
                         });
                     } else {
                         const targetRect = target.getBoundingClientRect();
-                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, isLeft: true});
+                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, isLeft: true}, Constants.MENU_TITLE_BREADCRUMB);
                     }
                     event.stopPropagation();
                     event.preventDefault();
@@ -199,7 +199,7 @@ ${padHTML}
     }
 
     private genMobileMenu(protyle: IProtyle) {
-        const menu = new Menu("breadcrumb-mobile-path");
+        const menu = new Menu(Constants.MENU_BREADCRUMB_MOBILE_PATH);
         let blockElement: Element;
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
@@ -245,7 +245,7 @@ ${padHTML}
 
     public showMenu(protyle: IProtyle, position: IPosition) {
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-            window.siyuan.menus.menu.element.getAttribute("data-name") === "breadcrumbMore") {
+            window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BREADCRUMB_MORE) {
             window.siyuan.menus.menu.remove();
             return;
         }
@@ -256,7 +256,7 @@ ${padHTML}
         }
         fetchPost("/api/block/getTreeStat", {id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)}, (response) => {
             window.siyuan.menus.menu.remove();
-            window.siyuan.menus.menu.element.setAttribute("data-name", "breadcrumbMore");
+            window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BREADCRUMB_MORE);
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
                 let uploadHTML = "";
                 uploadHTML = '<input class="b3-form__upload" type="file" multiple="multiple"';

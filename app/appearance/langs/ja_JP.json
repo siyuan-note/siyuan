@@ -231,6 +231,8 @@
   "cancelTempUnlock": "一時的なロック解除をキャンセル",
   "addFilter": "フィルタを追加",
   "removeFilters": "フィルタを削除",
+  "addSort": "ソートを追加",
+  "removeSorts": "ソートを削除",
   "checked": "チェック済み",
   "unchecked": "未チェック",
   "percentChecked": "チェック済みの割合",

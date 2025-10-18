@@ -183,9 +183,10 @@ export class Title {
                     event.stopPropagation();
                 }
             });
-            const iconElement = this.element.querySelector(".protyle-title__icon");
-            iconElement.addEventListener("click", () => {
-                if (window.siyuan.shiftIsPressed) {
+            const iconElement = this.element.querySelector(".protyle-title__icon") as HTMLElement;
+            iconElement.addEventListener("click", (event) => {
+                // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
+                if (event.shiftKey) {
                     fetchPost("/api/block/getDocInfo", {
                         id: protyle.block.rootID
                     }, (response) => {
@@ -193,15 +194,15 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom});
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom}, Constants.MENU_TITLE_PROTYLE);
                 }
             });
             this.element.addEventListener("contextmenu", (event) => {
                 if (event.shiftKey) {
                     return;
                 }
-                if (getSelection().rangeCount === 0) {
-                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
+                if (iconElement.contains((event.target as HTMLElement))) {
+                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY}, Constants.MENU_TITLE_PROTYLE);
                     return;
                 }
                 protyle.toolbar?.element.classList.add("fn__none");

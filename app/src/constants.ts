@@ -224,6 +224,68 @@ export abstract class Constants {
     public static readonly DIALOG_OPENWORKSPACE = "dialog-openworkspace"; // 打开工作空间
     public static readonly DIALOG_SAVEWORKSPACE = "dialog-saveworkspace"; // 保存工作空间
 
+    // menu
+    public static readonly MENU_BAR_WORKSPACE = "barWorkspace"; // 顶栏主菜单
+    public static readonly MENU_BAR_PLUGIN = "topBarPlugin"; // 顶栏插件菜单
+    public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
+    public static readonly MENU_BAR_MORE = "barmore"; // 顶栏外观菜单
+    public static readonly MENU_STATUS_HELP = "statusHelp"; // 状态栏帮助菜单
+    public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
+    public static readonly MENU_DOCK_MOBILE = "dockMobileMenu"; // 移动端侧栏插件选项菜单
+
+    public static readonly MENU_BLOCK_SINGLE = "block-single"; // 单选块菜单
+    public static readonly MENU_BLOCK_MULTI = "block-multi"; // 多选块菜单
+    public static readonly MENU_TITLE = "titleMenu"; // 文档块菜单
+    public static readonly MENU_TITLE_PROTYLE = "title-protyle"; // 在 Protyle 触发的文档块菜单
+    public static readonly MENU_TITLE_BREADCRUMB = "title-breadcrumb"; // 在面包屑触发的文档块菜单
+    public static readonly MENU_BREADCRUMB_MORE = "breadcrumbMore"; // 面包屑更多菜单
+    public static readonly MENU_BREADCRUMB_MOBILE_PATH = "breadcrumb-mobile-path"; // 移动端面包屑菜单
+
+    public static readonly MENU_DOC_TREE_MORE = "docTreeMore"; // 侧栏文档树右键菜单
+    public static readonly MENU_DOC_TREE_MORE_NOTEBOOK = "docTreeMore-notebook"; // 侧栏文档树右键菜单，单个笔记本
+    public static readonly MENU_DOC_TREE_MORE_DOC = "docTreeMore-doc"; // 侧栏文档树右键菜单，单个文档
+    public static readonly MENU_DOC_TREE_MORE_DOCS = "docTreeMore-docs"; // 侧栏文档树右键菜单，多个文档
+    public static readonly MENU_TAG = "tagMenu"; // 侧栏标签菜单
+    public static readonly MENU_BOOKMARK = "bookmarkMenu"; // 侧栏书签菜单
+    public static readonly MENU_OUTLINE_CONTEXT = "outline-context"; // 大纲标题右键菜单
+    public static readonly MENU_OUTLINE_EXPAND_LEVEL = "outline-expand-level"; // 大纲展开层级菜单
+
+    public static readonly MENU_AV_VIEW = "av-view"; // 数据库视图标题菜单
+    public static readonly MENU_AV_HEADER_CELL = "av-header-cell"; // 数据库字段标题菜单
+    public static readonly MENU_AV_HEADER_ADD = "av-header-add"; // 数据库添加字段菜单
+    public static readonly MENU_AV_ADD_FILTER = "av-add-filter"; // 数据库添加筛选条件菜单
+    public static readonly MENU_AV_ADD_SORT = "av-add-sort"; // 数据库添加排序条件菜单
+    public static readonly MENU_AV_COL_OPTION = "av-col-option"; // 数据库单选多选字段的选项编辑菜单
+    public static readonly MENU_AV_COL_FORMAT_NUMBER = "av-col-format-number"; // 数据库数字字段格式化菜单
+    public static readonly MENU_AV_GROUP_DATE = "avGroupDate"; // 数据库日期字段分组菜单的日期菜单
+    public static readonly MENU_AV_GROUP_SORT = "avGroupSort"; // 数据库日期字段分组菜单的排序菜单
+    public static readonly MENU_AV_ASSET_EDIT = "av-asset-edit"; // 数据库资源字段链接或资源文件菜单
+    public static readonly MENU_AV_CALC = "av-calc"; // 数据库计算菜单
+    public static readonly MENU_AV_PAGE_SIZE = "av-page-size"; // 数据库条目数菜单
+
+    public static readonly MENU_SEARCH_MORE = "searchMore"; // 搜索更多菜单
+    public static readonly MENU_SEARCH_METHOD = "searchMethod"; // 搜索方式菜单
+    public static readonly MENU_SEARCH_ASSET_MORE = "searchAssetMore"; // 资源文件搜索更多菜单
+    public static readonly MENU_SEARCH_ASSET_METHOD = "searchAssetMethod"; // 资源文件搜索方式菜单
+    public static readonly MENU_SEARCH_UNREF_MORE = "searchUnRefMore"; // 列出引用失效的块的更多菜单
+    public static readonly MENU_SEARCH_HISTORY = "search-history"; // 搜索历史菜单
+    public static readonly MENU_SEARCH_REPLACE_HISTORY = "search-replace-history"; // 替换历史菜单
+    public static readonly MENU_SEARCH_ASSET_HISTORY = "search-asset-history"; // 资源文件搜索历史菜单
+    public static readonly MENU_MOVE_PATH_HISTORY = "move-path-history"; // 移动文档窗口搜索历史菜单
+
+    public static readonly MENU_BACKGROUND_ASSET = "background-asset"; // 资源文件选择器菜单
+    public static readonly MENU_AI = "ai"; // 块 AI 菜单
+    public static readonly MENU_TAB = "tab"; // 页签右键菜单
+    public static readonly MENU_TAB_LIST = "tabList"; // 页签切换菜单
+
+    public static readonly MENU_INLINE_CONTEXT = "inline-context"; // 文本右键菜单
+    public static readonly MENU_INLINE_IMG = "inline-img"; // 图片元素菜单
+    public static readonly MENU_INLINE_FILE_ANNOTATION_REF = "inline-file-annotation-ref"; // PDF 标注元素菜单
+    public static readonly MENU_INLINE_REF = "inline-block-ref"; // 块引用元素菜单
+    public static readonly MENU_INLINE_A = "inline-a"; // 超链接元素菜单
+    public static readonly MENU_INLINE_TAG = "inline-tag"; // 行级标签元素菜单
+    public static readonly MENU_INLINE_MATH = "inline-math"; // 行级公式元素菜单
+
     // timeout
     public static readonly TIMEOUT_OPENDIALOG = 50;
     public static readonly TIMEOUT_DBLCLICK = 190;

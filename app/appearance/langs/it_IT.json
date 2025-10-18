@@ -231,6 +231,8 @@
   "cancelTempUnlock": "Annulla sblocco temporaneo",
   "addFilter": "Aggiungi filtro",
   "removeFilters": "Pulisci filtro",
+  "addSort": "Aggiungi ordinamento",
+  "removeSorts": "Pulisci ordinamento",
   "checked": "Selezionato",
   "unchecked": "Deselezionato",
   "percentChecked": "Percentuale selezionata",

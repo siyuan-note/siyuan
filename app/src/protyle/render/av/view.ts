@@ -12,7 +12,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     if (options.protyle.disabled) {
         return;
     }
-    const menu = new Menu("av-view");
+    const menu = new Menu(Constants.MENU_AV_VIEW);
     if (menu.isOpen) {
         return;
     }

@@ -263,7 +263,7 @@ export const setPageSize = (options: {
     avID: string,
     nodeElement: Element
 }) => {
-    const menu = new Menu("av-page-size");
+    const menu = new Menu(Constants.MENU_AV_PAGE_SIZE);
     if (menu.isOpen) {
         return;
     }

@@ -788,8 +788,10 @@ export class Outline extends Model {
      */
     private showExpandLevelMenu(target: HTMLElement) {
         window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_EXPAND_LEVEL);
         for (let i = 1; i <= 6; i++) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: `heading${i}`,
                 icon: `iconH${i}`,
                 label: window.siyuan.languages[`heading${i}`],
                 click: () => this.expandToLevel(i)
@@ -867,9 +869,11 @@ export class Outline extends Model {
         }
         const currentLevel = this.getHeadingLevel(element);
         window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_OUTLINE_CONTEXT);
         // 升级
         if (currentLevel > 1) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "upgrade",
                 icon: "iconUp",
                 label: window.siyuan.languages.upgrade,
                 click: () => {
@@ -889,6 +893,7 @@ export class Outline extends Model {
         // 降级
         if (currentLevel < 6) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "downgrade",
                 icon: "iconDown",
                 label: window.siyuan.languages.downgrade,
                 click: () => {
@@ -945,10 +950,11 @@ export class Outline extends Model {
             }).element);
         }
 
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
 
         // 在前面插入同级标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "insertSameLevelHeadingBefore",
             icon: "iconBefore",
             label: window.siyuan.languages.insertSameLevelHeadingBefore,
             click: () => {
@@ -973,6 +979,7 @@ export class Outline extends Model {
 
         // 在后面插入同级标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "insertSameLevelHeadingAfter",
             icon: "iconAfter",
             label: window.siyuan.languages.insertSameLevelHeadingAfter,
             click: () => {
@@ -1006,6 +1013,7 @@ export class Outline extends Model {
         // 添加子标题
         if (currentLevel < 6) { // 只有当前级别小于6时才能添加子标题
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "addChildHeading",
                 icon: "iconAdd",
                 label: window.siyuan.languages.addChildHeading,
                 click: () => {
@@ -1045,10 +1053,11 @@ export class Outline extends Model {
             }).element);
         }
 
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
 
         // 复制带子标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "copyHeadings1",
             icon: "iconCopy",
             label: `${window.siyuan.languages.copy} ${window.siyuan.languages.headings1}`,
             click: () => {
@@ -1070,6 +1079,7 @@ export class Outline extends Model {
 
         // 剪切带子标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "cutHeadings1",
             icon: "iconCut",
             label: `${window.siyuan.languages.cut} ${window.siyuan.languages.headings1}`,
             click: () => {
@@ -1117,6 +1127,7 @@ export class Outline extends Model {
 
         // 删除
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "deleteHeadings1",
             icon: "iconTrashcan",
             label: `${window.siyuan.languages.delete} ${window.siyuan.languages.headings1}`,
             click: () => {
@@ -1150,10 +1161,11 @@ export class Outline extends Model {
             }
         }).element);
 
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
 
         // 展开子标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "expandChildHeading",
             icon: "iconExpand",
             label: window.siyuan.languages.expandChildHeading,
             accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.clickArrow,
@@ -1162,6 +1174,7 @@ export class Outline extends Model {
 
         // 折叠子标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "foldChildHeading",
             icon: "iconContract",
             label: window.siyuan.languages.foldChildHeading,
             accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.clickArrow,
@@ -1170,6 +1183,7 @@ export class Outline extends Model {
 
         // 展开同级标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "expandSameLevelHeading",
             icon: "iconExpand",
             label: window.siyuan.languages.expandSameLevelHeading,
             accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.clickArrow,
@@ -1178,6 +1192,7 @@ export class Outline extends Model {
 
         // 折叠同级标题
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "foldSameLevelHeading",
             icon: "iconContract",
             label: window.siyuan.languages.foldSameLevelHeading,
             accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.clickArrow,
@@ -1186,6 +1201,7 @@ export class Outline extends Model {
 
         // 全部展开
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "expandAll",
             icon: "iconExpand",
             label: window.siyuan.languages.expandAll,
             click: () => {
@@ -1196,6 +1212,7 @@ export class Outline extends Model {
 
         // 全部折叠
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "foldAll",
             icon: "iconContract",
             label: window.siyuan.languages.foldAll,
             click: () => {

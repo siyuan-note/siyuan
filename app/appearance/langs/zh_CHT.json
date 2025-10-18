@@ -231,6 +231,8 @@
   "cancelTempUnlock": "取消暫時解鎖",
   "addFilter": "新增篩選條件",
   "removeFilters": "清空篩選規則",
+  "addSort": "新增排序條件",
+  "removeSorts": "清空排序規則",
   "checked": "已完成",
   "unchecked": "未完成",
   "percentChecked": "已完成佔比",

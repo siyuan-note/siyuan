@@ -1,5 +1,6 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
+import {Constants} from "../../../constants";
 
 const addFormatItem = (options: {
     menu: Menu,
@@ -40,7 +41,7 @@ export const formatNumber = (options: {
     avID: string,
     oldFormat: string
 }) => {
-    const menu = new Menu("av-col-format-number");
+    const menu = new Menu(Constants.MENU_AV_COL_FORMAT_NUMBER);
     addFormatItem({
         menu,
         protyle: options.protyle,

@@ -231,6 +231,8 @@
   "cancelTempUnlock": "Cancelar desbloqueo temporal",
   "addFilter": "Agregar filtro",
   "removeFilters": "Borrar filtro",
+  "addSort": "Agregar ordenación",
+  "removeSorts": "Borrar ordenación",
   "checked": "marcado",
   "unchecked": "desmarcado",
   "percentChecked": "Porcentaje comprobado",

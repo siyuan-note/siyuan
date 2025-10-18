@@ -1168,7 +1168,7 @@ export class Outline extends Model {
             id: "expandChildHeading",
             icon: "iconExpand",
             label: window.siyuan.languages.expandChildHeading,
-            accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.clickArrow,
+            accelerator: "⌘" + window.siyuan.languages.clickArrow,
             click: () => this.collapseChildren(element, true)
         }).element);
 
@@ -1177,7 +1177,7 @@ export class Outline extends Model {
             id: "foldChildHeading",
             icon: "iconContract",
             label: window.siyuan.languages.foldChildHeading,
-            accelerator: updateHotkeyTip("⌘") + window.siyuan.languages.clickArrow,
+            accelerator: "⌘" + window.siyuan.languages.clickArrow,
             click: () => this.collapseChildren(element, false)
         }).element);
 
@@ -1186,7 +1186,7 @@ export class Outline extends Model {
             id: "expandSameLevelHeading",
             icon: "iconExpand",
             label: window.siyuan.languages.expandSameLevelHeading,
-            accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.clickArrow,
+            accelerator: "⌥" + window.siyuan.languages.clickArrow,
             click: () => this.collapseSameLevel(element, true)
         }).element);
 
@@ -1195,7 +1195,7 @@ export class Outline extends Model {
             id: "foldSameLevelHeading",
             icon: "iconContract",
             label: window.siyuan.languages.foldSameLevelHeading,
-            accelerator: updateHotkeyTip("⌥") + window.siyuan.languages.clickArrow,
+            accelerator: "⌥" + window.siyuan.languages.clickArrow,
             click: () => this.collapseSameLevel(element, false)
         }).element);
 

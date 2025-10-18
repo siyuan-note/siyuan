@@ -120,7 +120,7 @@ export class Menu {
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
-        this.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
+        this.element.removeAttribute("data-from");    // 标识菜单入口
         this.data = undefined;    // 移除数据
     }
 

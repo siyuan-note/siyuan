@@ -236,8 +236,6 @@ export abstract class Constants {
     public static readonly MENU_BLOCK_SINGLE = "block-single"; // 单选块菜单
     public static readonly MENU_BLOCK_MULTI = "block-multi"; // 多选块菜单
     public static readonly MENU_TITLE = "titleMenu"; // 文档块菜单
-    public static readonly MENU_TITLE_PROTYLE = "title-protyle"; // 在 Protyle 触发的文档块菜单
-    public static readonly MENU_TITLE_BREADCRUMB = "title-breadcrumb"; // 在面包屑触发的文档块菜单
     public static readonly MENU_BREADCRUMB_MORE = "breadcrumbMore"; // 面包屑更多菜单
     public static readonly MENU_BREADCRUMB_MOBILE_PATH = "breadcrumb-mobile-path"; // 移动端面包屑菜单
 

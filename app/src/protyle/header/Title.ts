@@ -194,15 +194,15 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom}, Constants.MENU_TITLE_PROTYLE);
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom});
                 }
             });
             this.element.addEventListener("contextmenu", (event) => {
                 if (event.shiftKey) {
                     return;
                 }
-                if (iconElement.contains((event.target as HTMLElement))) {
-                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY}, Constants.MENU_TITLE_PROTYLE);
+                if (getSelection().rangeCount === 0 || iconElement.contains((event.target as HTMLElement))) {
+                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
                     return;
                 }
                 protyle.toolbar?.element.classList.add("fn__none");

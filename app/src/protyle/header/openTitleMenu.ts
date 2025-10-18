@@ -26,7 +26,7 @@ import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 
-export const openTitleMenu = (protyle: IProtyle, position: IPosition, subname: string) => {
+export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
         window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
@@ -38,7 +38,6 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, subname: s
     }, (response) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TITLE);
-        window.siyuan.menus.menu.element.setAttribute("data-subname", subname);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",
             label: window.siyuan.languages.copy,

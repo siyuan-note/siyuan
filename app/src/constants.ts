@@ -236,13 +236,15 @@ export abstract class Constants {
     public static readonly MENU_BLOCK_SINGLE = "block-single"; // 单选块菜单
     public static readonly MENU_BLOCK_MULTI = "block-multi"; // 多选块菜单
     public static readonly MENU_TITLE = "titleMenu"; // 文档块菜单
+    public static readonly MENU_FROM_TITLE_PROTYLE = "title-protyle"; // 在 Protyle 触发的文档块菜单
+    public static readonly MENU_FROM_TITLE_BREADCRUMB = "title-breadcrumb"; // 在面包屑触发的文档块菜单
     public static readonly MENU_BREADCRUMB_MORE = "breadcrumbMore"; // 面包屑更多菜单
     public static readonly MENU_BREADCRUMB_MOBILE_PATH = "breadcrumb-mobile-path"; // 移动端面包屑菜单
 
     public static readonly MENU_DOC_TREE_MORE = "docTreeMore"; // 侧栏文档树右键菜单
-    public static readonly MENU_DOC_TREE_MORE_NOTEBOOK = "docTreeMore-notebook"; // 侧栏文档树右键菜单，单个笔记本
-    public static readonly MENU_DOC_TREE_MORE_DOC = "docTreeMore-doc"; // 侧栏文档树右键菜单，单个文档
-    public static readonly MENU_DOC_TREE_MORE_DOCS = "docTreeMore-docs"; // 侧栏文档树右键菜单，多个文档
+    public static readonly MENU_FROM_DOC_TREE_MORE_NOTEBOOK = "tree-notebook"; // 侧栏文档树右键菜单，单个笔记本
+    public static readonly MENU_FROM_DOC_TREE_MORE_DOC = "tree-doc"; // 侧栏文档树右键菜单，单个文档
+    public static readonly MENU_FROM_DOC_TREE_MORE_DOCS = "tree-docs"; // 侧栏文档树右键菜单，多个文档
     public static readonly MENU_TAG = "tagMenu"; // 侧栏标签菜单
     public static readonly MENU_BOOKMARK = "bookmarkMenu"; // 侧栏书签菜单
     public static readonly MENU_OUTLINE_CONTEXT = "outline-context"; // 大纲标题右键菜单

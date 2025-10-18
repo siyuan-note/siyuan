@@ -97,7 +97,7 @@ ${padHTML}
                         });
                     } else {
                         const targetRect = target.getBoundingClientRect();
-                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, isLeft: true});
+                        openTitleMenu(protyle, {x: targetRect.right, y: targetRect.bottom, isLeft: true}, Constants.MENU_FROM_TITLE_BREADCRUMB);
                     }
                     event.stopPropagation();
                     event.preventDefault();

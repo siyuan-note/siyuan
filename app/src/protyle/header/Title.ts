@@ -194,7 +194,7 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom});
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom}, Constants.MENU_FROM_TITLE_PROTYLE);
                 }
             });
             this.element.addEventListener("contextmenu", (event) => {
@@ -202,7 +202,7 @@ export class Title {
                     return;
                 }
                 if (getSelection().rangeCount === 0 || iconElement.contains((event.target as HTMLElement))) {
-                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
+                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY}, Constants.MENU_FROM_TITLE_PROTYLE);
                     return;
                 }
                 protyle.toolbar?.element.classList.add("fn__none");

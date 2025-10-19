@@ -2,8 +2,7 @@ import {focusByRange} from "./selection";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {clipboard} from "electron";
-import {ipcRenderer} from "electron";
+import {clipboard, ipcRenderer} from "electron";
 /// #endif
 
 export const encodeBase64 = (text: string): string => {
@@ -500,7 +499,7 @@ export const getLocalStorage = (cb: () => void) => {
 };
 
 export const setStorageVal = (key: string, val: any, cb?: () => void) => {
-    if (window.siyuan.config.readonly) {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
     fetchPost("/api/storage/setLocalStorageVal", {

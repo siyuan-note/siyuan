@@ -393,7 +393,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		case FilterQuantifierNone:
 			if FilterOperatorIsEmpty == filter.Operator {
 				if 1 > len(value.MAsset) {
-					return true
+					return false
 				}
 
 				for _, asset := range value.MAsset {
@@ -404,7 +404,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				return true
 			} else if FilterOperatorIsNotEmpty == filter.Operator {
 				if 1 > len(value.MAsset) {
-					return false
+					return true
 				}
 
 				for _, asset := range value.MAsset {

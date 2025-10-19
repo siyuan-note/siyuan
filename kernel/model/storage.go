@@ -362,10 +362,6 @@ func GetLocalStorage() (ret map[string]interface{}) {
 }
 
 func setLocalStorage(val interface{}) (err error) {
-	if util.ReadOnly {
-		return
-	}
-
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [local] dir failed: %s", err)
@@ -437,7 +433,7 @@ func SetOutlineStorage(docID string, val interface{}) (err error) {
 		DocID: docID,
 		Data:  make(map[string]interface{}),
 	}
-	
+
 	if valMap, ok := val.(map[string]interface{}); ok {
 		outlineDoc.Data = valMap
 	}
@@ -457,7 +453,7 @@ func SetOutlineStorage(docID string, val interface{}) (err error) {
 
 	// 将新的文档信息添加到最前面
 	outlineDocs = append([]*OutlineDoc{outlineDoc}, outlineDocs...)
-	
+
 	// 限制为2000个文档
 	if 2000 < len(outlineDocs) {
 		outlineDocs = outlineDocs[:2000]

@@ -163,6 +163,9 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 protyle,
                 action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
+                    if (protyle.element.classList.contains("fn__none")) {
+                        return;
+                    }
                     let hasHide = false;
                     if (!window.siyuan.config.flashcard.superBlock &&
                         !window.siyuan.config.flashcard.heading &&

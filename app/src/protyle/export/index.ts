@@ -634,6 +634,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
         }
     });
 };
+/// #endif
 
 export const onExport = async (data: IWebSocketData, filePath: string, exportOption: IExportOptions, removeAssets?: boolean, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
@@ -715,8 +716,9 @@ id="preview">${data.data.content}</div>
     if (typeof filePath === "undefined") {
         return html;
     }
+    /// #if !BROWSER
     const htmlPath = path.join(filePath, "index.html");
     fs.writeFileSync(htmlPath, html);
     afterExport(htmlPath, msgId);
+    /// #endif
 };
-/// #endif

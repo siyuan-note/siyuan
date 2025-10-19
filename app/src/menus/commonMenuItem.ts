@@ -767,7 +767,7 @@ export const exportMd = (id: string) => {
                         merge: localData.mergeSubdocs,
                     }, async response => {
                         const html = await onExport(response, undefined, {type: "pdf", id});
-                        window.JSAndroid.exportPDF(html);
+                        window.JSAndroid.print(html);
                     });
                 }
             },

@@ -245,7 +245,8 @@ interface Window {
         readHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
-        exportPDF(html: string): void
+        print(html: string): void
+        getScreenWidthPx(): number
     };
     JSHarmony: {
         openExternal(url: string): void

@@ -637,7 +637,7 @@ export class Outline extends Model {
                 item.classList.remove("popover__block");
             });
             this.element.scrollTop = scrollTop;
-        } else {
+        } else if (this.blockId) {
             fetchPost("/api/storage/getOutlineStorage", {
                 docID: this.blockId
             }, storageResponse => {

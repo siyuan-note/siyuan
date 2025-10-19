@@ -762,7 +762,7 @@ export const exportMd = (id: string) => {
                 click: () => {
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
-                        id: "${id}",
+                        id,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
                     }, response => {

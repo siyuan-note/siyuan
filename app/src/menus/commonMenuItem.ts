@@ -766,8 +766,16 @@ export const exportMd = (id: string) => {
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
                     }, async response => {
+                        const htmlElement = document.createElement("template");
+                        htmlElement.innerHTML = response.data.content;
+                        htmlElement.content.querySelectorAll("svg > use").forEach(item => {
+                            const symbolElement = document.querySelector(`symbol${item.getAttribute("xlink:href")}`);
+                            item.parentElement.setAttribute("viewBox", symbolElement.getAttribute("viewBox"));
+                            item.outerHTML = symbolElement.innerHTML;
+                        });
+                        response.data.content = htmlElement.innerHTML
                         const html = await onExport(response, undefined, {type: "pdf", id});
-                        window.JSAndroid.exportPDF(html.replace('<use xlink:href="#iconDot"></use>', '<path d="M5.501 9.999c0 2.485 2.016 4.499 4.501 4.499s4.497-2.016 4.497-4.499c0-2.485-2.012-4.497-4.497-4.497s-4.501 2.012-4.501 4.497z"></path>'));
+                        window.JSAndroid.exportPDF(html);
                     });
                 }
             },

@@ -767,7 +767,7 @@ export const exportMd = (id: string) => {
                         merge: localData.mergeSubdocs,
                     }, async response => {
                         const html = await onExport(response, undefined, {type: "pdf", id});
-                        window.JSAndroid.exportPDF(html);
+                        window.JSAndroid.exportPDF(html.replace('<use xlink:href="#iconDot"></use>', '<path d="M5.501 9.999c0 2.485 2.016 4.499 4.501 4.499s4.497-2.016 4.497-4.499c0-2.485-2.012-4.497-4.497-4.497s-4.501 2.012-4.501 4.497z"></path>'));
                     });
                 }
             },

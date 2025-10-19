@@ -756,7 +756,7 @@ export const exportMd = (id: string) => {
             /// #else
             {
                 id: "exportPDF",
-                label: "PDF",
+                label: window.siyuan.languages.print,
                 icon: "iconPDF",
                 ignore: !isInAndroid(),
                 click: () => {

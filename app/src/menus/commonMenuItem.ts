@@ -760,6 +760,7 @@ export const exportMd = (id: string) => {
                 icon: "iconPDF",
                 ignore: !isInAndroid(),
                 click: () => {
+                    const msId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
                         id,
@@ -768,6 +769,9 @@ export const exportMd = (id: string) => {
                     }, async response => {
                         const html = await onExport(response, undefined, {type: "pdf", id});
                         window.JSAndroid.print(html);
+                        setTimeout(() => {
+                            hideMessage(msId);
+                        }, 3000);
                     });
                 }
             },

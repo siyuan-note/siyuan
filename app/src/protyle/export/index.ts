@@ -649,7 +649,6 @@ export const onExport = async (data: IWebSocketData, filePath: string, exportOpt
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    const screenWidth = window.JSAndroid.getScreenWidthPx();
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
@@ -674,12 +673,12 @@ export const onExport = async (data: IWebSocketData, filePath: string, exportOpt
 </head>
 <body>
 <div class="${["htmlmd", "word"].includes(exportOption.type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" 
-style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
+style="${window.JSAndroid ? "margin: 0 16px;" : "max-width: 800px;margin: 0 auto;"}" id="preview">${data.data.content}</div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?v=${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/build/export/protyle-method.js?v=${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/protyle/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}"></script>  
 <script>
-    document.body.style.minWidth = ${screenWidth} + "px";
+    ${window.JSAndroid ? document.body.style.minWidth = window.JSAndroid.getScreenWidthPx() + "px" : ""};
     window.siyuan = {
       config: {
         appearance: { mode: ${mode}, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },

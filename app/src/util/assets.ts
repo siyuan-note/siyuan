@@ -198,16 +198,15 @@ export const initAssets = () => {
     });
 };
 
-export const setInlineStyle = async (set = true) => {
+export const setInlineStyle = async (set = true, servePath = "../../..") => {
     const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);
     let style;
-
     // Emojis Reset: 字体中包含了 emoji，需重置
     // Emojis Additional： 苹果/win11 字体中没有的 emoji
     if (isMac() || isIPad() || isIPhone()) {
         style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1fa8f;
 }
 @font-face {
@@ -233,7 +232,7 @@ export const setInlineStyle = async (set = true) => {
         if (isWin11Browser) {
             style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
   U+e0065, U+e006e, U+e007f, U+e0073, U+e0063, U+e0074, U+e0077, U+e006c;
   size-adjust: 85%;
@@ -255,7 +254,7 @@ export const setInlineStyle = async (set = true) => {
         } else {
             style = `@font-face {
   font-family: "Emojis Reset";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1f170-1f171, U+1f17e, U+1f17f, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, U+1f251, U+1f32b, U+1f3bc,
   U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, U+1f600-1f60d, U+1f60f-1f623,
   U+1f625-1f62b, U+1f62d-1f63f, U+1F643, U+1F640, U+1f79, U+1f8f, U+1fa79, U+1fae4, U+1fae9, U+1fac6, U+1fabe, U+1fadf,
@@ -268,7 +267,7 @@ export const setInlineStyle = async (set = true) => {
 }
 @font-face {
   font-family: "Emojis";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol"),
   local("Apple Color Emoji"),

@@ -644,8 +644,6 @@ export class Outline extends Model {
                 const storageData = storageResponse.data;
                 if (storageData && storageData.expandIds) {
                     this.tree.setExpandIds(storageData.expandIds);
-                } else {
-                    this.tree.expandAll();
                 }
                 if ((this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value) {
                     this.setFilter();

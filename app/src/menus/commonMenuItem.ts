@@ -752,7 +752,24 @@ export const exportMd = (id: string) => {
                     }
                 },
                 ]
-            }
+            },
+            /// #else
+            {
+                id: "exportPDF",
+                label: "PDF",
+                icon: "iconPDF",
+                ignore: !isInAndroid(),
+                click: () => {
+                    const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
+                    fetchPost("/api/export/exportPreviewHTML", {
+                        id: "${id}",
+                        keepFold: localData.keepFold,
+                        merge: localData.mergeSubdocs,
+                    }, response => {
+                        window.JSAndroid.exportPDF(response.data.content);
+                    });
+                }
+            },
             /// #endif
         ]
     }).element;

@@ -5,7 +5,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
-import {saveExport} from "../protyle/export";
+import {onExport, saveExport} from "../protyle/export";
 import {isInAndroid, isInHarmony, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
@@ -765,8 +765,9 @@ export const exportMd = (id: string) => {
                         id,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
-                    }, response => {
-                        window.JSAndroid.exportPDF(response.data.content);
+                    }, async response => {
+                        const html = await onExport(response, undefined, {type: "pdf", id});
+                        window.JSAndroid.exportPDF(html);
                     });
                 }
             },

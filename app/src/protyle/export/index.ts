@@ -635,7 +635,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
     });
 };
 
-const onExport = async (data: IWebSocketData, filePath: string, exportOption: IExportOptions, removeAssets?: boolean, msgId?: string) => {
+export const onExport = async (data: IWebSocketData, filePath: string, exportOption: IExportOptions, removeAssets?: boolean, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(exportOption.type) && window.siyuan.config.appearance.mode === 1) {
@@ -711,6 +711,9 @@ id="preview">${data.data.content}</div>
       })
     });
 </script></body></html>`;
+    if (typeof filePath === "undefined") {
+        return html;
+    }
     const htmlPath = path.join(filePath, "index.html");
     fs.writeFileSync(htmlPath, html);
     afterExport(htmlPath, msgId);

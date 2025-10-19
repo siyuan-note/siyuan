@@ -766,14 +766,6 @@ export const exportMd = (id: string) => {
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
                     }, async response => {
-                        const htmlElement = document.createElement("template");
-                        htmlElement.innerHTML = response.data.content;
-                        htmlElement.content.querySelectorAll("svg > use").forEach(item => {
-                            const symbolElement = document.querySelector(`symbol${item.getAttribute("xlink:href")}`);
-                            item.parentElement.setAttribute("viewBox", symbolElement.getAttribute("viewBox"));
-                            item.outerHTML = symbolElement.innerHTML;
-                        });
-                        response.data.content = htmlElement.innerHTML
                         const html = await onExport(response, undefined, {type: "pdf", id});
                         window.JSAndroid.exportPDF(html);
                     });

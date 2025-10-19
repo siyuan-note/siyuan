@@ -6,7 +6,13 @@ import {getDockByType} from "../tabUtil";
 import {fetchPost} from "../../util/fetch";
 import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
-import {setStorageVal, updateHotkeyAfterTip, updateHotkeyTip} from "../../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    setStorageVal,
+    updateHotkeyAfterTip,
+    writeText
+} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
@@ -18,7 +24,6 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {transaction, turnsIntoTransaction} from "../../protyle/wysiwyg/transaction";
 import {goHome} from "../../protyle/wysiwyg/commonHotkey";
 import {Editor} from "../../editor";
-import {writeText, isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
 import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
 import {focusBlock, focusByWbr} from "../../protyle/util/selection";
@@ -658,6 +663,10 @@ export class Outline extends Model {
     }
 
     public saveExpendIds() {
+        if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+            return;
+        }
+
         if (!this.isPreview && this.type === "pin") {
             fetchPost("/api/storage/setOutlineStorage", {
                 docID: this.blockId,

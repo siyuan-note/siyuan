@@ -184,7 +184,7 @@ const renderPDF = async (id: string) => {
 </head>
 <body style="-webkit-print-color-adjust: exact;">
 <div id="action">
-    <div style="flex: 1;overflow: auto;">
+    <div style="flex: 1;overflow-y:auto;overflow-x:hidden">
         <div class="b3-label">
             <div>
                 ${window.siyuan.languages.exportPDF0}

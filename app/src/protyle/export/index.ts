@@ -212,17 +212,37 @@ const renderPDF = async (id: string) => {
             </select>
             <div class="${localData.marginType === "custom" ? "" : "fn__none"}">
                 <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginTop}</div>
-                <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
-                <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginRight}</div>
-                <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
-                <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginBottom}</div>
-                <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
-                <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginLeft}</div>
-                <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
+                <small>${window.siyuan.languages.marginTop}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <small>${window.siyuan.languages.marginRight}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <small>${window.siyuan.languages.marginBottom}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <small>${window.siyuan.languages.marginLeft}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
             </div>
         </div>
         <div class="b3-label">

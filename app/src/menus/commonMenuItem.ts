@@ -758,7 +758,7 @@ export const exportMd = (id: string) => {
                 id: "exportPDF",
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
-                ignore: !isInAndroid(),
+                ignore: !isInAndroid() && !isInHarmony(),
                 click: () => {
                     const msId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
@@ -768,7 +768,12 @@ export const exportMd = (id: string) => {
                         merge: localData.mergeSubdocs,
                     }, async response => {
                         const html = await onExport(response, undefined, {type: "pdf", id});
-                        window.JSAndroid.print(html);
+                        if (isInAndroid()) {
+                            window.JSAndroid.print(html);
+                        } else if (isInHarmony()) {
+                            window.JSHarmony.print(html);
+                        }
+
                         setTimeout(() => {
                             hideMessage(msId);
                         }, 3000);

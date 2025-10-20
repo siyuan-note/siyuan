@@ -251,7 +251,7 @@ const renderPDF = async (id: string) => {
                 <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
             </div>
             <span class="fn__hr"></span>
-            <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
+            <input style="width: 189px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
         </div>
         <label class="b3-label">
             <div>

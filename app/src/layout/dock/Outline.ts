@@ -334,6 +334,21 @@ export class Outline extends Model {
         }, response => {
             this.update(response);
         });
+
+        window.addEventListener("drag-cancel", () => {
+            this.stopScrollAnimation();
+        });
+    }
+
+    private stopScrollAnimation() {
+        if (this.scrollAnimationId) {
+            if (typeof cancelAnimationFrame !== "undefined") {
+                cancelAnimationFrame(this.scrollAnimationId);
+            } else {
+                clearTimeout(this.scrollAnimationId);
+            }
+            this.scrollAnimationId = null;
+        }
     }
 
     private bindSort() {
@@ -371,12 +386,6 @@ export class Outline extends Model {
                 }
                 ghostElement.style.top = moveEvent.clientY + "px";
                 ghostElement.style.left = moveEvent.clientX + "px";
-                if (!this.element.contains(moveEvent.target as Element)) {
-                    this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover, .dragover__current").forEach(item => {
-                        item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__current");
-                    });
-                    return;
-                }
                 // 检查是否在滚动边界区域
                 if (moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
                     // 如果还没有开始滚动，则开始持续滚动
@@ -431,14 +440,13 @@ export class Outline extends Model {
                     }
                 } else {
                     // 离开滚动区域时停止滚动
-                    if (this.scrollAnimationId) {
-                        if (typeof cancelAnimationFrame !== "undefined") {
-                            cancelAnimationFrame(this.scrollAnimationId);
-                        } else {
-                            clearTimeout(this.scrollAnimationId);
-                        }
-                        this.scrollAnimationId = null;
-                    }
+                    this.stopScrollAnimation();
+                }
+                if (!this.element.contains(moveEvent.target as Element)) {
+                    this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover, .dragover__current").forEach(item => {
+                        item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__current");
+                    });
+                    return;
                 }
                 selectItem = hasClosestByClassName(moveEvent.target as HTMLElement, "b3-list-item") as HTMLElement;
                 if (!selectItem || selectItem.tagName !== "LI" || selectItem.style.position === "fixed") {
@@ -471,14 +479,7 @@ export class Outline extends Model {
                 ghostElement?.remove();
                 item.style.opacity = "";
                 // 清理滚动动画
-                if (this.scrollAnimationId) {
-                    if (typeof cancelAnimationFrame !== "undefined") {
-                        cancelAnimationFrame(this.scrollAnimationId);
-                    } else {
-                        clearTimeout(this.scrollAnimationId);
-                    }
-                    this.scrollAnimationId = null;
-                }
+                this.stopScrollAnimation();
                 if (!selectItem) {
                     selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover");
                 }

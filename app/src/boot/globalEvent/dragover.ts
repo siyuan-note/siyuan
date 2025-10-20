@@ -18,5 +18,7 @@ export const cancelDrag = () => {
         }
         ghostElement.remove();
         document.onmousemove = null;
+        // 通知取消拖拽，供相关模块停止滚动动画等
+        window.dispatchEvent(new CustomEvent("drag-cancel"));
     }
 };

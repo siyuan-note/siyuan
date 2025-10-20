@@ -2776,20 +2776,6 @@
 			]
 		},
 		{
-			"ID": "20251020145407-x3ryl5r",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20251020145407-x3ryl5r",
-				"updated": "20251020145736"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "You can drag and drop list items by grabbing the bullet point."
-				}
-			]
-		},
-		{
 			"ID": "20251020145738-y544vzd",
 			"Type": "NodeParagraph",
 			"Properties": {

@@ -98,7 +98,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/renameNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameNotebook)
 	ginServer.Handle("POST", "/api/notebook/changeSortNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeSortNotebook)
 	ginServer.Handle("POST", "/api/notebook/setNotebookIcon", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNotebookIcon)
-	ginServer.Handle("POST", "/api/notebook/getNotebookInfo", model.CheckAuth, model.CheckReadonly, getNotebookInfo)
+	ginServer.Handle("POST", "/api/notebook/getNotebookInfo", model.CheckAuth, getNotebookInfo)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)

@@ -586,7 +586,7 @@
   "embedBlockBreadcrumbTip": "When enabled, embed blocks will display breadcrumbs, embed blocks in super blocks ignore this option and never show breadcrumbs",
   "appearanceMode": "Appearance Mode",
   "editReadonly": "Read-only mode",
-  "editReadonlyTip": "When enabled, the document will be read-only by default",
+  "editReadonlyTip": "When enabled, the document editor will be read-only by default. You can still search and replace text, modify content via API",
   "generateConflictDoc": "Generate conflict documentation when syncing conflicts",
   "generateConflictDocTip": "When enabled, a conflict document will be generated when a synchronization conflict occurs, so that it can be opened and viewed directly. Whether enabled or not, the [Data History] will record the conflict document",
   "deleteOpConfirm": "⚠️ Delete operation confirmation",

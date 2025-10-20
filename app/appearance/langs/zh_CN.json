@@ -586,7 +586,7 @@
   "embedBlockBreadcrumbTip": "启用后嵌入块将显示面包屑，在超级块中的嵌入块忽略该选项，始终不显示面包屑",
   "appearanceMode": "外观模式",
   "editReadonly": "只读模式",
-  "editReadonlyTip": "启用后文档将默认锁定编辑",
+  "editReadonlyTip": "启用后文档编辑器将默认锁定编辑。仍然能够搜索替换文本、通过 API 修改内容",
   "generateConflictDoc": "同步冲突时生成冲突文档",
   "generateConflictDocTip": "启用后当同步发生冲突时会生成冲突文档，以便直接打开查看。无论是否启用，[数据历史] 都会记录冲突文档",
   "deleteOpConfirm": "⚠️ 删除操作确认",

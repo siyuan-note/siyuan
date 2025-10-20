@@ -586,7 +586,7 @@
   "embedBlockBreadcrumbTip": "Quando ativado, blocos incorporados exibirão navegação estrutural, blocos incorporados em super blocos ignoram esta opção e nunca mostram navegação estrutural",
   "appearanceMode": "Modo de Aparência",
   "editReadonly": "Modo somente leitura",
-  "editReadonlyTip": "Quando ativado, o documento ficará somente leitura por padrão",
+  "editReadonlyTip": "Quando ativado, o editor de documentos ficará somente leitura por padrão. Ainda é possível buscar e substituir texto, modificar conteúdo via API",
   "generateConflictDoc": "Gerar documentação de conflito quando houver conflitos de sincronização",
   "generateConflictDocTip": "Quando ativado, um documento de conflito será gerado quando ocorrer um conflito de sincronização, para que possa ser aberto e visualizado diretamente. Independentemente de estar ativado ou não, o [Histórico de Dados] registrará o documento de conflito",
   "deleteOpConfirm": "⚠️ Confirmação de operação de exclusão",

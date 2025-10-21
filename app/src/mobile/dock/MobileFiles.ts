@@ -111,6 +111,9 @@ export class MobileFiles extends Model {
         filesElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.actionsElement)) {
+                if (target.classList.contains("b3-list-item__icon")) {
+                    target = target.previousElementSibling as HTMLElement;
+                }
                 const type = target.getAttribute("data-type");
                 if (type === "refresh") {
                     if (!target.getAttribute("disabled")) {

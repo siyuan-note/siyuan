@@ -586,7 +586,7 @@
   "embedBlockBreadcrumbTip": "Dopo l'abilitazione, i blocchi incorporati mostreranno i breadcrumb. I blocchi incorporati nei super blocchi ignorano questa opzione e non mostreranno mai breadcrumb",
   "appearanceMode": "Modalità aspetto",
   "editReadonly": "Modalità di sola lettura",
-  "editReadonlyTip": "Quando abilitato, il documento sarà in sola lettura per impostazione predefinita",
+  "editReadonlyTip": "Quando abilitato, l'editor di documenti sarà in sola lettura per impostazione predefinita. Puoi ancora cercare e sostituire testo, modificare contenuti tramite API",
   "generateConflictDoc": "Genera documento di conflitto quando si verificano conflitti di sincronizzazione",
   "generateConflictDocTip": "Dopo l'abilitazione, verrà generato un documento di conflitto quando si verifica un conflitto di sincronizzazione, in modo che possa essere aperto e visualizzato direttamente. Sia che sia abilitato o meno, la [Cronologia dati] registrerà il documento di conflitto",
   "deleteOpConfirm": "⚠️ Conferma operazione di eliminazione",

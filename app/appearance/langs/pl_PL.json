@@ -586,7 +586,7 @@
   "embedBlockBreadcrumbTip": "Po włączeniu wbudowane bloki będą wyświetlać okruszki, wbudowane bloki w super blokach ignorują tę opcję i nigdy nie pokazują okruszków",
   "appearanceMode": "Tryb wyglądu",
   "editReadonly": "Tryb tylko do odczytu",
-  "editReadonlyTip": "Po włączeniu dokument będzie domyślnie tylko do odczytu",
+  "editReadonlyTip": "Po włączeniu edytor dokumentów będzie domyślnie tylko do odczytu. Nadal można wyszukiwać i zastępować tekst, modyfikować zawartość przez API",
   "generateConflictDoc": "Generuj dokument konfliktowy podczas synchronizacji konfliktów",
   "generateConflictDocTip": "Po włączeniu, dokument konfliktowy zostanie wygenerowany, gdy wystąpi konflikt synchronizacji, aby można go było otworzyć i przeglądać bezpośrednio. Niezależnie od tego, czy włączone, [Historia danych] zarejestruje dokument konfliktowy",
   "deleteOpConfirm": "⚠️ Potwierdzenie operacji usunięcia",

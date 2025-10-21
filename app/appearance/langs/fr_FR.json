@@ -586,7 +586,7 @@
   "embedBlockBreadcrumbTip": "Après avoir activé l'intégration, les blocs afficheront le fil d'Ariane, intégrer des blocs dans des super blocs ignorent cette option et n'affichent jamais le fil d'Ariane",
   "appearanceMode": "Mode d'apparence",
   "editReadonly": "Mode lecture seule",
-  "editReadonlyTip": "Lorsqu'il est activé, le document sera en lecture seule par défaut",
+  "editReadonlyTip": "Lorsqu'il est activé, l'éditeur de document sera en lecture seule par défaut. Vous pouvez toujours rechercher et remplacer du texte, modifier le contenu via l'API",
   "generateConflictDoc": "Générer une documentation sur les conflits lors de la synchronisation des conflits",
   "generateConflictDocTip": "Lorsqu'il est activé, un document de conflit sera généré lorsqu'un conflit de synchronisation se produit, afin qu'il puisse être ouvert et visualisé directement. Qu'il soit activé ou non, l'historique des données enregistrera le document de conflit",
   "deleteOpConfirm": "⚠️ Supprimer la confirmation de l'opération",

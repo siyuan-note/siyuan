@@ -291,6 +291,15 @@ export const isWin11 = async () => {
     return false;
 };
 
+export const getScreenWidth = () => {
+    if (isInAndroid()) {
+        return window.JSAndroid.getScreenWidthPx();
+    } else if (isInHarmony()) {
+        return window.JSHarmony.getScreenWidthPx();
+    }
+    return window.outerWidth;
+}
+
 export const isWindows = () => {
     return navigator.platform.toUpperCase().indexOf("WIN") > -1;
 };

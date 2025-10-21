@@ -257,6 +257,8 @@ interface Window {
         readClipboard(): string
         readHTMLClipboard(): string
         returnDesktop(): void
+        print(html: string): void
+        getScreenWidthPx(): number
     };
 
     Protyle: import("../protyle/method").default;

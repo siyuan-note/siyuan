@@ -27,7 +27,7 @@ import {showMessage} from "../../dialog/message";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {
-    const menu = new Menu("dockMobileMenu");
+    const menu = new Menu(Constants.MENU_DOCK_MOBILE);
     if (menu.isOpen) {
         return;
     }

@@ -129,7 +129,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${group.groupValue.text?.content}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -153,6 +153,10 @@ const afterRenderGallery = (options: ITableOptions) => {
     }
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
+    }
+    if (options.blockElement.getAttribute("data-need-focus") === "true") {
+        focusBlock(options.blockElement);
+        options.blockElement.removeAttribute("data-need-focus");
     }
     options.blockElement.setAttribute("data-render", "true");
     if (options.resetData.alignSelf) {

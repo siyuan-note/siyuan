@@ -33,6 +33,7 @@ type CalcOperator string
 
 const (
 	CalcOperatorNone                CalcOperator = ""
+	CalcOperatorUniqueValues        CalcOperator = "Unique values"
 	CalcOperatorCountAll            CalcOperator = "Count all"
 	CalcOperatorCountValues         CalcOperator = "Count values"
 	CalcOperatorCountUniqueValues   CalcOperator = "Count unique values"
@@ -1709,9 +1710,35 @@ func calcFieldRollup(collection Collection, field Field, fieldIndex int) {
 			values := item.GetValues()
 			if nil != values[fieldIndex] && nil != values[fieldIndex].Rollup {
 				for _, content := range values[fieldIndex].Rollup.Contents {
-					if !uniqueValues[content.String(true)] {
-						uniqueValues[content.String(true)] = true
-						countUniqueValues++
+					switch content.Type {
+					case KeyTypeRelation:
+						for _, relationVal := range content.Relation.Contents {
+							key := relationVal.String(true)
+							if !uniqueValues[key] {
+								uniqueValues[key] = true
+								countUniqueValues++
+							}
+						}
+					case KeyTypeMSelect:
+						for _, mSelectVal := range content.MSelect {
+							if !uniqueValues[mSelectVal.Content] {
+								uniqueValues[mSelectVal.Content] = true
+								countUniqueValues++
+							}
+						}
+					case KeyTypeMAsset:
+						for _, mAssetVal := range content.MAsset {
+							if !uniqueValues[mAssetVal.Content] {
+								uniqueValues[mAssetVal.Content] = true
+								countUniqueValues++
+							}
+						}
+					default:
+						key := content.String(true)
+						if !uniqueValues[key] {
+							uniqueValues[key] = true
+							countUniqueValues++
+						}
 					}
 				}
 			}

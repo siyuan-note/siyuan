@@ -106,7 +106,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         </span>
         <span class="fn__space"></span>
         <span data-position="9south" id="searchInclude" ${enableIncludeChild ? "" : "disabled"} aria-label="${window.siyuan.languages.includeChildDoc}" class="block__icon block__icon--show ariaLabel">
-            <svg${includeChild ? ' class="ft__primary"' : ""}><use xlink:href="#iconCopy"></use></svg>
+            <svg${includeChild ? ' class="ft__primary"' : ""}><use xlink:href="#iconInclude"></use></svg>
         </span>
         <span class="fn__space"></span>
         <span id="searchPath" aria-label="${window.siyuan.languages.specifyPath}" class="block__icon block__icon--show ariaLabel" data-position="9south">
@@ -135,7 +135,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>
-            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}">
+            <input id="searchInput" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
         <div class="block__icons">
             <span id="searchFilter" aria-label="${window.siyuan.languages.searchType}" class="block__icon ariaLabel" data-position="9south">
@@ -239,7 +239,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         blockId: "",
         render: {
             gutter: true,
-            breadcrumbDocName: true
+            breadcrumbDocName: true,
+            title: true
         },
     });
     edit.resize();
@@ -247,7 +248,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         blockId: "",
         render: {
             gutter: true,
-            breadcrumbDocName: true
+            breadcrumbDocName: true,
+            title: true
         },
     });
     unRefEdit.resize();
@@ -494,6 +496,11 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchInclude") {
+                event.stopPropagation();
+                event.preventDefault();
+                if (target.hasAttribute("disabled")) {
+                    return;
+                }
                 const svgElement = target.firstElementChild;
                 svgElement.classList.toggle("ft__primary");
                 if (!svgElement.classList.contains("ft__primary")) {
@@ -511,8 +518,6 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 }
                 config.page = 1;
                 inputEvent(element, config, edit, true);
-                event.stopPropagation();
-                event.preventDefault();
                 break;
             } else if (target.id === "searchReplace") {
                 // ctrl+P 不需要保存
@@ -1090,7 +1095,9 @@ export const getArticle = (options: {
             if (articleId !== options.id) {
                 return;
             }
-            options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
+            if (options.edit.protyle.options.render.title) {
+                options.edit.protyle.title.render(options.edit.protyle, response);
+            }
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
                 query: options.value || null,
@@ -1118,6 +1125,7 @@ export const getArticle = (options: {
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 if (isSupportCSSHL()) {
+                    let observer:ResizeObserver;
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         const highlightKeys = () => {
                             const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];
@@ -1131,8 +1139,11 @@ export const getArticle = (options: {
                                 highlightById(options.edit.protyle, options.id);
                             }
                         };
+                        if (observer) {
+                            observer.disconnect();
+                        }
                         highlightKeys();
-                        const observer = new ResizeObserver(() => {
+                        observer = new ResizeObserver(() => {
                             highlightKeys();
                         });
                         observer.observe(options.edit.protyle.wysiwyg.element);

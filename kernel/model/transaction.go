@@ -275,8 +275,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doUpdateAttrViewColRollup(op)
 			case "hideAttrViewName":
 				ret = tx.doHideAttrViewName(op)
-			case "setAttrViewColDate":
-				ret = tx.doSetAttrViewColDate(op)
+			case "setAttrViewColDateFillCreated":
+				ret = tx.doSetAttrViewColDateFillCreated(op)
+			case "setAttrViewColDateFillSpecificTime":
+				ret = tx.doSetAttrViewColDateFillSpecificTime(op)
 			case "duplicateAttrViewKey":
 				ret = tx.doDuplicateAttrViewKey(op)
 			case "setAttrViewCoverFrom":
@@ -435,6 +437,25 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 		if isMovingParentIntoChild(srcNode, targetNode) {
 			return
+		}
+
+		if 0 < len(headingChildren) {
+			// 折叠标题再编辑形成外层列表（前面加上 * ）时，前端给的 tx 序列会形成死循环，在这里解开
+			// Nested lists cause hang after collapsing headings https://github.com/siyuan-note/siyuan/issues/15943
+			lastChild := headingChildren[len(headingChildren)-1]
+			if "1" == lastChild.IALAttr("heading-fold") && ast.NodeList == lastChild.Type &&
+				nil != lastChild.FirstChild && nil != lastChild.FirstChild.FirstChild && lastChild.FirstChild.FirstChild.ID == targetPreviousID {
+				ast.Walk(lastChild, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering || !n.IsBlock() {
+						return ast.WalkContinue
+					}
+
+					n.RemoveIALAttr("heading-fold")
+					n.RemoveIALAttr("fold")
+					return ast.WalkContinue
+				})
+				headingChildren = headingChildren[:len(headingChildren)-1]
+			}
 		}
 
 		for i := len(headingChildren) - 1; -1 < i; i-- {
@@ -892,6 +913,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	node.Unlink()
+
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		needAppendEmptyListItem := true
 		for _, op := range tx.DoOperations {
@@ -1032,6 +1054,10 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 			}
 
 			for i, blockValue := range blockValues.Values {
+				if nil == blockValue.Block {
+					continue
+				}
+
 				if blockValue.Block.ID == n.ID {
 					blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
 					changedAv = true
@@ -1254,12 +1280,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(remain)
 		}
 		node.InsertAfter(insertedNode)
-
-		if treenode.IsUnderFoldedHeading(insertedNode) {
-			// 保持在标题下的折叠状态
-			insertedNode.SetIALAttr("fold", "1")
-			insertedNode.SetIALAttr("heading-fold", "1")
-		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1506,18 +1526,51 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		syncDelete2AvBlock(n, tree, tx)
 	}
 
-	// 替换为新节点
+	// 将不属于折叠标题的块移动到折叠标题下方，需要展开折叠标题
+	needUnfoldParentHeading := 0 < oldNode.HeadingLevel && (0 == updatedNode.HeadingLevel || oldNode.HeadingLevel < updatedNode.HeadingLevel)
+
+	oldParentFoldedHeading := treenode.GetParentFoldedHeading(oldNode)
+	// 将原先折叠标题下的块提升为与折叠标题同级或更高一级的标题时，需要在折叠标题后插入该提升后的标题块（只需要推送界面插入）
+	needInsertAfterParentHeading := nil != oldParentFoldedHeading && 0 != updatedNode.HeadingLevel && updatedNode.HeadingLevel <= oldParentFoldedHeading.HeadingLevel
+
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
 
-	if treenode.IsUnderFoldedHeading(updatedNode) {
-		// 保持在标题下的折叠状态
-		updatedNode.SetIALAttr("fold", "1")
-		updatedNode.SetIALAttr("heading-fold", "1")
+	if needUnfoldParentHeading {
+		newParentFoldedHeading := treenode.GetParentFoldedHeading(updatedNode)
+		if nil == oldParentFoldedHeading || (nil != newParentFoldedHeading && oldParentFoldedHeading.ID != newParentFoldedHeading.ID) {
+			unfoldHeading(newParentFoldedHeading, updatedNode)
+		}
+	}
+
+	if needInsertAfterParentHeading {
+		insertDom := data
+		if 2 == len(tx.DoOperations) && "foldHeading" == tx.DoOperations[1].Action {
+			children := treenode.HeadingChildren(updatedNode)
+			for _, child := range children {
+				ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering || !n.IsBlock() {
+						return ast.WalkContinue
+					}
+
+					n.SetIALAttr("fold", "1")
+					n.SetIALAttr("heading-fold", "1")
+					return ast.WalkContinue
+				})
+			}
+			updatedNode.SetIALAttr("fold", "1")
+			insertDom = tx.luteEngine.RenderNodeBlockDOM(updatedNode)
+		}
+
+		evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+		evt.Data = []*Transaction{{
+			DoOperations:   []*Operation{{Action: "insert", ID: updatedNode.ID, PreviousID: oldParentFoldedHeading.ID, Data: insertDom}},
+			UndoOperations: []*Operation{{Action: "delete", ID: updatedNode.ID}},
+		}}
+		util.PushEvent(evt)
 	}
 
 	createdUpdated(updatedNode)
-
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
@@ -1545,6 +1598,29 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		}
 	}
 	return
+}
+
+func unfoldHeading(heading, currentNode *ast.Node) {
+	if nil == heading {
+		return
+	}
+
+	children := treenode.HeadingChildren(heading)
+	for _, child := range children {
+		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			n.RemoveIALAttr("fold")
+			n.RemoveIALAttr("heading-fold")
+			return ast.WalkContinue
+		})
+	}
+	heading.RemoveIALAttr("fold")
+	heading.RemoveIALAttr("heading-fold")
+
+	util.BroadcastByType("protyle", "unfoldHeading", 0, "", map[string]interface{}{"id": heading.ID, "currentNodeID": currentNode.ID})
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {

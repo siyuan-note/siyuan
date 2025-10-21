@@ -88,6 +88,30 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
+	luteEngine := NewLute()
+	parentFoldedHeading := treenode.GetParentFoldedHeading(heading)
+	if nil != parentFoldedHeading {
+		// 如果当前标题在上方某个折叠的标题下方，则展开上方那个折叠标题以保持一致性
+		children := treenode.HeadingChildren(parentFoldedHeading)
+		for _, child := range children {
+			ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
+				}
+
+				n.RemoveIALAttr("heading-fold")
+				n.RemoveIALAttr("fold")
+				return ast.WalkContinue
+			})
+		}
+		parentFoldedHeading.RemoveIALAttr("fold")
+		parentFoldedHeading.RemoveIALAttr("heading-fold")
+		go func() {
+			tx.WaitForCommit()
+			ReloadProtyle(tree.ID)
+		}()
+	}
+
 	children := treenode.HeadingChildren(heading)
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -116,7 +140,6 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	// 展开折叠的标题后显示块引用计数 Display reference counts after unfolding headings https://github.com/siyuan-note/siyuan/issues/13618
 	fillBlockRefCount(children)
 
-	luteEngine := NewLute()
 	operation.RetData = renderBlockDOMByNodes(children, luteEngine)
 	return
 }

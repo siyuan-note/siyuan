@@ -1,4 +1,4 @@
-import {genEmptyElement, insertEmptyBlock} from "../../block/util";
+import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
 import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
@@ -220,7 +220,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     const id = blockElement.getAttribute("data-node-id");
     const newElement = document.createElement("div");
-    newElement.appendChild(genEmptyElement(false, false));
+    if (blockElement.getAttribute("data-type") === "NodeHeading" && blockElement.getAttribute("fold") === "1") {
+        newElement.innerHTML = genHeadingElement(blockElement, true) as string;
+    } else {
+        newElement.appendChild(genEmptyElement(false, false));
+    }
     const newEditableElement = newElement.querySelector('[contenteditable="true"]');
     newEditableElement.appendChild(range.extractContents());
     const selectWbrElement = newEditableElement.querySelector("wbr");

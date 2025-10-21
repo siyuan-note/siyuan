@@ -32,6 +32,7 @@ import {openByMobile} from "../protyle/util/compatibility";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 
 const initMultiMenu = (selectItemElements: Element[], app: App) => {
+    window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_ITEMS);
     const items: { id: string, path: string }[] = [];
     const blockIDs: string[] = [];
     const fileItemElements = selectItemElements.filter(item => {
@@ -191,6 +192,7 @@ const initMultiMenu = (selectItemElements: Element[], app: App) => {
 
 export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return window.siyuan.menus.menu;
@@ -207,6 +209,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     if (selectItemElements.length > 1) {
         return initMultiMenu(selectItemElements, app);
     }
+    window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK);
     const notebookId = liElement.parentElement.getAttribute("data-url");
     const name = getNotebookName(notebookId);
     if (!window.siyuan.config.readonly) {
@@ -422,6 +425,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
 
 export const initFileMenu = (app: App, notebookId: string, pathString: string, liElement: Element) => {
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOC_TREE_MORE);
     const fileElement = hasClosestByTag(liElement, "DIV");
     if (!fileElement) {
         return window.siyuan.menus.menu;
@@ -713,7 +717,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             separatorPosition: "top",
         });
     }
-    window.siyuan.menus.menu.element.setAttribute("data-name", "docTreeMore");
+    window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOC);
     return window.siyuan.menus.menu;
 };
 

@@ -6,7 +6,7 @@
 		"id": "20201227201128-m1wrouw",
 		"title": "Docker hosting",
 		"type": "doc",
-		"updated": "20231108220523"
+		"updated": "20250926110627"
 	},
 	"Children": [
 		{
@@ -790,7 +790,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230406105311-sq5f3qj",
-				"updated": "20230406105334"
+				"updated": "20250926110627"
 			},
 			"Children": [
 				{
@@ -805,7 +805,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230406105311-jvtmuhi",
-				"updated": "20230406105617"
+				"updated": "20250926110627"
 			},
 			"Children": [
 				{
@@ -845,7 +845,7 @@
 					},
 					"Properties": {
 						"id": "20230406105311-rz3umi0",
-						"updated": "20230406105311"
+						"updated": "20250926110627"
 					},
 					"Children": [
 						{
@@ -853,40 +853,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230406105311-bhdrf8a",
-								"updated": "20230406105311"
+								"updated": "20250926110627"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Export to PDF, HTML and Word formats is not supported"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230406105311-3rrhrq2",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230406105311-3rrhrq2",
-						"updated": "20230406105617"
-					},
-					"Children": [
-						{
-							"ID": "20230406105311-w0rmhgz",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230406105311-w0rmhgz",
-								"updated": "20230406105617"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Import Markdown file is not supported"
+									"Data": "Does not support exporting to formats such as PDF, HTML, and Word"
 								}
 							]
 						}

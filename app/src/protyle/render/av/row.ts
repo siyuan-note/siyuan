@@ -14,9 +14,10 @@ import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
 import {clearSelect} from "../../util/clearSelect";
+import {isCustomAttr} from "./blockAttr";
 
 export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {
-    if (hasClosestByClassName(cellElement, "custom-attr")) {
+    if (isCustomAttr(cellElement)) {
         return cellElement.getAttribute("data-row-id");
     }
     return (hasClosestByClassName(cellElement, viewType === "table" ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
@@ -262,7 +263,7 @@ export const setPageSize = (options: {
     avID: string,
     nodeElement: Element
 }) => {
-    const menu = new Menu("av-page-size");
+    const menu = new Menu(Constants.MENU_AV_PAGE_SIZE);
     if (menu.isOpen) {
         return;
     }

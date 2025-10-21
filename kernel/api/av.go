@@ -77,7 +77,10 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
-	viewID := arg["viewID"].(string)
+	var viewID string
+	if viewIDArg := arg["viewID"]; nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
 	var groupID string
 	if groupIDArg := arg["groupID"]; nil != groupIDArg {
 		groupID = groupIDArg.(string)
@@ -225,7 +228,24 @@ func getAttributeViewKeysByAvID(c *gin.Context) {
 		return
 	}
 	avID := arg["avID"].(string)
-	ret.Data = model.GetAttributeViewKeysByAvID(avID)
+	ret.Data = model.GetAttributeViewKeysByID(avID)
+}
+
+func getAttributeViewKeysByID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	avID := arg["avID"].(string)
+	keyIDsArg := arg["keyIDs"].([]interface{})
+	var keyIDs []string
+	for _, v := range keyIDsArg {
+		keyIDs = append(keyIDs, v.(string))
+	}
+	ret.Data = model.GetAttributeViewKeysByID(avID, keyIDs...)
 }
 
 func getMirrorDatabaseBlocks(c *gin.Context) {
@@ -567,6 +587,24 @@ func searchAttributeViewNonRelationKey(c *gin.Context) {
 	}
 }
 
+func searchAttributeViewRollupDestKeys(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, _ := util.JsonArg(c, ret)
+	if nil == arg {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	keyword := arg["keyword"].(string)
+
+	rollupDestKeys := model.SearchAttributeViewRollupDestKeys(avID, keyword)
+	ret.Data = map[string]interface{}{
+		"keys": rollupDestKeys,
+	}
+}
+
 func searchAttributeViewRelationKey(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -675,7 +713,41 @@ func renderHistoryAttributeView(c *gin.Context) {
 
 	id := arg["id"].(string)
 	created := arg["created"].(string)
-	view, attrView, err := model.RenderHistoryAttributeView(id, created)
+	blockIDArg := arg["blockID"]
+	var blockID string
+	if nil != blockIDArg {
+		blockID = blockIDArg.(string)
+	}
+	viewIDArg := arg["viewID"]
+	var viewID string
+	if nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
+	page := 1
+	pageArg := arg["page"]
+	if nil != pageArg {
+		page = int(pageArg.(float64))
+	}
+
+	pageSize := -1
+	pageSizeArg := arg["pageSize"]
+	if nil != pageSizeArg {
+		pageSize = int(pageSizeArg.(float64))
+	}
+
+	query := ""
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
+	groupPaging := map[string]interface{}{}
+	groupPagingArg := arg["groupPaging"]
+	if nil != groupPagingArg {
+		groupPaging = groupPagingArg.(map[string]interface{})
+	}
+
+	view, attrView, err := model.RenderHistoryAttributeView(blockID, id, viewID, query, page, pageSize, groupPaging, created)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

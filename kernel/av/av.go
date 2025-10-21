@@ -168,7 +168,8 @@ func (k *Key) GetOption(name string) (ret *SelectOption) {
 }
 
 type Date struct {
-	AutoFillNow bool `json:"autoFillNow"` // 是否自动填充当前时间 The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
+	AutoFillNow      bool `json:"autoFillNow"`      // 是否自动填充当前时间 The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
+	FillSpecificTime bool `json:"fillSpecificTime"` // 是否填充具体时间 Add `Default fill specific time` switch to database date field https://github.com/siyuan-note/siyuan/issues/12089
 }
 
 type Rollup struct {
@@ -207,6 +208,7 @@ type View struct {
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
+	Kanban           *LayoutKanban  `json:"kanban,omitempty"`  // 看板布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
 	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
@@ -219,6 +221,10 @@ type View struct {
 	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
+}
+
+func (view *View) IsGroupView() bool {
+	return nil != view.Group && "" != view.Group.Field
 }
 
 // GetGroupValue 获取分组视图的分组值。
@@ -270,7 +276,7 @@ func (view *View) RemoveGroupByID(groupID string) {
 
 // GetGroupKey 获取分组视图的分组字段。
 func (view *View) GetGroupKey(attrView *AttributeView) (ret *Key) {
-	if nil == view.Group || "" == view.Group.Field {
+	if !view.IsGroupView() {
 		return
 	}
 
@@ -295,14 +301,15 @@ type LayoutType string
 const (
 	LayoutTypeTable   LayoutType = "table"   // 属性视图类型 - 表格
 	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 卡片
+	LayoutTypeKanban  LayoutType = "kanban"  // 属性视图类型 - 看板
 )
 
 const (
 	ViewDefaultPageSize = 50 // 视图默认分页大小
 )
 
-func NewTableView() (ret *View) {
-	ret = &View{
+func NewTableView() *View {
+	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("table"),
 		Filters:    []*ViewFilter{},
@@ -311,7 +318,6 @@ func NewTableView() (ret *View) {
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
 	}
-	return
 }
 
 func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKey *Key) {
@@ -334,7 +340,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 }
 
 func NewGalleryView() (ret *View) {
-	ret = &View{
+	return &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("gallery"),
 		Filters:    []*ViewFilter{},
@@ -343,7 +349,18 @@ func NewGalleryView() (ret *View) {
 		LayoutType: LayoutTypeGallery,
 		Gallery:    NewLayoutGallery(),
 	}
-	return
+}
+
+func NewKanbanView() (ret *View) {
+	return &View{
+		ID:         ast.NewNodeID(),
+		Name:       GetAttributeViewI18n("kanban"),
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
+		PageSize:   ViewDefaultPageSize,
+		LayoutType: LayoutTypeKanban,
+		Kanban:     NewLayoutKanban(),
+	}
 }
 
 // Viewable 描述了视图的接口。
@@ -527,6 +544,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		// 分页大小
 		if 1 > view.PageSize {
 			view.PageSize = ViewDefaultPageSize
+		}
+	}
+
+	// 清理渲染回填值
+	for _, kv := range av.KeyValues {
+		for i := len(kv.Values) - 1; i >= 0; i-- {
+			if kv.Values[i].IsRenderAutoFill {
+				kv.Values = append(kv.Values[:i], kv.Values[i+1:]...)
+			}
 		}
 	}
 
@@ -740,6 +766,11 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			view.Gallery.ID = ast.NewNodeID()
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
+			}
+		case LayoutTypeKanban:
+			view.Kanban.ID = ast.NewNodeID()
+			for _, field := range view.Kanban.Fields {
+				field.ID = keyIDMap[field.ID]
 			}
 		}
 		view.ItemIDs = []string{}

@@ -18,7 +18,6 @@ import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
-import {updateReadonly as updateReadonlyMethod} from "../breadcrumb/action";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 
@@ -66,7 +65,7 @@ export const onGet = (options: {
     options.protyle.block.parentID = options.data.data.parentID;
     options.protyle.block.parent2ID = options.data.data.parent2ID;
     options.protyle.block.rootID = options.data.data.rootID;
-    options.protyle.block.showAll = false;
+    options.protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     options.protyle.block.mode = options.data.data.mode;
     options.protyle.block.blockCount = options.data.data.blockCount;
     options.protyle.block.scroll = options.data.data.scroll;
@@ -81,6 +80,13 @@ export const onGet = (options: {
     if (options.protyle.options.render.title && options.protyle.title.element.getAttribute("data-render") !== "true") {
         // 文档A的大纲，关闭文档A后，点击大纲无法渲染头部
     } else if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE) || options.action.includes(Constants.CB_GET_HTML)) {
+        if (options.protyle.options.render.title && options.protyle.options.render.hideTitleOnZoom) {
+            if (options.protyle.block.showAll) {
+                options.protyle.title.element.classList.add("fn__none");
+            } else {
+                options.protyle.title.element.classList.remove("fn__none");
+            }
+        }
         // 防止动态加载加载过多的内容
         setHTML({
             content: options.data.data.content,
@@ -144,8 +150,6 @@ const setHTML = (options: {
         }
     });
     options.content = doc.body.innerHTML;
-
-    protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;
     if (options.action.includes(Constants.CB_GET_APPEND)) {
@@ -166,7 +170,7 @@ const setHTML = (options: {
             removeElements.forEach(item => {
                 item.remove();
             });
-            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop);
+            protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
             hideElements(["toolbar"], protyle);
         }
@@ -245,9 +249,10 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         protyle.element.removeAttribute("disabled-forever");
-        setReadonlyByConfig(protyle, updateReadonly);
-        if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly) {
-            updateReadonlyMethod(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
+        if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
+            enableProtyle(protyle);
+        } else {
+            setReadonlyByConfig(protyle, updateReadonly);
         }
     }
 
@@ -368,8 +373,10 @@ export const disabledProtyle = (protyle: IProtyle) => {
         item.setAttribute("draggable", "false");
     });
     if (protyle.breadcrumb) {
-        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconLock");
-        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);
+        const readonlyButton = protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]');
+        readonlyButton.querySelector("use").setAttribute("xlink:href", "#iconLock");
+        readonlyButton.setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.tempUnlock : window.siyuan.languages.unlockEdit);
+        readonlyButton.setAttribute("data-subtype", "lock");
         const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
         if (undoElement && !undoElement.classList.contains("fn__none")) {
             undoElement.classList.add("fn__none");
@@ -426,8 +433,10 @@ export const enableProtyle = (protyle: IProtyle) => {
         }
     });
     if (protyle.breadcrumb) {
-        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"] use').setAttribute("xlink:href", "#iconUnlock");
-        protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]').setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.cancelTempUnlock : window.siyuan.languages.lockEdit);
+        const readonlyButton = protyle.breadcrumb.element.parentElement.querySelector('[data-type="readonly"]');
+        readonlyButton.querySelector("use").setAttribute("xlink:href", "#iconUnlock");
+        readonlyButton.setAttribute("aria-label", window.siyuan.config.editor.readOnly ? window.siyuan.languages.cancelTempUnlock : window.siyuan.languages.lockEdit);
+        readonlyButton.setAttribute("data-subtype", "unlock");
         const undoElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="undo"]');
         if (undoElement && undoElement.classList.contains("fn__none")) {
             undoElement.classList.remove("fn__none");

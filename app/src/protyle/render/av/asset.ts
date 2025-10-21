@@ -199,7 +199,7 @@ export const editAssetItem = (options: {
 }) => {
     const linkAddress = removeCompressURL(options.content);
     const type = options.type as "image" | "file";
-    const menu = new Menu("av-asset-edit", () => {
+    const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, () => {
         if ((!textElements[1] && textElements[0].value === linkAddress) ||
             (textElements[1] && textElements[0].value === linkAddress && textElements[1].value === options.name)) {
             return;
@@ -382,7 +382,7 @@ export const editAssetItem = (options: {
 };
 
 export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], target: HTMLElement, blockElement: Element) => {
-    const menu = new Menu("av-asset-link", () => {
+    const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, () => {
         const textElements = menu.element.querySelectorAll("textarea");
         if (!textElements[0].value && !textElements[1].value) {
             return;

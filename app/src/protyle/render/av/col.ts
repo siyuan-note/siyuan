@@ -182,6 +182,11 @@ export const getEditHTML = (options: {
     <span class="fn__flex-center">${window.siyuan.languages.fillCreated}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
+</label>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.fillSpecificTime}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
 </label>`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
@@ -439,14 +444,31 @@ export const bindEditEvent = (options: {
         fillCreatedElement.addEventListener("change", () => {
             transaction(options.protyle, [{
                 avID,
-                action: "setAttrViewColDate",
+                action: "setAttrViewColDateFillCreated",
                 id: colId,
                 data: fillCreatedElement.checked
             }], [{
                 avID,
-                action: "setAttrViewColDate",
+                action: "setAttrViewColDateFillCreated",
                 id: colId,
                 data: !fillCreatedElement.checked
+            }]);
+        });
+    }
+
+    const fillSpecificTimeElement = options.menuElement.querySelector('[data-type="fillSpecificTime"]') as HTMLInputElement;
+    if (fillSpecificTimeElement) {
+        fillSpecificTimeElement.addEventListener("change", () => {
+            transaction(options.protyle, [{
+                avID,
+                action: "setAttrViewColDateFillSpecificTime",
+                id: colId,
+                data: fillSpecificTimeElement.checked
+            }], [{
+                avID,
+                action: "setAttrViewColDateFillSpecificTime",
+                id: colId,
+                data: !fillSpecificTimeElement.checked
             }]);
         });
     }
@@ -644,7 +666,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const blockID = blockElement.getAttribute("data-node-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const oldDesc = cellElement.dataset.desc;
-    const menu = new Menu("av-header-cell", () => {
+    const menu = new Menu(Constants.MENU_AV_HEADER_CELL, () => {
         const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue !== oldValue) {
             transaction(protyle, [{
@@ -784,45 +806,43 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
 
     // 行号类型不参与筛选和排序
     if (type !== "lineNumber") {
-        if (type !== "mAsset") {
-            menu.addItem({
-                id: "filter",
-                icon: "iconFilter",
-                label: window.siyuan.languages.filter,
-                click() {
-                    fetchPost("/api/av/renderAttributeView", {
-                        id: avID,
-                    }, (response) => {
-                        const avData = response.data as IAV;
-                        let filter: IAVFilter;
-                        avData.view.filters.find((item) => {
-                            if (item.column === colId && item.value.type === type) {
-                                filter = item;
-                                return true;
-                            }
-                        });
-                        let empty = false;
-                        if (!filter) {
-                            empty = true;
-                            filter = {
-                                column: colId,
-                                operator: getDefaultOperatorByType(type),
-                                value: genCellValue(type, ""),
-                            };
-                            avData.view.filters.push(filter);
+        menu.addItem({
+            id: "filter",
+            icon: "iconFilter",
+            label: window.siyuan.languages.filter,
+            click() {
+                fetchPost("/api/av/renderAttributeView", {
+                    id: avID,
+                }, (response) => {
+                    const avData = response.data as IAV;
+                    let filter: IAVFilter;
+                    avData.view.filters.find((item) => {
+                        if (item.column === colId && item.value.type === type) {
+                            filter = item;
+                            return true;
                         }
-                        setFilter({
-                            empty,
-                            filter,
-                            protyle,
-                            data: avData,
-                            blockElement: blockElement,
-                            target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
-                        });
                     });
-                }
-            });
-        }
+                    let empty = false;
+                    if (!filter) {
+                        empty = true;
+                        filter = {
+                            column: colId,
+                            operator: getDefaultOperatorByType(type),
+                            value: genCellValue(type, ""),
+                        };
+                        avData.view.filters.push(filter);
+                    }
+                    setFilter({
+                        empty,
+                        filter,
+                        protyle,
+                        data: avData,
+                        blockElement: blockElement,
+                        target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
+                    });
+                });
+            }
+        });
         menu.addItem({
             id: "asc",
             icon: "iconUp",
@@ -932,11 +952,12 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     });
     menu.addItem({
         icon: "iconSoftWrap",
-        label: `<label class="fn__flex" style="margin-bottom: 4px"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
+        label: `<label class="fn__flex fn__pointer"><span>${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
 <input type="checkbox" class="b3-switch b3-switch--menu"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
         bind(element) {
             const wrapElement = element.querySelector(".b3-switch") as HTMLInputElement;
             wrapElement.addEventListener("change", () => {
+                cellElement.dataset.wrap = wrapElement.checked.toString();
                 transaction(protyle, [{
                     action: "setAttrViewColWrap",
                     id: colId,
@@ -1214,7 +1235,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
 };
 
 export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: string) => {
-    const menu = new Menu("av-header-add");
+    const menu = new Menu(Constants.MENU_AV_HEADER_ADD);
     const avID = blockElement.getAttribute("data-av-id");
     if (typeof previousID === "undefined" && blockElement.getAttribute("data-av-type") === "table") {
         previousID = Array.from(blockElement.querySelectorAll(".av__row--header .av__cell")).pop().getAttribute("data-col-id");

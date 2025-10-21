@@ -243,6 +243,28 @@ func getHeadingDeleteTransaction(c *gin.Context) {
 	ret.Data = transaction
 }
 
+func getHeadingInsertTransaction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+
+	transaction, err := model.GetHeadingInsertTransaction(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = transaction
+}
+
 func getHeadingLevelTransaction(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

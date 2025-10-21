@@ -89,8 +89,10 @@ export class Menu {
 
     public addItem(option: IMenu) {
         const menuItem = new MenuItem(option);
-        this.append(menuItem.element, option.index);
-        return menuItem.element;
+        if (menuItem) {
+            this.append(menuItem.element, option.index);
+            return menuItem.element;
+        }
     }
 
     public removeScrollEvent() {
@@ -120,7 +122,7 @@ export class Menu {
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
-        this.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
+        this.element.removeAttribute("data-from");    // 标识菜单入口
         this.data = undefined;    // 移除数据
     }
 
@@ -236,7 +238,7 @@ export class MenuItem {
                 html = `<svg class="b3-menu__icon ${options.iconClass || ""}" style="${options.icon === "iconClose" ? "height:10px;" : ""}"><use xlink:href="#${options.icon || ""}"></use></svg>${html}`;
             }
             if (options.accelerator) {
-                html += `<span class="b3-menu__accelerator">${updateHotkeyTip(options.accelerator)}</span>`;
+                html += `<span class="b3-menu__accelerator b3-menu__accelerator--hotkey">${updateHotkeyTip(options.accelerator)}</span>`;
             }
             if (options.action) {
                 html += `<svg class="b3-menu__action${options.action === "iconCloseRound" ? " b3-menu__action--close" : ""}"><use xlink:href="#${options.action}"></use></svg>`;
@@ -258,7 +260,7 @@ export class MenuItem {
             submenuElement.classList.add("b3-menu__submenu");
             submenuElement.innerHTML = '<div class="b3-menu__items"></div>';
             options.submenu.forEach((item) => {
-                submenuElement.firstElementChild.append(new MenuItem(item).element);
+                submenuElement.firstElementChild.append(new MenuItem(item)?.element || "");
             });
             this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);

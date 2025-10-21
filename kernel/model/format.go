@@ -17,7 +17,10 @@
 package model
 
 import (
+	"bytes"
+
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -37,13 +40,18 @@ func AutoSpace(rootID string) (err error) {
 
 	generateOpTypeHistory(tree, HistoryOpFormat)
 	luteEngine := NewLute()
-	// 合并相邻的同类行级节点
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering {
-			switch n.Type {
-			case ast.NodeTextMark:
-				luteEngine.MergeSameTextMark(n)
-			}
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		switch n.Type {
+		case ast.NodeTextMark:
+			luteEngine.MergeSameTextMark(n) // 合并相邻的同类行级节点
+		case ast.NodeCodeBlockCode:
+			// 代码块中包含 ``` 时 `优化排版` 异常 `Optimize typography` exception when code block contains ``` https://github.com/siyuan-note/siyuan/issues/15843
+			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
+			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("```"), []byte(editor.Zwj+"```"))
 		}
 		return ast.WalkContinue
 	})

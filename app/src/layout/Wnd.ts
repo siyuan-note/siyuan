@@ -654,7 +654,7 @@ export class Wnd {
 
     private renderTabList(target: HTMLElement) {
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-            window.siyuan.menus.menu.element.getAttribute("data-name") === "tabList") {
+            window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TAB_LIST) {
             window.siyuan.menus.menu.remove();
             return;
         }
@@ -703,7 +703,7 @@ export class Wnd {
                 current: item.classList.contains("item--focus")
             }).element);
         });
-        window.siyuan.menus.menu.element.setAttribute("data-name", "tabList");
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TAB_LIST);
         const rect = target.getBoundingClientRect();
         window.siyuan.menus.menu.popup({
             x: rect.left + rect.width,

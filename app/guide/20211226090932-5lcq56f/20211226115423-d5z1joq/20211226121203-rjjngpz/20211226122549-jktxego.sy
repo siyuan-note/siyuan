@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20250529111304"
+		"updated": "20250929213959"
 	},
 	"Children": [
 		{
@@ -9104,7 +9104,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-8191vgw",
-				"updated": "20250115155758"
+				"updated": "20250924164911"
 			},
 			"Children": [
 				{
@@ -9124,7 +9124,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-v6as45b",
-				"updated": "20250115155758"
+				"updated": "20250924164911"
 			},
 			"Children": [
 				{
@@ -9233,7 +9233,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用塊"
+									"Data": "塊引用"
 								}
 							]
 						},
@@ -9280,7 +9280,43 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "需選中內容"
+									"Data": "需選中內容；預設使用靜態錨文本，在候選列表中按 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 或 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "點擊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 會使用動態錨文本"
 								}
 							]
 						}
@@ -15027,7 +15063,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20250407200322"
+				"updated": "20250929213959"
 			},
 			"Children": [
 				{
@@ -15047,7 +15083,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002223-xwob5s8",
-				"updated": "20250115160004"
+				"updated": "20250929213959"
 			},
 			"Children": [
 				{
@@ -15206,6 +15242,87 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "批次多選"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "點擊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧點擊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "需要先使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "點擊"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 選取首個文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "在右側打開"
 								},
 								{
@@ -15286,6 +15403,15 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Shift"
 								},
 								{
@@ -15304,7 +15430,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧點擊"
+									"TextMarkTextContent": "⌥⇧點擊"
 								},
 								{
 									"Type": "NodeText",

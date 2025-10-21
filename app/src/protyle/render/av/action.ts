@@ -394,7 +394,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             let text = "";
             rowElements.forEach((item, i) => {
                 if (rowElements.length > 1) {
-                    text += "* ";
+                    text += "- ";
                 }
                 text += item.querySelector('.av__cell[data-dtype="block"] .av__celltext').textContent.trim();
                 if (ids.length > 1 && i !== ids.length - 1) {
@@ -421,7 +421,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         content = `((${id} '${cellElement.querySelector(".av__celltext").textContent.replace(/[\n]+/g, " ")}'))`;
                     }
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
@@ -438,7 +438,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
@@ -460,7 +460,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
@@ -490,7 +490,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         content = `[${cellElement.querySelector(".av__celltext").textContent.replace(/[\n]+/g, " ")}](siyuan://blocks/${id})`;
                     }
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
@@ -517,7 +517,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     }
 
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
@@ -534,7 +534,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* ";
+                        text += "- ";
                     }
                     const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
@@ -606,7 +606,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
-                id: "insertRowBefore",
+                id: avType === "table" ? "insertRowBefore" : "insertItemBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
 ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field"><span class="fn__space"></span>`)}
@@ -641,7 +641,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 }
             });
             menu.addItem({
-                id: "insertRowAfter",
+                id: avType === "table" ? "insertRowAfter" : "insertItemAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
 ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field" value="1"><span class="fn__space"></span>`)}

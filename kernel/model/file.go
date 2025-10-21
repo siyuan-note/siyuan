@@ -323,6 +323,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			}
 
 			continue
+		} else {
+			if strings.HasSuffix(file.name, ".sy") && !ast.IsNodeIDPattern(strings.TrimSuffix(file.name, ".sy")) {
+				// 不以块 ID 命名的 .sy 文件不应该被加载到思源中 https://github.com/siyuan-note/siyuan/issues/16089
+				continue
+			}
 		}
 
 		subFolder := filepath.Join(boxLocalPath, strings.TrimSuffix(file.path, ".sy"))
@@ -933,7 +938,7 @@ func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
 		return
 	}
 	sql.UpsertTreeQueue(tree)
-	refreshDocInfo(tree, size)
+	refreshDocInfoWithSize(tree, size)
 	return
 }
 
@@ -959,7 +964,7 @@ func renameWriteJSONQueue(tree *parse.Tree) (err error) {
 	}
 	sql.RenameTreeQueue(tree)
 	treenode.UpsertBlockTree(tree)
-	refreshDocInfo(tree, size)
+	refreshDocInfoWithSize(tree, size)
 	return
 }
 
@@ -1068,6 +1073,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	SetBlockAttrs(retID, nameValues)
 
 	FlushTxQueue()
+	box.addMinSort(path.Dir(hPath), retID)
 	return
 }
 
@@ -1371,6 +1377,8 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 		return
 	}
 
+	fromParentTree := loadParentTree(tree)
+
 	moveToRoot := "/" == toPath
 	toBlockID := tree.ID
 	fromFolder := path.Join(path.Dir(fromPath), tree.ID)
@@ -1489,6 +1497,8 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	}
 	evt.Callback = callback
 	util.PushEvent(evt)
+
+	refreshDocInfo(fromParentTree)
 	return
 }
 
@@ -1538,16 +1548,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 		return
 	}
 
-	// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
-	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
-	for _, avNode := range avNodes {
-		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
-		destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
-		if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
-			logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
-		}
-	}
-
+	generateAvHistory(tree, historyDir)
 	copyDocAssetsToDataAssets(box.ID, p)
 
 	removeIDs := treenode.RootChildIDs(tree.ID)

@@ -57,6 +57,8 @@ type Value struct {
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
+
+	IsRenderAutoFill bool `json:"-"` // 标识是否是渲染阶段自动填充的值，保存数据的时候要删掉
 }
 
 func (value *Value) SetUpdatedAt(mills int64) {
@@ -532,34 +534,34 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatPercent:
 		s := fmt.Sprintf("%.2f", content*100)
 		return strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
-	case NumberFormatUSD:
+	case NumberFormatUSD, "usDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("$%.2f", content)
-	case NumberFormatCNY:
+	case NumberFormatCNY, "yuan":
 		p := message.NewPrinter(language.Chinese)
 		return p.Sprintf("CN¥%.2f", content)
-	case NumberFormatEUR:
+	case NumberFormatEUR, "euro":
 		p := message.NewPrinter(language.German)
 		return p.Sprintf("€%.2f", content)
-	case NumberFormatGBP:
+	case NumberFormatGBP, "pound":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("£%.2f", content)
-	case NumberFormatJPY:
+	case NumberFormatJPY, "yen":
 		p := message.NewPrinter(language.Japanese)
 		return p.Sprintf("¥%.0f", content)
-	case NumberFormatRUB:
+	case NumberFormatRUB, "ruble":
 		p := message.NewPrinter(language.Russian)
 		return p.Sprintf("₽%.2f", content)
-	case NumberFormatINR:
+	case NumberFormatINR, "rupee":
 		p := message.NewPrinter(language.Hindi)
 		return p.Sprintf("₹%.2f", content)
-	case NumberFormatKRW:
+	case NumberFormatKRW, "won":
 		p := message.NewPrinter(language.Korean)
 		return p.Sprintf("₩%.0f", content)
-	case NumberFormatCAD:
+	case NumberFormatCAD, "canadianDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("CA$%.2f", content)
-	case NumberFormatCHF:
+	case NumberFormatCHF, "franc":
 		p := message.NewPrinter(language.French)
 		return p.Sprintf("CHF%.2f", content)
 	case NumberFormatTHB:
@@ -700,7 +702,7 @@ type ValuePhone struct {
 type AssetType string
 
 const (
-	AssetTypeFile  = "file"
+	AssetTypeFile  = "file" // 链接也使用文件类型
 	AssetTypeImage = "image"
 )
 
@@ -806,6 +808,11 @@ func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relati
 		}
 
 		if nil == destVal {
+			if KeyTypeCheckbox == destKey.Type {
+				// 没有编辑过复选框的时候没有值，没有值等同于未选中，所以这里补一个未选中的值 https://github.com/siyuan-note/siyuan/issues/15858
+				defaultVal := GetAttributeViewDefaultValue(ast.NewNodeID(), destKey.ID, blockID, destKey.Type, false)
+				r.Contents = append(r.Contents, defaultVal)
+			}
 			continue
 		}
 
@@ -832,6 +839,40 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 
 	switch calc.Operator {
 	case CalcOperatorNone:
+	case CalcOperatorUniqueValues:
+		uniqueValues := map[string]bool{}
+		for _, content := range r.Contents {
+			switch content.Type {
+			case KeyTypeRelation:
+				var newRelationContents []*Value
+				for _, relationVal := range content.Relation.Contents {
+					key := relationVal.String(true)
+					if !uniqueValues[key] {
+						uniqueValues[key] = true
+						newRelationContents = append(newRelationContents, relationVal)
+					}
+				}
+				content.Relation.Contents = newRelationContents
+			case KeyTypeMSelect:
+				var newMSelect []*ValueSelect
+				for _, mSelect := range content.MSelect {
+					if !uniqueValues[mSelect.Content] {
+						uniqueValues[mSelect.Content] = true
+						newMSelect = append(newMSelect, mSelect)
+					}
+				}
+				content.MSelect = newMSelect
+			case KeyTypeMAsset:
+				var newMAsset []*ValueAsset
+				for _, mAsset := range content.MAsset {
+					if !uniqueValues[mAsset.Content] {
+						uniqueValues[mAsset.Content] = true
+						newMAsset = append(newMAsset, mAsset)
+					}
+				}
+				content.MAsset = newMAsset
+			}
+		}
 	case CalcOperatorCountAll:
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountValues:
@@ -1199,7 +1240,7 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	}
 }
 
-func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (ret *Value) {
+func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, keyDateIsTime bool) (ret *Value) {
 	if "" == valueID {
 		valueID = ast.NewNodeID()
 	}
@@ -1225,7 +1266,7 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (
 	case KeyTypeNumber:
 		ret.Number = &ValueNumber{}
 	case KeyTypeDate:
-		ret.Date = &ValueDate{IsNotTime: true}
+		ret.Date = &ValueDate{IsNotTime: !keyDateIsTime}
 	case KeyTypeSelect:
 		ret.MSelect = []*ValueSelect{}
 	case KeyTypeMSelect:

@@ -108,7 +108,11 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			}
 			galleryCard.ID = cardID
 
-			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.Template)
+			filedDateIsTime := false
+			if nil != field.Date {
+				filedDateIsTime = field.Date.FillSpecificTime
+			}
+			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.Template, filedDateIsTime)
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 

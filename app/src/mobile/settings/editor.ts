@@ -33,6 +33,7 @@ const setEditor = (modelMainElement: Element) => {
     window.siyuan.config.editor.displayNetImgMark = (modelMainElement.querySelector("#displayNetImgMark") as HTMLInputElement).checked;
     window.siyuan.config.editor.codeSyntaxHighlightLineNum = (modelMainElement.querySelector("#codeSyntaxHighlightLineNum") as HTMLInputElement).checked;
     window.siyuan.config.editor.embedBlockBreadcrumb = (modelMainElement.querySelector("#embedBlockBreadcrumb") as HTMLInputElement).checked;
+    window.siyuan.config.editor.headingEmbedMode = parseInt((modelMainElement.querySelector("#headingEmbedMode") as HTMLSelectElement).value);
     window.siyuan.config.editor.listLogicalOutdent = (modelMainElement.querySelector("#listLogicalOutdent") as HTMLInputElement).checked;
     window.siyuan.config.editor.listItemDotNumberClickFocus = (modelMainElement.querySelector("#listItemDotNumberClickFocus") as HTMLInputElement).checked;
     window.siyuan.config.editor.spellcheck = (modelMainElement.querySelector("#spellcheck") as HTMLInputElement).checked;
@@ -115,6 +116,16 @@ export const initEditor = () => {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="embedBlockBreadcrumb" type="checkbox"${window.siyuan.config.editor.embedBlockBreadcrumb ? " checked" : ""}/>
 </label>
+<div class="b3-label">
+    ${window.siyuan.languages.headingEmbedMode}
+    <span class="fn__hr"></span>
+    <select class="b3-select fn__block" id="headingEmbedMode">
+      <option value="0" ${window.siyuan.config.editor.headingEmbedMode === 0 ? "selected" : ""}>${window.siyuan.languages.showHeadingWithBlocks}</option>
+      <option value="1" ${window.siyuan.config.editor.headingEmbedMode === 1 ? "selected" : ""}>${window.siyuan.languages.showHeadingOnlyTitle}</option>
+      <option value="2" ${window.siyuan.config.editor.headingEmbedMode === 2 ? "selected" : ""}>${window.siyuan.languages.showHeadingOnlyBlocks}</option>
+    </select>
+    <div class="b3-label__text">${window.siyuan.languages.headingEmbedModeTip}</div>
+</div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.outlineOutdent}
@@ -240,7 +251,7 @@ export const initEditor = () => {
     ${window.siyuan.languages.historyRetentionDays} 
     <a href="javascript:void(0)" id="clearHistory">${window.siyuan.languages.clearHistory}</a>
     <span class="fn__hr"></span>
-    <input class="b3-text-field fn__block" id="historyRetentionDays" type="number" min="0" value="${window.siyuan.config.editor.historyRetentionDays}"/>
+    <input class="b3-text-field fn__block" id="historyRetentionDays" type="number" min="1" max="3650" value="${window.siyuan.config.editor.historyRetentionDays}"/>
     <div class="b3-label__text">${window.siyuan.languages.historyRetentionDaysTip}</div>
 </div>
 <div class="b3-label">

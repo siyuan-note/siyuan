@@ -228,7 +228,8 @@ export abstract class Constants {
     public static readonly MENU_BAR_WORKSPACE = "barWorkspace"; // 顶栏主菜单
     public static readonly MENU_BAR_PLUGIN = "topBarPlugin"; // 顶栏插件菜单
     public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
-    public static readonly MENU_BAR_MORE = "barmore"; // 顶栏外观菜单
+    public static readonly MENU_BAR_MODE = "barmode"; // 顶栏外观菜单
+    public static readonly MENU_BAR_MORE = "barmore"; // 顶栏更多菜单
     public static readonly MENU_STATUS_HELP = "statusHelp"; // 状态栏帮助菜单
     public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
     public static readonly MENU_DOCK_MOBILE = "dockMobileMenu"; // 移动端侧栏插件选项菜单

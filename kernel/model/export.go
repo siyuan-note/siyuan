@@ -1008,35 +1008,30 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 
 func processIFrame(tree *parse.Tree) {
 	// 导出 PDF/Word 时 IFrame 块使用超链接 https://github.com/siyuan-note/siyuan/issues/4035
-	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
+		if !entering || ast.NodeIFrame != n.Type {
 			return ast.WalkContinue
 		}
-		if ast.NodeIFrame == n.Type {
-			index := bytes.Index(n.Tokens, []byte("src=\""))
-			if 0 > index {
-				n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: n.Tokens})
-			} else {
-				src := n.Tokens[index+len("src=\""):]
-				src = src[:bytes.Index(src, []byte("\""))]
-				src = html.UnescapeHTML(src)
-				link := &ast.Node{Type: ast.NodeLink}
-				link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-				link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: src})
-				link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-				link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-				link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: src})
-				link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
-				n.InsertBefore(link)
-			}
-			unlinks = append(unlinks, n)
+
+		n.Type = ast.NodeParagraph
+		index := bytes.Index(n.Tokens, []byte("src=\""))
+		if 0 > index {
+			n.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: n.Tokens})
+		} else {
+			src := n.Tokens[index+len("src=\""):]
+			src = src[:bytes.Index(src, []byte("\""))]
+			src = html.UnescapeHTML(src)
+			link := &ast.Node{Type: ast.NodeLink}
+			link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+			link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: src})
+			link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+			link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+			link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: src})
+			link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+			n.AppendChild(link)
 		}
 		return ast.WalkContinue
 	})
-	for _, n := range unlinks {
-		n.Unlink()
-	}
 }
 
 func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {

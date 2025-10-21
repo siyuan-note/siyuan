@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20250330184030"
+		"updated": "20251021231250"
 	},
 	"Children": [
 		{
@@ -2535,7 +2535,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-ot6klof",
-				"updated": "20250330184040"
+				"updated": "20251021231250"
 			},
 			"Children": [
 				{
@@ -2659,6 +2659,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20251021231231-o6c9ofi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251021231231-o6c9ofi",
+				"updated": "20251021231250"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "列表項可以在列表之間移動。"
 				}
 			]
 		},

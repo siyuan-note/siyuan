@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20250929214205"
+		"updated": "20251021230901"
 	},
 	"Children": [
 		{
@@ -14191,7 +14191,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221105230824-p1mp4c2",
-				"updated": "20250115161030"
+				"updated": "20251021230901"
 			},
 			"Children": [
 				{
@@ -14211,7 +14211,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20221105230832-4q1qwpt",
-				"updated": "20250115161030"
+				"updated": "20251021230901"
 			},
 			"Children": [
 				{
@@ -14299,7 +14299,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "List item icon"
+									"Data": "List item icon / bullet point"
 								}
 							]
 						}
@@ -14344,7 +14344,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "List item icon"
+									"Data": "List item icon / bullet point"
 								}
 							]
 						}
@@ -14407,7 +14407,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "List item icon"
+									"Data": "List item icon / bullet point"
 								}
 							]
 						}
@@ -14474,7 +14474,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "List item icon"
+									"Data": "List item icon / bullet point"
 								}
 							]
 						}
@@ -14541,7 +14541,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "List item icon"
+									"Data": "List item icon / bullet point"
 								}
 							]
 						}

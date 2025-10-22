@@ -805,16 +805,13 @@ ${genHintItemHTML(item)}
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
-                    const doOperations: IOperation[] = [];
-                    const undoOperations: IOperation[] = [];
+                    const oldHTML = nodeElement.outerHTML;
+                    let foldData;
                     if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
                         nodeElement.getAttribute("fold") === "1") {
-                        const foldData = setFold(protyle, nodeElement, true, false, false, true);
-                        doOperations.push(...foldData.doOperations);
-                        undoOperations.push(...foldData.undoOperations);
+                        foldData = setFold(protyle, nodeElement, true, false, false, true);
                     }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
-                    const oldHTML = nodeElement.outerHTML;
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);
                     nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${newId}"]`);
                     // https://github.com/siyuan-note/siyuan/issues/6864
@@ -823,7 +820,7 @@ ${genHintItemHTML(item)}
                             item.style.minWidth = "60px";
                         });
                     }
-                    doOperations.push({
+                    const doOperations: IOperation[] = [{
                         data: oldHTML,
                         id,
                         action: "update"
@@ -832,15 +829,19 @@ ${genHintItemHTML(item)}
                         id: newId,
                         previousID: id,
                         action: "insert"
-                    });
-                    undoOperations.push({
+                    }];
+                    const undoOperations: IOperation[] = [{
                         id: newId,
                         action: "delete"
                     }, {
                         data: html,
                         id,
                         action: "update"
-                    });
+                    }];
+                    if (foldData) {
+                        doOperations.push(...foldData.doOperations);
+                        undoOperations.push(...foldData.undoOperations);
+                    }
                     transaction(protyle, doOperations, undoOperations);
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && (value.length > 3 || nodeElement.classList.contains("render-node")))) {

@@ -1431,7 +1431,11 @@ ${countHTML}
         const currentList = element.querySelector(`[data-node-id="${currentData.id}"]`) as HTMLElement;
         if (currentList) {
             currentList.classList.add("b3-list-item--focus");
-            currentList.scrollIntoView();
+            if (!currentList.previousElementSibling && currentList.parentElement.previousElementSibling) {
+                currentList.parentElement.previousElementSibling.scrollIntoView();
+            } else {
+                currentList.scrollIntoView();
+            }
         }
     }
 };

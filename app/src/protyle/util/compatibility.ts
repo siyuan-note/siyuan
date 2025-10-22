@@ -126,6 +126,22 @@ export const getLocalFiles = async () => {
 
 export const readClipboard = async () => {
     const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
+    if (isInAndroid()) {
+        text.textPlain = window.JSAndroid.readClipboard();
+        text.textHTML = window.JSAndroid.readHTMLClipboard();
+        const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+        text.textHTML = textObj.textHtml;
+        text.siyuanHTML = textObj.textSiyuan;
+        return text;
+    }
+    if (isInHarmony()) {
+        text.textPlain = window.JSHarmony.readClipboard();
+        text.textHTML = window.JSHarmony.readHTMLClipboard();
+        const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+        text.textHTML = textObj.textHtml;
+        text.siyuanHTML = textObj.textSiyuan;
+        return text;
+    }
     try {
         const clipboardContents = await navigator.clipboard.read().catch(() => {
             alert(window.siyuan.languages.clipboardPermissionDenied);
@@ -157,19 +173,6 @@ export const readClipboard = async () => {
         /// #endif
         return text;
     } catch (e) {
-        if (isInAndroid()) {
-            text.textPlain = window.JSAndroid.readClipboard();
-            text.textHTML = window.JSAndroid.readHTMLClipboard();
-            const textObj = getTextSiyuanFromTextHTML(text.textHTML);
-            text.textHTML = textObj.textHtml;
-            text.siyuanHTML = textObj.textSiyuan;
-        } else if (isInHarmony()) {
-            text.textPlain = window.JSHarmony.readClipboard();
-            text.textHTML = window.JSHarmony.readHTMLClipboard();
-            const textObj = getTextSiyuanFromTextHTML(text.textHTML);
-            text.textHTML = textObj.textHtml;
-            text.siyuanHTML = textObj.textSiyuan;
-        }
         return text;
     }
 };
@@ -298,7 +301,7 @@ export const getScreenWidth = () => {
         return window.JSHarmony.getScreenWidthPx();
     }
     return window.outerWidth;
-}
+};
 
 export const isWindows = () => {
     return navigator.platform.toUpperCase().indexOf("WIN") > -1;
@@ -532,7 +535,7 @@ export const initFocusFix = () => {
     const fixFocusAfterDialog = () => {
         ipcRenderer.send("siyuan-focus-fix");
     };
-    window.alert = function(message: string) {
+    window.alert = function (message: string) {
         try {
             const result = originalAlert.call(this, message);
             fixFocusAfterDialog();
@@ -543,7 +546,7 @@ export const initFocusFix = () => {
             return undefined;
         }
     };
-    window.confirm = function(message: string) {
+    window.confirm = function (message: string) {
         try {
             const result = originalConfirm.call(this, message);
             fixFocusAfterDialog();

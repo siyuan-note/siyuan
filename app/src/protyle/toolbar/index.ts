@@ -1291,7 +1291,7 @@ export class Toolbar {
                 `<b>${match}</b>`
             );
         };
-        
+
         inputElement.addEventListener("input", (event) => {
             const value = inputElement.value.trim();
             let matchLanguages;
@@ -1658,7 +1658,7 @@ ${item.name}
 <button class="keyboard__action" data-action="select"><svg><use xlink:href="#iconSelect"></use></svg></button>`;
         }
         if (hasCopy || !protyle.disabled) {
-            html += "<button class=\"keyboard__action\" data-action=\"more\"><svg><use xlink:href=\"#iconMore\"></use></svg></button>";
+            html += '<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>';
         }
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
         this.subElement.lastElementChild.addEventListener("click", async (event) => {

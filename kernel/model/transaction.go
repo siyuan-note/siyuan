@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -169,6 +170,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	isLargeInsert := tx.processLargeInsert()
 	if !isLargeInsert {
+		tx.processUndoInsertWithFoldedHeading()
 		for _, op := range tx.DoOperations {
 			switch op.Action {
 			case "create":
@@ -329,6 +331,62 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return &TxErr{msg: cr.Error()}
 	}
 	return
+}
+
+func (tx *Transaction) processUndoInsertWithFoldedHeading() {
+	// 删除折叠标题后撤销，需要调整 insert 顺序和 previousID
+	// https://github.com/siyuan-note/siyuan/issues/16120
+
+	// 所有操作均为 insert 才处理
+	for _, op := range tx.DoOperations {
+		if "insert" != op.Action {
+			return
+		}
+	}
+
+	for i := 0; i < len(tx.DoOperations); i++ {
+		op := tx.DoOperations[i]
+		ignoreProcess := false
+		if nil != op.Context["ignoreProcess"] {
+			var convErr error
+			ignoreProcess, convErr = strconv.ParseBool(op.Context["ignoreProcess"].(string))
+			if nil != convErr {
+				logging.LogErrorf("parse ignoreProcess failed: %s", convErr)
+				return
+			}
+		}
+		if ignoreProcess {
+			// 找到从当前 i 到下个 ignoreProcess=false 的区间，整体反转
+			j := i + 1
+			if j >= len(tx.DoOperations) {
+				return
+			}
+
+			for ; j < len(tx.DoOperations); j++ {
+				nextOp := tx.DoOperations[j]
+				nextIgnoreProcess := false
+				if nil != nextOp.Context["ignoreProcess"] {
+					var convErr error
+					nextIgnoreProcess, convErr = strconv.ParseBool(nextOp.Context["ignoreProcess"].(string))
+					if nil != convErr {
+						logging.LogErrorf("parse ignoreProcess failed: %s", convErr)
+						return
+					}
+				}
+				if !nextIgnoreProcess {
+					break
+				}
+			}
+			for _, nextOp := range tx.DoOperations[i:j] {
+				nextOp.PreviousID = tx.DoOperations[j].ID
+			}
+			slices.Reverse(tx.DoOperations[i : j+1])
+			i = j
+		}
+		if i >= len(tx.DoOperations) {
+			return
+		}
+	}
 }
 
 func (tx *Transaction) processLargeInsert() bool {

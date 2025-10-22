@@ -16,7 +16,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
-import {assetMenu, imgMenu} from "../../menus/protyle";
+import {assetMenu, imgMenu, setFold} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
@@ -805,6 +805,14 @@ ${genHintItemHTML(item)}
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
+                    const doOperations: IOperation[] = [];
+                    const undoOperations: IOperation[] = [];
+                    if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+                        nodeElement.getAttribute("fold") === "1") {
+                        const foldData = setFold(protyle, nodeElement, true, false, false, true);
+                        doOperations.push(...foldData.doOperations);
+                        undoOperations.push(...foldData.undoOperations);
+                    }
                     nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const oldHTML = nodeElement.outerHTML;
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);
@@ -815,7 +823,7 @@ ${genHintItemHTML(item)}
                             item.style.minWidth = "60px";
                         });
                     }
-                    transaction(protyle, [{
+                    doOperations.push({
                         data: oldHTML,
                         id,
                         action: "update"
@@ -824,14 +832,16 @@ ${genHintItemHTML(item)}
                         id: newId,
                         previousID: id,
                         action: "insert"
-                    }], [{
+                    });
+                    undoOperations.push({
                         id: newId,
                         action: "delete"
                     }, {
                         data: html,
                         id,
                         action: "update"
-                    }]);
+                    });
+                    transaction(protyle, doOperations, undoOperations);
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && (value.length > 3 || nodeElement.classList.contains("render-node")))) {
                     protyle.toolbar.showRender(protyle, nodeElement);

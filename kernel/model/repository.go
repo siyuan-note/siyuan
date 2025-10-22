@@ -1586,6 +1586,19 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
 				if pluginName := parts[3]; "petals.json" != pluginName {
 					upsertPluginSet.Add(pluginName)
+				} else {
+					// 修改了 petals.json 则重新加载所有插件
+					// The plugin switch status is not synchronized https://github.com/siyuan-note/siyuan/issues/16155
+					entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "petal"))
+					if nil != err {
+						logging.LogErrorf("read petals dir failed: %s", err)
+					} else {
+						for _, entry := range entries {
+							if entry.IsDir() {
+								upsertPluginSet.Add(entry.Name())
+							}
+						}
+					}
 				}
 			}
 		}

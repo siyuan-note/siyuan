@@ -7,17 +7,17 @@
 
 ## NPM 依赖
 
-安装 pnpm：`npm install -g pnpm@10.18.3`
+安装 pnpm：`npm install -g pnpm@10.19.0`
 
 <details>
 <summary>适用于中国大陆</summary>
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@37.7.0 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@37.7.1 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@37.7.0 -D`
+  * `pnpm install electron@37.7.1 -D`
 
 NPM 镜像：
 
@@ -27,7 +27,7 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@37.7.0 -D`
+* `pnpm install electron@37.7.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

@@ -52,6 +52,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
+        const unfoldOperations = [];
         for (let i = 0; i < selectElements.length; i++) {
             const item = selectElements[i];
             const topElement = getTopAloneElement(item);
@@ -108,9 +109,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     (topElement.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
                         (topElement.nextElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.nextElementSibling.getAttribute("data-subtype") < topElement.getAttribute("data-subtype"))
                     )) {
-                    const unfoldOperations = setFold(protyle, topElement.previousElementSibling, true, false, false, true);
-                    deletes.push(...unfoldOperations.doOperations);
-                    inserts.push(...unfoldOperations.undoOperations);
+                    unfoldOperations.push(setFold(protyle, topElement.previousElementSibling, true, false, false, true));
                     const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
                         id: topElement.previousElementSibling.getAttribute("data-node-id"),
                     });
@@ -131,6 +130,10 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 topElement.remove();
             }
         }
+        unfoldOperations.forEach(item => {
+            deletes.push(...item.doOperations);
+            inserts.push(...item.undoOperations);
+        });
         if (sideElement) {
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
                 setTimeout(() => {

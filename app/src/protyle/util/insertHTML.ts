@@ -21,6 +21,7 @@ import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
 import {getFieldIdByCellElement} from "../render/av/row";
 import {processClonePHElement} from "../render/util";
+import {setFold} from "../../menus/protyle";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -555,6 +556,17 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     const wbrElement = protyle.wysiwyg.element.querySelector("wbr");
     if (wbrElement) {
         wbrElement.remove();
+    }
+    let foldData;
+    if (blockElement.getAttribute("data-type") === "NodeHeading" &&
+        blockElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, blockElement, true, false, false, true);
+        doOperation.reverse();
+        foldData.doOperations[0].context = {
+            focusId: lastElement?.getAttribute("data-node-id"),
+        };
+        doOperation.push(...foldData.doOperations);
+        undoOperation.push(...foldData.undoOperations);
     }
     transaction(protyle, doOperation, undoOperation);
     // 复制容器块中包含折叠标题块

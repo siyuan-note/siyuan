@@ -258,8 +258,8 @@ github.com/juju/errors v1.0.0/go.mod h1:B5x9thDqx0wIMH3+aLIMP9HjItInYWObRovoCFM5
 github.com/juju/loggo v0.0.0-20190526231331-6e530bcce5d8/go.mod h1:vgyd7OREkbtVEN/8IXZe5Ooef3LQePvuBm9UWj6ZL8U=
 github.com/juju/testing v0.0.0-20191001232224-ce9dec17d28b/go.mod h1:63prj8cnj0tU0S9OHjGJn+b1h0ZghCndfnbQolrYTwA=
 github.com/klauspost/compress v1.4.1/go.mod h1:RyIbtBH6LamlWaDj8nUwkbUhJ87Yi3uG0guNDohfE1A=
-github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
-github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
+github.com/klauspost/compress v1.18.1 h1:bcSGx7UbpBqMChDtsF28Lw6v/G94LPrrbMbdC3JH2co=
+github.com/klauspost/compress v1.18.1/go.mod h1:ZQFFVG+MdnR0P+l6wpXgIL4NTtwiKIdBnrBd8Nrxr+0=
 github.com/klauspost/cpuid v1.2.0/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/cpuid/v2 v2.3.0 h1:S4CRMLnYUhGeDFDqkGriYKdfoFlDnMtqTiI/sFzhA9Y=
 github.com/klauspost/cpuid/v2 v2.3.0/go.mod h1:hqwkgyIinND0mEev00jJYCxPNVRVXFQeu1XKlok6oO0=
@@ -386,8 +386,8 @@ github.com/siyuan-note/httpclient v0.0.0-20251016024153-048ea2b2ebfd h1:g67edlPa
 github.com/siyuan-note/httpclient v0.0.0-20251016024153-048ea2b2ebfd/go.mod h1:xbFmjardDUhZL5+nKVwIr3dEbyhXC2eK3bbSYVR1GRE=
 github.com/siyuan-note/logging v0.0.0-20250425042449-b96c40249b54 h1:bNfLBxasCNYNIiE8YwIDDq0DxFjQ3aDbp25w8F5aShM=
 github.com/siyuan-note/logging v0.0.0-20250425042449-b96c40249b54/go.mod h1:9lb3q2RCdpjoQk7nDQwLSArNtCLafHwWtl8+kNkSISM=
-github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d h1:VJ/DuLIx4FE7MZtlX2Gahx2m9tr4YCXPxZxUXZIWRx4=
-github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d/go.mod h1:oz+GggNPu23prmW5/8aqpu9Zs5eQBgN+YQJzFLxbT4g=
+github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754 h1:6QYpy7s5HlRSge09TyM/mT0vz1RDcWYZdkxEh7hmbH4=
+github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754/go.mod h1:/N7+N2CsZ0nleNPpP3b+06Bzqvuhy6GUmLY7Kug/zT0=
 github.com/spf13/cast v1.10.0 h1:h2x0u2shc1QuLHfxi+cTJvs30+ZAHOGRic8uyGTDWxY=
 github.com/spf13/cast v1.10.0/go.mod h1:jNfB8QC9IA6ZuY2ZjDp0KtFO2LZZlg4S/7bzP6qqeHo=
 github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf h1:pvbZ0lM0XWPBqUKqFU8cmavspvIl9nulOYwdy6IFRRo=

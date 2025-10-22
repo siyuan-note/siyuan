@@ -458,6 +458,33 @@ func InitConf() {
 	if "" == Conf.Flashcard.Weights {
 		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
 	}
+	if 19 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights length must be [19]"
+		logging.LogWarnf("%s , given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
+	}
+	isInvalidFlashcardWeights := false
+	for _, w := range strings.Split(Conf.Flashcard.Weights, ",") {
+		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
+			isInvalidFlashcardWeights = true
+			break
+		}
+	}
+	if isInvalidFlashcardWeights {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights contain invalid number"
+		logging.LogWarnf("%s, given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
+	}
 
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()

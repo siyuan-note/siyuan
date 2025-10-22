@@ -64,7 +64,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20251010020544-2603449ff16d
 	github.com/siyuan-note/httpclient v0.0.0-20251016024153-048ea2b2ebfd
 	github.com/siyuan-note/logging v0.0.0-20250425042449-b96c40249b54
-	github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d
+	github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754
 	github.com/spf13/cast v1.10.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.11.0
@@ -145,7 +145,7 @@ require (
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056 // indirect
 	github.com/jolestar/go-commons-pool/v2 v2.1.2 // indirect
 	github.com/juju/errors v1.0.0 // indirect
-	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/klauspost/compress v1.18.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect

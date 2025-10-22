@@ -52,7 +52,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
-        const unfoldOperations = [];
+        const unfoldData: {
+            [key: string]: {
+                element: Element,
+                previousID: string
+            }
+        } = {};
         for (let i = 0; i < selectElements.length; i++) {
             const item = selectElements[i];
             const topElement = getTopAloneElement(item);
@@ -104,16 +109,22 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     data = protyle.lute.SpinBlockDOM(topElement.outerHTML);  // 防止图表撤销问题
                 }
                 let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
-                if (topElement.previousElementSibling && topElement.nextElementSibling && topElement.getAttribute("data-type") === "NodeHeading" && topElement.getAttribute("fold") !== "1" &&
+                if (topElement.previousElementSibling &&
                     topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.previousElementSibling.getAttribute("fold") === "1" &&
-                    (topElement.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                        (topElement.nextElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.nextElementSibling.getAttribute("data-subtype") < topElement.getAttribute("data-subtype"))
+                    (topElement.nextElementSibling?.getAttribute("data-type") !== "NodeHeading" ||
+                        (topElement.nextElementSibling?.getAttribute("data-type") === "NodeHeading" && topElement.nextElementSibling?.getAttribute("data-subtype") < topElement.getAttribute("data-subtype"))
                     )) {
-                    unfoldOperations.push(setFold(protyle, topElement.previousElementSibling, true, false, false, true));
-                    const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
-                        id: topElement.previousElementSibling.getAttribute("data-node-id"),
-                    });
-                    previousID = foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id;
+                    const foldId = topElement.previousElementSibling.getAttribute("data-node-id");
+                    if (!unfoldData[foldId]) {
+                        const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
+                            id: foldId,
+                        });
+                        unfoldData[foldId] = {
+                            element: topElement.previousElementSibling,
+                            previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id
+                        };
+                    }
+                    previousID = unfoldData[foldId].previousID;
                 }
                 inserts.push({
                     action: "insert",
@@ -130,9 +141,10 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 topElement.remove();
             }
         }
-        unfoldOperations.forEach(item => {
-            deletes.push(...item.doOperations);
-            inserts.push(...item.undoOperations);
+        Object.keys(unfoldData).forEach(item => {
+            const foldOperations = setFold(protyle, unfoldData[item].element, true, false, false, true);
+            deletes.push(...foldOperations.doOperations);
+            inserts.splice(0, 0, ...foldOperations.undoOperations);
         });
         if (sideElement) {
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {

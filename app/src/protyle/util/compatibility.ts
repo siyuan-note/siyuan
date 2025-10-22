@@ -98,6 +98,10 @@ export const readText = () => {
     } else if (isInHarmony()) {
         return window.JSHarmony.readClipboard();
     }
+    if (typeof navigator.clipboard === "undefined") {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
+        return "";
+    }
     return navigator.clipboard.readText().catch(() => {
         alert(window.siyuan.languages.clipboardPermissionDenied);
     }) || "";
@@ -140,6 +144,10 @@ export const readClipboard = async () => {
         const textObj = getTextSiyuanFromTextHTML(text.textHTML);
         text.textHTML = textObj.textHtml;
         text.siyuanHTML = textObj.textSiyuan;
+        return text;
+    }
+    if (typeof navigator.clipboard === "undefined") {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
         return text;
     }
     try {

@@ -1685,6 +1685,7 @@ ${item.name}
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
                 this.subElement.classList.add("fn__none");
             } else if (action === "paste") {
+                focusByRange(getEditorRange(nodeElement));
                 if (document.queryCommandSupported("paste")) {
                     document.execCommand("paste");
                 } else {
@@ -1708,6 +1709,7 @@ ${item.name}
                 pasteAsPlainText(protyle);
                 this.subElement.classList.add("fn__none");
             } else if (action === "pasteEscaped") {
+                focusByRange(getEditorRange(nodeElement));
                 pasteEscaped(protyle, nodeElement);
                 this.subElement.classList.add("fn__none");
             } else if (action === "back") {

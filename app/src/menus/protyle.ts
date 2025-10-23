@@ -825,6 +825,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             icon: "iconPaste",
             accelerator: "⌘V",
             async click() {
+                focusByRange(getEditorRange(nodeElement));
                 if (document.queryCommandSupported("paste")) {
                     document.execCommand("paste");
                 } else {
@@ -850,6 +851,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
             id: "pasteEscaped",
             label: window.siyuan.languages.pasteEscaped,
             click() {
+                focusByRange(getEditorRange(nodeElement));
                 pasteEscaped(protyle, nodeElement);
             }
         }).element);

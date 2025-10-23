@@ -29,6 +29,7 @@ import (
 	"net/http"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -213,6 +214,16 @@ func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess 
 	return
 }
 
+func CheckBlockIdAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
+	publishIgnore := GetDisablePublishAccess(publishAccess)
+	block := sql.GetBlock(blockID)
+	if block != nil {
+		return false
+	}
+	passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+	return CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
+}
+
 func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 	authCookie := util.SHA256Hash([]byte(ID + password))
 	http.SetCookie(c.Writer, &http.Cookie{
@@ -226,6 +237,52 @@ func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
 	authCookie, err := c.Request.Cookie("publish-auth-" + ID)
 	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID + password))
+}
+
+func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publishAccess PublishAccess) bool {
+	absPath = filepath.Clean(absPath)
+
+	if util.IsSubPath(util.HistoryDir, absPath) {
+		return false
+	}
+
+	if util.IsSubPath(util.DataDir, absPath) {
+		relPath, err := filepath.Rel(util.DataDir, absPath)
+		if err != nil {
+			return true
+		}
+
+		relPath = strings.ReplaceAll(relPath, "\\", "/")
+
+		pathParts := strings.Split(relPath, "/")
+		if len(pathParts) <= 1 {
+			return true
+		}
+
+		if ast.IsNodeIDPattern(pathParts[0]) {
+			box := pathParts[0]
+			blockPath := "/" + strings.Join(pathParts[1:], "/")
+			passwordID, password := GetPathPasswordByPublishAccess(box, blockPath, publishAccess)
+			publishIgnore := GetDisablePublishAccess(publishAccess)
+			return CheckPathAccessableByPublishIgnore(box, blockPath, publishIgnore) && (password == "" ||CheckPublishAuthCookie(c, passwordID, password))
+		} else if pathParts[0] == "assets" {
+			publishIgnore := GetDisablePublishAccess(publishAccess)
+			blocks := sql.GetAllRootBlocks()
+			for _, block := range blocks {
+				passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+				if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+					assets, _ := DocAssets(block.ID)
+					for _, assetPath := range assets {
+						if assetPath == relPath {
+							return true
+						}
+					}
+				}
+			}
+			return false
+		}
+	}
+	return true
 }
 
 func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, viewable av.Viewable) (ret av.Viewable) {

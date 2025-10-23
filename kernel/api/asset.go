@@ -206,6 +206,14 @@ func getDocImageAssets(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
 	ret.Data = assets
 }
 
@@ -224,6 +232,14 @@ func getDocAssets(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
 	}
 	ret.Data = assets
 }

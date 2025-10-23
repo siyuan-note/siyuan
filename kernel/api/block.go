@@ -404,6 +404,12 @@ func getDocsInfo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), ids)
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		for i, docinfo := range info {
+			info[i] = model.FilterBlockInfoByPublishAccess(c, publishAccess, docinfo)
+		}
+	}
 	ret.Data = info
 }
 

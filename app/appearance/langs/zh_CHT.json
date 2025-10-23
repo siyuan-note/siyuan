@@ -583,7 +583,7 @@
   "docNameAndContent": "文檔名和內容",
   "breadcrumb": "導覽路徑",
   "embedBlockBreadcrumb": "嵌入塊導覽路徑",
-  "embedBlockBreadcrumbTip": "啟用後嵌入塊將顯示導覽路徑，在超級塊中的嵌入塊忽略該選項，始終不顯示導覽路徑",
+  "embedBlockBreadcrumbTip": "啟用後嵌入塊將顯示導覽路徑",
   "appearanceMode": "外觀模式",
   "editReadonly": "只讀模式",
   "editReadonlyTip": "啟用後文檔編輯器將預設鎖定編輯。仍然能夠搜尋替換文字、透過 API 修改內容",

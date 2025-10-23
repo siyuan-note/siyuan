@@ -1,4 +1,4 @@
-import {hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
+import {hasClosestByAttribute} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
@@ -40,11 +40,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         } else {
             breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
         }
-        // https://github.com/siyuan-note/siyuan/issues/7575
-        const sbElement = hasTopClosestByClassName(item, "sb");
-        if (sbElement) {
-            breadcrumb = false;
-        }
+
         if (content.startsWith("//!js")) {
             try {
                 const includeIDs = new Function(

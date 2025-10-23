@@ -583,7 +583,7 @@
   "docNameAndContent": "Nom et contenu du document",
   "fil d'Ariane": "Fil d'Ariane",
   "embedBlockBreadcrumb": "Intégrer le fil d'Ariane du bloc",
-  "embedBlockBreadcrumbTip": "Après avoir activé l'intégration, les blocs afficheront le fil d'Ariane, intégrer des blocs dans des super blocs ignorent cette option et n'affichent jamais le fil d'Ariane",
+  "embedBlockBreadcrumbTip": "Après avoir activé l'intégration, les blocs afficheront le fil d'Ariane",
   "appearanceMode": "Mode d'apparence",
   "editReadonly": "Mode lecture seule",
   "editReadonlyTip": "Lorsqu'il est activé, l'éditeur de document sera en lecture seule par défaut. Vous pouvez toujours rechercher et remplacer du texte, modifier le contenu via l'API",

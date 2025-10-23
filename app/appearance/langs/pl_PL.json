@@ -583,7 +583,7 @@
   "docNameAndContent": "Nazwa dokumentu i treść",
   "breadcrumb": "Okruszek",
   "embedBlockBreadcrumb": "Wbudowany okruszek bloku",
-  "embedBlockBreadcrumbTip": "Po włączeniu wbudowane bloki będą wyświetlać okruszki, wbudowane bloki w super blokach ignorują tę opcję i nigdy nie pokazują okruszków",
+  "embedBlockBreadcrumbTip": "Po włączeniu wbudowane bloki będą wyświetlać okruszki",
   "appearanceMode": "Tryb wyglądu",
   "editReadonly": "Tryb tylko do odczytu",
   "editReadonlyTip": "Po włączeniu edytor dokumentów będzie domyślnie tylko do odczytu. Nadal można wyszukiwać i zastępować tekst, modyfikować zawartość przez API",

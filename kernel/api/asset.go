@@ -210,7 +210,7 @@ func getDocImageAssets(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
 			ret.Code = -1
-			ret.Msg = err.Error()
+			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 			return
 		}
 	}
@@ -237,7 +237,7 @@ func getDocAssets(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		if !model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, id) {
 			ret.Code = -1
-			ret.Msg = err.Error()
+			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 			return
 		}
 	}

@@ -213,6 +213,10 @@ func loadIcons() {
 	}
 }
 
+func ReloadIcon() {
+	loadIcons()
+}
+
 func unwatchTheme(folder string) {
 	val, _ := themeWatchers.Load(folder)
 	if nil != val {

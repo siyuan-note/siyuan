@@ -118,7 +118,7 @@ export const openSnippets = () => {
                         type: target.id === "addCodeSnippetCSS" ? "css" : "js",
                         name: "",
                         content: "",
-                        enabled: false,
+                        enabled: true,
                         disabledInPublish: false,
                     }));
                     event.stopPropagation();

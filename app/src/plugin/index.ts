@@ -251,6 +251,10 @@ export class Plugin {
     }
 
     public saveData(storageName: string, data: any) {
+        if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+            return;
+        }
+
         return new Promise((resolve) => {
             const pathString = `/data/storage/petal/${this.name}/${storageName}`;
             let file: File;
@@ -273,6 +277,10 @@ export class Plugin {
     }
 
     public removeData(storageName: string) {
+        if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+            return;
+        }
+
         return new Promise((resolve) => {
             if (!this.data) {
                 this.data = {};

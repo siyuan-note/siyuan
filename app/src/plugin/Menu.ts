@@ -18,7 +18,9 @@ export class Menu {
         }
         this.menu.remove();
         if (!this.isOpen) {
-            this.menu.element.setAttribute("data-name", id || "");
+            if (id) {
+                this.menu.element.setAttribute("data-name", id);
+            }
             this.menu.removeCB = closeCB;
         }
     }

@@ -807,6 +807,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
             }
+            const editElement = getContenteditableElement(nodeElement) as HTMLElement;
             const imgSelectElement = protyle.wysiwyg.element.querySelector(".img--select");
             if (imgSelectElement) {
                 imgSelectElement.classList.remove("img--select");
@@ -823,7 +824,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.preventDefault();
                     return;
                 }
-                const editElement = getContenteditableElement(nodeElement) as HTMLElement;
                 if (!editElement) {
                     nodeElement.classList.add("protyle-wysiwyg--select");
                     removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
@@ -833,11 +833,25 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const position = getSelectionOffset(editElement, protyle.wysiwyg.element, range);
                 if (event.key === "Delete" || matchHotKey("⌃D", event)) {
-                    // 图片后为空格，在空格后删除 https://github.com/siyuan-note/siyuan/issues/13949
                     if (range.startOffset === 0 && range.startContainer.textContent.length === 1) {
+                        // 图片后为空格，在空格后删除 https://github.com/siyuan-note/siyuan/issues/13949
                         const rangePreviousElement = hasPreviousSibling(range.startContainer) as HTMLElement;
                         const rangeNextElement = hasNextSibling(range.startContainer) as HTMLElement;
                         if (rangePreviousElement && rangePreviousElement.nodeType === 1 && rangePreviousElement.classList.contains("img") &&
+                            rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img")) {
+                            const wbrElement = document.createElement("wbr");
+                            range.insertNode(wbrElement);
+                            const oldHTML = nodeElement.outerHTML;
+                            wbrElement.nextSibling.textContent = Constants.ZWSP;
+                            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                            focusByWbr(nodeElement, range);
+                            event.preventDefault();
+                            return;
+                        }
+                        // 图片前有一个字符，在字符后删除 https://github.com/siyuan-note/siyuan/issues/15911
+                        if (position.start === 0 &&
+                            range.startContainer.textContent !== Constants.ZWSP &&  // 如果为 zwsp 需前移光标
+                            !rangePreviousElement &&
                             rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img")) {
                             const wbrElement = document.createElement("wbr");
                             range.insertNode(wbrElement);
@@ -860,7 +874,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 const nextBlockElement = hasClosestBlock(nextRange.startContainer);
                                 if (nextBlockElement &&
                                     (!nextBlockElement.classList.contains("code-block") ||
-                                        (nextBlockElement.classList.contains("code-block") && getContenteditableElement(nextBlockElement).textContent == "\n"))
+                                        (nextBlockElement.classList.contains("code-block") &&
+                                            (getContenteditableElement(nextBlockElement).textContent == "\n") || nextBlockElement.parentElement.classList.contains("li")))
                                 ) {
                                     // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
                                     cloneRange.insertNode(document.createElement("wbr"));
@@ -914,7 +929,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
                         if (!nodeElement.classList.contains("code-block") ||
-                            (nodeElement.classList.contains("code-block") && editElement.textContent == "\n")
+                            (nodeElement.classList.contains("code-block") &&
+                                (editElement.textContent == "\n" || nodeElement.parentElement.classList.contains("li")))
                         ) {
                             removeBlock(protyle, nodeElement, range, "Backspace");
                         }
@@ -1007,12 +1023,36 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                 }
-            } else if (nodeElement.classList.contains("code-block") && getContenteditableElement(nodeElement).textContent === "\n") {
+            } else if (nodeElement.classList.contains("code-block") && editElement.textContent === "\n") {
                 // 空代码块全选删除异常 https://github.com/siyuan-note/siyuan/issues/6706
                 range.collapse(true);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
+            } else if (selectText !== "") {
+                const position = getSelectionOffset(editElement, protyle.wysiwyg.element, range);
+                if (range.startOffset === 0 && range.endContainer.textContent.length === range.endOffset) {
+                    // 图片后为空格，在空格后删除 https://github.com/siyuan-note/siyuan/issues/13949
+                    // 图片前有一个字符，在字符后删除 https://github.com/siyuan-note/siyuan/issues/15911
+                    const rangePreviousElement = hasPreviousSibling(range.startContainer) as HTMLElement;
+                    const rangeNextElement = hasNextSibling(range.endContainer) as HTMLElement;
+                    if ((rangePreviousElement && rangePreviousElement.nodeType === 1 && rangePreviousElement.classList.contains("img") &&
+                            rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img")) ||
+                        (position.start === 0 &&
+                            range.startContainer.textContent !== Constants.ZWSP &&  // 如果为 zwsp 需前移光标
+                            !rangePreviousElement &&
+                            rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img"))) {
+                        range.insertNode(document.createElement("wbr"));
+                        const oldHTML = nodeElement.outerHTML;
+                        range.deleteContents();
+                        range.insertNode(document.createTextNode(Constants.ZWSP));
+                        range.insertNode(document.createElement("wbr"));
+                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        focusByWbr(nodeElement, range);
+                        event.preventDefault();
+                        return;
+                    }
+                }
             }
         }
 
@@ -1583,7 +1623,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     } else {
                         protyle.hint.splitChar = "/";
                         protyle.hint.lastIndex = -1;
-                        protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
+                        protyle.hint.fill((isMatchCheck ? "- [ ] " : (isMatchList ? "- " : "1. ")) + Lute.Caret, protyle);
                     }
                 }
             } else {

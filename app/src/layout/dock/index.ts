@@ -9,7 +9,7 @@ import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
 import {Model} from "../Model";
-import {saveLayout, setPanelFocus} from "../util";
+import {adjustLayout, saveLayout, setPanelFocus} from "../util";
 import {getDockByType, resizeTabs} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
@@ -112,6 +112,13 @@ export class Dock {
 
         if (activeElements.length === 0) {
             this.resizeElement.classList.add("fn__none");
+            // 如果没有打开的侧栏，隐藏 layout 的子元素
+            if (this.layout.children.length > 1) {
+                this.layout.children.forEach(child => {
+                    child.element.classList.add("fn__none");
+                });
+                this.layout.children[0].element.nextElementSibling?.classList.add("fn__none");
+            }
         } else {
             activeElements.forEach(item => {
                 this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
@@ -700,7 +707,8 @@ export class Dock {
                 this.layout.element.style.opacity = "";
                 this.hideResizeTimeout = window.setTimeout(() => {
                     this.resizeElement.classList.remove("fn__none");
-                }, 200);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
+                    adjustLayout();
+                }, Constants.TIMEOUT_TRANSITION);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
             }
             if (document.activeElement) {
                 (document.activeElement as HTMLElement).blur();

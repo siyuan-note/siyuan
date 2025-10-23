@@ -181,7 +181,7 @@ func GetCaptcha(c *gin.Context) {
 }
 
 func CheckReadonly(c *gin.Context) {
-	if util.ReadOnly {
+	if util.ReadOnly || IsReadOnlyRole(GetGinContextRole(c)) {
 		result := util.NewResult()
 		result.Code = -1
 		result.Msg = Conf.Language(34)

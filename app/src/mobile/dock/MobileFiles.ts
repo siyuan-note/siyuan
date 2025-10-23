@@ -111,6 +111,9 @@ export class MobileFiles extends Model {
         filesElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.actionsElement)) {
+                if (target.classList.contains("b3-list-item__icon")) {
+                    target = target.previousElementSibling as HTMLElement;
+                }
                 const type = target.getAttribute("data-type");
                 if (type === "refresh") {
                     if (!target.getAttribute("disabled")) {
@@ -603,7 +606,8 @@ export class MobileFiles extends Model {
             } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
                 const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                     notebook: data.box,
-                    path: item.path
+                    path: item.path,
+                    app: Constants.SIYUAN_APPID,
                 });
                 newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
             }
@@ -640,6 +644,7 @@ export class MobileFiles extends Model {
         fetchPost("/api/filetree/listDocsByPath", {
             notebook: notebookId,
             path: liElement.getAttribute("data-path"),
+            app: Constants.SIYUAN_APPID,
         }, response => {
             if (response.data.path === "/" && response.data.files.length === 0) {
                 newFile({
@@ -695,7 +700,8 @@ export class MobileFiles extends Model {
         } else {
             const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                 notebook: notebookId,
-                path: currentPath
+                path: currentPath,
+                app: Constants.SIYUAN_APPID,
             });
             liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }

@@ -53,6 +53,7 @@
     height: 16px;
     background-color: var(--b3-theme-surface);
     z-index: 1; // 防止被 protyle-scroll 遮挡
+    white-space: nowrap;
 
     &:hover {
       color: var(--b3-theme-on-background);

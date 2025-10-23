@@ -145,13 +145,13 @@ const togglePinDock = (id: string, dock: Dock, icon: string) => {
 
 export const workspaceMenu = (app: App, rect: DOMRect) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "barWorkspace") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_WORKSPACE) {
         window.siyuan.menus.menu.remove();
         return;
     }
     fetchPost("/api/system/getWorkspaces", {}, (response) => {
         window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.setAttribute("data-name", "barWorkspace");
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_WORKSPACE);
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "config",

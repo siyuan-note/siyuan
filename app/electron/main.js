@@ -352,7 +352,7 @@ const initMainWindow = () => {
     }).then((response) => {
         setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
             // 加载主界面
-            currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
+            currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
         });
     });
 
@@ -387,10 +387,7 @@ const initMainWindow = () => {
     });
 
     currentWindow.webContents.on("did-finish-load", () => {
-        let siyuanOpenURL;
-        if ("win32" === process.platform || "linux" === process.platform) {
-            siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        }
+        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
         if (siyuanOpenURL) {
             if (currentWindow.isMinimized()) {
                 currentWindow.restore();
@@ -607,7 +604,7 @@ const initKernel = (workspace, port, lang) => {
                     resolve(false);
                     return;
                 }
-                await sleep(200);
+                await sleep(500);
             }
         }
 
@@ -865,6 +862,13 @@ app.whenReady().then(() => {
         currentWindow.on("leave-full-screen", () => {
             event.sender.send("siyuan-event", "leave-full-screen");
         });
+    });
+    ipcMain.on("siyuan-focus-fix", (event) => {
+        const currentWindow = getWindowByContentId(event.sender.id);
+        if (currentWindow && process.platform === "win32") {
+            currentWindow.blur();
+            currentWindow.focus();
+        }
     });
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;

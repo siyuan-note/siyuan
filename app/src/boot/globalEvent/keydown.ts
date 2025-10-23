@@ -601,6 +601,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
             const liElement = files.element.querySelector(".b3-list-item");
             if (liElement) {
                 liElement.classList.add("b3-list-item--focus");
+                files.lastSelectedElement = liElement;
             }
             event.preventDefault();
         }
@@ -863,6 +864,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
                     item.classList.remove("b3-list-item--focus");
                 });
                 parentElement.classList.add("b3-list-item--focus");
+                files.lastSelectedElement = parentElement;
                 const parentRect = parentElement.getBoundingClientRect();
                 const fileRect = files.element.getBoundingClientRect();
                 if (parentRect.top < fileRect.top || parentRect.bottom > fileRect.bottom) {
@@ -895,6 +897,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
                     item.classList.remove("b3-list-item--focus");
                 });
                 nextElement.classList.add("b3-list-item--focus");
+                files.lastSelectedElement = nextElement;
                 const nextRect = nextElement.getBoundingClientRect();
                 const fileRect = files.element.getBoundingClientRect();
                 if (nextRect.top < fileRect.top || nextRect.bottom > fileRect.bottom) {
@@ -928,6 +931,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
                     item.classList.remove("b3-list-item--focus");
                 });
                 previousElement.classList.add("b3-list-item--focus");
+                files.lastSelectedElement = previousElement;
                 const previousRect = previousElement.getBoundingClientRect();
                 const fileRect = files.element.getBoundingClientRect();
                 if (previousRect.top < fileRect.top || previousRect.bottom > fileRect.bottom) {

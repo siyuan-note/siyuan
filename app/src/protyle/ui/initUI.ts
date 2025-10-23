@@ -9,7 +9,7 @@ import {lineNumberRender} from "../render/highlightRender";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {genUUID} from "../../util/genID";
 import {getContenteditableElement, getLastBlock} from "../wysiwyg/getBlock";
-import {genEmptyElement} from "../../block/util";
+import {genEmptyElement, genHeadingElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
 /// #if !MOBILE
@@ -137,16 +137,22 @@ export const initUI = (protyle: IProtyle) => {
                     return;
                 }
             }
-            const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
+            const lastElement = protyle.wysiwyg.element.lastElementChild;
+            const lastRect = lastElement.getBoundingClientRect();
             const range = document.createRange();
             if (event.y > lastRect.bottom) {
-                const lastEditElement = getContenteditableElement(getLastBlock(protyle.wysiwyg.element.lastElementChild));
+                const lastEditElement = getContenteditableElement(getLastBlock(lastElement));
                 if (!protyle.options.click.preventInsetEmptyBlock && (
                     !lastEditElement ||
-                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
-                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== ""))
+                    (lastElement.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
+                    (lastElement.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== ""))
                 ) {
-                    const emptyElement = genEmptyElement(false, false);
+                    let emptyElement:Element;
+                    if (lastElement.getAttribute("data-type") === "NodeHeading" && lastElement.getAttribute("fold") === "1") {
+                        emptyElement = genHeadingElement(lastElement) as Element;
+                    } else {
+                        emptyElement = genEmptyElement(false, false);
+                    }
                     protyle.wysiwyg.element.insertAdjacentElement("beforeend", emptyElement);
                     transaction(protyle, [{
                         action: "insert",

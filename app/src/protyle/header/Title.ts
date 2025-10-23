@@ -91,7 +91,7 @@ export class Title {
                 event.stopPropagation();
                 event.preventDefault();
             });
-            this.editElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            this.editElement.addEventListener("keydown", async (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
                 }
@@ -100,7 +100,10 @@ export class Title {
                     return true;
                 }
                 if (matchHotKey("⇧⌘V", event)) {
-                    navigator.clipboard.readText().then(textPlain => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    let textPlain = await readText() || "";
+                    if (textPlain) {
                         // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
                         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
                         enableLuteMarkdownSyntax(protyle);
@@ -110,9 +113,8 @@ export class Title {
                         content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
                         document.execCommand("insertText", false, replaceFileName(content));
                         this.rename(protyle);
-                    });
-                    event.preventDefault();
-                    event.stopPropagation();
+                    }
+                    return;
                 }
                 if (matchHotKey(window.siyuan.config.keymap.general.enterBack.custom, event)) {
                     const ids = protyle.path.split("/");
@@ -181,9 +183,10 @@ export class Title {
                     event.stopPropagation();
                 }
             });
-            const iconElement = this.element.querySelector(".protyle-title__icon");
-            iconElement.addEventListener("click", () => {
-                if (window.siyuan.shiftIsPressed) {
+            const iconElement = this.element.querySelector(".protyle-title__icon") as HTMLElement;
+            iconElement.addEventListener("click", (event) => {
+                // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
+                if (event.shiftKey) {
                     fetchPost("/api/block/getDocInfo", {
                         id: protyle.block.rootID
                     }, (response) => {
@@ -191,15 +194,15 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom});
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom}, Constants.MENU_FROM_TITLE_PROTYLE);
                 }
             });
             this.element.addEventListener("contextmenu", (event) => {
                 if (event.shiftKey) {
                     return;
                 }
-                if (getSelection().rangeCount === 0) {
-                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
+                if (getSelection().rangeCount === 0 || iconElement.contains((event.target as HTMLElement))) {
+                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY}, Constants.MENU_FROM_TITLE_PROTYLE);
                     return;
                 }
                 protyle.toolbar?.element.classList.add("fn__none");
@@ -255,7 +258,7 @@ export class Title {
                             document.execCommand("paste");
                         } else {
                             try {
-                                const text = await readText();
+                                const text = await readText() || "";
                                 document.execCommand("insertText", false, replaceFileName(text));
                                 this.rename(protyle);
                             } catch (e) {
@@ -269,16 +272,15 @@ export class Title {
                     label: window.siyuan.languages.pasteAsPlainText,
                     accelerator: "⇧⌘V",
                     click: async () => {
-                        navigator.clipboard.readText().then(textPlain => {
-                            textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
-                            enableLuteMarkdownSyntax(protyle);
-                            let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
-                            restoreLuteMarkdownSyntax(protyle);
-                            // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
-                            content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
-                            document.execCommand("insertText", false, replaceFileName(content));
-                            this.rename(protyle);
-                        });
+                        let textPlain = await readText() || "";
+                        textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                        enableLuteMarkdownSyntax(protyle);
+                        let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                        restoreLuteMarkdownSyntax(protyle);
+                        // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
+                        content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
+                        document.execCommand("insertText", false, replaceFileName(content));
+                        this.rename(protyle);
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -351,15 +353,15 @@ export class Title {
     }
 
     public render(protyle: IProtyle, response: IWebSocketData) {
-        if (this.element.getAttribute("data-render") === "true") {
-            return false;
-        }
         if (protyle.options.render.hideTitleOnZoom) {
             if (protyle.block.showAll) {
                 this.element.classList.add("fn__none");
             } else {
                 this.element.classList.remove("fn__none");
             }
+        }
+        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
+            return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
         if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {
@@ -380,7 +382,7 @@ export class Title {
             nodeAttrHTML += `<div class="protyle-attr--alias"><svg><use xlink:href="#iconA"></use></svg>${Lute.EscapeHTMLStr(response.data.ial.alias)}</div>`;
         }
         if (response.data.ial.memo) {
-            nodeAttrHTML += `<div class="protyle-attr--memo b3-tooltips b3-tooltips__sw" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}"><svg><use xlink:href="#iconM"></use></svg></div>`;
+            nodeAttrHTML += `<div class="protyle-attr--memo ariaLabel" aria-label="${Lute.EscapeHTMLStr(response.data.ial.memo)}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
         }
         if (response.data.ial["custom-avs"]) {
             let avTitle = "";

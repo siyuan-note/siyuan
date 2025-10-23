@@ -64,10 +64,10 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let lastColorHTML = "";
     const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (lastFonts.length > 0) {
-        lastColorHTML = `<div class="keyboard__slash-title">
+        lastColorHTML = `<div data-id="lastUsed" class="keyboard__slash-title">
     ${window.siyuan.languages.lastUsed}
 </div>
-<div class="keyboard__slash-block">`;
+<div data-id="lastUsedWrap" class="keyboard__slash-block">`;
         lastFonts.forEach((item: string) => {
             const lastFontStatus = item.split(Constants.ZWSP);
             switch (lastFontStatus[0]) {
@@ -137,8 +137,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     }
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `${lastColorHTML}
-<div class="keyboard__slash-title">${window.siyuan.languages.color}</div>
-<div class="keyboard__slash-block">
+<div data-id="color" class="keyboard__slash-title">${window.siyuan.languages.color}</div>
+<div data-id="colorWrap" class="keyboard__slash-block">
     <button class="keyboard__slash-item" data-type="style1">
         <span class="keyboard__slash-icon">A</span>
         <span class="keyboard__slash-text">${window.siyuan.languages.color} ${window.siyuan.languages.default}</span>
@@ -160,16 +160,16 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-text">${window.siyuan.languages.successStyle}</span>
     </button>
 </div>
-<div class="keyboard__slash-title">${window.siyuan.languages.colorFont}</div>
-<div class="keyboard__slash-block">
+<div data-id="colorFont" class="keyboard__slash-title">${window.siyuan.languages.colorFont}</div>
+<div data-id="colorFontWrap" class="keyboard__slash-block">
     ${colorHTML}
 </div>
-<div class="keyboard__slash-title">${window.siyuan.languages.colorPrimary}</div>
-<div class="keyboard__slash-block">
+<div data-id="colorPrimary" class="keyboard__slash-title">${window.siyuan.languages.colorPrimary}</div>
+<div data-id="colorPrimaryWrap" class="keyboard__slash-block">
     ${bgHTML}
 </div>
-<div class="keyboard__slash-title">${window.siyuan.languages.fontStyle}</div>
-<div class="keyboard__slash-block">
+<div data-id="fontStyle" class="keyboard__slash-title">${window.siyuan.languages.fontStyle}</div>
+<div data-id="fontStyleWrap" class="keyboard__slash-block">
     <button class="keyboard__slash-item" data-type="style2">
         <span class="keyboard__slash-text" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</span>
     </button>
@@ -181,8 +181,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-text">${window.siyuan.languages.clearFontStyle}</span>
     </button>
 </div>
-<div class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
-<div class="keyboard__slash-block${disableFont ? " fn__none" : ""}">
+<div data-id="fontSize" class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
+<div data-id="fontSizeWrap" class="keyboard__slash-block${disableFont ? " fn__none" : ""}">
     <select class="b3-select fn__block" style="width: calc(50% - 8px);margin: 4px 0 8px 0;">
         <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
         <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
@@ -246,9 +246,9 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("#### " + Lute.Caret, "iconH4", window.siyuan.languages.heading4, "true")}
     ${getSlashItem("##### " + Lute.Caret, "iconH5", window.siyuan.languages.heading5, "true")}
     ${getSlashItem("###### " + Lute.Caret, "iconH6", window.siyuan.languages.heading6, "true")}
-    ${getSlashItem("* " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
+    ${getSlashItem("- " + Lute.Caret, "iconList", window.siyuan.languages.list, "true")}
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
-    ${getSlashItem("* [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
+    ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
     ${getSlashItem("```", "iconCode", window.siyuan.languages.code, "true")}
     ${getSlashItem(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, "iconTable", window.siyuan.languages.table, "true")}
@@ -542,11 +542,12 @@ export const initKeyboardToolbar = () => {
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
         if (slashBtnElement && !slashBtnElement.getAttribute("data-type")) {
             const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
-            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
-            if (dataValue !== Constants.ZWSP + 3) {
-                event.preventDefault();
-                event.stopPropagation();
+            if (dataValue === Constants.ZWSP + 3) {
+                return;
             }
+            protyle.hint.fill(dataValue, protyle, false);   // 点击后 range 会改变
+            event.preventDefault();
+            event.stopPropagation();
             if (slashBtnElement.getAttribute("data-focus") === "true") {
                 focusByRange(protyle.toolbar.range);
             }

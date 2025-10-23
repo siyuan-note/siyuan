@@ -54,10 +54,10 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 	}
 
 	req := openai.ChatCompletionRequest{
-		Model:       model,
-		MaxTokens:   maxTokens,
-		Temperature: float32(temperature),
-		Messages:    reqMsgs,
+		Model:               model,
+		MaxCompletionTokens: maxTokens,
+		Temperature:         float32(temperature),
+		Messages:            reqMsgs,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()

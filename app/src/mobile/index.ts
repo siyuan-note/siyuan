@@ -164,7 +164,7 @@ window.reconnectWebSocket = () => {
     window.siyuan.ws.send("ping", {});
     window.siyuan.mobile.docks.file.send("ping", {});
     window.siyuan.mobile.editor.protyle.ws.send("ping", {});
-    window.siyuan.mobile.popEditor.protyle.ws.send("ping", {});
+    window.siyuan.mobile.popEditor?.protyle.ws.send("ping", {});
 };
 window.goBack = goBack;
 window.showMessage = showMessage;

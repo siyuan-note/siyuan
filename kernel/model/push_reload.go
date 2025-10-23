@@ -38,10 +38,18 @@ import (
 )
 
 func refreshDocInfo(tree *parse.Tree) {
+	if nil == tree {
+		return
+	}
+
 	refreshDocInfoWithSize(tree, filesys.TreeSize(tree))
 }
 
 func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
+	if nil == tree {
+		return
+	}
+
 	refreshDocInfo0(tree, size)
 	refreshParentDocInfo(tree)
 }

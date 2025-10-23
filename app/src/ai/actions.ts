@@ -161,7 +161,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     elements.forEach(item => {
         ids.push(item.getAttribute("data-node-id"));
     });
-    const menu = new Menu("ai", () => {
+    const menu = new Menu(Constants.MENU_AI, () => {
         focusByRange(protyle.toolbar.range);
     });
     let customHTML = "";

@@ -221,7 +221,7 @@ export const copyTextByType = async (ids: string[],
     for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
         if (ids.length > 1) {
-            text += "* ";
+            text += "- ";
         }
         if (type === "ref") {
             const response = await fetchSyncPost("/api/block/getRefText", {id});

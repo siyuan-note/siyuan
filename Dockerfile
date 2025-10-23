@@ -1,52 +1,60 @@
-FROM node:21 AS NODE_BUILD
+FROM --platform=$BUILDPLATFORM node:21 AS node-build
 
-WORKDIR /go/src/github.com/siyuan-note/siyuan/
-ADD . /go/src/github.com/siyuan-note/siyuan/
-RUN apt-get update && \
-    apt-get install -y jq
-RUN cd app && \
-packageManager=$(jq -r '.packageManager' package.json) && \
-if [ -n "$packageManager" ]; then \
-    npm install -g $packageManager; \
-else \
-    echo "No packageManager field found in package.json"; \
-    npm install -g pnpm; \
-fi && \
-pnpm install --registry=http://registry.npmjs.org/ --silent && \
+ARG NPM_REGISTRY=
+
+WORKDIR /app
+ADD app/package.json app/pnpm* app/.npmrc .
+
+RUN <<EORUN
+#!/bin/bash -e
+corepack enable
+corepack install --global $(node -e 'console.log(require("./package.json").packageManager)')
+npm config set registry ${NPM_REGISTRY}
+pnpm install --silent
+EORUN
+
+ADD app/ .
+RUN <<EORUN
+#!/bin/bash -e
 pnpm run build
-RUN apt-get purge -y jq
-RUN apt-get autoremove -y
-RUN rm -rf /var/lib/apt/lists/*
+mkdir /artifacts
+mv appearance stage guide changelogs /artifacts/
+EORUN
 
-FROM golang:1.24-alpine AS GO_BUILD
-WORKDIR /go/src/github.com/siyuan-note/siyuan/
-COPY --from=NODE_BUILD /go/src/github.com/siyuan-note/siyuan/ /go/src/github.com/siyuan-note/siyuan/
-ENV GO111MODULE=on
-ENV CGO_ENABLED=1
-RUN apk add --no-cache gcc musl-dev && \
-    cd kernel && go build --tags fts5 -v -ldflags "-s -w" && \
-    mkdir /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/appearance/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/stage/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/guide/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/changelogs/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/kernel/kernel /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/kernel/entrypoint.sh /opt/siyuan/entrypoint.sh && \
-    find /opt/siyuan/ -name .git | xargs rm -rf
+FROM golang:1.24-alpine AS go-build
+
+ARG GOPROXY=
+
+RUN <<EORUN
+#!/bin/sh -e
+apk add --no-cache gcc musl-dev
+go env -w GO111MODULE=on
+go env -w GOPROXY=${GOPROXY}
+go env -w CGO_ENABLED=1
+EORUN
+
+WORKDIR /kernel
+ADD kernel/go.* .
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg \
+    go mod download
+
+ADD kernel/ .
+RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg \
+    go build --tags fts5 -v -ldflags "-s -w"
 
 FROM alpine:latest
 LABEL maintainer="Liang Ding<845765@qq.com>"
 
-WORKDIR /opt/siyuan/
-COPY --from=GO_BUILD /opt/siyuan/ /opt/siyuan/
-
-RUN apk add --no-cache ca-certificates tzdata su-exec && \
-    chmod +x /opt/siyuan/entrypoint.sh
+RUN apk add --no-cache ca-certificates tzdata su-exec
 
 ENV TZ=Asia/Shanghai
 ENV HOME=/home/siyuan
 ENV RUN_IN_CONTAINER=true
 EXPOSE 6806
+
+WORKDIR /opt/siyuan/
+COPY --from=go-build --chmod=755 /kernel/kernel /kernel/entrypoint.sh .
+COPY --from=node-build /artifacts .
 
 ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
 CMD ["/opt/siyuan/kernel"]

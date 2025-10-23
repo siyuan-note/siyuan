@@ -224,8 +224,8 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
     const blockElement = hasClosestByClassName(target, "table");
     if (blockElement && blockElement.style.cursor !== "col-resize" && !hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
         const cellElement = (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD")) as HTMLTableCellElement;
-        if (cellElement) {
-            const tableElement = blockElement.querySelector("table");
+        const tableElement = blockElement.querySelector("table");
+        if (cellElement && tableElement && tableElement.getAttribute("contenteditable") === "true") {
             const tableHeight = blockElement.querySelector("table").clientHeight;
             const resizeElement = blockElement.querySelector(".table__resize");
             if (blockElement.style.textAlign === "center" || blockElement.style.textAlign === "right") {

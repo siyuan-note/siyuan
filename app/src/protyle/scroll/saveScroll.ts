@@ -67,7 +67,7 @@ export const getDocByScroll = (options: {
             actions = [Constants.CB_GET_UNUNDO];
         }
     }
-    if (options.scrollAttr?.zoomInId) {
+    if (options.scrollAttr?.zoomInId && options.scrollAttr?.rootId && options.scrollAttr.zoomInId !== options.scrollAttr.rootId) {
         fetchPost("/api/filetree/getDoc", {
             id: options.scrollAttr.zoomInId,
             size: Constants.SIZE_GET_MAX,

@@ -167,6 +167,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			groupView.Table.Columns = nil
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = nil
+		case av.LayoutTypeKanban:
+			groupView.Kanban.Fields = nil
 		}
 	}
 	viewable.SetGroups(groups)
@@ -402,6 +404,19 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 			end = len(gallery.Cards)
 		}
 		gallery.Cards = gallery.Cards[start:end]
+	case av.LayoutTypeKanban:
+		kanban := viewable.(*av.Kanban)
+		kanban.CardCount = 0
+		kanban.PageSize = view.PageSize
+		if 1 > pageSize {
+			pageSize = kanban.PageSize
+		}
+		start := (page - 1) * pageSize
+		end := start + pageSize
+		if len(kanban.Cards) < end {
+			end = len(kanban.Cards)
+		}
+		kanban.Cards = kanban.Cards[start:end]
 	}
 	return
 }
@@ -507,9 +522,11 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	historyDir := matches[0]
 	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if !gulu.File.IsExist(avJSONPath) {
+		logging.LogWarnf("attribute view [%s] not found in history data [%s], use current data instead", avID, historyDir)
 		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
 	}
 	if !gulu.File.IsExist(avJSONPath) {
+		logging.LogWarnf("attribute view [%s] not found in current data", avID)
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := os.ReadFile(avJSONPath)

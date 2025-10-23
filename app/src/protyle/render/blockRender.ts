@@ -1,4 +1,4 @@
-import {hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
+import {hasClosestByAttribute} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
@@ -40,11 +40,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         } else {
             breadcrumb = window.siyuan.config.editor.embedBlockBreadcrumb;
         }
-        // https://github.com/siyuan-note/siyuan/issues/7575
-        const sbElement = hasTopClosestByClassName(item, "sb");
-        if (sbElement) {
-            breadcrumb = false;
-        }
+
         if (content.startsWith("//!js")) {
             try {
                 const includeIDs = new Function(
@@ -59,7 +55,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                             fetchPost("/api/search/getEmbedBlock", {
                                 embedBlockID: item.getAttribute("data-node-id"),
                                 includeIDs: promiseIds,
-                                headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
+                                headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
                                 breadcrumb
                             }, (response) => {
                                 renderEmbed(response.data.blocks || [], protyle, item, top);
@@ -74,7 +70,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                     fetchPost("/api/search/getEmbedBlock", {
                         embedBlockID: item.getAttribute("data-node-id"),
                         includeIDs,
-                        headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
+                        headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
                         breadcrumb
                     }, (response) => {
                         renderEmbed(response.data.blocks || [], protyle, item, top);
@@ -89,7 +85,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
             fetchPost("/api/search/searchEmbedBlock", {
                 embedBlockID: item.getAttribute("data-node-id"),
                 stmt: content,
-                headingMode: item.getAttribute("custom-heading-mode") === "1" ? 1 : 0,
+                headingMode: ["0", "1", "2"].includes(item.getAttribute("custom-heading-mode")) ? parseInt(item.getAttribute("custom-heading-mode")) : window.siyuan.config.editor.headingEmbedMode,
                 excludeIDs: [item.getAttribute("data-node-id"), protyle.block.rootID],
                 breadcrumb
             }, (response) => {

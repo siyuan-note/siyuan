@@ -148,10 +148,9 @@
     width: 100%;
     background-color: var(--b3-theme-background);
     align-items: center;
-    min-width: 204px;
+    overflow: auto;
 
     .b3-list-item {
-      width: 204px;
       white-space: nowrap;
       font-size: 17px;
       color: var(--b3-theme-on-surface);

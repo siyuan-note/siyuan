@@ -1,4 +1,4 @@
-import {genEmptyElement, insertEmptyBlock} from "../../block/util";
+import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
 import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
@@ -180,7 +180,13 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
 
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
-        const newElement = genEmptyElement(false, true);
+        let newElement;
+        if (blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+            blockElement.previousElementSibling.getAttribute("fold") === "1") {
+            newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+        } else {
+            newElement = genEmptyElement(false, true);
+        }
         const newId = newElement.getAttribute("data-node-id");
         transaction(protyle, [{
             action: "insert",
@@ -220,7 +226,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     const id = blockElement.getAttribute("data-node-id");
     const newElement = document.createElement("div");
-    newElement.appendChild(genEmptyElement(false, false));
+    if (blockElement.getAttribute("data-type") === "NodeHeading" && blockElement.getAttribute("fold") === "1") {
+        newElement.innerHTML = genHeadingElement(blockElement, true) as string;
+    } else {
+        newElement.appendChild(genEmptyElement(false, false));
+    }
     const newEditableElement = newElement.querySelector('[contenteditable="true"]');
     newEditableElement.appendChild(range.extractContents());
     const selectWbrElement = newEditableElement.querySelector("wbr");

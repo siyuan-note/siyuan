@@ -341,7 +341,6 @@ export class Graph extends Model {
         });
         this.inputElement.addEventListener("compositionend", () => {
             this.searchGraph(false);
-            this.inputElement.classList.add("search__input--block");
         });
         this.inputElement.addEventListener("blur", (event: InputEvent) => {
             const inputElement = event.target as HTMLInputElement;
@@ -350,11 +349,6 @@ export class Graph extends Model {
         this.inputElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
-            }
-            if (this.inputElement.value === "") {
-                this.inputElement.classList.remove("search__input--block");
-            } else {
-                this.inputElement.classList.add("search__input--block");
             }
             this.searchGraph(false);
         });

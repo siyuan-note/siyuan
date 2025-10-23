@@ -5,7 +5,7 @@ import {
     hasPreviousSibling,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
@@ -140,12 +140,24 @@ export const getEditorRange = (element: Element): Range => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element === range.startContainer || element.contains(range.startContainer)) {
-            // 有时候点击编辑器头部需要矫正到第一个块中
-            if (range.toString() === "" && range.startContainer.nodeType === 1 && range.startOffset === 0 &&
-                (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
-                const focusRange = focusBlock(range.startContainer.firstChild as Element);
-                if (focusRange) {
-                    return focusRange;
+            if (range.toString() === "" && range.startContainer.nodeType === 1) {
+                // 有时候点击编辑器头部需要矫正到第一个块中
+                if (range.startOffset === 0 && (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
+                    const focusRange = focusBlock(range.startContainer.firstChild as Element);
+                    if (focusRange) {
+                        return focusRange;
+                    }
+                }
+                // 移动端获取有偏差 https://github.com/siyuan-note/siyuan/issues/15998
+                if ((range.startContainer as Element).getAttribute("contenteditable") !== "true" &&
+                    getContenteditableElement(range.startContainer as Element)) {
+                    const blockElement = hasClosestBlock(range.startContainer);
+                    if (blockElement) {
+                        const focusRange = focusBlock(blockElement);
+                        if (focusRange) {
+                            return focusRange;
+                        }
+                    }
                 }
             }
             return range;
@@ -194,7 +206,7 @@ export const getEditorRange = (element: Element): Range => {
     return range;
 };
 
-export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
+export const getSelectionPosition = (nodeElement: Element, range?: Range, useDirect = false) => {
     if (!range) {
         range = getEditorRange(nodeElement);
     }
@@ -261,10 +273,26 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
     } else {
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
         if (range.toString()) {
-            return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
-                left: rects[rects.length - 1].left,
-                top: rects[0].top
-            };
+            if (useDirect) {
+                const selection = window.getSelection();
+                // 判断选择方向
+                const isBackward = (selection && "direction" in selection && selection.direction !== "none") ?
+                    selection.direction === "backward"
+                    : range.startContainer === selection?.focusNode && range.startOffset === selection?.focusOffset;
+                const isBottom = !isBackward && rects[0].top !== rects[rects.length - 1].top;
+                return {
+                    // 向左选择：使用第一个矩形的左边界；向右选择：使用最后一个矩形的右边界
+                    left: isBackward ? rects[0].left : rects[rects.length - 1].right,
+                    // 如果向右选择时有多个垂直位置不同的矩形：使用最后一个矩形的下边界；否则使用第一个矩形的上边界
+                    top: isBottom ? rects[rects.length - 1].bottom : rects[0].top,
+                    isBottom
+                };
+            } else {
+                return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
+                    left: rects[rects.length - 1].left,
+                    top: rects[0].top
+                };
+            }
         } else {
             return {    // 代码块首 https://github.com/siyuan-note/siyuan/issues/13113
                 left: rects[rects.length - 1].left,

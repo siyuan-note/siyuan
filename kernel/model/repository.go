@@ -1589,7 +1589,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				} else {
 					// 修改了 petals.json 则重新加载所有插件
 					// The plugin switch status is not synchronized https://github.com/siyuan-note/siyuan/issues/16155
-					entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "petal"))
+					entries, err := os.ReadDir(filepath.Join(util.DataDir, "plugins"))
 					if nil != err {
 						logging.LogErrorf("read petals dir failed: %s", err)
 					} else {

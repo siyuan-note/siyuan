@@ -583,7 +583,7 @@
   "docNameAndContent": "Nome e Conteúdo do Documento",
   "breadcrumb": "Navegação Estruturada",
   "embedBlockBreadcrumb": "Navegação Estruturada de Bloco Incorporado",
-  "embedBlockBreadcrumbTip": "Quando ativado, blocos incorporados exibirão navegação estrutural, blocos incorporados em super blocos ignoram esta opção e nunca mostram navegação estrutural",
+  "embedBlockBreadcrumbTip": "Quando ativado, blocos incorporados exibirão navegação estrutural",
   "appearanceMode": "Modo de Aparência",
   "editReadonly": "Modo somente leitura",
   "editReadonlyTip": "Quando ativado, o editor de documentos ficará somente leitura por padrão. Ainda é possível buscar e substituir texto, modificar conteúdo via API",

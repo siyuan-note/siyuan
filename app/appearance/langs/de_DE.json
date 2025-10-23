@@ -583,7 +583,7 @@
   "docNameAndContent": "Dokumentname und -inhalt",
   "breadcrumb": "Breadcrumb",
   "embedBlockBreadcrumb": "Breadcrumb des eingebetteten Blocks",
-  "embedBlockBreadcrumbTip": "Nach der Aktivierung zeigen eingebettete Blöcke Breadcrumbs an, eingebettete Blöcke in Superblöcken ignorieren diese Option und zeigen niemals Breadcrumbs.",
+  "embedBlockBreadcrumbTip": "Nach der Aktivierung zeigen eingebettete Blöcke Breadcrumbs an.",
   "appearanceMode": "Darstellungsmodus",
   "editReadonly": "Schreibgeschützter Modus",
   "editReadonlyTip": "Nach der Aktivierung ist der Dokumenteditor standardmäßig schreibgeschützt. Textsuche und -ersetzung sowie API-Änderungen sind weiterhin möglich.",

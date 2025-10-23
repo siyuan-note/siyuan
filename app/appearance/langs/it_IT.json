@@ -583,7 +583,7 @@
   "docNameAndContent": "Nome documento e contenuto",
   "breadcrumb": "Breadcrumb",
   "embedBlockBreadcrumb": "Incorpora breadcrumb del blocco",
-  "embedBlockBreadcrumbTip": "Dopo l'abilitazione, i blocchi incorporati mostreranno i breadcrumb. I blocchi incorporati nei super blocchi ignorano questa opzione e non mostreranno mai breadcrumb",
+  "embedBlockBreadcrumbTip": "Dopo l'abilitazione, i blocchi incorporati mostreranno i breadcrumb",
   "appearanceMode": "Modalità aspetto",
   "editReadonly": "Modalità di sola lettura",
   "editReadonlyTip": "Quando abilitato, l'editor di documenti sarà in sola lettura per impostazione predefinita. Puoi ancora cercare e sostituire testo, modificare contenuti tramite API",

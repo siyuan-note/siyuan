@@ -583,7 +583,7 @@
   "docNameAndContent": "Nombre y contenido del documento",
   "miga de pan": "Miga de pan",
   "embedBlockBreadcrumb": "Incrustar migas de pan de bloque",
-  "embedBlockBreadcrumbTip": "Después de habilitar los bloques incrustados, se mostrarán migas de pan, incrustar bloques en superbloques ignora esta opción y nunca muestra migas de pan",
+  "embedBlockBreadcrumbTip": "Después de habilitar los bloques incrustados, se mostrarán migas de pan",
   "appearanceMode": "Modo de apariencia",
   "editReadonly": "Modo de solo lectura",
   "editReadonlyTip": "Después de habilitarlo, el editor de documentos será de solo lectura por defecto. Aún puedes buscar y reemplazar texto, modificar contenido a través de la API",

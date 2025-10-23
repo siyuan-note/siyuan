@@ -1591,7 +1591,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 					// The plugin switch status is not synchronized https://github.com/siyuan-note/siyuan/issues/16155
 					entries, err := os.ReadDir(filepath.Join(util.DataDir, "plugins"))
 					if nil != err {
-						logging.LogErrorf("read petals dir failed: %s", err)
+						logging.LogErrorf("read plugins dir failed: %s", err)
 					} else {
 						for _, entry := range entries {
 							if entry.IsDir() {

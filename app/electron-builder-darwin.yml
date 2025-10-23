@@ -22,6 +22,10 @@ mac:
     - NSMicrophoneUsageDescription: "This app requires microphone access to record audio."
   entitlementsInherit: "../../entitlements.mas.plist"
   minimumSystemVersion: "10.15"
+  protocols:
+    - name: "SiYuan"
+      schemes:
+        - "siyuan"
   extraResources:
     - from: "kernel-darwin"
       to: "kernel"

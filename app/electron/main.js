@@ -387,10 +387,7 @@ const initMainWindow = () => {
     });
 
     currentWindow.webContents.on("did-finish-load", () => {
-        let siyuanOpenURL;
-        if ("win32" === process.platform || "linux" === process.platform) {
-            siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        }
+        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
         if (siyuanOpenURL) {
             if (currentWindow.isMinimized()) {
                 currentWindow.restore();

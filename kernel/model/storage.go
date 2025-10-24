@@ -34,12 +34,12 @@ import (
 )
 
 type RecentDoc struct {
-	RootID     string `json:"rootID"`
-	Icon       string `json:"icon"`
-	Title      string `json:"title"`
-	ViewedAt   int64  `json:"viewedAt"` // 浏览时间字段
-	ClosedAt   int64  `json:"closedAt"` // 关闭时间字段
-	OpenAt     int64  `json:"openAt"`   // 文档第一次从文档树加载到页签的时间
+	RootID   string `json:"rootID"`
+	Icon     string `json:"icon"`
+	Title    string `json:"title"`
+	ViewedAt int64  `json:"viewedAt"` // 浏览时间字段
+	ClosedAt int64  `json:"closedAt"` // 关闭时间字段
+	OpenAt   int64  `json:"openAt"`   // 文档第一次从文档树加载到页签的时间
 }
 
 type OutlineDoc struct {
@@ -79,7 +79,7 @@ func setRecentDocByTree(tree *parse.Tree) {
 		Icon:     tree.Root.IALAttr("icon"),
 		Title:    tree.Root.IALAttr("title"),
 		ViewedAt: time.Now().Unix(), // 使用当前时间作为浏览时间
-		ClosedAt: 0, // 初始化关闭时间为0，表示未关闭
+		ClosedAt: 0,                 // 初始化关闭时间为0，表示未关闭
 		OpenAt:   time.Now().Unix(), // 设置文档打开时间
 	}
 
@@ -107,14 +107,14 @@ func setRecentDocByTree(tree *parse.Tree) {
 	return
 }
 
-// 更新文档打开时间（只在第一次从文档树加载到页签时调用）
-func UpdateRecentDocOpenTime(rootID string) error {
+// UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
+func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
 	recentDocs, err := getRecentDocs()
 	if err != nil {
-		return err
+		return
 	}
 
 	// 查找文档并更新打开时间
@@ -130,18 +130,17 @@ func UpdateRecentDocOpenTime(rootID string) error {
 	if found {
 		err = setRecentDocs(recentDocs)
 	}
-
-	return err
+	return
 }
 
-// 更新文档浏览时间
-func UpdateRecentDocViewTime(rootID string) error {
+// UpdateRecentDocViewTime 更新文档浏览时间
+func UpdateRecentDocViewTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
 	recentDocs, err := getRecentDocs()
 	if err != nil {
-		return err
+		return
 	}
 
 	// 查找文档并更新浏览时间
@@ -161,18 +160,17 @@ func UpdateRecentDocViewTime(rootID string) error {
 		})
 		err = setRecentDocs(recentDocs)
 	}
-
-	return err
+	return
 }
 
-// 更新文档关闭时间
-func UpdateRecentDocCloseTime(rootID string) error {
+// UpdateRecentDocCloseTime 更新文档关闭时间
+func UpdateRecentDocCloseTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
 	recentDocs, err := getRecentDocs()
 	if err != nil {
-		return err
+		return
 	}
 
 	// 查找文档并更新关闭时间
@@ -188,8 +186,7 @@ func UpdateRecentDocCloseTime(rootID string) error {
 	if found {
 		err = setRecentDocs(recentDocs)
 	}
-
-	return err
+	return
 }
 
 func GetRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
@@ -252,11 +249,11 @@ func getRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
 			notExists = append(notExists, doc.RootID)
 		}
 	}
-	
+
 	if 0 < len(notExists) {
 		setRecentDocs(ret)
 	}
-	
+
 	// 根据排序参数进行排序
 	if len(sortBy) > 0 {
 		switch sortBy[0] {
@@ -322,7 +319,7 @@ func getRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
 			return ret[i].ViewedAt > ret[j].ViewedAt
 		})
 	}
-	
+
 	return
 }
 

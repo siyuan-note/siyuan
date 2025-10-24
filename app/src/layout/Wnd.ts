@@ -488,6 +488,10 @@ export class Wnd {
                             isInitActive = true;
                         } else {
                             item.headElement.setAttribute("data-activetime", (new Date()).getTime().toString());
+                            // 更新文档浏览时间
+                            if (currentTab.model instanceof Editor) {
+                                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: currentTab.model.editor.protyle.block.rootID});
+                            }
                         }
                     }
                     item.panelElement.classList.remove("fn__none");
@@ -556,9 +560,6 @@ export class Wnd {
             }
             // focusin 触发前，layout__wnd--active 和 tab 已设置，需在调用里面更新
             if (update) {
-                // 更新文档浏览时间
-                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: currentTab.model.editor.protyle.block.rootID});
-
                 updatePanelByEditor({
                     protyle: currentTab.model.editor.protyle,
                     focus: true,
@@ -635,11 +636,6 @@ export class Wnd {
         tab.parent = this;
         if (tab.callback) {
             tab.callback(tab);
-        }
-
-        // 当文档第一次加载到页签时更新 openAt 时间
-        if (tab.model instanceof Editor && tab.model.editor?.protyle?.block?.rootID) {
-            fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: tab.model.editor.protyle.block.rootID});
         }
 
         // 移除 centerLayout 中的 empty

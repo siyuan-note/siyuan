@@ -1361,6 +1361,10 @@
   "uploadError": "上传错误",
   "uploading": "上传中...",
   "wysiwyg": "所见即所得",
+  "recentViewed": "最近浏览",
+  "recentOpened": "最近打开",
+  "recentClosed": "最近关闭",
+  "recentModified": "最近修改",
   "_label": "简体中文",
   "_time": {
     "albl": "前",

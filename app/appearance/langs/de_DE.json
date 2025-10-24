@@ -1361,6 +1361,10 @@
   "uploadError": "Upload-Fehler",
   "uploading": "Hochladen...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "Zuletzt angesehen",
+  "recentOpened": "Zuletzt geöffnet",
+  "recentClosed": "Zuletzt geschlossen",
+  "recentModified": "Zuletzt geändert",
   "_label": "Deutsch",
   "_time": {
     "albl": "vor",

@@ -1361,6 +1361,10 @@
   "uploadError": "שגיאת העלאה",
   "uploading": "מעלה...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "נצפה לאחרונה",
+  "recentOpened": "נפתח לאחרונה",
+  "recentClosed": "נסגר לאחרונה",
+  "recentModified": "שונה לאחרונה",
   "_label": "עברית",
   "_time": {
     "albl": "לפני",

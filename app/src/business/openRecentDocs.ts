@@ -10,10 +10,18 @@ import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 
-const getHTML = async (data: { rootID: string, icon: string, title: string }[], element: Element, key?: string) => {
+const getHTML = async (data: { rootID: string, icon: string, title: string, viewedAt?: number, closedAt?: number, openAt?: number, updated?: number }[], element: Element, key?: string, sortBy: "viewedAt" | "closedAt" | "openAt" | "updated" = "viewedAt") => {
     let tabHtml = "";
     let index = 0;
-    data.forEach((item) => {
+    
+    // 根据排序字段对数据进行排序
+    const sortedData = [...data].sort((a, b) => {
+        const aValue = a[sortBy] || 0;
+        const bValue = b[sortBy] || 0;
+        return bValue - aValue; // 降序排序
+    });
+    
+    sortedData.forEach((item) => {
         if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 ${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}
@@ -77,7 +85,7 @@ export const openRecentDocs = () => {
         hideElements(["dialog"]);
         return;
     }
-    fetchPost("/api/storage/getRecentDocs", {}, (response) => {
+    fetchPost("/api/storage/getRecentDocs", {sortBy: "viewedAt"}, (response) => {
         let range: Range;
         if (getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
@@ -90,6 +98,14 @@ export const openRecentDocs = () => {
 <div class="b3-form__icon fn__size200">
     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
     <input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block b3-form__icon-input">
+</div>
+<div class="fn__flex-center fn__ml8">
+    <select class="b3-select fn__size200" id="recentDocsSort">
+    <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
+    <option value="updated">${window.siyuan.languages.recentModified}</option>
+    <option value="openAt">${window.siyuan.languages.recentOpened}</option>
+    <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
+    </select>
 </div>
 </div>`,
             content: `<div class="fn__flex-column switch-doc">
@@ -106,13 +122,13 @@ export const openRecentDocs = () => {
         const searchElement = dialog.element.querySelector("input");
         searchElement.focus();
         searchElement.addEventListener("compositionend", () => {
-            getHTML(response.data, dialog.element, searchElement.value);
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt" | "updated");
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            getHTML(response.data, dialog.element, searchElement.value);
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt" | "updated");
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_RECENTDOCS);
         dialog.element.addEventListener("click", (event) => {
@@ -125,6 +141,45 @@ export const openRecentDocs = () => {
                 event.preventDefault();
             }
         });
+        
+        // 添加排序下拉框事件监听
+        const sortSelect = dialog.element.querySelector("#recentDocsSort") as HTMLSelectElement;
+        sortSelect.addEventListener("change", () => {
+            // 重新调用API获取排序后的数据
+            if (sortSelect.value === "updated") {
+                // 使用SQL查询获取最近修改的文档
+                const data = {
+                    stmt: "SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC LIMIT 33"
+                };
+                fetchSyncPost("/api/query/sql", data).then((sqlResponse) => {
+                    if (sqlResponse.data && sqlResponse.data.length > 0) {
+                        // 转换SQL查询结果格式
+                        const recentModifiedDocs = sqlResponse.data.map((block: any) => {
+                            // 从ial中解析icon
+                            let icon = "";
+                            if (block.ial) {
+                                const iconMatch = block.ial.match(/icon="([^"]*)"/);
+                                if (iconMatch) {
+                                    icon = iconMatch[1];
+                                }
+                            }
+                            return {
+                                rootID: block.id,
+                                icon: icon,
+                                title: block.content,
+                                updated: block.updated
+                            };
+                        });
+                        getHTML(recentModifiedDocs, dialog.element, searchElement.value, "updated");
+                    }
+                });
+            } else {
+                fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
+                    getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt");
+                });
+            }
+        });
+        
         getHTML(response.data, dialog.element);
     });
 };

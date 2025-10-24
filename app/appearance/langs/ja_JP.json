@@ -1361,6 +1361,10 @@
   "uploadError": "アップロードエラー",
   "uploading": "アップロード中...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "最近閲覧",
+  "recentOpened": "最近開いた",
+  "recentClosed": "最近閉じる",
+  "recentModified": "最近更新",
   "_label": "日本語",
   "_time": {
     "albl": "前",

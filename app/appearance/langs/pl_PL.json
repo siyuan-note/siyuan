@@ -1361,6 +1361,10 @@
   "uploadError": "błąd przesyłania",
   "uploading": "Przesyłanie...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "Ostatnio przeglądane",
+  "recentOpened": "Ostatnio otwarte",
+  "recentClosed": "Ostatnio zamknięte",
+  "recentModified": "Ostatnio modyfikowane",
   "_label": "Polski",
   "_time": {
     "albl": "temu",

@@ -21,7 +21,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
@@ -32,9 +34,12 @@ import (
 )
 
 type RecentDoc struct {
-	RootID string `json:"rootID"`
-	Icon   string `json:"icon"`
-	Title  string `json:"title"`
+	RootID     string `json:"rootID"`
+	Icon       string `json:"icon"`
+	Title      string `json:"title"`
+	ViewedAt   int64  `json:"viewedAt"` // 浏览时间字段
+	ClosedAt   int64  `json:"closedAt"` // 关闭时间字段
+	OpenAt     int64  `json:"openAt"`   // 文档第一次从文档树加载到页签的时间
 }
 
 type OutlineDoc struct {
@@ -70,9 +75,12 @@ func RemoveRecentDoc(ids []string) {
 
 func setRecentDocByTree(tree *parse.Tree) {
 	recentDoc := &RecentDoc{
-		RootID: tree.Root.ID,
-		Icon:   tree.Root.IALAttr("icon"),
-		Title:  tree.Root.IALAttr("title"),
+		RootID:   tree.Root.ID,
+		Icon:     tree.Root.IALAttr("icon"),
+		Title:    tree.Root.IALAttr("title"),
+		ViewedAt: time.Now().Unix(), // 使用当前时间作为浏览时间
+		ClosedAt: 0, // 初始化关闭时间为0，表示未关闭
+		OpenAt:   time.Now().Unix(), // 设置文档打开时间
 	}
 
 	recentDocLock.Lock()
@@ -99,10 +107,95 @@ func setRecentDocByTree(tree *parse.Tree) {
 	return
 }
 
-func GetRecentDocs() (ret []*RecentDoc, err error) {
+// 更新文档打开时间（只在第一次从文档树加载到页签时调用）
+func UpdateRecentDocOpenTime(rootID string) error {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
-	return getRecentDocs()
+
+	recentDocs, err := getRecentDocs()
+	if err != nil {
+		return err
+	}
+
+	// 查找文档并更新打开时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.OpenAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		err = setRecentDocs(recentDocs)
+	}
+
+	return err
+}
+
+// 更新文档浏览时间
+func UpdateRecentDocViewTime(rootID string) error {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs()
+	if err != nil {
+		return err
+	}
+
+	// 查找文档并更新浏览时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.ViewedAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		// 按浏览时间降序排序
+		sort.Slice(recentDocs, func(i, j int) bool {
+			return recentDocs[i].ViewedAt > recentDocs[j].ViewedAt
+		})
+		err = setRecentDocs(recentDocs)
+	}
+
+	return err
+}
+
+// 更新文档关闭时间
+func UpdateRecentDocCloseTime(rootID string) error {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs()
+	if err != nil {
+		return err
+	}
+
+	// 查找文档并更新关闭时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.ClosedAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		err = setRecentDocs(recentDocs)
+	}
+
+	return err
+}
+
+func GetRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+	return getRecentDocs(sortBy...)
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
@@ -127,7 +220,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	return
 }
 
-func getRecentDocs() (ret []*RecentDoc, err error) {
+func getRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
 	tmp := []*RecentDoc{}
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
 	if !filelock.IsExist(dataPath) {
@@ -159,9 +252,77 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 			notExists = append(notExists, doc.RootID)
 		}
 	}
+	
 	if 0 < len(notExists) {
 		setRecentDocs(ret)
 	}
+	
+	// 根据排序参数进行排序
+	if len(sortBy) > 0 {
+		switch sortBy[0] {
+		case "closedAt":
+			// 按关闭时间排序
+			sort.Slice(ret, func(i, j int) bool {
+				if ret[i].ClosedAt == 0 && ret[j].ClosedAt == 0 {
+					// 如果都没有关闭时间，按浏览时间排序
+					return ret[i].ViewedAt > ret[j].ViewedAt
+				}
+				if ret[i].ClosedAt == 0 {
+					return false // 没有关闭时间的排在后面
+				}
+				if ret[j].ClosedAt == 0 {
+					return true // 有关闭时间的排在前面
+				}
+				return ret[i].ClosedAt > ret[j].ClosedAt
+			})
+		case "openAt":
+			// 按打开时间排序
+			sort.Slice(ret, func(i, j int) bool {
+				if ret[i].OpenAt == 0 && ret[j].OpenAt == 0 {
+					// 如果都没有打开时间，按ID时间排序（ID包含时间信息）
+					return ret[i].RootID > ret[j].RootID
+				}
+				if ret[i].OpenAt == 0 {
+					return false // 没有打开时间的排在后面
+				}
+				if ret[j].OpenAt == 0 {
+					return true // 有打开时间的排在前面
+				}
+				return ret[i].OpenAt > ret[j].OpenAt
+			})
+		default:
+			// 默认按浏览时间排序
+			sort.Slice(ret, func(i, j int) bool {
+				if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
+					// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
+					return ret[i].RootID > ret[j].RootID
+				}
+				if ret[i].ViewedAt == 0 {
+					return false // 没有浏览时间的排在后面
+				}
+				if ret[j].ViewedAt == 0 {
+					return true // 有浏览时间的排在前面
+				}
+				return ret[i].ViewedAt > ret[j].ViewedAt
+			})
+		}
+	} else {
+		// 默认按浏览时间降序排序，如果ViewedAt为0则使用文档创建时间
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
+				// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
+				return ret[i].RootID > ret[j].RootID
+			}
+			if ret[i].ViewedAt == 0 {
+				return false // 没有浏览时间的排在后面
+			}
+			if ret[j].ViewedAt == 0 {
+				return true // 有浏览时间的排在前面
+			}
+			return ret[i].ViewedAt > ret[j].ViewedAt
+		})
+	}
+	
 	return
 }
 

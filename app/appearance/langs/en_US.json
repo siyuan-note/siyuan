@@ -1361,6 +1361,10 @@
   "uploadError": "upload error",
   "uploading": "Uploading...",
   "wysiwyg": "WYSIWYG",
+  "recentViewed": "Recently Viewed",
+  "recentOpened": "Recently Opened",
+  "recentClosed": "Recently Closed",
+  "recentModified": "Recently Modified",
   "_label": "English",
   "_time": {
     "albl": "ago",

@@ -1532,6 +1532,19 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
 
+    if (matchHotKey("⇧⌘T", event)) {
+        if ((window as any).siyuan.closedTabs && (window as any).siyuan.closedTabs.length > 0) {
+            const closedTab = (window as any).siyuan.closedTabs.pop();
+            openFileById({
+                app,
+                id: closedTab.id,
+                action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+            });
+        }
+        event.preventDefault();
+        return;
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.general.goToTab1.custom, event) && !event.repeat) {
         switchTabByIndex(0);
         event.preventDefault();

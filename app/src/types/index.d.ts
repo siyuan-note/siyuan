@@ -216,10 +216,6 @@ interface Window {
         encode(options: string): string,
     };
     pdfjsLib: any;
-
-    dataLayer: any[];
-
-    siyuan: ISiyuan;
     webkit: {
         messageHandlers: {
             openLink: { postMessage: (url: string) => void }
@@ -233,6 +229,8 @@ interface Window {
         toCanvas: (element: Element) => Promise<HTMLCanvasElement>
         toBlob: (element: Element) => Promise<Blob>
     };
+
+    siyuan: ISiyuan;
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
@@ -462,6 +460,7 @@ interface ISiyuan {
     storage?: {
         [key: string]: any
     },
+    closedTabs: string[]
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],

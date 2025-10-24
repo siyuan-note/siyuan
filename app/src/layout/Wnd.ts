@@ -558,7 +558,7 @@ export class Wnd {
             if (update) {
                 // 更新文档浏览时间
                 fetchPost("/api/storage/updateRecentDocViewTime", {rootID: currentTab.model.editor.protyle.block.rootID});
-                
+
                 updatePanelByEditor({
                     protyle: currentTab.model.editor.protyle,
                     focus: true,
@@ -636,12 +636,12 @@ export class Wnd {
         if (tab.callback) {
             tab.callback(tab);
         }
-        
+
         // 当文档第一次加载到页签时更新 openAt 时间
         if (tab.model instanceof Editor && tab.model.editor?.protyle?.block?.rootID) {
             fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: tab.model.editor.protyle.block.rootID});
         }
-        
+
         // 移除 centerLayout 中的 empty
         if (this.parent.type === "center" && this.children.length === 2 && !this.children[0].headElement) {
             this.removeTab(this.children[0].id);
@@ -793,12 +793,7 @@ export class Wnd {
                     saveScroll(item.model.editor.protyle);
                     // 更新文档关闭时间
                     fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
-                    if (!(window as any).siyuan.closedTabs) {
-                        (window as any).siyuan.closedTabs = [];
-                    }
-                    (window as any).siyuan.closedTabs.push({
-                        id: item.model.editor.protyle.block.rootID
-                    });
+                    window.siyuan.closedTabs.push(item.model.editor.protyle.block.rootID);
                 }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);

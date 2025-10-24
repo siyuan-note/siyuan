@@ -40,6 +40,7 @@ import {openCard} from "../../../card/openCard";
 import {syncGuide} from "../../../sync/syncGuide";
 import {Wnd} from "../../../layout/Wnd";
 import {unsplitWnd} from "../../../menus/tab";
+import {openFileById} from "../../../editor/util";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -147,6 +148,15 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "recentDocs":
             openRecentDocs();
+            return true;
+        case "recentClosed":
+            if (window.siyuan.closedTabs.length > 0) {
+                openFileById({
+                    app,
+                    id: window.siyuan.closedTabs.pop(),
+                    action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
+                });
+            }
             return true;
         case "toggleDock":
             toggleDockBar(document.querySelector("#barDock use"));

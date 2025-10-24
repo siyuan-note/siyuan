@@ -53,7 +53,7 @@ func RemoveRecentDoc(ids []string) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -86,7 +86,7 @@ func setRecentDocByTree(tree *parse.Tree) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -112,7 +112,7 @@ func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -138,7 +138,7 @@ func UpdateRecentDocViewTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -168,7 +168,7 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -189,10 +189,10 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 	return
 }
 
-func GetRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
+func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
-	return getRecentDocs(sortBy...)
+	return getRecentDocs(sortBy)
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
@@ -217,7 +217,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	return
 }
 
-func getRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
+func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	tmp := []*RecentDoc{}
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
 	if !filelock.IsExist(dataPath) {
@@ -255,56 +255,36 @@ func getRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
 	}
 
 	// 根据排序参数进行排序
-	if len(sortBy) > 0 {
-		switch sortBy[0] {
-		case "closedAt":
-			// 按关闭时间排序
-			sort.Slice(ret, func(i, j int) bool {
-				if ret[i].ClosedAt == 0 && ret[j].ClosedAt == 0 {
-					// 如果都没有关闭时间，按浏览时间排序
-					return ret[i].ViewedAt > ret[j].ViewedAt
-				}
-				if ret[i].ClosedAt == 0 {
-					return false // 没有关闭时间的排在后面
-				}
-				if ret[j].ClosedAt == 0 {
-					return true // 有关闭时间的排在前面
-				}
-				return ret[i].ClosedAt > ret[j].ClosedAt
-			})
-		case "openAt":
-			// 按打开时间排序
-			sort.Slice(ret, func(i, j int) bool {
-				if ret[i].OpenAt == 0 && ret[j].OpenAt == 0 {
-					// 如果都没有打开时间，按ID时间排序（ID包含时间信息）
-					return ret[i].RootID > ret[j].RootID
-				}
-				if ret[i].OpenAt == 0 {
-					return false // 没有打开时间的排在后面
-				}
-				if ret[j].OpenAt == 0 {
-					return true // 有打开时间的排在前面
-				}
-				return ret[i].OpenAt > ret[j].OpenAt
-			})
-		default:
-			// 默认按浏览时间排序
-			sort.Slice(ret, func(i, j int) bool {
-				if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
-					// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
-					return ret[i].RootID > ret[j].RootID
-				}
-				if ret[i].ViewedAt == 0 {
-					return false // 没有浏览时间的排在后面
-				}
-				if ret[j].ViewedAt == 0 {
-					return true // 有浏览时间的排在前面
-				}
+	switch sortBy {
+	case "closedAt": // 按关闭时间排序
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].ClosedAt == 0 && ret[j].ClosedAt == 0 {
+				// 如果都没有关闭时间，按浏览时间排序
 				return ret[i].ViewedAt > ret[j].ViewedAt
-			})
-		}
-	} else {
-		// 默认按浏览时间降序排序，如果ViewedAt为0则使用文档创建时间
+			}
+			if ret[i].ClosedAt == 0 {
+				return false // 没有关闭时间的排在后面
+			}
+			if ret[j].ClosedAt == 0 {
+				return true // 有关闭时间的排在前面
+			}
+			return ret[i].ClosedAt > ret[j].ClosedAt
+		})
+	case "openAt": // 按打开时间排序
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].OpenAt == 0 && ret[j].OpenAt == 0 {
+				// 如果都没有打开时间，按ID时间排序（ID包含时间信息）
+				return ret[i].RootID > ret[j].RootID
+			}
+			if ret[i].OpenAt == 0 {
+				return false // 没有打开时间的排在后面
+			}
+			if ret[j].OpenAt == 0 {
+				return true // 有打开时间的排在前面
+			}
+			return ret[i].OpenAt > ret[j].OpenAt
+		})
+	default: // 默认按浏览时间排序
 		sort.Slice(ret, func(i, j int) bool {
 			if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
 				// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
@@ -319,7 +299,6 @@ func getRecentDocs(sortBy ...string) (ret []*RecentDoc, err error) {
 			return ret[i].ViewedAt > ret[j].ViewedAt
 		})
 	}
-
 	return
 }
 

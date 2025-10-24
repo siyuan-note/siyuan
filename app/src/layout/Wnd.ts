@@ -489,8 +489,8 @@ export class Wnd {
                         } else {
                             item.headElement.setAttribute("data-activetime", (new Date()).getTime().toString());
                             // 更新文档浏览时间
-                            if (currentTab.model instanceof Editor) {
-                                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: currentTab.model.editor.protyle.block.rootID});
+                            if (item.model instanceof Editor) {
+                                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: item.model.editor.protyle.block.rootID});
                             }
                         }
                     }

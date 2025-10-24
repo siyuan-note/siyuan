@@ -35,7 +35,7 @@ func getRecentDocs(c *gin.Context) {
 	}
 
 	// 获取排序参数
-	sortBy := "viewedAt" // 默认按浏览时间排序
+	sortBy := "viewedAt" // 默认按浏览时间排序，openAt：按打开时间排序，closedAt：按关闭时间排序
 	if arg["sortBy"] != nil {
 		sortBy = arg["sortBy"].(string)
 	}
@@ -248,7 +248,6 @@ func removeOutlineStorage(c *gin.Context) {
 	}
 }
 
-
 func updateRecentDocViewTime(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -266,7 +265,6 @@ func updateRecentDocViewTime(c *gin.Context) {
 		return
 	}
 }
-
 
 func updateRecentDocOpenTime(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

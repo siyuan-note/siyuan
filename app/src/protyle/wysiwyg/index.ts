@@ -3034,6 +3034,19 @@ export class WYSIWYG {
             setTimeout(() => {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
+                // 点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
+                if (hasClosestBlock(event.target) !== hasClosestBlock(newRange.startContainer) &&
+                    this.element.firstElementChild.contains(newRange.startContainer)) {
+                    const rect = this.element.getBoundingClientRect();
+                    let rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY);
+                    if (rangeElement === this.element) {
+                        rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY + 8);
+                    }
+                    const blockElement = hasClosestBlock(rangeElement);
+                    if (blockElement) {
+                        newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
+                    }
+                }
                 // https://github.com/siyuan-note/siyuan/issues/10357
                 const attrElement = hasClosestByClassName(newRange.endContainer, "protyle-attr");
                 if (attrElement) {

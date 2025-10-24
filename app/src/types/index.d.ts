@@ -126,6 +126,8 @@ type TAVFilterOperator =
     | "Is true"
     | "Is false"
 
+type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "updated"
+
 declare module "blueimp-md5"
 
 declare class Highlight {

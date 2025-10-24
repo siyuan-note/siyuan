@@ -10,17 +10,25 @@ import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {hideElements} from "../protyle/ui/hideElements";
 
-const getHTML = async (data: { rootID: string, icon: string, title: string, viewedAt?: number, closedAt?: number, openAt?: number, updated?: number }[], element: Element, key?: string, sortBy: "viewedAt" | "closedAt" | "openAt" | "updated" = "viewedAt") => {
+const getHTML = async (data: {
+    rootID: string,
+    icon: string,
+    title: string,
+    viewedAt?: number,
+    closedAt?: number,
+    openAt?: number,
+    updated?: number
+}[], element: Element, key?: string, sortBy: TRecentDocsSort = "viewedAt") => {
     let tabHtml = "";
     let index = 0;
-    
+
     // 根据排序字段对数据进行排序
     const sortedData = [...data].sort((a, b) => {
         const aValue = a[sortBy] || 0;
         const bValue = b[sortBy] || 0;
         return bValue - aValue; // 降序排序
     });
-    
+
     sortedData.forEach((item) => {
         if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
@@ -99,12 +107,13 @@ export const openRecentDocs = () => {
     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
     <input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__block b3-form__icon-input">
 </div>
-<div class="fn__flex-center fn__ml8">
-    <select class="b3-select fn__size200" id="recentDocsSort">
-    <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
-    <option value="updated">${window.siyuan.languages.recentModified}</option>
-    <option value="openAt">${window.siyuan.languages.recentOpened}</option>
-    <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
+<span class="fn__space"></span>
+<div class="fn__flex-center">
+    <select class="b3-select" id="recentDocsSort">
+        <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
+        <option value="updated">${window.siyuan.languages.recentModified}</option>
+        <option value="openAt">${window.siyuan.languages.recentOpened}</option>
+        <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
     </select>
 </div>
 </div>`,
@@ -122,13 +131,13 @@ export const openRecentDocs = () => {
         const searchElement = dialog.element.querySelector("input");
         searchElement.focus();
         searchElement.addEventListener("compositionend", () => {
-            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt" | "updated");
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as TRecentDocsSort);
         });
         searchElement.addEventListener("input", (event: InputEvent) => {
             if (event.isComposing) {
                 return;
             }
-            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt" | "updated");
+            getHTML(response.data, dialog.element, searchElement.value, sortSelect.value as TRecentDocsSort);
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_RECENTDOCS);
         dialog.element.addEventListener("click", (event) => {
@@ -141,7 +150,7 @@ export const openRecentDocs = () => {
                 event.preventDefault();
             }
         });
-        
+
         // 添加排序下拉框事件监听
         const sortSelect = dialog.element.querySelector("#recentDocsSort") as HTMLSelectElement;
         sortSelect.addEventListener("change", () => {
@@ -165,7 +174,7 @@ export const openRecentDocs = () => {
                             }
                             return {
                                 rootID: block.id,
-                                icon: icon,
+                                icon,
                                 title: block.content,
                                 updated: block.updated
                             };
@@ -175,11 +184,11 @@ export const openRecentDocs = () => {
                 });
             } else {
                 fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
-                    getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as "viewedAt" | "closedAt" | "openAt");
+                    getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as TRecentDocsSort);
                 });
             }
         });
-        
+
         getHTML(response.data, dialog.element);
     });
 };

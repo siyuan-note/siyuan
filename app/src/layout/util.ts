@@ -723,6 +723,7 @@ export const resizeTopBar = () => {
     });
 };
 
+// TODO: 需支持所有页签类型，避免其他类型页签没有使用到而加载
 export const newModelByInitData = (app: App, tab: Tab, json: any) => {
     let model: Model;
     if (json.instance === "Custom") {

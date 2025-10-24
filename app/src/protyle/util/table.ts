@@ -461,8 +461,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             if (nextElement) {
                 range.selectNodeContents(nextElement);
             } else {
-                insertRow(protyle, range, cellElement, nodeElement);
-                range.selectNodeContents(nodeElement.querySelector("tbody").lastElementChild.firstElementChild);
+                insertRow(protyle, range, cellElement.parentElement.firstElementChild as HTMLTableCellElement, nodeElement);
             }
             event.preventDefault();
             return true;

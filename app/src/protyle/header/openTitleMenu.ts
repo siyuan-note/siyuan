@@ -76,7 +76,12 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             label: window.siyuan.languages.outline,
             accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
             click: () => {
-                openOutline(protyle);
+                openOutline({
+                    app: protyle.app,
+                    rootId: protyle.block.rootID,
+                    title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
+                    isPreview: !protyle.preview.element.classList.contains("fn__none")
+                });
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

@@ -460,7 +460,7 @@ interface ISiyuan {
     storage?: {
         [key: string]: any
     },
-    closedTabs: string[]
+    closedTabs?: ILayoutJSON[]
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],
@@ -595,6 +595,8 @@ interface ILayoutJSON extends ILayoutOptions {
     page?: string
     path?: string
     blockId?: string
+    mode?: TEditorMode
+    action?: TProtyleAction
     icon?: string
     rootId?: string
     active?: boolean

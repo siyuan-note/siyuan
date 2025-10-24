@@ -4,7 +4,7 @@ import {
     fixWndFlex1,
     getInstanceById,
     getWndByLayout,
-    JSONToCenter,
+    JSONToCenter, layoutToJSON,
     newModelByInitData,
     pdfIsLoading,
     saveLayout,
@@ -786,6 +786,13 @@ export class Wnd {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
+                if (window.siyuan.closedTabs.length > Constants.SIZE_UNDO) {
+                    window.siyuan.closedTabs.pop();
+                }
+                const tabJSON = {};
+                layoutToJSON(item, tabJSON);
+                window.siyuan.closedTabs.push(tabJSON);
+
                 if (item.model instanceof Custom && item.model.beforeDestroy) {
                     item.model.beforeDestroy();
                 }
@@ -793,7 +800,6 @@ export class Wnd {
                     saveScroll(item.model.editor.protyle);
                     // 更新文档关闭时间
                     fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
-                    window.siyuan.closedTabs.push(item.model.editor.protyle.block.rootID);
                 }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);

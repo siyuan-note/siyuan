@@ -615,6 +615,10 @@
         max-width: 25vw;
       }
     }
+
+    .b3-tooltips::after {
+      max-width: var(--b3-width-protyle-wysiwyg);
+    }
   }
 
   &--animate {

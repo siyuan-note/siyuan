@@ -296,34 +296,40 @@ export const setPadding = (protyle: IProtyle) => {
             padding: 0
         };
     }
-    const oldLeft = parseInt(protyle.wysiwyg.element.style.paddingLeft);
+    const oldLeft = parseInt(protyle.wysiwyg.element.style.paddingLeft || "0");
     const padding = getPadding(protyle);
-    const left = padding.left;
-    const right = padding.right;
+    const paddingLeft = padding.left;
+    const paddingRight = padding.right;
+
+    const protyleWidth = protyle.element.clientWidth;
+    const scrollbarWidth = protyle.contentElement.offsetWidth - protyle.contentElement.clientWidth;
+    const contentWidth = protyleWidth - scrollbarWidth;
+
+    const wysiwygOldWidth = parseInt(protyle.wysiwyg.element.getAttribute("data-realwidth") || "0");
+    const wysiwygNewWidth = contentWidth - paddingLeft - paddingRight;
+
+    // https://github.com/siyuan-note/siyuan/issues/15021
+    protyle.element.style.setProperty("--b3-width-protyle", protyleWidth + "px");
+    protyle.element.style.setProperty("--b3-width-protyle-content", contentWidth + "px");
+    protyle.element.style.setProperty("--b3-width-protyle-wysiwyg", wysiwygNewWidth.toString() + "px");
+    protyle.wysiwyg.element.setAttribute("data-realwidth", wysiwygNewWidth.toString());
+    
     if (protyle.options.backlinkData) {
-        protyle.wysiwyg.element.style.padding = `4px ${right}px 4px ${left}px`;
+        protyle.wysiwyg.element.style.padding = `4px ${paddingRight}px 4px ${paddingLeft}px`;
     } else {
-        protyle.wysiwyg.element.style.padding = `${padding.top}px ${right}px ${padding.bottom}px ${left}px`;
+        protyle.wysiwyg.element.style.padding = `${padding.top}px ${paddingRight}px ${padding.bottom}px ${paddingLeft}px`;
     }
     if (protyle.options.render.background) {
-        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${right}px`);
+        protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${paddingLeft}px;margin-right:${paddingRight}px`);
     }
     if (protyle.options.render.title) {
         // pc 端 文档名 attr 过长和添加标签等按钮重合
-        protyle.title.element.style.margin = `16px ${right}px 0 ${left}px`;
+        protyle.title.element.style.margin = `16px ${paddingRight}px 0 ${paddingLeft}px`;
     }
-    if (window.siyuan.config.editor.displayBookmarkIcon) {
-        const editorAttrElement = document.getElementById("editorAttr");
-        if (editorAttrElement) {
-            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips::after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
-        }
-    }
-    const oldWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");
-    const newWidth = protyle.wysiwyg.element.clientWidth - parseInt(protyle.wysiwyg.element.style.paddingLeft) - parseInt(protyle.wysiwyg.element.style.paddingRight);
-    protyle.wysiwyg.element.setAttribute("data-realwidth", newWidth.toString());
+
     return {
-        width: Math.abs(parseInt(oldWidth) - newWidth),
-        padding: Math.abs(oldLeft - parseInt(protyle.wysiwyg.element.style.paddingLeft))
+        width: Math.abs(wysiwygOldWidth - wysiwygNewWidth),
+        padding: Math.abs(oldLeft - paddingLeft)
     };
 };
 

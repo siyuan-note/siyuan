@@ -3,7 +3,7 @@ import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
 import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getAllDocks} from "../layout/getAll";
 import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
@@ -110,10 +110,10 @@ export const openRecentDocs = () => {
 <span class="fn__space"></span>
 <div class="fn__flex-center">
     <select class="b3-select" id="recentDocsSort">
-        <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
-        <option value="updated">${window.siyuan.languages.recentModified}</option>
-        <option value="openAt">${window.siyuan.languages.recentOpened}</option>
-        <option value="closedAt">${window.siyuan.languages.recentClosed}</option>
+        <option value="viewedAt"${window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type === "viewedAt" ? " selected" : ""}>${window.siyuan.languages.recentViewed}</option>
+        <option value="updated"${window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type === "updated" ? " selected" : ""}>${window.siyuan.languages.recentModified}</option>
+        <option value="openAt"${window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type === "openAt" ? " selected" : ""}>${window.siyuan.languages.recentOpened}</option>
+        <option value="closedAt"${window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type === "closedAt" ? " selected" : ""}>${window.siyuan.languages.recentClosed}</option>
     </select>
 </div>
 </div>`,
@@ -187,6 +187,8 @@ export const openRecentDocs = () => {
                     getHTML(newResponse.data, dialog.element, searchElement.value, sortSelect.value as TRecentDocsSort);
                 });
             }
+            window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type = sortSelect.value;
+            setStorageVal(Constants.LOCAL_RECENT_DOCS, window.siyuan.storage[Constants.LOCAL_RECENT_DOCS]);
         });
 
         getHTML(response.data, dialog.element);

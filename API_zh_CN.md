@@ -478,7 +478,7 @@
   ```
 
     * `fromIDs`：源文档 ID
-    * `toID`：目标父文档 ID
+    * `toID`：目标父文档 ID 或笔记本 ID
 * 返回值
 
   ```json

@@ -95,7 +95,13 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 cellScrollIntoView(nodeElement, newCellElement, false);
             } else if (event.key !== "ArrowRight") {
                 clearSelect(["cell"], nodeElement);
-                insertRows(nodeElement, protyle, 1, rowElement.getAttribute("data-id"));
+                insertRows({
+                    blockElement: nodeElement,
+                    protyle,
+                    count: 1,
+                    previousID: rowElement.getAttribute("data-id"),
+                    groupID: rowElement.parentElement.getAttribute("data-group-id")
+                });
             }
             event.preventDefault();
             return true;
@@ -230,7 +236,7 @@ export const bindAVPanelKeydown = (event: KeyboardEvent) => {
             } else if (event.key === "Escape") {
                 avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
                 return true;
-            } else if (upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild)){
+            } else if (upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild)) {
                 return true;
             }
         }

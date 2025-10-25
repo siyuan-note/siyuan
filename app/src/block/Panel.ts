@@ -182,6 +182,7 @@ export class BlockPanel {
                     scroll: true,
                     gutter: true,
                     breadcrumbDocName: true,
+                    title: response.data.rootID === this.refDefs[index].refID, // 如果块是文档，显示文档标题
                 },
                 typewriterMode: false,
                 after: (editor) => {
@@ -227,7 +228,7 @@ export class BlockPanel {
         this.targetElement = undefined;
         // 移除弹出上使用右键菜单
         const menuLevel = parseInt(window.siyuan.menus.menu.element.dataset.from);
-        if (window.siyuan.menus.menu.element.dataset.from !== "app" && menuLevel && menuLevel >= level) {
+        if (menuLevel && menuLevel >= level && window.siyuan.menus.menu.element.dataset.from?.includes("popover")) {
             // https://github.com/siyuan-note/siyuan/issues/9854 右键菜单不是从浮窗中弹出的则不进行移除
             window.siyuan.menus.menu.remove();
         }

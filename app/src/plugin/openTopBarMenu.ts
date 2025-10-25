@@ -7,26 +7,34 @@ import {openSetting} from "../config";
 import {Constants} from "../constants";
 
 export const openTopBarMenu = (app: App, target?: Element) => {
-    const menu = new Menu("topBarPlugin");
+    const menu = new Menu(Constants.MENU_BAR_PLUGIN);
     /// #if !MOBILE
-        menu.addItem({
-            icon: "iconSettings",
-            label: window.siyuan.languages.manage,
-            ignore: isHuawei() || window.siyuan.config.readonly,
-            click() {
-                openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-            }
-        });
-        menu.addSeparator(undefined, isHuawei() || window.siyuan.config.readonly);
+    menu.addItem({
+        id: "manage",
+        icon: "iconSettings",
+        label: window.siyuan.languages.manage,
+        ignore: isHuawei() || window.siyuan.config.readonly,
+        click() {
+            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+        }
+    });
+    menu.addSeparator({id: "separator_1", ignore: isHuawei() || window.siyuan.config.readonly});
     /// #endif
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
         // @ts-ignore
         const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
         let hasTopBar = false;
-        plugin.topBarIcons.forEach(item => {
+        for (let i = 0; i < plugin.topBarIcons.length; i++) {
+            const item = plugin.topBarIcons[i];
+            if (!document.contains(item)) {
+                plugin.topBarIcons.splice(i, 1);
+                i--;
+                continue;
+            }
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
+                id: hasUnpin ? "pin" : "unpin",
                 icon: hasUnpin ? "iconPin" : "iconUnpin",
                 label: hasUnpin ? window.siyuan.languages.pin : window.siyuan.languages.unpin,
                 click() {
@@ -43,6 +51,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             }];
             if (hasSetting) {
                 submenu.push({
+                    id: "config",
                     icon: "iconSettings",
                     label: window.siyuan.languages.config,
                     click() {
@@ -53,6 +62,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             const itemLabel = target ? item.getAttribute("aria-label") : item.textContent.trim();
             if (!target) {
                 submenu.push({
+                    id: "play",
                     icon: "iconPlay",
                     label: itemLabel,
                     click() {
@@ -62,6 +72,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                 });
             }
             const menuOption: IMenu = {
+                id: item.id,
                 icon: "iconInfo",
                 label: itemLabel,
                 click: target ? () => {
@@ -80,10 +91,11 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             menu.addItem(menuOption);
             hasPlugin = true;
             hasTopBar = true;
-        });
+        }
         if (!hasTopBar && hasSetting) {
             hasPlugin = true;
             menu.addItem({
+                id: plugin.name,
                 icon: "iconSettings",
                 label: plugin.displayName,
                 click() {
@@ -97,6 +109,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             window.siyuan.menus.menu.element.querySelector(".b3-menu__separator")?.remove();
         } else {
             menu.addItem({
+                id: "emptyContent",
                 iconHTML: "",
                 type: "readonly",
                 label: window.siyuan.languages.emptyContent,

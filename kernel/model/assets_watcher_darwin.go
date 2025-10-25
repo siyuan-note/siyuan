@@ -61,9 +61,9 @@ func watchAssets() {
 				go cache.LoadAssets()
 
 				if watcher.Remove == event.Op {
-					RemoveIndexAssetContent(event.Path)
+					HandleAssetsRemoveEvent(event.Path)
 				} else {
-					IndexAssetContent(event.Path)
+					HandleAssetsChangeEvent(event.Path)
 				}
 			case err, ok := <-assetsWatcher.Error:
 				if !ok {

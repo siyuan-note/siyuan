@@ -6,7 +6,7 @@ import {isNotCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
-import {hasPreviousSibling} from "../wysiwyg/getBlock";
+import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
@@ -67,7 +67,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
 
     for (let i = 0; i < rowCnt; i++) {
         for (let j = 0; j < columnCnt; j++) {
-            if (tableElement.rows[i].cells[j].isSameNode(cellElements[currentColumns.length])) {
+            if (tableElement.rows[i].cells[j] === cellElements[currentColumns.length]) {
                 currentColumns.push(j);
             }
         }
@@ -178,7 +178,7 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
         const colCellElement = tableElement.rows[i].cells[index];
         const newCellElement = document.createElement(colCellElement.tagName);
         colCellElement.insertAdjacentElement(type, newCellElement);
-        if (colCellElement.isSameNode(cellElement)) {
+        if (colCellElement === cellElement) {
             newCellElement.innerHTML = "<wbr> ";
             // 滚动条横向定位
             if (newCellElement.offsetLeft + newCellElement.clientWidth > nodeElement.firstElementChild.scrollLeft + nodeElement.firstElementChild.clientWidth) {
@@ -188,7 +188,7 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
             newCellElement.textContent = " ";
         }
     }
-    tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col>");
+    tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col style='min-width: 60px;'>");
     focusByWbr(nodeElement, range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
 };
@@ -319,7 +319,7 @@ export const moveColumnToLeft = (protyle: IProtyle, range: Range, cellElement: H
     const html = nodeElement.outerHTML;
     let cellIndex = 0;
     Array.from(cellElement.parentElement.children).find((item, index) => {
-        if (cellElement.isSameNode(item)) {
+        if (cellElement === item) {
             cellIndex = index;
             return true;
         }
@@ -346,7 +346,7 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
     const html = nodeElement.outerHTML;
     let cellIndex = 0;
     Array.from(cellElement.parentElement.children).find((item, index) => {
-        if (cellElement.isSameNode(item)) {
+        if (cellElement === item) {
             cellIndex = index;
             return true;
         }
@@ -369,6 +369,15 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     const nodeElement = hasClosestBlock(range.startContainer) as HTMLTableElement;
     if (!cellElement || !nodeElement) {
         return false;
+    }
+
+    if (event.key === "Backspace" && range.toString() === "") {
+        const previousElement = hasPreviousSibling(range.startContainer) as Element;
+        if (range.startOffset === 1 && previousElement.nodeType === 1 && previousElement.tagName === "BR" &&
+            range.startContainer.textContent.length === 1 && !hasNextSibling(range.startContainer)) {
+            previousElement.insertAdjacentHTML("beforebegin", "<br>");
+            return false;
+        }
     }
 
     // shift+enter 软换行
@@ -422,7 +431,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         // 表格后无内容时，按右键需新建空块
         if (event.key === "ArrowRight" && range.toString() === "" &&
             !nodeElement.nextElementSibling &&
-            cellElement.isSameNode(nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
+            cellElement === nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild &&
             getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
             event.preventDefault();
             insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
@@ -452,8 +461,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             if (nextElement) {
                 range.selectNodeContents(nextElement);
             } else {
-                insertRow(protyle, range, cellElement, nodeElement);
-                range.selectNodeContents(nodeElement.querySelector("tbody").lastElementChild.firstElementChild);
+                insertRow(protyle, range, cellElement.parentElement.firstElementChild as HTMLTableCellElement, nodeElement);
             }
             event.preventDefault();
             return true;

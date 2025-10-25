@@ -24,6 +24,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
@@ -69,6 +70,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	}
 	content := sql.NodeStaticContent(node, nil, false, false, false)
 	content = gulu.Str.SubStr(content, 128)
+	content = strings.ReplaceAll(content, editor.Zwsp, "")
 	err = SetCloudBlockReminder(id, content, timedMills)
 	if err != nil {
 		return

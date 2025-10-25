@@ -45,6 +45,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
@@ -53,8 +54,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -426,7 +425,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		var tree *parse.Tree
-		tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
 			return
@@ -439,7 +438,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
-	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
 	}
@@ -772,13 +771,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	task.AppendTask(task.DatabaseIndexFull, fullReindex)
-	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
-	go func() {
-		sql.FlushQueue()
-		ResetVirtualBlockRefCache()
-	}()
-	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
+	FullReindex()
 
 	if syncEnabled {
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
@@ -1155,6 +1148,8 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
+	beforeSyncPetals := getPetals()
+
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
 	elapsed := time.Since(start)
@@ -1185,6 +1180,7 @@ func syncRepoDownload() (err error) {
 	autoSyncErrCount = 0
 	BootSyncSucc = 0
 
+	calcPetalDiff(beforeSyncPetals, mergeResult)
 	processSyncMergeResult(false, true, mergeResult, trafficStat, "d", elapsed)
 	return
 }
@@ -1448,6 +1444,8 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
+	beforeSyncPetals := getPetals()
+
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
 	elapsed := time.Since(start)
@@ -1485,6 +1483,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	Conf.Save()
 	autoSyncErrCount = 0
 
+	calcPetalDiff(beforeSyncPetals, mergeResult)
 	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
 
 	if !exit {
@@ -1496,6 +1495,30 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		}()
 	}
 	return
+}
+
+func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
+	var upsertPetals, removePetals []string
+	afterSyncPetals := getPetals()
+	for _, afterSyncPetal := range afterSyncPetals {
+		if beforeSyncPetal := getPetalByName(afterSyncPetal.Name, beforeSyncPetals); nil != beforeSyncPetal {
+			a, _ := gulu.JSON.MarshalJSON(afterSyncPetal)
+			b, _ := gulu.JSON.MarshalJSON(beforeSyncPetal)
+			if !bytes.Equal(a, b) {
+				upsertPetals = append(upsertPetals, afterSyncPetal.Name)
+			}
+		} else {
+			upsertPetals = append(upsertPetals, afterSyncPetal.Name)
+		}
+	}
+	for _, beforeSyncPetal := range beforeSyncPetals {
+		if nil == getPetalByName(beforeSyncPetal.Name, afterSyncPetals) {
+			removePetals = append(removePetals, beforeSyncPetal.Name)
+		}
+	}
+
+	mergeResult.UpsertPetals = gulu.Str.RemoveDuplicatedElem(upsertPetals)
+	mergeResult.RemovePetals = gulu.Str.RemoveDuplicatedElem(removePetals)
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
@@ -1533,8 +1556,13 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				tree.Box = boxID
 				tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
 
+				previousPath := tree.Path
 				resetTree(tree, "Conflicted", true)
 				createTreeTx(tree)
+				box := Conf.Box(boxID)
+				if nil != box {
+					box.addSort(previousPath, tree.ID)
+				}
 			}
 
 			needReloadFiletree = true
@@ -1642,6 +1670,15 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				removeWidgetDirSet.Add(parts[2])
 			}
 		}
+	}
+
+	for _, upsertPetal := range mergeResult.UpsertPetals {
+		needReloadPlugin = true
+		upsertPluginSet.Add(upsertPetal)
+	}
+	for _, removePetal := range mergeResult.RemovePetals {
+		needReloadPlugin = true
+		removePluginSet.Add(removePetal)
 	}
 
 	if needReloadFlashcard {

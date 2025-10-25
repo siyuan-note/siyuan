@@ -47,7 +47,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
-import {genEmptyElement} from "../block/util";
+import {setFoldById, zoomOut} from "../menus/protyle";
 
 export class Protyle {
 
@@ -90,8 +90,8 @@ export class Protyle {
         if (isSupportCSSHL()) {
             const styleId = genUUID();
             this.protyle.highlight.styleElement.dataset.uuid = styleId;
-            this.protyle.highlight.styleElement.textContent = `.protyle-wysiwyg::highlight(search-mark-${styleId}) {background-color: var(--b3-highlight-background);color: var(--b3-highlight-color);}
-  .protyle-wysiwyg::highlight(search-mark-hl-${styleId}) {color: var(--b3-highlight-color);background-color: var(--b3-highlight-current-background)}`;
+            this.protyle.highlight.styleElement.textContent = `.protyle-content::highlight(search-mark-${styleId}) {background-color: var(--b3-highlight-background);color: var(--b3-highlight-color);}
+  .protyle-content::highlight(search-mark-hl-${styleId}) {color: var(--b3-highlight-color);background-color: var(--b3-highlight-current-background)}`;
         }
 
         this.protyle.hint = new Hint(this.protyle);
@@ -147,7 +147,7 @@ export class Protyle {
                             }
                             break;
                         case "refreshAttributeView":
-                            Array.from(this.protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
+                            Array.from(this.protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${data.data.id}"]`)).forEach((item: HTMLElement) => {
                                 item.removeAttribute("data-render");
                                 avRender(item, this.protyle);
                             });
@@ -157,40 +157,11 @@ export class Protyle {
                                 addLoading(this.protyle, data.msg);
                             }
                             break;
+                        case "unfoldHeading":
+                            setFoldById(data.data, this.protyle);
+                            break;
                         case "transactions":
-                            data.data[0].doOperations.find((item: IOperation) => {
-                                if (!this.protyle.preview.element.classList.contains("fn__none") &&
-                                    item.action !== "updateAttrs"   // 预览模式下点击只读
-                                ) {
-                                    this.protyle.preview.render(this.protyle);
-                                } else if (options.backlinkData && ["delete", "move"].includes(item.action)) {
-                                    // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
-                                    /// #if !MOBILE
-                                    getAllModels().backlink.find(backlinkItem => {
-                                        if (backlinkItem.element.contains(this.protyle.element)) {
-                                            backlinkItem.refresh();
-                                            return true;
-                                        }
-                                    });
-                                    /// #endif
-                                    return true;
-                                } else {
-                                    onTransaction(this.protyle, item, false);
-                                    // 反链面板移除元素后，文档为空
-                                    if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID) {
-                                        const newID = Lute.NewNodeID();
-                                        const emptyElement = genEmptyElement(false, false, newID);
-                                        this.protyle.wysiwyg.element.append(emptyElement);
-                                        transaction(this.protyle, [{
-                                            action: "insert",
-                                            data: emptyElement.outerHTML,
-                                            id: newID,
-                                            parentID: this.protyle.block.parentID
-                                        }]);
-                                        this.protyle.undo.clear();
-                                    }
-                                }
-                            });
+                            this.onTransaction(data);
                             break;
                         case "readonly":
                             window.siyuan.config.editor.readOnly = data.data;
@@ -314,6 +285,52 @@ export class Protyle {
             }
         } else {
             this.protyle.contentElement.classList.add("protyle-content--transition");
+        }
+    }
+
+    private onTransaction(data: IWebSocketData) {
+        let needCreateAction = "";
+        data.data[0].doOperations.find((item: IOperation) => {
+            if (!this.protyle.preview.element.classList.contains("fn__none")) {
+                this.protyle.preview.render(this.protyle);
+                if (item.action === "updateAttrs") {
+                    onTransaction(this.protyle, item, false);
+                }
+            } else if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
+                // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
+                /// #if !MOBILE
+                getAllModels().backlink.find(backlinkItem => {
+                    if (backlinkItem.element.contains(this.protyle.element)) {
+                        backlinkItem.refresh();
+                        return true;
+                    }
+                });
+                /// #endif
+                return true;
+            } else {
+                onTransaction(this.protyle, item, false);
+                // 反链面板移除元素后，文档为空
+                if (!(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
+                    needCreateAction = item.action;
+                }
+            }
+        });
+        if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID && needCreateAction) {
+            if (needCreateAction === "delete" && this.protyle.block.showAll) {
+                if (this.protyle.options.handleEmptyContent) {
+                    this.protyle.options.handleEmptyContent();
+                } else {
+                    zoomOut({
+                        protyle: this.protyle,
+                        id: this.protyle.block.rootID,
+                        focusId: this.protyle.block.id
+                    });
+                }
+            } else {
+                // 不能使用 transaction，否则分屏后会重复添加
+                this.protyle.undo.clear();
+                this.reload(false);
+            }
         }
     }
 

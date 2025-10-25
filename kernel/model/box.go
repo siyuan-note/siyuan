@@ -102,17 +102,22 @@ func ListNotebooks() (ret []*Box, err error) {
 			continue
 		}
 
-		if !ast.IsNodeIDPattern(dir.Name()) {
+		id := dir.Name()
+		if !ast.IsNodeIDPattern(id) {
 			continue
 		}
 
 		boxConf := conf.NewBoxConf()
-		boxDirPath := filepath.Join(util.DataDir, dir.Name())
+		boxDirPath := filepath.Join(util.DataDir, id)
 		boxConfPath := filepath.Join(boxDirPath, ".siyuan", "conf.json")
 		isExistConf := filelock.IsExist(boxConfPath)
 		if !isExistConf {
-			// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
-			logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+			if !IsUserGuide(id) {
+				// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
+				logging.LogWarnf("found a corrupted box [%s]", boxDirPath)
+			} else {
+				continue
+			}
 		} else {
 			data, readErr := filelock.ReadFile(boxConfPath)
 			if nil != readErr {
@@ -126,7 +131,6 @@ func ListNotebooks() (ret []*Box, err error) {
 			}
 		}
 
-		id := dir.Name()
 		icon := boxConf.Icon
 		if strings.Contains(icon, ".") { // 说明是自定义图标
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
@@ -473,6 +477,8 @@ func moveTree(tree *parse.Tree) {
 
 	box := Conf.Box(tree.Box)
 	box.renameSubTrees(tree)
+
+	refreshDocInfo(tree)
 }
 
 func (box *Box) renameSubTrees(tree *parse.Tree) {
@@ -663,6 +669,49 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 	return
 }
 
+func VacuumDataIndex() {
+	util.PushEndlessProgress(Conf.language(270))
+	defer util.PushClearProgress()
+
+	var oldsyDbSize, newSyDbSize, oldHistoryDbSize, newHistoryDbSize, oldAssetContentDbSize, newAssetContentDbSize int64
+	info, _ := os.Stat(util.DBPath)
+	if nil != info {
+		oldsyDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.HistoryDBPath)
+	if nil != info {
+		oldHistoryDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.AssetContentDBPath)
+	if nil != info {
+		oldAssetContentDbSize = info.Size()
+	}
+
+	sql.Vacuum()
+
+	info, _ = os.Stat(util.DBPath)
+	if nil != info {
+		newSyDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.HistoryDBPath)
+	if nil != info {
+		newHistoryDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.AssetContentDBPath)
+	if nil != info {
+		newAssetContentDbSize = info.Size()
+	}
+
+	logging.LogInfof("vacuum database [siyuan.db: %s -> %s, history.db: %s -> %s, asset_content.db: %s -> %s]",
+		humanize.BytesCustomCeil(uint64(oldsyDbSize), 2), humanize.BytesCustomCeil(uint64(newSyDbSize), 2),
+		humanize.BytesCustomCeil(uint64(oldHistoryDbSize), 2), humanize.BytesCustomCeil(uint64(newHistoryDbSize), 2),
+		humanize.BytesCustomCeil(uint64(oldAssetContentDbSize), 2), humanize.BytesCustomCeil(uint64(newAssetContentDbSize), 2))
+
+	releaseSize := (oldsyDbSize - newSyDbSize) + (oldHistoryDbSize - newHistoryDbSize) + (oldAssetContentDbSize - newAssetContentDbSize)
+	msg := fmt.Sprintf(Conf.language(271), humanize.BytesCustomCeil(uint64(releaseSize), 2))
+	util.PushMsg(msg, 7000)
+}
+
 func FullReindex() {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
@@ -677,6 +726,12 @@ func FullReindex() {
 }
 
 func fullReindex() {
+	pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = true, true
+	defer func() {
+		sql.FlushQueue()
+		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
+	}()
+
 	util.PushEndlessProgress(Conf.language(35))
 	defer util.PushClearProgress()
 
@@ -690,7 +745,7 @@ func fullReindex() {
 	sql.IndexIgnoreCached = false
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
-		index(openedBox.ID)
+		indexBox(openedBox.ID)
 	}
 	LoadFlashcards()
 	debug.FreeOSMemory()

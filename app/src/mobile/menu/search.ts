@@ -186,7 +186,7 @@ ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOC
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
-${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${childItem.tag.split("# #").map(tag => `${tag.replace("#", "")}`).join(" ").replace("#", "")}</span>` : ""}
+${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${childItem.tag.replace(/#/g, "")}</span>` : ""}
 </div>`;
             });
             resultHTML += "</div>";
@@ -206,7 +206,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
         <span class="b3-list-item__text">${item.content}</span>
     </div>
     <div class="fn__flex">
-        ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.split("# #").map(tag => `${tag.replace("#", "")}`).join(" ").replace("#", "")}</span><span class="fn__space"></span>` : ""}
+        ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span><span class="fn__space"></span>` : ""}
         <span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
     </div>
 </div>`;
@@ -266,7 +266,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
         const previousElement = element.querySelector('[data-type="previous"]');
         const nextElement = element.querySelector('[data-type="next"]');
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
-        if (inputElement.value === "" && (!config.idPath || config.idPath.length === 0)) {
+        config.query = inputElement.value;
+        if (config.query === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                 onRecentBlocks(response.data, config, undefined, focusId);
                 loadingElement.classList.add("fn__none");
@@ -283,7 +284,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 previousElement.setAttribute("disabled", "disabled");
             }
             fetchPost("/api/search/fullTextSearchBlock", {
-                query: inputElement.value,
+                query: config.query,
                 method: config.method,
                 types: config.types,
                 paths: config.idPath || [],
@@ -351,7 +352,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
-        while (target && !target.isSameNode(element)) {
+        while (target && (target !== element)) {
             const type = target.getAttribute("data-type");
             if (type === "replaceHistory") {
                 toggleReplaceHistory(target.nextElementSibling as HTMLInputElement);
@@ -716,7 +717,7 @@ export const popSearch = (app: App, searchConfig?: any) => {
         <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
         <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
     </span>
-    <input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">
+    <input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
     <svg id="toolbarSearchNew" class="toolbar__icon"><use xlink:href="#iconFile"></use></svg>
 </div>`,
         html: `<div class="fn__flex-column" style="height: 100%">
@@ -751,7 +752,7 @@ export const popSearch = (app: App, searchConfig?: any) => {
     <div class="toolbar">
         <span class="fn__flex-1"></span>
         <svg data-type="toggle-replace" class="toolbar__icon${config.hasReplace ? " toolbar__icon--active" : ""}"><use xlink:href="#iconReplace"></use></svg>
-        <svg ${enableIncludeChild ? "" : "disabled"} data-type="include" class="toolbar__icon${includeChild ? " toolbar__icon--active" : ""}"><use xlink:href="#iconCopy"></use></svg>
+        <svg ${enableIncludeChild ? "" : "disabled"} data-type="include" class="toolbar__icon${includeChild ? " toolbar__icon--active" : ""}"><use xlink:href="#iconInclude"></use></svg>
         <svg data-type="path" class="toolbar__icon"><use xlink:href="#iconFolder"></use></svg>
         <svg ${document.querySelector("#empty").classList.contains("fn__none") ? "" : "disabled"} data-type="currentPath" class="toolbar__icon"><use xlink:href="#iconFocus"></use></svg>
         <svg data-type="expand" class="toolbar__icon${config.group === 0 ? " fn__none" : ""}"><use xlink:href="#iconExpand"></use></svg>

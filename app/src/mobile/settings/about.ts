@@ -35,8 +35,12 @@ export const initAbout = () => {
         <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}">
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         <div class="fn__hr"></div>
-        <div class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.filter(ip => !(ip.startsWith("[") && ip.endsWith("]"))).join("</code> <code class='fn__code'>")}</code></div>
-        <div class="b3-label__text"><code class="fn__code">${window.siyuan.config.localIPs.filter(ip => (ip.startsWith("[") && ip.endsWith("]"))).join("</code> <code class='fn__code'>")}</code></div>
+        ${(() => {
+            const ipv4 = window.siyuan.config.localIPs.filter(ip => !(ip.startsWith("[") && ip.endsWith("]")));
+            const ipv6 = window.siyuan.config.localIPs.filter(ip => (ip.startsWith("[") && ip.endsWith("]")));
+            return `<div class="b3-label__text${ipv4.length > 0 ? "" : " fn__none"}"><code class="fn__code">${ipv4.join("</code> <code class='fn__code'>")}</code></div>
+                    <div class="b3-label__text${ipv6.length > 0 ? "" : " fn__none"}"><code class="fn__code">${ipv6.join("</code> <code class='fn__code'>")}</code></div>`;
+        })()}
         <div class="fn__hr"></div>
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
 </div>
@@ -89,6 +93,22 @@ export const initAbout = () => {
     <div class="fn__hr"></div>
     <input class="b3-text-field fn__block" style="padding-right: 64px;" id="retentionIndexesDaily" min="1" type="number" class="b3-text-field" value="${window.siyuan.config.repo.retentionIndexesDaily}">
     <div class="b3-label__text">${window.siyuan.languages.dataRepoAutoPurgeRetentionIndexesDaily}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.vacuumDataIndex}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="vacuumDataIndex">
+       <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.vacuumDataIndex}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.vacuumDataIndexTip}</div>
+</div>
+<div class="b3-label">
+    ${window.siyuan.languages.rebuildDataIndex}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="rebuildDataIndex">
+       <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.rebuildDataIndex}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.rebuildDataIndexTip}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.systemLog}
@@ -178,7 +198,7 @@ export const initAbout = () => {
             const importKeyElement = modelMainElement.querySelector("#importKey");
             modelMainElement.firstElementChild.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
-                while (target && !target.isSameNode(modelMainElement)) {
+                while (target && (target !== modelMainElement)) {
                     if (target.id === "authCode") {
                         setAccessAuthCode();
                         event.preventDefault();
@@ -276,6 +296,16 @@ export const initAbout = () => {
                         fetchPost("/api/system/exportConf", {}, response => {
                             openByMobile(response.data.zip);
                         });
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (target.id === "vacuumDataIndex") {
+                        fetchPost("/api/system/vacuumDataIndex", {}, () => {});
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (target.id === "rebuildDataIndex") {
+                        fetchPost("/api/system/rebuildDataIndex", {}, () => {});
                         event.preventDefault();
                         event.stopPropagation();
                         break;

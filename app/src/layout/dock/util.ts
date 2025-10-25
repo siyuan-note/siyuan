@@ -3,11 +3,13 @@ import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
 import {fixWndFlex1, getInstanceById, getWndByLayout, saveLayout, switchWnd} from "../util";
-import {resizeTabs} from "../tabUtil";
+import {getDockByType, resizeTabs} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";
 import {Wnd} from "../Wnd";
 import {fetchSyncPost} from "../../util/fetch";
+import {Files} from "./Files";
+import {Editor} from "../../editor";
 
 export const openBacklink = async (options: {
     app: App,
@@ -120,9 +122,14 @@ export const openGraph = async (options: {
     }));
 };
 
-export const openOutline = async (protyle: IProtyle) => {
+export const openOutline = async (options: {
+    app: App,
+    rootId: string,
+    isPreview: boolean,
+    title: string
+}) => {
     const outlinePanel = getAllModels().outline.find(item => {
-        if (item.blockId === protyle.block.rootID && item.type === "local") {
+        if (item.blockId === options.rootId && item.type === "local") {
             item.parent.parent.removeTab(item.parent.id);
             return true;
         }
@@ -139,23 +146,20 @@ export const openOutline = async (protyle: IProtyle) => {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
     const newWnd = wnd.split("lr");
-    let title = "";
-    if (!protyle.title) {
-        const response = await fetchSyncPost("api/block/getDocInfo", {id: protyle.block.rootID});
-        title = response.data.name || window.siyuan.languages.untitled;
-    } else {
-        title = protyle.title.editElement.textContent || window.siyuan.languages.untitled;
+    if (options.title) {
+        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.rootId});
+        options.title = response.data.name || window.siyuan.languages.untitled;
     }
     newWnd.addTab(new Tab({
         icon: "iconAlignCenter",
-        title,
+        title: options.title,
         callback(tab: Tab) {
             tab.addModel(new Outline({
-                app: protyle.app,
+                app: options.app,
                 type: "local",
                 tab,
-                blockId: protyle.block.rootID,
-                isPreview: !protyle.preview.element.classList.contains("fn__none")
+                blockId: options.rootId,
+                isPreview: options.isPreview,
             }));
         }
     }), false, false);
@@ -233,4 +237,24 @@ export const clearOBG = () => {
         item.blockId = "";
         item.render(undefined);
     });
+};
+
+export const selectOpenTab = async () => {
+    const dockFile = getDockByType("file");
+    if (!dockFile) {
+        return false;
+    }
+    const files = dockFile.data.file as Files;
+    const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
+        document.querySelector("ul.layout-tab-bar > .item--focus");
+    if (element) {
+        const tab = getInstanceById(element.getAttribute("data-id")) as Tab;
+        if (tab && tab.model instanceof Editor) {
+            tab.model.editor.protyle.wysiwyg.element.blur();
+            tab.model.editor.protyle.title.editElement.blur();
+            await files.selectItem(tab.model.editor.protyle.notebookId, tab.model.editor.protyle.path);
+            files.lastSelectedElement = files.element.querySelector(".b3-list-item--focus");
+        }
+    }
+    dockFile.toggleModel("file", true);
 };

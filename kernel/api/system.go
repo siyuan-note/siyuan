@@ -35,6 +35,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func vacuumDataIndex(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.VacuumDataIndex()
+}
+
+func rebuildDataIndex(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.FullReindex()
+}
+
 func addMicrosoftDefenderExclusion(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

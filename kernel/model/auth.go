@@ -19,8 +19,10 @@ package model
 import (
 	"crypto/rand"
 	"net/http"
+	"sync"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/siyuan-note/logging"
 )
 
@@ -29,11 +31,14 @@ type Account struct {
 	Password string
 	Token    string
 }
-type AccountsMap map[string]*Account
+type AccountsMap map[string]*Account // username -> account
+type SessionsMap map[string]string   // sessionID -> username
 type ClaimsKeyType string
 
 const (
 	XAuthTokenKey = "X-Auth-Token"
+
+	SessionIdCookieName = "publish-visitor-session-id"
 
 	ClaimsContextKey = "claims"
 
@@ -46,12 +51,35 @@ const (
 
 var (
 	accountsMap = AccountsMap{}
+	sessionsMap = SessionsMap{}
+	sessionLock = sync.Mutex{}
 
-	key = make([]byte, 32)
+	jwtKey = make([]byte, 32)
 )
 
 func GetBasicAuthAccount(username string) *Account {
 	return accountsMap[username]
+}
+
+func GetBasicAuthUsernameBySessionID(sessionID string) string {
+	return sessionsMap[sessionID]
+}
+
+func GetNewSessionID() string {
+	sessionID := uuid.New().String()
+	return sessionID
+}
+
+func AddSession(sessionID, username string) {
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+	sessionsMap[sessionID] = username
+}
+
+func DeleteSession(sessionID string) {
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+	delete(sessionsMap, sessionID)
 }
 
 func InitAccounts() {
@@ -69,7 +97,7 @@ func InitAccounts() {
 }
 
 func InitJWT() {
-	if _, err := rand.Read(key); err != nil {
+	if _, err := rand.Read(jwtKey); err != nil {
 		logging.LogErrorf("generate JWT signing key failed: %s", err)
 		return
 	}
@@ -87,7 +115,7 @@ func InitJWT() {
 				ClaimsKeyRole: RoleReader,
 			},
 		)
-		if token, err := t.SignedString(key); err != nil {
+		if token, err := t.SignedString(jwtKey); err != nil {
 			logging.LogErrorf("JWT signature failed: %s", err)
 			return
 		} else {
@@ -101,7 +129,7 @@ func ParseJWT(tokenString string) (*jwt.Token, error) {
 	return jwt.Parse(
 		tokenString,
 		func(token *jwt.Token) (interface{}, error) {
-			return key, nil
+			return jwtKey, nil
 		},
 		jwt.WithIssuer(iss),
 		jwt.WithSubject(sub),

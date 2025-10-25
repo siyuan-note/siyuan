@@ -8,6 +8,7 @@ import {setModelsHash} from "../window/setHeader";
 import {countBlockWord} from "../layout/status";
 import {App} from "../index";
 import {fullscreen} from "../protyle/breadcrumb/action";
+import {fetchPost} from "../util/fetch";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -33,6 +34,8 @@ export class Editor extends Model {
         this.headElement = options.tab.headElement;
         this.element = options.tab.panelElement;
         this.initProtyle(options);
+        // 当文档第一次加载到页签时更新 openAt 时间
+        fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: options.rootId});
     }
 
     private initProtyle(options: {

@@ -6,6 +6,7 @@ import {getAllTabs} from "../../layout/getAll";
 import {App} from "../../index";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../../protyle/util/hotKey";
+import {isWindow} from "../../util/functions";
 
 export const windowKeyUp = (app: App, event: KeyboardEvent) => {
     window.siyuan.ctrlIsPressed = false;
@@ -22,37 +23,52 @@ export const windowKeyUp = (app: App, event: KeyboardEvent) => {
             let currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
             currentLiElement.classList.remove("b3-list-item--focus");
             if (matchHotKey(window.siyuan.config.keymap.general.goToEditTabPrev.custom, event)) {
-                if (currentLiElement.previousElementSibling) {
-                    currentLiElement.previousElementSibling.classList.add("b3-list-item--focus");
-                } else if (currentLiElement.getAttribute("data-original")) {
-                    currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus");
-                    currentLiElement.removeAttribute("data-original");
-                } else if (currentLiElement.parentElement.nextElementSibling) {
-                    if (currentLiElement.parentElement.nextElementSibling.lastElementChild) {
-                        currentLiElement.parentElement.nextElementSibling.lastElementChild.classList.add("b3-list-item--focus");
-                    } else {
-                        currentLiElement.parentElement.lastElementChild.classList.add("b3-list-item--focus");
+                while (true) {
+                    if (currentLiElement.previousElementSibling) {
+                        currentLiElement = currentLiElement.previousElementSibling;
+                    } else if (currentLiElement.getAttribute("data-original")) {
+                        currentLiElement.removeAttribute("data-original");
+                        currentLiElement = currentLiElement.parentElement.lastElementChild;
+                    } else if (currentLiElement.parentElement.nextElementSibling) {
+                        if (currentLiElement.parentElement.nextElementSibling.lastElementChild) {
+                            currentLiElement = currentLiElement.parentElement.nextElementSibling.lastElementChild;
+                        } else {
+                            currentLiElement = currentLiElement.parentElement.lastElementChild;
+                        }
+                    } else if (currentLiElement.parentElement.previousElementSibling) {
+                        currentLiElement = currentLiElement.parentElement.previousElementSibling.lastElementChild;
+                    } else if (isWindow()) {
+                        currentLiElement = currentLiElement.parentElement.lastElementChild;
                     }
-                } else if (currentLiElement.parentElement.previousElementSibling) {
-                    currentLiElement.parentElement.previousElementSibling.lastElementChild.classList.add("b3-list-item--focus");
+                    if (currentLiElement.getBoundingClientRect().height !== 0) {
+                        break;
+                    }
                 }
+                currentLiElement.classList.add("b3-list-item--focus");
             } else {
-                if (currentLiElement.nextElementSibling) {
-                    currentLiElement.nextElementSibling.classList.add("b3-list-item--focus");
-                } else if (currentLiElement.getAttribute("data-original")) {
-                    currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
-                    currentLiElement.removeAttribute("data-original");
-                } else if (currentLiElement.parentElement.nextElementSibling) {
-                    if (currentLiElement.parentElement.nextElementSibling.firstElementChild) {
-                        currentLiElement.parentElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
-                    } else {
-                        currentLiElement.parentElement.firstElementChild.classList.add("b3-list-item--focus");
+                while (true) {
+                    if (currentLiElement.nextElementSibling) {
+                        currentLiElement = currentLiElement.nextElementSibling;
+                    } else if (currentLiElement.getAttribute("data-original")) {
+                        currentLiElement.removeAttribute("data-original");
+                        currentLiElement = currentLiElement.parentElement.firstElementChild;
+                    } else if (currentLiElement.parentElement.nextElementSibling) {
+                        if (currentLiElement.parentElement.nextElementSibling.firstElementChild) {
+                            currentLiElement = currentLiElement.parentElement.nextElementSibling.firstElementChild;
+                        } else {
+                            currentLiElement = currentLiElement.parentElement.firstElementChild;
+                        }
+                    } else if (currentLiElement.parentElement.previousElementSibling) {
+                        currentLiElement = currentLiElement.parentElement.previousElementSibling.firstElementChild;
+                    } else if (isWindow()) {
+                        currentLiElement = currentLiElement.parentElement.firstElementChild;
                     }
-                } else if (currentLiElement.parentElement.previousElementSibling) {
-                    currentLiElement.parentElement.previousElementSibling.firstElementChild.classList.add("b3-list-item--focus");
+                    if (currentLiElement.getBoundingClientRect().height !== 0) {
+                        break;
+                    }
                 }
+                currentLiElement.classList.add("b3-list-item--focus");
             }
-            currentLiElement = switchDialog.element.querySelector(".b3-list-item--focus");
             if (currentLiElement) {
                 const rootId = currentLiElement.getAttribute("data-node-id");
                 if (rootId) {

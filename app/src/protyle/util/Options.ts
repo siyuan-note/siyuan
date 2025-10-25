@@ -11,6 +11,8 @@ export class Options {
         render: {
             background: false,
             title: false,
+            titleShowTop: false,
+            hideTitleOnZoom: false,
             gutter: true,
             scroll: false,
             breadcrumb: true,
@@ -20,6 +22,9 @@ export class Options {
         after: undefined,
         classes: {
             preview: "",
+        },
+        click: {
+            preventInsetEmptyBlock: false
         },
         hint: {
             delay: 200,

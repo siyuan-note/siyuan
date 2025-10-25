@@ -236,7 +236,7 @@ type Tag struct {
 
 type Tags []*Tag
 
-func BuildTags() (ret *Tags) {
+func BuildTags(ignoreMaxListHintArg bool, appID string) (ret *Tags) {
 	FlushTxQueue()
 	sql.FlushQueue()
 
@@ -254,8 +254,8 @@ func BuildTags() (ret *Tags) {
 	for _, tag := range tags {
 		*tmp = append(*tmp, tag)
 		countTag(tag, &total)
-		if Conf.FileTree.MaxListCount < total {
-			util.PushMsg(fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+		if Conf.FileTree.MaxListCount < total && !ignoreMaxListHintArg {
+			util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
 			break
 		}
 	}

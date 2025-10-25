@@ -32,9 +32,12 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
             });
             /// #endif
             // rm topBar
-            plugin.topBarIcons.forEach(item => {
+            for (let i = 0; i < plugin.topBarIcons.length; i++) {
+                const item = plugin.topBarIcons[i];
                 item.remove();
-            });
+                plugin.topBarIcons.splice(i, 1);
+                i--;
+            }
             /// #if !MOBILE
             resizeTopBar();
             // rm statusBar
@@ -62,6 +65,8 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            // rm icons
+            document.querySelector(`svg[data-name="${plugin.name}"]`)?.remove();
             // rm protyle toolbar
             getAllEditor().forEach(editor => {
                 editor.protyle.toolbar.update(editor.protyle);

@@ -4,6 +4,9 @@ echo 'use ".\scripts\win-build.bat" instead of "win-build.bat"'
 echo 'Building UI'
 cd app
 call pnpm install
+if errorlevel 1 (
+    exit /b %errorlevel%
+)
 call pnpm run build
 if errorlevel 1 (
     exit /b %errorlevel%
@@ -11,9 +14,9 @@ if errorlevel 1 (
 cd ..
 
 echo 'Cleaning Builds'
-del /S /Q /F app\build 1>nul
-del /S /Q /F app\kernel 1>nul
-del /S /Q /F app\kernel-arm64 1>nul
+rmdir /S /Q app\build 1>nul
+rmdir /S /Q app\kernel 1>nul
+rmdir /S /Q app\kernel-arm64 1>nul
 
 echo 'Building Kernel'
 @REM the C compiler "gcc" is necessary https://sourceforge.net/projects/mingw-w64/files/mingw-w64/
@@ -65,4 +68,13 @@ cd ..
 echo 'Building Appx'
 echo 'Building Appx should be disabled if you do not need it. Not configured correctly will lead to build failures'
 cd . > app\build\win-unpacked\resources\ms-store
-electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
+call electron-windows-store --input-directory app\build\win-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan --manifest app\appx\AppxManifest.xml --assets app\appx\assets\ --make-pri true
+
+rmdir /S /Q app\build\pre-appx 1>nul
+
+echo 'Building Appx arm64'
+echo 'Building Appx arm64 should be disabled if you do not need it. Not configured correctly will lead to build failures'
+cd . > app\build\win-arm64-unpacked\resources\ms-store
+call electron-windows-store --input-directory app\build\win-arm64-unpacked --output-directory app\build\ --package-version 1.0.0.0 --package-name SiYuan-arm64 --manifest app\appx\AppxManifest-arm64.xml --assets app\appx\assets\ --make-pri true
+
+rmdir /S /Q app\build\pre-appx 1>nul

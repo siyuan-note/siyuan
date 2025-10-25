@@ -5,12 +5,14 @@ import {openMenuPanel} from "./openMenuPanel";
 import {focusBlock} from "../../util/selection";
 import {upDownHint} from "../../../util/upDownHint";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {hasClosestByClassName} from "../../util/hasClosest";
+import {Constants} from "../../../constants";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
         return;
     }
-    const menu = new Menu("av-view");
+    const menu = new Menu(Constants.MENU_AV_VIEW);
     if (menu.isOpen) {
         return;
     }
@@ -164,12 +166,7 @@ export const bindViewEvent = (options: {
 
 export const getViewHTML = (data: IAV) => {
     const view = data.view;
-    let fields: IAVColumn[];
-    if (data.viewType === "table") {
-        fields = (view as IAVTable).columns;
-    } else if (data.viewType === "gallery") {
-        fields = (view as IAVGallery).fields;
-    }
+    const fields = getFieldsByData(data);
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label ft__center">${window.siyuan.languages.config}</span>
@@ -199,7 +196,7 @@ export const getViewHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="go-properties">
-    <svg class="b3-menu__icon"></svg>
+    <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.fields}</span>
     <span class="b3-menu__accelerator">${fields.filter((item: IAVColumn) => !item.hidden).length}/${fields.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -214,6 +211,12 @@ export const getViewHTML = (data: IAV) => {
     <svg class="b3-menu__icon"><use xlink:href="#iconSort"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
     <span class="b3-menu__accelerator">${view.sorts.length}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item" data-type="goGroups">
+    <svg class="b3-menu__icon"><use xlink:href="#iconGroups"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.group}</span>
+    <span class="b3-menu__accelerator">${(data.view.group && data.view.group.field) ? fields.filter((item: IAVColumn) => item.id === data.view.group.field)[0].name : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
@@ -383,4 +386,41 @@ export const getViewName = (type: string) => {
 
 export const getFieldsByData = (data: IAV) => {
     return data.viewType === "table" ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
+};
+
+export const dragoverTab = (event: DragEvent) => {
+    const viewTabElement = window.siyuan.dragElement.parentElement;
+    if (viewTabElement.scrollWidth > viewTabElement.clientWidth) {
+        const viewTabRect = viewTabElement.getBoundingClientRect();
+        if (event.clientX < viewTabRect.left) {
+            viewTabElement.scroll({
+                left: viewTabElement.scrollLeft - Constants.SIZE_SCROLL_STEP,
+                behavior: "smooth"
+            });
+        } else if (event.clientX > viewTabRect.right) {
+            viewTabElement.scroll({
+                left: viewTabElement.scrollLeft + Constants.SIZE_SCROLL_STEP,
+                behavior: "smooth"
+            });
+        }
+    }
+    const target = hasClosestByClassName(document.elementFromPoint(event.clientX, window.siyuan.dragElement.getBoundingClientRect().top + 10), "item");
+    if (!target) {
+        return;
+    }
+    if (viewTabElement !== window.siyuan.dragElement.parentElement || (target === window.siyuan.dragElement)) {
+        return;
+    }
+    const targetRect = target.getBoundingClientRect();
+    if (targetRect.left + targetRect.width / 2 < event.clientX) {
+        if (target.nextElementSibling && target.nextElementSibling === window.siyuan.dragElement) {
+            return;
+        }
+        target.after(window.siyuan.dragElement);
+    } else {
+        if (target.previousElementSibling && target.previousElementSibling === window.siyuan.dragElement) {
+            return;
+        }
+        target.before(window.siyuan.dragElement);
+    }
 };

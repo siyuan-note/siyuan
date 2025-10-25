@@ -13,10 +13,10 @@ export class Tree {
     private topExtHTML: string;
 
     public click: (element: Element, event?: MouseEvent) => void;
-    private ctrlClick: (element: HTMLElement) => void;
+    private ctrlClick: (element: HTMLElement, event: MouseEvent) => void;
     private toggleClick: (element: Element) => void;
     private shiftClick: (element: HTMLElement) => void;
-    private altClick: (element: HTMLElement) => void;
+    private altClick: (element: HTMLElement, event: MouseEvent) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
 
     constructor(options: {
@@ -25,8 +25,8 @@ export class Tree {
         blockExtHTML?: string,
         topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
-        ctrlClick?(element: HTMLElement): void
-        altClick?(element: HTMLElement): void
+        ctrlClick?(element: HTMLElement, event: MouseEvent): void
+        altClick?(element: HTMLElement, event: MouseEvent): void
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
@@ -216,7 +216,8 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
+                if (target.classList.contains("b3-list-item__toggle") &&
+                    !target.classList.contains("fn__hidden") && !window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed) {
                     this.toggleBlocks(target.parentElement);
                     this.setCurrent(target.parentElement);
                     event.preventDefault();
@@ -235,9 +236,9 @@ data-def-path="${item.defPath}">
                     this.setCurrent(target);
                     if (target.getAttribute("data-node-id") || target.getAttribute("data-treetype") === "tag") {
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {
-                            this.ctrlClick(target);
+                            this.ctrlClick(target, event);
                         } else if (this.altClick && window.siyuan.altIsPressed) {
-                            this.altClick(target);
+                            this.altClick(target, event);
                         } else if (this.shiftClick && window.siyuan.shiftIsPressed) {
                             this.shiftClick(target);
                         } else if (this.click) {
@@ -302,6 +303,9 @@ data-def-path="${item.defPath}">
     }
 
     public setExpandIds(ids: string[]) {
+        if (!ids || ids.length === 0) {
+            return;
+        }
         this.element.querySelectorAll(".b3-list-item__arrow").forEach(item => {
             if (ids.includes(item.getAttribute("data-id"))) {
                 item.classList.add("b3-list-item__arrow--open");

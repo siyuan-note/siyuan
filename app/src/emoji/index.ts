@@ -240,7 +240,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     const dynamicCurrentObj: IObject = {
         color: "#d23f31",
         lang: "",
-        date: "",
+        date: dayjs().format("YYYY-MM-DD"),
         weekdayType: "1",
         type: "1",
         content: "SiYuan",
@@ -268,7 +268,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
         <div class="fn__space"></div>
-        <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicEmoji}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
+        <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
         <div class="fn__flex-1"></div>
         <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     </div>
@@ -334,6 +334,8 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.date}</span>
                 <span class="fn__space--small"></span>
                 <input type="date" max="9999-12-31" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
+                <span class="fn__space--small"></span>
+                <span data-action="clearDate" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIconDateEmptyInfo}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__hr"></div>
@@ -360,11 +362,11 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__space"></span>
                 <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.custom}</span>
                 <span class="fn__space--small"></span>
-                <input type="text" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.content}">
+                <input type="text" class="b3-text-field fn__flex-1" value="">
                 <span class="fn__space"></span>
             </div>
             <div>
-                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${dynamicCurrentObj.content}&id=${id}">
+                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${encodeURIComponent(dynamicCurrentObj.content)}&id=${id}">
             </div>
         </div>
     </div>
@@ -628,6 +630,10 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 dynamicTextElements[0].value = target.getAttribute("style").replace("background-color:", "");
                 dynamicTextElements[0].dispatchEvent(new CustomEvent("input"));
                 break;
+            } else if ("clearDate" === target.dataset.action) {
+                dynamicDateElement.value = "";
+                dynamicDateElement.dispatchEvent(new CustomEvent("change"));
+                break;
             }
             target = target.parentElement;
         }
@@ -679,6 +685,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             }
         });
     });
+    dynamicTextElements[1].value = dynamicCurrentObj.content;
     dynamicTextElements[1].addEventListener("input", () => {
         const url = new URLSearchParams(dynamicTextImgElement.getAttribute("src").replace(dynamicURL, ""));
         url.set("content", dynamicTextElements[1].value);

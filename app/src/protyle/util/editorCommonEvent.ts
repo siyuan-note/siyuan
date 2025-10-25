@@ -27,7 +27,7 @@ import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
-import {zoomOut} from "../../menus/protyle";
+import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
@@ -35,6 +35,7 @@ import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clearSelect";
+import {dragoverTab} from "../render/av/view";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -43,6 +44,16 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
     const newSourceId = newSourceElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
+    let foldData;
+    if (isBottom &&
+        targetElement.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement, true, false, false, true);
+    } else if (!isBottom && targetElement.previousElementSibling &&
+        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.previousElementSibling.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
+    }
     targetElement.insertAdjacentElement(isBottom ? "afterend" : "beforebegin", newSourceElement);
     if (isBottom) {
         doOperations.push({
@@ -63,7 +74,7 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         const itemId = item.getAttribute("data-node-id");
         if (index === sourceElements.length - 1) {
             topSourceElement = getTopAloneElement(item);
-            if (topSourceElement.isSameNode(item)) {
+            if (topSourceElement === item) {
                 topSourceElement = undefined;
                 // 单个缩放或反链面板中的列表项拖拽到包含该列表的编辑器中会导致残留的 list
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item.getAttribute("data-node-id")}"]`)).find((targetItem: HTMLElement) => {
@@ -137,6 +148,13 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         action: "delete",
         id: newSourceId,
     });
+    if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
+    }
     return {
         doOperations,
         undoOperations,
@@ -149,32 +167,44 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let topSourceElement;
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    const foldHeadingIds: { id: string, parentID: string }[] = [];
+    const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
     const targetId = targetElement.getAttribute("data-node-id");
     let tempTargetElement = targetElement;
+    let foldData;
+    if (position === "afterend" &&
+        targetElement.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement, true, false, false, true);
+    } else if (position === "beforebegin" && targetElement.previousElementSibling &&
+        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.previousElementSibling.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
+    }
     sourceElements.reverse().forEach((item, index) => {
         const id = item.getAttribute("data-node-id");
         const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
         if (index === sourceElements.length - 1) {
             topSourceElement = getTopAloneElement(item);
-            if (topSourceElement.isSameNode(item)) {
+            if (topSourceElement === item) {
                 topSourceElement = undefined;
             } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
                 // * * 1 列表项拖拽到父级列表项下 https://ld246.com/article/1665448570858
                 topSourceElement = targetElement;
             }
         }
+        const copyNewId = Lute.NewNodeID();
         if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            item.removeAttribute("fold");
-            foldHeadingIds.push({id, parentID});
+            copyFoldHeadingIds.push({
+                newId: copyNewId,
+                oldId: id
+            });
         }
-        let copyId;
+
         let copyElement;
         if (isCopy) {
-            copyId = Lute.NewNodeID();
             undoOperations.push({
                 action: "delete",
-                id: copyId,
+                id: copyNewId,
             });
         } else {
             undoOperations.push({
@@ -191,10 +221,9 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 sameElement.remove();
             }
         }
-
         if (isCopy) {
             copyElement = item.cloneNode(true) as HTMLElement;
-            copyElement.setAttribute("data-node-id", copyId);
+            copyElement.setAttribute("data-node-id", copyNewId);
             copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
                 const newId = Lute.NewNodeID();
                 e.setAttribute("data-node-id", newId);
@@ -203,7 +232,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             tempTargetElement.insertAdjacentElement(position, copyElement);
             doOperations.push({
                 action: "insert",
-                id: copyId,
+                id: copyNewId,
                 data: copyElement.outerHTML,
                 previousID: position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
                 parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
@@ -222,26 +251,21 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
     });
     undoOperations.reverse();
-    for (let j = 0; j < foldHeadingIds.length; j++) {
-        const childrenItem = foldHeadingIds[j];
-        const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
-        headingIds.data.reverse().forEach((headingId: string) => {
-            undoOperations.push({
-                action: "move",
-                id: headingId,
-                previousID: childrenItem.id,
-                parentID: childrenItem.parentID,
-            });
-        });
-        undoOperations.push({
-            action: "foldHeading",
-            id: childrenItem.id,
-            data: "remove"
-        });
-        doOperations.push({
-            action: "unfoldHeading",
-            id: childrenItem.id,
-        });
+    for (let j = 0; j < copyFoldHeadingIds.length; j++) {
+        const childrenItem = copyFoldHeadingIds[j];
+        const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
+        responseTransaction.data.doOperations.splice(0, 1);
+        responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
+        responseTransaction.data.undoOperations.splice(0, 1);
+        doOperations.push(...responseTransaction.data.doOperations);
+        undoOperations.push(...responseTransaction.data.undoOperations);
+    }
+    if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
     }
     return {
         doOperations,
@@ -311,7 +335,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         sourceElements.reverse().forEach((item, index) => {
             if (index === sourceElements.length - 1) {
                 topSourceElement = getTopAloneElement(item);
-                if (topSourceElement.isSameNode(item)) {
+                if (topSourceElement === item) {
                     topSourceElement = undefined;
                 }
             }
@@ -366,14 +390,14 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             id: newSourceId,
         });
     } else {
-        const foldHeadingIds: { id: string, parentID: string }[] = [];
+        const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
         let afterPreviousID;
         sourceElements.reverse().forEach((item, index) => {
             const id = item.getAttribute("data-node-id");
             const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
             if (index === sourceElements.length - 1) {
                 topSourceElement = getTopAloneElement(item);
-                if (topSourceElement.isSameNode(item)) {
+                if (topSourceElement === item) {
                     topSourceElement = undefined;
                 }
             }
@@ -383,8 +407,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
             if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                 if (isCopy) {
-                    item.removeAttribute("fold");
-                    foldHeadingIds.push({id, parentID});
+                    copyFoldHeadingIds.push({oldId: id, newId: copyId});
                 }
                 hasFoldHeading = true;
             }
@@ -433,29 +456,17 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
         });
         undoOperations.reverse();
-        for (let j = 0; j < foldHeadingIds.length; j++) {
-            const childrenItem = foldHeadingIds[j];
-            const headingIds = await fetchSyncPost("/api/block/getHeadingChildrenIDs", {id: childrenItem.id});
-            headingIds.data.reverse().forEach((headingId: string) => {
-                undoOperations.push({
-                    action: "move",
-                    id: headingId,
-                    previousID: childrenItem.id,
-                    parentID: childrenItem.parentID,
-                });
-            });
+        for (let j = 0; j < copyFoldHeadingIds.length; j++) {
+            const childrenItem = copyFoldHeadingIds[j];
+            const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
+            responseTransaction.data.doOperations.splice(0, 1);
+            responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
+            responseTransaction.data.undoOperations.splice(0, 1);
+            doOperations.push(...responseTransaction.data.doOperations);
+            undoOperations.push(...responseTransaction.data.undoOperations);
             if (j === 0) {
-                afterPreviousID = headingIds.data[0];
+                afterPreviousID = copyFoldHeadingIds[0].newId;
             }
-            undoOperations.push({
-                action: "foldHeading",
-                id: childrenItem.id,
-                data: "remove"
-            });
-            doOperations.push({
-                action: "unfoldHeading",
-                id: childrenItem.id,
-            });
         }
         if (isBottom) {
             sbElement.insertAdjacentElement("afterbegin", targetElement);
@@ -480,7 +491,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     // https://github.com/siyuan-note/insider/issues/536
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        !oldSourceParentElement.isSameNode(sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {
+        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
         Array.from(oldSourceParentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
@@ -539,7 +550,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             if (otherProtyleElement) {
                 const allEditor = getAllEditor();
                 for (let i = 0; i < allEditor.length; i++) {
-                    if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
+                    if (allEditor[i].protyle.element === otherProtyleElement) {
                         const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                         doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                         undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
@@ -557,7 +568,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement) {
             getAllEditor().find(item => {
-                if (item.protyle.element.isSameNode(protyleElement)) {
+                if (item.protyle.element === protyleElement) {
                     if (item.protyle.block.id === item.protyle.block.rootID) {
                         const newId = Lute.NewNodeID();
                         doOperations.splice(0, 0, {
@@ -594,7 +605,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 level: "row"
             });
         }
-        if ((sourceElements.length > 1 || hasFoldHeading)) {
+        if (sourceElements.length > 1 || hasFoldHeading) {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: sourceElements.reverse(),
@@ -675,7 +686,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         isSameDoc &&    // 同一文档分屏后，oldSourceParentElement 已经被移走，不可再 update https://github.com/siyuan-note/siyuan/issues/8863
         oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        !oldSourceParentElement.isSameNode(sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {
+        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
         Array.from(oldSourceParentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
@@ -742,7 +753,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             if (otherProtyleElement) {
                 const allEditor = getAllEditor();
                 for (let i = 0; i < allEditor.length; i++) {
-                    if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
+                    if (allEditor[i].protyle.element === otherProtyleElement) {
                         const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                         doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                         undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
@@ -759,7 +770,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement) {
             getAllEditor().find(item => {
-                if (item.protyle.element.isSameNode(protyleElement)) {
+                if (item.protyle.element === protyleElement) {
                     if (item.protyle.block.id === item.protyle.block.rootID) {
                         const newId = Lute.NewNodeID();
                         doOperations.splice(0, 0, {
@@ -784,7 +795,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {
-        // 跨文档不支持撤销
+        // 跨文档或插入折叠标题下不支持撤销
         transaction(protyle, doOperations);
     }
     let hasFoldHeading = false;
@@ -804,13 +815,22 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             level: "row"
         });
     }
-    focusBlock(sourceElements[0]);
+    if (document.contains(sourceElements[0])) {
+        focusBlock(sourceElements[0]);
+    } else {
+        focusBlock(targetElement);
+    }
 };
 
 export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragstart", (event) => {
+        if (protyle.disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         let target = event.target as HTMLElement;
-        if (target.classList.contains("av__gallery-img")) {
+        if (target.classList?.contains("av__gallery-img")) {
             target = hasClosestByClassName(target, "av__gallery-item") as HTMLElement;
         }
         if (!target) {
@@ -826,6 +846,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
                 window.siyuan.dragElement = undefined;
                 event.preventDefault();
+            } else if (target.parentElement.parentElement.classList.contains("av__views")) {
+                window.siyuan.dragElement = target;
+                target.style.width = target.clientWidth + "px";
+                target.style.opacity = ".36";
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}${[target.previousElementSibling?.getAttribute("data-id")]}`,
+                    target.outerHTML);
+                return;
             } else if (target.classList.contains("protyle-action")) {
                 target.parentElement.classList.add("protyle-wysiwyg--select");
                 const ghostElement = document.createElement("div");
@@ -850,16 +877,43 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (target.classList.contains("av__gallery-item")) {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
-                    target.classList.add("av__gallery-item--select");
+                    if (blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
+                        const bodyElements = blockElement.querySelectorAll(".av__body");
+                        if (bodyElements.length === 1) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        }
+                    }
+                    if (!target.classList.contains("av__gallery-item--select")) {
+                        blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                            item.classList.remove("av__gallery-item--select");
+                        });
+                        target.classList.add("av__gallery-item--select");
+                    }
                     const ghostElement = document.createElement("div");
-                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr " + target.parentElement.className;
-                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
+                    const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
+                    let galleryElement: HTMLElement;
+                    let cloneGalleryElement = document.createElement("div");
+                    selectElements.forEach(item => {
+                        if (!galleryElement || !galleryElement.contains(item)) {
+                            galleryElement = item.parentElement;
+                            cloneGalleryElement = document.createElement("div");
+                            cloneGalleryElement.classList.add("av__gallery");
+                            cloneGalleryElement.setAttribute("style", `width: 100vw;margin-bottom: 16px;grid-template-columns: repeat(auto-fill, ${selectElements[0].clientWidth}px);`);
+                            ghostElement.appendChild(cloneGalleryElement);
+                        }
                         const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
-                        cloneItem.setAttribute("style", `width:${item.clientWidth}px;;height:${item.clientHeight}px;`);
+                        cloneItem.setAttribute("style", `height:${item.clientHeight}px;`);
                         cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
-                        ghostElement.append(cloneItem);
+                        cloneGalleryElement.appendChild(cloneItem);
                     });
-                    ghostElement.setAttribute("style", "position:fixed;opacity:.1;padding:0;z-index:1;");
+                    ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
                     setTimeout(() => {
@@ -868,11 +922,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
-                        selectIds.push(item.getAttribute("data-id"));
+                        const bodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
+                        const groupId = bodyElement.getAttribute("data-group-id");
+                        selectIds.push(item.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
                     });
-                    if (selectIds.length === 0) {
-                        selectIds.push(target.getAttribute("data-id"));
-                    }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         ghostElement.outerHTML);
                 }
@@ -898,6 +951,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
                 gutterType = item.type;
             }
+        }
+        if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}`.toLowerCase())) {
+            const blockElement = hasClosestBlock(window.siyuan.dragElement);
+            if (blockElement) {
+                const avID = blockElement.getAttribute("data-av-id");
+                const blockID = blockElement.getAttribute("data-node-id");
+                const id = window.siyuan.dragElement.getAttribute("data-id");
+                transaction(protyle, [{
+                    action: "sortAttrViewView",
+                    avID,
+                    blockID,
+                    id,
+                    previousID: window.siyuan.dragElement.previousElementSibling?.getAttribute("data-id"),
+                    data: "unRefresh"   // 不需要重新渲染
+                }], [{
+                    action: "sortAttrViewView",
+                    avID,
+                    blockID,
+                    id,
+                    previousID: gutterType.split(Constants.ZWSP).pop()
+                }]);
+            }
+            return;
         }
         const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top");
         if (targetElement) {
@@ -972,6 +1048,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const id = item.getAttribute("data-node-id");
                     sourceIds.push(id);
                     srcs.push({
+                        itemID: Lute.NewNodeID(),
                         id,
                         isDetached: false,
                     });
@@ -1041,34 +1118,47 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 行内拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item && undoPreviousId !== previousID) {
+                                const items = item.split("@");
+                                const id = items[0];
+                                const groupID = items[1] || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                                if (previousID !== id && undoPreviousId !== previousID || (
+                                    (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
+                                )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID,
+                                        targetGroupID,
                                     });
                                     undoOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID: undoPreviousId,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID: targetGroupID,
+                                        targetGroupID: groupID,
                                     });
                                 }
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                            const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcs,
-                                blockID: blockElement.dataset.nodeId
+                                blockID: blockElement.dataset.nodeId,
+                                groupID
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1083,7 +1173,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 data: blockElement.getAttribute("updated")
                             }]);
                             blockElement.setAttribute("updated", newUpdated);
-                            insertAttrViewBlockAnimation(protyle, blockElement, sourceIds, previousID);
+                            insertAttrViewBlockAnimation({
+                                protyle,
+                                blockElement,
+                                srcIDs: sourceIds,
+                                previousId: previousID,
+                                groupID
+                            });
                         }
                     }
                 } else if (targetElement.classList.contains("av__gallery-item") || targetElement.classList.contains("av__gallery-add")) {
@@ -1101,34 +1197,46 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // gallery item 内部拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                            const targetGroupID = targetElement.parentElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item && undoPreviousId !== previousID) {
+                                const items = item.split("@");
+                                const id = items[0];
+                                const groupID = items[1] || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body[data-group-id="${groupID}"] .av__gallery-item[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                                if (previousID !== item && undoPreviousId !== previousID || (
+                                    (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
+                                )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID,
+                                        targetGroupID,
                                     });
                                     undoOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID: undoPreviousId,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID: targetGroupID,
+                                        targetGroupID: groupID,
                                     });
                                 }
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            const bodyElement = hasClosestByClassName(targetElement, "av__body");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcs,
-                                blockID: blockElement.dataset.nodeId
+                                blockID: blockElement.dataset.nodeId,
+                                groupID: bodyElement && bodyElement.getAttribute("data-group-id")
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1147,7 +1255,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 protyle,
                                 blockElement,
                                 srcIDs: sourceIds,
-                                previousId: previousID
+                                previousId: previousID,
+                                groupID: targetElement.parentElement.getAttribute("data-group-id")
                             });
                         }
                     }
@@ -1207,7 +1316,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < ids.length; i++) {
                     if (ids.length > 1) {
-                        html += "* ";
+                        html += "- ";
                     }
                     const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
                     html += `((${ids[i]} '${response.data}'))`;
@@ -1237,8 +1346,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                         const srcs: IOperationSrcs[] = [];
+                        const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                        const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({
+                                itemID: Lute.NewNodeID(),
                                 id,
                                 isDetached: false,
                             });
@@ -1249,6 +1361,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             previousID,
                             srcs,
                             blockID: blockElement.dataset.nodeId,
+                            groupID
                         }, {
                             action: "doUpdateUpdated",
                             id: blockElement.dataset.nodeId,
@@ -1262,7 +1375,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             id: blockElement.dataset.nodeId,
                             data: blockElement.getAttribute("updated")
                         }]);
-                        insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
+                        insertAttrViewBlockAnimation({
+                            protyle,
+                            blockElement,
+                            srcIDs: ids,
+                            previousId: previousID,
+                            groupID
+                        });
                         blockElement.setAttribute("updated", newUpdated);
                     }
                 } else {
@@ -1313,6 +1432,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
             }
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
+            event.preventDefault();
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             // https://github.com/siyuan-note/siyuan/issues/9544
             const avElement = hasClosestByClassName(event.target, "av");
@@ -1356,8 +1476,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.dataTransfer.dropEffect = "none";
             return;
         }
+        let gutterType = "";
+        for (const item of event.dataTransfer.items) {
+            if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                gutterType = item.type;
+            }
+        }
+        if (gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}ViewTab${Constants.ZWSP}`.toLowerCase())) {
+            dragoverTab(event);
+            event.preventDefault();
+            return;
+        }
         const contentRect = protyle.contentElement.getBoundingClientRect();
-        if (!hasClosestByClassName(event.target, "av__cell") && (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
+        if (!hasClosestByClassName(event.target, "av__cell") &&
+            (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
             protyle.contentElement.scroll({
                 top: protyle.contentElement.scrollTop + (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
                 behavior: "smooth"
@@ -1370,7 +1502,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement && targetElement.getAttribute("data-dtype") === "mAsset" &&
                 !targetElement.classList.contains("av__cell--header")) {
                 event.preventDefault(); // 不使用导致无法触发 drop
-                if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
+                if (dragoverElement && targetElement === dragoverElement) {
                     return;
                 }
                 const blockElement = hasClosestBlock(targetElement);
@@ -1386,17 +1518,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 使用 event.preventDefault(); 会导致无光标 https://github.com/siyuan-note/siyuan/issues/12857
             return;
         }
-        let gutterType = "";
-        for (const item of event.dataTransfer.items) {
-            if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                gutterType = item.type;
-            }
-        }
+
         if (!gutterType && !window.siyuan.dragElement) {
             // https://github.com/siyuan-note/siyuan/issues/6436
             event.preventDefault();
             return;
         }
+        const gutterTypes = gutterType ? gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP) : [];
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
             const targetAssetElement = hasClosestBlock(event.target);
@@ -1468,7 +1596,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
             }
         } else if (targetElement && targetElement.classList.contains("list")) {
-            if (gutterType && gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)[0] !== "nodelistitem") {
+            if (gutterTypes[0] !== "nodelistitem") {
                 targetElement = hasClosestBlock(document.elementFromPoint(event.clientX, event.clientY - 6));
             } else {
                 targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 6), "li");
@@ -1480,38 +1608,80 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement) {
                 const targetRowElement = hasClosestByClassName(targetElement, "av__row--header");
                 const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header");
-                if (targetElement.isSameNode(window.siyuan.dragElement) || !targetRowElement || !dragRowElement ||
-                    (targetRowElement && dragRowElement && !targetRowElement.isSameNode(dragRowElement))
+                if (targetElement === window.siyuan.dragElement || !targetRowElement || !dragRowElement ||
+                    (targetRowElement && dragRowElement && targetRowElement !== dragRowElement)
                 ) {
                     targetElement = false;
                 }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeViewRowMenu${Constants.ZWSP}`.toLowerCase())) {
-            // 行只能拖拽当前 av 中
             if ((!targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__row--util")) ||
                 (window.siyuan.dragElement && !window.siyuan.dragElement.contains(targetElement))) {
+                // 行只能拖拽当前 av 中
                 targetElement = false;
+            } else {
+                const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                if (bodyElement) {
+                    const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
+                    const groupID = bodyElement.getAttribute("data-group-id");
+                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 排序只能夸组拖拽
+                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
+                    gutterTypes[2].split(",").find(item => {
+                        const sourceGroupID = item ? item.split("@")[1] : "";
+                        if (sourceGroupID !== groupID && isTCU) {
+                            targetElement = false;
+                            return true;
+                        }
+                        if (sourceGroupID === groupID && hasSort) {
+                            targetElement = false;
+                            return true;
+                        }
+                    });
+                }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
-            // gallery item 只能拖拽当前 av 中
-            const galleryElement = hasClosestByClassName(event.target, "av__gallery");
-            if (targetElement.classList.contains("av") || !galleryElement ||
-                !galleryElement.contains(window.siyuan.dragElement) || targetElement.isSameNode(window.siyuan.dragElement)) {
+            const containerElement = hasClosestByClassName(event.target, "av__container");
+            if (targetElement.classList.contains("av") || !containerElement ||
+                !containerElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
+                // gallery item 只能拖拽当前 av 中
                 targetElement = false;
-                editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__left", "dragover__right");
-                });
+            } else {
+                const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                if (bodyElement) {
+                    const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
+                    const groupID = bodyElement.getAttribute("data-group-id");
+                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 排序只能夸组拖拽
+                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
+                    gutterTypes[2].split(",").find(item => {
+                        const sourceGroupID = item ? item.split("@")[1] : "";
+                        if (sourceGroupID !== groupID && isTCU) {
+                            targetElement = false;
+                            return true;
+                        }
+                        if (sourceGroupID === groupID && hasSort) {
+                            targetElement = false;
+                            return true;
+                        }
+                    });
+                }
             }
         }
 
         if (!targetElement) {
+            editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right");
+            });
             return;
         }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
-        if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
+        if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
@@ -1549,11 +1719,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
             if (targetElement.classList.contains("av__cell")) {
                 if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
-                    !targetElement.classList.contains("av__row") && !targetElement.previousElementSibling.isSameNode(window.siyuan.dragElement)) {
+                    !targetElement.classList.contains("av__row") && targetElement.previousElementSibling !== window.siyuan.dragElement) {
                     targetElement.classList.add("dragover__left");
                 } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX <= nodeRect.right + 1 &&
-                    !targetElement.classList.contains("av__row") && !targetElement.isSameNode(window.siyuan.dragElement.previousElementSibling)) {
-                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") && targetElement.isSameNode(window.siyuan.dragElement.previousElementSibling.lastElementChild)) {
+                    !targetElement.classList.contains("av__row") && targetElement !== window.siyuan.dragElement.previousElementSibling) {
+                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") &&
+                        targetElement === window.siyuan.dragElement.previousElementSibling.lastElementChild) {
                         // 拖拽到固定列的最后一个元素
                     } else {
                         targetElement.classList.add("dragover__right");
@@ -1618,13 +1789,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             disabledPosition = "";
             // gutter 文档内拖拽限制
             // 排除自己及子孙
-            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "col" && targetElement.getAttribute("data-id") === gutterTypes[2]) {
                 // 表头不能拖到自己上
                 clearDragoverElement(dragoverElement);
                 return;
             }
-            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2] === targetElement.getAttribute("data-id")) {
+            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2].split("@")[0] === targetElement.getAttribute("data-id")) {
                 // 行不能拖到自己上
                 clearDragoverElement(dragoverElement);
                 return;
@@ -1643,12 +1813,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 clearDragoverElement(dragoverElement);
                 return;
             }
-            if (gutterTypes[0] === "nodelistitem" &&
-                gutterTypes[1] !== targetElement.getAttribute("data-subtype") &&
-                "NodeListItem" === targetElement.getAttribute("data-type")) {
-                // 排除类型不同的列表项
-                clearDragoverElement(dragoverElement);
-                return;
+            if (gutterTypes[0] === "nodelistitem" && "NodeListItem" === targetElement.getAttribute("data-type")) {
+                if (gutterTypes[1] !== targetElement.getAttribute("data-subtype")) {
+                    // 排除类型不同的列表项
+                    clearDragoverElement(dragoverElement);
+                    return;
+                }
+                // 选中非列表不能拖拽到列表中 https://github.com/siyuan-note/siyuan/issues/13822
+                const notLiItem = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).find((item: HTMLElement) => {
+                    if (!item.classList.contains("li")) {
+                        return true;
+                    }
+                });
+                if (notLiItem) {
+                    clearDragoverElement(dragoverElement);
+                    return;
+                }
             }
             if (gutterTypes[0] !== "nodelistitem" && targetElement.getAttribute("data-type") === "NodeListItem") {
                 // 非列表项不能拖入列表项周围
@@ -1689,6 +1869,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragenter", (event) => {
         event.preventDefault();
         counter++;
+    });
+    editorElement.addEventListener("dragend", () => {
+        if (window.siyuan.dragElement) {
+            window.siyuan.dragElement.style.opacity = "";
+            window.siyuan.dragElement = undefined;
+            document.onmousemove = null;
+        }
     });
 };
 

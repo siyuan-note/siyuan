@@ -412,8 +412,8 @@ interface IHintData {
     id?: string;
     html: string;
     value: string;
-    filter?: string[]
-    focus?: boolean
+    filter?: string[];
+    focus?: boolean;
 }
 
 interface IHintExtend {
@@ -455,10 +455,12 @@ interface IProtyleOptions {
     render?: {
         background?: boolean
         title?: boolean
+        titleShowTop?: boolean
         gutter?: boolean
         scroll?: boolean
         breadcrumb?: boolean
         breadcrumbDocName?: boolean
+        hideTitleOnZoom?: boolean
     }
     /** 内部调试时使用 */
     _lutePath?: string;
@@ -478,6 +480,12 @@ interface IProtyleOptions {
     classes?: {
         preview?: string;
     };
+    click?: {
+        /** 点击末尾是否阻止插入新块 */
+        preventInsetEmptyBlock?: boolean
+    }
+
+    handleEmptyContent?(): void
 
     /** 编辑器异步渲染完成后的回调方法 */
     after?(protyle: import("../protyle").Protyle): void;

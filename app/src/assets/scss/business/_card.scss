@@ -1,3 +1,5 @@
+@use "../util/function";
+
 .card {
   &__main {
     @extend .fn__flex-column;

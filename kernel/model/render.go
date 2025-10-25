@@ -302,9 +302,37 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					} else if "h" == sqlBlock.Type {
 						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
 						var hChildren []*ast.Node
-						hChildren = append(hChildren, h)
-						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 
+						// 从嵌入块的 IAL 属性中解析 custom-heading-mode，默认值为 0
+						blockHeadingMode := 0 // 默认值
+						if customHeadingMode := n.IALAttr("custom-heading-mode"); "" != customHeadingMode {
+							if mode, err := strconv.Atoi(customHeadingMode); nil == err && (mode == 0 || mode == 1 || mode == 2) {
+								blockHeadingMode = mode
+							}
+						}
+
+						// 根据 blockHeadingMode 处理标题块的显示
+						// blockHeadingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
+						if 1 == blockHeadingMode {
+							// 仅显示标题
+							hChildren = append(hChildren, h)
+						} else if 2 == blockHeadingMode {
+							// 仅显示标题下方的块（默认行为）
+							if "1" != h.IALAttr("fold") {
+								children := treenode.HeadingChildren(h)
+								for _, c := range children {
+									if "1" == c.IALAttr("heading-fold") {
+										// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+										continue
+									}
+									hChildren = append(hChildren, c)
+								}
+							}
+						} else {
+							// 0: 显示标题与下方的块
+							hChildren = append(hChildren, h)
+							hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+						}
 						if 0 == blockEmbedMode {
 							embedTopLevel := 0
 							for _, hChild := range hChildren {

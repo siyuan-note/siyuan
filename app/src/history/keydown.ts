@@ -16,7 +16,7 @@ export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
             currentItem = items[items.length - 1];
         } else {
             items.find((item, index) => {
-                if (item.isSameNode(currentItem)) {
+                if (item === currentItem) {
                     if (event.key === "ArrowUp") {
                         if (index === 0) {
                             currentItem = items[items.length - 1];

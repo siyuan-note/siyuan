@@ -142,8 +142,8 @@ func extensionCopy(c *gin.Context) {
 
 		fName = util.FilterUploadFileName(fName)
 		ext := util.Ext(fName)
-		if "" == ext || strings.Contains(ext, "!") {
-			// 改进浏览器剪藏扩展转换本地图片后缀 https://github.com/siyuan-note/siyuan/issues/7467
+		if !util.IsCommonExt(ext) || strings.Contains(ext, "!") {
+			// 改进浏览器剪藏扩展转换本地图片后缀 https://github.com/siyuan-note/siyuan/issues/7467 https://github.com/siyuan-note/siyuan/issues/15320
 			if mtype := mimetype.Detect(data); nil != mtype {
 				ext = mtype.Extension()
 				fName += ext
@@ -154,7 +154,7 @@ func extensionCopy(c *gin.Context) {
 			fName += ext
 		}
 
-		fName = util.AssetName(fName)
+		fName = util.AssetName(fName, ast.NewNodeID())
 		writePath := filepath.Join(assets, fName)
 		if err = filelock.WriteFile(writePath, data); err != nil {
 			ret.Code = -1

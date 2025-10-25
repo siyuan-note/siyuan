@@ -35,12 +35,12 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -169,7 +169,7 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	isLargeDoc = 1024*1024*1 <= len(data)
 
 	luteEngine := NewLute()
-	historyTree, err := filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	historyTree, err := dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse tree from file [%s] failed: %s", historyPath, err)
 		return
@@ -259,7 +259,6 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 		historyDir = filepath.Join(util.HistoryDir, historyDir)
 
-		// 恢复包含的的属性视图 https://github.com/siyuan-note/siyuan/issues/9567
 		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 		for _, avNode := range avNodes {
 			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
@@ -355,13 +354,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		refDefIDs := getRefDefIDs(tree.Root)
 		// 推送定义节点引用计数
 		for _, defID := range refDefIDs {
-			defTree, _ := LoadTreeByBlockID(defID)
-			if nil != defTree {
-				defNode := treenode.GetNodeInTree(defTree, defID)
-				if nil != defNode {
-					task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defTree.ID, defNode.ID)
-				}
-			}
+			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 		}
 	}()
 	return nil
@@ -658,15 +651,7 @@ func (box *Box) generateDocHistory0() {
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
 			} else {
-				// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
-				avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
-				for _, avNode := range avNodes {
-					srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
-					destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
-					if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
-						logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
-					}
-				}
+				generateAvHistory(tree, historyDir)
 			}
 		}
 	}
@@ -677,7 +662,6 @@ func (box *Box) generateDocHistory0() {
 
 func clearOutdatedHistoryDir(historyDir string) {
 	if !gulu.File.IsExist(historyDir) {
-		logging.LogWarnf("history dir [%s] not exist", historyDir)
 		return
 	}
 
@@ -796,7 +780,20 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		return
 	}
 
+	generateAvHistory(tree, historyDir)
+
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+}
+
+func generateAvHistory(tree *parse.Tree, historyDir string) {
+	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+	for _, avNode := range avNodes {
+		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+		destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+		if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+			logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+		}
+	}
 }
 
 func GetHistoryDir(suffix string) (ret string, err error) {

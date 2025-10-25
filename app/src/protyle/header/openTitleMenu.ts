@@ -6,6 +6,8 @@ import {updateHotkeyTip} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import * as path from "path";
+/// #else
+import {openMobileFileById} from "../../mobile/editor";
 /// #endif
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
@@ -19,16 +21,15 @@ import {popSearch} from "../../mobile/menu/search";
 import {openSearch} from "../../search/spread";
 import {openDocHistory} from "../../history/doc";
 import {openNewWindowById} from "../../window/openNewWindow";
-import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 
-export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
+export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "titleMenu") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
         window.siyuan.menus.menu.remove();
         return;
     }
@@ -36,13 +37,15 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         id: protyle.block.rootID
     }, (response) => {
         window.siyuan.menus.menu.remove();
-        window.siyuan.menus.menu.element.setAttribute("data-name", "titleMenu");
+        window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TITLE);
+        const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+        window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover-" + from : "app-" + from);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu([protyle.block.rootID])
+            submenu: copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID)
         }).element);
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
@@ -73,7 +76,12 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             label: window.siyuan.languages.outline,
             accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
             click: () => {
-                openOutline(protyle);
+                openOutline({
+                    app: protyle.app,
+                    rootId: protyle.block.rootID,
+                    title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
+                    isPreview: !protyle.preview.element.classList.contains("fn__none")
+                });
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
@@ -128,6 +136,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     }
                 }).element);
             }
+            const isCardMade = !!response.data.ial[Constants.CUSTOM_RIFF_DECKS];
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
@@ -150,9 +159,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     });
                 }
             }, {
-                id: "quickMakeCard",
+                id: isCardMade ? "removeCard" : "quickMakeCard",
                 iconHTML: "",
-                label: window.siyuan.languages.quickMakeCard,
+                label: isCardMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 click: () => {
                     let titleElement = protyle.title?.element;
@@ -214,22 +223,24 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             transferBlockRef(protyle.block.rootID);
         }
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
-        /// #if !MOBILE
         if (!protyle.model) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
                 click() {
+                    /// #if !MOBILE
                     openFileById({
                         app: protyle.app,
                         id: protyle.block.id,
                         action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_CONTEXT],
                     });
+                    /// #else
+                    openMobileFileById(protyle.app, protyle.block.id, protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT]);
+                    /// #endif
                 }
             }).element);
         }
-        /// #endif
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             id: "openByNewWindow",
@@ -263,7 +274,6 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 }
             }).element);
         }
-        genImportMenu(protyle.notebookId, protyle.path);
         window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
 
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
@@ -290,7 +300,5 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         /// #else
         window.siyuan.menus.menu.popup(position);
         /// #endif
-        const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
-        window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     });
 };

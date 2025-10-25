@@ -75,9 +75,9 @@ func watchAssets() {
 				timer.Reset(time.Millisecond * 100)
 
 				if lastEvent.Op&fsnotify.Rename == fsnotify.Rename || lastEvent.Op&fsnotify.Write == fsnotify.Write {
-					IndexAssetContent(lastEvent.Name)
+					HandleAssetsChangeEvent(lastEvent.Name)
 				} else if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
-					RemoveIndexAssetContent(lastEvent.Name)
+					HandleAssetsRemoveEvent(lastEvent.Name)
 				}
 			case err, ok := <-assetsWatcher.Errors:
 				if !ok {
@@ -94,9 +94,9 @@ func watchAssets() {
 				go cache.LoadAssets()
 
 				if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
-					RemoveIndexAssetContent(lastEvent.Name)
+					HandleAssetsRemoveEvent(lastEvent.Name)
 				} else {
-					IndexAssetContent(lastEvent.Name)
+					HandleAssetsChangeEvent(lastEvent.Name)
 				}
 			}
 		}

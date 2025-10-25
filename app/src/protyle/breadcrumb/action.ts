@@ -26,7 +26,7 @@ export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
         /// #else
         getAllEditor().forEach(item => {
             if (item.protyle.block.rootID === protyle.block.rootID) {
-                reloadProtyle(item.protyle, item.protyle.element.isSameNode(protyle.element));
+                reloadProtyle(item.protyle, item.protyle.element === protyle.element);
             }
         });
         /// #endif
@@ -62,7 +62,7 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         /// #endif
     }
     /// #if !MOBILE
-    if ("darwin" !== window.siyuan.config.system.os) {
+    if ("darwin" !== window.siyuan.config.system.os && !isWindow()) {
         const windowControlsElement = document.getElementById("windowControls");
         if (isFullscreen) {
             windowControlsElement.style.zIndex = "";
@@ -95,7 +95,7 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         window.siyuan.editorIsFullscreen = !isFullscreen;
     }
     getAllModels().editor.forEach(item => {
-        if (!element.isSameNode(item.element)) {
+        if (element !== item.element) {
             if (window.siyuan.editorIsFullscreen) {
                 if (item.element.classList.contains("fullscreen")) {
                     item.element.classList.remove("fullscreen");
@@ -107,15 +107,6 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
             }
         }
     });
-    if ("darwin" !== window.siyuan.config.system.os) {
-        const windowControlsElement = document.getElementById("windowControls");
-        if (isFullscreen) {
-            windowControlsElement.style.zIndex = "";
-        } else {
-            window.siyuan.zIndex++;
-            windowControlsElement.style.zIndex = window.siyuan.zIndex.toString();
-        }
-    }
     /// #endif
 };
 

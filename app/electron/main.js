@@ -352,7 +352,7 @@ const initMainWindow = () => {
     }).then((response) => {
         setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
             // 加载主界面
-            currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
+            currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
         });
     });
 
@@ -387,10 +387,7 @@ const initMainWindow = () => {
     });
 
     currentWindow.webContents.on("did-finish-load", () => {
-        let siyuanOpenURL;
-        if ("win32" === process.platform || "linux" === process.platform) {
-            siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        }
+        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
         if (siyuanOpenURL) {
             if (currentWindow.isMinimized()) {
                 currentWindow.restore();
@@ -607,7 +604,7 @@ const initKernel = (workspace, port, lang) => {
                     resolve(false);
                     return;
                 }
-                await sleep(200);
+                await sleep(500);
             }
         }
 
@@ -678,6 +675,10 @@ for (let i = argStart; i < process.argv.length; i++) {
 
 app.whenReady().then(() => {
     const resetTrayMenu = (tray, lang, mainWindow) => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            return;
+        }
+
         const trayMenuTemplate = [{
             label: mainWindow.isVisible() ? lang.hideWindow : lang.showWindow, click: () => {
                 showHideWindow(tray, lang, mainWindow);
@@ -726,6 +727,10 @@ app.whenReady().then(() => {
         }
     };
     const showHideWindow = (tray, lang, mainWindow) => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            return;
+        }
+
         if (!mainWindow.isVisible()) {
             if (mainWindow.isMinimized()) {
                 mainWindow.restore();
@@ -857,6 +862,13 @@ app.whenReady().then(() => {
         currentWindow.on("leave-full-screen", () => {
             event.sender.send("siyuan-event", "leave-full-screen");
         });
+    });
+    ipcMain.on("siyuan-focus-fix", (event) => {
+        const currentWindow = getWindowByContentId(event.sender.id);
+        if (currentWindow && process.platform === "win32") {
+            currentWindow.blur();
+            currentWindow.focus();
+        }
     });
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;
@@ -1113,23 +1125,24 @@ app.whenReady().then(() => {
         if (exitWS) {
             return;
         }
-        let tray;
-        if ("win32" === process.platform || "linux" === process.platform) {
-            // 系统托盘
-            tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
-            tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
-            const mainWindow = getWindowByContentId(event.sender.id);
-            if (!mainWindow) {
-                return;
-            }
-            resetTrayMenu(tray, data.languages, mainWindow);
-            tray.on("click", () => {
-                showHideWindow(tray, data.languages, mainWindow);
-            });
-        }
+
         workspaces.find(item => {
             if (!item.workspaceDir) {
                 item.workspaceDir = data.workspaceDir;
+                let tray;
+                if ("win32" === process.platform || "linux" === process.platform) {
+                    // 系统托盘
+                    tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
+                    tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
+                    const mainWindow = getWindowByContentId(event.sender.id);
+                    if (!mainWindow || mainWindow.isDestroyed()) {
+                        return;
+                    }
+                    resetTrayMenu(tray, data.languages, mainWindow);
+                    tray.on("click", () => {
+                        showHideWindow(tray, data.languages, mainWindow);
+                    });
+                }
                 item.tray = tray;
                 return true;
             }

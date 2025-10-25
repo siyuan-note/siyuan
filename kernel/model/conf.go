@@ -218,6 +218,10 @@ func InitConf() {
 	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
 	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
+	if 2 > Conf.FileTree.LargeFileWarningSize {
+		Conf.FileTree.LargeFileWarningSize = 8
+	}
+	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 
@@ -255,6 +259,9 @@ func InitConf() {
 	}
 	if 1 > Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 30
+	}
+	if 3650 < Conf.Editor.HistoryRetentionDays {
+		Conf.Editor.HistoryRetentionDays = 3650
 	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
@@ -450,6 +457,33 @@ func InitConf() {
 	}
 	if "" == Conf.Flashcard.Weights {
 		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
+	}
+	if 19 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights length must be [19]"
+		logging.LogWarnf("%s , given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
+	}
+	isInvalidFlashcardWeights := false
+	for _, w := range strings.Split(Conf.Flashcard.Weights, ",") {
+		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
+			isInvalidFlashcardWeights = true
+			break
+		}
+	}
+	if isInvalidFlashcardWeights {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights contain invalid number"
+		logging.LogWarnf("%s, given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
 	}
 
 	if nil == Conf.AI {
@@ -689,7 +723,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		logging.LogInfof("exited kernel")
-		util.WebSocketServer.Close()
+		if nil != util.WebSocketServer {
+			util.WebSocketServer.Close()
+		}
 		util.HttpServing = false
 		os.Exit(logging.ExitCodeOk)
 	}()
@@ -870,7 +906,7 @@ func InitBoxes() {
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
 		if !initialized {
-			index(box.ID)
+			indexBox(box.ID)
 		}
 	}
 
@@ -1122,6 +1158,7 @@ func closeUserGuide() {
 
 		unindex(boxID)
 
+		sql.FlushQueue()
 		if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
 			logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
 		}

@@ -9,7 +9,7 @@ import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
 import {Model} from "../Model";
-import {saveLayout, setPanelFocus} from "../util";
+import {adjustLayout, saveLayout, setPanelFocus} from "../util";
 import {getDockByType, resizeTabs} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
@@ -112,6 +112,13 @@ export class Dock {
 
         if (activeElements.length === 0) {
             this.resizeElement.classList.add("fn__none");
+            // 如果没有打开的侧栏，隐藏 layout 的子元素
+            if (this.layout.children.length > 1) {
+                this.layout.children.forEach(child => {
+                    child.element.classList.add("fn__none");
+                });
+                this.layout.children[0].element.nextElementSibling?.classList.add("fn__none");
+            }
         } else {
             activeElements.forEach(item => {
                 this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
@@ -186,13 +193,13 @@ export class Dock {
                 const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
                     hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement ||
                     hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item--space") as HTMLElement;
-                if (targetItem && selectItem && targetItem.isSameNode(selectItem)) {
+                if (targetItem && selectItem && targetItem === selectItem) {
                     if (selectItem.classList.contains("dock__item--space")) {
                         const selectRect = selectItem.getBoundingClientRect();
                         if (selectItem.parentElement.id === "dockBottom") {
                             if (moveEvent.clientX < selectRect.right && moveEvent.clientX > selectRect.right - 40) {
                                 const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
-                                if (lastFirstElement && lastFirstElement.isSameNode(item)) {
+                                if (lastFirstElement && lastFirstElement === item) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -202,7 +209,7 @@ export class Dock {
                         } else {
                             if (moveEvent.clientY < selectRect.bottom && moveEvent.clientY > selectRect.bottom - 40) {
                                 const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
-                                if (lastFirstElement && lastFirstElement.isSameNode(item)) {
+                                if (lastFirstElement && lastFirstElement === item) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -211,7 +218,7 @@ export class Dock {
                             }
                         }
                     } else if (selectItem.classList.contains("dock__item--pin")) {
-                        if (item.nextElementSibling?.isSameNode(selectItem)) {
+                        if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                             moveItem.classList.add("fn__none");
                         } else {
                             moveItem.classList.remove("fn__none");
@@ -221,14 +228,14 @@ export class Dock {
                         const selectRect = selectItem.getBoundingClientRect();
                         if (selectItem.parentElement.parentElement.id === "dockBottom") {
                             if (selectRect.left + selectRect.width / 2 > moveEvent.clientX) {
-                                if (item.nextElementSibling?.isSameNode(selectItem)) {
+                                if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
                                     selectItem.before(moveItem);
                                 }
                             } else {
-                                if (item.previousElementSibling?.isSameNode(selectItem)) {
+                                if (item.previousElementSibling && item.previousElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -237,14 +244,14 @@ export class Dock {
                             }
                         } else {
                             if (selectRect.top + selectRect.height / 2 > moveEvent.clientY) {
-                                if (item.nextElementSibling?.isSameNode(selectItem)) {
+                                if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
                                     selectItem.before(moveItem);
                                 }
                             } else {
-                                if (item.previousElementSibling?.isSameNode(selectItem)) {
+                                if (item.previousElementSibling && item.previousElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -266,8 +273,8 @@ export class Dock {
                     }
                     return;
                 }
-                if (!targetItem || targetItem.style.position === "fixed" || targetItem.isSameNode(item) || targetItem.id === "dockMoveItem") {
-                    if (targetItem && targetItem.isSameNode(item)) {
+                if (!targetItem || targetItem.style.position === "fixed" || (targetItem === item) || targetItem.id === "dockMoveItem") {
+                    if (targetItem && targetItem === item) {
                         moveItem.classList.add("fn__none");
                     }
                     return;
@@ -295,7 +302,7 @@ export class Dock {
                     } else if (moveItem.parentElement.parentElement.id === "dockRight") {
                         dock = window.siyuan.layout.rightDock;
                     }
-                    dock.add(moveItem.parentElement.isSameNode(dock.element.firstElementChild) ? 0 : 1, item, moveItem.previousElementSibling?.getAttribute("data-type"));
+                    dock.add(moveItem.parentElement === dock.element.firstElementChild ? 0 : 1, item, moveItem.previousElementSibling?.getAttribute("data-type"));
                 }
                 moveItem.remove();
             };
@@ -700,7 +707,8 @@ export class Dock {
                 this.layout.element.style.opacity = "";
                 this.hideResizeTimeout = window.setTimeout(() => {
                     this.resizeElement.classList.remove("fn__none");
-                }, 200);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
+                    adjustLayout();
+                }, Constants.TIMEOUT_TRANSITION);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
             }
             if (document.activeElement) {
                 (document.activeElement as HTMLElement).blur();

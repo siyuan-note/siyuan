@@ -9,7 +9,7 @@ import {plantumlRender} from "../render/plantumlRender";
 import {Constants} from "../../constants";
 import {htmlRender} from "../render/htmlRender";
 
-export const processPasteCode = (html: string, text: string) => {
+export const processPasteCode = (html: string, text: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
     tempElement.innerHTML = html;
     let isCode = false;
@@ -32,8 +32,7 @@ export const processPasteCode = (html: string, text: string) => {
     if (isCode) {
         let code = text || html;
         if (/\n/.test(code)) {
-            // 不要格式化为多行代码块，否则 Lute 解析会出错 https://github.com/siyuan-note/siyuan/issues/8934
-            return `<div data-type="NodeCodeBlock" class="code-block" data-node-id="${Lute.NewNodeID()}"><div class="protyle-action"><span class="protyle-action--first protyle-action__language" contenteditable="false">${window.siyuan.storage[Constants.LOCAL_CODELANG]}</span><span class="fn__flex-1"></span><span aria-label="${window.siyuan.languages.copy}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-icon--first protyle-action__copy"><svg><use xlink:href="#iconCopy"></use></svg></span><span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-icon--last protyle-action__menu"><svg><use xlink:href="#iconMore"></use></svg></span></div><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}">${code.replace(/&/g, "&amp;").replace(/</g, "&lt;")}<wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+            return protyle.lute.Md2BlockDOM(code);
         } else {
             // Paste code from IDE no longer escape `<` and `>` https://github.com/siyuan-note/siyuan/issues/8340
             code = code.replace("<", "&lt;").replace(">", "&gt;");

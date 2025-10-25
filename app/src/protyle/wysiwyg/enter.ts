@@ -1,4 +1,4 @@
-import {genEmptyElement, insertEmptyBlock} from "../../block/util";
+import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
 import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement,
@@ -52,11 +52,14 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     if (blockElement.getAttribute("data-type") === "NodeAttributeView") {
         return true;
     }
-    // 代码块
-    const trimStartText = editableElement.innerHTML.trimStart();
-    if (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||
-        trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
-        if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+
+    const trimStartHTML = editableElement.innerHTML.trimStart();
+    const trimStartText = editableElement.textContent.trimStart();
+    if (trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~") ||
+        (trimStartHTML.indexOf("\n```") > -1 && trimStartText.indexOf("\n```") > -1) ||
+        (trimStartHTML.indexOf("\n~~~") > -1 && trimStartText.indexOf("\n~~~") > -1) ||
+        (trimStartHTML.indexOf("\n···") > -1 && trimStartText.indexOf("\n···") > -1)) {
+        if (trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
             const oldHTML = blockElement.outerHTML;
@@ -93,6 +96,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             return true;
         }
     }
+    // 代码块
     if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
@@ -176,7 +180,14 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
 
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
-        const newElement = genEmptyElement(false, true);
+        let newElement;
+        if (blockElement.previousElementSibling &&
+            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+            blockElement.previousElementSibling.getAttribute("fold") === "1") {
+            newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+        } else {
+            newElement = genEmptyElement(false, true);
+        }
         const newId = newElement.getAttribute("data-node-id");
         transaction(protyle, [{
             action: "insert",
@@ -216,7 +227,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     const id = blockElement.getAttribute("data-node-id");
     const newElement = document.createElement("div");
-    newElement.appendChild(genEmptyElement(false, false));
+    if (blockElement.getAttribute("data-type") === "NodeHeading" && blockElement.getAttribute("fold") === "1") {
+        newElement.innerHTML = genHeadingElement(blockElement, true) as string;
+    } else {
+        newElement.appendChild(genEmptyElement(false, false));
+    }
     const newEditableElement = newElement.querySelector('[contenteditable="true"]');
     newEditableElement.appendChild(range.extractContents());
     const selectWbrElement = newEditableElement.querySelector("wbr");
@@ -224,9 +239,12 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         selectWbrElement.parentElement.outerHTML = "<wbr>";
     }
     const newHTML = newEditableElement.innerHTML.trimStart();
+    const newText = newEditableElement.textContent.trimStart();
     // https://github.com/siyuan-note/siyuan/issues/10759
     if (newHTML.startsWith("```") || newHTML.startsWith("···") || newHTML.startsWith("~~~") ||
-        newHTML.indexOf("\n```") > -1 || newHTML.indexOf("\n~~~") > -1 || newHTML.indexOf("\n···") > -1) {
+        (newHTML.indexOf("\n```") > -1 && newText.indexOf("\n```") > -1) ||
+        (newHTML.indexOf("\n~~~") > -1 && newText.indexOf("\n~~~") > -1) ||
+        (newHTML.indexOf("\n···") > -1 && newText.indexOf("\n···") > -1)) {
         if (newHTML.indexOf("\n") === -1 && newHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {
@@ -384,7 +402,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     let newElement;
     if (subListElement && listItemElement.getAttribute("fold") !== "1" &&
         // 子列表下的段落块回车 https://ld246.com/article/1623919354587
-        blockElement.nextElementSibling.isSameNode(subListElement)) {
+        blockElement.nextElementSibling === subListElement) {
         // 含有子列表的换行
         if (position.end >= editableElement.textContent.length -
             // 数学公式结尾会有 zwsp https://github.com/siyuan-note/siyuan/issues/6679

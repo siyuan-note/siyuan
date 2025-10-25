@@ -20,6 +20,7 @@ import {publish} from "./publish";
 import {App} from "../index";
 import {isHuawei, isInHarmony} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
+import {focusByRange} from "../protyle/util/selection";
 /// #endif
 
 export const genItemPanel = (type: string, containerElement: Element, app: App) => {
@@ -107,6 +108,10 @@ export const openSetting = (app: App) => {
     if (exitDialog) {
         return exitDialog;
     }
+    let range: Range;
+    if (getSelection().rangeCount > 0) {
+        range = getSelection().getRangeAt(0);
+    }
     const dialog = new Dialog({
         content: `<div class="fn__flex-1 fn__flex config__panel" style="overflow: hidden;position: relative">
   <ul class="b3-tab-bar b3-list b3-list--background">
@@ -152,6 +157,11 @@ export const openSetting = (app: App) => {
 </div>`,
         width: "90vw",
         height: "90vh",
+        destroyCallback() {
+            if (range) {
+                focusByRange(range);
+            }
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_SETTING);
 

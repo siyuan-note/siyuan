@@ -11,9 +11,7 @@ import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
-import {setStorageVal} from "../util/compatibility";
-import {isPaidUser} from "../../util/needSubscribe";
-import {getCloudURL} from "../../config/util/about";
+import {getScreenWidth, isInAndroid, isInHarmony, setStorageVal} from "../util/compatibility";
 import {getFrontend} from "../../util/functions";
 
 const getPluginStyle = async () => {
@@ -85,7 +83,7 @@ const getSnippetCSS = () => {
     let snippetCSS = "";
     document.querySelectorAll("style").forEach((item) => {
         if (item.id.startsWith("snippet")) {
-            snippetCSS += item.innerHTML;
+            snippetCSS += item.outerHTML;
         }
     });
     return snippetCSS;
@@ -111,7 +109,6 @@ const renderPDF = async (id: string) => {
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
@@ -180,14 +177,14 @@ const renderPDF = async (id: string) => {
         .b3-label:last-child {
             border-bottom: none;
         }
-        ${await setInlineStyle(false)}
+        ${await setInlineStyle(false, servePath)}
         ${await getPluginStyle()}
-        ${getSnippetCSS()}
     </style>
+    ${getSnippetCSS()}
 </head>
 <body style="-webkit-print-color-adjust: exact;">
 <div id="action">
-    <div style="flex: 1;overflow: auto;">
+    <div style="flex: 1;overflow-y:auto;overflow-x:hidden">
         <div class="b3-label">
             <div>
                 ${window.siyuan.languages.exportPDF0}
@@ -215,17 +212,37 @@ const renderPDF = async (id: string) => {
             </select>
             <div class="${localData.marginType === "custom" ? "" : "fn__none"}">
                 <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginTop}</div>
-                <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
-                <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginRight}</div>
-                <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
-                <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginBottom}</div>
-                <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
-                <span class="fn__hr"></span>
-                <div>${window.siyuan.languages.marginLeft}</div>
-                <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
+                <small>${window.siyuan.languages.marginTop}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsTop" class="b3-text-field fn__block" value="${localData.marginTop || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <small>${window.siyuan.languages.marginRight}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsRight" class="b3-text-field fn__block" value="${localData.marginRight || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <small>${window.siyuan.languages.marginBottom}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsBottom" class="b3-text-field fn__block" value="${localData.marginBottom || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
+                <div class="fn__hr"></div>
+                <small>${window.siyuan.languages.marginLeft}</small>
+                <div class="fn__hr--small"></div>
+                <div class="fn__flex">
+                    <input id="marginsLeft" class="b3-text-field fn__block" value="${localData.marginLeft || 0}" type="number" min="0" step="0.01">
+                    <span class="fn__space"></span>
+                    <small class="fn__flex-center" style="white-space: nowrap;">${window.siyuan.languages.unitInches}</small>
+                </div>
             </div>
         </div>
         <div class="b3-label">
@@ -234,7 +251,7 @@ const renderPDF = async (id: string) => {
                 <span id="scaleTip" style="float: right;color: var(--b3-theme-on-background);">${localData.scale || 1}</span>
             </div>
             <span class="fn__hr"></span>
-            <input style="width: 192px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
+            <input style="width: 189px" value="${localData.scale || 1}" id="scale" step="0.1" class="b3-slider" type="range" min="0.1" max="2">
         </div>
         <label class="b3-label">
             <div>
@@ -270,7 +287,6 @@ const renderPDF = async (id: string) => {
             </div>
             <span class="fn__hr"></span>
             <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
-            <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL(""))}</div>
         </label>
     </div>
     <div class="fn__flex" style="padding: 0 16px">
@@ -439,7 +455,7 @@ const renderPDF = async (id: string) => {
               codeLigatures: ${window.siyuan.config.editor.codeLigatures},
               plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
               codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-              katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+              katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
             }
           },
           languages: {copy:"${window.siyuan.languages.copy}"}
@@ -478,12 +494,6 @@ const renderPDF = async (id: string) => {
             refreshPreview();
         });
         const  watermarkElement = actionElement.querySelector('#watermark');
-        watermarkElement.addEventListener('change', () => {
-            if (watermarkElement.checked && ${!isPaidUser()}) {
-                watermarkElement.nextElementSibling.style.display = "";
-                watermarkElement.checked = false;
-            }
-        });
         const refreshPreview = () => {
             previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {
@@ -638,14 +648,15 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                     }
                     afterExport(exportResponse.data.path, msgId);
                 } else {
-                    onExport(exportResponse, savePath, option, removeAssets, msgId);
+                    onExport(exportResponse, savePath, option, msgId);
                 }
             });
         }
     });
 };
+/// #endif
 
-const onExport = async (data: IWebSocketData, filePath: string, exportOption: IExportOptions, removeAssets?: boolean, msgId?: string) => {
+export const onExport = async (data: IWebSocketData, filePath: string, exportOption: IExportOptions, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(exportOption.type) && window.siyuan.config.appearance.mode === 1) {
@@ -653,40 +664,43 @@ const onExport = async (data: IWebSocketData, filePath: string, exportOption: IE
         mode = 1;
     }
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
+    const servePath = window.location.protocol + "//" + window.location.host;
     let themeStyle = "";
     if (!isDefault) {
-        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
+        themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
+    let screenWidth = getScreenWidth();
+    const minWidthHtml = isInAndroid() || isInHarmony() ? `document.body.style.minWidth = "${screenWidth}px"` : "";
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
+    <base href="${servePath}/">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="stylesheet" type="text/css" id="baseStyle" href="stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
-    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="appearance/themes/${themeName}/theme.css?v=${Constants.SIYUAN_VERSION}"/>
-    <script src="stage/protyle/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}"></script>
+    <link rel="stylesheet" type="text/css" id="baseStyle" href="${servePath}/stage/build/export/base.css?v=${Constants.SIYUAN_VERSION}"/>
+    <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="${servePath}/appearance/themes/${themeName}/theme.css?v=${Constants.SIYUAN_VERSION}"/>
+    <script src="${servePath}/stage/protyle/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}"></script>
     ${themeStyle}
     <title>${data.data.name}</title>
     <!-- Exported by SiYuan v${Constants.SIYUAN_VERSION} -->
     <style>
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
-        ${await setInlineStyle(false)}
+        ${await setInlineStyle(false, servePath)}
         ${await getPluginStyle()}
-        ${getSnippetCSS()}
     </style>
+    ${getSnippetCSS()}
 </head>
 <body>
 <div class="${["htmlmd", "word"].includes(exportOption.type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" 
-style="max-width: 800px;margin: 0 auto;" 
-id="preview">${data.data.content}</div>
-<script src="appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?v=${Constants.SIYUAN_VERSION}"></script>
-<script src="stage/build/export/protyle-method.js?v=${Constants.SIYUAN_VERSION}"></script>
-<script src="stage/protyle/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}"></script>  
+style="${isInAndroid() || isInHarmony() ? "margin: 0 16px;" : "max-width: 800px;margin: 0 auto;"}" id="preview">${data.data.content}</div>
+<script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?v=${Constants.SIYUAN_VERSION}"></script>
+<script src="${servePath}/stage/build/export/protyle-method.js?v=${Constants.SIYUAN_VERSION}"></script>
+<script src="${servePath}/stage/protyle/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}"></script>  
 <script>
+    ${minWidthHtml};
     window.siyuan = {
       config: {
         appearance: { mode: ${mode}, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
@@ -696,7 +710,7 @@ id="preview">${data.data.content}</div>
           codeLigatures: ${window.siyuan.config.editor.codeLigatures},
           plantUMLServePath: "${window.siyuan.config.editor.plantUMLServePath}",
           codeSyntaxHighlightLineNum: ${window.siyuan.config.editor.codeSyntaxHighlightLineNum},
-          katexMacros: JSON.stringify(${window.siyuan.config.editor.katexMacros}),
+          katexMacros: decodeURI(\`${encodeURI(window.siyuan.config.editor.katexMacros)}\`),
         }
       },
       languages: {copy:"${window.siyuan.languages.copy}"}
@@ -722,8 +736,13 @@ id="preview">${data.data.content}</div>
       })
     });
 </script></body></html>`;
+    // 移动端导出 pdf
+    if (typeof filePath === "undefined") {
+        return html;
+    }
+    /// #if !BROWSER
     const htmlPath = path.join(filePath, "index.html");
     fs.writeFileSync(htmlPath, html);
     afterExport(htmlPath, msgId);
+    /// #endif
 };
-/// #endif

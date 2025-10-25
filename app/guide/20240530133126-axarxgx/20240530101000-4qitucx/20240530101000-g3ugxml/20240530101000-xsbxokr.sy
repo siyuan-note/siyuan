@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20250529111249"
+		"updated": "20251024173645"
 	},
 	"Children": [
 		{
@@ -19,7 +19,7 @@
 			"Properties": {
 				"ID": "20240530101000-0wo4ch4",
 				"id": "20240530101000-9imgmgf",
-				"updated": "20250115161403"
+				"updated": "20251024173645"
 			},
 			"Children": [
 				{
@@ -39,7 +39,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-5z0uafx",
-				"updated": "20250115161403"
+				"updated": "20251024173645"
 			},
 			"Children": [
 				{
@@ -559,6 +559,72 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "タブを再度開く"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧⌘T"
 								},
 								{
 									"Type": "NodeText",
@@ -3775,7 +3841,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コードブロックではコードのみが選択されます"
+									"Data": "文書内のすべてのロード済みコンテンツブロックを選択するにはダブルプレスしてください；コードブロックではコードのみが選択されます"
 								}
 							]
 						}
@@ -9010,7 +9076,7 @@
 			"Properties": {
 				"ID": "20240530101000-qf3oj4u",
 				"id": "20240530101000-zy0pmo3",
-				"updated": "20250115161741"
+				"updated": "20250924165340"
 			},
 			"Children": [
 				{
@@ -9040,7 +9106,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-5be9vw0",
-				"updated": "20250115161741"
+				"updated": "20250924165340"
 			},
 			"Children": [
 				{
@@ -9200,7 +9266,43 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "コンテンツが選択されている必要があります"
+									"Data": "コンテンツを選択する必要があります。デフォルトでは静的アンカーテキストを使用し、候補リストで "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ または "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を押すと動的アンカーテキストを使用します"
 								}
 							]
 						}
@@ -11309,7 +11411,7 @@
 			"Properties": {
 				"ID": "20240530101000-uqhtil9",
 				"id": "20240530101000-9x0xqew",
-				"updated": "20250423105545"
+				"updated": "20251024173531"
 			},
 			"Children": [
 				{
@@ -11380,7 +11482,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20240530101000-prxsqyv",
-				"updated": "20250115161829"
+				"updated": "20251024173531"
 			},
 			"Children": [
 				{
@@ -11434,44 +11536,22 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
+									"TextMarkTextContent": "ショートカット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "T"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘T"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ で設定できます"
 								}
 							]
 						}
@@ -11502,38 +11582,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
+									"TextMarkTextContent": "ショートカット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "D"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘D"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ で設定できます"
 								}
 							]
 						}
@@ -11564,38 +11626,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
+									"TextMarkTextContent": "ショートカット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "L"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘L"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ で設定できます"
 								}
 							]
 						}
@@ -11626,38 +11670,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
+									"TextMarkTextContent": "ショートカット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "R"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘R"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ で設定できます"
 								}
 							]
 						}
@@ -14256,7 +14282,7 @@
 			"Properties": {
 				"ID": "20240530101000-8otxr1l",
 				"id": "20240530101000-tfqze2e",
-				"updated": "20250115161917"
+				"updated": "20251021231125"
 			},
 			"Children": [
 				{
@@ -14286,7 +14312,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-6s8hlcg",
-				"updated": "20250115161917"
+				"updated": "20251021231125"
 			},
 			"Children": [
 				{
@@ -14370,7 +14396,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "リスト項目アイコン"
+									"Data": "リスト項目アイコン / ドット"
 								}
 							]
 						}
@@ -14415,7 +14441,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "リスト項目アイコン"
+									"Data": "リスト項目アイコン / ドット"
 								}
 							]
 						}
@@ -14478,7 +14504,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "リスト項目アイコン"
+									"Data": "リスト項目アイコン / ドット"
 								}
 							]
 						}
@@ -14541,7 +14567,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "リスト項目アイコン"
+									"Data": "リスト項目アイコン / ドット"
 								}
 							]
 						}
@@ -14604,7 +14630,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "リスト項目アイコン"
+									"Data": "リスト項目アイコン / ドット"
 								}
 							]
 						}
@@ -15077,7 +15103,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240530101000-mifghto",
-				"updated": "20250407200635"
+				"updated": "20250929214234"
 			},
 			"Children": [
 				{
@@ -15097,7 +15123,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-4iuhg30",
-				"updated": "20250115161937"
+				"updated": "20250929214234"
 			},
 			"Children": [
 				{
@@ -15248,6 +15274,87 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "一括複数選択"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "まずは "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クリック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で最初の文書を選択する必要があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "右に開く"
 								}
 							]
@@ -15324,6 +15431,15 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Shift"
 								},
 								{
@@ -15342,7 +15458,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧クリック"
+									"TextMarkTextContent": "⌥⇧クリック"
 								},
 								{
 									"Type": "NodeText",

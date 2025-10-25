@@ -52,21 +52,9 @@ func LoadSysFonts() (ret []string) {
 		ret = append(ret, font.Family)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	ret = removeUnusedFonts(ret)
 	sort.Strings(ret)
 	sysFonts = ret
 	logging.LogInfof("loaded system fonts [%d] in [%dms]", len(sysFonts), time.Since(start).Milliseconds())
-	return
-}
-
-func removeUnusedFonts(fonts []string) (ret []string) {
-	ret = []string{}
-	for _, font := range fonts {
-		if strings.HasPrefix(font, "Noto Sans") {
-			continue
-		}
-		ret = append(ret, font)
-	}
 	return
 }
 
@@ -133,15 +121,23 @@ func parseTTCFontFamily(fontPath string) (ret []string) {
 			continue
 		}
 
-		family, _ := font.Name(nil, ttc.NameIDFamily)
-		if "" == family {
-			family, _ = font.Name(nil, ttc.NameIDTypographicFamily)
-		}
+		family, _ := font.Name(nil, ttc.NameIDFull)
 		family = strings.TrimSpace(family)
-		if "" == family || strings.HasPrefix(family, ".") {
-			continue
+		if "" != family && !strings.HasPrefix(family, ".") {
+			ret = append(ret, family)
 		}
-		ret = append(ret, family)
+
+		family, _ = font.Name(nil, ttc.NameIDFamily)
+		family = strings.TrimSpace(family)
+		if "" != family && !strings.HasPrefix(family, ".") {
+			ret = append(ret, family)
+		}
+
+		family, _ = font.Name(nil, ttc.NameIDTypographicFamily)
+		family = strings.TrimSpace(family)
+		if "" != family && !strings.HasPrefix(family, ".") {
+			ret = append(ret, family)
+		}
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
@@ -168,29 +164,43 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 		return
 	}
 
+	var family, subfamily string
 	for _, e := range t.List() {
-		if sfnt.NameFontFamily != e.NameID && sfnt.NamePreferredFamily != e.NameID {
-			continue
-		}
-
-		if sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID {
+		if sfnt.NameFontFamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
 			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-			if err != nil {
-				return ""
+			if err == nil {
+				family = strings.TrimSpace(string(v))
 			}
-			val := string(v)
-			if sfnt.NameFontFamily == e.NameID && "" != val {
-				ret = val
+		}
+		if sfnt.NamePreferredFamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
+			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+			if err == nil {
+				family = strings.TrimSpace(string(v))
 			}
-			if sfnt.NamePreferredFamily == e.NameID && "" != val {
-				ret = val
+		}
+		if sfnt.NameFontSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
+			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+			if err == nil {
+				subfamily = strings.TrimSpace(string(v))
+			}
+		}
+		if sfnt.NamePreferredSubfamily == e.NameID && (sfnt.PlatformLanguageID(1033) == e.LanguageID || sfnt.PlatformLanguageID(2052) == e.LanguageID) {
+			v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+			if err == nil {
+				subfamily = strings.TrimSpace(string(v))
 			}
 		}
 	}
 
-	ret = strings.TrimSpace(ret)
-	if strings.HasPrefix(ret, ".") {
-		return ""
-	}
+	//if family != "" && !strings.HasPrefix(family, ".") {
+	//	if subfamily != "" && !strings.Contains(subfamily, "<") && !strings.EqualFold(subfamily, "Regular") {
+	//		ret = family + "(" + subfamily + ")"
+	//	} else {
+	//		ret = family
+	//	}
+	//}
+	// TODO: 字重加载方案
+	_ = subfamily
+	ret = family
 	return
 }

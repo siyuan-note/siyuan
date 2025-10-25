@@ -383,6 +383,24 @@
             }
             const initPath = result.filePaths[0]
 
+            if (isPartitionRootPath(initPath)) {
+                let msg = '⚠️ Do not create the workspace in the partition root path, please create a new folder as the workspace'
+                if (isChinese(currentLang)) {
+                    msg = '⚠️ 请勿在分区根路径上创建工作空间，请新建一个文件夹作为工作空间'
+                }
+                alert(msg)
+                return
+            }
+
+            if (!isWorkspaceDir(initPath) && !isEmptyDir(initPath)) {
+                let msg = '⚠️ This folder contains other files, please create a new folder as the workspace'
+                if (isChinese(currentLang)) {
+                    msg = '⚠️ 该文件夹包含了其他文件，请新建一个文件夹作为工作空间'
+                }
+                alert(msg)
+                return
+            }
+
             if (isICloudPath(initPath)) {
                 let msg = '⚠️ This folder is under the iCloud sync path, please change another path'
                 if (isChinese(currentLang)) {
@@ -416,6 +434,36 @@
             })
         })
     })
+
+    const isPartitionRootPath = (absPath) => {
+        const path = require('path')
+        const parsedPath = path.parse(absPath)
+        return parsedPath.root === absPath
+    }
+
+    const isEmptyDir = (absPath) => {
+        const fs = require('fs')
+        let files;
+        try {
+            files = fs.readdirSync(absPath)
+        } catch (err) {
+            return false
+        }
+        return 0 === files.length
+    }
+
+    const isWorkspaceDir = (absPath) => {
+        const path = require('path');
+        const fs = require('fs');
+        const conf = path.join(absPath, 'conf', 'conf.json');
+        let data;
+        try {
+            data = fs.readFileSync(conf, 'utf8');
+        } catch (err) {
+            return false;
+        }
+        return data.includes('kernelVersion');
+    }
 
     const isCloudDrivePath = (absPath) => {
         const absPathLower = absPath.toLowerCase()

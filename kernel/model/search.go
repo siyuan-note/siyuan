@@ -314,6 +314,9 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 
 func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool) (ret []*Block, newDoc bool) {
 	cachedTrees := map[string]*parse.Tree{}
+	nodeTrees := map[string]*parse.Tree{}
+	var nodeIDs []string
+	var nodes []*ast.Node
 
 	onlyDoc := false
 	if isSquareBrackets {
@@ -332,6 +335,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		}
 		btsID = gulu.Str.RemoveDuplicatedElem(btsID)
 		bts := treenode.GetBlockTrees(btsID)
+
 		for _, ref := range refs {
 			tree := cachedTrees[ref.DefBlockRootID]
 			if nil == tree {
@@ -347,6 +351,15 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 				continue
 			}
 
+			nodes = append(nodes, node)
+			nodeIDs = append(nodeIDs, node.ID)
+			nodeTrees[node.ID] = tree
+		}
+
+		refCount := sql.QueryRefCount(nodeIDs)
+
+		for _, node := range nodes {
+			tree := nodeTrees[node.ID]
 			sqlBlock := sql.BuildBlockFromNode(node, tree)
 			if nil == sqlBlock {
 				return
@@ -355,8 +368,10 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 			block := fromSQLBlock(sqlBlock, "", 0)
 			block.RefText = getNodeRefText(node)
 			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+			block.RefCount = refCount[node.ID]
 			ret = append(ret, block)
 		}
+
 		if 1 > len(ret) {
 			ret = []*Block{}
 		}
@@ -388,7 +403,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		hitFirstChildID := false
 		if b.IsContainerBlock() && "NodeDocument" != b.Type {
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
-			tree := cachedTrees[b.RootID]
+			tree = cachedTrees[b.RootID]
 			if nil == tree {
 				tree, _ = loadTreeByBlockTree(bts[b.RootID])
 				cachedTrees[b.RootID] = tree
@@ -404,15 +419,24 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		if "NodeAttributeView" == b.Type {
 			// 数据库块可以添加到自身数据库块中，当前文档也可以添加到自身数据库块中
 			tmp = append(tmp, b)
+			nodeIDs = append(nodeIDs, b.ID)
+			nodeTrees[b.ID] = tree
 		} else {
 			// 排除自身块、父块和根块
 			if b.ID != id && !hitFirstChildID && b.ID != rootID {
 				tmp = append(tmp, b)
+				nodeIDs = append(nodeIDs, b.ID)
+				nodeTrees[b.ID] = tree
 			}
 		}
 
 	}
 	ret = tmp
+
+	refCount := sql.QueryRefCount(nodeIDs)
+	for _, b := range ret {
+		b.RefCount = refCount[b.ID]
+	}
 
 	if !isDatabase {
 		// 如果非数据库中搜索块引，则不允许新建重名文档
@@ -617,8 +641,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							unlinks = append(unlinks, n.Parent)
 
 							prev, next := n.Parent.Previous, n.Parent.Next
-							for ; prev != nil && ast.NodeText == prev.Type && prev.Tokens == nil; prev = prev.Previous {
-								// Tokens 为空的节点是之前处理过的节点，需要跳过
+							for ; prev != nil && ((ast.NodeText == prev.Type && prev.Tokens == nil) || ast.NodeBackslash == prev.Type); prev = prev.Previous {
+								// Tokens 为空的节点或者转义节点之前已经处理，需要跳过
 							}
 							if nil != prev && ast.NodeText == prev.Type && nil != next && ast.NodeText == next.Type {
 								prev.Tokens = append(prev.Tokens, next.Tokens...)
@@ -970,7 +994,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
 				replacement = strings.TrimPrefix(replacement, "#")
 				replacement = strings.TrimSuffix(replacement, "#")
-			} else {
+			} else if n.TextMarkTextContent == keyword || n.TextMarkTextContent == escapedKey {
 				// 将标签转换为纯文本
 
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
@@ -992,12 +1016,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 					for rNode := tree.Root.FirstChild.FirstChild; nil != rNode; rNode = rNode.Next {
 						replaceNodes = append(replaceNodes, rNode)
 						if blockRefID, _, _ := treenode.GetBlockRef(rNode); "" != blockRefID {
-							bt := treenode.GetBlockTree(blockRefID)
-							if nil == bt {
-								continue
-							}
-
-							task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, bt.RootID, blockRefID)
+							task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, blockRefID)
 						}
 					}
 
@@ -1011,6 +1030,18 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 				// 存在其他类型时仅移除标签类型
 				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "tag", "")
 				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
+			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) { // 标签包含了部分关键字的情况
+				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时保持标签类型不变，仅替换标签部分内容
+					content := n.TextMarkTextContent
+					if strings.Contains(content, escapedKey) {
+						content = strings.ReplaceAll(content, escapedKey, replacement)
+					} else if strings.Contains(content, keyword) {
+						content = strings.ReplaceAll(content, keyword, replacement)
+					}
+					content = strings.ReplaceAll(content, editor.Zwsp, "")
+					n.TextMarkTextContent = content
+					return
+				}
 			}
 		}
 
@@ -1219,14 +1250,14 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 				}
 
 				if 5 == orderBy { // 按内容顺序（仅在按文档分组时）
-					sort := 0
+					sortVal := 0
 					ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 						if !entering || !n.IsBlock() {
 							return ast.WalkContinue
 						}
 
-						contentSorts[n.ID] = sort
-						sort++
+						contentSorts[n.ID] = sortVal
+						sortVal++
 						return ast.WalkContinue
 					})
 				}
@@ -1271,7 +1302,8 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		case 4: // 按更新时间降序
 			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated > roots[j].Updated })
 		case 5: // 按内容顺序（仅在按文档分组时）
-		// 都是文档，不需要再次排序
+			// 都是文档，按更新时间降序
+			sort.Slice(roots, func(i, j int) bool { return roots[i].IAL["updated"] > roots[j].IAL["updated"] })
 		case 6, 7: // 按相关度
 		// 已在 ORDER BY 中处理
 		default: // 按块类型（默认）
@@ -1287,6 +1319,28 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 
 	if 0 == groupBy {
 		filterSelfHPath(ret)
+	}
+
+	var nodeIDs []string
+	for _, b := range ret {
+		if 0 == groupBy {
+			nodeIDs = append(nodeIDs, b.ID)
+		} else {
+			for _, c := range b.Children {
+				nodeIDs = append(nodeIDs, c.ID)
+			}
+		}
+	}
+
+	refCount := sql.QueryRefCount(nodeIDs)
+	for _, b := range ret {
+		if 0 == groupBy {
+			b.RefCount = refCount[b.ID]
+		} else {
+			for _, c := range b.Children {
+				c.RefCount = refCount[c.ID]
+			}
+		}
 	}
 	return
 }
@@ -1676,6 +1730,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 }
 
 func highlightByFTS(query, typeFilter, id string) (ret []string) {
+	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {
@@ -2217,9 +2272,12 @@ func getRefSearchIgnoreLines() (ret []string) {
 func filterQueryInvisibleChars(query string) string {
 	query = strings.ReplaceAll(query, "　", "_@full_width_space@_")
 	query = strings.ReplaceAll(query, "\t", "_@tab@_")
+	query = strings.ReplaceAll(query, string(gulu.ZWJ), "__@ZWJ@__")
 	query = util.RemoveInvalid(query)
 	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
 	query = strings.ReplaceAll(query, "_@tab@_", "\t")
+	query = strings.ReplaceAll(query, "__@ZWJ@__", string(gulu.ZWJ))
+	query = strings.ReplaceAll(query, string(gulu.ZWJ)+"#", "#")
 	return query
 }
 

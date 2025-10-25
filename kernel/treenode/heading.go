@@ -85,6 +85,37 @@ func GetHeadingFold(nodes []*ast.Node) (ret []*ast.Node) {
 	return
 }
 
+func GetParentFoldedHeading(node *ast.Node) (parentFoldedHeading *ast.Node) {
+	if nil == node {
+		return
+	}
+
+	currentLevel := 7
+	if ast.NodeHeading == node.Type {
+		currentLevel = node.HeadingLevel
+	}
+	for n := node.Previous; nil != n; n = n.Previous {
+		if ast.NodeHeading != n.Type {
+			continue
+		}
+
+		if n.HeadingLevel >= currentLevel {
+			continue
+		}
+		currentLevel = n.HeadingLevel
+
+		if "1" == n.IALAttr("fold") {
+			if ast.NodeHeading != node.Type {
+				parentFoldedHeading = n
+			}
+			if n.HeadingLevel < node.HeadingLevel {
+				parentFoldedHeading = n
+			}
+		}
+	}
+	return
+}
+
 func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 	start := heading.Next
 	if nil == start {

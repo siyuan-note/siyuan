@@ -386,7 +386,7 @@ export const transactionError = () => {
 export const refreshFileTree = (cb?: () => void) => {
     window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
     setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
-    fetchPost("/api/filetree/refreshFiletree", {}, () => {
+    fetchPost("/api/system/rebuildDataIndex", {}, () => {
         if (cb) {
             cb();
         }
@@ -461,7 +461,7 @@ export const progressBackgroundTask = (tasks: { action: string }[]) => {
     if (tasks.length === 0) {
         backgroundTaskElement.classList.add("fn__none");
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-            window.siyuan.menus.menu.element.getAttribute("data-name") === "statusBackgroundTask") {
+            window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_BACKGROUND_TASK) {
             window.siyuan.menus.menu.remove();
         }
     } else {

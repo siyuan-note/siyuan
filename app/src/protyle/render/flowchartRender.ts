@@ -49,8 +49,12 @@ const initFlowchart = (flowchartElements: Element[]) => {
             item.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
         }
         const renderElement = item.firstElementChild.nextElementSibling;
-        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false"></div>`;
+        if (!item.getAttribute("data-content")) {
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span>`;
+            return;
+        }
         try {
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"></div>`;
             flowchart.parse(Lute.UnEscapeHTMLStr(item.getAttribute("data-content"))).drawSVG(renderElement.lastElementChild);
         } catch (error) {
             renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">Flow Chart render error: <br>${error}</div>`;

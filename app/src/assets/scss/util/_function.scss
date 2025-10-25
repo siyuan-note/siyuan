@@ -1,10 +1,16 @@
+@use "mixin";
+
 .fn {
-  &__hidescrollbar::-webkit-scrollbar {
-    display: none;
+  &__hidescrollbar {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    overflow: auto;
   }
 
   &__ellipsis {
-    @include text-clamp(1);
+    @include mixin.text-clamp(1);
     display: block; // 集市挂件名称过长遮挡星标 https://github.com/siyuan-note/siyuan/issues/4782
   }
 
@@ -15,6 +21,12 @@
 
     &--small {
       width: 4px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    &--5 {
+      width: 5px;
       display: inline-block;
       flex-shrink: 0;
     }

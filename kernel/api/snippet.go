@@ -55,11 +55,20 @@ func getSnippet(c *gin.Context) {
 		return
 	}
 
+	isPublish := model.IsReadOnlyRole(model.GetGinContextRole(c))
 	var snippets []*conf.Snippet
 	for _, s := range confSnippets {
-		if ("all" == typ || s.Type == typ) && (2 == enabledArg || s.Enabled == enabled) {
-			snippets = append(snippets, s)
+		if isPublish && s.DisabledInPublish {
+			continue
 		}
+		if "all" != typ && s.Type != typ {
+			continue
+		}
+		if 2 != enabledArg && s.Enabled != enabled {
+			continue
+		}
+
+		snippets = append(snippets, s)
 	}
 
 	if "" != keyword {
@@ -100,6 +109,9 @@ func setSnippet(c *gin.Context) {
 			Type:    m["type"].(string),
 			Content: m["content"].(string),
 			Enabled: m["enabled"].(bool),
+		}
+		if nil != m["disabledInPublish"] {
+			snippet.DisabledInPublish = m["disabledInPublish"].(bool)
 		}
 		if "" == snippet.ID {
 			snippet.ID = ast.NewNodeID()

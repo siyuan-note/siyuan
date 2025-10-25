@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20250331163727"
+		"updated": "20250828155251"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20250331163727"
+				"updated": "20250828155251"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20250331163727"
+				"updated": "20250828155251"
 			},
 			"Children": [
 				{
@@ -421,7 +421,7 @@
 					},
 					"Properties": {
 						"id": "20210121193829-wfzsf6m",
-						"updated": "20250331163727"
+						"updated": "20250801152749"
 					},
 					"Children": [
 						{
@@ -454,7 +454,7 @@
 							"Properties": {
 								"id": "20241213215602-dk7iion",
 								"style": "line-height: 22px;",
-								"updated": "20250331163727"
+								"updated": "20250801152749"
 							},
 							"Children": [
 								{
@@ -462,11 +462,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+									"Data": ".action{ $today := now | date \"20060102150405\" }\n.action{ $blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -485,7 +486,7 @@
 					},
 					"Properties": {
 						"id": "20250331163529-vixv1we",
-						"updated": "20250331163604"
+						"updated": "20250801152801"
 					},
 					"Children": [
 						{
@@ -517,7 +518,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20250331163550-2r69a54",
-								"updated": "20250331163604"
+								"updated": "20250801152801"
 							},
 							"Children": [
 								{
@@ -525,11 +526,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{getBlock \"20250331163529-vixv1we\"}\n"
+									"Data": ".action{ getBlock \"20250331163529-vixv1we\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -548,7 +550,7 @@
 					},
 					"Properties": {
 						"id": "20210504093232-vukp34t",
-						"updated": "20241224162810"
+						"updated": "20250801152807"
 					},
 					"Children": [
 						{
@@ -581,7 +583,7 @@
 							"Properties": {
 								"id": "20241213215606-a1mq6zf",
 								"style": "line-height: 22px;",
-								"updated": "20241224162810"
+								"updated": "20250801152807"
 							},
 							"Children": [
 								{
@@ -589,11 +591,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": " .action{querySpans \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
+									"Data": ".action{ querySpans \"SELECT * FROM spans LIMIT ?\" \"3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -612,7 +615,7 @@
 					},
 					"Properties": {
 						"id": "20241213214939-he4wmcd",
-						"updated": "20241213214939"
+						"updated": "20250801152813"
 					},
 					"Children": [
 						{
@@ -645,7 +648,7 @@
 							"Properties": {
 								"id": "20241213215554-rox3jk7",
 								"style": "line-height: 22px;",
-								"updated": "20241213215554"
+								"updated": "20250801152813"
 							},
 							"Children": [
 								{
@@ -653,11 +656,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": " .action{querySQL \"SELECT * FROM refs LIMIT 3\"}\n"
+									"Data": ".action{ querySQL \"SELECT * FROM refs LIMIT 3\" }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -676,7 +680,7 @@
 					},
 					"Properties": {
 						"id": "20241212102027-j293sei",
-						"updated": "20241213215714"
+						"updated": "20250801152821"
 					},
 					"Children": [
 						{
@@ -709,7 +713,7 @@
 							"Properties": {
 								"id": "20241213215714-u0j3i4k",
 								"style": "line-height: 22px;",
-								"updated": "20241213215714"
+								"updated": "20250801152821"
 							},
 							"Children": [
 								{
@@ -717,11 +721,12 @@
 									"Data": "```"
 								},
 								{
-									"Type": "NodeCodeBlockFenceInfoMarker"
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "dGVtcGxhdGU="
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}\n"
+									"Data": ".action{ (statBlock .id).RuneCount }\n.action{ (statBlock .id).WordCount }\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1185,7 +1190,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162632-akk8sxn",
-								"updated": "20240308162632"
+								"updated": "20250828155241"
 							},
 							"Children": [
 								{
@@ -1199,7 +1204,136 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to return the week"
+									"Data": "​: This function returns the current week"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155216-zn0i9zg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155216-zn0i9zg",
+						"updated": "20250828155216"
+					},
+					"Children": [
+						{
+							"ID": "20250828155216-p5tgk3f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155216-p5tgk3f",
+								"updated": "20250828155232"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function returns the current month"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155242-k9x8rc7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155242-k9x8rc7",
+						"updated": "20250828155242"
+					},
+					"Children": [
+						{
+							"ID": "20250828155242-zwalrdw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155242-zwalrdw",
+								"updated": "20250828155246"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function returns the current year"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155247-992wou3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155247-992wou3",
+						"updated": "20250828155251"
+					},
+					"Children": [
+						{
+							"ID": "20250828155247-ow57gpr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155247-ow57gpr",
+								"updated": "20250828155251"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function returns the date of a specified day of the week using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. For example, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ returns the date of this Thursday"
 								}
 							]
 						}
@@ -1411,7 +1545,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091444-xz57sof"
+				"id": "20210104091444-xz57sof",
+				"updated": "20250801152837"
 			},
 			"Children": [
 				{
@@ -1428,36 +1563,26 @@
 			"ID": "20210104091444-cclnk66",
 			"Type": "NodeCodeBlock",
 			"IsFencedCodeBlock": true,
-			"CodeBlockFenceChar": 96,
-			"CodeBlockFenceLen": 3,
-			"CodeBlockOpenFence": "YGBg",
-			"CodeBlockInfo": "cGxhaW50ZXh0",
-			"CodeBlockCloseFence": "YGBg",
 			"Properties": {
-				"id": "20210104091444-cclnk66"
+				"id": "20210104091444-cclnk66",
+				"updated": "20250801152837"
 			},
 			"Children": [
 				{
 					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
+					"Data": "```"
 				},
 				{
 					"Type": "NodeCodeBlockFenceInfoMarker",
-					"CodeBlockInfo": "cGxhaW50ZXh0"
+					"CodeBlockInfo": "dGVtcGxhdGU="
 				},
 				{
-					"ID": "20220307092214-3y1eex2",
 					"Type": "NodeCodeBlockCode",
-					"Data": ".action{$before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24)}\n\n.action{$after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24)}\nToday is `.action{now | date \"2006-01-02\"}`.\n\n* `.action{$before}` days have passed since `2020-02-19`\n* There are `.action{$after}` days left from `2048-02-19`\n",
-					"Properties": {
-						"id": "20220307092214-3y1eex2"
-					}
+					"Data": ".action{ $before := (div (now.Sub (toDate \"2006-01-02\" \"2020-02-19\")).Hours 24) }\n.action{ $after := (div ((toDate \"2006-01-02\" \"2048-02-19\").Sub now).Hours 24) }\nToday is `.action{ now | date \"2006-01-02\" }`.\n\n* `.action{ $before }` days have passed since `2020-02-19`\n* There are `.action{ $after }` days left from `2048-02-19`\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```",
-					"CodeBlockFenceLen": 3
+					"Data": "```"
 				}
 			]
 		},

@@ -9,18 +9,6 @@ import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
 
-const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
-    addScript(iconURL, "iconDefaultScript").then(() => {
-        if (!["ant", "material"].includes(data.icon)) {
-            const iconScriptElement = document.getElementById("iconScript");
-            if (iconScriptElement) {
-                iconScriptElement.remove();
-            }
-            addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
-        }
-    });
-};
-
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
@@ -40,7 +28,17 @@ export const loadAssets = (data: Config.IAppearance) => {
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
-            defaultStyleElement.setAttribute("href", defaultThemeAddress);
+            const newStyleElement = document.createElement("link");
+            // 等待新样式表加载完成再移除旧样式表
+            new Promise((resolve) => {
+                newStyleElement.rel = "stylesheet";
+                newStyleElement.href = defaultThemeAddress;
+                newStyleElement.onload = resolve;
+                defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
+            }).then(() => {
+                defaultStyleElement.remove();
+                newStyleElement.id = "themeDefaultStyle";
+            });
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");
@@ -98,25 +96,56 @@ export const loadAssets = (data: Config.IAppearance) => {
         addScript(themeScriptAddress, "themeScript");
     }
 
+    // load icons
+    const isBuiltInIcon = ["ant", "material"].includes(data.icon);
+    const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
-    const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    if (iconDefaultScriptElement) {
-        if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
-            iconDefaultScriptElement.remove();
-            let svgElement = document.body.firstElementChild;
-            while (svgElement.tagName === "svg") {
-                const currentSvgElement = svgElement;
-                svgElement = svgElement.nextElementSibling;
-                if (!currentSvgElement.getAttribute("data-name")) {
-                    currentSvgElement.remove();
+    const iconDefaultURL = `/appearance/icons/${isBuiltInIcon ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
+    const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+
+    if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
+        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
+        // 第三方图标切换到 material
+        if (isBuiltInIcon) {
+            iconScriptElement?.remove();
+            Array.from(document.body.children).forEach((item) => {
+                if (item.tagName === "svg" &&
+                    !item.getAttribute("data-name") &&
+                    !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                    item.remove();
                 }
-            }
-            loadThirdIcon(iconURL, data);
+            });
         }
-    } else {
-        loadThirdIcon(iconURL, data);
+        return;
     }
+    if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) {
+        iconDefaultScriptElement.remove();
+        if (data.icon === "ant") {
+            document.querySelectorAll("#iconsMaterial").forEach(item => {
+                item.remove();
+            });
+        } else {
+            document.querySelectorAll("#iconsAnt").forEach(item => {
+                item.remove();
+            });
+        }
+    }
+    addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+        iconScriptElement?.remove();
+        if (!isBuiltInIcon) {
+            addScript(iconThirdURL, "iconScript").then(() => {
+                Array.from(document.body.children).forEach((item, index) => {
+                    if (item.tagName === "svg" &&
+                        index !== 0 &&
+                        !item.getAttribute("data-name") &&
+                        !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                        item.remove();
+                    }
+                });
+            });
+        }
+    });
 };
 
 export const initAssets = () => {
@@ -169,15 +198,14 @@ export const initAssets = () => {
     });
 };
 
-export const setInlineStyle = async (set = true) => {
+export const setInlineStyle = async (set = true, servePath = "../../..") => {
     let style;
-
     // Emojis Reset: 字体中包含了 emoji，需重置
     // Emojis Additional： 苹果/win11 字体中没有的 emoji
     if (isMac() || isIPad() || isIPhone()) {
         style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1fa8f;
 }
 @font-face {
@@ -202,7 +230,7 @@ export const setInlineStyle = async (set = true) => {
         // Win11 Browser
         style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
   U+e0065, U+e006e, U+e007f, U+e0073, U+e0063, U+e0074, U+e0077, U+e006c;
   size-adjust: 85%;
@@ -224,7 +252,7 @@ export const setInlineStyle = async (set = true) => {
     } else {
         style = `@font-face {
   font-family: "Emojis Reset";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1f170-1f171, U+1f17e, U+1f17f, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, U+1f251, U+1f32b, U+1f3bc,
   U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, U+1f600-1f60d, U+1f60f-1f623,
   U+1f625-1f62b, U+1f62d-1f63f, U+1F643, U+1F640, U+1f79, U+1f8f, U+1fa79, U+1fae4, U+1fae9, U+1fac6, U+1fabe, U+1fadf,
@@ -237,7 +265,7 @@ export const setInlineStyle = async (set = true) => {
 }
 @font-face {
   font-family: "Emojis";
-  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
+  src: url(${servePath}/appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol"),
   local("Apple Color Emoji"),

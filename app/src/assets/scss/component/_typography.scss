@@ -1,3 +1,5 @@
+@use "../util/function";
+
 @font-face {
   font-family: 'JetBrainsMono-Regular';
   /*! /* webpackIgnore: true */
@@ -58,6 +60,7 @@
   }
 
   em,
+  a[data-type~="em"],
   span[data-type~="em"] {
     font-style: italic;
     color: var(--b3-protyle-inline-em-color);
@@ -70,6 +73,7 @@
   }
 
   strong,
+  a[data-type~="strong"],
   span[data-type~="strong"] {
     font-weight: bold;
     color: var(--b3-protyle-inline-strong-color);
@@ -343,10 +347,11 @@
   [data-subtype="echarts"],
   [data-subtype="mindmap"] {
     z-index: 1;
+    height: 420px;
+    box-sizing: border-box;
 
     & > div:not(.protyle-icons):not(.protyle-attr) {
       overflow: hidden;
-      height: 420px;
     }
   }
 
@@ -513,6 +518,10 @@
       margin-left: auto;
       margin-right: auto;
     }
+
+    &[style*="direction: ltr"]:not([style*="text-align: right"]) {
+      margin-left: initial;
+    }
   }
 
   div[data-subtype="math"] {
@@ -601,11 +610,15 @@
     & > span {
       pointer-events: none;
       display: block;
+      color: var(--b3-theme-on-surface);
+
+      &:not(:empty)::before {
+        content: "";
+      }
 
       &::before {
         counter-increment: linenumber;
         content: counter(linenumber);
-        color: var(--b3-theme-on-surface);
         display: block;
         text-align: right;
         white-space: nowrap;

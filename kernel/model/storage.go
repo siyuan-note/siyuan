@@ -21,7 +21,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
@@ -32,9 +34,17 @@ import (
 )
 
 type RecentDoc struct {
-	RootID string `json:"rootID"`
-	Icon   string `json:"icon"`
-	Title  string `json:"title"`
+	RootID   string `json:"rootID"`
+	Icon     string `json:"icon"`
+	Title    string `json:"title"`
+	ViewedAt int64  `json:"viewedAt"` // 浏览时间字段
+	ClosedAt int64  `json:"closedAt"` // 关闭时间字段
+	OpenAt   int64  `json:"openAt"`   // 文档第一次从文档树加载到页签的时间
+}
+
+type OutlineDoc struct {
+	DocID string                 `json:"docID"`
+	Data  map[string]interface{} `json:"data"`
 }
 
 var recentDocLock = sync.Mutex{}
@@ -43,7 +53,7 @@ func RemoveRecentDoc(ids []string) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -65,15 +75,18 @@ func RemoveRecentDoc(ids []string) {
 
 func setRecentDocByTree(tree *parse.Tree) {
 	recentDoc := &RecentDoc{
-		RootID: tree.Root.ID,
-		Icon:   tree.Root.IALAttr("icon"),
-		Title:  tree.Root.IALAttr("title"),
+		RootID:   tree.Root.ID,
+		Icon:     tree.Root.IALAttr("icon"),
+		Title:    tree.Root.IALAttr("title"),
+		ViewedAt: time.Now().Unix(), // 使用当前时间作为浏览时间
+		ClosedAt: 0,                 // 初始化关闭时间为0，表示未关闭
+		OpenAt:   time.Now().Unix(), // 设置文档打开时间
 	}
 
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs()
+	recentDocs, err := getRecentDocs("")
 	if err != nil {
 		return
 	}
@@ -94,10 +107,92 @@ func setRecentDocByTree(tree *parse.Tree) {
 	return
 }
 
-func GetRecentDocs() (ret []*RecentDoc, err error) {
+// UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
+func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
-	return getRecentDocs()
+
+	recentDocs, err := getRecentDocs("")
+	if err != nil {
+		return
+	}
+
+	// 查找文档并更新打开时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.OpenAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		err = setRecentDocs(recentDocs)
+	}
+	return
+}
+
+// UpdateRecentDocViewTime 更新文档浏览时间
+func UpdateRecentDocViewTime(rootID string) (err error) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs("")
+	if err != nil {
+		return
+	}
+
+	// 查找文档并更新浏览时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.ViewedAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		// 按浏览时间降序排序
+		sort.Slice(recentDocs, func(i, j int) bool {
+			return recentDocs[i].ViewedAt > recentDocs[j].ViewedAt
+		})
+		err = setRecentDocs(recentDocs)
+	}
+	return
+}
+
+// UpdateRecentDocCloseTime 更新文档关闭时间
+func UpdateRecentDocCloseTime(rootID string) (err error) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+
+	recentDocs, err := getRecentDocs("")
+	if err != nil {
+		return
+	}
+
+	// 查找文档并更新关闭时间
+	found := false
+	for _, doc := range recentDocs {
+		if doc.RootID == rootID {
+			doc.ClosedAt = time.Now().Unix()
+			found = true
+			break
+		}
+	}
+
+	if found {
+		err = setRecentDocs(recentDocs)
+	}
+	return
+}
+
+func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
+	recentDocLock.Lock()
+	defer recentDocLock.Unlock()
+	return getRecentDocs(sortBy)
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
@@ -122,7 +217,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	return
 }
 
-func getRecentDocs() (ret []*RecentDoc, err error) {
+func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	tmp := []*RecentDoc{}
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
 	if !filelock.IsExist(dataPath) {
@@ -154,8 +249,55 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 			notExists = append(notExists, doc.RootID)
 		}
 	}
+
 	if 0 < len(notExists) {
 		setRecentDocs(ret)
+	}
+
+	// 根据排序参数进行排序
+	switch sortBy {
+	case "closedAt": // 按关闭时间排序
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].ClosedAt == 0 && ret[j].ClosedAt == 0 {
+				// 如果都没有关闭时间，按浏览时间排序
+				return ret[i].ViewedAt > ret[j].ViewedAt
+			}
+			if ret[i].ClosedAt == 0 {
+				return false // 没有关闭时间的排在后面
+			}
+			if ret[j].ClosedAt == 0 {
+				return true // 有关闭时间的排在前面
+			}
+			return ret[i].ClosedAt > ret[j].ClosedAt
+		})
+	case "openAt": // 按打开时间排序
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].OpenAt == 0 && ret[j].OpenAt == 0 {
+				// 如果都没有打开时间，按ID时间排序（ID包含时间信息）
+				return ret[i].RootID > ret[j].RootID
+			}
+			if ret[i].OpenAt == 0 {
+				return false // 没有打开时间的排在后面
+			}
+			if ret[j].OpenAt == 0 {
+				return true // 有打开时间的排在前面
+			}
+			return ret[i].OpenAt > ret[j].OpenAt
+		})
+	default: // 默认按浏览时间排序
+		sort.Slice(ret, func(i, j int) bool {
+			if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
+				// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
+				return ret[i].RootID > ret[j].RootID
+			}
+			if ret[i].ViewedAt == 0 {
+				return false // 没有浏览时间的排在后面
+			}
+			if ret[j].ViewedAt == 0 {
+				return true // 有浏览时间的排在前面
+			}
+			return ret[i].ViewedAt > ret[j].ViewedAt
+		})
 	}
 	return
 }
@@ -357,10 +499,6 @@ func GetLocalStorage() (ret map[string]interface{}) {
 }
 
 func setLocalStorage(val interface{}) (err error) {
-	if util.ReadOnly {
-		return
-	}
-
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [local] dir failed: %s", err)
@@ -398,6 +536,127 @@ func getLocalStorage() (ret map[string]interface{}) {
 
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal storage [local] failed: %s", err)
+		return
+	}
+	return
+}
+
+var outlineStorageLock = sync.Mutex{}
+
+func GetOutlineStorage(docID string) (ret map[string]interface{}, err error) {
+	outlineStorageLock.Lock()
+	defer outlineStorageLock.Unlock()
+
+	ret = map[string]interface{}{}
+	outlineDocs, err := getOutlineDocs()
+	if err != nil {
+		return
+	}
+
+	for _, doc := range outlineDocs {
+		if doc.DocID == docID {
+			ret = doc.Data
+			break
+		}
+	}
+	return
+}
+
+func SetOutlineStorage(docID string, val interface{}) (err error) {
+	outlineStorageLock.Lock()
+	defer outlineStorageLock.Unlock()
+
+	outlineDoc := &OutlineDoc{
+		DocID: docID,
+		Data:  make(map[string]interface{}),
+	}
+
+	if valMap, ok := val.(map[string]interface{}); ok {
+		outlineDoc.Data = valMap
+	}
+
+	outlineDocs, err := getOutlineDocs()
+	if err != nil {
+		return
+	}
+
+	// 如果文档已存在，先移除旧的
+	for i, doc := range outlineDocs {
+		if doc.DocID == docID {
+			outlineDocs = append(outlineDocs[:i], outlineDocs[i+1:]...)
+			break
+		}
+	}
+
+	// 将新的文档信息添加到最前面
+	outlineDocs = append([]*OutlineDoc{outlineDoc}, outlineDocs...)
+
+	// 限制为2000个文档
+	if 2000 < len(outlineDocs) {
+		outlineDocs = outlineDocs[:2000]
+	}
+
+	err = setOutlineDocs(outlineDocs)
+	return
+}
+
+func RemoveOutlineStorage(docID string) (err error) {
+	outlineStorageLock.Lock()
+	defer outlineStorageLock.Unlock()
+
+	outlineDocs, err := getOutlineDocs()
+	if err != nil {
+		return
+	}
+
+	for i, doc := range outlineDocs {
+		if doc.DocID == docID {
+			outlineDocs = append(outlineDocs[:i], outlineDocs[i+1:]...)
+			break
+		}
+	}
+
+	err = setOutlineDocs(outlineDocs)
+	return
+}
+
+func setOutlineDocs(outlineDocs []*OutlineDoc) (err error) {
+	dirPath := filepath.Join(util.DataDir, "storage")
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
+		logging.LogErrorf("create storage [outline] dir failed: %s", err)
+		return
+	}
+
+	data, err := gulu.JSON.MarshalJSON(outlineDocs)
+	if err != nil {
+		logging.LogErrorf("marshal storage [outline] failed: %s", err)
+		return
+	}
+
+	lsPath := filepath.Join(dirPath, "outline.json")
+	err = filelock.WriteFile(lsPath, data)
+	if err != nil {
+		logging.LogErrorf("write storage [outline] failed: %s", err)
+		return
+	}
+	return
+}
+
+func getOutlineDocs() (ret []*OutlineDoc, err error) {
+	ret = []*OutlineDoc{}
+	dataPath := filepath.Join(util.DataDir, "storage/outline.json")
+	if !filelock.IsExist(dataPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(dataPath)
+	if err != nil {
+		logging.LogErrorf("read storage [outline] failed: %s", err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
+		logging.LogErrorf("unmarshal storage [outline] failed: %s", err)
 		return
 	}
 	return

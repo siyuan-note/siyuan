@@ -25,7 +25,7 @@ export const confirmDialog = (title: string, text: string,
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         const isDispatch = typeof event.detail === "string";
-        while (target && !target.isSameNode(dialog.element) || isDispatch) {
+        while (target && target !== dialog.element || isDispatch) {
             if (target.id === "cancelDialogConfirmBtn" || (isDispatch && event.detail=== "Escape")) {
                 if (cancel) {
                     cancel(dialog);

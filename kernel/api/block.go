@@ -86,6 +86,31 @@ func getBlockSiblingID(c *gin.Context) {
 	}
 }
 
+func getBlockRelevantIDs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	parentID, previousID, nextID, err := model.GetBlockRelevantIDs(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = map[string]string{
+		"parentID":   parentID,
+		"previousID": previousID,
+		"nextID":     nextID,
+	}
+}
+
 func transferBlockRef(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -164,6 +189,20 @@ func getHeadingChildrenIDs(c *gin.Context) {
 	ret.Data = ids
 }
 
+func appendHeadingChildren(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	childrenDOM := arg["childrenDOM"].(string)
+	model.AppendHeadingChildren(id, childrenDOM)
+}
+
 func getHeadingChildrenDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -174,7 +213,11 @@ func getHeadingChildrenDOM(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	dom := model.GetHeadingChildrenDOM(id)
+	removeFoldAttr := true
+	if nil != arg["removeFoldAttr"] {
+		removeFoldAttr = arg["removeFoldAttr"].(bool)
+	}
+	dom := model.GetHeadingChildrenDOM(id, removeFoldAttr)
 	ret.Data = dom
 }
 
@@ -190,6 +233,28 @@ func getHeadingDeleteTransaction(c *gin.Context) {
 	id := arg["id"].(string)
 
 	transaction, err := model.GetHeadingDeleteTransaction(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = transaction
+}
+
+func getHeadingInsertTransaction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+
+	transaction, err := model.GetHeadingInsertTransaction(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

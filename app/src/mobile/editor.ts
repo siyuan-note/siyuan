@@ -43,6 +43,8 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             pushBack();
             scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, true);
             closePanel();
+            // 更新文档浏览时间
+            fetchPost("/api/storage/updateRecentDocViewTime", {rootID: window.siyuan.mobile.editor.protyle.block.rootID});
             return;
         }
     }
@@ -59,6 +61,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             render: {
                 scroll: true,
                 title: true,
+                titleShowTop: true,
                 background: true,
                 gutter: true,
             },
@@ -73,6 +76,9 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             addLoading(window.siyuan.mobile.editor.protyle);
             if (window.siyuan.mobile.editor.protyle.block.rootID !== data.data.rootID) {
                 window.siyuan.mobile.editor.protyle.wysiwyg.element.innerHTML = "";
+                fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: data.data.rootID});
+            } else {
+                fetchPost("/api/storage/updateRecentDocViewTime", {rootID: data.data.rootID});
             }
             if (action.includes(Constants.CB_GET_SCROLL) && window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID]) {
                 getDocByScroll({
@@ -105,6 +111,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
             window.siyuan.mobile.editor.protyle.undo.clear();
         } else {
+            fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: data.data.rootID});
             window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
         }
         setEditor();

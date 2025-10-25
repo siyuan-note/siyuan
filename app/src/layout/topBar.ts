@@ -75,12 +75,12 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barMore") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === "barmore") {
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_MORE) {
                     window.siyuan.menus.menu.remove();
                     return;
                 }
                 window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", "barmore");
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_MORE);
                 (target.getAttribute("data-hideids") || "").split(",").forEach((itemId) => {
                     const hideElement = toolbarElement.querySelector("#" + itemId);
                     const useElement = hideElement.querySelector("use");
@@ -127,13 +127,14 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barMode") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === "barmode") {
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_MODE) {
                     window.siyuan.menus.menu.remove();
                     return;
                 }
                 window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", "barmode");
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_MODE);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "themeLight",
                     label: window.siyuan.languages.themeLight,
                     icon: "iconLight",
                     current: window.siyuan.config.appearance.mode === 0 && !window.siyuan.config.appearance.modeOS,
@@ -142,6 +143,7 @@ export const initBar = (app: App) => {
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "themeDark",
                     label: window.siyuan.languages.themeDark,
                     current: window.siyuan.config.appearance.mode === 1 && !window.siyuan.config.appearance.modeOS,
                     icon: "iconDark",
@@ -150,6 +152,7 @@ export const initBar = (app: App) => {
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "themeOS",
                     label: window.siyuan.languages.themeOS,
                     current: window.siyuan.config.appearance.modeOS,
                     icon: "iconMode",
@@ -188,12 +191,12 @@ export const initBar = (app: App) => {
                 break;
             } else if (targetId === "barZoom") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === "barZoom") {
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_BAR_ZOOM) {
                     window.siyuan.menus.menu.remove();
                     return;
                 }
                 window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", "barZoom");
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BAR_ZOOM);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.zoomIn,
                     icon: "iconZoomIn",

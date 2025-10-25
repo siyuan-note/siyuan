@@ -16,7 +16,10 @@ export const initBlockPopover = (app: App) => {
     let timeoutHide: number;
     // 编辑器内容块引用/backlinks/tag/bookmark/套娃中使用
     document.addEventListener("mouseover", (event: MouseEvent & { target: HTMLElement, path: HTMLElement[] }) => {
-        if (!window.siyuan.config || !window.siyuan.menus) {
+        if (!window.siyuan.config || !window.siyuan.menus ||
+            // 拖拽时禁止
+            window.siyuan.dragElement || document.onmousemove) {
+            hideTooltip();
             return;
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
@@ -28,7 +31,7 @@ export const initBlockPopover = (app: App) => {
         if (aElement) {
             let tooltipClass = "";
             let tip = aElement.getAttribute("aria-label") || "";
-            if (aElement.classList.contains("av__cell")) {
+            if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
                     const desc = aElement.getAttribute("data-desc");
@@ -46,6 +49,7 @@ export const initBlockPopover = (app: App) => {
                             tooltipClass = "href";
                         }
                     }
+                    tip = "";
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (aElement.scrollWidth > aElement.clientWidth + 2) {
@@ -114,7 +118,7 @@ export const initBlockPopover = (app: App) => {
                     const boxData = response.data.boxInfo;
                     const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
                     const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
-                    if (notebookItemElement && scopeNotebookItemElement && notebookItemElement.isSameNode(scopeNotebookItemElement)) {
+                    if (notebookItemElement && scopeNotebookItemElement && (notebookItemElement === scopeNotebookItemElement)) {
                         showTooltip(tip, notebookItemElement);
                     }
                     if (scopeNotebookItemElement &&
@@ -216,7 +220,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     } else {
         // 浮窗上点击菜单，浮窗不能消失 https://ld246.com/article/1632668091023
         const menuElement = hasClosestByClassName(target, "b3-menu");
-        if (menuElement && menuElement.getAttribute("data-name") !== "docTreeMore") {
+        if (menuElement && menuElement.getAttribute("data-name") !== Constants.MENU_DOC_TREE_MORE) {
             const blockPanel = window.siyuan.blockPanels.find((item) => {
                 if (item.element.style.zIndex < menuElement.style.zIndex) {
                     return true;
@@ -239,7 +243,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     if (!popoverTargetElement && linkElement && linkElement.getAttribute("data-href")?.startsWith("siyuan://blocks")) {
         popoverTargetElement = linkElement;
     }
-    if (!popoverTargetElement || (popoverTargetElement && window.siyuan.menus.menu.data?.isSameNode(popoverTargetElement))) {
+    if (!popoverTargetElement || (popoverTargetElement && window.siyuan.menus.menu.data && window.siyuan.menus.menu.data === popoverTargetElement)) {
         // 移动到弹窗的 loading 元素上，但经过 settimeout 后 loading 已经被移除了
         // https://ld246.com/article/1673596577519/comment/1673767749885#comments
         let targetElement = target;
@@ -305,7 +309,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                             }
                         });
                         if (hasToolbar) {
-                           break;
+                            break;
                         }
                         item.destroy();
                     }
@@ -353,7 +357,7 @@ const getTarget = (event: MouseEvent & { target: HTMLElement }, aElement: false 
 };
 
 export const showPopover = async (app: App, showRef = false) => {
-    if (!popoverTargetElement || window.siyuan.menus.menu.data?.isSameNode(popoverTargetElement)) {
+    if (!popoverTargetElement || (window.siyuan.menus.menu.data && window.siyuan.menus.menu.data === popoverTargetElement)) {
         return;
     }
     let refDefs: IRefDefs[] = [];

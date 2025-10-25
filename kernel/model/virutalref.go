@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
@@ -54,6 +55,7 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 			}
 
 			content := sql.NodeStaticContent(n, nil, false, false, false)
+			content = strings.ReplaceAll(content, editor.Zwsp, "")
 			buf.WriteString(content)
 			return ast.WalkContinue
 		})
@@ -250,11 +252,15 @@ func getVirtualRefKeywords(root *ast.Node) (ret []string) {
 		if 0 < len(regexps) {
 			tmp = nil
 			for _, str := range ret {
+				matchExclude := false
 				for _, re := range regexps {
-					if ok, regErr := regexp.MatchString(re, str); !ok && nil == regErr {
-						tmp = append(tmp, str)
+					if ok, _ := regexp.MatchString(re, str); ok {
+						matchExclude = true
 						break
 					}
+				}
+				if !matchExclude {
+					tmp = append(tmp, str)
 				}
 			}
 			ret = tmp

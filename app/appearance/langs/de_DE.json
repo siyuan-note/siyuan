@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "Überschrift auf gleicher Ebene danach einfügen",
   "upgrade": "Aktualisieren",
   "downgrade": "Herabstufen",
-  "clipboardPermissionDenied": "Zwischenablage-Berechtigung verweigert. Bitte erlauben Sie den Zugriff auf die Zwischenablage in der Adressleiste des Browsers und versuchen Sie es erneut.",
+  "clipboardPermissionDenied": "Zugriff auf die Zwischenablage verweigert. Bitte erlauben Sie den Zugriff auf die Zwischenablage in der Adressleiste des Browsers und versuchen Sie es erneut. Hinweis: Über das http‑Protokoll ist möglicherweise kein Zugriff auf die Zwischenablage möglich, verwenden Sie Ctrl+V / ⌘V zum Einfügen",
   "jumpTo": "Springe zu",
   "vacuumDataIndex": "Index optimieren",
   "vacuumDataIndexTip": "Datenindex prüfen, Speicherplatz freigeben und Indexleistung verbessern",

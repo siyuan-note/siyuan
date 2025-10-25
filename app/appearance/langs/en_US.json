@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "Insert same level heading after",
   "upgrade": "Upgrade",
   "downgrade": "Downgrade",
-  "clipboardPermissionDenied": "Clipboard permission denied. Please allow clipboard access in the browser address bar and try again.",
+  "clipboardPermissionDenied": "Clipboard permission denied. Please allow clipboard access in the browser address bar and try again. Note: the http protocol may not be able to access the clipboard, please use Ctrl+V / ⌘V to paste",
   "jumpTo": "Jump to",
   "vacuumDataIndex": "Optimize Index",
   "vacuumDataIndexTip": "Check data index, free up storage, and improve index performance",

@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "後に同じレベルの見出しを挿入",
   "upgrade": "アップグレード",
   "downgrade": "ダウングレード",
-  "clipboardPermissionDenied": "クリップボードの権限が拒否されました。ブラウザのアドレスバーでクリップボードへのアクセスを許可してから再試行してください。",
+  "clipboardPermissionDenied": "A permissão para a área de transferência foi negada. Por favor, permita o acesso à área de transferência na barra de endereços do navegador e tente novamente. Atenção: o protocolo http pode não permitir o acesso à área de transferência, use Ctrl+V / ⌘V para colar",
   "jumpTo": "ジャンプ先",
   "vacuumDataIndex": "インデックスの最適化",
   "vacuumDataIndexTip": "データインデックスを検証し、ストレージを解放してインデックス性能を向上させます",

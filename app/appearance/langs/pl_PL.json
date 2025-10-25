@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "Wstaw nagłówek na tym samym poziomie po",
   "upgrade": "Aktualizuj",
   "downgrade": "Degraduj",
-  "clipboardPermissionDenied": "Odmowa dostępu do schowka. Zezwól na dostęp do schowka w pasku adresu przeglądarki, a następnie spróbuj ponownie.",
+  "clipboardPermissionDenied": "A permissão para a área de transferência foi negada. Por favor, permita o acesso à área de transferência na barra de endereços do navegador e tente novamente. Atenção: o protocolo http pode não permitir o acesso à área de transferência, use Ctrl+V / ⌘V para colar",
   "jumpTo": "Przejdź do",
   "vacuumDataIndex": "Optymalizuj indeks",
   "vacuumDataIndexTip": "Sprawdź indeks danych, zwolnij miejsce i popraw wydajność indeksu",

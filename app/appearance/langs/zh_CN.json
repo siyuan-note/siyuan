@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "在后方插入同级标题",
   "upgrade": "升级",
   "downgrade": "降级",
-  "clipboardPermissionDenied": "剪贴板权限被拒绝，请在浏览器地址栏允许访问剪贴板后再试",
+  "clipboardPermissionDenied": "剪贴板权限被拒绝，请在浏览器地址栏允许访问剪贴板后再试。注意：http 协议可能无法访问剪切板，请使用 Ctrl+V / ⌘V 进行粘贴",
   "jumpTo": "跳转到",
   "vacuumDataIndex": "优化索引",
   "vacuumDataIndexTip": "校验数据索引，释放存储空间并提升索引性能",

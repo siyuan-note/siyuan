@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "Inserisci intestazione dello stesso livello dopo",
   "upgrade": "Aggiorna",
   "downgrade": "Retrocedi",
-  "clipboardPermissionDenied": "Autorizzazione agli appunti negata. Consenti l'accesso agli appunti dalla barra degli indirizzi del browser e riprova.",
+  "clipboardPermissionDenied": "Il permesso per gli appunti è stato negato. Consenti l'accesso agli appunti nella barra degli indirizzi del browser e riprova. Attenzione: il protocollo http potrebbe non permettere l'accesso agli appunti, usa Ctrl+V / ⌘V per incollare",
   "jumpTo": "Vai a",
   "vacuumDataIndex": "Ottimizza indice",
   "vacuumDataIndexTip": "Verifica l'indice dei dati, libera spazio e migliora le prestazioni dell'indice",

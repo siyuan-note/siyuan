@@ -316,12 +316,10 @@ export const setPadding = (protyle: IProtyle) => {
     // https://github.com/siyuan-note/siyuan/issues/15021
     protyle.element.style.setProperty("--b3-width-protyle", protyle.element.clientWidth + "px");
     protyle.element.style.setProperty("--b3-width-protyle-content", protyle.contentElement.clientWidth + "px");
-
+    const realWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");
     const newWidth = protyle.wysiwyg.element.clientWidth - paddingLeft - paddingRight;
     protyle.wysiwyg.element.setAttribute("data-realwidth", newWidth.toString());
     protyle.element.style.setProperty("--b3-width-protyle-wysiwyg", newWidth.toString() + "px");
-
-    const realWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");
     return {
         width: realWidth ? Math.abs(parseFloat(realWidth) - newWidth) : 0,
     };

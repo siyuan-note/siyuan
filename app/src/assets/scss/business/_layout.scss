@@ -91,7 +91,7 @@
   }
 
   &__tab--active {
-    .b3-list--background .b3-list-item--focus {
+    .b3-list--background li.b3-list-item--focus {
       background-color: var(--b3-theme-primary-lightest);
     }
 

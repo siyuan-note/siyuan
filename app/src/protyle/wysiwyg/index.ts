@@ -3042,8 +3042,12 @@ export class WYSIWYG {
                     if (rangeElement === this.element) {
                         rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY + 8);
                     }
-                    const blockElement = hasClosestBlock(rangeElement);
+                    let blockElement = hasClosestBlock(rangeElement);
                     if (blockElement) {
+                        const embedElement = isInEmbedBlock(blockElement)
+                        if (embedElement) {
+                            blockElement = embedElement;
+                        }
                         newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
                         if (protyle.options.render.breadcrumb) {
                             protyle.breadcrumb.render(protyle, false, blockElement);

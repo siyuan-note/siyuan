@@ -1690,7 +1690,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadPlugin {
-		pushReloadPlugin(upsertPluginSet, removePluginSet)
+		pushReloadPlugin(upsertPluginSet, removePluginSet, "")
 	}
 
 	for _, widgetDir := range removeWidgetDirSet.Values() {
@@ -2257,20 +2257,4 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 		return
 	}
 	return
-}
-
-func pushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set) {
-	upsertPlugins, removePlugins := []string{}, []string{}
-	for _, n := range upsertPluginSet.Values() {
-		upsertPlugins = append(upsertPlugins, n.(string))
-	}
-	for _, n := range removePluginNameSet.Values() {
-		removePlugins = append(removePlugins, n.(string))
-	}
-
-	logging.LogInfof("reload plugins [upserts=%v, removes=%v]", upsertPlugins, removePlugins)
-	util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
-		"upsertPlugins": upsertPlugins,
-		"removePlugins": removePlugins,
-	})
 }

@@ -3045,6 +3045,9 @@ export class WYSIWYG {
                     const blockElement = hasClosestBlock(rangeElement);
                     if (blockElement) {
                         newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
+                        if (protyle.options.render.breadcrumb) {
+                            protyle.breadcrumb.render(protyle, false, blockElement);
+                        }
                     }
                 }
                 // https://github.com/siyuan-note/siyuan/issues/10357

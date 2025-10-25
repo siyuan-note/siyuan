@@ -181,7 +181,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
         let newElement;
-        if (blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        if (blockElement.previousElementSibling &&
+            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
             blockElement.previousElementSibling.getAttribute("fold") === "1") {
             newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
         } else {

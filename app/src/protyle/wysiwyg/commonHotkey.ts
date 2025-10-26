@@ -13,7 +13,8 @@ import * as dayjs from "dayjs";
 import {net2LocalAssets} from "../breadcrumb/action";
 import {processClonePHElement} from "../render/util";
 import {copyTextByType} from "../toolbar/util";
-import {hasClosestByTag} from "../util/hasClosest";
+import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
+import {removeEmbed} from "./removeEmbed";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
@@ -258,23 +259,53 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let starIndex: number;
-    const lastElement = nodeElements[nodeElements.length - 1];
-    if (lastElement.classList.contains("li") &&
-        lastElement.getAttribute("data-subtype") === "o") {
-        starIndex = parseInt(lastElement.getAttribute("data-marker"), 10);
+    let lastElement = nodeElements[nodeElements.length - 1];
+    if (lastElement.classList.contains("li")) {
+        if (lastElement.getAttribute("data-subtype") === "o") {
+            starIndex = parseInt(lastElement.getAttribute("data-marker"), 10);
+        }
+        const isSameLi = nodeElements.find(item => {
+            if (item.classList.contains("li") &&
+                lastElement.getAttribute("data-subtype") !== item.getAttribute("data-subtype")) {
+                return true;
+            }
+        });
+        if (!isSameLi) {
+            lastElement = hasTopClosestByClassName(lastElement, "list") || lastElement;
+        }
     }
+    let listHTML = "";
     const foldHeadingIds = [];
     for (let index = nodeElements.length - 1; index >= 0; --index) {
         const item = nodeElements[index];
+        item.classList.remove("protyle-wysiwyg--select");
         let tempElement = item.cloneNode(true) as HTMLElement;
         const newId = Lute.NewNodeID();
-        if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
+        if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" &&
+            item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
             const response = await fetchSyncPost("/api/block/getBlockDOM", {
                 id: item.getAttribute("data-node-id"),
             });
             const foldTempElement = document.createElement("template");
             foldTempElement.innerHTML = response.data.dom;
             tempElement = foldTempElement.content.firstElementChild as HTMLElement;
+        }
+        if (item.getAttribute("data-type") === "NodeListItem") {
+            if (!listHTML) {
+                listHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+            }
+            listHTML = removeEmbed(item) + listHTML;
+            if (index === 0 ||
+                nodeElements[index - 1].getAttribute("data-type") !== "NodeListItem" ||
+                nodeElements[index - 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype")
+            ) {
+                const foldTempElement = document.createElement("template");
+                foldTempElement.innerHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">${listHTML}`;
+                tempElement = foldTempElement.content.firstElementChild as HTMLElement;
+                listHTML = "";
+            } else {
+                continue;
+            }
         }
         if (index === nodeElements.length - 1) {
             focusElement = tempElement;
@@ -294,7 +325,6 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             childItem.removeAttribute("refcount");
             childItem.lastElementChild.querySelector(".protyle-attr--refcount")?.remove();
         });
-        item.classList.remove("protyle-wysiwyg--select");
         if (typeof starIndex === "number") {
             const orderIndex = starIndex + index + 1;
             tempElement.setAttribute("data-marker", (orderIndex) + ".");

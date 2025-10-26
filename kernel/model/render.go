@@ -303,8 +303,8 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
 						var hChildren []*ast.Node
 
-						// 从嵌入块的 IAL 属性中解析 custom-heading-mode，默认值为 0
-						blockHeadingMode := 0 // 默认值
+						// 从嵌入块的 IAL 属性中解析 custom-heading-mode，使用全局配置作为默认值
+						blockHeadingMode := Conf.Editor.HeadingEmbedMode
 						if customHeadingMode := n.IALAttr("custom-heading-mode"); "" != customHeadingMode {
 							if mode, err := strconv.Atoi(customHeadingMode); nil == err && (mode == 0 || mode == 1 || mode == 2) {
 								blockHeadingMode = mode

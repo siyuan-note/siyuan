@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "Insertar título del mismo nivel después",
   "upgrade": "Actualizar",
   "downgrade": "Degradar",
-  "clipboardPermissionDenied": "Permiso del portapapeles denegado. Permite el acceso al portapapeles en la barra de direcciones del navegador y vuelve a intentarlo.",
+  "clipboardPermissionDenied": "Permiso del portapapeles denegado. Por favor, permita el acceso al portapapeles en la barra de direcciones del navegador y vuelva a intentarlo. Atención: el protocolo http puede no permitir el acceso al portapapeles, utilice Ctrl+V / ⌘V para pegar",
   "jumpTo": "Ir a",
   "vacuumDataIndex": "Optimizar índice",
   "vacuumDataIndexTip": "Verifique el índice de datos, libere espacio y mejore el rendimiento del índice",

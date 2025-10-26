@@ -11,7 +11,7 @@
   "insertSameLevelHeadingAfter": "Inserir título do mesmo nível depois",
   "upgrade": "Atualizar",
   "downgrade": "Rebaixar",
-  "clipboardPermissionDenied": "Permissão da área de transferência negada. Permita o acesso à área de transferência na barra de endereço do navegador e tente novamente.",
+  "clipboardPermissionDenied": "A permissão para a área de transferência foi negada. Por favor, permita o acesso à área de transferência na barra de endereços do navegador e tente novamente. Atenção: o protocolo http pode não permitir o acesso à área de transferência, use Ctrl+V / ⌘V para colar",
   "jumpTo": "Ir para",
   "vacuumDataIndex": "Otimizar índice",
   "vacuumDataIndexTip": "Verifique o índice de dados, libere espaço e melhore o desempenho do índice",

@@ -81,7 +81,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/updateRecentDocViewTime", model.CheckAuth, updateRecentDocViewTime)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocCloseTime", model.CheckAuth, updateRecentDocCloseTime)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocOpenTime", model.CheckAuth, updateRecentDocOpenTime)
-	
+
 	ginServer.Handle("POST", "/api/storage/getOutlineStorage", model.CheckAuth, getOutlineStorage)
 	ginServer.Handle("POST", "/api/storage/setOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOutlineStorage)
 	ginServer.Handle("POST", "/api/storage/removeOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeOutlineStorage)
@@ -151,9 +151,12 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/history/getHistoryItems", model.CheckAuth, model.CheckAdminRole, getHistoryItems)
 
 	ginServer.Handle("POST", "/api/outline/getDocOutline", model.CheckAuth, getDocOutline)
+	ginServer.Handle("POST", "/api/outline/getDocOutlineAndStorage", model.CheckAuth, getDocOutlineAndStorage)
+
 	ginServer.Handle("POST", "/api/bookmark/getBookmark", model.CheckAuth, getBookmark)
 	ginServer.Handle("POST", "/api/bookmark/renameBookmark", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameBookmark)
 	ginServer.Handle("POST", "/api/bookmark/removeBookmark", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeBookmark)
+
 	ginServer.Handle("POST", "/api/tag/getTag", model.CheckAuth, getTag)
 	ginServer.Handle("POST", "/api/tag/renameTag", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameTag)
 	ginServer.Handle("POST", "/api/tag/removeTag", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeTag)

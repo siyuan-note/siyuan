@@ -3036,7 +3036,7 @@ export class WYSIWYG {
                 let newRange = getEditorRange(this.element);
                 // 点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
                 if (hasClosestBlock(event.target) !== hasClosestBlock(newRange.startContainer) &&
-                    this.element.firstElementChild.contains(newRange.startContainer)) {
+                    this.element.querySelector('[data-node-id]')?.contains(newRange.startContainer)) {
                     const rect = this.element.getBoundingClientRect();
                     let rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY);
                     if (rangeElement === this.element) {
@@ -3044,7 +3044,7 @@ export class WYSIWYG {
                     }
                     let blockElement = hasClosestBlock(rangeElement);
                     if (blockElement) {
-                        const embedElement = isInEmbedBlock(blockElement)
+                        const embedElement = isInEmbedBlock(blockElement);
                         if (embedElement) {
                             blockElement = embedElement;
                         }
@@ -3078,7 +3078,8 @@ export class WYSIWYG {
                     countSelectWord(newRange, protyle.block.rootID);
                 }
                 if (getSelection().rangeCount === 0 && !mobileBlur) {
-                    // TODO https://github.com/siyuan-note/siyuan/issues/14589  点击 video 也可以测试一下 https://github.com/siyuan-note/siyuan/issues/14569
+                    // https://github.com/siyuan-note/siyuan/issues/14589
+                    // https://github.com/siyuan-note/siyuan/issues/14569
                     // https://github.com/siyuan-note/siyuan/issues/5901
                     focusByRange(newRange);
                 }

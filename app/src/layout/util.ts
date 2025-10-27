@@ -65,13 +65,6 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
                 return true;
             }
         });
-        const blockElement = hasClosestBlock(document.activeElement);
-        if (blockElement) {
-            const editElement = getContenteditableElement(blockElement) as HTMLElement;
-            if (editElement) {
-                editElement.blur();
-            }
-        }
     }
 };
 

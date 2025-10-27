@@ -1546,7 +1546,7 @@
     "121": "Non ci sono file di rete in questo documento",
     "122": "La funzionalità della barra laterale fornita dal plugin deve essere configurata sul desktop. Dopo la configurazione, riavvia SiYuan (per gli utenti mobile, è necessario prima fidarsi del marketplace dal desktop prima di utilizzare il plugin per la prima volta)",
     "123": "La funzione di sincronizzazione può essere attivata solo dopo aver aggiunto/selezionato la directory di sincronizzazione cloud",
-    "124": "Si prega di abilitare la sincronizzazione cloud in [Impostazioni - Abilita sincronizzazione cloud]",
+    "124": "Si prega di abilitare la sincronizzazione cloud in [Impostazioni - Cloud - Abilita sincronizzazione cloud]",
     "125": "La sincronizzazione automatica è fallita troppe volte, si prega di tentare di attivare manualmente la sincronizzazione; se il problema persiste, si prega di segnalarlo tramite <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">GitHub Issues</a>",
     "126": "Il segnalibro non può essere vuoto",
     "127": "サブスクリプションの有効期限があと [%d] 日で切れます。有効期限が切れると、公式クラウドストレージのデータは完全に削除されます。更新するには<a target='_blank' href='${accountServer}/subscribe/siyuan'>こちら</a>をご覧ください",

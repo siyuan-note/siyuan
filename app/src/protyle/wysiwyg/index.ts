@@ -3036,7 +3036,7 @@ export class WYSIWYG {
                 let newRange = getEditorRange(this.element);
                 // 点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
                 if (hasClosestBlock(event.target) !== hasClosestBlock(newRange.startContainer) &&
-                    this.element.querySelector('[data-node-id]')?.contains(newRange.startContainer)) {
+                    this.element.querySelector("[data-node-id]")?.contains(newRange.startContainer)) {
                     const rect = this.element.getBoundingClientRect();
                     let rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY);
                     if (rangeElement === this.element) {

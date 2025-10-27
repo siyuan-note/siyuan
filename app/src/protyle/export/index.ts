@@ -669,7 +669,7 @@ export const onExport = async (data: IWebSocketData, filePath: string, exportOpt
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
-    let screenWidth = getScreenWidth();
+    const screenWidth = getScreenWidth();
     const minWidthHtml = isInAndroid() || isInHarmony() ? `document.body.style.minWidth = "${screenWidth}px"` : "";
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">

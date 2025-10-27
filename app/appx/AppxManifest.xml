@@ -17,7 +17,18 @@
         <Logo>assets\StoreLogo.png</Logo>
     </Properties>
     <Resources>
+        <Resource Language="ar-SA"/>
+        <Resource Language="de-DE"/>
         <Resource Language="en-US"/>
+        <Resource Language="es-ES"/>
+        <Resource Language="fr-FR"/>
+        <Resource Language="he-IL"/>
+        <Resource Language="it-IT"/>
+        <Resource Language="ja-JP"/>
+        <Resource Language="pl-PL"/>
+        <Resource Language="pt-BR"/>
+        <Resource Language="ru-RU"/>
+        <Resource Language="zh-TW"/>
         <Resource Language="zh-CN"/>
     </Resources>
     <Dependencies>

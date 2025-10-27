@@ -25,7 +25,36 @@ const getPluginStyle = async () => {
 };
 
 export const saveExport = (option: IExportOptions) => {
-    /// #if !BROWSER
+    /// #if BROWSER
+    if (["html", "htmlmd"].includes(option.type)) {
+        const msgId = showMessage(window.siyuan.languages.exporting, -1);
+        // 浏览器环境：先调用 API 生成资源文件，再在前端生成完整的 HTML
+        const url = option.type === "htmlmd" ? "/api/export/exportMdHTML" : "/api/export/exportHTML";
+        fetchPost(url, {
+            id: option.id,
+            pdf: false,
+            removeAssets: false,
+            merge: true,
+            savePath: ""
+        }, async exportResponse => {
+            const html = await onExport(exportResponse, undefined, option);
+            fetchPost("/api/export/exportBrowserHTML", {
+                folder: exportResponse.data.folder,
+                html: html,
+                name: exportResponse.data.name
+            }, zipResponse => {
+                hideMessage(msgId);
+                if (zipResponse.code === -1) {
+                    showMessage(window.siyuan.languages._kernel[14] + ": " + zipResponse.msg, 0, "error");
+                    return;
+                }
+                window.open(zipResponse.data.zip);
+                showMessage(window.siyuan.languages.exported);
+            });
+        });
+        return;
+    }
+    /// #else
     if (option.type === "pdf") {
         if (window.siyuan.config.appearance.mode === 1) {
             confirmDialog(window.siyuan.languages.pdfTip, window.siyuan.languages.pdfConfirm, () => {
@@ -736,7 +765,7 @@ style="${isInAndroid() || isInHarmony() ? "margin: 0 16px;" : "max-width: 800px;
       })
     });
 </script></body></html>`;
-    // 移动端导出 pdf
+    // 移动端导出 pdf、浏览器导出 HTML
     if (typeof filePath === "undefined") {
         return html;
     }

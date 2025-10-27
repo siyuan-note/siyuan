@@ -260,13 +260,15 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
     const undoOperations: IOperation[] = [];
     let starIndex: number;
     let lastElement = nodeElements[nodeElements.length - 1];
+    let isSameLi = true;
     if (lastElement.classList.contains("li")) {
         if (lastElement.getAttribute("data-subtype") === "o") {
             starIndex = parseInt(lastElement.getAttribute("data-marker"), 10);
         }
-        const isSameLi = nodeElements.find(item => {
-            if (item.classList.contains("li") &&
+        nodeElements.find(item => {
+            if (!item.classList.contains("li") ||
                 lastElement.getAttribute("data-subtype") !== item.getAttribute("data-subtype")) {
+                isSameLi = false;
                 return true;
             }
         });
@@ -290,7 +292,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             foldTempElement.innerHTML = response.data.dom;
             tempElement = foldTempElement.content.firstElementChild as HTMLElement;
         }
-        if (item.getAttribute("data-type") === "NodeListItem") {
+        if (item.getAttribute("data-type") === "NodeListItem" && !isSameLi) {
             if (!listHTML) {
                 listHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
             }

@@ -282,6 +282,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     blockID: blockElement.getAttribute("data-node-id"),
                     id: target.dataset.id,
                     avID: blockElement.getAttribute("data-av-id"),
+                }], [{
+                    action: "setAttrViewBlockView",
+                    blockID: blockElement.getAttribute("data-node-id"),
+                    id: target.parentElement.querySelector(".item--focus").getAttribute("data-id"),
+                    avID: blockElement.getAttribute("data-av-id"),
                 }]);
             }
             event.preventDefault();

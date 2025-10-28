@@ -2166,6 +2166,11 @@ export class WYSIWYG {
                         blockID: nodeElement.getAttribute("data-node-id"),
                         id: avTabHeaderElement.dataset.id,
                         avID: nodeElement.getAttribute("data-av-id"),
+                    }], [{
+                        action: "setAttrViewBlockView",
+                        blockID: nodeElement.getAttribute("data-node-id"),
+                        id: avTabHeaderElement.parentElement.querySelector(".item--focus").getAttribute("data-id"),
+                        avID: nodeElement.getAttribute("data-av-id"),
                     }]);
                     window.siyuan.menus.menu.remove();
                     openViewMenu({

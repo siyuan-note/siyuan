@@ -103,6 +103,7 @@ type Path struct {
 	Children []*Path  `json:"children,omitempty"` // 子路径节点
 	Depth    int      `json:"depth"`              // 层级深度
 	Count    int      `json:"count"`              // 子块计数
+	Folded   bool     `json:"folded"`             // 是否折叠
 
 	Updated string `json:"updated"` // 更新时间
 	Created string `json:"created"` // 创建时间

@@ -149,6 +149,11 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string, tree *parse.Tree) (r
 		root.Children = append(root.Children, block)
 	}
 
+	folded := false
+	if "outline" == typ {
+		folded = true
+	}
+
 	for _, root := range blockRoots {
 		treeNode := &Path{
 			ID:       root.ID,
@@ -159,6 +164,7 @@ func toFlatTree(blocks []*Block, baseDepth int, typ string, tree *parse.Tree) (r
 			SubType:  root.SubType,
 			Depth:    baseDepth,
 			Count:    len(root.Children),
+			Folded:   folded,
 
 			Updated: root.IAL["updated"],
 			Created: root.ID[:14],

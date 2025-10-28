@@ -17,6 +17,7 @@
 package model
 
 import (
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -236,7 +237,41 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 	}
 
 	ret = outline(tree)
+
+	storage, _ := GetOutlineStorage(rootID)
+	if nil == storage {
+		// 默认展开顶层
+		for _, p := range ret {
+			p.Folded = false
+		}
+	}
+
+	if nil != storage["expandIds"] {
+		expandIDsArg := storage["expandIds"].([]interface{})
+		var expandIDs []string
+		for _, id := range expandIDsArg {
+			expandIDs = append(expandIDs, id.(string))
+		}
+
+		for _, p := range ret {
+			p.Folded = false // 顶层默认展开
+
+			for _, b := range p.Blocks {
+				b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+				for _, c := range b.Children {
+					walkChildren(c, expandIDs)
+				}
+			}
+		}
+	}
 	return
+}
+
+func walkChildren(b *Block, expandIDs []string) {
+	b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+	for _, c := range b.Children {
+		walkChildren(c, expandIDs)
+	}
 }
 
 func outline(tree *parse.Tree) (ret []*Path) {
@@ -254,6 +289,7 @@ func outline(tree *parse.Tree) (ret []*Path) {
 				Content: renderOutline(n, luteEngine),
 				Type:    n.Type.String(),
 				SubType: treenode.SubTypeAbbr(n),
+				Folded:  true,
 			}
 			headings = append(headings, block)
 			return ast.WalkSkipChildren
@@ -303,6 +339,7 @@ func outline(tree *parse.Tree) (ret []*Path) {
 				Blocks:   b.Children,
 				Depth:    0,
 				Count:    b.Count,
+				Folded:   true,
 			})
 		}
 	}

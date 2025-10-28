@@ -858,7 +858,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Does not support exporting to formats such as PDF, HTML, and Word"
+									"Data": "Does not support exporting to formats such as PDF and Word"
 								}
 							]
 						}

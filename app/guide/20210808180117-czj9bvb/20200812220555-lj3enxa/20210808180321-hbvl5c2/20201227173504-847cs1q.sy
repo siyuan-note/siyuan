@@ -866,7 +866,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "不支持导出 PDF、HTML 和 Word 等格式"
+									"Data": "不支持导出 PDF 和 Word 等格式"
 								}
 							]
 						}

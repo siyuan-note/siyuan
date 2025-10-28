@@ -43,7 +43,7 @@ export const saveExport = (option: IExportOptions) => {
             merge: true,
             savePath: ""
         }, async exportResponse => {
-            const html = await onExport(exportResponse, undefined, option);
+            const html = await onExport(exportResponse, undefined, "", option);
             fetchPost("/api/export/exportBrowserHTML", {
                 folder: exportResponse.data.folder,
                 html: html,
@@ -684,7 +684,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                     }
                     afterExport(exportResponse.data.path, msgId);
                 } else {
-                    onExport(exportResponse, savePath, option, msgId);
+                    onExport(exportResponse, savePath, "", option, msgId);
                 }
             });
         }
@@ -692,7 +692,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
 };
 /// #endif
 
-export const onExport = async (data: IWebSocketData, filePath: string, exportOption: IExportOptions, msgId?: string) => {
+export const onExport = async (data: IWebSocketData, filePath: string, servePath: string, exportOption: IExportOptions, msgId?: string) => {
     let themeName = window.siyuan.config.appearance.themeLight;
     let mode = 0;
     if (["html", "htmlmd"].includes(exportOption.type) && window.siyuan.config.appearance.mode === 1) {
@@ -700,8 +700,6 @@ export const onExport = async (data: IWebSocketData, filePath: string, exportOpt
         mode = 1;
     }
     const isDefault = (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === "daylight");
-    const isLocalExport = typeof filePath !== "undefined";
-    const servePath = isLocalExport ? "" : window.location.protocol + "//" + window.location.host + "/";
     let themeStyle = "";
     if (!isDefault) {
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;

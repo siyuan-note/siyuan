@@ -37,6 +37,7 @@ import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clearSelect";
 import {dragoverTab} from "../render/av/view";
 
+// position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
                       isSameDoc: boolean, position: InsertPosition, isCopy: boolean) => {
     const doOperations: IOperation[] = [];
@@ -45,16 +46,6 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const targetId = targetElement.getAttribute("data-node-id");
     const newSourceElements: Element[] = [];
     let tempTargetElement = targetElement;
-    let foldData;
-    if (position === "afterend" &&
-        targetElement.getAttribute("data-type") === "NodeHeading" &&
-        targetElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, targetElement, true, false, false, true);
-    } else if (position === "beforebegin" && targetElement.previousElementSibling &&
-        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-        targetElement.previousElementSibling.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
-    }
     let isSameLi = true;
     sourceElements.find(item => {
         if (!item.classList.contains("li") ||
@@ -69,7 +60,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     for (let index = sourceElements.length - 1; index >= 0; index--) {
         const item = sourceElements[index];
         const id = item.getAttribute("data-node-id");
-        const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
+        const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID;
         if (item.getAttribute("data-type") === "NodeListItem" && !newListId && !isSameLi) {
             newListId = Lute.NewNodeID();
             newListElement = document.createElement("div");
@@ -79,8 +70,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 action: "insert",
                 data: newListElement.outerHTML,
                 id: newListId,
-                previousID: position === "afterend" ? targetId : tempTargetElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: tempTargetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
+                previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : tempTargetElement.previousElementSibling?.getAttribute("data-node-id")),
+                parentID: position === "afterbegin" ? targetId : (tempTargetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
                 action: "delete",
@@ -140,8 +131,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "insert",
                     id: copyNewId,
                     data: copyElement.outerHTML,
-                    previousID: position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
-                    parentID: copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
+                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    parentID: position === "afterbegin" ? targetId : (copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
             }
@@ -163,8 +154,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 doOperations.push({
                     action: "move",
                     id,
-                    previousID: position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id"), // 不能使用常量，移动后会被修改
-                    parentID: item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID,
+                    previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
+                    parentID: position === "afterbegin" ? targetId : (item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(item);
             }
@@ -238,15 +229,15 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
         }
 
-        if (newListId && (index === sourceElements.length - 1 ||
-            sourceElements[index + 1].getAttribute("data-type") !== "NodeListItem" ||
-            sourceElements[index + 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype"))
+        if (newListId && (index === 0||
+            sourceElements[index - 1].getAttribute("data-type") !== "NodeListItem" ||
+            sourceElements[index - 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype"))
         ) {
-            if (position !== "afterend") {
+            if (position === "beforebegin") {
                 tempTargetElement = newListElement;
             }
             newListId = null;
-        } else if (position !== "afterend") {
+        } else if (position === "beforebegin") {
             tempTargetElement = isCopy ? copyElement : item;
         }
     }
@@ -283,13 +274,6 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         doOperations.push(...responseTransaction.data.doOperations);
         undoOperations.push(...responseTransaction.data.undoOperations);
     }
-    if (foldData) {
-        foldData.doOperations[0].context = {
-            focusId: sourceElements[0].getAttribute("data-node-id"),
-        };
-        doOperations.push(...foldData.doOperations);
-        undoOperations.push(...foldData.undoOperations);
-    }
     return {
         doOperations,
         undoOperations,
@@ -300,25 +284,13 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean,
                       direct: "col" | "row", isCopy: boolean) => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
-
-    let newSourceElement: HTMLElement;
-    if (sourceElements[0].getAttribute("data-type") === "NodeListItem" && targetElement.getAttribute("data-type") !== "NodeListItem") {
-        newSourceElement = document.createElement("div");
-        newSourceElement.setAttribute("data-node-id", Lute.NewNodeID());
-        newSourceElement.setAttribute("data-type", "NodeList");
-        newSourceElement.setAttribute("data-subtype", sourceElements[0].getAttribute("data-subtype"));
-        newSourceElement.className = "list";
-        newSourceElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`);
-    }
-
-    const undoOperations: IOperation[] = [{
+    const undoOperations: IOperation[] = [];
+    const targetMoveUndo: IOperation = {
         action: "move",
         id: targetElement.getAttribute("data-node-id"),
         previousID: targetElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: targetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
-    }];
-    let topSourceElement: Element;
-    let oldSourceParentElement = sourceElements[0].parentElement;
+    };
     const sbElement = genSBElement(direct);
     targetElement.parentElement.replaceChild(sbElement, targetElement);
     const doOperations: IOperation[] = [{
@@ -329,315 +301,65 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
-    let hasFoldHeading = false;
-    if (newSourceElement) {
-        const newSourceId = newSourceElement.getAttribute("data-node-id");
+    const moveToResult = await moveTo(protyle, sourceElements, sbElement, isSameDoc, "afterbegin", isCopy);
+    doOperations.push(...moveToResult.doOperations);
+    undoOperations.push(...moveToResult.undoOperations);
+    const newSourceParentElement = moveToResult.newSourceElements;
+    if (isBottom) {
+        // 拖拽到超级块 col 下方， 其他块右侧
         sbElement.insertAdjacentElement("afterbegin", targetElement);
         doOperations.push({
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
             parentID: sbElement.getAttribute("data-node-id")
         });
-        if (isBottom) {
-            targetElement.insertAdjacentElement("afterend", newSourceElement);
-            doOperations.push({
-                action: "insert",
-                data: newSourceElement.outerHTML,
-                id: newSourceId,
-                previousID: targetElement.getAttribute("data-node-id"),
-            });
-        } else {
-            targetElement.insertAdjacentElement("beforebegin", newSourceElement);
-            doOperations.push({
-                action: "insert",
-                data: newSourceElement.outerHTML,
-                id: newSourceId,
-                nextID: targetElement.getAttribute("data-node-id"),
-            });
-        }
-        sourceElements.reverse().forEach((item, index) => {
-            if (index === sourceElements.length - 1) {
-                topSourceElement = getTopAloneElement(item);
-                if (topSourceElement === item) {
-                    topSourceElement = undefined;
-                }
-            }
-            const copyId = Lute.NewNodeID();
-            if (isCopy) {
-                undoOperations.push({
-                    action: "delete",
-                    id: copyId
-                });
-            } else {
-                undoOperations.push({
-                    action: "move",
-                    id: item.getAttribute("data-node-id"),
-                    previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: item.parentElement.getAttribute("data-node-id") || protyle.block.rootID,
-                });
-            }
-            if (!isSameDoc && !isCopy) {
-                // 打开两个相同的文档
-                const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`);
-                if (sameElement) {
-                    sameElement.remove();
-                }
-            }
-            if (isCopy) {
-                const copyElement = item.cloneNode(true) as HTMLElement;
-                copyElement.setAttribute("data-node-id", copyId);
-                copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
-                    const newId = Lute.NewNodeID();
-                    e.setAttribute("data-node-id", newId);
-                    e.setAttribute("updated", newId.split("-")[0]);
-                });
-                newSourceElement.insertAdjacentElement("afterbegin", copyElement);
-                doOperations.push({
-                    action: "insert",
-                    id: copyId,
-                    data: copyElement.outerHTML,
-                    parentID: newSourceId,
-                });
-            } else {
-                newSourceElement.insertAdjacentElement("afterbegin", item);
-                doOperations.push({
-                    action: "move",
-                    id: item.getAttribute("data-node-id"),
-                    parentID: newSourceId,
-                });
-            }
-        });
-        undoOperations.reverse();
-        undoOperations.push({
-            action: "delete",
-            id: newSourceId,
-        });
     } else {
-        const copyFoldHeadingIds: { newId: string, oldId: string }[] = [];
-        let afterPreviousID;
-        sourceElements.reverse().forEach((item, index) => {
-            const id = item.getAttribute("data-node-id");
-            const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
-            if (index === sourceElements.length - 1) {
-                topSourceElement = getTopAloneElement(item);
-                if (topSourceElement === item) {
-                    topSourceElement = undefined;
-                }
-            }
-            const copyId = Lute.NewNodeID();
-            if (index === 0) {
-                afterPreviousID = isCopy ? copyId : id;
-            }
-            if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-                if (isCopy) {
-                    copyFoldHeadingIds.push({oldId: id, newId: copyId});
-                }
-                hasFoldHeading = true;
-            }
-            if (isCopy) {
-                undoOperations.push({
-                    action: "delete",
-                    id: copyId,
-                });
-            } else {
-                undoOperations.push({
-                    action: "move",
-                    id,
-                    previousID: item.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID
-                });
-            }
-            if (!isSameDoc && !isCopy) {
-                // 打开两个相同的文档
-                const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
-                if (sameElement) {
-                    sameElement.remove();
-                }
-            }
-            if (isCopy) {
-                const copyElement = item.cloneNode(true) as HTMLElement;
-                copyElement.setAttribute("data-node-id", copyId);
-                copyElement.querySelectorAll("[data-node-id]").forEach((e) => {
-                    const newId = Lute.NewNodeID();
-                    e.setAttribute("data-node-id", newId);
-                    e.setAttribute("updated", newId.split("-")[0]);
-                });
-                sbElement.insertAdjacentElement("afterbegin", copyElement);
-                doOperations.push({
-                    action: "insert",
-                    id: copyId,
-                    data: copyElement.outerHTML,
-                    parentID: sbElement.getAttribute("data-node-id"),
-                });
-            } else {
-                sbElement.insertAdjacentElement("afterbegin", item);
-                doOperations.push({
-                    action: "move",
-                    id,
-                    parentID: sbElement.getAttribute("data-node-id"),
-                });
-            }
+        sbElement.lastElementChild.insertAdjacentElement("beforebegin", targetElement);
+        doOperations.push({
+            action: "move",
+            id: targetElement.getAttribute("data-node-id"),
+            previousID: newSourceParentElement[0].getAttribute("data-node-id"),
         });
-        undoOperations.reverse();
-        for (let j = 0; j < copyFoldHeadingIds.length; j++) {
-            const childrenItem = copyFoldHeadingIds[j];
-            const responseTransaction = await fetchSyncPost("/api/block/getHeadingInsertTransaction", {id: childrenItem.oldId});
-            responseTransaction.data.doOperations.splice(0, 1);
-            responseTransaction.data.doOperations[0].previousID = childrenItem.newId;
-            responseTransaction.data.undoOperations.splice(0, 1);
-            doOperations.push(...responseTransaction.data.doOperations);
-            undoOperations.push(...responseTransaction.data.undoOperations);
-            if (j === 0) {
-                afterPreviousID = copyFoldHeadingIds[0].newId;
-            }
-        }
-        if (isBottom) {
-            sbElement.insertAdjacentElement("afterbegin", targetElement);
-            doOperations.push({
-                action: "move",
-                id: targetElement.getAttribute("data-node-id"),
-                parentID: sbElement.getAttribute("data-node-id")
-            });
-        } else {
-            sbElement.lastElementChild.insertAdjacentElement("beforebegin", targetElement);
-            doOperations.push({
-                action: "move",
-                id: targetElement.getAttribute("data-node-id"),
-                previousID: afterPreviousID
-            });
-        }
     }
+    undoOperations.push(targetMoveUndo);
     undoOperations.push({
         action: "delete",
         id: sbElement.getAttribute("data-node-id"),
     });
-    // https://github.com/siyuan-note/insider/issues/536
-    if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
-        oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
-        Array.from(oldSourceParentElement.children).forEach((item) => {
-            if (item.classList.contains("protyle-attr")) {
-                return;
+    let hasFoldHeading = false;
+    newSourceParentElement.forEach(item => {
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            hasFoldHeading = true;
+            if (item.nextElementSibling && (
+                item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
+                item.nextElementSibling.getAttribute("data-subtype") > item.getAttribute("data-subtype")
+            )) {
+                const foldOperations = setFold(protyle, item, true, false, false, true);
+                doOperations.push(...foldOperations.doOperations);
+                // 不折叠，否则无法撤销 undoOperations.push(...foldOperations.undoOperations);
             }
-            // 撤销更新不能位于最后，否则又更新为最新结果 https://github.com/siyuan-note/siyuan/issues/5725
-            undoOperations.splice(0, 0, {
-                action: "update",
-                id: item.getAttribute("data-node-id"),
-                data: item.outerHTML
-            });
-        });
-        updateListOrder(oldSourceParentElement, 1);
-        Array.from(oldSourceParentElement.children).forEach((item) => {
-            if (item.classList.contains("protyle-attr")) {
-                return;
-            }
-            doOperations.push({
-                action: "update",
-                id: item.getAttribute("data-node-id"),
-                data: item.outerHTML
-            });
-        });
-    }
-    // 删除空元素
-    if (!isCopy && topSourceElement) {
-        doOperations.push({
-            action: "delete",
-            id: topSourceElement.getAttribute("data-node-id"),
-        });
-        undoOperations.splice(0, 0, {
-            action: "insert",
-            data: topSourceElement.outerHTML,
-            id: topSourceElement.getAttribute("data-node-id"),
-            previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
-        });
-        if (!isSameDoc) {
-            // 打开两个相同的文档
-            const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${topSourceElement.getAttribute("data-node-id")}"]`);
-            if (sameElement) {
-                sameElement.remove();
-            }
+            return true;
         }
-        oldSourceParentElement = topSourceElement.parentElement;
-        topSourceElement.remove();
-    }
-    if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
-        // 拖拽后，sb 只剩下一个元素
-        if (isSameDoc) {
-            const sbData = await cancelSB(protyle, oldSourceParentElement);
-            doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
-            undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
-        } else {
-            /// #if !MOBILE
-            const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-            if (otherProtyleElement) {
-                const allEditor = getAllEditor();
-                for (let i = 0; i < allEditor.length; i++) {
-                    if (allEditor[i].protyle.element === otherProtyleElement) {
-                        const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
-                        doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
-                        undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
-                        // 需清空操作栈，否则撤销到移动出去的块的操作会抛异常
-                        allEditor[i].protyle.undo.clear();
-                        return true;
-                    }
-                }
-            }
-            /// #endif
-        }
-    } else if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.innerHTML === "") {
-        /// #if !MOBILE
-        // 拖拽后，根文档原内容为空，且不为悬浮窗
-        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement) {
-            getAllEditor().find(item => {
-                if (item.protyle.element === protyleElement) {
-                    if (item.protyle.block.id === item.protyle.block.rootID) {
-                        const newId = Lute.NewNodeID();
-                        doOperations.splice(0, 0, {
-                            action: "insert",
-                            id: newId,
-                            data: genEmptyElement(false, false, newId).outerHTML,
-                            parentID: item.protyle.block.parentID
-                        });
-                        undoOperations.splice(0, 0, {
-                            action: "delete",
-                            id: newId,
-                        });
-                    } else {
-                        zoomOut({protyle: item.protyle, id: item.protyle.block.rootID});
-                    }
-                    return true;
-                }
-            });
-        }
-        /// #endif
-    }
+    });
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {
-        // 跨文档不支持撤销
+        // 跨文档或插入折叠标题下不支持撤销
         transaction(protyle, doOperations);
     }
-    if (!isCopy && direct === "col") {
-        if (targetElement.getAttribute("data-type") === "NodeHeading" && targetElement.getAttribute("fold") === "1") {
-            turnsIntoOneTransaction({
-                protyle,
-                selectsElement: [targetElement],
-                type: "BlocksMergeSuperBlock",
-                level: "row"
-            });
-        }
-        if (sourceElements.length > 1 || hasFoldHeading) {
-            turnsIntoOneTransaction({
-                protyle,
-                selectsElement: sourceElements.reverse(),
-                type: "BlocksMergeSuperBlock",
-                level: "row"
-            });
-        }
+    if ((newSourceParentElement.length > 1 || hasFoldHeading) && direct === "col") {
+        turnsIntoOneTransaction({
+            protyle,
+            selectsElement: newSourceParentElement.reverse(),
+            type: "BlocksMergeSuperBlock",
+            level: "row"
+        });
     }
-    focusBlock(sourceElements[0]);
+    if (document.contains(sourceElements[0])) {
+        focusBlock(sourceElements[0]);
+    } else {
+        focusBlock(targetElement);
+    }
 };
 
 const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean, isCopy: boolean) => {
@@ -649,8 +371,25 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     doOperations.push(...moveToResult.doOperations);
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
-
-    if (targetElement.getAttribute("data-type") === "NodeListItem" && targetElement.getAttribute("data-subtype") === "o") {
+    let foldData;
+    if (isBottom &&
+        targetElement.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement, true, false, false, true);
+    } else if (!isBottom && targetElement.previousElementSibling &&
+        targetElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        targetElement.previousElementSibling.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, targetElement.previousElementSibling, true, false, false, true);
+    }
+    if (foldData) {
+        foldData.doOperations[0].context = {
+            focusId: sourceElements[0].getAttribute("data-node-id"),
+        };
+        doOperations.push(...foldData.doOperations);
+        undoOperations.push(...foldData.undoOperations);
+    }
+    if (targetElement.getAttribute("data-type") === "NodeListItem" &&
+        targetElement.getAttribute("data-subtype") === "o") {
         // https://github.com/siyuan-note/insider/issues/536
         Array.from(targetElement.parentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {

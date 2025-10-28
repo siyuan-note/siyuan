@@ -978,7 +978,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "PDF、HTML、Word などの形式でのエクスポートはサポートしていません"
+									"Data": "PDF や Word などの形式へのエクスポートはサポートされていません"
 								}
 							]
 						}

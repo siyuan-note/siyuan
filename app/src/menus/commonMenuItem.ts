@@ -767,7 +767,8 @@ export const exportMd = (id: string) => {
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
                     }, async response => {
-                        const html = await onExport(response, undefined, {type: "pdf", id});
+                        const servePath = window.location.protocol + "//" + window.location.host + "/";
+                        const html = await onExport(response, undefined, servePath, {type: "pdf", id});
                         if (isInAndroid()) {
                             window.JSAndroid.print(html);
                         } else if (isInHarmony()) {

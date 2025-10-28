@@ -1546,7 +1546,7 @@
     "121": "Não há arquivo de rede neste documento",
     "122": "O recurso de barra lateral que vem com o plugin precisa ser configurado na área de trabalho. Após a configuração, por favor reinicie o SiYuan (para usuários móveis, você deve primeiro confiar no marketplace a partir da área de trabalho antes de usar o plugin pela primeira vez)",
     "123": "A função de sincronização só pode ser ativada após adicionar/selecionar o diretório de sincronização na nuvem",
-    "124": "Por favor, ative a sincronização na nuvem em [Configurações - Ativar Sincronização na Nuvem]",
+    "124": "Por favor, ative a sincronização na nuvem em [Configurações - Nuvem - Ativar Sincronização na Nuvem]",
     "125": "Falha na sincronização automática muitas vezes, por favor tente acionar a sincronização manualmente, se ainda houver problemas, por favor reporte via <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">GitHub Issues</a>",
     "126": "O favorito não pode estar vazio",
     "127": "Faltam [%d] dias para a assinatura expirar, após isso os dados oficiais de armazenamento em nuvem serão completamente excluídos. Para renovar, visite <a target='_blank' href='${accountServer}/subscribe/siyuan'>aqui</a>",

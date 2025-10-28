@@ -1546,7 +1546,7 @@
     "121": "Es gibt keine Netzwerkdatei in diesem Dokument",
     "122": "Die Sidebar-Funktion, die mit dem Plugin geliefert wird, muss auf dem Desktop konfiguriert werden. Bitte starten Sie SiYuan nach Abschluss der Konfiguration neu (für mobile Benutzer müssen Sie zuerst den Marktplatz vom Desktop aus vertrauen, bevor Sie das Plugin zum ersten Mal verwenden)",
     "123": "Die Synchronisierungsfunktion kann nur nach dem Hinzufügen/Auswählen des Cloud-Synchronisationsverzeichnisses aktiviert werden.",
-    "124": "Bitte aktivieren Sie die Cloud-Synchronisierung in [Einstellungen - Cloud-Synchronisierung aktivieren]",
+    "124": "Bitte aktivieren Sie die Cloud-Synchronisierung in [Einstellungen - Cloud - Cloud-Synchronisierung aktivieren]",
     "125": "Automatische Synchronisierung fehlgeschlagen zu viele Male, bitte versuchen Sie manuell die Synchronisierung auszulösen, wenn das Problem weiterhin besteht, melden Sie es bitte über <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">GitHub Issues</a>",
     "126": "Lesezeichen kann nicht leer sein",
     "127": "Es verbleiben [%d] Tage bis zum Ablauf des Abonnements, danach werden die offiziellen Cloud-Speicherdaten vollständig gelöscht. Um zu verlängern, besuchen Sie <a target='_blank' href='${accountServer}/subscribe/siyuan'>hier</a>",

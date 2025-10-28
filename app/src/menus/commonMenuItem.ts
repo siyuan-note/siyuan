@@ -760,7 +760,7 @@ export const exportMd = (id: string) => {
                 icon: "iconPDF",
                 ignore: !isInAndroid() && !isInHarmony(),
                 click: () => {
-                    const msId = showMessage(window.siyuan.languages.exporting);
+                    const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
                     fetchPost("/api/export/exportPreviewHTML", {
                         id,
@@ -775,9 +775,24 @@ export const exportMd = (id: string) => {
                         }
 
                         setTimeout(() => {
-                            hideMessage(msId);
+                            hideMessage(msgId);
                         }, 3000);
                     });
+                }
+            }, {
+                id: "exportHTML_SiYuan",
+                label: "HTML (SiYuan)",
+                iconClass: "ft__error",
+                icon: "iconHTML5",
+                click: () => {
+                    saveExport({type: "html", id});
+                }
+            }, {
+                id: "exportHTML_Markdown",
+                label: "HTML (Markdown)",
+                icon: "iconHTML5",
+                click: () => {
+                    saveExport({type: "htmlmd", id});
                 }
             },
             /// #endif

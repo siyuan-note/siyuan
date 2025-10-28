@@ -80,7 +80,6 @@ func BlockCount(fsize int64) int {
 }
 
 func CalSha1(b []byte, r io.Reader) ([]byte, error) {
-
 	h := sha1.New()
 	_, err := io.Copy(h, r)
 	if err != nil {

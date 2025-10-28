@@ -1546,7 +1546,7 @@
     "121": "Nie ma pliku sieciowego w tym dokumencie",
     "122": "Funkcja paska bocznego dołączona do wtyczki musi być skonfigurowana na komputerze stacjonarnym. Po zakończeniu konfiguracji, należy ponownie uruchomić SiYuan (dla użytkowników mobilnych, najpierw musisz zaufać rynkowi z pulpitu przed użyciem wtyczki po raz pierwszy)",
     "123": "Funkcjonalność synchronizacji może być aktywowana tylko po dodaniu/wybieraniu katalogu synchronizacji w chmurze",
-    "124": "Proszę włączyć synchronizację chmury w [Ustawienia - Włącz synchronizację w chmurze]",
+    "124": "Proszę włączyć synchronizację chmury w [Ustawienia - Chmura - Włącz synchronizację w chmurze]",
     "125": "Auto synchronizacja nie powiodła się zbyt wiele razy, proszę spróbować ręcznie uruchomić synchronizację, jeśli problem nadal występuje, zgłoś to za pomocą <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">GitHub Issues</a>",
     "126": "Zakładka nie może być pusta",
     "127": "Do wygaśnięcia subskrypcji pozostało [%d] dni, po czym dane w chmurze zostaną całkowicie usunięte. Aby przedłużyć, odwiedź <a target='_blank' href='${accountServer}/subscribe/siyuan'>tutaj</a>",

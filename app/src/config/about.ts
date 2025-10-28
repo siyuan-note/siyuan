@@ -210,7 +210,7 @@ ${checkUpdateHTML}
     <div class="b3-label__text">
         ${window.siyuan.languages.about17}
     </div>
-    <div class="b3-label__text fn__flex config__item" style="padding: 4px 0 4px 4px;">
+    <div class="b3-label__text fn__flex config__item">
         <select id="aboutScheme" class="b3-select">
             <option value="" ${window.siyuan.config.system.networkProxy.scheme === "" ? "selected" : ""}>${window.siyuan.languages.directConnection}</option>
             <option value="socks5" ${window.siyuan.config.system.networkProxy.scheme === "socks5" ? "selected" : ""}>SOCKS5</option>

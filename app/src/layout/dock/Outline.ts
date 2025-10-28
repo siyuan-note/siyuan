@@ -636,22 +636,10 @@ export class Outline extends Model {
             });
             this.element.scrollTop = scrollTop;
         } else if (this.blockId) {
-            fetchPost("/api/storage/getOutlineStorage", {
-                docID: this.blockId
-            }, storageResponse => {
-                const storageData = storageResponse.data;
-                if (storageData && storageData.expandIds) {
-                    if (storageData.expandIds.length === 0) {
-                        this.tree.collapseAll();
-                    } else {
-                        this.tree.setExpandIds(storageData.expandIds);
-                    }
-                }
-                if ((this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value) {
-                    this.setFilter();
-                }
-                this.element.scrollTop = scrollTop;
-            });
+            if ((this.headerElement.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value) {
+                this.setFilter();
+            }
+            this.element.scrollTop = scrollTop;
         }
         if (currentId) {
             currentElement = this.element.querySelector(`[data-node-id="${currentId}"]`);

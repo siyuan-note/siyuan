@@ -116,6 +116,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         data.forEach((item: IBlock & {
             subType: string;
             count: string;
+            folded?: boolean
             ial?: {
                 icon: string
             }
@@ -152,7 +153,7 @@ data-subtype="${item.subType}"
 data-treetype="${type}" 
 data-def-path="${item.defPath}">
     <span style="${style}" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}${item.children ? "" : " fn__hidden"}">
-        <svg data-id="${item.id}" class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        <svg data-id="${item.id}" class="b3-list-item__arrow${(type === "outline" && !item.folded) ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text ariaLabel" data-position="parentE" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
@@ -160,7 +161,7 @@ data-def-path="${item.defPath}">
     ${this.blockExtHTML || ""}
 </li>`;
             if (item.children && item.children.length > 0) {
-                html += this.genBlockHTML(item.children, false, type) + "</ul>";
+                html += this.genBlockHTML(item.children, (type === "outline" && !item.folded) ? true : false, type) + "</ul>";
             }
         });
         return html;

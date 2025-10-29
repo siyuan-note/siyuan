@@ -357,6 +357,7 @@ const renderKeyboardToolbar = () => {
         }
 
         const protyle = getCurrentEditor().protyle;
+        protyle.toolbar.range = range;
         if (!dynamicElements[0].classList.contains("fn__none")) {
             if (protyle.undo.undoStack.length === 0) {
                 dynamicElements[0].querySelector('[data-type="undo"]').setAttribute("disabled", "disabled");

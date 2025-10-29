@@ -255,7 +255,7 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 		// 先全部折叠，后面再根据展开 ID 列表展开对应标题
 		for _, p := range ret {
 			for _, b := range p.Blocks {
-				b.Folded = false
+				b.Folded = true
 				for _, c := range b.Children {
 					walkChildren(c, []string{"expandNone"})
 				}

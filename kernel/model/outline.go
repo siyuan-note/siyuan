@@ -239,10 +239,15 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 	ret = outline(tree)
 
 	storage, _ := GetOutlineStorage(rootID)
-	if nil == storage {
-		// 默认展开顶层
+	if nil == storage || 0 == len(storage) {
+		// 默认全部展开
 		for _, p := range ret {
-			p.Folded = false
+			for _, b := range p.Blocks {
+				b.Folded = false
+				for _, c := range b.Children {
+					walkChildren(c, []string{"expandAll"})
+				}
+			}
 		}
 	}
 
@@ -254,8 +259,6 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 		}
 
 		for _, p := range ret {
-			p.Folded = false // 顶层默认展开
-
 			for _, b := range p.Blocks {
 				b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
 				for _, c := range b.Children {
@@ -268,7 +271,12 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 }
 
 func walkChildren(b *Block, expandIDs []string) {
-	b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+	if 1 == len(expandIDs) && "expandAll" == expandIDs[0] {
+		b.Folded = false
+	} else {
+		b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+	}
+
 	for _, c := range b.Children {
 		walkChildren(c, expandIDs)
 	}

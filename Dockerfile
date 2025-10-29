@@ -23,7 +23,7 @@ EORUN
 
 FROM golang:1.24-alpine AS go-build
 
-ARG GOPROXY=
+ARG GOPROXY=""
 
 RUN <<EORUN
 #!/bin/sh -e

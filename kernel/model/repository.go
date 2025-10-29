@@ -1592,7 +1592,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	var upsertTrees int
 	// 可能需要重新加载部分功能
 	var needReloadFlashcard, needReloadOcrTexts, needReloadPlugin bool
-	upsertPluginSet := hashset.New()
+	upsertCodePluginSet := hashset.New() // 插件代码变更 data/plugins/
+	upsertDataPluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
@@ -1615,7 +1616,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadPlugin = true
 			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
 				if pluginName := parts[3]; "petals.json" != pluginName {
-					upsertPluginSet.Add(pluginName)
+					upsertDataPluginSet.Add(pluginName)
 				}
 			}
 		}
@@ -1623,7 +1624,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/plugins/") {
 			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
 				needReloadPlugin = true
-				upsertPluginSet.Add(parts[2])
+				upsertCodePluginSet.Add(parts[2])
 			}
 		}
 
@@ -1653,7 +1654,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadPlugin = true
 			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
 				if pluginName := parts[3]; "petals.json" != pluginName {
-					removePluginSet.Add(pluginName)
+					upsertDataPluginSet.Add(pluginName)
 				}
 			}
 		}
@@ -1674,7 +1675,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	for _, upsertPetal := range mergeResult.UpsertPetals {
 		needReloadPlugin = true
-		upsertPluginSet.Add(upsertPetal)
+		upsertCodePluginSet.Add(upsertPetal)
 	}
 	for _, removePetal := range mergeResult.RemovePetals {
 		needReloadPlugin = true
@@ -1690,7 +1691,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadPlugin {
-		pushReloadPlugin(upsertPluginSet, removePluginSet, "")
+		PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, removePluginSet, "")
 	}
 
 	for _, widgetDir := range removeWidgetDirSet.Values() {

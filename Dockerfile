@@ -23,13 +23,10 @@ EORUN
 
 FROM golang:1.24-alpine AS go-build
 
-ARG GOPROXY=""
-
 RUN <<EORUN
 #!/bin/sh -e
 apk add --no-cache gcc musl-dev
 go env -w GO111MODULE=on
-go env -w GOPROXY=${GOPROXY}
 go env -w CGO_ENABLED=1
 EORUN
 

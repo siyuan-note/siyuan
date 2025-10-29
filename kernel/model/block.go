@@ -862,7 +862,11 @@ func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
 		}
 
 		// 获取嵌入块的查询语句
-		stmt := node.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
+		scriptNode := node.ChildByType(ast.NodeBlockQueryEmbedScript)
+		if nil == scriptNode {
+			return ast.WalkContinue
+		}
+		stmt := scriptNode.TokensStr()
 		stmt = html.UnescapeString(stmt)
 		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 
@@ -889,6 +893,9 @@ func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
 			} else if "h" == sqlBlock.Type {
 				// 标题块：使用标题及其子块的原始 AST 节点渲染
 				h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+				if nil == h {
+					continue
+				}
 				var hChildren []*ast.Node
 				hChildren = append(hChildren, h)
 				hChildren = append(hChildren, treenode.HeadingChildren(h)...)
@@ -902,6 +909,9 @@ func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
 			} else {
 				// 其他块：直接使用原始 AST 节点渲染
 				blockNode := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+				if nil == blockNode {
+					continue
+				}
 				contentHTML = luteEngine.RenderNodeBlockDOM(blockNode)
 			}
 

@@ -28,7 +28,7 @@ const getIconScript = (servePath: string) => {
     const isBuiltInIcon = ["ant", "material"].includes(window.siyuan.config.appearance.icon);
     const html = isBuiltInIcon ? "" : `<script src="${servePath}appearance/icons/material/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
     return html + `<script src="${servePath}appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
-}
+};
 
 export const saveExport = (option: IExportOptions) => {
     /// #if BROWSER

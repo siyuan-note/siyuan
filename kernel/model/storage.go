@@ -232,6 +232,10 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 
 	if err = gulu.JSON.UnmarshalJSON(data, &tmp); err != nil {
 		logging.LogErrorf("unmarshal storage [recent-doc] failed: %s", err)
+		if err = setRecentDocs([]*RecentDoc{}); err != nil {
+			logging.LogErrorf("reset storage [recent-doc] failed: %s", err)
+		}
+		ret = []*RecentDoc{}
 		return
 	}
 

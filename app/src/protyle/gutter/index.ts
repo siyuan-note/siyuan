@@ -1698,7 +1698,7 @@ export class Gutter {
                         iconHTML: "",
                         checked: !nodeElement.getAttribute("custom-heading-mode"),
                         click() {
-                            nodeElement.setAttribute("custom-heading-mode", "0");
+                            nodeElement.removeAttribute("custom-heading-mode");
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id,
                                 attrs: {"custom-heading-mode": ""}

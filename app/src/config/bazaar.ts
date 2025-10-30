@@ -704,7 +704,8 @@ export const bazaar = {
                                         fetchPost("/api/petal/setPetalEnabled", {
                                             packageName: dataObj.name,
                                             enabled: true,
-                                            frontend: getFrontend()
+                                            frontend: getFrontend(),
+                                            app: Constants.SIYUAN_APPID,
                                         }, (response) => {
                                             loadPlugin(app, response.data);
                                             bazaar._genMyHTML(bazaarType, app, false);
@@ -946,7 +947,8 @@ export const bazaar = {
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
                             enabled,
-                            frontend: getFrontend()
+                            frontend: getFrontend(),
+                            app: Constants.SIYUAN_APPID,
                         }, (response) => {
                             target.removeAttribute("disabled");
                             if (enabled) {

@@ -250,6 +250,11 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
                     blockID: options.blockElement.getAttribute("data-node-id"),
                     id: currentElement.dataset.id,
                     avID: options.blockElement.getAttribute("data-av-id"),
+                }], [{
+                    action: "setAttrViewBlockView",
+                    blockID: options.blockElement.getAttribute("data-node-id"),
+                    id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
+                    avID: options.blockElement.getAttribute("data-av-id"),
                 }]);
                 options.menuElement.remove();
                 focusBlock(options.blockElement);

@@ -20,6 +20,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,6 +31,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -489,6 +491,21 @@ func exportMdHTML(c *gin.Context) {
 
 	id := arg["id"].(string)
 	savePath := arg["savePath"].(string)
+
+	savePath = strings.TrimSpace(savePath)
+	if savePath == "" {
+		folderName := "htmlmd-" + id + "-" + util.CurrentTimeSecondsStr()
+		tmpDir := filepath.Join(util.TempDir, "export", folderName)
+		name, content := model.ExportMarkdownHTML(id, tmpDir, false, false)
+		ret.Data = map[string]interface{}{
+			"id":      id,
+			"name":    name,
+			"content": content,
+			"folder":  folderName,
+		}
+		return
+	}
+
 	name, content := model.ExportMarkdownHTML(id, savePath, false, false)
 	ret.Data = map[string]interface{}{
 		"id":      id,
@@ -524,6 +541,62 @@ func exportTempContent(c *gin.Context) {
 	url := path.Join("/export/temp/", filepath.Base(p))
 	ret.Data = map[string]interface{}{
 		"url": "http://" + util.LocalHost + ":" + util.ServerPort + url,
+	}
+}
+
+func exportBrowserHTML(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	folder := arg["folder"].(string)
+	htmlContent := arg["html"].(string)
+	name := arg["name"].(string)
+
+	tmpDir := filepath.Join(util.TempDir, "export", folder)
+
+	htmlPath := filepath.Join(tmpDir, "index.html")
+	if err := filelock.WriteFile(htmlPath, []byte(htmlContent)); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = nil
+		return
+	}
+
+	zipFileName := util.FilterFileName(name) + ".zip"
+	zipPath := filepath.Join(util.TempDir, "export", zipFileName)
+	zip, err := gulu.Zip.Create(zipPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = nil
+		return
+	}
+
+	err = zip.AddDirectory("", tmpDir, func(string) {})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = nil
+		return
+	}
+
+	if err = zip.Close(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = nil
+		return
+	}
+
+	os.RemoveAll(tmpDir)
+
+	zipURL := "/export/" + url.PathEscape(filepath.Base(zipPath))
+	ret.Data = map[string]interface{}{
+		"zip": zipURL,
 	}
 }
 
@@ -590,6 +663,21 @@ func exportHTML(c *gin.Context) {
 	if nil != arg["merge"] {
 		merge = arg["merge"].(bool)
 	}
+
+	savePath = strings.TrimSpace(savePath)
+	if savePath == "" {
+		folderName := "html-" + id + "-" + util.CurrentTimeSecondsStr()
+		tmpDir := filepath.Join(util.TempDir, "export", folderName)
+		name, content, _ := model.ExportHTML(id, tmpDir, pdf, false, keepFold, merge)
+		ret.Data = map[string]interface{}{
+			"id":      id,
+			"name":    name,
+			"content": content,
+			"folder":  folderName,
+		}
+		return
+	}
+
 	name, content, _ := model.ExportHTML(id, savePath, pdf, false, keepFold, merge)
 	ret.Data = map[string]interface{}{
 		"id":      id,

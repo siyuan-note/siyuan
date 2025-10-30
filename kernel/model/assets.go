@@ -51,6 +51,19 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetAssetPathByHash(hash string) string {
+	assetHash := cache.GetAssetHash(hash)
+	if nil == assetHash {
+		sqlAsset := sql.QueryAssetByHash(hash)
+		if nil == sqlAsset {
+			return ""
+		}
+		cache.SetAssetHash(sqlAsset.Hash, sqlAsset.Path)
+		return sqlAsset.Path
+	}
+	return assetHash.Path
+}
+
 func HandleAssetsRemoveEvent(assetAbsPath string) {
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
@@ -648,6 +661,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 			hash, _ := util.GetEtag(p)
 			hashes = append(hashes, hash)
+			cache.RemoveAssetHash(hash)
 		}
 	}
 
@@ -703,6 +717,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 
 		hash, _ := util.GetEtag(absPath)
 		sql.BatchRemoveAssetsQueue([]string{hash})
+		cache.RemoveAssetHash(hash)
 	}
 
 	if err = filelock.Remove(absPath); err != nil {

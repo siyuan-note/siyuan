@@ -17,6 +17,7 @@
 package av
 
 import (
+	"reflect"
 	"strings"
 	"time"
 
@@ -192,17 +193,39 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 
 		switch filter.Qualifier {
 		case FilterQuantifierUndefined, FilterQuantifierAny:
-			if len(value.Rollup.Contents) < len(relVal.Relation.Contents) { // 说明汇总的目标字段存在空值
-				if FilterOperatorIsEmpty == filter.Operator {
+			if FilterOperatorIsEmpty == filter.Operator {
+				if 1 > len(value.Rollup.Contents) {
 					return true
-				} else if FilterOperatorIsNotEmpty == filter.Operator {
-					if 0 < len(value.Rollup.Contents) {
+				}
+
+				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) { // 说明汇总的目标字段存在空值
+					return true
+				}
+
+				for _, c := range value.Rollup.Contents {
+					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
 						return true
 					}
 				}
+				return false
+			} else if FilterOperatorIsNotEmpty == filter.Operator {
+				if 1 > len(value.Rollup.Contents) {
+					return false
+				}
+
+				for _, c := range value.Rollup.Contents {
+					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+						return true
+					}
+				}
+				return false
 			}
 
 			if 1 > len(filter.Value.Rollup.Contents) {
+				return true
+			}
+
+			if v := filter.Value.GetValByType(filter.Value.Rollup.Contents[0].Type); nil == v || reflect.ValueOf(v).IsNil() {
 				return true
 			}
 
@@ -212,17 +235,43 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 			}
 		case FilterQuantifierAll:
-			if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
-				if FilterOperatorIsEmpty == filter.Operator {
-					if 1 > len(value.Rollup.Contents) {
-						return true
-					}
-				} else if FilterOperatorIsNotEmpty == filter.Operator {
+			if FilterOperatorIsEmpty == filter.Operator {
+				if 1 > len(value.Rollup.Contents) {
+					return true
+				}
+
+				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
 					return false
 				}
+
+				for _, c := range value.Rollup.Contents {
+					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+						return false
+					}
+				}
+				return true
+			} else if FilterOperatorIsNotEmpty == filter.Operator {
+				if 1 > len(value.Rollup.Contents) {
+					return false
+				}
+
+				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+					return false
+				}
+
+				for _, c := range value.Rollup.Contents {
+					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+						return false
+					}
+				}
+				return true
 			}
 
 			if 1 > len(filter.Value.Rollup.Contents) {
+				return true
+			}
+
+			if v := filter.Value.GetValByType(filter.Value.Rollup.Contents[0].Type); nil == v || reflect.ValueOf(v).IsNil() {
 				return true
 			}
 
@@ -234,16 +283,38 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 			return true
 		case FilterQuantifierNone:
 			if FilterOperatorIsEmpty == filter.Operator {
-				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) || 1 > len(value.Rollup.Contents) {
+				if 1 > len(value.Rollup.Contents) {
 					return false
 				}
+
+				if len(value.Rollup.Contents) < len(relVal.Relation.Contents) {
+					return true
+				}
+
+				for _, c := range value.Rollup.Contents {
+					if v := c.GetValByType(c.Type); nil == v || reflect.ValueOf(v).IsNil() {
+						return false
+					}
+				}
+				return true
 			} else if FilterOperatorIsNotEmpty == filter.Operator {
 				if 1 > len(value.Rollup.Contents) {
 					return true
 				}
+
+				for _, c := range value.Rollup.Contents {
+					if v := c.GetValByType(c.Type); nil != v && !reflect.ValueOf(v).IsNil() {
+						return false
+					}
+				}
+				return true
 			}
 
 			if 1 > len(filter.Value.Rollup.Contents) {
+				return true
+			}
+
+			if v := filter.Value.GetValByType(filter.Value.Rollup.Contents[0].Type); nil == v || reflect.ValueOf(v).IsNil() {
 				return true
 			}
 
@@ -312,7 +383,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, asset := range value.MAsset {
-					if "" == strings.TrimSpace(asset.Content) {
+					if "" == strings.TrimSpace(asset.Name) && "" == strings.TrimSpace(asset.Content) {
 						return true
 					}
 				}
@@ -323,7 +394,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, asset := range value.MAsset {
-					if "" != strings.TrimSpace(asset.Content) {
+					if "" != strings.TrimSpace(asset.Name) || "" != strings.TrimSpace(asset.Content) {
 						return true
 					}
 				}
@@ -354,7 +425,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, asset := range value.MAsset {
-					if "" != strings.TrimSpace(asset.Content) {
+					if "" != strings.TrimSpace(asset.Name) || "" != strings.TrimSpace(asset.Content) {
 						return false
 					}
 				}
@@ -365,7 +436,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, asset := range value.MAsset {
-					if "" == strings.TrimSpace(asset.Content) {
+					if "" == strings.TrimSpace(asset.Name) && "" == strings.TrimSpace(asset.Content) {
 						return false
 					}
 				}
@@ -397,7 +468,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, asset := range value.MAsset {
-					if "" == strings.TrimSpace(asset.Content) {
+					if "" == strings.TrimSpace(asset.Name) && "" == strings.TrimSpace(asset.Content) {
 						return false
 					}
 				}
@@ -408,7 +479,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 				}
 
 				for _, asset := range value.MAsset {
-					if "" != strings.TrimSpace(asset.Content) {
+					if "" != strings.TrimSpace(asset.Name) || "" != strings.TrimSpace(asset.Content) {
 						return false
 					}
 				}

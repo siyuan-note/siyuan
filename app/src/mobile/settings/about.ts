@@ -36,10 +36,20 @@ export const initAbout = () => {
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         <div class="fn__hr"></div>
         ${(() => {
-            const ipv4 = window.siyuan.config.localIPs.filter(ip => !(ip.startsWith("[") && ip.endsWith("]")));
-            const ipv6 = window.siyuan.config.localIPs.filter(ip => (ip.startsWith("[") && ip.endsWith("]")));
-            return `<div class="b3-label__text${ipv4.length > 0 ? "" : " fn__none"}"><code class="fn__code">${ipv4.join("</code> <code class='fn__code'>")}</code></div>
-                    <div class="b3-label__text${ipv6.length > 0 ? "" : " fn__none"}"><code class="fn__code">${ipv6.join("</code> <code class='fn__code'>")}</code></div>`;
+            const ipv4Codes: string[] = [];
+            const ipv6Codes: string[] = [];
+            for (const ip of window.siyuan.config.localIPs) {
+                if (!ip.trim()) {
+                    break;
+                }
+                if (ip.startsWith("[") && ip.endsWith("]")) {
+                    ipv6Codes.push(`<code class="fn__code">${ip}</code>`);
+                } else {
+                    ipv4Codes.push(`<code class="fn__code">${ip}</code>`);
+                }
+            }
+            return `<div class="b3-label__text${ipv4Codes.length ? "" : " fn__none"}">${ipv4Codes.join(" ")}</div>
+                    <div class="b3-label__text${ipv6Codes.length ? "" : " fn__none"}">${ipv6Codes.join(" ")}</div>`;
         })()}
         <div class="fn__hr"></div>
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>

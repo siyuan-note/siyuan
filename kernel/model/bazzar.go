@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"path"
 	"path/filepath"
 	"strings"
@@ -27,8 +26,10 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
 )
@@ -254,6 +255,9 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 	}
 	petals = tmp
 	savePetals(petals)
+
+	removePluginSet := hashset.New(pluginName)
+	pushReloadPlugin(nil, removePluginSet, "")
 	return nil
 }
 

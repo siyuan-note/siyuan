@@ -9,7 +9,7 @@
     <Identity Name="89C2A984.SiYuan"
               ProcessorArchitecture="arm64"
               Publisher="CN=087C656E-C1D9-42D8-8807-CED45A74FC0F"
-              Version="3.3.5.0"/>
+              Version="3.3.6.0"/>
     <Properties>
         <DisplayName>SiYuan</DisplayName>
         <PublisherDisplayName>云南链滴科技有限公司</PublisherDisplayName>
@@ -17,7 +17,18 @@
         <Logo>assets\StoreLogo.png</Logo>
     </Properties>
     <Resources>
+        <Resource Language="ar-SA"/>
+        <Resource Language="de-DE"/>
         <Resource Language="en-US"/>
+        <Resource Language="es-ES"/>
+        <Resource Language="fr-FR"/>
+        <Resource Language="he-IL"/>
+        <Resource Language="it-IT"/>
+        <Resource Language="ja-JP"/>
+        <Resource Language="pl-PL"/>
+        <Resource Language="pt-BR"/>
+        <Resource Language="ru-RU"/>
+        <Resource Language="zh-TW"/>
         <Resource Language="zh-CN"/>
     </Resources>
     <Dependencies>

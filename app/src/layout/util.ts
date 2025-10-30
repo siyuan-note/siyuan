@@ -16,7 +16,6 @@ import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/s
 import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {Constants} from "../constants";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Backlink} from "./dock/Backlink";
@@ -65,13 +64,6 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
                 return true;
             }
         });
-        const blockElement = hasClosestBlock(document.activeElement);
-        if (blockElement) {
-            const editElement = getContenteditableElement(blockElement) as HTMLElement;
-            if (editElement) {
-                editElement.blur();
-            }
-        }
     }
 };
 

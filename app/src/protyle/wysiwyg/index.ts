@@ -2166,6 +2166,11 @@ export class WYSIWYG {
                         blockID: nodeElement.getAttribute("data-node-id"),
                         id: avTabHeaderElement.dataset.id,
                         avID: nodeElement.getAttribute("data-av-id"),
+                    }], [{
+                        action: "setAttrViewBlockView",
+                        blockID: nodeElement.getAttribute("data-node-id"),
+                        id: avTabHeaderElement.parentElement.querySelector(".item--focus").getAttribute("data-id"),
+                        avID: nodeElement.getAttribute("data-av-id"),
                     }]);
                     window.siyuan.menus.menu.remove();
                     openViewMenu({
@@ -3036,14 +3041,18 @@ export class WYSIWYG {
                 let newRange = getEditorRange(this.element);
                 // 点击两侧或间隙导致光标跳转到开头 https://github.com/siyuan-note/siyuan/issues/16179
                 if (hasClosestBlock(event.target) !== hasClosestBlock(newRange.startContainer) &&
-                    this.element.firstElementChild.contains(newRange.startContainer)) {
+                    this.element.querySelector("[data-node-id]")?.contains(newRange.startContainer)) {
                     const rect = this.element.getBoundingClientRect();
                     let rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY);
                     if (rangeElement === this.element) {
                         rangeElement = document.elementFromPoint(rect.left + rect.width / 2, event.clientY + 8);
                     }
-                    const blockElement = hasClosestBlock(rangeElement);
+                    let blockElement = hasClosestBlock(rangeElement);
                     if (blockElement) {
+                        const embedElement = isInEmbedBlock(blockElement);
+                        if (embedElement) {
+                            blockElement = embedElement;
+                        }
                         newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
                         if (protyle.options.render.breadcrumb) {
                             protyle.breadcrumb.render(protyle, false, blockElement);
@@ -3074,7 +3083,8 @@ export class WYSIWYG {
                     countSelectWord(newRange, protyle.block.rootID);
                 }
                 if (getSelection().rangeCount === 0 && !mobileBlur) {
-                    // TODO https://github.com/siyuan-note/siyuan/issues/14589  点击 video 也可以测试一下 https://github.com/siyuan-note/siyuan/issues/14569
+                    // https://github.com/siyuan-note/siyuan/issues/14589
+                    // https://github.com/siyuan-note/siyuan/issues/14569
                     // https://github.com/siyuan-note/siyuan/issues/5901
                     focusByRange(newRange);
                 }

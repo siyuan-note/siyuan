@@ -17,6 +17,7 @@
 package model
 
 import (
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
@@ -236,7 +237,68 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 	}
 
 	ret = outline(tree)
+
+	storage, _ := GetOutlineStorage(rootID)
+	if nil == storage || 0 == len(storage) {
+		// 默认全部展开
+		for _, p := range ret {
+			p.Folded = false
+			for _, b := range p.Blocks {
+				b.Folded = false
+				for _, c := range b.Children {
+					walkChildren(c, []string{"expandAll"})
+				}
+			}
+		}
+	}
+
+	if nil != storage["expandIds"] {
+		// 先全部折叠，后面再根据展开 ID 列表展开对应标题
+		for _, p := range ret {
+			p.Folded = true
+			for _, b := range p.Blocks {
+				b.Folded = true
+				for _, c := range b.Children {
+					walkChildren(c, []string{"expandNone"})
+				}
+			}
+		}
+
+		expandIDsArg := storage["expandIds"].([]interface{})
+		var expandIDs []string
+		for _, id := range expandIDsArg {
+			expandIDs = append(expandIDs, id.(string))
+		}
+
+		for _, p := range ret {
+			p.Folded = !gulu.Str.Contains(p.ID, expandIDs)
+			for _, b := range p.Blocks {
+				b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+				for _, c := range b.Children {
+					walkChildren(c, expandIDs)
+				}
+			}
+		}
+	}
 	return
+}
+
+func walkChildren(b *Block, expandIDs []string) {
+	if 1 == len(expandIDs) {
+		if "expandAll" == expandIDs[0] {
+			b.Folded = false
+		} else if "expandNone" == expandIDs[0] {
+			b.Folded = true
+		} else {
+			b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+		}
+	} else {
+		b.Folded = !gulu.Str.Contains(b.ID, expandIDs)
+	}
+
+	for _, c := range b.Children {
+		walkChildren(c, expandIDs)
+	}
 }
 
 func outline(tree *parse.Tree) (ret []*Path) {
@@ -254,6 +316,7 @@ func outline(tree *parse.Tree) (ret []*Path) {
 				Content: renderOutline(n, luteEngine),
 				Type:    n.Type.String(),
 				SubType: treenode.SubTypeAbbr(n),
+				Folded:  true,
 			}
 			headings = append(headings, block)
 			return ast.WalkSkipChildren
@@ -303,6 +366,7 @@ func outline(tree *parse.Tree) (ret []*Path) {
 				Blocks:   b.Children,
 				Depth:    0,
 				Count:    b.Count,
+				Folded:   true,
 			})
 		}
 	}

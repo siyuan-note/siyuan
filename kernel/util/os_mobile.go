@@ -25,5 +25,8 @@ func GetOSPlatform() (plat string) {
 	if ContainerAndroid == Container {
 		return "Android " + MobileOSVer
 	}
+	if ContainerHarmony == Container {
+		return "HarmonyOS " + MobileOSVer
+	}
 	return "Unknown " + MobileOSVer
 }

@@ -738,6 +738,42 @@ func getBlockDOMs(c *gin.Context) {
 	ret.Data = doms
 }
 
+func getBlockDOMWithEmbed(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	dom := model.GetBlockDOMWithEmbed(id)
+	ret.Data = map[string]string{
+		"id":  id,
+		"dom": dom,
+	}
+}
+
+func getBlockDOMsWithEmbed(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+
+	doms := model.GetBlockDOMsWithEmbed(ids)
+	ret.Data = doms
+}
+
 func getBlockKramdown(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -412,7 +412,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 }
             }
         }
-        pushBack(editor.editor.protyle, undefined, nodeElement || editor.editor.protyle.wysiwyg.element.firstElementChild);
+        pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);
     }
     if (options.mode) {
         setEditMode(editor.editor.protyle, options.mode);

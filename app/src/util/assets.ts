@@ -277,8 +277,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
 }`;
     }
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px }
-.b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
-${window.siyuan.config.editor.justify ? ".protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
+.b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (window.siyuan.config.editor.rtl) {
         style += `\n.protyle-title__input,
 .protyle-wysiwyg .p,

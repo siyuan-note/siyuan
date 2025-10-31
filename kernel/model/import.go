@@ -873,6 +873,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			if d.IsDir() {
+				if "assets" == d.Name() {
+					// 如果是 assets 文件夹则跳过，里面的 Markdown 文件算作资源文件 https://github.com/siyuan-note/siyuan/issues/13817
+					return nil
+				}
+
 				if subMdFiles := util.GetFilePathsByExts(currentPath, []string{".md", ".markdown"}); 1 > len(subMdFiles) {
 					// 如果该文件夹中不包含 Markdown 文件则不处理 https://github.com/siyuan-note/siyuan/issues/11567
 					return nil

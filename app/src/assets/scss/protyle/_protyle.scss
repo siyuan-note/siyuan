@@ -105,8 +105,8 @@
   }
 
   svg {
-    height: 14px;
     color: var(--b3-theme-on-surface-light);
+    height: calc(var(--b3-font-size-editor) * 1.625);
     width: 14px;
     float: left;
     transition: var(--b3-color-transition);

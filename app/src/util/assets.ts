@@ -199,7 +199,6 @@ export const initAssets = () => {
 };
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
-    const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);
     let style;
     // Emojis Reset: 字体中包含了 emoji，需重置
     // Emojis Additional： 苹果/win11 字体中没有的 emoji
@@ -227,10 +226,9 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   local("Segoe UI Symbol");
   size-adjust: 115%;
 }`;
-    } else {
-        const isWin11Browser = await isWin11();
-        if (isWin11Browser) {
-            style = `@font-face {
+    } else if (await isWin11()) {
+        // Win11 Browser
+        style = `@font-face {
   font-family: "Emojis Additional";
   src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
@@ -251,8 +249,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   local("Segoe UI Symbol");
   size-adjust: 85%;
 }`;
-        } else {
-            style = `@font-face {
+    } else {
+        style = `@font-face {
   font-family: "Emojis Reset";
   src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1f170-1f171, U+1f17e, U+1f17f, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, U+1f251, U+1f32b, U+1f3bc,
@@ -277,11 +275,13 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   local("EmojiSymbols");
   size-adjust: 92%;
 }`;
-        }
     }
-    let rtlCSS = "";
+    style += `\n:root{ --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px }
+.b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
+${window.siyuan.config.editor.justify ? ".protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (window.siyuan.config.editor.rtl) {
-        rtlCSS = `.protyle-title__input,
+        style += `
+.protyle-title__input,
 .protyle-wysiwyg .p,
 .protyle-wysiwyg .code-block .hljs,
 .protyle-wysiwyg .table,
@@ -305,11 +305,6 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   margin-left: auto;
 }`;
     }
-    style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}
-.b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
-${rtlCSS}
-.protyle-wysiwyg [data-node-id] {${window.siyuan.config.editor.justify ? " text-align: justify;" : ""}}
-.protyle-gutters button svg {height:${height}px}`;
     if (window.siyuan.config.editor.fontFamily) {
         style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Emojis Additional", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }

@@ -65,9 +65,9 @@ WYSIWYG.
 
 Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
-![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
+![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
 
-![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
+![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
 
 ## 🔮 Features
 

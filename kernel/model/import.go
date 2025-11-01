@@ -799,32 +799,6 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	moveIDs := map[string]string{}
 	assetsDone := map[string]string{}
 	if gulu.File.IsDir(localPath) { // 导入文件夹
-		// 收集所有资源文件
-		assets := map[string]string{}
-		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if d == nil {
-				return nil
-			}
-			if localPath == currentPath {
-				return nil
-			}
-			if strings.HasPrefix(d.Name(), ".") {
-				if d.IsDir() {
-					return filepath.SkipDir
-				}
-				return nil
-			}
-
-			if !strings.HasSuffix(d.Name(), ".md") && !strings.HasSuffix(d.Name(), ".markdown") {
-				assets[currentPath] = currentPath
-				return nil
-			}
-			return nil
-		})
-
 		targetPaths := map[string]string{}
 		count := 0
 		// md 转换 sy
@@ -838,6 +812,24 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			if strings.HasPrefix(d.Name(), ".") {
 				if d.IsDir() {
 					return filepath.SkipDir
+				}
+				return nil
+			}
+
+			if !d.IsDir() && strings.Contains(filepath.ToSlash(currentPath), "/assets/") {
+				// assets 文件夹下的文件算作资源文件
+				existName := assetsDone[currentPath]
+				var name string
+				if "" == existName {
+					name = filepath.Base(currentPath)
+					name = util.FilterUploadFileName(name)
+					name = util.AssetName(name, ast.NewNodeID())
+					assetTargetPath := filepath.Join(util.DataDir, "assets", name)
+					if err = filelock.Copy(currentPath, assetTargetPath); err != nil {
+						logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", currentPath, assetTargetPath, err)
+						return nil
+					}
+					assetsDone[currentPath] = name
 				}
 				return nil
 			}

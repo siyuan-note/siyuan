@@ -64,9 +64,9 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 詳細については、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご覧ください。
 
-![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
+![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
 
-![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
+![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
 
 ## 🔮 特徴
 

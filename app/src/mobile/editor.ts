@@ -5,7 +5,7 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
-import {scrollCenter} from "../util/highlightById";
+import {highlightById, scrollCenter} from "../util/highlightById";
 import {isInEmbedBlock} from "../protyle/util/hasClosest";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -42,6 +42,9 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         if (blockElement) {
             pushBack();
             scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, true);
+            if (action.includes(Constants.CB_GET_HL)) {
+                highlightById(window.siyuan.mobile.editor.protyle, id, true);
+            }
             closePanel();
             // 更新文档浏览时间
             fetchPost("/api/storage/updateRecentDocViewTime", {rootID: window.siyuan.mobile.editor.protyle.block.rootID});

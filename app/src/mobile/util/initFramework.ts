@@ -96,9 +96,18 @@ export const initFramework = (app: App, isStart: boolean) => {
             if (itemType === type) {
                 if (type === "sidebar-outline-tab") {
                     if (!window.siyuan.mobile.docks.outline) {
-                        window.siyuan.mobile.docks.outline = new MobileOutline(app);
+                        window.siyuan.mobile.docks.outline = new MobileOutline({
+                            app,
+                            blockId: window.siyuan.mobile.editor?.protyle.block.rootID,
+                            isPreview: window.siyuan.mobile.editor?.protyle.preview.element.classList.contains("fn__none")
+                        });
                     } else {
-                        window.siyuan.mobile.docks.outline.update();
+                        fetchPost("/api/outline/getDocOutline", {
+                            id: window.siyuan.mobile.editor.protyle.block.rootID,
+                            preview: window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
+                        }, response => {
+                            window.siyuan.mobile.docks.outline.update(response);
+                        });
                     }
                 } else if (type === "sidebar-backlink-tab") {
                     if (!window.siyuan.mobile.docks.backlink) {
@@ -142,7 +151,12 @@ export const initFramework = (app: App, isStart: boolean) => {
         sidebarElement.style.transform = "translateX(0px)";
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
         if (type === "sidebar-outline-tab") {
-            window.siyuan.mobile.docks.outline.update();
+            fetchPost("/api/outline/getDocOutline", {
+                id: window.siyuan.mobile.editor.protyle.block.rootID,
+                preview: window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
+            }, response => {
+                window.siyuan.mobile.docks.outline.update(response);
+            });
         } else if (type === "sidebar-backlink-tab") {
             window.siyuan.mobile.docks.backlink.update();
         } else if (type === "sidebar-bookmark-tab") {

@@ -1073,7 +1073,12 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	SetBlockAttrs(retID, nameValues)
 
 	FlushTxQueue()
-	box.addMinSort(path.Dir(hPath), retID)
+	docPath, _, err := GetPathByID(retID)
+	if err != nil {
+		logging.LogWarnf("get path by id [%s] failed: %s", retID, err)
+		return
+	}
+	box.addMinSort(path.Dir(docPath), retID)
 	return
 }
 

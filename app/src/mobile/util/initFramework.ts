@@ -99,7 +99,7 @@ export const initFramework = (app: App, isStart: boolean) => {
                         window.siyuan.mobile.docks.outline = new MobileOutline({
                             app,
                             blockId: window.siyuan.mobile.editor?.protyle.block.rootID,
-                            isPreview: window.siyuan.mobile.editor?.protyle.preview.element.classList.contains("fn__none")
+                            isPreview: window.siyuan.mobile.editor ? !window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none") : false
                         });
                     } else {
                         fetchPost("/api/outline/getDocOutline", {

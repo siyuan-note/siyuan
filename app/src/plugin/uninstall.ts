@@ -1,5 +1,5 @@
 import {App} from "../index";
-import {Plugin} from "../plugin";
+import {Plugin} from "./index";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
@@ -8,19 +8,22 @@ import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 
-export const uninstall = (app: App, name: string, isUninstall = false) => {
+export const uninstall = (app: App, name: string, isUninstall: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
-            // rm command
             try {
                 plugin.onunload();
-                if (isUninstall) {
-                    plugin.uninstall();
-                    window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
-                    setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
-                }
             } catch (e) {
                 console.error(`plugin ${plugin.name} onunload error:`, e);
+            }
+            if (isUninstall) {
+                try {
+                    plugin.uninstall();
+                } catch (e) {
+                    console.error(`plugin ${plugin.name} uninstall error:`, e);
+                }
+                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
+                setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
             }
             // rm tab
             /// #if !MOBILE

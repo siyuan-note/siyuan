@@ -721,6 +721,8 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		return
 	}
 
+	view.LayoutType = newLayout
+
 	switch newLayout {
 	case av.LayoutTypeTable:
 		if view.Name == av.GetAttributeViewI18n("gallery") || view.Name == av.GetAttributeViewI18n("kanban") {
@@ -787,8 +789,6 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		group := &av.ViewGroup{Field: preferredGroupKey.ID}
 		setAttributeViewGroup(attrView, view, group)
 	}
-
-	view.LayoutType = newLayout
 
 	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
 	for _, bID := range blockIDs {

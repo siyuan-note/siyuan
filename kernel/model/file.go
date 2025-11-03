@@ -1073,12 +1073,13 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	SetBlockAttrs(retID, nameValues)
 
 	FlushTxQueue()
-	docPath, _, err := GetPathByID(retID)
-	if err != nil {
-		logging.LogWarnf("get path by id [%s] failed: %s", retID, err)
+
+	bt := treenode.GetBlockTree(retID)
+	if nil == bt {
+		logging.LogWarnf("get block tree by id [%s] failed after create", retID)
 		return
 	}
-	box.addMinSort(path.Dir(docPath), retID)
+	box.addMinSort(path.Dir(bt.Path), retID)
 	return
 }
 

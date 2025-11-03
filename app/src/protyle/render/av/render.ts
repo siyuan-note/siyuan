@@ -13,7 +13,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
-import {renderGallery} from "./gallery/render";
+import {renderKanban, renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
@@ -465,6 +465,10 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
 
             if (e.getAttribute("data-av-type") === "gallery") {
                 renderGallery({blockElement: e, protyle, cb, renderAll});
+                return;
+            }
+            if (e.getAttribute("data-av-type") === "kanban") {
+                renderKanban({blockElement: e, protyle, cb, renderAll});
                 return;
             }
 

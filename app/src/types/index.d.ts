@@ -88,7 +88,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide" |
     "code-language-update" | "code-language-change"
-type TAVView = "table" | "gallery"
+type TAVView = "table" | "gallery" | "kanban"
 type TAVCol =
     "text"
     | "date"

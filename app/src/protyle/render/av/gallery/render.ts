@@ -368,3 +368,105 @@ export const renderGallery = async (options: {
         options.blockElement.querySelector(".av__gallery").classList.add("av__gallery--top");
     }
 };
+
+export const renderKanban = async (options: {
+    blockElement: HTMLElement,
+    protyle: IProtyle,
+    cb?: (data: IAV) => void,
+    renderAll: boolean,
+    data?: IAV,
+}) => {
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
+    const editIds: IIds[] = [];
+    options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
+        editIds.push({
+            groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
+            fieldId: item.parentElement.getAttribute("data-id"),
+        });
+    });
+    const selectItemIds: IIds[] = [];
+    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(galleryItem => {
+        const fieldId = galleryItem.getAttribute("data-id");
+        if (fieldId) {
+            selectItemIds.push({
+                groupId: (hasClosestByClassName(galleryItem, "av__body") as HTMLElement).dataset.groupId || "",
+                fieldId
+            });
+        }
+    });
+    const pageSizes: { [key: string]: string } = {};
+    options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+    });
+    const resetData = {
+        isSearching: searchInputElement && document.activeElement === searchInputElement,
+        query: searchInputElement?.value || "",
+        alignSelf: options.blockElement.style.alignSelf,
+        oldOffset: options.protyle.contentElement.scrollTop,
+        editIds,
+        selectItemIds,
+        pageSizes,
+    };
+    if (options.blockElement.firstElementChild.innerHTML === "") {
+        options.blockElement.style.alignSelf = "";
+        options.blockElement.firstElementChild.outerHTML = `<div class="av__kanban fn__flex">
+    <span style="width: 260px;height: 178px;" class="av__pulse"></span>
+    <span style="width: 260px;height: 178px;" class="av__pulse"></span>
+    <span style="width: 260px;height: 178px;" class="av__pulse"></span>
+</div>`;
+    }
+    const created = options.protyle.options.history?.created;
+    const snapshot = options.protyle.options.history?.snapshot;
+
+    let data: IAV = options.data;
+    if (!data) {
+        const avPageSize = getPageSize(options.blockElement);
+        const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
+            id: options.blockElement.getAttribute("data-av-id"),
+            created,
+            snapshot,
+            pageSize: avPageSize.unGroupPageSize,
+            groupPaging: avPageSize.groupPageSize,
+            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
+            query: resetData.query.trim()
+        });
+        data = response.data;
+    }
+    if (data.viewType === "table") {
+        options.blockElement.setAttribute("data-av-type", "table");
+        avRender(options.blockElement, options.protyle, options.cb, options.renderAll);
+        return;
+    }
+    const view: IAVGallery = data.view as IAVGallery;
+    let bodyHTML = ""
+    view.groups.forEach((group: IAVGallery) => {
+        if (group.groupHidden === 0) {
+            bodyHTML += `<div class="av__kanban-group">
+    ${getGroupTitleHTML(group, group.cards.length)}
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>
+</div>`;
+        }
+    });
+    if (options.renderAll) {
+        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    <div class="av__kanban">
+        ${bodyHTML}
+    </div>
+    <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
+</div>`;
+    } else {
+        options.blockElement.querySelector(".av__kanban").innerHTML = bodyHTML;
+    }
+    afterRenderGallery({
+        resetData,
+        renderAll: options.renderAll,
+        data,
+        cb: options.cb,
+        protyle: options.protyle,
+        blockElement: options.blockElement,
+    });
+    if (view.hideAttrViewName) {
+        options.blockElement.querySelector(".av__gallery").classList.add("av__gallery--top");
+    }
+};

@@ -972,6 +972,25 @@
       transform: rotate(90deg);
     }
   }
+
+  &__kanban {
+    overflow: auto;
+    gap: 16px;
+    padding: 0 1px 16px;
+    display: flex;
+
+    &-group {
+      width: 260px;
+
+      &--small {
+        width: 180px;
+      }
+
+      &--big {
+        width: 320px;
+      }
+    }
+  }
 }
 
 img.av__cellassetimg {

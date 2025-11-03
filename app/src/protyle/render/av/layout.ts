@@ -7,7 +7,7 @@ import {getFieldsByData} from "./view";
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
     const view = data.view as IAVGallery;
-    if (data.viewType === "gallery") {
+    if (data.viewType === "gallery" || data.viewType === "kanban") {
         let coverFromTitle = "";
         if (view.coverFrom === 0) {
             coverFromTitle = window.siyuan.languages.calcOperatorNone;
@@ -52,7 +52,7 @@ export const getLayoutHTML = (data: IAV) => {
     <input data-type="toggle-gallery-name" type="checkbox" class="b3-switch b3-switch--menu" ${view.displayFieldName ? "checked" : ""}>
 </label>`;
     }
-    return `<div class="b3-menu__items">
+    html = `<div class="b3-menu__items">
     <div class="b3-menu__items">
     <button class="b3-menu__item" data-type="nobg">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
@@ -67,6 +67,11 @@ export const getLayoutHTML = (data: IAV) => {
                 <svg><use xlink:href="#iconTable"></use></svg>
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.table}</div>
+            </div>
+            <div data-type="set-layout" data-view-type="kanban" class="av__layout-item${data.viewType === "kanban" ? " av__layout-item--select" : ""}">
+                <svg><use xlink:href="#iconBoard"></use></svg>
+                <div class="fn__hr"></div>
+                <div>${window.siyuan.languages.kanban}</div>
             </div>
             <div data-type="set-layout" data-view-type="gallery" class="av__layout-item${data.viewType === "gallery" ? " av__layout-item--select" : ""}">
                 <svg><use xlink:href="#iconGallery"></use></svg>
@@ -90,8 +95,21 @@ export const getLayoutHTML = (data: IAV) => {
         <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
         <span class="fn__space fn__flex-1"></span>
         <input data-type="toggle-entries-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
-    </label>
-    <button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
+    </label>`;
+    if (data.viewType === "kanban") {
+        html += `<button class="b3-menu__item" data-type="set-kanban-group">
+    <span class="fn__flex-center">${window.siyuan.languages.groups}</span>
+    <span class="fn__flex-1"></span>
+    <span class="b3-menu__accelerator">${view.cardSize === 0 ? window.siyuan.languages.small : (view.cardSize === 1 ? window.siyuan.languages.medium : window.siyuan.languages.large)}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.useBackground}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="toggle-kanban-bg" type="checkbox" class="b3-switch b3-switch--menu" ${view.displayFieldName ? "checked" : ""}>
+</label>`;
+    }
+    return html + `<button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
         <span class="fn__flex-1"></span>
         <span class="b3-menu__accelerator">${view.pageSize === Constants.SIZE_DATABASE_MAZ_SIZE ? window.siyuan.languages.all : view.pageSize}</span>

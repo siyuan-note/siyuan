@@ -23,7 +23,6 @@ export const loadAssets = (data: Config.IAppearance) => {
         fetchPost("/api/system/setAppearanceMode", {mode: OSTheme === "light" ? 0 : 1});
         window.siyuan.config.appearance.mode = (OSTheme === "light" ? 0 : 1);
     }
-
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
     if (defaultStyleElement) {
@@ -57,6 +56,15 @@ export const loadAssets = (data: Config.IAppearance) => {
         styleElement.remove();
     }
     /// #if !MOBILE
+    setTimeout(() => {
+        document.querySelectorAll(".av__kanban-group").forEach(item => {
+            const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
+            if (nameElement) {
+                const selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
+                item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
+            }
+        });
+    }, Constants.TIMEOUT_TRANSITION);
     getAllModels().graph.forEach(item => {
         item.searchGraph(false);
     });

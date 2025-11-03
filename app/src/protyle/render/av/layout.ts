@@ -97,13 +97,7 @@ export const getLayoutHTML = (data: IAV) => {
         <input data-type="toggle-entries-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
     </label>`;
     if (data.viewType === "kanban") {
-        html += `<button class="b3-menu__item" data-type="set-kanban-group">
-    <span class="fn__flex-center">${window.siyuan.languages.groups}</span>
-    <span class="fn__flex-1"></span>
-    <span class="b3-menu__accelerator">${view.cardSize === 0 ? window.siyuan.languages.small : (view.cardSize === 1 ? window.siyuan.languages.medium : window.siyuan.languages.large)}</span>
-    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
-</button>
-<label class="b3-menu__item">
+        html += `<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.useBackground}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-kanban-bg" type="checkbox" class="b3-switch b3-switch--menu" ${view.displayFieldName ? "checked" : ""}>

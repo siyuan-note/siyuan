@@ -438,10 +438,14 @@ export const renderKanban = async (options: {
         return;
     }
     const view: IAVGallery = data.view as IAVGallery;
-    let bodyHTML = ""
+    let bodyHTML = "";
     view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
-            bodyHTML += `<div class="av__kanban-group">
+            let selectBg;
+            if (["mSelect", "select"].includes(group.groupValue.type)) {
+                selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${group.groupValue.mSelect[0].color}`);
+            }
+            bodyHTML += `<div class="av__kanban-group" style="--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;">
     ${getGroupTitleHTML(group, group.cards.length)}
     <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>
 </div>`;

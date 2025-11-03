@@ -981,6 +981,9 @@
 
     &-group {
       width: 260px;
+      padding: 8px;
+      border-radius: var(--b3-border-radius);
+      background-color: var(--b3-av-kanban-bg);
 
       &--small {
         width: 180px;
@@ -988,6 +991,25 @@
 
       &--big {
         width: 320px;
+      }
+
+      .av__group-title {
+        padding-top: 0;
+      }
+
+      .av__gallery-item {
+        background-color: var(--b3-av-kanban-content-bg);
+        box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-border) 0 0 0 1px;
+
+        &:hover .av__gallery-fields,
+        &:hover .av__gallery-cover {
+          background-color: var(--b3-av-kanban-content-hover-bg);
+        }
+      }
+
+      .av__gallery-cover {
+        background-color: var(--b3-av-kanban-content-bg);
+        border-bottom: 1px solid var(--b3-av-kanban-border);
       }
     }
   }

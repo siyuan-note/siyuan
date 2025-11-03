@@ -2860,10 +2860,6 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: field.ID}})
 			}
 		}
-
-		preferredGroupKey := getKanbanPreferredGroupKey(attrView)
-		group := &av.ViewGroup{Field: preferredGroupKey.ID}
-		setAttributeViewGroup(attrView, view, group)
 	default:
 		err = av.ErrWrongLayoutType
 		logging.LogErrorf("wrong layout type [%s] for attribute view [%s]", layout, avID)
@@ -2874,6 +2870,12 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 	attrView.ViewID = viewID
 	view.ID = viewID
 	attrView.Views = append(attrView.Views, view)
+
+	if av.LayoutTypeKanban == layout {
+		preferredGroupKey := getKanbanPreferredGroupKey(attrView)
+		group := &av.ViewGroup{Field: preferredGroupKey.ID}
+		setAttributeViewGroup(attrView, view, group)
+	}
 
 	node, tree, _ := getNodeByBlockID(nil, blockID)
 	if nil == node {

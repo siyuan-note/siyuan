@@ -721,6 +721,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		return
 	}
 
+	oldLayout := view.LayoutType
 	view.LayoutType = newLayout
 
 	switch newLayout {
@@ -734,7 +735,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		}
 
 		view.Table = av.NewLayoutTable()
-		switch view.LayoutType {
+		switch oldLayout {
 		case av.LayoutTypeGallery:
 			for _, field := range view.Gallery.CardFields {
 				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
@@ -754,7 +755,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		}
 
 		view.Gallery = av.NewLayoutGallery()
-		switch view.LayoutType {
+		switch oldLayout {
 		case av.LayoutTypeTable:
 			for _, col := range view.Table.Columns {
 				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: col.ID}})
@@ -774,7 +775,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		}
 
 		view.Kanban = av.NewLayoutKanban()
-		switch view.LayoutType {
+		switch oldLayout {
 		case av.LayoutTypeTable:
 			for _, col := range view.Table.Columns {
 				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: &av.BaseField{ID: col.ID}})

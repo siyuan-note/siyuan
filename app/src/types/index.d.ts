@@ -909,6 +909,20 @@ interface IAVGallery extends IAVView {
     cardCount: number,
 }
 
+interface IAVKanban extends IAVView {
+    coverFrom: number;    // 0：无，1：内容图，2：资源字段，3：内容块
+    coverFromAssetKeyID?: string;
+    cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
+    cardAspectRatio: number;
+    displayFieldName: boolean;
+    fitImage: boolean;
+    cards: IAVGalleryItem[],
+    desc: string
+    fields: IAVColumn[]
+    cardCount: number,
+    fillColBackgroundColor: boolean
+}
+
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,

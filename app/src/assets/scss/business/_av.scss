@@ -976,7 +976,7 @@
   &__kanban {
     overflow: auto;
     gap: 16px;
-    padding: 0 1px 16px;
+    padding: 16px 1px;
     display: flex;
 
     &-group {
@@ -985,12 +985,22 @@
       border-radius: var(--b3-border-radius);
       background-color: var(--b3-av-kanban-bg);
 
+      &:hover {
+        .av__group-icon {
+          opacity: 1;
+        }
+      }
+
       &--small {
         width: 180px;
       }
 
       &--big {
         width: 320px;
+      }
+
+      .av__group-icon {
+        opacity: 0;
       }
 
       .av__group-title {

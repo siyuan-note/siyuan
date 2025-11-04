@@ -1,42 +1,41 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
-import {Constants} from "../../../../constants";
-import {fetchSyncPost} from "../../../../util/fetch";
-import {escapeAttr} from "../../../../util/escape";
-import {unicode2Emoji} from "../../../../emoji";
-import {cellValueIsEmpty, renderCell} from "../cell";
-import {focusBlock} from "../../../util/selection";
-import {electronUndo} from "../../../undo";
-import {addClearButton} from "../../../../util/addClearButton";
-import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
-import {processRender} from "../../../util/processCode";
-import {getColIconByType, getColNameByType} from "../col";
-import {getCompressURL} from "../../../../util/image";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {getPageSize} from "../groups";
-import {renderKanban} from "../kanban/render";
+import {fetchSyncPost} from "../../../../util/fetch";
+import {Constants} from "../../../../constants";
+import {avRender, genTabHeaderHTML} from "../render";
+import {afterRenderGallery, renderGallery} from "../gallery/render";
+import {escapeAttr, escapeHtml} from "../../../../util/escape";
+import {getCompressURL} from "../../../../util/image";
+import {cellValueIsEmpty, renderCell} from "../cell";
+import {getColIconByType, getColNameByType} from "../col";
+import {unicode2Emoji} from "../../../../emoji";
 
 interface IIds {
     groupId: string,
     fieldId: string,
 }
 
-interface ITableOptions {
-    protyle: IProtyle,
-    blockElement: HTMLElement,
-    cb: (data: IAV) => void,
-    data: IAV,
-    renderAll: boolean,
-    resetData: {
-        alignSelf: string,
-        selectItemIds: IIds[],
-        editIds: IIds[],
-        isSearching: boolean,
-        pageSizes: { [key: string]: string },
-        query: string,
-        oldOffset: number,
+const getKanbanTitleHTML = (group: IAVView, counter: number) => {
+    let nameHTML = "";
+    if (["mSelect", "select"].includes(group.groupValue.type)) {
+        group.groupValue.mSelect.forEach((item) => {
+            nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
+        });
+    } else if (group.groupValue.type === "checkbox") {
+        nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px)"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
+    } else {
+        nameHTML = group.name;
     }
-}
+    // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
+    return `<div class="av__group-title">
+    <span class="av__group-name">${nameHTML}</span>
+    ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.total}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
+    <span class="fn__flex-1"></span>
+    <span class="av__group-icon ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
+</div>`;
+};
 
-const getGalleryHTML = (data: IAVGallery) => {
+const getKanbanHTML = (data: IAVKanban) => {
     let galleryHTML = "";
     // body
     data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
@@ -121,147 +120,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 </div>`;
 };
 
-const renderGroupGallery = (options: ITableOptions) => {
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    const isSearching = searchInputElement && document.activeElement === searchInputElement;
-    const query = searchInputElement?.value || "";
-
-    let avBodyHTML = "";
-    options.data.view.groups.forEach((group: IAVGallery) => {
-        if (group.groupHidden === 0) {
-            avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
-        }
-    });
-    if (options.renderAll) {
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
-    <div>
-        ${avBodyHTML}
-    </div>
-    <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
-</div>`;
-    } else {
-        options.blockElement.querySelector(".av__header").nextElementSibling.innerHTML = avBodyHTML;
-    }
-    afterRenderGallery(options);
-};
-
-export const afterRenderGallery = (options: ITableOptions) => {
-    const view = options.data.view as IAVGallery;
-    if (view.coverFrom === 1 || view.coverFrom === 3) {
-        processRender(options.blockElement);
-    }
-    if (typeof options.resetData.oldOffset === "number") {
-        options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
-    }
-    if (options.blockElement.getAttribute("data-need-focus") === "true") {
-        focusBlock(options.blockElement);
-        options.blockElement.removeAttribute("data-need-focus");
-    }
-    options.blockElement.setAttribute("data-render", "true");
-    if (options.resetData.alignSelf) {
-        options.blockElement.style.alignSelf = options.resetData.alignSelf;
-    }
-    options.resetData.selectItemIds.find(selectId => {
-        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        if (!itemElement) {
-            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        }
-        if (itemElement) {
-            itemElement.classList.add("av__gallery-item--select");
-        }
-    });
-    options.resetData.editIds.find(selectId => {
-        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        if (!itemElement) {
-            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        }
-        if (itemElement) {
-            itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
-        }
-    });
-    Object.keys(options.resetData.pageSizes).forEach((groupId) => {
-        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId === "unGroup" ? "" : groupId}"]`) as HTMLElement;
-        if (bodyElement) {
-            bodyElement.dataset.pageSize = options.resetData.pageSizes[groupId];
-        }
-    });
-    if (getSelection().rangeCount > 0) {
-        // 修改表头后光标重新定位
-        const range = getSelection().getRangeAt(0);
-        if (!hasClosestByClassName(range.startContainer, "av__title")) {
-            const blockElement = hasClosestBlock(range.startContainer);
-            if (blockElement && options.blockElement === blockElement && !options.resetData.isSearching) {
-                focusBlock(options.blockElement);
-            }
-        }
-    }
-    options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
-    if (options.cb) {
-        options.cb(options.data);
-    }
-    if (!options.renderAll) {
-        return;
-    }
-    const viewsElement = options.blockElement.querySelector(".av__views") as HTMLElement;
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    searchInputElement.value = options.resetData.query || "";
-    if (options.resetData.isSearching) {
-        searchInputElement.focus();
-    }
-    searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
-        event.stopPropagation();
-    });
-    searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        electronUndo(event);
-    });
-    searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
-        event.stopPropagation();
-        if (event.isComposing) {
-            return;
-        }
-        if (searchInputElement.value || document.activeElement === searchInputElement) {
-            viewsElement.classList.add("av__views--show");
-        } else {
-            viewsElement.classList.remove("av__views--show");
-        }
-        updateSearch(options.blockElement, options.protyle);
-    });
-    searchInputElement.addEventListener("compositionend", () => {
-        updateSearch(options.blockElement, options.protyle);
-    });
-    searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
-        if (event.isComposing) {
-            return;
-        }
-        if (!searchInputElement.value) {
-            viewsElement.classList.remove("av__views--show");
-            searchInputElement.style.width = "0";
-            searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.paddingRight = "0";
-        }
-    });
-    addClearButton({
-        inputElement: searchInputElement,
-        right: 0,
-        width: "1em",
-        height: searchInputElement.clientHeight,
-        clearCB() {
-            viewsElement.classList.remove("av__views--show");
-            searchInputElement.style.width = "0";
-            searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.paddingRight = "0";
-            focusBlock(options.blockElement);
-            updateSearch(options.blockElement, options.protyle);
-        }
-    });
-};
-
-export const renderGallery = async (options: {
+export const renderKanban = async (options: {
     blockElement: HTMLElement,
     protyle: IProtyle,
     cb?: (data: IAV) => void,
@@ -301,10 +160,10 @@ export const renderGallery = async (options: {
     };
     if (options.blockElement.firstElementChild.innerHTML === "") {
         options.blockElement.style.alignSelf = "";
-        options.blockElement.firstElementChild.outerHTML = `<div class="av__gallery">
-    <span style="width: 100%;height: 178px;" class="av__pulse"></span>
-    <span style="width: 100%;height: 178px;" class="av__pulse"></span>
-    <span style="width: 100%;height: 178px;" class="av__pulse"></span>
+        options.blockElement.firstElementChild.outerHTML = `<div class="av__kanban fn__flex">
+    <span style="width: 260px;height: 178px;" class="av__pulse"></span>
+    <span style="width: 260px;height: 178px;" class="av__pulse"></span>
+    <span style="width: 260px;height: 178px;" class="av__pulse"></span>
 </div>`;
     }
     const created = options.protyle.options.history?.created;
@@ -325,42 +184,50 @@ export const renderGallery = async (options: {
         data = response.data;
     }
     if (data.viewType === "table") {
-        options.blockElement.setAttribute("data-av-type", data.viewType);
+        options.blockElement.setAttribute("data-av-type", "table");
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }
-    if (data.viewType === "kanban") {
+    if (data.viewType === "gallery") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
-        renderKanban({blockElement: options.blockElement, protyle:options.protyle, cb:options.cb, renderAll:options.renderAll, data});
+        renderGallery({blockElement: options.blockElement, protyle:options.protyle, cb:options.cb, renderAll:options.renderAll, data});
         return;
     }
-    const view: IAVGallery = data.view as IAVGallery;
-    if (view.groups?.length > 0) {
-        renderGroupGallery({
-            blockElement: options.blockElement,
-            protyle: options.protyle,
-            cb: options.cb,
-            renderAll: options.renderAll,
-            data,
-            resetData
-        });
-        return;
-    }
-    const bodyHTML = getGalleryHTML(view);
+    const view: IAVGallery = data.view as IAVKanban;
+    let bodyHTML = "";
+    let isSelectGroup = true;
+    view.groups.forEach((group: IAVKanban) => {
+        if (group.groupHidden === 0) {
+            let selectBg = "";
+            if (group.fillColBackgroundColor) {
+                let color = ""
+                if (["mSelect", "select"].includes(group.groupValue.type)) {
+                    isSelectGroup = true;
+                    color = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${group.groupValue.mSelect[0].color}`);
+                }
+                if (isSelectGroup) {
+                    if (!color) {
+                        color = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
+                    }
+                    selectBg = `style="--b3-av-kanban-border:${color};--b3-av-kanban-bg:${color}29;--b3-av-kanban-content-bg:${color}47;--b3-av-kanban-content-hover-bg:${color}5c;"`;
+                }
+            }
+            bodyHTML += `<div class="av__kanban-group"${selectBg}>
+    ${getKanbanTitleHTML(group, group.cards.length)}
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getKanbanHTML(group)}</div>
+</div>`;
+        }
+    });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
-    <div>
-        <div class="av__body" data-group-id="" data-page-size="${view.pageSize}">
-            ${bodyHTML}
-        </div>
+    <div class="av__kanban">
+        ${bodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
     } else {
-        const bodyElement = options.blockElement.querySelector(".av__body") as HTMLElement;
-        bodyElement.innerHTML = bodyHTML;
-        bodyElement.dataset.pageSize = view.pageSize.toString();
+        options.blockElement.querySelector(".av__kanban").innerHTML = bodyHTML;
     }
     afterRenderGallery({
         resetData,

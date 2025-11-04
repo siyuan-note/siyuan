@@ -1,4 +1,4 @@
-import {fetchPost} from "../../../util/fetch";
+import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
 import {addDragFill, cellScrollIntoView, popTextCell, renderCell} from "./cell";
@@ -13,12 +13,13 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
-import {renderKanban, renderGallery} from "./gallery/render";
+import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
 import {clearSelect} from "../../util/clearSelect";
 import {showMessage} from "../../../dialog/message";
+import {renderKanban} from "./kanban/render";
 
 interface IIds {
     groupId: string,
@@ -250,7 +251,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     </div>
     <span class="fn__space"></span>
     <span class="av__group-name">${nameHTML}</span>
-    ${counter === 0 ? '<span class="fn__space"></span>' : `<span class="av__group-counter">${counter}</span>`}
+    ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.total}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
@@ -442,7 +443,7 @@ const afterRenderTable = (options: ITableOptions) => {
     });
 };
 
-export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true) => {
+export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, data?: IAV) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -453,97 +454,98 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
     if (avElements.length === 0) {
         return;
     }
-    if (avElements.length > 0) {
-        avElements.forEach((e: HTMLElement) => {
-            e.removeAttribute("data-rendering");
-            if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
-                return;
-            }
-            if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {
-                e.classList.add("av--touch");
-            }
+    for (let i = 0; i < avElements.length; i++) {
+        const e = avElements[i] as HTMLElement;
+        e.removeAttribute("data-rendering");
+        if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
+            return;
+        }
+        if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {
+            e.classList.add("av--touch");
+        }
 
-            if (e.getAttribute("data-av-type") === "gallery") {
-                renderGallery({blockElement: e, protyle, cb, renderAll});
-                return;
-            }
-            if (e.getAttribute("data-av-type") === "kanban") {
-                renderKanban({blockElement: e, protyle, cb, renderAll});
-                return;
-            }
+        if (e.getAttribute("data-av-type") === "gallery") {
+            renderGallery({blockElement: e, protyle, cb, renderAll});
+            return;
+        }
+        if (e.getAttribute("data-av-type") === "kanban") {
+            renderKanban({blockElement: e, protyle, cb, renderAll});
+            return;
+        }
 
-            let selectCellId;
-            const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
-            if (selectCellElement) {
-                selectCellId = {
-                    groupId: (hasClosestByClassName(selectCellElement, "av__body") as HTMLElement).dataset.groupId || "",
-                    rowId: (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id,
-                    colId: selectCellElement.getAttribute("data-col-id"),
-                };
-            }
-            const selectRowIds: IIds[] = [];
-            e.querySelectorAll(".av__row--select").forEach(rowItem => {
-                const rowId = rowItem.getAttribute("data-id");
-                if (rowId) {
-                    selectRowIds.push({
-                        groupId: (hasClosestByClassName(rowItem, "av__body") as HTMLElement).dataset.groupId || "",
-                        rowId
-                    });
-                }
-            });
-            let dragFillId;
-            const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
-            if (dragFillElement) {
-                dragFillId = {
-                    groupId: (hasClosestByClassName(dragFillElement, "av__body") as HTMLElement).dataset.groupId || "",
-                    rowId: (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id,
-                    colId: dragFillElement.parentElement.getAttribute("data-col-id"),
-                };
-            }
-            const activeIds: IIds[] = [];
-            e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                activeIds.push({
-                    groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
-                    rowId: (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id,
-                    colId: item.getAttribute("data-col-id"),
-                });
-            });
-            const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
-            const pageSizes: { [key: string]: string } = {};
-            e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
-                pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
-            });
-            const resetData = {
-                selectCellId,
-                alignSelf: e.style.alignSelf,
-                left: e.querySelector(".av__scroll")?.scrollLeft || 0,
-                headerTransform: (e.querySelector('.av__row--header[style^="transform"]') as HTMLElement)?.style.transform,
-                footerTransform: (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform,
-                isSearching: searchInputElement && document.activeElement === searchInputElement,
-                selectRowIds,
-                dragFillId,
-                activeIds,
-                query: searchInputElement?.value || "",
-                pageSizes
+        let selectCellId;
+        const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
+        if (selectCellElement) {
+            selectCellId = {
+                groupId: (hasClosestByClassName(selectCellElement, "av__body") as HTMLElement).dataset.groupId || "",
+                rowId: (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id,
+                colId: selectCellElement.getAttribute("data-col-id"),
             };
-            if (e.firstElementChild.innerHTML === "") {
-                e.style.alignSelf = "";
-                let html = "";
-                [1, 2, 3].forEach(() => {
-                    html += `<div class="av__row">
+        }
+        const selectRowIds: IIds[] = [];
+        e.querySelectorAll(".av__row--select").forEach(rowItem => {
+            const rowId = rowItem.getAttribute("data-id");
+            if (rowId) {
+                selectRowIds.push({
+                    groupId: (hasClosestByClassName(rowItem, "av__body") as HTMLElement).dataset.groupId || "",
+                    rowId
+                });
+            }
+        });
+        let dragFillId;
+        const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
+        if (dragFillElement) {
+            dragFillId = {
+                groupId: (hasClosestByClassName(dragFillElement, "av__body") as HTMLElement).dataset.groupId || "",
+                rowId: (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id,
+                colId: dragFillElement.parentElement.getAttribute("data-col-id"),
+            };
+        }
+        const activeIds: IIds[] = [];
+        e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+            activeIds.push({
+                groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
+                rowId: (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id,
+                colId: item.getAttribute("data-col-id"),
+            });
+        });
+        const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+        const pageSizes: { [key: string]: string } = {};
+        e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+            pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+        });
+        const resetData = {
+            selectCellId,
+            alignSelf: e.style.alignSelf,
+            left: e.querySelector(".av__scroll")?.scrollLeft || 0,
+            headerTransform: (e.querySelector('.av__row--header[style^="transform"]') as HTMLElement)?.style.transform,
+            footerTransform: (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform,
+            isSearching: searchInputElement && document.activeElement === searchInputElement,
+            selectRowIds,
+            dragFillId,
+            activeIds,
+            query: searchInputElement?.value || "",
+            pageSizes
+        };
+        if (e.firstElementChild.innerHTML === "") {
+            e.style.alignSelf = "";
+            let html = "";
+            [1, 2, 3].forEach(() => {
+                html += `<div class="av__row">
     <div style="width: 24px;flex-shrink: 0"></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
     <div class="av__cell" style="width: 200px"><span class="av__pulse"></span></div>
 </div>`;
-                });
-                e.firstElementChild.innerHTML = html;
-            }
-            const created = protyle.options.history?.created;
-            const snapshot = protyle.options.history?.snapshot;
-            const avPageSize = getPageSize(e);
-            fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
+            });
+            e.firstElementChild.innerHTML = html;
+        }
+        const created = protyle.options.history?.created;
+        const snapshot = protyle.options.history?.snapshot;
+        const avPageSize = getPageSize(e);
+        if (!data) {
+            const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
@@ -552,43 +554,48 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 viewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 query: resetData.query.trim(),
                 blockID: e.getAttribute("data-node-id"),
-            }, (response) => {
-                const data = response.data.view as IAVTable;
-                if (response.data.viewType === "gallery") {
-                    e.setAttribute("data-av-type", "table");
-                    renderGallery({blockElement: e, protyle, cb, renderAll, data: response.data});
-                    return;
-                }
-                if (data.groups?.length > 0) {
-                    renderGroupTable({blockElement: e, protyle, cb, renderAll, data: response.data, resetData});
-                    return;
-                }
-                const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${data.pageSize}" style="float: left">
-    ${getTableHTMLs(data, e)}
+            });
+            data = response.data;
+        }
+        if (data.viewType === "gallery") {
+            e.setAttribute("data-av-type", data.viewType);
+            renderGallery({blockElement: e, protyle, cb, renderAll, data});
+            return;
+        }
+        if (data.viewType === "kanban") {
+            e.setAttribute("data-av-type", data.viewType);
+            renderKanban({blockElement: e, protyle, cb, renderAll, data});
+            return;
+        }
+        const view = data.view as IAVTable;
+        if (view.groups?.length > 0) {
+            renderGroupTable({blockElement: e, protyle, cb, renderAll, data, resetData});
+            return;
+        }
+        const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}" style="float: left">
+    ${getTableHTMLs(view, e)}
 </div>`;
-                if (renderAll) {
-                    e.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(response.data, resetData.isSearching || !!resetData.query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
+        if (renderAll) {
+            e.firstElementChild.outerHTML = `<div class="av__container">
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
-                } else {
-                    e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
-                }
-                afterRenderTable({
-                    renderAll,
-                    data: response.data,
-                    cb,
-                    protyle,
-                    blockElement: e,
-                    resetData
-                });
-                // 历史兼容
-                e.style.margin = "";
-            });
+        } else {
+            e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
+        }
+        afterRenderTable({
+            renderAll,
+            data,
+            cb,
+            protyle,
+            blockElement: e,
+            resetData
         });
+        // 历史兼容
+        e.style.margin = "";
     }
 };
 

@@ -947,6 +947,14 @@ func (tx *Transaction) doSetAttrViewDisplayFieldName(operation *Operation) (ret 
 	return
 }
 
+func (tx *Transaction) doSetAttrViewFillColBackgroundColor(operation *Operation) (ret *TxErr) {
+	err := setAttrViewFillColBackgroundColor(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
 func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 	attrView, err := av.ParseAttributeView(operation.AvID)
 	if err != nil {
@@ -965,6 +973,30 @@ func setAttrViewDisplayFieldName(operation *Operation) (err error) {
 		view.Gallery.DisplayFieldName = operation.Data.(bool)
 	case av.LayoutTypeKanban:
 		view.Kanban.DisplayFieldName = operation.Data.(bool)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func setAttrViewFillColBackgroundColor(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		return
+	case av.LayoutTypeGallery:
+		return
+	case av.LayoutTypeKanban:
+		view.Kanban.FillColBackgroundColor = operation.Data.(bool)
 	}
 
 	err = av.SaveAttributeView(attrView)

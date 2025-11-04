@@ -31,6 +31,8 @@ type LayoutKanban struct {
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
 	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
 
+	FillColBackgroundColor bool `json:"fillColBackgroundColor"` // 是否填充列背景颜色
+
 	Fields []*ViewKanbanField `json:"fields"` // 字段
 }
 

@@ -688,6 +688,23 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
+    if (operation.action === "setAttrViewFillColBackgroundColor") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((avItem: HTMLElement) => {
+            avItem.querySelectorAll(".av__kanban-group").forEach(item => {
+                if (item.getAttribute("style")) {
+                    let selectBg;
+                    const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
+                    if (nameElement) {
+                        selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
+                    } else {
+                        selectBg = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
+                    }
+                    item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
+                }
+            });
+        });
+        return;
+    }
     if (operation.action === "setAttrViewFitImage") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"] .av__gallery-img`)).forEach((item: HTMLElement) => {
             if (operation.data) {

@@ -11,6 +11,7 @@ export const insertGalleryItemAnimation = (options: {
     previousId: string;
     groupID?: string
 }) => {
+    const type = options.blockElement.getAttribute("data-av-type") as TAVView;
     (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let sideItemElement = options.previousId ? options.blockElement.querySelector(groupQuery + `.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
@@ -41,7 +42,7 @@ export const insertGalleryItemAnimation = (options: {
 data-field-id="${item.dataset.fieldId}" 
 data-wrap="${item.dataset.wrap}" 
 data-dtype="${item.dataset.dtype}" 
-${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, "gallery")}</div>`;
+${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, type)}</div>`;
         if (item.previousElementSibling.classList.contains("av__gallery-name")) {
             cellsHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${item.parentElement.dataset.empty}">
     ${item.previousElementSibling.outerHTML}
@@ -87,7 +88,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                         if (cellValue.type === "checkbox" && cellItem.parentElement.querySelector(".av__gallery-tip")) {
                             cellValue.checkbox.content = cellItem.getAttribute("aria-label").split('<div class="ft__on-surface">')[0];
                         }
-                        cellItem.innerHTML = renderCell(cellValue, undefined, false, "gallery");
+                        cellItem.innerHTML = renderCell(cellValue, undefined, false, type);
                         renderCellAttr(cellItem, cellValue);
                     }
                 });

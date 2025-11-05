@@ -80,7 +80,7 @@ data-field-id="${data.fields[fieldsIndex].id}"
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon, "gallery")}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon, "kanban")}</div>`;
             if (data.displayFieldName) {
                 galleryHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
     <div class="av__gallery-name">

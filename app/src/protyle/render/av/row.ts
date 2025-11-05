@@ -436,7 +436,7 @@ export const insertRows = (options: {
         id: options.blockElement.dataset.nodeId,
         data: options.blockElement.getAttribute("updated")
     }]);
-    if (options.blockElement.getAttribute("data-av-type") === "gallery") {
+    if (["gallery", "kanban"].includes(options.blockElement.getAttribute("data-av-type"))) {
         insertGalleryItemAnimation({
             blockElement: options.blockElement,
             protyle: options.protyle,

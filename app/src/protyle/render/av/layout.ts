@@ -7,7 +7,7 @@ import {getFieldsByData} from "./view";
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
     const view = data.view as IAVKanban;
-    if (data.viewType === "gallery" || data.viewType === "kanban") {
+    if (["gallery", "kanban"].includes(data.viewType)) {
         let coverFromTitle = "";
         if (view.coverFrom === 0) {
             coverFromTitle = window.siyuan.languages.calcOperatorNone;

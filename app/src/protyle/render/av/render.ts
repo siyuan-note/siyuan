@@ -815,7 +815,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         showMessage(operation.context.message);
                     } else {
                         const groupQuery = operation.groupID ? `[data-group-id="${operation.groupID}"]` : "";
-                        if (item.getAttribute("data-av-type") === "gallery") {
+                        if (["gallery", "kanban"].includes(item.getAttribute("data-av-type"))) {
                             operation.srcs.forEach(srcItem => {
                                 const filesElement = item.querySelector(`.av__body${groupQuery} .av__gallery-item[data-id="${srcItem.itemID}"]`)?.querySelector(".av__gallery-fields");
                                 if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.parentElement.getAttribute("data-empty") === "true") {

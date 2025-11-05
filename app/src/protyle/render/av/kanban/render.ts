@@ -28,7 +28,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number) => {
     }
     // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
     return `<div class="av__group-title">
-    <span class="av__group-name">${nameHTML}</span>
+    <span class="av__group-name fn__ellipsis" style="white-space: nowrap;">${nameHTML}</span>
     ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.total}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="fn__flex-1"></span>
     <span class="av__group-icon ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
@@ -193,12 +193,12 @@ export const renderKanban = async (options: {
     }
     const view: IAVGallery = data.view as IAVKanban;
     let bodyHTML = "";
-    let isSelectGroup = true;
+    let isSelectGroup = false;
     view.groups.forEach((group: IAVKanban) => {
         if (group.groupHidden === 0) {
             let selectBg = "";
             if (group.fillColBackgroundColor) {
-                let color = ""
+                let color = "";
                 if (["mSelect", "select"].includes(group.groupValue.type)) {
                     isSelectGroup = true;
                     color = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${group.groupValue.mSelect[0].color}`);

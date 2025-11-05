@@ -1417,7 +1417,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             if (operation.context?.focusId) {
                 const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.context.focusId}"]`);
                 focusBlock(focusElement);
-                scrollCenter(protyle, focusElement, false);
+                scrollCenter(protyle, focusElement);
             } else {
                 protyle.contentElement.scrollTop = scrollTop;
                 protyle.scroll.lastScrollTop = scrollTop;

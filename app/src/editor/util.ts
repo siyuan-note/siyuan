@@ -385,17 +385,17 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         preventScroll(editor.editor.protyle);
         editor.editor.protyle.observerLoad?.disconnect();
         if (options.action?.includes(Constants.CB_GET_HL)) {
-            highlightById(editor.editor.protyle, options.id, true);
+            highlightById(editor.editor.protyle, options.id, "top");
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                const newRange = focusBlock(nodeElement, undefined, options.action?.includes(Constants.CB_GET_OUTLINE) ? false : true);
+                const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }
-                scrollCenter(editor.editor.protyle, nodeElement, true);
+                scrollCenter(editor.editor.protyle, nodeElement, {position: "top"});
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
-                        scrollCenter(editor.editor.protyle, nodeElement, true);
+                        scrollCenter(editor.editor.protyle, nodeElement, {position: "top"});
                     }
                 });
                 setTimeout(() => {

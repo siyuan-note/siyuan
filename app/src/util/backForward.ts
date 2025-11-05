@@ -179,7 +179,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                             }
                         });
                         focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                        scrollCenter(stack.protyle, blockElement, true);
+                        scrollCenter(stack.protyle, blockElement, {position: "top"});
                     }
                 });
             });
@@ -207,7 +207,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     }
                 });
                 focusByOffset(getContenteditableElement(blockElement), stack.position.start, stack.position.end);
-                scrollCenter(stack.protyle, blockElement, true);
+                scrollCenter(stack.protyle, blockElement, {position: "top"});
             }
         });
         return true;

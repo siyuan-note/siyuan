@@ -41,9 +41,9 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         });
         if (blockElement) {
             pushBack();
-            scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, true);
+            scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, {position: "top"});
             if (action.includes(Constants.CB_GET_HL)) {
-                highlightById(window.siyuan.mobile.editor.protyle, id, true);
+                highlightById(window.siyuan.mobile.editor.protyle, id, "top");
             }
             closePanel();
             // 更新文档浏览时间

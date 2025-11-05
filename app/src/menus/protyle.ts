@@ -1022,7 +1022,7 @@ export const zoomOut = (options: {
                 }
                 focusBlock(showElement);
                 const resizeObserver = new ResizeObserver(() => {
-                    scrollCenter(options.protyle, focusElement, true);
+                    scrollCenter(options.protyle, focusElement, {position: "top"});
                 });
                 resizeObserver.observe(options.protyle.wysiwyg.element);
                 setTimeout(() => {

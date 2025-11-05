@@ -8,7 +8,7 @@ export const bgFade = (element: Element) => {
     }, 1024);
 };
 
-export const highlightById = (protyle: IProtyle, id: string, top = false) => {
+export const highlightById = (protyle: IProtyle, id: string, position: "auto" | "center" | "top" = "auto") => {
     let nodeElement: HTMLElement;
     const protyleElement = protyle.wysiwyg.element;
     if (!protyle.preview.element.classList.contains("fn__none")) {
@@ -28,7 +28,7 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
         }
     });
     if (nodeElement) {
-        scrollCenter(protyle, nodeElement, top);
+        scrollCenter(protyle, nodeElement, {position});
         bgFade(nodeElement);
         return nodeElement;// 仅配合前进后退使用
     }
@@ -38,8 +38,16 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
     }
 };
 
-export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false, behavior: ScrollBehavior = "auto") => {
-    if (!protyle.disabled && !top && getSelection().rangeCount > 0) {
+export const scrollCenter = (
+    protyle: IProtyle,
+    nodeElement?: Element,
+    options?: {
+        position?: "top" | "center" | "auto";
+        behavior?: ScrollBehavior;
+    }
+) => {
+    const {position = "auto", behavior = "auto"} = options || {};
+    if (!protyle.disabled && position === "auto" && getSelection().rangeCount > 0) {
         const range = getSelection().getRangeAt(0);
         const blockElement = hasClosestBlock(range.startContainer);
         if (blockElement) {
@@ -108,16 +116,33 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
         contentTop += topElement.clientHeight;
         topElement = topElement.nextElementSibling;
     }
-    if (top) {
+    if (position === "center") {
+        const elementRect = nodeElement.getBoundingClientRect();
+        const contentRect = protyle.contentElement.getBoundingClientRect();
+        // 如果块的高度超过容器视口，让块的上边界贴着容器上边界；否则让整个块居中
+        if (elementRect.height > contentRect.height) {
+            protyle.contentElement.scroll({top: protyle.contentElement.scrollTop + elementRect.top - contentRect.top, behavior});
+        } else {
+            const elementCenter = elementRect.top + elementRect.height / 2;
+            const contentCenter = contentRect.top + contentRect.height / 2;
+            protyle.contentElement.scroll({top: protyle.contentElement.scrollTop + elementCenter - contentCenter, behavior});
+        }
+        return;
+    } else if (position === "top") {
         protyle.contentElement.scroll({top: offsetTop - contentTop, behavior});
         return;
     }
     if (protyle.contentElement.scrollTop > offsetTop - 32) {
         protyle.contentElement.scroll({top: offsetTop - contentTop, behavior});
+        return;
     } else if (protyle.contentElement.scrollTop + protyle.contentElement.clientHeight < offsetTop + nodeElement.clientHeight - contentTop) {
         protyle.contentElement.scroll({
             top: offsetTop + nodeElement.clientHeight - contentTop - protyle.contentElement.clientHeight,
             behavior
         });
+        return;
     }
+    const elementRect = nodeElement.getBoundingClientRect();
+    const contentRect = protyle.contentElement.getBoundingClientRect();
+    protyle.contentElement.scroll({top: protyle.contentElement.scrollTop + elementRect.top - contentRect.top - contentRect.height / 2, behavior});
 };

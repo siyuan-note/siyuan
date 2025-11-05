@@ -539,7 +539,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 processRender(protyle.wysiwyg.element);
                 highlightRender(protyle.wysiwyg.element);
                 avRender(protyle.wysiwyg.element, protyle);
-                scrollCenter(protyle, undefined, false, "smooth");
+                scrollCenter(protyle, undefined, {behavior: "smooth"});
             });
             return;
         } else if (files && files.length > 0) {
@@ -592,7 +592,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.classList.contains("av") && selectCellElement) {
         cellScrollIntoView(nodeElement, selectCellElement);
     } else {
-        scrollCenter(protyle, undefined, false, "smooth");
+        scrollCenter(protyle, undefined, {behavior: "smooth"});
     }
 };
 

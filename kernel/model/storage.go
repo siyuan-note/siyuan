@@ -39,9 +39,9 @@ type RecentDoc struct {
 	RootID   string `json:"rootID"`
 	Icon     string `json:"icon,omitempty"`
 	Title    string `json:"title,omitempty"`
-	ViewedAt int64  `json:"viewedAt"` // 浏览时间字段
-	ClosedAt int64  `json:"closedAt"` // 关闭时间字段
-	OpenAt   int64  `json:"openAt"`   // 文档第一次从文档树加载到页签的时间
+	ViewedAt int64  `json:"viewedAt,omitempty"` // 浏览时间字段
+	ClosedAt int64  `json:"closedAt,omitempty"` // 关闭时间字段
+	OpenAt   int64  `json:"openAt,omitempty"`   // 文档第一次从文档树加载到页签的时间
 }
 
 type OutlineDoc struct {
@@ -142,13 +142,11 @@ func RemoveRecentDoc(ids []string) {
 }
 
 func setRecentDocByTree(tree *parse.Tree) {
+	timeNow := time.Now().Unix()
 	recentDoc := &RecentDoc{
 		RootID:   tree.Root.ID,
-		Icon:     "",
-		Title:    "",
-		ViewedAt: time.Now().Unix(), // 使用当前时间作为浏览时间
-		ClosedAt: 0,                 // 初始化关闭时间为0，表示未关闭
-		OpenAt:   time.Now().Unix(), // 设置文档打开时间
+		ViewedAt: timeNow, // 使用当前时间作为浏览时间
+		OpenAt:   timeNow, // 设置文档打开时间
 	}
 
 	recentDocLock.Lock()
@@ -281,11 +279,7 @@ func BatchUpdateRecentDocCloseTime(rootIDs []string) (err error) {
 
 		recentDoc := &RecentDoc{
 			RootID:   tree.Root.ID,
-			Icon:     tree.Root.IALAttr("icon"),
-			Title:    tree.Root.IALAttr("title"),
-			ViewedAt: 0,         // 未浏览过，设为 0
 			ClosedAt: closeTime, // 设置关闭时间
-			OpenAt:   0,         // 未记录打开时间，设为 0
 		}
 
 		recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)

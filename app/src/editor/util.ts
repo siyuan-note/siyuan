@@ -674,8 +674,8 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
         }
         item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
         fetchPost("/api/ref/getBacklink2", {
-            sort: item.status[blockId] ? item.status[blockId].sort : "3",
-            mSort: item.status[blockId] ? item.status[blockId].mSort : "3",
+            sort: item.status[blockId] ? item.status[blockId].sort.toString() : window.siyuan.config.editor.backlinkSort.toString(),
+            mSort: item.status[blockId] ? item.status[blockId].mSort.toString() : window.siyuan.config.editor.backmentionSort.toString(),
             id: blockId || "",
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,

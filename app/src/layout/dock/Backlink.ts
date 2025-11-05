@@ -24,8 +24,8 @@ export class Backlink extends Model {
     public editors: Protyle[] = [];
     public status: {
         [key: string]: {
-            sort: string,
-            mSort: string,
+            sort: number,
+            mSort: number,
             scrollTop: number,
             mScrollTop: number,
             backlinkOpenIds: string[],
@@ -80,6 +80,8 @@ export class Backlink extends Model {
         this.type = options.type;
         this.element = options.tab.panelElement;
         this.element.classList.add("fn__flex-column", "file-tree", "sy__backlink");
+        const backlinkSort = window.siyuan.config.editor.backlinkSort;
+        const backmentionSort = window.siyuan.config.editor.backmentionSort;
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
         <svg class="block__logoicon"><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.backlinks}
@@ -92,7 +94,7 @@ export class Backlink extends Model {
     <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="sort" data-sort="3" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
+    <span data-type="sort" data-sort="${backlinkSort}" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="expand" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.expand}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconExpand"></use></svg>
@@ -115,7 +117,7 @@ export class Backlink extends Model {
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
     <span data-type="search" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="mSort" data-sort="3" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
+    <span data-type="mSort" data-sort="${backmentionSort}" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="mExpand" class="block__icon b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.expand}">
         <svg><use xlink:href="#iconExpand"></use></svg>
@@ -353,6 +355,14 @@ export class Backlink extends Model {
     private showSortMenu(type: string, sort: string) {
         const clickEvent = (currentSort: string) => {
             (type === "sort" ? this.tree : this.mTree).element.previousElementSibling.querySelector(`[data-type="${type}"]`).setAttribute("data-sort", currentSort);
+            // 保存排序状态到配置
+            const sortValue = parseInt(currentSort);
+            if (type === "sort") {
+                window.siyuan.config.editor.backlinkSort = sortValue;
+            } else {
+                window.siyuan.config.editor.backmentionSort = sortValue;
+            }
+            fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
             this.searchBacklinks();
         };
         window.siyuan.menus.menu.remove();
@@ -489,8 +499,8 @@ export class Backlink extends Model {
         }
         element.classList.add("fn__rotate");
         fetchPost("/api/ref/getBacklink2", {
-            sort: this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort"),
-            mSort: this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort"),
+            sort: parseInt(this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort")).toString(),
+            mSort: parseInt(this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort")).toString(),
             k: this.inputsElement[0].value,
             mk: this.inputsElement[1].value,
             id: this.blockId,
@@ -504,8 +514,8 @@ export class Backlink extends Model {
 
     public saveStatus() {
         this.status[this.blockId] = {
-            sort: this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort"),
-            mSort: this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort"),
+            sort: parseInt(this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort")),
+            mSort: parseInt(this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort")),
             scrollTop: this.tree.element.scrollTop,
             mScrollTop: this.mTree.element.scrollTop,
             backlinkOpenIds: [],
@@ -582,8 +592,8 @@ export class Backlink extends Model {
 
         if (!this.status[this.blockId]) {
             this.status[this.blockId] = {
-                sort: "3",
-                mSort: "3",
+                sort: window.siyuan.config.editor.backlinkSort,
+                mSort: window.siyuan.config.editor.backmentionSort,
                 scrollTop: 0,
                 mScrollTop: 0,
                 backlinkOpenIds: [],
@@ -653,8 +663,8 @@ export class Backlink extends Model {
             layoutElement.setAttribute("aria-label", window.siyuan.languages.down);
             layoutElement.querySelector("use").setAttribute("xlink:href", "#iconDown");
         }
-        this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort);
-        this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort);
+        this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute("data-sort", this.status[this.blockId].sort.toString());
+        this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').setAttribute("data-sort", this.status[this.blockId].mSort.toString());
 
         setTimeout(() => {
             this.tree.element.scrollTop = this.status[this.blockId].scrollTop;

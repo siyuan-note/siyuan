@@ -132,12 +132,11 @@ func SaveAssetsTexts() {
 }
 
 func SetAssetText(asset, text string) {
-	var oldText string
 	assetsTextsLock.Lock()
-	oldText = assetsTexts[asset]
+	oldText, ok := assetsTexts[asset]
 	assetsTexts[asset] = text
 	assetsTextsLock.Unlock()
-	if oldText != text {
+	if !ok || oldText != text {
 		assetsTextsChanged.Store(true)
 	}
 }
@@ -265,7 +264,7 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 	return
 }
 
-// 提取并连接所有 text 字段的函数
+// GetOcrJsonText 提取并连接所有 text 字段的函数
 func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
 	for _, dataMap := range jsonData {
 		// 检查 text 字段是否存在

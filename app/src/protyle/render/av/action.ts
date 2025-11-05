@@ -162,12 +162,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const cellType = getTypeByCellElement(target);
-                if (viewType === "gallery") {
-                    const itemElement = hasClosestByClassName(target, "av__gallery-item");
-                    if (itemElement && cellType !== "updated" && cellType !== "created" && cellType !== "lineNumber") {
-                        popTextCell(protyle, [target]);
-                    }
-                } else {
+                if (viewType === "table") {
                     const scrollElement = hasClosestByClassName(target, "av__scroll");
                     if (!scrollElement) {
                         return;
@@ -176,7 +171,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     if (!rowElement) {
                         return;
                     }
-                    // TODO 点击单元格的时候， lineNumber 选中整行
                     if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
                         selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                     } else {
@@ -185,6 +179,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                             item.classList.remove("av__row--select");
                         });
                         updateHeader(rowElement);
+                        popTextCell(protyle, [target]);
+                    }
+                } else {
+                    const itemElement = hasClosestByClassName(target, "av__gallery-item");
+                    if (itemElement && cellType !== "updated" && cellType !== "created" && cellType !== "lineNumber") {
                         popTextCell(protyle, [target]);
                     }
                 }
@@ -834,7 +833,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         }
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
-        if (viewType === "gallery") {
+        if (["gallery", "kanban"].includes(viewType)) {
             if (value.type === "checkbox") {
                 value.checkbox = {
                     checked: value.checkbox?.checked || false,

@@ -600,11 +600,12 @@ export const openMenuPanel = (options: {
                         hideElements(["util"], options.protyle);
                     } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                         // 过滤面板先关闭过滤条件
-                        window.siyuan.menus.menu.remove();
                     } else {
                         closeCB?.();
                         avPanelElement.remove();
-                        focusBlock(options.blockElement);
+                        setTimeout(() => {
+                            focusBlock(options.blockElement);
+                        }, Constants.TIMEOUT_TRANSITION);  // 单选使用 enter 修改选项后会滚动
                     }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();

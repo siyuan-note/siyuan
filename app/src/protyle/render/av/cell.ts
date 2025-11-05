@@ -996,7 +996,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         });
     } else if (cellValue.type === "checkbox") {
         text += `<div class="fn__flex"><svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
-        if (type === "gallery" && cellValue?.checkbox?.content) {
+        if (["gallery", "kanban"].includes(type) && cellValue?.checkbox?.content) {
             text += `<span class="fn__space"></span>${cellValue?.checkbox?.content}`;
         }
         text += "</div>";
@@ -1223,7 +1223,7 @@ export const cellValueIsEmpty = (value: IAVCellValue) => {
         return !value[value.type as "text"]?.content;
     }
     if (value.type === "number") {
-        return !value.number?.isNotEmpty;
+        return value.number ? !value.number.isNotEmpty : true;
     }
     if (["mSelect", "mAsset", "select"].includes(value.type)) {
         if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {

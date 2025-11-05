@@ -64,6 +64,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Kanban.CardSize = view.Kanban.CardSize
 		groupView.Kanban.FitImage = view.Kanban.FitImage
 		groupView.Kanban.DisplayFieldName = view.Kanban.DisplayFieldName
+		groupView.Kanban.FillColBackgroundColor = view.Kanban.FillColBackgroundColor
 	}
 	if nil != err {
 		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)

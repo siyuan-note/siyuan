@@ -2788,6 +2788,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		view.Kanban.CardSize = masterView.Kanban.CardSize
 		view.Kanban.FitImage = masterView.Kanban.FitImage
 		view.Kanban.DisplayFieldName = masterView.Kanban.DisplayFieldName
+		view.Kanban.FillColBackgroundColor = masterView.Kanban.FillColBackgroundColor
 		view.Kanban.ShowIcon = masterView.Kanban.ShowIcon
 		view.Kanban.WrapField = masterView.Kanban.WrapField
 	}

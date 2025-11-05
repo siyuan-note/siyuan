@@ -705,7 +705,7 @@ func (tx *Transaction) doChangeAttrViewLayout(operation *Operation) (ret *TxErr)
 	return
 }
 
-func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error) {
+func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -716,7 +716,6 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		return
 	}
 
-	newLayout := layout
 	if newLayout == view.LayoutType {
 		return
 	}

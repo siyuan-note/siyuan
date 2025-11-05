@@ -638,14 +638,25 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewCardSize") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-            item.querySelectorAll(".av__gallery").forEach(galleryItem => {
-                galleryItem.classList.remove("av__gallery--small", "av__gallery--big");
-                if (operation.data === 0) {
-                    galleryItem.classList.add("av__gallery--small");
-                } else if (operation.data === 2) {
-                    galleryItem.classList.add("av__gallery--big");
-                }
-            });
+            if (item.getAttribute("data-av-type") === "kanban") {
+                item.querySelectorAll(".av__kanban-group").forEach(galleryItem => {
+                    galleryItem.classList.remove("av__kanban-group--small", "av__kanban-group--big");
+                    if (operation.data === 0) {
+                        galleryItem.classList.add("av__kanban-group--small");
+                    } else if (operation.data === 2) {
+                        galleryItem.classList.add("av__kanban-group--big");
+                    }
+                });
+            } else {
+                item.querySelectorAll(".av__gallery").forEach(galleryItem => {
+                    galleryItem.classList.remove("av__gallery--small", "av__gallery--big");
+                    if (operation.data === 0) {
+                        galleryItem.classList.add("av__gallery--small");
+                    } else if (operation.data === 2) {
+                        galleryItem.classList.add("av__gallery--big");
+                    }
+                });
+            }
         });
         return;
     }
@@ -691,16 +702,18 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewFillColBackgroundColor") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((avItem: HTMLElement) => {
             avItem.querySelectorAll(".av__kanban-group").forEach(item => {
-                if (item.getAttribute("style")) {
-                    let selectBg;
-                    const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
-                    if (nameElement) {
-                        selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
-                    } else {
-                        selectBg = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
-                    }
-                    item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
+                if (!operation.data) {
+                    item.removeAttribute("style");
+                    return;
                 }
+                let selectBg;
+                const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
+                if (nameElement) {
+                    selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
+                } else {
+                    selectBg = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
+                }
+                item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
             });
         });
         return;

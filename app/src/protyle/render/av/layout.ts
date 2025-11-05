@@ -154,24 +154,6 @@ export const bindLayoutEvent = (options: {
         }]);
         options.data.view.showIcon = checked;
     });
-    const toggleBgElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-kanban-bg"]') as HTMLInputElement;
-    toggleBgElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
-        const checked = toggleBgElement.checked;
-        transaction(options.protyle, [{
-            action: "setAttrViewFillColBackgroundColor",
-            avID,
-            blockID,
-            data: checked
-        }], [{
-            action: "setAttrViewFillColBackgroundColor",
-            avID,
-            blockID,
-            data: !checked
-        }]);
-        (options.data.view as IAVKanban).fillColBackgroundColor = checked;
-    })
     const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-entries-wrap"]') as HTMLInputElement;
     toggleWrapElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");
@@ -193,9 +175,27 @@ export const bindLayoutEvent = (options: {
         });
         options.data.view.wrapField = checked;
     });
-    if (options.data.viewType !== "gallery") {
+    if (options.data.viewType === "table") {
         return;
     }
+    const toggleBgElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-kanban-bg"]') as HTMLInputElement;
+    toggleBgElement.addEventListener("change", () => {
+        const avID = options.blockElement.getAttribute("data-av-id");
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        const checked = toggleBgElement.checked;
+        transaction(options.protyle, [{
+            action: "setAttrViewFillColBackgroundColor",
+            avID,
+            blockID,
+            data: checked
+        }], [{
+            action: "setAttrViewFillColBackgroundColor",
+            avID,
+            blockID,
+            data: !checked
+        }]);
+        (options.data.view as IAVKanban).fillColBackgroundColor = checked;
+    })
     const toggleFitElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-fit"]') as HTMLInputElement;
     toggleFitElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");

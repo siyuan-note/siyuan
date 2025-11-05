@@ -50,8 +50,6 @@ const getKanbanHTML = (data: IAVKanban) => {
                 }
             } else if (item.coverContent) {
                 galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
-            } else {
-                galleryHTML += `<div class="${coverClass}"></div>`;
             }
         }
         galleryHTML += '<div class="av__gallery-fields">';
@@ -108,7 +106,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 </div>`;
     });
     galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
-    return `<div class="av__gallery${data.cardSize === 0 ? " av__gallery--small" : (data.cardSize === 2 ? " av__gallery--big" : "")}">
+    return `<div class="av__gallery av__gallery--small">
     ${galleryHTML}
 </div>
 <div class="av__gallery-load${data.cardCount > data.cards.length ? "" : " fn__none"}">
@@ -212,7 +210,7 @@ export const renderKanban = async (options: {
                     selectBg = `style="--b3-av-kanban-border:${color};--b3-av-kanban-bg:${color}29;--b3-av-kanban-content-bg:${color}47;--b3-av-kanban-content-hover-bg:${color}5c;"`;
                 }
             }
-            bodyHTML += `<div class="av__kanban-group"${selectBg}>
+            bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cards.length)}
     <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getKanbanHTML(group)}</div>
 </div>`;

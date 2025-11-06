@@ -1596,7 +1596,6 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	logging.LogInfof("removed doc [%s%s]", box.ID, p)
 
 	box.removeSort(removeIDs)
-	RemoveRecentDoc(removeIDs)
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
 		if err == nil && 1 > len(others) {

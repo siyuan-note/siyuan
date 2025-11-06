@@ -305,6 +305,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     doOperations.push(...moveToResult.doOperations);
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
+    // 横向超级块A内两个元素拖拽成纵向超级块B，取消超级块A会导致 targetElement 被删除，需先移动再删除 https://github.com/siyuan-note/siyuan/issues/16292
     let removeIndex = doOperations.length - 1;
     doOperations.find((item, index) => {
         if (item.action === "delete" && item.id === targetMoveUndo.parentID) {

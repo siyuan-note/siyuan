@@ -745,7 +745,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	}
 	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 
-	go setRecentDocByTree(tree)
 	return
 }
 

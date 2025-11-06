@@ -51,9 +51,14 @@ type OutlineDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
-// 三种类型各保留 32 条记录
+// 三种类型各保留 32 条记录，并清空 Title 和 Icon
 func trimRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 	if len(recentDocs) <= 32 {
+		// 清空 Title 和 Icon
+		for _, doc := range recentDocs {
+			doc.Title = ""
+			doc.Icon = ""
+		}
 		return recentDocs
 	}
 
@@ -112,6 +117,9 @@ func trimRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 
 	result := make([]*RecentDoc, 0, len(docMap))
 	for _, doc := range docMap {
+		// 清空 Title 和 Icon
+		doc.Title = ""
+		doc.Icon = ""
 		result = append(result, doc)
 	}
 
@@ -141,40 +149,6 @@ func RemoveRecentDoc(ids []string) {
 	}
 }
 
-func setRecentDocByTree(tree *parse.Tree) {
-	timeNow := time.Now().Unix()
-	recentDoc := &RecentDoc{
-		RootID:   tree.Root.ID,
-		ViewedAt: timeNow, // 使用当前时间作为浏览时间
-		OpenAt:   timeNow, // 设置文档打开时间
-	}
-
-	recentDocLock.Lock()
-	defer recentDocLock.Unlock()
-
-	recentDocs, err := getRecentDocs("")
-	if err != nil {
-		return
-	}
-
-	for i, c := range recentDocs {
-		if c.RootID == recentDoc.RootID {
-			recentDoc.ClosedAt = c.ClosedAt
-			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
-			break
-		}
-	}
-
-	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
-
-	recentDocs = trimRecentDocs(recentDocs)
-
-	err = setRecentDocs(recentDocs)
-	if err != nil {
-		return
-	}
-}
-
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()
@@ -185,20 +159,30 @@ func UpdateRecentDocOpenTime(rootID string) (err error) {
 		return
 	}
 
-	// 查找文档并更新打开时间
+	timeNow := time.Now().Unix()
+	// 查找文档并更新打开时间和浏览时间
 	found := false
 	for _, doc := range recentDocs {
 		if doc.RootID == rootID {
-			doc.OpenAt = time.Now().Unix()
+			doc.OpenAt = timeNow
+			doc.ViewedAt = timeNow
 			doc.ClosedAt = 0
 			found = true
 			break
 		}
 	}
 
-	if found {
-		err = setRecentDocs(recentDocs)
+	// 如果文档不存在，创建新记录
+	if !found {
+		recentDoc := &RecentDoc{
+			RootID:   rootID,
+			OpenAt:   timeNow,
+			ViewedAt: timeNow,
+		}
+		recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
 	}
+
+	err = setRecentDocs(recentDocs)
 	return
 }
 
@@ -212,24 +196,30 @@ func UpdateRecentDocViewTime(rootID string) (err error) {
 		return
 	}
 
-	// 查找文档并更新浏览时间
+	timeNow := time.Now().Unix()
+	// 查找文档并更新浏览时间，保留原来的打开时间
 	found := false
 	for _, doc := range recentDocs {
 		if doc.RootID == rootID {
-			doc.ViewedAt = time.Now().Unix()
+			// OpenAt 保持不变，保留原来的打开时间
+			doc.ViewedAt = timeNow
 			doc.ClosedAt = 0
 			found = true
 			break
 		}
 	}
 
-	if found {
-		// 按浏览时间降序排序
-		sort.Slice(recentDocs, func(i, j int) bool {
-			return recentDocs[i].ViewedAt > recentDocs[j].ViewedAt
-		})
-		err = setRecentDocs(recentDocs)
+	// 如果文档不存在，创建新记录
+	if !found {
+		recentDoc := &RecentDoc{
+			RootID: rootID,
+			// 新创建的记录不设置 OpenAt，因为这是浏览而不是打开
+			ViewedAt: timeNow,
+		}
+		recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
 	}
+
+	err = setRecentDocs(recentDocs)
 	return
 }
 
@@ -299,16 +289,12 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
+	recentDocs = trimRecentDocs(recentDocs)
+
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [recent-doc] dir failed: %s", err)
 		return
-	}
-
-	// 不保存 Title 和 Icon
-	for _, doc := range recentDocs {
-		doc.Title = ""
-		doc.Icon = ""
 	}
 
 	data, err := gulu.JSON.MarshalIndentJSON(recentDocs, "", "  ")

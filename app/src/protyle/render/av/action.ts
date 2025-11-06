@@ -625,7 +625,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                             blockElement,
                             protyle,
                             count: parseInt(inputElement.value),
-                            previousID: rowElements[0].previousElementSibling.getAttribute("data-id"),
+                            previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
                             groupID: rowElements[0].parentElement.getAttribute("data-group-id")
                         });
                         menu.close();
@@ -636,7 +636,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                                 blockElement,
                                 protyle,
                                 count: parseInt(inputElement.value),
-                                previousID: rowElements[0].previousElementSibling.getAttribute("data-id"),
+                                previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
                                 groupID: rowElements[0].parentElement.getAttribute("data-group-id")
                             });
                             menu.close();

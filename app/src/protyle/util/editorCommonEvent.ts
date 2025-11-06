@@ -1171,7 +1171,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
             hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
             hasClosestBlock(event.target);
-        if (targetElement && targetElement.getAttribute("data-av-type") === "gallery" && event.target.classList.contains("av__gallery")) {
+        if (targetElement && ["gallery", "kanban"].includes(targetElement.getAttribute("data-av-type")) && event.target.classList.contains("av__gallery")) {
             // 拖拽到属性视图 gallery 内，但没选中 item
             return;
         }
@@ -1355,18 +1355,31 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return;
             }
-            // gallery
+            // gallery & kanban
             if (targetElement.classList.contains("av__gallery-item")) {
-                const midLeft = nodeRect.left + nodeRect.width / 2;
-                if (event.clientX < midLeft && event.clientX > nodeRect.left - 13) {
-                    targetElement.classList.add("dragover__left");
-                } else if (event.clientX > midLeft && event.clientX <= nodeRect.right + 13) {
-                    targetElement.classList.add("dragover__right");
+                if (hasClosestByClassName(targetElement, "av__kanban-group")) {
+                    const midTop = nodeRect.top + nodeRect.height / 2;
+                    if (event.clientY < midTop && event.clientY > nodeRect.top - 13) {
+                        targetElement.classList.add("dragover__top");
+                    } else if (event.clientY > midTop && event.clientY <= nodeRect.bottom + 13) {
+                        targetElement.classList.add("dragover__bottom");
+                    }
+                } else {
+                    const midLeft = nodeRect.left + nodeRect.width / 2;
+                    if (event.clientX < midLeft && event.clientX > nodeRect.left - 13) {
+                        targetElement.classList.add("dragover__left");
+                    } else if (event.clientX > midLeft && event.clientX <= nodeRect.right + 13) {
+                        targetElement.classList.add("dragover__right");
+                    }
                 }
                 return;
             }
             if (targetElement.classList.contains("av__gallery-add")) {
-                targetElement.classList.add("dragover__left");
+                if (hasClosestByClassName(targetElement, "av__kanban-group")) {
+                    targetElement.classList.add("dragover__bottom");
+                } else {
+                    targetElement.classList.add("dragover__left");
+                }
                 return;
             }
 

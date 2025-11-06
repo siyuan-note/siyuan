@@ -527,6 +527,26 @@
       &.dragover__right::after {
         right: -10px;
       }
+
+
+      &.dragover__top::after,
+      &.dragover__bottom::after {
+        left: 0;
+        right: 0;
+        height: 4px;
+        content: '';
+        position: absolute;
+        background-color: var(--b3-theme-primary-lighter);
+        z-index: 3;
+      }
+
+      &.dragover__top::after {
+        top: -10px;
+      }
+
+      &.dragover__bottom::after {
+        bottom: -10px;
+      }
     }
   }
 

@@ -48,7 +48,7 @@ const getKanbanHTML = (data: IAVKanban) => {
                 } else {
                     galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${data.fitImage ? " av__gallery-img--fit" : ""}" src="${getCompressURL(item.coverURL)}"></div>`;
                 }
-            } else if (item.coverContent) {
+            } else if (item.coverContent.trim()) {
                 galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
             }
         }

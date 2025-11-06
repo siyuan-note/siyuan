@@ -229,7 +229,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
         }
 
-        if (newListId && (index === 0||
+        if (newListId && (index === 0 ||
             sourceElements[index - 1].getAttribute("data-type") !== "NodeListItem" ||
             sourceElements[index - 1].getAttribute("data-subtype") !== item.getAttribute("data-subtype"))
         ) {
@@ -816,9 +816,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         let previousID = "";
-                        if (targetClass.includes("dragover__right")) {
+                        if (targetClass.includes("dragover__right") || targetElement.classList.contains("dragover__bottom")) {
                             previousID = targetElement.getAttribute("data-id") || "";
-                        } else {
+                        } else if (targetElement.classList.contains("dragover__top") || targetElement.classList.contains("dragover__left")) {
                             previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                         }
                         const avID = blockElement.getAttribute("data-av-id");
@@ -957,14 +957,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         let previousID = "";
-                        if (targetElement.classList.contains("dragover__bottom")) {
+                        if (targetElement.classList.contains("dragover__bottom") || targetElement.classList.contains("dragover__right")) {
                             previousID = targetElement.getAttribute("data-id") || "";
-                        } else if (targetElement.classList.contains("dragover__top")) {
+                        } else if (targetElement.classList.contains("dragover__top") || targetElement.classList.contains("dragover__left")) {
                             previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
-                        } else if (targetElement.classList.contains("dragover__left")) {
-                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
-                        } else if (targetElement.classList.contains("dragover__right")) {
-                            previousID = targetElement.getAttribute("data-id") || "";
                         }
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");

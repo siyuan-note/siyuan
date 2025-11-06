@@ -305,17 +305,24 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     doOperations.push(...moveToResult.doOperations);
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
+    let removeIndex = doOperations.length - 1;
+    doOperations.find((item, index) => {
+        if (item.action === "delete" && item.id === targetMoveUndo.parentID) {
+            removeIndex = index;
+            return true;
+        }
+    });
     if (isBottom) {
         // 拖拽到超级块 col 下方， 其他块右侧
         sbElement.insertAdjacentElement("afterbegin", targetElement);
-        doOperations.push({
+        doOperations.splice(removeIndex, 0, {
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
             parentID: sbElement.getAttribute("data-node-id")
         });
     } else {
         sbElement.lastElementChild.insertAdjacentElement("beforebegin", targetElement);
-        doOperations.push({
+        doOperations.splice(removeIndex, 0, {
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
             previousID: newSourceParentElement[0].getAttribute("data-node-id"),

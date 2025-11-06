@@ -126,29 +126,6 @@ func trimRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 	return result
 }
 
-func RemoveRecentDoc(ids []string) {
-	recentDocLock.Lock()
-	defer recentDocLock.Unlock()
-
-	recentDocs, err := getRecentDocs("")
-	if err != nil {
-		return
-	}
-
-	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	for i, doc := range recentDocs {
-		if gulu.Str.Contains(doc.RootID, ids) {
-			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
-			break
-		}
-	}
-
-	err = setRecentDocs(recentDocs)
-	if err != nil {
-		return
-	}
-}
-
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()

@@ -51,15 +51,25 @@ type OutlineDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
-// 三种类型各保留 32 条记录，并清空 Title 和 Icon
-func trimRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
-	if len(recentDocs) <= 32 {
+// normalizeRecentDocs 规范化最近文档列表：去重、清空 Title/Icon、按类型截取 32 条记录
+func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
+	// 去重
+	seen := make(map[string]struct{}, len(recentDocs))
+	deduplicated := make([]*RecentDoc, 0, len(recentDocs))
+	for _, doc := range recentDocs {
+		if _, ok := seen[doc.RootID]; !ok {
+			seen[doc.RootID] = struct{}{}
+			deduplicated = append(deduplicated, doc)
+		}
+	}
+
+	if len(deduplicated) <= 32 {
 		// 清空 Title 和 Icon
-		for _, doc := range recentDocs {
+		for _, doc := range deduplicated {
 			doc.Title = ""
 			doc.Icon = ""
 		}
-		return recentDocs
+		return deduplicated
 	}
 
 	// 分别统计三种类型的记录
@@ -67,7 +77,7 @@ func trimRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 	var openedDocs []*RecentDoc
 	var closedDocs []*RecentDoc
 
-	for _, doc := range recentDocs {
+	for _, doc := range deduplicated {
 		if doc.ViewedAt > 0 {
 			viewedDocs = append(viewedDocs, doc)
 		}
@@ -131,7 +141,7 @@ func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs("")
+	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
 		return
 	}
@@ -168,7 +178,7 @@ func UpdateRecentDocViewTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs("")
+	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
 		return
 	}
@@ -214,7 +224,7 @@ func BatchUpdateRecentDocCloseTime(rootIDs []string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs("")
+	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
 		return
 	}
@@ -266,7 +276,7 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
-	recentDocs = trimRecentDocs(recentDocs)
+	recentDocs = normalizeRecentDocs(recentDocs)
 
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
@@ -289,8 +299,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	return
 }
 
-func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
-	var tmp []*RecentDoc
+func loadRecentDocsRaw() (ret []*RecentDoc, err error) {
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
 	if !filelock.IsExist(dataPath) {
 		return
@@ -302,7 +311,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &tmp); err != nil {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal storage [recent-doc] failed: %s", err)
 		if err = setRecentDocs([]*RecentDoc{}); err != nil {
 			logging.LogErrorf("reset storage [recent-doc] failed: %s", err)
@@ -310,14 +319,33 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		ret = []*RecentDoc{}
 		return
 	}
+	return
+}
+
+func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
+	ret = []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+	recentDocs, err := loadRecentDocsRaw()
+	if err != nil {
+		return
+	}
+
+	// 去重
+	seen := make(map[string]struct{}, len(recentDocs))
+	var deduplicated []*RecentDoc
+	for _, doc := range recentDocs {
+		if _, ok := seen[doc.RootID]; !ok {
+			seen[doc.RootID] = struct{}{}
+			deduplicated = append(deduplicated, doc)
+		}
+	}
 
 	var rootIDs []string
-	for _, doc := range tmp {
+	for _, doc := range deduplicated {
 		rootIDs = append(rootIDs, doc.RootID)
 	}
 	bts := treenode.GetBlockTrees(rootIDs)
 	var notExists []string
-	for _, doc := range tmp {
+	for _, doc := range deduplicated {
 		if bt := bts[doc.RootID]; nil != bt {
 			// 获取最新的文档标题和图标
 			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
@@ -332,9 +360,9 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	}
 
 	if 0 < len(notExists) {
-		err := setRecentDocs(ret)
+		err = setRecentDocs(ret)
 		if err != nil {
-			return nil, err
+			return
 		}
 	}
 
@@ -391,38 +419,45 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			ret = append(ret, doc)
 		}
 	case "closedAt": // 按关闭时间排序
-		var filtered []*RecentDoc
+		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 		for _, doc := range ret {
 			if doc.ClosedAt > 0 {
 				filtered = append(filtered, doc)
 			}
 		}
 		ret = filtered
-		sort.Slice(ret, func(i, j int) bool {
-			return ret[i].ClosedAt > ret[j].ClosedAt
-		})
+		if 0 < len(ret) {
+			sort.Slice(ret, func(i, j int) bool {
+				return ret[i].ClosedAt > ret[j].ClosedAt
+			})
+		}
 	case "openAt": // 按打开时间排序
-		var filtered []*RecentDoc
+		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 		for _, doc := range ret {
 			if doc.OpenAt > 0 {
 				filtered = append(filtered, doc)
 			}
 		}
 		ret = filtered
-		sort.Slice(ret, func(i, j int) bool {
-			return ret[i].OpenAt > ret[j].OpenAt
-		})
-	default: // 默认按浏览时间排序
-		var filtered []*RecentDoc
+		if 0 < len(ret) {
+			sort.Slice(ret, func(i, j int) bool {
+				return ret[i].OpenAt > ret[j].OpenAt
+			})
+		}
+	case "viewedAt": // 按浏览时间排序
+	default:
+		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 		for _, doc := range ret {
 			if doc.ViewedAt > 0 {
 				filtered = append(filtered, doc)
 			}
 		}
 		ret = filtered
-		sort.Slice(ret, func(i, j int) bool {
-			return ret[i].ViewedAt > ret[j].ViewedAt
-		})
+		if 0 < len(ret) {
+			sort.Slice(ret, func(i, j int) bool {
+				return ret[i].ViewedAt > ret[j].ViewedAt
+			})
+		}
 	}
 	return
 }

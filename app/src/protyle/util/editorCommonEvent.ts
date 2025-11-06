@@ -816,9 +816,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         let previousID = "";
-                        if (targetClass.includes("dragover__right") || targetElement.classList.contains("dragover__bottom")) {
+                        if (targetClass.includes("dragover__right") || targetClass.includes("dragover__bottom")) {
                             previousID = targetElement.getAttribute("data-id") || "";
-                        } else if (targetElement.classList.contains("dragover__top") || targetElement.classList.contains("dragover__left")) {
+                        } else if (targetClass.includes("dragover__top") || targetClass.includes("dragover__left")) {
                             previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                         }
                         const avID = blockElement.getAttribute("data-av-id");
@@ -1372,7 +1372,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             if (targetElement.classList.contains("av__gallery-add")) {
                 if (hasClosestByClassName(targetElement, "av__kanban-group")) {
-                    targetElement.classList.add("dragover__bottom");
+                    targetElement.classList.add("dragover__top");
                 } else {
                     targetElement.classList.add("dragover__left");
                 }

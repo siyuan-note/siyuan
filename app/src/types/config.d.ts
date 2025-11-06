@@ -363,6 +363,14 @@ declare namespace Config {
          */
         backlinkContainChildren: boolean;
         /**
+         * Backlink sort mode
+         */
+        backlinkSort: number;
+        /**
+         * Backmention sort mode
+         */
+        backmentionSort: number;
+        /**
          * The maximum length of the dynamic anchor text for block references
          */
         blockRefDynamicAnchorTextMaxLen: number;

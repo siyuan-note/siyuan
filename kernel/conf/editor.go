@@ -52,6 +52,8 @@ type Editor struct {
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 	BacklinkContainChildren         bool           `json:"backlinkContainChildren"`         // 反向链接是否包含子块进行计算
+	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
+	BackmentionSort                 *int           `json:"backmentionSort"`                 // 反链提及排序方式
 	HeadingEmbedMode                int            `json:"headingEmbedMode"`                // 标题嵌入块模式，0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
 }
@@ -89,6 +91,8 @@ func NewEditor() *Editor {
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          -1,
 		BacklinkContainChildren:         true,
+		BacklinkSort:                    func() *int { v := util.SortModeUpdatedDESC; return &v }(),
+		BackmentionSort:                 func() *int { v := util.SortModeUpdatedDESC; return &v }(),
 		HeadingEmbedMode:                0,
 		Markdown:                        util.MarkdownSettings,
 	}

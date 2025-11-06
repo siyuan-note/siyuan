@@ -520,7 +520,11 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 }
 
 func (number *ValueNumber) FormatNumber() {
-	number.FormattedContent = formatNumber(number.Content, number.Format)
+	if !number.IsNotEmpty {
+		number.FormattedContent = ""
+	} else {
+		number.FormattedContent = formatNumber(number.Content, number.Format)
+	}
 }
 
 func formatNumber(content float64, format NumberFormat) string {

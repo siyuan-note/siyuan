@@ -334,28 +334,23 @@ export const updateHotkeyAfterTip = (hotkey: string) => {
     return "";
 };
 
-const KEY_MAP = new Map([
-    ["⌘", "Ctrl"],
-    ["⌃", "Ctrl"],
-    ["⇧", "Shift"],
-    ["⌥", "Alt"],
-    ["⇥", "Tab"],
-    ["⌫", "Backspace"],
-    ["⌦", "Delete"],
-    ["↩", "Enter"],
-]);
-
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {
-    if (!hotkey) {
-        return "";
-    }
-    if (isMac()) {
+    if (!hotkey||isMac()) {
         return hotkey;
     }
 
+    const KEY_MAP = new Map([
+        ["⌘", "Ctrl"],
+        ["⌃", "Ctrl"],
+        ["⇧", "Shift"],
+        ["⌥", "Alt"],
+        ["⇥", "Tab"],
+        ["⌫", "Backspace"],
+        ["⌦", "Delete"],
+        ["↩", "Enter"],
+    ]);
     const keys = [];
-
     if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push(KEY_MAP.get("⌘"));
     if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));
     if (hotkey.indexOf("⌥") > -1) keys.push(KEY_MAP.get("⌥"));
@@ -365,7 +360,6 @@ export const updateHotkeyTip = (hotkey: string) => {
     if (lastKey) {
         keys.push(KEY_MAP.get(lastKey) || lastKey);
     }
-
     return keys.join("+");
 };
 

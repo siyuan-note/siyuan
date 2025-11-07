@@ -360,14 +360,15 @@ export class Title {
                 this.element.classList.remove("fn__none");
             }
         }
-        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
+        const rootID = response.data.rootID;
+        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === rootID) {
             return false;
         }
-        this.element.setAttribute("data-node-id", protyle.block.rootID);
+        this.element.setAttribute("data-node-id", rootID);
         if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {
             this.element.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
         }
-        protyle.background?.render(response.data.ial, protyle.block.rootID);
+        protyle.background?.render(response.data.ial, rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.element.setAttribute("data-render", "true");
         this.setTitle(response.data.ial.title);

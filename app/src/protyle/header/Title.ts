@@ -360,6 +360,7 @@ export class Title {
                 this.element.classList.remove("fn__none");
             }
         }
+        protyle.block.rootID = response.data.rootID;
         if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
             return false;
         }

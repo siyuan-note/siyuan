@@ -735,8 +735,14 @@ const (
 	CreatedFormatDuration CreatedFormat = "duration"
 )
 
-func NewFormattedValueCreated(content, content2 int64, format CreatedFormat) (ret *ValueCreated) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueCreated(content, content2 int64, format CreatedFormat, isNotTime bool) (ret *ValueCreated) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
 	}
@@ -770,8 +776,14 @@ const (
 	UpdatedFormatDuration UpdatedFormat = "duration"
 )
 
-func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (ret *ValueUpdated) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat, isNotTime bool) (ret *ValueUpdated) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
 	}
@@ -1098,11 +1110,21 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest && 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration)}}
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration, isNotTime)}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest && 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration)}}
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration, isNotTime)}}
 			}
 		default:
 			if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
@@ -1146,11 +1168,21 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)}}
 			}
 		}
 	case CalcOperatorLatest:
@@ -1190,11 +1222,20 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)}}
 			}
 		case KeyTypeCreated:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)}}
 			}
 		}
 	case CalcOperatorChecked:

@@ -281,6 +281,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSetAttrViewColDateFillCreated(op)
 			case "setAttrViewColDateFillSpecificTime":
 				ret = tx.doSetAttrViewColDateFillSpecificTime(op)
+			case "setAttrViewCreatedIncludeTime":
+				ret = tx.doSetAttrViewCreatedIncludeTime(op)
+			case "setAttrViewUpdatedIncludeTime":
+				ret = tx.doSetAttrViewUpdatedIncludeTime(op)
 			case "duplicateAttrViewKey":
 				ret = tx.doDuplicateAttrViewKey(op)
 			case "setAttrViewCoverFrom":

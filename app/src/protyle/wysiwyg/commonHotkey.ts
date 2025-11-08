@@ -280,7 +280,6 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
     const foldHeadingIds = [];
     for (let index = nodeElements.length - 1; index >= 0; --index) {
         const item = nodeElements[index];
-        item.classList.remove("protyle-wysiwyg--select");
         let tempElement = item.cloneNode(true) as HTMLElement;
         const newId = Lute.NewNodeID();
         if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" &&
@@ -327,6 +326,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             childItem.removeAttribute("refcount");
             childItem.lastElementChild.querySelector(".protyle-attr--refcount")?.remove();
         });
+        item.classList.remove("protyle-wysiwyg--select");
         if (typeof starIndex === "number") {
             const orderIndex = starIndex + index + 1;
             tempElement.setAttribute("data-marker", (orderIndex) + ".");

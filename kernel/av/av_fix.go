@@ -24,10 +24,38 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+const CurrentSpec = 4
+
 func UpgradeSpec(av *AttributeView) {
+	if CurrentSpec <= av.Spec {
+		return
+	}
+
 	upgradeSpec1(av)
 	upgradeSpec2(av)
 	upgradeSpec3(av)
+	upgradeSpec4(av)
+}
+
+func upgradeSpec4(av *AttributeView) {
+	if 4 <= av.Spec {
+		return
+	}
+
+	for _, keyValues := range av.KeyValues {
+		switch keyValues.Key.Type {
+		case KeyTypeCreated:
+			if nil == keyValues.Key.Created {
+				keyValues.Key.Created = &Created{IncludeTime: true}
+			}
+		case KeyTypeUpdated:
+			if nil == keyValues.Key.Updated {
+				keyValues.Key.Updated = &Updated{IncludeTime: true}
+			}
+		}
+	}
+
+	av.Spec = 4
 }
 
 func upgradeSpec3(av *AttributeView) {

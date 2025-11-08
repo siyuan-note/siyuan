@@ -146,6 +146,12 @@ type Key struct {
 
 	// 日期
 	Date *Date `json:"date,omitempty"` // 日期设置
+
+	// 创建时间
+	Created *Created `json:"created,omitempty"` // 创建时间设置
+
+	// 更新时间
+	Updated *Updated `json:"updated,omitempty"` // 更新时间设置
 }
 
 func NewKey(id, name, icon string, keyType KeyType) *Key {
@@ -165,6 +171,14 @@ func (k *Key) GetOption(name string) (ret *SelectOption) {
 		}
 	}
 	return
+}
+
+type Created struct {
+	IncludeTime bool `json:"includeTime"` // 是否填充具体时间 Add `Include time` switch to database creation time field and update time field https://github.com/siyuan-note/siyuan/issues/12091
+}
+
+type Updated struct {
+	IncludeTime bool `json:"includeTime"` // 是否填充具体时间 Add `Include time` switch to database creation time field and update time field https://github.com/siyuan-note/siyuan/issues/12091
 }
 
 type Date struct {
@@ -396,7 +410,7 @@ type Viewable interface {
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
-		Spec:      3,
+		Spec:      CurrentSpec,
 		ID:        id,
 		KeyValues: []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		ViewID:    view.ID,

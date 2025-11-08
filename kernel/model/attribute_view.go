@@ -1688,25 +1688,35 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 					}
 				}
 			case av.KeyTypeCreated:
+				isNotTime := false
+				if nil != kv.Key && nil != kv.Key.Created {
+					isNotTime = !kv.Key.Created.IncludeTime
+				}
+
 				createdStr := nodeID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
-					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone, isNotTime)
 					kv.Values[0].Created.IsNotEmpty = true
 				} else {
 					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
-					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone, isNotTime)
 				}
 			case av.KeyTypeUpdated:
+				isNotTime := false
+				if nil != kv.Key && nil != kv.Key.Updated {
+					isNotTime = !kv.Key.Updated.IncludeTime
+				}
+
 				ial := sql.GetBlockAttrs(nodeID)
 				updatedStr := ial["updated"]
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
-					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone, isNotTime)
 					kv.Values[0].Updated.IsNotEmpty = true
 				} else {
 					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
-					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone, isNotTime)
 				}
 			}
 		}
@@ -2267,6 +2277,62 @@ func setAttrViewColDateFillSpecificTime(operation *Operation) (err error) {
 		v.Date.IsNotTime = !dateValues.Key.Date.FillSpecificTime
 	}
 
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewCreatedIncludeTime(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCreatedIncludeTime(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCreatedIncludeTime(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	key, _ := attrView.GetKey(operation.ID)
+	if nil == key {
+		return
+	}
+
+	if nil == key.Created {
+		key.Created = &av.Created{}
+	}
+
+	key.Created.IncludeTime = operation.Data.(bool)
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewUpdatedIncludeTime(operation *Operation) (ret *TxErr) {
+	err := setAttrViewUpdatedIncludeTime(operation)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewUpdatedIncludeTime(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	key, _ := attrView.GetKey(operation.ID)
+	if nil == key {
+		return
+	}
+
+	if nil == key.Updated {
+		key.Updated = &av.Updated{}
+	}
+
+	key.Updated.IncludeTime = operation.Data.(bool)
 	err = av.SaveAttributeView(attrView)
 	return
 }

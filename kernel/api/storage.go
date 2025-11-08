@@ -293,6 +293,10 @@ func updateRecentDocCloseTime(c *gin.Context) {
 		return
 	}
 
+	if nil == arg["rootID"] {
+		return
+	}
+
 	rootID := arg["rootID"].(string)
 	err := model.UpdateRecentDocCloseTime(rootID)
 	if err != nil {

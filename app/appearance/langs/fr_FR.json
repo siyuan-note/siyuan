@@ -932,7 +932,7 @@
   "collapse": "Collapse",
   "blockEmbed": "incorporer le bloc",
   "rowTip": "Cliquez sur <span class='ft__on-surface'>Ouvrir le menu</span><br>Faites glisser <span class='ft__on-surface'>Tri</span><br>⇧Cliquez sur <span class='ft__on-surface'>Mettre à jour l'attribut</span>",
-  "gutterTip": "Cliquez/⌘/ <span class='ft__on-surface'>Ouvrir le menu</span><br>⌘Cliquez/⌥→ <span class='ft__on-surface'>Se concentrer</span><br>⌥Cliquez/⌘↑ <span class='ft__on-surface'>Réduire/Développer</span><br>⇧Cliquez/⌥⌘A <span class='ft__on-surface'>Mettre à jour l'attribut</span><br>Faites glisser <span class='ft__on-surface'>Déplacer la position</span><br>⌃Faites glisser <span class='ft__on-surface'>Répétez</span><br>⌥Faites glisser <span class='ft__on-surface'>Générer une référence de bloc</span><br>⇧Faites glisser <span class='ft__on-surface'>Générer un bloc intégré</span>",
+  "gutterTip": "Cliquez/⌘/ <span class='ft__on-surface'>Ouvrir le menu</span><br>⌘Cliquez⌥→ <span class='ft__on-surface'>Se concentrer</span><br>⌥Cliquez⌘↑ <span class='ft__on-surface'>Réduire/Développer</span><br>⇧Cliquez⌥⌘A <span class='ft__on-surface'>Mettre à jour l'attribut</span><br>Faites glisser <span class='ft__on-surface'>Déplacer la position</span><br>⌃Faites glisser <span class='ft__on-surface'>Répétez</span><br>⌥Faites glisser <span class='ft__on-surface'>Générer une référence de bloc</span><br>⇧Faites glisser <span class='ft__on-surface'>Générer un bloc intégré</span>",
   "gutterTip2": "Cliquez sur <span class='ft__on-surface'>Ouvrir le menu</span><br>⇧Cliquez sur <span class='ft__on-surface'>Mettre à jour l'attribut</span>",
   "linkDistance": "Distance du lien",
   "collideStrength": "Force de collision",

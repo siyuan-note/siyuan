@@ -932,7 +932,7 @@
   "collapse": "Zwiń",
   "blockEmbed": "Wstaw blok",
   "rowTip": "Kliknij <span class='ft__on-surface'>Otwórz menu</span><br>Przeciągnij <span class='ft__on-surface'>Sortuj</span><br>⇧Kliknij <span class='ft__on-surface'>Zaktualizuj atrybut</span>",
-  "gutterTip": "Kliknij/⌘/ <span class='ft__on-surface'>Otwórz menu</span><br>⌘Kliknij/⌥→ <span class='ft__on-surface'>Skupienie</span><br>⌥Kliknij/⌘↑ <span class='ft__on-surface'>Zwiń/Rozwiń</span><br>⇧Kliknij/⌥⌘A <span class='ft__on-surface'>Zaktualizuj atrybut</span><br>Przeciągnij <span class='ft__on-surface'>Przesuń pozycję</span><br>⌃Przeciągnij <span class='ft__on-surface'>Powtórz</span><br>⌥Przeciągnij <span class='ft__on-surface'>Generuj odniesienie do bloku</span><br>⇧Przeciągnij <span class='ft__on-surface'>Generuj wbudowany blok</span>",
+  "gutterTip": "Kliknij/⌘/ <span class='ft__on-surface'>Otwórz menu</span><br>⌘Kliknij⌥→ <span class='ft__on-surface'>Skupienie</span><br>⌥Kliknij⌘↑ <span class='ft__on-surface'>Zwiń/Rozwiń</span><br>⇧Kliknij⌥⌘A <span class='ft__on-surface'>Zaktualizuj atrybut</span><br>Przeciągnij <span class='ft__on-surface'>Przesuń pozycję</span><br>⌃Przeciągnij <span class='ft__on-surface'>Powtórz</span><br>⌥Przeciągnij <span class='ft__on-surface'>Generuj odniesienie do bloku</span><br>⇧Przeciągnij <span class='ft__on-surface'>Generuj wbudowany blok</span>",
   "gutterTip2": "Kliknij <span class='ft__on-surface'>Otwórz menu</span><br>⇧Kliknij <span class='ft__on-surface'>Zaktualizuj atrybut</span>",
   "linkDistance": "Odległość linku",
   "collideStrength": "Siła kolizji",

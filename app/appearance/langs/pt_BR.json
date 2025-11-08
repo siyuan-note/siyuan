@@ -932,7 +932,7 @@
   "collapse": "Recolher",
   "blockEmbed": "Incorporar Bloco",
   "rowTip": "Clique <span class='ft__on-surface'>Abrir Menu</span><br>Arraste <span class='ft__on-surface'>Ordenar</span><br>⇧Clique <span class='ft__on-surface'>Atualizar atributo</span>",
-  "gutterTip": "Clique/⌘/ <span class='ft__on-surface'>Abrir Menu</span><br>⌘Clique/⌥→ <span class='ft__on-surface'>Focar</span><br>⌥Clique/⌘↑ <span class='ft__on-surface'>Recolher/Expandir</span><br>⇧Clique/⌥⌘A <span class='ft__on-surface'>Atualizar atributo</span><br>Arraste <span class='ft__on-surface'>Mover posição</span><br>⌃Arraste <span class='ft__on-surface'>Repetir</span><br>⌥Arraste <span class='ft__on-surface'>Gerar referência de bloco</span><br>⇧Arraste <span class='ft__on-surface'>Gerar bloco incorporado</span>",
+  "gutterTip": "Clique/⌘/ <span class='ft__on-surface'>Abrir Menu</span><br>⌘Clique⌥→ <span class='ft__on-surface'>Focar</span><br>⌥Clique⌘↑ <span class='ft__on-surface'>Recolher/Expandir</span><br>⇧Clique⌥⌘A <span class='ft__on-surface'>Atualizar atributo</span><br>Arraste <span class='ft__on-surface'>Mover posição</span><br>⌃Arraste <span class='ft__on-surface'>Repetir</span><br>⌥Arraste <span class='ft__on-surface'>Gerar referência de bloco</span><br>⇧Arraste <span class='ft__on-surface'>Gerar bloco incorporado</span>",
   "gutterTip2": "Clique <span class='ft__on-surface'>Abrir Menu</span><br>⇧Clique <span class='ft__on-surface'>Atualizar atributo</span>",
   "linkDistance": "Distância do link",
   "collideStrength": "Força de colisão",

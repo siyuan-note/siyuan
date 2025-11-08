@@ -932,7 +932,7 @@
   "collapse": "Collapse",
   "blockEmbed": "Embed Block",
   "rowTip": "Click <span class='ft__on-surface'>Open Menu</span><br>Drag <span class='ft__on-surface'>Sort</span><br>⇧Click <span class='ft__on-surface'>Update attribute</span>",
-  "gutterTip": "Click/⌘/ <span class='ft__on-surface'>Open Menu</span><br>⌘Click/⌥→ <span class='ft__on-surface'>Focus</span><br>⌥Click/⌘↑ <span class='ft__on-surface'>Collapse/Expand</span><br>⇧Click/⌥⌘A <span class='ft__on-surface'>Update attribute</span><br>Drag <span class='ft__on-surface'>Move position</span><br>⌃Drag <span class='ft__on-surface'>Repeat</span><br>⌥Drag <span class='ft__on-surface'>Generate block reference</span><br>⇧Drag <span class='ft__on-surface'>Generate embedded block</span>",
+  "gutterTip": "Click/⌘/ <span class='ft__on-surface'>Open Menu</span><br>⌘Click⌥→ <span class='ft__on-surface'>Focus</span><br>⌥Click⌘↑ <span class='ft__on-surface'>Collapse/Expand</span><br>⇧Click⌥⌘A <span class='ft__on-surface'>Update attribute</span><br>Drag <span class='ft__on-surface'>Move position</span><br>⌃Drag <span class='ft__on-surface'>Repeat</span><br>⌥Drag <span class='ft__on-surface'>Generate block reference</span><br>⇧Drag <span class='ft__on-surface'>Generate embedded block</span>",
   "gutterTip2": "Click <span class='ft__on-surface'>Open Menu</span><br>⇧Click <span class='ft__on-surface'>Update attribute</span>",
   "linkDistance": "Link distance",
   "collideStrength": "Collide strength",

@@ -932,7 +932,7 @@
   "collapse": "طي",
   "blockEmbed": "كتل التضمين",
   "rowTip": "‫نقر <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫سحب <span class='ft__on-surface'>فرز</span>‬<br>‫⇧نقر <span class='ft__on-surface'>تحديث السمة</span>‬",
-  "gutterTip": "‫نقر/⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫⌘نقر/⌥→ <span class='ft__on-surface'>تركيز</span>‬<br>‫⌥نقر/⌘↑ <span class='ft__on-surface'>طي/توسيع</span>‬<br>‫⇧نقرة/⌥⌘A <span class='ft__on-surface'>تحديث السمة</span>‬<br>‫سحب <span class='ft__on-surface'>نقل الموضع</span>‬<br>‫⌃سحب <span class='ft__on-surface'>تكرار</span>‬<br>‫⌥سحب <span class='ft__on-surface'>إنشاء مرجع الكتلة</span>‬<br>‫⇧سحب <span class='ft__on-surface'>إنشاء كتلة تضمين</span>‬",
+  "gutterTip": "‫نقر/⌘/ <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫⌘نقر⌥→ <span class='ft__on-surface'>تركيز</span>‬<br>‫⌥نقر⌘↑ <span class='ft__on-surface'>طي/توسيع</span>‬<br>‫⇧نقرة⌥⌘A <span class='ft__on-surface'>تحديث السمة</span>‬<br>‫سحب <span class='ft__on-surface'>نقل الموضع</span>‬<br>‫⌃سحب <span class='ft__on-surface'>تكرار</span>‬<br>‫⌥سحب <span class='ft__on-surface'>إنشاء مرجع الكتلة</span>‬<br>‫⇧سحب <span class='ft__on-surface'>إنشاء كتلة تضمين</span>‬",
   "gutterTip2": "‫نقر <span class='ft__on-surface'>فتح القائمة</span>‬<br>‫⇧نقرة <span class='ft__on-surface'>تحديث السمة</span>‬",
   "linkDistance": "مسافة الرابط",
   "collideStrength": "قوة التنافر",

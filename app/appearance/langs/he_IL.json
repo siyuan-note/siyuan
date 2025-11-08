@@ -932,7 +932,7 @@
   "collapse": "התרסק",
   "blockEmbed": "הטבעה בלוק",
   "rowTip": "לחץ על <span class='ft__on-surface'>פתח תפריט</span><br>גרור את <span class='ft__on-surface'>מיין</span><br>⇧לחץ על <span class='ft__on-surface'>עדכן מאפיין</span>",
-  "gutterTip": "לחץ/⌘/<span class='ft__on-surface'>פתח תפריט<span><br>⌘לחץ/⌥→ <span class='ft__on-surface'>מקד<span><br>⌥לחץ/⌘↑ <span class='ft__on-surface'>התרסק/הרחב<span><br>⇧לחץ/⌥⌘A <span class='ft__on-surface'>עדכן מאפיין<span><br>גרור <span class='ft__on-surface'>שנה מקום<span><br>⌃גרור <span class='ft__on-surface'>חזור<span><br>⌥גרור <span class='ft__on-surface'>צור הפניה לבלוק<span><br>⇧גרור <span class='ft__on-surface'>צור בלוק מוטמע</span>",
+  "gutterTip": "לחץ/⌘/<span class='ft__on-surface'>פתח תפריט<span><br>⌘לחץ⌥→ <span class='ft__on-surface'>מקד<span><br>⌥לחץ⌘↑ <span class='ft__on-surface'>התרסק/הרחב<span><br>⇧לחץ⌥⌘A <span class='ft__on-surface'>עדכן מאפיין<span><br>גרור <span class='ft__on-surface'>שנה מקום<span><br>⌃גרור <span class='ft__on-surface'>חזור<span><br>⌥גרור <span class='ft__on-surface'>צור הפניה לבלוק<span><br>⇧גרור <span class='ft__on-surface'>צור בלוק מוטמע</span>",
   "gutterTip2": "לחץ <span class='ft__on-surface'>פתח תפריט</span><br>⇧לחץ <span class='ft__on-surface'>עדכן מאפיין</span>",
   "linkDistance": "מרחק קישור",
   "collideStrength": "עוצמת התנגדות",

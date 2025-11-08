@@ -932,7 +932,7 @@
   "collapse": "Comprimi",
   "blockEmbed": "Incorpora Blocco",
   "rowTip": "Clicca <span class='ft__on-surface'>Apri Menu</span><br>Trascina <span class='ft__on-surface'>Ordina</span><br>⇧Clicca <span class='ft__on-surface'>Aggiorna attributo</span>",
-  "gutterTip": "Clicca/⌘/ <span class='ft__on-surface'>Apri Menu</span><br>⌘Clicca/⌥→ <span class='ft__on-surface'>Metti a fuoco</span><br>⌥Clicca/⌘↑ <span class='ft__on-surface'>Comprimi/Espandi</span><br>⇧Clicca/⌥⌘A <span class='ft__on-surface'>Aggiorna attributo</span><br>Trascina <span class='ft__on-surface'>Sposta posizione</span><br>⌃Trascina <span class='ft__on-surface'>Ripeti</span><br>⌥Trascina <span class='ft__on-surface'>Genera riferimento blocco</span><br>⇧Trascina <span class='ft__on-surface'>Genera blocco incorporato</span>",
+  "gutterTip": "Clicca/⌘/ <span class='ft__on-surface'>Apri Menu</span><br>⌘Clicca⌥→ <span class='ft__on-surface'>Metti a fuoco</span><br>⌥Clicca⌘↑ <span class='ft__on-surface'>Comprimi/Espandi</span><br>⇧Clicca⌥⌘A <span class='ft__on-surface'>Aggiorna attributo</span><br>Trascina <span class='ft__on-surface'>Sposta posizione</span><br>⌃Trascina <span class='ft__on-surface'>Ripeti</span><br>⌥Trascina <span class='ft__on-surface'>Genera riferimento blocco</span><br>⇧Trascina <span class='ft__on-surface'>Genera blocco incorporato</span>",
   "gutterTip2": "Clicca <span class='ft__on-surface'>Apri Menu</span><br>⇧Clicca <span class='ft__on-surface'>Aggiorna attributo</span>",
   "linkDistance": "Distanza del collegamento",
   "collideStrength": "Forza di collisione",

@@ -932,7 +932,7 @@
   "collapse": "Einklappen",
   "blockEmbed": "Block einbetten",
   "rowTip": "Klicken Sie <span class='ft__on-surface'>Menü öffnen</span><br> Ziehen <span class='ft__on-surface'>Sortieren</span><br>⇧Klicken <span class='ft__on-surface'>Attribut aktualisieren</span>",
-  "gutterTip": "Klicken/⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>⌘Klick/⌥→ <span class='ft__on-surface'>Fokussieren</span><br>⌥Klick/⌘↑ <span class='ft__on-surface'>Einklappen/Erweitern</span><br>⇧Klick/⌥⌘A <span class='ft__on-surface'>Attribut aktualisieren</span><br>Ziehen <span class='ft__on-surface'>Position verschieben</span><br>⌃Ziehen <span class='ft__on-surface'>Wiederholen</span><br>⌥Ziehen <span class='ft__on-surface'>Blockreferenz erzeugen</span><br>⇧Ziehen <span class='ft__on-surface'>Eingebetteten Block erzeugen</span>",
+  "gutterTip": "Klicken/⌘/ <span class='ft__on-surface'>Menü öffnen</span><br>⌘Klick⌥→ <span class='ft__on-surface'>Fokussieren</span><br>⌥Klick⌘↑ <span class='ft__on-surface'>Einklappen/Erweitern</span><br>⇧Klick⌥⌘A <span class='ft__on-surface'>Attribut aktualisieren</span><br>Ziehen <span class='ft__on-surface'>Position verschieben</span><br>⌃Ziehen <span class='ft__on-surface'>Wiederholen</span><br>⌥Ziehen <span class='ft__on-surface'>Blockreferenz erzeugen</span><br>⇧Ziehen <span class='ft__on-surface'>Eingebetteten Block erzeugen</span>",
   "gutterTip2": "Klicken <span class='ft__on-surface'>Menü öffnen</span><br>⇧Klicken <span class='ft__on-surface'>Attribut aktualisieren</span>",
   "linkDistance": "Link-Distanz",
   "collideStrength": "Kollisionsstärke",

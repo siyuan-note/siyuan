@@ -932,7 +932,7 @@
   "collapse": "Colapsar",
   "blockEmbed": "Integrar Bloque",
   "rowTip": "Haga clic en <span class='ft__on-surface'>Abrir menú</span><br>Arrastre <span class='ft__on-surface'>Ordenar</span><br>⇧Haga clic en <span class='ft__on-surface'>Actualizar atributo</span>",
-  "gutterTip": "Haga clic/⌘/ <span class='ft__on-surface'>Abrir menú</span><br>⌘Haga clic/⌥→ <span class='ft__on-surface'>Enfoque</span><br>⌥Hacer clic/⌘↑ <span class='ft__on-surface'>Contraer/Expandir</span><br>⇧Hacer clic/⌥⌘A <span class='ft__on-surface'>Actualizar atributo</span><br>Arrastrar <span class='ft__on-surface'>Mover posición</span><br>⌃Arrastrar <span class='ft__on-surface'>Repetir</span><br>⌥Arrastra <span class='ft__on-surface'>Generar referencia a bloque</span><br>⇧Arrastrar <span class='ft__on-surface'>Generar bloque incrustado</span>",
+  "gutterTip": "Haga clic/⌘/ <span class='ft__on-surface'>Abrir menú</span><br>⌘Haga clic⌥→ <span class='ft__on-surface'>Enfoque</span><br>⌥Hacer clic⌘↑ <span class='ft__on-surface'>Contraer/Expandir</span><br>⇧Hacer clic⌥⌘A <span class='ft__on-surface'>Actualizar atributo</span><br>Arrastrar <span class='ft__on-surface'>Mover posición</span><br>⌃Arrastrar <span class='ft__on-surface'>Repetir</span><br>⌥Arrastra <span class='ft__on-surface'>Generar referencia a bloque</span><br>⇧Arrastrar <span class='ft__on-surface'>Generar bloque incrustado</span>",
   "gutterTip2": "Haga clic en <span class='ft__on-surface'>Abrir menú</span><br>⇧Haga clic en <span class='ft__on-surface'>Actualizar atributo</span>",
   "linkDistance": "Distancia de enlace",
   "collideStrength": "Fuerza de colisión",

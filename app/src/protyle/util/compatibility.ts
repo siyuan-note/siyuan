@@ -327,9 +327,9 @@ export const isInHarmony = () => {
     return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 };
 
-export const updateHotkeyAfterTip = (hotkey: string) => {
+export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
     if (hotkey) {
-        return " " + updateHotkeyTip(hotkey);
+        return split + updateHotkeyTip(hotkey);
     }
     return "";
 };

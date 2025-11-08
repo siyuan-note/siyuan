@@ -932,7 +932,7 @@
   "collapse": "折りたたみ",
   "blockEmbed": "埋め込みブロック",
   "rowTip": "クリック <span class='ft__on-surface'>メニューを開く</span><br>ドラッグ <span class='ft__on-surface'>並べ替え</span><br>⇧クリック <span class='ft__on-surface'>属性を変更</span>",
-  "gutterTip": "クリック/⌘/ <span class='ft__on-surface'>ブロックメニューを開く</span><br>⌘クリック/⌥→ <span class='ft__on-surface'>フォーカス</span><br>⌥クリック/⌘↑ <span class='ft__on-surface'>折りたたみ/展開</span><br>⇧クリック/⌥⌘A <span class='ft__on-surface'>属性を変更</span><br>ドラッグ <span class='ft__on-surface'>ブロックを移動</span><br>⌃ドラッグ <span class='ft__on-surface'>ブロックを複製</span><br>⌥ドラッグ <span class='ft__on-surface'>ブロック参照を生成</span><br>⇧ドラッグ <span class='ft__on-surface'>埋め込みブロックを生成</span>",
+  "gutterTip": "クリック/⌘/ <span class='ft__on-surface'>ブロックメニューを開く</span><br>⌘クリック⌥→ <span class='ft__on-surface'>フォーカス</span><br>⌥クリック⌘↑ <span class='ft__on-surface'>折りたたみ/展開</span><br>⇧クリック⌥⌘A <span class='ft__on-surface'>属性を変更</span><br>ドラッグ <span class='ft__on-surface'>ブロックを移動</span><br>⌃ドラッグ <span class='ft__on-surface'>ブロックを複製</span><br>⌥ドラッグ <span class='ft__on-surface'>ブロック参照を生成</span><br>⇧ドラッグ <span class='ft__on-surface'>埋め込みブロックを生成</span>",
   "gutterTip2": "クリック <span class='ft__on-surface'>メニューを開く</span><br>⇧クリック <span class='ft__on-surface'>属性を変更</span>",
   "linkDistance": "リンクの距離",
   "collideStrength": "衝突の強さ",

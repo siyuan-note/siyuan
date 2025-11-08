@@ -932,7 +932,7 @@
   "collapse": "折叠",
   "blockEmbed": "嵌入块",
   "rowTip": "点击 <span class='ft__on-surface'>打开菜单</span><br>拖拽 <span class='ft__on-surface'>排序</span><br>⇧点击 <span class='ft__on-surface'>修改属性</span>",
-  "gutterTip": "点击/⌘/ <span class='ft__on-surface'>打开菜单</span><br>⌘点击/⌥→ <span class='ft__on-surface'>聚焦</span><br>⌥点击/⌘↑ <span class='ft__on-surface'>折叠/展开</span><br>⇧点击/⌥⌘A <span class='ft__on-surface'>修改属性</span><br>拖拽 <span class='ft__on-surface'>移动位置</span><br>⌃拖拽 <span class='ft__on-surface'>重复</span><br>⌥拖拽 <span class='ft__on-surface'>生成块引用</span><br>⇧拖拽 <span class='ft__on-surface'>生成嵌入块</span>",
+  "gutterTip": "点击/⌘/ <span class='ft__on-surface'>打开菜单</span><br>⌘点击⌥→ <span class='ft__on-surface'>聚焦</span><br>⌥点击⌘↑ <span class='ft__on-surface'>折叠/展开</span><br>⇧点击⌥⌘A <span class='ft__on-surface'>修改属性</span><br>拖拽 <span class='ft__on-surface'>移动位置</span><br>⌃拖拽 <span class='ft__on-surface'>重复</span><br>⌥拖拽 <span class='ft__on-surface'>生成块引用</span><br>⇧拖拽 <span class='ft__on-surface'>生成嵌入块</span>",
   "gutterTip2": "点击 <span class='ft__on-surface'>打开菜单</span><br>⇧点击 <span class='ft__on-surface'>修改属性</span>",
   "linkDistance": "链接距离",
   "collideStrength": "斥力强度",

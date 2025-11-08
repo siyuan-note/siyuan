@@ -932,7 +932,7 @@
   "collapse": "摺疊",
   "blockEmbed": "嵌入塊",
   "rowTip": "點擊 <span class='ft__on-surface'>打開菜單</span><br>拖拽 <span class='ft__on-surface'>排序</span><br>⇧點擊 <span class='ft__on-surface'>修改屬性</span>",
-  "gutterTip": "點擊/⌘/ <span class='ft__on-surface'>打開菜單</span><br>⌘點擊 <span class='ft__on-surface'>聚焦</span><br>⌥點擊/⌥→ <span class='ft__on-surface'>折疊/展開</span><br>⇧點擊/⌥⌘A <span class='ft__on-surface'>修改屬性</span><br>拖拽 <span class='ft__on-surface'>移動位置</span><br>⌃拖拽 <span class='ft__on-surface'>重複</span><br>⌥拖拽 <span class='ft__on-surface'>生成塊引用</span><br>⇧拖拽 <span class='ft__on-surface'>生成嵌入塊</span>",
+  "gutterTip": "點擊/⌘/ <span class='ft__on-surface'>打開菜單</span><br>⌘點擊⌥→ <span class='ft__on-surface'>聚焦</span><br>⌥點擊⌘↑ <span class='ft__on-surface'>折疊/展開</span><br>⇧點擊⌥⌘A <span class='ft__on-surface'>修改屬性</span><br>拖拽 <span class='ft__on-surface'>移動位置</span><br>⌃拖拽 <span class='ft__on-surface'>重複</span><br>⌥拖拽 <span class='ft__on-surface'>生成塊引用</span><br>⇧拖拽 <span class='ft__on-surface'>生成嵌入塊</span>",
   "gutterTip2": "點擊 <span class='ft__on-surface'>打開功能表</span><br>⇧點擊 <span class='ft__on-surface'>修改屬性</span>",
   "linkDistance": "連結距離",
   "collideStrength": "斥力強度",

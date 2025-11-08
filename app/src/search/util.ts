@@ -1049,7 +1049,7 @@ const renderNextSearchMark = (options: {
         });
         if (currentRange) {
             if (!currentRange.toString()) {
-                highlightById(options.edit.protyle, options.id);
+                highlightById(options.edit.protyle, options.id, "center");
             } else {
                 scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
             }
@@ -1131,12 +1131,12 @@ export const getArticle = (options: {
                             const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];
                             if (options.edit.protyle.highlight.ranges.length > 0 && currentRange) {
                                 if (!currentRange.toString()) {
-                                    highlightById(options.edit.protyle, options.id);
+                                    highlightById(options.edit.protyle, options.id, "center");
                                 } else {
                                     scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
                                 }
                             } else {
-                                highlightById(options.edit.protyle, options.id);
+                                highlightById(options.edit.protyle, options.id, "center");
                             }
                         };
                         if (observer) {

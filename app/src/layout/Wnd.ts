@@ -548,7 +548,7 @@ export class Wnd {
                         range.collapse();
                         currentTab.model.editor.protyle.toolbar.range = range;
                     }
-                    scrollCenter(currentTab.model.editor.protyle, nodeElement, {position: "top"});
+                    scrollCenter(currentTab.model.editor.protyle, nodeElement, "start");
                 } else {
                     openFileById({
                         app: this.app,

@@ -333,7 +333,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
         setTimeout(() => {
-            scrollCenter(protyle, blockElement, {behavior: "smooth"});
+            scrollCenter(protyle, undefined, "nearest", "smooth");
         }, Constants.TIMEOUT_LOAD);
         return;
     }

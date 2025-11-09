@@ -490,10 +490,8 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     // 下一个请求过来前需断开，否则 observerLoad 重新赋值后无法 disconnect https://ld246.com/article/1704612002446
     protyle.observerLoad?.disconnect();
     if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_SCROLL) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-        const contentRect = protyle.contentElement.getBoundingClientRect();
-        const focusRect = focusElement.getBoundingClientRect();
-        if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {
-            scrollCenter(protyle, focusElement, {position: "top"});
+        if (!hasScrollTop) {
+            scrollCenter(protyle, focusElement);
         }
     } else {
         return;
@@ -504,10 +502,8 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             protyle.contentElement.scrollTop = scrollAttr.scrollTop;
         }
         if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_HL) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-            const contentRect = protyle.contentElement.getBoundingClientRect();
-            const focusRect = focusElement.getBoundingClientRect();
-            if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {
-                scrollCenter(protyle, focusElement, {position: "top"});
+            if (!hasScrollTop) {
+                scrollCenter(protyle, focusElement);
             }
         }
     });

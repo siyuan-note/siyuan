@@ -4,7 +4,7 @@ import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
 import {moveToPrevious, removeBlock} from "./remove";
-import {hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, isBlockElement} from "../util/hasClosest";
 import {setFold} from "../../menus/protyle";
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
@@ -30,49 +30,96 @@ export const updateListOrder = (listElement: Element, sIndex?: number) => {
     });
 };
 
-export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false) => {
+export const genListItemElement = (listItemElement: Element, offset = 0, wbr = false, startIndex?: number) => {
     const element = document.createElement("template");
-    const type = listItemElement.getAttribute("data-subtype");
+    const type = listItemElement.getAttribute("data-subtype") || "u";
     if (type === "o") {
-        const index = parseInt(listItemElement.getAttribute("data-marker")) + offset;
-        element.innerHTML = `<div data-marker="${index + 1}." data-subtype="${type}" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div contenteditable="false" class="protyle-action protyle-action--order" draggable="true">${index + 1}.</div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
+        const index = startIndex !== undefined ? startIndex : parseInt(listItemElement.getAttribute("data-marker")) + offset + 1;
+        element.innerHTML = `<div data-marker="${index}." data-subtype="o" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div contenteditable="false" class="protyle-action protyle-action--order" draggable="true">${index}.</div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
     } else if (type === "t") {
-        element.innerHTML = `<div data-marker="*" data-subtype="${type}" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#iconUncheck"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
+        element.innerHTML = `<div data-marker="*" data-subtype="t" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#iconUncheck"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
     } else {
-        element.innerHTML = `<div data-marker="*" data-subtype="${type}" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
+        element.innerHTML = `<div data-marker="*" data-subtype="u" data-node-id="${Lute.NewNodeID()}" data-type="NodeListItem" class="li"><div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>${genEmptyBlock(false, wbr)}<div class="protyle-attr" contenteditable="false"></div></div>`;
     }
     return element.content.firstElementChild as HTMLElement;
 };
 
 export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range) => {
-    const parentItemElement = hasClosestByClassName(nodeElement, "li");
-    if (!parentItemElement) {
+    const liElement = hasClosestByClassName(nodeElement, "li");
+    if (!liElement) {
+        // 上层必须有列表项块才插入子列表
         return;
     }
-    const lastSubItem = parentItemElement.querySelector(".list")?.lastElementChild.previousElementSibling;
-    if (!lastSubItem) {
+    if (nodeElement.classList.contains("list") || nodeElement.classList.contains("li")) {
+        // 不存在 nodeElement 为列表块或列表项块的情况，如果以后需要的话再实现
         return;
     }
-    const newListElement = genListItemElement(lastSubItem, 0, true);
-    const id = newListElement.getAttribute("data-node-id");
-    lastSubItem.after(newListElement);
 
-    if (lastSubItem.parentElement.getAttribute("fold") === "1") {
-        setFold(protyle, lastSubItem.parentElement, true);
+    let listElement: Element | null | false = null;
+    // 向上遍历到列表项块，得到列表项块的直接子块
+    let blockElement = nodeElement;
+    while (blockElement.parentElement !== liElement) {
+        blockElement = blockElement.parentElement;
     }
-    if (parentItemElement.getAttribute("fold") === "1") {
-        setFold(protyle, parentItemElement, true);
+    // 考虑到列表项块内可能存在多个字列表块，在 nodeElement 的后面查找最近的同级列表块，如果不存在则在列表项块的最后一个子块后面插入新的列表块
+    let nextSibling = blockElement?.nextElementSibling;
+    while (nextSibling) {
+        if (nextSibling.classList.contains("list")) {
+            listElement = nextSibling;
+            break;
+        }
+        nextSibling = nextSibling.nextElementSibling;
     }
-    transaction(protyle, [{
-        action: "insert",
-        id,
-        data: newListElement.outerHTML,
-        previousID: lastSubItem.getAttribute("data-node-id"),
-    }], [{
-        action: "delete",
-        id,
-    }]);
-    focusByWbr(newListElement, range);
+
+    // 无列表块：在列表项块的最后一个子块后面插入新的列表块
+    if (!listElement) {
+        const lastChildBlock = liElement.lastElementChild.previousElementSibling;
+        const subType = liElement.getAttribute("data-subtype") || "u";
+        const id = Lute.NewNodeID();
+        const newListItemElement = genListItemElement(liElement, 0, true, 1);
+        const newListHTML = `<div data-subtype="${subType}" data-node-id="${id}" data-type="NodeList" class="list" updated="${dayjs().format("YYYYMMDDHHmmss")}">${newListItemElement.outerHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+        lastChildBlock.insertAdjacentHTML("afterend", newListHTML);
+        transaction(protyle, [{
+            action: "insert",
+            id,
+            data: newListHTML,
+            previousID: lastChildBlock.getAttribute("data-node-id"),
+        }], [{
+            action: "delete",
+            id,
+        }]);
+        focusByWbr(lastChildBlock.nextElementSibling, range);
+        return;
+    }
+
+    // 有列表块：在列表块的最后一个列表项块后插入新的列表项块
+    const lastSubItem = listElement.lastElementChild.previousElementSibling;
+    if (lastSubItem) {
+        const newListElement = genListItemElement(lastSubItem, 0, true);
+        const id = newListElement.getAttribute("data-node-id");
+        lastSubItem.after(newListElement);
+        if (lastSubItem.parentElement.getAttribute("fold") === "1") {
+            setFold(protyle, lastSubItem.parentElement, true);
+        }
+        if (liElement.getAttribute("fold") === "1") {
+            setFold(protyle, liElement, true);
+        }
+        const parentListElement = hasClosestByClassName(liElement, "list");
+        if (parentListElement && parentListElement.getAttribute("fold") === "1") {
+            setFold(protyle, parentListElement, true);
+        }
+        transaction(protyle, [{
+            action: "insert",
+            id,
+            data: newListElement.outerHTML,
+            previousID: lastSubItem.getAttribute("data-node-id"),
+        }], [{
+            action: "delete",
+            id,
+        }]);
+        focusByWbr(newListElement, range);
+        return;
+    }
 };
 
 export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {

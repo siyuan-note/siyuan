@@ -1057,31 +1057,40 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 软换行
-        if (matchHotKey("⇧↩", event) && selectText === "" && softEnter(range, nodeElement, protyle)) {
+        if (selectText === "" && matchHotKey("⇧↩", event) && softEnter(range, nodeElement, protyle)) {
             event.stopPropagation();
             event.preventDefault();
             return;
         }
 
         // 代码块语言选择 https://github.com/siyuan-note/siyuan/issues/14126
-        if (matchHotKey("⌥↩", event) && selectText === "") {
+        // 列表插入末尾子项 https://github.com/siyuan-note/siyuan/issues/11164
+        if (selectText === "" && matchHotKey("⌥↩", event) && !isIncludesHotKey("⌥↩")) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            if (selectElements.length > 0 && !isIncludesHotKey("⌥↩")) {
-                const otherElement = selectElements.find(item => {
-                    return !item.classList.contains("code-block");
+
+            const codeBlockElements = selectElements.filter(item => {
+                return item.classList.contains("code-block");
+            });
+            if (codeBlockElements.length > 0) {
+                const languageElements: HTMLElement[] = [];
+                codeBlockElements.forEach(item => {
+                    languageElements.push(item.querySelector(".protyle-action__language"));
                 });
-                if (!otherElement) {
-                    const languageElements: HTMLElement[] = [];
-                    selectElements.forEach(item => {
-                        languageElements.push(item.querySelector(".protyle-action__language"));
-                    });
-                    protyle.toolbar.showCodeLanguage(protyle, languageElements);
-                } else {
-                    addSubList(protyle, nodeElement, range);
-                }
+                protyle.toolbar.showCodeLanguage(protyle, languageElements);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
+            const liBlockElement = hasClosestByClassName(nodeElement, "li");
+            if (liBlockElement) {
+                selectElements.forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--select");
+                });
+                addSubList(protyle, nodeElement, range);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

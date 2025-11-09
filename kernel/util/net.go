@@ -121,7 +121,6 @@ func isOnline(checkURL string, skipTlsVerify bool, timeout int) (ret bool) {
 
 	for i := 0; i < 2; i++ {
 		resp, err := c.R().Get(checkURL)
-
 		if resp.GetHeader("Location") != "" {
 			return true
 		}
@@ -140,8 +139,8 @@ func isOnline(checkURL string, skipTlsVerify bool, timeout int) (ret bool) {
 			break
 		}
 
-		time.Sleep(1 * time.Second)
 		logging.LogWarnf("check url [%s] is online failed: %s", checkURL, err)
+		time.Sleep(1 * time.Second)
 	}
 	return
 }

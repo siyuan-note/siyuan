@@ -2,13 +2,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {
-    genCellValue,
-    genCellValueByElement,
-    getTypeByCellElement,
-    renderCell,
-    renderCellAttr
-} from "./cell";
+import {genCellValue, genCellValueByElement, getTypeByCellElement, renderCell, renderCellAttr} from "./cell";
 import {fetchPost} from "../../../util/fetch";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
@@ -268,6 +262,20 @@ export const setPageSize = (options: {
         return;
     }
     const currentPageSize = options.target.dataset.size;
+    menu.addItem({
+        iconHTML: "",
+        label: "5",
+        checked: currentPageSize === "5",
+        click() {
+            updatePageSize({
+                currentPageSize,
+                newPageSize: "5",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
+        }
+    });
     menu.addItem({
         iconHTML: "",
         label: "10",

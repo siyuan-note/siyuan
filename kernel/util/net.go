@@ -33,21 +33,6 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func ValidOptionalPort(port string) bool {
-	if port == "" {
-		return true
-	}
-	if port[0] != ':' {
-		return false
-	}
-	for _, b := range port[1:] {
-		if b < '0' || b > '9' {
-			return false
-		}
-	}
-	return true
-}
-
 func IsLocalHostname(hostname string) bool {
 	if "localhost" == hostname || strings.HasSuffix(hostname, ".localhost") {
 		return true
@@ -67,8 +52,8 @@ func IsLocalHost(host string) bool {
 }
 
 func IsLocalOrigin(origin string) bool {
-	if url, err := url.Parse(origin); err == nil {
-		return IsLocalHostname(url.Hostname())
+	if u, err := url.Parse(origin); err == nil {
+		return IsLocalHostname(u.Hostname())
 	}
 	return false
 }
@@ -178,11 +163,6 @@ func InvalidIDPattern(idArg string, result *gulu.Result) bool {
 	result.Code = -1
 	result.Msg = "invalid ID argument"
 	return true
-}
-
-func IsValidURL(str string) bool {
-	_, err := url.Parse(str)
-	return err == nil
 }
 
 func initHttpClient() {

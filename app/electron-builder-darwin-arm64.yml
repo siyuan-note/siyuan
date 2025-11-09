@@ -2,7 +2,7 @@ productName: "SiYuan"
 appId: "org.b3log.siyuan"
 asar: false
 compression: "normal"
-copyright: "© 2024 Yunnan Liandi Technology Co., Ltd."
+copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
 artifactName: "siyuan-${version}-${os}-arm64.${ext}"
 extraMetadata:
   main: "electron/main.js"

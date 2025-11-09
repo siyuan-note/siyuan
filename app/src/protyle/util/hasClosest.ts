@@ -104,10 +104,17 @@ export const hasClosestByClassName = (element: Node, className: string, top = fa
 
 export const hasClosestBlock = (element: Node) => {
     const nodeElement = hasClosestByAttribute(element, "data-node-id", null);
-    if (nodeElement && nodeElement.tagName !== "BUTTON" && nodeElement.getAttribute("data-type")?.startsWith("Node")) {
+    if (isBlockElement(nodeElement)) {
         return nodeElement;
     }
     return false;
+};
+
+export const isBlockElement = (element: Element | false | undefined) => {
+    if (!element) {
+        return false;
+    }
+    return element.hasAttribute("data-node-id") && element.tagName !== "BUTTON" && (element.getAttribute("data-type")?.startsWith("Node") ?? false);
 };
 
 export const isInEmbedBlock = (element: Element) => {

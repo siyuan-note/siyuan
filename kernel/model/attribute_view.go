@@ -290,6 +290,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type, false)
 		if av.KeyTypeText == groupView.GroupVal.Type {
 			content := groupView.GroupVal.Text.Content
+			if groupValueDefault == content {
+				content = ""
+			}
+
 			switch newValue.Type {
 			case av.KeyTypeBlock:
 				newValue.Block.Content = content

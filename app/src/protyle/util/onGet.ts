@@ -493,7 +493,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         const contentRect = protyle.contentElement.getBoundingClientRect();
         const focusRect = focusElement.getBoundingClientRect();
         if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {
-            scrollCenter(protyle, focusElement, true);
+            scrollCenter(protyle, focusElement, {position: "top"});
         }
     } else {
         return;
@@ -507,7 +507,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             const contentRect = protyle.contentElement.getBoundingClientRect();
             const focusRect = focusElement.getBoundingClientRect();
             if (!hasScrollTop && (contentRect.top > focusRect.top || contentRect.bottom < focusRect.bottom)) {
-                scrollCenter(protyle, focusElement, true);
+                scrollCenter(protyle, focusElement, {position: "top"});
             }
         }
     });

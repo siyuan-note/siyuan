@@ -443,7 +443,7 @@ const afterRenderTable = (options: ITableOptions) => {
     });
 };
 
-export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, data?: IAV) => {
+export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -544,7 +544,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const avPageSize = getPageSize(e);
-        if (!data) {
+        let data: IAV;
+        if (!avData) {
             const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
@@ -556,6 +557,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 blockID: e.getAttribute("data-node-id"),
             });
             data = response.data;
+        } else {
+            data = avData;
         }
         if (data.viewType === "gallery") {
             e.setAttribute("data-av-type", data.viewType);

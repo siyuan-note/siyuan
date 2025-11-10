@@ -188,6 +188,13 @@ export const getEditHTML = (options: {
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
 </label>`;
+    } else if (["updated", "created"].includes(colData.type)) {
+        html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.includeTime}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="includeTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.includeTime ? "checked" : ""}>
+</label>`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
 <label class="b3-menu__item">
@@ -362,6 +369,24 @@ export const bindEditEvent = (options: {
                 tplElement.dispatchEvent(new CustomEvent("blur"));
                 options.menuElement.parentElement.remove();
             }
+        });
+    }
+
+    const includeTimeElement = options.menuElement.querySelector('.b3-switch[data-type="includeTime"]') as HTMLInputElement;
+    if (includeTimeElement) {
+        includeTimeElement.addEventListener("change", () => {
+            transaction(options.protyle, [{
+                action: "setAttrViewUpdatedIncludeTime",
+                id: colId,
+                avID,
+                data: includeTimeElement.checked,
+            }], [{
+                action: "setAttrViewUpdatedIncludeTime",
+                id: colId,
+                avID,
+                data: !includeTimeElement.checked,
+            }]);
+            colData.includeTime = includeTimeElement.checked;
         });
     }
 

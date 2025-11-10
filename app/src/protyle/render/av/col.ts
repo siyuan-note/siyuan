@@ -193,7 +193,7 @@ export const getEditHTML = (options: {
 <label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.includeTime}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input data-type="includeTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData[colData.type as "updated"].includeTime ? "checked" : ""}>
+    <input data-type="includeTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData[colData.type as "updated"]?.includeTime ? "checked" : ""}>
 </label>`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>

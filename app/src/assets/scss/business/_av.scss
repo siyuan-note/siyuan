@@ -1005,6 +1005,7 @@
       padding: 8px;
       border-radius: var(--b3-border-radius);
       background-color: var(--b3-av-kanban-bg);
+      flex-shrink: 0;
 
       &:hover {
         .av__group-icon {

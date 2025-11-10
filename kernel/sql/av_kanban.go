@@ -57,6 +57,8 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 				Relation:     key.Relation,
 				Rollup:       key.Rollup,
 				Date:         key.Date,
+				Created:      key.Created,
+				Updated:      key.Updated,
 			},
 		})
 	}

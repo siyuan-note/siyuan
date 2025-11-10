@@ -2232,6 +2232,9 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 					}
 
 					sameDir := path.Dir(href) == currentDocDir
+					if strings.HasPrefix(href, "#") {
+						sameDir = true
+					}
 					href = util.FilterFilePath(href)
 					if !sameDir {
 						var relErr error

@@ -60,6 +60,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Relation:     key.Relation,
 				Rollup:       key.Rollup,
 				Date:         key.Date,
+				Created:      key.Created,
+				Updated:      key.Updated,
 			},
 			Width: col.Width,
 			Pin:   col.Pin,

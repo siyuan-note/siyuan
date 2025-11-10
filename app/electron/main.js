@@ -360,8 +360,15 @@ const initMainWindow = () => {
 
     // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
     currentWindow.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
-        if (-1 < details.url.indexOf("bili")) {
+        if (-1 < details.url.toLowerCase().indexOf("bili")) {
             // B 站不移除 Referer https://github.com/siyuan-note/siyuan/issues/94
+            cb({requestHeaders: details.requestHeaders});
+            return;
+        }
+
+        if (-1 < details.url.toLowerCase().indexOf("youtube")) {
+            // YouTube 设置 Referer https://github.com/siyuan-note/siyuan/issues/16319
+            details.requestHeaders["Referer"] = 'https://b3log.org/siyuan/';
             cb({requestHeaders: details.requestHeaders});
             return;
         }

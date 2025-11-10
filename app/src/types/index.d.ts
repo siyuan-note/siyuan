@@ -72,6 +72,8 @@ type TOperation =
     | "foldAttrViewGroup"
     | "setAttrViewDisplayFieldName"
     | "setAttrViewFillColBackgroundColor"
+    | "setAttrViewUpdatedIncludeTime"
+    | "setAttrViewCreatedIncludeTime"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -969,6 +971,12 @@ interface IAVColumn {
     numberFormat: string,
     template: string,
     calc: IAVCalc,
+    updated?: {
+        includeTime: boolean
+    }
+    created?: {
+        includeTime: boolean
+    }
     date?: {
         autoFillNow: boolean,
         fillSpecificTime: boolean,

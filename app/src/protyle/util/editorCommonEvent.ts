@@ -237,6 +237,30 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 tempTargetElement = newListElement;
             }
             newListId = null;
+            if (newListElement.getAttribute("data-subtype") === "o" && newListElement.firstElementChild.getAttribute("data-marker") !== "1.") {
+                Array.from(newListElement.children).forEach((listItem) => {
+                    if (listItem.classList.contains("protyle-attr")) {
+                        return;
+                    }
+                    undoOperations.push({
+                        action: "update",
+                        id: listItem.getAttribute("data-node-id"),
+                        data: listItem.outerHTML
+                    });
+                });
+                updateListOrder(newListElement, 1);
+                Array.from(newListElement.children).forEach((listItem) => {
+                    if (listItem.classList.contains("protyle-attr")) {
+                        return;
+                    }
+                    doOperations.push({
+                        action: "update",
+                        id: listItem.getAttribute("data-node-id"),
+                        data: listItem.outerHTML
+                    });
+                });
+                updateListOrder(newListElement, 1);
+            }
         } else if (position === "beforebegin") {
             tempTargetElement = isCopy ? copyElement : item;
         }

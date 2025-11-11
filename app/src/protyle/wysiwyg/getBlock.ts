@@ -118,7 +118,7 @@ export const getTopEmptyElement = (element: Element) => {
 
 export const getTopAloneElement = (topSourceElement: Element) => {
     if ("NodeBlockquote" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
-        while (!topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
             if (topSourceElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && topSourceElement.parentElement.childElementCount === 2) {
                 topSourceElement = topSourceElement.parentElement;
             } else {
@@ -127,7 +127,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
             }
         }
     } else if ("NodeSuperBlock" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
-        while (!topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
             if (topSourceElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" && topSourceElement.parentElement.childElementCount === 2) {
                 topSourceElement = topSourceElement.parentElement;
             } else {
@@ -136,7 +136,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
             }
         }
     } else if ("NodeListItem" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 3) {
-        while (!topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
             if (topSourceElement.parentElement.getAttribute("data-type") === "NodeListItem" && topSourceElement.parentElement.childElementCount === 3) {
                 topSourceElement = topSourceElement.parentElement;
             } else if (topSourceElement.parentElement.getAttribute("data-type") === "NodeList" && topSourceElement.parentElement.childElementCount === 2) {
@@ -147,7 +147,7 @@ export const getTopAloneElement = (topSourceElement: Element) => {
             }
         }
     } else if ("NodeList" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
-        while (!topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
             if ("NodeList" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
                 topSourceElement = topSourceElement.parentElement;
             } else if (topSourceElement.parentElement.getAttribute("data-type") === "NodeListItem" && topSourceElement.parentElement.childElementCount === 3) {

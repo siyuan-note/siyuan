@@ -284,6 +284,18 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element, isBottom: boolean,
                       direct: "col" | "row", isCopy: boolean) => {
     const isSameDoc = protyle.element.contains(sourceElements[0]);
+    // 把列表块中的唯一一个列表项块拖拽到列表块的左侧 https://github.com/siyuan-note/siyuan/issues/16315
+    if (isSameDoc && sourceElements[0].classList.contains("li") && targetElement === sourceElements[0].parentElement &&
+        targetElement.childElementCount === sourceElements.length + 1) {
+        const outLiElement = sourceElements.find((element) => {
+            if (!targetElement.contains(element)) {
+                return true;
+            }
+        });
+        if (!outLiElement) {
+            return;
+        }
+    }
     const undoOperations: IOperation[] = [];
     const targetMoveUndo: IOperation = {
         action: "move",

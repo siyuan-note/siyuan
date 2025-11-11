@@ -48,7 +48,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     let tempTargetElement = targetElement;
     let isSameLi = true;
     sourceElements.find(item => {
-        if (!item.classList.contains("li") ||
+        if (!item.classList.contains("li") || !targetElement.classList.contains("li") ||
             targetElement.getAttribute("data-subtype") !== item.getAttribute("data-subtype")) {
             isSameLi = false;
             return true;

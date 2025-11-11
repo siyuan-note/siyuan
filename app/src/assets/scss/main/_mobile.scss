@@ -150,7 +150,7 @@
 .side-panel {
   position: fixed;
   background-color: var(--b3-theme-surface);
-  height: 100vh;
+  height: 100%;
   width: 100vw;
   z-index: 7;
   transform: translateX(-100vw);

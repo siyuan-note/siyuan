@@ -388,7 +388,7 @@ export const bindCardEvent = async (options: {
                                 } else {
                                     options.cardsData.unreviewedOldCardCount--;
                                 }
-                                options.element.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                                options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
                                 options.cardsData.cards.splice(index, 1);
                                 index--;
                                 timedialog.destroy();
@@ -444,7 +444,7 @@ export const bindCardEvent = async (options: {
                         } else {
                             options.cardsData.unreviewedOldCardCount--;
                         }
-                        options.element.dispatchEvent(new CustomEvent("click", {detail: "0"}));
+                        options.element.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: "0"}));
                         transaction(undefined, [{
                             action: "removeFlashcards",
                             deckID: Constants.QUICK_DECK_ID,

@@ -707,8 +707,8 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     const screenWidth = getScreenWidth();
     const mobileHtml = isInAndroid() || isInHarmony() ? {
         js: `document.body.style.minWidth = "${screenWidth}px";`,
-        css: `@page { size: A4; }
-.protyle-wysiwyg {padding : 0}`
+        css: `@page { size: A4; margin: 10mm 0 10mm 0; }
+.protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">

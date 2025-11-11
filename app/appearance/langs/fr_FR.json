@@ -1547,7 +1547,7 @@
     "119": "Téléchargement du fichier réseau [%s]",
     "120": "Téléchargement terminé, [%d] fichiers au total",
     "121": "Il n'y a aucun fichier réseau dans ce document",
-    "122": "La fonction de barre latérale fournie avec le plugin doit être configurée sur le bureau. Une fois la configuration terminée, veuillez redémarrer SiYuan (pour les utilisateurs mobiles, vous devez d'abord faire confiance au marché depuis le bureau avant d'utiliser le plugin pour la première fois)",
+    "122": "La fonction de barre latérale fournie avec le plugin doit être configurée sur le bureau (vous pouvez accéder à http://127.0.0.1:6806/stage/build/desktop en utilisant un navigateur mobile, une fois la configuration terminée, veuillez redémarrer SiYuan APP)",
     "123": "Ajouter/sélectionner un répertoire de synchronisation Cloud avant d'activer la synchronisation",
     "124": "Veuillez activer la synchronisation cloud dans [Paramètres - Cloud - Activer la synchronisation cloud]",
     "125": "Il y a trop d'échecs de téléchargement dans la synchronisation automatique. Veuillez essayer de déclencher manuellement la synchronisation. Si le problème persiste, veuillez le signaler via <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">GitHub Issues</a>",

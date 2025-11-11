@@ -431,7 +431,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (sr
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else {
-		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
+		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
 	}
 	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
 		return "", "", err

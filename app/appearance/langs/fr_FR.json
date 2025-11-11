@@ -1169,6 +1169,8 @@
   "fileTree21": "Après activation, le format JSON sur une seule ligne sera utilisé lors de l'enregistrement des documents .sy et des fichiers .json de base de données, ce qui peut réduire la taille du fichier d'environ 30 % et améliorer l'efficacité de lecture et d'écriture de 50 %",
   "fileTree22": "Alerte de fichier volumineux",
   "fileTree23": "Notifier lorsque les fichiers .sy ou la base de données .json dépassent cette taille",
+  "fileTree24": "Placer les sous-documents nouvellement créés en haut",
+  "fileTree25": "Si activé, les nouveaux sous-documents seront placés en haut de la liste des sous-documents (ne prend effet que lorsque le tri personnalisé est activé)",
   "export10": "Par exemple <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, s'il est vide, utilisez le texte du filigrane ou le chemin du fichier du filigrane.",
   "export11": "Traitement du contenu des blocs de référence lors de l'exportation",
   "export12": "Gestion du contenu des blocs intégrés lors de l'exportation",

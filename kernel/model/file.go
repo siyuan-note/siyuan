@@ -1032,7 +1032,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	if 0 < len(sorts) {
 		ChangeFileTreeSort(box.ID, sorts)
 	} else {
-		box.addMinSort(path.Dir(tree.Path), tree.ID)
+		box.setSortByConf(path.Dir(tree.Path), tree.ID)
 	}
 	return
 }
@@ -1079,7 +1079,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		logging.LogWarnf("get block tree by id [%s] failed after create", retID)
 		return
 	}
-	box.addMinSort(path.Dir(bt.Path), retID)
+	box.setSortByConf(path.Dir(bt.Path), retID)
 	return
 }
 
@@ -1994,6 +1994,29 @@ func (box *Box) removeSort(ids []string) {
 	}
 }
 
+func (box *Box) setSortByConf(parentPath, id string) {
+	if *Conf.FileTree.CreateDocAtTop {
+		box.addMinSort(parentPath, id)
+	} else {
+		box.addMaxSort(parentPath, id)
+	}
+}
+
+func (box *Box) addMaxSort(parentPath, id string) {
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, 102400)
+	if err != nil {
+		logging.LogErrorf("list doc tree failed: %s", err)
+		return
+	}
+
+	sortVal := 0
+	if 0 < len(docs) {
+		sortVal = docs[len(docs)-1].Sort + 1
+	}
+
+	box.setSortVal(id, sortVal)
+}
+
 func (box *Box) addMinSort(parentPath, id string) {
 	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, 1)
 	if err != nil {
@@ -2006,6 +2029,11 @@ func (box *Box) addMinSort(parentPath, id string) {
 		sortVal = docs[0].Sort - 1
 	}
 
+	box.setSortVal(id, sortVal)
+}
+
+func (box *Box) setSortVal(id string, sortVal int) {
+	var err error
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err = os.MkdirAll(confDir, 0755); err != nil {
 		logging.LogErrorf("create conf dir failed: %s", err)
@@ -2027,7 +2055,6 @@ func (box *Box) addMinSort(parentPath, id string) {
 	}
 
 	fullSortIDs[id] = sortVal
-
 	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
 	if err != nil {
 		logging.LogErrorf("marshal sort conf failed: %s", err)
@@ -2037,6 +2064,7 @@ func (box *Box) addMinSort(parentPath, id string) {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
+	return
 }
 
 func (box *Box) addSort(previousPath, id string) {

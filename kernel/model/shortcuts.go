@@ -106,7 +106,7 @@ func MoveLocalShorthands(boxID, hPath, parentID string) (retIDs []string, err er
 
 			retIDs = append(retIDs, retID)
 			toRemoves = append(toRemoves, p)
-			box.addMinSort("/", retID)
+			box.setSortByConf("/", retID)
 		}
 	} else { // 不为空的话将所有速记合并到指定路径的文档中
 		if !strings.HasPrefix(hPath, "/") {

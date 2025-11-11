@@ -1169,6 +1169,8 @@
   "fileTree21": "Nach der Aktivierung wird beim Speichern von .sy-Dokumenten und Datenbank-.json-Dateien das Einzeilige JSON-Format verwendet, was die Dateigröße um etwa 30 % reduzieren und die Lese- und Schreibgeschwindigkeit um 50 % verbessern kann",
   "fileTree22": "Großdatei-Warnung",
   "fileTree23": "Benachrichtigen, wenn .sy-Dateien oder die Datenbank .json diese Größe überschreiten",
+  "fileTree24": "Neue Unterdokumente oben platzieren",
+  "fileTree25": "Wenn aktiviert, werden neu erstellte Unterdokumente oben in der Liste der Unterdokumente platziert (wirkt nur, wenn die benutzerdefinierte Sortierung aktiviert ist)",
   "export10": "Beispiel <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, wenn leer, verwenden Sie Wasserzeichentext oder den Pfad zur Wasserzeichen-Datei.",
   "export11": "Inhaltsbehandlungsverfahren des Inhaltsreferenzblocks beim Exportieren",
   "export12": "Inhaltsbehandlungsverfahren des Inhalteinbettungsblocks beim Exportieren",

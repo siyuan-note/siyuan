@@ -1169,6 +1169,8 @@
   "fileTree21": "启用后保存 .sy 文档和数据库 .json 时将使用单行 JSON 格式，大约能减少 30% 文件大小并提升 50% 读写效率",
   "fileTree22": "超大文件提醒",
   "fileTree23": ".sy 文档和数据库 .json 超过该大小时弹出通知提醒",
+  "fileTree24": "新建子文档放置在顶部",
+  "fileTree25": "启用后新建的子文档将放置在子文档列表的顶部（仅在自定义排序启用时生效）",
   "export10": "例如 <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code> ，为空时使用水印文本或水印文件路径。",
   "export11": "导出时关于块引用内容的处理方式",
   "export12": "导出时关于嵌入块内容的处理方式",

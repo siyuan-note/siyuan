@@ -74,6 +74,16 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	return
 }
 
+func getPetalByName(name string, petals []*Petal) (ret *Petal) {
+	for _, p := range petals {
+		if name == p.Name {
+			ret = p
+			break
+		}
+	}
+	return
+}
+
 func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 	ret = []*Petal{}
 
@@ -90,11 +100,6 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 
 	petals := getPetals()
 	for _, petal := range petals {
-		installPath := filepath.Join(util.DataDir, "plugins", petal.Name)
-		if !filelock.IsExist(installPath) {
-			continue
-		}
-
 		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish = bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) {
 			continue
@@ -244,7 +249,8 @@ func getPetals() (ret []*Petal) {
 	var tmp []*Petal
 	pluginsDir := filepath.Join(util.DataDir, "plugins")
 	for _, petal := range ret {
-		if petal.Enabled && filelock.IsExist(filepath.Join(pluginsDir, petal.Name)) {
+		pluginPath := filepath.Join(pluginsDir, petal.Name)
+		if hasPluginFiles(pluginPath) {
 			tmp = append(tmp, petal)
 		}
 	}
@@ -258,12 +264,19 @@ func getPetals() (ret []*Petal) {
 	return
 }
 
-func getPetalByName(name string, petals []*Petal) (ret *Petal) {
-	for _, p := range petals {
-		if name == p.Name {
-			ret = p
-			break
+// hasPluginFiles 检查插件安装目录是否存在且包含文件
+func hasPluginFiles(pluginPath string) bool {
+	if !filelock.IsExist(pluginPath) {
+		return false
+	}
+	entries, err := os.ReadDir(pluginPath)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			return true
 		}
 	}
-	return
+	return false
 }

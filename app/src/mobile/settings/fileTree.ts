@@ -30,6 +30,14 @@ export const initFileTree = () => {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="useSingleLineSave" type="checkbox"${window.siyuan.config.fileTree.useSingleLineSave ? " checked" : ""}/>
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.fileTree24}
+        <div class="b3-label__text">${window.siyuan.languages.fileTree25}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="createDocAtTop" type="checkbox"${window.siyuan.config.fileTree.createDocAtTop ? " checked" : ""}/>
+</label>
 <div class="b3-label">
     ${window.siyuan.languages.fileTree22}
     <span class="fn__hr"></span>
@@ -79,6 +87,7 @@ export const initFileTree = () => {
                         allowCreateDeeper: (modelMainElement.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
                         removeDocWithoutConfirm: (modelMainElement.querySelector("#removeDocWithoutConfirm") as HTMLInputElement).checked,
                         useSingleLineSave: (modelMainElement.querySelector("#useSingleLineSave") as HTMLInputElement).checked,
+                        createDocAtTop: (modelMainElement.querySelector("#createDocAtTop") as HTMLInputElement).checked,
                         largeFileWarningSize: parseInt((modelMainElement.querySelector("#largeFileWarningSize") as HTMLInputElement).value),
                         maxListCount: parseInt((modelMainElement.querySelector("#maxListCount") as HTMLInputElement).value),
                         maxOpenTabCount: window.siyuan.config.fileTree.maxOpenTabCount,

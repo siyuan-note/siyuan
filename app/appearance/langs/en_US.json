@@ -1169,6 +1169,8 @@
   "fileTree21": "When enabled, the single-line JSON format will be used when saving .sy docs and database .json files, which can reduce the file size by about 30% and improve read and write efficiency by 50%",
   "fileTree22": "Large File Warning",
   "fileTree23": "Notify when .sy files or database .json exceed this size",
+  "fileTree24": "Place new subdocuments at the top",
+  "fileTree25": "When enabled, newly created subdocuments will be placed at the top of the subdocument list (only takes effect when custom sorting is enabled)",
   "export10": "For example <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, if empty, use watermark text or watermark file path.",
   "export11": "Content handling method of content ref block when exporting",
   "export12": "Content handling method of content embed block when exporting",

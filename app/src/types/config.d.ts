@@ -662,6 +662,10 @@ declare namespace Config {
          * The .sy and database .json files larger than this value will prompt a warning (unit: MB)
          */
         largeFileWarningSize: number;
+        /**
+         * Whether to create new documents at the top of the document tree
+         */
+        createDocAtTop: boolean;
     }
 
     /**

@@ -34,8 +34,8 @@ type FileTree struct {
 	CloseTabsOnStart        bool   `json:"closeTabsOnStart"`        // 启动时关闭所有页签
 	UseSingleLineSave       bool   `json:"useSingleLineSave"`       // 使用单行保存文档 .sy 和属性视图 .json
 	LargeFileWarningSize    int    `json:"largeFileWarningSize"`    // 大文件警告大小（单位：MB）
-
-	Sort int `json:"sort"` // 排序方式
+	CreateDocAtTop          *bool  `json:"createDocAtTop"`          // 在顶部创建新文档 https://github.com/siyuan-note/siyuan/issues/16327
+	Sort                    int    `json:"sort"`                    // 排序方式
 }
 
 func NewFileTree() *FileTree {
@@ -49,5 +49,6 @@ func NewFileTree() *FileTree {
 		CloseTabsOnStart:       false,
 		UseSingleLineSave:      util.UseSingleLineSave,
 		LargeFileWarningSize:   util.LargeFileWarningSize,
+		CreateDocAtTop:         func() *bool { b := false; return &b }(),
 	}
 }

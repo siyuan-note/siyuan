@@ -132,7 +132,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else {
-		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
+		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
 	}
 	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
 		return "", "", err

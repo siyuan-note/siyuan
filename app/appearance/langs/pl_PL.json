@@ -1169,6 +1169,8 @@
   "fileTree21": "Po włączeniu, format JSON w pojedynczej linii będzie używany przy zapisywaniu .sy dokumentów i plików .json bazy danych, co może zmniejszyć rozmiar pliku o około 30% i poprawić wydajność odczytu i zapisu o 50%",
   "fileTree22": "Powiadomienie o dużym pliku",
   "fileTree23": "Powiadom, gdy plik .sy lub baza danych .json przekroczy ten rozmiar",
+  "fileTree24": "Umieść nowy poddokument na górze",
+  "fileTree25": "Po włączeniu nowe poddokumenty będą umieszczane na początku listy poddokumentów (działa tylko, gdy włączone jest niestandardowe sortowanie)",
   "export10": "Na przykład <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, jeśli jest puste, użyj tekstu znaków wodnych lub ścieżki pliku znaku wodnego.",
   "export11": "Sposób obsługi treści bloku odniesienia podczas eksportu",
   "export12": "Sposób obsługi treści bloku osadzonego podczas eksportu",

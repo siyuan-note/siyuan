@@ -1169,6 +1169,8 @@
   "fileTree21": "Dopo l'abilitazione, il formato JSON a riga singola verrà utilizzato quando si salvano documenti .sy e file di database .json, il che può ridurre le dimensioni del file del 30% circa e migliorare l'efficienza di lettura e scrittura del 50%",
   "fileTree22": "Avviso file di grandi dimensioni",
   "fileTree23": "Notifica quando i file .sy e il database .json superano questa dimensione",
+  "fileTree24": "Posiziona il nuovo sottodocumento in cima",
+  "fileTree25": "Se abilitato, i nuovi sottodocumenti verranno posizionati in cima all'elenco dei sottodocumenti (funziona solo quando l'ordinamento personalizzato è abilitato)",
   "export10": "Ad esempio <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, se vuoto, utilizza il testo della filigrana o il percorso del file della filigrana.",
   "export11": "Metodo di gestione del contenuto del blocco di riferimento durante l'esportazione",
   "export12": "Metodo di gestione del contenuto del blocco incorporato durante l'esportazione",

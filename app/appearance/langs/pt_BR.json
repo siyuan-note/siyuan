@@ -1169,6 +1169,8 @@
   "fileTree21": "Quando ativado, o formato JSON de linha única será usado ao salvar documentos .sy e arquivos .json de banco de dados, o que pode reduzir o tamanho do arquivo em cerca de 30% e melhorar a eficiência de leitura/gravação em 50%",
   "fileTree22": "Aviso de arquivo grande",
   "fileTree23": "Notificar quando arquivos .sy e banco de dados .json excederem este tamanho",
+  "fileTree24": "Colocar novo subdocumento no topo",
+  "fileTree25": "Ao ativar, os novos subdocumentos serão colocados no topo da lista de subdocumentos (somente tem efeito quando a ordenação personalizada estiver ativada)",
   "export10": "Por exemplo <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, se vazio, use texto de marca d'água ou caminho do arquivo de marca d'água.",
   "export11": "Método de manipulação de conteúdo do bloco de referência ao exportar",
   "export12": "Método de manipulação de conteúdo do bloco incorporado ao exportar",

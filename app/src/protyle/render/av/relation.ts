@@ -53,7 +53,7 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
                     const viewDefaultName = getViewName(subItem.viewLayout);
                     html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}">
 <span class="b3-list-item__text">${escapeHtml(subItem.viewName)}</span> 
-<span class="b3-list-item__meta">${subItem.viewName === viewDefaultName ? "" : viewDefaultName}</span>
+<span class="b3-list-item__meta">${viewDefaultName}</span>
 </div>`;
                 });
                 html += "</div>";

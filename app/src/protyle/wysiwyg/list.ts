@@ -13,6 +13,10 @@ export const updateListOrder = (listElement: Element, sIndex?: number) => {
     }
     let starIndex: number;
     Array.from(listElement.children).forEach((item, index) => {
+        // https://github.com/siyuan-note/siyuan/issues/16315 第三点会有为空的情况
+        if (!item.classList.contains("li")) {
+            return;
+        }
         if (index === 0) {
             if (sIndex) {
                 starIndex = sIndex;

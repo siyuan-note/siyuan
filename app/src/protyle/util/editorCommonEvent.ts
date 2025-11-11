@@ -173,12 +173,35 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
                     parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
                 });
+                const topSourceParentElement = topSourceElement.parentElement;
                 topSourceElement.remove();
                 if (!isSameDoc) {
                     // 打开两个相同的文档
                     const sameElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${topSourceElement.getAttribute("data-node-id")}"]`);
                     if (sameElement) {
                         sameElement.remove();
+                    }
+                }
+                if (topSourceParentElement.classList.contains("sb") && topSourceParentElement.childElementCount === 2) {
+                    // 拖拽后，sb 只剩下一个元素
+                    if (isSameDoc) {
+                        const sbData = await cancelSB(protyle, topSourceParentElement);
+                        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+                        undoOperations.push(sbData.undoOperations[1], sbData.undoOperations[0]);
+                    } else {
+                        /// #if !MOBILE
+                        const allEditor = getAllEditor();
+                        for (let i = 0; i < allEditor.length; i++) {
+                            if (allEditor[i].protyle.element.contains(topSourceParentElement)) {
+                                const otherSbData = await cancelSB(allEditor[i].protyle, topSourceParentElement);
+                                doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
+                                undoOperations.push(otherSbData.undoOperations[1], otherSbData.undoOperations[0]);
+                                // 需清空操作栈，否则撤销到移动出去的块的操作会抛异常
+                                allEditor[i].protyle.undo.clear();
+                                break;
+                            }
+                        }
+                        /// #endif
                     }
                 }
             } else if (oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {

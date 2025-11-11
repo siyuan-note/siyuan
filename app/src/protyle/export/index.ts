@@ -705,7 +705,11 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     const screenWidth = getScreenWidth();
-    const minWidthHtml = isInAndroid() || isInHarmony() ? `document.body.style.minWidth = "${screenWidth}px"` : "";
+    const mobileHtml = isInAndroid() || isInHarmony() ? {
+        js: `document.body.style.minWidth = "${screenWidth}px";`,
+        css: `@page { size: A4; }
+.protyle-wysiwyg {padding : 0}`
+    } : {js: "", css: ""};
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
@@ -725,17 +729,18 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
         ${await setInlineStyle(false, servePath)}
         ${await getPluginStyle()}
+        ${mobileHtml.css}
     </style>
     ${getSnippetCSS()}
 </head>
 <body>
 <div class="${["htmlmd", "word"].includes(exportOption.type) ? "b3-typography" : "protyle-wysiwyg" + (window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : "")}" 
-style="${isInAndroid() || isInHarmony() ? "margin: 0 16px;" : "max-width: 800px;margin: 0 auto;"}" id="preview">${data.data.content}</div>
+style="max-width: 800px;margin: 0 auto;" id="preview">${data.data.content}</div>
 ${getIconScript(servePath)}
 <script src="${servePath}stage/build/export/protyle-method.js?v=${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}stage/protyle/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}"></script>  
 <script>
-    ${minWidthHtml};
+    ${mobileHtml.js}
     window.siyuan = {
       config: {
         appearance: { mode: ${mode}, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },

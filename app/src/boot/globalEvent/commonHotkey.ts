@@ -150,7 +150,7 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
         }
         if (cardElement) {
             event.preventDefault();
-            cardElement.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
+            cardElement.firstElementChild.dispatchEvent(new CustomEvent("click", {detail: event.key.toLowerCase()}));
             return true;
         }
     }

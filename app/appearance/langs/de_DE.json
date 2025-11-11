@@ -1547,7 +1547,7 @@
     "119": "Herunterladen der Netzwerkdatei [%s]",
     "120": "Download abgeschlossen, insgesamt [%d] Dateien",
     "121": "Es gibt keine Netzwerkdatei in diesem Dokument",
-    "122": "Die Sidebar-Funktion, die mit dem Plugin geliefert wird, muss auf dem Desktop konfiguriert werden. Bitte starten Sie SiYuan nach Abschluss der Konfiguration neu (für mobile Benutzer müssen Sie zuerst den Marktplatz vom Desktop aus vertrauen, bevor Sie das Plugin zum ersten Mal verwenden)",
+    "122": "Die Sidebar-Funktion, die mit dem Plugin geliefert wird, muss auf dem Desktop konfiguriert werden (Sie können http://127.0.0.1:6806/stage/build/desktop mit einem mobilen Browser aufrufen, bitte starten Sie SiYuan APP nach Abschluss der Konfiguration neu)",
     "123": "Die Synchronisierungsfunktion kann nur nach dem Hinzufügen/Auswählen des Cloud-Synchronisationsverzeichnisses aktiviert werden.",
     "124": "Bitte aktivieren Sie die Cloud-Synchronisierung in [Einstellungen - Cloud - Cloud-Synchronisierung aktivieren]",
     "125": "Automatische Synchronisierung fehlgeschlagen zu viele Male, bitte versuchen Sie manuell die Synchronisierung auszulösen, wenn das Problem weiterhin besteht, melden Sie es bitte über <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">GitHub Issues</a>",

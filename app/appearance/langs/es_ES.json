@@ -1547,7 +1547,7 @@
     "119": "Descargando archivo de red [%s]",
     "120": "Descarga completa, [%d] archivos en total",
     "121": "No hay ningún archivo de red en este documento",
-    "122": "La función de barra lateral que viene con el complemento debe configurarse en el escritorio. Una vez completada la configuración, reinicie SiYuan (los usuarios móviles deben confiar primero en el mercado desde el escritorio antes de usar el complemento por primera vez)",
+    "122": "La función de barra lateral que viene con el complemento debe configurarse en el escritorio (puede acceder a http://127.0.0.1:6806/stage/build/desktop usando un navegador móvil, una vez completada la configuración, reinicie SiYuan APP)",
     "123": "La función de sincronización solo puede activarse después de añadir/seleccionar el directorio de sincronización en la nube",
     "124": "Por favor, active la sincronización en la nube en [Configuración - Nube - Activar sincronización en la nube]",
     "125": "La sincronización automática ha fallado demasiadas veces, por favor intente activar la sincronización manualmente, si todavía hay un problema, por favor infórmelo a través de <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">Problemas GitHub</a>",

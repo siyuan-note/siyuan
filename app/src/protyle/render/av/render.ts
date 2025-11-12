@@ -36,8 +36,8 @@ interface ITableOptions {
     resetData: {
         left: number,
         alignSelf: string,
-        headerTransform: string,
-        footerTransform: string,
+        headerTransform: { groupId: string, transform: string },
+        footerTransform: { groupId: string, transform: string },
         isSearching: boolean,
         selectCellId: IIds,
         selectRowIds: IIds[],
@@ -292,9 +292,9 @@ const afterRenderTable = (options: ITableOptions) => {
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
     const editRect = options.protyle.contentElement.getBoundingClientRect();
     if (options.resetData.headerTransform) {
-        const headerTransformElement = options.blockElement.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
+        const headerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.headerTransform.groupId}"] .av__row--header`) as HTMLElement;
         if (headerTransformElement) {
-            headerTransformElement.style.transform = options.resetData.headerTransform;
+            headerTransformElement.style.transform = options.resetData.headerTransform.transform;
         }
     } else {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
@@ -303,9 +303,9 @@ const afterRenderTable = (options: ITableOptions) => {
         }, Constants.TIMEOUT_LOAD);
     }
     if (options.resetData.footerTransform) {
-        const footerTransformElement = options.blockElement.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
+        const footerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.footerTransform.groupId}"] .av__row--footer`) as HTMLElement;
         if (footerTransformElement) {
-            footerTransformElement.style.transform = options.resetData.footerTransform;
+            footerTransformElement.style.transform = options.resetData.footerTransform.transform;
         }
     } else {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
@@ -514,12 +514,20 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
         });
+        const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
+        const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
         const resetData = {
             selectCellId,
             alignSelf: e.style.alignSelf,
             left: e.querySelector(".av__scroll")?.scrollLeft || 0,
-            headerTransform: (e.querySelector('.av__row--header[style^="transform"]') as HTMLElement)?.style.transform,
-            footerTransform: (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform,
+            headerTransform: headerTransformElement ? {
+                groupId: headerTransformElement.parentElement.getAttribute("data-group-id"),
+                transform: headerTransformElement.style.transform
+            } : null,
+            footerTransform: footerTransformElement ? {
+                groupId: footerTransformElement.parentElement.getAttribute("data-group-id"),
+                transform: footerTransformElement.style.transform
+            } : null,
             isSearching: searchInputElement && document.activeElement === searchInputElement,
             selectRowIds,
             dragFillId,

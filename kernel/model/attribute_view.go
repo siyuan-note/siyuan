@@ -2126,6 +2126,11 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 	}
 
 	for _, groupView := range view.Groups {
+		if av.LayoutTypeKanban == groupView.LayoutType {
+			// 看板视图的分组不能折叠
+			groupView.GroupFolded = false
+		}
+
 		groupStates[groupView.GetGroupValue()] = &GroupState{
 			ID:      groupView.ID,
 			Folded:  groupView.GroupFolded,

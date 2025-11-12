@@ -181,7 +181,7 @@ export const appearance = {
     <input class="b3-switch fn__flex-center" id="closeButtonBehavior" type="checkbox"${window.siyuan.config.appearance.closeButtonBehavior === 0 ? "" : " checked"}>
 </label>`;
     },
-    _send: (statusBar: {
+    _send: (statusBar?: {
         msgTaskHistoryDatabaseIndexCommitDisabled: boolean
         msgTaskAssetDatabaseIndexCommitDisabled: boolean
     }) => {

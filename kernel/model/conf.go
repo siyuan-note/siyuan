@@ -203,6 +203,10 @@ func InitConf() {
 	if "" == Conf.Appearance.CodeBlockThemeLight {
 		Conf.Appearance.CodeBlockThemeLight = "github"
 	}
+	if nil == Conf.Appearance.StatusBar {
+		Conf.Appearance.StatusBar = &util.StatusBar{}
+	}
+	util.StatusBarCfg = Conf.Appearance.StatusBar
 	if nil == Conf.FileTree {
 		Conf.FileTree = conf.NewFileTree()
 	}

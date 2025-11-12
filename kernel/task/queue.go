@@ -189,6 +189,13 @@ func StatusJob() {
 		}
 		count[action]++
 
+		if action == HistoryDatabaseIndexCommit && util.StatusBarCfg.MsgTaskHistoryDatabaseIndexCommitDisabled {
+			continue
+		}
+		if action == AssetContentDatabaseIndexCommit && util.StatusBarCfg.MsgTaskAssetDatabaseIndexCommitDisabled {
+			continue
+		}
+
 		if nil != actionLangs {
 			if label := actionLangs[task.Action]; nil != label {
 				action = label.(string)

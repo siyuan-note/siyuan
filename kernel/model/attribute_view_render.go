@@ -414,7 +414,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		gallery.Cards = gallery.Cards[start:end]
 	case av.LayoutTypeKanban:
 		kanban := viewable.(*av.Kanban)
-		kanban.CardCount = 0
+		kanban.CardCount = len(kanban.Cards)
 		kanban.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = kanban.PageSize

@@ -685,6 +685,8 @@ func setAppearanceMode(c *gin.Context) {
 	}
 	model.Conf.Save()
 
+	util.StatusBarCfg = model.Conf.Appearance.StatusBar
+
 	ret.Data = map[string]interface{}{
 		"appearance": model.Conf.Appearance,
 	}

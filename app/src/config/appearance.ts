@@ -201,6 +201,7 @@ export const appearance = {
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
             statusBar: {
+                msgTaskDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskDatabaseIndexCommitDisabled,
                 msgTaskHistoryDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskHistoryDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled,
                 msgTaskAssetDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskAssetDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled,
             }
@@ -250,6 +251,13 @@ export const appearance = {
 <div class="b3-tab-bar b3-list b3-list--background">
     <label class="b3-list-item">
         <div class="b3-list-item__text">
+           ${window.siyuan.languages["_taskAction"]["task.database.index.commit"]}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="database" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskDatabaseIndexCommitDisabled ? "" : " checked"}>
+    </label>    
+    <label class="b3-list-item">
+        <div class="b3-list-item__text">
            ${window.siyuan.languages["_taskAction"]["task.asset.database.index.commit"]}
         </div>
         <span class="fn__space"></span>
@@ -264,16 +272,27 @@ export const appearance = {
     </label>
 </div>`
             });
+
+            const databaseElement = dialog.element.querySelector("#database") as HTMLInputElement;
             const assetElement = dialog.element.querySelector("#asset") as HTMLInputElement;
             const historyElement = dialog.element.querySelector("#history") as HTMLInputElement;
+            databaseElement.addEventListener("change", () => {
+                appearance._send({
+                    msgTaskDatabaseIndexCommitDisabled: !databaseElement.checked,
+                    msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
+                    msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
+                });
+            });
             assetElement.addEventListener("change", () => {
                 appearance._send({
+                    msgTaskDatabaseIndexCommitDisabled: !databaseElement.checked,
                     msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
                     msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
                 });
             });
             historyElement.addEventListener("change", () => {
                 appearance._send({
+                    msgTaskDatabaseIndexCommitDisabled: !databaseElement.checked,
                     msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
                     msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
                 });

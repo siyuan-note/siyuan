@@ -18,6 +18,7 @@ package util
 
 // StatusBar 底部状态栏配置。https://github.com/siyuan-note/siyuan/issues/16236
 type StatusBar struct {
+	MsgTaskDatabaseIndexCommitDisabled        bool `json:"msgTaskDatabaseIndexCommitDisabled"`
 	MsgTaskHistoryDatabaseIndexCommitDisabled bool `json:"msgTaskHistoryDatabaseIndexCommitDisabled"`
 	MsgTaskAssetDatabaseIndexCommitDisabled   bool `json:"msgTaskAssetDatabaseIndexCommitDisabled"`
 }

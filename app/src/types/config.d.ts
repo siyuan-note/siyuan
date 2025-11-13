@@ -264,6 +264,7 @@ declare namespace Config {
     }
 
     export interface IAppearanceStatusBar {
+        msgTaskDatabaseIndexCommitDisabled: boolean;
         msgTaskHistoryDatabaseIndexCommitDisabled: boolean;
         msgTaskAssetDatabaseIndexCommitDisabled: boolean;
     }

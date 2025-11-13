@@ -189,6 +189,9 @@ func StatusJob() {
 		}
 		count[action]++
 
+		if action == DatabaseIndexCommit && util.StatusBarCfg.MsgTaskDatabaseIndexCommitDisabled {
+			continue
+		}
 		if action == HistoryDatabaseIndexCommit && util.StatusBarCfg.MsgTaskHistoryDatabaseIndexCommitDisabled {
 			continue
 		}

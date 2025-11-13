@@ -744,6 +744,10 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 	fillBlockRefCount(childrenHeadings)
 
 	transaction = &Transaction{}
+	if "1" == node.IALAttr("fold") {
+		unfoldHeading(node, node)
+	}
+
 	luteEngine := util.NewLute()
 	for _, c := range childrenHeadings {
 		op := &Operation{}

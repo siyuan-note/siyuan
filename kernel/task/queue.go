@@ -189,13 +189,7 @@ func StatusJob() {
 		}
 		count[action]++
 
-		if action == DatabaseIndexCommit && util.StatusBarCfg.MsgTaskDatabaseIndexCommitDisabled {
-			continue
-		}
-		if action == HistoryDatabaseIndexCommit && util.StatusBarCfg.MsgTaskHistoryDatabaseIndexCommitDisabled {
-			continue
-		}
-		if action == AssetContentDatabaseIndexCommit && util.StatusBarCfg.MsgTaskAssetDatabaseIndexCommitDisabled {
+		if skipPushTaskAction(action) {
 			continue
 		}
 
@@ -213,7 +207,7 @@ func StatusJob() {
 	defer queueLock.Unlock()
 
 	currentTaskLock.Lock()
-	if nil != currentTask && nil != actionLangs {
+	if nil != currentTask && nil != actionLangs && !skipPushTaskAction(currentTask.Action) {
 		if label := actionLangs[currentTask.Action]; nil != label {
 			items = append([]map[string]interface{}{{"action": label.(string)}}, items...)
 		}
@@ -226,6 +220,19 @@ func StatusJob() {
 	data := map[string]interface{}{}
 	data["tasks"] = items
 	util.PushBackgroundTask(data)
+}
+
+func skipPushTaskAction(action string) bool {
+	switch action {
+	case DatabaseIndexCommit:
+		return util.StatusBarCfg.MsgTaskDatabaseIndexCommitDisabled
+	case HistoryDatabaseIndexCommit:
+		return util.StatusBarCfg.MsgTaskHistoryDatabaseIndexCommitDisabled
+	case AssetContentDatabaseIndexCommit:
+		return util.StatusBarCfg.MsgTaskAssetDatabaseIndexCommitDisabled
+	default:
+		return false
+	}
 }
 
 func ExecTaskJob() {

@@ -68,12 +68,39 @@ try {
     app.exit();
 }
 
-const windowNavigate = (currentWindow) => {
+const windowNavigate = (currentWindow, windowType) => {
     currentWindow.webContents.on("will-navigate", (event) => {
         const url = event.url;
         if (url.startsWith(localServer)) {
-            return;
+            const urlObj = new URL(url);
+            const pathname = urlObj.pathname;
+            let isAllowed = false;
+            // 所有窗口都允许认证页面
+            if (pathname === "/check-auth") {
+                isAllowed = true;
+            } else {
+                // 根据窗口类型判断允许的路径
+                switch (windowType) {
+                    case "app":
+                        // 主窗口：只允许应用入口路径
+                        isAllowed = pathname === "/stage/build/app/";
+                        break;
+                    case "window":
+                        // 新窗口：允许 window.html
+                        isAllowed = pathname === "/stage/build/app/window.html";
+                        break;
+                    case "export":
+                        // 导出预览窗口：允许导出临时文件路径
+                        isAllowed = pathname.startsWith("/export/temp/");
+                        break;
+                }
+            }
+
+            if (isAllowed) {
+                return;
+            }
         }
+        // 阻止导航并在外部浏览器打开
         event.preventDefault();
         shell.openExternal(url);
     });
@@ -449,7 +476,7 @@ const initMainWindow = () => {
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
     // 当前页面链接使用浏览器打开
-    windowNavigate(currentWindow);
+    windowNavigate(currentWindow, "app");
     currentWindow.on("close", (event) => {
         if (currentWindow && !currentWindow.isDestroyed()) {
             currentWindow.webContents.send("siyuan-save-close", false);
@@ -1043,7 +1070,7 @@ app.whenReady().then(() => {
         printWin.center();
         printWin.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + printWin.webContents.userAgent;
         printWin.loadURL(data);
-        windowNavigate(printWin);
+        windowNavigate(printWin, "export");
     });
     ipcMain.on("siyuan-quit", (event, port) => {
         exitApp(port);
@@ -1092,7 +1119,7 @@ app.whenReady().then(() => {
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
         win.loadURL(data.url);
-        windowNavigate(win);
+        windowNavigate(win, "window");
         win.on("close", (event) => {
             if (win && !win.isDestroyed()) {
                 win.webContents.send("siyuan-save-close");

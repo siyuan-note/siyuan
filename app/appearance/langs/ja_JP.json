@@ -1,6 +1,6 @@
 {
   "statusBarMsgPushTip": "ステータスバーのメッセージによってシステムの動作状況を即座に把握でき、迷惑に感じる場合はオフにできます",
-  "useBackground": "列の背景色を塗りつぶす",
+  "useBackground": "オプションの色で列の背景を塗りつぶす",
   "print": "印刷",
   "clickArrow": "矢印をクリック",
   "foldAll": "すべて折りたたむ",

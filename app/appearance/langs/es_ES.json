@@ -1,6 +1,6 @@
 {
   "statusBarMsgPushTip": "A través de los mensajes en la barra de estado puedes conocer al instante el funcionamiento del sistema, si te molestan puedes desactivarlos",
-  "useBackground": "Rellenar el color de fondo de la columna",
+  "useBackground": "Rellenar el fondo de la columna con el color de la opción",
   "print": "Imprimir",
   "clickArrow": "Haz clic en la flecha",
   "foldAll": "Colapsar todo",

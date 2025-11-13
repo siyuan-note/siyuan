@@ -1052,7 +1052,7 @@
 
       .av__gallery-item {
         position: relative;
-        box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-border) 0 0 0 1px;
+        box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-border, var(--b3-border-color)) 0 0 0 1px;
 
         &::before {
           content: "";
@@ -1063,6 +1063,16 @@
           border-radius: inherit;
           pointer-events: none;
           z-index: 0;
+        }
+
+        &--select::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-color: var(--b3-theme-primary-lighter);
+          border-radius: inherit;
+          pointer-events: none;
+          z-index: 1;
         }
 
         // 禁用父级 hover 规则对背景色的改变，避免与 ::before 伪元素冲突
@@ -1097,6 +1107,7 @@
         &:hover .av__gallery-cover {
           &::before {
             background-color: var(--b3-av-kanban-content-hover-bg);
+            opacity: 0.65;
           }
         }
       }

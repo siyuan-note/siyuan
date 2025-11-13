@@ -3,6 +3,7 @@ import {Dialog} from "../../dialog";
 import {objEquals} from "../../util/functions";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Constants} from "../../constants";
+import {reloadOtherWindow} from "../../dialog/processSystem";
 
 export const renderSnippet = () => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
@@ -224,7 +225,9 @@ const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[
         });
         window.siyuan.config.snippet.enabledCSS = (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked;
         window.siyuan.config.snippet.enabledJS = (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked;
-        fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);
+        fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet, () => {
+            reloadOtherWindow();
+        });
         renderSnippet();
         dialog.destroy({cancel: "true"});
     });

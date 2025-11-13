@@ -19,6 +19,7 @@ import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/
 import {loadAssets} from "../util/assets";
 import {addScript} from "../protyle/util/addScript";
 import {useShell} from "../util/pathName";
+import {reloadOtherWindow} from "../dialog/processSystem";
 
 export const bazaar = {
     element: undefined as Element,
@@ -857,6 +858,7 @@ export const bazaar = {
                                 response.data.appearance = appearanceResponse.data;
                                 bazaar._onBazaar(response, "icons", true);
                                 bazaar._data.icons = response.data.packages;
+                                reloadOtherWindow();
                             });
                         });
                     } else if (bazaarType === "themes") {
@@ -866,6 +868,7 @@ export const bazaar = {
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
                         }), async (appearanceResponse) => {
+                            reloadOtherWindow();
                             if ((mode !== window.siyuan.config.appearance.mode ||
                                     (mode === 1 && window.siyuan.config.appearance.themeDark !== packageName) ||
                                     (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&

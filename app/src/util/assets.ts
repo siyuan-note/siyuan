@@ -8,6 +8,7 @@ import {exportLayout} from "../layout/util";
 import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
+import {reloadOtherWindow} from "../dialog/processSystem";
 
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
@@ -371,6 +372,13 @@ export const setMode = (modeElementValue: number) => {
         mode,
         modeOS: modeElementValue === 2,
     }), async response => {
+        if (response.data.mode !== window.siyuan.config.appearance.mode ||
+            (response.data.mode === window.siyuan.config.appearance.mode && (
+                    (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
+                    (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
+            )) {
+            reloadOtherWindow();
+        }
         if (window.siyuan.config.appearance.themeJS) {
             if (response.data.mode !== window.siyuan.config.appearance.mode ||
                 (response.data.mode === window.siyuan.config.appearance.mode && (

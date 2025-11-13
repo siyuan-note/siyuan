@@ -280,6 +280,12 @@ export const kernelError = () => {
     }
 };
 
+export const reloadOtherWindow = () => {
+    /// #if !BROWSER
+    ipcRenderer.send(Constants.SIYUAN_RELOAD_WINDOW, location.port);
+    /// #endif
+};
+
 export const exitSiYuan = async () => {
     hideAllElements(["util"]);
     /// #if MOBILE

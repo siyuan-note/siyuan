@@ -12,6 +12,7 @@ import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {useShell} from "../util/pathName";
 import {Dialog} from "../dialog";
+import {reloadOtherWindow} from "../dialog/processSystem";
 
 export const appearance = {
     element: undefined as Element,
@@ -207,6 +208,13 @@ export const appearance = {
                 msgTaskHistoryGenerateFileDisabled: statusBar ? statusBar.msgTaskHistoryGenerateFileDisabled : window.siyuan.config.appearance.statusBar.msgTaskHistoryGenerateFileDisabled,
             }
         }, async response => {
+            if (response.data.mode !== window.siyuan.config.appearance.mode ||
+                (response.data.mode === window.siyuan.config.appearance.mode && (
+                        (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
+                        (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
+                ) || response.data.lang !== window.siyuan.config.appearance.lang) {
+                reloadOtherWindow();
+            }
             if (window.siyuan.config.appearance.themeJS) {
                 if (response.data.mode !== window.siyuan.config.appearance.mode ||
                     (response.data.mode === window.siyuan.config.appearance.mode && (

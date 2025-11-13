@@ -181,10 +181,7 @@ export const appearance = {
     <input class="b3-switch fn__flex-center" id="closeButtonBehavior" type="checkbox"${window.siyuan.config.appearance.closeButtonBehavior === 0 ? "" : " checked"}>
 </label>`;
     },
-    _send: (statusBar?: {
-        msgTaskHistoryDatabaseIndexCommitDisabled: boolean
-        msgTaskAssetDatabaseIndexCommitDisabled: boolean
-    }) => {
+    _send: (statusBar?: Config.IAppearanceStatusBar) => {
         const themeLight = (appearance.element.querySelector("#themeLight") as HTMLSelectElement).value;
         const themeDark = (appearance.element.querySelector("#themeDark") as HTMLSelectElement).value;
         const modeElementValue = parseInt((appearance.element.querySelector("#mode") as HTMLSelectElement).value);
@@ -246,7 +243,6 @@ export const appearance = {
     bindEvent: () => {
         appearance.element.querySelector("#statusBarSetting").addEventListener("click", () => {
             const dialog = new Dialog({
-                transparent: true,
                 width: "360px",
                 height: "80vh",
                 title: window.siyuan.languages.appearance18,
@@ -257,14 +253,14 @@ export const appearance = {
            ${window.siyuan.languages["_taskAction"]["task.asset.database.index.commit"]}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" id="asset" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" id="asset" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled ? "" : " checked"}>
     </label>
     <label class="b3-list-item">
         <div class="b3-list-item__text">
            ${window.siyuan.languages["_taskAction"]["task.history.database.index.commit"]}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" id="history" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskHistoryDatabaseIndexCommitDisabled ? " checked" : ""}>
+        <input class="b3-switch fn__flex-center" id="history" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskHistoryDatabaseIndexCommitDisabled ? "" : " checked"}">
     </label>
 </div>`
             });
@@ -272,14 +268,14 @@ export const appearance = {
             const historyElement = dialog.element.querySelector("#history") as HTMLInputElement;
             assetElement.addEventListener("change", () => {
                 appearance._send({
-                    msgTaskHistoryDatabaseIndexCommitDisabled: historyElement.checked,
-                    msgTaskAssetDatabaseIndexCommitDisabled: assetElement.checked
+                    msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
+                    msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
                 });
             });
             historyElement.addEventListener("change", () => {
                 appearance._send({
-                    msgTaskHistoryDatabaseIndexCommitDisabled: historyElement.checked,
-                    msgTaskAssetDatabaseIndexCommitDisabled: assetElement.checked
+                    msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
+                    msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
                 });
             });
         });

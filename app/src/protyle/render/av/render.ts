@@ -458,19 +458,19 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const e = avElements[i] as HTMLElement;
         e.removeAttribute("data-rendering");
         if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
-            return;
+            continue;
         }
         if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {
             e.classList.add("av--touch");
         }
 
         if (e.getAttribute("data-av-type") === "gallery") {
-            renderGallery({blockElement: e, protyle, cb, renderAll});
-            return;
+            await renderGallery({blockElement: e, protyle, cb, renderAll});
+            continue;
         }
         if (e.getAttribute("data-av-type") === "kanban") {
-            renderKanban({blockElement: e, protyle, cb, renderAll});
-            return;
+            await renderKanban({blockElement: e, protyle, cb, renderAll});
+            continue;
         }
 
         let selectCellId;
@@ -570,18 +570,18 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         }
         if (data.viewType === "gallery") {
             e.setAttribute("data-av-type", data.viewType);
-            renderGallery({blockElement: e, protyle, cb, renderAll, data});
-            return;
+            await renderGallery({blockElement: e, protyle, cb, renderAll, data});
+            continue;
         }
         if (data.viewType === "kanban") {
             e.setAttribute("data-av-type", data.viewType);
-            renderKanban({blockElement: e, protyle, cb, renderAll, data});
-            return;
+            await renderKanban({blockElement: e, protyle, cb, renderAll, data});
+            continue;
         }
         const view = data.view as IAVTable;
         if (view.groups?.length > 0) {
             renderGroupTable({blockElement: e, protyle, cb, renderAll, data, resetData});
-            return;
+            continue;
         }
         const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}" style="float: left">
     ${getTableHTMLs(view, e)}

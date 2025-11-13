@@ -535,6 +535,7 @@ func setAppearance(c *gin.Context) {
 	}
 
 	model.Conf.Appearance = appearance
+	util.StatusBarCfg = model.Conf.Appearance.StatusBar
 	model.Conf.Lang = appearance.Lang
 	oldLang := util.Lang
 	util.Lang = model.Conf.Lang

@@ -155,6 +155,7 @@ export const renderKanban = async (options: {
         editIds,
         selectItemIds,
         pageSizes,
+        left: options.blockElement.querySelector(".av__kanban")?.scrollLeft,
     };
     if (options.blockElement.firstElementChild.innerHTML === "") {
         options.blockElement.style.alignSelf = "";

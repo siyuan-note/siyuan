@@ -33,6 +33,7 @@ interface ITableOptions {
         pageSizes: { [key: string]: string },
         query: string,
         oldOffset: number,
+        left?: number,
     }
 }
 
@@ -162,6 +163,9 @@ export const afterRenderGallery = (options: ITableOptions) => {
     options.blockElement.setAttribute("data-render", "true");
     if (options.resetData.alignSelf) {
         options.blockElement.style.alignSelf = options.resetData.alignSelf;
+    }
+    if (options.resetData.left) {
+        options.blockElement.querySelector(".av__kanban").scrollLeft = options.resetData.left;
     }
     options.resetData.selectItemIds.find(selectId => {
         let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
@@ -331,7 +335,13 @@ export const renderGallery = async (options: {
     }
     if (data.viewType === "kanban") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
-        renderKanban({blockElement: options.blockElement, protyle:options.protyle, cb:options.cb, renderAll:options.renderAll, data});
+        renderKanban({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
         return;
     }
     const view: IAVGallery = data.view as IAVGallery;

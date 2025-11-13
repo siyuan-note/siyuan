@@ -230,6 +230,8 @@ func skipPushTaskAction(action string) bool {
 		return util.StatusBarCfg.MsgTaskHistoryDatabaseIndexCommitDisabled
 	case AssetContentDatabaseIndexCommit:
 		return util.StatusBarCfg.MsgTaskAssetDatabaseIndexCommitDisabled
+	case HistoryGenerateFile:
+		return util.StatusBarCfg.MsgTaskHistoryGenerateFileDisabled
 	default:
 		return false
 	}

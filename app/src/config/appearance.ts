@@ -202,8 +202,9 @@ export const appearance = {
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
             statusBar: {
                 msgTaskDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskDatabaseIndexCommitDisabled,
-                msgTaskHistoryDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskHistoryDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled,
+                msgTaskHistoryDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskHistoryDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskHistoryDatabaseIndexCommitDisabled,
                 msgTaskAssetDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskAssetDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled,
+                msgTaskHistoryGenerateFileDisabled: statusBar ? statusBar.msgTaskHistoryGenerateFileDisabled : window.siyuan.config.appearance.statusBar.msgTaskHistoryGenerateFileDisabled,
             }
         }, async response => {
             if (window.siyuan.config.appearance.themeJS) {
@@ -246,55 +247,51 @@ export const appearance = {
             const dialog = new Dialog({
                 width: "360px",
                 height: "80vh",
-                title: window.siyuan.languages.appearance18,
+                title: "\uD83D\uDD07 " + window.siyuan.languages.appearance18,
                 content: `<div class="fn__hr"></div>
+<div class="b3-label">
+${window.siyuan.languages.statusBarMsgPushTip}
+</div>
 <div class="b3-tab-bar b3-list b3-list--background">
     <label class="b3-list-item">
         <div class="b3-list-item__text">
            ${window.siyuan.languages["_taskAction"]["task.database.index.commit"]}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" id="database" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskDatabaseIndexCommitDisabled ? "" : " checked"}>
+        <input class="b3-switch fn__flex-center" id="msgTaskDatabaseIndexCommitDisabled" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskDatabaseIndexCommitDisabled ? "" : " checked"}>
     </label>    
     <label class="b3-list-item">
         <div class="b3-list-item__text">
            ${window.siyuan.languages["_taskAction"]["task.asset.database.index.commit"]}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" id="asset" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled ? "" : " checked"}>
+        <input class="b3-switch fn__flex-center" id="msgTaskAssetDatabaseIndexCommitDisabled" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled ? "" : " checked"}>
     </label>
     <label class="b3-list-item">
         <div class="b3-list-item__text">
            ${window.siyuan.languages["_taskAction"]["task.history.database.index.commit"]}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch fn__flex-center" id="history" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskHistoryDatabaseIndexCommitDisabled ? "" : " checked"}">
+        <input class="b3-switch fn__flex-center" id="msgTaskHistoryDatabaseIndexCommitDisabled" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskHistoryDatabaseIndexCommitDisabled ? "" : " checked"}>
+    </label>
+    <label class="b3-list-item">
+        <div class="b3-list-item__text">
+           ${window.siyuan.languages["_taskAction"]["task.history.generateFile"]}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="msgTaskHistoryGenerateFileDisabled" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskHistoryGenerateFileDisabled ? "" : " checked"}>
     </label>
 </div>`
             });
 
-            const databaseElement = dialog.element.querySelector("#database") as HTMLInputElement;
-            const assetElement = dialog.element.querySelector("#asset") as HTMLInputElement;
-            const historyElement = dialog.element.querySelector("#history") as HTMLInputElement;
-            databaseElement.addEventListener("change", () => {
-                appearance._send({
-                    msgTaskDatabaseIndexCommitDisabled: !databaseElement.checked,
-                    msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
-                    msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
-                });
-            });
-            assetElement.addEventListener("change", () => {
-                appearance._send({
-                    msgTaskDatabaseIndexCommitDisabled: !databaseElement.checked,
-                    msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
-                    msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
-                });
-            });
-            historyElement.addEventListener("change", () => {
-                appearance._send({
-                    msgTaskDatabaseIndexCommitDisabled: !databaseElement.checked,
-                    msgTaskHistoryDatabaseIndexCommitDisabled: !historyElement.checked,
-                    msgTaskAssetDatabaseIndexCommitDisabled: !assetElement.checked
+            dialog.element.querySelectorAll(".b3-switch").forEach((item) => {
+                item.addEventListener("change", () => {
+                    appearance._send({
+                        msgTaskDatabaseIndexCommitDisabled: !(dialog.element.querySelector("#msgTaskDatabaseIndexCommitDisabled") as HTMLInputElement).checked,
+                        msgTaskAssetDatabaseIndexCommitDisabled: !(dialog.element.querySelector("#msgTaskAssetDatabaseIndexCommitDisabled") as HTMLInputElement).checked,
+                        msgTaskHistoryDatabaseIndexCommitDisabled: !(dialog.element.querySelector("#msgTaskHistoryDatabaseIndexCommitDisabled") as HTMLInputElement).checked,
+                        msgTaskHistoryGenerateFileDisabled: !(dialog.element.querySelector("#msgTaskHistoryGenerateFileDisabled") as HTMLInputElement).checked,
+                    });
                 });
             });
         });

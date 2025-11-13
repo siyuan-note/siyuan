@@ -267,6 +267,7 @@ declare namespace Config {
         msgTaskDatabaseIndexCommitDisabled: boolean;
         msgTaskHistoryDatabaseIndexCommitDisabled: boolean;
         msgTaskAssetDatabaseIndexCommitDisabled: boolean;
+        msgTaskHistoryGenerateFileDisabled: boolean;
     }
 
     /**

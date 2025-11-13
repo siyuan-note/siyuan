@@ -1,4 +1,5 @@
 {
+  "statusBarMsgPushTip": "通过状态栏消息可以即时地了解系统的运行情况，如果感到打扰可以将其关闭",
   "useBackground": "填充列背景颜色",
   "print": "打印",
   "clickArrow": "点击箭头",

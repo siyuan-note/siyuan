@@ -1,6 +1,6 @@
 {
   "statusBarMsgPushTip": "Status bar messages let you instantly know the system's running status, and if they bother you you can turn them off",
-  "useBackground": "Fill column background color",
+  "useBackground": "Fill column background with option color",
   "print": "Print",
   "clickArrow": "Click arrow",
   "foldAll": "Fold all",

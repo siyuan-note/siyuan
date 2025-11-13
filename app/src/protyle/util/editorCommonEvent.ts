@@ -360,18 +360,25 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
+    // 临时插入，防止后面计算错误，最终再移动矫正
+    sbElement.lastElementChild.before(targetElement);
     const moveToResult = await moveTo(protyle, sourceElements, sbElement, isSameDoc, "afterbegin", isCopy);
     doOperations.push(...moveToResult.doOperations);
     undoOperations.push(...moveToResult.undoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
     // 横向超级块A内两个元素拖拽成纵向超级块B，取消超级块A会导致 targetElement 被删除，需先移动再删除 https://github.com/siyuan-note/siyuan/issues/16292
-    let removeIndex = doOperations.length - 1;
+    let removeIndex = doOperations.length;
     doOperations.find((item, index) => {
+        // 横向超级块A内两个元素拖拽成纵向超级块B，取消超级块A会导致 targetElement 被删除，需先移动再删除 https://github.com/siyuan-note/siyuan/issues/16292
         if (item.action === "delete" && item.id === targetMoveUndo.parentID) {
             removeIndex = index;
-            return true;
+        }
+        // 超级块内有两个块，拖拽其中一个到超级块外 https://github.com/siyuan-note/siyuan/issues/16292#issuecomment-3523600155
+        if (item.action === "delete" && item.id === targetElement.getAttribute("data-node-id")) {
+            targetElement = sbElement.querySelector(`[data-node-id="${doOperations[index - 1].id}"]`);
         }
     });
+
     if (isBottom) {
         // 拖拽到超级块 col 下方， 其他块右侧
         sbElement.insertAdjacentElement("afterbegin", targetElement);

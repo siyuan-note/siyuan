@@ -1559,7 +1559,7 @@ export const openMenuPanel = (options: {
                             data
                         });
                     } else {
-                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group, data.viewType);
                     }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
@@ -1567,7 +1567,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goGroupsMethod") {
                     window.siyuan.menus.menu.remove();
-                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group, data.viewType);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

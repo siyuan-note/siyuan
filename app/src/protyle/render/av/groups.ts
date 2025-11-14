@@ -64,9 +64,9 @@ export const setGroupMethod = async (options: {
     setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
 };
 
-export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
+export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup, viewType: TAVView) => {
     const selectHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
-    let html = `<button class="b3-menu__item" data-type="setGroupMethod">
+    let html = viewType === "kanban" ? "" : `<button class="b3-menu__item" data-type="setGroupMethod">
     <div class="b3-menu__label">${window.siyuan.languages.calcOperatorNone}</div>
     ${(!group || !group.field) ? selectHTML : ""}
 </button>`;

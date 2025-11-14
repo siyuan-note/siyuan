@@ -737,10 +737,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     const colorMatch = nameElement.style.backgroundColor.match(/--b3-font-background(\d+)/);
                     if (colorMatch) {
                         item.setAttribute("style", `--b3-av-kanban-border: var(--b3-font-background${colorMatch[1]}); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);`);
-                        return;
                     }
+                } else {
+                    item.setAttribute("style", "--b3-av-kanban-border: var(--b3-border-color); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);");
                 }
-                item.removeAttribute("style");
             });
         });
         return;

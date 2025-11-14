@@ -203,8 +203,14 @@ export const renderKanban = async (options: {
     view.groups.forEach((group: IAVKanban) => {
         if (group.groupHidden === 0) {
             let selectBg = "";
-            if (group.fillColBackgroundColor && ["mSelect", "select"].includes(group.groupValue.type)) {
-                selectBg = `style="--b3-av-kanban-border: var(--b3-font-background${group.groupValue.mSelect[0].color}); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);"`;
+            if (group.fillColBackgroundColor && ["mSelect", "select"].includes(group.groupKey.type)) {
+                if (group.groupValue.mSelect) {
+                    // 单选多选字段分组使用选项颜色
+                    selectBg = `style="--b3-av-kanban-border: var(--b3-font-background${group.groupValue.mSelect[0].color}); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);"`;
+                } else {
+                    // _@default@_ 分组使用 var(--b3-border-color)
+                    selectBg = 'style="--b3-av-kanban-border: var(--b3-border-color); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);"';
+                }
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount)}

@@ -941,9 +941,15 @@
       align-items: center;
 
       .b3-chip {
-        padding: 2px 6px;
-        line-height: calc(1.625em - 6px);
+        padding: 0 6px;
+        line-height: 1.625;
         font-size: 87.5%;
+        float: left;
+        margin-right: 8px;
+
+        &:last-child {
+          margin-right: 0;
+        }
       }
 
       & + .av__body .av__gallery {
@@ -954,7 +960,7 @@
     &-counter {
       font-size: 87.5%;
       color: var(--b3-theme-on-surface-light);
-      margin: 0 8px;
+      margin: 0 8px 0 16px;
     }
 
     &-icon {

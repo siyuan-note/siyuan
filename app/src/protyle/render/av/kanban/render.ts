@@ -189,7 +189,13 @@ export const renderKanban = async (options: {
     }
     if (data.viewType === "gallery") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
-        renderGallery({blockElement: options.blockElement, protyle:options.protyle, cb:options.cb, renderAll:options.renderAll, data});
+        renderGallery({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
         return;
     }
     const view: IAVGallery = data.view as IAVKanban;
@@ -213,7 +219,7 @@ export const renderKanban = async (options: {
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
     ${getKanbanTitleHTML(group, group.cardCount)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body">${getKanbanHTML(group)}</div>
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body">${getKanbanHTML(group)}</div>
 </div>`;
         }
     });

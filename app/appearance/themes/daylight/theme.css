@@ -36,7 +36,7 @@
     --b3-toolbar-blur-background: #fcfcfc;
     --b3-toolbar-color: var(--b3-theme-on-surface);
     --b3-toolbar-hover: var(--b3-theme-background-light);
-    --b3-toolbar-left-mac: 69px;
+    --b3-toolbar-left-mac: 74px;
 
     /* 线条 */
     --b3-border-color: var(--b3-theme-surface-lighter);

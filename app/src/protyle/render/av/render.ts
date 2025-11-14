@@ -502,7 +502,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             };
         }
         const activeIds: IIds[] = [];
-        e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+        e.querySelectorAll(".av__cell--active").forEach((item) => {
             activeIds.push({
                 groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
                 rowId: (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id,
@@ -624,9 +624,23 @@ const refreshTimeouts: {
     [key: string]: number;
 } = {};
 
+const getAVElements = (protyle: IProtyle, avID: string, viewID?: string): HTMLElement[] => {
+    const elements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avID}"]`)) as HTMLElement[];
+    if (viewID) {
+        return elements.filter((item) => getViewIDByAVElement(item) === viewID);
+    }
+    return elements;
+};
+
+const getViewIDByAVElement = (avElement: HTMLElement): string | null => {
+    return avElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
+        || avElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") // 旧版本的数据库块没有 CUSTOM_SY_AV_VIEW 属性，所以在视图元素上获取 viewID
+        || null;
+};
+
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
-        getAVElements(protyle, operation.id).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.id).forEach((item) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
             if (!titleElement) {
                 return;
@@ -634,8 +648,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             titleElement.textContent = operation.data;
             titleElement.dataset.title = operation.data;
         });
-    } else if (operation.action === "setAttrViewColWidth") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+        return;
+    }
+    if (operation.action === "setAttrViewColWidth") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
             if (!cellElement || cellElement.style.width === operation.data) {
                 return;
@@ -645,8 +661,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         });
         return;
-    } else if (operation.action === "setAttrViewCardSize") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "setAttrViewCardSize") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             if (item.getAttribute("data-av-type") === "kanban") {
                 item.querySelectorAll(".av__kanban-group").forEach(galleryItem => {
                     galleryItem.classList.remove("av__kanban-group--small", "av__kanban-group--big");
@@ -668,15 +685,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
         });
         return;
-    } else if (operation.action === "setAttrViewCardAspectRatio") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "setAttrViewCardAspectRatio") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
                 coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
             });
         });
         return;
-    } else if (operation.action === "hideAttrViewName") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "hideAttrViewName") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             const titleElement = item.querySelector(".av__title");
             if (titleElement) {
                 if (!operation.data) {
@@ -697,16 +716,18 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
         });
         return;
-    } else if (operation.action === "setAttrViewWrapField") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "setAttrViewWrapField") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll(".av__cell").forEach(fieldItem => {
                 fieldItem.setAttribute("data-wrap", operation.data.toString());
             });
         });
         return;
-    } else if (operation.action === "setAttrViewFillColBackgroundColor") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
-            item.querySelectorAll(".av__kanban-group").forEach(item => {
+    }
+    if (operation.action === "setAttrViewFillColBackgroundColor") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((avItem: HTMLElement) => {
+            avItem.querySelectorAll(".av__kanban-group").forEach(item => {
                 if (!operation.data) {
                     item.removeAttribute("style");
                     return;
@@ -722,8 +743,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         });
         return;
-    } else if (operation.action === "setAttrViewFitImage") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "setAttrViewFitImage") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             const imgElement = item.querySelector(".av__gallery-img");
             if (operation.data) {
                 imgElement.classList.add("av__gallery-img--fit");
@@ -732,8 +754,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             }
         });
         return;
-    } else if (operation.action === "setAttrViewShowIcon") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "setAttrViewShowIcon") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
                 if (operation.data) {
                     cellItem.classList.remove("fn__none");
@@ -743,15 +766,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         });
         return;
-    } else if (operation.action === "setAttrViewColWrap") {
-        getAVElements(protyle, operation.avID, operation.viewID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "setAttrViewColWrap") {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
                 cellItem.setAttribute("data-wrap", operation.data.toString());
             });
         });
         return;
-    } else if (operation.action === "foldAttrViewGroup") {
-        getAVElements(protyle, operation.avID).forEach((item: HTMLElement) => {
+    }
+    if (operation.action === "foldAttrViewGroup") {
+        getAVElements(protyle, operation.avID).forEach((item) => {
             const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
             if (foldElement) {
                 if (operation.data) {
@@ -777,12 +802,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             attrElement.removeAttribute("data-rendering");
             renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
         }
-        getAVElements(protyle, avID).forEach((item: HTMLElement) => {
+        getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
             if (operation.action === "sortAttrViewRow") {
                 clearSelect(["cell"], item);
             } else if (operation.action === "sortAttrViewCol") {
-                item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                item.querySelectorAll(".av__cell--active").forEach((item) => {
                     item.classList.remove("av__cell--active");
                     item.querySelector(".av__drag-fill")?.remove();
                 });
@@ -800,10 +825,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 });
             } else if (operation.action === "removeAttrViewView") {
                 item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-                    const viewID = getViewIDByAVElement(item);
-                    if (viewID) {
-                        bodyItem.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${viewID}"]`)?.getAttribute("data-page");
-                    }
+                    bodyItem.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${getViewIDByAVElement(item)}"]`)?.getAttribute("data-page");
                 });
             } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
                 const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
@@ -859,18 +881,4 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         });
     }, ["insertAttrViewBlock"].includes(operation.action) ? 2 : 100);
-};
-
-const getAVElements = (protyle: IProtyle, avID: string, viewID?: string): HTMLElement[] => {
-    const elements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avID}"]`)) as HTMLElement[];
-    if (viewID) {
-        return elements.filter((item: HTMLElement) => getViewIDByAVElement(item) === viewID);
-    }
-    return elements;
-};
-
-const getViewIDByAVElement = (avElement: HTMLElement): string | null => {
-    return avElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
-        || avElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") // 旧版本的数据库块没有 CUSTOM_SY_AV_VIEW 属性，所以在视图元素上获取 viewID
-        || null;
 };

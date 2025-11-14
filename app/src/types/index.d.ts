@@ -566,7 +566,7 @@ interface IOperation {
     srcIDs?: string[] // removeAttrViewBlock 专享
     srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
     ignoreDefaultFill?: boolean // insertAttrViewBlock 专享
-    viewID?: string // insertAttrViewBlock 专享
+    viewID?: string // 多个属性视图操作使用，用于推送时不影响其他视图
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享

@@ -183,6 +183,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
         }
         if (itemElement) {
             itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+            itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
         }
     });
     Object.keys(options.resetData.pageSizes).forEach((groupId) => {

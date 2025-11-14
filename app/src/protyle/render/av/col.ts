@@ -402,12 +402,14 @@ export const bindEditEvent = (options: {
                 id: colId,
                 avID,
                 data: wrapElement.checked,
-                blockID: options.blockID
+                blockID: options.blockID,
+                viewID: options.data.viewID,
             }], [{
                 action: "setAttrViewColWrap",
                 id: colId,
                 avID,
                 data: !wrapElement.checked,
+                viewID: options.data.viewID,
                 blockID: options.blockID
             }]);
             colData.wrap = wrapElement.checked;
@@ -693,6 +695,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
     const blockID = blockElement.getAttribute("data-node-id");
+    const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const oldDesc = cellElement.dataset.desc;
     const menu = new Menu(Constants.MENU_AV_HEADER_CELL, () => {
@@ -975,7 +978,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 action: "syncAttrViewTableColWidth",
                 keyID: colId,
                 avID,
-                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                id: viewID,
             }]);
         }
     });
@@ -992,13 +995,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     id: colId,
                     avID,
                     data: wrapElement.checked,
-                    blockID
+                    blockID,
+                    viewID
                 }], [{
                     action: "setAttrViewColWrap",
                     id: colId,
                     avID,
                     data: !wrapElement.checked,
-                    blockID
+                    blockID,
+                    viewID
                 }]);
                 menu.close();
             });
@@ -1051,7 +1056,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     }, (response) => {
                         duplicateCol({
                             blockElement,
-                            viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            viewID,
                             protyle,
                             colId,
                             data: response.data

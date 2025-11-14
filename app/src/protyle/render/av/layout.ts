@@ -118,57 +118,60 @@ export const bindLayoutEvent = (options: {
     menuElement: HTMLElement
     blockElement: Element
 }) => {
+    const avID = options.blockElement.getAttribute("data-av-id");
+    const blockID = options.blockElement.getAttribute("data-node-id");
+    const viewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const toggleTitleElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-view-title"]') as HTMLInputElement;
     toggleTitleElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleTitleElement.checked;
         transaction(options.protyle, [{
             action: "hideAttrViewName",
             avID,
             blockID,
-            data: !checked
+            data: !checked,
+            viewID
         }], [{
             action: "hideAttrViewName",
             avID,
             blockID,
-            data: checked
+            data: checked,
+            viewID
         }]);
         options.data.view.hideAttrViewName = !checked;
     });
     const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-entries-icons"]') as HTMLInputElement;
     toggleIconElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleIconElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewShowIcon",
             avID,
             blockID,
-            data: checked
+            data: checked,
+            viewID
         }], [{
             action: "setAttrViewShowIcon",
             avID,
             blockID,
-            data: !checked
+            data: !checked,
+            viewID
         }]);
         options.data.view.showIcon = checked;
     });
     const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-entries-wrap"]') as HTMLInputElement;
     toggleWrapElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleWrapElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewWrapField",
             avID,
             blockID,
-            data: checked
+            data: checked,
+            viewID
         }], [{
             action: "setAttrViewWrapField",
             avID,
             blockID,
-            data: !checked
+            data: !checked,
+            viewID
         }]);
         getFieldsByData(options.data).forEach(item => {
             item.wrap = checked;
@@ -180,26 +183,24 @@ export const bindLayoutEvent = (options: {
     }
     const toggleFitElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-fit"]') as HTMLInputElement;
     toggleFitElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleFitElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewFitImage",
             avID,
             blockID,
-            data: checked
+            data: checked,
+            viewID
         }], [{
             action: "setAttrViewFitImage",
             avID,
             blockID,
-            data: !checked
+            data: !checked,
+            viewID
         }]);
         (options.data.view as IAVGallery).fitImage = checked;
     });
     const toggleNameElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-name"]') as HTMLInputElement;
     toggleNameElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleNameElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewDisplayFieldName",
@@ -219,19 +220,19 @@ export const bindLayoutEvent = (options: {
     }
     const toggleBgElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-kanban-bg"]') as HTMLInputElement;
     toggleBgElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleBgElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewFillColBackgroundColor",
             avID,
             blockID,
-            data: checked
+            data: checked,
+            viewID
         }], [{
             action: "setAttrViewFillColBackgroundColor",
             avID,
             blockID,
-            data: !checked
+            data: !checked,
+            viewID
         }]);
         (options.data.view as IAVKanban).fillColBackgroundColor = checked;
     });

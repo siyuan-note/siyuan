@@ -600,21 +600,37 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     const ghostElement = document.createElement("div");
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
-                    const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
+                    const isKanban = blockElement.getAttribute("data-av-type") === "kanban";
+                    if (isKanban) {
+                        ghostElement.innerHTML = `<div class="av__kanban"></div>`;
+                    }
                     let galleryElement: HTMLElement;
                     let cloneGalleryElement = document.createElement("div");
+                    const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
                     selectElements.forEach(item => {
                         if (!galleryElement || !galleryElement.contains(item)) {
                             galleryElement = item.parentElement;
                             cloneGalleryElement = document.createElement("div");
-                            cloneGalleryElement.classList.add("av__gallery");
-                            cloneGalleryElement.setAttribute("style", `width: 100vw;margin-bottom: 16px;grid-template-columns: repeat(auto-fill, ${selectElements[0].clientWidth}px);`);
-                            ghostElement.appendChild(cloneGalleryElement);
+                            if (isKanban) {
+                                cloneGalleryElement.className = "av__kanban-group";
+                                cloneGalleryElement.setAttribute("style", item.parentElement.parentElement.parentElement.getAttribute("style"));
+                                cloneGalleryElement.innerHTML = `<div class="av__gallery"></div>`;
+                                ghostElement.firstElementChild.appendChild(cloneGalleryElement);
+                            } else {
+                                cloneGalleryElement.classList.add("av__gallery");
+                                cloneGalleryElement.setAttribute("style", `width: 100vw;margin-bottom: 16px;grid-template-columns: repeat(auto-fill, ${selectElements[0].clientWidth}px);`);
+                                ghostElement.appendChild(cloneGalleryElement);
+                            }
                         }
                         const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
                         cloneItem.setAttribute("style", `height:${item.clientHeight}px;`);
-                        cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
-                        cloneGalleryElement.appendChild(cloneItem);
+                        cloneItem.classList.remove("av__gallery-item--select");
+                        if (isKanban) {
+                            cloneGalleryElement.firstElementChild.appendChild(cloneItem);
+                        } else {
+                            cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
+                            cloneGalleryElement.appendChild(cloneItem);
+                        }
                     });
                     ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);

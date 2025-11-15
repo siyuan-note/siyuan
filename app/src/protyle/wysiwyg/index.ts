@@ -982,7 +982,8 @@ export class WYSIWYG {
             if (targetCellElement) {
                 target = targetCellElement;
             }
-            if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" || target.classList.contains("table__resize") || target.classList.contains("table__select")) {
+            if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" ||
+                target.classList.contains("table__resize") || target.classList.contains("table__select")) {
                 tableBlockElement = nodeElement;
                 if (tableBlockElement) {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");

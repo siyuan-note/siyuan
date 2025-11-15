@@ -523,6 +523,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 // ctrl+P 不需要保存
                 config.hasReplace = !config.hasReplace;
                 element.querySelectorAll(".search__header")[1].classList.toggle("fn__none");
+                element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -952,7 +953,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     if (dialogElement && dialogElement.getAttribute("data-key") === Constants.DIALOG_SEARCH) {
         // https://github.com/siyuan-note/siyuan/issues/6828
         item.hPath = config.hPath;
-        item.idPath = config.idPath.join(",").split(",");
+        item.idPath = [...config.idPath];
     }
     if (config.hasReplace !== item.hasReplace) {
         const replaceHeaderElement = element.querySelectorAll(".search__header")[1];
@@ -979,11 +980,11 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     }
     let includeChild = true;
     let enableIncludeChild = false;
-    item.idPath.forEach(item => {
-        if (item.endsWith(".sy")) {
+    item.idPath.forEach(pathItem => {
+        if (pathItem.endsWith(".sy")) {
             includeChild = false;
         }
-        if (item.split("/").length > 1) {
+        if (pathItem.split("/").length > 1) {
             enableIncludeChild = true;
         }
     });
@@ -1003,8 +1004,8 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     }
     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
     element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(item.method, "searchSyntaxCheck");
-    Object.assign(config, item);
-    window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+    config = JSON.parse(JSON.stringify(item));
+    window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = JSON.parse(JSON.stringify(item));
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
     inputEvent(element, config, edit);
     window.siyuan.menus.menu.remove();
@@ -1125,7 +1126,7 @@ export const getArticle = (options: {
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 if (isSupportCSSHL()) {
-                    let observer:ResizeObserver;
+                    let observer: ResizeObserver;
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         const highlightKeys = () => {
                             const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];

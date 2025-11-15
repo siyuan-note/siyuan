@@ -475,8 +475,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             const tempDiv = document.createElement("div");
             tempDiv.innerHTML = textHTML;
             const walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null);
-            let node;
-            while (node = walker.nextNode()) {
+            let node: Node | null = null;
+            while ((node = walker.nextNode())) {
                 if (node.nodeValue && (node.nodeValue.match(/\n/g) || []).length >= 2) {
                     containsNewlines = true;
                     break;

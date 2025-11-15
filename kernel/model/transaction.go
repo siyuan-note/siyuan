@@ -1156,6 +1156,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 
 		data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 		subTree := tx.luteEngine.BlockDOM2Tree(data)
+		subTree.Box, subTree.Path = tree.Box, tree.Path
 		tx.processGlobalAssets(subTree)
 
 		insertedNode := subTree.Root.FirstChild
@@ -1288,6 +1289,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
+	subTree.Box, subTree.Path = tree.Box, tree.Path
 	tx.processGlobalAssets(subTree)
 
 	insertedNode := subTree.Root.FirstChild

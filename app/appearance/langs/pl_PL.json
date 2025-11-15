@@ -1143,7 +1143,7 @@
   "md33": "Wirtualna referencja",
   "md34": "Po włączeniu, automatycznie zidentyfikuje możliwą relację referencyjną według nazwy, aliasu i tekstu zakotwienia istniejącego odniesienia bloku",
   "md35": "Lista słów kluczowych wykluczenia referencji wirtualnych",
-  "md36": "Używaj angielskiego przecinka <code class='fn__code'>,</code> jako separatora, przecinek sam w sobie można eskapować przez <code class='fn__code'>\\,</code>",
+  "md36": "Używaj angielskiego przecinka <code class='fn__code'>,</code> lub znaku nowej linii jako separatora, przecinek sam w sobie można eskapować przez <code class='fn__code'>\\,</code>",
   "md37": "Maksymalna długość dynamicznego tekstu zakotwienia referencji bloku",
   "md38": "Maksymalna długość tekstu zakotwienia, która jest automatycznie renderowana, gdy tekst zakotwienia dla referencji bloku nie jest dostosowany, domyślnie <code class='fn__code'>96</code> znaków",
   "md39": "Adres serwera PlantUML",

@@ -1143,7 +1143,7 @@
   "md33": "Riferimento virtuale",
   "md34": "Dopo l'abilitazione, identificherà automaticamente la possibile relazione di riferimento in base al nome, alias e testo di ancoraggio del riferimento al blocco esistente",
   "md35": "Lista di esclusione delle parole chiave di riferimento virtuale",
-  "md36": "Utilizzare la virgola inglese <code class='fn__code'>,</code> per separare, la virgola stessa può essere sfuggita con <code class='fn__code'>\\,</code>",
+  "md36": "Utilizzare la virgola inglese <code class='fn__code'>,</code> o interruzione di riga per separare, la virgola stessa può essere sfuggita con <code class='fn__code'>\\,</code>",
   "md37": "Lunghezza massima del testo di ancoraggio dinamico del riferimento al blocco",
   "md38": "La lunghezza massima del testo di ancoraggio che viene automaticamente reso quando il testo di ancoraggio del riferimento al blocco non è personalizzato, il valore predefinito è <code class='fn__code'>96</code> caratteri",
   "md39": "Indirizzo del server PlantUML",

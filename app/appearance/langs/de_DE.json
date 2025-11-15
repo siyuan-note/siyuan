@@ -1143,7 +1143,7 @@
   "md33": "Virtuelle Referenz",
   "md34": "Nach der Aktivierung wird sie automatisch mögliche Referenzbeziehungen nach Name, Alias und Ankertext des bestehenden Blockrefs erkennen.",
   "md35": "Virtuelle Referenz-Stichwort-Ausschlussliste",
-  "md36": "Verwende das englische Komma <code class='fn__code'>,</code> zum Trennen, das Komma selbst kann mit <code class='fn__code'>\\,</code> escaped werden.",
+  "md36": "Verwende das englische Komma <code class='fn__code'>,</code> oder Zeilenumbruch zum Trennen, das Komma selbst kann mit <code class='fn__code'>\\,</code> escaped werden.",
   "md37": "Die maximale Länge des dynamischen Ankertextes des Blockrefs",
   "md38": "Die maximale Länge des Ankertextes, die automatisch gerendert wird, wenn der Ankertext des Blockrefs nicht angepasst ist, beträgt standardmäßig <code class='fn__code'>96</code> Zeichen",
   "md39": "PlantUML-Serveradresse",

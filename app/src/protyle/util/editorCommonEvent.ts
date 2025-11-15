@@ -602,7 +602,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
                     const isKanban = blockElement.getAttribute("data-av-type") === "kanban";
                     if (isKanban) {
-                        ghostElement.innerHTML = `<div class="av__kanban"></div>`;
+                        ghostElement.innerHTML = "<div class=\"av__kanban\"></div>";
                     }
                     let galleryElement: HTMLElement;
                     let cloneGalleryElement = document.createElement("div");
@@ -614,7 +614,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (isKanban) {
                                 cloneGalleryElement.className = "av__kanban-group";
                                 cloneGalleryElement.setAttribute("style", item.parentElement.parentElement.parentElement.getAttribute("style"));
-                                cloneGalleryElement.innerHTML = `<div class="av__gallery"></div>`;
+                                cloneGalleryElement.innerHTML = "<div class=\"av__gallery\"></div>";
                                 ghostElement.firstElementChild.appendChild(cloneGalleryElement);
                             } else {
                                 cloneGalleryElement.classList.add("av__gallery");

@@ -3,7 +3,7 @@ import {Tab} from "../Tab";
 import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 /// #endif
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
@@ -333,27 +333,26 @@ ${data.shorthandContent}
     }
 
     private move(ids: string[]) {
-        movePathTo((toPath, toNotebook) => {
-            ids.forEach(item => {
-                fetchPost("/api/inbox/getShorthand", {
-                    id: item
-                }, (response) => {
-                    this.data[response.data.oId] = response.data;
-                    let md = response.data.shorthandMd;
-                    if ("" === md && "" === response.data.shorthandContent && "" != response.data.shorthandURL) {
-                        md = "[" + response.data.shorthandTitle + "](" + response.data.shorthandURL + ")";
-                    }
-                    fetchPost("/api/filetree/createDoc", {
-                        notebook: toNotebook[0],
-                        path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
-                        title: replaceFileName(response.data.shorthandTitle),
-                        md: md,
-                        listDocTree: true,
-                    }, () => {
-                        this.remove(item);
-                    });
+        movePathTo(async (toPath, toNotebook) => {
+            for (let i = 0; i < ids.length; i++) {
+                const idItem = ids[i];
+                const response = await fetchSyncPost("/api/inbox/getShorthand", {
+                    id: idItem
                 });
-            });
+                this.data[response.data.oId] = response.data;
+                let md = response.data.shorthandMd;
+                if ("" === md && "" === response.data.shorthandContent && "" != response.data.shorthandURL) {
+                    md = "[" + response.data.shorthandTitle + "](" + response.data.shorthandURL + ")";
+                }
+                await fetchSyncPost("/api/filetree/createDoc", {
+                    notebook: toNotebook[0],
+                    path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
+                    title: replaceFileName(response.data.shorthandTitle),
+                    md: md,
+                    listDocTree: true,
+                });
+                this.remove(idItem);
+            }
         });
     }
 

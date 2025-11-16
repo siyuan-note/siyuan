@@ -284,11 +284,11 @@ ${data.shorthandContent}
                     });
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} ${removeTitle}?`, () => {
                         if (itemElement) {
-                            this.remove(itemElement.dataset.id);
+                            this.remove([itemElement.dataset.id]);
                         } else if (detailsElement.classList.contains("fn__none")) {
                             this.remove();
                         } else {
-                            this.remove(detailsElement.getAttribute("data-id"));
+                            this.remove([detailsElement.getAttribute("data-id")]);
                         }
                     }, undefined, true);
                 }
@@ -308,22 +308,18 @@ ${data.shorthandContent}
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
     }
 
-    private remove(id?: string) {
-        let ids: string[];
-        if (id) {
-            ids = [id];
-        } else {
-            ids = this.selectIds;
+    private remove(removeIds?: string[]) {
+        if (!removeIds) {
+            removeIds = this.selectIds;
         }
-        fetchPost("/api/inbox/removeShorthands", {ids}, () => {
-            if (id) {
+        fetchPost("/api/inbox/removeShorthands", {ids:removeIds}, () => {
+            if (removeIds) {
                 this.back();
-                this.selectIds.find((item, index) => {
-                    if (item === id) {
-                        this.selectIds.splice(index, 1);
-                        return true;
+                for (let i = this.selectIds.length - 1; i >= 0; i--) {
+                    if (removeIds.includes(this.selectIds[i])) {
+                        this.selectIds.splice(i, 1);
                     }
-                });
+                }
             } else {
                 this.selectIds = [];
             }
@@ -348,11 +344,11 @@ ${data.shorthandContent}
                     notebook: toNotebook[0],
                     path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
                     title: replaceFileName(response.data.shorthandTitle),
-                    md: md,
+                    md,
                     listDocTree: true,
                 });
-                this.remove(idItem);
             }
+            this.remove(ids);
         });
     }
 

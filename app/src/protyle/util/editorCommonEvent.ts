@@ -602,7 +602,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
                     const isKanban = blockElement.getAttribute("data-av-type") === "kanban";
                     if (isKanban) {
-                        ghostElement.innerHTML = "<div class=\"av__kanban\"></div>";
+                        ghostElement.innerHTML = `<div class="${blockElement.querySelector(".av__kanban").className}"></div>`;
                     }
                     let galleryElement: HTMLElement;
                     let cloneGalleryElement = document.createElement("div");
@@ -614,7 +614,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (isKanban) {
                                 cloneGalleryElement.className = "av__kanban-group";
                                 cloneGalleryElement.setAttribute("style", item.parentElement.parentElement.parentElement.getAttribute("style") || "--b3-av-kanban-content-bg: var(--b3-theme-background);");
-                                cloneGalleryElement.innerHTML = "<div class=\"av__gallery\"></div>";
+                                cloneGalleryElement.innerHTML = '<div class="av__gallery"></div>';
                                 ghostElement.firstElementChild.appendChild(cloneGalleryElement);
                             } else {
                                 cloneGalleryElement.classList.add("av__gallery");
@@ -628,11 +628,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (isKanban) {
                             cloneGalleryElement.firstElementChild.appendChild(cloneItem);
                         } else {
-                            cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
                             cloneGalleryElement.appendChild(cloneItem);
                         }
                     });
-                    ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
+                    ghostElement.setAttribute("style", "left: 1px;top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
                     setTimeout(() => {

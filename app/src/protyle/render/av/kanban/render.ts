@@ -31,7 +31,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number) => {
     <span class="av__group-name fn__ellipsis" style="white-space: nowrap;">${nameHTML}</span>
     ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="fn__flex-1"></span>
-    <span class="av__group-icon ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
+    <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
 
@@ -198,18 +198,22 @@ export const renderKanban = async (options: {
         });
         return;
     }
-    const view: IAVGallery = data.view as IAVKanban;
+    const view = data.view as IAVKanban;
     let bodyHTML = "";
+    let isSelectGroup = false;
     view.groups.forEach((group: IAVKanban) => {
         if (group.groupHidden === 0) {
             let selectBg = "";
-            if (group.fillColBackgroundColor && ["mSelect", "select"].includes(group.groupKey.type)) {
-                if (group.groupValue.mSelect) {
-                    // 单选多选字段分组使用选项颜色
-                    selectBg = `style="--b3-av-kanban-border: var(--b3-font-background${group.groupValue.mSelect[0].color}); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);"`;
-                } else {
-                    // _@default@_ 分组使用 var(--b3-border-color)
-                    selectBg = 'style="--b3-av-kanban-border: var(--b3-border-color); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);"';
+            if (group.fillColBackgroundColor) {
+                if (["mSelect", "select"].includes(group.groupValue.type)) {
+                    isSelectGroup = true;
+                }
+                if (isSelectGroup) {
+                    if (group.groupValue.mSelect && group.groupValue.mSelect.length > 0) {
+                        selectBg = `style="--b3-av-kanban-background: var(--b3-font-background${group.groupValue.mSelect[0].color});"`;
+                    } else {
+                        selectBg = 'style="--b3-av-kanban-background: var(--b3-border-color);"';
+                    }
                 }
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
@@ -221,13 +225,19 @@ export const renderKanban = async (options: {
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
-    <div class="av__kanban">
+    <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}">
         ${bodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
     } else {
-        options.blockElement.querySelector(".av__kanban").innerHTML = bodyHTML;
+        const kanbanElement = options.blockElement.querySelector(".av__kanban");
+        kanbanElement.innerHTML = bodyHTML;
+        if (isSelectGroup) {
+            kanbanElement.classList.add("av__kanban--bg");
+        } else {
+            kanbanElement.classList.remove("av__kanban--bg");
+        }
     }
     afterRenderGallery({
         resetData,

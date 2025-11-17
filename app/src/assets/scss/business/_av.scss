@@ -278,13 +278,18 @@
       position: relative;
       min-height: 40px;
 
-      &:hover {
-        .av__gallery-cover {
-          background-color: var(--b3-theme-surface-light);
-        }
+      &::before {
+        transition: background 100ms ease-out;
+        content: "";
+        inset: 0;
+        position: absolute;
+        border-radius: inherit;
+        background-color: var(--b3-theme-background);
+      }
 
-        .av__gallery-fields {
-          background-color: var(--b3-theme-surface);
+      &:hover {
+        &:not(.av__gallery-item--select)::before {
+          background-color: var(--b3-theme-surface-light);
         }
 
         .av__gallery-actions {
@@ -292,22 +297,16 @@
         }
       }
 
-      &--select:before {
-        content: "";
-        background-color: var(--b3-theme-primary-lightest);
-        height: 100%;
-        width: 100%;
-        z-index: 1;
-        position: absolute;
+      &--select::before {
+        background-color: var(--b3-theme-primary-lightest) !important;
+        opacity: 1 !important;
       }
     }
 
     &-cover {
       border-bottom: 1px solid var(--b3-border-color);
-      background-color: var(--b3-theme-surface);
       border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;
       overflow: hidden;
-      transition: background 100ms ease-out;
       position: relative;
       cursor: pointer;
 
@@ -376,9 +375,8 @@
     }
 
     &-fields {
-      border-radius: var(--b3-border-radius);
+      border-radius: 0 0 var(--b3-border-radius) var(--b3-border-radius);
       flex: 1;
-      transition: background 100ms ease-out;
       white-space: nowrap;
       font-size: 85%;
       min-height: 23px;
@@ -428,10 +426,6 @@
       &:not(.av__gallery-fields--edit) [data-empty="true"] {
         display: none;
       }
-    }
-
-    &-cover + &-fields {
-      border-radius: 0 0 var(--b3-border-radius) var(--b3-border-radius);
     }
 
     &-field {
@@ -492,7 +486,7 @@
       position: relative;
 
       &:hover {
-        background-color: var(--b3-list-hover);
+        background-color: var(--b3-theme-surface-light);
         color: var(--b3-theme-on-background);
       }
     }
@@ -1010,29 +1004,64 @@
     display: flex;
     align-items: flex-start;
 
+    &--bg {
+      .av__kanban-group::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-color: var(--b3-av-kanban-background);
+        opacity: 0.16;
+        border-radius: inherit;
+      }
+
+      .av__gallery-item {
+        position: relative;
+        box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-background) 0 0 0 1px;
+
+        &::before {
+          background-color: var(--b3-av-kanban-background);
+          opacity: 0.26;
+        }
+
+        &:hover:not(.av__gallery-item--select)::before {
+          background-color: var(--b3-av-kanban-background);
+          opacity: 0.38;
+        }
+      }
+
+      .av__gallery-cover {
+        border-bottom-color: var(--b3-av-kanban-background);
+      }
+
+      .av__gallery-add {
+        box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-background) 0 0 0 1px;
+
+        &::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background-color: var(--b3-av-kanban-background);
+          border-radius: inherit;
+          opacity: 0.26;
+        }
+
+        &:hover {
+          background-color: transparent;
+
+          &::before {
+            background-color: var(--b3-av-kanban-background);
+            opacity: 0.38;
+          }
+        }
+      }
+    }
+
     &-group {
       width: 260px;
       padding: 8px;
       border-radius: var(--b3-border-radius);
       position: relative;
       flex-shrink: 0;
-
-      &::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-color: var(--b3-av-kanban-border);
-        opacity: 0.161;
-        border-radius: inherit;
-        pointer-events: none;
-        z-index: 0;
-      }
-
-      &:hover {
-        .av__group-icon {
-          opacity: 1;
-        }
-      }
 
       &--small {
         width: 180px;
@@ -1042,90 +1071,8 @@
         width: 320px;
       }
 
-      .av__group-icon {
-        opacity: 0;
-      }
-
       .av__group-title {
         padding-top: 0;
-      }
-
-      .av__gallery-item {
-        position: relative;
-        box-shadow: rgba(0, 0, 0, 0.04) 0 2px 4px 0, var(--b3-av-kanban-border, var(--b3-border-color)) 0 0 0 1px;
-
-        &::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background-color: var(--b3-av-kanban-border);
-          opacity: 0.278;
-          border-radius: inherit;
-          pointer-events: none;
-          z-index: 0;
-        }
-
-        &--select::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background-color: var(--b3-theme-primary-lighter);
-          border-radius: inherit;
-          pointer-events: none;
-          z-index: 1;
-        }
-
-        // 禁用父级 hover 规则对背景色的改变，避免与 ::before 伪元素冲突
-        &:hover {
-          .av__gallery-cover {
-            background-color: var(--b3-theme-surface);
-          }
-
-          .av__gallery-fields {
-            background-color: transparent;
-          }
-        }
-
-        .av__gallery-fields,
-        .av__gallery-cover {
-          position: relative;
-
-          &::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-color: transparent;
-            opacity: 0.361;
-            border-radius: inherit;
-            pointer-events: none;
-            z-index: 0;
-            transition: background-color 100ms ease-out;
-          }
-        }
-
-        &:hover .av__gallery-fields,
-        &:hover .av__gallery-cover {
-          &::before {
-            background-color: var(--b3-av-kanban-content-hover-bg);
-            opacity: 0.65;
-          }
-        }
-      }
-
-      .av__gallery-cover {
-        position: relative;
-        border-bottom: 1px solid var(--b3-av-kanban-border);
-
-        &::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background-color: var(--b3-av-kanban-border);
-          opacity: 0.278;
-          border-radius: inherit;
-          pointer-events: none;
-          z-index: 0;
-        }
       }
     }
   }

@@ -727,19 +727,23 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewFillColBackgroundColor") {
         getAVElements(protyle, operation.avID, operation.viewID).forEach((avItem: HTMLElement) => {
+            const hasSelect = avItem.querySelector(".av__group-title .b3-chip");
+            const kanbanElement = avItem.querySelector(".av__kanban");
+            if (operation.data && hasSelect) {
+                kanbanElement.classList.add("av__kanban--bg");
+            } else {
+                kanbanElement.classList.remove("av__kanban--bg");
+            }
             avItem.querySelectorAll(".av__kanban-group").forEach(item => {
-                if (!operation.data) {
-                    item.removeAttribute("style");
-                    return;
-                }
-                const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
-                if (nameElement) {
-                    const colorMatch = nameElement.style.backgroundColor.match(/--b3-font-background(\d+)/);
-                    if (colorMatch) {
-                        item.setAttribute("style", `--b3-av-kanban-border: var(--b3-font-background${colorMatch[1]}); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);`);
+                if (operation.data && hasSelect) {
+                    const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
+                    if (nameElement) {
+                        item.setAttribute("style", `--b3-av-kanban-background:var(--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)})`);
+                    } else {
+                        item.setAttribute("style", "--b3-av-kanban-background: var(--b3-border-color)");
                     }
                 } else {
-                    item.setAttribute("style", "--b3-av-kanban-border: var(--b3-border-color); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);");
+                    item.removeAttribute("style");
                 }
             });
         });

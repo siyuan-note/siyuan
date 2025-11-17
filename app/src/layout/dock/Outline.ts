@@ -475,7 +475,7 @@ export class Outline extends Model {
         });
     }
 
-    public updateDocTitle(ial?: IObject) {
+    public updateDocTitle(ial?: IObject, count?: number) {
         const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
             if (ial) {
@@ -483,12 +483,26 @@ export class Outline extends Model {
                 if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }
-                docTitleElement.innerHTML = `${iconHTML}
-<span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
+                docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
                 docTitleElement.setAttribute("title", ial.title);
                 docTitleElement.classList.remove("fn__none");
-            } else {
+            } else if (count === undefined) {
                 docTitleElement.classList.add("fn__none");
+            }
+            if (count !== undefined && docTitleElement) {
+                const textElement = docTitleElement.querySelector(".b3-list-item__text");
+                if (textElement) {
+                    const counterElement = docTitleElement.querySelector(".counter") as HTMLElement;
+                    if (count > 0) {
+                        if (counterElement) {
+                            counterElement.textContent = count.toString();
+                        } else {
+                            textElement.insertAdjacentHTML("afterend", `<span class="counter">${count.toString()}</span>`);
+                        }
+                    } else {
+                        counterElement?.remove();
+                    }
+                }
             }
         } else {
             docTitleElement.classList.add("fn__none");
@@ -629,6 +643,7 @@ export class Outline extends Model {
             this.blockId = callbackId;
         }
         this.tree.updateData(data.data);
+        this.updateDocTitle(undefined, data.data?.length);
 
         if (this.isPreview) {
             this.tree.element.querySelectorAll(".popover__block").forEach(item => {

@@ -91,7 +91,7 @@
 
         .drag {
             -webkit-app-region: drag;
-            height: 22px;
+            height: 32px;
             cursor: pointer;
             position: fixed;
             top: 0;
@@ -180,7 +180,28 @@
     }
 
     (() => {
-        document.querySelector('#icon').innerHTML = `<img src="${decodeURIComponent(getSearch('icon'))}"> SiYuan v${getSearch('v')}`
+        if (process.platform === 'darwin') {
+            document.getElementById('min').style.display = 'none';
+            document.getElementById('close').style.display = 'none';
+            document.querySelector('.drag').style.right = '0';
+            document.querySelector('#icon').style.left = '74px';
+        } else {
+            document.querySelector('#icon').style.right = '70px';
+        }
+
+        const os = require('os')
+        const platformMap = {
+            'darwin': 'macOS',
+            'win32': 'Windows',
+            'linux': 'Linux'
+        }
+        const platform = platformMap[process.platform] || process.platform
+        const release = os.release()
+        const arch = os.arch()
+        const cpus = os.cpus()
+        const cpuModel = cpus.length > 0 ? cpus[0].model : ''
+        const systemInfo = `· ${platform} ${release} · ${arch} · ${cpuModel}`
+        document.querySelector('#icon').innerHTML = `<img src="${decodeURIComponent(getSearch('icon'))}"> SiYuan v${getSearch('v')} ${systemInfo}`
 
         document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
         document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))

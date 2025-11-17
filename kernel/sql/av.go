@@ -111,7 +111,7 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 	return
 }
 
-func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
+func renderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
 		if nil != block {
@@ -267,6 +267,11 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	ret = buf.String()
 	if ret == "<no value>" {
 		ret = ""
+		return
+	}
+
+	if util.HasUnclosedHtmlTag(ret) {
+		ret = util.EscapeHTML(ret)
 	}
 	return
 }
@@ -623,7 +628,7 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 				ial = map[string]string{}
 			}
 
-			content, renderErr := RenderTemplateField(ial, keyValues, value.Template.Content)
+			content, renderErr := renderTemplateField(ial, keyValues, value.Template.Content)
 			if nil != renderErr {
 				key, _ := attrView.GetKey(value.KeyID)
 				keyName := ""

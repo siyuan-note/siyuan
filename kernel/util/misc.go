@@ -100,6 +100,31 @@ func UnescapeHTML(s string) (ret string) {
 	return
 }
 
+func HasUnclosedHtmlTag(htmlStr string) bool {
+	tagRe := regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
+	selfClosing := map[string]bool{
+		"br": true, "img": true, "hr": true, "input": true, "meta": true, "link": true,
+	}
+	stack := []string{}
+	matches := tagRe.FindAllStringSubmatch(htmlStr, -1)
+	for _, m := range matches {
+		isClose := m[1] == "/"
+		tag := strings.ToLower(m[2])
+		if selfClosing[tag] {
+			continue
+		}
+		if !isClose {
+			stack = append(stack, tag)
+		} else {
+			if len(stack) == 0 || stack[len(stack)-1] != tag {
+				return true // 闭合标签不匹配
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) != 0
+}
+
 func Reverse(s string) string {
 	runes := []rune(s)
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {

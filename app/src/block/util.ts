@@ -50,7 +50,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
-            nodeElement.replaceWith(nodeElement.firstElementChild);
+            nodeElement.replaceWith(...nodeElement.children);
             if (range) {
                 focusByWbr(protyle.wysiwyg.element, range);
             }

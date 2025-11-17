@@ -101,6 +101,25 @@ func UnescapeHTML(s string) (ret string) {
 }
 
 func HasUnclosedHtmlTag(htmlStr string) bool {
+	// 检查未闭合注释
+	openIdx := 0
+	for {
+		start := strings.Index(htmlStr[openIdx:], "<!--")
+		if start == -1 {
+			break
+		}
+		start += openIdx
+		end := strings.Index(htmlStr[start+4:], "-->")
+		if end == -1 {
+			return true // 存在未闭合注释
+		}
+		openIdx = start + 4 + end + 3
+	}
+
+	// 去除所有注释内容
+	commentRe := regexp.MustCompile(`<!--[\s\S]*?-->`)
+	htmlStr = commentRe.ReplaceAllString(htmlStr, "")
+
 	tagRe := regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
 	selfClosing := map[string]bool{
 		"br": true, "img": true, "hr": true, "input": true, "meta": true, "link": true,

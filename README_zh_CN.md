@@ -170,11 +170,11 @@
 
 #### `siyuan`
 
-[![siyuan 包状态](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
 
 #### `siyuan-note`
 
-[![siyuan-note 包状态](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker 部署
 

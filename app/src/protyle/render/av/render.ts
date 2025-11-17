@@ -732,14 +732,15 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     item.removeAttribute("style");
                     return;
                 }
-                let selectBg;
                 const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
                 if (nameElement) {
-                    selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
+                    const colorMatch = nameElement.style.backgroundColor.match(/--b3-font-background(\d+)/);
+                    if (colorMatch) {
+                        item.setAttribute("style", `--b3-av-kanban-border: var(--b3-font-background${colorMatch[1]}); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);`);
+                    }
                 } else {
-                    selectBg = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
+                    item.setAttribute("style", "--b3-av-kanban-border: var(--b3-border-color); --b3-av-kanban-content-hover-bg: var(--b3-av-kanban-border);");
                 }
-                item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
             });
         });
         return;

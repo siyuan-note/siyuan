@@ -361,17 +361,21 @@ func getTesseractVer() (ret string) {
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if err != nil {
-		if strings.Contains(err.Error(), "executable file not found") {
+		errMsg := strings.ToLower(err.Error())
+		if strings.Contains(errMsg, "executable file not found") || strings.Contains(errMsg, "no such file or directory") {
 			// macOS 端 Tesseract OCR 安装后不识别 https://github.com/siyuan-note/siyuan/issues/7107
 			TesseractBin = "/usr/local/bin/tesseract"
 			cmd = exec.Command(TesseractBin, "--version")
 			gulu.CmdAttr(cmd)
 			data, err = cmd.CombinedOutput()
-			if err != nil && strings.Contains(err.Error(), "executable file not found") {
-				TesseractBin = "/opt/homebrew/bin/tesseract"
-				cmd = exec.Command(TesseractBin, "--version")
-				gulu.CmdAttr(cmd)
-				data, err = cmd.CombinedOutput()
+			if err != nil {
+				errMsg = strings.ToLower(err.Error())
+				if strings.Contains(errMsg, "executable file not found") || strings.Contains(errMsg, "no such file or directory") {
+					TesseractBin = "/opt/homebrew/bin/tesseract"
+					cmd = exec.Command(TesseractBin, "--version")
+					gulu.CmdAttr(cmd)
+					data, err = cmd.CombinedOutput()
+				}
 			}
 		}
 	}

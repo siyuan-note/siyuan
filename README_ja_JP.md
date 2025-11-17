@@ -40,6 +40,7 @@
 * [🚀 ダウンロードとセットアップ](#-ダウンロードとセットアップ)
   * [アプリマーケット](#アプリマーケット)
   * [インストールパッケージ](#インストールパッケージ)
+  * [パッケージマネージャー](#パッケージマネージャー)
   * [Docker ホスティング](#docker-ホスティング)
   * [Unraid ホスティング](#unraid-ホスティング)
   * [インサイダープレビュー](#インサイダープレビュー)
@@ -157,6 +158,16 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 
 * [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### パッケージマネージャー
+
+#### `siyuan`
+
+[![梱包状態](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+
+#### `siyuan-note`
+
+[![梱包状態](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker ホスティング
 

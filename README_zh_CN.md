@@ -40,6 +40,7 @@
 * [🚀 下载安装](#-下载安装)
   * [应用市场](#应用市场)
   * [安装包](#安装包)
+  * [包管理器](#包管理器)
   * [Docker 部署](#docker-部署)
   * [Unraid 部署](#unraid-部署)
   * [宝塔面板 部署](#宝塔面板部署)
@@ -164,6 +165,16 @@
 
 * [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### 包管理器
+
+#### `siyuan`
+
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+
+#### `siyuan-note`
+
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker 部署
 

@@ -40,6 +40,7 @@
 * [🚀 Download Setup](#-download-setup)
   * [App Market](#app-market)
   * [Installation Package](#installation-package)
+  * [Package Manager](#package-manager)
   * [Docker Hosting](#docker-hosting)
   * [Unraid Hosting](#unraid-hosting)
   * [Insider Preview](#insider-preview)
@@ -158,6 +159,16 @@ Desktop:
 
 * [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### Package Manager
+
+#### `siyuan`
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+
+#### `siyuan-note`
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker Hosting
 

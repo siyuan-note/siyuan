@@ -613,9 +613,6 @@ export class Dock {
                                     blockId: editor?.protyle?.block?.rootID,
                                     isPreview: editor?.protyle?.preview ? !editor.protyle.preview.element.classList.contains("fn__none") : false
                                 });
-                                if (editor?.protyle?.title?.editElement) {
-                                    outline.updateDocTitle(editor.protyle?.background?.ial);
-                                }
                                 tab.addModel(outline);
                             }
                         });

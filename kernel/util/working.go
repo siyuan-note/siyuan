@@ -45,7 +45,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.3.6"
+	Ver       = "3.4.0"
 	IsInsider = false
 
 	// env vars as fallback for commandline parameters

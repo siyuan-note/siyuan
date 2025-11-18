@@ -53,7 +53,6 @@ export const getLayoutHTML = (data: IAV) => {
 </label>`;
     }
     html = `<div class="b3-menu__items">
-    <div class="b3-menu__items">
     <button class="b3-menu__item" data-type="nobg">
         <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
             <svg><use xlink:href="#iconLeft"></use></svg>

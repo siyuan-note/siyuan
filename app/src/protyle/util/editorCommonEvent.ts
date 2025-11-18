@@ -613,7 +613,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             cloneGalleryElement = document.createElement("div");
                             if (isKanban) {
                                 cloneGalleryElement.className = "av__kanban-group";
-                                cloneGalleryElement.setAttribute("style", item.parentElement.parentElement.parentElement.getAttribute("style") || "--b3-av-kanban-content-bg: var(--b3-theme-background);");
+                                cloneGalleryElement.setAttribute("style", item.parentElement.parentElement.parentElement.getAttribute("style"));
                                 cloneGalleryElement.innerHTML = '<div class="av__gallery"></div>';
                                 ghostElement.firstElementChild.appendChild(cloneGalleryElement);
                             } else {

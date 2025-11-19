@@ -484,6 +484,8 @@
       cursor: pointer;
       transition: background 100ms ease-out, color 100ms ease-out;
       position: relative;
+      font-size: 85%;
+      padding: 4px 0;
 
       &:hover {
         background-color: var(--b3-theme-surface-light);

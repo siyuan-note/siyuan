@@ -104,7 +104,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                     app,
                     id,
                     position: "right",
-                    action,
+                    action: [...action, Constants.CB_GET_HL],
                     zoomIn
                 });
                 if (dialog) {
@@ -225,7 +225,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                     openFileById({
                         app,
                         id,
-                        action,
+                        action: [...action, Constants.CB_GET_HL],
                         zoomIn
                     });
                     if (dialog) {

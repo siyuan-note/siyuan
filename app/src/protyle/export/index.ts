@@ -11,7 +11,7 @@ import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
-import {getScreenWidth, isInAndroid, isInHarmony, setStorageVal} from "../util/compatibility";
+import {getScreenWidth, isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../util/compatibility";
 import {getFrontend} from "../../util/functions";
 
 const getPluginStyle = async () => {
@@ -705,13 +705,14 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
         themeStyle = `<link rel="stylesheet" type="text/css" id="themeStyle" href="${servePath}appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>`;
     }
     const screenWidth = getScreenWidth();
-    const mobileHtml = isInAndroid() || isInHarmony() ? {
+    const isInMobile = isInAndroid() || isInHarmony() || isInIOS();
+    const mobileHtml = isInMobile ? {
         js: `document.body.style.minWidth = "${screenWidth}px";`,
         css: `@page { size: A4; margin: 10mm 0 10mm 0; }
 .protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};
     const html = `<!DOCTYPE html>
-<html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
+<html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${isInMobile ? "light" : getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
     <base href="${servePath}">
     <meta charset="utf-8">

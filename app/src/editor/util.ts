@@ -392,7 +392,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }
-                scrollCenter(editor.editor.protyle);
+                scrollCenter(editor.editor.protyle, editor.editor.protyle.disabled ? nodeElement : null);
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         scrollCenter(editor.editor.protyle);

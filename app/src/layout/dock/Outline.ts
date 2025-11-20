@@ -331,7 +331,7 @@ export class Outline extends Model {
             preview: this.isPreview
         }, response => {
             this.update(response);
-            this.updateDocTitle((options.tab.model as Editor)?.editor.protyle?.background?.ial, response.data?.length || 0);
+            this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
         });
     }
 

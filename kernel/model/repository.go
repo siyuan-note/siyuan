@@ -1289,6 +1289,7 @@ func bootSyncRepo() (err error) {
 	waitGroup.Add(1)
 	go func() {
 		defer waitGroup.Done()
+		defer logging.Recover()
 
 		start := time.Now()
 		_, _, indexErr := indexRepoBeforeCloudSync(repo)
@@ -1314,6 +1315,7 @@ func bootSyncRepo() (err error) {
 	waitGroup.Add(1)
 	go func() {
 		defer waitGroup.Done()
+		defer logging.Recover()
 
 		start := time.Now()
 		syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}

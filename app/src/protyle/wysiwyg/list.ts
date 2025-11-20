@@ -276,7 +276,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
         action: "delete"
     });
 
-    Array.from(listItemElement.children).reverse().forEach((item) => {
+    Array.from(listItemElement.children).reverse().forEach((item, index) => {
         if (!item.classList.contains("protyle-action") && !item.classList.contains("protyle-attr")) {
             doOperations.push({
                 id: item.getAttribute("data-node-id"),
@@ -286,7 +286,8 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
             undoOperations.push({
                 id: item.getAttribute("data-node-id"),
                 action: "move",
-                parentID: listItemId
+                parentID: listItemId,
+                data: index === listItemElement.childElementCount - 2 ? "focus" : null
             });
             listItemElement.parentElement.after(item);
         }

@@ -376,8 +376,8 @@ github.com/siyuan-note/dataparser v0.0.0-20250804100744-b41253b236f3 h1:EH063L0H
 github.com/siyuan-note/dataparser v0.0.0-20250804100744-b41253b236f3/go.mod h1:8lb+SsWAPQblGbjmwEBsBdJszMCcLeECtB95fv6mReg=
 github.com/siyuan-note/dejavu v0.0.0-20251119144413-268e132a113d h1:Ah/UmA0GPZs/fpNXIGvd6xpigPF2auxZgOlMJgJW/q4=
 github.com/siyuan-note/dejavu v0.0.0-20251119144413-268e132a113d/go.mod h1:RLdhsM9rIA28y5UA8mcC9IOjM2/QV1UpXYgi1vWFL+8=
-github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec h1:D8Sjwa+7WxP3XrIBscT4PxBZZddZ83/O+5nX1sq6g6g=
-github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec/go.mod h1:6iAxXPOOAG3+M4bCiKQZTQ+n4gSUx/OyHhsP57dJlS8=
+github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f h1:HSgJKIAMgokJDAvBBfRj47SzRSm6mNGssY0Wv7rcEtg=
+github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f/go.mod h1:JE3S9VuJqTggyfhjesNDuqvqrRvwG3IctFjXXchLx1M=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97/go.mod h1:1/nGgthl89FPA7GzAcEWKl6zRRnfgyTjzLZj9bW7kuw=
 github.com/siyuan-note/filelock v0.0.0-20251107023958-207cad31f0dd h1:7Rr+wH2hy/goTMe5EAZHjpfEudZZXVVaZOkhs/xzX+I=
@@ -459,8 +459,8 @@ golang.org/x/crypto v0.14.0/go.mod h1:MVFd36DqK4CsrnJYDkBA3VC4m2GkXAM0PvzMCn4JQf
 golang.org/x/crypto v0.19.0/go.mod h1:Iy9bg/ha4yyC70EfRS8jz+B6ybOBKMaSxLj6P6oBDfU=
 golang.org/x/crypto v0.23.0/go.mod h1:CKFgDieR+mRhux2Lsu27y0fO304Db0wZe70UKqHu0v8=
 golang.org/x/crypto v0.31.0/go.mod h1:kDsLvtWBEx7MV9tJOj9bnXsPbxwJQ6csT/x4KIN4Ssk=
-golang.org/x/crypto v0.44.0 h1:A97SsFvM3AIwEEmTBiaxPPTYpDC47w720rdiiUvgoAU=
-golang.org/x/crypto v0.44.0/go.mod h1:013i+Nw79BMiQiMsOPcVCB5ZIJbYkerPrGnOa00tvmc=
+golang.org/x/crypto v0.45.0 h1:jMBrvKuj23MTlT0bQEOBcAE0mjg8mK9RXFhRH6nyF3Q=
+golang.org/x/crypto v0.45.0/go.mod h1:XTGrrkGJve7CYK7J8PEww4aY7gM3qMCElcJQ8n8JdX4=
 golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
 golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d/go.mod h1:023OzeP/+EPmXeapQh35lcL3II3LrY8Ic+EFFKVhULM=
 golang.org/x/image v0.32.0 h1:6lZQWq75h7L5IWNk0r+SCpUJ6tUVd3v4ZHnbRKLkUDQ=

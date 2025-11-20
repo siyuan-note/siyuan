@@ -59,7 +59,7 @@ require (
 	github.com/shirou/gopsutil/v4 v4.25.10
 	github.com/siyuan-note/dataparser v0.0.0-20250804100744-b41253b236f3
 	github.com/siyuan-note/dejavu v0.0.0-20251119144413-268e132a113d
-	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
+	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20251107023958-207cad31f0dd
 	github.com/siyuan-note/httpclient v0.0.0-20251119144307-63b815d7d198
@@ -183,7 +183,7 @@ require (
 	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/arch v0.22.0 // indirect
-	golang.org/x/crypto v0.44.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect

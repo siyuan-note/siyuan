@@ -228,6 +228,7 @@ interface Window {
             changeStatusBar: { postMessage: (url: string) => void }
             setClipboard: { postMessage: (url: string) => void }
             purchase: { postMessage: (url: string) => void }
+            print: { postMessage: (html: string) => void }
         }
     };
     htmlToImage: {

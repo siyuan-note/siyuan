@@ -6,7 +6,7 @@ import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -758,7 +758,7 @@ export const exportMd = (id: string) => {
                 id: "exportPDF",
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
-                ignore: !isInAndroid() && !isInHarmony(),
+                ignore: !isInAndroid() && !isInHarmony() && !isInIOS(),
                 click: () => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
@@ -773,6 +773,8 @@ export const exportMd = (id: string) => {
                             window.JSAndroid.print(html);
                         } else if (isInHarmony()) {
                             window.JSHarmony.print(html);
+                        } else if (isInIOS()) {
+                            window.webkit.messageHandlers.print.postMessage(html);
                         }
 
                         setTimeout(() => {

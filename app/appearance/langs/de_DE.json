@@ -918,6 +918,7 @@
   "moveToRight": "Nach rechts bewegen",
   "copyProtocol": "Blockhyperlink kopieren",
   "copyProtocolInMd": "Block-Markdown-Link kopieren",
+  "copyWebURL": "Web-URL kopieren",
   "uploadAssets2CDN": "Asset-Dateien in die Cloud hochladen",
   "uploadAssets2CDNConfirmTip": "Sind Sie sicher, dass Sie die Assets in diesem Dokument in die Cloud hochladen möchten?",
   "notSupport1": "Unterstützt kein Drag & Drop über Notizen hinweg.",

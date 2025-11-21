@@ -918,6 +918,7 @@
   "moveToRight": "تحريك لليمين",
   "copyProtocol": "نسخ الرابط التشعبي للكتلة",
   "copyProtocolInMd": "‫نسخ رابط Markdown للكتلة‬",
+  "copyWebURL": "نسخ رابط الويب",
   "uploadAssets2CDN": "رفع ملفات الأصول إلى السحابة",
   "uploadAssets2CDNConfirmTip": "هل أنت متأكد من رفع الأصول في هذا المستند إلى السحابة؟",
   "notSupport1": "لا يمكن السحب والإسقاط عبر الدفاتر",

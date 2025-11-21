@@ -918,6 +918,7 @@
   "moveToRight": "Przenieś w prawo",
   "copyProtocol": "Kopiuj hiperlink bloku",
   "copyProtocolInMd": "Kopiuj link Markdown bloku",
+  "copyWebURL": "Kopiuj URL internetowy",
   "uploadAssets2CDN": "Prześlij pliki zasobów do chmury",
   "uploadAssets2CDNConfirmTip": "Czy na pewno chcesz przesłać zasoby w tym dokumencie do chmury?",
   "notSupport1": "Nie wspiera przeciągania i upuszczania między notesami",

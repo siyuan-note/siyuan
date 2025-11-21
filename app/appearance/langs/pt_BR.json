@@ -918,6 +918,7 @@
   "moveToRight": "Mover para Direita",
   "copyProtocol": "Copiar hiperlink do bloco",
   "copyProtocolInMd": "Copiar link Markdown do bloco",
+  "copyWebURL": "Copiar URL da web",
   "uploadAssets2CDN": "Enviar arquivos de ativos para a nuvem",
   "uploadAssets2CDNConfirmTip": "Tem certeza que deseja enviar os ativos neste documento para a nuvem?",
   "notSupport1": "Não suporta arrastar e soltar entre blocos de notas",

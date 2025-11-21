@@ -918,6 +918,7 @@
   "moveToRight": "Move Right",
   "copyProtocol": "Copy block hyperlink",
   "copyProtocolInMd": "Copy block Markdown link",
+  "copyWebURL": "Copy web URL",
   "uploadAssets2CDN": "Upload asset files to cloud",
   "uploadAssets2CDNConfirmTip": "Are you sure to upload the assets in this document to the cloud?",
   "notSupport1": "Does not support drag and drop across notebooks",

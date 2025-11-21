@@ -443,7 +443,21 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
                 focusBlock(focusElement);
             }
         }
-    }, {
+    },
+    /// #if BROWSER
+    {
+        id: "copyWebURL",
+        iconHTML: "",
+        label: window.siyuan.languages.copyWebURL,
+        click: () => {
+            copyTextByType(ids, "webURL");
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    },
+    /// #endif
+    {
         id: "copyHPath",
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,

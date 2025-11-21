@@ -918,6 +918,7 @@
   "moveToRight": "Sposta a Destra",
   "copyProtocol": "Copia il collegamento del blocco",
   "copyProtocolInMd": "Copia collegamento Markdown del blocco",
+  "copyWebURL": "Copia URL web",
   "uploadAssets2CDN": "Carica file di asset su cloud",
   "uploadAssets2CDNConfirmTip": "Sei sicuro di voler caricare gli asset di questo documento sul cloud?",
   "notSupport1": "Non supporta il trascinamento tra taccuini",

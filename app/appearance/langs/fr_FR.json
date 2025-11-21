@@ -918,6 +918,7 @@
   "moveToRight": "vers la Droite",
   "copyProtocol": "Copier bloc d'hyperliens",
   "copyProtocolInMd": "Copier le lien Markdown du bloc",
+  "copyWebURL": "Copier l'URL web",
   "uploadAssets2CDN": "Transférer les fichiers asset vers le Cloud",
   "uploadAssets2CDNConfirmTip": "Êtes-vous sûr de télécharger les ressources de ce document dans le cloud ?",
   "notSupport1": "Le glisser-déposer entre carnets n'est pas pris en charge",

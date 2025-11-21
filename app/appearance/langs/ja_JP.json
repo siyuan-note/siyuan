@@ -918,6 +918,7 @@
   "moveToRight": "右に移動",
   "copyProtocol": "ハイパーリンクとしてコピー",
   "copyProtocolInMd": "Markdown リンクとしてコピー",
+  "copyWebURL": "ウェブURLをコピー",
   "uploadAssets2CDN": "アセットファイルをクラウドにアップロード",
   "uploadAssets2CDNConfirmTip": "このドキュメントのアセットをクラウドにアップロードしてもよろしいですか？",
   "notSupport1": "ノートブック間でのドラッグ＆ドロップはサポートされていません",

@@ -78,6 +78,27 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 			return ast.WalkContinue
 		}
 
+		if ast.NodeHTMLBlock == n.Type {
+			if bytes.HasPrefix(n.Tokens, []byte("<pre ")) && bytes.HasSuffix(n.Tokens, []byte("</pre>")) && bytes.Contains(n.Tokens, []byte("data:image/svg+xml;base64")) {
+				matches := regexp.MustCompile(`(?sU)<pre [^>]*>(.*)</pre>`).FindSubmatch(n.Tokens)
+				if len(matches) >= 2 {
+					n.Tokens = matches[1]
+				}
+				subTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+				if nil != subTree && nil != subTree.Root && nil != subTree.Root.FirstChild {
+					n.Type = ast.NodeParagraph
+					var children []*ast.Node
+					for c := subTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+						children = append(children, c)
+					}
+					for _, c := range children {
+						n.AppendChild(c)
+					}
+				}
+			}
+			return ast.WalkContinue
+		}
+
 		if ast.NodeText == n.Type {
 			if n.ParentIs(ast.NodeTableCell) {
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\|"), []byte("|"))

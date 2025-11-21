@@ -237,7 +237,7 @@ export const copyTextByType = async (ids: string[],
             const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
             text += response.data;
         } else if (type === "webURL") {
-            text += `${window.location.origin}/?id=${id}`;
+            text += `${window.location.origin}?id=${id}`;
         } else if (type === "id") {
             text += id;
         }

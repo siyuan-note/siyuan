@@ -276,7 +276,6 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      min-height: 40px;
 
       &::before {
         transition: background 100ms ease-out;
@@ -379,7 +378,7 @@
       flex: 1;
       white-space: nowrap;
       font-size: 85%;
-      min-height: 23px;
+      min-height: calc(1.625em + 4px);
       padding: 5px 4px;
 
       &:hover {

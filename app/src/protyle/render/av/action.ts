@@ -39,6 +39,7 @@ import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clearSelect";
 import {removeCompressURL} from "../../../util/image";
 
+let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
         return false;
@@ -228,9 +229,16 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-group-fold") {
-            if (target.getAttribute("data-folding") !== "true") {
-                target.setAttribute("data-folding", "true");
-                const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
+            const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
+            if (isOpen) {
+                target.firstElementChild.classList.remove("av__group-arrow--open");
+                target.parentElement.nextElementSibling.classList.add("fn__none");
+            } else {
+                target.firstElementChild.classList.add("av__group-arrow--open");
+                target.parentElement.nextElementSibling.classList.remove("fn__none");
+            }
+            clearTimeout(foldTimeout);
+            foldTimeout = window.setTimeout(() => {
                 transaction(protyle, [{
                     action: "foldAttrViewGroup",
                     avID: blockElement.dataset.avId,
@@ -244,14 +252,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     id: target.dataset.id,
                     data: !isOpen
                 }]);
-                if (isOpen) {
-                    target.firstElementChild.classList.remove("av__group-arrow--open");
-                    target.parentElement.nextElementSibling.classList.add("fn__none");
-                } else {
-                    target.firstElementChild.classList.add("av__group-arrow--open");
-                    target.parentElement.nextElementSibling.classList.remove("fn__none");
-                }
-            }
+            }, Constants.TIMEOUT_TRANSITION);
             event.preventDefault();
             event.stopPropagation();
             return true;

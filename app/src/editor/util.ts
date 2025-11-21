@@ -388,11 +388,12 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             highlightById(editor.editor.protyle, options.id, "start");
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
+                const isFromOutline = options.action?.includes(Constants.CB_GET_OUTLINE);
+                const newRange = focusBlock(nodeElement, undefined, !isFromOutline);
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }
-                scrollCenter(editor.editor.protyle, editor.editor.protyle.disabled ? nodeElement : null);
+                scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || isFromOutline) ? nodeElement : null, isFromOutline ? "start" : "nearest");
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         scrollCenter(editor.editor.protyle);

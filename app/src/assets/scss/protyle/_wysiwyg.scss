@@ -513,11 +513,6 @@
         -webkit-user-modify: read-only;
       }
 
-      .iframe-content {
-        display: inline-block;
-        position: relative;
-      }
-
       &--drag {
         .iframe-content::after {
           content: "";

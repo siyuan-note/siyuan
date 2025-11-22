@@ -408,10 +408,13 @@
 
   [data-subtype="NodeIFrame"],
   [data-subtype="widget"] {
+    height: 256px;
+    width: 100%;
+
     .iframe-content {
+      position: relative;
+      height: 100%;
       width: 100%;
-      height: 256px;
-      max-width: 100%;
     }
 
     iframe {

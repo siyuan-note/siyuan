@@ -1206,19 +1206,9 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 
 		upsertAvBlockRel(insertedNode)
 
-		// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
-		avs := insertedNode.IALAttr(av.NodeAttrNameAvs)
-		for _, avID := range strings.Split(avs, ",") {
-			if !ast.IsNodeIDPattern(avID) {
-				continue
-			}
-
-			AddAttributeViewBlock(tx, []map[string]interface{}{{
-				"id":         insertedNode.ID,
-				"isDetached": false,
-			}}, avID, "", "", "", previousID, true, map[string]interface{}{})
-			ReloadAttrView(avID)
-		}
+		// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
+		insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
+		insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
 
 		if ast.NodeAttributeView == insertedNode.Type {
 			// 插入数据库块时需要重新绑定其中已经存在的块
@@ -1394,19 +1384,9 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	upsertAvBlockRel(insertedNode)
 
-	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
-	avs := insertedNode.IALAttr(av.NodeAttrNameAvs)
-	for _, avID := range strings.Split(avs, ",") {
-		if !ast.IsNodeIDPattern(avID) {
-			continue
-		}
-
-		AddAttributeViewBlock(tx, []map[string]interface{}{{
-			"id":         insertedNode.ID,
-			"isDetached": false,
-		}}, avID, "", "", "", previousID, true, map[string]interface{}{})
-		ReloadAttrView(avID)
-	}
+	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
+	insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
+	insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
 
 	if ast.NodeAttributeView == insertedNode.Type {
 		// 插入数据库块时需要重新绑定其中已经存在的块

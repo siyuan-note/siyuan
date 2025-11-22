@@ -1849,6 +1849,24 @@ func moveSorts(rootID, fromBox, toBox string) {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
+
+	sortIDs := map[string]int{}
+	bt := treenode.GetBlockTree(rootID)
+	if nil != bt {
+		parentPath := path.Dir(bt.Path)
+		docs, _, listErr := ListDocTree(toBox, parentPath, util.SortModeUnassigned, false, false, 102400)
+		if listErr != nil {
+			logging.LogErrorf("list doc tree failed: %s", err)
+			return
+		}
+
+		for _, doc := range docs {
+			sortIDs[doc.ID] = doc.Sort
+		}
+
+		pushFiletreeSortChanged(sortIDs)
+	}
+
 }
 
 func ChangeFileTreeSort(boxID string, paths []string) {
@@ -1926,6 +1944,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	}
 
 	IncSync()
+
+	pushFiletreeSortChanged(sortFolderIDs)
 }
 
 func (box *Box) fillSort(files *[]*File) {
@@ -2006,6 +2026,13 @@ func (box *Box) addMaxSort(parentPath, id string) {
 	}
 
 	box.setSortVal(id, sortVal)
+
+	sortIDs := map[string]int{}
+	for _, doc := range docs {
+		sortIDs[doc.ID] = doc.Sort
+	}
+	sortIDs[id] = sortVal
+	pushFiletreeSortChanged(sortIDs)
 }
 
 func (box *Box) addMinSort(parentPath, id string) {
@@ -2021,6 +2048,13 @@ func (box *Box) addMinSort(parentPath, id string) {
 	}
 
 	box.setSortVal(id, sortVal)
+
+	sortIDs := map[string]int{}
+	for _, doc := range docs {
+		sortIDs[doc.ID] = doc.Sort
+	}
+	sortIDs[id] = sortVal
+	pushFiletreeSortChanged(sortIDs)
 }
 
 func (box *Box) setSortVal(id string, sortVal int) {
@@ -2086,6 +2120,7 @@ func (box *Box) addSort(previousPath, id string) {
 		return
 	}
 
+	sortIDs := map[string]int{}
 	previousID := util.GetTreeID(previousPath)
 	sortVal := 0
 	for _, doc := range docs {
@@ -2095,6 +2130,7 @@ func (box *Box) addSort(previousPath, id string) {
 			fullSortIDs[id] = sortVal
 		}
 		sortVal++
+		sortIDs[doc.ID] = sortVal
 	}
 
 	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
@@ -2106,6 +2142,8 @@ func (box *Box) addSort(previousPath, id string) {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
+
+	pushFiletreeSortChanged(sortIDs)
 }
 
 func (box *Box) setSort(sortIDVals map[string]int) {
@@ -2139,4 +2177,28 @@ func (box *Box) setSort(sortIDVals map[string]int) {
 		logging.LogErrorf("write sort conf failed: %s", err)
 		return
 	}
+
+	pushFiletreeSortChanged(sortIDVals)
+}
+
+func pushFiletreeSortChanged(sortIDs map[string]int) {
+	var childIDs []string
+	for sortID := range sortIDs {
+		childIDs = append(childIDs, sortID)
+	}
+	sort.Slice(childIDs, func(i, j int) bool {
+		return sortIDs[childIDs[i]] < sortIDs[childIDs[j]]
+	})
+
+	firstID := childIDs[0]
+	bt := treenode.GetBlockTree(firstID)
+	if nil == bt {
+		return
+	}
+
+	parentPath := path.Dir(bt.Path)
+	util.BroadcastByType("main", "filetreeSortChanged", 0, "", map[string]any{
+		"parentPath": parentPath,
+		"childIDs":   childIDs,
+	})
 }

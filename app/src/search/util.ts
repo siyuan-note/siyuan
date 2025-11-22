@@ -821,7 +821,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                             id,
                                             action: [...action, Constants.CB_GET_HL],
                                             zoomIn,
-                                            position: "right"
+                                            position: "right",
+                                            scrollPosition: "center"
                                         });
                                         if (closeCB) {
                                             closeCB();
@@ -860,7 +861,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                     app,
                                     id,
                                     action: [...action, Constants.CB_GET_HL],
-                                    zoomIn
+                                    zoomIn,
+                                    scrollPosition: "center"
                                 });
                                 if (closeCB) {
                                     closeCB();

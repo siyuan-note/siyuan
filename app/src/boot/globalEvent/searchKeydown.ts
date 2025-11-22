@@ -105,7 +105,8 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                     id,
                     position: "right",
                     action: [...action, Constants.CB_GET_HL],
-                    zoomIn
+                    zoomIn,
+                    scrollPosition: "center"
                 });
                 if (dialog) {
                     dialog.destroy({focus: "false"});
@@ -226,7 +227,8 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                         app,
                         id,
                         action: [...action, Constants.CB_GET_HL],
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "center"
                     });
                     if (dialog) {
                         dialog.destroy({focus: "false"});

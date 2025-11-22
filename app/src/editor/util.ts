@@ -46,7 +46,8 @@ export const openFileById = async (options: {
     zoomIn?: boolean
     removeCurrentTab?: boolean
     openNewTab?: boolean
-    afterOpen?: (model: Model) => void
+    afterOpen?: (model: Model) => void,
+    scrollPositon?: ScrollLogicalPosition
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
     if (response.code === -1) {
@@ -70,7 +71,8 @@ export const openFileById = async (options: {
         keepCursor: options.keepCursor,
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,
-        openNewTab: options.openNewTab
+        openNewTab: options.openNewTab,
+        scrollPositon: options.scrollPositon,
     });
 };
 
@@ -388,12 +390,11 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             highlightById(editor.editor.protyle, options.id, "start");
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                const isFromOutline = options.action?.includes(Constants.CB_GET_OUTLINE);
-                const newRange = focusBlock(nodeElement, undefined, !isFromOutline);
+                const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }
-                scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || isFromOutline) ? nodeElement : null, isFromOutline ? "start" : "nearest");
+                scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPositon) ? nodeElement : null, options.scrollPositon);
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         scrollCenter(editor.editor.protyle);

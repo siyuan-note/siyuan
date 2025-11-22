@@ -182,9 +182,29 @@ func RemoveAssetText(asset string) {
 	assetsTextsChanged.Store(true)
 }
 
+var tesseractExts = []string{
+	".png",
+	".jpg",
+	".jpeg",
+	".tif",
+	".tiff",
+	".bmp",
+	".gif",
+	".webp",
+	".pbm",
+	".pgm",
+	".ppm",
+	".pnm",
+}
+
 func IsTesseractExtractable(p string) bool {
 	lowerName := strings.ToLower(p)
-	return strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg")
+	for _, ext := range tesseractExts {
+		if strings.HasSuffix(lowerName, ext) {
+			return true
+		}
+	}
+	return false
 }
 
 // tesseractOCRLock 用于 Tesseract OCR 加锁串行执行提升稳定性 https://github.com/siyuan-note/siyuan/issues/7265
@@ -300,7 +320,7 @@ func InitTesseract() {
 
 	langs := getTesseractLangs()
 	if 1 > len(langs) {
-		logging.LogWarnf("no tesseract langs found")
+		logging.LogWarnf("no tesseract langs found, disabling tesseract-ocr")
 		TesseractEnabled = false
 		tesseractInited.Store(true)
 		return

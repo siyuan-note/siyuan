@@ -234,7 +234,16 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 
 	defer logging.Recover()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+	timeout := 7000
+	timeoutEnv := os.Getenv("SIYUAN_TESSERACT_TIMEOUT")
+	if "" != timeoutEnv {
+		if timeoutParsed, parseErr := strconv.Atoi(timeoutEnv); nil == parseErr {
+			timeout = timeoutParsed
+		} else {
+			logging.LogWarnf("parse tesseract timeout [%s] failed: %s", timeoutEnv, parseErr)
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"), "tsv")

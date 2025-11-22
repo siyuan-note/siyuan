@@ -318,6 +318,9 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
         tempElement.setAttribute("updated", newId.split("-")[0]);
         tempElement.removeAttribute("refcount");
         tempElement.lastElementChild.querySelector(".protyle-attr--refcount")?.remove();
+        tempElement.lastElementChild.querySelector(".protyle-attr--av")?.remove();
+        tempElement.removeAttribute("custom-avs");
+        tempElement.removeAttribute("av-names");
         tempElement.querySelectorAll("[data-node-id]").forEach(childItem => {
             const subNewId = Lute.NewNodeID();
             childItem.setAttribute("data-node-id", subNewId);
@@ -326,6 +329,9 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
             childItem.setAttribute("updated", subNewId.split("-")[0]);
             childItem.removeAttribute("refcount");
             childItem.lastElementChild.querySelector(".protyle-attr--refcount")?.remove();
+            childItem.lastElementChild.querySelector(".protyle-attr--av")?.remove();
+            childItem.removeAttribute("custom-avs");
+            childItem.removeAttribute("av-names");
         });
         if (typeof starIndex === "number") {
             const orderIndex = starIndex + index + 1;
@@ -356,11 +362,17 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
                     subItem.setAttribute("data-node-id", Lute.NewNodeID());
                     subItem.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
                     subItem.removeAttribute("refcount");
+                    subItem.lastElementChild.querySelector(".protyle-attr--av")?.remove();
+                    subItem.removeAttribute("custom-avs");
+                    subItem.removeAttribute("av-names");
                 });
                 const newChildId = Lute.NewNodeID();
                 childItem.setAttribute("data-node-id", newChildId);
                 childItem.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
                 childItem.removeAttribute("refcount");
+                childItem.lastElementChild.querySelector(".protyle-attr--av")?.remove();
+                childItem.removeAttribute("custom-avs");
+                childItem.removeAttribute("av-names");
                 doOperations.push({
                     context: {
                         ignoreProcess: "true"

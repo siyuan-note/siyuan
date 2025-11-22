@@ -411,6 +411,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
             e.setAttribute("updated", newId.split("-")[0]);
             e.removeAttribute("refcount");
+            e.querySelector(".protyle-attr--av")?.remove();
+            e.removeAttribute("custom-avs");
+            e.removeAttribute("av-names");
             isBlock = true;
         });
         if (nodeElement.classList.contains("table")) {

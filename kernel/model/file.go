@@ -981,24 +981,15 @@ func DuplicateDoc(tree *parse.Tree) {
 	}
 	FlushTxQueue()
 
-	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
+	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
 		}
 
-		avs := n.IALAttr(av.NodeAttrNameAvs)
-		for _, avID := range strings.Split(avs, ",") {
-			if !ast.IsNodeIDPattern(avID) {
-				continue
-			}
-
-			AddAttributeViewBlock(nil, []map[string]interface{}{{
-				"id":         n.ID,
-				"isDetached": false,
-			}}, avID, "", "", "", "", false, map[string]interface{}{})
-			ReloadAttrView(avID)
-		}
+		n.RemoveIALAttr(av.NodeAttrNameAvs)
+		n.RemoveIALAttr(av.NodeAttrViewNames)
+		n.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 		return ast.WalkContinue
 	})
 	return

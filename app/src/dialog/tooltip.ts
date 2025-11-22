@@ -1,6 +1,6 @@
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
+export const showTooltip = (message: string, target: Element, tooltipClass?: string, delay?: number) => {
     if (isMobile()) {
         return;
     }
@@ -15,6 +15,9 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     messageElement.innerHTML = message;
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
+
+    delay ??= parseInt(target.closest("[data-tooltips-delay]")?.getAttribute("data-tooltips-delay") || "500");
+    messageElement.style.setProperty("--b3-tooltips-delay", delay + "ms");
 
 
     const position = target.getAttribute("data-position");

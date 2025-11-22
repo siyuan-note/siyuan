@@ -761,6 +761,14 @@ func ChangeBoxSort(boxIDs []string) {
 		boxConf.Sort = i + 1
 		box.SaveConf(boxConf)
 	}
+
+	var notebookIDs []string
+	for _, box := range Conf.GetOpenedBoxes() {
+		notebookIDs = append(notebookIDs, box.ID)
+	}
+	util.BroadcastByType("main", "notebookSortChanged", 0, "", map[string]any{
+		"notebookIDs": notebookIDs,
+	})
 }
 
 func SetBoxIcon(boxID, icon string) {

@@ -663,7 +663,7 @@ interface IOpenFileOptions {
             data: any,
         }) => import("../layout/Model").Model,   // plugin 0.8.3 历史兼容
     }
-    scrollPositon?: ScrollLogicalPosition,
+    scrollPosition?: ScrollLogicalPosition,
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填
     rootIcon?: string, // 文档图标

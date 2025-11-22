@@ -47,7 +47,7 @@ export const openFileById = async (options: {
     removeCurrentTab?: boolean
     openNewTab?: boolean
     afterOpen?: (model: Model) => void,
-    scrollPositon?: ScrollLogicalPosition
+    scrollPosition?: ScrollLogicalPosition
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
     if (response.code === -1) {
@@ -72,7 +72,7 @@ export const openFileById = async (options: {
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,
         openNewTab: options.openNewTab,
-        scrollPositon: options.scrollPositon,
+        scrollPosition: options.scrollPosition,
     });
 };
 
@@ -378,7 +378,12 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle: editor.editor.protyle, action: options.action});
+            onGet({
+                data: getResponse,
+                protyle: editor.editor.protyle,
+                action: options.action,
+                scrollPosition: options.scrollPosition
+            });
             // 大纲点击折叠标题下的内容时，需更新反链面板
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });
@@ -388,13 +393,14 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         editor.editor.protyle.observerLoad?.disconnect();
         if (options.action?.includes(Constants.CB_GET_HL)) {
             highlightById(editor.editor.protyle, options.id, "start");
-        } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
+        }
+        if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
                 const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }
-                scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPositon) ? nodeElement : null, options.scrollPositon);
+                scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         scrollCenter(editor.editor.protyle);
@@ -506,6 +512,7 @@ const newTab = (options: IOpenFileOptions) => {
                         blockId: options.id,
                         rootId: options.rootID,
                         action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
+                        scrollPosition: options.scrollPosition,
                     });
                 } else {
                     editor = new Editor({
@@ -515,6 +522,7 @@ const newTab = (options: IOpenFileOptions) => {
                         rootId: options.rootID,
                         mode: options.mode,
                         action: options.action,
+                        scrollPosition: options.scrollPosition,
                     });
                 }
                 tab.addModel(editor);

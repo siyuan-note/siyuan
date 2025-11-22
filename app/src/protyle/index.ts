@@ -347,6 +347,7 @@ export class Protyle {
                 data: getResponse,
                 protyle: this.protyle,
                 action: mergedOptions.action,
+                scrollPosition: mergedOptions.scrollPosition,
                 afterCB: () => {
                     this.afterOnGet(mergedOptions);
                 }

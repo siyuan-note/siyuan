@@ -2970,6 +2970,7 @@ func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
 		node.SetIALAttr(av.NodeAttrViewNames, avNames)
 		pushBroadcastAttrTransactions(oldAttrs, node)
+		node.RemoveIALAttr(av.NodeAttrViewNames)
 	}
 	return
 }
@@ -3561,6 +3562,7 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 		node.RemoveIALAttr("custom-hidden")
 	}
 
+	var avNames string
 	if avs := attrs[av.NodeAttrNameAvs]; "" != avs {
 		avIDs := strings.Split(avs, ",")
 		avIDs = gulu.Str.RemoveElem(avIDs, avID)
@@ -3577,7 +3579,7 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 		} else {
 			attrs[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 			node.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
-			avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
+			avNames = getAvNames(node.IALAttr(av.NodeAttrNameAvs))
 			attrs[av.NodeAttrViewNames] = avNames
 		}
 	}
@@ -3590,6 +3592,9 @@ func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tr
 		if err = setNodeAttrs(node, tree, attrs); err != nil {
 			return
 		}
+	}
+	if "" != avNames {
+		node.RemoveIALAttr(av.NodeAttrViewNames)
 	}
 	return
 }
@@ -5050,6 +5055,9 @@ func unbindBlockAv(tx *Transaction, avID, nodeID string) {
 		logging.LogWarnf("set node [%s] attrs failed: %s", nodeID, err)
 		return
 	}
+	if "" != avNames {
+		node.RemoveIALAttr(av.NodeAttrViewNames)
+	}
 	return
 }
 
@@ -5088,6 +5096,9 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 	if err != nil {
 		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)
 		return
+	}
+	if "" != avNames {
+		node.RemoveIALAttr(av.NodeAttrViewNames)
 	}
 	return
 }
@@ -5521,6 +5532,9 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 			}
 			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 			pushBroadcastAttrTransactions(oldAttrs, node)
+			if "" != avNames {
+				node.RemoveIALAttr(av.NodeAttrViewNames)
+			}
 		}
 	}
 

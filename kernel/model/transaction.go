@@ -1209,6 +1209,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 		// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 		insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
 		insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
+		insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
 		if ast.NodeAttributeView == insertedNode.Type {
 			// 插入数据库块时需要重新绑定其中已经存在的块
@@ -1387,6 +1388,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
 	insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
+	insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
 	if ast.NodeAttributeView == insertedNode.Type {
 		// 插入数据库块时需要重新绑定其中已经存在的块

@@ -2102,7 +2102,7 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "";
-                        } else if (["NodeIFrame", "widget"].includes(e.getAttribute("data-subtype"))) {
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
                             e.style.margin = "";
                         } else {
                             e.style.textAlign = "left";
@@ -2118,7 +2118,7 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "center";
-                        } else if (["NodeIFrame", "widget"].includes(e.getAttribute("data-subtype"))) {
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
                             e.style.margin = "0 auto";
                         } else {
                             e.style.textAlign = "center";
@@ -2134,7 +2134,7 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "flex-end";
-                        } else if (["NodeIFrame", "widget"].includes(e.getAttribute("data-subtype"))) {
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
                             e.style.margin = "0 0 0 auto";
                         } else {
                             e.style.textAlign = "right";
@@ -2186,7 +2186,7 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "";
-                        } else if (["NodeIFrame", "widget"].includes(e.getAttribute("data-subtype"))) {
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
                             e.style.margin = "";
                         } else {
                             e.style.textAlign = "";

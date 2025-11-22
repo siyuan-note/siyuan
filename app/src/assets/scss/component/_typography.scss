@@ -406,8 +406,8 @@
     text-align: center;
   }
 
-  [data-subtype="NodeIFrame"],
-  [data-subtype="widget"] {
+  [data-type="NodeIFrame"],
+  [data-type="NodeWidget"] {
     height: 256px;
     width: 100%;
 

@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -249,8 +250,8 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"), "tsv")
 	gulu.CmdAttr(cmd)
 	output, err := cmd.CombinedOutput()
-	if ctx.Err() == context.DeadlineExceeded {
-		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		logging.LogWarnf("tesseract [path=%s, size=%d] timeout [%dms]", imgAbsPath, info.Size(), timeout)
 		return
 	}
 

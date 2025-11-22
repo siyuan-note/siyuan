@@ -99,7 +99,7 @@ import {img3115} from "../../boot/compatibleVersion";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
 import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
-import {clearSelect} from "../util/clearSelect";
+import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 
 export class WYSIWYG {

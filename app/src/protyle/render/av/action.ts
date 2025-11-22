@@ -36,7 +36,7 @@ import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {scrollCenter} from "../../../util/highlightById";
 import {escapeHtml} from "../../../util/escape";
 import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 
 let foldTimeout: number;

@@ -62,7 +62,7 @@ import {openFileById} from "../../editor/util";
 import * as path from "path";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
-import {clearSelect} from "../util/clearSelect";
+import {clearSelect} from "../util/clear";
 
 export class Gutter {
     public element: HTMLElement;

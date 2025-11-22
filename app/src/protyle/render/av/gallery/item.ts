@@ -2,7 +2,7 @@ import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "..
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
 import {Constants} from "../../../../constants";
-import {clearSelect} from "../../../util/clearSelect";
+import {clearSelect} from "../../../util/clear";
 
 export const insertGalleryItemAnimation = (options: {
     blockElement: HTMLElement;

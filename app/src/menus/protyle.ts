@@ -61,7 +61,7 @@ import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
-import {clearSelect} from "../protyle/util/clearSelect";
+import {clearSelect} from "../protyle/util/clear";
 import {scrollCenter} from "../util/highlightById";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {

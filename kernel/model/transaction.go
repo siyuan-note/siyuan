@@ -1073,6 +1073,7 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
 			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
 			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
+			toChangNode.RemoveIALAttr(av.NodeAttrViewNames)
 		}
 
 		for _, tree := range trees {
@@ -1208,7 +1209,6 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 
 		// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 		insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
-		insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
 		insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
 		if ast.NodeAttributeView == insertedNode.Type {
@@ -1387,7 +1387,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	insertedNode.RemoveIALAttr(av.NodeAttrNameAvs)
-	insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
 	insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
 	if ast.NodeAttributeView == insertedNode.Type {

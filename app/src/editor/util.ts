@@ -339,6 +339,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 } else {
                     initObj.action = options.action;
                 }
+                initObj.scrollPosition = options.scrollPosition;
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                 item.parent.switchTab(item.headElement);
                 return true;

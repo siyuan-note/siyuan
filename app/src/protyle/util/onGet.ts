@@ -464,6 +464,9 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
             }
         });
     }
+    if (!focusElement && protyle.block.id === protyle.block.rootID) {
+        focusElement = protyle.title.editElement;
+    }
     if (protyle.block.mode === 4) {
         preventScroll(protyle);
         focusElement = protyle.wysiwyg.element.lastElementChild;

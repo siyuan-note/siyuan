@@ -27,6 +27,8 @@ import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {updateControlAlt} from "../protyle/util/hotKey";
+import {updateAppearance} from "../config/util/updateAppearance";
+import {renderSnippet} from "../config/util/snippets";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -56,6 +58,12 @@ class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "setAppearance":
+                                updateAppearance(data.data);
+                                break;
+                            case "setSnippet":
+                                renderSnippet();
+                                break;
                             case "setDefRefCount":
                                 setDefRefCount(data.data);
                                 break;

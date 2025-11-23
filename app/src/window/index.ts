@@ -62,6 +62,7 @@ class App {
                                 updateAppearance(data.data);
                                 break;
                             case "setSnippet":
+                                window.siyuan.config.snippet = data.data;
                                 renderSnippet();
                                 break;
                             case "setDefRefCount":

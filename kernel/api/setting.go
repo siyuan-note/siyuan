@@ -548,6 +548,7 @@ func setAppearance(c *gin.Context) {
 	}
 
 	ret.Data = model.Conf.Appearance
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 
 func setPublish(c *gin.Context) {

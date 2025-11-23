@@ -215,6 +215,9 @@ var (
 )
 
 func RefreshCheckJob() {
+	// PRIVACY-PRO: Disabled all external refresh checks to prevent connections
+	return
+
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
 	go refreshAnnouncement()
@@ -257,6 +260,8 @@ func refreshSubscriptionExpirationRemind() {
 
 func refreshUser() {
 	defer logging.Recover()
+	// PRIVACY-PRO: Disabled to prevent user info refresh from external server
+	return
 
 	if nil != Conf.GetUser() {
 		time.Sleep(2 * time.Minute)
@@ -279,6 +284,8 @@ func refreshCheckDownloadInstallPkg() {
 
 func refreshAnnouncement() {
 	defer logging.Recover()
+	// PRIVACY-PRO: Disabled to prevent downloading announcements from external servers
+	return
 
 	time.Sleep(1 * time.Minute)
 	announcementConf := filepath.Join(util.HomeDir, ".config", "siyuan", "announcement.json")
@@ -328,6 +335,9 @@ func refreshAnnouncement() {
 }
 
 func RefreshUser(token string) {
+	// PRIVACY-PRO: Disabled to prevent HTTP calls to user info server
+	return
+
 	threeDaysAfter := util.CurrentTimeMillis() + 1000*60*60*24*3
 	if "" == token {
 		if "" != Conf.UserData {

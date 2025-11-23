@@ -111,6 +111,9 @@ var (
 )
 
 func SyncDataJob() {
+	// PRIVACY-PRO: Disabled automatic cloud sync to prevent external connections
+	return
+
 	syncPlanTimeLock.Lock()
 	if time.Now().Before(syncPlanTime) {
 		syncPlanTimeLock.Unlock()

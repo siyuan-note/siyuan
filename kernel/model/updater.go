@@ -82,6 +82,8 @@ var checkDownloadInstallPkgLock = sync.Mutex{}
 
 func checkDownloadInstallPkg() {
 	defer logging.Recover()
+	// PRIVACY-PRO: Auto-update disabled
+	return
 
 	if skipNewVerInstallPkg() {
 		return

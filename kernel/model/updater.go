@@ -260,6 +260,9 @@ func getAnnouncements() (ret []*Announcement) {
 }
 
 func CheckUpdate(showMsg bool) {
+	// PRIVACY-PRO: Disabled to prevent external version check calls
+	return
+
 	if !showMsg {
 		return
 	}

@@ -210,20 +210,48 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     /// #endif
 };
 
-export const reloadPlugin = async (app: App, data: { upsertPlugins: string[], removePlugins: string[] }) => {
-    data.removePlugins.forEach((item) => {
+export const reloadPlugin = async (app: App, data: { upsertCodePlugins?: string[], upsertDataPlugins?: string[], removePlugins?: string[] } = {}) => {
+    const { upsertCodePlugins = [], upsertDataPlugins = [], removePlugins = [] } = data;
+    const reloadPlugins: string[] = [];
+
+    removePlugins.forEach((item) => {
         uninstall(app, item, true);
     });
-    data.upsertPlugins.forEach((item) => {
+
+    upsertCodePlugins.forEach((pluginName) => {
+        reloadPlugins.push(pluginName);
+    });
+
+    upsertDataPlugins.forEach((pluginName) => {
+        const plugin = app.plugins.find(p => p.name === pluginName);
+        // 检查插件是否重写了 onDataChanged 方法（不是基类的默认实现）
+        const hasOverriddenOnDataChanged = plugin && 
+            typeof plugin.onDataChanged === "function" && 
+            plugin.onDataChanged !== Plugin.prototype.onDataChanged;
+        if (hasOverriddenOnDataChanged) {
+            try {
+                plugin.onDataChanged();
+                return;
+            } catch (e) {
+                console.error(`plugin ${pluginName} onDataChanged error:`, e);
+            }
+        }
+        reloadPlugins.push(pluginName);
+    });
+
+    reloadPlugins.forEach((item) => {
         uninstall(app, item, false);
     });
-    loadPlugins(app, data.upsertPlugins).then(() => {
-        app.plugins.forEach(item => {
-            if (data.upsertPlugins.includes(item.name)) {
-                afterLoadPlugin(item);
-            }
+    if (reloadPlugins.length > 0) {
+        loadPlugins(app, reloadPlugins).then(() => {
+            app.plugins.forEach(item => {
+                if (reloadPlugins.includes(item.name)) {
+                    afterLoadPlugin(item);
+                }
+            });
         });
-    });
+    }
+
     /// #if !MOBILE
     saveLayout();
     /// #endif

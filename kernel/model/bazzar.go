@@ -257,7 +257,7 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 	savePetals(petals)
 
 	removePluginSet := hashset.New(pluginName)
-	pushReloadPlugin(nil, removePluginSet, "")
+	PushReloadPlugin(nil, nil, removePluginSet, "")
 	return nil
 }
 

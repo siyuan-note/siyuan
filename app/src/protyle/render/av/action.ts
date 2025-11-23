@@ -252,7 +252,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     id: target.dataset.id,
                     data: !isOpen
                 }]);
-            }, Constants.TIMEOUT_TRANSITION);
+            }, Constants.TIMEOUT_COUNT);
             event.preventDefault();
             event.stopPropagation();
             return true;

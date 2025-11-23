@@ -1314,6 +1314,10 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	}
 	keyValues.Values = values
 
+	sort.Slice(keyValues.Values, func(i, j int) bool {
+		return keyValues.Values[i].Block.Updated > keyValues.Values[j].Block.Updated
+	})
+
 	if 1 > pageSize {
 		pageSize = 16
 	}
@@ -1323,10 +1327,6 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 		end = len(keyValues.Values)
 	}
 	keyValues.Values = keyValues.Values[start:end]
-
-	sort.Slice(keyValues.Values, func(i, j int) bool {
-		return keyValues.Values[i].Block.Updated > keyValues.Values[j].Block.Updated
-	})
 	return
 }
 

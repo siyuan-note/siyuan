@@ -4848,14 +4848,10 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	if av.KeyTypeRelation == val.Type {
 		// 关联字段得 content 是自动渲染的，所以不需要保存
 		val.Relation.Contents = nil
-
-		// 去重
 		val.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(val.Relation.BlockIDs)
 
 		// 计算关联变更模式
-		if len(oldRelationBlockIDs) == len(val.Relation.BlockIDs) {
-			relationChangeMode = 0
-		} else {
+		if !slices.Equal(oldRelationBlockIDs, val.Relation.BlockIDs) {
 			if len(oldRelationBlockIDs) > len(val.Relation.BlockIDs) {
 				relationChangeMode = 2
 			} else {

@@ -410,6 +410,7 @@
   [data-type="NodeWidget"] {
     height: 256px;
     width: 100%;
+    max-width: 100%;
 
     .iframe-content {
       position: relative;

@@ -316,6 +316,7 @@ export const duplicateBlock = async (nodeElements: Element[], protyle: IProtyle)
         tempElement.setAttribute("data-node-id", newId);
         tempElement.setAttribute("updated", newId.split("-")[0]);
         clearBlockElement(tempElement);
+        tempElement.classList.add("protyle-wysiwyg--select");
         tempElement.querySelectorAll("[data-node-id]").forEach(childItem => {
             const subNewId = Lute.NewNodeID();
             childItem.setAttribute("data-node-id", subNewId);

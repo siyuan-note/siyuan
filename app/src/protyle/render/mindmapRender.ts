@@ -15,9 +15,9 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
         return;
     }
     // load d3 first, then markmap-lib, then markmap-view (in order)
-    addScript(`${cdn}/js/markmap/d3.min.js`, "protyleD3Script")
-        .then(() => addScript(`${cdn}/js/markmap/markmap-lib.min.js`, "protyleMarkmapLibScript"))
-        .then(() => addScript(`${cdn}/js/markmap/markmap-view.min.js`, "protyleMarkmapScript"))
+    addScript(`${cdn}/js/d3/d3.min.js?v6.7.0`, "protyleD3Script")
+        .then(() => addScript(`${cdn}/js/markmap/markmap-lib.min.js?v0.14.4`, "protyleMarkmapLibScript"))
+        .then(() => addScript(`${cdn}/js/markmap/markmap-view.min.js?v0.14.4`, "protyleMarkmapScript"))
         .then(() => {
             const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
             let width: number = undefined;
@@ -65,38 +65,45 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                     }
 
                     // Try to obtain markmap entry from loaded bundles (single unified reference)
-                    const mm: any = (window as any).markmap;
+                    const mm: any = (window as any).markmap || (window as any).Markmap || null;
 
-                    // Prefer the new markmap Transformer API when available
+                    // Prefer the Transformer API when available (example usage: transform -> getUsedAssets -> load assets -> create)
                     let data: any = null;
                     let rootData: any = null;
                     try {
                         if (mm && typeof mm.Transformer === "function") {
                             const transformer = new mm.Transformer();
-                            const tx = transformer.transform(md);
-                            // tx contains { root, features }
-                            rootData = tx && tx.root;
+                            // transform markdown -> { root, features }
+                            const tx = transformer.transform(md) || {};
+                            rootData = tx.root || null;
 
-                            // load assets required by used features
+                            // select asset getter: prefer getUsedAssets (only assets used), fallback to getAssets
                             const assetsGetter = typeof transformer.getUsedAssets === "function" ? "getUsedAssets" : (typeof transformer.getAssets === "function" ? "getAssets" : null);
                             if (assetsGetter) {
-                                const assets = (transformer as any)[assetsGetter](tx.features);
+                                const assets = (transformer as any)[assetsGetter](tx.features || {});
                                 const styles = assets && assets.styles;
                                 const scripts = assets && assets.scripts;
-                                if (styles && typeof mm.loadCSS === "function") {
-                                    try { mm.loadCSS(styles); } catch (err) { /* ignore */ }
+
+                                // Use markmap provided loaders when available
+                                const loadCSS = typeof mm.loadCSS === "function" ? mm.loadCSS : null;
+                                const loadJS = typeof mm.loadJS === "function" ? mm.loadJS : null;
+
+                                if (styles && loadCSS) {
+                                    try { loadCSS(styles); } catch (err) { /* ignore */ }
                                 }
-                                if (scripts && typeof mm.loadJS === "function") {
-                                    try { mm.loadJS(scripts, { getMarkmap: () => (window as any).markmap }); } catch (err) { /* ignore */ }
+                                if (scripts && loadJS) {
+                                    try { loadJS(scripts, { getMarkmap: () => (window as any).markmap || mm }); } catch (err) { /* ignore */ }
                                 }
                             }
-                        } else if (mm && typeof mm.transform === "function") {
-                            data = mm.transform(md);
-                        } else if ((window as any).markmap && typeof (window as any).markmap.transform === "function") {
-                            data = (window as any).markmap.transform(md);
+                        } else {
+                            // fallback: try older transform functions
+                            const transformFn = mm && (mm.transform || (window as any).markmap && (window as any).markmap.transform);
+                            if (typeof transformFn === "function") {
+                                data = transformFn(md);
+                            }
                         }
                     } catch (e) {
-                        // fallback, leave data/rootData null and let downstream handle it
+                        // leave data/rootData null and let downstream handle it
                         data = null;
                         rootData = null;
                     }
@@ -117,15 +124,13 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
 
                     // prefer Markmap.create if available
                     const MarkmapCtor = (mm && (mm.Markmap || mm.default || mm)) || (window as any).Markmap;
+                    const options = {
+                        duration: 0,        // 🔥 禁用动画，设为0
+                    };
                     if (MarkmapCtor && typeof MarkmapCtor.create === "function") {
                         if (rootData) {
                             // When Transformer was used we have a `root` structure
-                            MarkmapCtor.create(svg, null, rootData);
-                        } else {
-                            if (!data && typeof MarkmapCtor.transform === "function") {
-                                try { data = MarkmapCtor.transform(md); } catch (err) { data = null; }
-                            }
-                            MarkmapCtor.create(svg, data || { root: { children: [] } }, { embedCSS: true });
+                            MarkmapCtor.create(svg, options, rootData);
                         }
                     } else {
                         throw new Error("Markmap not available");

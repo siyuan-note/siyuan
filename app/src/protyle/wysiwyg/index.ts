@@ -655,8 +655,13 @@ export class WYSIWYG {
             }
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey) {
                 let ctrlElement = nodeElement;
-                if (!hasSelectClassElement && galleryItemElement) {
-                    galleryItemElement.classList.toggle("av__gallery-item--select");
+                const rowElement = hasClosestByClassName(target, "av__row");
+                if (!hasSelectClassElement && (galleryItemElement || (rowElement && !rowElement.classList.contains("av__row--header")))) {
+                    if (galleryItemElement) {
+                        galleryItemElement.classList.toggle("av__gallery-item--select");
+                    } else if (rowElement) {
+                        selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                    }
                 } else if (ctrlElement) {
                     const embedBlockElement = isInEmbedBlock(ctrlElement);
                     if (embedBlockElement) {

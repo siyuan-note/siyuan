@@ -1743,7 +1743,6 @@ func upsertAvBlockRel(node *ast.Node) {
 
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		sql.FlushQueue()
 
 		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
 		var relatedAvIDs []string
@@ -2090,7 +2089,7 @@ func updateRefTextRenameDoc(renamedTree *parse.Tree) {
 }
 
 func FlushUpdateRefTextRenameDocJob() {
-	sql.FlushQueue()
+	sql.WaitFlushTx()
 	flushUpdateRefTextRenameDoc()
 }
 

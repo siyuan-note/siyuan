@@ -784,6 +784,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         getAVElements(protyle, operation.avID).forEach((item) => {
             const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
             if (foldElement) {
+                if (foldElement.getAttribute("data-processed") === "true") {
+                    foldElement.removeAttribute("data-processed");
+                    return;
+                }
                 if (operation.data) {
                     foldElement.firstElementChild.classList.remove("av__group-arrow--open");
                     foldElement.parentElement.nextElementSibling.classList.add("fn__none");

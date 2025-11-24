@@ -229,6 +229,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-group-fold") {
+            target.setAttribute("data-processed", "true");
             const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
             if (isOpen) {
                 target.firstElementChild.classList.remove("av__group-arrow--open");

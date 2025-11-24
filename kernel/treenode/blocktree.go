@@ -410,6 +410,18 @@ func RemoveBlockTreesByRootID(rootID string) {
 	}
 }
 
+func CountBlockTreesByPathPrefix(pathPrefix string) (ret int) {
+	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE path LIKE ?"
+	err := db.QueryRow(sqlStmt, pathPrefix+"%").Scan(&ret)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0
+		}
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
+	}
+	return
+}
+
 func GetBlockTreesByPathPrefix(pathPrefix string) (ret []*BlockTree) {
 	sqlStmt := "SELECT * FROM blocktrees WHERE path LIKE ?"
 	rows, err := db.Query(sqlStmt, pathPrefix+"%")

@@ -117,11 +117,21 @@ export const saveExport = (option: IExportOptions) => {
 const getSnippetCSS = () => {
     let snippetCSS = "";
     document.querySelectorAll("style").forEach((item) => {
-        if (item.id.startsWith("snippet")) {
+        if (item.id.startsWith("snippetCSS")) {
             snippetCSS += item.outerHTML;
         }
     });
     return snippetCSS;
+};
+
+const getSnippetJS = () => {
+    let snippetScript = "";
+    document.querySelectorAll("script").forEach((item) => {
+        if (item.id.startsWith("snippetJS")) {
+            snippetScript += item.outerHTML;
+        }
+    });
+    return snippetScript;
 };
 
 /// #if !BROWSER
@@ -624,7 +634,9 @@ ${getIconScript(servePath)}
             }
         })
     });
-</script></body></html>`;
+</script>
+${getSnippetJS()}
+</body></html>`;
     fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
         ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
     });
@@ -776,7 +788,8 @@ ${getIconScript(servePath)}
             event.stopPropagation();
       })
     });
-</script></body></html>`;
+</script>
+${getSnippetJS()}</body></html>`;
     // 移动端导出 pdf、浏览器导出 HTML
     if (typeof filePath === "undefined") {
         return html;

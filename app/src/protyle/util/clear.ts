@@ -1,4 +1,19 @@
 import {updateHeader} from "../render/av/row";
+import {Constants} from "../../constants";
+
+export const clearBlockElement = (element: Element) => {
+    element.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+    element.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
+    element.removeAttribute("refcount");
+    element.querySelector(".protyle-attr--av")?.remove();
+    element.querySelector(".protyle-attr--refcount")?.remove();
+    element.removeAttribute("custom-avs");
+    element.getAttributeNames().forEach(attr => {
+        if (attr.startsWith("custom-sy-av-s-text-")) {
+            element.removeAttribute(attr);
+        }
+    });
+};
 
 export const clearSelect = (types: ("av" | "img" | "cell" | "row" | "galleryItem")[], element: Element) => {
     if (types.includes("cell")) {

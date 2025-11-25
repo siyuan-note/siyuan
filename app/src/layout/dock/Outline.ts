@@ -177,6 +177,7 @@ export class Outline extends Model {
                         openFileById({
                             app: options.app,
                             id,
+                            scrollPosition: "start",
                             action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
@@ -331,7 +332,7 @@ export class Outline extends Model {
             preview: this.isPreview
         }, response => {
             this.update(response);
-            this.updateDocTitle((options.tab.model as Editor)?.editor.protyle?.background?.ial, response.data?.length || 0);
+            this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
         });
     }
 
@@ -930,6 +931,7 @@ export class Outline extends Model {
                 openFileById({
                     app: this.app,
                     id,
+                    scrollPosition: "start",
                     action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                 });
             });

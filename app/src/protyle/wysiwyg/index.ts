@@ -101,6 +101,16 @@ import { hideTooltip } from "../../dialog/tooltip";
 import { openGalleryItemMenu } from "../render/av/gallery/util";
 import { clearSelect } from "../util/clearSelect";
 import { chartRender } from "../render/chartRender";
+import {openEmojiPanel, unicode2Emoji} from "../../emoji";
+import {openLink} from "../../editor/openLink";
+import {mathRender} from "../render/mathRender";
+import {editAssetItem} from "../render/av/asset";
+import {img3115} from "../../boot/compatibleVersion";
+import {globalClickHideMenu} from "../../boot/globalEvent/click";
+import {hideTooltip} from "../../dialog/tooltip";
+import {openGalleryItemMenu} from "../render/av/gallery/util";
+import {clearSelect} from "../util/clear";
+import {chartRender} from "../render/chartRender";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -152,7 +162,7 @@ export class WYSIWYG {
             }
         }
         ialKeys.forEach((key: string) => {
-            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly"].includes(key)) {
+            if (!["title-img", "title", "updated", "icon", "id", "type", "class", "spellcheck", "contenteditable", "data-doc-type", "style", "data-realwidth", "data-readonly", "av-names"].includes(key)) {
                 this.element.setAttribute(key, ial[key]);
             }
         });
@@ -655,8 +665,13 @@ export class WYSIWYG {
             }
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey) {
                 let ctrlElement = nodeElement;
-                if (!hasSelectClassElement && galleryItemElement) {
-                    galleryItemElement.classList.toggle("av__gallery-item--select");
+                const rowElement = hasClosestByClassName(target, "av__row");
+                if (!hasSelectClassElement && (galleryItemElement || (rowElement && !rowElement.classList.contains("av__row--header")))) {
+                    if (galleryItemElement) {
+                        galleryItemElement.classList.toggle("av__gallery-item--select");
+                    } else if (rowElement) {
+                        selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
+                    }
                 } else if (ctrlElement) {
                     const embedBlockElement = isInEmbedBlock(ctrlElement);
                     if (embedBlockElement) {
@@ -917,15 +932,20 @@ export class WYSIWYG {
                 };
                 return false;
             }
-            // 图片、iframe、video 缩放
+            // 图片、iframe、video、挂件缩放
             if (!protyle.disabled && target.classList.contains("protyle-action__drag")) {
                 if (!nodeElement) {
                     return;
                 }
                 let isCenter = true;
-                if (["NodeIFrame", "NodeWidget", "NodeVideo"].includes(nodeElement.getAttribute("data-type"))) {
+                if ("NodeVideo" === nodeElement.dataset.type) {
                     nodeElement.classList.add("iframe--drag");
-                    if (nodeElement.style.textAlign === "left" || nodeElement.style.textAlign === "right") {
+                    if (["left", "right", ""].includes(nodeElement.style.textAlign)) {
+                        isCenter = false;
+                    }
+                } else if (["NodeIFrame", "NodeWidget"].includes(nodeElement.dataset.type)) {
+                    nodeElement.classList.add("iframe--drag");
+                    if (!nodeElement.style.margin) {
                         isCenter = false;
                     }
                 } else if (target.parentElement.parentElement.getAttribute("data-type") === "img") {
@@ -943,6 +963,11 @@ export class WYSIWYG {
                 if (dragElement.tagName === "IMG") {
                     img3115(imgElement);
                 }
+                // 3.4.1 以前历史数据兼容
+                if (dragElement.tagName === "IFRAME") {
+                    dragElement.style.height = "";
+                    dragElement.style.width = "";
+                }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {
                         dragElement.style.height = "";
@@ -951,13 +976,19 @@ export class WYSIWYG {
                         const multiple = ((dragElement.tagName === "IMG" && !imgElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
                         if (dragElement.tagName === "IMG") {
                             dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
+                        } else if (dragElement.tagName === "IFRAME") {
+                            nodeElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         } else {
                             dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         }
                     }
                     if (dragElement.tagName !== "IMG") {
                         if (moveEvent.clientY > y - dragHeight + 8 && moveEvent.clientY < mostBottom) {
-                            dragElement.style.height = (dragHeight + (moveEvent.clientY - y)) + "px";
+                            if (dragElement.tagName === "IFRAME") {
+                                nodeElement.style.height = (dragHeight + (moveEvent.clientY - y)) + "px";
+                            } else {
+                                dragElement.style.height = (dragHeight + (moveEvent.clientY - y)) + "px";
+                            }
                         }
                     }
                 };

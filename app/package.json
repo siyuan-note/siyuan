@@ -1,10 +1,10 @@
 {
   "name": "SiYuan",
-  "version": "3.4.0",
+  "version": "3.4.1",
   "description": "Refactor your thinking",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@10.20.0",
+  "packageManager": "pnpm@10.22.0",
   "scripts": {
     "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",

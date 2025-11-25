@@ -5,7 +5,7 @@ import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {upDownHint} from "../../../util/upDownHint";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {

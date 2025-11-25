@@ -62,7 +62,7 @@ import {openFileById} from "../../editor/util";
 import * as path from "path";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
-import {clearSelect} from "../util/clearSelect";
+import {clearSelect} from "../util/clear";
 
 export class Gutter {
     public element: HTMLElement;
@@ -2102,6 +2102,8 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "";
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
+                            e.style.margin = "";
                         } else {
                             e.style.textAlign = "left";
                         }
@@ -2116,6 +2118,8 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "center";
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
+                            e.style.margin = "0 auto";
                         } else {
                             e.style.textAlign = "center";
                         }
@@ -2130,6 +2134,8 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "flex-end";
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
+                            e.style.margin = "0 0 0 auto";
                         } else {
                             e.style.textAlign = "right";
                         }
@@ -2180,6 +2186,8 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.classList.contains("av")) {
                             e.style.justifyContent = "";
+                        } else if (["NodeIFrame", "NodeWidget"].includes(e.getAttribute("data-type"))) {
+                            e.style.margin = "";
                         } else {
                             e.style.textAlign = "";
                             e.style.direction = "";

@@ -918,6 +918,7 @@
   "moveToRight": "向右移",
   "copyProtocol": "複製塊超連結",
   "copyProtocolInMd": "複製塊 Markdown 連結",
+  "copyWebURL": "複製網頁連結",
   "uploadAssets2CDN": "上傳資料檔到圖床",
   "uploadAssets2CDNConfirmTip": "確定將該文檔內的資源文件上傳到圖床嗎？",
   "notSupport1": "不支援跨筆記本進行拖拽",

@@ -99,13 +99,15 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (searchType !== "asset") {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
             const id = currentList.getAttribute("data-node-id");
-            checkFold(id, (zoomIn, action) => {
+            checkFold(id, (zoomIn) => {
                 openFileById({
                     app,
                     id,
                     position: "right",
-                    action,
-                    zoomIn
+                    action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HL] :
+                        [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_HL],
+                    zoomIn,
+                    scrollPosition: "center"
                 });
                 if (dialog) {
                     dialog.destroy({focus: "false"});
@@ -221,12 +223,14 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 replace(element, config, edit, false);
             } else {
                 const id = currentList.getAttribute("data-node-id");
-                checkFold(id, (zoomIn, action) => {
+                checkFold(id, (zoomIn) => {
                     openFileById({
                         app,
                         id,
-                        action,
-                        zoomIn
+                        action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HL] :
+                            [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_HL],
+                        zoomIn,
+                        scrollPosition: "center"
                     });
                     if (dialog) {
                         dialog.destroy({focus: "false"});

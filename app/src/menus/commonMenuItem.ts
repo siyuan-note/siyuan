@@ -6,7 +6,7 @@ import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -443,7 +443,21 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
                 focusBlock(focusElement);
             }
         }
-    }, {
+    },
+    /// #if BROWSER
+    {
+        id: "copyWebURL",
+        iconHTML: "",
+        label: window.siyuan.languages.copyWebURL,
+        click: () => {
+            copyTextByType(ids, "webURL");
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    },
+    /// #endif
+    {
         id: "copyHPath",
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,
@@ -758,7 +772,7 @@ export const exportMd = (id: string) => {
                 id: "exportPDF",
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
-                ignore: !isInAndroid() && !isInHarmony(),
+                ignore: !isInAndroid() && !isInHarmony() && !isInIOS(),
                 click: () => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
@@ -770,9 +784,11 @@ export const exportMd = (id: string) => {
                         const servePath = window.location.protocol + "//" + window.location.host + "/";
                         const html = await onExport(response, undefined, servePath, {type: "pdf", id});
                         if (isInAndroid()) {
-                            window.JSAndroid.print(html);
+                            window.JSAndroid.print(response.data.name, html);
                         } else if (isInHarmony()) {
-                            window.JSHarmony.print(html);
+                            window.JSHarmony.print(response.data.name, html);
+                        } else if (isInIOS()) {
+                            window.webkit.messageHandlers.print.postMessage(response.data.name + Constants.ZWSP + html);
                         }
 
                         setTimeout(() => {

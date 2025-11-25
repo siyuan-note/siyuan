@@ -745,6 +745,13 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 		oldKeyIDs = append(oldKeyIDs, kv.Key.ID)
 		kv.Key.ID = newID
 		kv.Values = []*Value{}
+
+		if KeyTypeRelation == kv.Key.Type {
+			// 断开关联
+			kv.Key.Relation.IsTwoWay = false
+			kv.Key.Relation.AvID = ""
+			kv.Key.Relation.BackKeyID = ""
+		}
 	}
 
 	oldKeyIDs = gulu.Str.RemoveDuplicatedElem(oldKeyIDs)

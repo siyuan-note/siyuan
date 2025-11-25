@@ -1,7 +1,6 @@
 import {fetchPost} from "../../util/fetch";
 import {genLangOptions, genOptions} from "../../util/genOptions";
 import {openModel} from "../menu/model";
-import {reloadOtherWindow} from "../../dialog/processSystem";
 
 export const initAppearance = () => {
     openModel({
@@ -55,10 +54,7 @@ export const initAppearance = () => {
                         themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,
                         themeLight: (modelMainElement.querySelector("#themeLight") as HTMLSelectElement).value,
                         lang: (modelMainElement.querySelector("#lang") as HTMLSelectElement).value,
-                    }), () => {
-                        reloadOtherWindow();
-                        window.location.reload();
-                    });
+                    }));
                 });
             });
         }

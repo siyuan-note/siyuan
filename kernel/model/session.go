@@ -120,7 +120,9 @@ func LoginAuth(c *gin.Context) {
 
 		if err := session.Save(c); err != nil {
 			logging.LogErrorf("save session failed: " + err.Error())
-			c.Status(http.StatusInternalServerError)
+			session.Clear(c)
+			ret.Code = 1
+			ret.Msg = Conf.Language(258)
 			return
 		}
 		return

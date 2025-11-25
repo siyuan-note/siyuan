@@ -17,7 +17,7 @@ import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 
@@ -251,7 +251,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     </div>
     <span class="fn__space"></span>
     <span class="av__group-name">${nameHTML}</span>
-    ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
+    ${(!counter || counter === 0) ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
@@ -784,6 +784,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         getAVElements(protyle, operation.avID).forEach((item) => {
             const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
             if (foldElement) {
+                if (foldElement.getAttribute("data-processed") === "true") {
+                    foldElement.removeAttribute("data-processed");
+                    return;
+                }
                 if (operation.data) {
                     foldElement.firstElementChild.classList.remove("av__group-arrow--open");
                     foldElement.parentElement.nextElementSibling.classList.add("fn__none");

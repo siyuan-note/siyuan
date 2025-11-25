@@ -218,7 +218,7 @@ export const bindLayoutEvent = (options: {
         return;
     }
     const toggleBgElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-kanban-bg"]') as HTMLInputElement;
-    toggleBgElement.addEventListener("change", () => {
+    toggleBgElement?.addEventListener("change", () => {
         const checked = toggleBgElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewFillColBackgroundColor",

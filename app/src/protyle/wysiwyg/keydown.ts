@@ -763,6 +763,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             }
+            if (selectText === "" && event.key === "ArrowLeft" && position.start === 1 &&
+                range.startContainer.textContent === Constants.ZWSP) {
+                range.setStart(range.startContainer, 0);
+                range.collapse(true);
+            }
+            if (selectText === "" && event.key === "ArrowRight" && position.start === 0 &&
+                range.startContainer.textContent === Constants.ZWSP) {
+                range.setStart(range.startContainer, 1);
+                range.collapse(true);
+            }
             return;
         }
 

@@ -209,8 +209,24 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         if (this.element.classList.contains("fn__none")) {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
-            const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
-            setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+            if (this.source === "av") {
+                const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+                if (cellElement) {
+                    /// #if !MOBILE
+                    const cellRect = cellElement.getBoundingClientRect();
+                    setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
+                    /// #else
+                    setPosition(this.element, 0, 0);
+                    /// #endif
+                }
+            } else {
+                /// #if !MOBILE
+                const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+                setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+                /// #else
+                setPosition(this.element, 0, 0);
+                /// #endif
+            }
         } else {
             this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
         }

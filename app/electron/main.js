@@ -1051,25 +1051,6 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-quit", (event, port) => {
         exitApp(port);
     });
-    ipcMain.on("siyuan-reload-window", (event, port) => {
-        BrowserWindow.getAllWindows().forEach((item) => {
-            try {
-                const currentURL = new URL(item.getURL());
-                if (port.toString() === currentURL.port.toString()) {
-                    const hasMain = workspaces.find((workspaceItem) => {
-                        if (workspaceItem.browserWindow.id === item.id) {
-                            return true;
-                        }
-                    });
-                    if (!hasMain) {
-                        item.reload();
-                    }
-                }
-            } catch (e) {
-                // load file is not a url
-            }
-        });
-    });
     ipcMain.on("siyuan-show-window", (event) => {
         const mainWindow = getWindowByContentId(event.sender.id);
         if (!mainWindow) {

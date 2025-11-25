@@ -918,6 +918,7 @@
   "moveToRight": "העבר ימינה",
   "copyProtocol": "העתק היפר-קישור בלוק",
   "copyProtocolInMd": "העתק קישור Markdown של בלוק",
+  "copyWebURL": "העתק URL אינטרנט",
   "uploadAssets2CDN": "העלה קבצי נכסים לענן",
   "uploadAssets2CDNConfirmTip": "האם אתה בטוח להעלות את הנכסים במסמך זה לענן?",
   "notSupport1": "לא תומך בגרירת מסמכים בין מחברות",

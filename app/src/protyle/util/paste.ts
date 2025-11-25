@@ -14,6 +14,7 @@ import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {clearBlockElement} from "./clear";
 
 export const getTextStar = (blockElement: HTMLElement) => {
     const dataType = blockElement.dataset.type;
@@ -407,10 +408,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
             const newId = Lute.NewNodeID();
             e.setAttribute("data-node-id", newId);
-            e.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
-            e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
-            e.setAttribute("updated", newId.split("-")[0]);
-            e.removeAttribute("refcount");
+            clearBlockElement(e);
             isBlock = true;
         });
         if (nodeElement.classList.contains("table")) {

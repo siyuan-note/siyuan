@@ -1,9 +1,8 @@
-import {appearance} from "./appearance";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
-import {exportLayout, saveLayout} from "../layout/util";
+import {saveLayout} from "../layout/util";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import * as path from "path";
@@ -16,10 +15,7 @@ import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/loader";
-import {loadAssets} from "../util/assets";
-import {addScript} from "../protyle/util/addScript";
 import {useShell} from "../util/pathName";
-import {reloadOtherWindow} from "../dialog/processSystem";
 
 export const bazaar = {
     element: undefined as Element,
@@ -674,28 +670,7 @@ export const bazaar = {
                             mode: dataObj.themeMode === "dark" ? 1 : 0,
                             frontend: getFrontend()
                         }, async response => {
-                            if (window.siyuan.config.appearance.themeJS && bazaarType === "themes") {
-                                if (window.destroyTheme) {
-                                    try {
-                                        await window.destroyTheme();
-                                        window.destroyTheme = undefined;
-                                        document.getElementById("themeScript").remove();
-                                    } catch (e) {
-                                        console.error("destroyTheme error: " + e);
-                                    }
-                                    window.siyuan.config.appearance = response.data.appearance;
-                                    loadAssets(window.siyuan.config.appearance);
-                                } else {
-                                    exportLayout({
-                                        cb() {
-                                            window.location.reload();
-                                        },
-                                        errorExit: false,
-                                    });
-                                    return;
-                                }
-                            }
-                            bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                            bazaar._onBazaar(response, bazaarType);
                             bazaar._genMyHTML(bazaarType, app, false);
                             if (bazaarType === "plugins") {
                                 if (window.siyuan.config.bazaar.petalDisabled) {
@@ -757,45 +732,14 @@ export const bazaar = {
                                 frontend: getFrontend()
                             }, async response => {
                                 this._genMyHTML(bazaarType, app);
-                                bazaar._onBazaar(response, bazaarType, ["icons"].includes(bazaarType));
+                                bazaar._onBazaar(response, bazaarType);
                                 // https://github.com/siyuan-note/siyuan/issues/15177
                                 if (bazaarType === "themes" && response.data.appearance?.themeVer) {
                                     window.siyuan.config.appearance.themeVer = response.data.appearance.themeVer;
                                 }
                                 // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                                 // https://github.com/siyuan-note/siyuan/issues/5411
-                                if (bazaarType === "themes" && (
-                                    (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === dataObj.name) ||
-                                    (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === dataObj.name)
-                                )) {
-                                    const currentTheme = window.siyuan.config.appearance.mode === 1 ? window.siyuan.config.appearance.themeDark : window.siyuan.config.appearance.themeLight;
-                                    if (window.siyuan.config.appearance.themeJS) {
-                                        if (window.destroyTheme) {
-                                            try {
-                                                await window.destroyTheme();
-                                                window.destroyTheme = undefined;
-                                                document.getElementById("themeScript").remove();
-                                                addScript(`/appearance/themes/${currentTheme}/theme.js?v=${response.data.appearance.themeVer}`, "themeScript");
-                                            } catch (e) {
-                                                console.error("destroyTheme error: " + e);
-                                            }
-                                        } else {
-                                            exportLayout({
-                                                cb() {
-                                                    window.location.reload();
-                                                },
-                                                errorExit: false,
-                                            });
-                                            return;
-                                        }
-                                    }
-                                    if ((window.siyuan.config.appearance.mode === 1 && currentTheme === "midnight") ||
-                                        (window.siyuan.config.appearance.mode !== 1 && currentTheme === "daylight")) {
-                                        (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = `/appearance/themes/${window.siyuan.config.appearance.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
-                                    } else {
-                                        (document.getElementById("themeStyle") as HTMLLinkElement).href = `/appearance/themes/${currentTheme}/theme.css?v=${response.data.appearance.themeVer}`;
-                                    }
-                                } else if (bazaarType === "plugins") {
+                                if (bazaarType === "plugins") {
                                     app.plugins.find((item: Plugin) => {
                                         if (item.name === dataObj.name) {
                                             reloadPlugin(app, {
@@ -838,7 +782,7 @@ export const bazaar = {
                                 frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(bazaarType, app);
-                                bazaar._onBazaar(response, bazaarType, ["themes", "icons"].includes(bazaarType));
+                                bazaar._onBazaar(response, bazaarType);
                             });
                         });
                     }
@@ -856,9 +800,8 @@ export const bazaar = {
                             this._genMyHTML(bazaarType, app, false);
                             fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
                                 response.data.appearance = appearanceResponse.data;
-                                bazaar._onBazaar(response, "icons", true);
+                                bazaar._onBazaar(response, "icons");
                                 bazaar._data.icons = response.data.packages;
-                                reloadOtherWindow();
                             });
                         });
                     } else if (bazaarType === "themes") {
@@ -868,35 +811,10 @@ export const bazaar = {
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
                         }), async (appearanceResponse) => {
-                            reloadOtherWindow();
-                            if ((mode !== window.siyuan.config.appearance.mode ||
-                                    (mode === 1 && window.siyuan.config.appearance.themeDark !== packageName) ||
-                                    (mode === 0 && window.siyuan.config.appearance.themeLight !== packageName)) &&
-                                window.siyuan.config.appearance.themeJS) {
-                                if (window.destroyTheme) {
-                                    try {
-                                        await window.destroyTheme();
-                                        window.destroyTheme = undefined;
-                                        document.getElementById("themeScript").remove();
-                                    } catch (e) {
-                                        console.error("destroyTheme error: " + e);
-                                    }
-                                    window.siyuan.config.appearance = appearanceResponse.data;
-                                    loadAssets(window.siyuan.config.appearance);
-                                } else {
-                                    exportLayout({
-                                        cb() {
-                                            window.location.reload();
-                                        },
-                                        errorExit: false,
-                                    });
-                                    return;
-                                }
-                            }
                             this._genMyHTML("themes", app, false);
                             fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
                                 response.data.appearance = appearanceResponse.data;
-                                bazaar._onBazaar(response, "themes", true);
+                                bazaar._onBazaar(response, "themes");
                                 bazaar._data.themes = response.data.packages;
                             });
                         });
@@ -993,29 +911,29 @@ export const bazaar = {
                             if (!item.getAttribute("data-init")) {
                                 if (type === "template") {
                                     fetchPost("/api/bazaar/getBazaarTemplate", {}, response => {
-                                        bazaar._onBazaar(response, "templates", false);
+                                        bazaar._onBazaar(response, "templates");
                                         bazaar._data.templates = response.data.packages;
                                     });
                                 } else if (type === "icon") {
                                     fetchPost("/api/bazaar/getBazaarIcon", {}, response => {
-                                        bazaar._onBazaar(response, "icons", false);
+                                        bazaar._onBazaar(response, "icons");
                                         bazaar._data.icons = response.data.packages;
                                     });
                                 } else if (type === "widget") {
                                     fetchPost("/api/bazaar/getBazaarWidget", {}, response => {
-                                        bazaar._onBazaar(response, "widgets", false);
+                                        bazaar._onBazaar(response, "widgets");
                                         bazaar._data.widgets = response.data.packages;
                                     });
                                 } else if (type === "theme") {
                                     fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
-                                        bazaar._onBazaar(response, "themes", false);
+                                        bazaar._onBazaar(response, "themes");
                                         bazaar._data.themes = response.data.packages;
                                     });
                                 } else if (type === "plugin") {
                                     fetchPost("/api/bazaar/getBazaarPlugin", {
                                         frontend: getFrontend()
                                     }, response => {
-                                        bazaar._onBazaar(response, "plugins", false);
+                                        bazaar._onBazaar(response, "plugins");
                                         bazaar._data.plugins = response.data.packages;
                                     });
                                 }
@@ -1048,22 +966,22 @@ export const bazaar = {
                     const type = (hasClosestByClassName(inputElement, "config-bazaar__panel") as HTMLElement).getAttribute("data-type");
                     if (type === "template") {
                         fetchPost("/api/bazaar/getBazaarTemplate", {keyword}, response => {
-                            bazaar._onBazaar(response, "templates", false);
+                            bazaar._onBazaar(response, "templates");
                             bazaar._data.templates = response.data.packages;
                         });
                     } else if (type === "icon") {
                         fetchPost("/api/bazaar/getBazaarIcon", {keyword}, response => {
-                            bazaar._onBazaar(response, "icons", false);
+                            bazaar._onBazaar(response, "icons");
                             bazaar._data.icons = response.data.packages;
                         });
                     } else if (type === "widget") {
                         fetchPost("/api/bazaar/getBazaarWidget", {keyword}, response => {
-                            bazaar._onBazaar(response, "widgets", false);
+                            bazaar._onBazaar(response, "widgets");
                             bazaar._data.widgets = response.data.packages;
                         });
                     } else if (type === "theme") {
                         fetchPost("/api/bazaar/getBazaarTheme", {keyword}, response => {
-                            bazaar._onBazaar(response, "themes", false);
+                            bazaar._onBazaar(response, "themes");
                             bazaar._data.themes = response.data.packages;
                         });
                     } else if (type === "plugin") {
@@ -1071,7 +989,7 @@ export const bazaar = {
                             frontend: getFrontend(),
                             keyword
                         }, response => {
-                            bazaar._onBazaar(response, "plugins", false);
+                            bazaar._onBazaar(response, "plugins");
                             bazaar._data.plugins = response.data.packages;
                         });
                     } else if (type === "downloaded") {
@@ -1148,7 +1066,7 @@ export const bazaar = {
             });
         });
     },
-    _onBazaar(response: IWebSocketData, bazaarType: TBazaarType, reload: boolean) {
+    _onBazaar(response: IWebSocketData, bazaarType: TBazaarType) {
         if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
             const dataObj = JSON.parse(bazaar.element.querySelector("#configBazaarReadme > .item__side").getAttribute("data-obj"));
             bazaar._renderReadme((dataObj.bazaarType) as TBazaarType,
@@ -1206,8 +1124,5 @@ export const bazaar = {
             html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div><div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
         }
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
-        if (reload) {
-            appearance.onSetAppearance(response.data.appearance);
-        }
     }
 };

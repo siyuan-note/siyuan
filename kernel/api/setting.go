@@ -79,6 +79,7 @@ func setConfSnippet(c *gin.Context) {
 	model.Conf.Save()
 
 	ret.Data = snippet
+	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
 }
 
 func addVirtualBlockRefExclude(c *gin.Context) {
@@ -548,6 +549,7 @@ func setAppearance(c *gin.Context) {
 	}
 
 	ret.Data = model.Conf.Appearance
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 
 func setPublish(c *gin.Context) {

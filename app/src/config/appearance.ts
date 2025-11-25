@@ -12,7 +12,6 @@ import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {useShell} from "../util/pathName";
 import {Dialog} from "../dialog";
-import {reloadOtherWindow} from "../dialog/processSystem";
 
 export const appearance = {
     element: undefined as Element,
@@ -207,46 +206,7 @@ export const appearance = {
                 msgTaskAssetDatabaseIndexCommitDisabled: statusBar ? statusBar.msgTaskAssetDatabaseIndexCommitDisabled : window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled,
                 msgTaskHistoryGenerateFileDisabled: statusBar ? statusBar.msgTaskHistoryGenerateFileDisabled : window.siyuan.config.appearance.statusBar.msgTaskHistoryGenerateFileDisabled,
             }
-        }, async response => {
-            if (response.data.mode !== window.siyuan.config.appearance.mode ||
-                (response.data.mode === window.siyuan.config.appearance.mode && (
-                        (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
-                        (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
-                ) || response.data.lang !== window.siyuan.config.appearance.lang) {
-                reloadOtherWindow();
-            }
-            if (window.siyuan.config.appearance.themeJS) {
-                if (response.data.mode !== window.siyuan.config.appearance.mode ||
-                    (response.data.mode === window.siyuan.config.appearance.mode && (
-                            (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
-                            (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
-                    )
-                ) {
-                    if (window.destroyTheme) {
-                        try {
-                            await window.destroyTheme();
-                            window.destroyTheme = undefined;
-                            document.getElementById("themeScript").remove();
-                        } catch (e) {
-                            console.error("destroyTheme error: " + e);
-                        }
-                    } else {
-                        exportLayout({
-                            errorExit: false,
-                            cb() {
-                                window.location.reload();
-                            },
-                        });
-                        return;
-                    }
-                }
-            }
-            appearance.onSetAppearance(response.data);
-            if (response.data.hideStatusBar) {
-                document.getElementById("status").classList.add("fn__none");
-            } else {
-                document.getElementById("status").classList.remove("fn__none");
-            }
+        }, () => {
             resetFloatDockSize();
         });
     },

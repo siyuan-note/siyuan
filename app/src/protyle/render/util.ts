@@ -12,7 +12,7 @@ export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "m
         }
     }
     const mapActionToHTML = (action: string, isFirst: boolean, isLast: boolean) => {
-        const classList = ["b3-tooltips__nw", "b3-tooltips", "protyle-icon"];
+        const classList = ["ariaLabel", "protyle-icon"];
         if (isFirst) classList.push("protyle-icon--first");
         if (isLast) classList.push("protyle-icon--last");
         let aria = "";
@@ -45,7 +45,7 @@ export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "m
         }
         // Only the edit button honors read-only enable
         const hidden = (action === "edit" && !enable) ? " fn__none" : "";
-        return `<span aria-label="${aria}" class="${classList.join(" ")} ${className}${hidden}"><svg><use xlink:href="#${icon}"></use></svg></span>`;
+        return `<span aria-label="${aria}" data-position="4north" class="${classList.join(" ")} ${className}${hidden}"><svg><use xlink:href="#${icon}"></use></svg></span>`;
     };
     const res: string[] = [];
     for (let i = 0; i < actions.length; i++) {
@@ -65,9 +65,9 @@ export const genRenderFrame = (renderElement: Element) => {
     const type = renderElement.getAttribute("data-type");
     if (type === "NodeBlockQueryEmbed") {
         renderElement.insertAdjacentHTML("afterbegin", `<div class="protyle-icons${isInEmbedBlock(renderElement) ? " fn__none" : ""}">
-    <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.update} SQL" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.refresh}" data-position="4north" class="ariaLabel protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.update} SQL" data-position="4north" class="ariaLabel protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.more}" data-position="4north" class="ariaLabel protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div><div class="protyle-cursor">${Constants.ZWSP}</div>`);
     } else if (type === "NodeMathBlock" || renderElement.getAttribute("data-subtype") === "math") {
         renderElement.firstElementChild.innerHTML = `<span></span><span class="protyle-cursor">${Constants.ZWSP}</span>`;

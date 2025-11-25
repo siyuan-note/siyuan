@@ -508,14 +508,11 @@
     &.iframe {
       // https://ld246.com/article/1644827326901
       // https://github.com/siyuan-note/siyuan/issues/4172
-      &[data-type="NodeWidget"] .iframe-content,
-      &[data-type="NodeIFrame"] .iframe-content {
-        -webkit-user-modify: read-only;
-      }
-
-      .iframe-content {
-        display: inline-block;
-        position: relative;
+      &[data-type="NodeWidget"],
+      &[data-type="NodeIFrame"] {
+        .iframe-content {
+          -webkit-user-modify: read-only;
+        }
       }
 
       &--drag {

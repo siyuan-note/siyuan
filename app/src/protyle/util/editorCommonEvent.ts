@@ -34,7 +34,7 @@ import {webUtils} from "electron";
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
-import {clearSelect} from "./clearSelect";
+import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽

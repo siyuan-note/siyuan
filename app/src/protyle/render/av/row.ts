@@ -7,7 +7,7 @@ import {fetchPost} from "../../../util/fetch";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
 import {isCustomAttr} from "./blockAttr";
 
 export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {

@@ -276,7 +276,6 @@
       display: flex;
       flex-direction: column;
       position: relative;
-      min-height: 40px;
 
       &::before {
         transition: background 100ms ease-out;
@@ -379,7 +378,7 @@
       flex: 1;
       white-space: nowrap;
       font-size: 85%;
-      min-height: 23px;
+      min-height: calc(1.625em + 4px);
       padding: 5px 4px;
 
       &:hover {
@@ -484,6 +483,8 @@
       cursor: pointer;
       transition: background 100ms ease-out, color 100ms ease-out;
       position: relative;
+      font-size: 85%;
+      padding: 4px 0;
 
       &:hover {
         background-color: var(--b3-theme-surface-light);
@@ -941,7 +942,7 @@
       .b3-chip {
         padding: 0 6px;
         line-height: 1.625;
-        font-size: 87.5%;
+        font-size: 1em;
         float: left;
         margin-right: 8px;
 

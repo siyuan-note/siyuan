@@ -356,6 +356,7 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	Conf.Appearance.Icon = iconName
 	Conf.Save()
 	InitAppearance()
+	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	return nil
 }
 
@@ -431,6 +432,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 	}
 
 	InitAppearance()
+	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	return nil
 }
 

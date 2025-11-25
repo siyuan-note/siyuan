@@ -29,7 +29,7 @@ export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "m
             case "fit":
                 aria = window.siyuan.languages.reset;
                 className = "protyle-action__home";
-                icon = "#iconHistory";
+                icon = "iconHistory";
                 break;
             case "edit":
                 aria = window.siyuan.languages.edit;

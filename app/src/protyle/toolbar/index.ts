@@ -1,6 +1,6 @@
-import {Divider} from "./Divider";
-import {Font, hasSameTextStyle, setFontStyle} from "./Font";
-import {ToolbarItem} from "./ToolbarItem";
+import { Divider } from "./Divider";
+import { Font, hasSameTextStyle, setFontStyle } from "./Font";
+import { ToolbarItem } from "./ToolbarItem";
 import {
     fixTableRange,
     focusBlock,
@@ -12,40 +12,40 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
-import {Link} from "./Link";
-import {setPosition} from "../../util/setPosition";
-import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {Constants} from "../../constants";
-import {copyPlainText, openByMobile, readClipboard, setStorageVal} from "../util/compatibility";
-import {upDownHint} from "../../util/upDownHint";
-import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import {processRender} from "../util/processCode";
-import {BlockRef} from "./BlockRef";
-import {hintRenderTemplate, hintRenderWidget} from "../hint/extend";
-import {blockRender} from "../render/blockRender";
+import { hasClosestBlock, hasClosestByAttribute, hasClosestByClassName } from "../util/hasClosest";
+import { Link } from "./Link";
+import { setPosition } from "../../util/setPosition";
+import { transaction, updateTransaction } from "../wysiwyg/transaction";
+import { Constants } from "../../constants";
+import { copyPlainText, openByMobile, readClipboard, setStorageVal } from "../util/compatibility";
+import { upDownHint } from "../../util/upDownHint";
+import { highlightRender } from "../render/highlightRender";
+import { getContenteditableElement, hasNextSibling, hasPreviousSibling } from "../wysiwyg/getBlock";
+import { processRender } from "../util/processCode";
+import { BlockRef } from "./BlockRef";
+import { hintRenderTemplate, hintRenderWidget } from "../hint/extend";
+import { blockRender } from "../render/blockRender";
 /// #if !BROWSER
-import {openBy} from "../../editor/util";
+import { openBy } from "../../editor/util";
 /// #endif
-import {fetchPost} from "../../util/fetch";
-import {isArrayEqual, isMobile} from "../../util/functions";
+import { fetchPost } from "../../util/fetch";
+import { isArrayEqual, isMobile } from "../../util/functions";
 import * as dayjs from "dayjs";
-import {insertEmptyBlock} from "../../block/util";
-import {matchHotKey} from "../util/hotKey";
-import {hideElements} from "../ui/hideElements";
-import {electronUndo} from "../undo";
-import {previewTemplate, toolbarKeyToMenu} from "./util";
-import {hideMessage, showMessage} from "../../dialog/message";
-import {InlineMath} from "./InlineMath";
-import {InlineMemo} from "./InlineMemo";
-import {mathRender} from "../render/mathRender";
-import {linkMenu} from "../../menus/protyle";
-import {addScript} from "../util/addScript";
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
-import {escapeHtml} from "../../util/escape";
-import {resizeSide} from "../../history/resizeSide";
+import { insertEmptyBlock } from "../../block/util";
+import { matchHotKey } from "../util/hotKey";
+import { hideElements } from "../ui/hideElements";
+import { electronUndo } from "../undo";
+import { previewTemplate, toolbarKeyToMenu } from "./util";
+import { hideMessage, showMessage } from "../../dialog/message";
+import { InlineMath } from "./InlineMath";
+import { InlineMemo } from "./InlineMemo";
+import { mathRender } from "../render/mathRender";
+import { linkMenu } from "../../menus/protyle";
+import { addScript } from "../util/addScript";
+import { confirmDialog } from "../../dialog/confirmDialog";
+import { paste, pasteAsPlainText, pasteEscaped } from "../util/paste";
+import { escapeHtml } from "../../util/escape";
+import { resizeSide } from "../../history/resizeSide";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -309,12 +309,12 @@ export class Toolbar {
             const startPreviousSibling = hasPreviousSibling(this.range.startContainer);
             const endNextSibling = hasNextSibling(this.range.endContainer);
             if ((
-                    this.range.startOffset !== 0 ||
-                    // https://github.com/siyuan-note/siyuan/issues/14869
-                    (this.range.startOffset === 0 && startPreviousSibling &&
-                        (startPreviousSibling.nodeType === 3 || (startPreviousSibling as HTMLElement).tagName === "BR") &&
-                        this.range.startContainer.previousSibling.parentElement === this.range.startContainer.parentElement)
-                ) && (
+                this.range.startOffset !== 0 ||
+                // https://github.com/siyuan-note/siyuan/issues/14869
+                (this.range.startOffset === 0 && startPreviousSibling &&
+                    (startPreviousSibling.nodeType === 3 || (startPreviousSibling as HTMLElement).tagName === "BR") &&
+                    this.range.startContainer.previousSibling.parentElement === this.range.startContainer.parentElement)
+            ) && (
                     this.range.endOffset !== this.range.endContainer.textContent.length ||
                     // https://github.com/siyuan-note/siyuan/issues/14869#issuecomment-2911553387
                     (
@@ -1038,9 +1038,9 @@ export class Toolbar {
                     }
                     const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
                     const bbox = svgElement.getBBox();
-                    clonedSvg.setAttribute("viewBox", `${bbox.x-20} ${bbox.y-20} ${bbox.width+40} ${bbox.height+40}`);
-                    clonedSvg.setAttribute("width", String(bbox.width+40));
-                    clonedSvg.setAttribute("height", String(bbox.height+40));
+                    clonedSvg.setAttribute("viewBox", `${bbox.x - 20} ${bbox.y - 20} ${bbox.width + 40} ${bbox.height + 40}`);
+                    clonedSvg.setAttribute("width", String(bbox.width + 40));
+                    clonedSvg.setAttribute("height", String(bbox.height + 40));
                     clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
                     clonedSvg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
 
@@ -1348,7 +1348,7 @@ export class Toolbar {
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
 
-        const eventDetail = {languages: hljsLanguages, type: "init", listElement};
+        const eventDetail = { languages: hljsLanguages, type: "init", listElement };
         if (protyle.app && protyle.app.plugins) {
             protyle.app.plugins.forEach((plugin: any) => {
                 plugin.eventBus.emit("code-language-update", eventDetail);
@@ -1422,7 +1422,7 @@ export class Toolbar {
                 }
             }
 
-            const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
+            const eventDetail = { languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement };
             if (protyle.app && protyle.app.plugins) {
                 protyle.app.plugins.forEach((plugin: any) => {
                     plugin.eventBus.emit("code-language-update", eventDetail);
@@ -1589,7 +1589,7 @@ export class Toolbar {
             /// #endif
             if (iconElement && iconElement.getAttribute("data-type") === "remove") {
                 confirmDialog(window.siyuan.languages.remove, window.siyuan.languages.confirmDelete + "?", () => {
-                    fetchPost("/api/search/removeTemplate", {path: iconElement.parentElement.getAttribute("data-value")}, () => {
+                    fetchPost("/api/search/removeTemplate", { path: iconElement.parentElement.getAttribute("data-value") }, () => {
                         if (iconElement.parentElement.parentElement.childElementCount === 1) {
                             iconElement.parentElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             previewTemplate("", previewElement, protyle.block.parentID);
@@ -1613,13 +1613,13 @@ export class Toolbar {
             }
             const previousElement = hasClosestByAttribute(target, "data-type", "previous");
             if (previousElement) {
-                inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowUp"}));
+                inputElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
                 event.stopPropagation();
                 return;
             }
             const nextElement = hasClosestByAttribute(target, "data-type", "next");
             if (nextElement) {
-                inputElement.dispatchEvent(new KeyboardEvent("keydown", {key: "ArrowDown"}));
+                inputElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
                 event.stopPropagation();
                 return;
             }
@@ -1791,7 +1791,7 @@ ${item.name}
                 } else {
                     try {
                         const text = await readClipboard();
-                        paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
+                        paste(protyle, Object.assign(text, { target: nodeElement as HTMLElement }));
                     } catch (e) {
                         console.log(e);
                     }

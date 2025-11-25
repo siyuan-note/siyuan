@@ -1,5 +1,5 @@
-import {isInEmbedBlock} from "../util/hasClosest";
-import {Constants} from "../../constants";
+import { isInEmbedBlock } from "../util/hasClosest";
+import { Constants } from "../../constants";
 
 export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "more"]) => {
     let enable = true;

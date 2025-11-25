@@ -476,7 +476,7 @@ ${getIconScript(servePath)}
         Protyle.flowchartRender(wysElement, "${servePath}stage/protyle");
         Protyle.graphvizRender(wysElement, "${servePath}stage/protyle");
         Protyle.chartRender(wysElement, "${servePath}stage/protyle");
-        Protyle.mindmapRender(wysElement, "${servePath}stage/protyle");
+        Protyle.mindmapRender(wysElement, "${servePath}stage/protyle", {zoom: false, pan: false});
         Protyle.abcRender(wysElement, "${servePath}stage/protyle");
         Protyle.htmlRender(wysElement);
         Protyle.plantumlRender(wysElement, "${servePath}stage/protyle");
@@ -775,7 +775,7 @@ ${getIconScript(servePath)}
     Protyle.flowchartRender(previewElement, "stage/protyle");
     Protyle.graphvizRender(previewElement, "stage/protyle");
     Protyle.chartRender(previewElement, "stage/protyle");
-    Protyle.mindmapRender(previewElement, "stage/protyle");
+    Protyle.mindmapRender(previewElement, "stage/protyle", {zoom: false, pan: false});
     Protyle.abcRender(previewElement, "stage/protyle");
     Protyle.htmlRender(previewElement);
     Protyle.plantumlRender(previewElement, "stage/protyle");

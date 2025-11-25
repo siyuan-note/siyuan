@@ -3,7 +3,7 @@ import { Constants } from "../../constants";
 import { hasClosestByClassName } from "../util/hasClosest";
 import { genIconHTML } from "./util";
 
-export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
+export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN, markmapOptions: {zoom?: boolean; pan?: boolean} = {}) => {
     let mindmapElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "mindmap") {
         // 编辑器内代码块编辑渲染
@@ -124,9 +124,10 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
 
                     // prefer Markmap.create if available
                     const MarkmapCtor = (mm && (mm.Markmap || mm.default || mm)) || (window as any).Markmap;
-                    const options = {
+                    // default options, allow overriding via markmapOptions (e.g. in export we can pass zoom/pan false)
+                    const options = Object.assign({
                         duration: 0,        // 🔥 禁用动画，设为0
-                    };
+                    }, markmapOptions || {});
                     // create and store markmap + transformer on the element so callers can update instead of re-creating
                     if (MarkmapCtor && typeof MarkmapCtor.create === "function") {
                         if (rootData) {

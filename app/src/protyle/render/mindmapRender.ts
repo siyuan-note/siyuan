@@ -3,7 +3,7 @@ import { Constants } from "../../constants";
 import { hasClosestByClassName } from "../util/hasClosest";
 import { genIconHTML } from "./util";
 
-export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN, markmapOptions: {zoom?: boolean; pan?: boolean} = {}) => {
+export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN, markmapOptions: { zoom?: boolean; pan?: boolean } = {}) => {
     let mindmapElements: Element[] = [];
     if (element.getAttribute("data-subtype") === "mindmap") {
         // 编辑器内代码块编辑渲染

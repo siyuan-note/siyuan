@@ -393,9 +393,9 @@ export const showPopover = async (app: App, showRef = false) => {
     } else if (popoverTargetElement.dataset.type === "url") {
         // 在 database 的 url 列中以思源协议开头的链接
         refDefs = [{refID: getIdFromSYProtocol(popoverTargetElement.textContent.trim())}];
-    } else if (popoverTargetElement.dataset.popoverUrl) {
+    } else if (popoverTargetElement.dataset.type === "av") {
         // 镜像数据库
-        const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {avID: popoverTargetElement.dataset.avId});
+        const postResponse = await fetchSyncPost("/api/av/getMirrorDatabaseBlocks", {avID: popoverTargetElement.dataset.avId});
         refDefs = postResponse.data.refDefs;
     } else {
         // pdf

@@ -387,7 +387,7 @@ export class Title {
         if (response.data.ial["custom-avs"]) {
             let avTitle = "";
             response.data.attrViews.forEach((item: { id: string, name: string }) => {
-                avTitle += `<span data-av-id="${item.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${item.name}</span>&nbsp;`;
+                avTitle += `<span data-av-id="${item.id}" data-type="av" class="popover__block">${item.name}</span>&nbsp;`;
             });
             if (avTitle) {
                 avTitle = avTitle.substring(0, avTitle.length - 6);

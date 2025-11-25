@@ -2948,7 +2948,7 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 	return
 }
 
-const attrAvNameTpl = `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
+const attrAvNameTpl = `<span data-av-id="${avID}" data-type="av" class="popover__block">${avName}</span>`
 
 func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 	avID := operation.ID

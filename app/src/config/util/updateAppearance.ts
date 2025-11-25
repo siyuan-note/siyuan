@@ -37,4 +37,4 @@ export const updateAppearance = async (data:IAppearance) => {
         }
     }
     appearance.onSetAppearance(data);
-}
+};

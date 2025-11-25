@@ -1,9 +1,8 @@
-import {appearance} from "./appearance";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
-import {exportLayout, saveLayout} from "../layout/util";
+import {saveLayout} from "../layout/util";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import * as path from "path";

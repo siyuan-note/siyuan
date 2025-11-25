@@ -987,6 +987,17 @@ export class Toolbar {
                     break;
                 case "refresh":
                     btnElement.classList.toggle("block__icon--active");
+                    // If this is a mindmap, call markmap instance fit() to reset view
+                    if (renderElement.getAttribute("data-subtype") === "mindmap") {
+                        const mmEntry: any = (renderElement as any).__markmap || (nodeElement as any).__markmap || null;
+                        if (mmEntry && mmEntry.markmap && typeof mmEntry.markmap.fit === "function") {
+                            try {
+                                mmEntry.markmap.fit();
+                            } catch (e) {
+                                console.error("markmap fit error", e);
+                            }
+                        }
+                    }
                     break;
                 case "before":
                     insertEmptyBlock(protyle, "beforebegin", id);
@@ -1016,6 +1027,55 @@ export class Toolbar {
                     });
                 });
                 return;
+            }
+            // mindmap: try to export SVG directly using the rendered SVG
+            if (renderElement.getAttribute("data-subtype") === "mindmap") {
+                try {
+                    // find rendered svg inside the renderElement
+                    const svgElement = renderElement.querySelector("svg.markmap") as SVGSVGElement;
+                    if (!svgElement) {
+                        throw new Error("SVG not found");
+                    }
+                    const clonedSvg = svgElement.cloneNode(true) as SVGSVGElement;
+                    const bbox = svgElement.getBBox();
+                    clonedSvg.setAttribute("viewBox", `${bbox.x-20} ${bbox.y-20} ${bbox.width+40} ${bbox.height+40}`);
+                    clonedSvg.setAttribute("width", String(bbox.width+40));
+                    clonedSvg.setAttribute("height", String(bbox.height+40));
+                    clonedSvg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                    clonedSvg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+                    // inline styles
+                    const styles = Array.from(document.styleSheets)
+                        .filter(sheet => {
+                            try {
+                                return sheet.cssRules;
+                            } catch (e) {
+                                return false;
+                            }
+                        })
+                        .reduce((acc, sheet) => {
+                            return acc + Array.from((sheet as CSSStyleSheet).cssRules).map(rule => rule.cssText).join("\n");
+                        }, "");
+
+                    const styleElement = document.createElementNS("http://www.w3.org/2000/svg", "style");
+                    styleElement.textContent = styles;
+                    clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
+
+                    const serializer = new XMLSerializer();
+                    const svgString = serializer.serializeToString(clonedSvg);
+                    const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                    const formData = new FormData();
+                    formData.append("file", blob);
+                    formData.append("type", "image/svg+xml");
+                    fetchPost("/api/export/exportAsFile", formData, (response) => {
+                        openByMobile(response.data.file);
+                        hideMessage(msgId);
+                    });
+                    return;
+                } catch (err) {
+                    console.error("mindmap export error", err);
+                    // fall through to html-to-image fallback
+                }
             }
             setTimeout(() => {
                 addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
@@ -1067,11 +1127,32 @@ export class Toolbar {
                     }
                 });
             } else {
-                renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
-                renderElement.removeAttribute("data-render");
+                // mindmap: try incremental update via stored markmap instance
+                const isMindmap = renderElement.getAttribute("data-subtype") === "mindmap";
+                const mmEntry: any = (renderElement as any).__markmap || (nodeElement as any).__markmap || null;
+                if (isMindmap && mmEntry && mmEntry.transformer && mmEntry.markmap && this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
+                    try {
+                        // update markmap in-place
+                        const txu = mmEntry.transformer.transform(textElement.value) || {};
+                        const rootu = txu.root || null;
+                        mmEntry.markmap.setData(rootu, mmEntry.options);
+                        renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                    } catch (err) {
+                        // fallback to re-render
+                        renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                        renderElement.removeAttribute("data-render");
+                    }
+                } else {
+                    renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
+                    renderElement.removeAttribute("data-render");
+                }
             }
-            if (!types.includes("NodeBlockQueryEmbed") || !types.includes("NodeHTMLBlock") || !isInlineMemo) {
-                processRender(renderElement);
+            // If mindmap was updated via markmap.setData above, no need to run full processRender.
+            const didIncrementalUpdate = renderElement.getAttribute("data-subtype") === "mindmap" && ((renderElement as any).__markmap && (renderElement as any).__markmap.markmap) && this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active");
+            if (!didIncrementalUpdate) {
+                if (!types.includes("NodeBlockQueryEmbed") || !types.includes("NodeHTMLBlock") || !isInlineMemo) {
+                    processRender(renderElement);
+                }
             }
             event.stopPropagation();
         });
@@ -1158,11 +1239,30 @@ export class Toolbar {
             } else {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
                 renderElement.removeAttribute("data-render");
-                if (types.includes("NodeBlockQueryEmbed")) {
-                    blockRender(protyle, renderElement);
-                    (renderElement as HTMLElement).style.height = "";
+                // If this is a mindmap and we have a stored markmap instance, prefer incremental update
+                const isMindmap = renderElement.getAttribute("data-subtype") === "mindmap";
+                const mmEntry: any = (renderElement as any).__markmap || (nodeElement as any).__markmap || null;
+                if (isMindmap && mmEntry && mmEntry.transformer && mmEntry.markmap) {
+                    try {
+                        const txu = mmEntry.transformer.transform(textElement.value) || {};
+                        const rootu = txu.root || null;
+                        mmEntry.markmap.setData(rootu, mmEntry.options);
+                    } catch (err) {
+                        // fallback to full render
+                        if (types.includes("NodeBlockQueryEmbed")) {
+                            blockRender(protyle, renderElement);
+                            (renderElement as HTMLElement).style.height = "";
+                        } else {
+                            processRender(renderElement);
+                        }
+                    }
                 } else {
-                    processRender(renderElement);
+                    if (types.includes("NodeBlockQueryEmbed")) {
+                        blockRender(protyle, renderElement);
+                        (renderElement as HTMLElement).style.height = "";
+                    } else {
+                        processRender(renderElement);
+                    }
                 }
             }
 

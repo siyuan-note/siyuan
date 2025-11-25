@@ -2886,6 +2886,24 @@ export class WYSIWYG {
                 return;
             }
 
+            const fitElement = hasClosestByClassName(event.target, "protyle-action__home");
+            if (fitElement) {
+                const blockElement = hasClosestBlock(fitElement);
+                if (blockElement && blockElement.getAttribute("data-subtype") === "mindmap") {
+                    try {
+                        const mmEntry: any = (blockElement as any).__markmap || null;
+                        if (mmEntry && mmEntry.markmap && typeof mmEntry.markmap.fit === "function") {
+                            mmEntry.markmap.fit();
+                        }
+                    } catch (e) {
+                        console.error("markmap fit error", e);
+                    }
+                }
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
             const languageElement = hasClosestByClassName(event.target, "protyle-action__language");
             if (languageElement && !protyle.disabled && !ctrlIsPressed) {
                 protyle.toolbar.showCodeLanguage(protyle, [languageElement]);

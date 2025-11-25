@@ -11,18 +11,51 @@ export const genIconHTML = (element?: false | HTMLElement, actions = ["edit", "m
             return '<div class="protyle-icons"></div>';
         }
     }
-    if (actions.length === 3) {
-        return `<div class="protyle-icons">
-    <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-icon--first protyle-action__reload"><svg><use xlink:href="#iconRefresh"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.edit}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit${enable ? "" : " fn__none"}"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
-</div>`;
-    } else {
-        return `<div class="protyle-icons">
-    <span aria-label="${window.siyuan.languages.edit}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-icon--first protyle-action__edit${enable ? "" : " fn__none"}"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last${enable ? "" : " protyle-icon--first"}"><svg><use xlink:href="#iconMore"></use></svg></span>
-</div>`;
+    const mapActionToHTML = (action: string, isFirst: boolean, isLast: boolean) => {
+        const classList = ["b3-tooltips__nw", "b3-tooltips", "protyle-icon"];
+        if (isFirst) classList.push("protyle-icon--first");
+        if (isLast) classList.push("protyle-icon--last");
+        let aria = "";
+        let className = "";
+        let icon = "";
+        switch (action) {
+            case "reload":
+            case "refresh":
+                aria = window.siyuan.languages.refresh;
+                className = "protyle-action__reload";
+                icon = "iconRefresh";
+                break;
+            case "home":
+            case "fit":
+                aria = window.siyuan.languages.reset;
+                className = "protyle-action__home";
+                icon = "#iconHistory";
+                break;
+            case "edit":
+                aria = window.siyuan.languages.edit;
+                className = "protyle-action__edit";
+                icon = "iconEdit";
+                break;
+            case "more":
+            default:
+                aria = window.siyuan.languages.more;
+                className = "protyle-action__menu";
+                icon = "iconMore";
+                break;
+        }
+        // Only the edit button honors read-only enable
+        const hidden = (action === "edit" && !enable) ? " fn__none" : "";
+        return `<span aria-label="${aria}" class="${classList.join(" ")} ${className}${hidden}"><svg><use xlink:href="#${icon}"></use></svg></span>`;
+    };
+    const res: string[] = [];
+    for (let i = 0; i < actions.length; i++) {
+        const isFirst = i === 0;
+        const isLast = i === actions.length - 1;
+        res.push(mapActionToHTML(actions[i], isFirst, isLast));
     }
+    return `<div class="protyle-icons">
+    ${res.join("\n    ")}
+</div>`;
 };
 
 export const genRenderFrame = (renderElement: Element) => {

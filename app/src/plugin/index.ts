@@ -113,6 +113,10 @@ export class Plugin {
         // 卸载
     }
 
+    public onDataChanged() {
+        // 存储数据变更
+    }
+
     public async updateCards(options: ICardData) {
         return options;
     }

@@ -743,7 +743,8 @@ export const bazaar = {
                                     app.plugins.find((item: Plugin) => {
                                         if (item.name === dataObj.name) {
                                             reloadPlugin(app, {
-                                                upsertPlugins: [dataObj.name],
+                                                upsertCodePlugins: [dataObj.name],
+                                                upsertDataPlugins: [],
                                                 removePlugins: []
                                             });
                                             return true;

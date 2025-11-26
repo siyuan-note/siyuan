@@ -210,48 +210,34 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     /// #endif
 };
 
-export const reloadPlugin = async (app: App, data: { upsertCodePlugins?: string[], upsertDataPlugins?: string[], removePlugins?: string[] } = {}) => {
-    const { upsertCodePlugins = [], upsertDataPlugins = [], removePlugins = [] } = data;
-    const reloadPlugins: string[] = [];
-
+export const reloadPlugin = async (app: App, data: {
+    upsertCodePlugins?: string[],
+    upsertDataPlugins?: string[],
+    removePlugins?: string[]
+} = {}) => {
+    const {upsertCodePlugins = [], upsertDataPlugins = [], removePlugins = []} = data;
     removePlugins.forEach((item) => {
         uninstall(app, item, true);
     });
-
-    upsertCodePlugins.forEach((pluginName) => {
-        reloadPlugins.push(pluginName);
-    });
-
-    upsertDataPlugins.forEach((pluginName) => {
-        const plugin = app.plugins.find(p => p.name === pluginName);
-        // 检查插件是否重写了 onDataChanged 方法（不是基类的默认实现）
-        const hasOverriddenOnDataChanged = plugin && 
-            typeof plugin.onDataChanged === "function" && 
-            plugin.onDataChanged !== Plugin.prototype.onDataChanged;
-        if (hasOverriddenOnDataChanged) {
-            try {
-                plugin.onDataChanged();
-                return;
-            } catch (e) {
-                console.error(`plugin ${pluginName} onDataChanged error:`, e);
-            }
-        }
-        reloadPlugins.push(pluginName);
-    });
-
-    reloadPlugins.forEach((item) => {
+    upsertCodePlugins.forEach((item) => {
         uninstall(app, item, false);
     });
-    if (reloadPlugins.length > 0) {
-        loadPlugins(app, reloadPlugins).then(() => {
-            app.plugins.forEach(item => {
-                if (reloadPlugins.includes(item.name)) {
-                    afterLoadPlugin(item);
-                }
-            });
+    loadPlugins(app, upsertCodePlugins).then(() => {
+        app.plugins.forEach(item => {
+            if (upsertCodePlugins.includes(item.name)) {
+                afterLoadPlugin(item);
+            }
         });
-    }
-
+    });
+    app.plugins.forEach(item => {
+        if (upsertDataPlugins.includes(item.name)) {
+            try {
+                item.onDataChanged();
+            } catch (e) {
+                console.error(`plugin ${item.name} onDataChanged error:`, e);
+            }
+        }
+    });
     /// #if !MOBILE
     saveLayout();
     /// #endif

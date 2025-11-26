@@ -620,7 +620,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 }
 
                 item.setAttribute(key, data.new[key]);
-                if (key === Constants.CUSTOM_RIFF_DECKS && key !== data.new[Constants.CUSTOM_RIFF_DECKS]) {
+                if (key === Constants.CUSTOM_RIFF_DECKS &&
+                    data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                     item.style.animation = "addCard 450ms linear";
                     setTimeout(() => {
                         if (item.parentElement) {

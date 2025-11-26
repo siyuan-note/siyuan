@@ -479,6 +479,7 @@ func initMime() {
 	mime.AddExtensionType(".gif", "image/gif")
 	mime.AddExtensionType(".bmp", "image/bmp")
 	mime.AddExtensionType(".tiff", "image/tiff")
+	mime.AddExtensionType(".tif", "image/tiff")
 	mime.AddExtensionType(".webp", "image/webp")
 	mime.AddExtensionType(".ico", "image/x-icon")
 }

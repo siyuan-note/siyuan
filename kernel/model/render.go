@@ -190,11 +190,6 @@ func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 						}
 					}
 				}
-			} else {
-				// 填充属性视图角标之后即可移除 av-names 属性
-				if n.IsBlock() && "" != n.IALAttr(av.NodeAttrViewNames) {
-					n.RemoveIALAttr(av.NodeAttrViewNames)
-				}
 			}
 
 			rendererFunc := blockRenderer.RendererFuncs[n.Type]

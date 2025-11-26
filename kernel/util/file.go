@@ -149,7 +149,7 @@ func RemoveID(name string) string {
 }
 
 var commonSuffixes = []string{
-	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tiff",
+	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tif", ".tiff",
 	".txt", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".md", ".rtf",
 	".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
 	".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a",

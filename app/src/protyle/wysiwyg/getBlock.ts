@@ -184,6 +184,15 @@ export const isEndOfBlock = (range: Range) => {
     let nextSibling = range.endContainer;
     if (range.endContainer.nodeType !== 3) {
         nextSibling = range.endContainer.childNodes[range.endOffset];
+        if (!nextSibling) {
+            // https://github.com/siyuan-note/siyuan/issues/16214
+            if (range.endContainer.parentElement.getAttribute("spellcheck")) {
+                nextSibling = range.endContainer;
+            }
+        } else if (nextSibling.nodeType === 3 && !range.endContainer.childNodes[range.endOffset + 1]) {
+            // https://github.com/siyuan-note/siyuan/issues/16227
+            return nextSibling.textContent === Constants.ZWSP || nextSibling.textContent === "\n";
+        }
     }
 
     while (nextSibling) {

@@ -663,6 +663,7 @@ export class WYSIWYG {
                         selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                     }
                 } else if (ctrlElement) {
+                    clearSelect(["row", "galleryItem"], this.element);
                     const embedBlockElement = isInEmbedBlock(ctrlElement);
                     if (embedBlockElement) {
                         ctrlElement = embedBlockElement;

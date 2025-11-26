@@ -2181,6 +2181,10 @@ func (box *Box) setSort(sortIDVals map[string]int) {
 }
 
 func pushFiletreeSortChanged(sortIDs map[string]int) {
+	if 1 > len(sortIDs) {
+		return
+	}
+
 	var childIDs []string
 	for sortID := range sortIDs {
 		childIDs = append(childIDs, sortID)

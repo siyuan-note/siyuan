@@ -116,7 +116,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		av.SaveAttributeView(attrView)
 	}
 
-	// 如果存在分组的话渲染分组视图
+	// 渲染分组视图
+	if nil == view.Groups {
+		genAttrViewGroups(view, attrView)
+		av.SaveAttributeView(attrView)
+	}
 
 	for _, groupView := range view.Groups {
 		groupView.Name = groupView.GetGroupValue()

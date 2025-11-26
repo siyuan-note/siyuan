@@ -117,7 +117,7 @@ export class Plugin {
 
     public onDataChanged() {
         // 存储数据变更
-        // 兼容 4.3.1 以前同步数据使用重载插件的问题
+        // 兼容 3.4.1 以前同步数据使用重载插件的问题
         uninstall(this.app, this.name, false);
         afterLoadPlugin(this);
     }

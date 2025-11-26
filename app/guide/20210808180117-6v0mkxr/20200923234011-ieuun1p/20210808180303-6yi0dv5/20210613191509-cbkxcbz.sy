@@ -6,7 +6,7 @@
 		"id": "20210613191509-cbkxcbz",
 		"title": "Content Block Attribute",
 		"type": "doc",
-		"updated": "20250115150122"
+		"updated": "20251126211142"
 	},
 	"Children": [
 		{
@@ -214,7 +214,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-65gd8yo",
-				"updated": "20250115150122"
+				"updated": "20251126211142"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613191548-7p2bvoq",
-				"updated": "20250115150122"
+				"updated": "20251126211142"
 			},
 			"Children": [
 				{
@@ -251,7 +251,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, and only English letters and Arabic numerals are allowed in the attribute name (such as "
+					"Data": "​, and only lowercase English letters and Arabic numerals are allowed in the attribute name (such as "
 				},
 				{
 					"Type": "NodeTextMark",

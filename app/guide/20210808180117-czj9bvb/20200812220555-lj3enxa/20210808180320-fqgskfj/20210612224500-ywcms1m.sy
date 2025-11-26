@@ -6,7 +6,7 @@
 		"id": "20210612224500-ywcms1m",
 		"title": "内容块属性",
 		"type": "doc",
-		"updated": "20250115150045"
+		"updated": "20251126211031"
 	},
 	"Children": [
 		{
@@ -214,7 +214,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613004117-1jnl9m0",
-				"updated": "20250115150045"
+				"updated": "20251126211031"
 			},
 			"Children": [
 				{
@@ -228,7 +228,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613004135-7td7u1o",
-				"updated": "20250115150045"
+				"updated": "20251126211031"
 			},
 			"Children": [
 				{
@@ -251,7 +251,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 进行设置，属性名仅允许使用英文字母和阿拉伯数字（例如 "
+					"Data": "​ 进行设置，属性名仅允许使用小写英文字母和阿拉伯数字（例如 "
 				},
 				{
 					"Type": "NodeTextMark",

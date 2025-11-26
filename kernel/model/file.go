@@ -988,6 +988,7 @@ func DuplicateDoc(tree *parse.Tree) {
 		}
 
 		n.RemoveIALAttr(av.NodeAttrNameAvs)
+		n.RemoveIALAttr(av.NodeAttrViewNames)
 		n.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 		return ast.WalkContinue
 	})

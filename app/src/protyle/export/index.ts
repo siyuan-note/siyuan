@@ -720,7 +720,7 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
     const isInMobile = isInAndroid() || isInHarmony() || isInIOS();
     const mobileHtml = isInMobile ? {
         js: `document.body.style.minWidth = "${screenWidth}px";`,
-        css: `@page { size: A4; margin: 10mm 0 10mm 0; }
+        css: `@page { size: A4; margin: 10mm 0 10mm 0; background-color: var(--b3-theme-background); }
 .protyle-wysiwyg {padding: 0; margin: 0;}`
     } : {js: "", css: ""};
     const html = `<!DOCTYPE html>

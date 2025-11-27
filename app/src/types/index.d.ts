@@ -110,7 +110,6 @@ type TAVCol =
     | "updated"
     | "checkbox"
     | "lineNumber"
-type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
     | "!="

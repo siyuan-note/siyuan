@@ -689,15 +689,19 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     }, false);
 };
 
-export const popSearch = (app: App, searchConfig?: any) => {
+export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConfig) => {
     const config: Config.IUILayoutTabSearchConfig = JSON.parse(JSON.stringify(window.siyuan.storage[Constants.LOCAL_SEARCHDATA]));
     const rangeText = (getCurrentEditor()?.protyle.toolbar.range || (getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : document.createRange())).toString();
     if (rangeText) {
         config.k = rangeText;
     }
     if (searchConfig) {
-        Object.keys(searchConfig).forEach((key: "r") => {
-            config[key] = searchConfig[key];
+        Object.keys(searchConfig).forEach((key: keyof Config.IUILayoutTabSearchConfig) => {
+            if (key === "idPath") {
+                config[key] = [...searchConfig[key]];
+            } else {
+                config[key as "r"] = searchConfig[key as "r"];
+            }
         });
     }
 

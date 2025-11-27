@@ -233,6 +233,8 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 		}
 	}
 
+	normalizeKeysToLower(nameValues)
+
 	for name, value := range nameValues {
 		value = util.RemoveInvalidRetainCtrl(value)
 		value = strings.TrimSpace(value)
@@ -248,6 +250,23 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 		ReloadTag()
 	}
 	return
+}
+
+// normalizeKeysToLower 将 nameValues 的键统一为小写 https://github.com/siyuan-note/siyuan/issues/16447
+func normalizeKeysToLower(nameValues map[string]string) {
+	newMap := make(map[string]string, len(nameValues))
+	for name, value := range nameValues {
+		lower := strings.ToLower(name)
+		newMap[lower] = value
+	}
+
+	for k := range nameValues {
+		delete(nameValues, k)
+	}
+
+	for k, v := range newMap {
+		nameValues[k] = v
+	}
 }
 
 func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {

@@ -63,12 +63,12 @@ export const openSearch = async (options: {
             item.element.setAttribute("data-key", options.hotkey);
             if (options.hotkey === Constants.DIALOG_REPLACE) {
                 cloneData.hasReplace = true;
-                updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
             } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {
                 cloneData.hasReplace = false;
                 cloneData.hPath = "";
                 cloneData.idPath = [];
-                updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
             } else if (options.hotkey === Constants.DIALOG_SEARCH) {
                 cloneData.hasReplace = false;
                 const toPath = item.editors.edit.protyle.path;
@@ -77,7 +77,7 @@ export const openSearch = async (options: {
                     cloneData.hPath = response.data[0];
                     item.data.idPath = cloneData.idPath;
                     item.data.hPath = cloneData.hPath;
-                    updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                    item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
                 });
             }
             return true;

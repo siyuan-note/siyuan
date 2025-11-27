@@ -342,7 +342,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         while (target && target !== element) {
             const type = target.getAttribute("data-type");
             if (type === "removeCriterion") {
-                updateConfig(element, {
+                config = updateConfig(element, {
                     removed: true,
                     sort: 0,
                     group: 0,
@@ -391,7 +391,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 target.classList.add("b3-chip--current");
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
-                        updateConfig(element, item, config, edit);
+                        config = updateConfig(element, item, config, edit);
                         return true;
                     }
                 });
@@ -408,7 +408,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     }
                 });
                 if (target.parentElement.classList.contains("b3-chip--current")) {
-                    updateConfig(element, {
+                    config = updateConfig(element, {
                         removed: true,
                         sort: 0,
                         group: 0,
@@ -604,7 +604,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     config.page = 1;
                     inputEvent(element, config, edit, true);
                 }, () => {
-                    updateConfig(element, {
+                    config = updateConfig(element, {
                         removed: true,
                         sort: 0,
                         group: 0,
@@ -1013,6 +1013,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
     inputEvent(element, config, edit);
     window.siyuan.menus.menu.remove();
+    return config;
 };
 
 const scrollToCurrent = (contentElement: HTMLElement, currentRange: Range, contentRect: DOMRect) => {

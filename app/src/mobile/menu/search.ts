@@ -147,11 +147,12 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     }
     (document.querySelector("#toolbarSearch") as HTMLInputElement).value = newConfig.k;
     (element.querySelector("#toolbarReplace") as HTMLInputElement).value = newConfig.r;
-    Object.assign(config, newConfig);
+    config = JSON.parse(JSON.stringify(newConfig));
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
     updateSearchResult(config, element);
     window.siyuan.menus.menu.remove();
+    return config;
 };
 
 const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
@@ -386,7 +387,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 target.classList.add("b3-chip--current");
                 criteriaData.find(item => {
                     if (item.name === target.innerText.trim()) {
-                        updateConfig(element, item, config);
+                        item = updateConfig(element, item, config);
                         return true;
                     }
                 });
@@ -403,7 +404,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                     }
                 });
                 if (target.parentElement.classList.contains("b3-chip--current")) {
-                    updateConfig(element, {
+                    config = updateConfig(element, {
                         removed: true,
                         sort: 0,
                         group: 0,
@@ -545,7 +546,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                     config.page = 1;
                     updateSearchResult(config, element, true);
                 }, () => {
-                    updateConfig(element, {
+                    config = updateConfig(element, {
                         removed: true,
                         sort: 0,
                         group: 0,

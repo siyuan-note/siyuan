@@ -406,9 +406,12 @@
     text-align: center;
   }
 
+  [data-type="NodeIFrame"] {
+    height: 256px;
+  }
+
   [data-type="NodeIFrame"],
   [data-type="NodeWidget"] {
-    height: 256px;
     width: 100%;
     max-width: 100%;
 

@@ -131,7 +131,7 @@ func autoPurgeRepo(cron bool) {
 	}
 
 	todayDate := now.Format("2006-01-02")
-	// 筛选出每日需要保留的索引
+	// 过滤出每日需要保留的索引
 	var retentionIndexIDs []string
 	for date, indexes := range dateGroupedIndexes {
 		if len(indexes) <= Conf.Repo.RetentionIndexesDaily || todayDate == date {

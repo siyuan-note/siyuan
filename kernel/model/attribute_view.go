@@ -115,7 +115,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
-	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID, true)
 	for _, value := range ret {
 		// 主键都不返回内容，避免闪烁 https://github.com/siyuan-note/siyuan/issues/15561#issuecomment-3184746195
 		if av.KeyTypeBlock == value.Type {
@@ -125,7 +125,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	return
 }
 
-func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string) (ret map[string]*av.Value) {
+func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate bool) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
 	if 1 > len(view.Filters) && !view.IsGroupView() {
@@ -240,6 +240,31 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 					if 1 > len(newValue.MSelect) || av.KeyTypeMSelect == groupKey.Type {
 						newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 					}
+				} else {
+					var vals []*av.ValueSelect
+					if isCreate {
+						vals = append(vals, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+					} else {
+						existingVal := keyValues.GetValue(addingItemID)
+						if nil != existingVal {
+							if !av.MSelectExistOption(existingVal.MSelect, opt.Name) {
+								existingVal.MSelect = append(existingVal.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+							}
+							vals = existingVal.MSelect
+						} else {
+							vals = append(vals, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+						}
+					}
+
+					// 添加过滤结果选项的值
+					if nil != ret[groupKey.ID] {
+						for _, v := range ret[groupKey.ID].MSelect {
+							if !av.MSelectExistOption(vals, v.Content) {
+								vals = append(vals, v)
+							}
+						}
+					}
+					newValue.MSelect = vals
 				}
 			} else {
 				newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type, false)
@@ -3305,7 +3330,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	}
 
 	if !ignoreDefaultFill {
-		fillDefaultValue(attrView, view, groupView, previousItemID, addingItemID)
+		fillDefaultValue(attrView, view, groupView, previousItemID, addingItemID, true)
 	}
 
 	// 处理日期字段默认填充当前创建时间
@@ -3376,8 +3401,8 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 	return
 }
 
-func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string) {
-	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousItemID, addingItemID)
+func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate bool) {
+	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousItemID, addingItemID, isCreate)
 	for keyID, newValue := range defaultValues {
 		newValue.BlockID = addingItemID
 		keyValues, getErr := attrView.GetKeyValues(keyID)
@@ -3956,7 +3981,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 			if isAcrossGroup {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
-					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
+					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID, false)
 
 					for i, r := range targetGroupView.GroupItemIDs {
 						if r == operation.PreviousID {

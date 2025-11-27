@@ -26,6 +26,7 @@ import {copyTextByType} from "../protyle/toolbar/util";
 import {hideElements} from "../protyle/ui/hideElements";
 import {Protyle} from "../protyle";
 import {getAllEditor} from "../layout/getAll";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -351,22 +352,34 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                     addDialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    if (!isValidAttrName(inputElement.value)) {
-                        showMessage(window.siyuan.languages.attrName + " <b>" + escapeHtml(inputElement.value) + "</b> " + window.siyuan.languages.invalid);
+                    const value = inputElement.value.toLowerCase();
+                    if (!isValidAttrName(value)) {
+                        showMessage(window.siyuan.languages.attrName + " <b>" + escapeHtml(value) + "</b> " + window.siyuan.languages.invalid);
                         return false;
                     }
-                    target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
+                    let existElement: HTMLElement | false;
+                    Array.from(dialog.element.querySelectorAll('.custom-attr[data-type="custom"] .b3-label .fn__flex-1')).find((labelItem: HTMLElement) => {
+                        if (labelItem.textContent === value) {
+                            existElement = hasClosestByClassName(labelItem, "b3-label");
+                            return true;
+                        }
+                    });
+                    if (existElement) {
+                        showMessage(window.siyuan.languages.hasAttrName.replace('${x}', value));
+                    } else {
+                        target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
     <div class="fn__flex">
-        <span class="fn__flex-1">${inputElement.value}</span>
+        <span class="fn__flex-1">${value}</span>
         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__hr"></div>
-    <textarea style="resize: vertical" spellcheck="false" data-name="custom-${inputElement.value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
+    <textarea style="resize: vertical" spellcheck="false" data-name="custom-${value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
 </div>`);
-                    const valueElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
-                    valueElement.focus();
-                    bindAttrInput(valueElement, attrs.id);
-                    addDialog.destroy();
+                        const newInputElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
+                        newInputElement.focus();
+                        bindAttrInput(newInputElement, attrs.id);
+                        addDialog.destroy();
+                    }
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -444,42 +457,42 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             }
         }
     },
-    /// #if BROWSER
-    {
-        id: "copyWebURL",
-        iconHTML: "",
-        label: window.siyuan.languages.copyWebURL,
-        click: () => {
-            copyTextByType(ids, "webURL");
-            if (focusElement) {
-                focusBlock(focusElement);
+        /// #if BROWSER
+        {
+            id: "copyWebURL",
+            iconHTML: "",
+            label: window.siyuan.languages.copyWebURL,
+            click: () => {
+                copyTextByType(ids, "webURL");
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
             }
-        }
-    },
-    /// #endif
-    {
-        id: "copyHPath",
-        iconHTML: "",
-        label: window.siyuan.languages.copyHPath,
-        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-        click: () => {
-            copyTextByType(ids, "hPath");
-            if (focusElement) {
-                focusBlock(focusElement);
+        },
+        /// #endif
+        {
+            id: "copyHPath",
+            iconHTML: "",
+            label: window.siyuan.languages.copyHPath,
+            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
+            click: () => {
+                copyTextByType(ids, "hPath");
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
             }
-        }
-    }, {
-        id: "copyID",
-        iconHTML: "",
-        label: window.siyuan.languages.copyID,
-        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
-        click: () => {
-            copyTextByType(ids, "id");
-            if (focusElement) {
-                focusBlock(focusElement);
+        }, {
+            id: "copyID",
+            iconHTML: "",
+            label: window.siyuan.languages.copyID,
+            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
+            click: () => {
+                copyTextByType(ids, "id");
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
             }
-        }
-    }];
+        }];
 
     if (stdMarkdownId) {
         menuItems.push({

@@ -1,4 +1,5 @@
 {
+  "hasAttrName": "El nombre del atributo ${x} ya existe",
   "statusBarMsgPushTip": "A través de los mensajes en la barra de estado puedes conocer al instante el funcionamiento del sistema, si te molestan puedes desactivarlos",
   "useBackground": "Rellenar el fondo de la columna con el color de la opción",
   "print": "Imprimir",

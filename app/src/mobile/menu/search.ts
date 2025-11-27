@@ -560,6 +560,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         types: getDefaultType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
+                    element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 });
                 window.siyuan.menus.menu.fullscreen();
                 event.stopPropagation();

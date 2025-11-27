@@ -446,7 +446,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         label: window.siyuan.languages.searchMethod,
         type: "submenu",
         submenu: [{
-            iconHTML: "",
+            icon: "iconExact",
             label: window.siyuan.languages.keyword,
             current: config.method === 0,
             click() {
@@ -455,7 +455,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconQuote",
             label: window.siyuan.languages.querySyntax,
             current: config.method === 1,
             click() {
@@ -464,7 +464,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconDatabase",
             label: "SQL",
             current: config.method === 2,
             click() {
@@ -473,7 +473,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconRegex",
             label: window.siyuan.languages.regex,
             current: config.method === 3,
             click() {

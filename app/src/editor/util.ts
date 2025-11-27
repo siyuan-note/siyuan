@@ -404,7 +404,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
-                        scrollCenter(editor.editor.protyle);
+                        scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                     }
                 });
                 setTimeout(() => {
@@ -416,7 +416,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             } else if (editor.editor.protyle.toolbar.range) {
                 nodeElement = hasClosestBlock(editor.editor.protyle.toolbar.range.startContainer) as Element;
                 focusByRange(editor.editor.protyle.toolbar.range);
-                scrollCenter(editor.editor.protyle);
+                scrollCenter(editor.editor.protyle, undefined, options.scrollPosition);
             }
         }
         pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);

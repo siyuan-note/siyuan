@@ -35,6 +35,7 @@ import {newCardModel} from "../card/newCardTab";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {clearOBG} from "../layout/dock/util";
 import {Model} from "../layout/Model";
+import {hideElements} from "../protyle/ui/hideElements";
 
 export const openFileById = async (options: {
     app: App,
@@ -420,6 +421,10 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             }
         }
         pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);
+    }
+    // https://github.com/siyuan-note/siyuan/issues/16445
+    if (options.action.includes(Constants.CB_GET_OUTLINE)) {
+        hideElements(["select"], editor.editor.protyle);
     }
     if (options.mode) {
         setEditMode(editor.editor.protyle, options.mode);

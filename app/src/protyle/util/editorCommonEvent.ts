@@ -36,6 +36,7 @@ import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
+import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
@@ -1174,6 +1175,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;
         }
+        stopScrollAnimation();
     });
     let dragoverElement: Element;
     let disabledPosition: string;
@@ -1196,12 +1198,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const contentRect = protyle.contentElement.getBoundingClientRect();
-        if (!hasClosestByClassName(event.target, "av__cell") &&
-            (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
-            protyle.contentElement.scroll({
-                top: protyle.contentElement.scrollTop + (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
-                behavior: "smooth"
-            });
+        if (!hasClosestByClassName(event.target, "av__cell")) {
+            dragOverScroll(event, contentRect, protyle.contentElement);
         }
         let targetElement: HTMLElement | false;
         // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
@@ -1597,6 +1595,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
             document.onmousemove = null;
         }
+        stopScrollAnimation();
     });
 };
 

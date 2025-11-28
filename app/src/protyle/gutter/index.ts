@@ -63,6 +63,7 @@ import * as path from "path";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
+import {stopScrollAnimation} from "../../boot/globalEvent/dragover";
 
 export class Gutter {
     public element: HTMLElement;
@@ -183,6 +184,7 @@ export class Gutter {
                 item.style.opacity = "";
             });
             window.siyuan.dragElement = undefined;
+            stopScrollAnimation();
         });
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLInputElement }) => {
             const buttonElement = hasClosestByTag(event.target, "BUTTON");

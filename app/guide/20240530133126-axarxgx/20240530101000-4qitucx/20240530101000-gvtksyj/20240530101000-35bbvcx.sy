@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20250330192711"
+		"updated": "20251021231004"
 	},
 	"Children": [
 		{
@@ -2905,7 +2905,7 @@
 			"Properties": {
 				"ID": "20240530101000-xaefotq",
 				"id": "20240530101000-y5kx7kx",
-				"updated": "20250330192723"
+				"updated": "20251021231004"
 			},
 			"Children": [
 				{
@@ -3056,6 +3056,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ を使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20251021231003-8yfhynt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251021231003-8yfhynt",
+				"updated": "20251021231004"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リスト項目はリスト間で移動できます。"
 				}
 			]
 		},

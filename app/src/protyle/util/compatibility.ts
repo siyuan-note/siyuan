@@ -2,7 +2,7 @@ import {focusByRange} from "./selection";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {clipboard} from "electron";
+import {clipboard, ipcRenderer} from "electron";
 /// #endif
 
 export const encodeBase64 = (text: string): string => {
@@ -98,8 +98,12 @@ export const readText = () => {
     } else if (isInHarmony()) {
         return window.JSHarmony.readClipboard();
     }
-    return navigator.clipboard.readText().catch((err) => {
-        alert(err);
+    if (typeof navigator.clipboard === "undefined") {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
+        return "";
+    }
+    return navigator.clipboard.readText().catch(() => {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
     }) || "";
 };
 
@@ -126,8 +130,33 @@ export const getLocalFiles = async () => {
 
 export const readClipboard = async () => {
     const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
+    if (isInAndroid()) {
+        text.textPlain = window.JSAndroid.readClipboard();
+        text.textHTML = window.JSAndroid.readHTMLClipboard();
+        const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+        text.textHTML = textObj.textHtml;
+        text.siyuanHTML = textObj.textSiyuan;
+        return text;
+    }
+    if (isInHarmony()) {
+        text.textPlain = window.JSHarmony.readClipboard();
+        text.textHTML = window.JSHarmony.readHTMLClipboard();
+        const textObj = getTextSiyuanFromTextHTML(text.textHTML);
+        text.textHTML = textObj.textHtml;
+        text.siyuanHTML = textObj.textSiyuan;
+        return text;
+    }
+    if (typeof navigator.clipboard === "undefined") {
+        alert(window.siyuan.languages.clipboardPermissionDenied);
+        return text;
+    }
     try {
-        const clipboardContents = await navigator.clipboard.read();
+        const clipboardContents = await navigator.clipboard.read().catch(() => {
+            alert(window.siyuan.languages.clipboardPermissionDenied);
+        });
+        if (!clipboardContents) {
+            return text;
+        }
         for (const item of clipboardContents) {
             if (item.types.includes("text/html")) {
                 const blob = await item.getType("text/html");
@@ -152,19 +181,6 @@ export const readClipboard = async () => {
         /// #endif
         return text;
     } catch (e) {
-        if (isInAndroid()) {
-            text.textPlain = window.JSAndroid.readClipboard();
-            text.textHTML = window.JSAndroid.readHTMLClipboard();
-            const textObj = getTextSiyuanFromTextHTML(text.textHTML);
-            text.textHTML = textObj.textHtml;
-            text.siyuanHTML = textObj.textSiyuan;
-        } else if (isInHarmony()) {
-            text.textPlain = window.JSHarmony.readClipboard();
-            text.textHTML = window.JSHarmony.readHTMLClipboard();
-            const textObj = getTextSiyuanFromTextHTML(text.textHTML);
-            text.textHTML = textObj.textHtml;
-            text.siyuanHTML = textObj.textSiyuan;
-        }
         return text;
     }
 };
@@ -286,6 +302,15 @@ export const isWin11 = async () => {
     return false;
 };
 
+export const getScreenWidth = () => {
+    if (isInAndroid()) {
+        return window.JSAndroid.getScreenWidthPx();
+    } else if (isInHarmony()) {
+        return window.JSHarmony.getScreenWidthPx();
+    }
+    return window.outerWidth;
+};
+
 export const isWindows = () => {
     return navigator.platform.toUpperCase().indexOf("WIN") > -1;
 };
@@ -302,42 +327,33 @@ export const isInHarmony = () => {
     return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 };
 
-export const updateHotkeyAfterTip = (hotkey: string) => {
+export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
     if (hotkey) {
-        return " " + updateHotkeyTip(hotkey);
+        return split + updateHotkeyTip(hotkey);
     }
     return "";
 };
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {
-    if (isMac()) {
+    if (!hotkey || isMac()) {
         return hotkey;
     }
-
-    const KEY_MAP = new Map(Object.entries({
-        "⌘": "Ctrl",
-        "⌃": "Ctrl",
-        "⇧": "Shift",
-        "⌥": "Alt",
-        "⇥": "Tab",
-        "⌫": "Backspace",
-        "⌦": "Delete",
-        "↩": "Enter",
-    }));
-
     const keys = [];
-
-    if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push(KEY_MAP.get("⌘"));
-    if (hotkey.indexOf("⇧") > -1) keys.push(KEY_MAP.get("⇧"));
-    if (hotkey.indexOf("⌥") > -1) keys.push(KEY_MAP.get("⌥"));
+    if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push("Ctrl");
+    if (hotkey.indexOf("⇧") > -1) keys.push("Shift");
+    if (hotkey.indexOf("⌥") > -1) keys.push( "Alt");
 
     // 不能去最后一个，需匹配 F2
-    const lastKey = hotkey.replace(/⌘|⇧|⌥|⌃/g, "");
+    const lastKey = hotkey.replace(/[⌘⇧⌥⌃]/g, "");
     if (lastKey) {
-        keys.push(KEY_MAP.get(lastKey) || lastKey);
+        keys.push({
+            "⇥": "Tab",
+            "⌫": "Backspace",
+            "⌦": "Delete",
+            "↩": "Enter"
+        }[lastKey] || lastKey);
     }
-
     return keys.join("+");
 };
 
@@ -383,7 +399,7 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGIN_DOCKS] = {};  // { pluginName: {dockId: IPluginDockTab}}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
-        defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};
+        defaultStorage[Constants.LOCAL_OUTLINE] = {keepCurrentExpand: false};
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {
@@ -460,6 +476,7 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
         defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
+        defaultStorage[Constants.LOCAL_RECENT_DOCS] = {type: "viewedAt"};   // TRecentDocsSort
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
@@ -467,7 +484,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH].forEach((key) => {
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);
@@ -494,7 +511,7 @@ export const getLocalStorage = (cb: () => void) => {
 };
 
 export const setStorageVal = (key: string, val: any, cb?: () => void) => {
-    if (window.siyuan.config.readonly) {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
     fetchPost("/api/storage/setLocalStorageVal", {
@@ -507,3 +524,38 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
         }
     });
 };
+
+/// #if !BROWSER
+export const initFocusFix = () => {
+    if (!isWindows()) {
+        return;
+    }
+    const originalAlert = window.alert;
+    const originalConfirm = window.confirm;
+    const fixFocusAfterDialog = () => {
+        ipcRenderer.send("siyuan-focus-fix");
+    };
+    window.alert = function (message: string) {
+        try {
+            const result = originalAlert.call(this, message);
+            fixFocusAfterDialog();
+            return result;
+        } catch (error) {
+            console.error("alert error:", error);
+            fixFocusAfterDialog();
+            return undefined;
+        }
+    };
+    window.confirm = function (message: string) {
+        try {
+            const result = originalConfirm.call(this, message);
+            fixFocusAfterDialog();
+            return result;
+        } catch (error) {
+            console.error("confirm error:", error);
+            fixFocusAfterDialog();
+            return false;
+        }
+    };
+};
+/// #endif

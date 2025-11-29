@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20250330192550"
+		"updated": "20251021230320"
 	},
 	"Children": [
 		{
@@ -2644,7 +2644,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-wqiaxdu",
-				"updated": "20250330192559"
+				"updated": "20251020145747"
 			},
 			"Children": [
 				{
@@ -2772,6 +2772,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20251020145738-y544vzd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251020145738-y544vzd",
+				"updated": "20251020145747"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "List items can be moved between lists."
 				}
 			]
 		},
@@ -2988,16 +3002,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-clx67q4",
-				"updated": "20250330192605"
+				"updated": "20251021230320"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "Documentation block"
+					"Data": "Document block"
 				}
 			]
 		},

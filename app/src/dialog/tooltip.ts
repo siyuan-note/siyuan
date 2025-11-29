@@ -53,9 +53,9 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         if (left < 0) {
             left = targetRect.right;
         }
-    } else if (position === "north") {
-        // north: av 视图，列，多选描述
-        const positionDiff = 0.5;
+    } else if (position?.endsWith("north")) {
+        // north: av 视图，列，多选描述, protyle-icon
+        const positionDiff = parseInt(position) || 0.5;
         left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
         top = targetRect.top - messageElement.clientHeight - positionDiff;
         if (top < 0) {

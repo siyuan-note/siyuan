@@ -20,15 +20,16 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 	}
 
 	ret = &av.Kanban{
-		BaseInstance:        av.NewViewBaseInstance(view),
-		CoverFrom:           view.Kanban.CoverFrom,
-		CoverFromAssetKeyID: view.Kanban.CoverFromAssetKeyID,
-		CardAspectRatio:     view.Kanban.CardAspectRatio,
-		CardSize:            view.Kanban.CardSize,
-		FitImage:            view.Kanban.FitImage,
-		DisplayFieldName:    view.Kanban.DisplayFieldName,
-		Fields:              []*av.KanbanField{},
-		Cards:               []*av.KanbanCard{},
+		BaseInstance:           av.NewViewBaseInstance(view),
+		CoverFrom:              view.Kanban.CoverFrom,
+		CoverFromAssetKeyID:    view.Kanban.CoverFromAssetKeyID,
+		CardAspectRatio:        view.Kanban.CardAspectRatio,
+		CardSize:               view.Kanban.CardSize,
+		FitImage:               view.Kanban.FitImage,
+		DisplayFieldName:       view.Kanban.DisplayFieldName,
+		FillColBackgroundColor: view.Kanban.FillColBackgroundColor,
+		Fields:                 []*av.KanbanField{},
+		Cards:                  []*av.KanbanCard{},
 	}
 
 	// 组装字段
@@ -56,6 +57,8 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 				Relation:     key.Relation,
 				Rollup:       key.Rollup,
 				Date:         key.Date,
+				Created:      key.Created,
+				Updated:      key.Updated,
 			},
 		})
 	}

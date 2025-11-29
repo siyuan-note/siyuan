@@ -611,13 +611,14 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 data.new.style += ";animation:addCard 450ms linear";
             }
             Object.keys(data.new).forEach(key => {
-                if ("id" === key) {
+                if ("id" === key || "av-names" === key) {
                     // 设置属性以后不应该给块元素添加 id 属性 No longer add the `id` attribute to block elements after setting the attribute https://github.com/siyuan-note/siyuan/issues/15327
+                    // av-names 属性仅用于生成角标，不添加到元素
                     return;
                 }
 
                 item.setAttribute(key, data.new[key]);
-                if (key === Constants.CUSTOM_RIFF_DECKS && data.new[Constants.CUSTOM_RIFF_DECKS] !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
+                if (key === Constants.CUSTOM_RIFF_DECKS && key !== data.old[Constants.CUSTOM_RIFF_DECKS]) {
                     item.style.animation = "addCard 450ms linear";
                     setTimeout(() => {
                         if (item.parentElement) {
@@ -878,7 +879,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "setAttrViewBlockView", "setAttrViewCardSize", "setAttrViewCardAspectRatio", "hideAttrViewName", "setAttrViewShowIcon",
         "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
         "foldAttrViewGroup", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName",
-        "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime"].includes(operation.action)) {
+        "insertAttrViewBlock", "setAttrViewColDateFillSpecificTime", "setAttrViewFillColBackgroundColor", "setAttrViewUpdatedIncludeTime",
+        "setAttrViewCreatedIncludeTime"].includes(operation.action)) {
         // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
         if (!isUndo) {
             refreshAV(protyle, operation);
@@ -1023,7 +1025,7 @@ export const turnsIntoTransaction = (options: {
     range?: Range
 }) => {
     // https://github.com/siyuan-note/siyuan/issues/14505
-    options.protyle.observerLoad.disconnect();
+    options.protyle.observerLoad?.disconnect();
     let selectsElement: Element[] = options.selectsElement;
     let range: Range;
     // 通过快捷键触发
@@ -1065,7 +1067,7 @@ export const turnsIntoTransaction = (options: {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId: string;
-    selectsElement.forEach((item, index) => {
+    selectsElement.forEach((item: HTMLElement, index) => {
         item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
@@ -1075,7 +1077,7 @@ export const turnsIntoTransaction = (options: {
         const tempElement = document.createElement("template");
         if (!options.isContinue) {
             // @ts-ignore
-            const newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
+            let newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
             tempElement.innerHTML = newHTML;
 
             if (!tempElement.content.querySelector(`[data-node-id="${id}"]`)) {
@@ -1110,6 +1112,15 @@ export const turnsIntoTransaction = (options: {
                     previousId = undefined;
                 }
             } else {
+                let foldData;
+                if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
+                    tempElement.content.firstElementChild.getAttribute("data-subtype") !== item.dataset.subtype) {
+                    foldData = setFold(options.protyle, item, undefined, undefined, false, true);
+                    newHTML = newHTML.replace(' fold="1"', "");
+                }
+                if (foldData && foldData.doOperations?.length > 0) {
+                    doOperations.push(...foldData.doOperations);
+                }
                 undoOperations.push({
                     action: "update",
                     id,
@@ -1120,6 +1131,9 @@ export const turnsIntoTransaction = (options: {
                     id,
                     data: newHTML
                 });
+                if (foldData && foldData.undoOperations?.length > 0) {
+                    undoOperations.push(...foldData.undoOperations);
+                }
             }
             item.outerHTML = newHTML;
         } else {
@@ -1405,7 +1419,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             if (operation.context?.focusId) {
                 const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.context.focusId}"]`);
                 focusBlock(focusElement);
-                scrollCenter(protyle, focusElement, false);
+                scrollCenter(protyle, focusElement);
             } else {
                 protyle.contentElement.scrollTop = scrollTop;
                 protyle.scroll.lastScrollTop = scrollTop;

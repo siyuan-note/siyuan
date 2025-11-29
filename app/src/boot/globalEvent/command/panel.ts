@@ -66,7 +66,7 @@ export const commandPanel = (app: App) => {
             "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev", "lockScreen",
             "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow",
             "splitLR", "splitMoveB", "splitMoveR", "splitTB", "tabToWindow", "stickSearch", "toggleDock", "unsplitAll",
-            "unsplit"];
+            "unsplit", "recentClosed"];
         /// #if !BROWSER
         keys.push("toggleWin");
         /// #endif
@@ -442,7 +442,7 @@ export const execByCommand = async (options: {
         case "move":
             if (!isFileFocus) {
                 const nodeElement = hasClosestBlock(range.startContainer);
-                if (protyle.title?.editElement.contains(range.startContainer) || !nodeElement || window.siyuan.menus.menu.element.getAttribute("data-name") === "titleMenu") {
+                if (protyle.title?.editElement.contains(range.startContainer) || !nodeElement || window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
                     movePathTo((toPath, toNotebook) => {
                         moveToPath([protyle.path], toNotebook[0], toPath[0]);
                     }, [protyle.path], range);

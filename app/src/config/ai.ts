@@ -10,7 +10,7 @@ export const ai = {
     <div class="b3-label__text">
         ${window.siyuan.languages.apiProviderTip}
     </div>
-    <div class="b3-label__text fn__flex config__item" style="padding: 4px 0 4px 4px;">
+    <div class="b3-label__text fn__flex config__item">
         <select id="apiProvider" class="b3-select">
             <option value="OpenAI" ${window.siyuan.config.ai.openAI.apiProvider === "OpenAI" ? "selected" : ""}>OpenAI</option>
             <option value="Azure" ${window.siyuan.config.ai.openAI.apiProvider === "Azure" ? "selected" : ""}>Azure</option>

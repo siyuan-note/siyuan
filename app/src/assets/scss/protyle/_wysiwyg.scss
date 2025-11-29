@@ -508,14 +508,11 @@
     &.iframe {
       // https://ld246.com/article/1644827326901
       // https://github.com/siyuan-note/siyuan/issues/4172
-      &[data-type="NodeWidget"] .iframe-content,
-      &[data-type="NodeIFrame"] .iframe-content {
-        -webkit-user-modify: read-only;
-      }
-
-      .iframe-content {
-        display: inline-block;
-        position: relative;
+      &[data-type="NodeWidget"],
+      &[data-type="NodeIFrame"] {
+        .iframe-content {
+          -webkit-user-modify: read-only;
+        }
       }
 
       &--drag {
@@ -615,6 +612,10 @@
         max-width: 25vw;
       }
     }
+
+    .b3-tooltips::after {
+      max-width: var(--b3-width-protyle-wysiwyg);
+    }
   }
 
   &--animate {
@@ -709,8 +710,8 @@
   }
 }
 
-// 只读情况下列表前的圆点需要可以点击进行缩放
 .protyle .protyle-wysiwyg {
+  // 只读情况下列表前的圆点需要可以点击进行缩放
   .li[data-subtype="o"] > .protyle-action,
   .li[data-subtype="u"] > .protyle-action,
   &[data-readonly="false"] .li[data-subtype="t"] > .protyle-action {
@@ -723,6 +724,11 @@
 
       color: var(--b3-theme-on-background);
     }
+  }
+
+  // 复制粘贴序号会状态异常 https://ld246.com/article/1762691143057
+  .li > .protyle-action {
+    user-select: none;
   }
 }
 

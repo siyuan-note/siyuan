@@ -13,10 +13,10 @@ export class Tree {
     private topExtHTML: string;
 
     public click: (element: Element, event?: MouseEvent) => void;
-    private ctrlClick: (element: HTMLElement) => void;
+    private ctrlClick: (element: HTMLElement, event: MouseEvent) => void;
     private toggleClick: (element: Element) => void;
     private shiftClick: (element: HTMLElement) => void;
-    private altClick: (element: HTMLElement) => void;
+    private altClick: (element: HTMLElement, event: MouseEvent) => void;
     private rightClick: (element: HTMLElement, event: MouseEvent) => void;
 
     constructor(options: {
@@ -25,8 +25,8 @@ export class Tree {
         blockExtHTML?: string,
         topExtHTML?: string,
         click?(element: HTMLElement, event: MouseEvent): void
-        ctrlClick?(element: HTMLElement): void
-        altClick?(element: HTMLElement): void
+        ctrlClick?(element: HTMLElement, event: MouseEvent): void
+        altClick?(element: HTMLElement, event: MouseEvent): void
         shiftClick?(element: HTMLElement): void
         toggleClick?(element: HTMLElement): void
         rightClick?(element: HTMLElement, event: MouseEvent): void
@@ -54,7 +54,7 @@ export class Tree {
         }
     }
 
-    private genHTML(data: IBlockTree[]) {
+    private genHTML(data: (IBlockTree & { folded?: boolean })[]) {
         let html = `<ul${data[0].depth === 0 ? " class='b3-list b3-list--background'" : ""}>`;
         data.forEach((item) => {
             let titleTip = "";
@@ -94,7 +94,7 @@ data-type="${item.nodeType}"
 data-subtype="${item.subType}" 
 ${item.label ? "data-label='" + item.label + "'" : ""}>
     <span style="${style}" class="b3-list-item__toggle${showArrow ? " b3-list-item__toggle--hl" : ""}${showArrow ? "" : " fn__hidden"}">
-        <svg data-id="${item.id || encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${hasChild ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
+        <svg data-id="${item.id || encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${(item.type === "outline" ? !item.folded : hasChild) ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text ariaLabel" data-position="parentE"${titleTip}>${item.name}</span>
@@ -105,7 +105,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
                 html += this.genHTML(item.children) + "</ul>";
             }
             if (item.blocks && item.blocks.length > 0) {
-                html += this.genBlockHTML(item.blocks, true, item.type) + "</ul>";
+                html += this.genBlockHTML(item.blocks, item.type === "outline" ? !item.folded : true, item.type) + "</ul>";
             }
         });
         return html;
@@ -116,6 +116,7 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
         data.forEach((item: IBlock & {
             subType: string;
             count: string;
+            folded?: boolean
             ial?: {
                 icon: string
             }
@@ -152,7 +153,7 @@ data-subtype="${item.subType}"
 data-treetype="${type}" 
 data-def-path="${item.defPath}">
     <span style="${style}" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}${item.children ? "" : " fn__hidden"}">
-        <svg data-id="${item.id}" class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        <svg data-id="${item.id}" class="b3-list-item__arrow${(type === "outline" ? !item.folded : show) ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${iconHTML}
     <span class="b3-list-item__text ariaLabel" data-position="parentE" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
@@ -160,7 +161,7 @@ data-def-path="${item.defPath}">
     ${this.blockExtHTML || ""}
 </li>`;
             if (item.children && item.children.length > 0) {
-                html += this.genBlockHTML(item.children, false, type) + "</ul>";
+                html += this.genBlockHTML(item.children, type === "outline" ? !item.folded : false, type) + "</ul>";
             }
         });
         return html;
@@ -216,7 +217,8 @@ data-def-path="${item.defPath}">
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.classList.contains("b3-list-item__toggle") && !target.classList.contains("fn__hidden")) {
+                if (target.classList.contains("b3-list-item__toggle") &&
+                    !target.classList.contains("fn__hidden") && !window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed) {
                     this.toggleBlocks(target.parentElement);
                     this.setCurrent(target.parentElement);
                     event.preventDefault();
@@ -235,9 +237,9 @@ data-def-path="${item.defPath}">
                     this.setCurrent(target);
                     if (target.getAttribute("data-node-id") || target.getAttribute("data-treetype") === "tag") {
                         if (this.ctrlClick && window.siyuan.ctrlIsPressed) {
-                            this.ctrlClick(target);
+                            this.ctrlClick(target, event);
                         } else if (this.altClick && window.siyuan.altIsPressed) {
-                            this.altClick(target);
+                            this.altClick(target, event);
                         } else if (this.shiftClick && window.siyuan.shiftIsPressed) {
                             this.shiftClick(target);
                         } else if (this.click) {
@@ -302,6 +304,9 @@ data-def-path="${item.defPath}">
     }
 
     public setExpandIds(ids: string[]) {
+        if (!ids || ids.length === 0) {
+            return;
+        }
         this.element.querySelectorAll(".b3-list-item__arrow").forEach(item => {
             if (ids.includes(item.getAttribute("data-id"))) {
                 item.classList.add("b3-list-item__arrow--open");

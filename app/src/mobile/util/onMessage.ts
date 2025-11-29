@@ -11,10 +11,18 @@ import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
 import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
 import {updateControlAlt} from "../../protyle/util/hotKey";
+import {renderSnippet} from "../../config/util/snippets";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "setAppearance":
+                window.location.reload();
+                break;
+            case "setSnippet":
+                window.siyuan.config.snippet = data.data;
+                renderSnippet();
+                break;
             case "setDefRefCount":
                 setDefRefCount(data.data);
                 break;

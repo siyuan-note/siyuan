@@ -34,15 +34,6 @@
     border: 0;
   }
 
-  iframe {
-    border: 1px solid var(--b3-theme-surface-lighter);
-    width: 765px;
-    box-sizing: border-box;
-    height: 256px;
-    max-width: 100%;
-    vertical-align: bottom;
-  }
-
   span[data-type~="sup"],
   span[data-type~="sub"] {
     position: relative;
@@ -413,6 +404,29 @@
   [data-subtype="plantuml"],
   [data-subtype="abc"] {
     text-align: center;
+  }
+
+  [data-type="NodeIFrame"],
+  [data-type="NodeWidget"] {
+    height: 256px;
+    width: 100%;
+    max-width: 100%;
+
+    .iframe-content {
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--b3-theme-surface-lighter);
+      box-sizing: border-box;
+      max-width: 100%;
+      min-height: 100%;
+      max-height: 100%;
+    }
   }
 
   [data-subtype="flowchart"] > [spin="1"],

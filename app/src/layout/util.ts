@@ -16,7 +16,6 @@ import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/s
 import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {Constants} from "../constants";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Backlink} from "./dock/Backlink";
@@ -65,13 +64,6 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
                 return true;
             }
         });
-        const blockElement = hasClosestBlock(document.activeElement);
-        if (blockElement) {
-            const editElement = getContenteditableElement(blockElement) as HTMLElement;
-            if (editElement) {
-                editElement.blur();
-            }
-        }
     }
 };
 
@@ -723,6 +715,7 @@ export const resizeTopBar = () => {
     });
 };
 
+// TODO: 需支持所有页签类型，避免其他类型页签没有使用到而加载
 export const newModelByInitData = (app: App, tab: Tab, json: any) => {
     let model: Model;
     if (json.instance === "Custom") {
@@ -757,6 +750,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
+            scrollPosition: json.scrollPosition,
             action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
         });
     }
@@ -986,23 +980,21 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             item.element.style.minWidth = "";
         }
     });
-    let lastItem: HTMLElement;
-    let index = Math.floor(window.innerWidth / 24);
-    // +2 由于某些分辨率下 scrollWidth 会大于 clientWidth
-    while (layout.element.scrollWidth > layout.element.clientWidth + 2 && index > 0) {
-        layout.children.find((item: Layout | Wnd) => {
-            if (item.element.style.width && item.element.style.width !== "0px") {
-                item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
-                lastItem = item.element;
+    if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2 ) {
+        let index = Math.ceil(screen.width / 8);
+        while (index > 0) {
+            let width = 0;
+            layout.children.find((item: Layout | Wnd) => {
+                if (item.element.style.width && item.element.style.width !== "0px") {
+                    item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
+                }
+                width += item.element.clientWidth;
+            });
+            index--;
+            if (width <= layout.element.clientWidth) {
+                break;
             }
-            if (layout.element.scrollWidth <= layout.element.clientWidth + 2) {
-                return true;
-            }
-        });
-        index--;
-    }
-    if (lastItem) {
-        lastItem.style.maxWidth = Math.max(Math.min(lastItem.clientWidth, window.innerWidth) - 8, 64) + "px";
+        }
     }
     layout.children.forEach((item: Layout | Wnd) => {
         if (item instanceof Layout && item.size !== "0px") {

@@ -188,6 +188,8 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
         });
         cb();
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
 };
@@ -223,18 +225,20 @@ export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             config.replaceTypes[item.getAttribute("data-type") as keyof (typeof config.replaceTypes)] = item.checked;
         });
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
 };
 
 export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_SEARCH_METHOD) {
         window.siyuan.menus.menu.remove();
         return;
     }
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMethod");
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_SEARCH_METHOD);
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconExact",
         label: window.siyuan.languages.keyword,
@@ -406,12 +410,12 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                                removeCriterion: () => void,
                                layoutMenu?: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMore") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_SEARCH_MORE) {
         window.siyuan.menus.menu.remove();
         return;
     }
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMore");
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_SEARCH_MORE);
     /// #if MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",

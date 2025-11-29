@@ -22,7 +22,7 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
         return element.getAttribute("data-col-id");
-    } else if (viewType === "gallery") {
+    } else if (["gallery", "kanban"].includes(viewType)) {
         return element.getAttribute("data-field-id");
     }
 };
@@ -187,6 +187,13 @@ export const getEditHTML = (options: {
     <span class="fn__flex-center">${window.siyuan.languages.fillSpecificTime}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="fillSpecificTime" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.fillSpecificTime ? "checked" : ""}>
+</label>`;
+    } else if (["updated", "created"].includes(colData.type)) {
+        html += `<button class="b3-menu__separator" data-id="separator_2"></button>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.includeTime}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="includeTime" type="checkbox" class="b3-switch b3-switch--menu" ${(!colData[colData.type as "updated"] || colData[colData.type as "updated"].includeTime) ? "checked" : ""}>
 </label>`;
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
@@ -365,6 +372,28 @@ export const bindEditEvent = (options: {
         });
     }
 
+    const includeTimeElement = options.menuElement.querySelector('.b3-switch[data-type="includeTime"]') as HTMLInputElement;
+    if (includeTimeElement) {
+        includeTimeElement.addEventListener("change", () => {
+            transaction(options.protyle, [{
+                action: colData.type === "updated" ? "setAttrViewUpdatedIncludeTime" : "setAttrViewCreatedIncludeTime",
+                id: colId,
+                avID,
+                data: includeTimeElement.checked,
+            }], [{
+                action: colData.type === "updated" ? "setAttrViewUpdatedIncludeTime" : "setAttrViewCreatedIncludeTime",
+                id: colId,
+                avID,
+                data: !includeTimeElement.checked,
+            }]);
+            if (colData[colData.type as "updated"]) {
+                colData[colData.type as "updated"].includeTime = includeTimeElement.checked;
+            } else {
+                colData[colData.type as "updated"] = {includeTime: includeTimeElement.checked};
+            }
+        });
+    }
+
     const wrapElement = options.menuElement.querySelector('.b3-switch[data-type="wrap"]') as HTMLInputElement;
     if (wrapElement) {
         wrapElement.addEventListener("change", () => {
@@ -373,12 +402,14 @@ export const bindEditEvent = (options: {
                 id: colId,
                 avID,
                 data: wrapElement.checked,
-                blockID: options.blockID
+                blockID: options.blockID,
+                viewID: options.data.viewID,
             }], [{
                 action: "setAttrViewColWrap",
                 id: colId,
                 avID,
                 data: !wrapElement.checked,
+                viewID: options.data.viewID,
                 blockID: options.blockID
             }]);
             colData.wrap = wrapElement.checked;
@@ -664,9 +695,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
     const blockID = blockElement.getAttribute("data-node-id");
+    const viewID = blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
     const oldDesc = cellElement.dataset.desc;
-    const menu = new Menu("av-header-cell", () => {
+    const menu = new Menu(Constants.MENU_AV_HEADER_CELL, () => {
         const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
         if (newValue !== oldValue) {
             transaction(protyle, [{
@@ -946,7 +978,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 action: "syncAttrViewTableColWidth",
                 keyID: colId,
                 avID,
-                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                id: viewID,
             }]);
         }
     });
@@ -963,13 +995,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     id: colId,
                     avID,
                     data: wrapElement.checked,
-                    blockID
+                    blockID,
+                    viewID
                 }], [{
                     action: "setAttrViewColWrap",
                     id: colId,
                     avID,
                     data: !wrapElement.checked,
-                    blockID
+                    blockID,
+                    viewID
                 }]);
                 menu.close();
             });
@@ -1022,7 +1056,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     }, (response) => {
                         duplicateCol({
                             blockElement,
-                            viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            viewID,
                             protyle,
                             colId,
                             data: response.data
@@ -1235,7 +1269,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
 };
 
 export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: string) => {
-    const menu = new Menu("av-header-add");
+    const menu = new Menu(Constants.MENU_AV_HEADER_ADD);
     const avID = blockElement.getAttribute("data-av-id");
     if (typeof previousID === "undefined" && blockElement.getAttribute("data-av-type") === "table") {
         previousID = Array.from(blockElement.querySelectorAll(".av__row--header .av__cell")).pop().getAttribute("data-col-id");

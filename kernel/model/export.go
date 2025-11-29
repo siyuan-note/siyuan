@@ -130,11 +130,23 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 					}
 				} else if av.KeyTypeCreated == cell.Value.Type {
 					if nil != cell.Value.Created {
-						cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone)
+						key, _ := attrView.GetKey(cell.Value.KeyID)
+						isNotTime := false
+						if nil != key && nil != key.Created {
+							isNotTime = !key.Created.IncludeTime
+						}
+
+						cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone, isNotTime)
 					}
 				} else if av.KeyTypeUpdated == cell.Value.Type {
 					if nil != cell.Value.Updated {
-						cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
+						key, _ := attrView.GetKey(cell.Value.KeyID)
+						isNotTime := false
+						if nil != key && nil != key.Updated {
+							isNotTime = !key.Updated.IncludeTime
+						}
+
+						cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone, isNotTime)
 					}
 				} else if av.KeyTypeMAsset == cell.Value.Type {
 					if nil != cell.Value.MAsset {
@@ -766,7 +778,8 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	if 1 == Conf.Appearance.Mode {
 		theme = Conf.Appearance.ThemeDark
 	}
-	srcs = []string{"icons", "themes/" + theme}
+	// 复制主题文件夹
+	srcs = []string{"themes/" + theme}
 	appearancePath := util.AppearancePath
 	if util.IsSymlinkPath(util.AppearancePath) {
 		// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
@@ -784,6 +797,35 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		if err := filelock.Copy(from, to); err != nil {
 			logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
 			return
+		}
+	}
+
+	// 只复制图标文件夹中的 icon.js 文件
+	iconName := Conf.Appearance.Icon
+	// 如果使用的不是内建图标（ant 或 material），需要复制 material 作为后备
+	if iconName != "ant" && iconName != "material" && iconName != "" {
+		srcIconFile := filepath.Join(appearancePath, "icons", "material", "icon.js")
+		toIconDir := filepath.Join(savePath, "appearance", "icons", "material")
+		if err := os.MkdirAll(toIconDir, 0755); err != nil {
+			logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
+			return
+		}
+		toIconFile := filepath.Join(toIconDir, "icon.js")
+		if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
+			logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
+		}
+	}
+	// 复制当前使用的图标文件
+	if iconName != "" {
+		srcIconFile := filepath.Join(appearancePath, "icons", iconName, "icon.js")
+		toIconDir := filepath.Join(savePath, "appearance", "icons", iconName)
+		if err := os.MkdirAll(toIconDir, 0755); err != nil {
+			logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
+			return
+		}
+		toIconFile := filepath.Join(toIconDir, "icon.js")
+		if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
+			logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
 		}
 	}
 
@@ -930,7 +972,8 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		if 1 == Conf.Appearance.Mode {
 			theme = Conf.Appearance.ThemeDark
 		}
-		srcs = []string{"icons", "themes/" + theme}
+		// 复制主题文件夹
+		srcs = []string{"themes/" + theme}
 		appearancePath := util.AppearancePath
 		if util.IsSymlinkPath(util.AppearancePath) {
 			// Support for symlinked theme folder when exporting HTML https://github.com/siyuan-note/siyuan/issues/9173
@@ -946,6 +989,35 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			to := filepath.Join(savePath, "appearance", src)
 			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
+			}
+		}
+
+		// 只复制图标文件夹中的 icon.js 文件
+		iconName := Conf.Appearance.Icon
+		// 如果使用的不是内建图标（ant 或 material），需要复制 material 作为后备
+		if iconName != "ant" && iconName != "material" && iconName != "" {
+			srcIconFile := filepath.Join(appearancePath, "icons", "material", "icon.js")
+			toIconDir := filepath.Join(savePath, "appearance", "icons", "material")
+			if err := os.MkdirAll(toIconDir, 0755); err != nil {
+				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
+				return
+			}
+			toIconFile := filepath.Join(toIconDir, "icon.js")
+			if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
+				logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
+			}
+		}
+		// 复制当前使用的图标文件
+		if iconName != "" {
+			srcIconFile := filepath.Join(appearancePath, "icons", iconName, "icon.js")
+			toIconDir := filepath.Join(savePath, "appearance", "icons", iconName)
+			if err := os.MkdirAll(toIconDir, 0755); err != nil {
+				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
+				return
+			}
+			toIconFile := filepath.Join(toIconDir, "icon.js")
+			if err := filelock.Copy(srcIconFile, toIconFile); err != nil {
+				logging.LogWarnf("copy icon file from [%s] to [%s] failed: %s", srcIconFile, toIconFile, err)
 			}
 		}
 
@@ -1008,35 +1080,30 @@ func prepareExportTree(bt *treenode.BlockTree) (ret *parse.Tree) {
 
 func processIFrame(tree *parse.Tree) {
 	// 导出 PDF/Word 时 IFrame 块使用超链接 https://github.com/siyuan-note/siyuan/issues/4035
-	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
+		if !entering || ast.NodeIFrame != n.Type {
 			return ast.WalkContinue
 		}
-		if ast.NodeIFrame == n.Type {
-			index := bytes.Index(n.Tokens, []byte("src=\""))
-			if 0 > index {
-				n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: n.Tokens})
-			} else {
-				src := n.Tokens[index+len("src=\""):]
-				src = src[:bytes.Index(src, []byte("\""))]
-				src = html.UnescapeHTML(src)
-				link := &ast.Node{Type: ast.NodeLink}
-				link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-				link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: src})
-				link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-				link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-				link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: src})
-				link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
-				n.InsertBefore(link)
-			}
-			unlinks = append(unlinks, n)
+
+		n.Type = ast.NodeParagraph
+		index := bytes.Index(n.Tokens, []byte("src=\""))
+		if 0 > index {
+			n.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: n.Tokens})
+		} else {
+			src := n.Tokens[index+len("src=\""):]
+			src = src[:bytes.Index(src, []byte("\""))]
+			src = html.UnescapeHTML(src)
+			link := &ast.Node{Type: ast.NodeLink}
+			link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+			link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: src})
+			link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+			link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+			link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: src})
+			link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+			n.AppendChild(link)
 		}
 		return ast.WalkContinue
 	})
-	for _, n := range unlinks {
-		n.Unlink()
-	}
 }
 
 func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
@@ -2109,6 +2176,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	}
 
 	currentDocDir := path.Dir(tree.HPath)
+	currentDocDir = util.FilterFilePath(currentDocDir)
 
 	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2162,11 +2230,22 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 							href = "#" + defID
 						}
 					}
-					newHref := strings.TrimPrefix(href, currentDocDir)
-					if !strings.HasPrefix(newHref, ".md") {
-						href = newHref
+
+					sameDir := path.Dir(href) == currentDocDir
+					if strings.HasPrefix(href, "#") {
+						sameDir = true
 					}
 					href = util.FilterFilePath(href)
+					if !sameDir {
+						var relErr error
+						href, relErr = filepath.Rel(currentDocDir, href)
+						if nil != relErr {
+							logging.LogWarnf("get relative path from [%s] to [%s] failed: %s", currentDocDir, href, relErr)
+						}
+						href = filepath.ToSlash(href)
+					} else {
+						href = strings.TrimPrefix(href, currentDocDir+"/")
+					}
 					blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: href}
 					blockRefLink.KramdownIAL = n.KramdownIAL
 					n.InsertBefore(blockRefLink)
@@ -2647,11 +2726,23 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 						}
 					} else if av.KeyTypeCreated == cell.Value.Type {
 						if nil != cell.Value.Created {
-							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone)
+							key, _ := attrView.GetKey(cell.Value.KeyID)
+							isNotTime := false
+							if nil != key && nil != key.Created {
+								isNotTime = !key.Created.IncludeTime
+							}
+
+							cell.Value.Created = av.NewFormattedValueCreated(cell.Value.Created.Content, 0, av.CreatedFormatNone, isNotTime)
 						}
 					} else if av.KeyTypeUpdated == cell.Value.Type {
 						if nil != cell.Value.Updated {
-							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
+							key, _ := attrView.GetKey(cell.Value.KeyID)
+							isNotTime := false
+							if nil != key && nil != key.Updated {
+								isNotTime = !key.Updated.IncludeTime
+							}
+
+							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone, isNotTime)
 						}
 					} else if av.KeyTypeURL == cell.Value.Type {
 						if nil != cell.Value.URL {

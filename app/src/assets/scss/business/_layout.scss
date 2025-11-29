@@ -91,7 +91,7 @@
   }
 
   &__tab--active {
-    .b3-list--background .b3-list-item--focus {
+    .b3-list--background li.b3-list-item--focus {
       background-color: var(--b3-theme-primary-lightest);
     }
 
@@ -148,10 +148,9 @@
     width: 100%;
     background-color: var(--b3-theme-background);
     align-items: center;
-    min-width: 204px;
+    overflow: auto;
 
     .b3-list-item {
-      width: 204px;
       white-space: nowrap;
       font-size: 17px;
       color: var(--b3-theme-on-surface);

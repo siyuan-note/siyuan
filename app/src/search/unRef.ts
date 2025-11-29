@@ -133,7 +133,7 @@ ${getAttr(item)}
 };
 
 export const unRefMoreMenu = (target: Element, element: Element, edit: Protyle) => {
-    const menu = new Menu("searchUnRefMore");
+    const menu = new Menu(Constants.MENU_SEARCH_UNREF_MORE);
     if (menu.isOpen) {
         return;
     }

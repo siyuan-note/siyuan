@@ -33,7 +33,7 @@ export const openSearch = async (options: {
             idPath = [];
         } else {
             hPath = localData.hPath;
-            idPath = localData.idPath;
+            idPath = [...localData.idPath];
         }
     }
     const config = {

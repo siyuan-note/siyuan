@@ -78,6 +78,13 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/getCriteria", model.CheckAuth, getCriteria)
 	ginServer.Handle("POST", "/api/storage/removeCriterion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeCriterion)
 	ginServer.Handle("POST", "/api/storage/getRecentDocs", model.CheckAuth, getRecentDocs)
+	ginServer.Handle("POST", "/api/storage/updateRecentDocViewTime", model.CheckAuth, updateRecentDocViewTime)
+	ginServer.Handle("POST", "/api/storage/updateRecentDocCloseTime", model.CheckAuth, updateRecentDocCloseTime)
+	ginServer.Handle("POST", "/api/storage/updateRecentDocOpenTime", model.CheckAuth, updateRecentDocOpenTime)
+
+	ginServer.Handle("POST", "/api/storage/getOutlineStorage", model.CheckAuth, getOutlineStorage)
+	ginServer.Handle("POST", "/api/storage/setOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOutlineStorage)
+	ginServer.Handle("POST", "/api/storage/removeOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeOutlineStorage)
 
 	ginServer.Handle("POST", "/api/account/login", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, login)
 	ginServer.Handle("POST", "/api/account/checkActivationcode", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, checkActivationcode)
@@ -95,7 +102,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/renameNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameNotebook)
 	ginServer.Handle("POST", "/api/notebook/changeSortNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeSortNotebook)
 	ginServer.Handle("POST", "/api/notebook/setNotebookIcon", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNotebookIcon)
-	ginServer.Handle("POST", "/api/notebook/getNotebookInfo", model.CheckAuth, model.CheckReadonly, getNotebookInfo)
+	ginServer.Handle("POST", "/api/notebook/getNotebookInfo", model.CheckAuth, getNotebookInfo)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)
@@ -147,9 +154,11 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/history/getHistoryItems", model.CheckAuth, model.CheckAdminRole, getHistoryItems)
 
 	ginServer.Handle("POST", "/api/outline/getDocOutline", model.CheckAuth, getDocOutline)
+
 	ginServer.Handle("POST", "/api/bookmark/getBookmark", model.CheckAuth, getBookmark)
 	ginServer.Handle("POST", "/api/bookmark/renameBookmark", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameBookmark)
 	ginServer.Handle("POST", "/api/bookmark/removeBookmark", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeBookmark)
+
 	ginServer.Handle("POST", "/api/tag/getTag", model.CheckAuth, getTag)
 	ginServer.Handle("POST", "/api/tag/renameTag", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameTag)
 	ginServer.Handle("POST", "/api/tag/removeTag", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeTag)
@@ -179,6 +188,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/getBlockInfo", model.CheckAuth, getBlockInfo)
 	ginServer.Handle("POST", "/api/block/getBlockDOM", model.CheckAuth, getBlockDOM)
 	ginServer.Handle("POST", "/api/block/getBlockDOMs", model.CheckAuth, getBlockDOMs)
+	ginServer.Handle("POST", "/api/block/getBlockDOMWithEmbed", model.CheckAuth, getBlockDOMWithEmbed)
+	ginServer.Handle("POST", "/api/block/getBlockDOMsWithEmbed", model.CheckAuth, getBlockDOMsWithEmbed)
 	ginServer.Handle("POST", "/api/block/getBlockKramdown", model.CheckAuth, getBlockKramdown)
 	ginServer.Handle("POST", "/api/block/getChildBlocks", model.CheckAuth, getChildBlocks)
 	ginServer.Handle("POST", "/api/block/getTailChildBlocks", model.CheckAuth, getTailChildBlocks)
@@ -318,6 +329,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/export/exportData", model.CheckAuth, model.CheckAdminRole, exportData)
 	ginServer.Handle("POST", "/api/export/exportDataInFolder", model.CheckAuth, model.CheckAdminRole, exportDataInFolder)
 	ginServer.Handle("POST", "/api/export/exportTempContent", model.CheckAuth, model.CheckAdminRole, exportTempContent)
+	ginServer.Handle("POST", "/api/export/exportBrowserHTML", model.CheckAuth, model.CheckAdminRole, exportBrowserHTML)
 	ginServer.Handle("POST", "/api/export/export2Liandi", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, export2Liandi)
 	ginServer.Handle("POST", "/api/export/exportReStructuredText", model.CheckAuth, model.CheckAdminRole, exportReStructuredText)
 	ginServer.Handle("POST", "/api/export/exportAsciiDoc", model.CheckAuth, model.CheckAdminRole, exportAsciiDoc)

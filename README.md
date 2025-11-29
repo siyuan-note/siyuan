@@ -40,6 +40,7 @@
 * [🚀 Download Setup](#-download-setup)
   * [App Market](#app-market)
   * [Installation Package](#installation-package)
+  * [Package Manager](#package-manager)
   * [Docker Hosting](#docker-hosting)
   * [Unraid Hosting](#unraid-hosting)
   * [Insider Preview](#insider-preview)
@@ -65,9 +66,9 @@ WYSIWYG.
 
 Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
 
-![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
+![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
 
-![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
+![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
 
 ## 🔮 Features
 
@@ -158,6 +159,16 @@ Desktop:
 
 * [B3log](https://b3log.org/siyuan/en/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### Package Manager
+
+#### `siyuan`
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+
+#### `siyuan-note`
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker Hosting
 

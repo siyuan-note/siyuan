@@ -40,6 +40,7 @@
 * [🚀 下载安装](#-下载安装)
   * [应用市场](#应用市场)
   * [安装包](#安装包)
+  * [包管理器](#包管理器)
   * [Docker 部署](#docker-部署)
   * [Unraid 部署](#unraid-部署)
   * [宝塔面板 部署](#宝塔面板部署)
@@ -65,9 +66,9 @@
 
 思源笔记是一款隐私优先的个人知识管理系统，支持细粒度块级引用和 Markdown 所见即所得。
 
-![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
+![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
 
-![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
+![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
 
@@ -164,6 +165,16 @@
 
 * [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### 包管理器
+
+#### `siyuan`
+
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+
+#### `siyuan-note`
+
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker 部署
 

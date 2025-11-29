@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -36,6 +37,42 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func PushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set, excludeApp string) {
+	pushReloadPlugin(upsertPluginSet, removePluginNameSet, excludeApp)
+}
+
+func pushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set, excludeApp string) {
+	upsertPlugins, removePlugins := []string{}, []string{}
+	if nil != upsertPluginSet {
+		for _, n := range upsertPluginSet.Values() {
+			upsertPlugins = append(upsertPlugins, n.(string))
+		}
+	}
+	if nil != removePluginNameSet {
+		for _, n := range removePluginNameSet.Values() {
+			removePlugins = append(removePlugins, n.(string))
+		}
+	}
+
+	pushReloadPlugin0(upsertPlugins, removePlugins, excludeApp)
+}
+
+func pushReloadPlugin0(upsertPlugins, removePlugins []string, excludeApp string) {
+	logging.LogInfof("reload plugins [upserts=%v, removes=%v]", upsertPlugins, removePlugins)
+	if "" == excludeApp {
+		util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
+			"upsertPlugins": upsertPlugins,
+			"removePlugins": removePlugins,
+		})
+		return
+	}
+
+	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", map[string]interface{}{
+		"upsertPlugins": upsertPlugins,
+		"removePlugins": removePlugins,
+	})
+}
 
 func refreshDocInfo(tree *parse.Tree) {
 	if nil == tree {

@@ -183,9 +183,10 @@ export class Title {
                     event.stopPropagation();
                 }
             });
-            const iconElement = this.element.querySelector(".protyle-title__icon");
-            iconElement.addEventListener("click", () => {
-                if (window.siyuan.shiftIsPressed) {
+            const iconElement = this.element.querySelector(".protyle-title__icon") as HTMLElement;
+            iconElement.addEventListener("click", (event) => {
+                // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
+                if (event.shiftKey) {
                     fetchPost("/api/block/getDocInfo", {
                         id: protyle.block.rootID
                     }, (response) => {
@@ -193,15 +194,15 @@ export class Title {
                     });
                 } else {
                     const iconRect = iconElement.getBoundingClientRect();
-                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom});
+                    openTitleMenu(protyle, {x: iconRect.left, y: iconRect.bottom}, Constants.MENU_FROM_TITLE_PROTYLE);
                 }
             });
             this.element.addEventListener("contextmenu", (event) => {
                 if (event.shiftKey) {
                     return;
                 }
-                if (getSelection().rangeCount === 0) {
-                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY});
+                if (getSelection().rangeCount === 0 || iconElement.contains((event.target as HTMLElement))) {
+                    openTitleMenu(protyle, {x: event.clientX, y: event.clientY}, Constants.MENU_FROM_TITLE_PROTYLE);
                     return;
                 }
                 protyle.toolbar?.element.classList.add("fn__none");
@@ -352,15 +353,15 @@ export class Title {
     }
 
     public render(protyle: IProtyle, response: IWebSocketData) {
-        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
-            return false;
-        }
         if (protyle.options.render.hideTitleOnZoom) {
             if (protyle.block.showAll) {
                 this.element.classList.add("fn__none");
             } else {
                 this.element.classList.remove("fn__none");
             }
+        }
+        if (this.element.getAttribute("data-render") === "true" && this.element.dataset.nodeId === protyle.block.rootID) {
+            return false;
         }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
         if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {

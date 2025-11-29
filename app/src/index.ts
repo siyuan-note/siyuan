@@ -38,6 +38,8 @@ import {setLocalShorthandCount} from "./util/noRelyPCFunction";
 import {getDockByType} from "./layout/tabUtil";
 import {Tag} from "./layout/dock/Tag";
 import {updateControlAlt} from "./protyle/util/hotKey";
+import {updateAppearance} from "./config/util/updateAppearance";
+import {renderSnippet} from "./config/util/snippets";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -56,6 +58,7 @@ export class App {
             layout: {},
             dialogs: [],
             blockPanels: [],
+            closedTabs: [],
             ctrlIsPressed: false,
             altIsPressed: false,
             ws: new Model({
@@ -68,6 +71,13 @@ export class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "setAppearance":
+                                updateAppearance(data.data);
+                                break;
+                            case "setSnippet":
+                                window.siyuan.config.snippet = data.data;
+                                renderSnippet();
+                                break;
                             case "setDefRefCount":
                                 setDefRefCount(data.data);
                                 break;

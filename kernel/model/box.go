@@ -708,6 +708,9 @@ func VacuumDataIndex() {
 		humanize.BytesCustomCeil(uint64(oldAssetContentDbSize), 2), humanize.BytesCustomCeil(uint64(newAssetContentDbSize), 2))
 
 	releaseSize := (oldsyDbSize - newSyDbSize) + (oldHistoryDbSize - newHistoryDbSize) + (oldAssetContentDbSize - newAssetContentDbSize)
+	if releaseSize < 0 {
+		releaseSize = 0
+	}
 	msg := fmt.Sprintf(Conf.language(271), humanize.BytesCustomCeil(uint64(releaseSize), 2))
 	util.PushMsg(msg, 7000)
 }
@@ -758,6 +761,14 @@ func ChangeBoxSort(boxIDs []string) {
 		boxConf.Sort = i + 1
 		box.SaveConf(boxConf)
 	}
+
+	var notebookIDs []string
+	for _, box := range Conf.GetOpenedBoxes() {
+		notebookIDs = append(notebookIDs, box.ID)
+	}
+	util.BroadcastByType("main", "notebookSortChanged", 0, "", map[string]any{
+		"notebookIDs": notebookIDs,
+	})
 }
 
 func SetBoxIcon(boxID, icon string) {

@@ -196,7 +196,9 @@ const showErrorWindow = (title, content) => {
     const errWindow = new BrowserWindow({
         width: Math.floor(screen.getPrimaryDisplay().size.width * 0.5),
         height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
-        frame: false,
+        frame: "darwin" === process.platform,
+        titleBarStyle: "hidden",
+        fullscreenable: false,
         icon: path.join(appDir, "stage", "icon-large.png"),
         webPreferences: {
             nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
@@ -325,6 +327,7 @@ const initMainWindow = () => {
         fullscreenable: true,
         fullscreen: windowState.fullscreen,
         trafficLightPosition: {x: 8, y: 8},
+        transparent: "darwin" === process.platform, // 避免缩放窗口时出现边框
         webPreferences: {
             nodeIntegration: true,
             webviewTag: true,
@@ -352,7 +355,7 @@ const initMainWindow = () => {
     }).then((response) => {
         setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
             // 加载主界面
-            currentWindow.loadURL(getServer() + "/stage/build/app/index.html?v=" + new Date().getTime());
+            currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
         });
     });
 
@@ -360,8 +363,15 @@ const initMainWindow = () => {
 
     // 发起互联网服务请求时绕过安全策略 https://github.com/siyuan-note/siyuan/issues/5516
     currentWindow.webContents.session.webRequest.onBeforeSendHeaders((details, cb) => {
-        if (-1 < details.url.indexOf("bili")) {
+        if (-1 < details.url.toLowerCase().indexOf("bili")) {
             // B 站不移除 Referer https://github.com/siyuan-note/siyuan/issues/94
+            cb({requestHeaders: details.requestHeaders});
+            return;
+        }
+
+        if (-1 < details.url.toLowerCase().indexOf("youtube")) {
+            // YouTube 设置 Referer https://github.com/siyuan-note/siyuan/issues/16319
+            details.requestHeaders["Referer"] = "https://b3log.org/siyuan/";
             cb({requestHeaders: details.requestHeaders});
             return;
         }
@@ -387,10 +397,7 @@ const initMainWindow = () => {
     });
 
     currentWindow.webContents.on("did-finish-load", () => {
-        let siyuanOpenURL;
-        if ("win32" === process.platform || "linux" === process.platform) {
-            siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        }
+        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
         if (siyuanOpenURL) {
             if (currentWindow.isMinimized()) {
                 currentWindow.restore();
@@ -866,6 +873,13 @@ app.whenReady().then(() => {
             event.sender.send("siyuan-event", "leave-full-screen");
         });
     });
+    ipcMain.on("siyuan-focus-fix", (event) => {
+        const currentWindow = getWindowByContentId(event.sender.id);
+        if (currentWindow && process.platform === "win32") {
+            currentWindow.blur();
+            currentWindow.focus();
+        }
+    });
     ipcMain.on("siyuan-cmd", (event, data) => {
         let cmd = data;
         let webContentsId = event.sender.id;
@@ -1060,6 +1074,7 @@ app.whenReady().then(() => {
             minWidth: 493,
             minHeight: 376,
             fullscreenable: true,
+            transparent: "darwin" === process.platform, // 避免缩放窗口时出现边框
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",

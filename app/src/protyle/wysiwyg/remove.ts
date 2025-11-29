@@ -52,7 +52,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         let listElement: Element;
         let topParentElement: Element;
         hideElements(["select"], protyle);
-        let foldPreviousId: string;
+        const unfoldData: {
+            [key: string]: {
+                element: Element,
+                previousID: string
+            }
+        } = {};
         for (let i = 0; i < selectElements.length; i++) {
             const item = selectElements[i];
             const topElement = getTopAloneElement(item);
@@ -85,10 +90,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     id: topElement.getAttribute("data-node-id"),
                 });
                 deletes.push(...foldTransaction.data.doOperations.slice(1));
-                let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
-                if (typeof foldPreviousId !== "undefined") {
-                    previousID = foldPreviousId;
-                }
+                const previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
                 foldTransaction.data.undoOperations.forEach((operationItem: IOperation, index: number) => {
                     operationItem.previousID = previousID;
                     if (index > 0) {
@@ -98,16 +100,6 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     }
                 });
                 inserts.push(...foldTransaction.data.undoOperations);
-                // 折叠块和非折叠块同时删除时撤销异常 https://github.com/siyuan-note/siyuan/issues/11312
-                let foldPreviousElement = getPreviousBlock(topElement);
-                while (foldPreviousElement && foldPreviousElement.childElementCount === 3) {
-                    foldPreviousElement = getPreviousBlock(foldPreviousElement);
-                }
-                if (foldPreviousElement) {
-                    foldPreviousId = foldPreviousElement.getAttribute("data-node-id");
-                } else {
-                    foldPreviousId = "";
-                }
                 // https://github.com/siyuan-note/siyuan/issues/4422
                 topElement.firstElementChild.removeAttribute("contenteditable");
                 topElement.remove();
@@ -117,8 +109,22 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     data = protyle.lute.SpinBlockDOM(topElement.outerHTML);  // 防止图表撤销问题
                 }
                 let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
-                if (typeof foldPreviousId !== "undefined") {
-                    previousID = foldPreviousId;
+                if (topElement.previousElementSibling &&
+                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.previousElementSibling.getAttribute("fold") === "1" &&
+                    (topElement.nextElementSibling?.getAttribute("data-type") !== "NodeHeading" ||
+                        (topElement.nextElementSibling?.getAttribute("data-type") === "NodeHeading" && topElement.nextElementSibling?.getAttribute("data-subtype") < topElement.getAttribute("data-subtype"))
+                    )) {
+                    const foldId = topElement.previousElementSibling.getAttribute("data-node-id");
+                    if (!unfoldData[foldId]) {
+                        const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
+                            id: foldId,
+                        });
+                        unfoldData[foldId] = {
+                            element: topElement.previousElementSibling,
+                            previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id
+                        };
+                    }
+                    previousID = unfoldData[foldId].previousID;
                 }
                 inserts.push({
                     action: "insert",
@@ -135,6 +141,11 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 topElement.remove();
             }
         }
+        Object.keys(unfoldData).forEach(item => {
+            const foldOperations = setFold(protyle, unfoldData[item].element, true, false, false, true);
+            deletes.push(...foldOperations.doOperations);
+            inserts.splice(0, 0, ...foldOperations.undoOperations);
+        });
         if (sideElement) {
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
                 setTimeout(() => {

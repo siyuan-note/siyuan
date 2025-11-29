@@ -600,11 +600,12 @@ export const openMenuPanel = (options: {
                         hideElements(["util"], options.protyle);
                     } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                         // 过滤面板先关闭过滤条件
-                        window.siyuan.menus.menu.remove();
                     } else {
                         closeCB?.();
                         avPanelElement.remove();
-                        focusBlock(options.blockElement);
+                        setTimeout(() => {
+                            focusBlock(options.blockElement);
+                        }, Constants.TIMEOUT_TRANSITION);  // 单选使用 enter 修改选项后会滚动
                     }
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -1427,6 +1428,11 @@ export const openMenuPanel = (options: {
                             blockID,
                             id: target.parentElement.dataset.id,
                             avID
+                        }], [{
+                            action: "setAttrViewBlockView",
+                            blockID,
+                            id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
+                            avID
                         }]);
                     }
                     event.preventDefault();
@@ -1446,6 +1452,11 @@ export const openMenuPanel = (options: {
                             action: "setAttrViewBlockView",
                             blockID,
                             id: target.parentElement.dataset.id,
+                            avID,
+                        }], [{
+                            action: "setAttrViewBlockView",
+                            blockID,
+                            id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
                             avID,
                         }]);
                         window.siyuan.menus.menu.remove();
@@ -1548,7 +1559,7 @@ export const openMenuPanel = (options: {
                             data
                         });
                     } else {
-                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group, data.viewType);
                     }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
@@ -1556,7 +1567,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goGroupsMethod") {
                     window.siyuan.menus.menu.remove();
-                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group, data.viewType);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

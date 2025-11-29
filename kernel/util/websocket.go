@@ -32,6 +32,29 @@ var (
 	sessions = sync.Map{} // {appId, {sessionId, session}}
 )
 
+func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg string, data interface{}) {
+	sessions.Range(func(key, value interface{}) bool {
+		appSessions := value.(*sync.Map)
+		if key == excludeApp {
+			return true
+		}
+
+		appSessions.Range(func(key, value interface{}) bool {
+			session := value.(*melody.Session)
+			if t, ok := session.Get("type"); ok && typ == t {
+				event := NewResult()
+				event.Cmd = cmd
+				event.Code = code
+				event.Msg = msg
+				event.Data = data
+				session.Write(event.Bytes())
+			}
+			return true
+		})
+		return true
+	})
+}
+
 func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data interface{}) {
 	appSessions, ok := sessions.Load(app)
 	if !ok {

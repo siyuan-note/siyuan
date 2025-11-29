@@ -1,8 +1,12 @@
 @use "mixin";
 
 .fn {
-  &__hidescrollbar::-webkit-scrollbar {
-    display: none;
+  &__hidescrollbar {
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    overflow: auto;
   }
 
   &__ellipsis {

@@ -211,8 +211,11 @@ export const afterLoadPlugin = (plugin: Plugin) => {
 };
 
 export const reloadPlugin = async (app: App, data: { upsertPlugins: string[], removePlugins: string[] }) => {
-    data.removePlugins.concat(data.upsertPlugins).forEach((item) => {
-        uninstall(app, item);
+    data.removePlugins.forEach((item) => {
+        uninstall(app, item, true);
+    });
+    data.upsertPlugins.forEach((item) => {
+        uninstall(app, item, false);
     });
     loadPlugins(app, data.upsertPlugins).then(() => {
         app.plugins.forEach(item => {

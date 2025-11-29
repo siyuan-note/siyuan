@@ -446,6 +446,7 @@ interface IProtyleOptions {
         expand: boolean
     }[],
     action?: TProtyleAction[],
+    scrollPosition?: ScrollLogicalPosition,
     mode?: TEditorMode,
     blockId?: string
     rootId?: string

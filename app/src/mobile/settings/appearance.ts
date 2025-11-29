@@ -54,9 +54,7 @@ export const initAppearance = () => {
                         themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,
                         themeLight: (modelMainElement.querySelector("#themeLight") as HTMLSelectElement).value,
                         lang: (modelMainElement.querySelector("#lang") as HTMLSelectElement).value,
-                    }), () => {
-                        window.location.reload();
-                    });
+                    }));
                 });
             });
         }

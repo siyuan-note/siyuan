@@ -5,8 +5,8 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
-import {saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, openByMobile, writeText} from "../protyle/util/compatibility";
+import {onExport, saveExport} from "../protyle/export";
+import {isInAndroid, isInHarmony, isInIOS, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -171,7 +171,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
             }
         });
         if (!protyle) {
-            ghostProtyle = new Protyle(window.siyuan.ws.app, document.createElement('div'), {
+            ghostProtyle = new Protyle(window.siyuan.ws.app, document.createElement("div"), {
                 blockId: attrs.id,
             });
         }
@@ -443,7 +443,21 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
                 focusBlock(focusElement);
             }
         }
-    }, {
+    },
+    /// #if BROWSER
+    {
+        id: "copyWebURL",
+        iconHTML: "",
+        label: window.siyuan.languages.copyWebURL,
+        click: () => {
+            copyTextByType(ids, "webURL");
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
+        }
+    },
+    /// #endif
+    {
         id: "copyHPath",
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,
@@ -752,7 +766,52 @@ export const exportMd = (id: string) => {
                     }
                 },
                 ]
-            }
+            },
+            /// #else
+            {
+                id: "exportPDF",
+                label: window.siyuan.languages.print,
+                icon: "iconPDF",
+                ignore: !isInAndroid() && !isInHarmony() && !isInIOS(),
+                click: () => {
+                    const msgId = showMessage(window.siyuan.languages.exporting);
+                    const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
+                    fetchPost("/api/export/exportPreviewHTML", {
+                        id,
+                        keepFold: localData.keepFold,
+                        merge: localData.mergeSubdocs,
+                    }, async response => {
+                        const servePath = window.location.protocol + "//" + window.location.host + "/";
+                        const html = await onExport(response, undefined, servePath, {type: "pdf", id});
+                        if (isInAndroid()) {
+                            window.JSAndroid.print(response.data.name, html);
+                        } else if (isInHarmony()) {
+                            window.JSHarmony.print(response.data.name, html);
+                        } else if (isInIOS()) {
+                            window.webkit.messageHandlers.print.postMessage(response.data.name + Constants.ZWSP + html);
+                        }
+
+                        setTimeout(() => {
+                            hideMessage(msgId);
+                        }, 3000);
+                    });
+                }
+            }, {
+                id: "exportHTML_SiYuan",
+                label: "HTML (SiYuan)",
+                iconClass: "ft__error",
+                icon: "iconHTML5",
+                click: () => {
+                    saveExport({type: "html", id});
+                }
+            }, {
+                id: "exportHTML_Markdown",
+                label: "HTML (Markdown)",
+                icon: "iconHTML5",
+                click: () => {
+                    saveExport({type: "htmlmd", id});
+                }
+            },
             /// #endif
         ]
     }).element;

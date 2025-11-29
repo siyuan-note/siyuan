@@ -29,7 +29,18 @@ func getRecentDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	data, err := model.GetRecentDocs()
+	// 获取排序参数
+	sortBy := "viewedAt" // 默认按浏览时间排序，openAt：按打开时间排序，closedAt：按关闭时间排序
+
+	// 兼容旧版接口，不能直接使用 util.JsonArg()
+	arg := map[string]interface{}{}
+	if err := c.ShouldBindJSON(&arg); err == nil {
+		if arg["sortBy"] != nil {
+			sortBy = arg["sortBy"].(string)
+		}
+	}
+
+	data, err := model.GetRecentDocs(sortBy)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -187,4 +198,118 @@ func getLocalStorage(c *gin.Context) {
 		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
 	}
 	ret.Data = data
+}
+
+func getOutlineStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	docID := arg["docID"].(string)
+	data, err := model.GetOutlineStorage(docID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = data
+}
+
+func setOutlineStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	docID := arg["docID"].(string)
+	val := arg["val"].(interface{})
+	err := model.SetOutlineStorage(docID, val)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func removeOutlineStorage(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	docID := arg["docID"].(string)
+	err := model.RemoveOutlineStorage(docID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func updateRecentDocViewTime(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	err := model.UpdateRecentDocViewTime(rootID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func updateRecentDocOpenTime(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	err := model.UpdateRecentDocOpenTime(rootID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func updateRecentDocCloseTime(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	if nil == arg["rootID"] {
+		return
+	}
+
+	rootID := arg["rootID"].(string)
+	err := model.UpdateRecentDocCloseTime(rootID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 }

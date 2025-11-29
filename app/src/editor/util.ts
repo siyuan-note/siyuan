@@ -46,7 +46,8 @@ export const openFileById = async (options: {
     zoomIn?: boolean
     removeCurrentTab?: boolean
     openNewTab?: boolean
-    afterOpen?: (model: Model) => void
+    afterOpen?: (model: Model) => void,
+    scrollPosition?: ScrollLogicalPosition
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
     if (response.code === -1) {
@@ -56,6 +57,7 @@ export const openFileById = async (options: {
         showMessage(response.msg);
         return;
     }
+
     return openFile({
         app: options.app,
         fileName: response.data.rootTitle,
@@ -69,7 +71,8 @@ export const openFileById = async (options: {
         keepCursor: options.keepCursor,
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,
-        openNewTab: options.openNewTab
+        openNewTab: options.openNewTab,
+        scrollPosition: options.scrollPosition,
     });
 };
 
@@ -336,6 +339,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 } else {
                     initObj.action = options.action;
                 }
+                initObj.scrollPosition = options.scrollPosition;
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                 item.parent.switchTab(item.headElement);
                 return true;
@@ -375,7 +379,12 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
         }, getResponse => {
-            onGet({data: getResponse, protyle: editor.editor.protyle, action: options.action});
+            onGet({
+                data: getResponse,
+                protyle: editor.editor.protyle,
+                action: options.action,
+                scrollPosition: options.scrollPosition
+            });
             // 大纲点击折叠标题下的内容时，需更新反链面板
             updateBacklinkGraph(allModels, editor.editor.protyle);
         });
@@ -384,17 +393,18 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         preventScroll(editor.editor.protyle);
         editor.editor.protyle.observerLoad?.disconnect();
         if (options.action?.includes(Constants.CB_GET_HL)) {
-            highlightById(editor.editor.protyle, options.id, true);
-        } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
+            highlightById(editor.editor.protyle, options.id, "start");
+        }
+        if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                const newRange = focusBlock(nodeElement, undefined, options.action?.includes(Constants.CB_GET_OUTLINE) ? false : true);
+                const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }
-                scrollCenter(editor.editor.protyle, nodeElement, true);
+                scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
-                        scrollCenter(editor.editor.protyle, nodeElement, true);
+                        scrollCenter(editor.editor.protyle);
                     }
                 });
                 setTimeout(() => {
@@ -406,12 +416,10 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             } else if (editor.editor.protyle.toolbar.range) {
                 nodeElement = hasClosestBlock(editor.editor.protyle.toolbar.range.startContainer) as Element;
                 focusByRange(editor.editor.protyle.toolbar.range);
-                if (nodeElement) {
-                    scrollCenter(editor.editor.protyle, nodeElement);
-                }
+                scrollCenter(editor.editor.protyle);
             }
         }
-        pushBack(editor.editor.protyle, undefined, nodeElement || editor.editor.protyle.wysiwyg.element.firstElementChild);
+        pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);
     }
     if (options.mode) {
         setEditMode(editor.editor.protyle, options.mode);
@@ -505,6 +513,7 @@ const newTab = (options: IOpenFileOptions) => {
                         blockId: options.id,
                         rootId: options.rootID,
                         action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
+                        scrollPosition: options.scrollPosition,
                     });
                 } else {
                     editor = new Editor({
@@ -514,6 +523,7 @@ const newTab = (options: IOpenFileOptions) => {
                         rootId: options.rootID,
                         mode: options.mode,
                         action: options.action,
+                        scrollPosition: options.scrollPosition,
                     });
                 }
                 tab.addModel(editor);
@@ -618,7 +628,7 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                 item.isPreview = !protyle.preview.element.classList.contains("fn__none");
                 item.update(response, blockId);
                 if (protyle) {
-                    item.updateDocTitle(protyle.background.ial);
+                    item.updateDocTitle(protyle.background.ial, response.data?.length || 0);
                     if (getSelection().rangeCount > 0) {
                         const startContainer = getSelection().getRangeAt(0).startContainer;
                         if (protyle.wysiwyg.element.contains(startContainer)) {
@@ -673,8 +683,8 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
         }
         item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
         fetchPost("/api/ref/getBacklink2", {
-            sort: item.status[blockId] ? item.status[blockId].sort : "3",
-            mSort: item.status[blockId] ? item.status[blockId].mSort : "3",
+            sort: item.status[blockId] ? item.status[blockId].sort.toString() : window.siyuan.config.editor.backlinkSort.toString(),
+            mSort: item.status[blockId] ? item.status[blockId].mSort.toString() : window.siyuan.config.editor.backmentionSort.toString(),
             id: blockId || "",
             k: item.inputsElement[0].value,
             mk: item.inputsElement[1].value,

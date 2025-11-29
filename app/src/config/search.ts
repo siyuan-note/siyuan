@@ -33,7 +33,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 文档树
         getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4", "fileTree5",
             "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
-            "fileTree16", "fileTree17", "fileTree18", "fileTree19", "fileTree20", "fileTree21", "fileTree22", "fileTree23"]),
+            "fileTree16", "fileTree17", "fileTree18", "fileTree19", "fileTree20", "fileTree21", "fileTree22", "fileTree23",
+            "fileTree24", "fileTree25"]),
 
         // 闪卡
         getLang(["riffCard", "flashcardNewCardLimit", "flashcardNewCardLimitTip", "flashcardReviewCardLimit",
@@ -59,7 +60,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 外观
         getLang(["language", "language1", "appearance", "appearance1", "appearance2", "appearance3", "appearance4",
             "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11", "appearance16",
-            "appearance17", "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
+            "appearance17", "appearance18", "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
             "theme2", "theme11", "theme12", "customEmoji", "customEmojiTip", "refresh"]),
 
         // 集市

@@ -100,6 +100,50 @@ func UnescapeHTML(s string) (ret string) {
 	return
 }
 
+func HasUnclosedHtmlTag(htmlStr string) bool {
+	// 检查未闭合注释
+	openIdx := 0
+	for {
+		start := strings.Index(htmlStr[openIdx:], "<!--")
+		if start == -1 {
+			break
+		}
+		start += openIdx
+		end := strings.Index(htmlStr[start+4:], "-->")
+		if end == -1 {
+			return true // 存在未闭合注释
+		}
+		openIdx = start + 4 + end + 3
+	}
+
+	// 去除所有注释内容
+	commentRe := regexp.MustCompile(`<!--[\s\S]*?-->`)
+	htmlStr = commentRe.ReplaceAllString(htmlStr, "")
+
+	tagRe := regexp.MustCompile(`<(/?)([a-zA-Z0-9]+)[^>]*?>`)
+	selfClosing := map[string]bool{
+		"br": true, "img": true, "hr": true, "input": true, "meta": true, "link": true,
+	}
+	stack := []string{}
+	matches := tagRe.FindAllStringSubmatch(htmlStr, -1)
+	for _, m := range matches {
+		isClose := m[1] == "/"
+		tag := strings.ToLower(m[2])
+		if selfClosing[tag] {
+			continue
+		}
+		if !isClose {
+			stack = append(stack, tag)
+		} else {
+			if len(stack) == 0 || stack[len(stack)-1] != tag {
+				return true // 闭合标签不匹配
+			}
+			stack = stack[:len(stack)-1]
+		}
+	}
+	return len(stack) != 0
+}
+
 func Reverse(s string) string {
 	runes := []rune(s)
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {

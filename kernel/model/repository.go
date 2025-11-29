@@ -1148,6 +1148,8 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
+	beforeSyncPetals := getPetals()
+
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
 	elapsed := time.Since(start)
@@ -1178,6 +1180,7 @@ func syncRepoDownload() (err error) {
 	autoSyncErrCount = 0
 	BootSyncSucc = 0
 
+	calcPetalDiff(beforeSyncPetals, mergeResult)
 	processSyncMergeResult(false, true, mergeResult, trafficStat, "d", elapsed)
 	return
 }
@@ -1286,6 +1289,7 @@ func bootSyncRepo() (err error) {
 	waitGroup.Add(1)
 	go func() {
 		defer waitGroup.Done()
+		defer logging.Recover()
 
 		start := time.Now()
 		_, _, indexErr := indexRepoBeforeCloudSync(repo)
@@ -1311,6 +1315,7 @@ func bootSyncRepo() (err error) {
 	waitGroup.Add(1)
 	go func() {
 		defer waitGroup.Done()
+		defer logging.Recover()
 
 		start := time.Now()
 		syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
@@ -1441,6 +1446,8 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		return
 	}
 
+	beforeSyncPetals := getPetals()
+
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
 	elapsed := time.Since(start)
@@ -1478,6 +1485,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	Conf.Save()
 	autoSyncErrCount = 0
 
+	calcPetalDiff(beforeSyncPetals, mergeResult)
 	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
 
 	if !exit {
@@ -1489,6 +1497,30 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 		}()
 	}
 	return
+}
+
+func calcPetalDiff(beforeSyncPetals []*Petal, mergeResult *dejavu.MergeResult) {
+	var upsertPetals, removePetals []string
+	afterSyncPetals := getPetals()
+	for _, afterSyncPetal := range afterSyncPetals {
+		if beforeSyncPetal := getPetalByName(afterSyncPetal.Name, beforeSyncPetals); nil != beforeSyncPetal {
+			a, _ := gulu.JSON.MarshalJSON(afterSyncPetal)
+			b, _ := gulu.JSON.MarshalJSON(beforeSyncPetal)
+			if !bytes.Equal(a, b) {
+				upsertPetals = append(upsertPetals, afterSyncPetal.Name)
+			}
+		} else {
+			upsertPetals = append(upsertPetals, afterSyncPetal.Name)
+		}
+	}
+	for _, beforeSyncPetal := range beforeSyncPetals {
+		if nil == getPetalByName(beforeSyncPetal.Name, afterSyncPetals) {
+			removePetals = append(removePetals, beforeSyncPetal.Name)
+		}
+	}
+
+	mergeResult.UpsertPetals = gulu.Str.RemoveDuplicatedElem(upsertPetals)
+	mergeResult.RemovePetals = gulu.Str.RemoveDuplicatedElem(removePetals)
 }
 
 func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, trafficStat *dejavu.TrafficStat, mode string, elapsed time.Duration) {
@@ -1642,6 +1674,15 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		}
 	}
 
+	for _, upsertPetal := range mergeResult.UpsertPetals {
+		needReloadPlugin = true
+		upsertPluginSet.Add(upsertPetal)
+	}
+	for _, removePetal := range mergeResult.RemovePetals {
+		needReloadPlugin = true
+		removePluginSet.Add(removePetal)
+	}
+
 	if needReloadFlashcard {
 		LoadFlashcards()
 	}
@@ -1651,7 +1692,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadPlugin {
-		pushReloadPlugin(upsertPluginSet, removePluginSet)
+		pushReloadPlugin(upsertPluginSet, removePluginSet, "")
 	}
 
 	for _, widgetDir := range removeWidgetDirSet.Values() {
@@ -2218,20 +2259,4 @@ func getCloudSpace() (stat *cloud.Stat, err error) {
 		return
 	}
 	return
-}
-
-func pushReloadPlugin(upsertPluginSet, removePluginNameSet *hashset.Set) {
-	upsertPlugins, removePlugins := []string{}, []string{}
-	for _, n := range upsertPluginSet.Values() {
-		upsertPlugins = append(upsertPlugins, n.(string))
-	}
-	for _, n := range removePluginNameSet.Values() {
-		removePlugins = append(removePlugins, n.(string))
-	}
-
-	logging.LogInfof("reload plugins [upserts=%v, removes=%v]", upsertPlugins, removePlugins)
-	util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
-		"upsertPlugins": upsertPlugins,
-		"removePlugins": removePlugins,
-	})
 }

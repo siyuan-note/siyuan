@@ -203,6 +203,10 @@ func InitConf() {
 	if "" == Conf.Appearance.CodeBlockThemeLight {
 		Conf.Appearance.CodeBlockThemeLight = "github"
 	}
+	if nil == Conf.Appearance.StatusBar {
+		Conf.Appearance.StatusBar = &util.StatusBar{}
+	}
+	util.StatusBarCfg = Conf.Appearance.StatusBar
 	if nil == Conf.FileTree {
 		Conf.FileTree = conf.NewFileTree()
 	}
@@ -222,6 +226,9 @@ func InitConf() {
 		Conf.FileTree.LargeFileWarningSize = 8
 	}
 	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
+	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
+		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
+	}
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 
@@ -229,8 +236,17 @@ func InitConf() {
 		Conf.Tag = conf.NewTag()
 	}
 
+	defaultEditor := conf.NewEditor()
 	if nil == Conf.Editor {
-		Conf.Editor = conf.NewEditor()
+		Conf.Editor = defaultEditor
+	}
+	// 新增字段的默认值
+	// 使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
+	if nil == Conf.Editor.BacklinkSort {
+		Conf.Editor.BacklinkSort = defaultEditor.BacklinkSort
+	}
+	if nil == Conf.Editor.BackmentionSort {
+		Conf.Editor.BackmentionSort = defaultEditor.BackmentionSort
 	}
 	if 1 > len(Conf.Editor.Emoji) {
 		Conf.Editor.Emoji = []string{}
@@ -457,6 +473,33 @@ func InitConf() {
 	}
 	if "" == Conf.Flashcard.Weights {
 		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
+	}
+	if 19 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights length must be [19]"
+		logging.LogWarnf("%s , given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
+	}
+	isInvalidFlashcardWeights := false
+	for _, w := range strings.Split(Conf.Flashcard.Weights, ",") {
+		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
+			isInvalidFlashcardWeights = true
+			break
+		}
+	}
+	if isInvalidFlashcardWeights {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights contain invalid number"
+		logging.LogWarnf("%s, given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
 	}
 
 	if nil == Conf.AI {

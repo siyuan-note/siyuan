@@ -22,7 +22,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
-    let parentID = nodeElement.parentElement.getAttribute("data-node-id");
+    let parentID = nodeElement.parentElement?.getAttribute("data-node-id");
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
         if (protyle.block.showAll || protyle.options.backlinkData) {
@@ -50,11 +50,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
-            // 超级块中的 html 块需要反转义再赋值 https://github.com/siyuan-note/siyuan/issues/13155
-            nodeElement.querySelectorAll("protyle-html").forEach(item => {
-                item.setAttribute("data-content", item.getAttribute("data-content").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
-            });
-            nodeElement.outerHTML = nodeElement.innerHTML;
+            nodeElement.replaceWith(...nodeElement.children);
             if (range) {
                 focusByWbr(protyle.wysiwyg.element, range);
             }

@@ -3,6 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
+import {Constants} from "../../../constants";
 
 const calcItem = (options: {
     menu: Menu,
@@ -112,7 +113,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
     if (type === "lineNumber") {
         return;
     }
-    const menu = new Menu("av-calc", () => {
+    const menu = new Menu(Constants.MENU_AV_CALC, () => {
         if (rowElement) {
             rowElement.classList.remove("av__row--show");
         }

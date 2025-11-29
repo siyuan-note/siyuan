@@ -21,6 +21,7 @@ import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
 import {getFieldIdByCellElement} from "../render/av/row";
 import {processClonePHElement} from "../render/util";
+import {setFold} from "../../menus/protyle";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -41,7 +42,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         });
     }
     const avID = blockElement.dataset.avId;
-    fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, (response) => {
+    fetchPost("/api/av/getAttributeViewKeysByAvID", {avID}, async (response) => {
         const columns: IAVColumn[] = response.data;
         const cellElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select")) || [];
         if (values && Array.isArray(values) && values.length > 0) {
@@ -61,17 +62,18 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const id = blockElement.dataset.nodeId;
             let currentRowElement: Element;
             const firstColIndex = cellElements[0].getAttribute("data-col-id");
-            values.find(rowItem => {
+            for (let i = 0; i < values.length; i++) {
                 if (!currentRowElement) {
                     currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                 } else {
                     currentRowElement = currentRowElement.nextElementSibling;
                 }
                 if (!currentRowElement.classList.contains("av__row")) {
-                    return true;
+                    break;
                 }
                 let cellElement: HTMLElement;
-                rowItem.find(cellValue => {
+                for (let j = 0; j < values[i].length; j++) {
+                    const cellValue = values[i][j];
                     if (!cellElement) {
                         cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                     } else {
@@ -82,16 +84,16 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         }
                     }
                     if (!cellElement.classList.contains("av__cell")) {
-                        return true;
+                        break;
                     }
-                    const operations = updateCellsValue(protyle, blockElement as HTMLElement,
+                    const operations = await updateCellsValue(protyle, blockElement as HTMLElement,
                         cellValue, [cellElement], columns, html, true);
                     if (operations.doOperations.length > 0) {
                         doOperations.push(...operations.doOperations);
                         undoOperations.push(...operations.undoOperations);
                     }
-                });
-            });
+                }
+            }
             if (doOperations.length > 0) {
                 doOperations.push({
                     action: "doUpdateUpdated",
@@ -162,17 +164,17 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 const doOperations: IOperation[] = [];
                 const undoOperations: IOperation[] = [];
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
-                textJSON.forEach((rowValue) => {
+                for (let i = 0; i < textJSON.length; i++) {
                     if (!currentRowElement) {
                         currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                     } else {
                         currentRowElement = currentRowElement.nextElementSibling;
                     }
                     if (!currentRowElement.classList.contains("av__row")) {
-                        return true;
+                        break;
                     }
                     let cellElement: HTMLElement;
-                    rowValue.forEach((cellValue) => {
+                    for (let j = 0; j < textJSON[i].length; j++) {
                         if (!cellElement) {
                             cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                         } else {
@@ -183,15 +185,16 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                             }
                         }
                         if (!cellElement.classList.contains("av__cell")) {
-                            return true;
+                            break;
                         }
-                        const operations = updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, html, true);
+                        const cellValue = textJSON[i][j];
+                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, html, true);
                         if (operations.doOperations.length > 0) {
                             doOperations.push(...operations.doOperations);
                             undoOperations.push(...operations.undoOperations);
                         }
-                    });
-                });
+                    }
+                }
                 if (doOperations.length > 0) {
                     const id = blockElement.getAttribute("data-node-id");
                     doOperations.push({
@@ -330,7 +333,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, id, blockElement.outerHTML, oldHTML);
         setTimeout(() => {
-            scrollCenter(protyle, blockElement, false, "smooth");
+            scrollCenter(protyle, undefined, "nearest", "smooth");
         }, Constants.TIMEOUT_LOAD);
         return;
     }
@@ -553,6 +556,17 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     const wbrElement = protyle.wysiwyg.element.querySelector("wbr");
     if (wbrElement) {
         wbrElement.remove();
+    }
+    let foldData;
+    if (blockElement.getAttribute("data-type") === "NodeHeading" &&
+        blockElement.getAttribute("fold") === "1") {
+        foldData = setFold(protyle, blockElement, true, false, false, true);
+        doOperation.reverse();
+        foldData.doOperations[0].context = {
+            focusId: lastElement?.getAttribute("data-node-id"),
+        };
+        doOperation.push(...foldData.doOperations);
+        undoOperation.push(...foldData.undoOperations);
     }
     transaction(protyle, doOperation, undoOperation);
     // 复制容器块中包含折叠标题块

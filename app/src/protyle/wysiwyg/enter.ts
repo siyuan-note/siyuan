@@ -180,7 +180,14 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
 
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
-        const newElement = genEmptyElement(false, true);
+        let newElement;
+        if (blockElement.previousElementSibling &&
+            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+            blockElement.previousElementSibling.getAttribute("fold") === "1") {
+            newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+        } else {
+            newElement = genEmptyElement(false, true);
+        }
         const newId = newElement.getAttribute("data-node-id");
         transaction(protyle, [{
             action: "insert",

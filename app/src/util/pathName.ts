@@ -162,7 +162,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     const dialog = new Dialog({
         title: `<div style="padding: 8px;">
     ${title || window.siyuan.languages.move}
-    <div style="max-height: 16px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>
+    <div style="max-height: 16px;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>
 </div>`,
         content: `<div class="b3-form__icon" style="margin: 8px">
     <span data-menu="true" class="b3-form__icon-list fn__a b3-tooltips b3-tooltips__s" aria-label="${updateHotkeyTip("⌥↓")}">
@@ -272,7 +272,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === inputElement.value)) {
             return;
         }
-        const menu = new Menu("move-path-history");
+        const menu = new Menu(Constants.MENU_MOVE_PATH_HISTORY);
         if (menu.isOpen) {
             return;
         }
@@ -364,7 +364,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             toggleMovePathHistory();
             return;
         }
-        if (window.siyuan.menus.menu.element.getAttribute("data-name") === "move-path-history") {
+        if (window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_MOVE_PATH_HISTORY) {
             return;
         }
         const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;

@@ -78,8 +78,8 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         }
         updateTransaction(protyle, previousElement.parentElement.parentElement.parentElement.getAttribute("data-node-id"), previousElement.parentElement.parentElement.parentElement.outerHTML, oldListHTML);
         preventScroll(protyle);
-        scrollCenter(protyle);
         focusByWbr(previousElement.parentElement, range);
+        scrollCenter(protyle);
         return;
     }
     if (!sourceElements[0].previousElementSibling || sourceElements[0].previousElementSibling?.classList.contains("protyle-action")) {
@@ -176,8 +176,8 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         }
         updateTransaction(protyle, nextElement.parentElement.parentElement.parentElement.getAttribute("data-node-id"), nextElement.parentElement.parentElement.parentElement.outerHTML, oldListHTML);
         preventScroll(protyle);
-        scrollCenter(protyle);
         focusByWbr(nextElement.parentElement, range);
+        scrollCenter(protyle);
         return;
     }
     if (!sourceElements[sourceElements.length - 1].nextElementSibling || sourceElements[sourceElements.length - 1].nextElementSibling?.classList.contains("protyle-attr")) {

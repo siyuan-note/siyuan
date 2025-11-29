@@ -36,9 +36,10 @@ import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {scrollCenter} from "../../../util/highlightById";
 import {escapeHtml} from "../../../util/escape";
 import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
 
+let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
         return false;
@@ -162,12 +163,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const cellType = getTypeByCellElement(target);
-                if (viewType === "gallery") {
-                    const itemElement = hasClosestByClassName(target, "av__gallery-item");
-                    if (itemElement && cellType !== "updated" && cellType !== "created" && cellType !== "lineNumber") {
-                        popTextCell(protyle, [target]);
-                    }
-                } else {
+                if (viewType === "table") {
                     const scrollElement = hasClosestByClassName(target, "av__scroll");
                     if (!scrollElement) {
                         return;
@@ -176,7 +172,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     if (!rowElement) {
                         return;
                     }
-                    // TODO 点击单元格的时候， lineNumber 选中整行
                     if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
                         selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                     } else {
@@ -185,6 +180,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                             item.classList.remove("av__row--select");
                         });
                         updateHeader(rowElement);
+                        popTextCell(protyle, [target]);
+                    }
+                } else {
+                    const itemElement = hasClosestByClassName(target, "av__gallery-item");
+                    if (itemElement && cellType !== "updated" && cellType !== "created" && cellType !== "lineNumber") {
                         popTextCell(protyle, [target]);
                     }
                 }
@@ -229,9 +229,17 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-group-fold") {
-            if (target.getAttribute("data-folding") !== "true") {
-                target.setAttribute("data-folding", "true");
-                const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
+            target.setAttribute("data-processed", "true");
+            const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
+            if (isOpen) {
+                target.firstElementChild.classList.remove("av__group-arrow--open");
+                target.parentElement.nextElementSibling.classList.add("fn__none");
+            } else {
+                target.firstElementChild.classList.add("av__group-arrow--open");
+                target.parentElement.nextElementSibling.classList.remove("fn__none");
+            }
+            clearTimeout(foldTimeout);
+            foldTimeout = window.setTimeout(() => {
                 transaction(protyle, [{
                     action: "foldAttrViewGroup",
                     avID: blockElement.dataset.avId,
@@ -245,14 +253,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     id: target.dataset.id,
                     data: !isOpen
                 }]);
-                if (isOpen) {
-                    target.firstElementChild.classList.remove("av__group-arrow--open");
-                    target.parentElement.nextElementSibling.classList.add("fn__none");
-                } else {
-                    target.firstElementChild.classList.add("av__group-arrow--open");
-                    target.parentElement.nextElementSibling.classList.remove("fn__none");
-                }
-            }
+            }, Constants.TIMEOUT_COUNT);
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -281,6 +282,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     action: "setAttrViewBlockView",
                     blockID: blockElement.getAttribute("data-node-id"),
                     id: target.dataset.id,
+                    avID: blockElement.getAttribute("data-av-id"),
+                }], [{
+                    action: "setAttrViewBlockView",
+                    blockID: blockElement.getAttribute("data-node-id"),
+                    id: target.parentElement.querySelector(".item--focus").getAttribute("data-id"),
                     avID: blockElement.getAttribute("data-av-id"),
                 }]);
             }
@@ -606,7 +612,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
-                id: "insertRowBefore",
+                id: avType === "table" ? "insertRowBefore" : "insertItemBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
 ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field"><span class="fn__space"></span>`)}
@@ -621,7 +627,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                             blockElement,
                             protyle,
                             count: parseInt(inputElement.value),
-                            previousID: rowElements[0].previousElementSibling.getAttribute("data-id"),
+                            previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
                             groupID: rowElements[0].parentElement.getAttribute("data-group-id")
                         });
                         menu.close();
@@ -632,7 +638,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                                 blockElement,
                                 protyle,
                                 count: parseInt(inputElement.value),
-                                previousID: rowElements[0].previousElementSibling.getAttribute("data-id"),
+                                previousID: rowElements[0].previousElementSibling?.getAttribute("data-id"),
                                 groupID: rowElements[0].parentElement.getAttribute("data-group-id")
                             });
                             menu.close();
@@ -641,7 +647,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 }
             });
             menu.addItem({
-                id: "insertRowAfter",
+                id: avType === "table" ? "insertRowAfter" : "insertItemAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
 ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field" value="1"><span class="fn__space"></span>`)}
@@ -829,7 +835,7 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         }
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
-        if (viewType === "gallery") {
+        if (["gallery", "kanban"].includes(viewType)) {
             if (value.type === "checkbox") {
                 value.checkbox = {
                     checked: value.checkbox?.checked || false,

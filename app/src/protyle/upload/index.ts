@@ -209,7 +209,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     insertHTML(successFileText, protyle, insertBlock);
     // 粘贴图片后定位不准确 https://github.com/siyuan-note/siyuan/issues/13336
     setTimeout(() => {
-        scrollCenter(protyle, undefined, false, "smooth");
+        scrollCenter(protyle, undefined, "nearest", "smooth");
     }, hasImage ? 0 : Constants.TIMEOUT_LOAD);
 };
 

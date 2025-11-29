@@ -52,8 +52,8 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
                 item.children.forEach((subItem) => {
                     const viewDefaultName = getViewName(subItem.viewLayout);
                     html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}">
-<span class="b3-list-item__text">${escapeHtml(subItem.avName || window.siyuan.languages._kernel[267])}</span> 
-<span class="b3-list-item__meta">${escapeHtml(subItem.viewName)}${viewDefaultName === subItem.viewName ? "" : " - " + viewDefaultName}</span>
+<span class="b3-list-item__text">${escapeHtml(subItem.viewName)}</span> 
+<span class="b3-list-item__meta">${viewDefaultName}</span>
 </div>`;
                 });
                 html += "</div>";

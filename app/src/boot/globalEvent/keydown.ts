@@ -442,7 +442,12 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.outline.custom, event)) {
         event.preventDefault();
         const offset = getSelectionOffset(target);
-        openOutline(protyle);
+        openOutline({
+            app,
+            rootId: protyle.block.rootID,
+            title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
+            isPreview: !protyle.preview.element.classList.contains("fn__none")
+        });
         // switchWnd 后，range会被清空，需要重新设置
         focusByOffset(target, offset.start, offset.end);
         return true;
@@ -1527,6 +1532,15 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.closeTab.custom, event) && !event.repeat) {
         execByCommand({
             command: "closeTab"
+        });
+        event.preventDefault();
+        return;
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.general.recentClosed.custom, event)) {
+        execByCommand({
+            command: "recentClosed",
+            app
         });
         event.preventDefault();
         return;

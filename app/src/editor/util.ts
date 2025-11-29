@@ -10,7 +10,7 @@ import {Constants} from "../constants";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {focusBlock, focusByRange} from "../protyle/util/selection";
+import {focusBlock, focusByOffset, focusByRange} from "../protyle/util/selection";
 import {onGet} from "../protyle/util/onGet";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
@@ -398,9 +398,14 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         }
         if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
-                if (newRange) {
-                    editor.editor.protyle.toolbar.range = newRange;
+                if (options.action.includes(Constants.CB_GET_SEARCH)) {
+                    const scrollAttr = window.siyuan.storage[Constants.LOCAL_FILEPOSITION][editor.editor.protyle.block.rootID];
+                    focusByOffset(nodeElement, scrollAttr.focusStart, scrollAttr.focusEnd);
+                } else {
+                    const newRange = focusBlock(nodeElement, undefined, !options.action?.includes(Constants.CB_GET_OUTLINE));
+                    if (newRange) {
+                        editor.editor.protyle.toolbar.range = newRange;
+                    }
                 }
                 scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                 editor.editor.protyle.observerLoad = new ResizeObserver(() => {

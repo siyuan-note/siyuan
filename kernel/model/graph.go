@@ -126,17 +126,17 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 				refBlocks := fromSQLBlocks(&sqlRefBs, "", 0)
 
 				if 0 < len(dailyNotesPaths) {
-					filterDailyNote := false
+					isDailyNote := false
 					var tmp []*Block
 					for _, refBlock := range refBlocks {
 						for _, dailyNotePath := range dailyNotesPaths {
 							if strings.HasPrefix(refBlock.HPath, dailyNotePath) {
-								filterDailyNote = true
+								isDailyNote = true
 								break
 							}
 						}
 
-						if !filterDailyNote {
+						if !isDailyNote {
 							tmp = append(tmp, refBlock)
 						}
 					}
@@ -149,6 +149,7 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 		}
 	}
 
+	blocks = filterDailyNote(blocks, true)
 	genTreeNodes(blocks, &nodes, &links, true)
 	growTreeGraph(&forwardlinks, &backlinks, &nodes)
 	blocks = append(blocks, forwardlinks...)
@@ -187,6 +188,7 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 
 	sqlBlocks := sql.GetAllChildBlocks(rootIDs, stmt, Conf.Graph.MaxBlocks)
 	treeBlocks := fromSQLBlocks(&sqlBlocks, "", 0)
+	treeBlocks = filterDailyNote(treeBlocks, false)
 	genTreeNodes(treeBlocks, &nodes, &links, false)
 	blocks = append(blocks, treeBlocks...)
 
@@ -596,6 +598,34 @@ func graphTypeFilter(local bool) string {
 
 	inList = append(inList, "'d'")
 	return " AND ref.type IN (" + strings.Join(inList, ",") + ")"
+}
+
+func filterDailyNote(blocks []*Block, local bool) (ret []*Block) {
+	// Graph dailynote filtering not working https://github.com/siyuan-note/siyuan/issues/16463
+
+	dailyNote := Conf.Graph.Local.DailyNote
+	if !local {
+		dailyNote = Conf.Graph.Global.DailyNote
+	}
+
+	if dailyNote {
+		ret = blocks
+		return
+	}
+
+	for _, block := range blocks {
+		isDailyNote := false
+		for k, _ := range block.IAL {
+			isDailyNote = strings.HasPrefix(k, DailyNoteAttrPrefix)
+			if isDailyNote {
+				break
+			}
+		}
+		if !isDailyNote {
+			ret = append(ret, block)
+		}
+	}
+	return
 }
 
 func graphDailyNoteFilter(local bool) string {

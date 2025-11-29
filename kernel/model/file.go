@@ -1074,6 +1074,8 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	return
 }
 
+const DailyNoteAttrPrefix = "custom-dailynote-"
+
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -1110,8 +1112,8 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		}
 		p = tree.Path
 		date := time.Now().Format("20060102")
-		if tree.Root.IALAttr("custom-dailynote-"+date) == "" {
-			tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
+			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 			if err = indexWriteTreeUpsertQueue(tree); err != nil {
 				return
 			}
@@ -1179,7 +1181,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 	p = tree.Path
 	date := time.Now().Format("20060102")
-	tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
 	}

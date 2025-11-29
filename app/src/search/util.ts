@@ -46,6 +46,7 @@ import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRend
 import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
 import {highlightById} from "../util/highlightById";
 import {getSelectionOffset} from "../protyle/util/selection";
+import {electronUndo} from "../protyle/undo";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
@@ -890,6 +891,12 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         }
         saveKeyList("keys", searchInputElement.value);
     });
+    searchInputElement.addEventListener("keydown", (event) => {
+        electronUndo(event);
+    });
+    replaceInputElement.addEventListener("keydown", (event) => {
+        electronUndo(event);
+    });
     addClearButton({
         inputElement: searchInputElement,
         right: 8,
@@ -914,7 +921,7 @@ export const openSearchEditor = (options: {
     id?: string,
     cb?: () => void
 }) => {
-    const currentRange = options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex];
+    let currentRange = options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex];
     if (currentRange) {
         const rangeBlockElement = hasClosestBlock(currentRange.startContainer);
         if (rangeBlockElement) {
@@ -928,12 +935,15 @@ export const openSearchEditor = (options: {
                 zoomInId: options.protyle.block.showAll ? options.protyle.block.id : undefined
             };
             window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.protyle.block.rootID] = scrollAttr;
+            if (offset.start === offset.end) {
+                currentRange = null;
+            }
         }
     }
     checkFold(options.id, (zoomIn) => {
         openFileById({
             app: options.protyle.app,
-            id:options.id,
+            id: options.id,
             action: currentRange ?
                 (zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_SCROLL, Constants.CB_GET_SEARCH] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_SCROLL, Constants.CB_GET_SEARCH]) :
                 (zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_HL]),

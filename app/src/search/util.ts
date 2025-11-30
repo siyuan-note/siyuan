@@ -817,6 +817,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             } else {
                                 if (event.altKey) {
                                     openSearchEditor({
+                                        rootId: target.getAttribute("data-root-id"),
                                         protyle: edit.protyle,
                                         id: target.getAttribute("data-node-id"),
                                         cb: closeCB,
@@ -850,6 +851,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             /// #endif
                         } else {
                             openSearchEditor({
+                                rootId: target.getAttribute("data-root-id"),
                                 protyle: edit.protyle,
                                 id: target.getAttribute("data-node-id"),
                                 cb: closeCB
@@ -918,10 +920,12 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
 export const openSearchEditor = (options: {
     protyle: IProtyle,
     openPosition?: string,
-    id?: string,
-    cb?: () => void
+    id: string,
+    rootId: string,
+    cb: () => void
 }) => {
-    let currentRange = options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex];
+    let currentRange = (options.rootId === options.protyle.block.rootID && options.id === options.protyle.block.id) ?
+        options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex] : null;
     if (currentRange) {
         const rangeBlockElement = hasClosestBlock(currentRange.startContainer);
         if (rangeBlockElement) {

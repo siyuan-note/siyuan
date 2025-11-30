@@ -99,6 +99,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
             openSearchEditor({
                 protyle: edit.protyle,
+                rootId: currentList.getAttribute("data-root-id"),
                 id: currentList.getAttribute("data-node-id"),
                 cb: () => {
                     if (dialog) {
@@ -217,6 +218,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                 replace(element, config, edit, false);
             } else {
                 openSearchEditor({
+                    rootId: currentList.getAttribute("data-root-id"),
                     protyle: edit.protyle,
                     id: currentList.getAttribute("data-node-id"),
                     cb: () => {

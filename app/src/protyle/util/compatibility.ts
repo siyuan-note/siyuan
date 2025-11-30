@@ -53,6 +53,33 @@ export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
     }
+    //https://github.com/siyuan-note/siyuan/issues/15892
+    if (uri.startsWith("siyuan://")) {
+        let urlObj: URL;
+        try {
+            urlObj = new URL(uri);
+        if (urlObj.protocol !== "siyuan:") {
+            return;
+        }
+        } catch (error) {
+            return;
+        }
+        if (urlObj && urlObj.hostname === "plugins") {
+            const pluginNameType = urlObj.pathname.split("/")[1];
+            if (!pluginNameType) {
+                return;
+            }
+            window.siyuan.ws.app.plugins.find((plugin) => {
+                if (pluginNameType.startsWith(plugin.name)) {
+                    // siyuan://plugins/plugin-name/foo?bar=baz
+                    plugin.eventBus.emit("open-siyuan-url-plugin", {
+                        url: uri
+                    });
+                }
+            });
+            return;
+        }
+    }
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
             // iOS 16.7 之前的版本，uri 需要 encodeURIComponent

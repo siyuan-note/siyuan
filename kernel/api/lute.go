@@ -29,6 +29,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -64,7 +65,13 @@ func copyStdMarkdown(c *gin.Context) {
 		imgTag = arg["imgTag"].(bool)
 	}
 
-	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
+	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
+	if model.IsReadOnlyRoleContext(c) {
+		block := sql.GetBlock(id)
+		publishAccess := model.GetPublishAccess()
+		markdownContent = model.FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, markdownContent, true)
+	}
+	ret.Data = markdownContent
 }
 
 func html2BlockDOM(c *gin.Context) {

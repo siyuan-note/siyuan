@@ -52,6 +52,10 @@ func listInvalidBlockRefs(c *gin.Context) {
 	}
 
 	blocks, matchedBlockCount, matchedRootCount, pageCount := model.ListInvalidBlockRefs(page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,
@@ -72,9 +76,18 @@ func getAssetContent(c *gin.Context) {
 	id := arg["id"].(string)
 	query := arg["query"].(string)
 	queryMethod := int(arg["queryMethod"].(float64))
-
+	assetContent := model.GetAssetContent(id, query, queryMethod)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		filteredAssetContents := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
+		if len(filteredAssetContents) > 0 {
+			assetContent = filteredAssetContents[0]
+		} else {
+			assetContent = nil
+		}
+	}
 	ret.Data = map[string]interface{}{
-		"assetContent": model.GetAssetContent(id, query, queryMethod),
+		"assetContent": assetContent,
 	}
 	return
 }
@@ -90,6 +103,12 @@ func fullTextSearchAssetContent(c *gin.Context) {
 
 	page, pageSize, query, types, method, orderBy := parseSearchAssetContentArgs(arg)
 	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		assetContents = model.FilterAssetContentByPublishAccess(c, publishAccess, assetContents)
+		matchedAssetCount = len(assetContents)
+		pageCount = (matchedAssetCount + pageSize - 1) / pageSize
+	}
 	ret.Data = map[string]interface{}{
 		"assetContents":     assetContents,
 		"matchedAssetCount": matchedAssetCount,
@@ -258,6 +277,10 @@ func getEmbedBlock(c *gin.Context) {
 	}
 
 	blocks := model.GetEmbedBlock(embedBlockID, includeIDs, headingMode, breadcrumb)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
+	}
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 	}
@@ -311,6 +334,10 @@ func searchEmbedBlock(c *gin.Context) {
 	}
 
 	blocks := model.SearchEmbedBlock(embedBlockID, stmt, excludeIDs, headingMode, breadcrumb)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
+	}
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 	}
@@ -346,6 +373,10 @@ func searchRefBlock(c *gin.Context) {
 	keyword := arg["k"].(string)
 	beforeLen := int(arg["beforeLen"].(float64))
 	blocks, newDoc := model.SearchRefBlock(id, rootID, keyword, beforeLen, isSquareBrackets, isDatabase)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
 	ret.Data = map[string]interface{}{
 		"blocks": blocks,
 		"newDoc": newDoc,
@@ -365,6 +396,10 @@ func fullTextSearchBlock(c *gin.Context) {
 
 	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchBlockArgs(arg)
 	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,

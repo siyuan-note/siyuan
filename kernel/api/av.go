@@ -169,7 +169,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil)
+	ret = renderAttrView(c, blockID, avID, "", "", 1, -1, nil)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -192,7 +192,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil)
+	ret = renderAttrView(c, blockID, avID, "", "", 1, -1, nil)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -821,11 +821,11 @@ func renderAttributeView(c *gin.Context) {
 		groupPaging = groupPagingArg.(map[string]interface{})
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging)
+	ret = renderAttrView(c, blockID, id, viewID, query, page, pageSize, groupPaging)
 	c.JSON(http.StatusOK, ret)
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (ret *gulu.Result) {
+func renderAttrView(c *gin.Context, blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
 	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging)
 	if err != nil {
@@ -847,6 +847,11 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		}
 
 		views = append(views, view)
+	}
+
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		view = model.FilterViewByPublishAccess(c, publishAccess, view)
 	}
 
 	ret.Data = map[string]interface{}{
@@ -903,6 +908,10 @@ func getAttributeViewKeys(c *gin.Context) {
 
 	id := arg["id"].(string)
 	blockAttributeViewKeys := model.GetBlockAttributeViewKeys(id)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blockAttributeViewKeys = model.FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKeys)
+	}
 	ret.Data = blockAttributeViewKeys
 }
 

@@ -28,6 +28,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
 import {selectOpenTab} from "./util";
+import {stopScrollAnimation} from "../../boot/globalEvent/dragover";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -484,6 +485,7 @@ export class Files extends Model {
                 item.classList.remove("layout-tab-bars--drag");
             });
             /// #endif
+            stopScrollAnimation();
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {

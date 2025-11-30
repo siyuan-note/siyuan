@@ -66,7 +66,7 @@ html {
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
-    padding-left: env(titlebar-area-x, 0);
+    padding-left: env(titlebar-area-x, 5px);
     padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0));
     height: calc(env(titlebar-area-height, 31px) + 1px);
   }

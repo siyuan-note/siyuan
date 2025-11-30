@@ -210,7 +210,6 @@ const setHTML = (options: {
     protyle.wysiwyg.element.querySelectorAll("video, audio").forEach(item => {
         item.addEventListener("playing", () => {
             activeBlur();
-            console.log("playing");
         });
     });
     /// #endif

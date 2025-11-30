@@ -88,11 +88,9 @@ export const initWindowEvent = (app: App) => {
         }
     });
     window.addEventListener("dragend", () => {
-        console.log("dragend");
         stopScrollAnimation();
     });
     window.addEventListener("dragleave", () => {
-        console.log("dragleave");
         stopScrollAnimation();
     });
 

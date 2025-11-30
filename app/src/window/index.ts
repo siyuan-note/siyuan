@@ -23,7 +23,7 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "./init";
-import {loadPlugins, syncPlugins} from "../plugin/loader";
+import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {updateControlAlt} from "../protyle/util/hotKey";
@@ -72,7 +72,7 @@ class App {
                                 setRefDynamicText(data.data);
                                 break;
                             case "reloadPlugin":
-                                syncPlugins(this, data.data);
+                                reloadPlugin(this, data.data);
                                 break;
                             case "reloadEmojiConf":
                                 reloadEmoji();

@@ -14,7 +14,7 @@ import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
-import {afterLoadPlugin, loadPlugin, loadPlugins, syncPlugins} from "../plugin/loader";
+import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/loader";
 import {useShell} from "../util/pathName";
 
 export const bazaar = {
@@ -742,7 +742,7 @@ export const bazaar = {
                                 if (bazaarType === "plugins") {
                                     app.plugins.find((item: Plugin) => {
                                         if (item.name === dataObj.name) {
-                                            syncPlugins(app, {
+                                            reloadPlugin(app, {
                                                 upsertCodePlugins: [dataObj.name],
                                             });
                                             return true;

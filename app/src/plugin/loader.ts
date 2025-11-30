@@ -218,7 +218,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     /// #endif
 };
 
-export const syncPlugins = async (app: App, data: {
+export const reloadPlugin = async (app: App, data: {
     upsertCodePlugins?: string[],
     upsertDataPlugins?: string[],
     removePlugins?: string[]

@@ -28,7 +28,7 @@ import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {getSearch} from "./util/functions";
 import {hideAllElements} from "./protyle/ui/hideElements";
-import {loadPlugins, syncPlugins} from "./plugin/loader";
+import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
@@ -95,7 +95,7 @@ export class App {
                                 setRefDynamicText(data.data);
                                 break;
                             case "reloadPlugin":
-                                syncPlugins(this, data.data);
+                                reloadPlugin(this, data.data);
                                 break;
                             case "reloadEmojiConf":
                                 reloadEmoji();

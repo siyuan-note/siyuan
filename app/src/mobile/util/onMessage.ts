@@ -7,7 +7,7 @@ import {
     transactionError
 } from "../../dialog/processSystem";
 import {App} from "../../index";
-import {syncPlugins} from "../../plugin/loader";
+import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
 import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
 import {updateControlAlt} from "../../protyle/util/hotKey";
@@ -36,7 +36,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 setRefDynamicText(data.data);
                 break;
             case "reloadPlugin":
-                syncPlugins(app, data.data);
+                reloadPlugin(app, data.data);
                 break;
             case "reloadEmojiConf":
                 reloadEmoji();

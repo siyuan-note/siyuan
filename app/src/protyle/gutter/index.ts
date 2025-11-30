@@ -63,7 +63,6 @@ import * as path from "path";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
-import {stopScrollAnimation} from "../../boot/globalEvent/dragover";
 
 export class Gutter {
     public element: HTMLElement;

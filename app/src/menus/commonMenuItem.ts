@@ -365,7 +365,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                         }
                     });
                     if (existElement) {
-                        showMessage(window.siyuan.languages.hasAttrName.replace('${x}', value));
+                        showMessage(window.siyuan.languages.hasAttrName.replace("${x}", value));
                     } else {
                         target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
     <div class="fn__flex">

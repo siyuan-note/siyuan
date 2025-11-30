@@ -52,7 +52,6 @@ import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
-import {stopScrollAnimation} from "../boot/globalEvent/dragover";
 
 export class Wnd {
     private app: App;

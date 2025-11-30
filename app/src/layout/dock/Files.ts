@@ -28,7 +28,6 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
 import {selectOpenTab} from "./util";
-import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -490,7 +489,6 @@ export class Files extends Model {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 return;
             }
-            // dragOverScroll(event, this.element.getBoundingClientRect(), this.element);
             let liElement = hasClosestByTag(event.target, "LI");
             if (!liElement) {
                 liElement = hasClosestByTag(document.elementFromPoint(event.clientX, event.clientY - 1), "LI");

@@ -781,6 +781,17 @@
   .protyle-wysiwyg__embed .iframe:hover .protyle-action__drag {
     display: none;
   }
+
+  .callout-icon {
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--b3-border-radius);
+    transition: var(--b3-background-transition);
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+    }
+  }
 }
 
 .protyle-wysiwyg:not([contenteditable]),

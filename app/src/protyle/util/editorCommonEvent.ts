@@ -1175,7 +1175,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;
         }
-        stopScrollAnimation();
     });
     let dragoverElement: Element;
     let disabledPosition: string;
@@ -1595,7 +1594,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.dragElement = undefined;
             document.onmousemove = null;
         }
-        stopScrollAnimation();
     });
 };
 

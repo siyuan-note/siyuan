@@ -313,11 +313,6 @@ export class Wnd {
             }
             saveLayout();
         });
-        this.headersElement.parentElement.addEventListener("dragenter", (event) => {
-            if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
-                stopScrollAnimation();
-            }
-        });
         let elementDragCounter = 0;
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
             elementDragCounter++;
@@ -341,9 +336,6 @@ export class Wnd {
                 dragElement.removeAttribute("style");
             }
         });
-        dragElement.addEventListener("dragenter", () => {
-            stopScrollAnimation();
-        });
         dragElement.addEventListener("dragover", (event: DragEvent & { layerX: number, layerY: number }) => {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                 item.classList.remove("layout-tab-bars--drag");
@@ -358,7 +350,6 @@ export class Wnd {
         dragElement.addEventListener("dragleave", () => {
             dragElement.classList.add("fn__none");
             dragElement.removeAttribute("style");
-            stopScrollAnimation();
         });
 
         dragElement.addEventListener("drop", (event: DragEvent & { target: HTMLElement }) => {

@@ -485,13 +485,12 @@ export class Files extends Model {
                 item.classList.remove("layout-tab-bars--drag");
             });
             /// #endif
-            stopScrollAnimation();
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 return;
             }
-            dragOverScroll(event, this.element.getBoundingClientRect(), this.element);
+            // dragOverScroll(event, this.element.getBoundingClientRect(), this.element);
             let liElement = hasClosestByTag(event.target, "LI");
             if (!liElement) {
                 liElement = hasClosestByTag(document.elementFromPoint(event.clientX, event.clientY - 1), "LI");

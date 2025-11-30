@@ -24,6 +24,21 @@ export const encodeBase64 = (text: string): string => {
 };
 
 export const getTextSiyuanFromTextHTML = (html: string) => {
+    const trimmedHtml = html.trimStart();
+    if (trimmedHtml.startsWith("<html")) {
+        const htmlTagEnd = trimmedHtml.indexOf(">");
+        if (htmlTagEnd > 0) {
+            const htmlTag = trimmedHtml.substring(0, htmlTagEnd);
+            // 兼容 Microsoft Excel 应用，HTML 以包含 Excel 命名空间声明的 html 元素开头（备注：从 WPS 复制也有这个命名空间）
+            if (htmlTag.includes('xmlns:x="urn:schemas-microsoft-com:office:excel"')) {
+                // 粘贴表格不需要解析 textSiyuan https://ld246.com/article/1763027417781/comment/1763032527460#comments
+                return {
+                    textSiyuan: "",
+                    textHtml: html.replace(/<!--data-siyuan='[^']+'-->/g, "")
+                };
+            }
+        }
+    }
     const siyuanMatch = html.match(/<!--data-siyuan='([^']+)'-->/);
     let textSiyuan = "";
     let textHtml = html;
@@ -38,7 +53,7 @@ export const getTextSiyuanFromTextHTML = (html: string) => {
                 textSiyuan = decoder.decode(bytes);
             }
             // 移除注释节点，保持原有的 text/html 内容
-            textHtml = html.replace(/<!--data-siyuan='[^']+'-->/, "");
+            textHtml = html.replace(/<!--data-siyuan='[^']+'-->/g, "");
         } catch (e) {
             console.log("Failed to decode siyuan data from HTML comment:", e);
         }

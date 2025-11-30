@@ -357,7 +357,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             return a.name.localeCompare(b.name, undefined, {numeric: true});
                         }).forEach((item: ISaveLayout) => {
                             if (inputElement.value === "" || item.name.toLowerCase().indexOf(inputElement.value.toLowerCase()) > -1) {
-                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action ${html ? "" : "b3-list-item--focus"}">
+                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
     <div class="b3-list-item__text">${item.name}</div>
     <span class="b3-list-item__meta">${item.time ? dayjs(item.time).format("YYYY-MM-DD HH:mm") : ""}</span>
     <span class="b3-list-item__action">
@@ -370,14 +370,18 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     };
                     const inputElement = menuElement.querySelector(".b3-text-field") as HTMLInputElement;
                     const listElement = menuElement.querySelector(".b3-list");
+                    inputElement.addEventListener("focus", () => {
+                        const listItemElement = inputElement.nextElementSibling?.querySelector(".b3-list-item");
+                        listItemElement?.classList.add("b3-list-item--focus");
+                    });
                     inputElement.addEventListener("keydown", (event) => {
                         event.stopPropagation();
                         if (event.isComposing) {
                             return;
                         }
                         upDownHint(listElement, event);
-                        if (event.key === "Escape") {
-                            window.siyuan.menus.menu.remove();
+                        if (event.key === "Escape" || (event.key === "ArrowLeft" && inputElement.value === "")) {
+                            window.siyuan.menus.menu.remove(true);
                         } else if (event.key === "Enter") {
                             const currentElement = listElement.querySelector(".b3-list-item--focus");
                             if (currentElement) {
@@ -394,6 +398,8 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         }
                         event.stopPropagation();
                         listElement.innerHTML = genListHTML();
+                        const listItemElement = inputElement.nextElementSibling?.querySelector(".b3-list-item");
+                        listItemElement?.classList.add("b3-list-item--focus");
                     });
                     listElement.addEventListener("click", (event: MouseEvent) => {
                         if (window.siyuan.config.readonly) {

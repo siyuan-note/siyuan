@@ -1034,8 +1034,16 @@ func searchDocs(c *gin.Context) {
 		flashcard = arg["flashcard"].(bool)
 	}
 
+	var excludeIDs []string
+	if arg["excludeIDs"] != nil {
+		excludeIDsArg := arg["excludeIDs"].([]interface{})
+		for _, excludeID := range excludeIDsArg {
+			excludeIDs = append(excludeIDs, excludeID.(string))
+		}
+	}
+
 	k := arg["k"].(string)
-	ret.Data = model.SearchDocsByKeyword(k, flashcard)
+	ret.Data = model.SearchDocsByKeyword(k, flashcard, excludeIDs)
 }
 
 func listDocsByPath(c *gin.Context) {

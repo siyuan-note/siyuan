@@ -139,7 +139,7 @@ func (box *Box) moveCorruptedData(filePath string) {
 	logging.LogWarnf("moved corrupted data file [%s] to [%s]", filePath, to)
 }
 
-func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]string) {
+func SearchDocsByKeyword(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
 	ret = []map[string]string{}
 
 	var deck *riff.Deck
@@ -185,6 +185,10 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 			if i < len(keywords)-1 {
 				condition += " AND "
 			}
+		}
+
+		if 0 < len(excludeIDs) {
+			condition += fmt.Sprintf(" AND root_id NOT IN ('%s')", strings.Join(excludeIDs, "', '"))
 		}
 
 		rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)

@@ -225,6 +225,8 @@ declare class Lute {
 
     public SetSuperBlock(enable: boolean): void;
 
+    public SetCallout(enable: boolean): void;
+
     public SetTag(enable: boolean): void;
 
     public SetInlineMath(enable: boolean): void;

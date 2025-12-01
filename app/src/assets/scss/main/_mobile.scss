@@ -21,6 +21,10 @@
     font-size: 16px;
     line-height: 40px;
 
+    &:hover {
+      background-color: transparent !important;
+    }
+
     &__icon {
       font-size: 18px;
       line-height: 32px;

@@ -16,7 +16,7 @@ import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 
-export const getTextStar = (blockElement: HTMLElement) => {
+export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
     let refText = "";
     if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
@@ -44,14 +44,15 @@ export const getTextStar = (blockElement: HTMLElement) => {
         } else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
             Array.from(blockElement.querySelectorAll("[data-node-id]")).find((item: HTMLElement) => {
                 if (!["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(item.getAttribute("data-type"))) {
-                    refText = getTextStar(blockElement.querySelector("[data-node-id]"));
+                    // 获取子块内容，使用容器块本身的 ID
+                    refText = getTextStar(item, true);
                     return true;
                 }
             });
-            if (refText) {
-                return refText;
-            }
         }
+    }
+    if (contentOnly) {
+        return refText;
     }
     return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
 };

@@ -3,6 +3,8 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {clipboard, ipcRenderer} from "electron";
+/// #endif
+/// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
 /// #endif
 
@@ -54,10 +56,11 @@ export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
     }
-    //https://github.com/siyuan-note/siyuan/issues/15892
+    /// #if MOBILE
     if (processSYLink(window.siyuan.ws.app, uri)) {
         return;
     }
+    /// #endif
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
             // iOS 16.7 之前的版本，uri 需要 encodeURIComponent
@@ -564,3 +567,4 @@ export const initFocusFix = () => {
     };
 };
 /// #endif
+

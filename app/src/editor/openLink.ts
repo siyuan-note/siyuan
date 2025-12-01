@@ -3,12 +3,12 @@ import {getIdFromSYProtocol, isLocalPath, isSYProtocol, pathPosix} from "../util
 import {shell, ipcRenderer} from "electron";
 /// #endif
 import {getSearch} from "../util/functions";
-import {openByMobile} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
-import {showMessage} from "../dialog/message";
 /// #if !MOBILE
 import {openAsset, openBy, openFile, openFileById} from "./util";
 /// #endif
+import {showMessage} from "../dialog/message";
+import {openByMobile} from "../protyle/util/compatibility";
 import {App} from "../index";
 import {fetchPost} from "../util/fetch";
 import {checkFold} from "../util/noRelyPCFunction";

@@ -682,6 +682,15 @@ type ValueSelect struct {
 	Color   string `json:"color"` // 1-14
 }
 
+func MSelectRemoveOption(mSelect []*ValueSelect, opt string) (ret []*ValueSelect) {
+	for _, s := range mSelect {
+		if s.Content != opt {
+			ret = append(ret, s)
+		}
+	}
+	return
+}
+
 func MSelectExistOption(mSelect []*ValueSelect, opt string) bool {
 	for _, s := range mSelect {
 		if s.Content == opt {

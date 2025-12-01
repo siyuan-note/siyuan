@@ -145,6 +145,12 @@
   .callout {
     padding: 8px;
 
+    &[data-subtype="NOTE"] {
+      .callout-info {
+        color: var(--b3-theme-primary);
+      }
+    }
+
     &-info {
       display: flex;
       align-items: center;
@@ -165,6 +171,8 @@
 
     &-title {
       margin-left: 8px;
+      font-weight: 500;
+      font-size: 140%;
     }
   }
 

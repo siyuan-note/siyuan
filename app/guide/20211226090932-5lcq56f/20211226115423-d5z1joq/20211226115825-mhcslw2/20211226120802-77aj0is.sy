@@ -6,7 +6,7 @@
 		"id": "20211226120802-77aj0is",
 		"title": "内容塊屬性",
 		"type": "doc",
-		"updated": "20251126211207"
+		"updated": "20251201102544"
 	},
 	"Children": [
 		{
@@ -215,7 +215,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-347kbz5",
-				"updated": "20251126211207"
+				"updated": "20251201102544"
 			},
 			"Children": [
 				{
@@ -229,7 +229,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120833-a02rthr",
-				"updated": "20251126211207"
+				"updated": "20251201102544"
 			},
 			"Children": [
 				{
@@ -252,7 +252,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 進行設置，屬性名僅允許使用小寫英文字母和阿拉伯數字（例如 "
+					"Data": "​ 進行設置，屬性名稱僅允許使用小寫英文字母和阿拉伯數字並且需要以字母開頭（例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -266,7 +266,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": " 7days"
+					"TextMarkTextContent": "day1"
 				},
 				{
 					"Type": "NodeText",

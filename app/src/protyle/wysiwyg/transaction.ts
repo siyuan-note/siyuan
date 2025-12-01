@@ -162,11 +162,14 @@ const promiseTransaction = () => {
                     } else if (updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
                             if (!isInEmbedBlock(item) && !getFirstBlock(item).contains(range.startContainer)) {
+                                const cloneElement = processClonePHElement(updateElements[0].cloneNode(true) as Element);
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
-                                    item.firstElementChild.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                                    item.firstElementChild.after(cloneElement);
+                                } else if (item.classList.contains("callout")) {
+                                    item.querySelector(".callout-content").prepend(cloneElement);
                                 } else {
-                                    item.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                                    item.prepend(cloneElement);
                                 }
                                 hasFind = true;
                             }
@@ -208,10 +211,14 @@ const promiseTransaction = () => {
                             if (!isInEmbedBlock(item) && !item.contains(range.startContainer)) {
                                 // 列表特殊处理
                                 if (item.firstElementChild && item.firstElementChild.classList.contains("protyle-action") &&
-                                    item.firstElementChild.nextElementSibling.getAttribute("data-node-id") !== operation.id) {
+                                    item.firstElementChild.nextElementSibling?.getAttribute("data-node-id") !== operation.id) {
                                     item.firstElementChild.insertAdjacentHTML("afterend", operation.data);
                                     cursorElements.push(item.firstElementChild.nextElementSibling);
-                                } else if (item.firstElementChild && item.firstElementChild.getAttribute("data-node-id") !== operation.id) {
+                                } else if (item.classList.contains("callout") &&
+                                    item.querySelector('[data-node-id]')?.getAttribute("data-node-id") !== operation.id) {
+                                    item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", operation.data);
+                                    cursorElements.push(item.querySelector('[data-node-id]'));
+                                } else if (item.firstElementChild.getAttribute("data-node-id") !== operation.id) {
                                     item.insertAdjacentHTML("afterbegin", operation.data);
                                     cursorElements.push(item.firstElementChild);
                                 }
@@ -719,11 +726,14 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             } else {
                 parentElement.forEach(item => {
                     if (!isInEmbedBlock(item)) {
+                        const cloneElement = processClonePHElement(updateElements[0].cloneNode(true) as Element);
                         // 列表特殊处理
                         if (item.firstElementChild?.classList.contains("protyle-action")) {
-                            item.firstElementChild.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                            item.firstElementChild.after(cloneElement);
+                        } else if (item.classList.contains("callout")) {
+                            item.querySelector(".callout-content").prepend(cloneElement);
                         } else {
-                            item.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                            item.prepend(cloneElement);
                         }
                         hasFind = true;
                     }
@@ -825,6 +835,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                         if (item.firstElementChild?.classList.contains("protyle-action")) {
                             item.firstElementChild.insertAdjacentHTML("afterend", operation.data);
                             cursorElements.push(item.firstElementChild.nextElementSibling);
+                        } else if (item.classList.contains("callout")) {
+                            item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", operation.data);
+                            cursorElements.push(item.querySelector('[data-node-id]'));
                         } else {
                             item.insertAdjacentHTML("afterbegin", operation.data);
                             cursorElements.push(item.firstElementChild);
@@ -923,14 +936,15 @@ export const turnsIntoOneTransaction = (options: {
         parentElement.classList.add("bq");
         parentElement.setAttribute("data-node-id", id);
         parentElement.setAttribute("data-type", "NodeBlockquote");
-        parentElement.innerHTML = '<div class="protyle-attr" contenteditable="false"></div>';
+        parentElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     } else if (options.type === "Blocks2Callout") {
-        // TODO
         parentElement = document.createElement("div");
-        parentElement.classList.add("bq");
+        parentElement.classList.add("callout");
         parentElement.setAttribute("data-node-id", id);
-        parentElement.setAttribute("data-type", "NodeBlockquote");
-        parentElement.innerHTML = '<div class="protyle-attr" contenteditable="false"></div>';
+        parentElement.setAttribute("data-type", "NodeCallout");
+        parentElement.setAttribute("contenteditable", "false");
+        parentElement.setAttribute("data-subtype", "NOTE");
+        parentElement.innerHTML = `<div class="callout-info"><span class="callout-icon">✏️</span><span class="callout-title">Note</span></div><div class="callout-content"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     } else if (options.type.endsWith("Ls")) {
         parentElement = document.createElement("div");
         parentElement.classList.add("list");
@@ -989,6 +1003,14 @@ export const turnsIntoOneTransaction = (options: {
                 parentID: parentElement.children[index].getAttribute("data-node-id")
             });
             parentElement.children[index].firstElementChild.after(item);
+        } else if (options.type === "Blocks2Callout") {
+            doOperations.push({
+                action: "move",
+                id: itemId,
+                previousID: itemPreviousId,
+                parentID: id
+            });
+            parentElement.querySelector(".callout-content").insertAdjacentElement("beforeend", item);
         } else {
             doOperations.push({
                 action: "move",

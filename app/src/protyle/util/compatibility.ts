@@ -3,6 +3,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {clipboard, ipcRenderer} from "electron";
+import {processSYLink} from "../../editor/openLink";
 /// #endif
 
 export const encodeBase64 = (text: string): string => {
@@ -54,31 +55,8 @@ export const openByMobile = (uri: string) => {
         return;
     }
     //https://github.com/siyuan-note/siyuan/issues/15892
-    if (uri.startsWith("siyuan://")) {
-        let urlObj: URL;
-        try {
-            urlObj = new URL(uri);
-        if (urlObj.protocol !== "siyuan:") {
-            return;
-        }
-        } catch (error) {
-            return;
-        }
-        if (urlObj && urlObj.hostname === "plugins") {
-            const pluginNameType = urlObj.pathname.split("/")[1];
-            if (!pluginNameType) {
-                return;
-            }
-            window.siyuan.ws.app.plugins.find((plugin) => {
-                if (pluginNameType.startsWith(plugin.name)) {
-                    // siyuan://plugins/plugin-name/foo?bar=baz
-                    plugin.eventBus.emit("open-siyuan-url-plugin", {
-                        url: uri
-                    });
-                }
-            });
-            return;
-        }
+    if (processSYLink(window.siyuan.ws.app, uri)) {
+        return;
     }
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
@@ -369,7 +347,7 @@ export const updateHotkeyTip = (hotkey: string) => {
     const keys = [];
     if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push("Ctrl");
     if (hotkey.indexOf("⇧") > -1) keys.push("Shift");
-    if (hotkey.indexOf("⌥") > -1) keys.push( "Alt");
+    if (hotkey.indexOf("⌥") > -1) keys.push("Alt");
 
     // 不能去最后一个，需匹配 F2
     const lastKey = hotkey.replace(/[⌘⇧⌥⌃]/g, "");

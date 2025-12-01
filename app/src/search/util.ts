@@ -463,37 +463,41 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 break;
             } else if (target.id === "searchPath") {
-                movePathTo((toPath, toNotebook) => {
-                    fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
-                        config.idPath = [];
-                        const hPathList: string[] = [];
-                        let enableIncludeChild = false;
-                        toPath.forEach((item, index) => {
-                            if (item === "/") {
-                                config.idPath.push(toNotebook[index]);
-                                hPathList.push(getNotebookName(toNotebook[index]));
-                            } else {
-                                enableIncludeChild = true;
-                                config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
+                movePathTo({
+                    cb: (toPath, toNotebook) => {
+                        fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
+                            config.idPath = [];
+                            const hPathList: string[] = [];
+                            let enableIncludeChild = false;
+                            toPath.forEach((item, index) => {
+                                if (item === "/") {
+                                    config.idPath.push(toNotebook[index]);
+                                    hPathList.push(getNotebookName(toNotebook[index]));
+                                } else {
+                                    enableIncludeChild = true;
+                                    config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
+                                }
+                            });
+                            if (response.data) {
+                                hPathList.push(...response.data);
                             }
+                            config.hPath = hPathList.join(" ");
+                            config.page = 1;
+                            searchPathInputElement.innerHTML = `${escapeGreat(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+                            searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
+                            const includeElement = element.querySelector("#searchInclude");
+                            includeElement.firstElementChild.classList.add("ft__primary");
+                            if (enableIncludeChild) {
+                                includeElement.removeAttribute("disabled");
+                            } else {
+                                includeElement.setAttribute("disabled", "disabled");
+                            }
+                            inputEvent(element, config, edit, true);
                         });
-                        if (response.data) {
-                            hPathList.push(...response.data);
-                        }
-                        config.hPath = hPathList.join(" ");
-                        config.page = 1;
-                        searchPathInputElement.innerHTML = `${escapeGreat(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-                        searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
-                        const includeElement = element.querySelector("#searchInclude");
-                        includeElement.firstElementChild.classList.add("ft__primary");
-                        if (enableIncludeChild) {
-                            includeElement.removeAttribute("disabled");
-                        } else {
-                            includeElement.setAttribute("disabled", "disabled");
-                        }
-                        inputEvent(element, config, edit, true);
-                    });
-                }, [], undefined, window.siyuan.languages.specifyPath);
+                    },
+                    title: window.siyuan.languages.specifyPath,
+                    flashcard: false
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

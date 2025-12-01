@@ -12,7 +12,7 @@ interface ILuteNode {
 
 type THintSource = "search" | "av" | "hint";
 
-type TTurnIntoOne = "BlocksMergeSuperBlock" | "Blocks2ULs" | "Blocks2OLs" | "Blocks2TLs" | "Blocks2Blockquote"
+type TTurnIntoOne = "BlocksMergeSuperBlock" | "Blocks2ULs" | "Blocks2OLs" | "Blocks2TLs" | "Blocks2Blockquote" | "Blocks2Callout"
 
 type TTurnIntoOneSub = "row" | "col"
 

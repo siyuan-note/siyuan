@@ -607,11 +607,15 @@ export const bindCardEvent = async (options: {
                         iconHTML: "",
                         label: window.siyuan.languages.fileTree,
                         click() {
-                            movePathTo((toPath, toNotebook) => {
-                                filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
-                                filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
-                                fetchNewRound();
-                            }, [], undefined, window.siyuan.languages.specifyPath, true);
+                            movePathTo({
+                                cb: (toPath, toNotebook) => {
+                                    filterElement.setAttribute("data-id", toPath[0] === "/" ? toNotebook[0] : getDisplayName(toPath[0], true, true));
+                                    filterElement.setAttribute("data-cardtype", toPath[0] === "/" ? "notebook" : "doc");
+                                    fetchNewRound();
+                                },
+                                title: window.siyuan.languages.specifyPath,
+                                flashcard: true
+                            });
                         }
                     }).element);
                     if (options.title || response.data.length > 0) {

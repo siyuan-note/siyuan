@@ -816,8 +816,12 @@ export class Gutter {
                 accelerator: window.siyuan.config.keymap.general.move.custom,
                 icon: "iconMove",
                 click: () => {
-                    movePathTo((toPath) => {
-                        hintMoveBlock(toPath[0], selectsElement, protyle);
+                    movePathTo({
+                        cb: (toPath) => {
+                            hintMoveBlock(toPath[0], selectsElement, protyle);
+                        },
+                        rootIDs: [protyle.block.rootID],
+                        flashcard: false
                     });
                 }
             }).element);
@@ -1372,8 +1376,12 @@ export class Gutter {
                 label: window.siyuan.languages.move,
                 accelerator: window.siyuan.config.keymap.general.move.custom,
                 click: () => {
-                    movePathTo((toPath) => {
-                        hintMoveBlock(toPath[0], [nodeElement], protyle);
+                    movePathTo({
+                        cb: (toPath) => {
+                            hintMoveBlock(toPath[0], [nodeElement], protyle);
+                        },
+                        flashcard: false,
+                        rootIDs: [protyle.block.rootID],
                     });
                 }
             }).element);

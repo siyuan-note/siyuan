@@ -477,40 +477,44 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                 event.preventDefault();
                 break;
             } else if (type === "path") {
-                movePathTo((toPath, toNotebook) => {
-                    fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
-                        config.idPath = [];
-                        const hPathList: string[] = [];
-                        let enableIncludeChild = false;
-                        toPath.forEach((item, index) => {
-                            if (item === "/") {
-                                config.idPath.push(toNotebook[index]);
-                                hPathList.push(getNotebookName(toNotebook[index]));
-                            } else {
-                                enableIncludeChild = true;
-                                config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
+                movePathTo({
+                    cb: (toPath, toNotebook) => {
+                        fetchPost("/api/filetree/getHPathsByPaths", {paths: toPath}, (response) => {
+                            config.idPath = [];
+                            const hPathList: string[] = [];
+                            let enableIncludeChild = false;
+                            toPath.forEach((item, index) => {
+                                if (item === "/") {
+                                    config.idPath.push(toNotebook[index]);
+                                    hPathList.push(getNotebookName(toNotebook[index]));
+                                } else {
+                                    enableIncludeChild = true;
+                                    config.idPath.push(pathPosix().join(toNotebook[index], item.replace(".sy", "")));
+                                }
+                            });
+                            if (response.data) {
+                                hPathList.push(...response.data);
                             }
+                            config.hPath = hPathList.join(" ");
+
+                            const searchPathElement = element.querySelector("#searchPath");
+                            searchPathElement.classList.remove("fn__none");
+                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+
+                            const includeElement = element.querySelector('[data-type="include"]');
+                            includeElement.classList.add("toolbar__icon--active");
+                            if (enableIncludeChild) {
+                                includeElement.removeAttribute("disabled");
+                            } else {
+                                includeElement.setAttribute("disabled", "disabled");
+                            }
+                            config.page = 1;
+                            updateSearchResult(config, element, true);
                         });
-                        if (response.data) {
-                            hPathList.push(...response.data);
-                        }
-                        config.hPath = hPathList.join(" ");
-
-                        const searchPathElement = element.querySelector("#searchPath");
-                        searchPathElement.classList.remove("fn__none");
-                        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
-
-                        const includeElement = element.querySelector('[data-type="include"]');
-                        includeElement.classList.add("toolbar__icon--active");
-                        if (enableIncludeChild) {
-                            includeElement.removeAttribute("disabled");
-                        } else {
-                            includeElement.setAttribute("disabled", "disabled");
-                        }
-                        config.page = 1;
-                        updateSearchResult(config, element, true);
-                    });
-                }, [], undefined, window.siyuan.languages.specifyPath);
+                    },
+                    flashcard: false,
+                    title: window.siyuan.languages.specifyPath
+                });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

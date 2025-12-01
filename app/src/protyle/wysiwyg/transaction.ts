@@ -924,6 +924,13 @@ export const turnsIntoOneTransaction = (options: {
         parentElement.setAttribute("data-node-id", id);
         parentElement.setAttribute("data-type", "NodeBlockquote");
         parentElement.innerHTML = '<div class="protyle-attr" contenteditable="false"></div>';
+    } else if (options.type === "Blocks2Callout") {
+        // TODO
+        parentElement = document.createElement("div");
+        parentElement.classList.add("bq");
+        parentElement.setAttribute("data-node-id", id);
+        parentElement.setAttribute("data-type", "NodeBlockquote");
+        parentElement.innerHTML = '<div class="protyle-attr" contenteditable="false"></div>';
     } else if (options.type.endsWith("Ls")) {
         parentElement = document.createElement("div");
         parentElement.classList.add("list");

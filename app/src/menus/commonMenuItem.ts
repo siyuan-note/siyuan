@@ -986,9 +986,18 @@ export const movePathToMenu = (paths: string[]) => {
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,
         click() {
-            movePathTo((toPath, toNotebook) => {
-                moveToPath(paths, toNotebook[0], toPath[0]);
-            }, paths);
+            const rootIDs: string[] = [];
+            paths.forEach(item => {
+                rootIDs.push(pathPosix().basename(item).replace(".sy", ""));
+            });
+            movePathTo({
+                cb: (toPath, toNotebook) => {
+                    moveToPath(paths, toNotebook[0], toPath[0]);
+                },
+                paths,
+                flashcard: false,
+                rootIDs,
+            });
         }
     }).element;
 };

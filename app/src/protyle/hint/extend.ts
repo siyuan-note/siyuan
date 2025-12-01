@@ -130,13 +130,13 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         id: "quote",
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
-    },{
+    }, /*{
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi"],
         id: "callout",
         value: `> [!NOTE]
 > ${Lute.Caret}`,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCallout"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.callout}</span></div>`,
-    }, {
+    },*/ {
         filter: [window.siyuan.languages.code, "code block", "代码块", "daimakuai", "dmk"],
         id: "code",
         value: "```",

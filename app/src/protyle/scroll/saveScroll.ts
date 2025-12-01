@@ -85,7 +85,7 @@ export const getDocByScroll = (options: {
                     highlight: !isSupportCSSHL(),
                 }, response => {
                     onGet({
-                        scrollPosition: options.mergedOptions.scrollPosition,
+                        scrollPosition: options.mergedOptions?.scrollPosition,
                         data: response,
                         protyle: options.protyle,
                         action: actions,
@@ -99,7 +99,7 @@ export const getDocByScroll = (options: {
             } else {
                 actions.push(Constants.CB_GET_ALL);
                 onGet({
-                    scrollPosition: options.mergedOptions.scrollPosition,
+                    scrollPosition: options.mergedOptions?.scrollPosition,
                     data: response,
                     protyle: options.protyle,
                     action: actions,
@@ -123,7 +123,7 @@ export const getDocByScroll = (options: {
         highlight: !isSupportCSSHL(),
     }, response => {
         onGet({
-            scrollPosition: options.mergedOptions.scrollPosition,
+            scrollPosition: options.mergedOptions?.scrollPosition,
             data: response,
             protyle: options.protyle,
             action: actions,

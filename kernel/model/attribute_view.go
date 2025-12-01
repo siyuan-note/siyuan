@@ -231,8 +231,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		// 因为单选或多选只能按选项分组，并且可能存在空白分组（找不到临近项），所以单选或多选类型的分组字段使用分组值内容对应的选项
 		if opt := groupKey.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
 			if nil == newValue {
-				// 如果没有临近项，则尝试从过滤结果中获取
-				newValue = ret[groupKey.ID]
+				newValue = ret[groupKey.ID] // 如果没有临近项，则尝试从过滤结果中获取
+			}
+			if nil == newValue {
+				newValue = keyValues.GetValue(addingItemID) // 尝试从已有值中获取
 			}
 
 			if nil != newValue {
@@ -3982,6 +3984,13 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			if isAcrossGroup {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
 					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID, false)
+
+					// 移除旧分组的值
+					if val := attrView.GetValue(groupKey.ID, itemID); nil != val {
+						if av.MSelectExistOption(val.MSelect, groupView.GetGroupValue()) {
+							val.MSelect = av.MSelectRemoveOption(val.MSelect, groupView.GetGroupValue())
+						}
+					}
 
 					for i, r := range targetGroupView.GroupItemIDs {
 						if r == operation.PreviousID {

@@ -543,6 +543,9 @@ export class Graph extends Model {
                 case "NodeBlockquote":
                     item.color = {background: rootStyle.getPropertyValue("--b3-graph-bq-point").trim()};
                     break;
+                case "NodeCallout":
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-callout-point").trim()};
+                    break;
                 case "NodeSuperBlock":
                     item.color = {background: rootStyle.getPropertyValue("--b3-graph-super-point").trim()};
                     break;

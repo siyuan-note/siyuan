@@ -151,6 +151,30 @@
       }
     }
 
+    &[data-subtype="WARNING"] {
+      .callout-info {
+        color: var(--b3-callout-warning);
+      }
+    }
+
+    &[data-subtype="TIP"] {
+      .callout-info {
+        color: var(--b3-theme-success);
+      }
+    }
+
+    &[data-subtype="IMPORTANT"] {
+      .callout-info {
+        color: var(--b3-callout-important);
+      }
+    }
+
+    &[data-subtype="CAUTION"] {
+      .callout-info {
+        color: var(--b3-theme-error);
+      }
+    }
+
     &-info {
       display: flex;
       align-items: center;

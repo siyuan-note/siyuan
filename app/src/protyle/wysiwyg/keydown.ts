@@ -1390,6 +1390,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id: selectsElement[0].getAttribute("data-node-id"),
                         type: "CancelBlockquote",
                     });
+                } else if (type === "NodeCallout") {
+                    turnsOneInto({
+                        protyle,
+                        nodeElement: selectsElement[0],
+                        id: selectsElement[0].getAttribute("data-node-id"),
+                        type: "CancelCallout",
+                    });
                 }
             }
             event.preventDefault();

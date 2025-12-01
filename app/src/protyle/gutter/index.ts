@@ -1249,6 +1249,17 @@ export class Gutter {
                 nodeElement,
                 type: "CancelBlockquote"
             }));
+        } else if (type === "NodeCallout" && !protyle.disabled) {
+            turnIntoSubmenu.push(this.turnsOneInto({
+                menuId: "paragraph",
+                id,
+                icon: "iconParagraph",
+                label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle,
+                nodeElement,
+                type: "CancelCallout"
+            }));
         }
         if (turnIntoSubmenu.length > 0 && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2444,7 +2455,7 @@ export class Gutter {
                 }
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
-                    if (["NodeBlockquote", "NodeList", "NodeSuperBlock"].includes(type)) {
+                    if (["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock"].includes(type)) {
                         return;
                     }
                     const topElement = getTopAloneElement(nodeElement);
@@ -2498,7 +2509,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                 if (type === "NodeHeading") {
                     html = html + foldHTML;
                 }
-                if (type === "NodeBlockquote") {
+                if (["NodeBlockquote", "NodeCallout"].includes(type)) {
                     space += 8;
                 }
                 if (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) {
@@ -2509,7 +2520,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                         return;
                     }
                     // 列表项中的引述块中的第二个段落块块标和引述块左侧样式重叠
-                    if (parentElement && parentElement.getAttribute("data-type") === "NodeBlockquote") {
+                    if (parentElement && ["NodeBlockquote", "NodeCallout"].includes(parentElement.getAttribute("data-type"))) {
                         space += 8;
                     }
                 }

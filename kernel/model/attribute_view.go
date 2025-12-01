@@ -817,9 +817,11 @@ func ChangeAttrViewLayout(blockID, avID string, newLayout av.LayoutType) (err er
 			}
 		}
 
-		preferredGroupKey := getKanbanPreferredGroupKey(attrView)
-		group := &av.ViewGroup{Field: preferredGroupKey.ID}
-		setAttributeViewGroup(attrView, view, group)
+		if !view.IsGroupView() {
+			preferredGroupKey := getKanbanPreferredGroupKey(attrView)
+			group := &av.ViewGroup{Field: preferredGroupKey.ID}
+			setAttributeViewGroup(attrView, view, group)
+		}
 	}
 
 	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)

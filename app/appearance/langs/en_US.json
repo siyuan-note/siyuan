@@ -1,4 +1,5 @@
 {
+  "callout": "Callout",
   "hasAttrName": "The attribute name ${x} already exists",
   "statusBarMsgPushTip": "Status bar messages let you instantly know the system's running status, and if they bother you you can turn them off",
   "useBackground": "Fill column background with option color",

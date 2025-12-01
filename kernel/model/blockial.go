@@ -236,10 +236,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	normalizeKeysToLower(nameValues)
 
 	for name, value := range nameValues {
-		if "id" == name {
-			continue
-		}
-
 		value = util.RemoveInvalidRetainCtrl(value)
 		value = strings.TrimSpace(value)
 		value = strings.TrimSuffix(value, ",")

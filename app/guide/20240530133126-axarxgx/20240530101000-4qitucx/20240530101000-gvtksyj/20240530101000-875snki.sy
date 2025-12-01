@@ -281,14 +281,6 @@
 			]
 		},
 		{
-			"ID": "20251126211253-ndli88f",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20251126211253-ndli88f",
-				"updated": "20251126211253"
-			}
-		},
-		{
 			"ID": "20240530101000-st9ddhf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

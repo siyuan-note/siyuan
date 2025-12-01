@@ -1198,8 +1198,8 @@ export const turnsOneInto = async (options: {
     if (!options.nodeElement.querySelector("wbr")) {
         getContenteditableElement(options.nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
     }
-    if (options.type === "CancelList" || options.type === "CancelBlockquote") {
-        for await(const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
+    if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
+        for (const item of options.nodeElement.querySelectorAll('[data-type="NodeHeading"][fold="1"]')) {
             const itemId = item.getAttribute("data-node-id");
             item.removeAttribute("fold");
             const response = await fetchSyncPost("/api/transactions", {
@@ -1236,7 +1236,7 @@ export const turnsOneInto = async (options: {
     // @ts-ignore
     const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
     options.nodeElement.outerHTML = newHTML;
-    if (options.type === "CancelList" || options.type === "CancelBlockquote") {
+    if (["CancelBlockquote", "CancelList", "CancelCallout"].includes(options.type)) {
         const tempElement = document.createElement("template");
         tempElement.innerHTML = newHTML;
         const doOperations: IOperation[] = [{

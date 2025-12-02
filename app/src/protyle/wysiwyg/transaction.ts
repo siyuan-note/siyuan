@@ -215,9 +215,9 @@ const promiseTransaction = () => {
                                     item.firstElementChild.insertAdjacentHTML("afterend", operation.data);
                                     cursorElements.push(item.firstElementChild.nextElementSibling);
                                 } else if (item.classList.contains("callout") &&
-                                    item.querySelector('[data-node-id]')?.getAttribute("data-node-id") !== operation.id) {
+                                    item.querySelector("[data-node-id]")?.getAttribute("data-node-id") !== operation.id) {
                                     item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", operation.data);
-                                    cursorElements.push(item.querySelector('[data-node-id]'));
+                                    cursorElements.push(item.querySelector("[data-node-id]"));
                                 } else if (item.firstElementChild.getAttribute("data-node-id") !== operation.id) {
                                     item.insertAdjacentHTML("afterbegin", operation.data);
                                     cursorElements.push(item.firstElementChild);
@@ -837,7 +837,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                             cursorElements.push(item.firstElementChild.nextElementSibling);
                         } else if (item.classList.contains("callout")) {
                             item.querySelector(".callout-content").insertAdjacentHTML("afterbegin", operation.data);
-                            cursorElements.push(item.querySelector('[data-node-id]'));
+                            cursorElements.push(item.querySelector("[data-node-id]"));
                         } else {
                             item.insertAdjacentHTML("afterbegin", operation.data);
                             cursorElements.push(item.firstElementChild);

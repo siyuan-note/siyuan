@@ -33,8 +33,8 @@ export const loadPlugins = async (app: App, names?: string[]) => {
     response.data.forEach((item: IPluginData) => {
         if (!names || (names && names.includes(item.name))) {
             loadPluginJS(app, item);
+            insertPluginCSS(item, pluginsStyle);
         }
-        insertPluginCSS(item, pluginsStyle);
     });
 };
 

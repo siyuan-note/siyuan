@@ -392,7 +392,7 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 				av.SaveAttributeView(attrView)
 				ReloadAttrView(avID)
 
-				refreshRelatedSrcAvs(avID)
+				refreshRelatedSrcAvs(avID, nil)
 			}
 		}
 	}

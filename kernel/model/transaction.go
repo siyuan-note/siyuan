@@ -1924,8 +1924,9 @@ type Transaction struct {
 	DoOperations   []*Operation `json:"doOperations"`
 	UndoOperations []*Operation `json:"undoOperations"`
 
-	trees map[string]*parse.Tree // 事务中变更的树
-	nodes map[string]*ast.Node   // 事务中变更的节点
+	trees        map[string]*parse.Tree // 事务中变更的树
+	nodes        map[string]*ast.Node   // 事务中变更的节点
+	relatedAvIDs []string               // 事务中变更的属性视图 ID
 
 	isGlobalAssetsInit bool   // 是否初始化过全局资源判断
 	isGlobalAssets     bool   // 是否属于全局资源
@@ -1968,6 +1969,19 @@ func (tx *Transaction) commit() (err error) {
 		checkUpsertInUserGuide(tree)
 	}
 	refreshDynamicRefTexts(tx.nodes, tx.trees)
+
+	tx.relatedAvIDs = gulu.Str.RemoveDuplicatedElem(tx.relatedAvIDs)
+	for _, avID := range tx.relatedAvIDs {
+		destAv, _ := av.ParseAttributeView(avID)
+		if nil == destAv {
+			continue
+		}
+
+		regenAttrViewGroups(destAv)
+		av.SaveAttributeView(destAv)
+		ReloadAttrView(avID)
+	}
+
 	IncSync()
 	tx.state.Store(2)
 	tx.m.Unlock()

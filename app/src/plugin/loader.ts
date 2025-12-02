@@ -30,12 +30,10 @@ const runCode = (code: string, sourceURL: string) => {
 export const loadPlugins = async (app: App, names?: string[]) => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     const pluginsStyle = getPluginsStyle();
-    const pluginsToLoad = !names 
-        ? response.data 
-        : response.data.filter((item: IPluginData) => names.includes(item.name));
-    pluginsToLoad.forEach((item: IPluginData) => {
-        // 为加快启动速度，不进行 await
-        loadPluginJS(app, item);
+    response.data.forEach((item: IPluginData) => {
+        if (!names || (names && names.includes(item.name))) {
+            loadPluginJS(app, item);
+        }
         insertPluginCSS(item, pluginsStyle);
     });
 };
@@ -237,31 +235,16 @@ export const reloadPlugin = async (app: App, data: {
             }
         });
     });
-    // 先收集需要处理的插件，避免在遍历过程中修改数组导致重复执行
-    const dataChangedPlugins = app.plugins.filter(item => upsertDataPlugins.includes(item.name));
-    dataChangedPlugins.forEach(item => {
-        try {
-            item.onDataChanged();
-        } catch (e) {
-            console.error(`plugin ${item.name} onDataChanged error:`, e);
+    app.plugins.forEach(item => {
+        if (upsertDataPlugins.includes(item.name)) {
+            try {
+                item.onDataChanged();
+            } catch (e) {
+                console.error(`plugin ${item.name} onDataChanged error:`, e);
+            }
         }
     });
     /// #if !MOBILE
     saveLayout();
     /// #endif
-};
-
-// 重启插件
-export const restartPlugin = async (app: App, plugin: Plugin) => {
-    uninstall(app, plugin.name, false, true);
-    app.plugins.push(plugin);
-    try {
-        await plugin.onload();
-    } catch (e) {
-        console.error(`plugin ${plugin.name} onload error:`, e);
-    }
-    afterLoadPlugin(plugin);
-    getAllEditor().forEach(editor => {
-        editor.protyle.toolbar.update(editor.protyle);
-    });
 };

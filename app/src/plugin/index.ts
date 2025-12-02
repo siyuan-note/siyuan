@@ -16,7 +16,8 @@ import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
 import {clearOBG} from "../layout/dock/util";
 import {Constants} from "../constants";
-import {restartPlugin} from "./loader";
+import {uninstall} from "./uninstall";
+import {afterLoadPlugin, loadPlugins} from "./loader";
 
 export class Plugin {
     private app: App;
@@ -117,7 +118,10 @@ export class Plugin {
     public onDataChanged() {
         // 存储数据变更
         // 兼容 3.4.1 以前同步数据使用重载插件的问题
-        restartPlugin(this.app, this);
+        uninstall(this.app, this.name, false);
+        loadPlugins(this.app, [this.name]).then(() => {
+            afterLoadPlugin(this);
+        });
     }
 
     public async updateCards(options: ICardData) {

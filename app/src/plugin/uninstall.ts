@@ -8,7 +8,7 @@ import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 
-export const uninstall = (app: App, name: string, isUninstall: boolean, keepCSS: boolean = false) => {
+export const uninstall = (app: App, name: string, isUninstall: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
             try {
@@ -75,9 +75,7 @@ export const uninstall = (app: App, name: string, isUninstall: boolean, keepCSS:
                 editor.protyle.toolbar.update(editor.protyle);
             });
             // rm style
-            if (!keepCSS) {
-                document.getElementById("pluginsStyle" + name)?.remove();
-            }
+            document.getElementById("pluginsStyle" + name)?.remove();
             return true;
         }
     });

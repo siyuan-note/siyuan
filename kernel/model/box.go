@@ -650,6 +650,21 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 
 				tree.Root.SetIALAttr("custom-"+attrK, fmt.Sprint(attrV))
 			}
+
+			// Import the YAML at the beginning of the Markdown as a code block https://github.com/siyuan-note/siyuan/issues/16488
+			codeBlock := &ast.Node{Type: ast.NodeCodeBlock}
+			openMarker := &ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}
+			codeBlock.AppendChild(openMarker)
+			info := &ast.Node{Type: ast.NodeCodeBlockFenceInfoMarker, CodeBlockInfo: []byte("yaml")}
+			codeBlock.AppendChild(info)
+			content := []byte("---\n")
+			content = append(content, n.Tokens...)
+			content = append(content, []byte("\n---")...)
+			code := &ast.Node{Type: ast.NodeCodeBlockCode, Tokens: content}
+			codeBlock.AppendChild(code)
+			closeMarker := &ast.Node{Type: ast.NodeCodeBlockFenceCloseMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}
+			codeBlock.AppendChild(closeMarker)
+			tree.Root.PrependChild(codeBlock)
 		}
 
 		if ast.NodeYamlFrontMatter == n.Type {

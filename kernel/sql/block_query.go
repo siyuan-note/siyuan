@@ -379,6 +379,7 @@ func QueryNoLimit(stmt string) (ret []map[string]interface{}, err error) {
 }
 
 func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
+	originalStmt := stmt
 	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
 	// 这里为了支持 || 操作符，使用了另一个 sql 解析器，但是这个解析器无法处理 UNION https://github.com/siyuan-note/siyuan/issues/8226
 	// 考虑到 UNION 的使用场景不多，这里还是以支持 || 操作符为主
@@ -426,8 +427,11 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 	ret = []map[string]interface{}{}
 	rows, err := query(stmt)
 	if err != nil {
-		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
-		return
+		rows, err = query(originalStmt + " LIMIT " + strconv.Itoa(limit))
+		if err != nil {
+			logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
+			return
+		}
 	}
 	defer rows.Close()
 

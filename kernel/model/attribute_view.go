@@ -3548,7 +3548,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		return
 	}
 
-	refreshRelatedSrcAvs(avID)
+	refreshRelatedSrcAvs(avID, tx)
 
 	historyDir, err := GetHistoryDir(HistoryOpUpdate)
 	if err != nil {
@@ -4688,7 +4688,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 				content = util.UnescapeHTML(content)
 				blockVal.Block.Icon, blockVal.Block.Content = icon, content
 
-				refreshRelatedSrcAvs(avID)
+				refreshRelatedSrcAvs(avID, tx)
 			} else {
 				blockVal.Block.ID = ""
 			}
@@ -4950,21 +4950,37 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		return
 	}
 
-	refreshRelatedSrcAvs(avID)
+	refreshRelatedSrcAvs(avID, tx)
 	return
 }
 
-func refreshRelatedSrcAvs(destAvID string) {
+func refreshRelatedSrcAvs(destAvID string, tx *Transaction) {
 	relatedAvIDs := av.GetSrcAvIDs(destAvID)
+
+	var tmp []string
 	for _, relatedAvID := range relatedAvIDs {
-		destAv, _ := av.ParseAttributeView(relatedAvID)
-		if nil == destAv {
+		if relatedAvID == destAvID {
+			// 目标和源相同则跳过
 			continue
 		}
 
-		regenAttrViewGroups(destAv)
-		av.SaveAttributeView(destAv)
-		ReloadAttrView(relatedAvID)
+		tmp = append(tmp, relatedAvID)
+	}
+	relatedAvIDs = tmp
+
+	if nil != tx {
+		tx.relatedAvIDs = append(tx.relatedAvIDs, relatedAvIDs...)
+	} else {
+		for _, relatedAvID := range relatedAvIDs {
+			destAv, _ := av.ParseAttributeView(relatedAvID)
+			if nil == destAv {
+				continue
+			}
+
+			regenAttrViewGroups(destAv)
+			av.SaveAttributeView(destAv)
+			ReloadAttrView(relatedAvID)
+		}
 	}
 }
 

@@ -229,10 +229,10 @@ export const reloadPlugin = async (app: App, data: {
 } = {}) => {
     const {upsertCodePlugins = [], upsertDataPlugins = [], removePlugins = []} = data;
     removePlugins.forEach((item) => {
-        uninstall(app, item, true);
+        uninstall(app, item, false);
     });
     upsertCodePlugins.forEach((item) => {
-        uninstall(app, item, false);
+        uninstall(app, item, true);
     });
     loadPlugins(app, upsertCodePlugins, false).then(() => {
         app.plugins.forEach(item => {

@@ -118,7 +118,7 @@ export class Plugin {
     public onDataChanged() {
         // 存储数据变更
         // 兼容 3.4.1 以前同步数据使用重载插件的问题
-        uninstall(this.app, this.name, false);
+        uninstall(this.app, this.name, true);
         loadPlugins(this.app, [this.name], false).then(() => {
             afterLoadPlugin(this);
             getAllEditor().forEach(editor => {

@@ -238,6 +238,9 @@ export const reloadPlugin = async (app: App, data: {
         app.plugins.forEach(item => {
             if (upsertCodePlugins.includes(item.name)) {
                 afterLoadPlugin(item);
+                getAllEditor().forEach(editor => {
+                    editor.protyle.toolbar.update(editor.protyle);
+                });
             }
         });
     });

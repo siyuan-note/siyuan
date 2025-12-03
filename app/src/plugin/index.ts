@@ -4,7 +4,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile, isWindow} from "../util/functions";
 /// #if !MOBILE
 import {Custom} from "../layout/dock/Custom";
-import {getAllModels} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
 import {resizeTopBar, setPanelFocus} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
@@ -121,6 +121,9 @@ export class Plugin {
         uninstall(this.app, this.name, false);
         loadPlugins(this.app, [this.name], false).then(() => {
             afterLoadPlugin(this);
+            getAllEditor().forEach(editor => {
+                editor.protyle.toolbar.update(editor.protyle);
+            });
         });
     }
 

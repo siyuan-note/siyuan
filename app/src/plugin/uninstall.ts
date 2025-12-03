@@ -51,6 +51,8 @@ export const uninstall = (app: App, name: string, isUninstall: boolean) => {
             // rm dock
             const docksKeys = Object.keys(plugin.docks);
             docksKeys.forEach(key => {
+                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].show =
+                    !!document.querySelector(`.dock__item[data-type="${key}"]`)?.classList.contains("dock__item--active");
                 if (Object.keys(window.siyuan.layout.leftDock.data).includes(key)) {
                     window.siyuan.layout.leftDock.remove(key);
                 } else if (Object.keys(window.siyuan.layout.rightDock.data).includes(key)) {

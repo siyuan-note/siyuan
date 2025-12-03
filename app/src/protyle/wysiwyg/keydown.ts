@@ -1960,7 +1960,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         app: protyle.app,
                         id,
                         action,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();
@@ -1974,7 +1975,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id,
                         action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                         keepCursor: true,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();
@@ -1990,7 +1992,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id,
                         position: "right",
                         action,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();
@@ -2006,7 +2009,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id,
                         position: "bottom",
                         action,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();

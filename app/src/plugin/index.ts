@@ -119,7 +119,7 @@ export class Plugin {
         // 存储数据变更
         // 兼容 3.4.1 以前同步数据使用重载插件的问题
         uninstall(this.app, this.name, false);
-        loadPlugins(this.app, [this.name]).then(() => {
+        loadPlugins(this.app, [this.name], false).then(() => {
             afterLoadPlugin(this);
         });
     }

@@ -27,15 +27,21 @@ const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
-export const loadPlugins = async (app: App, names?: string[]) => {
+export const loadPlugins = async (app: App, names?: string[], init = true) => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
     const pluginsStyle = getPluginsStyle();
-    response.data.forEach((item: IPluginData) => {
+    for (let i = 0; i < response.data.length; i++) {
+        const item = response.data[i] as IPluginData;
         if (!names || (names && names.includes(item.name))) {
-            loadPluginJS(app, item);
+            if (init) {
+                // 初始化时为加快启动速度，已特殊处理，不进行 await
+                loadPluginJS(app, item);
+            } else {
+                await loadPluginJS(app, item);
+            }
             insertPluginCSS(item, pluginsStyle);
         }
-    });
+    }
 };
 
 const loadPluginJS = async (app: App, item: IPluginData) => {
@@ -228,7 +234,7 @@ export const reloadPlugin = async (app: App, data: {
     upsertCodePlugins.forEach((item) => {
         uninstall(app, item, false);
     });
-    loadPlugins(app, upsertCodePlugins).then(() => {
+    loadPlugins(app, upsertCodePlugins, false).then(() => {
         app.plugins.forEach(item => {
             if (upsertCodePlugins.includes(item.name)) {
                 afterLoadPlugin(item);

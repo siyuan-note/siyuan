@@ -1,10 +1,11 @@
 {
 	"ID": "20230422120236-58nari9",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230422120236-58nari9",
 		"title": "資料可用性保障",
+		"type": "doc",
 		"updated": "20230630141949"
 	},
 	"Children": [

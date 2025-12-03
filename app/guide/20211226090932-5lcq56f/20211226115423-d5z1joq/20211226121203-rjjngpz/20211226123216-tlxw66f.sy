@@ -1,10 +1,11 @@
 {
 	"ID": "20211226123216-tlxw66f",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
+		"type": "doc",
 		"updated": "20230630130211"
 	},
 	"Children": [

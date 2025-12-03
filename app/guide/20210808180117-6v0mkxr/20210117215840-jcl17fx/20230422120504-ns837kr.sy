@@ -1,10 +1,11 @@
 {
 	"ID": "20230422120504-ns837kr",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230422120504-ns837kr",
 		"title": "Data Availability Guarantee",
+		"type": "doc",
 		"updated": "20230422122821"
 	},
 	"Children": [

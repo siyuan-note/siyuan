@@ -1,6 +1,6 @@
 {
 	"ID": "20200924093441-ft2rhps",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f4f0",
@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20240702222031"
+		"updated": "20251203220553"
 	},
 	"Children": [
 		{
@@ -3425,7 +3425,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-3e348ea",
-				"updated": "20210415201010"
+				"updated": "20251203220553"
 			},
 			"Children": [
 				{
@@ -3476,7 +3476,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211213122144-gdl5u9e",
-				"updated": "20211213122317"
+				"updated": "20251203220553"
 			},
 			"Children": [
 				{
@@ -3486,7 +3486,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://mermaid.js.org/",
+					"TextMarkAHref": "https://flowchart.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

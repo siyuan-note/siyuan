@@ -1,6 +1,6 @@
 {
 	"ID": "20240530101000-3qhz7br",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-rgsbrsc",
@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20251203220656"
 	},
 	"Children": [
 		{
@@ -3685,7 +3685,7 @@
 			"Properties": {
 				"ID": "20240530101000-7lnq0j6",
 				"id": "20240530101000-jsiuxor",
-				"updated": "20240530101000"
+				"updated": "20251203220656"
 			},
 			"Children": [
 				{
@@ -3737,9 +3737,8 @@
 			"ID": "20240530101000-fjm1gdk",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-8046wgs",
 				"id": "20240530101000-fjm1gdk",
-				"updated": "20240530101000"
+				"updated": "20251203220656"
 			},
 			"Children": [
 				{
@@ -3749,7 +3748,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://mermaid.js.org/",
+					"TextMarkAHref": "https://flowchart.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

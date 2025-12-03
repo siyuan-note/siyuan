@@ -187,8 +187,8 @@ func SearchDocsByKeyword(keyword string, flashcard bool, excludeIDs []string) (r
 			}
 		}
 
-		if 0 < len(excludeIDs) {
-			condition += fmt.Sprintf(" AND root_id NOT IN ('%s')", strings.Join(excludeIDs, "', '"))
+		for _, excludeID := range excludeIDs {
+			condition += fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID)
 		}
 
 		rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)

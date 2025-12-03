@@ -1264,7 +1264,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 prevElement = prevElement.parentElement;
             }
         }
-
         if (!targetElement) {
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
                 // 命中底部

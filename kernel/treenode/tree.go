@@ -22,6 +22,7 @@ import (
 	"io/fs"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -29,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -71,7 +73,7 @@ func NewTree(boxID, p, hp, title string) *parse.Tree {
 	root.SetIALAttr("id", id)
 	root.SetIALAttr("updated", util.TimeFromID(id))
 	ret := &parse.Tree{Root: root, ID: id, Box: boxID, Path: p, HPath: hp}
-	ret.Root.Spec = "1"
+	ret.Root.Spec = CurrentSpec
 	newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID(), Box: boxID, Path: p}
 	newPara.SetIALAttr("id", newPara.ID)
 	newPara.SetIALAttr("updated", util.TimeFromID(newPara.ID))
@@ -128,4 +130,63 @@ func NewSpanAnchor(id string) (ret *ast.Node) {
 
 func ContainOnlyDefaultIAL(tree *parse.Tree) bool {
 	return 5 > len(tree.Root.KramdownIAL)
+}
+
+var CurrentSpec = "2"
+
+var ErrSpecTooNew = fmt.Errorf("the document spec is too new")
+
+func CheckSpec(tree *parse.Tree) (err error) {
+	if CurrentSpec == tree.Root.Spec || "" == tree.Root.Spec {
+		return
+	}
+
+	spec, err := strconv.Atoi(tree.Root.Spec)
+	if nil != err {
+		logging.LogErrorf("parse spec [%s] failed: %s", tree.Root.Spec, err)
+		return
+	}
+
+	currentSpec, _ := strconv.Atoi(CurrentSpec)
+	if spec > currentSpec {
+		logging.LogErrorf("tree spec [%s] is newer than current spec [%s]", tree.Root.Spec, CurrentSpec)
+		return ErrSpecTooNew
+	}
+	return
+}
+
+func UpgradeSpec(tree *parse.Tree) (upgraded bool) {
+	if CurrentSpec == tree.Root.Spec {
+		return
+	}
+
+	upgradeSpec1(tree)
+	upgradeSpec2(tree)
+	return true
+}
+
+func upgradeSpec2(tree *parse.Tree) {
+	oldSpec, err := strconv.Atoi(tree.Root.Spec)
+	if nil != err {
+		logging.LogErrorf("parse spec [%s] failed: %s", tree.Root.Spec, err)
+		return
+	}
+
+	if 2 <= oldSpec {
+		return
+	}
+
+	// 增加了 Callout
+
+	tree.Root.Spec = "2"
+}
+
+func upgradeSpec1(tree *parse.Tree) {
+	if "" != tree.Root.Spec {
+		return
+	}
+
+	parse.NestedInlines2FlattedSpans(tree, false)
+	tree.Root.Spec = "1"
+	return
 }

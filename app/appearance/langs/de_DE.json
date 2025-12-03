@@ -1704,6 +1704,7 @@
     "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben",
     "272": "Unbenanntes Feld",
     "273": "Erstellen Sie den Arbeitsbereich nicht im Stammverzeichnis der Partition, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
-    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich"
+    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
+    "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut"
   }
 }

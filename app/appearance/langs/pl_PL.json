@@ -1704,6 +1704,7 @@
     "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku",
     "272": "Nienazwane pole",
     "273": "Nie twórz przestrzeni roboczej w katalogu głównym partycji, utwórz nowy folder jako przestrzeń roboczą",
-    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą"
+    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą",
+    "275": "Nie można otworzyć dokumentu utworzonego w nowszej wersji. Zaktualizuj program do najnowszej wersji i spróbuj ponownie"
   }
 }

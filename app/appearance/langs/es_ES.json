@@ -1704,6 +1704,7 @@
     "271": "Optimización del índice de datos completada, se liberaron [%s] de espacio en disco",
     "272": "Campo sin nombre",
     "273": "No cree el espacio de trabajo en la ruta raíz de la partición, cree una nueva carpeta como espacio de trabajo",
-    "274": "Esta carpeta contiene otros archivos, cree una nueva carpeta como espacio de trabajo"
+    "274": "Esta carpeta contiene otros archivos, cree una nueva carpeta como espacio de trabajo",
+    "275": "No se puede abrir el documento creado con una versión más reciente. Actualiza a la última versión e inténtalo de nuevo"
   }
 }

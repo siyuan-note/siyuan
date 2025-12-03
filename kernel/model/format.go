@@ -23,6 +23,7 @@ import (
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -63,13 +64,13 @@ func AutoSpace(rootID string) (err error) {
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
 	newTree := parseKTree(md)
-	newTree.Root.Spec = "1"
+	newTree.Root.Spec = treenode.CurrentSpec
 	// 第二次格式化启用自动空格
 	luteEngine.SetAutoSpace(true)
 	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions)
 	md = formatRenderer.Render()
 	newTree = parseKTree(md)
-	newTree.Root.Spec = "1"
+	newTree.Root.Spec = treenode.CurrentSpec
 	newTree.Root.ID = tree.ID
 	newTree.Root.KramdownIAL = rootIAL
 	newTree.ID = tree.ID

@@ -1704,6 +1704,7 @@
     "271": "Otimização do índice de dados concluída, [%s] de espaço liberado",
     "272": "Campo sem nome",
     "273": "Não crie o espaço de trabalho na raiz da partição, crie uma nova pasta para o espaço de trabalho",
-    "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho"
+    "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho",
+    "275": "Não é possível abrir o documento criado por uma versão mais recente. Atualize para a versão mais recente e tente novamente"
   }
 }

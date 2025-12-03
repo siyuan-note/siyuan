@@ -1704,6 +1704,7 @@
     "271": "Data index optimization completed, [%s] disk space freed",
     "272": "Unnamed field",
     "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
-    "274": "This folder contains other files, please create a new folder as the workspace"
+    "274": "This folder contains other files, please create a new folder as the workspace",
+    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again"
   }
 }

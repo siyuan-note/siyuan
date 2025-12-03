@@ -1704,6 +1704,7 @@
     "271": "Optimisation de l'index des données terminée, [%s] d'espace disque libéré",
     "272": "Champ sans nom",
     "273": "Ne créez pas l’espace de travail à la racine de la partition, créez un nouveau dossier comme espace de travail",
-    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail"
+    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail",
+    "275": "Impossible d'ouvrir le document créé par une version plus récente. Veuillez mettre à jour vers la dernière version et réessayer"
   }
 }

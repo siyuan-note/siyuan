@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "認證帳戶",
   "publishServiceAuthAccountsTip": "Basic 認證帳戶列表。啟用 Basic 認證後訪問者輸入列表中的用戶名與密碼後才能查看發布的內容",
   "publishServiceAuthAccountAdd": "添加帳戶",
+  "publishAccess": "發布存取控制",
+  "publishAccessPublic": "公開",
+  "publishAccessProtected": "保護",
+  "publishAccessHidden": "隱藏",
+  "publishAccessPrivate": "私密",
+  "publishAccessForbidden": "禁止",
+  "publishAccessPublicComment": "完全公開存取",
+  "publishAccessProtectedComment": "公眾可見，需密碼才能存取",
+  "publishAccessHiddenComment": "公眾不可見，可直接存取",
+  "publishAccessPrivateComment": "公眾不可見，需密碼才能存取",
+  "publishAccessForbiddenComment": "禁止存取",
   "copyMirror": "複製鏡像",
   "duplicateMirror": "複製為鏡像副本",
   "duplicateCompletely": "複製為完整副本",
@@ -1704,6 +1715,9 @@
     "271": "資料索引優化完畢，共釋放 [%s] 磁碟空間",
     "272": "未命名欄位",
     "273": "請勿在分區根路徑上建立工作空間，請新建一個資料夾作為工作空間",
-    "274": "該資料夾包含其他檔案，請新建一個資料夾作為工作空間"
+    "274": "該資料夾包含其他檔案，請新建一個資料夾作為工作空間",
+    "275": "密碼",
+    "276": "禁止訪問",
+    "277": "密碼不正確"
   }
 }

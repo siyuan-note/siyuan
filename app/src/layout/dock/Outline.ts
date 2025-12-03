@@ -1311,4 +1311,27 @@ export class Outline extends Model {
             }
         };
     }
+
+    public reload(blockId?: string) {
+        if (!blockId) {
+            blockId = this.blockId;
+        }
+        fetchPost("/api/outline/getDocOutline", {
+            id: blockId,
+            preview: this.isPreview
+        }, response => {
+            // 文档切换后不再更新原有推送 https://github.com/siyuan-note/siyuan/issues/13409
+            if (blockId !== this.blockId) {
+                return;
+            }
+            this.update(response);
+            // https://github.com/siyuan-note/siyuan/issues/8372
+            if (getSelection().rangeCount > 0) {
+                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
+                if (blockElement && blockElement.getAttribute("data-type") === "NodeHeading") {
+                    this.setCurrent(blockElement);
+                }
+            }
+        });
+    }
 }

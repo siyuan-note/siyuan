@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "Account autenticati",
   "publishServiceAuthAccountsTip": "Elenco degli account per l'autenticazione di base. I visitatori devono inserire nome utente e password da questo elenco per visualizzare il contenuto pubblicato.",
   "publishServiceAuthAccountAdd": "Aggiungi account",
+  "publishAccess": "Controllo accesso alla pubblicazione",
+  "publishAccessPublic": "Pubblico",
+  "publishAccessProtected": "Protetto",
+  "publishAccessHidden": "Nascosto",
+  "publishAccessPrivate": "Privato",
+  "publishAccessForbidden": "Vietato",
+  "publishAccessPublicComment": "Accesso completamente pubblico",
+  "publishAccessProtectedComment": "Visibile al pubblico, richiede password per l'accesso",
+  "publishAccessHiddenComment": "Non visibile al pubblico, accessibile direttamente",
+  "publishAccessPrivateComment": "Non visibile al pubblico, richiede password per l'accesso",
+  "publishAccessForbiddenComment": "Accesso vietato",
   "copyMirror": "Copia specchio",
   "duplicateMirror": "Duplica specchio",
   "duplicateCompletely": "Duplica completamente",
@@ -1704,6 +1715,9 @@
     "271": "Ottimizzazione dell'indice dei dati completata, liberati [%s] di spazio su disco",
     "272": "Campo senza nome",
     "273": "Non creare lo spazio di lavoro nella directory radice della partizione, crea una nuova cartella come spazio di lavoro",
-    "274": "Questa cartella contiene altri file, crea una nuova cartella come spazio di lavoro"
+    "274": "Questa cartella contiene altri file, crea una nuova cartella come spazio di lavoro",
+    "275": "Password",
+    "276": "Accesso negato",
+    "277": "La password è errata"
   }
 }

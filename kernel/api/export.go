@@ -33,6 +33,7 @@ import (
 	"github.com/mssola/useragent"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -734,6 +735,13 @@ func exportPreview(c *gin.Context) {
 	}
 
 	stdHTML := model.Preview(id, fillCSSVar)
+	if model.IsReadOnlyRoleContext(c) {
+		block := sql.GetBlock(id)
+		if block != nil {
+			publishAccess := model.GetPublishAccess()
+			stdHTML = model.FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, stdHTML, true)
+		}
+	}
 	ret.Data = map[string]interface{}{
 		"html":       stdHTML,
 		"fillCSSVar": fillCSSVar,

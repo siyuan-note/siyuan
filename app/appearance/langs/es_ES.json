@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "Cuentas de autenticación",
   "publishServiceAuthAccountsTip": "Lista de cuentas de autenticación básica. Después de activar la autenticación básica, los visitantes deberán ingresar el nombre de usuario y la contraseña de la lista para ver el contenido publicado",
   "publishServiceAuthAccountAdd": "Agregar cuenta",
+  "publishAccess": "Control de acceso a la publicación",
+  "publishAccessPublic": "Público",
+  "publishAccessProtected": "Protegido",
+  "publishAccessHidden": "Oculto",
+  "publishAccessPrivate": "Privado",
+  "publishAccessForbidden": "Prohibido",
+  "publishAccessPublicComment": "Acceso completamente público",
+  "publishAccessProtectedComment": "Visible públicamente, requiere contraseña para acceder",
+  "publishAccessHiddenComment": "No visible públicamente, se puede acceder directamente",
+  "publishAccessPrivateComment": "No visible públicamente, requiere contraseña para acceder",
+  "publishAccessForbiddenComment": "Acceso prohibido",
   "copyMirror": "Copiar espejo",
   "duplicateMirror": "Espejo duplicado",
   "duplicateCompletely": "Duplicar completamente",
@@ -1704,6 +1715,9 @@
     "271": "Optimización del índice de datos completada, se liberaron [%s] de espacio en disco",
     "272": "Campo sin nombre",
     "273": "No cree el espacio de trabajo en la ruta raíz de la partición, cree una nueva carpeta como espacio de trabajo",
-    "274": "Esta carpeta contiene otros archivos, cree una nueva carpeta como espacio de trabajo"
+    "274": "Esta carpeta contiene otros archivos, cree una nueva carpeta como espacio de trabajo",
+    "275": "Contraseña",
+    "276": "Acceso denegado",
+    "277": "La contraseña es incorrecta"
   }
 }

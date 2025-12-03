@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "Comptes d'authentification",
   "publishServiceAuthAccountsTip": "Liste des comptes d'authentification Basic. Lorsque l'authentification Basic est activée, les visiteurs doivent entrer un nom d'utilisateur et un mot de passe figurant dans cette liste pour consulter le contenu publié.",
   "publishServiceAuthAccountAdd": "Ajouter un compte",
+  "publishAccess": "Contrôle d'accès à la publication",
+  "publishAccessPublic": "Public",
+  "publishAccessProtected": "Protégé",
+  "publishAccessHidden": "Caché",
+  "publishAccessPrivate": "Privé",
+  "publishAccessForbidden": "Interdit",
+  "publishAccessPublicComment": "Accès entièrement public",
+  "publishAccessProtectedComment": "Visible publiquement, nécessite un mot de passe pour accéder",
+  "publishAccessHiddenComment": "Pas visible publiquement, peut être accédé directement",
+  "publishAccessPrivateComment": "Pas visible publiquement, nécessite un mot de passe pour accéder",
+  "publishAccessForbiddenComment": "Accès interdit",
   "copyMirror": "Copier le miroir",
   "duplicateMirror": "Miroir en double",
   "duplicateCompletely": "Dupliquer complètement",
@@ -1704,6 +1715,9 @@
     "271": "Optimisation de l'index des données terminée, [%s] d'espace disque libéré",
     "272": "Champ sans nom",
     "273": "Ne créez pas l’espace de travail à la racine de la partition, créez un nouveau dossier comme espace de travail",
-    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail"
+    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail",
+    "275": "Mot de passe",
+    "276": "Accès refusé",
+    "277": "Le mot de passe est incorrect"
   }
 }

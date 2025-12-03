@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "认证账户",
   "publishServiceAuthAccountsTip": "Basic 认证账户列表。访问者输入列表中的用户名与密码后才能查看发布的内容",
   "publishServiceAuthAccountAdd": "添加账户",
+  "publishAccess": "发布访问控制",
+  "publishAccessPublic": "公开",
+  "publishAccessProtected": "保护",
+  "publishAccessHidden": "隐藏",
+  "publishAccessPrivate": "私密",
+  "publishAccessForbidden": "禁止",
+  "publishAccessPublicComment": "完全公开访问",
+  "publishAccessProtectedComment": "公众可见，需密码访问",
+  "publishAccessHiddenComment": "公众不可见，可直接访问",
+  "publishAccessPrivateComment": "公众不可见，需密码访问",
+  "publishAccessForbiddenComment": "禁止访问",
   "copyMirror": "复制镜像",
   "duplicateMirror": "复制为镜像副本",
   "duplicateCompletely": "复制为完整副本",
@@ -1704,6 +1715,9 @@
     "271": "数据索引优化完毕，共释放 [%s] 磁盘空间",
     "272": "未命名字段",
     "273": "请勿在分区根路径上创建工作空间，请新建一个文件夹作为工作空间",
-    "274": "该文件夹包含了其他文件，请新建一个文件夹作为工作空间"
+    "274": "该文件夹包含了其他文件，请新建一个文件夹作为工作空间",
+    "275": "密码",
+    "276": "禁止访问",
+    "277": "密码不正确"
   }
 }

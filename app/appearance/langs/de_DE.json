@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "Authentifizierte Konten",
   "publishServiceAuthAccountsTip": "Liste der Basisauthentifizierungskonten. Besucher müssen den Benutzernamen und das Passwort aus dieser Liste eingeben, um den veröffentlichten Inhalt anzuzeigen.",
   "publishServiceAuthAccountAdd": "Konto hinzufügen",
+  "publishAccess": "Veröffentlichungszugriffskontrolle",
+  "publishAccessPublic": "Öffentlich",
+  "publishAccessProtected": "Geschützt",
+  "publishAccessHidden": "Versteckt",
+  "publishAccessPrivate": "Privat",
+  "publishAccessForbidden": "Verboten",
+  "publishAccessPublicComment": "Vollständig öffentlicher Zugriff",
+  "publishAccessProtectedComment": "Öffentlich sichtbar, Zugriff erfordert Passwort",
+  "publishAccessHiddenComment": "Für Öffentlichkeit nicht sichtbar, direkter Zugriff möglich",
+  "publishAccessPrivateComment": "Für Öffentlichkeit nicht sichtbar, Zugriff erfordert Passwort",
+  "publishAccessForbiddenComment": "Zugriff verboten",
   "copyMirror": "Spiegel kopieren",
   "duplicateMirror": "Spiegel duplizieren",
   "duplicateCompletely": "Vollständig duplizieren",
@@ -1704,6 +1715,9 @@
     "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben",
     "272": "Unbenanntes Feld",
     "273": "Erstellen Sie den Arbeitsbereich nicht im Stammverzeichnis der Partition, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
-    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich"
+    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
+    "275": "Passwort",
+    "276": "Zugriff verweigert",
+    "277": "Passwort ist falsch"
   }
 }

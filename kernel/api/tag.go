@@ -51,7 +51,14 @@ func getTag(c *gin.Context) {
 	}
 
 	app := arg["app"].(string)
-	ret.Data = model.BuildTags(ignoreMaxListHint, app)
+	tags := model.BuildTags(ignoreMaxListHint, app)
+	
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		tags = model.FilterTagsByPublishIgnore(publishIgnore, tags)
+	}
+	ret.Data = tags
 }
 
 func renameTag(c *gin.Context) {

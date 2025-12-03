@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "Contas autenticadas",
   "publishServiceAuthAccountsTip": "Lista de contas de autenticação básica. Os visitantes precisam inserir o nome de usuário e senha desta lista para visualizar o conteúdo publicado.",
   "publishServiceAuthAccountAdd": "Adicionar conta",
+  "publishAccess": "Controle de acesso à publicação",
+  "publishAccessPublic": "Público",
+  "publishAccessProtected": "Protegido",
+  "publishAccessHidden": "Oculto",
+  "publishAccessPrivate": "Privado",
+  "publishAccessForbidden": "Proibido",
+  "publishAccessPublicComment": "Acesso totalmente público",
+  "publishAccessProtectedComment": "Visível publicamente, requer senha para acessar",
+  "publishAccessHiddenComment": "Não visível publicamente, pode ser acessado diretamente",
+  "publishAccessPrivateComment": "Não visível publicamente, requer senha para acessar",
+  "publishAccessForbiddenComment": "Acesso proibido",
   "copyMirror": "Copiar espelho",
   "duplicateMirror": "Duplicar espelho",
   "duplicateCompletely": "Duplicar completamente",
@@ -1704,6 +1715,9 @@
     "271": "Otimização do índice de dados concluída, [%s] de espaço liberado",
     "272": "Campo sem nome",
     "273": "Não crie o espaço de trabalho na raiz da partição, crie uma nova pasta para o espaço de trabalho",
-    "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho"
+    "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho",
+    "275": "Senha",
+    "276": "Acesso negado",
+    "277": "A senha está incorreta"
   }
 }

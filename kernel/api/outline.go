@@ -21,6 +21,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -49,6 +50,20 @@ func getDocOutline(c *gin.Context) {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		block := sql.GetBlock(rootID)
+		if block != nil {
+			passwordID, password := model.GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+			if password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
+				headings = nil
+			}
+			publishIgnore := model.GetDisablePublishAccess(publishAccess)
+			if !model.CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				headings = nil
+			}
+		}
 	}
 	ret.Data = headings
 }

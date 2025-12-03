@@ -106,6 +106,17 @@
   "publishServiceAuthAccounts": "認証アカウント",
   "publishServiceAuthAccountsTip": "基本認証アカウントのリスト。基本認証を有効にした場合、訪問者はリスト内のユーザー名とパスワードを入力して公開内容を表示することができます",
   "publishServiceAuthAccountAdd": "アカウントを追加する",
+  "publishAccess": "公開アクセス制御",
+  "publishAccessPublic": "公開",
+  "publishAccessProtected": "保護",
+  "publishAccessHidden": "非表示",
+  "publishAccessPrivate": "非公開",
+  "publishAccessForbidden": "禁止",
+  "publishAccessPublicComment": "完全に公開されたアクセス",
+  "publishAccessProtectedComment": "一般に公開されていますが、アクセスにはパスワードが必要です",
+  "publishAccessHiddenComment": "一般には非表示ですが、直接アクセス可能です",
+  "publishAccessPrivateComment": "一般には非表示で、パスワードが必要です",
+  "publishAccessForbiddenComment": "アクセスは禁止されています",
   "copyMirror": "ミラーをコピー",
   "duplicateMirror": "ミラーを複製",
   "duplicateCompletely": "完全に複製",
@@ -1704,6 +1715,9 @@
     "271": "データインデックスの最適化が完了しました。合計 [%s] のディスク容量が解放されました",
     "272": "未命名フィールド",
     "273": "パーティションのルートパスにワークスペースを作成しないでください。新しいフォルダーをワークスペースとして作成してください",
-    "274": "このフォルダーには他のファイルが含まれています。新しいフォルダーをワークスペースとして作成してください"
+    "274": "このフォルダーには他のファイルが含まれています。新しいフォルダーをワークスペースとして作成してください",
+    "275": "パスワード",
+    "276": "アクセスが禁止されています",
+    "277": "パスワードが正しくありません"
   }
 }

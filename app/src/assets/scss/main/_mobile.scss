@@ -21,7 +21,7 @@
     font-size: 16px;
     line-height: 40px;
 
-    &:hover {
+    &:not(.b3-list-item--focus):hover {
       background-color: transparent !important;
     }
 

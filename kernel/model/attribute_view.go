@@ -241,6 +241,8 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 				if !av.MSelectExistOption(newValue.MSelect, groupView.GetGroupValue()) {
 					if 1 > len(newValue.MSelect) || av.KeyTypeMSelect == groupKey.Type {
 						newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+					} else {
+						newValue.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
 					}
 				} else {
 					var vals []*av.ValueSelect
@@ -3987,10 +3989,17 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
 					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID, false)
 
-					// 移除旧分组的值
 					if val := attrView.GetValue(groupKey.ID, itemID); nil != val {
 						if av.MSelectExistOption(val.MSelect, groupView.GetGroupValue()) {
+							// 移除旧分组的值
 							val.MSelect = av.MSelectRemoveOption(val.MSelect, groupView.GetGroupValue())
+						}
+
+						now := time.Now().UnixMilli()
+						val.SetUpdatedAt(now)
+						if blockVal := attrView.GetBlockValue(itemID); nil != blockVal {
+							blockVal.Block.Updated = now
+							blockVal.SetUpdatedAt(now)
 						}
 					}
 

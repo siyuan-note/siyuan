@@ -1,6 +1,11 @@
 import {hasClosestBlock, hasClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
+export const getCalloutInfo = (element: Element) => {
+    const icon = element.querySelector(".callout-icon").textContent;
+    return (icon ? icon + " " : "") + element.querySelector(".callout-title").textContent;
+};
+
 export const getPreviousBlock = (element: Element) => {
     let parentElement = element;
     while (parentElement) {
@@ -117,10 +122,23 @@ export const getTopEmptyElement = (element: Element) => {
 };
 
 export const getTopAloneElement = (topSourceElement: Element) => {
-    if ("NodeBlockquote" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
+    if ("NodeBlockquote" === topSourceElement.parentElement.getAttribute("data-type") &&
+        topSourceElement.parentElement.childElementCount === 2) {
         while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
-            if (topSourceElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && topSourceElement.parentElement.childElementCount === 2) {
+            if (topSourceElement.parentElement.getAttribute("data-type") === "NodeBlockquote" &&
+                topSourceElement.parentElement.childElementCount === 2) {
                 topSourceElement = topSourceElement.parentElement;
+            } else {
+                topSourceElement = getTopAloneElement(topSourceElement);
+                break;
+            }
+        }
+    } else if (topSourceElement.parentElement.classList.contains("callout-content") &&
+        topSourceElement.parentElement.childElementCount === 1) {
+        while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
+            if (topSourceElement.parentElement.classList.contains("callout-content") &&
+                topSourceElement.parentElement.childElementCount === 1) {
+                topSourceElement = topSourceElement.parentElement.parentElement;
             } else {
                 topSourceElement = getTopAloneElement(topSourceElement);
                 break;

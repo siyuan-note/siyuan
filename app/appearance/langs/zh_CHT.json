@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "下载并回滚",
   "callout": "提示",
   "hasAttrName": "屬性名 ${x} 已存在",
   "statusBarMsgPushTip": "透過狀態列訊息可以即時地了解系統的運作情況，如果感到打擾可以將其關閉",

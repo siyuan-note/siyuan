@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Pobierz i przywróć",
   "callout": "Wskazówka",
   "hasAttrName": "Nazwa atrybutu ${x} już istnieje",
   "statusBarMsgPushTip": "Dzięki powiadomieniom na pasku stanu można na bieżąco poznać działanie systemu, a jeśli przeszkadzają, można je wyłączyć",

@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Herunterladen und Zurücksetzen",
   "callout": "Hinweis",
   "hasAttrName": "Der Attributname ${x} ist bereits vorhanden",
   "statusBarMsgPushTip": "Über Nachrichten in der Statusleiste können Sie den Zustand des Systems sofort erfahren, wenn sie stören, können Sie sie deaktivieren",

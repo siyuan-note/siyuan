@@ -978,12 +978,6 @@ func DuplicateDoc(tree *parse.Tree) {
 
 	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
-	createTreeTx(tree)
-	box := Conf.Box(tree.Box)
-	if nil != box {
-		box.addSort(previousPath, tree.ID)
-	}
-	FlushTxQueue()
 
 	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -996,6 +990,13 @@ func DuplicateDoc(tree *parse.Tree) {
 		n.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 		return ast.WalkContinue
 	})
+
+	createTreeTx(tree)
+	box := Conf.Box(tree.Box)
+	if nil != box {
+		box.addSort(previousPath, tree.ID)
+	}
+	FlushTxQueue()
 	return
 }
 

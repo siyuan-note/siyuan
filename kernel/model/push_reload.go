@@ -38,11 +38,11 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, removePluginNameSet *hashset.Set, excludeApp string) {
-	if nil != removePluginNameSet {
-		for _, n := range removePluginNameSet.Values() {
+func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginNameSet *hashset.Set, excludeApp string) {
+	if nil != unloadPluginNameSet {
+		for _, n := range unloadPluginNameSet.Values() {
 			pluginName := n.(string)
-			// 如果插件在 removePluginSet 中，从其他集合中移除
+			// 如果插件在 unloadPluginSet 中，从其他集合中移除
 			if nil != upsertCodePluginSet {
 				upsertCodePluginSet.Remove(pluginName)
 			}
@@ -61,7 +61,7 @@ func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, removePluginName
 		}
 	}
 
-	upsertCodePlugins, upsertDataPlugins, removePlugins := []string{}, []string{}, []string{}
+	upsertCodePlugins, upsertDataPlugins, unloadPlugins := []string{}, []string{}, []string{}
 	if nil != upsertCodePluginSet {
 		for _, n := range upsertCodePluginSet.Values() {
 			upsertCodePlugins = append(upsertCodePlugins, n.(string))
@@ -72,22 +72,22 @@ func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, removePluginName
 			upsertDataPlugins = append(upsertDataPlugins, n.(string))
 		}
 	}
-	if nil != removePluginNameSet {
-		for _, n := range removePluginNameSet.Values() {
-			removePlugins = append(removePlugins, n.(string))
+	if nil != unloadPluginNameSet {
+		for _, n := range unloadPluginNameSet.Values() {
+			unloadPlugins = append(unloadPlugins, n.(string))
 		}
 	}
 
-	pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, removePlugins, excludeApp)
+	pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, unloadPlugins, excludeApp)
 }
 
-func pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, removePlugins []string, excludeApp string) {
-	logging.LogInfof("reload plugins [codeChanges=%v, dataChanges=%v, removes=%v]", upsertCodePlugins, upsertDataPlugins, removePlugins)
+func pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, unloadPlugins []string, excludeApp string) {
+	logging.LogInfof("reload plugins [codeChanges=%v, dataChanges=%v, unloads=%v]", upsertCodePlugins, upsertDataPlugins, unloadPlugins)
 	if "" == excludeApp {
 		util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
 			"upsertCodePlugins": upsertCodePlugins,
 			"upsertDataPlugins": upsertDataPlugins,
-			"removePlugins":     removePlugins,
+			"unloadPlugins":     unloadPlugins,
 		})
 		return
 	}
@@ -95,7 +95,7 @@ func pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, removePlugins []str
 	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", map[string]interface{}{
 		"upsertCodePlugins": upsertCodePlugins,
 		"upsertDataPlugins": upsertDataPlugins,
-		"removePlugins":     removePlugins,
+		"unloadPlugins":     unloadPlugins,
 	})
 }
 

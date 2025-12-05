@@ -285,6 +285,7 @@ declare namespace Config {
         | "he_IL"
         | "it_IT"
         | "ja_JP"
+        | "ko_KR"
         | "pl_PL"
         | "pt_BR"
         | "ru_RU"

@@ -50,6 +50,7 @@ type DisplayName struct {
 	HeIL    string `json:"he_IL"`
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
+	KoKR    string `json:"ko_KR"`
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
@@ -67,6 +68,7 @@ type Description struct {
 	HeIL    string `json:"he_IL"`
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
+	KoKR    string `json:"ko_KR"`
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
@@ -84,6 +86,7 @@ type Readme struct {
 	HeIL    string `json:"he_IL"`
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
+	koKR    string `json:"ko_KR"`
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
@@ -205,6 +208,10 @@ func getPreferredReadme(readme *Readme) string {
 		if "" != readme.JaJP {
 			ret = readme.JaJP
 		}
+	case "ko_KR":
+		if "" != readme.KoKR {
+			ret = readme.KoKR
+		}
 	case "pl_PL":
 		if "" != readme.PlPL {
 			ret = readme.PlPL
@@ -275,6 +282,10 @@ func GetPreferredName(pkg *Package) string {
 		if "" != pkg.DisplayName.JaJP {
 			ret = pkg.DisplayName.JaJP
 		}
+	case "ko_KR":
+		if "" != pkg.DisplayName.KoKR {
+			ret = pkg.DisplayName.KoKR
+		}
 	case "pl_PL":
 		if "" != pkg.DisplayName.PlPL {
 			ret = pkg.DisplayName.PlPL
@@ -344,6 +355,10 @@ func getPreferredDesc(desc *Description) string {
 	case "ja_JP":
 		if "" != desc.JaJP {
 			ret = desc.JaJP
+		}
+	case "ko_KR":
+		if "" != desc.KoKR {
+			ret = desc.KoKR
 		}
 	case "pl_PL":
 		if "" != desc.PlPL {

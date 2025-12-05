@@ -233,13 +233,14 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
 
-    if (!blockElement.previousElementSibling && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
+    const isCallout = blockElement.parentElement.classList.contains("callout-content");
+    if (!blockElement.previousElementSibling && (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout)) {
         if (type !== "Delete") {
             range.insertNode(document.createElement("wbr"));
         }
-        const blockParentElement = blockElement.parentElement;
+        const blockParentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
         blockParentElement.insertAdjacentElement("beforebegin", blockElement);
-        if (blockParentElement.childElementCount === 1) {
+        if (isCallout ? blockParentElement.querySelector(".callout-content").childElementCount === 0:blockParentElement.childElementCount === 1 ) {
             transaction(protyle, [{
                 action: "move",
                 id: blockElement.getAttribute("data-node-id"),

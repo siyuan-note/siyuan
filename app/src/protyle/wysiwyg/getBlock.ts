@@ -100,7 +100,7 @@ export const isNotEditBlock = (element: Element) => {
 export const getTopEmptyElement = (element: Element) => {
     let topElement = element;
     while (topElement.parentElement && !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
-        if (!topElement.parentElement.getAttribute("data-node-id")) {
+        if (!topElement.parentElement.getAttribute("data-node-id") && !topElement.parentElement.classList.contains("callout-content")) {
             topElement = topElement.parentElement;
         } else {
             let hasText = false;

@@ -225,11 +225,17 @@ export const afterLoadPlugin = (plugin: Plugin) => {
 export const reloadPlugin = async (app: App, data: {
     upsertCodePlugins?: string[],
     upsertDataPlugins?: string[],
-    unloadPlugins?: string[]
+    unloadPlugins?: string[],
+    uninstallPlugins?: string[],
 } = {}) => {
-    const {upsertCodePlugins = [], upsertDataPlugins = [], unloadPlugins = []} = data;
+    const {upsertCodePlugins = [], upsertDataPlugins = [], unloadPlugins = [], uninstallPlugins = []} = data;
+    // 禁用
     unloadPlugins.forEach((item) => {
         uninstall(app, item, true);
+    });
+    // 卸载
+    uninstallPlugins.forEach((item) => {
+        uninstall(app, item, false);
     });
     upsertCodePlugins.forEach((item) => {
         uninstall(app, item, true);

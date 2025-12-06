@@ -804,6 +804,10 @@ declare namespace Config {
          */
         blockquote: boolean;
         /**
+         * Display callout
+         */
+        callout: boolean;
+        /**
          * Display code block
          */
         code: boolean;

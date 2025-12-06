@@ -717,6 +717,7 @@ interface IGraphCommon {
     };
     type: {
         blockquote: boolean
+        callout: boolean
         code: boolean
         heading: boolean
         list: boolean

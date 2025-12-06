@@ -109,6 +109,10 @@ export class Graph extends Model {
     <input data-type="blockquote" type="checkbox" class="b3-switch"${window.siyuan.config.graph.global.type.blockquote ? " checked" : ""}/>
 </label>
 <label>
+    <span>${window.siyuan.languages.callout}</span> 
+    <input data-type="callout" type="checkbox" class="b3-switch"${window.siyuan.config.graph.global.type.callout ? " checked" : ""}/>
+</label>
+<label>
     <span>${window.siyuan.languages.superBlock}</span> 
     <input data-type="super" type="checkbox" class="b3-switch"${window.siyuan.config.graph.global.type.super ? " checked" : ""}/>
 </label>
@@ -191,6 +195,10 @@ export class Graph extends Model {
 <label>
     <span>${window.siyuan.languages.quote}</span> 
     <input data-type="blockquote" type="checkbox" class="b3-switch"${window.siyuan.config.graph.local.type.blockquote ? " checked" : ""}/>
+</label>
+<label>
+    <span>${window.siyuan.languages.callout}</span> 
+    <input data-type="callout" type="checkbox" class="b3-switch"${window.siyuan.config.graph.local.type.callout ? " checked" : ""}/>
 </label>
 <label>
     <span>${window.siyuan.languages.superBlock}</span> 
@@ -401,6 +409,7 @@ export class Graph extends Model {
         (this.panelElement.querySelector("[data-type='heading']") as HTMLInputElement).checked = conf.type.heading;
         (this.panelElement.querySelector("[data-type='arrow']") as HTMLInputElement).checked = conf.d3.arrow;
         (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked = conf.type.blockquote;
+        (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked = conf.type.callout;
         (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked = conf.type.code;
         this.searchGraph(false);
     }
@@ -421,6 +430,7 @@ export class Graph extends Model {
             tag: (this.panelElement.querySelector("[data-type='tag']") as HTMLInputElement).checked,
             heading: (this.panelElement.querySelector("[data-type='heading']") as HTMLInputElement).checked,
             blockquote: (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked,
+            callout: (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked,
             code: (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked,
         };
         const d3 = {

@@ -86,7 +86,7 @@ type Readme struct {
 	HeIL    string `json:"he_IL"`
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
-	koKR    string `json:"ko_KR"`
+	KoKR    string `json:"ko_KR"`
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`

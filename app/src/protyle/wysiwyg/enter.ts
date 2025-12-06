@@ -116,12 +116,15 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         return true;
     }
 
-    // bq
+    // bq || callout
+    const isCallout = blockElement.parentElement.classList.contains("callout-content");
     if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
-        blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
-        blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
+        ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
+                blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
+            (isCallout && !blockElement.nextElementSibling))) {
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement);
+        const parentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
         const blockId = blockElement.getAttribute("data-node-id");
         const topId = topElement.getAttribute("data-node-id");
         const doInsert: IOperation = {
@@ -135,9 +138,9 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: topElement.outerHTML,
         };
         if (topId === blockId) {
-            doInsert.previousID = blockElement.parentElement.getAttribute("data-node-id");
+            doInsert.previousID = parentElement.getAttribute("data-node-id");
             undoInsert.previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
-            blockElement.parentElement.after(blockElement);
+            parentElement.after(blockElement);
         } else {
             doInsert.previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : undefined;
             doInsert.parentID = topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID;
@@ -153,8 +156,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             action: "delete",
             id: blockId,
         }, undoInsert]);
-        if (topId === blockId && blockElement.parentElement.classList.contains("sb") &&
-            blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
+        if (topId === blockId && parentElement.classList.contains("sb") &&
+            parentElement.getAttribute("data-sb-layout") === "col") {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: [blockElement.previousElementSibling, blockElement],

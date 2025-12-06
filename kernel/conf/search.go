@@ -42,6 +42,7 @@ type Search struct {
 	VideoBlock    bool `json:"videoBlock"`
 	IFrameBlock   bool `json:"iframeBlock"`
 	WidgetBlock   bool `json:"widgetBlock"`
+	Callout       bool `json:"callout"`
 
 	Limit         int  `json:"limit"`
 	CaseSensitive bool `json:"caseSensitive"`
@@ -84,6 +85,7 @@ func NewSearch() *Search {
 		VideoBlock:    false,
 		IFrameBlock:   false,
 		WidgetBlock:   false,
+		Callout:       false,
 
 		Limit:         64,
 		CaseSensitive: false,
@@ -224,6 +226,12 @@ func (s *Search) TypeFilter() string {
 	if s.WidgetBlock {
 		buf.WriteByte('\'')
 		buf.WriteString(treenode.TypeAbbr(ast.NodeWidget.String()))
+		buf.WriteByte('\'')
+		buf.WriteString(",")
+	}
+	if s.Callout {
+		buf.WriteByte('\'')
+		buf.WriteString(treenode.TypeAbbr(ast.NodeCallout.String()))
 		buf.WriteByte('\'')
 		buf.WriteString(",")
 	}

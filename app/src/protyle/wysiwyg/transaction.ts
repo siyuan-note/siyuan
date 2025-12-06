@@ -396,7 +396,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "unfoldHeading") {
-        const scrollTop = protyle.contentElement.scrollTop;
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
             item.removeAttribute("fold");
             // undo 会走 transaction
@@ -425,8 +424,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
-            protyle.contentElement.scrollTop = scrollTop;
-            protyle.scroll.lastScrollTop = scrollTop;
         }
         return;
     }

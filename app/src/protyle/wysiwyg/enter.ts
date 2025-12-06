@@ -17,7 +17,7 @@ import {isIPad, setStorageVal} from "../util/compatibility";
 import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
-import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
@@ -197,7 +197,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: newElement.outerHTML,
             id: newId,
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
-            parentID: blockElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: (hasClosestBlock(blockElement.parentElement) as HTMLElement)?.getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "delete",
             id: newId,

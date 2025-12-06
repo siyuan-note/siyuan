@@ -905,7 +905,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				headings = append(headings, n)
 				return ast.WalkSkipChildren
 			}
@@ -1128,7 +1128,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+		if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 			headings = append(headings, n)
 			return ast.WalkSkipChildren
 		}
@@ -3557,14 +3557,14 @@ func adjustHeadingLevel(bt *treenode.BlockTree, tree *parse.Tree) {
 	var firstHeading *ast.Node
 	if !Conf.Export.AddTitle {
 		for n := tree.Root.FirstChild; nil != n; n = n.Next {
-			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				firstHeading = n
 				break
 			}
 		}
 	} else {
 		for n := tree.Root.FirstChild.Next; nil != n; n = n.Next {
-			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				firstHeading = n
 				break
 			}

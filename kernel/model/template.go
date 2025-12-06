@@ -373,7 +373,8 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 
 		if (ast.NodeListItem == n.Type && (nil == n.FirstChild ||
 			(3 == n.ListData.Typ && (nil == n.FirstChild.Next || ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type)))) ||
-			(ast.NodeBlockquote == n.Type && nil != n.FirstChild && nil != n.FirstChild.Next && ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type) {
+			(ast.NodeBlockquote == n.Type && nil != n.FirstChild && nil != n.FirstChild.Next && ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type) ||
+			(ast.NodeCallout == n.Type && nil != n.FirstChild && ast.NodeKramdownBlockIAL == n.FirstChild.Next.Type) {
 			nodesNeedAppendChild = append(nodesNeedAppendChild, n)
 		}
 

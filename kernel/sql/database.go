@@ -1433,7 +1433,6 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 
 func nSort(n *ast.Node) int {
 	switch n.Type {
-	// 以下为块级元素
 	case ast.NodeHeading:
 		return 5
 	case ast.NodeParagraph:
@@ -1451,6 +1450,8 @@ func nSort(n *ast.Node) int {
 	case ast.NodeListItem:
 		return 20
 	case ast.NodeBlockquote:
+		return 20
+	case ast.NodeCallout:
 		return 20
 	case ast.NodeSuperBlock:
 		return 30

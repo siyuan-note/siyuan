@@ -1217,6 +1217,10 @@ declare namespace Config {
          */
         blockquote: boolean;
         /**
+         * Whether to search callout
+         */
+        callout: boolean;
+        /**
          * Whether to distinguish between uppercase and lowercase letters when searching
          */
         caseSensitive: boolean;
@@ -2302,6 +2306,11 @@ declare namespace Config {
          * @default false
          */
         blockquote: boolean;
+        /**
+         * Search results contain callout blocks
+         * @default false
+         */
+        callout: boolean;
         /**
          * Search results contain code blocks
          * @default false

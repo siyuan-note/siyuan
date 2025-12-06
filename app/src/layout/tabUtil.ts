@@ -23,6 +23,7 @@ import {openHistory} from "../history/history";
 import {newFile} from "../util/newFile";
 import {mountHelp, newNotebook} from "../util/mount";
 import {Constants} from "../constants";
+import {fetchPost} from "../util/fetch";
 
 export const getActiveTab = (wndActive = true) => {
     const activeTabElement = document.querySelector(".layout__wnd--active .item--focus");
@@ -360,26 +361,56 @@ export const copyTab = (app: App, tab: Tab) => {
 };
 
 export const closeTabByType = async (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
+    const tabsToClose: Tab[] = [];
     if (type === "closeOthers") {
-        for (let index = 0; index < tab.parent.children.length; index++) {
-            if (tab.parent.children[index].id !== tab.id && !tab.parent.children[index].headElement.classList.contains("item--pin")) {
-                await tab.parent.children[index].parent.removeTab(tab.parent.children[index].id, true, false);
-                index--;
+        for (const item of tab.parent.children) {
+            if (item.id !== tab.id && !item.headElement.classList.contains("item--pin")) {
+                tabsToClose.push(item);
             }
         }
     } else if (type === "closeAll") {
-        for (let index = 0; index < tab.parent.children.length; index++) {
-            if (!tab.parent.children[index].headElement.classList.contains("item--pin")) {
-                await tab.parent.children[index].parent.removeTab(tab.parent.children[index].id, true);
-                index--;
+        for (const item of tab.parent.children) {
+            if (!item.headElement.classList.contains("item--pin")) {
+                tabsToClose.push(item);
             }
         }
-    } else if (tabs.length > 0) {
-        for (let index = 0; index < tabs.length; index++) {
-            if (!tabs[index].headElement.classList.contains("item--pin")) {
-                await tabs[index].parent.removeTab(tabs[index].id);
+    } else if (tabs && tabs.length > 0) {
+        for (const item of tabs) {
+            if (!item.headElement.classList.contains("item--pin")) {
+                tabsToClose.push(item);
             }
         }
+    }
+
+    // 收集所有需要关闭的文档 rootID 并批量关闭页签
+    const rootIDs: string[] = [];
+    for (const item of tabsToClose) {
+        let rootID;
+        if (item.model instanceof Editor) {
+            rootID = item.model.editor.protyle.block.rootID;
+        } else if (!item.model) {
+            const initTab = item.headElement.getAttribute("data-initdata");
+            if (initTab) {
+                const initTabData = JSON.parse(initTab);
+                if (initTabData && initTabData.instance === "Editor" && initTabData.rootId) {
+                    rootID = initTabData.rootId;
+                }
+            }
+        }
+        if (rootID) {
+            rootIDs.push(rootID);
+        }
+
+        if (type === "closeOthers") {
+            item.parent.removeTab(item.id, true, false);
+        } else {
+            item.parent.removeTab(item.id, true);
+        }
+    }
+
+    // 批量更新文档关闭时间
+    if (rootIDs.length > 0) {
+        fetchPost("/api/storage/batchUpdateRecentDocCloseTime", {rootIDs});
     }
 
     if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {

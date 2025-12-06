@@ -113,8 +113,7 @@ func (box *Box) Unindex() {
 }
 
 func unindex(boxID string) {
-	ids := treenode.RemoveBlockTreesByBoxID(boxID)
-	RemoveRecentDoc(ids)
+	treenode.RemoveBlockTreesByBoxID(boxID)
 	sql.DeleteBoxQueue(boxID)
 }
 

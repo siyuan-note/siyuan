@@ -3036,6 +3036,37 @@ export class WYSIWYG {
                 return;
             }
 
+            const calloutIconElement = hasTopClosestByClassName(event.target, "callout-icon");
+            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutIconElement) {
+                const nodeElement = hasClosestBlock(calloutIconElement);
+                if (nodeElement) {
+                    const emojiRect = calloutIconElement.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: emojiRect.left,
+                        y: emojiRect.bottom,
+                        h: emojiRect.height,
+                        w: emojiRect.width
+                    }, (unicode) => {
+                        const oldHTML = nodeElement.outerHTML;
+                        let emojiHTML;
+                        if (unicode.startsWith("api/icon/getDynamicIcon")) {
+                            emojiHTML = `<img class="callout-img" src="${unicode}"/>`;
+                        } else if (unicode.indexOf(".") > -1) {
+                            emojiHTML = `<img class="callout-img" src="/emojis/${unicode}">`;
+                        } else {
+                            emojiHTML = unicode2Emoji(unicode);
+                        }
+                        calloutIconElement.innerHTML = emojiHTML;
+                        hideElements(["dialog"]);
+                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        focusByWbr(nodeElement, range);
+                    }, calloutIconElement.querySelector("img"));
+                }
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+
             const emojiElement = hasTopClosestByClassName(event.target, "emoji");
             if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && emojiElement) {
                 const nodeElement = hasClosestBlock(emojiElement);

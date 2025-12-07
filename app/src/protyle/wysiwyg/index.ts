@@ -624,7 +624,9 @@ export class WYSIWYG {
                             hasJump = true;
                         }
                     }
-                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
+                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
+                        !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
+                        !selectElements[0].classList.contains("sb")) {
                         // 单个 p 不选中
                     } else {
                         const ids: string[] = [];
@@ -1230,7 +1232,8 @@ export class WYSIWYG {
                 protyle.selectElement.setAttribute("style", `background-color: ${protyle.selectElement.style.backgroundColor};top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
                 const newMouseElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
                 if (mouseElement && mouseElement === newMouseElement && !mouseElement.classList.contains("protyle-wysiwyg") &&
-                    !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") && !mouseElement.classList.contains("sb")) {
+                    !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") &&
+                    !mouseElement.classList.contains("sb") && !mouseElement.classList.contains("callout")) {
                     // 性能优化，同一个p元素不进行选中计算
                     return;
                 } else {
@@ -1250,7 +1253,7 @@ export class WYSIWYG {
                 }
                 if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") ||
                     firstElement.classList.contains("li") || firstElement.classList.contains("sb") ||
-                    firstElement.classList.contains("bq")) {
+                    firstElement.classList.contains("callout") || firstElement.classList.contains("bq")) {
                     firstElement = document.elementFromPoint(newLeft, newTop + 16);
                 }
                 if (!firstElement) {
@@ -1340,7 +1343,8 @@ export class WYSIWYG {
                     endLastElement = selectElements[selectElements.length - 1];
                 }
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
-                    !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
+                    !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
+                    !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
                     protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");

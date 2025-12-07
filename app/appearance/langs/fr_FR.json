@@ -739,6 +739,7 @@
   "exportPDF3": "Échelle de page",
   "exportPDF4": "Incorporer des ressources",
   "exportPDF5": "Garder plié",
+  "paged": "Pagination",
   "mergeSubdocs": "Fusionner les sous-documents",
   "removeAssetsFolder": "Supprimer le répertoire des actifs",
   "upload": "Télécharger",

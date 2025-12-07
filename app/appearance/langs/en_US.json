@@ -739,6 +739,7 @@
   "exportPDF3": "Page Scale",
   "exportPDF4": "Embed assets",
   "exportPDF5": "Keep folded",
+  "paged": "Paged",
   "mergeSubdocs": "Merge subdocuments",
   "removeAssetsFolder": "Remove assets directory",
   "upload": "Upload",

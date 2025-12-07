@@ -221,6 +221,9 @@ export const initWindow = async (app: App) => {
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
+        const isPaged = ipcData.paged !== undefined ? ipcData.paged : true;
+        // 分页模式下 pageSize 是字符串，不分页模式下是对象，统一使用 pageSizeValue 获取原始页面大小
+        const pageSizeValue = ipcData.pageSizeValue !== undefined ? ipcData.pageSizeValue : (isPaged ? ipcData.pdfOptions.pageSize : "A4");
         window.siyuan.storage[Constants.LOCAL_EXPORTPDF] = {
             removeAssets: ipcData.removeAssets,
             keepFold: ipcData.keepFold,
@@ -228,16 +231,17 @@ export const initWindow = async (app: App) => {
             watermark: ipcData.watermark,
             landscape: ipcData.pdfOptions.landscape,
             marginType: ipcData.pdfOptions.marginType,
-            pageSize: ipcData.pdfOptions.pageSize,
+            pageSize: pageSizeValue,
             scale: ipcData.pdfOptions.scale,
             marginTop: ipcData.pdfOptions.margins.top,
             marginRight: ipcData.pdfOptions.margins.right,
             marginBottom: ipcData.pdfOptions.margins.bottom,
             marginLeft: ipcData.pdfOptions.margins.left,
+            paged: isPaged,
         };
         setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
         try {
-            if (window.siyuan.config.export.pdfFooter.trim()) {
+            if (window.siyuan.config.export.pdfFooter.trim() && isPaged) {
                 const response = await fetchSyncPost("/api/template/renderSprig", {template: window.siyuan.config.export.pdfFooter});
                 ipcData.pdfOptions.displayHeaderFooter = true;
                 ipcData.pdfOptions.headerTemplate = "<span></span>";

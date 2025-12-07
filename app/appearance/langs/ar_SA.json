@@ -739,6 +739,7 @@
   "exportPDF3": "مقياس الصفحة",
   "exportPDF4": "تضمين الأصول",
   "exportPDF5": "البقاء مطوية",
+  "paged": "ترقيم الصفحات",
   "mergeSubdocs": "إبقاء مطوياً",
   "removeAssetsFolder": "إزالة دليل الأصول",
   "upload": "رفع",

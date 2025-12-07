@@ -739,6 +739,7 @@
   "exportPDF3": "Seitenmaßstab",
   "exportPDF4": "Assets einbetten",
   "exportPDF5": "Aufgeklappt beibehalten",
+  "paged": "Seitenumbruch",
   "mergeSubdocs": "Unterdokumente zusammenführen",
   "removeAssetsFolder": "Assets-Verzeichnis entfernen",
   "upload": "Hochladen",

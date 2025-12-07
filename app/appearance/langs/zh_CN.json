@@ -739,6 +739,7 @@
   "exportPDF3": "页面缩放",
   "exportPDF4": "嵌入资源文件",
   "exportPDF5": "保持折叠状态",
+  "paged": "分页",
   "mergeSubdocs": "合并子文档",
   "removeAssetsFolder": "移除 assets 目录",
   "upload": "上传",

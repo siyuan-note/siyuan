@@ -7,7 +7,7 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
-	github.com/88250/gulu v1.2.3-0.20251119142510-7b1583ab4aa0
+	github.com/88250/gulu v1.2.3-0.20251208021445-f93f2666eaac
 	github.com/88250/lute v1.7.7-0.20251206130006-9ab22d55a1d6
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4

@@ -241,6 +241,8 @@ func getWorkspaces(c *gin.Context) {
 		return
 	}
 
+	logging.LogInfof("workspace paths [%+v]", workspacePaths)
+
 	var workspaces, openedWorkspaces, closedWorkspaces []*Workspace
 	for _, p := range workspacePaths {
 		logging.LogInfof("get workspace [%s]", p)

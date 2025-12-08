@@ -414,7 +414,7 @@
   "confirmPassword": "Ich habe das Passwort bereits gemerkt",
   "passwordNoMatch": "Die zweimal eingegebenen Passwörter stimmen nicht überein",
   "cloudConfigTip": "Bitte in [Einstellungen - Cloud] konfigurieren",
-  "confirmUninstall": "Sind Sie sicher, dass Sie ${name} deinstallieren möchten?",
+  "confirmUninstall": "Deinstallation von ${name} bestätigen?<br>Die Deinstallation entfernt alle zugehörigen Einstellungen und Daten. Bitte vorsichtig vorgehen!",
   "scrollGetMore": "Scrollen Sie nach oben und unten, um mehr zu laden",
   "flashcardNewCard": "Neu",
   "flashcardReviewCard": "Alt",

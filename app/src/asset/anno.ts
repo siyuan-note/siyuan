@@ -7,6 +7,7 @@ import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
+import {isMobile} from "../util/functions";
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
@@ -314,7 +315,7 @@ const setRelation = (pdf: any) => {
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--background">${getRelationHTML(configItem.ids)}</ul>
 </div>`,
-        width: "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
 
     const addRelation = () => {

@@ -13,7 +13,7 @@ import {bindRollupData, getRollupHTML} from "./rollup";
 import {Constants} from "../../../constants";
 import * as dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
-import {duplicateNameAddOne} from "../../../util/functions";
+import {duplicateNameAddOne, isMobile} from "../../../util/functions";
 import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
@@ -1093,7 +1093,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     <div class="fn__hr"></div>
     <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
-                            width: "520px",
+                            width: isMobile() ? "92vw" : "520px",
                         });
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;

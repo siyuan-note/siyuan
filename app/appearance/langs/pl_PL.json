@@ -414,7 +414,7 @@
   "confirmPassword": "Zapamiętałem już hasło",
   "passwordNoMatch": "Wprowadzone dwa hasła się nie zgadzają",
   "cloudConfigTip": "Proszę skonfigurować w [Ustawienia - Chmura]",
-  "confirmUninstall": "Czy na pewno odinstalować ${name}?<br>Odinstalowanie usunie wszystkie powiązane ustawienia i dane. Proszę zachować ostrożność!",
+  "confirmUninstall": "Czy na pewno chcesz odinstalować ${name}?<br>Odinstalowanie może usunąć wszystkie powiązane ustawienia i dane, podejmij decyzję ostrożnie!",
   "scrollGetMore": "Przewiń w górę i w dół, aby załadować więcej",
   "flashcardNewCard": "Nowa",
   "flashcardReviewCard": "Stara",

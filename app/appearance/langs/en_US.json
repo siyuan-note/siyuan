@@ -414,7 +414,7 @@
   "confirmPassword": "I have already remembered the password",
   "passwordNoMatch": "The passwords entered twice do not match",
   "cloudConfigTip": "Please configure in [Settings - Cloud]",
-  "confirmUninstall": "Confirm uninstall of ${name}?<br>Uninstalling will remove all related settings and data. Proceed with caution!",
+  "confirmUninstall": "Are you sure you want to uninstall ${name}?<br>Uninstalling may remove all related settings and data; please proceed with caution!",
   "scrollGetMore": "Scroll up and down to load more",
   "flashcardNewCard": "New",
   "flashcardReviewCard": "Old",

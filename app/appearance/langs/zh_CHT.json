@@ -414,7 +414,7 @@
   "confirmPassword": "我已經牢記密碼了",
   "passwordNoMatch": "兩次輸入的密碼不一致",
   "cloudConfigTip": "請在 [設置 - 雲端] 中進行配置",
-  "confirmUninstall": "確定卸載 ${name} ？<br>卸載會刪除所有相關設定和資料，請謹慎決定！",
+  "confirmUninstall": "確定卸載 ${name} ？<br>卸載可能會刪除所有相關設定和資料，請謹慎決定！",
   "scrollGetMore": "上下滾動即可加載更多內容",
   "flashcardNewCard": "新卡",
   "flashcardReviewCard": "舊卡",

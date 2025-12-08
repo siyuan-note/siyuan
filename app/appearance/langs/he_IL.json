@@ -414,7 +414,7 @@
   "confirmPassword": "אני כבר זוכר את הסיסמה",
   "passwordNoMatch": "הסיסמאות שהזנת לא תואמות",
   "cloudConfigTip": "אנא הגדר ב[הגדרות - ענן]",
-  "confirmUninstall": "לאשר הסרה של ${name}?<br>ההסרה תמחק את כל ההגדרות והנתונים הקשורים. יש לפעול בזהירות!",
+  "confirmUninstall": "האם אתה בטוח שברצונך להסיר את ${name}?<br>ההסרה עלולה למחוק את כל ההגדרות והנתונים הקשורים, אנא היזהר בהחלטתך!",
   "scrollGetMore": "גלול למעלה ולמטה כדי לטעון יותר",
   "flashcardNewCard": "חדש",
   "flashcardReviewCard": "ישן",

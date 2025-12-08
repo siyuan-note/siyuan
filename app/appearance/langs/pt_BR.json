@@ -414,7 +414,7 @@
   "confirmPassword": "Eu já lembrei a senha",
   "passwordNoMatch": "As senhas inseridas não coincidem",
   "cloudConfigTip": "Por favor, configure em [Configurações - Nuvem]",
-  "confirmUninstall": "Confirmar desinstalação de ${name}?<br>A desinstalação removerá todas as configurações e dados relacionados. Proceda com cautela!",
+  "confirmUninstall": "Tem certeza de que deseja desinstalar ${name}?<br>A desinstalação pode remover todas as configurações e dados relacionados, por favor, decida com cautela!",
   "scrollGetMore": "Role para cima e para baixo para carregar mais",
   "flashcardNewCard": "Novo",
   "flashcardReviewCard": "Antigo",

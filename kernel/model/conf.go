@@ -282,8 +282,8 @@ func InitConf() {
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}
-	if "" == Conf.Editor.SpellcheckLanguage {
-		Conf.Editor.SpellcheckLanguage = "en-US"
+	if 1 > len(Conf.Editor.SpellcheckLanguages) {
+		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
 	}
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0

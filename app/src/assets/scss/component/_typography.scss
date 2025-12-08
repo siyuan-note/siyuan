@@ -161,20 +161,20 @@
     display: flex;
     flex-direction: column;
 
-    &[data-subtype="NOTE"] {
-      &::before {
-        background-color: var(--b3-theme-primary);
-      }
+    // NOTE
+    &::before {
+      background-color: var(--b3-theme-primary);
+    }
 
-      .callout-info {
-        color: var(--b3-theme-primary);
-      }
+    .callout-info {
+      color: var(--b3-theme-primary);
     }
 
     &[data-subtype="WARNING"] {
       &::before {
         background-color: var(--b3-callout-warning);
       }
+
       .callout-info {
         color: var(--b3-callout-warning);
       }
@@ -184,6 +184,7 @@
       &::before {
         background-color: var(--b3-theme-success);
       }
+
       .callout-info {
         color: var(--b3-theme-success);
       }
@@ -193,6 +194,7 @@
       &::before {
         background-color: var(--b3-callout-important);
       }
+
       .callout-info {
         color: var(--b3-callout-important);
       }
@@ -202,6 +204,7 @@
       &::before {
         background-color: var(--b3-theme-error);
       }
+
       .callout-info {
         color: var(--b3-theme-error);
       }
@@ -229,6 +232,8 @@
       margin-left: 8px;
       font-weight: 500;
       font-size: 114%;
+      opacity: .86;
+      transition: var(--b3-color-transition);
     }
   }
 

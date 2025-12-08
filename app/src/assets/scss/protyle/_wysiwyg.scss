@@ -793,6 +793,14 @@
       background-color: var(--b3-list-hover);
     }
   }
+
+  .callout-title {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
 }
 
 .protyle-wysiwyg:not([contenteditable]),

@@ -101,6 +101,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
+import {updateCalloutType} from "./callout";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -3036,6 +3037,13 @@ export class WYSIWYG {
                 return;
             }
 
+            const calloutTitleElement = hasTopClosestByClassName(event.target, "callout-title");
+            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutTitleElement) {
+                updateCalloutType(calloutTitleElement, protyle);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
             const calloutIconElement = hasTopClosestByClassName(event.target, "callout-icon");
             if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutIconElement) {
                 const nodeElement = hasClosestBlock(calloutIconElement);
@@ -3059,7 +3067,7 @@ export class WYSIWYG {
                         calloutIconElement.innerHTML = emojiHTML;
                         hideElements(["dialog"]);
                         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                        focusByWbr(nodeElement, range);
+                        focusBlock(nodeElement);
                     }, calloutIconElement.querySelector("img"));
                 }
                 event.preventDefault();

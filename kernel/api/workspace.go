@@ -238,6 +238,7 @@ func getWorkspaces(c *gin.Context) {
 		model.RoleAdministrator,
 	}) {
 		ret.Data = []*Workspace{}
+		logging.LogInfof("non-admin user tried to get workspaces")
 		return
 	}
 

@@ -414,7 +414,7 @@
   "confirmPassword": "Ya he recordado la contraseña",
   "passwordNoMatch": "Las contraseñas ingresadas dos veces no coinciden",
   "cloudConfigTip": "Configure en [Configuración - Nube]",
-  "confirmUninstall": "¿Está seguro de que desea desinstalar ${name}?",
+  "confirmUninstall": "¿Confirmar la desinstalación de ${name}?<br>La desinstalación eliminará todas las configuraciones y datos relacionados. ¡Proceda con precaución!",
   "scrollGetMore": "Desplácese hacia arriba y hacia abajo para cargar más",
   "flashcardNewCard": "Nueva Tarjeta",
   "flashcardReviewCard": "Vieja Tarjeta",

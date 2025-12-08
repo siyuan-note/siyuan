@@ -414,7 +414,7 @@
   "confirmPassword": "비밀번호를 이미 기억했습니다",
   "passwordNoMatch": "두 번 입력한 비밀번호가 일치하지 않습니다",
   "cloudConfigTip": "[설정 - 클라우드]에서 구성하세요",
-  "confirmUninstall": "${name}을(를) 제거하시겠습니까?",
+  "confirmUninstall": "정말로 ${name} 을(를) 제거하시겠습니까?<br>제거하면 모든 관련 설정 및 데이터가 삭제됩니다. 신중하게 결정하세요!",
   "scrollGetMore": "위아래로 스크롤하여 더 불러오기",
   "flashcardNewCard": "신규",
   "flashcardReviewCard": "이전",

@@ -414,7 +414,7 @@
   "confirmPassword": "パスワードはすでに覚えています",
   "passwordNoMatch": "入力されたパスワードが一致しません",
   "cloudConfigTip": "[設定] - [クラウド] で設定してください",
-  "confirmUninstall": "${name} をアンインストールしてもよろしいですか？",
+  "confirmUninstall": "本当に ${name} をアンインストールしてもよろしいですか？<br>アンインストールすると関連するすべての設定とデータが削除されます。ご注意ください！",
   "scrollGetMore": "さらに読み込むには上下にスクロールしてください",
   "flashcardNewCard": "新しいカード",
   "flashcardReviewCard": "古いカード",

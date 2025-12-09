@@ -238,18 +238,13 @@ func getWorkspaces(c *gin.Context) {
 		model.RoleAdministrator,
 	}) {
 		ret.Data = []*Workspace{}
-		logging.LogInfof("non-admin user tried to get workspaces")
 		return
 	}
 
-	logging.LogInfof("workspace paths [%+v]", workspacePaths)
-
 	var workspaces, openedWorkspaces, closedWorkspaces []*Workspace
 	for _, p := range workspacePaths {
-		logging.LogInfof("get workspace [%s]", p)
 		closed := !util.IsWorkspaceLocked(p)
 		if closed {
-			logging.LogInfof("workspace [%s] is closed", p)
 			closedWorkspaces = append(closedWorkspaces, &Workspace{Path: p, Closed: closed})
 		} else {
 			openedWorkspaces = append(openedWorkspaces, &Workspace{Path: p, Closed: closed})

@@ -43,6 +43,8 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	httpclient.SetUserAgent(UserAgent)
 	Lang = lang
 
+	logging.LogInfof("workspace base dir [%s]", workspaceBaseDir)
+
 	WorkingDir = filepath.Join(appDir, "app")
 	HomeDir = filepath.Join(workspaceBaseDir, "home")
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")

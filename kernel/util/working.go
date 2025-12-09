@@ -339,6 +339,8 @@ func ReadWorkspacePaths() (ret []string, err error) {
 		return
 	}
 
+	logging.LogInfof("read data [%s] from workspace conf [%s]", string(data), workspaceConf)
+
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)

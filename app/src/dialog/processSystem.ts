@@ -307,7 +307,8 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                         }
 
                         if (isInHarmony()) {
-                            window.location.href = "siyuan://api/system/exit";
+                            window.JSHarmony.exit();
+                            return;
                         }
                         /// #endif
                     });
@@ -363,7 +364,8 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
             }
 
             if (isInHarmony()) {
-                window.location.href = "siyuan://api/system/exit";
+                window.JSHarmony.exit();
+                return;
             }
             /// #endif
         }

@@ -17,6 +17,7 @@
 package bazaar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -207,9 +208,9 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.PreferredName = GetPreferredName(plugin.Package)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "plugin.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install plugin.json failed: %s", statErr)
 			continue
 		}
 		plugin.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -223,12 +224,22 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
 		readmeFilename := getPreferredReadme(plugin.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
+		if nil == readErr {
+			plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
+		} else {
+			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
+			plugin.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 README.md
+			if readmeFilename != "README.md" {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
+				if nil == readErr {
+					plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed README.md failed: %s", readErr)
+					plugin.PreferredReadme += "<br>File README.md not found"
+				}
+			}
 		}
-
-		plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)

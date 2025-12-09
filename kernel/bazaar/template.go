@@ -17,6 +17,7 @@
 package bazaar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -170,9 +171,9 @@ func InstalledTemplates() (ret []*Template) {
 		template.PreferredFunding = getPreferredFunding(template.Funding)
 		template.PreferredName = GetPreferredName(template.Package)
 		template.PreferredDesc = getPreferredDesc(template.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "template.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install template.json failed: %s", statErr)
 			continue
 		}
 		template.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -186,12 +187,22 @@ func InstalledTemplates() (ret []*Template) {
 		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
 		readmeFilename := getPreferredReadme(template.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
+		if nil == readErr {
+			template.PreferredReadme, _ = renderLocalREADME("/templates/"+dirName+"/", readme)
+		} else {
+			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
+			template.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 README.md
+			if readmeFilename != "README.md" {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
+				if nil == readErr {
+					template.PreferredReadme, _ = renderLocalREADME("/templates/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed README.md failed: %s", readErr)
+					template.PreferredReadme += "<br>File README.md not found"
+				}
+			}
 		}
-
-		template.PreferredReadme, _ = renderLocalREADME("/templates/"+dirName+"/", readme)
 		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
 		ret = append(ret, template)
 	}

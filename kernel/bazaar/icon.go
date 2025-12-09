@@ -17,6 +17,7 @@
 package bazaar
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -169,9 +170,9 @@ func InstalledIcons() (ret []*Icon) {
 		icon.PreferredFunding = getPreferredFunding(icon.Funding)
 		icon.PreferredName = GetPreferredName(icon.Package)
 		icon.PreferredDesc = getPreferredDesc(icon.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "icon.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install icon.json failed: %s", statErr)
 			continue
 		}
 		icon.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -185,12 +186,22 @@ func InstalledIcons() (ret []*Icon) {
 		icon.HInstallSize = humanize.BytesCustomCeil(uint64(icon.InstallSize), 2)
 		readmeFilename := getPreferredReadme(icon.Readme)
 		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
+		if nil == readErr {
+			icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)
+		} else {
+			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
+			icon.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 README.md
+			if readmeFilename != "README.md" {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
+				if nil == readErr {
+					icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed README.md failed: %s", readErr)
+					icon.PreferredReadme += "<br>File README.md not found"
+				}
+			}
 		}
-
-		icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)
 		icon.Outdated = isOutdatedIcon(icon, bazaarIcons)
 		ret = append(ret, icon)
 	}

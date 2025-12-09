@@ -302,7 +302,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                             return;
                         }
                         if (isInIOS()) {
-                            window.webkit.messageHandlers.exit.postMessage();
+                            window.webkit.messageHandlers.exit.postMessage("");
                             return;
                         }
 
@@ -358,7 +358,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                 return;
             }
             if (isInIOS()) {
-                window.webkit.messageHandlers.exit.postMessage();
+                window.webkit.messageHandlers.exit.postMessage("");
                 return;
             }
 

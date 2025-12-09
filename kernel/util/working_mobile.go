@@ -21,7 +21,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -42,8 +41,6 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	UserAgent = UserAgent + " " + Container + "/" + runtime.GOOS
 	httpclient.SetUserAgent(UserAgent)
 	Lang = lang
-
-	logging.LogInfof("workspace base dir [%s]", workspaceBaseDir)
 
 	WorkingDir = filepath.Join(appDir, "app")
 	HomeDir = filepath.Join(workspaceBaseDir, "home")
@@ -141,11 +138,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 			WorkspaceDir = defaultWorkspaceDir
 			workspacePaths = append(workspacePaths, WorkspaceDir)
 		}
-
-		logging.LogInfof("2 read workspace paths [%s]", strings.Join(workspacePaths, ","))
 	}
-
-	logging.LogInfof("3 read workspace paths [%s]", strings.Join(workspacePaths, ","))
 
 	if err := WriteWorkspacePaths(workspacePaths); err != nil {
 		logging.LogErrorf("write workspace conf [%s] failed: %s", workspaceConf, err)

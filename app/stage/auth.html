@@ -428,11 +428,17 @@
                 return;
             }
 
-            if ((window.webkit && window.webkit.messageHandlers) || window.JSHarmony) {
-                window.location.href = 'siyuan://api/system/exit'
-            } else {
-                window.location.reload()
+            if (window.webkit && window.webkit.messageHandlers) {
+                window.webkit.messageHandlers.exit.postMessage("");
+                return;
             }
+
+            if (window.JSHarmony) {
+                window.JSHarmony.exit();
+                return;
+            }
+
+            window.location.reload()
         }
     }
 
@@ -472,7 +478,7 @@
         }
     }
 
-    const showMessage = (msg)=> {
+    const showMessage = (msg) => {
         document.querySelector('#message').classList.add('b3-snackbar--show')
         document.querySelector('#message').firstElementChild.innerHTML = msg
         setTimeout(() => {
@@ -485,7 +491,7 @@
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
         const rememberMeElement = document.getElementById('rememberMe')
-        let code =  inputElement.value.trim();
+        let code = inputElement.value.trim();
         if ("" === code) {
             showMessage({{.l9}})
             inputElement.value = ''

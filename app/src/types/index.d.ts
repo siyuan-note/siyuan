@@ -264,6 +264,7 @@ interface Window {
         returnDesktop(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
+        exit(): void
     };
 
     Protyle: import("../protyle/method").default;

@@ -694,14 +694,29 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 
 	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
 	if err != nil {
-		ret = fmt.Sprintf("Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
-		if readme == repo.Package.Readme.Default || "" == strings.TrimSpace(repo.Package.Readme.Default) {
-			return
+		ret = fmt.Sprintf("Load bazaar package's preferred README(%s) failed: %s", readme, err.Error())
+		// 回退到 Default README
+		var defaultReadme string
+		if nil != repo.Package.Readme {
+			defaultReadme = repo.Package.Readme.Default
 		}
-		readme = repo.Package.Readme.Default
-		data, err = downloadPackage(repoURLHash+"/"+readme, false, "")
-		if err != nil {
-			ret += fmt.Sprintf("<br>Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
+		if "" == strings.TrimSpace(defaultReadme) {
+			defaultReadme = "README.md"
+		}
+		if readme != defaultReadme {
+			data, err = downloadPackage(repoURLHash+"/"+defaultReadme, false, "")
+			if err != nil {
+				ret += fmt.Sprintf("<br>Load bazaar package's default README(%s) failed: %s", defaultReadme, err.Error())
+			}
+		}
+		// 回退到 README.md
+		if err != nil && readme != "README.md" && defaultReadme != "README.md" {
+			data, err = downloadPackage(repoURLHash+"/README.md", false, "")
+			if err != nil {
+				ret += fmt.Sprintf("<br>Load bazaar package's README.md failed: %s", err.Error())
+				return
+			}
+		} else if err != nil {
 			return
 		}
 	}

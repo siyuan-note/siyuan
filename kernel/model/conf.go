@@ -746,6 +746,11 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 			util.WebSocketServer.Close()
 		}
 		util.HttpServing = false
+
+		if util.ContainerAndroid == util.Container {
+			return
+		}
+
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return

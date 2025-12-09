@@ -297,7 +297,11 @@ export const exitSiYuan = async () => {
                         /// #if !BROWSER
                         ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
                         /// #else
-                        if (isInIOS() || isInAndroid() || isInHarmony()) {
+                        if (isInAndroid()) {
+                            window.JSAndroid.exit();
+                            return;
+                        }
+                        if (isInIOS() || isInHarmony()) {
                             window.location.href = "siyuan://api/system/exit";
                         }
                         /// #endif
@@ -342,7 +346,11 @@ export const exitSiYuan = async () => {
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
             /// #else
-            if (isInIOS() || isInAndroid() || isInHarmony()) {
+            if (isInAndroid()) {
+                window.JSAndroid.exit();
+                return;
+            }
+            if (isInIOS() || isInHarmony()) {
                 window.location.href = "siyuan://api/system/exit";
             }
             /// #endif

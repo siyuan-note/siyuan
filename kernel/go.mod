@@ -63,7 +63,7 @@ require (
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20251107023958-207cad31f0dd
 	github.com/siyuan-note/httpclient v0.0.0-20251119144307-63b815d7d198
-	github.com/siyuan-note/logging v0.0.0-20251107023700-cd4339891032
+	github.com/siyuan-note/logging v0.0.0-20251209020516-52f1a2f65ec5
 	github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754
 	github.com/spf13/cast v1.10.0
 	github.com/steambap/captcha v1.4.1
@@ -77,7 +77,7 @@ require (
 	golang.org/x/mod v0.30.0
 	golang.org/x/net v0.47.0
 	golang.org/x/sys v0.38.0
-	golang.org/x/text v0.31.0
+	golang.org/x/text v0.32.0
 	golang.org/x/time v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -185,7 +185,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/arch v0.23.0 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/tools v0.39.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

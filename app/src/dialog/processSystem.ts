@@ -301,7 +301,12 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                             window.JSAndroid.exit();
                             return;
                         }
-                        if (isInIOS() || isInHarmony()) {
+                        if (isInIOS()) {
+                            window.webkit.messageHandlers.exit.postMessage();
+                            return;
+                        }
+
+                        if (isInHarmony()) {
                             window.location.href = "siyuan://api/system/exit";
                         }
                         /// #endif
@@ -352,7 +357,12 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                 window.JSAndroid.exit();
                 return;
             }
-            if (isInIOS() || isInHarmony()) {
+            if (isInIOS()) {
+                window.webkit.messageHandlers.exit.postMessage();
+                return;
+            }
+
+            if (isInHarmony()) {
                 window.location.href = "siyuan://api/system/exit";
             }
             /// #endif

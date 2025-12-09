@@ -228,6 +228,7 @@ interface Window {
             setClipboard: { postMessage: (url: string) => void }
             purchase: { postMessage: (url: string) => void }
             print: { postMessage: (html: string) => void }
+            exit: { postMessage: () => void }
         }
     };
     htmlToImage: {

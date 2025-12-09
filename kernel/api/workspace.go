@@ -335,9 +335,10 @@ func setWorkspaceDir(c *gin.Context) {
 
 	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 		util.PushMsg(model.Conf.Language(42), 1000*15)
-		time.Sleep(time.Second * 1)
-		model.Close(false, false, 1)
-		time.Sleep(time.Second * 1)
+		go func() {
+			time.Sleep(1 * time.Second)
+			model.Close(false, false, 1)
+		}()
 	}
 }
 

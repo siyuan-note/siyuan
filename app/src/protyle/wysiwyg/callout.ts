@@ -59,11 +59,26 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
     dialog.bindInput(textElements[1], () => {
         btnElements[1].dispatchEvent(new CustomEvent("click"));
     });
+    textElements[0].addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key.startsWith("Arrow")) {
+            dialog.element.querySelector(".b3-form__icona-icon").dispatchEvent(new CustomEvent("click"));
+            textElements[0].blur();
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    });
     textElements[0].focus();
     textElements[0].select();
     let updateIcon = "";
     dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
         const menu = new Menu();
+        if (menu.isOpen) {
+            menu.close();
+            return;
+        }
         [{
             icon: "✏️", type: "Note", color: "var(--b3-theme-primary)"
         }, {

@@ -217,7 +217,11 @@ func Serve(fastMode bool) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
-	if err = http.Serve(ln, ginServer.Handler()); err != nil {
+	util.HttpServer = &http.Server{
+		Handler: ginServer,
+	}
+
+	if err = util.HttpServer.Serve(ln); err != nil {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)

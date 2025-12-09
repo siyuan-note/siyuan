@@ -398,12 +398,21 @@ func getPreferredFunding(funding *Funding) string {
 	}
 
 	if "" != funding.OpenCollective {
+		if strings.HasPrefix(funding.OpenCollective, "http://") || strings.HasPrefix(funding.OpenCollective, "https://") {
+			return funding.OpenCollective
+		}
 		return "https://opencollective.com/" + funding.OpenCollective
 	}
 	if "" != funding.Patreon {
+		if strings.HasPrefix(funding.Patreon, "http://") || strings.HasPrefix(funding.Patreon, "https://") {
+			return funding.Patreon
+		}
 		return "https://www.patreon.com/" + funding.Patreon
 	}
 	if "" != funding.GitHub {
+		if strings.HasPrefix(funding.GitHub, "http://") || strings.HasPrefix(funding.GitHub, "https://") {
+			return funding.GitHub
+		}
 		return "https://github.com/sponsors/" + funding.GitHub
 	}
 	if 0 < len(funding.Custom) {

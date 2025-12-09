@@ -750,7 +750,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		}
 		util.HttpServing = false
 
-		if util.ContainerAndroid == util.Container {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
 			return
 		}
 

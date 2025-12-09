@@ -191,8 +191,25 @@ func InstalledIcons() (ret []*Icon) {
 		} else {
 			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
 			icon.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 Default README
+			var defaultReadme string
+			if nil != icon.Readme {
+				defaultReadme = strings.TrimSpace(icon.Readme.Default)
+			}
+			if "" == defaultReadme {
+				defaultReadme = "README.md"
+			}
+			if readmeFilename != defaultReadme {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
+				if nil == readErr {
+					icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
+					icon.PreferredReadme += fmt.Sprintf("<br>File %s not found", defaultReadme)
+				}
+			}
 			// 回退到 README.md
-			if readmeFilename != "README.md" {
+			if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
 				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
 				if nil == readErr {
 					icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)

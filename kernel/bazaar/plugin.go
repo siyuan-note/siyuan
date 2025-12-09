@@ -229,8 +229,25 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		} else {
 			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
 			plugin.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 Default README
+			var defaultReadme string
+			if nil != plugin.Readme {
+				defaultReadme = strings.TrimSpace(plugin.Readme.Default)
+			}
+			if "" == defaultReadme {
+				defaultReadme = "README.md"
+			}
+			if readmeFilename != defaultReadme {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
+				if nil == readErr {
+					plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
+					plugin.PreferredReadme += fmt.Sprintf("<br>File %s not found", defaultReadme)
+				}
+			}
 			// 回退到 README.md
-			if readmeFilename != "README.md" {
+			if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
 				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
 				if nil == readErr {
 					plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)

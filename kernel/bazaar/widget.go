@@ -189,8 +189,25 @@ func InstalledWidgets() (ret []*Widget) {
 		} else {
 			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
 			widget.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 Default README
+			var defaultReadme string
+			if nil != widget.Readme {
+				defaultReadme = strings.TrimSpace(widget.Readme.Default)
+			}
+			if "" == defaultReadme {
+				defaultReadme = "README.md"
+			}
+			if readmeFilename != defaultReadme {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
+				if nil == readErr {
+					widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
+					widget.PreferredReadme += fmt.Sprintf("<br>File %s not found", defaultReadme)
+				}
+			}
 			// 回退到 README.md
-			if readmeFilename != "README.md" {
+			if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
 				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
 				if nil == readErr {
 					widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)

@@ -193,8 +193,25 @@ func InstalledThemes() (ret []*Theme) {
 		} else {
 			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
 			theme.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
+			// 回退到 Default README
+			var defaultReadme string
+			if nil != theme.Readme {
+				defaultReadme = strings.TrimSpace(theme.Readme.Default)
+			}
+			if "" == defaultReadme {
+				defaultReadme = "README.md"
+			}
+			if readmeFilename != defaultReadme {
+				readme, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
+				if nil == readErr {
+					theme.PreferredReadme, _ = renderLocalREADME("/appearance/themes/"+dirName+"/", readme)
+				} else {
+					logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
+					theme.PreferredReadme += fmt.Sprintf("<br>File %s not found", defaultReadme)
+				}
+			}
 			// 回退到 README.md
-			if readmeFilename != "README.md" {
+			if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
 				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
 				if nil == readErr {
 					theme.PreferredReadme, _ = renderLocalREADME("/appearance/themes/"+dirName+"/", readme)

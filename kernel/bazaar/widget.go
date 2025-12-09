@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -182,41 +181,7 @@ func InstalledWidgets() (ret []*Widget) {
 			packageInstallSizeCache.SetDefault(widget.RepoURL, is)
 		}
 		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
-		readmeFilename := getPreferredReadme(widget.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil == readErr {
-			widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)
-		} else {
-			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
-			widget.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
-			// 回退到 Default README
-			var defaultReadme string
-			if nil != widget.Readme {
-				defaultReadme = strings.TrimSpace(widget.Readme.Default)
-			}
-			if "" == defaultReadme {
-				defaultReadme = "README.md"
-			}
-			if readmeFilename != defaultReadme {
-				readme, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
-				if nil == readErr {
-					widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)
-				} else {
-					logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
-					widget.PreferredReadme += fmt.Sprintf("<br>File %s not found", defaultReadme)
-				}
-			}
-			// 回退到 README.md
-			if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
-				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
-				if nil == readErr {
-					widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)
-				} else {
-					logging.LogWarnf("read installed README.md failed: %s", readErr)
-					widget.PreferredReadme += "<br>File README.md not found"
-				}
-			}
-		}
+		widget.PreferredReadme = loadInstalledReadme(installPath, "/widgets/"+dirName+"/", widget.Readme)
 		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
 		ret = append(ret, widget)
 	}

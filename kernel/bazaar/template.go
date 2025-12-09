@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -185,41 +184,7 @@ func InstalledTemplates() (ret []*Template) {
 			packageInstallSizeCache.SetDefault(template.RepoURL, is)
 		}
 		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
-		readmeFilename := getPreferredReadme(template.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil == readErr {
-			template.PreferredReadme, _ = renderLocalREADME("/templates/"+dirName+"/", readme)
-		} else {
-			logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
-			template.PreferredReadme = fmt.Sprintf("File %s not found", readmeFilename)
-			// 回退到 Default README
-			var defaultReadme string
-			if nil != template.Readme {
-				defaultReadme = strings.TrimSpace(template.Readme.Default)
-			}
-			if "" == defaultReadme {
-				defaultReadme = "README.md"
-			}
-			if readmeFilename != defaultReadme {
-				readme, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
-				if nil == readErr {
-					template.PreferredReadme, _ = renderLocalREADME("/templates/"+dirName+"/", readme)
-				} else {
-					logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
-					template.PreferredReadme += fmt.Sprintf("<br>File %s not found", defaultReadme)
-				}
-			}
-			// 回退到 README.md
-			if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
-				readme, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
-				if nil == readErr {
-					template.PreferredReadme, _ = renderLocalREADME("/templates/"+dirName+"/", readme)
-				} else {
-					logging.LogWarnf("read installed README.md failed: %s", readErr)
-					template.PreferredReadme += "<br>File README.md not found"
-				}
-			}
-		}
+		template.PreferredReadme = loadInstalledReadme(installPath, "/templates/"+dirName+"/", template.Readme)
 		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
 		ret = append(ret, template)
 	}

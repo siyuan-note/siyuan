@@ -708,6 +708,46 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	return
 }
 
+func loadInstalledReadme(installPath, basePath string, readme *Readme) (ret string) {
+	readmeFilename := getPreferredReadme(readme)
+	readmeData, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
+	if nil == readErr {
+		ret, _ = renderLocalREADME(basePath, readmeData)
+		return
+	}
+
+	logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
+	ret = fmt.Sprintf("File %s not found", readmeFilename)
+	// 回退到 Default README
+	var defaultReadme string
+	if nil != readme {
+		defaultReadme = strings.TrimSpace(readme.Default)
+	}
+	if "" == defaultReadme {
+		defaultReadme = "README.md"
+	}
+	if readmeFilename != defaultReadme {
+		readmeData, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
+		if nil == readErr {
+			ret, _ = renderLocalREADME(basePath, readmeData)
+			return
+		}
+		logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
+		ret += fmt.Sprintf("<br>File %s not found", defaultReadme)
+	}
+	// 回退到 README.md
+	if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
+		readmeData, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
+		if nil == readErr {
+			ret, _ = renderLocalREADME(basePath, readmeData)
+			return
+		}
+		logging.LogWarnf("read installed README.md failed: %s", readErr)
+		ret += "<br>File README.md not found"
+	}
+	return
+}
+
 func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)

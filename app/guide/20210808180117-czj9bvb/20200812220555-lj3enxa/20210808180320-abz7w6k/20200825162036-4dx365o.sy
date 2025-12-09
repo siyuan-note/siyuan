@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20240702222051"
+		"updated": "20251209210844"
 	},
 	"Children": [
 		{
@@ -1823,7 +1823,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604182634-xswb2hw",
-				"updated": "20211120101257"
+				"updated": "20251209210844"
 			},
 			"Children": [
 				{
@@ -1837,7 +1837,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20210604223030-6gapuyv",
-				"updated": "20210604223045"
+				"updated": "20251209210836"
 			},
 			"Children": [
 				{
@@ -1855,6 +1855,48 @@
 						{
 							"Type": "NodeText",
 							"Data": "注意不是内容块引用，而是引述块（Blockquote）。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209210844-rap5wy6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209210844-rap5wy6",
+				"updated": "20251209210302"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提示块"
+				}
+			]
+		},
+		{
+			"ID": "20251209210844-5fa4e8p",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251209210844-5fa4e8p",
+				"updated": "20251209210419"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251209210844-h3sp774",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251209210844-h3sp774",
+						"updated": "20251209210628"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "醒目的提示！"
 						}
 					]
 				}

@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20251203220656"
+		"updated": "20251209213443"
 	},
 	"Children": [
 		{
@@ -1971,7 +1971,7 @@
 			"Properties": {
 				"ID": "20240530101000-2k3sk89",
 				"id": "20240530101000-qg4hn8x",
-				"updated": "20240530101000"
+				"updated": "20251209213443"
 			},
 			"Children": [
 				{
@@ -1986,7 +1986,7 @@
 			"Properties": {
 				"ID": "20240530101000-78fv7al",
 				"id": "20240530101000-jf3juor",
-				"updated": "20240530101000"
+				"updated": "20251209213426"
 			},
 			"Children": [
 				{
@@ -1997,7 +1997,6 @@
 					"ID": "20240530101000-5cczm4i",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"ID": "20240530101000-iznlrms",
 						"id": "20240530101000-5cczm4i",
 						"updated": "20240530101000"
 					},
@@ -2005,6 +2004,48 @@
 						{
 							"Type": "NodeText",
 							"Data": "これはコンテンツのブロック参照ではなく、HTML のブロック引用 (Blockquote) であることに注意してください。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209213443-j5jhozb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209213443-j5jhozb",
+				"updated": "20251209213325"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "吹き出しブロック"
+				}
+			]
+		},
+		{
+			"ID": "20251209213443-iono8bm",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251209213443-iono8bm",
+				"updated": "20251209213308"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251209213443-y1n0smi",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251209213443-y1n0smi",
+						"updated": "20251209213307"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "目立つメッセージです！"
 						}
 					]
 				}

@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20251203220553"
+		"updated": "20251209212851"
 	},
 	"Children": [
 		{
@@ -1820,7 +1820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604230145-zsjeri5",
-				"updated": "20210604230152"
+				"updated": "20251209212851"
 			},
 			"Children": [
 				{
@@ -1834,7 +1834,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20210604230152-vpxtzjj",
-				"updated": "20210604230216"
+				"updated": "20251209212850"
 			},
 			"Children": [
 				{
@@ -1852,6 +1852,48 @@
 						{
 							"Type": "NodeText",
 							"Data": "Note that it is not a content block ref, but a block quote (Blockquote)."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209212851-yo274kb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209212851-yo274kb",
+				"updated": "20251209212525"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Callout block"
+				}
+			]
+		},
+		{
+			"ID": "20251209212851-q7ji9yd",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251209212851-q7ji9yd",
+				"updated": "20251209212537"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251209212851-3iejv3r",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251209212851-3iejv3r",
+						"updated": "20251209212547"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "A prominent message!"
 						}
 					]
 				}

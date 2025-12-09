@@ -571,6 +571,7 @@ func serveDebug(ginServer *gin.Engine) {
 }
 
 func serveWebSocket(ginServer *gin.Engine) {
+	util.WebSocketServer = melody.New()
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {

@@ -140,7 +140,7 @@ func Boot() {
 				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
 				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker\n")
 				fmt.Printf("or you can set the SIYUAN_ACCESS_AUTH_CODE env var")
-				os.Exit(1)
+				os.Exit(logging.ExitCodeSecurityRisk)
 			}
 		}
 	}

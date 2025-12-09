@@ -174,7 +174,7 @@ func getPreferredReadme(readme *Readme) string {
 		return "README.md"
 	}
 
-	ret := readme.Default
+	var ret string
 	switch util.Lang {
 	case "ar_SA":
 		if "" != readme.ArSA {
@@ -232,13 +232,14 @@ func getPreferredReadme(readme *Readme) string {
 		if "" != readme.ZhCN {
 			ret = readme.ZhCN
 		}
-	default:
-		if "" != readme.EnUS {
-			ret = readme.EnUS
-		}
 	}
-	if "" == ret {
-		ret = "README.md"
+	if "" == strings.TrimSpace(ret) {
+		defaultReadme := strings.TrimSpace(readme.Default)
+		if defaultReadme != "" {
+			ret = defaultReadme
+		} else {
+			ret = "README.md"
+		}
 	}
 	return ret
 }
@@ -248,7 +249,7 @@ func GetPreferredName(pkg *Package) string {
 		return pkg.Name
 	}
 
-	ret := pkg.DisplayName.Default
+	var ret string
 	switch util.Lang {
 	case "ar_SA":
 		if "" != pkg.DisplayName.ArSA {
@@ -306,13 +307,14 @@ func GetPreferredName(pkg *Package) string {
 		if "" != pkg.DisplayName.ZhCN {
 			ret = pkg.DisplayName.ZhCN
 		}
-	default:
-		if "" != pkg.DisplayName.EnUS {
-			ret = pkg.DisplayName.EnUS
-		}
 	}
-	if "" == ret {
-		ret = pkg.Name
+	if "" == strings.TrimSpace(ret) {
+		defaultName := strings.TrimSpace(pkg.DisplayName.Default)
+		if defaultName != "" {
+			ret = defaultName
+		} else {
+			ret = pkg.Name
+		}
 	}
 	return ret
 }
@@ -322,7 +324,7 @@ func getPreferredDesc(desc *Description) string {
 		return ""
 	}
 
-	ret := desc.Default
+	var ret string
 	switch util.Lang {
 	case "ar_SA":
 		if "" != desc.ArSA {
@@ -380,13 +382,12 @@ func getPreferredDesc(desc *Description) string {
 		if "" != desc.ZhCN {
 			ret = desc.ZhCN
 		}
-	default:
-		if "" != desc.EnUS {
-			ret = desc.EnUS
-		}
 	}
-	if "" == ret {
-		ret = desc.EnUS
+	if "" == strings.TrimSpace(ret) {
+		defaultDesc := strings.TrimSpace(desc.Default)
+		if defaultDesc != "" {
+			ret = defaultDesc
+		}
 	}
 	return ret
 }

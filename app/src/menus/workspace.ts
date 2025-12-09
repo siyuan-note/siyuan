@@ -7,14 +7,7 @@ import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/p
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {
-    isInAndroid,
-    isInHarmony,
-    isInIOS,
-    isIPad,
-    setStorageVal,
-    writeText
-} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -287,7 +280,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                                 fetchPost("/api/system/setWorkspaceDir", {
                                     path: openPath
                                 }, () => {
-                                    exitSiYuan();
+                                    exitSiYuan(false);
                                 });
                             });
                         });
@@ -317,7 +310,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                                 fetchPost("/api/system/setWorkspaceDir", {
                                     path: item.path
                                 }, () => {
-                                    exitSiYuan();
+                                    exitSiYuan(false);
                                 });
                             });
                         });

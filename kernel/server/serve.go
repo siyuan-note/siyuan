@@ -18,6 +18,7 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"mime"
@@ -222,6 +223,10 @@ func Serve(fastMode bool) {
 	}
 
 	if err = util.HttpServer.Serve(ln); err != nil {
+		if errors.Is(err, http.ErrServerClosed) {
+			return
+		}
+
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)

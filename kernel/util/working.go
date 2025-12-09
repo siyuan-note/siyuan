@@ -339,8 +339,6 @@ func ReadWorkspacePaths() (ret []string, err error) {
 		return
 	}
 
-	logging.LogInfof("read data [%s] from workspace conf [%s]", string(data), workspaceConf)
-
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)
@@ -349,10 +347,18 @@ func ReadWorkspacePaths() (ret []string, err error) {
 	}
 
 	var tmp []string
+	workspaceBaseDir := filepath.Dir(HomeDir)
 	for _, d := range ret {
+		if ContainerIOS == Container && strings.Contains(d, "/Documents/") {
+			d = d[strings.Index(d, "/Documents/")+len("/Documents/"):]
+			d = filepath.Join(workspaceBaseDir, d)
+		}
+
 		d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
 		if gulu.File.IsDir(d) {
 			tmp = append(tmp, d)
+		} else {
+			logging.LogWarnf("workspace path [%s] is not a dir", d)
 		}
 	}
 	ret = tmp

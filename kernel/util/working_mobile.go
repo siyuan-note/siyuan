@@ -129,7 +129,6 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		workspacePaths = append(workspacePaths, WorkspaceDir)
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
-		logging.LogInfof("1 read workspace paths [%s]", strings.Join(workspacePaths, ","))
 
 		if 0 < len(workspacePaths) {
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]

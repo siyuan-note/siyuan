@@ -350,6 +350,7 @@ func ReadWorkspacePaths() (ret []string, err error) {
 	workspaceBaseDir := filepath.Dir(HomeDir)
 	for _, d := range ret {
 		if ContainerIOS == Container && strings.Contains(d, "/Documents/") {
+			// iOS 端沙箱路径会变化，需要转换为相对路径再拼接当前沙箱中的工作空间基路径
 			d = d[strings.Index(d, "/Documents/")+len("/Documents/"):]
 			d = filepath.Join(workspaceBaseDir, d)
 		}

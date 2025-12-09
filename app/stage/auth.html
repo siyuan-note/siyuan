@@ -423,7 +423,12 @@
             const {ipcRenderer} = require('electron')
             ipcRenderer.send('siyuan-quit', window.location.port)
         } catch (e) {
-            if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid || window.JSHarmony) {
+            if (window.JSAndroid) {
+                window.JSAndroid.exit();
+                return;
+            }
+
+            if ((window.webkit && window.webkit.messageHandlers) || window.JSHarmony) {
                 window.location.href = 'siyuan://api/system/exit'
             } else {
                 window.location.reload()

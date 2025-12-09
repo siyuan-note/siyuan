@@ -4,7 +4,16 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     if (isMobile()) {
         return;
     }
-    const targetRect = target.getBoundingClientRect();
+    let targetRect = target.getBoundingClientRect();
+    if (target.getAttribute("data-inline-memo-content") && target.getClientRects().length > 1) {
+        let lastWidth = 0;
+        Array.from(target.getClientRects()).forEach(item => {
+            if (item.width > lastWidth) {
+                targetRect = item;
+            }
+            lastWidth = item.width;
+        });
+    }
     if (targetRect.height === 0 || !message) {
         hideTooltip();
         return;
@@ -78,7 +87,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
         if (top + messageElement.clientHeight > window.innerHeight) {
             if (targetRect.top - positionDiff > window.innerHeight - top) {
-                top = targetRect.top - positionDiff - messageElement.clientHeight;
+                top = Math.max(0, targetRect.top - positionDiff - messageElement.clientHeight);
                 messageElement.style.maxHeight = (targetRect.top - positionDiff) + "px";
             } else {
                 messageElement.style.maxHeight = (window.innerHeight - top) + "px";

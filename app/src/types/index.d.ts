@@ -250,6 +250,7 @@ interface Window {
         hideKeyboard(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
+        exit(): void
     };
     JSHarmony: {
         openExternal(url: string): void

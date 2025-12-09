@@ -5,6 +5,7 @@ import {Dialog} from "../../dialog";
 import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
 import {isMobile} from "../../util/functions";
+import {Constants} from "../../constants";
 
 export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) => {
     const blockElement = hasClosestBlock(titleElement);
@@ -74,7 +75,11 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
     textElements[0].select();
     let updateIcon = "";
     dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
-        const menu = new Menu();
+        const menu = new Menu(Constants.MENU_CALLOUT_SELECT, () => {
+            if (document.activeElement.tagName === "BODY") {
+                textElements[0].focus();
+            }
+        });
         if (menu.isOpen) {
             menu.close();
             return;
@@ -89,7 +94,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
             icon: "⚠️", type: "Warning", color: "var(--b3-callout-warning)"
         }, {
             icon: "🚨", type: "Caution", color: "var(--b3-theme-error)"
-        }].forEach(item => {
+        }].forEach((item) => {
             menu.addItem({
                 iconHTML: `<span class="b3-menu__icon">${item.icon.toUpperCase()}</span>`,
                 label: `<span style="color: ${item.color}">${item.type}</span>`,

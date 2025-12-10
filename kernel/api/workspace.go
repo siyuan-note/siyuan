@@ -328,8 +328,10 @@ func setWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	util.PushMsg(model.Conf.Language(42), 1000*15)
-	time.Sleep(1 * time.Second)
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		util.PushMsg(model.Conf.Language(42), 1000*15)
+		time.Sleep(2 * time.Second)
+	}
 }
 
 func isInvalidWorkspacePath(absPath string) bool {

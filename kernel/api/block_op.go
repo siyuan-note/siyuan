@@ -903,7 +903,6 @@ func batchUpdateBlock(c *gin.Context) {
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
-
 }
 
 func deleteBlock(c *gin.Context) {

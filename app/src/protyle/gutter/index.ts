@@ -1285,6 +1285,14 @@ export class Gutter {
                 nodeElement,
                 type: "CancelBlockquote"
             }));
+            turnIntoSubmenu.push(this.turnsOneInto({
+                id,
+                icon: "iconCallout",
+                label: window.siyuan.languages.callout,
+                protyle,
+                nodeElement,
+                type: "Blockquote2Callout"
+            }));
         } else if (type === "NodeCallout" && !protyle.disabled) {
             turnIntoSubmenu.push(this.turnsOneInto({
                 menuId: "paragraph",
@@ -1295,6 +1303,14 @@ export class Gutter {
                 protyle,
                 nodeElement,
                 type: "CancelCallout"
+            }));
+            turnIntoSubmenu.push(this.turnsOneInto({
+                id,
+                icon: "iconQuote",
+                label: window.siyuan.languages.quote,
+                protyle,
+                nodeElement,
+                type: "Callout2Blockquote"
             }));
         }
         if (turnIntoSubmenu.length > 0 && !protyle.disabled) {

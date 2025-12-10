@@ -12,9 +12,10 @@
   border-radius: var(--b3-border-radius);
   line-height: 17px;
   max-width: 320px;
-  animation-duration: 150ms;
-  animation-fill-mode: both;
   animation-name: zoomIn;
+  animation-duration: 100ms;
+  animation-delay: var(--b3-tooltips-delay, 500ms);
+  animation-fill-mode: both;
   max-height: 90vh;
   overflow: auto;
   box-sizing: border-box;
@@ -55,7 +56,7 @@
     background-color: var(--b3-tooltips-background);
     border-radius: var(--b3-border-radius);
     line-height: 17px;
-    transform: scale(.8);
+    transform: scale(.9);
     max-width: 60vw;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -64,21 +65,11 @@
     font-family: var(--b3-font-family);
   }
 
-  &::before {
-    z-index: 1000001;
-    width: 0;
-    height: 0;
-    content: "";
-    border: 5px solid transparent;
-    transform: scale(1.54);
-  }
-
-  &::after,
-  &::before {
+  &::after {
     pointer-events: none;
     position: absolute;
     opacity: 0;
-    transition: opacity 150ms 0ms cubic-bezier(0, 0, .2, 1), transform 150ms 0ms cubic-bezier(0, 0, .2, 1);
+    transition: opacity 100ms 500ms cubic-bezier(0, 0, .2, 1), transform 100ms 500ms cubic-bezier(0, 0, .2, 1);
   }
 
   &:hover,
@@ -86,7 +77,6 @@
     overflow: initial;
   }
 
-  &:hover::before,
   &:hover::after {
     display: inline-block;
     opacity: 1;
@@ -99,16 +89,6 @@
     top: 100%;
     right: 50%;
     margin-top: 5px
-  }
-
-  &__s::before,
-  &__se::before,
-  &__sw::before {
-    top: auto;
-    right: 50%;
-    bottom: -5px;
-    margin-right: -5px;
-    border-bottom-color: var(--b3-tooltips-background)
   }
 
   &__se::after {
@@ -127,16 +107,6 @@
     right: 50%;
     bottom: 100%;
     margin-bottom: 5px
-  }
-
-  &__n::before,
-  &__ne::before,
-  &__nw::before {
-    top: -5px;
-    right: 50%;
-    bottom: auto;
-    margin-right: -5px;
-    border-top-color: var(--b3-tooltips-background)
   }
 
   &__ne::after {
@@ -166,14 +136,6 @@
     transform: translateY(50%) scale(.8);
   }
 
-  &__w::before {
-    top: 50%;
-    bottom: 50%;
-    left: -5px;
-    margin-top: -5px;
-    border-left-color: var(--b3-tooltips-background);
-  }
-
   &__e::after {
     bottom: 50%;
     left: 100%;
@@ -185,19 +147,9 @@
   &__w:hover::after {
     transform: translateY(50%) scale(1);
   }
-
-
-  &__e::before {
-    top: 50%;
-    right: -5px;
-    bottom: 50%;
-    margin-top: -5px;
-    border-right-color: var(--b3-tooltips-background);
-  }
 }
 
 @media screen and (max-width: 520px) {
-  .b3-tooltips::before,
   .b3-tooltips::after {
     content: none;
   }

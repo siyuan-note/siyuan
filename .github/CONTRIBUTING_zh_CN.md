@@ -1,4 +1,4 @@
-[English](CONTRIBUTING.md)
+[English](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md)
 
 ## 获取源码
 

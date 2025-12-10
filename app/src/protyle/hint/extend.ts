@@ -134,12 +134,12 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "note"],
         id: "calloutNote",
         value: `> [!NOTE]\n> ${Lute.Caret}`,
-        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">✏️</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-theme-primary)">Note</span></span></div>`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">✏️</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span></span></div>`,
     },{
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "tip"],
         id: "calloutTip",
         value: `> [!TIP]\n> ${Lute.Caret}`,
-        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">💡</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-theme-success)">Tip</span></span></div>`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">💡</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-tip)">Tip</span></span></div>`,
     },{
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "important"],
         id: "calloutImportant",
@@ -154,7 +154,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "caution"],
         id: "calloutCaution",
         value: `> [!CAUTION]\n> ${Lute.Caret}`,
-        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">🚨</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-theme-error)">Caution</span></span></div>`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">🚨</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-caution)">Caution</span></span></div>`,
     }, {
         filter: [window.siyuan.languages.code, "code block", "代码块", "daimakuai", "dmk"],
         id: "code",

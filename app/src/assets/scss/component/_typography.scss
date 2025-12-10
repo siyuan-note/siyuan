@@ -163,11 +163,11 @@
 
     // NOTE
     &::before {
-      background-color: var(--b3-theme-primary);
+      background-color: var(--b3-callout-note);
     }
 
     .callout-info {
-      color: var(--b3-theme-primary);
+      color: var(--b3-callout-note);
     }
 
     &[data-subtype="WARNING"] {
@@ -182,11 +182,11 @@
 
     &[data-subtype="TIP"] {
       &::before {
-        background-color: var(--b3-theme-success);
+        background-color: var(--b3-callout-tip);
       }
 
       .callout-info {
-        color: var(--b3-theme-success);
+        color: var(--b3-callout-tip);
       }
     }
 
@@ -202,11 +202,11 @@
 
     &[data-subtype="CAUTION"] {
       &::before {
-        background-color: var(--b3-theme-error);
+        background-color: var(--b3-callout-caution);
       }
 
       .callout-info {
-        color: var(--b3-theme-error);
+        color: var(--b3-callout-caution);
       }
     }
 

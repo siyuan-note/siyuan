@@ -85,15 +85,15 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
             return;
         }
         [{
-            icon: "✏️", type: "Note", color: "var(--b3-theme-primary)"
+            icon: "✏️", type: "Note", color: "var(--b3-callout-note)"
         }, {
-            icon: "💡", type: "Tip", color: "var(--b3-theme-success)"
+            icon: "💡", type: "Tip", color: "var(--b3-callout-tip)"
         }, {
             icon: "❗", type: "Important", color: "var(--b3-callout-important)"
         }, {
             icon: "⚠️", type: "Warning", color: "var(--b3-callout-warning)"
         }, {
-            icon: "🚨", type: "Caution", color: "var(--b3-theme-error)"
+            icon: "🚨", type: "Caution", color: "var(--b3-callout-caution)"
         }].forEach((item) => {
             menu.addItem({
                 iconHTML: `<span class="b3-menu__icon">${item.icon.toUpperCase()}</span>`,

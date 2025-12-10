@@ -207,9 +207,9 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.PreferredName = GetPreferredName(plugin.Package)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "plugin.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install plugin.json failed: %s", statErr)
 			continue
 		}
 		plugin.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -221,14 +221,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			packageInstallSizeCache.SetDefault(plugin.RepoURL, is)
 		}
 		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
-		readmeFilename := getPreferredReadme(plugin.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
+		plugin.PreferredReadme = loadInstalledReadme(installPath, "/plugins/"+dirName+"/", plugin.Readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)

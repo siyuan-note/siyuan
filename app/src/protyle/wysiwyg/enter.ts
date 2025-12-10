@@ -209,6 +209,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
+    const parentHTML = (hasClosestBlock(blockElement.parentElement) as HTMLElement)?.outerHTML;
     if (range.toString() !== "") {
         // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
         const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
@@ -331,8 +332,22 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement = item;
         selectsElement.push(item);
     });
-    const parentElement = currentElement.parentElement;
+    if (currentElement.parentElement.classList.contains("bq") && currentElement.parentElement.childElementCount === 3 &&
+        currentElement.previousElementSibling.classList.contains("p") && currentElement.classList.contains("p") &&
+        currentElement.previousElementSibling.textContent.startsWith("[!") && parentHTML) {
+        const parentId = currentElement.parentElement.getAttribute("data-node-id");
+        const calloutHTML = protyle.lute.SpinBlockDOM(currentElement.parentElement.outerHTML);
+        if (calloutHTML.indexOf('data-type="NodeCallout"') > -1) {
+            currentElement.parentElement.outerHTML = calloutHTML;
+            mathRender(protyle.wysiwyg.element);
+            updateTransaction(protyle, parentId, calloutHTML, parentHTML);
+            focusByWbr(protyle.wysiwyg.element, range);
+            scrollCenter(protyle);
+            return true;
+        }
+    }
     transaction(protyle, doOperation, undoOperation);
+    const parentElement = currentElement.parentElement;
     if (parentElement.classList.contains("sb") && parentElement.getAttribute("data-sb-layout") === "col") {
         turnsIntoOneTransaction({
             protyle,

@@ -1,18 +1,26 @@
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
+export const showTooltip = (message: string, target: Element, tooltipClass?: string, event?: MouseEvent) => {
     if (isMobile()) {
         return;
     }
     let targetRect = target.getBoundingClientRect();
     if (target.getAttribute("data-inline-memo-content") && target.getClientRects().length > 1) {
         let lastWidth = 0;
-        Array.from(target.getClientRects()).forEach(item => {
-            if (item.width > lastWidth) {
-                targetRect = item;
-            }
-            lastWidth = item.width;
-        });
+        if (event) {
+            Array.from(target.getClientRects()).forEach(item => {
+                if (event.clientY >= item.top - 3 && event.clientY <= item.bottom) {
+                    targetRect = item;
+                }
+            });
+        } else {
+            Array.from(target.getClientRects()).forEach(item => {
+                if (item.width > lastWidth) {
+                    targetRect = item;
+                }
+                lastWidth = item.width;
+            });
+        }
     }
     if (targetRect.height === 0 || !message) {
         hideTooltip();
@@ -24,7 +32,6 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     messageElement.innerHTML = message;
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
-
 
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();

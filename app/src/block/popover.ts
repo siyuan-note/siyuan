@@ -132,10 +132,10 @@ export const initBlockPopover = (app: App) => {
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass);
+                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass, event);
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
-                    showTooltip(tip, aElement, tooltipClass);
+                    showTooltip(tip, aElement, tooltipClass, event);
                 }
                 event.stopPropagation();
             } else {

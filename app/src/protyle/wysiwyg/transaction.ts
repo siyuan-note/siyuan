@@ -784,6 +784,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             if (previousElement.length === 0 && isUndo && protyle.wysiwyg.element.childElementCount === 0) {
                 // https://github.com/siyuan-note/siyuan/issues/15396 操作后撤销
                 protyle.wysiwyg.element.innerHTML = operation.data;
+                cursorElements.push(protyle.wysiwyg.element.firstElementChild);
             } else if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                 // 反链面板删除超级块中的最后一个段落块后撤销
                 const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
@@ -856,6 +857,14 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             return;
         }
         cursorElements.forEach(item => {
+            // https://github.com/siyuan-note/siyuan/issues/16554
+            item.querySelector(".protyle-attr--av")?.remove();
+            item.removeAttribute("custom-avs");
+            item.getAttributeNames().forEach(attr => {
+                if (attr.startsWith("custom-sy-av-s-text-")) {
+                    item.removeAttribute(attr);
+                }
+            });
             processRender(item);
             highlightRender(item);
             avRender(item, protyle);

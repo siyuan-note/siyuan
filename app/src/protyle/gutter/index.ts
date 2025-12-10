@@ -120,7 +120,8 @@ export class Gutter {
                 rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
                 updateHeader(rowElement as HTMLElement);
                 avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-                    const groupId = (hasClosestByClassName(item, "av__body") as HTMLElement)?.dataset.groupId || "";
+                    const avBodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
+                    const groupId = (avBodyElement ? avBodyElement.dataset.groupId : "") || "";
                     selectIds.push(item.getAttribute("data-id") + (groupId ? "@" + groupId : ""));
                     selectElements.push(item);
                 });

@@ -358,7 +358,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     } else if (!selectElements[0].parentElement.classList.contains("protyle-wysiwyg")) {
                         hideElements(["select"], protyle);
-                        (hasClosestBlock(selectElements[0].parentElement) as HTMLElement)?.classList.add("protyle-wysiwyg--select");
+                        const parentBlockElement = hasClosestBlock(selectElements[0].parentElement);
+                        if (parentBlockElement) {
+                            parentBlockElement.classList.add("protyle-wysiwyg--select");
+                        }
                     }
                 }
             });
@@ -384,7 +387,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     } else if (!selectLastElement.parentElement.classList.contains("protyle-wysiwyg")) {
                         hideElements(["select"], protyle);
-                        (hasClosestBlock(selectLastElement.parentElement) as HTMLElement)?.classList.add("protyle-wysiwyg--select");
+                        const parentBlockElement = hasClosestBlock(selectLastElement.parentElement);
+                        if (parentBlockElement) {
+                            parentBlockElement.classList.add("protyle-wysiwyg--select");
+                        }
                     }
                 }
             });
@@ -409,7 +415,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                         } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
                             hideElements(["select"], protyle);
-                            (hasClosestBlock(startEndElement.endElement.parentElement) as HTMLElement)?.classList.add("protyle-wysiwyg--select");
+                            const parentBlockElement = hasClosestBlock(startEndElement.endElement.parentElement);
+                            if (parentBlockElement) {
+                                parentBlockElement.classList.add("protyle-wysiwyg--select");
+                            }
                         }
                     } else {
                         startEndElement.endElement.classList.remove("protyle-wysiwyg--select");
@@ -443,7 +452,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (nextElement.getBoundingClientRect().width === 0) {
                                 // https://github.com/siyuan-note/siyuan/issues/11194
                                 hideElements(["select"], protyle);
-                                (hasClosestBlock(startEndElement.endElement.parentElement) as HTMLElement)?.classList.add("protyle-wysiwyg--select");
+                                const parentBlockElement = hasClosestBlock(startEndElement.endElement.parentElement);
+                                if (parentBlockElement) {
+                                    parentBlockElement.classList.add("protyle-wysiwyg--select");
+                                }
                             } else {
                                 nextElement.classList.add("protyle-wysiwyg--select");
                                 nextElement.setAttribute("select-end", "true");
@@ -456,7 +468,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                         } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
                             hideElements(["select"], protyle);
-                            (hasClosestBlock(startEndElement.endElement.parentElement) as HTMLElement)?.classList.add("protyle-wysiwyg--select");
+                            const parentBlockElement = hasClosestBlock(startEndElement.endElement.parentElement);
+                            if (parentBlockElement) {
+                                parentBlockElement.classList.add("protyle-wysiwyg--select");
+                            }
                         }
                     } else {
                         startEndElement.endElement.classList.remove("protyle-wysiwyg--select");

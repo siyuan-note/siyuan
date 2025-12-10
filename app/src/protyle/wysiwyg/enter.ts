@@ -118,13 +118,13 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
 
     // bq || callout
     const isCallout = blockElement.parentElement.classList.contains("callout-content");
+    const parentBlockElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
     if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
         ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
                 blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
             (isCallout && !blockElement.nextElementSibling))) {
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement);
-        const parentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
         const blockId = blockElement.getAttribute("data-node-id");
         const topId = topElement.getAttribute("data-node-id");
         const doInsert: IOperation = {
@@ -138,9 +138,9 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: topElement.outerHTML,
         };
         if (topId === blockId) {
-            doInsert.previousID = parentElement.getAttribute("data-node-id");
+            doInsert.previousID = parentBlockElement.getAttribute("data-node-id");
             undoInsert.previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
-            parentElement.after(blockElement);
+            parentBlockElement.after(blockElement);
         } else {
             doInsert.previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : undefined;
             doInsert.parentID = topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID;
@@ -156,8 +156,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             action: "delete",
             id: blockId,
         }, undoInsert]);
-        if (topId === blockId && parentElement.classList.contains("sb") &&
-            parentElement.getAttribute("data-sb-layout") === "col") {
+        if (topId === blockId && parentBlockElement.classList.contains("sb") &&
+            parentBlockElement.getAttribute("data-sb-layout") === "col") {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: [blockElement.previousElementSibling, blockElement],
@@ -197,7 +197,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: newElement.outerHTML,
             id: newId,
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
-            parentID: (hasClosestBlock(blockElement.parentElement) as HTMLElement)?.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: parentBlockElement.getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "delete",
             id: newId,
@@ -209,7 +209,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
-    const parentHTML = (hasClosestBlock(blockElement.parentElement) as HTMLElement)?.outerHTML;
+    const parentHTML = parentBlockElement.outerHTML;
     if (range.toString() !== "") {
         // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
         const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
@@ -347,8 +347,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
     }
     transaction(protyle, doOperation, undoOperation);
-    const parentElement = currentElement.parentElement;
-    if (parentElement.classList.contains("sb") && parentElement.getAttribute("data-sb-layout") === "col") {
+    if (currentElement.parentElement.classList.contains("sb") && currentElement.parentElement.getAttribute("data-sb-layout") === "col") {
         turnsIntoOneTransaction({
             protyle,
             selectsElement,

@@ -318,9 +318,7 @@ export class Files extends Model {
                     } else if (target.tagName === "LI") {
                         if (isOnlyMeta(event) && !event.altKey && !event.shiftKey) {
                             target.classList.toggle("b3-list-item--focus");
-                            if (target.classList.contains("b3-list-item__toggle")) {
-                                this.lastSelectedElement = target;
-                            }
+                            this.lastSelectedElement = target;
                         } else if (event.shiftKey && !event.altKey && isNotCtrl(event)) {
                             // Shift+click 多选文档
                             if (!document.contains(this.lastSelectedElement)) {

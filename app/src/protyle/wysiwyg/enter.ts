@@ -332,7 +332,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement = item;
         selectsElement.push(item);
     });
-    if (currentElement.parentElement.classList.contains("bq") && currentElement.parentElement.childElementCount === 3 &&
+    if (currentElement.parentElement.classList.contains("bq") && currentElement.parentElement.childElementCount > 2 &&
         currentElement.previousElementSibling.classList.contains("p") && currentElement.classList.contains("p") &&
         currentElement.previousElementSibling.textContent.startsWith("[!") && parentHTML) {
         const parentId = currentElement.parentElement.getAttribute("data-node-id");
@@ -347,7 +347,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
     }
     transaction(protyle, doOperation, undoOperation);
-    if (currentElement.parentElement.classList.contains("sb") && currentElement.parentElement.getAttribute("data-sb-layout") === "col") {
+    if (currentElement.parentElement.classList.contains("sb") &&
+        currentElement.parentElement.getAttribute("data-sb-layout") === "col") {
         turnsIntoOneTransaction({
             protyle,
             selectsElement,

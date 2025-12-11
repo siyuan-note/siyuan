@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20251209211701"
+		"updated": "20251211094201"
 	},
 	"Children": [
 		{
@@ -1864,7 +1864,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20251209211701-hu8m4pm",
-				"updated": "20251209211421"
+				"updated": "20251211094201"
 			},
 			"Children": [
 				{
@@ -1874,27 +1874,135 @@
 			]
 		},
 		{
-			"ID": "20251209211701-958yoox",
+			"ID": "20251211094143-aymafj0",
 			"Type": "NodeCallout",
 			"Properties": {
-				"id": "20251209211701-958yoox",
-				"updated": "20251209211426"
+				"id": "20251211094143-aymafj0",
+				"updated": "20251211094150"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211094143-df00ss1",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-df00ss1",
+						"updated": "20251211094150"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "反白顯示即使快速瀏覽也應注意的資訊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-tfdwvoe",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-tfdwvoe",
+				"updated": "20251211094152"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211094143-jgbn677",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-jgbn677",
+						"updated": "20251211094152"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "幫助取得更大成功的選用資訊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-zst3xpn",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-zst3xpn",
+				"updated": "20251211094157"
 			},
 			"CalloutType": "IMPORTANT",
 			"CalloutTitle": "Important",
 			"CalloutIcon": "❗",
 			"Children": [
 				{
-					"ID": "20251209211701-q3z8lo2",
+					"ID": "20251211094143-91vr3mm",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20251209211701-q3z8lo2",
-						"updated": "20251209211442"
+						"id": "20251211094143-91vr3mm",
+						"updated": "20251211094157"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "醒目的提示！"
+							"Data": "成功所必需的關鍵資訊。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-vij9zby",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-vij9zby",
+				"updated": "20251211094201"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211094143-xt5f7c4",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-xt5f7c4",
+						"updated": "20251211094201"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "由於潛在風險，需要立即關注的關鍵內容。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094143-1kho5im",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094143-1kho5im",
+				"updated": "20251211094143"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211094143-s8sta3t",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094143-s8sta3t",
+						"updated": "20251211094143"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "操作可能帶來的負面後果。"
 						}
 					]
 				}

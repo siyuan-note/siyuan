@@ -211,10 +211,10 @@ export const initUI = (protyle: IProtyle) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                protyle.gutter.render(protyle, embedElement, protyle.wysiwyg.element);
+                protyle.gutter.render(protyle, embedElement);
                 return;
             }
-            protyle.gutter.render(protyle, nodeElement, protyle.wysiwyg.element, event.target);
+            protyle.gutter.render(protyle, nodeElement, event.target);
             return;
         }
 

@@ -2468,13 +2468,13 @@ export class Gutter {
         };
     }
 
-    public render(protyle: IProtyle, element: Element, wysiwyg: HTMLElement, target?: Element) {
+    public render(protyle: IProtyle, element: Element, target?: Element) {
         // https://github.com/siyuan-note/siyuan/issues/4659
         if (protyle.title && protyle.title.element.getAttribute("data-render") !== "true") {
             return;
         }
         // 防止划选时触碰图标导致 hl 无法移除
-        const selectElement = wysiwyg.parentElement.parentElement.querySelector(".protyle-select");
+        const selectElement = protyle.element.querySelector(".protyle-select");
         if (selectElement && !selectElement.classList.contains("fn__none")) {
             return;
         }
@@ -2512,8 +2512,12 @@ export class Gutter {
                 }
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
-                    if (["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock"].includes(type)) {
-                        return;
+                    if (["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
+                        if (target && type === "NodeCallout" && hasTopClosestByClassName(target, "callout-info")) {
+                            // Callout 标题需显示
+                        } else {
+                            return;
+                        }
                     }
                     const topElement = getTopAloneElement(nodeElement);
                     listItem = topElement.querySelector(".li") || topElement.querySelector(".list");
@@ -2522,7 +2526,7 @@ export class Gutter {
                         listItem = undefined;
                     }
                     // 标题必须显示
-                    if (topElement !== nodeElement && type !== "NodeHeading") {
+                    if (topElement !== nodeElement && type !== "NodeHeading" && !topElement.classList.contains("callout")) {
                         nodeElement = topElement;
                         parentElement = hasClosestBlock(nodeElement.parentElement);
                         type = nodeElement.getAttribute("data-type");
@@ -2569,7 +2573,8 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                 if (["NodeBlockquote", "NodeCallout"].includes(type)) {
                     space += 8;
                 }
-                if (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) {
+                if ((nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) ||
+                    nodeElement.parentElement.classList.contains("callout-content")) {
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304
@@ -2615,7 +2620,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         this.element.innerHTML = html;
         this.element.classList.remove("fn__none");
         this.element.style.width = "";
-        const contentTop = wysiwyg.parentElement.getBoundingClientRect().top;
+        const contentTop = protyle.contentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
         if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {

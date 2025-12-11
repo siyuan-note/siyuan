@@ -249,28 +249,18 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		}
 		break
 	}
-	parent = treenode.FirstLeafBlock(parentBlock).ID
-
-	parentBlock = treenode.ParentBlock(current)
-	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
-		if nil != parentBlock.Previous && parentBlock.Previous.IsBlock() {
-			previous = parentBlock.Previous.ID
-			if flb := treenode.FirstChildBlock(parentBlock.Previous); nil != flb {
-				previous = flb.ID
-			}
-			break
-		}
+	if ast.NodeDocument == parentBlock.Type {
+		parentBlock = treenode.FirstLeafBlock(parentBlock)
+		parent = parentBlock.ID
+	} else {
+		parent = parentBlock.ID
 	}
 
-	parentBlock = treenode.ParentBlock(current)
-	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
-		if nil != parentBlock.Next && parentBlock.Next.IsBlock() {
-			next = parentBlock.Next.ID
-			if flb := treenode.FirstChildBlock(parentBlock.Next); nil != flb {
-				next = flb.ID
-			}
-			break
-		}
+	if nil != parentBlock.Previous {
+		previous = parentBlock.Previous.ID
+	}
+	if nil != parentBlock.Next {
+		next = parentBlock.Next.ID
 	}
 	return
 }

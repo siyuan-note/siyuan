@@ -2,7 +2,7 @@ import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRan
 import {
     getContenteditableElement,
     getLastBlock,
-    getNextBlock,
+    getNextBlock, getParentBlock,
     getPreviousBlock,
     getTopAloneElement,
     getTopEmptyElement,
@@ -126,13 +126,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     }
                     previousID = unfoldData[foldId].previousID;
                 }
-                const parentElement = hasClosestBlock(topElement.parentElement);
                 inserts.push({
                     action: "insert",
                     data,
                     id,
                     previousID,
-                    parentID: (parentElement ? parentElement.getAttribute("data-node-id") : null) || protyle.block.parentID
+                    parentID: getParentBlock(topElement)?.getAttribute("data-node-id") || protyle.block.parentID
                 });
                 if (topElement.getAttribute("data-subtype") === "o" && topElement.classList.contains("li")) {
                     listElement = topElement.parentElement;

@@ -1,6 +1,13 @@
 import {hasClosestBlock, hasClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
+export const getParentBlock = (element: Element) => {
+    if (element.parentElement.classList.contains("callout-content")) {
+        return element.parentElement.parentElement;
+    }
+    return element.parentElement;
+};
+
 export const getCalloutInfo = (element: Element) => {
     const icon = element.querySelector(".callout-icon").textContent;
     return (icon ? icon + " " : "") + element.querySelector(".callout-title").textContent;

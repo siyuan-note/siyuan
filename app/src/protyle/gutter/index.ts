@@ -16,7 +16,8 @@ import {
     isInHarmony,
     isMac,
     isOnlyMeta,
-    openByMobile, updateHotkeyAfterTip,
+    openByMobile,
+    updateHotkeyAfterTip,
     updateHotkeyTip,
     writeText
 } from "../util/compatibility";
@@ -829,7 +830,6 @@ export class Gutter {
                         cb: (toPath) => {
                             hintMoveBlock(toPath[0], selectsElement, protyle);
                         },
-                        rootIDs: [protyle.block.rootID],
                         flashcard: false
                     });
                 }
@@ -1430,7 +1430,6 @@ export class Gutter {
                             hintMoveBlock(toPath[0], [nodeElement], protyle);
                         },
                         flashcard: false,
-                        rootIDs: [protyle.block.rootID],
                     });
                 }
             }).element);

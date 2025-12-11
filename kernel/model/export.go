@@ -586,7 +586,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	return
 }
 
-func Preview(id string, fillCSSVar bool) (retStdHTML string) {
+func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {

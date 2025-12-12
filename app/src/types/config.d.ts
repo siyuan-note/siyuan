@@ -496,6 +496,10 @@ declare namespace Config {
          */
         spellcheck: boolean;
         /**
+         * Support spell check languages
+         */
+        spellcheckLanguages: string[];
+        /**
          * Whether to enable virtual references
          */
         virtualBlockRef: boolean;

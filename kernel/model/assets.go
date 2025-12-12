@@ -680,8 +680,8 @@ func RemoveUnusedAssets() (ret []string) {
 				}
 			}
 
-			if err := filelock.Remove(absPath); err != nil {
-				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
+			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
+				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, removeErr)
 			}
 			util.RemoveAssetText(unusedAsset)
 		}
@@ -720,7 +720,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		cache.RemoveAssetHash(hash)
 	}
 
-	if err = filelock.Remove(absPath); err != nil {
+	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 	}
 	ret = absPath

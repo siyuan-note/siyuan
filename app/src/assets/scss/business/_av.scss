@@ -105,7 +105,7 @@
     font-weight: bold;
 
     &:empty::after {
-      color: var(--b3-theme-on-surface-light);
+      color: var(--b3-empty-color);
       content: attr(data-tip);
     }
   }

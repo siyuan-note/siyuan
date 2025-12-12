@@ -682,6 +682,8 @@ func RemoveUnusedAssets() (ret []string) {
 
 			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
 				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, removeErr)
+				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
+				return
 			}
 			util.RemoveAssetText(unusedAsset)
 		}
@@ -722,6 +724,8 @@ func RemoveUnusedAsset(p string) (ret string) {
 
 	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
+		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
+		return
 	}
 	ret = absPath
 

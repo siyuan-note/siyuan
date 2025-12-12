@@ -565,6 +565,10 @@ func GetFurtherCollections(attrView *av.AttributeView, cachedAttrViews map[strin
 			continue
 		}
 
+		if nil == kv.Key.Rollup {
+			continue
+		}
+
 		relKey, _ := attrView.GetKey(kv.Key.Rollup.RelationKeyID)
 		if nil == relKey {
 			continue

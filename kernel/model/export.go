@@ -891,6 +891,9 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 
 	tree := prepareExportTree(bt)
 	node = treenode.GetNodeInTree(tree, id)
+	if ast.NodeDocument == node.Type {
+		node.RemoveIALAttr("style")
+	}
 
 	if merge {
 		var mergeErr error
@@ -2442,7 +2445,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			root.IAL["type"] = "doc"
 			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
 			for k, v := range root.IAL {
-				if "type" == k {
+				if "type" == k || "style" == k {
 					continue
 				}
 				title.SetIALAttr(k, v)

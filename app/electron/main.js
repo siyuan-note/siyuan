@@ -786,7 +786,7 @@ app.whenReady().then(() => {
             return event.sender.id;
         }
         if (data.cmd === "getSpellCheckerLanguages") {
-            return  event.sender.session.getSpellCheckerLanguages();
+            return event.sender.session.availableSpellCheckerLanguages;
         }
         if (data.cmd === "setProxy") {
             return setProxy(data.proxyURL, event.sender);

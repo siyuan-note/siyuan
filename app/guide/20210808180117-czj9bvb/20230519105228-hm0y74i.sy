@@ -1,11 +1,12 @@
 {
 	"ID": "20230519105228-hm0y74i",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f6e3",
 		"id": "20230519105228-hm0y74i",
 		"title": "最新进展",
+		"type": "doc",
 		"updated": "20230617085456"
 	},
 	"Children": [

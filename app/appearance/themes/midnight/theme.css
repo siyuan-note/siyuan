@@ -184,8 +184,11 @@
     --b3-pdf-dark: #212224;
 
     /* callout */
+    --b3-callout-note: var(--b3-theme-primary);
+    --b3-callout-tip: var(--b3-theme-success);
+    --b3-callout-caution: var(--b3-theme-error);
     --b3-callout-important: var(--b3-protyle-inline-blockref-color);
-    --b3-callout-warning: var(--b3-protyle-inline-mark-background);
+    --b3-callout-warning: var(--b3-highlight-current-background);
 
     /* 表格 */
     --b3-table-even-background: rgba(255, 255, 255, .03);

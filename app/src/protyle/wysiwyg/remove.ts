@@ -2,7 +2,7 @@ import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRan
 import {
     getContenteditableElement,
     getLastBlock,
-    getNextBlock,
+    getNextBlock, getParentBlock,
     getPreviousBlock,
     getTopAloneElement,
     getTopEmptyElement,
@@ -19,7 +19,7 @@ import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
 import {isMobile} from "../../util/functions";
 import {mathRender} from "../render/mathRender";
-import {hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {Backlink} from "../../layout/dock/Backlink";
@@ -131,7 +131,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     data,
                     id,
                     previousID,
-                    parentID: topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                    parentID: getParentBlock(topElement)?.getAttribute("data-node-id") || protyle.block.parentID
                 });
                 if (topElement.getAttribute("data-subtype") === "o" && topElement.classList.contains("li")) {
                     listElement = topElement.parentElement;
@@ -233,13 +233,15 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
 
-    if (!blockElement.previousElementSibling && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
+    const isCallout = blockElement.parentElement.classList.contains("callout-content");
+    if (!blockElement.previousElementSibling && (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout)) {
         if (type !== "Delete") {
             range.insertNode(document.createElement("wbr"));
         }
-        const blockParentElement = blockElement.parentElement;
+        const blockParentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
         blockParentElement.insertAdjacentElement("beforebegin", blockElement);
-        if (blockParentElement.childElementCount === 1) {
+        if (isCallout ? blockParentElement.querySelector(".callout-content").childElementCount === 0 :
+            blockParentElement.childElementCount === 1) {
             transaction(protyle, [{
                 action: "move",
                 id: blockElement.getAttribute("data-node-id"),
@@ -351,7 +353,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
 
-    const parentElement = blockElement.parentElement;
+    const parentElement = hasClosestBlock(blockElement.parentElement);
     const editableElement = getContenteditableElement(blockElement);
     const previousLastElement = getLastBlock(previousElement) as HTMLElement;
     if (range.toString() === "" && isMobile() && previousLastElement && previousLastElement.classList.contains("hr") && getSelectionOffset(editableElement).start === 0) {
@@ -393,7 +395,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }];
                 blockElement.remove();
                 // 取消超级块
-                if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
+                if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
                     const sbData = await cancelSB(protyle, parentElement);
                     transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
                 } else {
@@ -426,7 +428,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         id: removeId,
         // 不能使用 previousLastElement，否则在超级块下的元素前删除撤销错误
         previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: parentElement.getAttribute("data-node-id")
+        parentID: parentElement ? parentElement.getAttribute("data-node-id") : protyle.block.parentID
     }];
     const doOperations: IOperation[] = [{
         action: "delete",
@@ -501,7 +503,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             id: previousId,
         });
     }
-    if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
+    if (parentElement && parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
         const sbData = await cancelSB(protyle, parentElement);
         transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
     } else {

@@ -1,10 +1,11 @@
 {
 	"ID": "20230422103807-d46wjhs",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230422103807-d46wjhs",
 		"title": "数据可用性保障",
+		"type": "doc",
 		"updated": "20230422120121"
 	},
 	"Children": [

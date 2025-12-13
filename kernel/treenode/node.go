@@ -224,7 +224,7 @@ func FirstLeafBlock(node *ast.Node) (ret *ast.Node) {
 
 func CountBlockNodes(node *ast.Node) (ret int) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type {
+		if !entering || !n.IsBlock() || ast.NodeList == n.Type || ast.NodeBlockquote == n.Type || ast.NodeSuperBlock == n.Type || ast.NodeCallout == n.Type {
 			return ast.WalkContinue
 		}
 
@@ -403,6 +403,7 @@ var typeAbbrMap = map[string]string{
 	"NodeThematicBreak":    "tb",
 	"NodeVideo":            "video",
 	"NodeAudio":            "audio",
+	"NodeCallout":          "callout",
 	// 行级元素
 	"NodeText":     "text",
 	"NodeImage":    "img",
@@ -458,6 +459,8 @@ func SubTypeAbbr(n *ast.Node) string {
 		if 6 == n.HeadingLevel {
 			return "h6"
 		}
+	case ast.NodeCallout:
+		return n.CalloutType
 	}
 	return ""
 }

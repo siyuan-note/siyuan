@@ -785,7 +785,13 @@ func exit(c *gin.Context) {
 		execInstallPkg = int(execInstallPkgArg.(float64))
 	}
 
-	exitCode := model.Close(force, true, execInstallPkg)
+	setCurrentWorkspaceArg := arg["setCurrentWorkspace"]
+	setCurrentWorkspace := true
+	if nil != setCurrentWorkspaceArg {
+		setCurrentWorkspace = setCurrentWorkspaceArg.(bool)
+	}
+
+	exitCode := model.Close(force, setCurrentWorkspace, execInstallPkg)
 	ret.Code = exitCode
 	switch exitCode {
 	case 0:

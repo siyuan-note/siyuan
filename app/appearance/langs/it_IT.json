@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Scarica e ripristina",
   "callout": "Suggerimento",
   "hasAttrName": "Il nome dell'attributo ${x} esiste già",
   "statusBarMsgPushTip": "Tramite i messaggi nella barra di stato è possibile conoscere immediatamente lo stato di funzionamento del sistema, se danno fastidio è possibile disattivarli",
@@ -414,7 +415,7 @@
   "confirmPassword": "Ho già memorizzato la password",
   "passwordNoMatch": "Le password inserite non coincidono",
   "cloudConfigTip": "Configura in [Impostazioni - Cloud]",
-  "confirmUninstall": "Sei sicuro di voler disinstallare ${name}?",
+  "confirmUninstall": "Sei sicuro di voler disinstallare ${name}?<br>La disinstallazione potrebbe rimuovere tutte le impostazioni e i dati correlati, procedi con cautela!",
   "scrollGetMore": "Scorri su e giù per caricare di più",
   "flashcardNewCard": "Nuova",
   "flashcardReviewCard": "Vecchia",
@@ -1338,7 +1339,8 @@
   "outlineOutdent": "Riduci rientro elenco struttura",
   "outlineOutdentTip": "Dopo l'abilitazione, il riduci rientro utilizzerà la logica di struttura dell'elenco, ovvero spostando gli elementi dell'elenco sotto il genitore",
   "spellcheck": "Controllo ortografico",
-  "spellcheckTip": "Dopo l'abilitazione, verrà utilizzata la funzione di controllo ortografico integrata del browser. Attualmente, supporta solo l'inglese",
+  "spellcheckTip": "Se abilitato, verrà utilizzato il correttore ortografico integrato del browser. Seleziona le lingue da controllare nelle impostazioni del browser",
+  "spellcheckTip2": "Se abilitato, verrà utilizzato il correttore ortografico integrato. Seleziona le lingue da controllare dall'elenco sottostante",
   "over": "terminato",
   "preview": "Anteprima esportazione",
   "desktop": "Desktop",
@@ -1705,6 +1707,7 @@
     "271": "Ottimizzazione dell'indice dei dati completata, liberati [%s] di spazio su disco",
     "272": "Campo senza nome",
     "273": "Non creare lo spazio di lavoro nella directory radice della partizione, crea una nuova cartella come spazio di lavoro",
-    "274": "Questa cartella contiene altri file, crea una nuova cartella come spazio di lavoro"
+    "274": "Questa cartella contiene altri file, crea una nuova cartella come spazio di lavoro",
+    "275": "Impossibile aprire il documento creato con una versione più recente. Aggiorna all'ultima versione e riprova"
   }
 }

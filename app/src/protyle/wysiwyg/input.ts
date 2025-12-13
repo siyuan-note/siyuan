@@ -167,7 +167,11 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 // ```test` 不处理，正常渲染为段落块
             } else {
                 let replaceInnerHTML = editElement.innerHTML.trim().replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();
-                if (!replaceInnerHTML.endsWith("\n```") && !replaceInnerHTML.endsWith("\n```<wbr>")) {
+                if (replaceInnerHTML.endsWith("\n```<wbr>") &&
+                    (replaceInnerHTML.split("\n```").length - 1 + (replaceInnerHTML.startsWith("```") ? 1 : 0)) % 2 === 0) {
+                   // 匹配已闭合的不需添加 https://github.com/siyuan-note/siyuan/issues/16053
+                } else if (!replaceInnerHTML.endsWith("\n```")) {
+                    // 以 "\n```<wbr>" 结尾需要添加的情况 https://github.com/siyuan-note/siyuan/issues/16519
                     replaceInnerHTML = replaceInnerHTML.replace("<wbr>", "") + "<wbr>\n```";
                 }
                 editElement.innerHTML = replaceInnerHTML;

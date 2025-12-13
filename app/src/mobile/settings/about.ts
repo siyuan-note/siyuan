@@ -358,7 +358,7 @@ export const initAbout = () => {
                                     fetchPost("/api/system/setWorkspaceDir", {
                                         path: openPath
                                     }, () => {
-                                        exitSiYuan();
+                                        exitSiYuan(false);
                                     });
                                 });
                             });
@@ -412,7 +412,7 @@ export const initAbout = () => {
                             fetchPost("/api/system/setWorkspaceDir", {
                                 path: target.getAttribute("data-path")
                             }, () => {
-                                exitSiYuan();
+                                exitSiYuan(false);
                             });
                         });
                         event.preventDefault();

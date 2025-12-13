@@ -7,7 +7,7 @@ import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";
-import {escapeAriaLabel} from "../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../util/escape";
 
 let popoverTargetElement: HTMLElement;
 let notebookItemElement: HTMLElement | false;
@@ -81,7 +81,7 @@ export const initBlockPopover = (app: App) => {
                 }
             }
             if (!tip) {
-                tip = aElement.getAttribute("data-inline-memo-content");
+                tip = escapeHtml(aElement.getAttribute("data-inline-memo-content"));
                 if (tip) {
                     tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
                 }
@@ -132,10 +132,10 @@ export const initBlockPopover = (app: App) => {
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass);
+                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass, event);
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
-                    showTooltip(tip, aElement, tooltipClass);
+                    showTooltip(tip, aElement, tooltipClass, event);
                 }
                 event.stopPropagation();
             } else {

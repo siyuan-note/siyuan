@@ -428,7 +428,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         pushBack(editor.editor.protyle, editor.editor.protyle.toolbar.range);
     }
     // https://github.com/siyuan-note/siyuan/issues/16445
-    if (options.action.includes(Constants.CB_GET_OUTLINE)) {
+    if (options.action?.includes(Constants.CB_GET_OUTLINE)) {
         hideElements(["select"], editor.editor.protyle);
     }
     if (options.mode) {

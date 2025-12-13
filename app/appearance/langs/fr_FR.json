@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Télécharger et restaurer",
   "callout": "Astuce",
   "hasAttrName": "Le nom d’attribut ${x} existe déjà",
   "statusBarMsgPushTip": "Via les messages de la barre d'état, vous pouvez connaître immédiatement le fonctionnement du système, si cela vous dérange vous pouvez les désactiver",
@@ -414,7 +415,7 @@
   "confirmPassword": "J'ai déjà retenu le mot de passe",
   "passwordNoMatch": "Les mots de passe saisis deux fois ne correspondent pas",
   "cloudConfigTip": "Veuillez configurer dans [Paramètres - Cloud]",
-  "confirmUninstall": "Êtes-vous sûr de vouloir désinstaller ${name} ?",
+  "confirmUninstall": "Êtes-vous sûr de vouloir désinstaller ${name} ?<br>La désinstallation peut supprimer toutes les configurations et données associées, veuillez décider prudemment !",
   "scrollGetMore": "Faites défiler de haut en bas pour en charger plus",
   "flashcardNewCard": "Nouvelle carte",
   "flashcardReviewCard": "Ancienne carte",
@@ -1338,7 +1339,8 @@
   "outlineOutdent": "Liste des retraits excessifs du contour",
   "outlineOutdentTip": "Après l'activation, le retrait négatif utilisera la logique de contour de la liste, c'est-à-dire en déplaçant les éléments de la liste sous le parent",
   "spellcheck": "Vérification orthographique",
-  "spellcheckTip": "Après l'activation, la fonction de vérification orthographique intégrée du navigateur sera utilisée. Actuellement, seule la vérification orthographique en anglais est prise en charge",
+  "spellcheckTip": "Si activé, la vérification orthographique intégrée du navigateur sera utilisée. Veuillez choisir les langues à vérifier dans les paramètres du navigateur",
+  "spellcheckTip2": "Si activé, la vérification orthographique intégrée sera utilisée. Veuillez choisir les langues à vérifier dans la liste ci-dessous",
   "over": "over",
   "preview": "Aperçu de l'exportation",
   "desktop": "bureau",
@@ -1705,6 +1707,7 @@
     "271": "Optimisation de l'index des données terminée, [%s] d'espace disque libéré",
     "272": "Champ sans nom",
     "273": "Ne créez pas l’espace de travail à la racine de la partition, créez un nouveau dossier comme espace de travail",
-    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail"
+    "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail",
+    "275": "Impossible d'ouvrir le document créé par une version plus récente. Veuillez mettre à jour vers la dernière version et réessayer"
   }
 }

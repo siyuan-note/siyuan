@@ -280,25 +280,35 @@ export const kernelError = () => {
     }
 };
 
-export const exitSiYuan = async () => {
+export const exitSiYuan = async (setCurrentWorkspace = true) => {
     hideAllElements(["util"]);
     /// #if MOBILE
     if (window.siyuan.mobile.editor) {
         await saveScroll(window.siyuan.mobile.editor.protyle);
     }
     /// #endif
-    fetchPost("/api/system/exit", {force: false}, (response) => {
+    fetchPost("/api/system/exit", {force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
             const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
             const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
                 buttonElement.addEventListener("click", () => {
-                    fetchPost("/api/system/exit", {force: true}, () => {
+                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, () => {
                         /// #if !BROWSER
                         ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
                         /// #else
-                        if (isInIOS() || isInAndroid() || isInHarmony()) {
-                            window.location.href = "siyuan://api/system/exit";
+                        if (isInAndroid()) {
+                            window.JSAndroid.exit();
+                            return;
+                        }
+                        if (isInIOS()) {
+                            window.webkit.messageHandlers.exit.postMessage("");
+                            return;
+                        }
+
+                        if (isInHarmony()) {
+                            window.JSHarmony.exit();
+                            return;
                         }
                         /// #endif
                     });
@@ -314,6 +324,7 @@ export const exitSiYuan = async () => {
             confirmDialog(window.siyuan.languages.tip, response.msg, () => {
                 fetchPost("/api/system/exit", {
                     force: true,
+                    setCurrentWorkspace,
                     execInstallPkg: 2 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
                 }, () => {
                     /// #if !BROWSER
@@ -331,6 +342,7 @@ export const exitSiYuan = async () => {
             }, () => {
                 fetchPost("/api/system/exit", {
                     force: true,
+                    setCurrentWorkspace,
                     execInstallPkg: 1 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
                 }, () => {
                     /// #if !BROWSER
@@ -342,8 +354,18 @@ export const exitSiYuan = async () => {
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
             /// #else
-            if (isInIOS() || isInAndroid() || isInHarmony()) {
-                window.location.href = "siyuan://api/system/exit";
+            if (isInAndroid()) {
+                window.JSAndroid.exit();
+                return;
+            }
+            if (isInIOS()) {
+                window.webkit.messageHandlers.exit.postMessage("");
+                return;
+            }
+
+            if (isInHarmony()) {
+                window.JSHarmony.exit();
+                return;
             }
             /// #endif
         }

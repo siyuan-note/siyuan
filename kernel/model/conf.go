@@ -240,8 +240,8 @@ func InitConf() {
 	if nil == Conf.Editor {
 		Conf.Editor = defaultEditor
 	}
-	// 新增字段的默认值
-	// 使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
+
+	// 新增字段的默认值，使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
 	if nil == Conf.Editor.BacklinkSort {
 		Conf.Editor.BacklinkSort = defaultEditor.BacklinkSort
 	}
@@ -281,6 +281,9 @@ func InitConf() {
 	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
+	}
+	if 1 > len(Conf.Editor.SpellcheckLanguages) {
+		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
 	}
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0
@@ -742,7 +745,15 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		if nil != util.WebSocketServer {
 			util.WebSocketServer.Close()
 		}
+		if nil != util.HttpServer {
+			util.HttpServer.Close()
+		}
 		util.HttpServing = false
+
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+			return
+		}
+
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return

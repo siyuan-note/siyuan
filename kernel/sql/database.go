@@ -1358,6 +1358,8 @@ func commitTx(tx *sql.Tx) (err error) {
 	if err = tx.Commit(); err != nil {
 		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
 	}
+
+	closeTxPreparedStmts(tx)
 	return
 }
 
@@ -1380,6 +1382,8 @@ func commitHistoryTx(tx *sql.Tx) (err error) {
 	if err = tx.Commit(); err != nil {
 		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
 	}
+
+	closeTxPreparedStmts(tx)
 	return
 }
 
@@ -1402,16 +1406,80 @@ func commitAssetContentTx(tx *sql.Tx) (err error) {
 	if err = tx.Commit(); err != nil {
 		logging.LogErrorf("commit tx failed: %s\n  %s", err, logging.ShortStack())
 	}
+
+	closeTxPreparedStmts(tx)
 	return
 }
 
-func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err error) {
-	stmt, err := tx.Prepare(stmtSQL)
-	if err != nil {
+func closeTxPreparedStmts(tx *sql.Tx) {
+	if tx == nil {
 		return
 	}
+	cacheKey := txCacheKey(tx)
+
+	txStmtCacheLock.Lock()
+	stmtMap, ok := txStmtCache[cacheKey]
+	if ok {
+		delete(txStmtCache, cacheKey)
+	}
+	txStmtCacheLock.Unlock()
+
+	if !ok {
+		return
+	}
+	for _, stmt := range stmtMap {
+		_ = stmt.Close()
+	}
+}
+
+var (
+	txStmtCache     = make(map[string]map[string]*sql.Stmt)
+	txStmtCacheLock = sync.Mutex{}
+)
+
+func txCacheKey(tx *sql.Tx) string {
+	return fmt.Sprintf("%p", tx)
+}
+
+func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err error) {
+	if tx == nil {
+		return fmt.Errorf("tx is nil")
+	}
+
+	cacheKey := txCacheKey(tx)
+
+	txStmtCacheLock.Lock()
+	stmtMap, ok := txStmtCache[cacheKey]
+	if !ok {
+		stmtMap = make(map[string]*sql.Stmt)
+		txStmtCache[cacheKey] = stmtMap
+	}
+	stmt, ok := stmtMap[stmtSQL]
+	txStmtCacheLock.Unlock()
+
+	if !ok {
+		stmt, err = tx.Prepare(stmtSQL)
+		if err != nil {
+			return
+		}
+		txStmtCacheLock.Lock()
+		if existing, exists := txStmtCache[cacheKey][stmtSQL]; exists {
+			stmt.Close()
+			stmt = existing
+		} else {
+			txStmtCache[cacheKey][stmtSQL] = stmt
+		}
+		txStmtCacheLock.Unlock()
+	}
+
 	if _, err = stmt.Exec(args...); err != nil {
-		logging.LogErrorf("exec database stmt [%s] failed: %s", stmtSQL, err)
+		if strings.Contains(err.Error(), "database disk image is malformed") {
+			tx.Rollback()
+			closeDatabase()
+			removeDatabaseFile()
+			logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
+		}
+		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
 		return
 	}
 	return
@@ -1433,7 +1501,6 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 
 func nSort(n *ast.Node) int {
 	switch n.Type {
-	// 以下为块级元素
 	case ast.NodeHeading:
 		return 5
 	case ast.NodeParagraph:
@@ -1451,6 +1518,8 @@ func nSort(n *ast.Node) int {
 	case ast.NodeListItem:
 		return 20
 	case ast.NodeBlockquote:
+		return 20
+	case ast.NodeCallout:
 		return 20
 	case ast.NodeSuperBlock:
 		return 30

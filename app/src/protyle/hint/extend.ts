@@ -130,13 +130,32 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         id: "quote",
         value: "> " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
-    }, /*{
-        filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi"],
-        id: "callout",
-        value: `> [!NOTE]
-> ${Lute.Caret}`,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCallout"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.callout}</span></div>`,
-    },*/ {
+    }, {
+        filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "note"],
+        id: "calloutNote",
+        value: `> [!NOTE]\n> ${Lute.Caret}`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">✏️</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span></span></div>`,
+    },{
+        filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "tip"],
+        id: "calloutTip",
+        value: `> [!TIP]\n> ${Lute.Caret}`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">💡</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-tip)">Tip</span></span></div>`,
+    },{
+        filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "important"],
+        id: "calloutImportant",
+        value: `> [!IMPORTANT]\n> ${Lute.Caret}`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">❗</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-important)">Important</span></span></div>`,
+    },{
+        filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "warning"],
+        id: "calloutWarning",
+        value: `> [!WARNING]\n> ${Lute.Caret}`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">⚠️</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-warning)">Warning</span></span></div>`,
+    },{
+        filter: [window.siyuan.languages.callout, "callout", "ts", "提示", "tishi", "caution"],
+        id: "calloutCaution",
+        value: `> [!CAUTION]\n> ${Lute.Caret}`,
+        html: `<div class="b3-list-item__first"><span class="b3-list-item__graphic">🚨</span><span class="b3-list-item__text">${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-caution)">Caution</span></span></div>`,
+    }, {
         filter: [window.siyuan.languages.code, "code block", "代码块", "daimakuai", "dmk"],
         id: "code",
         value: "```",

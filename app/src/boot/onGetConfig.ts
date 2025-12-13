@@ -114,6 +114,10 @@ const winOnMaxRestore = async () => {
 
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
+    ipcRenderer.send(Constants.SIYUAN_CMD, {
+        cmd: "setSpellCheckerLanguages",
+        languages: window.siyuan.config.editor.spellcheckLanguages
+    });
     const winOnClose = (close = false) => {
         exportLayout({
             cb() {

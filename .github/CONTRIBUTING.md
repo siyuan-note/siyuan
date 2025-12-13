@@ -1,4 +1,4 @@
-[中文](CONTRIBUTING_zh_CN.md)
+[中文](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)
 
 ## Get the source code
 

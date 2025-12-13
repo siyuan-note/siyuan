@@ -18,6 +18,7 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"mime"
@@ -217,7 +218,15 @@ func Serve(fastMode bool) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
-	if err = http.Serve(ln, ginServer.Handler()); err != nil {
+	util.HttpServer = &http.Server{
+		Handler: ginServer,
+	}
+
+	if err = util.HttpServer.Serve(ln); err != nil {
+		if errors.Is(err, http.ErrServerClosed) {
+			return
+		}
+
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)
@@ -562,6 +571,7 @@ func serveDebug(ginServer *gin.Engine) {
 }
 
 func serveWebSocket(ginServer *gin.Engine) {
+	util.WebSocketServer = melody.New()
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {

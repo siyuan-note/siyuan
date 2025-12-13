@@ -25,7 +25,7 @@ import {
     getContenteditableElement,
     getFirstBlock,
     getLastBlock,
-    getNextBlock,
+    getNextBlock, getParentBlock,
     getPreviousBlock,
     getTopAloneElement,
     hasNextSibling,
@@ -356,9 +356,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
                             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
                         }
-                    } else if (!selectElements[0].parentElement.classList.contains("protyle-wysiwyg")) {
+                    } else if (!getParentBlock(selectElements[0]).classList.contains("protyle-wysiwyg")) {
                         hideElements(["select"], protyle);
-                        selectElements[0].parentElement.classList.add("protyle-wysiwyg--select");
+                        getParentBlock(selectElements[0]).classList.add("protyle-wysiwyg--select");
                     }
                 }
             });
@@ -382,9 +382,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
                             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
                         }
-                    } else if (!selectLastElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                    } else if (!getParentBlock(selectLastElement).classList.contains("protyle-wysiwyg")) {
                         hideElements(["select"], protyle);
-                        selectLastElement.parentElement.classList.add("protyle-wysiwyg--select");
+                        getParentBlock(selectLastElement).classList.add("protyle-wysiwyg--select");
                     }
                 }
             });
@@ -407,9 +407,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
                                 protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
                             }
-                        } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                        } else if (!getParentBlock(startEndElement.endElement).classList.contains("protyle-wysiwyg")) {
                             hideElements(["select"], protyle);
-                            startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
+                            getParentBlock(startEndElement.endElement).classList.add("protyle-wysiwyg--select");
                         }
                     } else {
                         startEndElement.endElement.classList.remove("protyle-wysiwyg--select");
@@ -443,7 +443,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (nextElement.getBoundingClientRect().width === 0) {
                                 // https://github.com/siyuan-note/siyuan/issues/11194
                                 hideElements(["select"], protyle);
-                                startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
+                                getParentBlock(startEndElement.endElement).classList.add("protyle-wysiwyg--select");
                             } else {
                                 nextElement.classList.add("protyle-wysiwyg--select");
                                 nextElement.setAttribute("select-end", "true");
@@ -454,9 +454,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
                                 }
                             }
-                        } else if (!startEndElement.endElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                        } else if (!getParentBlock(startEndElement.endElement).classList.contains("protyle-wysiwyg")) {
                             hideElements(["select"], protyle);
-                            startEndElement.endElement.parentElement.classList.add("protyle-wysiwyg--select");
+                            getParentBlock(startEndElement.endElement).classList.add("protyle-wysiwyg--select");
                         }
                     } else {
                         startEndElement.endElement.classList.remove("protyle-wysiwyg--select");
@@ -635,11 +635,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (event.key === "ArrowDown" && nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 && (
                 (tdElement && !tdElement.parentElement.nextElementSibling && nodeElement.getAttribute("data-type") === "NodeTable" && !getNextBlock(nodeElement)) ||
                 (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
-                (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && nodeElement.nextElementSibling.classList.contains("protyle-attr") && !getNextBlock(nodeElement.parentElement))
+                (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && nodeElement.nextElementSibling.classList.contains("protyle-attr") && !getNextBlock(nodeElement.parentElement)) ||
+                (nodeElement.parentElement.classList.contains("callout-content") && !nodeElement.nextElementSibling && !getNextBlock(nodeElement.parentElement.parentElement))
             )) {
                 // 跳出代码块和bq
                 if (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
                     insertEmptyBlock(protyle, "afterend", nodeElement.parentElement.getAttribute("data-node-id"));
+                } else if (nodeElement.parentElement.classList.contains("callout-content")) {
+                    insertEmptyBlock(protyle, "afterend", nodeElement.parentElement.parentElement.getAttribute("data-node-id"));
                 } else {
                     insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
                 }
@@ -1960,7 +1963,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         app: protyle.app,
                         id,
                         action,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();
@@ -1974,7 +1978,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id,
                         action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
                         keepCursor: true,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();
@@ -1990,7 +1995,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id,
                         position: "right",
                         action,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();
@@ -2006,7 +2012,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         id,
                         position: "bottom",
                         action,
-                        zoomIn
+                        zoomIn,
+                        scrollPosition: "start"
                     });
                 });
                 event.preventDefault();

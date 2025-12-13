@@ -338,6 +338,7 @@ type CriterionTypes struct {
 	VideoBlock    bool `json:"videoBlock"`
 	IFrameBlock   bool `json:"iframeBlock"`
 	WidgetBlock   bool `json:"widgetBlock"`
+	Callout       bool `json:"callout"`
 }
 
 type CriterionReplaceTypes struct {

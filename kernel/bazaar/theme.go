@@ -171,9 +171,9 @@ func InstalledThemes() (ret []*Theme) {
 		theme.PreferredFunding = getPreferredFunding(theme.Funding)
 		theme.PreferredName = GetPreferredName(theme.Package)
 		theme.PreferredDesc = getPreferredDesc(theme.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "theme.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install theme.json failed: %s", statErr)
 			continue
 		}
 		theme.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -185,14 +185,7 @@ func InstalledThemes() (ret []*Theme) {
 			packageInstallSizeCache.SetDefault(theme.RepoURL, is)
 		}
 		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
-		readmeFilename := getPreferredReadme(theme.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		theme.PreferredReadme, _ = renderLocalREADME("/appearance/themes/"+dirName+"/", readme)
+		theme.PreferredReadme = loadInstalledReadme(installPath, "/appearance/themes/"+dirName+"/", theme.Readme)
 		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
 		ret = append(ret, theme)
 	}

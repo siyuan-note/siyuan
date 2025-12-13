@@ -256,165 +256,168 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 				return ast.WalkContinue
 			}
 
-			if ast.NodeBlockQueryEmbed == n.Type {
-				if gulu.Str.Contains(n.ID, *resolved) {
-					return ast.WalkContinue
+			if ast.NodeBlockQueryEmbed != n.Type {
+				return ast.WalkContinue
+			}
+
+			if gulu.Str.Contains(n.ID, *resolved) {
+				return ast.WalkContinue
+			}
+			*resolved = append(*resolved, n.ID)
+
+			stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
+			stmt = html.UnescapeString(stmt)
+			stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+			sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+			for _, sqlBlock := range sqlBlocks {
+				if "query_embed" == sqlBlock.Type {
+					continue
 				}
-				*resolved = append(*resolved, n.ID)
 
-				stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
-				stmt = html.UnescapeString(stmt)
-				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-				sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
-				for _, sqlBlock := range sqlBlocks {
-					if "query_embed" == sqlBlock.Type {
-						continue
-					}
+				subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+				if nil == subTree {
+					continue
+				}
 
-					subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
-					if nil == subTree {
-						continue
-					}
-
-					var md string
-					if "d" == sqlBlock.Type {
-						if 0 == blockEmbedMode {
-							// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
-							// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233 https://github.com/siyuan-note/siyuan/issues/12741
-							embedTopLevel := 0
-							ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-								if !entering || ast.NodeHeading != n.Type {
-									return ast.WalkContinue
-								}
-
-								embedTopLevel = n.HeadingLevel
-								if parentHeadingLevel >= embedTopLevel {
-									n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-									if 6 < n.HeadingLevel {
-										n.HeadingLevel = 6
-									}
-								}
+				var md string
+				if "d" == sqlBlock.Type {
+					if 0 == blockEmbedMode {
+						// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
+						// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233 https://github.com/siyuan-note/siyuan/issues/12741
+						embedTopLevel := 0
+						ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+							if !entering || ast.NodeHeading != n.Type {
 								return ast.WalkContinue
-							})
-						}
-
-						md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-					} else if "h" == sqlBlock.Type {
-						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
-						var hChildren []*ast.Node
-
-						// 从嵌入块的 IAL 属性中解析 custom-heading-mode，使用全局配置作为默认值
-						blockHeadingMode := Conf.Editor.HeadingEmbedMode
-						if customHeadingMode := n.IALAttr("custom-heading-mode"); "" != customHeadingMode {
-							if mode, err := strconv.Atoi(customHeadingMode); nil == err && (mode == 0 || mode == 1 || mode == 2) {
-								blockHeadingMode = mode
 							}
-						}
 
-						// 根据 blockHeadingMode 处理标题块的显示
-						// blockHeadingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
-						if 1 == blockHeadingMode {
-							// 仅显示标题
-							hChildren = append(hChildren, h)
-						} else if 2 == blockHeadingMode {
-							// 仅显示标题下方的块（默认行为）
-							if "1" != h.IALAttr("fold") {
-								children := treenode.HeadingChildren(h)
-								for _, c := range children {
-									if "1" == c.IALAttr("heading-fold") {
-										// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
-										continue
-									}
-									hChildren = append(hChildren, c)
+							embedTopLevel = n.HeadingLevel
+							if parentHeadingLevel >= embedTopLevel {
+								n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+								if 6 < n.HeadingLevel {
+									n.HeadingLevel = 6
 								}
 							}
-						} else {
-							// 0: 显示标题与下方的块
-							hChildren = append(hChildren, h)
-							hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+							return ast.WalkContinue
+						})
+					}
+
+					md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
+				} else if "h" == sqlBlock.Type {
+					h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+					var hChildren []*ast.Node
+
+					// 从嵌入块的 IAL 属性中解析 custom-heading-mode，使用全局配置作为默认值
+					blockHeadingMode := Conf.Editor.HeadingEmbedMode
+					if customHeadingMode := n.IALAttr("custom-heading-mode"); "" != customHeadingMode {
+						if mode, err := strconv.Atoi(customHeadingMode); nil == err && (mode == 0 || mode == 1 || mode == 2) {
+							blockHeadingMode = mode
 						}
-						if 0 == blockEmbedMode {
-							embedTopLevel := 0
+					}
+
+					// 根据 blockHeadingMode 处理标题块的显示
+					// blockHeadingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
+					if 1 == blockHeadingMode {
+						// 仅显示标题
+						hChildren = append(hChildren, h)
+					} else if 2 == blockHeadingMode {
+						// 仅显示标题下方的块（默认行为）
+						if "1" != h.IALAttr("fold") {
+							children := treenode.HeadingChildren(h)
+							for _, c := range children {
+								if "1" == c.IALAttr("heading-fold") {
+									// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
+									continue
+								}
+								hChildren = append(hChildren, c)
+							}
+						}
+					} else {
+						// 0: 显示标题与下方的块
+						hChildren = append(hChildren, h)
+						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+					}
+					if 0 == blockEmbedMode {
+						embedTopLevel := 0
+						for _, hChild := range hChildren {
+							if ast.NodeHeading == hChild.Type {
+								embedTopLevel = hChild.HeadingLevel
+								break
+							}
+						}
+						if parentHeadingLevel >= embedTopLevel {
 							for _, hChild := range hChildren {
 								if ast.NodeHeading == hChild.Type {
-									embedTopLevel = hChild.HeadingLevel
-									break
-								}
-							}
-							if parentHeadingLevel >= embedTopLevel {
-								for _, hChild := range hChildren {
-									if ast.NodeHeading == hChild.Type {
-										hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-										if 6 < hChild.HeadingLevel {
-											hChild.HeadingLevel = 6
-										}
+									hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+									if 6 < hChild.HeadingLevel {
+										hChild.HeadingLevel = 6
 									}
 								}
 							}
 						}
-
-						mdBuf := &bytes.Buffer{}
-						for _, hChild := range hChildren {
-							md, _ = lute.FormatNodeSync(hChild, luteEngine.ParseOptions, luteEngine.RenderOptions)
-							mdBuf.WriteString(md)
-							mdBuf.WriteString("\n\n")
-						}
-						md = mdBuf.String()
-					} else {
-						node := treenode.GetNodeInTree(subTree, sqlBlock.ID)
-						md, _ = lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
 					}
 
-					buf := &bytes.Buffer{}
-					lines := strings.Split(md, "\n")
-					for i, line := range lines {
-						if 0 == blockEmbedMode { // 使用原始文本
-							buf.WriteString(line)
-						} else { // 使用引述块
-							buf.WriteString("> " + line)
-						}
-						if i < len(lines)-1 {
-							buf.WriteString("\n")
-						}
+					mdBuf := &bytes.Buffer{}
+					for _, hChild := range hChildren {
+						md, _ = lute.FormatNodeSync(hChild, luteEngine.ParseOptions, luteEngine.RenderOptions)
+						mdBuf.WriteString(md)
+						mdBuf.WriteString("\n\n")
 					}
-					buf.WriteString("\n\n")
+					md = mdBuf.String()
+				} else {
+					node := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+					md, _ = lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
+				}
 
-					subTree = parse.Parse("", buf.Bytes(), luteEngine.ParseOptions)
-					var inserts []*ast.Node
-					for subNode := subTree.Root.FirstChild; nil != subNode; subNode = subNode.Next {
-						if ast.NodeKramdownBlockIAL != subNode.Type {
-							inserts = append(inserts, subNode)
-						}
+				buf := &bytes.Buffer{}
+				lines := strings.Split(md, "\n")
+				for i, line := range lines {
+					if 0 == blockEmbedMode { // 使用原始文本
+						buf.WriteString(line)
+					} else { // 使用引述块
+						buf.WriteString("> " + line)
 					}
-					if 2 < len(n.KramdownIAL) && 0 < len(inserts) {
-						if bookmark := n.IALAttr("bookmark"); "" != bookmark {
-							inserts[0].SetIALAttr("bookmark", bookmark)
-						}
-						if name := n.IALAttr("name"); "" != name {
-							inserts[0].SetIALAttr("name", name)
-						}
-						if alias := n.IALAttr("alias"); "" != alias {
-							inserts[0].SetIALAttr("alias", alias)
-						}
-						if memo := n.IALAttr("memo"); "" != memo {
-							inserts[0].SetIALAttr("memo", memo)
-						}
-					}
-					for _, insert := range inserts {
-						n.InsertBefore(insert)
-
-						if gulu.Str.Contains(sqlBlock.ID, *resolved) {
-							return ast.WalkContinue
-						}
-
-						resolveEmbedR(insert, blockEmbedMode, luteEngine, resolved, depth)
+					if i < len(lines)-1 {
+						buf.WriteString("\n")
 					}
 				}
-				unlinks = append(unlinks, n)
-				return ast.WalkSkipChildren
+				buf.WriteString("\n\n")
+
+				subTree = parse.Parse("", buf.Bytes(), luteEngine.ParseOptions)
+				var inserts []*ast.Node
+				for subNode := subTree.Root.FirstChild; nil != subNode; subNode = subNode.Next {
+					if ast.NodeKramdownBlockIAL != subNode.Type {
+						inserts = append(inserts, subNode)
+					}
+				}
+				if 2 < len(n.KramdownIAL) && 0 < len(inserts) {
+					if bookmark := n.IALAttr("bookmark"); "" != bookmark {
+						inserts[0].SetIALAttr("bookmark", bookmark)
+					}
+					if name := n.IALAttr("name"); "" != name {
+						inserts[0].SetIALAttr("name", name)
+					}
+					if alias := n.IALAttr("alias"); "" != alias {
+						inserts[0].SetIALAttr("alias", alias)
+					}
+					if memo := n.IALAttr("memo"); "" != memo {
+						inserts[0].SetIALAttr("memo", memo)
+					}
+				}
+				for _, insert := range inserts {
+					n.InsertBefore(insert)
+
+					if gulu.Str.Contains(sqlBlock.ID, *resolved) {
+						return ast.WalkContinue
+					}
+
+					resolveEmbedR(insert, blockEmbedMode, luteEngine, resolved, depth)
+					*depth--
+				}
 			}
-			return ast.WalkContinue
+			unlinks = append(unlinks, n)
+			return ast.WalkSkipChildren
 		})
+
 		for _, unlink := range unlinks {
 			unlink.Unlink()
 		}

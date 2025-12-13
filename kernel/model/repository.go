@@ -1635,7 +1635,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		}
 	}
 
-	removeWidgetDirSet, removePluginSet := hashset.New(), hashset.New()
+	removeWidgetDirSet, unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New(), hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -1664,7 +1664,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/plugins/") {
 			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
 				needReloadPlugin = true
-				removePluginSet.Add(parts[2])
+				// 删除插件目录：卸载
+				uninstallPluginSet.Add(parts[2])
 			}
 		}
 
@@ -1681,7 +1682,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 	for _, removePetal := range mergeResult.RemovePetals {
 		needReloadPlugin = true
-		removePluginSet.Add(removePetal)
+		// Petal 中删除插件：卸载
+		uninstallPluginSet.Add(removePetal)
 	}
 
 	if needReloadFlashcard {
@@ -1693,7 +1695,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadPlugin {
-		PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, removePluginSet, "")
+		PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginSet, uninstallPluginSet, "")
 	}
 
 	for _, widgetDir := range removeWidgetDirSet.Values() {

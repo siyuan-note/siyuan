@@ -52,7 +52,7 @@
   * [SiYuan açık kaynak mı?](#siyuan-açık-kaynak-mı)
   * [Yeni bir sürüme nasıl yükseltilir?](#yeni-bir-sürüme-nasıl-yükseltilir)
   * [Bazı bloklar (örneğin liste öğelerindeki paragraflar) blok simgesini bulamıyorsa ne yapmalıyım?](#bazı-bloklar-örneğin-liste-öğelerindeki-paragraflar-blok-simgesini-bulamıyorsa-ne-yapmalıyım)
-  * [Veri deposu anahtarını kaybedersem ne olur?](#veri-deposu-anahtarını-kaybedersem-ne-olur)
+  * [Veri deposu anahtarı (data repo key) kaybolursa ne yapmalıyım?](#veri-deposu-anahtarı-data-repo-key-kaybolursa-ne-yapmalıyım)
   * [Ücretli mi?](#ücretli-mi)
 * [🙏 Teşekkür](#-teşekkür)
   * [Katkıda Bulunanlar](#katkıda-bulunanlar)
@@ -313,7 +313,7 @@ Publish parameters: --accessAuthCode=******(Access authorization code)
 
 </details>
 
-### Insider Preview
+### Erken Önizleme (Insider Preview)
 
 Büyük güncellemelerden önce erken erişim (Insider Preview) sürümlerini yayınlıyoruz. Lütfen [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider) adresini ziyaret edin.
 
@@ -374,7 +374,7 @@ Daha fazla bilgi için [Geliştirme Rehberi](https://github.com/siyuan-note/siyu
 
 Ayrıca, <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Geçerli Sürüm</kbd> sekmesinden <kbd>Güncellemeyi kontrol et</kbd> seçeneğini kullanabilir veya [Resmî İndirme Sayfası](https://b3log.org/siyuan/en/download.html) ya da [GitHub Sürümleri](https://github.com/siyuan-note/siyuan/releases) sayfalarını takip edebilirsiniz.
 
-### Bazı bloklarda (örneğin liste öğelerindeki paragraf bloklarında) blok simgesi görünmüyorsa ne yapmalıyım?
+### Bazı bloklar (örneğin liste öğelerindeki paragraflar) blok simgesini bulamıyorsa ne yapmalıyım?
 
 Liste öğesinin altındaki ilk alt blok, blok simgesi görünmeyen bloktur. İmleci bu bloğa getirip <kbd>Ctrl+/</kbd> tuş kombinasyonuyla blok menüsünü açabilirsin.
 

@@ -1298,8 +1298,8 @@
   "alternateText": "Alternatif metin",
   "bold": "Kalın",
   "cardPreview": "Önizleme",
-  "check": "Görev listesi",
-  "code": "Kod bloğu",
+  "check": "Görev Listesi",
+  "code": "Kod Bloğu",
   "column": "Sütun",
   "copied": "Kopyalandı",
   "copy": "Kopyala",
@@ -1339,6 +1339,7 @@
   "outlineOutdentTip": "Etkinleştirildiğinde dışa girinti, alt öğeleri üst öğenin altına taşıyacak şekilde liste mantığını kullanır",
   "spellcheck": "Yazım denetimi",
   "spellcheckTip": "Etkinleştirildiğinde tarayıcının yerleşik yazım denetimi kullanılır (şu anda yalnızca İngilizce desteklenir)",
+  "spellcheckTip2": "Etkinleştirildiğinde, yerleşik yazım denetimi kullanılacaktır. Lütfen aşağıdaki listeden denetlenecek dilleri seçin",
   "over": "üzeri",
   "preview": "Dışa aktarma önizlemesi",
   "desktop": "Masaüstü",
@@ -1705,6 +1706,7 @@
     "271": "Veri indeksi optimizasyonu tamamlandı, [%s] disk alanı boşaltıldı",
     "272": "Adsız alan",
     "273": "Çalışma alanını diskin kök dizinine oluşturma, yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
-    "274": "Bu klasör başka dosyalar içeriyor, lütfen yeni bir klasör oluştur ve onu çalışma alanı olarak kullan"
+    "274": "Bu klasör başka dosyalar içeriyor, lütfen yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
+    "275": "Daha yeni bir sürümde oluşturulmuş belgeler açılamıyor. Lütfen en son sürüme yükseltip tekrar deneyin"
   }
 }

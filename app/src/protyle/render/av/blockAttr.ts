@@ -16,7 +16,7 @@ import {webUtils} from "electron";
 /// #endif
 import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
-import {getCompressURL} from "../../../util/image";
+import {getCompressURL, removeCompressURL} from "../../../util/image";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -90,7 +90,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "mAsset":
             value.mAsset?.forEach(item => {
                 if (item.type === "image") {
-                    html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}">`;
+                    html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}" data-src="${item.content}">`;
                 } else {
                     html += `<span class="b3-chip b3-chip--middle av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
                 }
@@ -491,7 +491,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                     protyle,
                     cellElements: [target.parentElement],
                     blockElement: hasClosestBlock(target) as HTMLElement,
-                    content: target.tagName === "IMG" ? target.getAttribute("src") : target.getAttribute("data-url"),
+                    content: target.tagName === "IMG" ? (target.getAttribute("data-src") || target.getAttribute("src")) : target.getAttribute("data-url"),
                     type: target.tagName === "IMG" ? "image" : "file",
                     name: target.tagName === "IMG" ? "" : target.getAttribute("data-name"),
                     index,
@@ -499,7 +499,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 });
             } else {
                 if (target.tagName === "IMG") {
-                    previewImages([target.getAttribute("src")]);
+                    previewImages([target.getAttribute("data-src") || removeCompressURL(target.getAttribute("src"))]);
                 } else {
                     openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
                 }

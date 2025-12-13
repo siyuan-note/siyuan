@@ -2577,7 +2577,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("dblclick", (event: MouseEvent & { target: HTMLElement }) => {
             if (event.target.tagName === "IMG" && !event.target.classList.contains("emoji")) {
-                previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
+                previewDocImage((event.target as HTMLElement).getAttribute("data-src") || (event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                 return;
             }
         });
@@ -3064,7 +3064,7 @@ export class WYSIWYG {
                         const oldHTML = nodeElement.outerHTML;
                         let emojiHTML;
                         if (unicode.startsWith("api/icon/getDynamicIcon")) {
-                            emojiHTML = `<img class="callout-img" src="${unicode}"/>`;
+                            emojiHTML = `<img class="callout-img" src="${unicode}" data-src="${unicode}"/>`;
                         } else if (unicode.indexOf(".") > -1) {
                             emojiHTML = `<img class="callout-img" src="/emojis/${unicode}">`;
                         } else {
@@ -3096,7 +3096,7 @@ export class WYSIWYG {
                         const oldHTML = nodeElement.outerHTML;
                         let emojiHTML;
                         if (unicode.startsWith("api/icon/getDynamicIcon")) {
-                            emojiHTML = `<img class="emoji" src="${unicode}"/>`;
+                            emojiHTML = `<img class="emoji" src="${unicode}" data-src="${unicode}"/>`;
                         } else if (unicode.indexOf(".") > -1) {
                             const emojiList = unicode.split(".");
                             emojiHTML = `<img alt="${emojiList[0]}" class="emoji" src="/emojis/${unicode}" title="${emojiList[0]}">`;

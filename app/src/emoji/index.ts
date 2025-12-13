@@ -26,7 +26,7 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
     }
     let emoji = "";
     if (unicode.startsWith("api/icon/getDynamicIcon")) {
-        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="${unicode}"/>`;
+        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="${unicode}" data-src="${unicode}"/>`;
     } else if (unicode.indexOf(".") > -1) {
         emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/emojis/${unicode}"/>`;
     } else {

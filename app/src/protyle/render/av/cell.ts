@@ -131,7 +131,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
                 type: isImg ? "image" : "file",
-                content: isImg ? removeCompressURL(item.getAttribute("src")) : item.getAttribute("data-url"),
+                content: isImg ? (item.getAttribute("data-src") || removeCompressURL(item.getAttribute("src"))) : item.getAttribute("data-url"),
                 name: isImg ? "" : item.getAttribute("data-name")
             });
         });
@@ -989,7 +989,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
-                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}" data-src="${item.content}">`;
             } else {
                 text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
             }

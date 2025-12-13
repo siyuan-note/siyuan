@@ -15,6 +15,12 @@ import {Menu} from "../plugin/Menu";
 export const editor = {
     element: undefined as Element,
     genHTML: () => {
+        let spellcheckTip = "";
+        /// #if !BROWSER
+        spellcheckTip = window.siyuan.languages.spellcheckTip1;
+        /// #else
+        spellcheckTip = window.siyuan.languages.spellcheckTip;
+        /// #endif
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fullWidth}
@@ -104,7 +110,7 @@ export const editor = {
     <label class="fn__flex">
         <div class="fn__flex-1">
             ${window.siyuan.languages.spellcheck}
-            <div class="b3-label__text">${window.siyuan.languages.spellcheckTip}</div>
+            <div class="b3-label__text">${spellcheckTip}</div>
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" id="spellcheck" type="checkbox"${window.siyuan.config.editor.spellcheck ? " checked" : ""}/>

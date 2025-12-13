@@ -17,7 +17,7 @@ export const editor = {
     genHTML: () => {
         let spellcheckTip = "";
         /// #if !BROWSER
-        spellcheckTip = window.siyuan.languages.spellcheckTip1;
+        spellcheckTip = window.siyuan.languages.spellcheckTip2;
         /// #else
         spellcheckTip = window.siyuan.languages.spellcheckTip;
         /// #endif

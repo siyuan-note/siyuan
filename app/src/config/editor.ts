@@ -375,11 +375,11 @@ export const editor = {
     bindEvent: async () => {
         /// #if !BROWSER
         const languages: string[] = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: "getSpellCheckerLanguages",
+            cmd: "availableSpellCheckerLanguages",
         });
         let spellcheckLanguagesHTML = "";
         languages.forEach(item => {
-            spellcheckLanguagesHTML = `<div class="fn__pointer b3-chip b3-chip--middle${window.siyuan.config.editor.spellcheckLanguages.includes(item) ? " b3-chip--current" : ""}">${item}</div>`;
+            spellcheckLanguagesHTML += `<div class="fn__pointer b3-chip b3-chip--middle${window.siyuan.config.editor.spellcheckLanguages.includes(item) ? " b3-chip--current" : ""}">${item}</div>`;
         });
         const spellcheckLanguagesElement = editor.element.querySelector("#spellcheckLanguages");
         spellcheckLanguagesElement.innerHTML = spellcheckLanguagesHTML;

@@ -840,13 +840,13 @@ export const bazaar = {
                             if (window.siyuan.config.bazaar.petalDisabled) {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
                                     item.classList.add("b3-card--disabled");
-                                    uninstall(app, JSON.parse(item.getAttribute("data-obj")).name, false);
+                                    uninstall(app, JSON.parse(item.getAttribute("data-obj")).name, true);
                                 });
                             } else {
                                 bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach(item => {
                                     item.classList.remove("b3-card--disabled");
                                 });
-                                loadPlugins(app).then(() => {
+                                loadPlugins(app, null, false).then(() => {
                                     app.plugins.forEach(item => {
                                         afterLoadPlugin(item);
                                     });
@@ -878,7 +878,7 @@ export const bazaar = {
                                     }
                                 });
                             } else {
-                                uninstall(app, dataObj.name, false);
+                                uninstall(app, dataObj.name, true);
                                 target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
                             }
                         });

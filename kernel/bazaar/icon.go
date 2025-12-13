@@ -169,9 +169,9 @@ func InstalledIcons() (ret []*Icon) {
 		icon.PreferredFunding = getPreferredFunding(icon.Funding)
 		icon.PreferredName = GetPreferredName(icon.Package)
 		icon.PreferredDesc = getPreferredDesc(icon.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "icon.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install icon.json failed: %s", statErr)
 			continue
 		}
 		icon.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -183,14 +183,7 @@ func InstalledIcons() (ret []*Icon) {
 			packageInstallSizeCache.SetDefault(icon.RepoURL, is)
 		}
 		icon.HInstallSize = humanize.BytesCustomCeil(uint64(icon.InstallSize), 2)
-		readmeFilename := getPreferredReadme(icon.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)
+		icon.PreferredReadme = loadInstalledReadme(installPath, "/appearance/icons/"+dirName+"/", icon.Readme)
 		icon.Outdated = isOutdatedIcon(icon, bazaarIcons)
 		ret = append(ret, icon)
 	}

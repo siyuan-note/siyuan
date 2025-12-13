@@ -17,7 +17,7 @@ import {isIPad, setStorageVal} from "../util/compatibility";
 import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
-import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
@@ -116,10 +116,13 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         return true;
     }
 
-    // bq
+    // bq || callout
+    const isCallout = blockElement.parentElement.classList.contains("callout-content");
+    const parentBlockElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
     if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
-        blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
-        blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
+        ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
+                blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
+            (isCallout && !blockElement.nextElementSibling))) {
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement);
         const blockId = blockElement.getAttribute("data-node-id");
@@ -135,9 +138,9 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: topElement.outerHTML,
         };
         if (topId === blockId) {
-            doInsert.previousID = blockElement.parentElement.getAttribute("data-node-id");
+            doInsert.previousID = parentBlockElement.getAttribute("data-node-id");
             undoInsert.previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
-            blockElement.parentElement.after(blockElement);
+            parentBlockElement.after(blockElement);
         } else {
             doInsert.previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : undefined;
             doInsert.parentID = topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID;
@@ -153,8 +156,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             action: "delete",
             id: blockId,
         }, undoInsert]);
-        if (topId === blockId && blockElement.parentElement.classList.contains("sb") &&
-            blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
+        if (topId === blockId && parentBlockElement.classList.contains("sb") &&
+            parentBlockElement.getAttribute("data-sb-layout") === "col") {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: [blockElement.previousElementSibling, blockElement],
@@ -194,7 +197,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: newElement.outerHTML,
             id: newId,
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
-            parentID: blockElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: parentBlockElement.getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "delete",
             id: newId,
@@ -206,6 +209,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
+    const parentHTML = parentBlockElement.outerHTML;
     if (range.toString() !== "") {
         // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
         const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
@@ -328,9 +332,23 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement = item;
         selectsElement.push(item);
     });
-    const parentElement = currentElement.parentElement;
+    if (currentElement.parentElement.classList.contains("bq") && currentElement.parentElement.childElementCount > 2 &&
+        currentElement.previousElementSibling.classList.contains("p") && currentElement.classList.contains("p") &&
+        currentElement.previousElementSibling.textContent.startsWith("[!") && parentHTML) {
+        const parentId = currentElement.parentElement.getAttribute("data-node-id");
+        const calloutHTML = protyle.lute.SpinBlockDOM(currentElement.parentElement.outerHTML);
+        if (calloutHTML.indexOf('data-type="NodeCallout"') > -1) {
+            currentElement.parentElement.outerHTML = calloutHTML;
+            mathRender(protyle.wysiwyg.element);
+            updateTransaction(protyle, parentId, calloutHTML, parentHTML);
+            focusByWbr(protyle.wysiwyg.element, range);
+            scrollCenter(protyle);
+            return true;
+        }
+    }
     transaction(protyle, doOperation, undoOperation);
-    if (parentElement.classList.contains("sb") && parentElement.getAttribute("data-sb-layout") === "col") {
+    if (currentElement.parentElement.classList.contains("sb") &&
+        currentElement.parentElement.getAttribute("data-sb-layout") === "col") {
         turnsIntoOneTransaction({
             protyle,
             selectsElement,

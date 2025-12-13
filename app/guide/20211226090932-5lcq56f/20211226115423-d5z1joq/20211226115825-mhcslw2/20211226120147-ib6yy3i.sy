@@ -1,12 +1,12 @@
 {
 	"ID": "20211226120147-ib6yy3i",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20251021231250"
+		"updated": "20251209212407"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-2s70boj",
-				"updated": "20250330191635"
+				"updated": "20251209212229"
 			},
 			"Children": [
 				{
@@ -49,7 +49,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226120227-nx8tlf5",
-				"updated": "20250330191635"
+				"updated": "20251209212229"
 			},
 			"Children": [
 				{
@@ -107,7 +107,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -176,7 +176,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -245,7 +245,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -314,7 +314,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -383,7 +383,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -426,7 +426,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "表格塊"
+									"Data": "表格"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "塊"
 								}
 							]
 						},
@@ -452,7 +456,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -521,7 +525,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -590,7 +594,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -633,7 +637,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "無序列表塊"
+									"Data": "無序"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "塊"
 								}
 							]
 						},
@@ -659,7 +671,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -702,7 +714,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "有序列表塊"
+									"Data": "有序"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "塊"
 								}
 							]
 						},
@@ -728,7 +748,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -771,7 +791,15 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "任務列表塊"
+									"Data": "任務"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "塊"
 								}
 							]
 						},
@@ -797,7 +825,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -840,7 +868,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項塊"
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "項塊"
 								}
 							]
 						},
@@ -866,7 +898,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -909,7 +941,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引述塊"
+									"Data": "引述"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "塊"
 								}
 							]
 						},
@@ -935,7 +971,76 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "​​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "callout"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/callout-20251209210931-cq1e6w6.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "提示塊"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "容器塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -1004,7 +1109,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -2682,7 +2787,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-7tg2ytf",
-				"updated": "20250330184042"
+				"updated": "20251209211414"
 			},
 			"Children": [
 				{
@@ -2792,12 +2897,101 @@
 			]
 		},
 		{
+			"ID": "20251209211414-k61h1ws",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20251209211414-k61h1ws",
+				"updated": "20251209212407"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提示塊"
+				}
+			]
+		},
+		{
+			"ID": "20251209211447-h7a5c97",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251209211447-h7a5c97",
+				"updated": "20251209212407"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "callout"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/callout-20251209210931-cq1e6w6.svg"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20251209211422-dkp0tc8",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251209211422-dkp0tc8",
+				"updated": "20251209211442"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251209211427-jf7onn3",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251209211427-jf7onn3",
+						"updated": "20251209211442"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "醒目的提示！"
+						}
+					]
+				}
+			]
+		},
+		{
 			"ID": "20211226120227-hqosjsi",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-hqosjsi",
-				"updated": "20250330184043"
+				"updated": "20251209212240"
 			},
 			"Children": [
 				{
@@ -2811,7 +3005,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-aqlpu1r",
-				"updated": "20250330184043"
+				"updated": "20251209212240"
 			},
 			"Children": [
 				{
@@ -2971,7 +3165,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-3jdgfm5",
-				"updated": "20211225225419"
+				"updated": "20251209211409"
 			},
 			"Children": [
 				{
@@ -3000,7 +3194,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120227-8jsk008",
-				"updated": "20211225225419"
+				"updated": "20251209211409"
 			},
 			"Children": [
 				{
@@ -3011,19 +3205,33 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120227-xrfeso1"
+						"id": "20211226120227-xrfeso1",
+						"updated": "20211226120227"
 					},
 					"Children": [
 						{
 							"ID": "20211226120227-3yh1s5d",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120227-3yh1s5d"
+								"id": "20211226120227-3yh1s5d",
+								"updated": "20211226120227"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表塊：只能包含列表項塊"
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "塊：只能包含"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "項塊"
 								}
 							]
 						}
@@ -3037,19 +3245,25 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120227-bt51psa"
+						"id": "20211226120227-bt51psa",
+						"updated": "20211226120227"
 					},
 					"Children": [
 						{
 							"ID": "20211226120227-v2a9i1u",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120227-v2a9i1u"
+								"id": "20211226120227-v2a9i1u",
+								"updated": "20211226120227"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "列表項塊：可以包含任意非文檔塊"
+									"Data": "列表"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "項塊：可以包含任意非文檔塊"
 								}
 							]
 						}
@@ -3063,19 +3277,49 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120227-qygjey0"
+						"id": "20211226120227-qygjey0",
+						"updated": "20211226120227"
 					},
 					"Children": [
 						{
 							"ID": "20211226120227-6g0cn8z",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120227-6g0cn8z"
+								"id": "20211226120227-6g0cn8z",
+								"updated": "20211226120227"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
 									"Data": "引述塊：可以包含任意非文檔塊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20251209211358-23cnrur",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20251209211358-23cnrur",
+						"updated": "20251209211409"
+					},
+					"Children": [
+						{
+							"ID": "20251209211358-rnxj20h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20251209211358-rnxj20h",
+								"updated": "20251209211409"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "提示塊：可以包含任意非文檔塊"
 								}
 							]
 						}
@@ -3089,14 +3333,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120227-sxzlmxk"
+						"id": "20211226120227-sxzlmxk",
+						"updated": "20211226120227"
 					},
 					"Children": [
 						{
 							"ID": "20211226120227-m58y7ii",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120227-m58y7ii"
+								"id": "20211226120227-m58y7ii",
+								"updated": "20211226120227"
 							},
 							"Children": [
 								{
@@ -3115,14 +3361,16 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120227-jksb114"
+						"id": "20211226120227-jksb114",
+						"updated": "20211226120227"
 					},
 					"Children": [
 						{
 							"ID": "20211226120227-yksb3ck",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120227-yksb3ck"
+								"id": "20211226120227-yksb3ck",
+								"updated": "20211226120227"
 							},
 							"Children": [
 								{

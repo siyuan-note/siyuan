@@ -273,11 +273,13 @@ export class Wnd {
                 return;
             }
 
-            const nextTabHeaderElement = (Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
+            let nextTabHeaderElement: HTMLElement;
+            Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
                 if (item.style?.opacity === "0.38") {
+                    nextTabHeaderElement = item.nextElementSibling as HTMLElement;
                     return true;
                 }
-            }) as HTMLElement)?.nextElementSibling;
+            });
 
             if (!it.contains(oldTab.headElement)) {
                 // 从其他 Wnd 拖动过来

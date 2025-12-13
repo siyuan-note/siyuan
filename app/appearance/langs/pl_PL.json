@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Pobierz i przywróć",
   "callout": "Wskazówka",
   "hasAttrName": "Nazwa atrybutu ${x} już istnieje",
   "statusBarMsgPushTip": "Dzięki powiadomieniom na pasku stanu można na bieżąco poznać działanie systemu, a jeśli przeszkadzają, można je wyłączyć",
@@ -414,7 +415,7 @@
   "confirmPassword": "Zapamiętałem już hasło",
   "passwordNoMatch": "Wprowadzone dwa hasła się nie zgadzają",
   "cloudConfigTip": "Proszę skonfigurować w [Ustawienia - Chmura]",
-  "confirmUninstall": "Czy na pewno chcesz odinstalować ${name}?",
+  "confirmUninstall": "Czy na pewno chcesz odinstalować ${name}?<br>Odinstalowanie może usunąć wszystkie powiązane ustawienia i dane, podejmij decyzję ostrożnie!",
   "scrollGetMore": "Przewiń w górę i w dół, aby załadować więcej",
   "flashcardNewCard": "Nowa",
   "flashcardReviewCard": "Stara",
@@ -1338,7 +1339,8 @@
   "outlineOutdent": "Zwiń zarys listy",
   "outlineOutdentTip": "Po włączeniu, zwijanie będzie używać logiki zarysu listy, czyli przeniesienie elementów listy poniżej rodzica",
   "spellcheck": "Sprawdzanie pisowni",
-  "spellcheckTip": "Po włączeniu zostanie użyta wbudowana funkcja sprawdzania pisowni przeglądarki. Obecnie obsługiwane jest tylko sprawdzanie pisowni w języku angielskim",
+  "spellcheckTip": "Po włączeniu będzie używana wbudowana w przeglądarkę kontrola pisowni. Proszę wybrać języki do sprawdzania w ustawieniach przeglądarki",
+  "spellcheckTip2": "Po włączeniu będzie używana wbudowana kontrola pisowni. Proszę wybrać języki do sprawdzania z poniższej listy",
   "over": "ponad",
   "preview": "Podgląd eksportu",
   "desktop": "Desktop",
@@ -1705,6 +1707,7 @@
     "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku",
     "272": "Nienazwane pole",
     "273": "Nie twórz przestrzeni roboczej w katalogu głównym partycji, utwórz nowy folder jako przestrzeń roboczą",
-    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą"
+    "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą",
+    "275": "Nie można otworzyć dokumentu utworzonego w nowszej wersji. Zaktualizuj program do najnowszej wersji i spróbuj ponownie"
   }
 }

@@ -1,10 +1,11 @@
 {
 	"ID": "20211226123241-51pujtr",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226123241-51pujtr",
 		"title": "剪藏",
+		"type": "doc",
 		"updated": "20230630112320"
 	},
 	"Children": [

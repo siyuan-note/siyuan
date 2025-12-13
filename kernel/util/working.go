@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"math/rand"
 	"mime"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -72,6 +73,7 @@ func initEnvVars() {
 var (
 	bootProgress = atomic.Int32{} // 启动进度，从 0 到 100
 	bootDetails  string           // 启动细节描述
+	HttpServer   *http.Server     // HTTP 伺服器实例
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
 )
 
@@ -101,7 +103,7 @@ func Boot() {
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/it_IT/ja_JP/pl_PL/pt_BR/ru_RU/tr_TR/zh_CHT/zh_CN")
+	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/it_IT/ja_JP/ko_KR/pl_PL/pt_BR/ru_RU/tr_TR/zh_CHT/zh_CN")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
@@ -140,7 +142,7 @@ func Boot() {
 				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
 				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker\n")
 				fmt.Printf("or you can set the SIYUAN_ACCESS_AUTH_CODE env var")
-				os.Exit(1)
+				os.Exit(logging.ExitCodeSecurityRisk)
 			}
 		}
 	}
@@ -345,10 +347,19 @@ func ReadWorkspacePaths() (ret []string, err error) {
 	}
 
 	var tmp []string
+	workspaceBaseDir := filepath.Dir(HomeDir)
 	for _, d := range ret {
+		if ContainerIOS == Container && strings.Contains(d, "/Documents/") {
+			// iOS 端沙箱路径会变化，需要转换为相对路径再拼接当前沙箱中的工作空间基路径
+			d = d[strings.Index(d, "/Documents/")+len("/Documents/"):]
+			d = filepath.Join(workspaceBaseDir, d)
+		}
+
 		d = strings.TrimRight(d, " \t\n") // 去掉工作空间路径尾部空格 https://github.com/siyuan-note/siyuan/issues/6353
 		if gulu.File.IsDir(d) {
 			tmp = append(tmp, d)
+		} else {
+			logging.LogWarnf("workspace path [%s] is not a dir", d)
 		}
 	}
 	ret = tmp

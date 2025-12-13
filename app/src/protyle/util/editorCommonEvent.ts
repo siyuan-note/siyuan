@@ -11,7 +11,7 @@ import {Constants} from "../../constants";
 import {paste} from "./paste";
 import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
-import {getTopAloneElement} from "../wysiwyg/getBlock";
+import {getParentBlock, getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
@@ -71,7 +71,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 data: newListElement.outerHTML,
                 id: newListId,
                 previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : tempTargetElement.previousElementSibling?.getAttribute("data-node-id")),
-                parentID: position === "afterbegin" ? targetId : (tempTargetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                parentID: position === "afterbegin" ? targetId : (getParentBlock(tempTargetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
                 action: "delete",
@@ -132,7 +132,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     id: copyNewId,
                     data: copyElement.outerHTML,
                     previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
-                    parentID: position === "afterbegin" ? targetId : (copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                    parentID: position === "afterbegin" ? targetId : (getParentBlock(copyElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
             }
@@ -155,7 +155,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "move",
                     id,
                     previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
-                    parentID: position === "afterbegin" ? targetId : (item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                    parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(item);
             }
@@ -171,7 +171,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     data: topSourceElement.outerHTML,
                     id: topSourceElement.getAttribute("data-node-id"),
                     previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+                    parentID: getParentBlock(topSourceElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
                 });
                 const topSourceParentElement = topSourceElement.parentElement;
                 topSourceElement.remove();
@@ -348,7 +348,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         action: "move",
         id: targetElement.getAttribute("data-node-id"),
         previousID: targetElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: targetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+        parentID: getParentBlock(targetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     };
     const sbElement = genSBElement(direct);
     targetElement.parentElement.replaceChild(sbElement, targetElement);
@@ -358,7 +358,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         id: sbElement.getAttribute("data-node-id"),
         nextID: sbElement.nextElementSibling?.getAttribute("data-node-id"),
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+        parentID: getParentBlock(sbElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
     // 临时插入，防止后面计算错误，最终再移动矫正
     sbElement.lastElementChild.before(targetElement);
@@ -1264,7 +1264,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 prevElement = prevElement.parentElement;
             }
         }
-
         if (!targetElement) {
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
                 // 命中底部

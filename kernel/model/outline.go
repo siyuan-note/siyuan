@@ -54,7 +54,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 	headings := []*ast.Node{}
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 			headings = append(headings, n)
 		}
 		return ast.WalkContinue
@@ -305,7 +305,7 @@ func outline(tree *parse.Tree) (ret []*Path) {
 	luteEngine := NewLute()
 	var headings []*Block
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 			n.Box, n.Path = tree.Box, tree.Path
 			block := &Block{
 				RootID:  tree.Root.ID,

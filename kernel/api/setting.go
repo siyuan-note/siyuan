@@ -326,6 +326,7 @@ func setEditor(c *gin.Context) {
 	model.Conf.Save()
 
 	if oldGenerateHistoryInterval != model.Conf.Editor.GenerateHistoryInterval {
+		model.GenerateFileHistory()
 		model.ChangeHistoryTick(editor.GenerateHistoryInterval)
 	}
 

@@ -101,6 +101,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
+import {updateCalloutType} from "./callout";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -624,7 +625,9 @@ export class WYSIWYG {
                             hasJump = true;
                         }
                     }
-                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
+                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
+                        !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
+                        !selectElements[0].classList.contains("sb")) {
                         // 单个 p 不选中
                     } else {
                         const ids: string[] = [];
@@ -1230,7 +1233,8 @@ export class WYSIWYG {
                 protyle.selectElement.setAttribute("style", `background-color: ${protyle.selectElement.style.backgroundColor};top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
                 const newMouseElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
                 if (mouseElement && mouseElement === newMouseElement && !mouseElement.classList.contains("protyle-wysiwyg") &&
-                    !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") && !mouseElement.classList.contains("sb")) {
+                    !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") &&
+                    !mouseElement.classList.contains("sb") && !mouseElement.classList.contains("callout")) {
                     // 性能优化，同一个p元素不进行选中计算
                     return;
                 } else {
@@ -1250,7 +1254,7 @@ export class WYSIWYG {
                 }
                 if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") ||
                     firstElement.classList.contains("li") || firstElement.classList.contains("sb") ||
-                    firstElement.classList.contains("bq")) {
+                    firstElement.classList.contains("callout") || firstElement.classList.contains("bq")) {
                     firstElement = document.elementFromPoint(newLeft, newTop + 16);
                 }
                 if (!firstElement) {
@@ -1319,7 +1323,11 @@ export class WYSIWYG {
                                     !currentElement.classList.contains("protyle-breadcrumb__item")) {
                                     selectElements.push(currentElement);
                                 }
-                                currentElement = currentElement.nextElementSibling;
+                                if (!currentElement.nextElementSibling && currentElement.parentElement.classList.contains("callout-content")) {
+                                    currentElement = currentElement.parentElement.nextElementSibling;
+                                } else {
+                                    currentElement = currentElement.nextElementSibling;
+                                }
                             }
                         } else if (currentElement.parentElement.classList.contains("sb")) {
                             // 跳出超级块横向排版中的未选中元素
@@ -1340,7 +1348,8 @@ export class WYSIWYG {
                     endLastElement = selectElements[selectElements.length - 1];
                 }
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
-                    !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
+                    !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("callout") &&
+                    !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
                     protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
@@ -2479,7 +2488,13 @@ export class WYSIWYG {
                     input(protyle, blockElement, range, true); // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
                 });
             } else {
-                input(protyle, blockElement, range, true, event);
+                if (isMac() && event.data === "【】") {
+                    setTimeout(() => {
+                        input(protyle, blockElement, range, true, event);
+                    }, Constants.TIMEOUT_INPUT);
+                } else {
+                    input(protyle, blockElement, range, true, event);
+                }
             }
             event.stopPropagation();
         });
@@ -2670,7 +2685,7 @@ export class WYSIWYG {
                         /// #if MOBILE
                         mobileBlur = true;
                         activeBlur();
-                        openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL], "start");
                         /// #else
                         if (event.shiftKey) {
                             openFileById({
@@ -2678,7 +2693,8 @@ export class WYSIWYG {
                                 id: refBlockId,
                                 position: "bottom",
                                 action,
-                                zoomIn
+                                zoomIn,
+                                scrollPosition: "start"
                             });
                             window.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape"}));
                         } else if (event.altKey) {
@@ -2687,7 +2703,8 @@ export class WYSIWYG {
                                 id: refBlockId,
                                 position: "right",
                                 action,
-                                zoomIn
+                                zoomIn,
+                                scrollPosition: "start"
                             });
                         } else if (ctrlIsPressed) {
                             openFileById({
@@ -2695,14 +2712,16 @@ export class WYSIWYG {
                                 id: refBlockId,
                                 keepCursor: true,
                                 action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                                zoomIn
+                                zoomIn,
+                                scrollPosition: "start"
                             });
                         } else {
                             openFileById({
                                 app: protyle.app,
                                 id: refBlockId,
                                 action,
-                                zoomIn
+                                zoomIn,
+                                scrollPosition: "start"
                             });
                         }
                         /// #endif
@@ -3021,6 +3040,44 @@ export class WYSIWYG {
                         protyle.breadcrumb.render(protyle);
                     }
                 }
+                return;
+            }
+
+            const calloutTitleElement = hasTopClosestByClassName(event.target, "callout-title");
+            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutTitleElement) {
+                updateCalloutType(calloutTitleElement, protyle);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            const calloutIconElement = hasTopClosestByClassName(event.target, "callout-icon");
+            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutIconElement) {
+                const nodeElement = hasClosestBlock(calloutIconElement);
+                if (nodeElement) {
+                    const emojiRect = calloutIconElement.getBoundingClientRect();
+                    openEmojiPanel("", "av", {
+                        x: emojiRect.left,
+                        y: emojiRect.bottom,
+                        h: emojiRect.height,
+                        w: emojiRect.width
+                    }, (unicode) => {
+                        const oldHTML = nodeElement.outerHTML;
+                        let emojiHTML;
+                        if (unicode.startsWith("api/icon/getDynamicIcon")) {
+                            emojiHTML = `<img class="callout-img" src="${unicode}"/>`;
+                        } else if (unicode.indexOf(".") > -1) {
+                            emojiHTML = `<img class="callout-img" src="/emojis/${unicode}">`;
+                        } else {
+                            emojiHTML = unicode2Emoji(unicode);
+                        }
+                        calloutIconElement.innerHTML = emojiHTML;
+                        hideElements(["dialog"]);
+                        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        focusBlock(nodeElement);
+                    }, calloutIconElement.querySelector("img"));
+                }
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
 

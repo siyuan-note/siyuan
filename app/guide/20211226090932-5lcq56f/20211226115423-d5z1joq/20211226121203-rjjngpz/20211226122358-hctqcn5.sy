@@ -1,10 +1,11 @@
 {
 	"ID": "20211226122358-hctqcn5",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122358-hctqcn5",
 		"title": "Kernel 參數",
+		"type": "doc",
 		"updated": "20221025095721"
 	},
 	"Children": [

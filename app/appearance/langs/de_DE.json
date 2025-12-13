@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Herunterladen und Zurücksetzen",
   "callout": "Hinweis",
   "hasAttrName": "Der Attributname ${x} ist bereits vorhanden",
   "statusBarMsgPushTip": "Über Nachrichten in der Statusleiste können Sie den Zustand des Systems sofort erfahren, wenn sie stören, können Sie sie deaktivieren",
@@ -414,7 +415,7 @@
   "confirmPassword": "Ich habe das Passwort bereits gemerkt",
   "passwordNoMatch": "Die zweimal eingegebenen Passwörter stimmen nicht überein",
   "cloudConfigTip": "Bitte in [Einstellungen - Cloud] konfigurieren",
-  "confirmUninstall": "Sind Sie sicher, dass Sie ${name} deinstallieren möchten?",
+  "confirmUninstall": "Möchten Sie ${name} wirklich deinstallieren?<br>Die Deinstallation kann alle zugehörigen Einstellungen und Daten entfernen. Bitte entscheiden Sie vorsichtig!",
   "scrollGetMore": "Scrollen Sie nach oben und unten, um mehr zu laden",
   "flashcardNewCard": "Neu",
   "flashcardReviewCard": "Alt",
@@ -1338,7 +1339,8 @@
   "outlineOutdent": "Listenumriss ausrücken",
   "outlineOutdentTip": "Nach der Aktivierung wird das Ausrücken den Listenumriss-Logik verwenden, d.h. die Listenpunkte unter dem übergeordneten Element verschieben",
   "spellcheck": "Rechtschreibprüfung",
-  "spellcheckTip": "Nach der Aktivierung wird die eingebaute Rechtschreibprüfung des Browsers verwendet. Derzeit wird nur die englische Rechtschreibprüfung unterstützt.",
+  "spellcheckTip": "Wenn aktiviert, wird die im Browser integrierte Rechtschreibprüfung verwendet. Bitte wählen Sie die zu prüfenden Sprachen in den Browsereinstellungen aus",
+  "spellcheckTip2": "Wenn aktiviert, wird die integrierte Rechtschreibprüfung verwendet. Bitte wählen Sie die zu prüfenden Sprachen aus der folgenden Liste",
   "over": "über",
   "preview": "Export Vorschau",
   "desktop": "Desktop",
@@ -1705,6 +1707,7 @@
     "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben",
     "272": "Unbenanntes Feld",
     "273": "Erstellen Sie den Arbeitsbereich nicht im Stammverzeichnis der Partition, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
-    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich"
+    "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
+    "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut"
   }
 }

@@ -1,10 +1,11 @@
 {
 	"ID": "20211226122814-r1rdpcx",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122814-r1rdpcx",
 		"title": "虛擬引用",
+		"type": "doc",
 		"updated": "20240228164030"
 	},
 	"Children": [

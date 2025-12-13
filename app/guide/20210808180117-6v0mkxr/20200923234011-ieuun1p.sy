@@ -1,33 +1,32 @@
 {
 	"ID": "20200923234011-ieuun1p",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f389",
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20241125224626"
+		"updated": "20251209212055"
 	},
 	"Children": [
 		{
-			"ID": "20241125224615-dwfqru1",
-			"Type": "NodeBlockquote",
+			"ID": "20251209212043-iea22ml",
+			"Type": "NodeCallout",
 			"Properties": {
-				"id": "20241125224615-dwfqru1",
-				"updated": "20241125224626"
+				"id": "20251209212043-iea22ml",
+				"updated": "20251209212055"
 			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
 			"Children": [
 				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20241125224615-z2fevdf",
+					"ID": "20251209212048-wngov6k",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20241125224615-z2fevdf",
-						"updated": "20241125224626"
+						"id": "20251209212048-wngov6k",
+						"updated": "20251209212055"
 					},
 					"Children": [
 						{
@@ -41,7 +40,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " - "
+							"Data": "​ - "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -50,7 +49,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " to view it again"
+							"Data": "​ to view it again"
 						}
 					]
 				}

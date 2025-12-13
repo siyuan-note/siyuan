@@ -285,6 +285,7 @@ declare namespace Config {
         | "he_IL"
         | "it_IT"
         | "ja_JP"
+        | "ko_KR"
         | "pl_PL"
         | "pt_BR"
         | "ru_RU"
@@ -495,6 +496,10 @@ declare namespace Config {
          * Whether to enable spell checking
          */
         spellcheck: boolean;
+        /**
+         * Support spell check languages
+         */
+        spellcheckLanguages: string[];
         /**
          * Whether to enable virtual references
          */
@@ -804,6 +809,10 @@ declare namespace Config {
          * Display quote block
          */
         blockquote: boolean;
+        /**
+         * Display callout
+         */
+        callout: boolean;
         /**
          * Display code block
          */
@@ -1217,6 +1226,10 @@ declare namespace Config {
          * Whether to search quote blocks
          */
         blockquote: boolean;
+        /**
+         * Whether to search callout
+         */
+        callout: boolean;
         /**
          * Whether to distinguish between uppercase and lowercase letters when searching
          */
@@ -2303,6 +2316,11 @@ declare namespace Config {
          * @default false
          */
         blockquote: boolean;
+        /**
+         * Search results contain callout blocks
+         * @default false
+         */
+        callout: boolean;
         /**
          * Search results contain code blocks
          * @default false

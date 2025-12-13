@@ -596,6 +596,14 @@ func graphTypeFilter(local bool) string {
 		inList = append(inList, "'s'")
 	}
 
+	callout := Conf.Graph.Local.Callout
+	if !local {
+		callout = Conf.Graph.Global.Callout
+	}
+	if callout {
+		inList = append(inList, "'callout'")
+	}
+
 	inList = append(inList, "'d'")
 	return " AND ref.type IN (" + strings.Join(inList, ",") + ")"
 }

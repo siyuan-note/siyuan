@@ -1,10 +1,11 @@
 {
 	"ID": "20220708103401-mgydrfg",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20220708103401-mgydrfg",
 		"title": "Data backup",
+		"type": "doc",
 		"updated": "20220708104612"
 	},
 	"Children": [

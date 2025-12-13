@@ -42,7 +42,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         if (blockElement) {
             pushBack();
             if (action.includes(Constants.CB_GET_HL)) {
-                highlightById(window.siyuan.mobile.editor.protyle, id);
+                highlightById(window.siyuan.mobile.editor.protyle, id, scrollPosition);
             } else {
                 scrollCenter(window.siyuan.mobile.editor.protyle, blockElement, scrollPosition);
             }
@@ -61,6 +61,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
         const protyleOptions: IProtyleOptions = {
             blockId: id,
             rootId: data.data.rootID,
+            scrollPosition,
             action,
             render: {
                 scroll: true,
@@ -105,6 +106,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                         data: getResponse,
                         protyle: window.siyuan.mobile.editor.protyle,
                         action,
+                        scrollPosition,
                         afterCB() {
                             app.plugins.forEach(item => {
                                 item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});

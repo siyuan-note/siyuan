@@ -31,6 +31,7 @@
         content: '';
         position: absolute;
         background-color: var(--b3-theme-primary-lighter);
+        pointer-events: none;
       }
 
       &__top::after,
@@ -790,6 +791,14 @@
 
     &:hover {
       background-color: var(--b3-list-hover);
+    }
+  }
+
+  .callout-title {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
     }
   }
 }

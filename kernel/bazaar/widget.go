@@ -167,9 +167,9 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
 		widget.PreferredName = GetPreferredName(widget.Package)
 		widget.PreferredDesc = getPreferredDesc(widget.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "widget.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install widget.json failed: %s", statErr)
 			continue
 		}
 		widget.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -181,14 +181,7 @@ func InstalledWidgets() (ret []*Widget) {
 			packageInstallSizeCache.SetDefault(widget.RepoURL, is)
 		}
 		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
-		readmeFilename := getPreferredReadme(widget.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)
+		widget.PreferredReadme = loadInstalledReadme(installPath, "/widgets/"+dirName+"/", widget.Readme)
 		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
 		ret = append(ret, widget)
 	}

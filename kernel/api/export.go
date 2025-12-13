@@ -733,7 +733,7 @@ func exportPreview(c *gin.Context) {
 		}
 	}
 
-	stdHTML := model.Preview(id, fillCSSVar)
+	stdHTML := model.ExportPreview(id, fillCSSVar)
 	ret.Data = map[string]interface{}{
 		"html":       stdHTML,
 		"fillCSSVar": fillCSSVar,

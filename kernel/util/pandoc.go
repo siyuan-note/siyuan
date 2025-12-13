@@ -211,6 +211,71 @@ func IsValidPandocBin(binPath string) bool {
 		return false
 	}
 
+	// 解析符号链接
+	if real, err := filepath.EvalSymlinks(binPath); err == nil {
+		binPath = real
+	}
+
+	// 文件信息检查
+	fi, err := os.Stat(binPath)
+	if err != nil || fi.IsDir() || !fi.Mode().IsRegular() {
+		return false
+	}
+
+	// 在 Unix 上要求拥有可执行权限
+	if !gulu.OS.IsWindows() {
+		if fi.Mode().Perm()&0111 == 0 {
+			return false
+		}
+	}
+
+	// 读取文件头判断是否为二进制并排除脚本（#!）
+	f, err := os.Open(binPath)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	header := make([]byte, 16)
+	n, _ := f.Read(header)
+	header = header[:n]
+
+	// 拒绝以 shebang 开头的脚本
+	if bytes.HasPrefix(header, []byte("#!")) {
+		return false
+	}
+
+	isBin := false
+	// 常见二进制魔数：ELF, PE("MZ"), Mach-O/FAT
+	if len(header) >= 4 {
+		switch {
+		case bytes.Equal(header[:4], []byte{0x7f, 'E', 'L', 'F'}):
+			isBin = true // ELF
+		case bytes.Equal(header[:4], []byte{0xfe, 0xed, 0xfa, 0xce}):
+			isBin = true // Mach-O
+		case bytes.Equal(header[:4], []byte{0xce, 0xfa, 0xed, 0xfe}):
+			isBin = true // Mach-O (swapped)
+		case bytes.Equal(header[:4], []byte{0xca, 0xfe, 0xba, 0xbe}):
+			isBin = true // FAT
+		}
+	}
+	// PE only needs first 2 bytes "MZ"
+	if !isBin && len(header) >= 2 && bytes.Equal(header[:2], []byte{'M', 'Z'}) {
+		isBin = true
+	}
+
+	// Windows 上允许 .exe 文件（作为补充判断）
+	if !isBin && gulu.OS.IsWindows() {
+		ext := strings.ToLower(filepath.Ext(binPath))
+		if ext == ".exe" {
+			isBin = true
+		}
+	}
+
+	if !isBin {
+		return false
+	}
+
 	cmd := exec.Command(binPath, "--version")
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()

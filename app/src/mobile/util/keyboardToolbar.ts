@@ -250,6 +250,11 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem("1. " + Lute.Caret, "iconOrderedList", window.siyuan.languages["ordered-list"], "true")}
     ${getSlashItem("- [ ] " + Lute.Caret, "iconCheck", window.siyuan.languages.check, "true")}
     ${getSlashItem("> " + Lute.Caret, "iconQuote", window.siyuan.languages.quote, "true")}
+    ${getSlashItem(`> [!NOTE]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">✏️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-note)">Note</span>`, "true")}
+    ${getSlashItem(`> [!TIP]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">💡</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-tip)">Tip</span>`, "true")}
+    ${getSlashItem(`> [!IMPORTANT]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">❗</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-important)">Important</span>`, "true")}
+    ${getSlashItem(`> [!WARNING]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">⚠️</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-warning)">Warning</span>`, "true")}
+    ${getSlashItem(`> [!CAUTION]\n> ${Lute.Caret}`, '<span class="keyboard__slash-icon">🚨</span>', `${window.siyuan.languages.callout} - <span style="color: var(--b3-callout-caution)">Caution</span>`, "true")}
     ${getSlashItem("```", "iconCode", window.siyuan.languages.code, "true")}
     ${getSlashItem(`| ${Lute.Caret} |  |  |\n| --- | --- | --- |\n|  |  |  |\n|  |  |  |`, "iconTable", window.siyuan.languages.table, "true")}
     ${getSlashItem("---", "iconLine", window.siyuan.languages.line, "true")}

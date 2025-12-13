@@ -54,11 +54,11 @@ func AutoGenerateFileHistory() {
 	ChangeHistoryTick(Conf.Editor.GenerateHistoryInterval)
 	for {
 		<-historyTicker.C
-		task.AppendTask(task.HistoryGenerateFile, generateFileHistory)
+		task.AppendTask(task.HistoryGenerateFile, GenerateFileHistory)
 	}
 }
 
-func generateFileHistory() {
+func GenerateFileHistory() {
 	defer logging.Recover()
 
 	if 1 > Conf.Editor.GenerateHistoryInterval {

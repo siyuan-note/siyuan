@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "Download and rollback",
   "callout": "Callout",
   "hasAttrName": "The attribute name ${x} already exists",
   "statusBarMsgPushTip": "Status bar messages let you instantly know the system's running status, and if they bother you you can turn them off",
@@ -414,7 +415,7 @@
   "confirmPassword": "I have already remembered the password",
   "passwordNoMatch": "The passwords entered twice do not match",
   "cloudConfigTip": "Please configure in [Settings - Cloud]",
-  "confirmUninstall": "Are you sure you want to uninstall ${name}?",
+  "confirmUninstall": "Are you sure you want to uninstall ${name}?<br>Uninstalling may remove all related settings and data; please proceed with caution!",
   "scrollGetMore": "Scroll up and down to load more",
   "flashcardNewCard": "New",
   "flashcardReviewCard": "Old",
@@ -1338,7 +1339,8 @@
   "outlineOutdent": "List outline outdent",
   "outlineOutdentTip": "When enabled, the outdent will be using the list outline logic, i.e. moving the list items below the parent",
   "spellcheck": "Spell Check",
-  "spellcheckTip": "When enabled, the browser's built-in spell check function will be used. Currently, only English spell check is supported",
+  "spellcheckTip": "When enabled, the browser's built-in spellcheck will be used. Please select the languages to check in your browser settings",
+  "spellcheckTip2": "When enabled, the built-in spellcheck will be used. Please select the languages to check from the list below",
   "over": "over",
   "preview": "Export Preview",
   "desktop": "Desktop",
@@ -1705,6 +1707,7 @@
     "271": "Data index optimization completed, [%s] disk space freed",
     "272": "Unnamed field",
     "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
-    "274": "This folder contains other files, please create a new folder as the workspace"
+    "274": "This folder contains other files, please create a new folder as the workspace",
+    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again"
   }
 }

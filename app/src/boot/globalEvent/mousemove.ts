@@ -104,15 +104,11 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
             if (!targetBlockElement) {
                 return;
             }
-            let rowElement: Element;
-            if (targetBlockElement.classList.contains("av")) {
-                rowElement = hasClosestByClassName(mouseElement, "av__row") as HTMLElement;
-            }
             const allModels = getAllModels();
             let findNode = false;
             allModels.editor.find(item => {
                 if (item.editor.protyle.wysiwyg.element === eventPath0) {
-                    item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, item.editor.protyle.wysiwyg.element, rowElement);
+                    item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, mouseElement);
                     findNode = true;
                     return true;
                 }
@@ -121,7 +117,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
                 window.siyuan.blockPanels.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element, rowElement);
+                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, mouseElement);
                             findNode = true;
                             return true;
                         }
@@ -135,7 +131,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
                 allModels.backlink.find(item => {
                     item.editors.find(eItem => {
                         if (eItem.protyle.wysiwyg.element === eventPath0) {
-                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element, rowElement);
+                            eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, mouseElement);
                             findNode = true;
                             return true;
                         }
@@ -162,7 +158,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
         let findNode = false;
         allModels.editor.find(item => {
             if (item.editor.protyle.wysiwyg.element.contains(eventPath0)) {
-                item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement, item.editor.protyle.wysiwyg.element);
+                item.editor.protyle.gutter.render(item.editor.protyle, targetBlockElement);
                 findNode = true;
                 return true;
             }
@@ -171,7 +167,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
             window.siyuan.blockPanels.find(item => {
                 item.editors.find(eItem => {
                     if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element);
+                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement);
                         findNode = true;
                         return true;
                     }
@@ -185,7 +181,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
             allModels.backlink.find(item => {
                 item.editors.find(eItem => {
                     if (eItem.protyle.wysiwyg.element.contains(eventPath0)) {
-                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement, eItem.protyle.wysiwyg.element);
+                        eItem.protyle.gutter.render(eItem.protyle, targetBlockElement);
                         findNode = true;
                         return true;
                     }
@@ -205,7 +201,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
             if (rowElement && !rowElement.classList.contains("av__row--header")) {
                 getAllEditor().find(item => {
                     if (item.protyle.wysiwyg.element.contains(eventPath0)) {
-                        item.protyle.gutter.render(item.protyle, eventPath0, item.protyle.wysiwyg.element, rowElement);
+                        item.protyle.gutter.render(item.protyle, eventPath0, rowElement);
                         return true;
                     }
                 });

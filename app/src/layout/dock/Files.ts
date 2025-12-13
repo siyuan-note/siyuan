@@ -464,15 +464,15 @@ export class Files extends Model {
                 });
             }
         });
-        this.element.addEventListener("dragend", () => {
+        this.element.addEventListener("dragend", (event) => {
             this.parent.panelElement.classList.remove("sy__file--disablehover");
-            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement, index) => {
+            this.element.querySelectorAll('.b3-list-item[style*="opacity: 0.38;"]').forEach((item: HTMLElement, index) => {
                 item.style.opacity = "";
                 // https://github.com/siyuan-note/siyuan/issues/11587
-                if (index === 0) {
-                    const airaLabelElement = item.querySelector(".ariaLabel");
-                    if (airaLabelElement) {
-                        showTooltip(airaLabelElement.getAttribute("aria-label"), airaLabelElement);
+                if (index === 0 && hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY), "sy__file")) {
+                    const ariaLabelElement = item.querySelector(".ariaLabel");
+                    if (ariaLabelElement) {
+                        showTooltip(ariaLabelElement.getAttribute("aria-label"), ariaLabelElement);
                     }
                 }
             });

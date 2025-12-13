@@ -1,6 +1,6 @@
 {
 	"ID": "20200924093441-ft2rhps",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f4f0",
@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20240702222031"
+		"updated": "20251211094305"
 	},
 	"Children": [
 		{
@@ -1820,7 +1820,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604230145-zsjeri5",
-				"updated": "20210604230152"
+				"updated": "20251209212851"
 			},
 			"Children": [
 				{
@@ -1834,7 +1834,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20210604230152-vpxtzjj",
-				"updated": "20210604230216"
+				"updated": "20251209212850"
 			},
 			"Children": [
 				{
@@ -1852,6 +1852,156 @@
 						{
 							"Type": "NodeText",
 							"Data": "Note that it is not a content block ref, but a block quote (Blockquote)."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209212851-yo274kb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209212851-yo274kb",
+				"updated": "20251211094305"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Callout block"
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-py67twd",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-py67twd",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211094305-ow2t21o",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-ow2t21o",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Highlights information that users should take into account, even when skimming."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-7j529td",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-7j529td",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211094305-49y1j3r",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-49y1j3r",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Optional information to help a user be more successful."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-6tapwrt",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-6tapwrt",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251211094305-pmwapsh",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-pmwapsh",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Crucial information necessary for users to succeed."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-kq893ph",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-kq893ph",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211094305-2622twh",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-2622twh",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Critical content demanding immediate user attention due to potential risks."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094305-bmbbwkp",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094305-bmbbwkp",
+				"updated": "20251211094305"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211094305-tmokbr0",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094305-tmokbr0",
+						"updated": "20251211094305"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "Negative potential consequences of an action."
 						}
 					]
 				}
@@ -3425,7 +3575,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-3e348ea",
-				"updated": "20210415201010"
+				"updated": "20251203220553"
 			},
 			"Children": [
 				{
@@ -3476,7 +3626,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211213122144-gdl5u9e",
-				"updated": "20211213122317"
+				"updated": "20251203220553"
 			},
 			"Children": [
 				{
@@ -3486,7 +3636,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://mermaid.js.org/",
+					"TextMarkAHref": "https://flowchart.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	WebSocketServer = melody.New()
+	WebSocketServer *melody.Melody
 
 	// map[string]map[string]*melody.Session{}
 	sessions = sync.Map{} // {appId, {sessionId, session}}

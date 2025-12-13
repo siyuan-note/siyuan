@@ -161,20 +161,20 @@
     display: flex;
     flex-direction: column;
 
-    &[data-subtype="NOTE"] {
-      &::before {
-        background-color: var(--b3-theme-primary);
-      }
+    // NOTE
+    &::before {
+      background-color: var(--b3-callout-note);
+    }
 
-      .callout-info {
-        color: var(--b3-theme-primary);
-      }
+    .callout-info {
+      color: var(--b3-callout-note);
     }
 
     &[data-subtype="WARNING"] {
       &::before {
         background-color: var(--b3-callout-warning);
       }
+
       .callout-info {
         color: var(--b3-callout-warning);
       }
@@ -182,10 +182,11 @@
 
     &[data-subtype="TIP"] {
       &::before {
-        background-color: var(--b3-theme-success);
+        background-color: var(--b3-callout-tip);
       }
+
       .callout-info {
-        color: var(--b3-theme-success);
+        color: var(--b3-callout-tip);
       }
     }
 
@@ -193,6 +194,7 @@
       &::before {
         background-color: var(--b3-callout-important);
       }
+
       .callout-info {
         color: var(--b3-callout-important);
       }
@@ -200,10 +202,11 @@
 
     &[data-subtype="CAUTION"] {
       &::before {
-        background-color: var(--b3-theme-error);
+        background-color: var(--b3-callout-caution);
       }
+
       .callout-info {
-        color: var(--b3-theme-error);
+        color: var(--b3-callout-caution);
       }
     }
 
@@ -226,9 +229,11 @@
     }
 
     &-title {
-      margin-left: 8px;
+      margin-left: 4px;
       font-weight: 500;
       font-size: 114%;
+      opacity: .86;
+      transition: var(--b3-color-transition);
     }
   }
 

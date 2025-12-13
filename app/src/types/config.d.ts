@@ -288,6 +288,7 @@ declare namespace Config {
         | "pl_PL"
         | "pt_BR"
         | "ru_RU"
+        | "tr_TR"
         | "zh_CN"
         | "zh_CHT";
 

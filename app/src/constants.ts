@@ -312,6 +312,7 @@ export abstract class Constants {
         pl_PL: "20210808180117-6v0mkxr",
         pt_BR: "20210808180117-6v0mkxr",
         ru_RU: "20210808180117-6v0mkxr",
+        tr_TR: "20210808180117-6v0mkxr",
         zh_CHT: "20211226090932-5lcq56f",
         zh_CN: "20210808180117-czj9bvb",
     };

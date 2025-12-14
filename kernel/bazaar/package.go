@@ -54,6 +54,7 @@ type DisplayName struct {
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
+	TrTR    string `json:"tr_TR"`
 	ZhCHT   string `json:"zh_CHT"`
 	ZhCN    string `json:"zh_CN"`
 }
@@ -72,6 +73,7 @@ type Description struct {
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
+	TrTR    string `json:"tr_TR"`
 	ZhCHT   string `json:"zh_CHT"`
 	ZhCN    string `json:"zh_CN"`
 }
@@ -90,6 +92,7 @@ type Readme struct {
 	PlPL    string `json:"pl_PL"`
 	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
+	TrTR    string `json:"tr_TR"`
 	ZhCHT   string `json:"zh_CHT"`
 	ZhCN    string `json:"zh_CN"`
 }
@@ -224,6 +227,10 @@ func getPreferredReadme(readme *Readme) string {
 		if "" != readme.RuRU {
 			ret = readme.RuRU
 		}
+	case "tr_TR":
+		if "" != readme.TrTR {
+			ret = readme.TrTR
+		}
 	case "zh_CHT":
 		if "" != readme.ZhCHT {
 			ret = readme.ZhCHT
@@ -299,6 +306,10 @@ func GetPreferredName(pkg *Package) string {
 		if "" != pkg.DisplayName.RuRU {
 			ret = pkg.DisplayName.RuRU
 		}
+	case "tr_TR":
+		if "" != pkg.DisplayName.TrTR {
+			ret = pkg.DisplayName.TrTR
+		}
 	case "zh_CHT":
 		if "" != pkg.DisplayName.ZhCHT {
 			ret = pkg.DisplayName.ZhCHT
@@ -373,6 +384,10 @@ func getPreferredDesc(desc *Description) string {
 	case "ru_RU":
 		if "" != desc.RuRU {
 			ret = desc.RuRU
+		}
+	case "tr_TR":
+		if "" != desc.TrTR {
+			ret = desc.TrTR
 		}
 	case "zh_CHT":
 		if "" != desc.ZhCHT {

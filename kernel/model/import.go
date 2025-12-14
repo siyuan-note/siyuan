@@ -828,7 +828,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return nil
 			}
 
-			if !d.IsDir() && !strings.HasSuffix(currentPath, ".md") && !strings.HasSuffix(currentPath, ".markdown") {
+			if !d.IsDir() && (!strings.HasSuffix(currentPath, ".md") && !strings.HasSuffix(currentPath, ".markdown") ||
+				strings.Contains(filepath.ToSlash(currentPath), "/assets/")) {
 				// 非 Markdown 文件作为资源文件处理 https://github.com/siyuan-note/siyuan/issues/13817
 				existName := assetsDone[currentPath]
 				var name string

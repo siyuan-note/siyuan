@@ -490,7 +490,7 @@ const (
 	NumberFormatRUB NumberFormat = "RUB" // 卢布
 	NumberFormatINR NumberFormat = "INR" // 卢比
 	NumberFormatKRW NumberFormat = "KRW" // 韩元
-	NumberFormatKRW NumberFormat = "TRY" // 土耳其里拉
+	NumberFormatTRY NumberFormat = "TRY" // 土耳其里拉
 	NumberFormatCAD NumberFormat = "CAD" // 加拿大元
 	NumberFormatCHF NumberFormat = "CHF" // 瑞士法郎
 	NumberFormatTHB NumberFormat = "THB" // 泰铢

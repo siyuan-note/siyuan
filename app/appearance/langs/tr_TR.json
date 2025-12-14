@@ -1,4 +1,5 @@
 {
+  "downloadRollback": "İndir ve geri al",
   "callout": "Vurgu kutusu",
   "hasAttrName": "Öznitelik adı ${x} zaten mevcut",
   "statusBarMsgPushTip": "Durum çubuğu mesajları sistemin çalışma durumunu anında gösterir, rahatsız oluyorsan kapatabilirsin",

@@ -6,6 +6,7 @@ import {Constants} from "../../constants";
 import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {setFold} from "../../menus/protyle";
+import {getParentBlock} from "./getBlock";
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {
@@ -352,13 +353,14 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         // zoom in 列表项
         return;
     }
-    const parentLiItemElement = liElement.parentElement;
+    const parentLiItemElement = getParentBlock(liElement);
     const parentParentElement = parentLiItemElement.parentElement;
     if (liElement.previousElementSibling?.classList.contains("protyle-action") && !parentParentElement.getAttribute("data-node-id")) {
         // https://ld246.com/article/1691981936960 情况下 zoom in 列表项
         return;
     }
-    if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") || parentLiItemElement.classList.contains("bq")) {
+    if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") ||
+        parentLiItemElement.classList.contains("bq") || parentLiItemElement.classList.contains("callout")) {
         // 顶层列表
         const topDoOperations: IOperation[] = [];
         const topUndoOperations: IOperation[] = [];

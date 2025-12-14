@@ -9,6 +9,7 @@ import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag} from "./hasClos
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
+import {Constants} from "../../constants";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -544,8 +545,13 @@ export const focusByWbr = (element: Element, range: Range) => {
             range.setStart(wbrElement.previousSibling, wbrElement.previousSibling.textContent.length);
         } else if (wbrElement.nextSibling) {
             if (wbrElement.nextSibling.nodeType === 3) {
-                // <wbr>text
-                range.setStart(wbrElement.nextSibling, 0);
+                if (wbrElement.nextSibling.textContent === Constants.ZWSP) {
+                    // <wbr>零块空格text
+                    range.setStart(wbrElement.nextSibling, 1);
+                } else {
+                    // <wbr>text
+                    range.setStart(wbrElement.nextSibling, 0);
+                }
             } else {
                 // <wbr><span>a</span>
                 range.setStartAfter(wbrElement);

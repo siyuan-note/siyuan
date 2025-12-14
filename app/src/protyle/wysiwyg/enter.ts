@@ -454,6 +454,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             if (subWbrElement && subWbrElement.parentElement.tagName === "SPAN" && subWbrElement.parentElement.innerHTML === "<wbr>") {
                 subWbrElement.parentElement.outerHTML = "<wbr>";
             }
+            newEditElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(newEditElement.parentElement.outerHTML);
             let subListNextElement = subListElement.nextElementSibling;
             newElement.lastElementChild.before(subListElement);
             // https://github.com/siyuan-note/siyuan/issues/13016
@@ -462,6 +463,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                 newElement.lastElementChild.before(subListNextElement.previousElementSibling);
             }
             listItemElement.insertAdjacentElement("afterend", newElement);
+            blockRender(protyle, newElement);
+            mathRender(newElement);
+            processRender(newElement);
             if (listItemElement.getAttribute("data-subtype") === "o") {
                 updateListOrder(listItemElement.parentElement);
             }

@@ -1079,7 +1079,7 @@
   "sync": "同步",
   "syncNow": "立即同步",
   "waitSync": "編輯資料尚未同步到雲端",
-  "payment": "累計已支付",
+  "paymentSum": "累計已支付",
   "refresh": "重新整理",
   "logout": "登出",
   "refreshUser": "使用者資訊更新完畢",

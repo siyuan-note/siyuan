@@ -396,6 +396,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     });
     if (focusName === "av") {
         dialog.element.dispatchEvent(new CustomEvent("click", {detail: "NodeAttributeView"}));
+        (document.activeElement as HTMLElement)?.blur();
     } else if (focusName === "custom") {
         dialog.element.dispatchEvent(new CustomEvent("click", {detail: "custom"}));
     }

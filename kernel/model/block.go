@@ -205,6 +205,11 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	if nil == current || !current.IsBlock() {
 		return
 	}
+
+	if nil != current.Parent && ast.NodeListItem == current.Parent.Type {
+		current = current.Parent
+	}
+
 	parentBlock := treenode.ParentBlock(current)
 	if nil == parentBlock {
 		return

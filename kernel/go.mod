@@ -58,7 +58,7 @@ require (
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/shirou/gopsutil/v4 v4.25.11
 	github.com/siyuan-note/dataparser v0.0.0-20251203120213-59c16535cb56
-	github.com/siyuan-note/dejavu v0.0.0-20251206130752-28126fa5ecd1
+	github.com/siyuan-note/dejavu v0.0.0-20251215141804-60fd7eb3cf4a
 	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20251212095217-08318833e008

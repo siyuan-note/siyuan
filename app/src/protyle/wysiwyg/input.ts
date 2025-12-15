@@ -4,7 +4,7 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, hasNextSibling, isNotEditBlock} from "./getBlock";
+import {getContenteditableElement, hasNextSibling, hasPreviousSibling, isNotEditBlock} from "./getBlock";
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
@@ -59,6 +59,11 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     range.insertNode(wbrElement);
     if (event) {
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
+        // 行内代码前软换行，光标应在行内代码前
+        if (!hasPreviousSibling(wbrElement) && wbrElement.parentElement.tagName === "SPAN" &&
+            wbrNextElement && wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+            wbrElement.parentElement.before(wbrElement);
+        }
         if (event.inputType === "deleteContentForward") {
             if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
                 const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
@@ -169,7 +174,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 let replaceInnerHTML = editElement.innerHTML.trim().replace(/^(~|·|`){3,}/g, "```").replace(/\n(~|·|`){3,}/g, "\n```").trim();
                 if (replaceInnerHTML.endsWith("\n```<wbr>") &&
                     (replaceInnerHTML.split("\n```").length - 1 + (replaceInnerHTML.startsWith("```") ? 1 : 0)) % 2 === 0) {
-                   // 匹配已闭合的不需添加 https://github.com/siyuan-note/siyuan/issues/16053
+                    // 匹配已闭合的不需添加 https://github.com/siyuan-note/siyuan/issues/16053
                 } else if (!replaceInnerHTML.endsWith("\n```")) {
                     // 以 "\n```<wbr>" 结尾需要添加的情况 https://github.com/siyuan-note/siyuan/issues/16519
                     replaceInnerHTML = replaceInnerHTML.replace("<wbr>", "") + "<wbr>\n```";

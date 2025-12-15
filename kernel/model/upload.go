@@ -98,7 +98,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 		existAssetPath := GetAssetPathByHash(hash)
 		if "" != existAssetPath {
 			originalName := util.RemoveID(filepath.Base(existAssetPath))
-			if fName != originalName {
+			if strings.ToLower(fName) != strings.ToLower(originalName) {
 				hash = "random_2_" + gulu.Rand.String(12)
 			}
 		}
@@ -213,13 +213,13 @@ func Upload(c *gin.Context) {
 		}
 
 		if 1 > file.Size {
-			hash = "empty_" + gulu.Rand.String(12)
+			hash = "random_1_" + gulu.Rand.String(12)
 		}
 
 		existAssetPath := GetAssetPathByHash(hash)
 		if "" != existAssetPath {
 			originalName := util.RemoveID(filepath.Base(existAssetPath))
-			if fName != originalName {
+			if strings.ToLower(fName) != strings.ToLower(originalName) {
 				hash = "random_2_" + gulu.Rand.String(12)
 			}
 		}

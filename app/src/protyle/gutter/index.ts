@@ -34,7 +34,7 @@ import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
-import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
+import {getContenteditableElement, getParentBlock, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../../util/fetch";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
@@ -2518,7 +2518,13 @@ export class Gutter {
                             return;
                         }
                     }
-                    const topElement = getTopAloneElement(nodeElement);
+
+                    let topElement = getTopAloneElement(nodeElement);
+                    // 提示下方仅有单个列表
+                    if (topElement.classList.contains("callout") && !nodeElement.classList.contains("callout") &&
+                        getParentBlock(nodeElement) !== topElement) {
+                        topElement = topElement.querySelector("[data-node-id]");
+                    }
                     listItem = topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
                     if (isInEmbedBlock(listItem) || isInAVBlock(listItem)) {
@@ -2622,7 +2628,9 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         const contentTop = protyle.contentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
-        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {
+        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl" &&
+            // 提示下有列表
+            !element.classList.contains("callout")) {
             rect = listItem.firstElementChild.getBoundingClientRect();
             space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {

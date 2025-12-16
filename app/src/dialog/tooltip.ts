@@ -1,29 +1,29 @@
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element, tooltipClass?: string, event?: MouseEvent) => {
+export const showTooltip = (message: string, target: Element, tooltipClass?: string, event?: MouseEvent, space: number = 0.5) => {
     if (isMobile()) {
         return;
     }
     let targetRect = target.getBoundingClientRect();
-    let space = 0.5;
-    if (target.getAttribute("data-inline-memo-content")) {
-        space = 0;
-        if (target.getClientRects().length > 1) {
+    // 跨行元素
+    const clientRects = target.getClientRects();
+    if (clientRects.length > 1) {
+        if (event) {
+            // 选择包含鼠标的矩形
+            Array.from(clientRects).forEach(item => {
+                if (event.clientY >= item.top - 3 && event.clientY <= item.bottom) {
+                    targetRect = item;
+                }
+            });
+        } else {
+            // 选择宽度最大的矩形
             let lastWidth = 0;
-            if (event) {
-                Array.from(target.getClientRects()).forEach(item => {
-                    if (event.clientY >= item.top - 3 && event.clientY <= item.bottom) {
-                        targetRect = item;
-                    }
-                });
-            } else {
-                Array.from(target.getClientRects()).forEach(item => {
-                    if (item.width > lastWidth) {
-                        targetRect = item;
-                    }
-                    lastWidth = item.width;
-                });
-            }
+            Array.from(clientRects).forEach(item => {
+                if (item.width > lastWidth) {
+                    targetRect = item;
+                }
+                lastWidth = item.width;
+            });
         }
     }
     if (targetRect.height === 0 || !message) {

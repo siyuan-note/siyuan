@@ -109,16 +109,24 @@ func SaveAssetsTexts() {
 
 	start := time.Now()
 
+	assetsPath := GetDataAssetsAbsPath()
+	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
+
 	assetsTextsLock.Lock()
+	// OCR 功能未开启且 ocr-texts.json 不存在时，如果 assetsTexts 为空则不创建文件
+	if !TesseractEnabled && !filelock.IsExist(assetsTextsPath) && 0 == len(assetsTexts) {
+		assetsTextsLock.Unlock()
+		assetsTextsChanged.Store(false)
+		return
+	}
 	data, err := gulu.JSON.MarshalIndentJSON(assetsTexts, "", "  ")
 	if err != nil {
 		logging.LogErrorf("marshal assets texts failed: %s", err)
+		assetsTextsLock.Unlock()
 		return
 	}
 	assetsTextsLock.Unlock()
 
-	assetsPath := GetDataAssetsAbsPath()
-	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
 	if err = filelock.WriteFile(assetsTextsPath, data); err != nil {
 		logging.LogErrorf("write assets texts failed: %s", err)
 		return

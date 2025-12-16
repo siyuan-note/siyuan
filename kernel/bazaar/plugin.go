@@ -247,9 +247,10 @@ func isIncompatiblePlugin(plugin *Plugin, currentFrontend string) bool {
 		return false
 	}
 
+	currentBackend := getCurrentBackend()
 	backendOk := false
 	for _, backend := range plugin.Backends {
-		if backend == getCurrentBackend() || "all" == backend {
+		if backend == currentBackend || "all" == backend {
 			backendOk = true
 			break
 		}

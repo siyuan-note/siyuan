@@ -80,10 +80,12 @@ export const initBlockPopover = (app: App) => {
                     tip = childElement.textContent;
                 }
             }
+            let tooltipSpace: number | undefined;
             if (!tip) {
                 tip = escapeHtml(aElement.getAttribute("data-inline-memo-content"));
                 if (tip) {
                     tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
+                    tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
                 }
             }
             if (!tip) {
@@ -132,10 +134,10 @@ export const initBlockPopover = (app: App) => {
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass, event);
+                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass, event, tooltipSpace);
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
-                    showTooltip(tip, aElement, tooltipClass, event);
+                    showTooltip(tip, aElement, tooltipClass, event, tooltipSpace);
                 }
                 event.stopPropagation();
             } else {

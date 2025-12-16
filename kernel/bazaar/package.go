@@ -240,17 +240,21 @@ func getPreferredReadme(readme *Readme) string {
 			ret = readme.ZhCN
 		}
 	}
-	if "" == strings.TrimSpace(ret) {
-		defaultReadme := strings.TrimSpace(readme.Default)
-		if defaultReadme != "" {
-			ret = defaultReadme
-		} else if "" != readme.EnUS {
-			ret = readme.EnUS
-		} else {
-			ret = "README.md"
-		}
+	if "" != strings.TrimSpace(ret) {
+		return ret
 	}
-	return ret
+
+	defaultReadme := strings.TrimSpace(readme.Default)
+	if "" != defaultReadme {
+		return defaultReadme
+	}
+
+	enUSReadme := strings.TrimSpace(readme.EnUS)
+	if "" != enUSReadme {
+		return enUSReadme
+	}
+
+	return "README.md"
 }
 
 func GetPreferredName(pkg *Package) string {
@@ -321,17 +325,21 @@ func GetPreferredName(pkg *Package) string {
 			ret = pkg.DisplayName.ZhCN
 		}
 	}
-	if "" == strings.TrimSpace(ret) {
-		defaultName := strings.TrimSpace(pkg.DisplayName.Default)
-		if defaultName != "" {
-			ret = defaultName
-		} else if "" != pkg.DisplayName.EnUS {
-			ret = pkg.DisplayName.EnUS
-		} else {
-			ret = pkg.Name
-		}
+	if "" != strings.TrimSpace(ret) {
+		return ret
 	}
-	return ret
+
+	defaultName := strings.TrimSpace(pkg.DisplayName.Default)
+	if "" != defaultName {
+		return defaultName
+	}
+
+	enUSName := strings.TrimSpace(pkg.DisplayName.EnUS)
+	if "" != enUSName {
+		return enUSName
+	}
+
+	return pkg.Name
 }
 
 func getPreferredDesc(desc *Description) string {
@@ -402,15 +410,21 @@ func getPreferredDesc(desc *Description) string {
 			ret = desc.ZhCN
 		}
 	}
-	if "" == strings.TrimSpace(ret) {
-		defaultDesc := strings.TrimSpace(desc.Default)
-		if defaultDesc != "" {
-			ret = defaultDesc
-		} else if "" != desc.EnUS {
-			ret = desc.EnUS
-		}
+	if "" != strings.TrimSpace(ret) {
+		return ret
 	}
-	return ret
+
+	defaultDesc := strings.TrimSpace(desc.Default)
+	if "" != defaultDesc {
+		return defaultDesc
+	}
+
+	enUSDesc := strings.TrimSpace(desc.EnUS)
+	if "" != enUSDesc {
+		return enUSDesc
+	}
+
+	return ""
 }
 
 func getPreferredFunding(funding *Funding) string {

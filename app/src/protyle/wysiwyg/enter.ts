@@ -17,7 +17,7 @@ import {isIPad, setStorageVal} from "../util/compatibility";
 import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {

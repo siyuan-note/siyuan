@@ -244,6 +244,8 @@ func getPreferredReadme(readme *Readme) string {
 		defaultReadme := strings.TrimSpace(readme.Default)
 		if defaultReadme != "" {
 			ret = defaultReadme
+		} else if "" != readme.EnUS {
+			ret = readme.EnUS
 		} else {
 			ret = "README.md"
 		}
@@ -323,6 +325,8 @@ func GetPreferredName(pkg *Package) string {
 		defaultName := strings.TrimSpace(pkg.DisplayName.Default)
 		if defaultName != "" {
 			ret = defaultName
+		} else if "" != pkg.DisplayName.EnUS {
+			ret = pkg.DisplayName.EnUS
 		} else {
 			ret = pkg.Name
 		}
@@ -402,6 +406,8 @@ func getPreferredDesc(desc *Description) string {
 		defaultDesc := strings.TrimSpace(desc.Default)
 		if defaultDesc != "" {
 			ret = defaultDesc
+		} else if "" != desc.EnUS {
+			ret = desc.EnUS
 		}
 	}
 	return ret

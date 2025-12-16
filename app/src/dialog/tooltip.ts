@@ -1,16 +1,22 @@
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element, tooltipClass?: string, event?: MouseEvent, space: number = 0.5) => {
-    if (isMobile()) {
+export const showTooltip = (
+    message: string,
+    target: Element,
+    tooltipClass?: string,
+    event?: MouseEvent,
+    space: number = 0.5
+) => {
+    if (isMobile() || !message) {
         return;
     }
     let targetRect = target.getBoundingClientRect();
     // 跨行元素
-    const clientRects = target.getClientRects();
+    const clientRects = Array.from(target.getClientRects());
     if (clientRects.length > 1) {
         if (event) {
-            // 选择包含鼠标的矩形
-            Array.from(clientRects).forEach(item => {
+            // 选择鼠标附近的矩形
+            clientRects.forEach(item => {
                 if (event.clientY >= item.top - 3 && event.clientY <= item.bottom) {
                     targetRect = item;
                 }
@@ -18,7 +24,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         } else {
             // 选择宽度最大的矩形
             let lastWidth = 0;
-            Array.from(clientRects).forEach(item => {
+            clientRects.forEach(item => {
                 if (item.width > lastWidth) {
                     targetRect = item;
                 }
@@ -26,11 +32,10 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
             });
         }
     }
-    if (targetRect.height === 0 || !message) {
+    if (targetRect.height === 0) {
         hideTooltip();
         return;
     }
-
     const messageElement = document.getElementById("tooltip");
     messageElement.className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
     messageElement.innerHTML = message;

@@ -81,19 +81,20 @@ export const initBlockPopover = (app: App) => {
                 }
             }
             let tooltipSpace: number | undefined;
-            if (!tip) {
+            if (!tip && aElement.getAttribute("data-type") === "inline-memo") {
                 tip = escapeHtml(aElement.getAttribute("data-inline-memo-content"));
-                if (tip) {
-                    tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
-                    tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
-                }
+                tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
+                tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
             }
             if (!tip) {
+                if (aElement.getAttribute("data-type") === "a") {
+                    tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
+                    tooltipSpace = 0;
+                }
                 const href = aElement.getAttribute("data-href") || "";
                 // 链接地址强制换行 https://github.com/siyuan-note/siyuan/issues/11539
                 if (href) {
                     tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
-                    tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
                 }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
@@ -106,7 +107,7 @@ export const initBlockPopover = (app: App) => {
                         } else {
                             assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
-                        showTooltip(assetTip, aElement, tooltipClass);
+                        showTooltip(assetTip, aElement, tooltipClass, event, tooltipSpace);
                     });
                     tip = "";
                 } else if (title) {

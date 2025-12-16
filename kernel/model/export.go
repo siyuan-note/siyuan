@@ -245,9 +245,14 @@ func Export2Liandi(id string) (err error) {
 	defer util.PushClearMsg(msgId)
 
 	// 判断帖子是否已经存在，存在则使用更新接口
-	const liandiArticleIdAttrName = "custom-liandi-articleId"
+	const liandiArticleIdAttrName = "custom-liandi-articleid"
+	const liandiArticleIdAttrNameOld = "custom-liandi-articleId" // 兼容旧属性名
 	foundArticle := false
+	// 优先使用新属性名，如果不存在则尝试旧属性名
 	articleId := tree.Root.IALAttr(liandiArticleIdAttrName)
+	if "" == articleId {
+		articleId = tree.Root.IALAttr(liandiArticleIdAttrNameOld)
+	}
 	if "" != articleId {
 		result := gulu.Ret.NewResult()
 		request := httpclient.NewCloudRequest30s()

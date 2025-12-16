@@ -1458,7 +1458,7 @@
     "22": "Il captcha è errato",
     "23": "Il repository dei dati è corrotto, per favore ripristina il repository dei dati",
     "24": "La rete ha impiegato troppo tempo, riprova più tardi",
-    "25": "Il nome dell'attributo supporta solo lettere e numeri",
+    "25": "Il nome dell'attributo può contenere solo lettere minuscole, numeri e trattini e deve iniziare con una lettera minuscola",
     "26": "Si prega di inizializzare prima la chiave del repository dati in [Impostazioni - Informazioni - Chiave del repository dati]",
     "27": "Caricamento [%v]",
     "28": "La rete è anormale, riprova più tardi",

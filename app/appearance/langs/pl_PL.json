@@ -1458,7 +1458,7 @@
     "22": "Captcha jest nieprawidłowa",
     "23": "Repozytorium danych jest uszkodzone, proszę zresetować repozytorium danych",
     "24": "Czas oczekiwania w sieci, proszę spróbować ponownie później",
-    "25": "Nazwa atrybutu obsługuje tylko litery angielskie i cyfry",
+    "25": "Nazwa atrybutu może zawierać tylko małe litery angielskie, cyfry i myślniki i musi zaczynać się od małej litery angielskiej",
     "26": "Proszę najpierw zainicjować klucz repozytorium danych w [Ustawienia - O - Klucz repozytorium danych]",
     "27": "Przesyłanie [%v]",
     "28": "Sieć jest nieprawidłowa, proszę spróbować ponownie później",

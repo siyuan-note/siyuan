@@ -1458,7 +1458,7 @@
     "22": "Das Captcha ist falsch",
     "23": "Das Daten-Repository ist beschädigt, bitte setzen Sie das Daten-Repository zurück",
     "24": "Netzwerkzeitüberschreitung, bitte versuchen Sie es später erneut",
-    "25": "Der Attributname unterstützt nur englische Buchstaben und Ziffern",
+    "25": "Der Attributname darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten und muss mit einem Kleinbuchstaben beginnen",
     "26": "Bitte initialisieren Sie zuerst den Schlüssel des Daten-Repositorys in [Einstellungen - Über - Schlüssel des Daten-Repositorys]",
     "27": "Hochladen [%v]",
     "28": "Das Netzwerk ist abnormal, bitte versuchen Sie es später erneut",

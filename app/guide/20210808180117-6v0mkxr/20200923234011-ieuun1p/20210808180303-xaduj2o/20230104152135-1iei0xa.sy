@@ -268,11 +268,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ (previously "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "custom-liandi-articleId"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to the document to associate the link post ID"
+									"Data": "​ ) to the document to associate the link post ID"
 								}
 							]
 						}

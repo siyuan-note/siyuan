@@ -285,11 +285,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（以前は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "custom-liandi-articleId"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 属性が書き込まれ、リンクされた投稿 ID を関連付けます"
+									"Data": "​ ）属性が書き込まれ、リンクされた投稿 ID を関連付けます"
 								}
 							]
 						}

@@ -31,7 +31,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -1736,11 +1735,9 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 
 	var invalidNames []string
 	for name := range attrs {
-		for i := 0; i < len(name); i++ {
-			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				logging.LogWarnf("invalid attr name [%s]", name)
-				invalidNames = append(invalidNames, name)
-			}
+		if !isValidAttrName(name) {
+			logging.LogWarnf("invalid attr name [%s]", name)
+			invalidNames = append(invalidNames, name)
 		}
 	}
 	for _, name := range invalidNames {
@@ -1748,6 +1745,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	}
 
 	for name, value := range attrs {
+		name := strings.ToLower(name)
 		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {

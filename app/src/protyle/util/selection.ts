@@ -546,7 +546,7 @@ export const focusByWbr = (element: Element, range: Range) => {
         } else if (wbrElement.nextSibling) {
             if (wbrElement.nextSibling.nodeType === 3) {
                 if (wbrElement.nextSibling.textContent === Constants.ZWSP) {
-                    // <wbr>零块空格text
+                    // <wbr>零宽空格text
                     range.setStart(wbrElement.nextSibling, 1);
                 } else {
                     // <wbr>text

@@ -419,6 +419,14 @@ func (value *Value) SetValByType(typ KeyType, val interface{}) {
 }
 
 func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+	// 单独处理汇总
+	if KeyTypeRollup == value.Type {
+		if 1 > len(value.Rollup.Contents) {
+			return nil
+		}
+		return value.Rollup.Contents[0].GetValByType(typ)
+	}
+
 	switch typ {
 	case KeyTypeBlock:
 		return value.Block

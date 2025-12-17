@@ -2,6 +2,7 @@ import {Constants} from "../constants";
 import {genItemPanel} from "./index";
 import {keymap} from "./keymap";
 import {App} from "../index";
+import {isPhablet} from "../protyle/util/compatibility";
 
 const getLang = (keys: string[]) => {
     const langArray: string[] = [];
@@ -106,9 +107,11 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "vacuumDataIndex", "vacuumDataIndexTip", "rebuildDataIndex", "rebuildDataIndexTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
-    /// #if !BROWSER
-    inputElement.focus();
-    /// #endif
+    if (!isPhablet()) {
+        inputElement.focus();
+    } else {
+        (document.activeElement as HTMLElement)?.blur();
+    }
     const updateTab = () => {
         const indexList: number[] = [];
         const inputValue = inputElement.value;

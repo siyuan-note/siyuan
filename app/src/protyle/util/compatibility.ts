@@ -8,6 +8,10 @@ import {clipboard, ipcRenderer} from "electron";
 import {processSYLink} from "../../editor/openLink";
 /// #endif
 
+export const isPhablet = () => {
+    return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
+};
+
 export const encodeBase64 = (text: string): string => {
     if (typeof Buffer !== "undefined") {
         return Buffer.from(text, "utf8").toString("base64");

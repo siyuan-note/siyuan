@@ -75,7 +75,7 @@ export const initAbout = () => {
         </button>
         <div class="fn__hr"></div>
         <button class="b3-button b3-button--outline fn__block" id="initKeyByPW">
-            ${window.siyuan.languages.genKeyByPW}
+            <svg><use xlink:href="#iconKey"></use></svg>${window.siyuan.languages.genKeyByPW}
         </button>
     </div>
     <div class="${window.siyuan.config.repo.key ? "" : "fn__none"}">

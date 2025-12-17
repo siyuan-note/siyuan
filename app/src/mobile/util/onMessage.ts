@@ -2,7 +2,6 @@ import {openMobileFileById} from "../editor";
 import {
     processSync,
     progressLoading,
-    progressStatus,
     reloadSync, setDefRefCount, setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
@@ -13,9 +12,24 @@ import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
 import {updateControlAlt} from "../../protyle/util/hotKey";
 import {renderSnippet} from "../../config/util/snippets";
 
+let statusTimeout: number;
+const statusElement = document.querySelector("#status") as HTMLElement;
+
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "backgroundtask":
+                if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+                    return;
+                }
+                if (data.data.tasks.length === 0) {
+                    statusElement.style.bottom = "";
+                } else {
+                    clearTimeout(statusTimeout);
+                    statusElement.innerHTML = `<div class="fn__flex">${data.data.tasks[0].action}<div class="fn__progress"><div></div></div>`;
+                    statusElement.style.bottom = "0";
+                }
+                break;
             case "setAppearance":
                 window.location.reload();
                 break;
@@ -70,7 +84,15 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 transactionError();
                 break;
             case"statusbar":
-                progressStatus(data);
+                if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+                    return;
+                }
+                clearTimeout(statusTimeout);
+                statusElement.innerHTML = data.msg;
+                statusElement.style.bottom = "0";
+                statusTimeout = window.setTimeout(() => {
+                    statusElement.style.bottom = "";
+                }, 12000);
                 break;
         }
     }

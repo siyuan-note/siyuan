@@ -417,30 +417,13 @@ export const refreshFileTree = (cb?: () => void) => {
 
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {
-    const statusElement = document.querySelector("#status") as HTMLElement;
-    if (!statusElement) {
-        return;
-    }
-
-    if (isMobile()) {
-        if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
-            return;
-        }
+    const msgElement = document.querySelector("#status .status__msg");
+    if (msgElement) {
         clearTimeout(statusTimeout);
-        statusElement.innerHTML = data.msg;
-        statusElement.style.bottom = "0";
+        msgElement.innerHTML = data.msg;
         statusTimeout = window.setTimeout(() => {
-            statusElement.style.bottom = "";
+            msgElement.innerHTML = "";
         }, 12000);
-    } else {
-        const msgElement = statusElement.querySelector(".status__msg");
-        if (msgElement) {
-            clearTimeout(statusTimeout);
-            msgElement.innerHTML = data.msg;
-            statusTimeout = window.setTimeout(() => {
-                msgElement.innerHTML = "";
-            }, 12000);
-        }
     }
 };
 
@@ -489,7 +472,7 @@ export const progressBackgroundTask = (tasks: { action: string }[]) => {
     } else {
         backgroundTaskElement.classList.remove("fn__none");
         backgroundTaskElement.setAttribute("data-tasks", JSON.stringify(tasks));
-        backgroundTaskElement.innerHTML = tasks[0].action + "<div><div></div></div>";
+        backgroundTaskElement.innerHTML = tasks[0].action + '<div class="fn__progress"><div></div></div>';
     }
 };
 

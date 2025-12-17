@@ -1,6 +1,6 @@
 import {focusByWbr, getEditorRange} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {getContenteditableElement, getParentBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -22,7 +22,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
-    let parentID = nodeElement.parentElement?.getAttribute("data-node-id");
+    let parentID = getParentBlock(nodeElement)?.getAttribute("data-node-id");
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
         if (protyle.block.showAll || protyle.options.backlinkData) {

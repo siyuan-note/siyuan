@@ -293,6 +293,7 @@ export abstract class Constants {
     // timeout
     public static readonly TIMEOUT_OPENDIALOG = 50;
     public static readonly TIMEOUT_DBLCLICK = 190;
+    public static readonly TIMEOUT_RESIZE = 200;
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
     public static readonly TIMEOUT_TRANSITION = 300;

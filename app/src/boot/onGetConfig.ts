@@ -30,6 +30,7 @@ import {closeWindow} from "../window/closeWin";
 import {correctHotkey} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {processSYLink} from "../editor/openLink";
+import {getAllEditor} from "../layout/getAll";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
@@ -88,7 +89,15 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             resizeTabs();
             resizeTopBar();
             firstResize = true;
-        }, 200);
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0);
+                getAllEditor().forEach(item => {
+                    if (item.protyle.wysiwyg.element.contains(range.startContainer)) {
+                        item.protyle.toolbar.render(item.protyle, range);
+                    }
+                });
+            }
+        }, Constants.TIMEOUT_RESIZE);
     });
 };
 

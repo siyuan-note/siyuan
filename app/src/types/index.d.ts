@@ -936,11 +936,11 @@ interface IAVFilter {
     operator: TAVFilterOperator,
     quantifier?: string,
     value: IAVCellValue,
-    relativeDate?: relativeDate
-    relativeDate2?: relativeDate
+    relativeDate?: IAVRelativeDate
+    relativeDate2?: IAVRelativeDate
 }
 
-interface relativeDate {
+interface IAVRelativeDate {
     count: number;   // 数量
     unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
     direction: number;   // 方向：-1: 前、0: 现在、1: 后

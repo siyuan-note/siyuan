@@ -222,9 +222,10 @@ func IsValidPandocBin(binPath string) bool {
 		return false
 	}
 
-	// 在 Unix 上要求拥有可执行权限
+	// 在 Unix-like 上要求拥有可执行权限
 	if !gulu.OS.IsWindows() {
 		if fi.Mode().Perm()&0111 == 0 {
+			logging.LogWarnf("file [%s] is not executable", binPath)
 			return false
 		}
 	}
@@ -273,6 +274,7 @@ func IsValidPandocBin(binPath string) bool {
 	}
 
 	if !isBin {
+		logging.LogWarnf("file [%s] is not a valid binary executable", binPath)
 		return false
 	}
 

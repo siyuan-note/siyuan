@@ -16,6 +16,7 @@ import {Constants} from "../constants";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
+import ProtyleMethod from "../protyle/method";
 import {openMobileFileById} from "../mobile/editor";
 import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
@@ -320,6 +321,7 @@ export const API = {
     lockScreen,
     exitSiYuan,
     Protyle,
+    ProtyleMethod,
     Plugin,
     Dialog,
     Menu,

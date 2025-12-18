@@ -12,7 +12,6 @@ import { avRender } from "./render/av/render";
 import "../assets/scss/export.scss";
 
 class Protyle {
-
     /** 对 graphviz 进行渲染 */
     public static graphvizRender = graphvizRender;
     /** 为 element 中的代码块进行高亮渲染 */

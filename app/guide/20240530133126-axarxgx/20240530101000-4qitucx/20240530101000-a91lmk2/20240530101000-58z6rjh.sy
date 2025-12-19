@@ -7,7 +7,7 @@
 		"id": "20240530101000-58z6rjh",
 		"title": "データベーステーブル",
 		"type": "doc",
-		"updated": "20241024010606"
+		"updated": "20251219205212"
 	},
 	"Children": [
 		{
@@ -704,7 +704,7 @@
 			"Properties": {
 				"ID": "20240530101000-hotqrms",
 				"id": "20240530101000-214gvio",
-				"updated": "20241024010606"
+				"updated": "20251219205212"
 			},
 			"Children": [
 				{
@@ -725,7 +725,7 @@
 			"Properties": {
 				"ID": "20240530101000-e9bmqha",
 				"id": "20240530101000-4hc7zl9",
-				"updated": "20241024010606"
+				"updated": "20251219205212"
 			},
 			"Children": [
 				{
@@ -811,7 +811,7 @@
 					"Properties": {
 						"ID": "20240530101000-rsk9w3i",
 						"id": "20240530101000-7pu1enh",
-						"updated": "20241024010606"
+						"updated": "20251219205212"
 					},
 					"Children": [
 						{
@@ -843,7 +843,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20240530101000-8rv3wzu",
-								"updated": "20241024010606"
+								"updated": "20251219205212"
 							},
 							"Children": [
 								{
@@ -1165,6 +1165,43 @@
 												{
 													"Type": "NodeText",
 													"Data": "ブロック引用: "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "20"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20251219205156-zely6l5",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20251219205156-zely6l5",
+										"updated": "20251219205212"
+									},
+									"Children": [
+										{
+											"ID": "20251219205156-8l0lmrx",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20251219205156-8l0lmrx",
+												"updated": "20251219205212"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "吹き出しブロック: "
 												},
 												{
 													"Type": "NodeTextMark",

@@ -6,7 +6,7 @@
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
 		"type": "doc",
-		"updated": "20241024010548"
+		"updated": "20251219204957"
 	},
 	"Children": [
 		{
@@ -687,7 +687,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121831-zvnhouv",
-				"updated": "20241024010548"
+				"updated": "20251219204957"
 			},
 			"Children": [
 				{
@@ -702,7 +702,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121831-oj726eb",
-				"updated": "20241024010548"
+				"updated": "20251219204957"
 			},
 			"Children": [
 				{
@@ -778,7 +778,7 @@
 					},
 					"Properties": {
 						"id": "20211226121831-zs0ji69",
-						"updated": "20241024010548"
+						"updated": "20251219204957"
 					},
 					"Children": [
 						{
@@ -810,7 +810,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226121831-6ak7dij",
-								"updated": "20241024010548"
+								"updated": "20251219204957"
 							},
 							"Children": [
 								{
@@ -983,7 +983,11 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "表格塊："
+													"Data": "表格"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1057,7 +1061,11 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "列表塊："
+													"Data": "列表"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1094,7 +1102,11 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "列表項塊："
+													"Data": "列表"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "項塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1132,6 +1144,43 @@
 												{
 													"Type": "NodeText",
 													"Data": "引述塊："
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "20"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20251219204951-g20np5g",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20251219204951-g20np5g",
+										"updated": "20251219204957"
+									},
+									"Children": [
+										{
+											"ID": "20251219204951-gdvwekm",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20251219204951-gdvwekm",
+												"updated": "20251219204957"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "提示塊："
 												},
 												{
 													"Type": "NodeTextMark",

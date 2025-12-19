@@ -81,13 +81,13 @@ export const initBlockPopover = (app: App) => {
                 }
             }
             let tooltipSpace: number | undefined;
-            if (!tip && aElement.getAttribute("data-type") === "inline-memo") {
+            if (!tip && aElement.getAttribute("data-type")?.includes("inline-memo")) {
                 tip = escapeHtml(aElement.getAttribute("data-inline-memo-content"));
                 tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
                 tooltipSpace = 0; // tooltip 和备注元素之间不能有空隙 https://github.com/siyuan-note/siyuan/issues/14796#issuecomment-3649757267
             }
             if (!tip) {
-                if (aElement.getAttribute("data-type") === "a") {
+                if (aElement.getAttribute("data-type")?.includes("a")) {
                     tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
                     tooltipSpace = 0;
                 }

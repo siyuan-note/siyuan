@@ -222,14 +222,6 @@ func IsValidPandocBin(binPath string) bool {
 		return false
 	}
 
-	// 在 Unix-like 上要求拥有可执行权限
-	if !gulu.OS.IsWindows() {
-		if fi.Mode().Perm()&os.FileMode(0o111) == 0 {
-			logging.LogWarnf("file [%s] is not executable", binPath)
-			return false
-		}
-	}
-
 	// 读取文件头判断是否为二进制并排除脚本（#!）
 	f, err := os.Open(binPath)
 	if err != nil {

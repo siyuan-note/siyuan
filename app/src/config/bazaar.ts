@@ -234,10 +234,10 @@ export const bazaar = {
         if (!funding) {
             return "";
         }
-        const isLink = funding.startsWith("http://") || funding.startsWith("https://");
-        if (isLink) {
+        try {
+            new URL(funding);
             return `<a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
-        } else {
+        } catch (e) {
             return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
         }
     },
@@ -284,7 +284,8 @@ export const bazaar = {
                 ${item.downloads}
             </span>
             <span class="fn__space"></span>
-            ${item.preferredFunding ? `${bazaar._genFundingHTML(item.preferredFunding)}<span class="fn__space"></span>` : ""}
+            ${bazaar._genFundingHTML(item.preferredFunding)}
+            <span class="fn__space"></span>
             <div class="fn__flex-1"></div>
             <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
                 <svg><use xlink:href="#iconTrashcan"></use></svg>
@@ -321,7 +322,7 @@ export const bazaar = {
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${item.incompatible ? `<span class="fn__space"></span><span class="fn__flex-center b3-tooltips b3-tooltips__nw b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>` : ""}
-        ${item.preferredFunding ? bazaar._genFundingHTML(item.preferredFunding) : ""}
+        ${bazaar._genFundingHTML(item.preferredFunding)}
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
@@ -430,7 +431,7 @@ export const bazaar = {
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${item.incompatible ? `<span class="fn__space"></span><span class="fn__flex-center b3-tooltips b3-tooltips__nw b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>` : ""}
-        ${item.preferredFunding ? bazaar._genFundingHTML(item.preferredFunding) : ""}
+        ${bazaar._genFundingHTML(item.preferredFunding)}
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${hasSetting ? "" : " fn__none"}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>
         </span>
@@ -520,7 +521,7 @@ export const bazaar = {
         <span class="fn__flex-1"></span>
         ${data.preferredFunding ?
             bazaar._genFundingHTML(data.preferredFunding) :
-            `<span class="b3-tooltips b3-tooltips__ne block__icon block__icon--show ft__primary" aria-label="${window.siyuan.languages.author}" style="cursor: default;"><svg><use xlink:href="#iconAccount"></use></svg></span>`
+            `<span class="b3-tooltips b3-tooltips__ne block__icon block__icon--show ft__primary" aria-label="${window.siyuan.languages.author}" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>`
         }
         <span class="fn__space"></span>
         <a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a>
@@ -630,9 +631,8 @@ export const bazaar = {
                 if (target.tagName === "A") {
                     break;
                 }
-                const copyFundingElement = hasClosestByAttribute(target, "data-type", "copy-funding");
-                if (copyFundingElement) {
-                    const funding = copyFundingElement.getAttribute("data-funding");
+                if (type === "copy-funding") {
+                    const funding = target.getAttribute("data-funding");
                     if (funding) {
                         writeText(funding);
                         showMessage(window.siyuan.languages.copied);

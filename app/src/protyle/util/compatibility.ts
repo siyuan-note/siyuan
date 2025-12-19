@@ -240,7 +240,7 @@ export const writeText = (text: string) => {
     }
 };
 
-export const copyPlainText = async (text: string) => {
+export const copyPlainText = (text: string) => {
     text = text.replace(new RegExp(Constants.ZWSP, "g"), ""); // `复制纯文本` 时移除所有零宽空格 https://github.com/siyuan-note/siyuan/issues/6674
     writeText(text);
 };

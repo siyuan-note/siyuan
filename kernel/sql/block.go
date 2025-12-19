@@ -181,6 +181,15 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 				buf.WriteByte(' ')
 				lastSpace = true
 			}
+			if ast.NodeCallout == n.Type {
+				buf.WriteString(n.CalloutType + " ")
+				if "" != n.CalloutIcon && 0 == n.CalloutIconType {
+					buf.WriteString(n.CalloutIcon + " ")
+				}
+				if "" != n.CalloutTitle {
+					buf.WriteString(n.CalloutTitle)
+				}
+			}
 			return ast.WalkContinue
 		}
 

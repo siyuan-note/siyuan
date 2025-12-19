@@ -187,7 +187,7 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 					buf.WriteString(n.CalloutIcon + " ")
 				}
 				if "" != n.CalloutTitle {
-					buf.WriteString(n.CalloutTitle)
+					buf.WriteString(n.CalloutTitle + " ")
 				}
 			}
 			return ast.WalkContinue

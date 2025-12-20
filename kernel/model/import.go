@@ -262,6 +262,14 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if d == nil {
 				return nil
 			}
+
+			if ".json" == d.Name() { // https://github.com/siyuan-note/siyuan/issues/16637
+				if removeErr := os.RemoveAll(path); nil != removeErr {
+					logging.LogErrorf("remove empty av file [%s] failed: %s", path, removeErr)
+				}
+				return nil
+			}
+
 			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".json")) {
 				return nil
 			}

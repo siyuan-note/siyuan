@@ -2,7 +2,6 @@ import {hasClosestBlock} from "../util/hasClosest";
 import {updateTransaction} from "./transaction";
 import {focusBlock} from "../util/selection";
 import {Dialog} from "../../dialog";
-import {escapeHtml} from "../../util/escape";
 import {Menu} from "../../plugin/Menu";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
@@ -31,7 +30,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
             ${window.siyuan.languages.title}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-text-field fn__flex-1" value="${titleElement.textContent}" type="text">
+        <input class="b3-text-field fn__flex-1" type="text">
     </label>
 </div>
 <div class="b3-dialog__action">
@@ -47,8 +46,14 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
     btnElements[1].addEventListener("click", () => {
         const oldHTML = blockElement.outerHTML;
         blockElement.setAttribute("data-subtype", textElements[0].value.trim());
-        titleElement.textContent = escapeHtml(textElements[1].value.trim() ||
-            (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase()));
+        let title = textElements[1].value.trim();
+        if (title) {
+            const template = document.createElement("template");
+            template.innerHTML = protyle.lute.Md2BlockDOM(textElements[1].value.trim());
+            title = template.content.firstElementChild.firstElementChild.innerHTML;
+        }
+        titleElement.innerHTML = title ||
+            (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase());
         if (updateIcon) {
             blockElement.querySelector(".callout-icon").textContent = updateIcon;
         }
@@ -73,6 +78,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
     });
     textElements[0].focus();
     textElements[0].select();
+    textElements[1].value = protyle.lute.BlockDOM2StdMd(titleElement.innerHTML);
     let updateIcon = "";
     dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
         const menu = new Menu(Constants.MENU_CALLOUT_SELECT, () => {

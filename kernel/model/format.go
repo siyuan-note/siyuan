@@ -61,13 +61,13 @@ func AutoSpace(rootID string) (err error) {
 	addBlockIALNodes(tree, false)
 
 	// 第一次格式化为了合并相邻的文本节点
-	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	md := formatRenderer.Render()
 	newTree := parseKTree(md)
 	newTree.Root.Spec = treenode.CurrentSpec
 	// 第二次格式化启用自动空格
 	luteEngine.SetAutoSpace(true)
-	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions)
+	formatRenderer = render.NewFormatRenderer(newTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	md = formatRenderer.Render()
 	newTree = parseKTree(md)
 	newTree.Root.Spec = treenode.CurrentSpec

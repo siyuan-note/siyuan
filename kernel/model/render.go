@@ -177,7 +177,7 @@ func fillBlockRefCount(nodes []*ast.Node) {
 
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
-	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
+	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	for _, node := range nodes {
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if entering {

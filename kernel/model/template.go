@@ -229,7 +229,7 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 	}
 
 	luteEngine := NewLute()
-	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	md := formatRenderer.Render()
 
 	// 单独渲染根节点的 IAL
@@ -488,7 +488,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 
 	luteEngine := NewLute()
-	dom = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+	dom = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	return
 }
 

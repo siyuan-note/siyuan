@@ -737,7 +737,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	}
 
 	luteEngine.RenderOptions.NodeIndexStart = index
-	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
+	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 
 	if 1 > len(keywords) {
 		keywords = []string{}

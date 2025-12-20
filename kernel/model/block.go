@@ -1028,7 +1028,7 @@ func GetBlockKramdown(id, mode string) (ret string) {
 		ret = treenode.ExportNodeStdMd(root, luteEngine)
 	} else {
 		tree.Root = root
-		formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+		formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		ret = string(formatRenderer.Render())
 	}
 	return

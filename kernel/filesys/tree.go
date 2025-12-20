@@ -207,7 +207,7 @@ func DocIAL(absPath string) (ret map[string]string) {
 
 func TreeSize(tree *parse.Tree) (size uint64) {
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
-	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	return uint64(len(renderer.Render()))
 }
 
@@ -248,7 +248,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 
 	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)
 	tree.Root.SetIALAttr("type", "doc")
-	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
 	data = bytes.ReplaceAll(data, []byte("\u0000"), []byte(""))
 
@@ -301,7 +301,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	}
 
 	if needFix {
-		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions)
+		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		data := renderer.Render()
 
 		if !util.UseSingleLineSave {

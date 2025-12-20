@@ -250,10 +250,10 @@ func OpenRepoSnapshotDoc(fileID string) (title, content string, displayInText bo
 		luteEngine.RenderOptions.ProtyleContenteditable = false
 		if displayInText {
 			util.PushMsg(Conf.Language(36), 5000)
-			formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
+			formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 			content = gulu.Str.FromBytes(formatRenderer.Render())
 		} else {
-			content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
+			content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		}
 	} else {
 		displayInText = true

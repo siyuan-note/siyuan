@@ -468,7 +468,7 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	luteEngine.SetFootnotes(true)
 	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	luteEngine.RenderOptions.ProtyleMarkNetImg = false
-	content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret["shorthandContent"] = content
 	return
 }
@@ -522,7 +522,7 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 		shorthand["shorthandMd"] = md
 		tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
 		luteEngine.RenderOptions.ProtyleMarkNetImg = false
-		content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+		content := luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		shorthand["shorthandContent"] = content
 	}
 	return

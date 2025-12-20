@@ -640,7 +640,7 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 		fillThemeStyleVar(tree)
 	}
 	luteEngine.RenderOptions.ProtyleMarkNetImg = false
-	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 
 	if footnotesDefBlock := tree.Root.ChildByType(ast.NodeFootnotesDefBlock); nil != footnotesDefBlock {
 		footnotesDefBlock.Unlink()
@@ -872,11 +872,11 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	})
 
 	if docx {
-		renderer := render.NewProtyleExportDocxRenderer(tree, luteEngine.RenderOptions)
+		renderer := render.NewProtyleExportDocxRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		output := renderer.Render()
 		dom = gulu.Str.FromBytes(output)
 	} else {
-		dom = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+		dom = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	}
 	return
 }
@@ -1048,7 +1048,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
 	luteEngine.SetSanitize(false)
 
-	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return
 }
@@ -2268,7 +2268,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 
 	luteEngine.SetUnorderedListMarker("-")
 	luteEngine.SetImgTag(imgTag)
-	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return
 }

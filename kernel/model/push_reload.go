@@ -143,7 +143,7 @@ func refreshParentDocInfo(tree *parse.Tree) {
 	}
 
 	luteEngine := lute.New()
-	renderer := render.NewJSONRenderer(parentTree, luteEngine.RenderOptions)
+	renderer := render.NewJSONRenderer(parentTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data := renderer.Render()
 	refreshDocInfo0(parentTree, uint64(len(data)))
 }

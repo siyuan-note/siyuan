@@ -97,6 +97,21 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                         };
                     }
                 });
+                foldTransaction.data.undoOperations.reverse();
+                if (topElement.previousElementSibling &&
+                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+                    topElement.previousElementSibling.getAttribute("fold") === "1") {
+                    const foldId = topElement.previousElementSibling.getAttribute("data-node-id");
+                    if (!unfoldData[foldId]) {
+                        const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {
+                            id: foldId,
+                        });
+                        unfoldData[foldId] = {
+                            element: topElement.previousElementSibling,
+                            previousID: foldTransaction.data.doOperations[foldTransaction.data.doOperations.length - 1].id
+                        };
+                    }
+                }
                 inserts.push(...foldTransaction.data.undoOperations);
                 // https://github.com/siyuan-note/siyuan/issues/4422
                 topElement.firstElementChild.removeAttribute("contenteditable");

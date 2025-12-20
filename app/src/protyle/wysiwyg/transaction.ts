@@ -319,7 +319,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
 };
 
 const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, isUndo: boolean) => {
-    if (isUndo) {
+    if (isUndo && updateElements[0]) {
         focusSideBlock(updateElements[0]);
     }
     updateElements.forEach(item => {

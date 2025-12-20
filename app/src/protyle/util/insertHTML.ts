@@ -553,24 +553,35 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         // https://github.com/siyuan-note/siyuan/issues/5591
         focusBlock(lastElement, undefined, false);
     }
-    const wbrElement = protyle.wysiwyg.element.querySelector("wbr");
-    if (wbrElement) {
-        wbrElement.remove();
-    }
-    let foldData;
-    if (blockElement.getAttribute("data-type") === "NodeHeading" &&
-        blockElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, blockElement, true, false, false, true);
-        doOperation.reverse();
-        foldData.doOperations[0].context = {
-            focusId: lastElement?.getAttribute("data-node-id"),
-        };
-        doOperation.push(...foldData.doOperations);
-        undoOperation.push(...foldData.undoOperations);
-    }
-    transaction(protyle, doOperation, undoOperation);
+    protyle.wysiwyg.element.querySelectorAll("wbr").forEach(item => {
+        item.remove();
+    });
     // 复制容器块中包含折叠标题块
     protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
         item.remove();
     });
+    let foldData;
+    if (blockElement.getAttribute("data-type") === "NodeHeading" &&
+        blockElement.getAttribute("fold") === "1" && !insertBefore) {
+        fetchPost("/api/block/getHeadingChildrenIDs", {id: blockElement.getAttribute("data-node-id")}, (response) => {
+            const childrenIDs: string[] = response.data;
+            if (childrenIDs.length > 0) {
+                const previousId = childrenIDs[childrenIDs.length - 1];
+                foldData = setFold(protyle, blockElement, true, false, false, true);
+                foldData.doOperations[0].context = {
+                    focusId: lastElement?.getAttribute("data-node-id"),
+                };
+                doOperation.forEach(item => {
+                    if (item.action === "insert") {
+                        item.previousID = previousId;
+                    }
+                });
+                doOperation.splice(0, 0, ...foldData.doOperations);
+                undoOperation.push(...foldData.undoOperations);
+                transaction(protyle, doOperation, undoOperation);
+            }
+        });
+        return;
+    }
+    transaction(protyle, doOperation, undoOperation);
 };

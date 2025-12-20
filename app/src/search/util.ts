@@ -940,7 +940,8 @@ export const openSearchEditor = (options: {
                 focusId: options.id,
                 focusStart: offset.start,
                 focusEnd: offset.end,
-                zoomInId: options.protyle.block.showAll ? options.protyle.block.id : undefined
+                zoomInId: options.protyle.block.showAll ? options.protyle.block.id : undefined,
+                scrollTop: options.protyle.contentElement.scrollTop,
             };
             window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.protyle.block.rootID] = scrollAttr;
             if (offset.start === offset.end) {

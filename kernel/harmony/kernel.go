@@ -138,4 +138,9 @@ func Unzip(zipFilePath, destination *C.char) {
 	}
 }
 
+//export Exit
+func Exit() {
+	os.Exit(logging.ExitCodeOk)
+}
+
 func main() {}

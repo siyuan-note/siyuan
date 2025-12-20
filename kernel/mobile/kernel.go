@@ -292,3 +292,7 @@ func FilterUploadFileName(name string) string {
 func AssetName(name string) string {
 	return util.AssetName(name, ast.NewNodeID())
 }
+
+func Exit() {
+	os.Exit(logging.ExitCodeOk)
+}

@@ -90,9 +90,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     id: topElement.getAttribute("data-node-id"),
                 });
                 deletes.push(...foldTransaction.data.doOperations.slice(1));
-                const previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
                 foldTransaction.data.undoOperations.forEach((operationItem: IOperation, index: number) => {
-                    operationItem.previousID = previousID;
                     if (index > 0) {
                         operationItem.context = {
                             ignoreProcess: "true"

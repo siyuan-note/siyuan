@@ -108,10 +108,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }
                 let previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : "";
                 if (topElement.previousElementSibling &&
-                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" && topElement.previousElementSibling.getAttribute("fold") === "1" &&
-                    (topElement.nextElementSibling?.getAttribute("data-type") !== "NodeHeading" ||
-                        (topElement.nextElementSibling?.getAttribute("data-type") === "NodeHeading" && topElement.nextElementSibling?.getAttribute("data-subtype") < topElement.getAttribute("data-subtype"))
-                    )) {
+                    topElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+                    topElement.previousElementSibling.getAttribute("fold") === "1") {
                     const foldId = topElement.previousElementSibling.getAttribute("data-node-id");
                     if (!unfoldData[foldId]) {
                         const foldTransaction = await fetchSyncPost("/api/block/getHeadingDeleteTransaction", {

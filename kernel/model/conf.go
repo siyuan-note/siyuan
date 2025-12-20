@@ -83,11 +83,16 @@ type AppConf struct {
 	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
 	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
 
-	m *sync.Mutex
+	m        *sync.RWMutex // 配置数据锁
+	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
 }
 
 func NewAppConf() *AppConf {
-	return &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
+	return &AppConf{
+		LogLevel: "debug",
+		m:        &sync.RWMutex{},
+		userLock: &sync.RWMutex{},
+	}
 }
 
 func (conf *AppConf) GetUILayout() *conf.UILayout {
@@ -103,14 +108,14 @@ func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
 }
 
 func (conf *AppConf) GetUser() *conf.User {
-	conf.m.Lock()
-	defer conf.m.Unlock()
+	conf.userLock.RLock()
+	defer conf.userLock.RUnlock()
 	return conf.User
 }
 
 func (conf *AppConf) SetUser(user *conf.User) {
-	conf.m.Lock()
-	defer conf.m.Unlock()
+	conf.userLock.Lock()
+	defer conf.userLock.Unlock()
 	conf.User = user
 }
 

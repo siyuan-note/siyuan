@@ -824,9 +824,33 @@ app.whenReady().then(() => {
         }
         if (data.cmd === "siyuan-open-file") {
             let hasMatch = false;
+            const senderWindow = BrowserWindow.fromWebContents(event.sender);
+            let senderPort = "";
+            try {
+                if (senderWindow && !senderWindow.isDestroyed()) {
+                    const senderUrl = new URL(senderWindow.getURL());
+                    senderPort = senderUrl.port;
+                }
+            } catch (e) {
+                // 如果无法获取发送消息的窗口的端口，则不进行工作空间检查
+            }
             BrowserWindow.getAllWindows().find(item => {
                 if (item.webContents.id === event.sender.id) {
                     return;
+                }
+                // 只检查属于同一个工作空间的窗口（通过端口判断）
+                // 修复：在工作空间 B 中点击块引用时，会激活工作空间 A 的新窗口
+                // https://github.com/siyuan-note/siyuan/issues/16559
+                if (senderPort) {
+                    try {
+                        const itemUrl = new URL(item.webContents.getURL());
+                        if (itemUrl.port !== senderPort) {
+                            return; // 不同工作空间，跳过
+                        }
+                    } catch (e) {
+                        // 如果无法解析 URL，跳过该窗口
+                        return;
+                    }
                 }
                 const ids = decodeURIComponent(new URL(item.webContents.getURL()).hash.substring(1)).split("\u200b");
                 const options = JSON.parse(data.options);
@@ -1069,6 +1093,7 @@ app.whenReady().then(() => {
         mainWindow.show();
     });
     ipcMain.on("siyuan-open-window", (event, data) => {
+        const senderWindow = BrowserWindow.fromWebContents(event.sender);
         const mainWindow = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
         const mainBounds = mainWindow.getBounds();
         const mainScreen = screen.getDisplayNearestPoint({x: mainBounds.x, y: mainBounds.y});
@@ -1101,7 +1126,20 @@ app.whenReady().then(() => {
         }
         win.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + win.webContents.userAgent;
         win.webContents.session.setSpellCheckerLanguages(["en-US"]);
-        win.loadURL(data.url);
+        // 始终使用发送消息的窗口的 origin（协议和主机），确保新窗口连接到正确的工作空间
+        // 修复：在工作空间 A 中以新窗口打开文档后，在工作空间 B 无法再打开该文档
+        // https://github.com/siyuan-note/siyuan/issues/16559
+        let finalUrl = data.url;
+        try {
+            if (senderWindow && !senderWindow.isDestroyed()) {
+                const senderUrlObj = new URL(senderWindow.getURL());
+                const receivedUrlObj = new URL(data.url);
+                finalUrl = data.url.replace(receivedUrlObj.origin, senderUrlObj.origin);
+            }
+        } catch (e) {
+            // 如果 URL 解析失败，使用原始 URL
+        }
+        win.loadURL(finalUrl);
         windowNavigate(win);
         win.on("close", (event) => {
             if (win && !win.isDestroyed()) {

@@ -213,6 +213,7 @@ export const openFile = async (options: IOpenFileOptions) => {
         hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
             cmd: Constants.SIYUAN_OPEN_FILE,
             options: JSON.stringify(optionsClone),
+            port: location.port,
         });
         if (hasMatch) {
             if (options.afterOpen) {

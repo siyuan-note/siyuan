@@ -1894,7 +1894,12 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			if ast.NodeAttributeView == n.Type {
 				avIDs = append(avIDs, n.AttributeViewID)
 			}
+
 			avs := n.IALAttr(av.NodeAttrNameAvs)
+			if "" == avs {
+				return ast.WalkContinue
+			}
+
 			for _, avID := range strings.Split(avs, ",") {
 				avIDs = append(avIDs, strings.TrimSpace(avID))
 			}
@@ -1903,6 +1908,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
 	for _, avID := range avIDs {
+		if !ast.IsNodeIDPattern(avID) {
+			continue
+		}
+
 		exportAv(avID, exportStorageAvDir, exportDir, assetPathMap)
 	}
 

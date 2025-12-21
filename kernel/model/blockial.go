@@ -195,9 +195,7 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 		return
 	}
 
-	if err = tx.writeTree(tree); err != nil {
-		return
-	}
+	tx.writeTree(tree)
 
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))

@@ -203,9 +203,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 	}
 
-	if err = tx.writeTree(tree); err != nil {
-		return
-	}
+	tx.writeTree(tree)
 	return
 }
 

@@ -825,9 +825,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 			node.SetIALAttr("custom-riff-decks", val)
 		}
 
-		if err = tx.writeTree(tree); err != nil {
-			return
-		}
+		tx.writeTree(tree)
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
 		pushBroadcastAttrTransactions(oldAttrs, node)
@@ -921,9 +919,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		val = strings.TrimSuffix(val, ",")
 		node.SetIALAttr("custom-riff-decks", val)
 
-		if err := tx.writeTree(tree); err != nil {
-			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
-		}
+		tx.writeTree(tree)
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
 		pushBroadcastAttrTransactions(oldAttrs, node)

@@ -514,6 +514,19 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	return
 }
 
+func RemoveBlockTreesByIDs(ids []string) {
+	if 1 > len(ids) {
+		return
+	}
+
+	sqlStmt := "DELETE FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
+	_, err := db.Exec(sqlStmt)
+	if err != nil {
+		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
+		return
+	}
+}
+
 func RemoveBlockTree(id string) {
 	sqlStmt := "DELETE FROM blocktrees WHERE id = ?"
 	_, err := db.Exec(sqlStmt, id)
@@ -536,6 +549,10 @@ func IndexBlockTree(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
+	if 1 > len(changedNodes) {
+		return
+	}
+
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
 
@@ -545,21 +562,7 @@ func IndexBlockTree(tree *parse.Tree) {
 		return
 	}
 
-	sqlStmt := "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-	for _, n := range changedNodes {
-		var parentID string
-		if nil != n.Parent {
-			parentID = n.Parent.ID
-		}
-		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
-			tx.Rollback()
-			logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
-			return
-		}
-	}
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit transaction failed: %s", err)
-	}
+	execInsertBlocktrees(tx, tree, changedNodes)
 }
 
 func UpsertBlockTree(tree *parse.Tree) {
@@ -587,6 +590,10 @@ func UpsertBlockTree(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
+	if 1 > len(changedNodes) {
+		return
+	}
+
 	ids := bytes.Buffer{}
 	for i, n := range changedNodes {
 		ids.WriteString("'")
@@ -607,14 +614,26 @@ func UpsertBlockTree(tree *parse.Tree) {
 	}
 
 	sqlStmt := "DELETE FROM blocktrees WHERE id IN (" + ids.String() + ")"
-
 	_, err = tx.Exec(sqlStmt)
 	if err != nil {
 		tx.Rollback()
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
 	}
-	sqlStmt = "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+
+	execInsertBlocktrees(tx, tree, changedNodes)
+}
+
+func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node) {
+	sqlStmt := "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	stmt, err := tx.Prepare(sqlStmt)
+	if err != nil {
+		tx.Rollback()
+		logging.LogErrorf("prepare statement [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer stmt.Close()
+
 	for _, n := range changedNodes {
 		var parentID string
 		if nil != n.Parent {

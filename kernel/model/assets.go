@@ -516,6 +516,15 @@ func UploadAssets2Cloud(id string) (count int, err error) {
 	return
 }
 
+func UploadAssets2CloudByAssetsPaths(assetPaths []string) (count int, err error) {
+	if !IsSubscriber() {
+		return
+	}
+
+	count, err = uploadAssets2Cloud(assetPaths, bizTypeUploadAssets)
+	return
+}
+
 const (
 	bizTypeUploadAssets  = "upload-assets"
 	bizTypeExport2Liandi = "export-liandi"

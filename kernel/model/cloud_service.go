@@ -330,12 +330,10 @@ func refreshAnnouncement() {
 func RefreshUser(token string) {
 	threeDaysAfter := util.CurrentTimeMillis() + 1000*60*60*24*3
 	if "" == token {
-		// 先尝试从内存中获取用户，避免不必要的文件读取和锁竞争
 		user := Conf.GetUser()
 		if nil == user && "" != Conf.UserData {
 			user = loadUserFromConf()
 			if nil != user {
-				// 只有在用户数据存在且与当前用户不同时才设置用户，避免不必要的锁竞争
 				Conf.SetUser(user)
 			}
 		}

@@ -608,7 +608,10 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         liElement.nextElementSibling.classList.remove("fn__none");
         return;
     }
-
+    if (liElement.getAttribute("data-loading") === "true") {
+        return;
+    }
+    liElement.setAttribute("data-loading", "true");
     const notebookId = liElement.getAttribute("data-box");
     fetchPost("/api/filetree/listDocsByPath", {
         notebook: notebookId,
@@ -616,6 +619,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         flashcard,
         app: Constants.SIYUAN_APPID,
     }, response => {
+        liElement.removeAttribute("data-loading");
         if (response.data.files.length === 0) {
             showMessage(window.siyuan.languages.emptyContent);
             return;

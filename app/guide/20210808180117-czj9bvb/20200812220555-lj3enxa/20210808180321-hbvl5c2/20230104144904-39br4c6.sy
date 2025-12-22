@@ -268,11 +268,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（原为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "custom-liandi-articleId"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用于关联链滴帖子 ID"
+									"Data": "​ ）用于关联链滴帖子 ID"
 								}
 							]
 						}

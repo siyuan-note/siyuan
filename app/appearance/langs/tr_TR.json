@@ -1458,7 +1458,7 @@
     "22": "Doğrulama kodu hatalı",
     "23": "Veri deposu bozulmuş, lütfen veri deposunu sıfırla",
     "24": "Ağ zaman aşımına uğradı, lütfen daha sonra tekrar dene",
-    "25": "Öznitelik adı yalnızca İngilizce harf ve rakam içerebilir",
+    "25": "Öznitelik adı yalnızca küçük harf İngilizce harf, rakam ve tire içerebilir ve küçük harf İngilizce harf ile başlamalıdır",
     "26": "Lütfen önce [Ayarlar - Hakkında - Veri deposu anahtarı] kısmından veri deposu anahtarını başlat",
     "27": "[%v] yükleniyor",
     "28": "Ağ hatalı, lütfen daha sonra tekrar dene",

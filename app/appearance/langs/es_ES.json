@@ -1458,7 +1458,7 @@
     "22": "El captcha es incorrecto",
     "23": "El repositorio de datos está dañado, reinicie el repositorio de datos",
     "24": "Se agotó el tiempo de espera de la red. Vuelva a intentarlo más tarde.",
-    "25": "El nombre del atributo sólo admite letras y dígitos en inglés",
+    "25": "El nombre del atributo solo puede contener letras minúsculas, dígitos y guiones, y debe comenzar con una letra minúscula",
     "26": "Por favor, inicialice primero la clave de repositorio de datos en [Configuración - Acerca de - Clave de repositorio de datos]",
     "27": "Subiendo [%v]",
     "28": "La red es anómala, inténtalo de nuevo más tarde",

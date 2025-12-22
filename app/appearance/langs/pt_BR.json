@@ -1458,7 +1458,7 @@
     "22": "O captcha está incorreto",
     "23": "O repositório de dados está corrompido, por favor redefina o repositório de dados",
     "24": "Tempo limite da rede, por favor tente novamente mais tarde",
-    "25": "O nome do atributo só suporta letras inglesas e dígitos",
+    "25": "O nome do atributo pode conter apenas letras minúsculas, dígitos e hífens e deve começar com uma letra minúscula",
     "26": "Por favor, inicialize a chave do repositório de dados primeiro em [Configurações - Sobre - Chave do repositório de dados]",
     "27": "Enviando [%v]",
     "28": "A rede está anormal, por favor tente novamente mais tarde",

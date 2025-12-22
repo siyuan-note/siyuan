@@ -363,7 +363,7 @@ export class Wnd {
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 JSONToCenter(app, tabData, this);
                 this.children.find(item => {
-                    if (item.headElement.getAttribute("data-activeTime") === tabData.activeTime) {
+                    if (item.headElement.getAttribute("data-activetime") === tabData.activeTime) {
                         oldTab = item;
                         return true;
                     }

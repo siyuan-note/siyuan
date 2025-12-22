@@ -19,13 +19,13 @@ package model
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
-	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -34,6 +34,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// isValidAttrName 验证属性名是否合法
+func isValidAttrName(name string) bool {
+	if len(name) == 0 {
+		return false
+	}
+	// 首字符必须是小写字母
+	if name[0] < 'a' || name[0] > 'z' {
+		return false
+	}
+	// 自定义属性 custom- 之后的首个字符必须是小写字母
+	if strings.HasPrefix(name, "custom-") {
+		if len(name) <= 7 || name[7] < 'a' || name[7] > 'z' {
+			return false
+		}
+	}
+	// 后续字符只能是小写字母、数字、连字符
+	for i := 1; i < len(name); i++ {
+		c := name[i]
+		if c == '-' || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') {
+			continue
+		}
+		return false
+	}
+	return true
+}
 
 func SetBlockReminder(id string, timed string) (err error) {
 	if !IsSubscriber() {
@@ -205,66 +231,62 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 
 func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[string]string, err error) {
 	oldAttrs = parse.IAL2Map(node.KramdownIAL)
-
-	for name := range nameValues {
-		for i := 0; i < len(name); i++ {
-			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				err = errors.New(fmt.Sprintf(Conf.Language(25), node.ID))
-				return
-			}
-		}
-	}
-
-	if tag, ok := nameValues["tags"]; ok {
-		var tags []string
-		tmp := strings.Split(tag, ",")
-		for _, t := range tmp {
-			t = util.RemoveInvalid(t)
-			t = strings.TrimSpace(t)
-			if "" != t {
-				tags = append(tags, t)
-			}
-		}
-		tags = gulu.Str.RemoveDuplicatedElem(tags)
-		if 0 < len(tags) {
-			nameValues["tags"] = strings.Join(tags, ",")
-		}
-	}
-
-	normalizeKeysToLower(nameValues)
+	newAttrs := maps.Clone(oldAttrs)
 
 	for name, value := range nameValues {
 		value = util.RemoveInvalidRetainCtrl(value)
 		value = strings.TrimSpace(value)
-		value = strings.TrimSuffix(value, ",")
+		lowerName := strings.ToLower(name)
+		// 转换为小写再验证属性名
+		if !isValidAttrName(lowerName) {
+			err = errors.New(Conf.Language(25) + " [" + node.ID + "]")
+			return
+		}
+
+		// 处理文档标签 https://github.com/siyuan-note/siyuan/issues/13311
+		if lowerName == "tags" {
+			var tags []string
+			tmp := strings.Split(value, ",")
+			for _, t := range tmp {
+				t = util.RemoveInvalid(t)
+				t = strings.TrimSpace(t)
+				if "" != t {
+					tags = append(tags, t)
+				}
+			}
+			tags = gulu.Str.RemoveDuplicatedElem(tags)
+			if 0 < len(tags) {
+				value = strings.Join(tags, ",")
+			} else {
+				value = ""
+			}
+		}
+
 		if "" == value {
-			node.RemoveIALAttr(name)
+			// 删除属性
+			if name != lowerName {
+				if _, exists := newAttrs[name]; exists {
+					// 仅删除完全匹配的包含大写字母的属性
+					delete(newAttrs, name)
+					continue
+				}
+			}
+			delete(newAttrs, lowerName)
 		} else {
-			node.SetIALAttr(name, value)
+			// 添加或更新属性
+			// 删除大小写完全匹配的属性
+			delete(newAttrs, name)
+			// 保存小写的属性 https://github.com/siyuan-note/siyuan/issues/16447
+			newAttrs[lowerName] = value
 		}
 	}
 
-	if oldAttrs["tags"] != nameValues["tags"] {
+	node.KramdownIAL = parse.Map2IAL(newAttrs)
+
+	if oldAttrs["tags"] != newAttrs["tags"] {
 		ReloadTag()
 	}
 	return
-}
-
-// normalizeKeysToLower 将 nameValues 的键统一为小写 https://github.com/siyuan-note/siyuan/issues/16447
-func normalizeKeysToLower(nameValues map[string]string) {
-	newMap := make(map[string]string, len(nameValues))
-	for name, value := range nameValues {
-		lower := strings.ToLower(name)
-		newMap[lower] = value
-	}
-
-	for k := range nameValues {
-		delete(nameValues, k)
-	}
-
-	for k, v := range newMap {
-		nameValues[k] = v
-	}
 }
 
 func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
@@ -294,15 +316,15 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 
 	for name := range nameValues {
-		for i := 0; i < len(name); i++ {
-			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				return errors.New(fmt.Sprintf(Conf.Language(25), id))
-			}
+		if !isValidAttrName(name) {
+			return errors.New(Conf.Language(25) + " [" + id + "]")
 		}
 	}
 
 	node.ClearIALAttrs()
 	for name, value := range nameValues {
+		value = util.RemoveInvalidRetainCtrl(value)
+		value = strings.TrimSpace(value)
 		if "" != value {
 			node.SetIALAttr(name, value)
 		}

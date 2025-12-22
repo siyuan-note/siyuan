@@ -1459,7 +1459,7 @@
     "22": "The captcha is incorrect",
     "23": "The data repo is corrupted, please reset the data repo",
     "24": "Network timed out, please try again later",
-    "25": "The attribute name only supports English letters and digits",
+    "25": "The attribute name can only contain lowercase English letters, digits, and hyphens, and must start with a lowercase English letter",
     "26": "Please initialize the data repo key first in [Settings - About - Data repo key]",
     "27": "Uploading [%v]",
     "28": "The network is abnormal, please try again later",

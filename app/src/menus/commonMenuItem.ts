@@ -2,7 +2,7 @@
 import {shell} from "electron";
 /// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
-import {getSearch, isMobile, isValidAttrName} from "../util/functions";
+import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
@@ -353,8 +353,8 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                 });
                 btnsElement[1].addEventListener("click", () => {
                     const value = inputElement.value.toLowerCase();
-                    if (!isValidAttrName(value)) {
-                        showMessage(window.siyuan.languages.attrName + " <b>" + escapeHtml(value) + "</b> " + window.siyuan.languages.invalid);
+                    if (!isValidCustomAttrName(value)) {
+                        showMessage(window.siyuan.languages._kernel[25]);
                         return false;
                     }
                     let existElement: HTMLElement | false;

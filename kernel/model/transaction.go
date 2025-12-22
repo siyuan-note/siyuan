@@ -1745,7 +1745,6 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	}
 
 	for name, value := range attrs {
-		name := strings.ToLower(name)
 		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {

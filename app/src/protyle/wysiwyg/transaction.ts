@@ -874,11 +874,13 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             blockRender(protyle, item);
             const wbrElement = item.querySelector("wbr");
             if (isUndo) {
-                const range = getEditorRange(item);
-                if (wbrElement) {
-                    focusByWbr(item, range);
-                } else {
-                    focusBlock(item);
+                if (operation.context?.setRange === "true") {
+                    const range = getEditorRange(item);
+                    if (wbrElement) {
+                        focusByWbr(item, range);
+                    } else {
+                        focusBlock(item);
+                    }
                 }
             } else if (wbrElement) {
                 wbrElement.remove();

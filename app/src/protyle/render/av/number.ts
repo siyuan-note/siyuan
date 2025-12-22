@@ -146,6 +146,15 @@ export const formatNumber = (options: {
         protyle: options.protyle,
         colId: options.colId,
         avID: options.avID,
+        format:"TRY",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
         format: "CAD",
         oldFormat: options.oldFormat,
         avPanelElement: options.avPanelElement,
@@ -222,6 +231,16 @@ export const formatNumber = (options: {
         oldFormat: options.oldFormat,
         avPanelElement: options.avPanelElement,
     });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format:"ILS",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+
     const rect = options.element.getBoundingClientRect();
     menu.open({
         x: rect.left,

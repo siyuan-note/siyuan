@@ -508,6 +508,7 @@ const (
 	NumberFormatMOP NumberFormat = "MOP" // 澳门币
 	NumberFormatSGD NumberFormat = "SGD" // 新加坡元
 	NumberFormatNZD NumberFormat = "NZD" // 新西兰元
+	NumberFormatILS NumberFormat = "ILS" // 以色列新谢克尔
 )
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
@@ -601,6 +602,9 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatNZD:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("NZ$%.2f", content)
+	case NumberFormatILS:
+		p := message.NewPrinter(language.Hebrew)
+		return p.Sprintf("ILS₪%.2f", content)
 	default:
 		return strconv.FormatFloat(content, 'f', -1, 64)
 	}

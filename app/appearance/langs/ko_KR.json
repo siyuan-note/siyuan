@@ -314,6 +314,7 @@
   "numberFormatMOP": "마카오 파타카",
   "numberFormatSGD": "싱가포르 달러",
   "numberFormatNZD": "뉴질랜드 달러",
+  "numberFormatILS": "이스라엘 신셰켈",
   "email": "이메일",
   "phone": "전화",
   "inboxTip": "사용자 가이드에서 <code class='fn__code'>inbox</code>(수집함)를 검색하여 지침을 확인하세요",

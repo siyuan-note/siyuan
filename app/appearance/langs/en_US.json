@@ -314,6 +314,7 @@
   "numberFormatMOP": "Macau Pataca",
   "numberFormatSGD": "Singapore Dollar",
   "numberFormatNZD": "New Zealand Dollar",
+  "numberFormatILS": "Israeli New Shekel",
   "email": "Email",
   "phone": "Phone",
   "inboxTip": "Open the user guide to search the <code class='fn__code'>inbox</code> to view the instructions",

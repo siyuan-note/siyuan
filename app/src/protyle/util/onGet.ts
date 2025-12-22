@@ -477,17 +477,19 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         bgFade(focusElement);
     }
     if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
-        let range: Range;
-        if (scrollAttr && scrollAttr.focusId) {
-            range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
-        } else {
-            focusBlock(focusElement, undefined, action.includes(Constants.CB_GET_OUTLINE) ? false : true);
-        }
-        /// #if !MOBILE
-        if (!action.includes(Constants.CB_GET_UNUNDO)) {
-            pushBack(protyle, range, focusElement);
-        }
-        /// #endif
+        setTimeout(() => {
+            let range: Range;
+            if (scrollAttr && scrollAttr.focusId) {
+                range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
+            } else {
+                focusBlock(focusElement, undefined, action.includes(Constants.CB_GET_OUTLINE) ? false : true);
+            }
+            /// #if !MOBILE
+            if (!action.includes(Constants.CB_GET_UNUNDO)) {
+                pushBack(protyle, range, focusElement);
+            }
+            /// #endif
+        }, focusElement.getAttribute("data-type") === "NodeCodeBlock" ? Constants.TIMEOUT_TRANSITION : 0);
     }
     const hasScrollTop = scrollAttr && typeof scrollAttr.scrollTop === "number";
     if (hasScrollTop) {

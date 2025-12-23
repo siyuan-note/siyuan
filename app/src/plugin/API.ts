@@ -16,7 +16,6 @@ import {Constants} from "../constants";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
-import ProtyleMethod from "../protyle/method";
 import {openMobileFileById} from "../mobile/editor";
 import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
@@ -32,6 +31,7 @@ import {exportLayout} from "../layout/util";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Files} from "../layout/dock/Files";
+import {ProtyleMethod} from "./ProtyleMethod";
 
 let openTab;
 let openWindow;

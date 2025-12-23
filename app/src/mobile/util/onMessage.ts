@@ -19,7 +19,8 @@ export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
             case "backgroundtask":
-                if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+                if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
+                    window.siyuan.config.appearance.hideStatusBar) {
                     return;
                 }
                 if (data.data.tasks.length === 0) {
@@ -84,7 +85,8 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 transactionError();
                 break;
             case"statusbar":
-                if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+                if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
+                    window.siyuan.config.appearance.hideStatusBar) {
                     return;
                 }
                 clearTimeout(statusTimeout);

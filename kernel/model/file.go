@@ -139,7 +139,7 @@ func (box *Box) moveCorruptedData(filePath string) {
 	logging.LogWarnf("moved corrupted data file [%s] to [%s]", filePath, to)
 }
 
-func SearchDocsByKeyword(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
+func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
 	ret = []map[string]string{}
 
 	var deck *riff.Deck
@@ -159,11 +159,46 @@ func SearchDocsByKeyword(keyword string, flashcard bool, excludeIDs []string) (r
 		boxes[box.ID] = box
 	}
 
-	keywords := strings.Fields(keyword)
+	keyword = strings.TrimSpace(keyword)
+
 	var rootBlocks []*sql.Block
-	if 0 < len(keywords) {
-		for _, box := range boxes {
-			if gulu.Str.Contains(box.Name, keywords) {
+	if ast.IsNodeIDPattern(keyword) {
+		rootBlocks = sql.QueryRootBlockByCondition("id='"+keyword+"'", 1)
+	} else {
+		keywords := strings.Fields(keyword)
+		if 0 < len(keywords) {
+			for _, box := range boxes {
+				if gulu.Str.Contains(box.Name, keywords) {
+					if flashcard {
+						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
+						if 0 < flashcardCount {
+							ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
+						}
+					} else {
+						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+					}
+				}
+			}
+
+			var condition string
+			for i, k := range keywords {
+				condition += "(hpath LIKE '%" + k + "%'"
+				namCondition := Conf.Search.NAMFilter(k)
+				condition += " " + namCondition
+				condition += ")"
+
+				if i < len(keywords)-1 {
+					condition += " AND "
+				}
+			}
+
+			for _, excludeID := range excludeIDs {
+				condition += fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID)
+			}
+
+			rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
+		} else {
+			for _, box := range boxes {
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
@@ -172,35 +207,6 @@ func SearchDocsByKeyword(keyword string, flashcard bool, excludeIDs []string) (r
 				} else {
 					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
 				}
-			}
-		}
-
-		var condition string
-		for i, k := range keywords {
-			condition += "(hpath LIKE '%" + k + "%'"
-			namCondition := Conf.Search.NAMFilter(k)
-			condition += " " + namCondition
-			condition += ")"
-
-			if i < len(keywords)-1 {
-				condition += " AND "
-			}
-		}
-
-		for _, excludeID := range excludeIDs {
-			condition += fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID)
-		}
-
-		rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
-	} else {
-		for _, box := range boxes {
-			if flashcard {
-				newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
-				if 0 < flashcardCount {
-					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
-				}
-			} else {
-				ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
 			}
 		}
 	}

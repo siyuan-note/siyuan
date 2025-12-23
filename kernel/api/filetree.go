@@ -1043,7 +1043,7 @@ func searchDocs(c *gin.Context) {
 	}
 
 	k := arg["k"].(string)
-	ret.Data = model.SearchDocsByKeyword(k, flashcard, excludeIDs)
+	ret.Data = model.SearchDocs(k, flashcard, excludeIDs)
 }
 
 func listDocsByPath(c *gin.Context) {

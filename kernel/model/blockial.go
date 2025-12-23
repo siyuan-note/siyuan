@@ -323,8 +323,6 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 	node.ClearIALAttrs()
 	for name, value := range nameValues {
-		value = util.RemoveInvalidRetainCtrl(value)
-		value = strings.TrimSpace(value)
 		if "" != value {
 			node.SetIALAttr(name, value)
 		}

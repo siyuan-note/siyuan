@@ -619,9 +619,9 @@ interface ILayoutJSON extends ILayoutOptions {
 interface ICommand {
     langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
-    hotkey: string,
+    hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
-    callback?: () => void   // 其余回调存在时将不会触
+    callback?: () => void   // 其余回调存在时将不会触发
     globalCallback?: () => void // 焦点不在应用内时执行的回调
     fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void // 焦点在文档树上时执行的回调
     editorCallback?: (protyle: IProtyle) => void     // 焦点在编辑器上时执行的回调

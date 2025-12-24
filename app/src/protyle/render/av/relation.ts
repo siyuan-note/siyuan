@@ -515,6 +515,7 @@ export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElemen
                 text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent),
                 className: target.className
             });
+            updateCellsValue(protyle, nodeElement, newValue, cellElements);
         } else if (rowId) {
             newValue.blockIDs.push(rowId);
             newValue.contents.push({
@@ -569,7 +570,6 @@ draggable="true">${genSelectItemHTML({
                 id: blockID,
                 data: dayjs().format("YYYYMMDDHHmmss"),
             }];
-            transaction(protyle, doOperations.concat(updateOptions.doOperations));
             separatorElement.insertAdjacentHTML("beforebegin", `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" 
 class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
                 type: "selected",
@@ -577,6 +577,7 @@ class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
                 isDetached: true,
                 text: Lute.EscapeHTMLStr(content)
             })}</button>`);
+            transaction(protyle, doOperations.concat(updateOptions.doOperations));
         }
     }
     updateCopyRelatedItems(menuElement);

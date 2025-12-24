@@ -544,6 +544,7 @@ draggable="true">${genSelectItemHTML({
             const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: true,
                 avID: menuElement.firstElementChild.getAttribute("data-av-id"),
                 srcs: [{
                     itemID: rowId,

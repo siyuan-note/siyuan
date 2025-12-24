@@ -435,7 +435,14 @@ func uploadCloudByAssetsPaths(c *gin.Context) {
 		return
 	}
 
-	util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
+	ignorePushMsg := false
+	if nil != arg["ignorePushMsg"] {
+		ignorePushMsg = arg["ignorePushMsg"].(bool)
+	}
+
+	if !ignorePushMsg {
+		util.PushMsg(fmt.Sprintf(model.Conf.Language(41), count), 3000)
+	}
 }
 
 func insertLocalAssets(c *gin.Context) {

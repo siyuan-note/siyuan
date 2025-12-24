@@ -8,17 +8,16 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20250615173941"
+		"updated": "20251224102052"
 	},
 	"Children": [
 		{
-			"ID": "20240530101000-u8n11jd",
+			"ID": "20251224101829-7bloks9",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-ywbxxgy",
-				"id": "20240530101000-u8n11jd",
-				"updated": "20240530101000"
+				"id": "20251224101829-7bloks9",
+				"updated": "20251224101829"
 			},
 			"Children": [
 				{
@@ -28,66 +27,61 @@
 			]
 		},
 		{
-			"ID": "20240530101000-t0nuxhl",
+			"ID": "20251224101829-j0vtpnz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-hm1lv77",
-				"id": "20240530101000-t0nuxhl",
-				"updated": "20240530101000"
+				"id": "20251224101829-j0vtpnz",
+				"updated": "20251224101829"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "データベースはコンテンツブロックやコンテンツブロック以外のデータで構成され、テーブルビューやカンバンビュー (開発中) など、さまざまなビュー形式で表示できます。"
+					"Data": "データベースは、コンテンツブロックまたは非コンテンツブロックデータで構成され、テーブルビュー、カンバンビュー、カードビューなど、さまざまなビューで表示されます。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-p9rd9nj",
+			"ID": "20251224101829-lva3op2",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-xvvpnr1",
-				"id": "20240530101000-p9rd9nj",
-				"updated": "20240530101000"
+				"id": "20251224101829-lva3op2",
+				"updated": "20251224102052"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "テーブルビュー"
+					"Data": "ビュー"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-sa0cnr0",
+			"ID": "20251224101829-v3hcvn9",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-czryp4c",
-				"id": "20240530101000-sa0cnr0",
-				"updated": "20240530101000"
+				"id": "20251224101829-v3hcvn9",
+				"updated": "20251224102052"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-mq8ub96",
+					"ID": "20251224101828-b51gq76",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-jhulje4",
-						"id": "20240530101000-mq8ub96",
-						"updated": "20240530101000"
+						"id": "20251224101828-b51gq76",
+						"updated": "20251224102052"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-ndagjdy",
+							"ID": "20251224101829-nahieq9",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-p2otv2t",
-								"id": "20240530101000-ndagjdy",
-								"updated": "20240530101000"
+								"id": "20251224101829-nahieq9",
+								"updated": "20251224102052"
 							},
 							"Children": [
 								{
@@ -101,110 +95,126 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で作成します。デフォルトのビューはテーブルビューです"
+									"Data": "​ で作成され、デフォルトのビューはテーブルビューです。レイアウトで切り替えることができます。"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-euf1cie",
+					"ID": "20251224101828-2a5gd2v",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-faoswnc",
-						"id": "20240530101000-euf1cie",
-						"updated": "20240530101000"
+						"id": "20251224101828-2a5gd2v",
+						"updated": "20251224101828"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-3unlq9a",
+							"ID": "20251224101829-rmah7sv",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-o7eh8l4",
-								"id": "20240530101000-3unlq9a",
-								"updated": "20240530101000"
+								"id": "20251224101829-rmah7sv",
+								"updated": "20251224101829"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "さまざまな種類の属性 (カラム) を追加できます"
+									"Data": "フィールドの追加"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-odll96w",
+					"ID": "20251224101828-il385ww",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-xerxesx",
-						"id": "20240530101000-odll96w",
-						"updated": "20240530101000"
+						"id": "20251224101828-il385ww",
+						"updated": "20251224101846"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-kr2fng3",
+							"ID": "20251224101829-uwpfgrc",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-jtv2oud",
-								"id": "20240530101000-kr2fng3",
-								"updated": "20240530101000"
+								"id": "20251224101829-uwpfgrc",
+								"updated": "20251224101829"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "テーブルビューに行を追加する方法は二通りあります:"
+									"Data": "エントリの追加"
 								}
 							]
 						},
 						{
-							"ID": "20240530101000-oymkj2l",
+							"ID": "20251224101832-46yjrsx",
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"ID": "20240530101000-5vouagt",
-								"id": "20240530101000-oymkj2l",
-								"updated": "20240530101000"
+								"id": "20251224101832-46yjrsx",
+								"updated": "20251224101846"
 							},
 							"Children": [
 								{
-									"ID": "20240530101000-81v2rbl",
+									"ID": "20251224101828-o2k0u2l",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"ID": "20240530101000-okcj69z",
-										"id": "20240530101000-81v2rbl",
-										"updated": "20240530101000"
+										"id": "20251224101828-o2k0u2l",
+										"updated": "20251224101828"
 									},
 									"Children": [
 										{
-											"ID": "20240530101000-9byotu3",
+											"ID": "20251224101829-u1xda60",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"ID": "20240530101000-gnvf55x",
-												"id": "20240530101000-9byotu3",
-												"updated": "20240530101000"
+												"id": "20251224101829-u1xda60",
+												"updated": "20251224101829"
 											},
 											"Children": [
 												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "strong",
-													"TextMarkTextContent": "追加したいコンテンツブロックがすでに存在する"
-												},
+													"Type": "NodeText",
+													"Data": "非コンテンツブロック: ビューに直接追加されたエントリで、どのコンテンツブロックにもバインドされていません。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20251224101828-n4zvp3w",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20251224101828-n4zvp3w",
+										"updated": "20251224101846"
+									},
+									"Children": [
+										{
+											"ID": "20251224101829-fvmo0l6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20251224101829-fvmo0l6",
+												"updated": "20251224101846"
+											},
+											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": ": コンテンツブロックをドラッグ＆ドロップするか、ブロックメニューの "
+													"Data": "コンテンツブロック: ビューにドラッグ＆ドロップするか、ブロックラベルメニューの "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -213,42 +223,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ から追加します"
-												}
-											]
-										}
-									]
-								},
-								{
-									"ID": "20240530101000-c92uoid",
-									"Type": "NodeListItem",
-									"ListData": {
-										"BulletChar": 42,
-										"Marker": "Kg=="
-									},
-									"Properties": {
-										"ID": "20240530101000-o1l8zj1",
-										"id": "20240530101000-c92uoid",
-										"updated": "20240530101000"
-									},
-									"Children": [
-										{
-											"ID": "20240530101000-3l77hc5",
-											"Type": "NodeParagraph",
-											"Properties": {
-												"ID": "20240530101000-3kgep4x",
-												"id": "20240530101000-3l77hc5",
-												"updated": "20240530101000"
-											},
-											"Children": [
-												{
-													"Type": "NodeTextMark",
-													"TextMarkType": "strong",
-													"TextMarkTextContent": "追加したいコンテンツブロックがまだ存在しない"
-												},
-												{
-													"Type": "NodeText",
-													"Data": ": テーブルに行を直接追加します"
+													"Data": "​ からデータベースに追加することで追加されたエントリです。"
 												}
 											]
 										}
@@ -259,60 +234,56 @@
 					]
 				},
 				{
-					"ID": "20240530101000-hlubo8h",
+					"ID": "20251224101828-xh5li76",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-n6j5rgd",
-						"id": "20240530101000-hlubo8h",
-						"updated": "20240530101000"
+						"id": "20251224101828-xh5li76",
+						"updated": "20251224101828"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-4p2g60a",
+							"ID": "20251224101829-sq7d75m",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-x2nvsxx",
-								"id": "20240530101000-4p2g60a",
-								"updated": "20240530101000"
+								"id": "20251224101829-sq7d75m",
+								"updated": "20251224101829"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "必要に応じてフィルタリングと並べ替えを設定できます"
+									"Data": "必要に応じてフィルタリングと並べ替えを設定"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-rwa6w0s",
+					"ID": "20251224101828-kq5kwxx",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-531q6zy",
-						"id": "20240530101000-rwa6w0s",
-						"updated": "20240530101000"
+						"id": "20251224101828-kq5kwxx",
+						"updated": "20251224101828"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-so3xgub",
+							"ID": "20251224101829-8hoyjam",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-gcndrek",
-								"id": "20240530101000-so3xgub",
-								"updated": "20240530101000"
+								"id": "20251224101829-8hoyjam",
+								"updated": "20251224101829"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "同じデータベースに複数のビューを追加できます。これらは同じデータを共有しますが、フィルタリングとソートの設定はそれぞれ独立しています"
+									"Data": "同じデータベースに複数のビューを追加できます。すべてのビューは同じデータを共有しますが、フィルタリングと並べ替えの設定はそれぞれ独立しています。"
 								}
 							]
 						}

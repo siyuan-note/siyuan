@@ -7,16 +7,16 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20250615173721"
+		"updated": "20251224101729"
 	},
 	"Children": [
 		{
-			"ID": "20240208171620-418i7ju",
+			"ID": "20251224101729-y8gjlt8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20240208171620-418i7ju",
-				"updated": "20240208171620"
+				"id": "20251224101729-y8gjlt8",
+				"updated": "20251224101729"
 			},
 			"Children": [
 				{
@@ -26,61 +26,61 @@
 			]
 		},
 		{
-			"ID": "20240208171620-gbm6zj6",
+			"ID": "20251224101729-3lny7un",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20240208171620-gbm6zj6",
-				"updated": "20240208171621"
+				"id": "20251224101729-3lny7un",
+				"updated": "20251224101729"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "資料庫由內容塊或非內容塊資料組成，並以不同視圖呈現，例如表格視圖和看板視圖（看板視圖仍在開發中）。"
+					"Data": "資料庫由內容區塊或非內容區塊資料組成，並以不同視圖呈現，例如表格視圖、看板視圖和卡片視圖。"
 				}
 			]
 		},
 		{
-			"ID": "20240208171620-hbecr4u",
+			"ID": "20251224101729-yhz5zrt",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20240208171620-hbecr4u",
-				"updated": "20250115152038"
+				"id": "20251224101729-yhz5zrt",
+				"updated": "20251224101729"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "表格視圖"
+					"Data": "視圖"
 				}
 			]
 		},
 		{
-			"ID": "20240208171620-r36g6d4",
+			"ID": "20251224101729-lwgcyhc",
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"id": "20240208171620-r36g6d4",
-				"updated": "20250115152038"
+				"id": "20251224101729-lwgcyhc",
+				"updated": "20251224101729"
 			},
 			"Children": [
 				{
-					"ID": "20240208171620-1rp2cpe",
+					"ID": "20251224101729-n23jrss",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208171620-1rp2cpe",
-						"updated": "20240208171620"
+						"id": "20251224101729-n23jrss",
+						"updated": "20251224101729"
 					},
 					"Children": [
 						{
-							"ID": "20240208171620-y7nstt5",
+							"ID": "20251224101729-t3zkp0p",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208171620-y7nstt5",
-								"updated": "20240208171620"
+								"id": "20251224101729-t3zkp0p",
+								"updated": "20251224101729"
 							},
 							"Children": [
 								{
@@ -94,58 +94,58 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 創建，預設視圖即表格視圖"
+									"Data": "​ 創建，預設視圖是表格視圖，可在佈局中切換"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240208171620-ycff58d",
+					"ID": "20251224101729-4bf1fkr",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208171620-ycff58d",
-						"updated": "20240208171620"
+						"id": "20251224101729-4bf1fkr",
+						"updated": "20251224101729"
 					},
 					"Children": [
 						{
-							"ID": "20240208171620-57b0rg8",
+							"ID": "20251224101729-24c0xqx",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208171620-57b0rg8",
-								"updated": "20240208171620"
+								"id": "20251224101729-24c0xqx",
+								"updated": "20251224101729"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "新增不同類型的欄位"
+									"Data": "新增字段"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240208171620-b1b1l10",
+					"ID": "20251224101729-2jw2x1q",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208171620-b1b1l10",
-						"updated": "20250115152038"
+						"id": "20251224101729-2jw2x1q",
+						"updated": "20251224101729"
 					},
 					"Children": [
 						{
-							"ID": "20240208171620-jkv8wcw",
+							"ID": "20251224101729-cebzpvt",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208171620-jkv8wcw",
-								"updated": "20240208171620"
+								"id": "20251224101729-cebzpvt",
+								"updated": "20251224101729"
 							},
 							"Children": [
 								{
@@ -155,65 +155,65 @@
 							]
 						},
 						{
-							"ID": "20240208171620-o6mi24d",
+							"ID": "20251224101731-wtymkf7",
 							"Type": "NodeList",
 							"ListData": {},
 							"Properties": {
-								"id": "20240208171620-o6mi24d",
-								"updated": "20250115152038"
+								"id": "20251224101731-wtymkf7",
+								"updated": "20251224101731"
 							},
 							"Children": [
 								{
-									"ID": "20240208171620-8ganbuy",
+									"ID": "20251224101729-ennq3b4",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20240208171620-8ganbuy",
-										"updated": "20240208171620"
+										"id": "20251224101729-ennq3b4",
+										"updated": "20251224101729"
 									},
 									"Children": [
 										{
-											"ID": "20240208171620-xfdgii5",
+											"ID": "20251224101729-ynq0s7b",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20240208171620-xfdgii5",
-												"updated": "20240208171620"
+												"id": "20251224101729-ynq0s7b",
+												"updated": "20251224101729"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "非內容塊：直接在表格中新增的條目，不綁定到任何內容塊"
+													"Data": "非內容區塊：直接在視圖中新增的條目，不綁定到任何內容區塊"
 												}
 											]
 										}
 									]
 								},
 								{
-									"ID": "20240208171620-ks66a38",
+									"ID": "20251224101729-v5y9dgy",
 									"Type": "NodeListItem",
 									"ListData": {
 										"BulletChar": 42,
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20240208171620-ks66a38",
-										"updated": "20250115152038"
+										"id": "20251224101729-v5y9dgy",
+										"updated": "20251224101729"
 									},
 									"Children": [
 										{
-											"ID": "20240208171620-eo37wp1",
+											"ID": "20251224101729-g39ct0p",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"id": "20240208171620-eo37wp1",
-												"updated": "20250115152038"
+												"id": "20251224101729-g39ct0p",
+												"updated": "20251224101729"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "內容塊：透過拖曳到表格新增的條目，或透過塊標選單 "
+													"Data": "內容區塊：透過拖曳到視圖新增的條目，或透過區塊標選單 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -233,23 +233,23 @@
 					]
 				},
 				{
-					"ID": "20240208171620-qanz5ln",
+					"ID": "20251224101729-bwcgcqe",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208171620-qanz5ln",
-						"updated": "20240208171620"
+						"id": "20251224101729-bwcgcqe",
+						"updated": "20251224101729"
 					},
 					"Children": [
 						{
-							"ID": "20240208171620-y5i41gf",
+							"ID": "20251224101729-lkwlo0p",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208171620-y5i41gf",
-								"updated": "20240208171620"
+								"id": "20251224101729-lkwlo0p",
+								"updated": "20251224101729"
 							},
 							"Children": [
 								{
@@ -261,23 +261,23 @@
 					]
 				},
 				{
-					"ID": "20240208171620-w1hnt6t",
+					"ID": "20251224101729-8oqf0mk",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240208171620-w1hnt6t",
-						"updated": "20240208171620"
+						"id": "20251224101729-8oqf0mk",
+						"updated": "20251224101729"
 					},
 					"Children": [
 						{
-							"ID": "20240208171620-oguaafh",
+							"ID": "20251224101729-p81lwen",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240208171620-oguaafh",
-								"updated": "20240208171620"
+								"id": "20251224101729-p81lwen",
+								"updated": "20251224101729"
 							},
 							"Children": [
 								{

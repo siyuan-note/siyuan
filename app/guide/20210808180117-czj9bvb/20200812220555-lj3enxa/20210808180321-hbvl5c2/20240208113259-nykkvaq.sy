@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20250615173511"
+		"updated": "20251224102323"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208113259-sp3g7zb",
-				"updated": "20240208114023"
+				"updated": "20251224100843"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240208114024-40auf5m",
-				"updated": "20240208115135"
+				"updated": "20251224100843"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "数据库由内容块或者非内容块数据组成，并以不同视图呈现，比如表格视图和看板视图（看板视图还在开发中）。"
+					"Data": "数据库由内容块或者非内容块数据组成，并以不同视图呈现，比如表格视图、看板视图和卡片视图。"
 				}
 			]
 		},
@@ -45,12 +45,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208115136-9g2b46l",
-				"updated": "20250115152026"
+				"updated": "20251224102323"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "表格视图"
+					"Data": "视图"
 				}
 			]
 		},
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240208115415-bvq6noy",
-				"updated": "20250115152026"
+				"updated": "20251224102323"
 			},
 			"Children": [
 				{
@@ -80,7 +80,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240208115511-eia5i60",
-								"updated": "20240208164823"
+								"updated": "20251224101527"
 							},
 							"Children": [
 								{
@@ -94,7 +94,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 创建，默认视图即表格视图"
+									"Data": "​ 创建，默认视图是表格视图，可在布局中切换"
 								}
 							]
 						}
@@ -109,7 +109,7 @@
 					},
 					"Properties": {
 						"id": "20240208115512-ecutymg",
-						"updated": "20240208164333"
+						"updated": "20251224101629"
 					},
 					"Children": [
 						{
@@ -117,12 +117,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240208115512-pcoezgv",
-								"updated": "20240208164333"
+								"updated": "20251224101629"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "添加不同类型的字段"
+									"Data": "添加字段"
 								}
 							]
 						}
@@ -171,7 +171,8 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20240208115529-6o006s5"
+										"id": "20240208115529-6o006s5",
+										"updated": "20240208115529"
 									},
 									"Children": [
 										{
@@ -179,12 +180,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20240208115529-h73qpv6",
-												"updated": "20240208115626"
+												"updated": "20251224101456"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "非内容块：直接在表格中添加的条目，不绑定到任何内容块"
+													"Data": "非内容块：直接在视图中添加的条目，不绑定到任何内容块"
 												}
 											]
 										}
@@ -207,12 +208,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20240208115626-5tboobu",
-												"updated": "20250115152026"
+												"updated": "20251224101503"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "内容块：通过拖拽到表格添加的条目，或者通过块标菜单 "
+													"Data": "内容块：通过拖拽到视图添加的条目，或者通过块标菜单 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -240,7 +241,7 @@
 					},
 					"Properties": {
 						"id": "20240208120016-3d7euem",
-						"updated": "20240208120104"
+						"updated": "20251224102244"
 					},
 					"Children": [
 						{
@@ -248,7 +249,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240208120016-7vdgyf1",
-								"updated": "20240208120104"
+								"updated": "20251224102244"
 							},
 							"Children": [
 								{
@@ -268,7 +269,7 @@
 					},
 					"Properties": {
 						"id": "20240208115934-tayls7s",
-						"updated": "20240208120115"
+						"updated": "20251224102323"
 					},
 					"Children": [
 						{
@@ -276,7 +277,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240208115934-aowaqra",
-								"updated": "20240208120115"
+								"updated": "20251224102323"
 							},
 							"Children": [
 								{

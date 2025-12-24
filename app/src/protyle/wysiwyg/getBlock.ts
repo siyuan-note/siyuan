@@ -78,7 +78,7 @@ export const getNoContainerElement = (element: Element) => {
     return false;
 };
 
-export const getContenteditableElement = (element: Element) => {
+export const getContenteditableElement = (element: Element): Element => {
     if (!element) {
         return element;
     }
@@ -92,16 +92,19 @@ export const getContenteditableElement = (element: Element) => {
     if (!blockElement) {
         return element;
     }
-    const type = element.getAttribute("data-type");
+    const type = blockElement.getAttribute("data-type");
     if (["NodeParagraph", "NodeHeading"].includes(type)) {
-        return element.firstElementChild;
+        return blockElement.firstElementChild;
     } else if ("NodeTable" === type) {
-        return element.querySelector("table");
+        return blockElement.querySelector("table");
     } else if ("NodeCodeBlock" === type) {
-        return element.querySelector(".hljs").lastElementChild;
-    } else {
+        return blockElement.querySelector(".hljs").lastElementChild;
+    } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
         return element;
+    } else if (element.getAttribute("data-node-id")) {
+        return getContenteditableElement(element.querySelector("[data-node-id]"));
     }
+    return element;
 };
 
 export const isNotEditBlock = (element: Element) => {

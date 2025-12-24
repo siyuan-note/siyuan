@@ -56,8 +56,11 @@ export const keymap = {
 </label>`;
             });
             item.updateProtyleToolbar([]).forEach(toolbarItem => {
-                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                     return;
+                }
+                if (typeof toolbarItem.hotkey !== "string") {
+                    toolbarItem.hotkey = "";
                 }
                 const dockKeymap = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name];
                 const keyValue = updateHotkeyTip(dockKeymap.custom);

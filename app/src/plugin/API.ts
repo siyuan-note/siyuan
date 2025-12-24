@@ -229,7 +229,7 @@ const getActiveEditor = (wndActive = true) => {
     }
     if (!editor) {
         editor = allEditor.find(item => {
-            if (hasClosestByClassName(item.protyle.element, "layout__wnd--active", true)) {
+            if (!item.protyle.element.classList.contains("fn__none") && hasClosestByClassName(item.protyle.element, "layout__wnd--active", true)) {
                 return true;
             }
         });

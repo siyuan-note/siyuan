@@ -43,6 +43,7 @@
   * [Paket Yöneticisi](#paket-yöneticisi)
   * [Docker Barındırma](#docker-barındırma)
   * [Unraid Barındırma](#unraid-barındırma)
+  * [TrueNAS Barındırma](#truenas-barındırma)
   * [Erken Önizleme (Insider Preview)](#erken-önizleme-insider-preview)
 * [🏘️ Topluluk](#️-topluluk)
 * [🛠️ Geliştirme Rehberi](#️-geliştirme-rehberi)
@@ -309,6 +310,42 @@ Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
 Publish parameters: --accessAuthCode=******(Access authorization code)
+```
+
+</details>
+
+### TrueNAS Barındırma
+
+<details>
+<summary>TrueNAS Dağıtım Dokümanı</summary>
+
+Not: Önce TrueNAS Shell'te aşağıdaki komutları çalıştırın. Lütfen `Pool_1/Apps_Data/siyuan` yolunu uygulamanızın dataset'ine göre güncelleyin。
+
+```shell
+zfs create Pool_1/Apps_Data/siyuan
+chown -R 1001:1002 /mnt/Pool_1/Apps_Data/siyuan
+chmod 755 /mnt/Pool_1/Apps_Data/siyuan
+```
+
+Apps --> DiscoverApps --> More Options (sağ üst, Custom App hariç) --> YAML ile Yükle bölümüne gidin
+
+Şablon örneği：
+
+```yaml
+services:
+  siyuan:
+    image: b3log/siyuan
+    container_name: siyuan
+    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    ports:
+      - 6806:6806
+    volumes:
+      - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Adjust to your dataset path 
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles  # Replace with your timezone if needed
+      - PUID=1001
+      - PGID=1002
 ```
 
 </details>

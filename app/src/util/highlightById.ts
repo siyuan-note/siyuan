@@ -104,7 +104,7 @@ export const scrollCenter = (
     const contentRect = protyle.contentElement.getBoundingClientRect();
     if (position === "start") {
         protyle.contentElement.scroll({
-            top: protyle.contentElement.scrollTop + elementRect.top - contentRect.top,
+            top: protyle.contentElement.scrollTop + elementRect.top - contentRect.top - (window.siyuan.config.editor.fontSize * 1.625 * 2 + 24),
             behavior
         });
         return;

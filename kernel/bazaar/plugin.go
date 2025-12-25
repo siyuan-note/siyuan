@@ -87,10 +87,7 @@ func Plugins(frontend string) (plugins []*Plugin) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(plugin.Package) {
-			return
-		}
-
+		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin.Package)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 
 		plugin.URL = strings.TrimSuffix(plugin.URL, "/")

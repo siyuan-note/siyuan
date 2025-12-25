@@ -85,10 +85,7 @@ func Icons() (icons []*Icon) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(icon.Package) {
-			return
-		}
-
+		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
 		icon.URL = strings.TrimSuffix(icon.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		icon.RepoURL = "https://github.com/" + repoURLHash[0]

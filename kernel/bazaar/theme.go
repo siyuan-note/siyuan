@@ -87,9 +87,7 @@ func Themes() (ret []*Theme) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(theme.Package) {
-			return
-		}
+		theme.DisallowInstall = disallowInstallBazaarPackage(theme.Package)
 
 		theme.URL = strings.TrimSuffix(theme.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")

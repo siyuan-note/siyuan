@@ -319,19 +319,19 @@ Publish parameters: --accessAuthCode=******(Access authorization code)
 <details>
 <summary>TrueNAS Deployment</summary>
 
-Note: First run below commands in the TrueNAS Shell. please update Pool_1/Apps_Data/siyuan to match your dataset for Apps
+Note: First run below commands in the TrueNAS Shell. please update `Pool_1/Apps_Data/siyuan to match your dataset for Apps.
 
-`zfs create Pool_1/Apps_Data/siyuan`
+```shell
+zfs create Pool_1/Apps_Data/siyuan
+chown -R 1001:1002 /mnt/Pool_1/Apps_Data/siyuan
+chmod 755 /mnt/Pool_1/Apps_Data/siyuan
+```
 
-`chown -R 1001:1002 /mnt/Pool_1/Apps_Data/siyuan`
-
-`chmod 755 /mnt/Pool_1/Apps_Data/siyuan`
-
-Navigate to Apps --> DiscoverApps --> More Options(on top right, besies Custom App) --> Install via YAML
+Navigate to Apps - DiscoverApps - More Options(on top right, besies Custom App) - Install via YAML
 
 Template reference:
 
-```
+```yaml
 services:
   siyuan:
     image: b3log/siyuan

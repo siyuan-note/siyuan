@@ -86,9 +86,7 @@ func Templates() (templates []*Template) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(template.Package) {
-			return
-		}
+		template.DisallowInstall = disallowInstallBazaarPackage(template.Package)
 
 		template.URL = strings.TrimSuffix(template.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")

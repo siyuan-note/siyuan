@@ -85,9 +85,7 @@ func Widgets() (widgets []*Widget) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(widget.Package) {
-			return
-		}
+		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
 
 		widget.URL = strings.TrimSuffix(widget.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")

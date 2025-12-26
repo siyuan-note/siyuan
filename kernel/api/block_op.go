@@ -706,8 +706,8 @@ func updateBlock(c *gin.Context) {
 		if nil != tree.Root.FirstChild {
 			tree.Root.FirstChild.SetIALAttr("id", id)
 		} else {
-			logging.LogWarnf("tree root has no child node when updating block [id=%s]", id)
-			return
+			logging.LogWarnf("tree root has no child node, append empty paragraph node")
+			tree.Root.AppendChild(treenode.NewParagraph(id))
 		}
 
 		data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)

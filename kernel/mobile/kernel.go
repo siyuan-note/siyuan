@@ -197,7 +197,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 }
 
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
-	go server.Serve(true)
+	go server.Serve(true, model.Conf.CookieKey)
 }
 
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
@@ -208,7 +208,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	util.BootMobile(container, appDir, workspaceBaseDir, lang)
 
 	model.InitConf()
-	go server.Serve(false)
+	go server.Serve(false, model.Conf.CookieKey)
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)

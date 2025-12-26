@@ -82,6 +82,7 @@ type AppConf struct {
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
 	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
+	CookieKey      string           `json:"cookieKey"`      // 用于加密 Cookie 的密钥
 
 	m        *sync.RWMutex // 配置数据锁
 	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
@@ -578,6 +579,10 @@ func InitConf() {
 	}
 
 	Conf.DataIndexState = 0
+
+	if "" == Conf.CookieKey {
+		Conf.CookieKey = gulu.Rand.String(16)
+	}
 
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)

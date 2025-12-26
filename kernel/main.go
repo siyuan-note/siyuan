@@ -31,7 +31,7 @@ func main() {
 	util.Boot()
 
 	model.InitConf()
-	go server.Serve(false)
+	go server.Serve(false, model.Conf.CookieKey)
 	model.InitAppearance()
 	sql.InitDatabase(false)
 	sql.InitHistoryDatabase(false)

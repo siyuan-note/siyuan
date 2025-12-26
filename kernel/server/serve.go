@@ -62,7 +62,7 @@ const (
 )
 
 var (
-	sessionStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	sessionStore cookie.Store
 
 	HttpMethods = []string{
 		http.MethodGet,
@@ -129,7 +129,7 @@ var (
 	}
 )
 
-func Serve(fastMode bool) {
+func Serve(fastMode bool, cookieKey string) {
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
 	ginServer.UseH2C = true
@@ -143,6 +143,7 @@ func Serve(fastMode bool) {
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"})),
 	)
 
+	sessionStore = cookie.NewStore([]byte(cookieKey))
 	sessionStore.Options(sessions.Options{
 		Path:   "/",
 		Secure: util.SSL,

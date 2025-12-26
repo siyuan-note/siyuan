@@ -740,6 +740,7 @@
   "exportPDF3": "Escala de la página",
   "exportPDF4": "Activos incrustados",
   "exportPDF5": "Mantener doblado",
+  "paged": "Paginado",
   "mergeSubdocs": "Fusionar subdocumentos",
   "removeAssetsFolder": "Eliminar directorio de activos",
   "upload": "Subir",

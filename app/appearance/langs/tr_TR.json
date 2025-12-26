@@ -740,6 +740,7 @@
   "exportPDF3": "Sayfa ölçeği",
   "exportPDF4": "Varlıkları göm",
   "exportPDF5": "Daraltılmış alanları koru",
+  "paged": "Sayfalandırılmış",
   "mergeSubdocs": "Alt belgeleri birleştir",
   "removeAssetsFolder": "Varlıklar klasörünü kaldır",
   "upload": "Yükle",

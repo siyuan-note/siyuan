@@ -740,6 +740,7 @@
   "exportPDF3": "頁面縮放",
   "exportPDF4": "嵌入資源文件",
   "exportPDF5": "保持折疊狀態",
+  "paged": "分頁",
   "mergeSubdocs": "合併子文檔",
   "removeAssetsFolder": "移除 assets 目錄",
   "upload": "上傳",

@@ -440,7 +440,8 @@ export const getLocalStorage = (cb: () => void) => {
             removeAssets: true,
             keepFold: false,
             mergeSubdocs: false,
-            watermark: false
+            watermark: false,
+            paged: true
         };
         defaultStorage[Constants.LOCAL_EXPORTIMG] = {
             keepFold: false,

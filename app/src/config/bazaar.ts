@@ -449,7 +449,13 @@ export const bazaar = {
         </span>
         <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
         <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
-        <input ${(item.disallowInstall && !item.enabled || item.incompatible) ? "disabled" : ""} aria-label="${(item.disallowInstall && !item.enabled) ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : ""}" class="b3-tooltips b3-tooltips__nw b3-switch fn__flex-center${bazaarType === "plugins" ? "" : " fn__none"}" ${item.enabled ? "checked" : ""} data-type="plugin-enable" type="checkbox">
+        <input ${((item.disallowInstall && !item.enabled) || item.incompatible) ? "disabled" : ""} 
+aria-label="${(item.disallowInstall && !item.enabled) ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : ""}" 
+data-position="north" class="ariaLabel b3-switch fn__flex-center${bazaarType === "plugins" ? "" : " fn__none"}" 
+${item.enabled ? "checked" : ""} 
+data-type="plugin-enable" 
+data-disabletip="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : ""}"
+type="checkbox">
     </div>
 </div>`;
                 });
@@ -902,6 +908,11 @@ export const bazaar = {
                             } else {
                                 uninstall(app, dataObj.name, true);
                                 target.parentElement.querySelector('[data-type="setting"]').classList.add("fn__none");
+                                const disableTip = target.getAttribute("data-disabletip");
+                                if (disableTip) {
+                                    target.setAttribute("disabled", "disabled");
+                                    target.setAttribute("aria-label", disableTip);
+                                }
                             }
                         });
                     }

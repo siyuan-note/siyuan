@@ -72,35 +72,26 @@ const windowNavigate = (currentWindow, windowType) => {
     currentWindow.webContents.on("will-navigate", (event) => {
         const url = event.url;
         if (url.startsWith(localServer)) {
-            const urlObj = new URL(url);
-            const pathname = urlObj.pathname;
-            let isAllowed = false;
-            // 所有窗口都允许认证页面
-            if (pathname === "/check-auth") {
-                isAllowed = true;
-            } else {
-                // 根据窗口类型判断允许的路径
-                switch (windowType) {
-                    case "app":
-                        // 主窗口：只允许应用入口路径
-                        isAllowed = pathname === "/stage/build/app/";
-                        break;
-                    case "window":
-                        // 新窗口：允许 window.html
-                        isAllowed = pathname === "/stage/build/app/window.html";
-                        break;
-                    case "export":
-                        // 导出预览窗口：允许导出临时文件路径
-                        isAllowed = pathname.startsWith("/export/temp/");
-                        break;
+            try {
+                const pathname = new URL(url).pathname;
+                // 所有窗口都允许认证页面
+                if (pathname === "/check-auth") {
+                    return;
                 }
-            }
-
-            if (isAllowed) {
+                if (pathname === "/stage/build/app/" && windowType === "app") {
+                    return;
+                }
+                if (pathname === "/stage/build/app/window.html" && windowType === "window") {
+                    return;
+                }
+                if (pathname.startsWith("/export/temp/") && windowType === "export") {
+                    return;
+                }
+            } catch (e) {
                 return;
             }
         }
-        // 阻止导航并在外部浏览器打开
+        // 其他链接使用浏览器打开
         event.preventDefault();
         shell.openExternal(url);
     });

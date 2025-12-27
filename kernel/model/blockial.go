@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -277,7 +278,7 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 			// 删除大小写完全匹配的属性
 			delete(newAttrs, name)
 			// 保存小写的属性 https://github.com/siyuan-note/siyuan/issues/16447
-			newAttrs[lowerName] = value
+			newAttrs[lowerName] = html.EscapeAttrVal(value)
 		}
 	}
 

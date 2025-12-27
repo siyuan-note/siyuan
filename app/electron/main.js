@@ -75,7 +75,7 @@ const windowNavigate = (currentWindow, windowType) => {
             try {
                 const pathname = new URL(url).pathname;
                 // 所有窗口都允许认证页面
-                if (pathname === "/check-auth") {
+                if (pathname === "/check-auth" || pathname === "/") {
                     return;
                 }
                 if (pathname === "/stage/build/app/" && windowType === "app") {

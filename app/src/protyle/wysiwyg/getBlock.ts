@@ -97,7 +97,7 @@ export const getContenteditableElement = (element: Element): Element => {
         return blockElement.firstElementChild;
     } else if ("NodeTable" === type) {
         return blockElement.querySelector("table");
-    } else if ("NodeCodeBlock" === type) {
+    } else if ("NodeCodeBlock" === type && blockElement.classList.contains("code-block")) {
         return blockElement.querySelector(".hljs").lastElementChild;
     } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
         return element;

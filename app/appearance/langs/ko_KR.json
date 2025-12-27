@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "사용하려면 SiYuan을 v${x} 이상으로 업그레이드해야 합니다",
   "downloadRollback": "다운로드 및 롤백",
   "callout": "콜아웃",
   "hasAttrName": "속성명 ${x} 은(는) 이미 존재합니다",

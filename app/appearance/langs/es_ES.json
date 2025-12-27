@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "Se requiere actualizar SiYuan a la versión v${x} o posterior para usarlo",
   "downloadRollback": "Descargar y revertir",
   "callout": "Aviso",
   "hasAttrName": "El nombre del atributo ${x} ya existe",

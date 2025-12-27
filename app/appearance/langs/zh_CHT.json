@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "需升級到思源筆記 v${x} 或更高版本才能使用",
   "downloadRollback": "下载并回滚",
   "callout": "提示",
   "hasAttrName": "屬性名 ${x} 已存在",

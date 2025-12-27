@@ -71,6 +71,13 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 		return
 	}
 
+	if disallowInstall {
+		msg := "requires upgrading SiYuan to v${x} or later to use"
+		err = fmt.Errorf(msg)
+		logging.LogInfof(msg)
+		return
+	}
+
 	savePetals(petals)
 	loadCode(ret)
 	return

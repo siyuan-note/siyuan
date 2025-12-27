@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "使用するには SiYuan を v${x} 以上にアップグレードする必要があります",
   "downloadRollback": "ダウンロードしてロールバック",
   "callout": "ヒント",
   "hasAttrName": "属性名 ${x} は既に存在します",

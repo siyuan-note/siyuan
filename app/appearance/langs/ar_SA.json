@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "يتطلب ترقية SiYuan إلى الإصدار v${x} أو أحدث لاستخدام هذه الميزة",
   "downloadRollback": "تنزيل واستعادة",
   "callout": "تلميح",
   "hasAttrName": "اسم السمة ${x} موجود بالفعل",

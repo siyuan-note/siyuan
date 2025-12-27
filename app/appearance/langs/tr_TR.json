@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "Bu özelliği kullanmak için SiYuan'ı v${x} veya daha yeni bir sürüme yükseltmeniz gerekir",
   "downloadRollback": "İndir ve geri al",
   "callout": "Vurgu kutusu",
   "hasAttrName": "Öznitelik adı ${x} zaten mevcut",

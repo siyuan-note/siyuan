@@ -1,4 +1,5 @@
 {
+  "bazaarNeedVersion": "נדרש לשדרג את SiYuan לגרסה v${x} או גבוהה יותר כדי להשתמש",
   "downloadRollback": "הורד ושחזר",
   "callout": "הערה",
   "hasAttrName": "שם המאפיין ${x} כבר קיים",

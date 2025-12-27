@@ -65,14 +65,14 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	ret.DisabledInPublish = disabledInPublish
 	ret.DisallowInstall = disallowInstall
 
-	if incompatible {
+	if enabled && incompatible {
 		err = fmt.Errorf(Conf.Language(205))
 		logging.LogInfof("plugin [%s] is incompatible [%s]", name, frontend)
 		return
 	}
 
-	if disallowInstall {
-		msg := "requires upgrading SiYuan to v${x} or later to use"
+	if enabled && disallowInstall {
+		msg := "require upgrade SiYuan to use this plugin [" + name + "]"
 		err = fmt.Errorf(msg)
 		logging.LogInfof(msg)
 		return

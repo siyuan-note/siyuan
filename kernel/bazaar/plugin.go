@@ -131,7 +131,7 @@ func Plugins(frontend string) (plugins []*Plugin) {
 	return
 }
 
-func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish bool) {
+func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish, disallowInstall bool) {
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
 	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
 		return
@@ -161,6 +161,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		displayName = GetPreferredName(plugin.Package)
 		incompatible = isIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
+		disallowInstall = disallowInstallBazaarPackage(plugin.Package)
 	}
 	return
 }
@@ -194,6 +195,8 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		if nil != parseErr || nil == plugin {
 			continue
 		}
+
+		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin.Package)
 
 		installPath := filepath.Join(util.DataDir, "plugins", dirName)
 		plugin.Installed = true

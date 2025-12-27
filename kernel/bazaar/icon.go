@@ -156,8 +156,9 @@ func InstalledIcons() (ret []*Icon) {
 			continue
 		}
 
-		installPath := filepath.Join(util.IconsPath, dirName)
+		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
 
+		installPath := filepath.Join(util.IconsPath, dirName)
 		icon.Installed = true
 		icon.RepoURL = icon.URL
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"

@@ -158,8 +158,9 @@ func InstalledTemplates() (ret []*Template) {
 			continue
 		}
 
-		installPath := filepath.Join(util.DataDir, "templates", dirName)
+		template.DisallowInstall = disallowInstallBazaarPackage(template.Package)
 
+		installPath := filepath.Join(util.DataDir, "templates", dirName)
 		template.Installed = true
 		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"

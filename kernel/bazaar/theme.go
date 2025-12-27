@@ -159,8 +159,9 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 
-		installPath := filepath.Join(util.ThemesPath, dirName)
+		theme.DisallowInstall = disallowInstallBazaarPackage(theme.Package)
 
+		installPath := filepath.Join(util.ThemesPath, dirName)
 		theme.Installed = true
 		theme.RepoURL = theme.URL
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"

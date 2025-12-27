@@ -155,8 +155,9 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 
-		installPath := filepath.Join(util.DataDir, "widgets", dirName)
+		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
 
+		installPath := filepath.Join(util.DataDir, "widgets", dirName)
 		widget.Installed = true
 		widget.RepoURL = widget.URL
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"

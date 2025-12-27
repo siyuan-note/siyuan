@@ -1,5 +1,6 @@
 {
   "downloadRollback": "下载并回滚",
+  "bazaarNeedVersion": "思源笔记版本需为 v${x} 或更高版本",
   "callout": "提示",
   "hasAttrName": "属性名 <b>${x}</b> 已存在",
   "statusBarMsgPushTip": "通过状态栏消息可以即时地了解系统的运行情况，如果感到打扰可以将其关闭",

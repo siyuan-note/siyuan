@@ -295,7 +295,7 @@ export const bazaar = {
                 <svg><use xlink:href="#iconSelect"></use></svg>
             </span>
             <div class="fn__space${item.outdated ? "" : " fn__none"}"></div>
-            <span data-type="install-t" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}" aria-label="${window.siyuan.languages.update}">
+            <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
                 <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
             </span>
         </div>
@@ -326,7 +326,7 @@ export const bazaar = {
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
-        <span data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show">
+        <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show">
             <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
         </span>
     </div>
@@ -444,7 +444,7 @@ export const bazaar = {
         <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
             <svg><use xlink:href="#iconSelect"></use></svg>
         </span>
-        <span data-type="install-t" aria-label="${window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
+        <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
             <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
         </span>
         <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
@@ -539,10 +539,10 @@ export const bazaar = {
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
     <div${(data.installed || downloaded) ? ' class="fn__none"' : ""}>
-        <button class="b3-button" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
+        <button ${data.disallowInstall ? `disabled aria-label="${window.siyuan.languages.bazaarNeedVersion.replace("${x}", data.minAppVersion)}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px"  data-type="install">${window.siyuan.languages.download}</button>
     </div>
     <div${(data.outdated && (data.installed || downloaded)) ? "" : ' class="fn__none"'}>
-        <button class="b3-button" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
+        <button ${data.disallowInstall ? `disabled aria-label="${window.siyuan.languages.bazaarNeedVersion.replace("${x}", data.minAppVersion)}" data-position="north"` : ""} class="b3-button ariaLabel" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
     </div>
     <div class="fn__hr--b"></div>
     <div>
@@ -672,7 +672,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "install") {
-                    if (!target.classList.contains("b3-button--progress")) {
+                    if (!target.classList.contains("b3-button--progress") && !target.hasAttribute("disabled")) {
                         const bazaarType = dataObj.bazaarType as TBazaarType;
                         let url = "/api/bazaar/installBazaarTemplate";
                         if (bazaarType === "themes") {
@@ -728,7 +728,7 @@ export const bazaar = {
                     event.stopPropagation();
                     break;
                 } else if (type === "install-t") {
-                    if (!target.classList.contains("b3-button--progress")) {
+                    if (!target.classList.contains("b3-button--progress") && !target.hasAttribute("disabled")) {
                         confirmDialog("⬆️ " + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
                             const bazaarType = dataObj.bazaarType as TBazaarType;
                             let url = "/api/bazaar/installBazaarTemplate";

@@ -426,7 +426,8 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             protyle,
             selectsElement: newSourceParentElement.reverse(),
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     if (document.contains(sourceElements[0])) {
@@ -515,7 +516,8 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             protyle,
             selectsElement: newSourceParentElement.reverse(),
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     if (document.contains(sourceElements[0])) {

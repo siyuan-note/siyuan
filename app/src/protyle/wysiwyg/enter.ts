@@ -1,7 +1,7 @@
 import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
 import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
 import {
-    getContenteditableElement,
+    getContenteditableElement, getParentBlock,
     getTopEmptyElement,
     hasNextSibling,
     hasPreviousSibling,
@@ -117,12 +117,10 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
 
     // bq || callout
-    const isCallout = blockElement.parentElement.classList.contains("callout-content");
-    const parentBlockElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
     if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
         ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
                 blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
-            (isCallout && !blockElement.nextElementSibling))) {
+            (blockElement.parentElement.classList.contains("callout-content") && !blockElement.nextElementSibling))) {
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement);
         const blockId = blockElement.getAttribute("data-node-id");
@@ -137,6 +135,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             id: topId,
             data: topElement.outerHTML,
         };
+        let parentBlockElement = getParentBlock(blockElement);
         if (topId === blockId) {
             doInsert.previousID = parentBlockElement.getAttribute("data-node-id");
             undoInsert.previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
@@ -156,13 +155,15 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             action: "delete",
             id: blockId,
         }, undoInsert]);
+        parentBlockElement = getParentBlock(blockElement);
         if (topId === blockId && parentBlockElement.classList.contains("sb") &&
             parentBlockElement.getAttribute("data-sb-layout") === "col") {
             turnsIntoOneTransaction({
                 protyle,
                 selectsElement: [blockElement.previousElementSibling, blockElement],
                 type: "BlocksMergeSuperBlock",
-                level: "row"
+                level: "row",
+                unfocus: true,
             });
         }
         focusByWbr(blockElement, range);
@@ -197,7 +198,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             data: newElement.outerHTML,
             id: newId,
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
-            parentID: parentBlockElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "delete",
             id: newId,
@@ -209,7 +210,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     }
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
-    const parentHTML = parentBlockElement.outerHTML;
+    const parentHTML = getParentBlock(blockElement).outerHTML;
     if (range.toString() !== "") {
         // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
         const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
@@ -353,7 +354,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             protyle,
             selectsElement,
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     focusByWbr(currentElement, range);

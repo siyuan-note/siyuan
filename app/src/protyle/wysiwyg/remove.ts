@@ -655,7 +655,8 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
                 protyle,
                 selectsElement: selectsElement.reverse(),
                 type: "BlocksMergeSuperBlock",
-                level: "row"
+                level: "row",
+                unfocus: true,
             });
         }
         focusByWbr(protyle.wysiwyg.element, range);

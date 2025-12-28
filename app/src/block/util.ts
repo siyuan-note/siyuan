@@ -191,7 +191,8 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             protyle,
             selectsElement: position === "afterend" ? [blockElement, blockElement.nextElementSibling] : [blockElement.previousElementSibling, blockElement],
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     focusByWbr(protyle.wysiwyg.element, range);

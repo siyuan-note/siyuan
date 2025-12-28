@@ -513,7 +513,8 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 protyle,
                 selectsElement: [liElement, liElement.nextElementSibling],
                 type: "BlocksMergeSuperBlock",
-                level: "row"
+                level: "row",
+                unfocus: true,
             });
         }
         focusByWbr(parentLiItemElement, range);

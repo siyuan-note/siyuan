@@ -13,7 +13,7 @@ import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {avRender, refreshAV} from "../render/av/render";
 import {removeFoldHeading} from "../util/heading";
-import {genEmptyElement, genSBElement} from "../../block/util";
+import {cancelSB, genEmptyElement, genSBElement} from "../../block/util";
 import {hideElements} from "../ui/hideElements";
 import {reloadProtyle} from "../util/reload";
 import {countBlockWord} from "../../layout/status";
@@ -935,11 +935,12 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     }
 };
 
-export const turnsIntoOneTransaction = (options: {
+export const turnsIntoOneTransaction = async (options: {
     protyle: IProtyle,
     selectsElement: Element[],
     type: TTurnIntoOne,
-    level?: TTurnIntoOneSub
+    level?: TTurnIntoOneSub,
+    unfocus?: boolean
 }) => {
     let parentElement: Element;
     const id = Lute.NewNodeID();
@@ -1048,8 +1049,16 @@ export const turnsIntoOneTransaction = (options: {
             blockRender(options.protyle, item);
         }
     });
+    if ((["Blocks2Blockquote", "Blocks2Callout"].includes(options.type) || options.type.endsWith("Ls")) &&
+        parentElement.parentElement.classList.contains("sb") && parentElement.parentElement.childElementCount === 2) {
+        const cancelOperations = await cancelSB(options.protyle, parentElement.parentElement);
+        doOperations.push(...cancelOperations.doOperations);
+        undoOperations.splice(0, 0, ...cancelOperations.undoOperations);
+    }
     transaction(options.protyle, doOperations, undoOperations);
-    focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.selectsElement[0].getAttribute("data-node-id")}"]`));
+    if (!options.unfocus) {
+        focusBlock(options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.selectsElement[0].getAttribute("data-node-id")}"]`));
+    }
     hideElements(["gutter"], options.protyle);
 };
 

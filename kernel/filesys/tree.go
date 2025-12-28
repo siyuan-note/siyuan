@@ -345,10 +345,8 @@ func escapeAttributeValues(tree *parse.Tree) (hasEscaped bool) {
 		if escaped := escapeNodeAttributeValues(n); escaped {
 			hasEscaped = true
 		}
-
 		return ast.WalkContinue
 	})
-
 	return hasEscaped
 }
 
@@ -358,34 +356,13 @@ func escapeNodeAttributeValues(node *ast.Node) (escaped bool) {
 		return false
 	}
 
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	needsEscape := false
-	escapedAttrs := make(map[string]string)
-
-	for key, value := range attrs {
-		if needsEscapeForValue(value) {
-			escapedAttrs[key] = html.EscapeAttrVal(value)
-			needsEscape = true
+	for _, kv := range node.KramdownIAL {
+		if value := kv[1]; needsEscapeForValue(value) {
+			kv[1] = html.EscapeAttrVal(value)
+			escaped = true
 		}
 	}
-
-	if !needsEscape {
-		return false
-	}
-
-	oldAttrs := parse.IAL2Map(node.KramdownIAL)
-	newAttrs := make(map[string]string)
-	for k, v := range oldAttrs {
-		newAttrs[k] = v
-	}
-	for name, value := range escapedAttrs {
-		lowerName := strings.ToLower(name)
-		delete(newAttrs, name)
-		newAttrs[lowerName] = value
-	}
-	node.KramdownIAL = parse.Map2IAL(newAttrs)
-
-	return true
+	return
 }
 
 // needsEscapeForValue 检查值是否需要转义（包含需要转义的特殊字符但尚未被转义）
@@ -410,6 +387,5 @@ func needsEscapeForValue(value string) bool {
 			return false
 		}
 	}
-
 	return true
 }

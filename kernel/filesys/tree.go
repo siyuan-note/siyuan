@@ -294,7 +294,9 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		needFix = true
 	}
 
-	if escapeAttributeValues(ret) {
+	if escapeAttributeValues(ret) { // TODO 划于 2026 年 6 月 30 日后删除
+		// v3.5.1 https://github.com/siyuan-note/siyuan/pull/16657 引入的问题，属性值未转义
+		// v3.5.2 https://github.com/siyuan-note/siyuan/issues/16686 进行了修复，并加了订正逻辑 https://github.com/siyuan-note/siyuan/pull/16712
 		needFix = true
 	}
 

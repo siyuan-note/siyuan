@@ -165,6 +165,14 @@ func IsRelativePath(dest string) bool {
 	if '/' == dest[0] {
 		return false
 	}
+
+	// 检查特定协议前缀
+	lowerDest := strings.ToLower(dest)
+	if strings.HasPrefix(lowerDest, "mailto:") ||
+		strings.HasPrefix(lowerDest, "tel:") ||
+		strings.HasPrefix(lowerDest, "sms:") {
+		return false
+	}
 	return !strings.Contains(dest, ":/") && !strings.Contains(dest, ":\\")
 }
 

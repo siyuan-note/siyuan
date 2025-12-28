@@ -28,6 +28,8 @@ import (
 	"sync"
 
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	jsoniter "github.com/json-iterator/go"
@@ -292,6 +294,12 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		needFix = true
 	}
 
+	if escapeAttributeValues(ret) { // TODO 计划于 2026 年 6 月 30 日后删除
+		// v3.5.1 https://github.com/siyuan-note/siyuan/pull/16657 引入的问题，属性值未转义
+		// v3.5.2 https://github.com/siyuan-note/siyuan/issues/16686 进行了修复，并加了订正逻辑 https://github.com/siyuan-note/siyuan/pull/16712
+		needFix = true
+	}
+
 	if pathID := util.GetTreeID(p); pathID != ret.Root.ID {
 		needFix = true
 		logging.LogInfof("reset tree id from [%s] to [%s]", ret.Root.ID, pathID)
@@ -323,4 +331,63 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		}
 	}
 	return
+}
+
+// escapeAttributeValues 转义属性值
+func escapeAttributeValues(tree *parse.Tree) (hasEscaped bool) {
+	if util.ReadOnly || nil == tree || nil == tree.Root {
+		return false
+	}
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || "" == n.ID || 0 == len(n.KramdownIAL) {
+			return ast.WalkContinue
+		}
+
+		if escaped := escapeNodeAttributeValues(n); escaped {
+			hasEscaped = true
+		}
+		return ast.WalkContinue
+	})
+	return hasEscaped
+}
+
+// escapeNodeAttributeValues 转义节点的属性值
+func escapeNodeAttributeValues(node *ast.Node) (escaped bool) {
+	if nil == node || 0 == len(node.KramdownIAL) {
+		return false
+	}
+
+	for _, kv := range node.KramdownIAL {
+		if value := kv[1]; needsEscapeForValue(value) {
+			kv[1] = html.EscapeAttrVal(value)
+			escaped = true
+		}
+	}
+	return
+}
+
+// needsEscapeForValue 检查值是否需要转义（包含需要转义的特殊字符但尚未被转义）
+func needsEscapeForValue(value string) bool {
+	hasSpecialChars := false
+	for _, char := range value {
+		switch char {
+		case '<', '>', '&', '"', '{', '}':
+			hasSpecialChars = true
+		}
+		if hasSpecialChars {
+			break
+		}
+	}
+	if !hasSpecialChars {
+		return false
+	}
+
+	entities := []string{"&quot;", "&#123;", "&#125;", "&amp;", "&lt;", "&gt;"}
+	for _, entity := range entities {
+		if strings.Contains(value, entity) {
+			return false
+		}
+	}
+	return true
 }

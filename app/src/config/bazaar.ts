@@ -99,7 +99,7 @@ export const bazaar = {
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
             <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">
-            <div class="counter counter--bg fn__none fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarDownloaded" class="config-bazaar__content">
             ${loadingHTML}
@@ -128,7 +128,7 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarTheme" class="config-bazaar__content">
             ${loadingHTML}
@@ -151,7 +151,7 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarTemplate" class="config-bazaar__content">
             ${loadingHTML}
@@ -174,7 +174,7 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarPlugin" class="config-bazaar__content">
             ${loadingHTML}
@@ -197,7 +197,7 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarIcon" class="config-bazaar__content">
             ${loadingHTML}
@@ -220,7 +220,7 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarWidget" class="config-bazaar__content">
             ${loadingHTML}
@@ -236,9 +236,9 @@ export const bazaar = {
         }
         try {
             new URL(funding);
-            return `<a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
+            return `<a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
         } catch (e) {
-            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
+            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
         }
     },
     _genCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
@@ -287,15 +287,15 @@ export const bazaar = {
             ${bazaar._genFundingHTML(item.preferredFunding)}
             <span class="fn__space"></span>
             <div class="fn__flex-1"></div>
-            <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
+            <span data-position="north" class="ariaLabel block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
                 <svg><use xlink:href="#iconTrashcan"></use></svg>
             </span>
             <div class="fn__space${!item.current && item.installed && showSwitch ? "" : " fn__none"}"></div>
-            <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && item.installed && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
+            <span data-position="north" class="ariaLabel block__icon block__icon--show${!item.current && item.installed && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
                 <svg><use xlink:href="#iconSelect"></use></svg>
             </span>
             <div class="fn__space${item.outdated ? "" : " fn__none"}"></div>
-            <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
+            <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" data-position="north" class="ariaLabel block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
                 <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
             </span>
         </div>
@@ -321,12 +321,12 @@ export const bazaar = {
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
-        ${item.incompatible ? `<span class="fn__space"></span><span class="fn__flex-center b3-tooltips b3-tooltips__nw b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>` : ""}
+        ${item.incompatible ? `<span class="fn__space"></span><span data-position="north" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>` : ""}
         ${bazaar._genFundingHTML(item.preferredFunding)}
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
-        <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show">
+        <span data-position="north" data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="ariaLabel block__icon block__icon--show">
             <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
         </span>
     </div>
@@ -360,7 +360,7 @@ export const bazaar = {
     <div class="fn__flex-1"></div>
     <button class="b3-button" data-type="install-all">${window.siyuan.languages.updateAll}</button>
     <span class="fn__space"></span>
-    <div class="counter counter--bg fn__flex-center">${allCount}</div>
+    <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}">${allCount}</div>
 </div>
 <div class="config-bazaar__content">${html}</div>`;
         });
@@ -430,21 +430,21 @@ export const bazaar = {
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
-        ${item.incompatible ? `<span class="fn__space"></span><span class="fn__flex-center b3-tooltips b3-tooltips__nw b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>` : ""}
+        ${item.incompatible ? `<span class="fn__space"></span><span data-position="north" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small" aria-label="${window.siyuan.languages.incompatiblePluginTip}">${window.siyuan.languages.incompatible}</span>` : ""}
         ${bazaar._genFundingHTML(item.preferredFunding)}
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${hasSetting ? "" : " fn__none"}" data-type="setting" aria-label="${window.siyuan.languages.config}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${hasSetting ? "" : " fn__none"}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>
         </span>
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
             <svg><use xlink:href="#iconTrashcan"></use></svg>
         </span>
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
-        <span class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${!item.current && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${!item.current && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
             <svg><use xlink:href="#iconSelect"></use></svg>
         </span>
-        <span data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="b3-tooltips b3-tooltips__nw block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
+        <span data-position="north" data-type="install-t" ${item.disallowInstall ? "disabled" : ""} aria-label="${item.disallowInstall ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.minAppVersion) : window.siyuan.languages.update}" class="ariaLabel block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
             <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
         </span>
         <span class="fn__space${bazaarType === "plugins" ? "" : " fn__none"}"></span>
@@ -509,7 +509,7 @@ type="checkbox">
         };
         readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
-        <div style="padding-right: 8px" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" data-type="goBack" aria-label="${window.siyuan.languages.back}">
+        <div style="padding-right: 8px" class="block__icon block__icon--show ariaLabel" data-position="north" data-type="goBack" aria-label="${window.siyuan.languages.back}">
             <svg><use xlink:href="#iconLeft"></use></svg>
             <span class="fn__space"></span>
             ${navTitle}
@@ -527,7 +527,7 @@ type="checkbox">
         <span class="fn__flex-1"></span>
         ${data.preferredFunding ?
             bazaar._genFundingHTML(data.preferredFunding) :
-            `<span class="b3-tooltips b3-tooltips__ne block__icon block__icon--show ft__primary" aria-label="${window.siyuan.languages.author}" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>`
+            `<span data-position="north" class="ariaLabel block__icon block__icon--show ft__primary" aria-label="${window.siyuan.languages.author}" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>`
         }
         <span class="fn__space"></span>
         <a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a>

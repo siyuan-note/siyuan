@@ -50,7 +50,13 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
                 }
 
                 if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
-                    return response.json();
+                    return response.text().then((text) => {
+                        try {
+                            return JSON.parse(text);
+                        } catch {
+                            return text;
+                        }
+                    });
                 } else {
                     return response.text();
                 }
@@ -76,7 +82,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
             cb(response);
         }
     }).catch((e) => {
-        console.warn("fetch post failed [" + e + "], url [" + url + "]");
+        console.error("fetch post failed [" + e + "], url [" + url + "]");
         if (url === "/api/transactions" && (e.message === "Failed to fetch" || e.message === "Unexpected end of JSON input")) {
             kernelError();
             return;

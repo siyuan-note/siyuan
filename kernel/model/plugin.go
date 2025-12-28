@@ -111,6 +111,10 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 	for _, petal := range petals {
 		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall = bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) || petal.DisallowInstall {
+			if petal.DisallowInstall {
+				SetPetalEnabled(petal.Name, false, frontend)
+				logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
+			}
 			continue
 		}
 

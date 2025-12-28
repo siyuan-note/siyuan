@@ -28,6 +28,8 @@ import (
 	"sync"
 
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	jsoniter "github.com/json-iterator/go"
@@ -292,6 +294,10 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		needFix = true
 	}
 
+	if escapeAttributeValues(ret) {
+		needFix = true
+	}
+
 	if pathID := util.GetTreeID(p); pathID != ret.Root.ID {
 		needFix = true
 		logging.LogInfof("reset tree id from [%s] to [%s]", ret.Root.ID, pathID)
@@ -323,4 +329,87 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		}
 	}
 	return
+}
+
+// escapeAttributeValues 转义属性值
+func escapeAttributeValues(tree *parse.Tree) (hasEscaped bool) {
+	if util.ReadOnly || nil == tree || nil == tree.Root {
+		return false
+	}
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || "" == n.ID || 0 == len(n.KramdownIAL) {
+			return ast.WalkContinue
+		}
+
+		if escaped := escapeNodeAttributeValues(n); escaped {
+			hasEscaped = true
+		}
+
+		return ast.WalkContinue
+	})
+
+	return hasEscaped
+}
+
+// escapeNodeAttributeValues 转义节点的属性值
+func escapeNodeAttributeValues(node *ast.Node) (escaped bool) {
+	if nil == node || 0 == len(node.KramdownIAL) {
+		return false
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	needsEscape := false
+	escapedAttrs := make(map[string]string)
+
+	for key, value := range attrs {
+		if needsEscapeForValue(value) {
+			escapedAttrs[key] = html.EscapeAttrVal(value)
+			needsEscape = true
+		}
+	}
+
+	if !needsEscape {
+		return false
+	}
+
+	oldAttrs := parse.IAL2Map(node.KramdownIAL)
+	newAttrs := make(map[string]string)
+	for k, v := range oldAttrs {
+		newAttrs[k] = v
+	}
+	for name, value := range escapedAttrs {
+		lowerName := strings.ToLower(name)
+		delete(newAttrs, name)
+		newAttrs[lowerName] = value
+	}
+	node.KramdownIAL = parse.Map2IAL(newAttrs)
+
+	return true
+}
+
+// needsEscapeForValue 检查值是否需要转义（包含需要转义的特殊字符但尚未被转义）
+func needsEscapeForValue(value string) bool {
+	hasSpecialChars := false
+	for _, char := range value {
+		switch char {
+		case '<', '>', '&', '"', '{', '}':
+			hasSpecialChars = true
+		}
+		if hasSpecialChars {
+			break
+		}
+	}
+	if !hasSpecialChars {
+		return false
+	}
+
+	entities := []string{"&quot;", "&#123;", "&#125;", "&amp;", "&lt;", "&gt;"}
+	for _, entity := range entities {
+		if strings.Contains(value, entity) {
+			return false
+		}
+	}
+
+	return true
 }

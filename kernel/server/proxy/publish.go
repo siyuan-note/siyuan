@@ -35,10 +35,6 @@ var (
 
 	listener  net.Listener
 	transport = PublishServiceTransport{}
-	proxy     = &httputil.ReverseProxy{
-		Rewrite:   rewrite,
-		Transport: transport,
-	}
 )
 
 func InitPublishService() (uint16, error) {
@@ -108,12 +104,17 @@ func closePublishListener() (err error) {
 
 func startPublishReverseProxyService() {
 	logging.LogInfof("publish service [%s:%s] is running", Host, Port)
-	// 服务进行时一直阻塞
+
+	proxy := &httputil.ReverseProxy{
+		Rewrite:   rewrite,
+		Transport: transport,
+	}
 	if err := http.Serve(listener, proxy); err != nil {
 		if listener != nil {
 			logging.LogErrorf("boot publish service failed: %s", err)
 		}
 	}
+
 	logging.LogInfof("publish service [%s:%s] is stopped", Host, Port)
 }
 

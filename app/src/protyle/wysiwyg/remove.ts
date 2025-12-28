@@ -55,7 +55,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         const unfoldData: {
             [key: string]: {
                 element: Element,
-                previousID: string
+                previousID?: string
             }
         } = {};
         for (let i = 0; i < selectElements.length; i++) {
@@ -148,6 +148,13 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     listElement = topElement.parentElement;
                 } else {
                     listElement = undefined;
+                }
+                // https://github.com/siyuan-note/siyuan/issues/12327
+                if (topElement.parentElement.classList.contains("li") && topElement.parentElement.childElementCount === 4 &&
+                    topElement.parentElement.getAttribute("fold") === "1") {
+                    unfoldData[topElement.parentElement.getAttribute("data-node-id")] = {
+                        element: topElement.parentElement,
+                    };
                 }
                 topElement.remove();
             }

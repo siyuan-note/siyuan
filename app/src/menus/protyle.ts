@@ -2460,7 +2460,9 @@ export const setFoldById = (data: {
 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean,
                         isRemove?: boolean, addLoading = true, getOperations = false) => {
-    if (nodeElement.getAttribute("data-type") === "NodeListItem" && nodeElement.childElementCount < 4) {
+    if (nodeElement.getAttribute("data-type") === "NodeListItem" && nodeElement.childElementCount < 4 &&
+        // 该情况需要强制展开 https://github.com/siyuan-note/siyuan/issues/12327
+        !isOpen) {
         // 没有子列表或多个块的列表项不进行折叠
         return {fold: -1};
     }

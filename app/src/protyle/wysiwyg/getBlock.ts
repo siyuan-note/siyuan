@@ -85,12 +85,13 @@ export const getContenteditableElement = (element: Element): Element => {
     let blockElement = element;
     if (!blockElement.getAttribute("data-node-id")) {
         blockElement = element.querySelector("[data-node-id]");
-        if (!blockElement) {
-            blockElement = hasClosestBlock(blockElement) as Element;
-        }
     }
     if (!blockElement) {
-        return element;
+        const tempBlockElement = hasClosestBlock(element);
+        if (tempBlockElement && element === getContenteditableElement(tempBlockElement)) {
+            return element;
+        }
+        return undefined;
     }
     const type = blockElement.getAttribute("data-type");
     if (["NodeParagraph", "NodeHeading"].includes(type)) {
@@ -100,11 +101,11 @@ export const getContenteditableElement = (element: Element): Element => {
     } else if ("NodeCodeBlock" === type && blockElement.classList.contains("code-block")) {
         return blockElement.querySelector(".hljs").lastElementChild;
     } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
-        return element;
-    } else if (element.getAttribute("data-node-id")) {
-        return getContenteditableElement(element.querySelector("[data-node-id]"));
+        return undefined;
+    } else if (blockElement.getAttribute("data-node-id")) {
+        return getContenteditableElement(blockElement.querySelector("[data-node-id]"));
     }
-    return element;
+    return undefined;
 };
 
 export const isNotEditBlock = (element: Element) => {

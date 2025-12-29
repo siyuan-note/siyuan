@@ -213,6 +213,9 @@ ${padHTML}
         if (!blockElement) {
             blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
         }
+        if (!blockElement) {
+            return;
+        }
         const id = blockElement.getAttribute("data-node-id");
         fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes: []}, (response) => {
             response.data.forEach((item: IBreadcrumb) => {
@@ -602,6 +605,10 @@ ${padHTML}
         }
         if (!blockElement) {
             blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+        }
+        if (!blockElement) {
+            // 浮窗删除单个块后，面包屑无法获取到 blockElement，直接返回即可
+            return;
         }
         const id = blockElement.getAttribute("data-node-id");
         if (id === this.id && !update) {

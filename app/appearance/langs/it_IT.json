@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "Numero massimo di documenti recenti elencati",
+  "recentDocsMaxListCountTip": "Numero massimo di documenti elencati nella finestra di dialogo Documenti recenti",
   "bazaarNeedVersion": "È necessario aggiornare SiYuan alla versione v${x} o successiva per poter utilizzare",
   "downloadRollback": "Scarica e ripristina",
   "callout": "Suggerimento",

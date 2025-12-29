@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "최근 문서 목록 최대 수",
+  "recentDocsMaxListCountTip": "최근 문서 대화상자에 최대 나열될 문서 수",
   "bazaarNeedVersion": "사용하려면 SiYuan을 v${x} 이상으로 업그레이드해야 합니다",
   "downloadRollback": "다운로드 및 롤백",
   "callout": "콜아웃",

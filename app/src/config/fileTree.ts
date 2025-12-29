@@ -88,6 +88,14 @@ export const fileTree = {
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="maxOpenTabCount" type="number" min="1" max="32" value="${window.siyuan.config.fileTree.maxOpenTabCount}">
 </div>
+<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.recentDocsMaxCount}
+        <div class="b3-label__text">${window.siyuan.languages.recentDocsMaxCountTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="recentDocsMaxListCount" type="number" min="1" max="256" value="${window.siyuan.config.fileTree.recentDocsMaxListCount}">
+</div>
 <div class="b3-label config__item">
     ${window.siyuan.languages.fileTree12}
     <div class="b3-label__text">${window.siyuan.languages.fileTree13}</div>
@@ -137,6 +145,7 @@ export const fileTree = {
             largeFileWarningSize: parseInt((fileTree.element.querySelector("#largeFileWarningSize") as HTMLInputElement).value),
             maxListCount: parseInt((fileTree.element.querySelector("#maxListCount") as HTMLInputElement).value),
             maxOpenTabCount: inputMaxOpenTabCount,
+            recentDocsMaxListCount: parseInt((fileTree.element.querySelector("#recentDocsMaxListCount") as HTMLInputElement).value),
         }, response => {
             window.siyuan.config.fileTree = response.data;
         });

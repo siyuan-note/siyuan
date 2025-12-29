@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "最近的文檔列出數量",
+  "recentDocsMaxListCountTip": "在最近的文檔對話框中最多列出文檔的數量",
   "bazaarNeedVersion": "需升級到思源筆記 v${x} 或更高版本才能使用",
   "downloadRollback": "下载并回滚",
   "callout": "提示",

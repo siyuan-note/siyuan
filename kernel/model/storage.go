@@ -99,8 +99,8 @@ func setRecentDocByTree(tree *parse.Tree) {
 	}
 
 	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
-	if 32 < len(recentDocs) {
-		recentDocs = recentDocs[:32]
+	if Conf.FileTree.RecentDocsMaxListCount < len(recentDocs) {
+		recentDocs = recentDocs[:Conf.FileTree.RecentDocsMaxListCount]
 	}
 
 	err = setRecentDocs(recentDocs)

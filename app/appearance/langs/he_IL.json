@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "מספר מקסימלי של מסמכים אחרונים ברשימה",
+  "recentDocsMaxListCountTip": "מספר המסמכים המקסימלי שיופיע בתיבת הדו-שיח של 'מסמכים אחרונים'",
   "bazaarNeedVersion": "נדרש לשדרג את SiYuan לגרסה v${x} או גבוהה יותר כדי להשתמש",
   "downloadRollback": "הורד ושחזר",
   "callout": "הערה",

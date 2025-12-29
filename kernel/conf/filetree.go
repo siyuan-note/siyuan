@@ -36,6 +36,7 @@ type FileTree struct {
 	LargeFileWarningSize    int    `json:"largeFileWarningSize"`    // 大文件警告大小（单位：MB）
 	CreateDocAtTop          *bool  `json:"createDocAtTop"`          // 在顶部创建新文档 https://github.com/siyuan-note/siyuan/issues/16327
 	Sort                    int    `json:"sort"`                    // 排序方式
+	RecentDocsMaxListCount  int    `json:"recentDocsMaxListCount"`  // 最近的文档最大列出数量
 }
 
 func NewFileTree() *FileTree {

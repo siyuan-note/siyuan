@@ -236,6 +236,13 @@ func InitConf() {
 		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
 	}
 
+	if 1 > Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = 32
+	}
+	if 256 < Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = 256
+	}
+
 	util.CurrentCloudRegion = Conf.CloudRegion
 
 	if nil == Conf.Tag {

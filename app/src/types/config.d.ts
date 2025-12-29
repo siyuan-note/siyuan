@@ -680,6 +680,10 @@ declare namespace Config {
          * Whether to create new documents at the top of the document tree
          */
         createDocAtTop: boolean;
+        /**
+         * The maximum number of recent documents listed
+         */
+        recentDocsMaxListCount: number;
     }
 
     /**

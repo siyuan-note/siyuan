@@ -309,7 +309,6 @@ func renameFile(c *gin.Context) {
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if filelock.IsExist(destAbsPath) {

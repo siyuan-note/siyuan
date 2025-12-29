@@ -258,7 +258,7 @@ export class Plugin {
         this.setting.open(this.displayName || this.name);
     }
 
-    public loadData(storageName: string) {
+    public loadData(storageName: string): Promise<IWebSocketData> {
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
@@ -274,7 +274,7 @@ export class Plugin {
         });
     }
 
-    public saveData(storageName: string, data: any) {
+    public saveData(storageName: string, data: any): Promise<any | IWebSocketData> {
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
             return Promise.reject({
                 code: 403,
@@ -312,7 +312,7 @@ export class Plugin {
         });
     }
 
-    public removeData(storageName: string) {
+    public removeData(storageName: string): Promise<IWebSocketData> {
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
             return Promise.reject({
                 code: 403,

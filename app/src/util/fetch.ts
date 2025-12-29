@@ -93,6 +93,14 @@ export const fetchPost = (
             cb(response);
         }
     }).catch((e) => {
+        if (failCallback && url === "/api/file/getFile") {
+            failCallback({
+                data: null,
+                msg: e.message,
+                code: 400,
+            });
+            return;
+        }
         console.warn("fetch post failed [" + e + "], url [" + url + "]");
         if (url === "/api/transactions" && (e.message === "Failed to fetch" || e.message === "Unexpected end of JSON input")) {
             kernelError();

@@ -75,14 +75,23 @@ func ISOYear(date time.Time) int {
 
 // ISOMonth returns the month in which the first day of the ISO 8601 week of date occurs.
 func ISOMonth(date time.Time) int {
-	weekday := int(date.Weekday())
-	if weekday == 0 {
-		weekday = 7
-	}
+	isoYear, isoWeek := date.ISOWeek()
 
-	daysToMonday := weekday - 1
-	monday := date.AddDate(0, 0, -daysToMonday)
-	return int(monday.Month())
+	// 1. 找到该 ISO 年份的 1 月 4 日（它必然属于第 1 周）
+	jan4 := time.Date(isoYear, time.January, 4, 0, 0, 0, 0, date.Location())
+
+	// 2. 找到第 1 周的周四
+	// (jan4.Weekday() + 6) % 7 将周一~周日映射为 0~6
+	daysToMonday := (int(jan4.Weekday()) + 6) % 7
+	mondayOfWeek1 := jan4.AddDate(0, 0, -daysToMonday)
+	thursdayOfWeek1 := mondayOfWeek1.AddDate(0, 0, 3)
+
+	// 3. 计算目标周的周四
+	// 目标周四 = 第一周周四 + (isoWeek-1) * 7天
+	targetThursday := thursdayOfWeek1.AddDate(0, 0, (isoWeek-1)*7)
+
+	// 4. 返回该周四所在的自然月份
+	return int(targetThursday.Month())
 }
 
 // ISOWeekDate returns the date of the specified day of the week in the ISO 8601 week of date.

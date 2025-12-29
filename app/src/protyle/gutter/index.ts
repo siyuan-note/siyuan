@@ -376,7 +376,10 @@ export class Gutter {
                             }
                         }
                     });
-                    (buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement).style.transform = hasFold ? "rotate(90deg)" : "";
+                    const arrowElement = buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement;
+                    if (arrowElement) {
+                        arrowElement.style.transform = hasFold ? "rotate(90deg)" : "";
+                    }
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {

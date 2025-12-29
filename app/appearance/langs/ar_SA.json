@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "الحد الأقصى لعدد المستندات الحديثة المعروضة",
+  "recentDocsMaxListCountTip": "الحد الأقصى لعدد المستندات المدرجة في مربع حوار المستندات الحديثة",
   "bazaarNeedVersion": "يتطلب ترقية SiYuan إلى الإصدار v${x} أو أحدث لاستخدام هذه الميزة",
   "downloadRollback": "تنزيل واستعادة",
   "callout": "تلميح",

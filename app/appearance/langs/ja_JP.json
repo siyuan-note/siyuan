@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "最近のドキュメントの最大表示数",
+  "recentDocsMaxListCountTip": "最近のドキュメントダイアログに最大で表示されるドキュメント数",
   "bazaarNeedVersion": "使用するには SiYuan を v${x} 以上にアップグレードする必要があります",
   "downloadRollback": "ダウンロードしてロールバック",
   "callout": "ヒント",

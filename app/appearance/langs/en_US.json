@@ -1,4 +1,6 @@
 {
+  "recentDocsMaxListCount": "Maximum number of recent documents listed",
+  "recentDocsMaxListCountTip": "Maximum number of documents listed in the Recent Documents dialog",
   "bazaarNeedVersion": "Requires upgrading SiYuan to v${x} or later to use",
   "downloadRollback": "Download and rollback",
   "callout": "Callout",

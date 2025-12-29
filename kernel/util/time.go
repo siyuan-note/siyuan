@@ -59,7 +59,7 @@ func WeekdayCN2(date time.Time) string {
 	return weekdayCN2[week]
 }
 
-// ISOWeek returns the ISO 8601 year and week number in which date occurs.
+// ISOWeek returns the ISO 8601 week number in which date occurs.
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to week 52 or 53 of year n-1,
 // and Dec 29 to Dec 31 might belong to week 1 of year n+1.
 func ISOWeek(date time.Time) int {
@@ -73,7 +73,7 @@ func ISOYear(date time.Time) int {
 	return year
 }
 
-// ISOMonth returns the month in which the first day of the ISO 8601 week of date occurs.
+// ISOMonth returns the month in which the Thursday of the ISO 8601 week of date occurs.
 func ISOMonth(date time.Time) int {
 	isoYear, isoWeek := date.ISOWeek()
 

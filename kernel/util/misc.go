@@ -63,7 +63,7 @@ func RandString(length int) string {
 	return string(b)
 }
 
-// InsertElem inserts value at index into a.
+// InsertElem inserts value at index into s.
 // 0 <= index <= len(s)
 func InsertElem[T any](s []T, index int, value T) []T {
 	if len(s) == index { // nil or empty slice or after last element

@@ -545,6 +545,8 @@
   "compare": "比较",
   "switchTab": "页签切换",
   "recentDocs": "最近的文档",
+  "recentDocsMaxCount": "最近的文档最大数量",
+  "recentDocsMaxCountTip": "最近的文档对话框中列出文档的最大数量",
   "autoLaunch": "开机自动启动",
   "autoLaunchTip": "启用后会在登录操作系统后自动启动应用",
   "sortByContent": "按原文内容顺序",

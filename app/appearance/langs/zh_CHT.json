@@ -545,6 +545,8 @@
   "compare": "比較",
   "switchTab": "分頁切換",
   "recentDocs": "最近的文檔",
+  "recentDocsMaxCount": "最近的文檔最大數量",
+  "recentDocsMaxCountTip": "最近的文檔對話框中列出文檔的最大數量",
   "autoLaunch": "開機自動啟動",
   "autoLaunchTip": "啟用後會在登錄操作系統後自動啟動應用",
   "sortByContent": "按原文內容順序",

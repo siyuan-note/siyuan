@@ -545,6 +545,8 @@
   "compare": "Karşılaştır",
   "switchTab": "Sekme değiştirici",
   "recentDocs": "Son belgeler",
+  "recentDocsMaxCount": "Listelenen son belgelerin maksimum sayısı",
+  "recentDocsMaxCountTip": "Son Belgeler iletişim kutusunda listelenen belgelerin maksimum sayısı",
   "autoLaunch": "Açılışta otomatik başlat",
   "autoLaunchTip": "Etkinleştirildiğinde, işletim sistemine giriş yaptıktan sonra uygulama otomatik olarak başlatılır",
   "sortByContent": "Orijinal içerik sırası",

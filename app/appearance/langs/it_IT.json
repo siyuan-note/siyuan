@@ -545,6 +545,8 @@
   "compare": "Confronta",
   "switchTab": "Switcher",
   "recentDocs": "Documenti recenti",
+  "recentDocsMaxCount": "Numero massimo di documenti recenti elencati",
+  "recentDocsMaxCountTip": "Numero massimo di documenti elencati nella finestra di dialogo Documenti recenti",
   "autoLaunch": "Avvio automatico all'avvio",
   "autoLaunchTip": "Dopo l'abilitazione, l'applicazione verrà avviata automaticamente dopo l'accesso al sistema operativo",
   "sortByContent": "Ordine contenuto originale",

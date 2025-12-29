@@ -447,6 +447,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			})
 		}
 	case "viewedAt": // 按浏览时间排序
+		fallthrough
 	default:
 		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 		for _, doc := range ret {

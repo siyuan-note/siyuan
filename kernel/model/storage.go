@@ -51,8 +51,10 @@ type OutlineDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
-// normalizeRecentDocs 规范化最近文档列表：去重、清空 Title/Icon、按类型截取 32 条记录
+// normalizeRecentDocs 规范化最近文档列表：去重、清空 Title/Icon、按类型截取配置的最大数量记录
 func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
+	maxCount := Conf.FileTree.RecentDocsMaxListCount
+
 	// 去重
 	seen := make(map[string]struct{}, len(recentDocs))
 	deduplicated := make([]*RecentDoc, 0, len(recentDocs))
@@ -63,7 +65,7 @@ func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 		}
 	}
 
-	if len(deduplicated) <= 32 {
+	if len(deduplicated) <= maxCount {
 		// 清空 Title 和 Icon
 		for _, doc := range deduplicated {
 			doc.Title = ""
@@ -89,28 +91,28 @@ func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 		}
 	}
 
-	// 分别按时间排序并截取 32 条记录
-	if len(viewedDocs) > 32 {
+	// 分别按时间排序并截取配置的最大数量记录
+	if len(viewedDocs) > maxCount {
 		sort.Slice(viewedDocs, func(i, j int) bool {
 			return viewedDocs[i].ViewedAt > viewedDocs[j].ViewedAt
 		})
-		viewedDocs = viewedDocs[:32]
+		viewedDocs = viewedDocs[:maxCount]
 	}
-	if len(openedDocs) > 32 {
+	if len(openedDocs) > maxCount {
 		sort.Slice(openedDocs, func(i, j int) bool {
 			return openedDocs[i].OpenAt > openedDocs[j].OpenAt
 		})
-		openedDocs = openedDocs[:32]
+		openedDocs = openedDocs[:maxCount]
 	}
-	if len(closedDocs) > 32 {
+	if len(closedDocs) > maxCount {
 		sort.Slice(closedDocs, func(i, j int) bool {
 			return closedDocs[i].ClosedAt > closedDocs[j].ClosedAt
 		})
-		closedDocs = closedDocs[:32]
+		closedDocs = closedDocs[:maxCount]
 	}
 
 	// 合并三类记录
-	docMap := make(map[string]*RecentDoc, 64)
+	docMap := make(map[string]*RecentDoc, maxCount*2)
 	for _, doc := range viewedDocs {
 		docMap[doc.RootID] = doc
 	}

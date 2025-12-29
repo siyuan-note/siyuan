@@ -545,8 +545,6 @@
   "compare": "比較",
   "switchTab": "タブの切り替え",
   "recentDocs": "最近開いたドキュメント",
-  "recentDocsMaxCount": "最近のドキュメントの最大表示数",
-  "recentDocsMaxCountTip": "最近のドキュメントダイアログに表示されるドキュメントの最大数",
   "autoLaunch": "起動時に自動起動",
   "autoLaunchTip": "オペレーティングシステムにログインした後、アプリケーションを自動的に起動します",
   "sortByContent": "元のコンテンツの順序",

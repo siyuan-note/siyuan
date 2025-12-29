@@ -545,8 +545,6 @@
   "compare": "비교",
   "switchTab": "전환기",
   "recentDocs": "최근 문서",
-  "recentDocsMaxCount": "나열된 최근 문서의 최대 수",
-  "recentDocsMaxCountTip": "최근 문서 대화 상자에 나열된 문서의 최대 수",
   "autoLaunch": "부팅 시 자동 시작",
   "autoLaunchTip": "활성화하면 운영 체제 로그인 후 애플리케이션이 자동으로 시작됩니다",
   "sortByContent": "원본 내용 순서",

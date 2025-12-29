@@ -545,8 +545,6 @@
   "compare": "Vergleichen",
   "switchTab": "Umschalter",
   "recentDocs": "Kürzliche Dokumente",
-  "recentDocsMaxCount": "Maximale Anzahl der aufgelisteten kürzlichen Dokumente",
-  "recentDocsMaxCountTip": "Maximale Anzahl der Dokumente, die im Dialogfeld für kürzliche Dokumente aufgelistet werden",
   "autoLaunch": "Automatisches Starten beim Booten",
   "autoLaunchTip": "Nach der Aktivierung wird die Anwendung automatisch gestartet, nachdem Sie sich im Betriebssystem angemeldet haben.",
   "sortByContent": "Ursprüngliche Inhaltsreihenfolge",

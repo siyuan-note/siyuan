@@ -259,47 +259,31 @@ export class Plugin {
     }
 
     public loadData(storageName: string) {
-        if (storageName.includes("/") || storageName.includes("\\")) {
-            console.error(`plugin ${this.name} loadData failed: storageName cannot contain path separators`);
-            return Promise.resolve(this.data[storageName]);
-        }
-
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
-        return new Promise((resolve) => {
-            fetchPost("/api/file/getFile", {path: `/data/storage/petal/${this.name}/${storageName}`}, (response) => {
-                if (response.code !== 404 && response.code !== 403) {
-                    this.data[storageName] = response;
-                }
+        return new Promise((resolve, reject) => {
+            fetchPost("/api/file/getFile", {
+                path: `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`
+            }, (response) => {
+                this.data[storageName] = response;
                 resolve(this.data[storageName]);
+            }, null, (response) => {
+                reject(response);
             });
         });
     }
 
     public saveData(storageName: string, data: any) {
-        if (storageName.includes("/") || storageName.includes("\\")) {
-            console.error(`plugin ${this.name} saveData failed: storageName cannot contain path separators`);
-            return Promise.resolve({
-                code: -1,
-                msg: "storageName cannot contain path separators",
-                data: null
-            } as IWebSocketData);
-        }
-
-        this.data[storageName] = data;
-
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
-            console.warn(`plugin ${this.name} saveData failed: Readonly mode or publish mode`);
-            return Promise.resolve({
+            return Promise.reject({
                 code: 403,
                 msg: "Readonly mode or publish mode",
                 data: null
-            } as IWebSocketData);
+            });
         }
-
-        return new Promise((resolve) => {
-            const pathString = `/data/storage/petal/${this.name}/${storageName}`;
+        return new Promise((resolve, reject) => {
+            const pathString = `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`;
             let file: File;
             try {
                 if (typeof data === "object") {
@@ -310,12 +294,11 @@ export class Plugin {
                     file = new File([new Blob([data])], pathString.split("/").pop());
                 }
             } catch (e) {
-                console.error(`plugin ${this.name} saveData failed:`, e);
-                resolve({
-                    code: -1,
+                reject({
+                    code: 400,
                     msg: e instanceof Error ? e.message : String(e),
                     data: null
-                } as IWebSocketData);
+                });
                 return;
             }
             const formData = new FormData();
@@ -323,29 +306,15 @@ export class Plugin {
             formData.append("file", file);
             formData.append("isDir", "false");
             fetchPost("/api/file/putFile", formData, (response) => {
-                if (typeof response === "object" && response.code !== 0) {
-                    console.error(`plugin ${this.name} saveData failed:`, response);
-                }
+                this.data[storageName] = data;
                 resolve(response);
             });
         });
     }
 
     public removeData(storageName: string) {
-        if (storageName.includes("/") || storageName.includes("\\")) {
-            console.error(`plugin ${this.name} removeData failed: storageName cannot contain path separators`);
-            return Promise.resolve({
-                code: -1,
-                msg: "storageName cannot contain path separators",
-                data: null
-            } as IWebSocketData);
-        }
-
-        delete this.data[storageName];
-
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
-            console.warn(`plugin ${this.name} removeData failed: Readonly mode or publish mode`);
-            return Promise.resolve({
+            return Promise.reject({
                 code: 403,
                 msg: "Readonly mode or publish mode",
                 data: null
@@ -356,10 +325,8 @@ export class Plugin {
             if (!this.data) {
                 this.data = {};
             }
-            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${storageName}`}, (response) => {
-                if (response.code !== 0 && response.code !== 404) {
-                    console.error(`plugin ${this.name} removeData failed:`, response);
-                }
+            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`}, (response) => {
+                delete this.data[storageName];
                 resolve(response);
             });
         });

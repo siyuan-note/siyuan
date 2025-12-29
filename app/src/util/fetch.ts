@@ -5,7 +5,12 @@ import {ipcRenderer} from "electron";
 import {processMessage} from "./processMessage";
 import {kernelError} from "../dialog/processSystem";
 
-export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketData) => void, headers?: IObject) => {
+export const fetchPost = (
+    url: string,
+    data?: any,
+    cb?: (response: IWebSocketData) => void,
+    headers?: IObject,
+    failCallback?: (response: IWebSocketData) => void,) => {
     const init: RequestInit = {
         method: "POST",
     };
@@ -41,14 +46,25 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
                     msg: response.statusText,
                     code: -response.status,
                 };
+            case 401:
+                // 返回鉴权失败的话直接刷新页面，避免用户在当前页面操作 https://github.com/siyuan-note/siyuan/issues/15163
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+                return {
+                    data: null,
+                    msg: response.statusText,
+                    code: -response.status,
+                };
+            case 202:
+                // /api/file/getFile 接口返回202时表示文件没有正常读取
+                failCallback({
+                    data: null,
+                    msg: response.statusText,
+                    code: response.status,
+                });
+                return;
             default:
-                if (401 == response.status) {
-                    // 返回鉴权失败的话直接刷新页面，避免用户在当前页面操作 https://github.com/siyuan-note/siyuan/issues/15163
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 3000);
-                }
-
                 if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
                     return response.json();
                 } else {

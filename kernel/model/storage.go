@@ -99,8 +99,8 @@ func setRecentDocByTree(tree *parse.Tree) {
 	}
 
 	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
-	if Conf.FileTree.RecentDocsMaxListCount < len(recentDocs) {
-		recentDocs = recentDocs[:Conf.FileTree.RecentDocsMaxListCount]
+	if 256 < len(recentDocs) {
+		recentDocs = recentDocs[:256]
 	}
 
 	err = setRecentDocs(recentDocs)
@@ -192,7 +192,14 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
-	return getRecentDocs(sortBy)
+	ret, err = getRecentDocs(sortBy)
+	if err != nil {
+		return
+	}
+	if len(ret) > Conf.FileTree.RecentDocsMaxListCount {
+		ret = ret[:Conf.FileTree.RecentDocsMaxListCount]
+	}
+	return
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {

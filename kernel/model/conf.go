@@ -239,8 +239,8 @@ func InitConf() {
 	if 1 > Conf.FileTree.RecentDocsMaxListCount {
 		Conf.FileTree.RecentDocsMaxListCount = 32
 	}
-	if 256 < Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = 256
+	if conf.MaxFileTreeRecentDocsListCount < Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
 	}
 
 	util.CurrentCloudRegion = Conf.CloudRegion

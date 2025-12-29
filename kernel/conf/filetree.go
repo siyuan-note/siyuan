@@ -53,3 +53,5 @@ func NewFileTree() *FileTree {
 		CreateDocAtTop:         func() *bool { b := false; return &b }(),
 	}
 }
+
+const MaxFileTreeRecentDocsListCount = 256

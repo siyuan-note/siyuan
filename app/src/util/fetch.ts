@@ -37,6 +37,7 @@ export const fetchPost = (
     if (headers) {
         init.headers = headers;
     }
+    let isGetFile202 = false;
     fetch(url, init).then((response) => {
         switch (response.status) {
             case 403:
@@ -56,15 +57,11 @@ export const fetchPost = (
                     msg: response.statusText,
                     code: -response.status,
                 };
-            case 202:
-                // /api/file/getFile 接口返回202时表示文件没有正常读取
-                failCallback({
-                    data: null,
-                    msg: response.statusText,
-                    code: response.status,
-                });
-                return;
             default:
+                // /api/file/getFile 接口返回202时表示文件没有正常读取
+                if (response.status === 202 && url === "/api/file/getFile") {
+                    isGetFile202 = true;
+                }
                 if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
                     return response.json();
                 } else {
@@ -72,6 +69,10 @@ export const fetchPost = (
                 }
         }
     }).then((response: IWebSocketData) => {
+        if (failCallback && url === "/api/file/getFile" && isGetFile202) {
+            failCallback(response);
+            return;
+        }
         if (typeof response === "string") {
             if (cb) {
                 cb(response);

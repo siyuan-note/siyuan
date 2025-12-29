@@ -26,6 +26,11 @@ import (
 	"github.com/88250/go-humanize"
 )
 
+func IsTimeStr(str string) bool {
+	_, err := time.Parse("20060102150405", str)
+	return nil == err
+}
+
 func GetTodayStart() (ret time.Time) {
 	ret = time.Now()
 	ret = time.Date(ret.Year(), ret.Month(), ret.Day(), 0, 0, 0, 0, time.Local)

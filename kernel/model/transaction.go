@@ -1203,9 +1203,14 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 			remains = append(remains, remain)
 		}
 	}
-	if "" == insertedNode.ID {
+	if !ast.IsNodeIDPattern(insertedNode.ID) {
 		insertedNode.ID = ast.NewNodeID()
 		insertedNode.SetIALAttr("id", insertedNode.ID)
+	}
+	if ast.NodeAttributeView == insertedNode.Type {
+		if !ast.IsNodeIDPattern(insertedNode.AttributeViewID) {
+			insertedNode.AttributeViewID = ast.NewNodeID()
+		}
 	}
 
 	var node *ast.Node
@@ -1783,8 +1788,9 @@ func createdUpdated(node *ast.Node) {
 
 	created := util.TimeFromID(node.ID)
 	updated := node.IALAttr("updated")
-	if "" == updated {
+	if !util.IsTimeStr(updated) {
 		updated = created
+		node.SetIALAttr("updated", updated)
 	}
 	if updated < created {
 		updated = created

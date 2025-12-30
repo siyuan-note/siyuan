@@ -258,17 +258,17 @@ export class Plugin {
         this.setting.open(this.displayName || this.name);
     }
 
-    public loadData(storageName: string): Promise<IWebSocketData> {
+    public loadData(storageName: string): Promise<any> {
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             fetchPost("/api/file/getFile", {
                 path: `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`
             }, (response) => {
                 this.data[storageName] = response;
                 resolve(this.data[storageName]);
-            }, null, (response) => {
+            }, null, () => {
                 resolve("");
             });
         });

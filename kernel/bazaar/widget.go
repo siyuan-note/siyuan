@@ -193,8 +193,8 @@ func InstalledWidgets() (ret []*Widget) {
 	return
 }
 
-func getBazaarWidget(name string, widegets []*Widget) *Widget {
-	for _, p := range widegets {
+func getBazaarWidget(name string, widgets []*Widget) *Widget {
+	for _, p := range widgets {
 		if p.Name == name {
 			return p
 		}

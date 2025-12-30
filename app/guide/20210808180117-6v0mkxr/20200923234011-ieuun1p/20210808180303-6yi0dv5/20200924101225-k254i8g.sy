@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20251209213552"
+		"updated": "20251230163004"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091538-4b3n4al",
-				"updated": "20251209212738"
+				"updated": "20251230141904"
 			},
 			"Children": [
 				{
@@ -64,7 +64,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104091538-le8t1ci",
-				"updated": "20251209212738"
+				"updated": "20251230141904"
 			},
 			"Children": [
 				{
@@ -619,6 +619,75 @@
 										},
 										{
 											"Type": "NodeLinkText",
+											"Data": "database"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/database-20251230141500-2trhu14.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Database block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leaf block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
 											"Data": "unordered-list"
 										},
 										{
@@ -921,6 +990,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 18,
+							"TableCellContentMaxWidth": 22,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -931,6 +1002,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 17,
+							"TableCellContentMaxWidth": 17,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -947,6 +1020,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 58,
+							"TableCellContentMaxWidth": 72,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -990,6 +1065,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 15,
+							"TableCellContentMaxWidth": 22,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1000,6 +1077,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 17,
+							"TableCellContentMaxWidth": 17,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1016,6 +1095,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 66,
+							"TableCellContentMaxWidth": 72,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1051,14 +1132,15 @@
 									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Type": "NodeText"
 								}
 							]
 						},
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 13,
+							"TableCellContentMaxWidth": 22,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1069,6 +1151,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 17,
+							"TableCellContentMaxWidth": 17,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1085,6 +1169,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 50,
+							"TableCellContentMaxWidth": 72,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1120,14 +1206,15 @@
 									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Type": "NodeText"
 								}
 							]
 						},
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 16,
+							"TableCellContentMaxWidth": 22,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1138,6 +1225,8 @@
 						{
 							"Type": "NodeTableCell",
 							"Data": "td",
+							"TableCellContentWidth": 17,
+							"TableCellContentMaxWidth": 17,
 							"Children": [
 								{
 									"Type": "NodeText",
@@ -1631,7 +1720,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-38bsz5r",
-				"updated": "20250330192541"
+				"updated": "20251230163004"
 			},
 			"Children": [
 				{
@@ -1833,12 +1922,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818174819-rfu3puw",
-				"updated": "20250330191901"
+				"updated": "20251230163004"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you need to wrap a line in a table block, use "
+					"Data": "To insert a line break within a cell, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1847,7 +1936,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​+"
+					"Data": "​ + "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1953,7 +2042,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429115218-ydwuros",
-				"updated": "20250330192550"
+				"updated": "20251230141912"
 			},
 			"Children": [
 				{
@@ -2141,6 +2230,111 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20251230141911-udqgcrm",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20251230141911-udqgcrm",
+				"updated": "20251230162958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Database block"
+				}
+			]
+		},
+		{
+			"ID": "20251230141916-nuqlgln",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230141916-nuqlgln",
+				"updated": "20251230141916"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "database"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/database-20251230141500-2trhu14.svg"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20251230141917-1ljqnn4",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"custom-sy-av-view": "20251230141929-ogkqgga",
+				"id": "20251230141917-1ljqnn4",
+				"updated": "20251230141929"
+			},
+			"AttributeViewID": "20251230141929-2trv0vl",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20251230162952-v98vteh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230162952-v98vteh",
+				"updated": "20251230162958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To insert a line break within a cell, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},

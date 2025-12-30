@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20251209213509"
+		"updated": "20251230162933"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-6nam42g",
 				"id": "20240530101000-n0tipvh",
-				"updated": "20251209213247"
+				"updated": "20251230142024"
 			},
 			"Children": [
 				{
@@ -73,7 +73,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-7ed5u6l",
-				"updated": "20251209213247"
+				"updated": "20251230142024"
 			},
 			"Children": [
 				{
@@ -639,6 +639,75 @@
 								{
 									"Type": "NodeBr",
 									"Data": "br"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "database"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/database-20251230141500-2trhu14.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データベースブロック"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リーフブロック"
 								}
 							]
 						}
@@ -1676,7 +1745,7 @@
 			"Properties": {
 				"ID": "20240530101000-1iwbq48",
 				"id": "20240530101000-riwihza",
-				"updated": "20250330192704"
+				"updated": "20251230162927"
 			},
 			"Children": [
 				{
@@ -1900,12 +1969,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818180047-hluqmta",
-				"updated": "20250115145206"
+				"updated": "20251230162927"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "テーブルブロックで改行する必要がある場合は、"
+					"Data": "セル内に改行を追加するには、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1914,7 +1983,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​+"
+					"Data": "​ + "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1923,7 +1992,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ を使用してください。"
+					"Data": "​ を使用します。"
 				}
 			]
 		},
@@ -2021,7 +2090,7 @@
 			"Properties": {
 				"ID": "20240530101000-l2cwfzo",
 				"id": "20240530101000-3b4bvhu",
-				"updated": "20250330192711"
+				"updated": "20251230141957"
 			},
 			"Children": [
 				{
@@ -2133,15 +2202,8 @@
 		{
 			"ID": "20240530101000-jplysif",
 			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-w48cspx",
 				"id": "20240530101000-jplysif",
 				"updated": "20240530101000"
 			},
@@ -2149,16 +2211,11 @@
 				{
 					"ID": "20240530101000-veodkk2",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-8zzjykz",
 						"id": "20240530101000-veodkk2",
 						"updated": "20240530101000"
 					},
@@ -2167,62 +2224,40 @@
 							"ID": "20240530101000-u4lkzdu",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-jlcafxx",
 								"id": "20240530101000-u4lkzdu",
 								"updated": "20240530101000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "HTML ブロックを使用する場合、ブロック内のコードはデフォルトでサニタイズされます。サニタイズが不要な場合は、",
-									"Properties": {
-										"id": ""
-									}
+									"Data": "HTML ブロックを使用する場合、ブロック内のコードはデフォルトでサニタイズされます。サニタイズが不要な場合は、"
 								},
 								{
 									"Type": "NodeTextMark",
-									"Properties": {
-										"id": ""
-									},
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - ",
-									"Properties": {
-										"id": ""
-									}
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
-									"Properties": {
-										"id": ""
-									},
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "エディタ"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - ",
-									"Properties": {
-										"id": ""
-									}
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
-									"Properties": {
-										"id": ""
-									},
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "HTML ブロック内のスクリプトの実行を許可"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を有効にします。この場合、クロスサイトスクリプティング攻撃 (XSS) を避けるため、コードが十分に安全であることを確認してください。",
-									"Properties": {
-										"id": ""
-									}
+									"Data": "​ を有効にします。この場合、クロスサイトスクリプティング攻撃 (XSS) を避けるため、コードが十分に安全であることを確認してください。"
 								}
 							]
 						}
@@ -2231,16 +2266,11 @@
 				{
 					"ID": "20240530101000-af3aq09",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-osa9ud4",
 						"id": "20240530101000-af3aq09",
 						"updated": "20240530101000"
 					},
@@ -2249,36 +2279,131 @@
 							"ID": "20240530101000-znnyg92",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-yqcf1hp",
 								"id": "20240530101000-znnyg92",
 								"updated": "20240530101000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Markdown の仕様では HTML ブロックの解析ルールが複雑なため、HTML コード全体を ",
-									"Properties": {
-										"id": ""
-									}
+									"Data": "Markdown の仕様では HTML ブロックの解析ルールが複雑なため、HTML コード全体を "
 								},
 								{
 									"Type": "NodeTextMark",
-									"Properties": {
-										"id": ""
-									},
 									"TextMarkType": "code",
 									"TextMarkTextContent": "\u0026lt;div\u0026gt;\u0026lt;/div\u0026gt;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で囲み、空の行は削除することを推奨します。",
-									"Properties": {
-										"id": ""
-									}
+									"Data": "​ で囲み、空の行は削除することを推奨します。"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20251230141957-1a2yhar",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20251230141957-1a2yhar",
+				"updated": "20251230162933"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースブロック"
+				}
+			]
+		},
+		{
+			"ID": "20251230142001-2h2tzno",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230142001-2h2tzno",
+				"updated": "20251230142009"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "database"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/database-20251230141500-2trhu14.svg"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20251230142010-ihoh4dv",
+			"Type": "NodeAttributeView",
+			"Properties": {
+				"custom-sy-av-view": "20251230142020-srwlylx",
+				"id": "20251230142010-ihoh4dv",
+				"updated": "20251230142019"
+			},
+			"AttributeViewID": "20251230142020-5frasem",
+			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20251230162932-9udtkk5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230162932-9udtkk5",
+				"updated": "20251230162933"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "セル内に改行を追加するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用します。"
 				}
 			]
 		},

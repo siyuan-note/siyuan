@@ -86,6 +86,8 @@ func Widgets() (widgets []*Widget) {
 		}
 
 		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
+		widget.DisallowUpdate = disallowInstallBazaarPackage(widget.Package)
+		widget.UpdateRequiredMinAppVer = widget.MinAppVersion
 
 		widget.URL = strings.TrimSuffix(widget.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
@@ -156,6 +158,10 @@ func InstalledWidgets() (ret []*Widget) {
 		}
 
 		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
+		if bazaarPkg := getBazaarWidget(widget.Name, bazaarWidgets); nil != bazaarPkg {
+			widget.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+			widget.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		}
 
 		installPath := filepath.Join(util.DataDir, "widgets", dirName)
 		widget.Installed = true
@@ -185,6 +191,15 @@ func InstalledWidgets() (ret []*Widget) {
 		ret = append(ret, widget)
 	}
 	return
+}
+
+func getBazaarWidget(name string, widegets []*Widget) *Widget {
+	for _, p := range widegets {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
 }
 
 func InstallWidget(repoURL, repoHash, installPath string, systemID string) error {

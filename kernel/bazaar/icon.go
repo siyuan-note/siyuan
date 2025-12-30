@@ -86,6 +86,9 @@ func Icons() (icons []*Icon) {
 		}
 
 		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
+		icon.DisallowUpdate = disallowInstallBazaarPackage(icon.Package)
+		icon.UpdateRequiredMinAppVer = icon.MinAppVersion
+
 		icon.URL = strings.TrimSuffix(icon.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
 		icon.RepoURL = "https://github.com/" + repoURLHash[0]
@@ -157,6 +160,10 @@ func InstalledIcons() (ret []*Icon) {
 		}
 
 		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
+		if bazaarPkg := getBazaarIcon(icon.Name, bazaarIcons); nil != bazaarPkg {
+			icon.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+			icon.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		}
 
 		installPath := filepath.Join(util.IconsPath, dirName)
 		icon.Installed = true
@@ -190,6 +197,15 @@ func InstalledIcons() (ret []*Icon) {
 
 func isBuiltInIcon(dirName string) bool {
 	return "ant" == dirName || "material" == dirName
+}
+
+func getBazaarIcon(name string, icon []*Icon) *Icon {
+	for _, p := range icon {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
 }
 
 func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {

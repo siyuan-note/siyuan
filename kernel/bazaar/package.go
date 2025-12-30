@@ -130,20 +130,22 @@ type Package struct {
 	PreviewURLThumb string `json:"previewURLThumb"`
 	IconURL         string `json:"iconURL"`
 
-	Installed       bool   `json:"installed"`
-	Outdated        bool   `json:"outdated"`
-	Current         bool   `json:"current"`
-	Updated         string `json:"updated"`
-	Stars           int    `json:"stars"`
-	OpenIssues      int    `json:"openIssues"`
-	Size            int64  `json:"size"`
-	HSize           string `json:"hSize"`
-	InstallSize     int64  `json:"installSize"`
-	HInstallSize    string `json:"hInstallSize"`
-	HInstallDate    string `json:"hInstallDate"`
-	HUpdated        string `json:"hUpdated"`
-	Downloads       int    `json:"downloads"`
-	DisallowInstall bool   `json:"disallowInstall"`
+	Installed               bool   `json:"installed"`
+	Outdated                bool   `json:"outdated"`
+	Current                 bool   `json:"current"`
+	Updated                 string `json:"updated"`
+	Stars                   int    `json:"stars"`
+	OpenIssues              int    `json:"openIssues"`
+	Size                    int64  `json:"size"`
+	HSize                   string `json:"hSize"`
+	InstallSize             int64  `json:"installSize"`
+	HInstallSize            string `json:"hInstallSize"`
+	HInstallDate            string `json:"hInstallDate"`
+	HUpdated                string `json:"hUpdated"`
+	Downloads               int    `json:"downloads"`
+	DisallowInstall         bool   `json:"disallowInstall"`
+	DisallowUpdate          bool   `json:"disallowUpdate"`
+	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer"`
 
 	Incompatible bool `json:"incompatible"`
 }

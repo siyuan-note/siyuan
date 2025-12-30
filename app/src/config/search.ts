@@ -35,7 +35,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4", "fileTree5",
             "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
             "fileTree16", "fileTree17", "fileTree18", "fileTree19", "fileTree20", "fileTree21", "fileTree22", "fileTree23",
-            "fileTree24", "fileTree25", "recentDocsMaxCount", "recentDocsMaxCountTip"]),
+            "fileTree24", "fileTree25", "recentDocsMaxListCount", "recentDocsMaxListCountTip"]),
 
         // 闪卡
         getLang(["riffCard", "flashcardNewCardLimit", "flashcardNewCardLimitTip", "flashcardReviewCardLimit",

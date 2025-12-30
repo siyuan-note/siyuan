@@ -869,7 +869,7 @@ interface IBazaarItem {
     hUpdated: string;
     preferredFunding: string;
     disallowUpdate: boolean;
-    updateRequiredMinVer: string;
+    updateRequiredMinAppVer: string;
 }
 
 interface IAV {

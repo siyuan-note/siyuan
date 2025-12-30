@@ -269,7 +269,7 @@ export class Plugin {
                 this.data[storageName] = response;
                 resolve(this.data[storageName]);
             }, null, (response) => {
-                reject(response);
+                resolve("");
             });
         });
     }

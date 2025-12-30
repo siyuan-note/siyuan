@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20251230141636"
+		"updated": "20251230162824"
 	},
 	"Children": [
 		{
@@ -1722,7 +1722,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-erf17it",
-				"updated": "20250330184312"
+				"updated": "20251230162813"
 			},
 			"Children": [
 				{
@@ -1924,12 +1924,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818173939-j0bcrw6",
-				"updated": "20250311200014"
+				"updated": "20251230162813"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要在表格块中换行，请使用 "
+					"Data": "如果需要在单元格中换行，请使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1947,7 +1947,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 。"
+					"Data": "​。"
 				}
 			]
 		},
@@ -2257,7 +2257,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20251230141559-ewkpoyo",
-				"updated": "20251230141636"
+				"updated": "20251230162824"
 			},
 			"Children": [
 				{
@@ -2323,6 +2323,38 @@
 			},
 			"AttributeViewID": "20251230141609-2kvghrg",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20251230162824-tgrt7nd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230162824-tgrt7nd",
+				"updated": "20251230162824"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在单元格中换行，请使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
+				}
+			]
 		},
 		{
 			"ID": "20210104090624-1gdzl0u",

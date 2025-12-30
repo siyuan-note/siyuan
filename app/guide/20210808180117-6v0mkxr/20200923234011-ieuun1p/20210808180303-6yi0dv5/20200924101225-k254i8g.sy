@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20251230141929"
+		"updated": "20251230163004"
 	},
 	"Children": [
 		{
@@ -1720,7 +1720,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-38bsz5r",
-				"updated": "20250330192541"
+				"updated": "20251230163004"
 			},
 			"Children": [
 				{
@@ -1922,12 +1922,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818174819-rfu3puw",
-				"updated": "20250330191901"
+				"updated": "20251230163004"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "If you need to wrap a line in a table block, use "
+					"Data": "To insert a line break within a cell, use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1936,7 +1936,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​+"
+					"Data": "​ + "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -2239,7 +2239,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20251230141911-udqgcrm",
-				"updated": "20251230141929"
+				"updated": "20251230162958"
 			},
 			"Children": [
 				{
@@ -2305,6 +2305,38 @@
 			},
 			"AttributeViewID": "20251230141929-2trv0vl",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20251230162952-v98vteh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20251230162952-v98vteh",
+				"updated": "20251230162958"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To insert a line break within a cell, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
+				}
+			]
 		},
 		{
 			"ID": "20210104091538-cddpqkl",

@@ -633,10 +633,6 @@ declare namespace Config {
          */
         maxOpenTabCount: number;
         /**
-         * The maximum number of recent documents to be listed
-         */
-        recentDocsMaxListCount: number;
-        /**
          * Whether to open the file in the current tab
          */
         openFilesUseCurrentTab: boolean;

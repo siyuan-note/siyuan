@@ -423,12 +423,14 @@ func setFiletree(c *gin.Context) {
 	if 32 < fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 32
 	}
-	if 32 > fileTree.RecentDocsMaxListCount {
-		fileTree.RecentDocsMaxListCount = 32
+
+	if conf.MinFileTreeRecentDocsListCount > fileTree.RecentDocsMaxListCount {
+		fileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
 	}
-	if 256 < fileTree.RecentDocsMaxListCount {
-		fileTree.RecentDocsMaxListCount = 256
+	if conf.MaxFileTreeRecentDocsListCount < fileTree.RecentDocsMaxListCount {
+		fileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
 	}
+
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
 

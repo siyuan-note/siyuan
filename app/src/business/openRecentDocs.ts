@@ -88,7 +88,7 @@ export const openRecentDocs = () => {
         hideElements(["dialog"]);
         return;
     }
-    const sortBy = window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type;
+    const sortBy = window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type as TRecentDocsSort;
     fetchPost("/api/storage/getRecentDocs", {sortBy}, (response) => {
         let range: Range;
         if (getSelection().rangeCount > 0) {

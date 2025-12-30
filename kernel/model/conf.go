@@ -235,12 +235,6 @@ func InitConf() {
 	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
 		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
 	}
-	if 32 > Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = 32
-	}
-	if 256 < Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = 256
-	}
 
 	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
 		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount

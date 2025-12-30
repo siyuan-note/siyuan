@@ -196,9 +196,6 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		}
 
 		newValue := filter.GetAffectValue(keyValues.Key, addingItemID)
-		if nil == newValue {
-			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
-		}
 		if nil != newValue {
 			if av.KeyTypeDate == keyValues.Key.Type {
 				if nil != nearItem {

@@ -100,6 +100,8 @@ export const getContenteditableElement = (element: Element): Element => {
         return blockElement.querySelector("table");
     } else if ("NodeCodeBlock" === type && blockElement.classList.contains("code-block")) {
         return blockElement.querySelector(".hljs").lastElementChild;
+    } else if ("NodeAttributeView" === type) {
+        return blockElement.querySelector(".av__title");
     } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
         return undefined;
     } else if (blockElement.getAttribute("data-node-id")) {

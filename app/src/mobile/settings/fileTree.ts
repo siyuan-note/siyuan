@@ -55,10 +55,10 @@ export const initFileTree = () => {
     <div class="b3-label__text">${window.siyuan.languages.fileTree17}</div>
 </div>
 <div class="b3-label">
-    ${window.siyuan.languages.recentDocsMaxCount}
+    ${window.siyuan.languages.recentDocsMaxListCount}
     <span class="fn__hr"></span>
     <input class="b3-text-field fn__block" id="recentDocsMaxListCount" type="number" min="1" max="256" value="${window.siyuan.config.fileTree.recentDocsMaxListCount}">
-    <div class="b3-label__text">${window.siyuan.languages.recentDocsMaxCountTip}</div>
+    <div class="b3-label__text">${window.siyuan.languages.recentDocsMaxListCountTip}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.fileTree12}

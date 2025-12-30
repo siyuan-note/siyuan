@@ -18,11 +18,11 @@ package proxy
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"time"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -93,11 +93,9 @@ func closePublishListener() {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	if err := server.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(context.Background()); err != nil {
 		logging.LogErrorf("shutdown server failed: %s", err)
 	}
-	cancel()
 
 	if err := server.Close(); err != nil {
 		logging.LogErrorf("close server failed: %s", err)
@@ -116,10 +114,8 @@ func startPublishReverseProxyService() {
 		},
 	}
 
-	if err := server.Serve(listener); err != nil {
-		if listener != nil {
-			logging.LogErrorf("boot publish service failed: %s", err)
-		}
+	if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logging.LogErrorf("boot publish service failed: %s", err)
 	}
 
 	logging.LogInfof("publish service [%s:%s] is stopped", Host, Port)

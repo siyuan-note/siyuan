@@ -54,4 +54,7 @@ func NewFileTree() *FileTree {
 	}
 }
 
-const MaxFileTreeRecentDocsListCount = 256
+const (
+	MinFileTreeRecentDocsListCount = 32
+	MaxFileTreeRecentDocsListCount = 256
+)

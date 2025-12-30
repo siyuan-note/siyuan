@@ -236,8 +236,8 @@ func InitConf() {
 		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
 	}
 
-	if 1 > Conf.FileTree.RecentDocsMaxListCount {
-		Conf.FileTree.RecentDocsMaxListCount = 32
+	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
 	}
 	if conf.MaxFileTreeRecentDocsListCount < Conf.FileTree.RecentDocsMaxListCount {
 		Conf.FileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount

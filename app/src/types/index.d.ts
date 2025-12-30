@@ -868,6 +868,8 @@ interface IBazaarItem {
     hInstallDate: string;
     hUpdated: string;
     preferredFunding: string;
+    disallowUpdate: boolean;
+    updateRequiredMinVer: string;
 }
 
 interface IAV {

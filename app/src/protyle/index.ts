@@ -294,7 +294,7 @@ export class Protyle {
 
     private onTransaction(data: IWebSocketData) {
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
-            data.context.rootIDs.includes(this.protyle.block.rootID)) {
+            data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
             this.protyle.preview.render(this.protyle);
             return;
         }

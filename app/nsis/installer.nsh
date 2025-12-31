@@ -30,6 +30,10 @@ Caption "${PRODUCT_NAME} ${VERSION}"
     ${EndIf}
 !macroend
 
+!macro customInstall
+    RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
+!macroend
+
 !macro customUnInstall
     ${IfNot} ${isUpdated}
         MessageBox MB_YESNO "是否需要彻底删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\

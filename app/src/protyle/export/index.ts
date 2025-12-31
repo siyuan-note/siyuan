@@ -648,7 +648,7 @@ ${getIconScript(servePath)}
                     };
                     return pageSizes[actionElement.querySelector("#pageSize").value];
                 };
-                const previewHeight = previewElement.scrollHeight / 96 - (parseFloat(document.querySelector("#marginsTop").value) || 0) - (parseFloat(document.querySelector("#marginsBottom").value) || 0);
+                const previewHeight = Math.max(previewElement.scrollHeight / 96 - (parseFloat(document.querySelector("#marginsTop").value) || 0) - (parseFloat(document.querySelector("#marginsBottom").value) || 0), getPageSizeDimensions().height);
                 ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig(actionElement.querySelector("#landscape").checked ? {
                     height: getPageSizeDimensions().height,
                     width: previewHeight,

@@ -52,6 +52,8 @@ Caption "${PRODUCT_NAME} ${VERSION}"
                 RMDir /r "$PROFILE\SiYuan\"
             SkippedRMWrokspace:
     ${EndIf}
+
+    RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
 !macroend
 
 # https://nsis.sourceforge.io/FindIt:_Simple_search_for_file_/_directory

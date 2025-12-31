@@ -18,8 +18,12 @@ package model
 
 import (
 	"bytes"
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -29,6 +33,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/go-humanize"
@@ -39,6 +44,8 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/disintegration/imaging"
 	"github.com/gabriel-vasile/mimetype"
+	"github.com/jdeng/goheif"
+	"github.com/rwcarlsen/goexif/exif"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -50,6 +57,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// convertingTasks 用于并发控制，避免同一文件重复转换
+var convertingTasks sync.Map // map[string]*sync.Once
 
 func GetAssetPathByHash(hash string) string {
 	assetHash := cache.GetAssetHash(hash)
@@ -66,24 +76,205 @@ func GetAssetPathByHash(hash string) string {
 
 func HandleAssetsRemoveEvent(assetAbsPath string) {
 	removeIndexAssetContent(assetAbsPath)
-	removeAssetThumbnail(assetAbsPath)
+	removeAssetCache(assetAbsPath)
 }
 
 func HandleAssetsChangeEvent(assetAbsPath string) {
 	indexAssetContent(assetAbsPath)
-	removeAssetThumbnail(assetAbsPath)
+	removeAssetCache(assetAbsPath)
 }
 
-func removeAssetThumbnail(assetAbsPath string) {
-	if util.IsCompressibleAssetImage(assetAbsPath) {
-		p := filepath.ToSlash(assetAbsPath)
-		idx := strings.Index(p, "assets/")
-		if -1 == idx {
-			return
-		}
-		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", p[idx+7:])
+// removeAssetCache 删除资源文件缓存
+func removeAssetCache(assetAbsPath string) {
+	if util.IsDirectThumbnailableImage(assetAbsPath) {
+		hash := GetFilenameHash(assetAbsPath)
+		thumbnailPath := filepath.Join(util.TempDir, "assets-cache", "thumb", hash+filepath.Ext(assetAbsPath))
 		os.RemoveAll(thumbnailPath)
+		convertingTasks.Delete(hash + "_thumb") // 清理 sync.Map，允许重新转换
+	} else if util.IsHeifImage(assetAbsPath) {
+		hash := GetFilenameHash(assetAbsPath)
+
+		thumbnailPath := filepath.Join(util.TempDir, "assets-cache", "thumb", hash+".jpg")
+		os.RemoveAll(thumbnailPath)
+		convertingTasks.Delete(hash + "_thumb")
+
+		heifCachePath := filepath.Join(util.TempDir, "assets-cache", "heif", hash+".jpg")
+		os.RemoveAll(heifCachePath)
+		convertingTasks.Delete(hash + "_heif")
 	}
+}
+
+// GetFilenameHash 计算文件名的 SHA1 hash（包含扩展名）
+func GetFilenameHash(assetAbsPath string) string {
+	filename := filepath.Base(assetAbsPath)
+	hash := sha1.Sum([]byte(filename))
+	return hex.EncodeToString(hash[:])
+}
+
+// ConvertHeifToJpeg 将 HEIF 文件转换为 JPEG（保持原始尺寸）
+func ConvertHeifToJpeg(sourceImgPath, jpegPath, hash string, quality int) error {
+	if gulu.File.IsExist(jpegPath) {
+		return nil
+	}
+
+	once, _ := convertingTasks.LoadOrStore(hash+"_heif", &sync.Once{})
+
+	var convertErr error
+	once.(*sync.Once).Do(func() {
+		convertErr = convertHeifToJpeg(sourceImgPath, jpegPath, quality)
+	})
+
+	return convertErr
+}
+
+func convertHeifToJpeg(sourceImgPath, jpegPath string, quality int) (err error) {
+	start := time.Now()
+	img, err := decodeHeifImage(sourceImgPath)
+	if err != nil {
+		return
+	}
+
+	if err = os.MkdirAll(filepath.Dir(jpegPath), 0755); err != nil {
+		return
+	}
+
+	fo, err := os.Create(jpegPath)
+	if err != nil {
+		return
+	}
+	defer fo.Close()
+
+	err = jpeg.Encode(fo, img, &jpeg.Options{Quality: quality})
+	if err != nil {
+		return
+	}
+	logging.LogDebugf("converted HEIF image [%s] to [%s], quality [%d], cost [%d]ms", sourceImgPath, jpegPath, quality, time.Since(start).Milliseconds())
+	return
+}
+
+// decodeHeifImage 解码 HEIF 图像
+func decodeHeifImage(sourceImgPath string) (image.Image, error) {
+	fi, err := os.Open(sourceImgPath)
+	if err != nil {
+		return nil, err
+	}
+	defer fi.Close()
+
+	exifData, _ := goheif.ExtractExif(fi)
+	if _, err = fi.Seek(0, 0); err != nil {
+		return nil, err
+	}
+
+	img, err := goheif.Decode(fi)
+	if err != nil {
+		return nil, err
+	}
+
+	if exifData != nil {
+		img = fixImageOrientation(img, exifData)
+	}
+
+	return img, nil
+}
+
+// fixImageOrientation 根据 EXIF 方向信息修正图像方向
+func fixImageOrientation(img image.Image, exifData []byte) image.Image {
+	if len(exifData) == 0 {
+		return img
+	}
+
+	x, err := exif.Decode(bytes.NewReader(exifData))
+	if err != nil {
+		return img
+	}
+
+	orientationTag, err := x.Get(exif.Orientation)
+	if err != nil {
+		return img
+	}
+
+	orientation, err := orientationTag.Int(0)
+	if err != nil {
+		return img
+	}
+
+	// 从正确方向恢复原图方向的操作（Mac预览中的描述） -> 从原图方向调整到正确方向的操作 = 等效操作
+	switch orientation {
+	case 1:
+		// 正常方向，返回原图
+		return img
+	case 2:
+		// 水平翻转 -> 水平翻转
+		return imaging.FlipH(img)
+	case 3:
+		// 旋转 180 度 -> 旋转 180 度
+		return imaging.Rotate180(img)
+	case 4:
+		// 垂直翻转 -> 垂直翻转
+		return imaging.FlipV(img)
+	case 5:
+		// 逆时针旋转 90 度 + 垂直翻转 -> 顺时针旋转 90 度 + 垂直翻转 = 逆时针旋转 270 度 + 垂直翻转
+		return imaging.FlipH(imaging.Rotate270(img))
+	case 6:
+		// 逆时针旋转 90 度 -> 顺时针旋转 90 度 = 逆时针旋转 270 度
+		return imaging.Rotate270(img)
+	case 7:
+		// 顺时针旋转 90 度 + 垂直翻转 -> 逆时针旋转 90 度 + 垂直翻转
+		return imaging.FlipH(imaging.Rotate90(img))
+	case 8:
+		// 顺时针旋转 90 度 -> 逆时针旋转 90 度
+		return imaging.Rotate90(img)
+	default:
+		// 无 orientation 或未知值，返回原图
+		return img
+	}
+}
+
+// GenerateHeifThumbnail 生成 HEIF 文件的缩略图
+func GenerateHeifThumbnail(sourceImgPath, thumbnailPath, hash string) error {
+	if gulu.File.IsExist(thumbnailPath) {
+		return nil
+	}
+
+	once, _ := convertingTasks.LoadOrStore(hash+"_thumb", &sync.Once{})
+
+	var convertErr error
+	once.(*sync.Once).Do(func() {
+		convertErr = generateHeifThumbnail(sourceImgPath, thumbnailPath)
+	})
+
+	return convertErr
+}
+
+func generateHeifThumbnail(sourceImgPath, thumbnailPath string) (err error) {
+	start := time.Now()
+	img, err := decodeHeifImage(sourceImgPath)
+	if err != nil {
+		return
+	}
+
+	// 固定最大宽度为 520，计算缩放比例
+	bounds := img.Bounds()
+	maxWidth := 520
+	scale := float64(maxWidth) / float64(bounds.Dx())
+	resizedImg := imaging.Resize(img, maxWidth, int(float64(bounds.Dy())*scale), imaging.Lanczos)
+
+	if err = os.MkdirAll(filepath.Dir(thumbnailPath), 0755); err != nil {
+		return
+	}
+
+	fo, err := os.Create(thumbnailPath)
+	if err != nil {
+		return
+	}
+	defer fo.Close()
+
+	err = jpeg.Encode(fo, resizedImg, &jpeg.Options{Quality: 85})
+	if err != nil {
+		return
+	}
+	logging.LogDebugf("generated HEIF thumbnail [%s] to [%s], cost [%d]ms", sourceImgPath, thumbnailPath, time.Since(start).Milliseconds())
+	return
 }
 
 func NeedGenerateAssetsThumbnail(sourceImgPath string) bool {
@@ -98,6 +289,24 @@ func NeedGenerateAssetsThumbnail(sourceImgPath string) bool {
 }
 
 func GenerateAssetsThumbnail(sourceImgPath, resizedImgPath string) (err error) {
+	if gulu.File.IsExist(resizedImgPath) {
+		return nil
+	}
+
+	// 获取或创建 sync.Once
+	key := GetFilenameHash(sourceImgPath) + "_thumb"
+	once, _ := convertingTasks.LoadOrStore(key, &sync.Once{})
+
+	var convertErr error
+	once.(*sync.Once).Do(func() {
+		convertErr = generateAssetsThumbnail(sourceImgPath, resizedImgPath)
+	})
+
+	return convertErr
+}
+
+// generateAssetsThumbnail 执行实际的缩略图生成
+func generateAssetsThumbnail(sourceImgPath, resizedImgPath string) (err error) {
 	start := time.Now()
 	img, err := imaging.Open(sourceImgPath)
 	if err != nil {

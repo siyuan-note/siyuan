@@ -18,7 +18,7 @@
   "insertSameLevelHeadingBefore": "Insertar título del mismo nivel antes",
   "insertSameLevelHeadingAfter": "Insertar título del mismo nivel después",
   "upgrade": "Actualizar",
-  "downgrade": "Degradar",
+  "downgrade": "Revertir",
   "clipboardPermissionDenied": "Permiso del portapapeles denegado. Por favor, permita el acceso al portapapeles en la barra de direcciones del navegador y vuelva a intentarlo. Atención: el protocolo http puede no permitir el acceso al portapapeles, utilice Ctrl+V / ⌘V para pegar",
   "jumpTo": "Ir a",
   "vacuumDataIndex": "Optimizar índice",

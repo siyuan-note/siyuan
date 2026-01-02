@@ -65,11 +65,19 @@ func GetAssetPathByHash(hash string) string {
 }
 
 func HandleAssetsRemoveEvent(assetAbsPath string) {
+	if !filelock.IsExist(assetAbsPath) {
+		return
+	}
+
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
 }
 
 func HandleAssetsChangeEvent(assetAbsPath string) {
+	if !filelock.IsExist(assetAbsPath) {
+		return
+	}
+
 	indexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
 }
@@ -694,7 +702,11 @@ func RemoveUnusedAssets() (ret []string) {
 				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
 				return
 			}
+
 			util.RemoveAssetText(unusedAsset)
+			if !isFileWatcherAvailable() {
+				HandleAssetsRemoveEvent(absPath)
+			}
 		}
 		ret = append(ret, absPath)
 	}
@@ -739,6 +751,9 @@ func RemoveUnusedAsset(p string) (ret string) {
 	ret = absPath
 
 	util.RemoveAssetText(p)
+	if !isFileWatcherAvailable() {
+		HandleAssetsRemoveEvent(absPath)
+	}
 
 	IncSync()
 

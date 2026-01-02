@@ -30,10 +30,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func isFileWatcherAvailable() bool {
-	return util.ContainerAndroid != util.Container && util.ContainerIOS != util.Container && util.ContainerHarmony != util.Container
-}
-
 var assetsWatcher *fsnotify.Watcher
 
 func WatchAssets() {

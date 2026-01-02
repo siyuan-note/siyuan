@@ -1579,3 +1579,7 @@ func copyAssetsToDataAssets(rootPath string) {
 		}
 	}
 }
+
+func isFileWatcherAvailable() bool {
+	return util.ContainerAndroid != util.Container && util.ContainerIOS != util.Container && util.ContainerHarmony != util.Container
+}

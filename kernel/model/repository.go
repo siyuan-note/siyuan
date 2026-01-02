@@ -742,8 +742,10 @@ func checkoutRepo(id string) {
 
 	util.PushEndlessProgress(Conf.Language(63))
 	FlushTxQueue()
+
 	CloseWatchAssets()
 	defer WatchAssets()
+
 	CloseWatchEmojis()
 	defer WatchEmojis()
 

@@ -1034,6 +1034,43 @@ func GetBlockKramdown(id, mode string) (ret string) {
 	return
 }
 
+func GetBlockKramdowns(ids []string, mode string) (ret map[string]string) {
+	ret = map[string]string{}
+	if 0 == len(ids) {
+		return
+	}
+
+	luteEngine := NewLute()
+	if "md" == mode {
+		// `/api/block/getBlockKramdown` link/image URLs are no longer encoded with spaces https://github.com/siyuan-note/siyuan/issues/15611
+		luteEngine.SetPreventEncodeLinkSpace(true)
+	}
+
+	trees := filesys.LoadTrees(ids)
+	for id, tree := range trees {
+		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			continue
+		}
+
+		addBlockIALNodes(tree, false)
+		root := &ast.Node{Type: ast.NodeDocument}
+		root.AppendChild(node.Next) // IAL
+		root.PrependChild(node)
+
+		var kramdown string
+		if "md" == mode {
+			kramdown = treenode.ExportNodeStdMd(root, luteEngine)
+		} else {
+			tree.Root = root
+			formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+			kramdown = string(formatRenderer.Render())
+		}
+		ret[id] = kramdown
+	}
+	return
+}
+
 type ChildBlock struct {
 	ID       string `json:"id"`
 	Type     string `json:"type"`

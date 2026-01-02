@@ -742,8 +742,10 @@ func checkoutRepo(id string) {
 
 	util.PushEndlessProgress(Conf.Language(63))
 	FlushTxQueue()
+
 	CloseWatchAssets()
 	defer WatchAssets()
+
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
@@ -1633,6 +1635,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasSuffix(file.Path, ".sy") {
 			upsertTrees++
 		}
+
+		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+			absPath := filepath.Join(util.DataDir, file.Path)
+			HandleAssetsChangeEvent(absPath)
+		}
 	}
 
 	removeWidgetDirSet, unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New(), hashset.New()
@@ -1673,6 +1680,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
 				removeWidgetDirSet.Add(parts[2])
 			}
+		}
+
+		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+			absPath := filepath.Join(util.DataDir, file.Path)
+			HandleAssetsRemoveEvent(absPath)
 		}
 	}
 

@@ -36,32 +36,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// isValidAttrName 验证属性名是否合法
-func isValidAttrName(name string) bool {
-	if len(name) == 0 {
-		return false
-	}
-	// 首字符必须是小写字母
-	if name[0] < 'a' || name[0] > 'z' {
-		return false
-	}
-	// 自定义属性 custom- 之后的首个字符必须是小写字母
-	if strings.HasPrefix(name, "custom-") {
-		if len(name) <= 7 || name[7] < 'a' || name[7] > 'z' {
-			return false
-		}
-	}
-	// 后续字符只能是小写字母、数字、连字符
-	for i := 1; i < len(name); i++ {
-		c := name[i]
-		if c == '-' || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') {
-			continue
-		}
-		return false
-	}
-	return true
-}
-
 func SetBlockReminder(id string, timed string) (err error) {
 	if !IsSubscriber() {
 		if "ios" == util.Container {
@@ -341,4 +315,49 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	IncSync()
 	cache.RemoveBlockIAL(id)
 	return
+}
+
+// isValidAttrName 验证属性名是否合法
+func isValidAttrName(name string) bool {
+	n := len(name)
+	if n == 0 {
+		return false
+	}
+
+	// 首字符必须是小写字母
+	c := name[0]
+	if c < 'a' || c > 'z' {
+		return false
+	}
+
+	// 后续字符只能是小写字母、数字、连字符
+	if c != 'c' {
+		return validateChars(name, 1, n)
+	}
+
+	// 首字符是 'c'，检查自定义属性 custom- 前缀
+	if n >= 7 && name[1] == 'u' && name[2] == 's' && name[3] == 't' && name[4] == 'o' && name[5] == 'm' && name[6] == '-' {
+		if n == 7 {
+			return false // 不允许只包含前缀
+		}
+
+		if c = name[7]; c < 'a' || c > 'z' {
+			return false // 首字符必须是小写字母
+		}
+		return validateChars(name, 7, n)
+	}
+
+	// 非自定义属性
+	return validateChars(name, 1, n)
+}
+
+// validateChars 验证从指定索引开始的字符是否合法（小写字母、数字、连字符）
+func validateChars(name string, startIdx, n int) bool {
+	for i := startIdx; i < n; i++ {
+		c := name[i]
+		if (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '-' {
+			return false
+		}
+	}
+	return true
 }

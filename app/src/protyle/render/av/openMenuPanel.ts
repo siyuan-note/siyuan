@@ -1356,15 +1356,14 @@ export const openMenuPanel = (options: {
                 } else if (type === "openAssetItem") {
                     const assetType = target.parentElement.dataset.type;
                     const assetLink = target.parentElement.dataset.content;
-                    const suffix = pathPosix().extname(assetLink);
                     /// #if !MOBILE
+                    const suffix = pathPosix().extname(assetLink);
                     if (assetType === "image") {
                         previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                             (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "");
-                    } else if (isLocalPath(assetLink) && (
-                        assetType === "file" && Constants.SIYUAN_ASSETS_IMAGE.includes(suffix) || // data-type="file" 但内容是图片链接时，分屏打开
-                        suffix === ".pdf" && !assetLink.startsWith("file://") ||
-                        Constants.SIYUAN_ASSETS_AUDIO.concat(Constants.SIYUAN_ASSETS_VIDEO).includes(suffix)
+                    } else if (isLocalPath(assetLink) && assetType === "file" && (
+                        (suffix === ".pdf" && !assetLink.startsWith("file://")) ||
+                        Constants.SIYUAN_ASSETS_AUDIO.concat(Constants.SIYUAN_ASSETS_VIDEO, Constants.SIYUAN_ASSETS_IMAGE).includes(suffix)
                     )) {
                         openAsset(options.protyle.app, assetLink.trim(), parseInt(getSearch("page", assetLink)), "right");
                     } else {

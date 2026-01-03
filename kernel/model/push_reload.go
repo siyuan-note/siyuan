@@ -31,12 +31,17 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func PushReloadSnippet(snippet *conf.Snpt) {
+	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
+}
 
 func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginNameSet, uninstallPluginNameSet *hashset.Set, excludeApp string) {
 	// 集合去重

@@ -272,9 +272,6 @@ func refreshCheckDownloadInstallPkg() {
 
 	time.Sleep(3 * time.Minute)
 	checkDownloadInstallPkg()
-	if "" != getNewVerInstallPkgPath() {
-		util.PushMsg(Conf.Language(62), 15*1000)
-	}
 }
 
 func refreshAnnouncement() {

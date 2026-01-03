@@ -79,7 +79,7 @@ func setConfSnippet(c *gin.Context) {
 	model.Conf.Save()
 
 	ret.Data = snippet
-	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
+	model.PushReloadSnippet(snippet)
 }
 
 func addVirtualBlockRefExclude(c *gin.Context) {

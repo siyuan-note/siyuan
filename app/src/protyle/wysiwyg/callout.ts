@@ -5,15 +5,27 @@ import {Dialog} from "../../dialog";
 import {Menu} from "../../plugin/Menu";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
+import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 
 export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) => {
     const blockElement = hasClosestBlock(titleElement);
     if (!blockElement) {
         return;
     }
+    const blockCalloutElement = blockElement.querySelector(".callout-icon");
     const dialog = new Dialog({
         title: window.siyuan.languages.callout,
         content: `<div class="b3-dialog__content">
+    <label class="fn__flex">
+        <div class="fn__flex-center">
+            ${window.siyuan.languages.icon}
+        </div>
+        <span class="fn__space"></span>
+        <div class="protyle-wysiwyg" style="padding: 0" data-readonly="false">
+            <span class="callout-icon">${blockCalloutElement.innerHTML}</span>
+        </div>
+    </label>
+    <div class="fn__hr"></div>
     <label class="fn__flex">
         <div class="fn__flex-center">
             ${window.siyuan.languages.type}
@@ -54,9 +66,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
         }
         titleElement.innerHTML = title ||
             (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase());
-        if (updateIcon) {
-            blockElement.querySelector(".callout-icon").textContent = updateIcon;
-        }
+        blockCalloutElement.innerHTML = dialogCalloutIconElement.innerHTML;
         updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
         focusBlock(blockElement);
         dialog.destroy();
@@ -79,7 +89,39 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
     textElements[0].focus();
     textElements[0].select();
     textElements[1].value = protyle.lute.BlockDOM2StdMd(titleElement.innerHTML);
-    let updateIcon = "";
+    const dialogCalloutIconElement = dialog.element.querySelector(".callout-icon");
+    dialogCalloutIconElement.addEventListener("click", () => {
+        const emojiRect = dialogCalloutIconElement.getBoundingClientRect();
+        openEmojiPanel("", "av", {
+            x: emojiRect.left,
+            y: emojiRect.bottom,
+            h: emojiRect.height,
+            w: emojiRect.width
+        }, (unicode) => {
+            let emojiHTML;
+            if (unicode.startsWith("api/icon/getDynamicIcon")) {
+                emojiHTML = `<img class="callout-img" src="${unicode}"/>`;
+            } else if (unicode.indexOf(".") > -1) {
+                emojiHTML = `<img class="callout-img" src="/emojis/${unicode}">`;
+            } else {
+                emojiHTML = unicode2Emoji(unicode);
+            }
+            if (unicode === "") {
+                if (textElements[0].value === "NOTE") {
+                    emojiHTML = "✏️";
+                } else if (textElements[0].value === "TIP") {
+                    emojiHTML = "💡";
+                } else if (textElements[0].value === "IMPORTANT") {
+                    emojiHTML = "️❗";
+                } else if (textElements[0].value === "WARNING") {
+                    emojiHTML = "⚠️";
+                } else if (textElements[0].value === "CAUTION") {
+                    emojiHTML = "🚨";
+                }
+            }
+            dialogCalloutIconElement.innerHTML = emojiHTML;
+        }, dialogCalloutIconElement.querySelector("img"));
+    });
     dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
         const menu = new Menu(Constants.MENU_CALLOUT_SELECT, () => {
             if (document.activeElement.tagName === "BODY") {
@@ -109,7 +151,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
                         textElements[1].value = item.type;
                     }
                     textElements[0].value = item.type.toUpperCase();
-                    updateIcon = item.icon;
+                    dialogCalloutIconElement.innerHTML = item.icon;
                     textElements[1].focus();
                     textElements[1].select();
                 }

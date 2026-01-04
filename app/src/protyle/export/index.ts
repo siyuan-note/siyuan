@@ -1,21 +1,21 @@
-import {hideMessage, showMessage} from "../../dialog/message";
-import {Constants} from "../../constants";
+import { hideMessage, showMessage } from "../../dialog/message";
+import { Constants } from "../../constants";
 /// #if !BROWSER
-import {ipcRenderer} from "electron";
+import { ipcRenderer } from "electron";
 import * as fs from "fs";
 import * as path from "path";
-import {afterExport} from "./util";
+import { afterExport } from "./util";
 /// #endif
-import {confirmDialog} from "../../dialog/confirmDialog";
-import {getThemeMode, setInlineStyle} from "../../util/assets";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {Dialog} from "../../dialog";
-import {replaceLocalPath} from "../../editor/rename";
-import {getScreenWidth, isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../util/compatibility";
-import {getFrontend} from "../../util/functions";
+import { confirmDialog } from "../../dialog/confirmDialog";
+import { getThemeMode, setInlineStyle } from "../../util/assets";
+import { fetchPost, fetchSyncPost } from "../../util/fetch";
+import { Dialog } from "../../dialog";
+import { replaceLocalPath } from "../../editor/rename";
+import { getScreenWidth, isInAndroid, isInHarmony, isInIOS, setStorageVal } from "../util/compatibility";
+import { getFrontend } from "../../util/functions";
 
 const getPluginStyle = async () => {
-    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
+    const response = await fetchSyncPost("/api/petal/loadPetals", { frontend: getFrontend() });
     let css = "";
     // 为加快启动速度，不进行 await
     response.data.forEach((item: IPluginData) => {
@@ -103,7 +103,7 @@ export const saveExport = (option: IExportOptions) => {
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
             const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
-            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {removeAssets, mergeSubdocs};
+            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = { removeAssets, mergeSubdocs };
             setStorageVal(Constants.LOCAL_EXPORTWORD, window.siyuan.storage[Constants.LOCAL_EXPORTWORD]);
             getExportPath(option, removeAssets, mergeSubdocs);
             wordDialog.destroy();
@@ -486,7 +486,7 @@ ${getIconScript(servePath)}
         Protyle.flowchartRender(wysElement, "${servePath}stage/protyle");
         Protyle.graphvizRender(wysElement, "${servePath}stage/protyle");
         Protyle.chartRender(wysElement, "${servePath}stage/protyle");
-        Protyle.mindmapRender(wysElement, "${servePath}stage/protyle");
+        Protyle.mindmapRender(wysElement, "${servePath}stage/protyle", {zoom: false, pan: false});
         Protyle.abcRender(wysElement, "${servePath}stage/protyle");
         Protyle.htmlRender(wysElement);
         Protyle.plantumlRender(wysElement, "${servePath}stage/protyle");
@@ -679,7 +679,7 @@ ${getIconScript(servePath)}
 </script>
 ${getSnippetJS()}
 </body></html>`;
-    fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
+    fetchPost("/api/export/exportTempContent", { content: html }, (response) => {
         ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
     });
 };
@@ -764,7 +764,7 @@ export const onExport = async (data: IWebSocketData, filePath: string, servePath
         js: `document.body.style.minWidth = "${screenWidth}px";`,
         css: `@page { size: A4; margin: 10mm 0 10mm 0; background-color: var(--b3-theme-background); }
 .protyle-wysiwyg {padding: 0; margin: 0;}`
-    } : {js: "", css: ""};
+    } : { js: "", css: "" };
     const html = `<!DOCTYPE html>
 <html lang="${window.siyuan.config.appearance.lang}" data-theme-mode="${isInMobile ? "light" : getThemeMode()}" data-light-theme="${window.siyuan.config.appearance.themeLight}" data-dark-theme="${window.siyuan.config.appearance.themeDark}">
 <head>
@@ -817,7 +817,7 @@ ${getIconScript(servePath)}
     Protyle.flowchartRender(previewElement, "stage/protyle");
     Protyle.graphvizRender(previewElement, "stage/protyle");
     Protyle.chartRender(previewElement, "stage/protyle");
-    Protyle.mindmapRender(previewElement, "stage/protyle");
+    Protyle.mindmapRender(previewElement, "stage/protyle", {zoom: false, pan: false});
     Protyle.abcRender(previewElement, "stage/protyle");
     Protyle.htmlRender(previewElement);
     Protyle.plantumlRender(previewElement, "stage/protyle");

@@ -25,11 +25,15 @@ import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
-import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
 import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
+import {dragUpload} from "../render/av/asset";
+/// #else
+import {uploadFiles} from "../upload";
+import {updateAssetCell} from "../render/av/asset";
+import {pathPosix} from "../../util/pathName";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
@@ -1141,14 +1145,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
             }
-        } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
+        } else if (!window.siyuan.dragElement && ["Files", "application/x-moz-file"].includes(event.dataTransfer.types?.[0] || "") 
+            || event.dataTransfer.types.includes("text/html")
+        ) {
             event.preventDefault();
+            // Firefox 的 types[0] 是 "application/x-moz-file"，types[1] 是 "Files"
+            const hasFilesType = ["Files", "application/x-moz-file"].includes(event.dataTransfer.types?.[0] || "");
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             // https://github.com/siyuan-note/siyuan/issues/9544
             const avElement = hasClosestByClassName(event.target, "av");
             if (!avElement) {
                 focusByRange(getRangeByPoint(event.clientX, event.clientY));
-                if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                if (hasFilesType && !isBrowser()) {
                     const files: string[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
                         files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
@@ -1161,12 +1169,36 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
-                    if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                    if (getTypeByCellElement(cellElement) === "mAsset" && hasFilesType) {
+                        /// #if !BROWSER
                         const files: string[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
                             files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
                         }
                         dragUpload(files, protyle, cellElement);
+                        /// #else
+                        const blockElement = hasClosestBlock(cellElement);
+                        if (blockElement) {
+                            const files = event.dataTransfer.files;
+                            uploadFiles(protyle, files, undefined, (res) => {
+                                const resData = JSON.parse(res);
+                                const value: IAVCellAssetValue[] = [];
+                                Object.keys(resData.data.succMap).forEach((key) => {
+                                    value.push({
+                                        name: key,
+                                        content: resData.data.succMap[key],
+                                        type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
+                                    });
+                                });
+                                updateAssetCell({
+                                    protyle,
+                                    cellElements: [cellElement],
+                                    addValue: value,
+                                    blockElement
+                                });
+                            });
+                        }
+                        /// #endif
                         clearSelect(["cell"], avElement);
                     }
                 }

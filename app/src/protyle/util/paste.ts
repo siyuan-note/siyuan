@@ -159,7 +159,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
             if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
-                insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+                insertHTML(textPlain.replace(/```/g, "\u200D```"), protyle);
                 return;
             }
         }
@@ -361,7 +361,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+        insertHTML(textPlain.replace(/```/g, "\u200D```"), protyle);
         return;
     } else if (siyuanHTML) {
         // 编辑器内部粘贴
@@ -439,10 +439,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }
-
-            // https://github.com/siyuan-note/siyuan/issues/13552
-            tempInnerHTML = tempInnerHTML.replace(/\u200D```/g, "```");
-
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
@@ -588,10 +584,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
-
-            // https://github.com/siyuan-note/siyuan/issues/13552
-            textPlain = textPlain.replace(/\u200D```/g, "```");
-
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             insertHTML(textPlainDom, protyle, false, false, true);
         }

@@ -773,7 +773,10 @@ export class Gutter {
                 selectsElement.forEach((item: HTMLElement) => {
                     html += getPlainText(item) + "\n";
                 });
-                copyPlainText(html.trimEnd());
+                let plainText = html.trimEnd();
+                // https://github.com/siyuan-note/siyuan/issues/14800
+                plainText = plainText.replace(/\u200D```/g, "```");
+                copyPlainText(plainText);
                 focusBlock(selectsElement[0]);
             }
         }, {
@@ -1344,7 +1347,12 @@ export class Gutter {
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
-                copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
+                let plainText = getPlainText(nodeElement as HTMLElement).trimEnd();
+                if (type === "NodeCodeBlock") {
+                    // https://github.com/siyuan-note/siyuan/issues/14800
+                    plainText = plainText.replace(/\u200D```/g, "```");
+                }
+                copyPlainText(plainText);
                 focusBlock(nodeElement);
             }
         }, {

@@ -43,6 +43,8 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     if (copyElement) {
         let text = copyElement.parentElement.nextElementSibling.textContent.replace(/\n$/, "");
         text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+        // https://github.com/siyuan-note/siyuan/issues/14800
+        text = text.replace(/\u200D```/g, "```");
         writeText(text);
         showMessage(window.siyuan.languages.copied, 2000);
         event.preventDefault();

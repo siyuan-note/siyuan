@@ -469,6 +469,8 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
+                        // https://github.com/siyuan-note/siyuan/issues/14800
+                        textPlain = textPlain.replace(/\u200D```/g, "```");
                         isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
@@ -2037,6 +2039,8 @@ export class WYSIWYG {
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
                     textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                    // https://github.com/siyuan-note/siyuan/issues/14800
+                    textPlain = textPlain.replace(/\u200D```/g, "```");
                     isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321

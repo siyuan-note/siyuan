@@ -51,7 +51,7 @@ export const saveExport = (option: IExportOptions) => {
             }, zipResponse => {
                 hideMessage(msgId);
                 if (zipResponse.code === -1) {
-                    showMessage(window.siyuan.languages._kernel[14] + ": " + zipResponse.msg, 0, "error");
+                    showMessage(window.siyuan.languages._kernel[14].replace("%s", zipResponse.msg), 0, "error");
                     return;
                 }
                 window.open(zipResponse.data.zip);
@@ -532,6 +532,7 @@ ${getIconScript(servePath)}
                 } else if (target.classList.contains("protyle-action__copy")) {
                     let text = target.parentElement.nextElementSibling.textContent.trimEnd();
                     text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+                    text = text.replace(/\u200D\`\`\`/g, "\`\`\`");
                     navigator.clipboard.writeText(text);
                     event.preventDefault();
                     event.stopPropagation();
@@ -825,6 +826,7 @@ ${getIconScript(servePath)}
       item.addEventListener("click", (event) => {
             let text = item.parentElement.nextElementSibling.textContent.trimEnd();
             text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying
+            text = text.replace(/\u200D\`\`\`/g, "\`\`\`");
             navigator.clipboard.writeText(text);
             event.preventDefault();
             event.stopPropagation();

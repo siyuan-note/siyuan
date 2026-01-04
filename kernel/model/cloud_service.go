@@ -214,10 +214,13 @@ var (
 	subscriptionExpirationReminded bool
 )
 
-func RefreshCheckJob() {
+func RefreshCheckJob2H() {
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
 	go refreshAnnouncement()
+}
+
+func RefreshCheckJob6H() {
 	go refreshCheckDownloadInstallPkg()
 }
 

@@ -22,6 +22,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,17 +30,18 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type RecentDoc struct {
 	RootID   string `json:"rootID"`
-	Icon     string `json:"icon"`
-	Title    string `json:"title"`
-	ViewedAt int64  `json:"viewedAt"` // 浏览时间字段
-	ClosedAt int64  `json:"closedAt"` // 关闭时间字段
-	OpenAt   int64  `json:"openAt"`   // 文档第一次从文档树加载到页签的时间
+	Icon     string `json:"icon,omitempty"`
+	Title    string `json:"title,omitempty"`
+	ViewedAt int64  `json:"viewedAt,omitempty"` // 浏览时间字段
+	ClosedAt int64  `json:"closedAt,omitempty"` // 关闭时间字段
+	OpenAt   int64  `json:"openAt,omitempty"`   // 文档第一次从文档树加载到页签的时间
 }
 
 type OutlineDoc struct {
@@ -49,62 +51,91 @@ type OutlineDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
-func RemoveRecentDoc(ids []string) {
-	recentDocLock.Lock()
-	defer recentDocLock.Unlock()
+// normalizeRecentDocs 规范化最近文档列表：去重、清空 Title/Icon、按类型截取配置的最大数量记录
+func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
+	maxCount := Conf.FileTree.RecentDocsMaxListCount
 
-	recentDocs, err := getRecentDocs("")
-	if err != nil {
-		return
-	}
-
-	ids = gulu.Str.RemoveDuplicatedElem(ids)
-	for i, doc := range recentDocs {
-		if gulu.Str.Contains(doc.RootID, ids) {
-			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
-			break
+	// 去重
+	seen := make(map[string]struct{}, len(recentDocs))
+	deduplicated := make([]*RecentDoc, 0, len(recentDocs))
+	for _, doc := range recentDocs {
+		if _, ok := seen[doc.RootID]; !ok {
+			seen[doc.RootID] = struct{}{}
+			deduplicated = append(deduplicated, doc)
 		}
 	}
 
-	err = setRecentDocs(recentDocs)
-	if err != nil {
-		return
-	}
-	return
-}
-
-func setRecentDocByTree(tree *parse.Tree) {
-	recentDoc := &RecentDoc{
-		RootID:   tree.Root.ID,
-		Icon:     tree.Root.IALAttr("icon"),
-		Title:    tree.Root.IALAttr("title"),
-		ViewedAt: time.Now().Unix(), // 使用当前时间作为浏览时间
-		ClosedAt: 0,                 // 初始化关闭时间为0，表示未关闭
-		OpenAt:   time.Now().Unix(), // 设置文档打开时间
+	if len(deduplicated) <= maxCount {
+		// 清空 Title 和 Icon
+		for _, doc := range deduplicated {
+			doc.Title = ""
+			doc.Icon = ""
+		}
+		return deduplicated
 	}
 
-	recentDocLock.Lock()
-	defer recentDocLock.Unlock()
+	// 分别统计三种类型的记录
+	var viewedDocs []*RecentDoc
+	var openedDocs []*RecentDoc
+	var closedDocs []*RecentDoc
 
-	recentDocs, err := getRecentDocs("")
-	if err != nil {
-		return
-	}
-
-	for i, c := range recentDocs {
-		if c.RootID == recentDoc.RootID {
-			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
-			break
+	for _, doc := range deduplicated {
+		if doc.ViewedAt > 0 {
+			viewedDocs = append(viewedDocs, doc)
+		}
+		if doc.OpenAt > 0 {
+			openedDocs = append(openedDocs, doc)
+		}
+		if doc.ClosedAt > 0 {
+			closedDocs = append(closedDocs, doc)
 		}
 	}
 
-	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
-	if 256 < len(recentDocs) {
-		recentDocs = recentDocs[:256]
+	// 分别按时间排序并截取配置的最大数量记录
+	if len(viewedDocs) > maxCount {
+		sort.Slice(viewedDocs, func(i, j int) bool {
+			return viewedDocs[i].ViewedAt > viewedDocs[j].ViewedAt
+		})
+		viewedDocs = viewedDocs[:maxCount]
+	}
+	if len(openedDocs) > maxCount {
+		sort.Slice(openedDocs, func(i, j int) bool {
+			return openedDocs[i].OpenAt > openedDocs[j].OpenAt
+		})
+		openedDocs = openedDocs[:maxCount]
+	}
+	if len(closedDocs) > maxCount {
+		sort.Slice(closedDocs, func(i, j int) bool {
+			return closedDocs[i].ClosedAt > closedDocs[j].ClosedAt
+		})
+		closedDocs = closedDocs[:maxCount]
 	}
 
-	err = setRecentDocs(recentDocs)
-	return
+	// 合并三类记录
+	docMap := make(map[string]*RecentDoc, maxCount*2)
+	for _, doc := range viewedDocs {
+		docMap[doc.RootID] = doc
+	}
+	for _, doc := range openedDocs {
+		if _, ok := docMap[doc.RootID]; !ok {
+			docMap[doc.RootID] = doc
+		}
+	}
+	for _, doc := range closedDocs {
+		if _, ok := docMap[doc.RootID]; !ok {
+			docMap[doc.RootID] = doc
+		}
+	}
+
+	result := make([]*RecentDoc, 0, len(docMap))
+	for _, doc := range docMap {
+		// 清空 Title 和 Icon
+		doc.Title = ""
+		doc.Icon = ""
+		result = append(result, doc)
+	}
+
+	return result
 }
 
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
@@ -112,24 +143,35 @@ func UpdateRecentDocOpenTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs("")
+	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
 		return
 	}
 
-	// 查找文档并更新打开时间
+	timeNow := time.Now().Unix()
+	// 查找文档并更新打开时间和浏览时间
 	found := false
 	for _, doc := range recentDocs {
 		if doc.RootID == rootID {
-			doc.OpenAt = time.Now().Unix()
+			doc.OpenAt = timeNow
+			doc.ViewedAt = timeNow
+			doc.ClosedAt = 0
 			found = true
 			break
 		}
 	}
 
-	if found {
-		err = setRecentDocs(recentDocs)
+	// 如果文档不存在，创建新记录
+	if !found {
+		recentDoc := &RecentDoc{
+			RootID:   rootID,
+			OpenAt:   timeNow,
+			ViewedAt: timeNow,
+		}
+		recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
 	}
+
+	err = setRecentDocs(recentDocs)
 	return
 }
 
@@ -138,52 +180,92 @@ func UpdateRecentDocViewTime(rootID string) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs("")
+	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
 		return
 	}
 
-	// 查找文档并更新浏览时间
+	timeNow := time.Now().Unix()
+	// 查找文档并更新浏览时间，保留原来的打开时间
 	found := false
 	for _, doc := range recentDocs {
 		if doc.RootID == rootID {
-			doc.ViewedAt = time.Now().Unix()
+			// OpenAt 保持不变，保留原来的打开时间
+			doc.ViewedAt = timeNow
+			doc.ClosedAt = 0
 			found = true
 			break
 		}
 	}
 
-	if found {
-		// 按浏览时间降序排序
-		sort.Slice(recentDocs, func(i, j int) bool {
-			return recentDocs[i].ViewedAt > recentDocs[j].ViewedAt
-		})
-		err = setRecentDocs(recentDocs)
+	// 如果文档不存在，创建新记录
+	if !found {
+		recentDoc := &RecentDoc{
+			RootID: rootID,
+			// 新创建的记录不设置 OpenAt，因为这是浏览而不是打开
+			ViewedAt: timeNow,
+		}
+		recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
 	}
+
+	err = setRecentDocs(recentDocs)
 	return
 }
 
 // UpdateRecentDocCloseTime 更新文档关闭时间
 func UpdateRecentDocCloseTime(rootID string) (err error) {
+	return BatchUpdateRecentDocCloseTime([]string{rootID})
+}
+
+// BatchUpdateRecentDocCloseTime 批量更新文档关闭时间
+func BatchUpdateRecentDocCloseTime(rootIDs []string) (err error) {
+	if len(rootIDs) == 0 {
+		return
+	}
+
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
-	recentDocs, err := getRecentDocs("")
+	recentDocs, err := loadRecentDocsRaw()
 	if err != nil {
 		return
 	}
 
-	// 查找文档并更新关闭时间
-	found := false
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+	rootIDsMap := make(map[string]bool, len(rootIDs))
+	for _, id := range rootIDs {
+		rootIDsMap[id] = true
+	}
+
+	closeTime := time.Now().Unix()
+
+	// 更新已存在的文档
+	updated := false
 	for _, doc := range recentDocs {
-		if doc.RootID == rootID {
-			doc.ClosedAt = time.Now().Unix()
-			found = true
-			break
+		if rootIDsMap[doc.RootID] {
+			doc.ClosedAt = closeTime
+			updated = true
+			delete(rootIDsMap, doc.RootID) // 标记已处理
 		}
 	}
 
-	if found {
+	// 为不存在的文档创建新记录
+	for rootID := range rootIDsMap {
+		tree, loadErr := LoadTreeByBlockID(rootID)
+		if loadErr != nil {
+			continue
+		}
+
+		recentDoc := &RecentDoc{
+			RootID:   tree.Root.ID,
+			ClosedAt: closeTime, // 设置关闭时间
+		}
+
+		recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
+		updated = true
+	}
+
+	if updated {
 		err = setRecentDocs(recentDocs)
 	}
 	return
@@ -192,17 +274,12 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
-	ret, err = getRecentDocs(sortBy)
-	if err != nil {
-		return
-	}
-	if len(ret) > Conf.FileTree.RecentDocsMaxListCount {
-		ret = ret[:Conf.FileTree.RecentDocsMaxListCount]
-	}
-	return
+	return getRecentDocs(sortBy)
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
+	recentDocs = normalizeRecentDocs(recentDocs)
+
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [recent-doc] dir failed: %s", err)
@@ -224,8 +301,7 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	return
 }
 
-func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
-	tmp := []*RecentDoc{}
+func loadRecentDocsRaw() (ret []*RecentDoc, err error) {
 	dataPath := filepath.Join(util.DataDir, "storage/recent-doc.json")
 	if !filelock.IsExist(dataPath) {
 		return
@@ -237,7 +313,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &tmp); err != nil {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal storage [recent-doc] failed: %s", err)
 		if err = setRecentDocs([]*RecentDoc{}); err != nil {
 			logging.LogErrorf("reset storage [recent-doc] failed: %s", err)
@@ -245,16 +321,40 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		ret = []*RecentDoc{}
 		return
 	}
+	return
+}
+
+func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
+	ret = []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+	recentDocs, err := loadRecentDocsRaw()
+	if err != nil {
+		return
+	}
+
+	// 去重
+	seen := make(map[string]struct{}, len(recentDocs))
+	var deduplicated []*RecentDoc
+	for _, doc := range recentDocs {
+		if _, ok := seen[doc.RootID]; !ok {
+			seen[doc.RootID] = struct{}{}
+			deduplicated = append(deduplicated, doc)
+		}
+	}
 
 	var rootIDs []string
-	for _, doc := range tmp {
+	for _, doc := range deduplicated {
 		rootIDs = append(rootIDs, doc.RootID)
 	}
 	bts := treenode.GetBlockTrees(rootIDs)
 	var notExists []string
-	for _, doc := range tmp {
+	for _, doc := range deduplicated {
 		if bt := bts[doc.RootID]; nil != bt {
+			// 获取最新的文档标题和图标
 			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
+			ial := sql.GetBlockAttrs(doc.RootID)
+			if "" != ial["icon"] {
+				doc.Icon = ial["icon"]
+			}
 			ret = append(ret, doc)
 		} else {
 			notExists = append(notExists, doc.RootID)
@@ -262,53 +362,105 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	}
 
 	if 0 < len(notExists) {
-		setRecentDocs(ret)
+		err = setRecentDocs(ret)
+		if err != nil {
+			return
+		}
 	}
 
 	// 根据排序参数进行排序
 	switch sortBy {
+	case "updated": // 按更新时间排序
+		// 从数据库查询最近修改的文档
+		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, 32)
+		ret = []*RecentDoc{}
+		if 1 > len(sqlBlocks) {
+			return
+		}
+
+		// 获取文档树信息
+		var rootIDs []string
+		for _, sqlBlock := range sqlBlocks {
+			rootIDs = append(rootIDs, sqlBlock.ID)
+		}
+		bts := treenode.GetBlockTrees(rootIDs)
+
+		for _, sqlBlock := range sqlBlocks {
+			// 解析 IAL 获取 icon
+			icon := ""
+			if sqlBlock.IAL != "" {
+				ialStr := strings.TrimPrefix(sqlBlock.IAL, "{:")
+				ialStr = strings.TrimSuffix(ialStr, "}")
+				ial := parse.Tokens2IAL([]byte(ialStr))
+				for _, kv := range ial {
+					if kv[0] == "icon" {
+						icon = kv[1]
+						break
+					}
+				}
+			}
+			// 获取文档标题
+			title := ""
+			if bt := bts[sqlBlock.ID]; nil != bt {
+				title = path.Base(bt.HPath)
+			}
+			if title == "" {
+				title = sqlBlock.Content
+				if title == "" {
+					title = sqlBlock.HPath
+					if title == "" {
+						title = sqlBlock.ID
+					}
+				}
+			}
+			doc := &RecentDoc{
+				RootID: sqlBlock.ID,
+				Icon:   icon,
+				Title:  title,
+			}
+			ret = append(ret, doc)
+		}
 	case "closedAt": // 按关闭时间排序
-		sort.Slice(ret, func(i, j int) bool {
-			if ret[i].ClosedAt == 0 && ret[j].ClosedAt == 0 {
-				// 如果都没有关闭时间，按浏览时间排序
-				return ret[i].ViewedAt > ret[j].ViewedAt
+		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+		for _, doc := range ret {
+			if doc.ClosedAt > 0 {
+				filtered = append(filtered, doc)
 			}
-			if ret[i].ClosedAt == 0 {
-				return false // 没有关闭时间的排在后面
-			}
-			if ret[j].ClosedAt == 0 {
-				return true // 有关闭时间的排在前面
-			}
-			return ret[i].ClosedAt > ret[j].ClosedAt
-		})
+		}
+		ret = filtered
+		if 0 < len(ret) {
+			sort.Slice(ret, func(i, j int) bool {
+				return ret[i].ClosedAt > ret[j].ClosedAt
+			})
+		}
 	case "openAt": // 按打开时间排序
-		sort.Slice(ret, func(i, j int) bool {
-			if ret[i].OpenAt == 0 && ret[j].OpenAt == 0 {
-				// 如果都没有打开时间，按ID时间排序（ID包含时间信息）
-				return ret[i].RootID > ret[j].RootID
+		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+		for _, doc := range ret {
+			if doc.OpenAt > 0 {
+				filtered = append(filtered, doc)
 			}
-			if ret[i].OpenAt == 0 {
-				return false // 没有打开时间的排在后面
+		}
+		ret = filtered
+		if 0 < len(ret) {
+			sort.Slice(ret, func(i, j int) bool {
+				return ret[i].OpenAt > ret[j].OpenAt
+			})
+		}
+	case "viewedAt": // 按浏览时间排序
+		fallthrough
+	default:
+		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+		for _, doc := range ret {
+			if doc.ViewedAt > 0 {
+				filtered = append(filtered, doc)
 			}
-			if ret[j].OpenAt == 0 {
-				return true // 有打开时间的排在前面
-			}
-			return ret[i].OpenAt > ret[j].OpenAt
-		})
-	default: // 默认按浏览时间排序
-		sort.Slice(ret, func(i, j int) bool {
-			if ret[i].ViewedAt == 0 && ret[j].ViewedAt == 0 {
-				// 如果都没有浏览时间，按ID时间排序（ID包含时间信息）
-				return ret[i].RootID > ret[j].RootID
-			}
-			if ret[i].ViewedAt == 0 {
-				return false // 没有浏览时间的排在后面
-			}
-			if ret[j].ViewedAt == 0 {
-				return true // 有浏览时间的排在前面
-			}
-			return ret[i].ViewedAt > ret[j].ViewedAt
-		})
+		}
+		ret = filtered
+		if 0 < len(ret) {
+			sort.Slice(ret, func(i, j int) bool {
+				return ret[i].ViewedAt > ret[j].ViewedAt
+			})
+		}
 	}
 	return
 }

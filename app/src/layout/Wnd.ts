@@ -779,7 +779,7 @@ export class Wnd {
         model.send("closews", {});
     }
 
-    private removeTabAction = (id: string, closeAll = false, animate = true, isSaveLayout = true) => {
+    private removeTabAction = (id: string, isBatchClose = false, animate = true, isSaveLayout = true) => {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
@@ -795,8 +795,10 @@ export class Wnd {
                 }
                 if (item.model instanceof Editor) {
                     saveScroll(item.model.editor.protyle);
-                    // 更新文档关闭时间
-                    fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
+                    // 更新文档关闭时间（批量关闭页签时由 closeTabByType 批量处理，这里不单独调用）
+                    if (!isBatchClose) {
+                        fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
+                    }
                 }
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);
@@ -842,7 +844,7 @@ export class Wnd {
                                 }
                             }
                         });
-                        if (latestHeadElement && !closeAll) {
+                        if (latestHeadElement && !isBatchClose) {
                             this.switchTab(latestHeadElement, true, true, false, false);
                             this.showHeading();
                         }
@@ -890,7 +892,7 @@ export class Wnd {
         /// #endif
     };
 
-    public removeTab(id: string, closeAll = false, animate = true, isSaveLayout = true) {
+    public removeTab(id: string, isBatchClose = false, animate = true, isSaveLayout = true) {
         for (let index = 0; index < this.children.length; index++) {
             const item = this.children[index];
             if (item.id === id) {
@@ -899,9 +901,9 @@ export class Wnd {
                         showMessage(window.siyuan.languages.uploading);
                         return;
                     }
-                    this.removeTabAction(id, closeAll, animate, isSaveLayout);
+                    this.removeTabAction(id, isBatchClose, animate, isSaveLayout);
                 } else {
-                    this.removeTabAction(id, closeAll, animate, isSaveLayout);
+                    this.removeTabAction(id, isBatchClose, animate, isSaveLayout);
                 }
                 return;
             }

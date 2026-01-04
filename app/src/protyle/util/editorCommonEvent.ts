@@ -25,11 +25,15 @@ import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
-import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
 import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
+import {dragUpload} from "../render/av/asset";
+/// #else
+import {uploadFiles} from "../upload";
+import {updateAssetCell} from "../render/av/asset";
+import {pathPosix} from "../../util/pathName";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
@@ -1164,7 +1168,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
-                    if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                    if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files") {
+                        /// #if !BROWSER
                         const files: ILocalFiles[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
                             files.push({
@@ -1173,6 +1178,29 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             });
                         }
                         dragUpload(files, protyle, cellElement);
+                        /// #else
+                        const blockElement = hasClosestBlock(cellElement);
+                        if (blockElement) {
+                            const files = event.dataTransfer.files;
+                            uploadFiles(protyle, files, undefined, (res) => {
+                                const resData = JSON.parse(res);
+                                const value: IAVCellAssetValue[] = [];
+                                Object.keys(resData.data.succMap).forEach((key) => {
+                                    value.push({
+                                        name: key,
+                                        content: resData.data.succMap[key],
+                                        type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
+                                    });
+                                });
+                                updateAssetCell({
+                                    protyle,
+                                    cellElements: [cellElement],
+                                    addValue: value,
+                                    blockElement
+                                });
+                            });
+                        }
+                        /// #endif
                         clearSelect(["cell"], avElement);
                     }
                 }

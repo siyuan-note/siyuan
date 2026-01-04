@@ -575,7 +575,7 @@ func getStageIndex(pkgType string) (ret *StageIndex, err error) {
 	defer stageIndexLock.Unlock()
 
 	now := time.Now().Unix()
-	if 3600 >= now-stageIndexCacheTime && nil != cachedStageIndex[pkgType] {
+	if util.RhyCacheDuration >= now-stageIndexCacheTime && nil != cachedStageIndex[pkgType] {
 		ret = cachedStageIndex[pkgType]
 		return
 	}

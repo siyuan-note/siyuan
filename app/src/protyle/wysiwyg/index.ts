@@ -789,10 +789,14 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
+                const bodyElement = hasClosestByClassName(avDragFillElement, "av__body") as HTMLElement;
+                if (!bodyElement) {
+                    return;
+                }
                 const originData: { [key: string]: IAVCellValue[] } = {};
                 let lastOriginCellElement: HTMLElement;
                 const originCellIds: string[] = [];
-                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     const rowElement = hasClosestByClassName(item, "av__row");
                     if (rowElement) {
                         if (!originData[rowElement.dataset.id]) {
@@ -804,7 +808,7 @@ export class WYSIWYG {
                     }
                 });
                 const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
-                const firstCellIndex = getPositionByCellElement(nodeElement.querySelector(".av__cell--active"));
+                const firstCellIndex = getPositionByCellElement(bodyElement.querySelector(".av__cell--active"));
                 let moveAVCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
@@ -815,7 +819,7 @@ export class WYSIWYG {
                     moveAVCellElement = tempCellElement;
                     if (moveAVCellElement && moveAVCellElement.dataset.id) {
                         const newIndex = getPositionByCellElement(moveAVCellElement);
-                        nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                        bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             if (!originCellIds.includes(item.dataset.id)) {
                                 item.classList.remove("av__cell--active");
                             }
@@ -824,7 +828,7 @@ export class WYSIWYG {
                             lastCellElement = undefined;
                             return;
                         }
-                        nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
+                        bodyElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
                             if ((newIndex.rowIndex < firstCellIndex.rowIndex && index >= newIndex.rowIndex && index < firstCellIndex.rowIndex) ||
                                 (newIndex.rowIndex > dragFillCellIndex.rowIndex && index <= newIndex.rowIndex && index > dragFillCellIndex.rowIndex)) {
                                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
@@ -846,7 +850,7 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     if (lastCellElement) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
-                        const allActiveCellsElement = nodeElement.querySelectorAll(".av__cell--active");
+                        const allActiveCellsElement = bodyElement.querySelectorAll(".av__cell--active");
                         addDragFill(allActiveCellsElement[allActiveCellsElement.length - 1]);
                     }
                     return false;

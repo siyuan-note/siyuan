@@ -1317,7 +1317,7 @@
   "edit-mode": "編集モードの切り替え",
   "emoji": "絵文字",
   "export": "エクスポート",
-  "exportCodeBlock": "コードブロックの内容をエクスポート",
+  "saveCodeBlockAsFile": "コードブロックをファイルとして保存",
   "fileTypeError": "ファイルの種類が正しくありません",
   "fullscreen": "禅モードの切り替え",
   "generate": "生成中",

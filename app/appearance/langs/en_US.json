@@ -1317,7 +1317,7 @@
   "edit-mode": "Toggle Mode",
   "emoji": "Emoji",
   "export": "Export",
-  "exportCodeBlock": "Export code block content",
+  "saveCodeBlockAsFile": "Save code block as file",
   "fileTypeError": "file type is error",
   "fullscreen": "Toggle Fullscreen",
   "generate": "Generating",

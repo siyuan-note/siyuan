@@ -1317,7 +1317,7 @@
   "edit-mode": "Przełącz tryb",
   "emoji": "Emoji",
   "export": "Eksportuj",
-  "exportCodeBlock": "Eksportuj zawartość bloku kodu",
+  "saveCodeBlockAsFile": "Zapisz blok kodu jako plik",
   "fileTypeError": "błąd typu pliku",
   "fullscreen": "Przełącz pełny ekran",
   "generate": "Generowanie",

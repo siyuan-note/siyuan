@@ -1317,7 +1317,7 @@
   "edit-mode": "모드 전환",
   "emoji": "이모티콘",
   "export": "내보내기",
-  "exportCodeBlock": "코드 블록 내용 내보내기",
+  "saveCodeBlockAsFile": "코드 블록을 파일로 저장",
   "fileTypeError": "파일 유형 오류",
   "fullscreen": "전체 화면 전환",
   "generate": "생성 중",

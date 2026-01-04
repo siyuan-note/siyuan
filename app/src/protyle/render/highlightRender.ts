@@ -141,11 +141,16 @@ export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
         const lineNumberTemp = document.createElement("div");
         lineNumberTemp.className = "hljs";
         // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
+        // 需要手动复制字体样式 https://ld246.com/article/1762527296449
         lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
 width: ${codeElement.getBoundingClientRect().width / zoom}px;
 white-space:${codeElementStyle.whiteSpace};
 word-break:${codeElementStyle.wordBreak};
 font-variant-ligatures:${codeElementStyle.fontVariantLigatures};
+font-family:${codeElementStyle.fontFamily};
+font-size:${codeElementStyle.fontSize};
+line-height:${codeElementStyle.lineHeight};
+font-weight:${codeElementStyle.fontWeight};
 padding-right:0;max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
         lineNumberTemp.setAttribute("contenteditable", "true");
         block.insertAdjacentElement("afterend", lineNumberTemp);

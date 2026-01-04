@@ -268,8 +268,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = event.dataTransfer.getData("text/html");
         textPlain = event.dataTransfer.getData("text/plain");
         siyuanHTML = event.dataTransfer.getData("text/siyuan");
-        if (event.dataTransfer.types[0] === "Files") {
-            files = event.dataTransfer.items;
+        // Firefox 的 types[0] 是 "application/x-moz-file"，types[1] 是 "Files"
+        if (["Files", "application/x-moz-file"].includes(event.dataTransfer.types?.[0] || "")) {
+            files = event.dataTransfer.files;
         }
     } else {
         if (event.localFiles?.length > 0) {

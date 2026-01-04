@@ -127,7 +127,19 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
 
 // https://github.com/siyuan-note/siyuan/issues/8196
 export const getRangeByPoint = (x: number, y: number) => {
-    const range = document.caretRangeFromPoint(x, y);
+    let range: Range;
+    if (document.caretRangeFromPoint) {
+        // WebKit 专有实现，Firefox 不支持 https://bugzilla.mozilla.org/show_bug.cgi?id=1550635
+        range = document.caretRangeFromPoint(x, y);
+    } else if (document.caretPositionFromPoint) {
+        const caretPosition = document.caretPositionFromPoint(x, y);
+        range = document.createRange();
+        range.setStart(caretPosition.offsetNode, caretPosition.offset);
+        range.collapse(true);
+    } else {
+        console.warn("failed to get range by point");
+        return null;
+    }
     const imgElement = hasClosestByAttribute(range.startContainer, "data-type", "img");
     if (imgElement) {
         range.setStart(imgElement.nextSibling, 0);

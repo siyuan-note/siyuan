@@ -288,9 +288,15 @@ export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;
 };
 
+// 浏览器检查 https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Browser_detection_using_the_user_agent
 export const isSafari = () => {
     const userAgent = navigator.userAgent;
     return userAgent.includes("Safari") && !userAgent.includes("Chrome") && !userAgent.includes("Chromium");
+};
+
+export const isFirefox = () => {
+    const userAgent = navigator.userAgent;
+    return userAgent.includes("Firefox") && !userAgent.includes("Seamonkey");
 };
 
 export const isIPad = () => {

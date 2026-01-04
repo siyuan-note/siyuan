@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
-import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
+import {getLocalFiles, getTextSiyuanFromTextHTML, isFirefox, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {getEditorRange} from "./selection";
 import {blockRender} from "../render/blockRender";
@@ -251,6 +251,19 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textPlain = event.clipboardData.getData("text/plain");
         siyuanHTML = event.clipboardData.getData("text/siyuan");
         files = event.clipboardData.files;
+        // Firefox 的 clipboardData.files 在异步操作之后无法再读取 https://bugzilla.mozilla.org/show_bug.cgi?id=1940573
+        // 另外，Firefox 的 files 只有一个文件，是其本身的问题 https://bugzilla.mozilla.org/show_bug.cgi?id=864052
+        if (files?.length > 0 && isFirefox()) {
+            if (typeof structuredClone === "function") {
+                files = structuredClone(files);
+            } else {
+                const fileArray: File[] = [];
+                for (let i = 0; i < files.length; i++) {
+                    fileArray.push(files[i]);
+                }
+                files = fileArray;
+            }
+        }
     } else if ("dataTransfer" in event) {
         textHTML = event.dataTransfer.getData("text/html");
         textPlain = event.dataTransfer.getData("text/plain");

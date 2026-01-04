@@ -1317,6 +1317,7 @@
   "edit-mode": "החלף מצב",
   "emoji": "אימוג'י",
   "export": "ייצוא",
+  "exportCodeBlock": "ייצא תוכן בלוק קוד",
   "fileTypeError": "סוג הקובץ שגוי",
   "fullscreen": "החלף מסך מלא",
   "generate": "מייצר",

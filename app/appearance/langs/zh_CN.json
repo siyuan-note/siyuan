@@ -1317,6 +1317,7 @@
   "edit-mode": "模式切换",
   "emoji": "表情",
   "export": "导出",
+  "exportCodeBlock": "导出代码块内容",
   "fileTypeError": "文件类型不允许上传",
   "fullscreen": "全屏切换",
   "generate": "生成中",

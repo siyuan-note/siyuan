@@ -1317,6 +1317,7 @@
   "edit-mode": "تبديل الوضع",
   "emoji": "الرموز التعبيرية",
   "export": "تصدير",
+  "exportCodeBlock": "تصدير محتوى كتلة الكود",
   "fileTypeError": "نوع الملف خطأ",
   "fullscreen": "ملء الشاشة",
   "generate": "جاري التوليد",

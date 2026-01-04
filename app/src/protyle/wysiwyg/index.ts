@@ -66,7 +66,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard, encodeBase64} from "../util/compatibility";
+import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -102,6 +102,7 @@ import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {updateCalloutType} from "./callout";
+import {code160to32} from "../util/code160to32";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -484,7 +485,7 @@ export class WYSIWYG {
                 html = getEnableHTML(html);
             }
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
-            textPlain = textPlain.replace(/\u00A0/g, " ") // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = code160to32(textPlain) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
@@ -2074,7 +2075,7 @@ export class WYSIWYG {
                     textPlain = textPlain.endsWith("\n") ? textPlain.replace(/\n$/, "") : textPlain;
                 }
             }
-            textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = code160to32(textPlain); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
 
             if (!isInCodeBlock) {

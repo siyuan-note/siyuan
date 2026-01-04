@@ -7,6 +7,7 @@ import {isWindow} from "../../util/functions";
 import {writeText} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
 import {cancelDrag} from "./dragover";
+import {code160to32} from "../../protyle/util/code160to32";
 
 export const globalClickHideMenu = (element: HTMLElement) => {
     if (!window.siyuan.menus.menu.element.contains(element) && !hasClosestByAttribute(element, "data-menu", "true")) {
@@ -42,7 +43,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {
         let text = copyElement.parentElement.nextElementSibling.textContent.replace(/\n$/, "");
-        text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+        text = code160to32(text) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
         // https://github.com/siyuan-note/siyuan/issues/14800
         text = text.replace(/\u200D```/g, "```");
         writeText(text);

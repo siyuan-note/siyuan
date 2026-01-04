@@ -1317,6 +1317,7 @@
   "edit-mode": "Cambia modalità",
   "emoji": "Emoji",
   "export": "Esporta",
+  "exportCodeBlock": "Esporta contenuto blocco codice",
   "fileTypeError": "tipo di file errato",
   "fullscreen": "Attiva/disattiva schermo intero",
   "generate": "Generando",

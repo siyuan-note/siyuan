@@ -1317,6 +1317,7 @@
   "edit-mode": "Mode Toggle",
   "emoji": "Emoji",
   "export": "Exporter",
+  "exportCodeBlock": "Exporter le contenu du bloc de code",
   "fileTypeError": "type de fichier est une erreur",
   "fullscreen": "Basculer en plein écran",
   "generate": "Génération en cours",

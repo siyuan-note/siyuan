@@ -1317,6 +1317,7 @@
   "edit-mode": "Düzenleme modunu değiştir",
   "emoji": "Emoji",
   "export": "Dışa aktar",
+  "exportCodeBlock": "Kod bloğu içeriğini dışa aktar",
   "fileTypeError": "Dosya türü hatalı",
   "fullscreen": "Tam ekranı aç/kapat",
   "generate": "Oluşturuluyor",

@@ -61,6 +61,11 @@ import {processClonePHElement} from "../render/util";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 import * as path from "path";
+import {fetchSyncPost} from "../../util/fetch";
+import {replaceLocalPath} from "../../editor/rename";
+import {showMessage} from "../../dialog/message";
+import {ipcRenderer} from "electron";
+import * as fs from "node:fs";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
@@ -1566,6 +1571,77 @@ export class Gutter {
                     }
                 }]
             }).element);
+            /// #if !MOBILE
+            const hljsElement = nodeElement.querySelector(".hljs") as HTMLElement;
+            let code = hljsElement?.textContent || "";
+            if (code.length > 0) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "exportCodeBlock",
+                    label: window.siyuan.languages.exportCodeBlock,
+                    icon: "iconUpload",
+                    async click() {
+                        code = code.replace(/\u00A0/g, " ");
+                        // https://github.com/siyuan-note/siyuan/issues/14800
+                        code = code.replace(/\u200D```/g, "```");
+
+                        let docName = window.siyuan.languages._kernel[16];
+                        if (protyle.block?.rootID) {
+                            try {
+                                const docInfo = await fetchSyncPost("/api/block/getDocInfo", {
+                                    id: protyle.block.rootID
+                                });
+                                if (docInfo?.data?.name) {
+                                    docName = replaceLocalPath(docInfo.data.name);
+                                    let truncatedDocName = "";
+                                    let byteCount = 0;
+                                    const encoder = new TextEncoder();
+                                    for (const char of docName) {
+                                        const charBytes = encoder.encode(char).length;
+                                        if (byteCount + charBytes > 170) { // 189 - 19(-YYYYMMDDHHmmss.txt)
+                                            break;
+                                        }
+                                        truncatedDocName += char;
+                                        byteCount += charBytes;
+                                    }
+                                    docName = truncatedDocName;
+                                }
+                            } catch {
+                                // API 获取失败时使用默认值
+                            }
+                        }
+                        const fileName = `${docName}-${dayjs().format("YYYYMMDDHHmmss")}.txt`;
+
+                        /// #if BROWSER
+                        const blob = new Blob([code], {type: "text/plain;charset=utf-8"});
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        link.href = url;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        URL.revokeObjectURL(url);
+                        showMessage(window.siyuan.languages.exported);
+                        /// #else
+                        const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                            cmd: "showSaveDialog",
+                            defaultPath: fileName,
+                            properties: ["showOverwriteConfirmation"],
+                        });
+                        if (!result.canceled && result.filePath) {
+                            try {
+                                fs.writeFileSync(result.filePath, code, "utf-8");
+                                showMessage(window.siyuan.languages.exported);
+                            } catch (error) {
+                                showMessage(window.siyuan.languages._kernel[14].replace("%s", (error instanceof Error ? error.message : String(error))));
+                            }
+                        }
+                        /// #endif
+                        window.siyuan.menus.menu.remove();
+                    }
+                }).element);
+            }
+            /// #endif
         } else if (type === "NodeCodeBlock" && !protyle.disabled && ["echarts", "mindmap"].includes(nodeElement.getAttribute("data-subtype"))) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_chart", type: "separator"}).element);
             const height = (nodeElement as HTMLElement).style.height;

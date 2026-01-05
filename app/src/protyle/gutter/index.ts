@@ -68,7 +68,7 @@ import * as fs from "node:fs";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
-import {code160to32} from "../util/code160to32";
+import {nbsp2space} from "../util/nbsp2space";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1586,7 +1586,7 @@ export class Gutter {
                         element.addEventListener("click", async () => {
                             const hljsElement = nodeElement.querySelector(".hljs") as HTMLElement;
                             let code = hljsElement?.textContent || "";
-                            code = code160to32(code);
+                            code = nbsp2space(code);
                             // https://github.com/siyuan-note/siyuan/issues/14800
                             code = code.replace(/\u200D```/g, "```");
 

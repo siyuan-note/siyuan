@@ -394,8 +394,13 @@ func uploadCloud(c *gin.Context) {
 		return
 	}
 
+	ignorePushMsg := false
+	if nil != arg["ignorePushMsg"] {
+		ignorePushMsg = arg["ignorePushMsg"].(bool)
+	}
+
 	id := arg["id"].(string)
-	count, err := model.UploadAssets2Cloud(id)
+	count, err := model.UploadAssets2Cloud(id, ignorePushMsg)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -427,17 +432,17 @@ func uploadCloudByAssetsPaths(c *gin.Context) {
 		assets = append(assets, pathArg.(string))
 	}
 
-	count, err := model.UploadAssets2CloudByAssetsPaths(assets)
+	ignorePushMsg := false
+	if nil != arg["ignorePushMsg"] {
+		ignorePushMsg = arg["ignorePushMsg"].(bool)
+	}
+
+	count, err := model.UploadAssets2CloudByAssetsPaths(assets, ignorePushMsg)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 3000}
 		return
-	}
-
-	ignorePushMsg := false
-	if nil != arg["ignorePushMsg"] {
-		ignorePushMsg = arg["ignorePushMsg"].(bool)
 	}
 
 	if !ignorePushMsg {

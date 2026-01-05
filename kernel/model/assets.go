@@ -490,7 +490,7 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
-func UploadAssets2Cloud(id string) (count int, err error) {
+func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
@@ -517,19 +517,19 @@ func UploadAssets2Cloud(id string) (count int, err error) {
 		assets = append(assets, getQueryEmbedNodesAssetsLinkDests(n)...)
 	}
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
-	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
+	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets, ignorePushMsg)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func UploadAssets2CloudByAssetsPaths(assetPaths []string) (count int, err error) {
+func UploadAssets2CloudByAssetsPaths(assetPaths []string, ignorePushMsg bool) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
-	count, err = uploadAssets2Cloud(assetPaths, bizTypeUploadAssets)
+	count, err = uploadAssets2Cloud(assetPaths, bizTypeUploadAssets, ignorePushMsg)
 	return
 }
 
@@ -539,7 +539,7 @@ const (
 )
 
 // uploadAssets2Cloud 将资源文件上传到云端图床。
-func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err error) {
+func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool) (count int, err error) {
 	var uploadAbsAssets []string
 	for _, assetPath := range assetPaths {
 		var absPath string
@@ -562,7 +562,11 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err err
 	}
 
 	logging.LogInfof("uploading [%d] assets", len(uploadAbsAssets))
-	msgId := util.PushMsg(fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
+
+	var msgId string
+	if !ignorePushMsg {
+		msgId = util.PushMsg(fmt.Sprintf(Conf.Language(27), len(uploadAbsAssets)), 3000)
+	}
 	if loadErr := LoadUploadToken(); nil != loadErr {
 		util.PushMsg(loadErr.Error(), 5000)
 		return
@@ -638,7 +642,10 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err err
 		logging.LogInfof("uploaded asset [%s]", relAsset)
 		count++
 	}
-	util.PushClearMsg(msgId)
+
+	if !ignorePushMsg {
+		util.PushClearMsg(msgId)
+	}
 
 	if 0 < len(completedUploadAssets) {
 		logging.LogInfof("uploaded [%d] assets", len(completedUploadAssets))

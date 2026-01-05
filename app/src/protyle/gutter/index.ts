@@ -14,6 +14,7 @@ import {
     copyPlainText,
     isInAndroid,
     isInHarmony,
+    isInIOS,
     isMac,
     isOnlyMeta,
     openByMobile,
@@ -1578,77 +1579,42 @@ export class Gutter {
                         });
                     }
                 }, {
-                    /// #if !MOBILE
                     id: "saveCodeBlockAsFile",
                     iconHTML: "",
+                    ignore: !!isInIOS() || !!isInAndroid() || !!isInHarmony(),
                     label: window.siyuan.languages.saveCodeBlockAsFile,
-                    async bind(element) {
+                    bind(element) {
                         element.addEventListener("click", async () => {
-                            const hljsElement = nodeElement.querySelector(".hljs") as HTMLElement;
-                            let code = hljsElement?.textContent || "";
-                            code = nbsp2space(code);
                             // https://github.com/siyuan-note/siyuan/issues/14800
-                            code = code.replace(/\u200D```/g, "```");
-
-                            let docName = window.siyuan.languages._kernel[16];
-                            if (protyle.block?.rootID) {
-                                try {
-                                    const docInfo = await fetchSyncPost("/api/block/getDocInfo", {
-                                        id: protyle.block.rootID
-                                    });
-                                    if (docInfo?.data?.name) {
-                                        docName = replaceLocalPath(docInfo.data.name);
-                                        let truncatedDocName = "";
-                                        let byteCount = 0;
-                                        const encoder = new TextEncoder();
-                                        for (const char of docName) {
-                                            const charBytes = encoder.encode(char).length;
-                                            if (byteCount + charBytes > 170) { // 189 - 19(-YYYYMMDDHHmmss.txt)
-                                                break;
-                                            }
-                                            truncatedDocName += char;
-                                            byteCount += charBytes;
-                                        }
-                                        docName = truncatedDocName;
-                                    }
-                                } catch {
-                                    console.warn("Failed to fetch document info for code block export.");
-                                }
-                            }
-
-                            const fileName = `${docName}-${dayjs().format("YYYYMMDDHHmmss")}.txt`;
-
+                            const code = nbsp2space(getContenteditableElement(nodeElement)?.textContent || "").replace(/\u200D```/g, "```");
+                            const docInfo = await fetchSyncPost("/api/block/getDocInfo", {
+                                id: protyle.block.rootID
+                            });
+                            const fileName = `${replaceLocalPath(docInfo.data?.name || window.siyuan.languages._kernel[16])}.${nodeElement.querySelector(".protyle-action__language").textContent || "txt"}`;
                             /// #if BROWSER
-                            const blob = new Blob([code], {type: "text/plain;charset=utf-8"});
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.download = fileName;
-                            document.body.appendChild(link);
-                            link.click();
-                            link.remove();
+                            const url = URL.createObjectURL(new Blob([code], {type: "text/plain;charset=utf-8"}));
+                            const linkElement = document.createElement("a");
+                            linkElement.href = url;
+                            linkElement.download = fileName;
+                            document.body.appendChild(linkElement);
+                            linkElement.click();
+                            linkElement.remove();
                             URL.revokeObjectURL(url);
                             showMessage(window.siyuan.languages.exported);
                             /// #else
-
                             const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
                                 cmd: "showSaveDialog",
                                 defaultPath: fileName,
                                 properties: ["showOverwriteConfirmation"],
                             });
                             if (!result.canceled && result.filePath) {
-                                try {
-                                    fs.writeFileSync(result.filePath, code, "utf-8");
-                                    showMessage(window.siyuan.languages.exported);
-                                } catch (error) {
-                                    showMessage(window.siyuan.languages._kernel[14].replace("%s", (error instanceof Error ? error.message : String(error))));
-                                }
+                                fs.writeFileSync(result.filePath, code, "utf-8");
+                                showMessage(window.siyuan.languages.exported);
                             }
                             /// #endif
                             window.siyuan.menus.menu.remove();
                         });
                     }
-                    /// #endif
                 }]
             }).element);
         } else if (type === "NodeCodeBlock" && !protyle.disabled && ["echarts", "mindmap"].includes(nodeElement.getAttribute("data-subtype"))) {

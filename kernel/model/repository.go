@@ -742,8 +742,10 @@ func checkoutRepo(id string) {
 
 	util.PushEndlessProgress(Conf.Language(63))
 	FlushTxQueue()
+
 	CloseWatchAssets()
 	defer WatchAssets()
+
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
@@ -1593,7 +1595,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	var upserts, removes []string
 	var upsertTrees int
 	// 可能需要重新加载部分功能
-	var needReloadFlashcard, needReloadOcrTexts, needReloadPlugin bool
+	var needReloadFlashcard, needReloadOcrTexts, needReloadPlugin, needReloadSnippet bool
 	upsertCodePluginSet := hashset.New() // 插件代码变更 data/plugins/
 	upsertDataPluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
@@ -1632,6 +1634,15 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasSuffix(file.Path, ".sy") {
 			upsertTrees++
+		}
+
+		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+			absPath := filepath.Join(util.DataDir, file.Path)
+			HandleAssetsChangeEvent(absPath)
+		}
+
+		if file.Path == "/snippets/conf.json" {
+			needReloadSnippet = true
 		}
 	}
 
@@ -1674,6 +1685,15 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				removeWidgetDirSet.Add(parts[2])
 			}
 		}
+
+		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+			absPath := filepath.Join(util.DataDir, file.Path)
+			HandleAssetsRemoveEvent(absPath)
+		}
+
+		if file.Path == "/snippets/conf.json" {
+			needReloadSnippet = true
+		}
 	}
 
 	for _, upsertPetal := range mergeResult.UpsertPetals {
@@ -1696,6 +1716,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	if needReloadPlugin {
 		PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginSet, uninstallPluginSet, "")
+	}
+
+	if needReloadSnippet {
+		PushReloadSnippet(Conf.Snippet)
 	}
 
 	for _, widgetDir := range removeWidgetDirSet.Values() {

@@ -705,6 +705,7 @@ interface IWebSocketData {
     msg: string;
     code: number;
     sid?: string;
+    context?: any;
 }
 
 interface IGraphCommon {

@@ -711,6 +711,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false
+	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
 			waitSecondForExecInstallPkg = true

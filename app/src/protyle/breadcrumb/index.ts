@@ -446,17 +446,7 @@ ${padHTML}
                     accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
                     click: () => {
                         setEditMode(protyle, "wysiwyg");
-                        protyle.scroll.lastScrollTop = 0;
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.id,
-                            size: protyle.block.id === protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
-                        }, getResponse => {
-                            onGet({
-                                data: getResponse,
-                                protyle,
-                                action: protyle.block.id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]
-                            });
-                        });
+                        reloadProtyle(protyle, true);
                         /// #if !MOBILE
                         saveLayout();
                         /// #endif

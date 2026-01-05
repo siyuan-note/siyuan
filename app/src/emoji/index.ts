@@ -439,7 +439,6 @@ export const openEmojiPanel = (
                     icon: unicode
                 }, () => {
                     dialog.destroy();
-                    addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id, "iconFilesRoot");
                 });
             } else if (type === "doc") {
@@ -448,7 +447,6 @@ export const openEmojiPanel = (
                     attrs: {"icon": unicode}
                 }, () => {
                     dialog.destroy();
-                    addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
@@ -456,6 +454,7 @@ export const openEmojiPanel = (
             if (callback) {
                 callback(unicode);
             }
+            addEmoji(unicode);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -561,7 +560,6 @@ export const openEmojiPanel = (
                         notebook: id,
                         icon: ""
                     }, () => {
-                        dialog.destroy();
                         updateFileTreeEmoji("", id, "iconFilesRoot");
                     });
                 } else if (type === "doc") {
@@ -569,7 +567,6 @@ export const openEmojiPanel = (
                         id: id,
                         attrs: {"icon": ""}
                     }, () => {
-                        dialog.destroy();
                         updateFileTreeEmoji("", id);
                         updateOutlineEmoji("", id);
                     });
@@ -577,6 +574,7 @@ export const openEmojiPanel = (
                 if (callback) {
                     callback("");
                 }
+                dialog.destroy();
                 break;
             } else if (target.classList.contains("emojis__item") || target.getAttribute("data-action") === "random" || target.classList.contains("emoji__dynamic-item")) {
                 let unicode = "";
@@ -595,7 +593,6 @@ export const openEmojiPanel = (
                         notebook: id,
                         icon: unicode
                     }, () => {
-                        addEmoji(unicode);
                         updateFileTreeEmoji(unicode, id, "iconFilesRoot");
                     });
                 } else if (type === "doc") {
@@ -603,15 +600,14 @@ export const openEmojiPanel = (
                         id,
                         attrs: {"icon": unicode}
                     }, () => {
-                        addEmoji(unicode);
                         updateFileTreeEmoji(unicode, id);
                         updateOutlineEmoji(unicode, id);
-
                     });
                 }
                 if (callback) {
                     callback(unicode);
                 }
+                addEmoji(unicode);
                 break;
             } else if (target.getAttribute("data-type")?.startsWith("tab-")) {
                 dialogElement.querySelectorAll('.emojis__tabheader [data-type|="tab"]').forEach((item: HTMLElement) => {

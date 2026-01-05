@@ -196,6 +196,7 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 							buf.WriteString(inline.Content())
 						}
 					}
+					buf.WriteByte(' ')
 				}
 			}
 			return ast.WalkContinue

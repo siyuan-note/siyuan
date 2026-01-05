@@ -66,7 +66,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard, encodeBase64} from "../util/compatibility";
+import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -102,6 +102,7 @@ import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {updateCalloutType} from "./callout";
+import {nbsp2space} from "../util/nbsp2space";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -469,6 +470,8 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
+                        // https://github.com/siyuan-note/siyuan/issues/14800
+                        textPlain = textPlain.replace(/\u200D```/g, "```");
                         isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
@@ -482,7 +485,7 @@ export class WYSIWYG {
                 html = getEnableHTML(html);
             }
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
-            textPlain = textPlain.replace(/\u00A0/g, " ") // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = nbsp2space(textPlain) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
@@ -789,10 +792,14 @@ export class WYSIWYG {
                 if (!nodeElement) {
                     return;
                 }
+                const bodyElement = hasClosestByClassName(avDragFillElement, "av__body") as HTMLElement;
+                if (!bodyElement) {
+                    return;
+                }
                 const originData: { [key: string]: IAVCellValue[] } = {};
                 let lastOriginCellElement: HTMLElement;
                 const originCellIds: string[] = [];
-                nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     const rowElement = hasClosestByClassName(item, "av__row");
                     if (rowElement) {
                         if (!originData[rowElement.dataset.id]) {
@@ -804,7 +811,7 @@ export class WYSIWYG {
                     }
                 });
                 const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
-                const firstCellIndex = getPositionByCellElement(nodeElement.querySelector(".av__cell--active"));
+                const firstCellIndex = getPositionByCellElement(bodyElement.querySelector(".av__cell--active"));
                 let moveAVCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
@@ -815,7 +822,7 @@ export class WYSIWYG {
                     moveAVCellElement = tempCellElement;
                     if (moveAVCellElement && moveAVCellElement.dataset.id) {
                         const newIndex = getPositionByCellElement(moveAVCellElement);
-                        nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                        bodyElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             if (!originCellIds.includes(item.dataset.id)) {
                                 item.classList.remove("av__cell--active");
                             }
@@ -824,7 +831,7 @@ export class WYSIWYG {
                             lastCellElement = undefined;
                             return;
                         }
-                        nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
+                        bodyElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
                             if ((newIndex.rowIndex < firstCellIndex.rowIndex && index >= newIndex.rowIndex && index < firstCellIndex.rowIndex) ||
                                 (newIndex.rowIndex > dragFillCellIndex.rowIndex && index <= newIndex.rowIndex && index > dragFillCellIndex.rowIndex)) {
                                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
@@ -846,7 +853,7 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     if (lastCellElement) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
-                        const allActiveCellsElement = nodeElement.querySelectorAll(".av__cell--active");
+                        const allActiveCellsElement = bodyElement.querySelectorAll(".av__cell--active");
                         addDragFill(allActiveCellsElement[allActiveCellsElement.length - 1]);
                     }
                     return false;
@@ -2037,6 +2044,8 @@ export class WYSIWYG {
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
                     textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                    // https://github.com/siyuan-note/siyuan/issues/14800
+                    textPlain = textPlain.replace(/\u200D```/g, "```");
                     isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321
@@ -2066,7 +2075,7 @@ export class WYSIWYG {
                     textPlain = textPlain.endsWith("\n") ? textPlain.replace(/\n$/, "") : textPlain;
                 }
             }
-            textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = nbsp2space(textPlain); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
 
             if (!isInCodeBlock) {
@@ -3070,8 +3079,21 @@ export class WYSIWYG {
                         } else {
                             emojiHTML = unicode2Emoji(unicode);
                         }
+                        if (unicode === "") {
+                            const subType = nodeElement.getAttribute("data-subtype");
+                            if (subType === "NOTE") {
+                                emojiHTML = "✏️";
+                            } else if (subType === "TIP") {
+                                emojiHTML = "💡";
+                            } else if (subType === "IMPORTANT") {
+                                emojiHTML = "️❗";
+                            } else if (subType === "WARNING") {
+                                emojiHTML = "⚠️";
+                            } else if (subType === "CAUTION") {
+                                emojiHTML = "🚨";
+                            }
+                        }
                         calloutIconElement.innerHTML = emojiHTML;
-                        hideElements(["dialog"]);
                         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
                         focusBlock(nodeElement);
                     }, calloutIconElement.querySelector("img"));

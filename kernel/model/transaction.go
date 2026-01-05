@@ -1841,9 +1841,10 @@ type Transaction struct {
 	DoOperations   []*Operation `json:"doOperations"`
 	UndoOperations []*Operation `json:"undoOperations"`
 
-	trees        map[string]*parse.Tree // 事务中变更的树
-	nodes        map[string]*ast.Node   // 事务中变更的节点
-	relatedAvIDs []string               // 事务中变更的属性视图 ID
+	trees          map[string]*parse.Tree // 事务中变更的树
+	nodes          map[string]*ast.Node   // 事务中变更的节点
+	relatedAvIDs   []string               // 事务中变更的属性视图 ID
+	changedRootIDs []string               // 变更的树 ID 列表（包含了变更定义块后影响的动态锚文本所在的树）
 
 	isGlobalAssetsInit bool   // 是否初始化过全局资源判断
 	isGlobalAssets     bool   // 是否属于全局资源
@@ -1852,6 +1853,18 @@ type Transaction struct {
 	luteEngine *lute.Lute
 	m          *sync.Mutex
 	state      atomic.Int32 // 0: 初始化，1：未提交，:2: 已提交，3: 已回滚
+}
+
+func (tx *Transaction) GetChangedRootIDs() (ret []string) {
+	for t := range tx.trees {
+		ret = append(ret, t)
+	}
+
+	for _, id := range tx.changedRootIDs {
+		ret = append(ret, id)
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
 }
 
 func (tx *Transaction) WaitForCommit() {
@@ -1885,7 +1898,7 @@ func (tx *Transaction) commit() (err error) {
 
 		checkUpsertInUserGuide(tree)
 	}
-	refreshDynamicRefTexts(tx.nodes, tx.trees)
+	tx.changedRootIDs = refreshDynamicRefTexts(tx.nodes, tx.trees)
 
 	tx.relatedAvIDs = gulu.Str.RemoveDuplicatedElem(tx.relatedAvIDs)
 	for _, avID := range tx.relatedAvIDs {

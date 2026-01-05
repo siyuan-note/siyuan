@@ -671,6 +671,9 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         });
     }
     if (cursorElement) {
+        if (cursorElement.getAttribute("contenteditable") === "false") {
+            return false;
+        }
         if (cursorElement.tagName === "TABLE") {
             if (toStart) {
                 cursorElement = cursorElement.querySelector("th, td");

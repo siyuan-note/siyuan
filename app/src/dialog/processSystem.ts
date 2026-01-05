@@ -305,7 +305,6 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                             window.webkit.messageHandlers.exit.postMessage("");
                             return;
                         }
-
                         if (isInHarmony()) {
                             window.JSHarmony.exit();
                             return;
@@ -321,7 +320,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                 ipcRenderer.send(Constants.SIYUAN_SHOW_WINDOW);
             }
 
-            confirmDialog(window.siyuan.languages.tip, response.msg, () => {
+            confirmDialog(window.siyuan.languages.updateVersion, response.msg, () => {
                 fetchPost("/api/system/exit", {
                     force: true,
                     setCurrentWorkspace,

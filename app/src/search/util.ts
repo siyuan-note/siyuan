@@ -1143,9 +1143,6 @@ export const getArticle = (options: {
             if (articleId !== options.id) {
                 return;
             }
-            if (options.edit.protyle.options.render.title) {
-                options.edit.protyle.title.render(options.edit.protyle, response);
-            }
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
                 query: options.value || null,
@@ -1170,7 +1167,9 @@ export const getArticle = (options: {
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                 });
-
+                if (options.edit.protyle.options.render.title) {
+                    options.edit.protyle.title.render(options.edit.protyle, response);
+                }
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 if (isSupportCSSHL()) {
                     let observer: ResizeObserver;

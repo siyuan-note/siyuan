@@ -381,29 +381,27 @@ export class WYSIWYG {
                     html = html.substring(0, html.length - 1) + "]";
                 }
             } else if (selectTableElement) {
-                const selectCellElements: HTMLTableCellElement[] = [];
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 html = "<table>";
-                nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                    if (!item.classList.contains("fn__none") && isIncludeCell({
-                        tableSelectElement,
-                        scrollLeft,
-                        scrollTop,
-                        item,
-                    })) {
-                        selectCellElements.push(item);
-                    }
-                });
-                selectCellElements.forEach((item, index) => {
-                    if (index === 0 || !item.previousElementSibling ||
-                        item.previousElementSibling !== selectCellElements[index - 1]) {
+                nodeElement.querySelectorAll("tr").forEach(rowElement => {
+                    const rowCells: HTMLTableCellElement[] = [];
+                    rowElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                        if (!item.classList.contains("fn__none") && isIncludeCell({
+                            tableSelectElement,
+                            scrollLeft,
+                            scrollTop,
+                            item,
+                        })) {
+                            rowCells.push(item);
+                        }
+                    });
+                    if (rowCells.length > 0) {
                         html += "<tr>";
-                    }
-                    html += item.outerHTML;
-                    if (!item.nextElementSibling || !selectCellElements[index + 1] ||
-                        item.nextElementSibling !== selectCellElements[index + 1]) {
+                        rowCells.forEach(cell => {
+                            html += cell.outerHTML;
+                        });
                         html += "</tr>";
                     }
                 });

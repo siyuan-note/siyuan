@@ -4754,7 +4754,7 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 		if _, ok := v["itemID"]; ok {
 			itemID = v["itemID"].(string)
 		} else if _, ok := v["rowID"]; ok {
-			// TODO 划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
+			// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
 			itemID = v["rowID"].(string)
 		}
 		valueData := v["value"]

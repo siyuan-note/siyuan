@@ -323,7 +323,7 @@ export class WYSIWYG {
                             });
                             itemHTML = response.data.dom;
                         } else {
-                            itemHTML = removeZWJ(removeEmbed(item));
+                            itemHTML = removeEmbed(item);
                         }
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             if (!listHTML) {
@@ -470,7 +470,6 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
-                        textPlain = removeZWJ(textPlain);
                         isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
@@ -484,7 +483,7 @@ export class WYSIWYG {
                 html = getEnableHTML(html);
             }
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
-            textPlain = nbsp2space(textPlain) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
@@ -495,7 +494,7 @@ export class WYSIWYG {
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ(selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
                     try {
@@ -1881,7 +1880,7 @@ export class WYSIWYG {
                         });
                         itemHTML = response.data.dom;
                     } else {
-                        itemHTML = removeZWJ(removeEmbed(item));
+                        itemHTML = removeEmbed(item);
                     }
                     if (item.getAttribute("data-type") === "NodeListItem") {
                         if (!listHTML) {
@@ -2042,7 +2041,7 @@ export class WYSIWYG {
                 // https://github.com/siyuan-note/siyuan/issues/10722
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
-                    textPlain = removeZWJ(tempElement.textContent.replace(Constants.ZWSP, ""));
+                    textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
                     isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321
@@ -2072,7 +2071,7 @@ export class WYSIWYG {
                     textPlain = textPlain.endsWith("\n") ? textPlain.replace(/\n$/, "") : textPlain;
                 }
             }
-            textPlain = nbsp2space(textPlain); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = removeZWJ(nbsp2space(textPlain)); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
 
             if (!isInCodeBlock) {
@@ -2081,7 +2080,7 @@ export class WYSIWYG {
                 restoreLuteMarkdownSyntax(protyle);
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ(selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
                     try {

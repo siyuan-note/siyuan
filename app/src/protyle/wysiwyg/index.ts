@@ -323,7 +323,7 @@ export class WYSIWYG {
                             });
                             itemHTML = response.data.dom;
                         } else {
-                            itemHTML = removeEmbed(item);
+                            itemHTML = removeZWJ(removeEmbed(item));
                         }
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             if (!listHTML) {
@@ -1881,7 +1881,7 @@ export class WYSIWYG {
                         });
                         itemHTML = response.data.dom;
                     } else {
-                        itemHTML = removeEmbed(item);
+                        itemHTML = removeZWJ(removeEmbed(item));
                     }
                     if (item.getAttribute("data-type") === "NodeListItem") {
                         if (!listHTML) {

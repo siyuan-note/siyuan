@@ -1148,6 +1148,9 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 	var blockIDs []string
 	for _, blockValues := range blocksValues {
 		blockID := ast.NewNodeID()
+		if v := blockValues[0]; "" != v.BlockID {
+			blockID = v.BlockID
+		}
 		blockIDs = append(blockIDs, blockID)
 		for _, v := range blockValues {
 			keyValues, _ := attrView.GetKeyValues(v.KeyID)

@@ -15,6 +15,7 @@ import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
+import {removeZWJ} from "./normalizeText";
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
@@ -81,8 +82,10 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
-    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock"].includes(dataType)) {
+    } else if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
         text += blockElement.querySelector("[spellcheck]").textContent;
+    } else if ("NodeCodeBlock" === dataType) {
+        text += removeZWJ(blockElement.querySelector("[spellcheck]").textContent);
     } else if (dataType === "NodeTable") {
         blockElement.querySelectorAll("th, td").forEach((item) => {
             text += item.textContent.trim() + "\t";
@@ -159,7 +162,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
             if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
-                insertHTML(textPlain.replace(/```/g, "\u200D```"), protyle);
+                insertHTML(removeZWJ(textPlain).replace(/```/g, "\u200D```"), protyle);
                 return;
             }
         }
@@ -361,7 +364,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        insertHTML(textPlain.replace(/```/g, "\u200D```"), protyle);
+        insertHTML(removeZWJ(textPlain).replace(/```/g, "\u200D```"), protyle);
         return;
     } else if (siyuanHTML) {
         // 编辑器内部粘贴

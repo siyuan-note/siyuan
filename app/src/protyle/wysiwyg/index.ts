@@ -102,7 +102,7 @@ import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {updateCalloutType} from "./callout";
-import {nbsp2space} from "../util/nbsp2space";
+import {nbsp2space, removeZWJ} from "../util/normalizeText";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -470,8 +470,7 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
-                        // https://github.com/siyuan-note/siyuan/issues/14800
-                        textPlain = textPlain.replace(/\u200D```/g, "```");
+                        textPlain = removeZWJ(textPlain);
                         isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
@@ -2043,9 +2042,7 @@ export class WYSIWYG {
                 // https://github.com/siyuan-note/siyuan/issues/10722
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
-                    textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
-                    // https://github.com/siyuan-note/siyuan/issues/14800
-                    textPlain = textPlain.replace(/\u200D```/g, "```");
+                    textPlain = removeZWJ(tempElement.textContent.replace(Constants.ZWSP, ""));
                     isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321

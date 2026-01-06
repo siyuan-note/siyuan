@@ -20,7 +20,7 @@ import {openFileById} from "../../editor/util";
 import {setTitle} from "../../dialog/processSystem";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
-import {nbsp2space} from "../util/nbsp2space";
+import {nbsp2space} from "../util/normalizeText";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";

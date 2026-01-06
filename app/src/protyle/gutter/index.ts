@@ -69,7 +69,7 @@ import {replaceLocalPath} from "../../editor/rename";
 import {showMessage} from "../../dialog/message";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
-import {nbsp2space} from "../util/nbsp2space";
+import {nbsp2space} from "../util/normalizeText";
 
 export class Gutter {
     public element: HTMLElement;
@@ -779,10 +779,7 @@ export class Gutter {
                 selectsElement.forEach((item: HTMLElement) => {
                     html += getPlainText(item) + "\n";
                 });
-                let plainText = html.trimEnd();
-                // https://github.com/siyuan-note/siyuan/issues/14800
-                plainText = plainText.replace(/\u200D```/g, "```");
-                copyPlainText(plainText);
+                copyPlainText(html.trimEnd());
                 focusBlock(selectsElement[0]);
             }
         }, {
@@ -1353,12 +1350,7 @@ export class Gutter {
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
             click() {
-                let plainText = getPlainText(nodeElement as HTMLElement).trimEnd();
-                if (type === "NodeCodeBlock") {
-                    // https://github.com/siyuan-note/siyuan/issues/14800
-                    plainText = plainText.replace(/\u200D```/g, "```");
-                }
-                copyPlainText(plainText);
+                copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
                 focusBlock(nodeElement);
             }
         }, {

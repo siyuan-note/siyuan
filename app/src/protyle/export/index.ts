@@ -530,10 +530,7 @@ ${getIconScript(servePath)}
                         return;
                     }
                 } else if (target.classList.contains("protyle-action__copy")) {
-                    let text = target.parentElement.nextElementSibling.textContent.trimEnd();
-                    text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
-                    text = text.replace(/\u200D\`\`\`/g, "\`\`\`");
-                    navigator.clipboard.writeText(text);
+                    navigator.clipboard.writeText(target.parentElement.nextElementSibling.textContent.trimEnd().replace(/\u00A0/g, " ").replace(/\u200D\`\`\`/g, "\`\`\`"));
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -824,10 +821,7 @@ ${getIconScript(servePath)}
     Protyle.plantumlRender(previewElement, "stage/protyle");
     document.querySelectorAll(".protyle-action__copy").forEach((item) => {
       item.addEventListener("click", (event) => {
-            let text = item.parentElement.nextElementSibling.textContent.trimEnd();
-            text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying
-            text = text.replace(/\u200D\`\`\`/g, "\`\`\`");
-            navigator.clipboard.writeText(text);
+            navigator.clipboard.writeText(item.parentElement.nextElementSibling.textContent.trimEnd().replace(/\u00A0/g, " ").replace(/\u200D\`\`\`/g, "\`\`\`"));
             event.preventDefault();
             event.stopPropagation();
       })

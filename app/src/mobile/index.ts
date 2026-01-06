@@ -30,7 +30,7 @@ import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {updateControlAlt} from "../protyle/util/hotKey";
-import {nbsp2space} from "../protyle/util/nbsp2space";
+import {nbsp2space} from "../protyle/util/normalizeText";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];

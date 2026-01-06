@@ -69,12 +69,20 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 		return
 	}
 
+	if ".DS_Store" == filepath.Base(assetAbsPath) {
+		return
+	}
+
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
 }
 
 func HandleAssetsChangeEvent(assetAbsPath string) {
 	if !filelock.IsExist(assetAbsPath) {
+		return
+	}
+
+	if ".DS_Store" == filepath.Base(assetAbsPath) {
 		return
 	}
 

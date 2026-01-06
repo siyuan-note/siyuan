@@ -587,8 +587,13 @@ func InitConf() {
 
 	Conf.DataIndexState = 0
 
-	if "" == Conf.CookieKey {
-		Conf.CookieKey = gulu.Rand.String(16)
+	if cookieKey := readCookieKey(); "" != cookieKey {
+		Conf.CookieKey = cookieKey
+	} else {
+		if "" == Conf.CookieKey {
+			Conf.CookieKey = gulu.Rand.String(16)
+		}
+		writeCookieKey(Conf.CookieKey)
 	}
 
 	Conf.Save()
@@ -598,6 +603,33 @@ func InitConf() {
 
 	go util.InitPandoc()
 	go util.InitTesseract()
+}
+
+func readCookieKey() (cookieKey string) {
+	cookieKeyPath := filepath.Join(util.HomeDir, ".config", "siyuan", "cookie.key")
+	if !gulu.File.IsExist(cookieKeyPath) {
+		return
+	}
+
+	data, err := os.ReadFile(cookieKeyPath)
+	if err != nil {
+		logging.LogErrorf("read cookie key file [%s] failed: %s", cookieKeyPath, err)
+		return
+	}
+
+	cookieKey = string(bytes.TrimSpace(data))
+	return
+}
+
+func writeCookieKey(cookieKey string) {
+	cookieKeyPath := filepath.Join(util.HomeDir, ".config", "siyuan", "cookie.key")
+	if gulu.File.IsExist(cookieKeyPath) {
+		return
+	}
+
+	if err := os.WriteFile(cookieKeyPath, []byte(cookieKey), 0644); err != nil {
+		logging.LogErrorf("save cookie key file [%s] failed: %s", cookieKeyPath, err)
+	}
 }
 
 func initLang() {

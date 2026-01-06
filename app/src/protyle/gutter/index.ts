@@ -61,12 +61,12 @@ import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {processClonePHElement} from "../render/util";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
+import {ipcRenderer} from "electron";
+import * as fs from "fs";
 import * as path from "path";
+/// #endif
 import {replaceLocalPath} from "../../editor/rename";
 import {showMessage} from "../../dialog/message";
-import {ipcRenderer} from "electron";
-import * as fs from "node:fs";
-/// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {nbsp2space} from "../util/nbsp2space";

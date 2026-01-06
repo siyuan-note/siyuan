@@ -712,6 +712,10 @@ func RemoveUnusedAssets() (ret []string) {
 				}
 			}
 
+			if !isFileWatcherAvailable() {
+				HandleAssetsRemoveEvent(absPath)
+			}
+
 			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
 				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, removeErr)
 				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
@@ -719,9 +723,6 @@ func RemoveUnusedAssets() (ret []string) {
 			}
 
 			util.RemoveAssetText(unusedAsset)
-			if !isFileWatcherAvailable() {
-				HandleAssetsRemoveEvent(absPath)
-			}
 		}
 		ret = append(ret, absPath)
 	}
@@ -758,6 +759,10 @@ func RemoveUnusedAsset(p string) (ret string) {
 		cache.RemoveAssetHash(hash)
 	}
 
+	if !isFileWatcherAvailable() {
+		HandleAssetsRemoveEvent(absPath)
+	}
+
 	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
@@ -766,9 +771,6 @@ func RemoveUnusedAsset(p string) (ret string) {
 	ret = absPath
 
 	util.RemoveAssetText(p)
-	if !isFileWatcherAvailable() {
-		HandleAssetsRemoveEvent(absPath)
-	}
 
 	IncSync()
 

@@ -17,7 +17,7 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            min-height: 100vh;
+            min-height: calc(100vh - 32px);
             box-sizing: border-box;
             padding: 0 max(16px, calc((100vw - 608px) / 2));
         }
@@ -99,12 +99,12 @@
 
         #content div {
             line-height: 1.6;
-            margin-bottom: 16px;
+            margin-top: 16px;
         }
 
         hr {
             border: 1px solid #e0e0e0;
-            margin: 0 0 16px 0;
+            margin: 16px 0;
         }
 
         .info-section {
@@ -183,7 +183,6 @@
         <span class="title-emoji" id="titleEmoji"></span>
         <div class="title-text" id="titleText"></div>
     </div>
-    <div class="fn__flex-1"></div>
     <div id="content"></div>
     <hr>
     <div class="info-section">

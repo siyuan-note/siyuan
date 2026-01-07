@@ -226,10 +226,9 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
         query: {
             home: app.getPath("home"),
             v: appVer,
-            titleZh: titleZh,
-            titleEn: titleEn,
-            emoji: emoji,
-            content: content,
+            title: `<h2>${titleZh}</h2><h2>${titleEn}</h2>`,
+            emoji,
+            content,
             icon: path.join(appDir, "stage", "icon-large.png"),
         },
     });

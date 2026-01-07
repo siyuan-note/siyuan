@@ -8,8 +8,8 @@
         body {
             margin: 0;
             background-color: #fff;
-            color: #202124;
-            font-family: BlinkMacSystemFont, "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            color: #222;
+            font-family: BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", arial, "Microsoft Yahei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Twemoji Mozilla", "Android Emoji", "EmojiSymbols";
             font-size: 16px;
         }
 
@@ -17,11 +17,9 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            margin: 0 auto;
-            border: 1px solid rgba(0, 0, 0, .06);
             min-height: 100vh;
             box-sizing: border-box;
-            padding: 0 calc((100vw - 608px) / 2);
+            padding: 0 max(16px, calc((100vw - 608px) / 2));
         }
 
         .fn__flex-1 {
@@ -30,41 +28,81 @@
             flex-shrink: 0;
         }
 
+        a {
+            text-decoration: none;
+            color: #3575f0;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .topbar {
+            background: #fff;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            left: 0;
+            display: flex;
+            box-sizing: border-box;
+            line-height: 32px;
+        }
+
+        .svg {
+            right: 32px;
+            top: 0;
+            width: 13px;
+            fill: #5f6368;
+            padding: 9.5px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .svg:hover {
+            background: #dfe0e1;
+            fill: #222;
+        }
+
+        #close {
+            width: 10px;
+            padding: 11px 11px;
+        }
+
+        #close:hover {
+            background-color: #d23f31;
+            fill: #fff;
+        }
+
+        .topbar img {
+            height: 32px;
+            width: 32px;
+            float: left;
+            margin-right: 8px;
+        }
+
+        .drag {
+            -webkit-app-region: drag;
+            flex: 1;
+        }
+
         .title-container {
             display: flex;
-            gap: 12px;
+            gap: 16px;
         }
 
         .title-emoji {
-            font-size: 40px;
-            line-height: 50px;
+            font-size: 48px;
             align-self: center;
-        }
-
-        .title-text {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .title-line {
-            font-size: 24px;
-            line-height: 30px;
-        }
-
-        h2 {
-            margin: 0;
-            padding: 0;
+            margin: 0 32px 0 8px;
         }
 
         #content div {
             line-height: 1.6;
-            margin-top: 0;
             margin-bottom: 16px;
         }
 
         hr {
-            border: 1px solid rgba(0, 0, 0, .06);
+            border: 1px solid #e0e0e0;
             margin: 0 0 16px 0;
         }
 
@@ -85,92 +123,27 @@
             text-align: center;
         }
 
-        a {
-            text-decoration: none;
-            color: #218bff;
-        }
-
-        a:hover {
-            text-decoration: underline;
-            color: #0969da;
-        }
-
-        .svg {
-            position: fixed;
-            right: 32px;
-            top: 0;
-            width: 13px;
-            fill: #5f6368;
-            padding: 9.5px;
-            cursor: pointer;
-            z-index: 1;
-        }
-
-        .svg:hover {
-            background: #dfe0e1;
-            fill: #202124;
-        }
-
-        #close {
-            right: 0;
-            width: 10px;
-            padding: 11px 11px;
-        }
-
-        #close:hover {
-            background-color: #d23f31;
-            fill: #fff;
-        }
-
         .darwin #min,
         .darwin #close {
             display: none;
         }
 
-        #icon {
-            position: fixed;
-            left: 4px;
-            top: 0;
-            line-height: 32px;
-            color: #5f6368;
+        .darwin .topbar {
+            padding-left: 80px;
         }
 
-        .darwin #icon {
-            left: 74px;
-        }
-
-        #icon img {
-            height: 32px;
-            width: 32px;
-            vertical-align: top;
-        }
-
-        .drag {
-            -webkit-app-region: drag;
-            height: 32px;
-            cursor: pointer;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 64px;
-        }
-
-        .darwin .drag {
-            right: 0;
-        }
-
-        @media (prefers-color-scheme: dark) {
+        @media (prefers-color-scheme: light) {
             body {
                 background-color: #1e1e1e;
-                color: #e4e4e4;
+                color: #dadada;
             }
 
-            .fn__flex-column {
-                border: 1px solid rgba(255, 255, 255, .1);
+            .topbar {
+                background-color: #1e1e1e;
             }
 
             hr {
-                border: 1px solid rgba(255, 255, 255, .1);
+                border: 1px solid #363636;
             }
 
             .info-section {
@@ -178,11 +151,7 @@
             }
 
             a {
-                color: #58a6ff;
-            }
-
-            a:hover {
-                color: #79c0ff;
+                color: #3573f0;
             }
 
             .svg {
@@ -190,30 +159,28 @@
             }
 
             .svg:hover {
-                background: #3c3c3c;
-                fill: #e4e4e4;
-            }
-
-            #close:hover {
-                background-color: #d23f31;
-                fill: #fff;
-            }
-
-            #icon {
-                color: #9aa0a6;
+                background: rgba(255, 255, 255, .075);
+                fill: #dadada;
             }
         }
     </style>
 </head>
 <body>
+<div class="topbar">
+    <div id="icon"></div>
+    <div class="drag"></div>
+    <svg class="svg" id="min" viewBox="0 0 32 32">
+        <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+    </svg>
+    <svg class="svg" id="close" viewBox="0 0 32 32">
+        <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+    </svg>
+</div>
 <div class="fn__flex-column">
     <div class="fn__flex-1"></div>
-    <div id="title" class="title-container">
+    <div class="title-container">
         <span class="title-emoji" id="titleEmoji"></span>
-        <div class="title-text">
-            <h2 class="title-line" id="titleZh"></h2>
-            <h2 class="title-line" id="titleEn"></h2>
-        </div>
+        <div class="title-text" id="titleText"></div>
     </div>
     <div class="fn__flex-1"></div>
     <div id="content"></div>
@@ -231,14 +198,6 @@
     </div>
     <div class="fn__flex-1"></div>
 </div>
-<svg class="svg" id="min" viewBox="0 0 32 32">
-    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
-</svg>
-<svg class="svg" id="close" viewBox="0 0 32 32">
-    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
-</svg>
-<div id="icon"></div>
-<div class="drag"></div>
 <script>
     'use strict';
     const params = new URLSearchParams(window.location.search);
@@ -261,37 +220,23 @@
     document.querySelector('#icon').innerHTML = `<img src="${params.get('icon') || ''}" alt="SiYuan LOGO"> ${version}`;
 
     // 标题
-    document.getElementById('titleEmoji').textContent = params.get('emoji') || '⚠️';
-    document.getElementById('titleZh').textContent = params.get('titleZh') || '';
-    document.getElementById('titleEn').textContent = params.get('titleEn') || '';
+    document.getElementById('titleEmoji').textContent = params.get('emoji');
+    document.getElementById('titleText').innerHTML = params.get('title') || '';
 
     // 内容
     document.getElementById('content').innerHTML = params.get('content') || '';
 
     // 时间信息
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    const timeString = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
-    document.getElementById('time').innerHTML = timeString;
+    const date = new Date();
+    document.getElementById('time').innerHTML = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
 
     // 系统信息
     const os = require('os');
-    const platformMap = {
+    document.getElementById('systemInfo').innerHTML = `${version} · ${{
         'darwin': 'macOS',
         'win32': 'Windows',
         'linux': 'Linux'
-    };
-    const platform = platformMap[process.platform] || process.platform;
-    const release = os.release();
-    const arch = os.arch();
-    const cpus = os.cpus();
-    const cpuModel = cpus[0]?.model || '';
-    document.getElementById('systemInfo').innerHTML = `${version} · ${platform} ${release} · ${arch} · ${cpuModel}`;
+    }[process.platform] || process.platform} ${os.release()} · ${os.arch()} · ${os.cpus()[0]?.model || ''}`;
 </script>
 </body>
 </html>

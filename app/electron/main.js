@@ -218,6 +218,7 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
         titleBarStyle: "hidden",
         fullscreenable: false,
         icon: path.join(appDir, "stage", "icon-large.png"),
+        transparent: "darwin" === process.platform, // 避免深色模式关闭窗口时闪现白色背景
         webPreferences: {
             nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
         },

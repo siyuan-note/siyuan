@@ -725,7 +725,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         parentElement.focus();
     } else {
         // li 下面为 hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等时递归处理
-        if (element.classList.contains("li")) {
+        if (element.classList.contains("li") || element.classList.contains("sb") || element.classList.contains("bq") || element.classList.contains("callout")) {
             return focusBlock(element.querySelector("[data-node-id]"), parentElement, toStart);
         }
     }

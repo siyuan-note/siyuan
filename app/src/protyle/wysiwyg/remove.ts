@@ -695,6 +695,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
         data: "",
         previousID: listItemElement.previousElementSibling.getAttribute("data-node-id")
     }];
+    let foldElement: Element;
     const previousLastElement = listItemElement.previousElementSibling.lastElementChild;
     if (listItemElement.previousElementSibling.getAttribute("fold") === "1") {
         if (getContenteditableElement(blockElement).textContent.trim() === "" &&
@@ -715,7 +716,11 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
             return;
         }
     } else {
-        let previousID = previousLastElement.previousElementSibling.getAttribute("data-node-id");
+        const previousElement = previousLastElement.previousElementSibling;
+        if (previousElement.getAttribute("fold") === "1" && previousElement.getAttribute("data-type") === "NodeHeading") {
+            foldElement = previousElement;
+        }
+        let previousID = previousElement.getAttribute("data-node-id");
         Array.from(blockElement.parentElement.children).forEach((item, index) => {
             if (item.classList.contains("protyle-action") || item.classList.contains("protyle-attr")) {
                 return;
@@ -725,6 +730,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
                 action: "move",
                 id,
                 previousID,
+                context: {ignoreProcess: foldElement ? "true" : "false"}
             });
             undoOperations.push({
                 action: "move",
@@ -733,7 +739,11 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
                 parentID: listItemId
             });
             previousID = id;
-            previousLastElement.before(item);
+            if (foldElement) {
+                item.remove();
+            } else {
+                previousLastElement.before(item);
+            }
         });
         doOperations.push({
             action: "delete",
@@ -743,7 +753,32 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
         listItemElement.remove();
     }
 
-    if (listElement.classList.contains("protyle-wysiwyg")) {
+    if (foldElement) {
+        const foldOperations = setFold(protyle, foldElement, true, false, false, true);
+        doOperations.push(...foldOperations.doOperations);
+        undoOperations.push(...foldOperations.undoOperations);
+        if (foldElement.parentElement.getAttribute("data-subtype") === "o") {
+            let nextElement = foldElement.parentElement.nextElementSibling;
+            while (nextElement && !nextElement.classList.contains("protyle-attr")) {
+                const nextId = nextElement.getAttribute("data-node-id");
+                undoOperations.push({
+                    action: "update",
+                    id: nextId,
+                    data: nextElement.outerHTML
+                });
+                const count = parseInt(nextElement.getAttribute("data-marker")) - 1 + ".";
+                nextElement.setAttribute("data-marker", count);
+                nextElement.querySelector(".protyle-action--order").textContent = count;
+                doOperations.push({
+                    action: "update",
+                    id: nextId,
+                    data: nextElement.outerHTML
+                });
+                nextElement = nextElement.nextElementSibling;
+            }
+        }
+        transaction(protyle, doOperations, undoOperations);
+    } else if (listElement.classList.contains("protyle-wysiwyg")) {
         transaction(protyle, doOperations, undoOperations);
     } else {
         if (listElement.getAttribute("data-subtype") === "o") {

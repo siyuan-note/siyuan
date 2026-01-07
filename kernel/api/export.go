@@ -37,6 +37,29 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func exportCodeBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	filePath, err := model.ExportCodeBlock(id)
+	if err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"path": filePath,
+	}
+}
+
 func exportAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

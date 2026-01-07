@@ -61,6 +61,50 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ExportCodeBlock(blockID string) (filePath string, err error) {
+	// Supports exporting a code block as a file https://github.com/siyuan-note/siyuan/pull/16774
+
+	tree, _ := LoadTreeByBlockID(blockID)
+	if nil == tree {
+		err = ErrBlockNotFound
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if ast.NodeCodeBlock != node.Type {
+		err = errors.New("not a code block")
+		return
+	}
+
+	code := node.ChildByType(ast.NodeCodeBlockCode)
+	if nil == code {
+		err = errors.New("code block has no code node")
+		return
+	}
+
+	name := tree.Root.IALAttr("title") + "-" + util.CurrentTimeSecondsStr() + ".txt"
+	name = util.FilterFileName(name)
+	exportFolder := filepath.Join(util.TempDir, "export", "code")
+	if err = os.MkdirAll(exportFolder, 0755); err != nil {
+		logging.LogErrorf("create export temp folder failed: %s", err)
+		return
+	}
+
+	writePath := filepath.Join(exportFolder, name)
+	err = filelock.WriteFile(writePath, code.Tokens)
+	if nil != err {
+		return
+	}
+
+	filePath = "/export/code/" + url.PathEscape(name)
+	return
+}
+
 func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 

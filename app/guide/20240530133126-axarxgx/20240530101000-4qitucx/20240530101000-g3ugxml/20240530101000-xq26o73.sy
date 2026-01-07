@@ -275,6 +275,24 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
+					"TextMarkTextContent": "ar_SA"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "de_DE"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "en_US"
 				},
 				{
@@ -302,6 +320,24 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
+					"TextMarkTextContent": "he_IL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "it_IT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "ja_JP"
 				},
 				{
@@ -311,7 +347,43 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "zh_CN"
+					"TextMarkTextContent": "ko_KR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pl_PL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pt_BR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ru_RU"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tr_TR"
 				},
 				{
 					"Type": "NodeText",
@@ -321,6 +393,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "zh_CHT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CN"
 				},
 				{
 					"Type": "NodeText",

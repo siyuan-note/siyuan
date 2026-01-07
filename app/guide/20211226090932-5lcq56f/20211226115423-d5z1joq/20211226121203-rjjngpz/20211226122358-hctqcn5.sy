@@ -363,7 +363,7 @@
 						"id": ""
 					},
 					"TextMarkType": "code",
-					"TextMarkTextContent": "zh_CN"
+					"TextMarkTextContent": "ar_SA"
 				},
 				{
 					"Type": "NodeText",
@@ -378,7 +378,7 @@
 						"id": ""
 					},
 					"TextMarkType": "code",
-					"TextMarkTextContent": "zh_CHT"
+					"TextMarkTextContent": "de_DE"
 				},
 				{
 					"Type": "NodeText",
@@ -397,7 +397,22 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 ",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "es_ES"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
 					"Properties": {
 						"id": ""
 					}
@@ -409,6 +424,156 @@
 					},
 					"TextMarkType": "code",
 					"TextMarkTextContent": "fr_FR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "he_IL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "it_IT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ja_JP"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ko_KR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pl_PL"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "pt_BR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "ru_RU"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tr_TR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CHT"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "code",
+					"TextMarkTextContent": "zh_CN"
 				},
 				{
 					"Type": "NodeText",

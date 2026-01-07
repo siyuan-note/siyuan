@@ -66,6 +66,7 @@ type AppConf struct {
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
 	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
+	OIDC           *conf.OIDC       `json:"oidc"`           // OIDC 登录配置
 	System         *conf.System     `json:"system"`         // 系统配置
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置
@@ -381,6 +382,9 @@ func InitConf() {
 	}
 	if nil == Conf.Account {
 		Conf.Account = conf.NewAccount()
+	}
+	if nil == Conf.OIDC {
+		Conf.OIDC = conf.NewOIDC()
 	}
 
 	if nil == Conf.Sync {
@@ -979,6 +983,7 @@ func IsPaidUser() bool {
 const (
 	MaskedUserData       = ""
 	MaskedAccessAuthCode = "*******"
+	MaskedSecret         = "*******"
 )
 
 func GetMaskedConf() (ret *AppConf, err error) {
@@ -998,6 +1003,16 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
+	if nil != ret.OIDC && nil != ret.OIDC.Providers {
+		for _, provider := range ret.OIDC.Providers {
+			if nil == provider {
+				continue
+			}
+			if "" != provider.ClientSecret {
+				provider.ClientSecret = MaskedSecret
+			}
+		}
+	}
 	return
 }
 
@@ -1008,6 +1023,7 @@ func HideConfSecret(c *AppConf) {
 	c.Api = &conf.API{}
 	c.Flashcard = &conf.Flashcard{}
 	c.LocalIPs = []string{}
+	c.OIDC = &conf.OIDC{}
 	c.Publish = &conf.Publish{}
 	c.Repo = &conf.Repo{}
 	c.Sync = &conf.Sync{}

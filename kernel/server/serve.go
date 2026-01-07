@@ -45,6 +45,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/net/webdav"
@@ -168,6 +169,7 @@ func Serve(fastMode bool, cookieKey string) {
 	serveSnippets(ginServer)
 	serveRepoDiff(ginServer)
 	serveCheckAuth(ginServer)
+	serveOIDC(ginServer)
 	serveFixedStaticFiles(ginServer)
 	api.ServeAPI(ginServer)
 
@@ -416,6 +418,15 @@ func serveCheckAuth(ginServer *gin.Engine) {
 	ginServer.GET("/check-auth", serveAuthPage)
 }
 
+func serveOIDC(ginServer *gin.Engine) {
+	ginServer.GET("/auth/oidc/login", func(c *gin.Context) {
+		oidc.Login(c, model.Conf.OIDC)
+	})
+	ginServer.GET("/auth/oidc/callback", func(c *gin.Context) {
+		oidc.Callback(c, model.Conf.OIDC)
+	})
+}
+
 func serveAuthPage(c *gin.Context) {
 	data, err := os.ReadFile(filepath.Join(util.WorkingDir, "stage/auth.html"))
 	if err != nil {
@@ -450,6 +461,8 @@ func serveAuthPage(c *gin.Context) {
 			keymapHideWindow = "⌥M"
 		}
 	}
+	oidcEnabled := oidc.IsEnabled(model.Conf.OIDC)
+	oidcProviderName := oidc.ProviderLabel(model.Conf.OIDC)
 	model := map[string]interface{}{
 		"l0":                     model.Conf.Language(173),
 		"l1":                     model.Conf.Language(174),
@@ -469,6 +482,9 @@ func serveAuthPage(c *gin.Context) {
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
 		"workspaceDir":           util.WorkspaceDir,
+		"oidcEnabled":            oidcEnabled,
+		"oidcProviderName":       oidcProviderName,
+		"hasAccessAuthCode":      "" != model.Conf.AccessAuthCode,
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); err != nil {
@@ -606,7 +622,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 						logging.LogErrorf("unmarshal cookie failed: %s", err)
 					} else {
 						workspaceSess := util.GetWorkspaceSession(sess)
-						authOk = workspaceSess.AccessAuthCode == model.Conf.AccessAuthCode
+						authOk = workspaceSess.AccessAuthCode == model.Conf.AccessAuthCode || oidc.IsSessionValid(model.Conf.OIDC, workspaceSess)
 					}
 				}
 			}

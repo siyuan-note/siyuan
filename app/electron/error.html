@@ -88,13 +88,16 @@
 
         .title-container {
             display: flex;
-            gap: 16px;
+        }
+
+        .title-container h2 {
+            margin: 8px 0;
         }
 
         .title-emoji {
             font-size: 48px;
             align-self: center;
-            margin: 0 32px 0 8px;
+            margin: 0 24px 0 8px;
         }
 
         #content div {
@@ -181,7 +184,7 @@
     <div class="fn__flex-1"></div>
     <div class="title-container">
         <span class="title-emoji" id="titleEmoji"></span>
-        <div class="title-text" id="titleText"></div>
+        <div id="titleText"></div>
     </div>
     <div id="content"></div>
     <hr>

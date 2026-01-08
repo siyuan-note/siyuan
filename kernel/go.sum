@@ -366,8 +366,8 @@ github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06/go.mod h1:+e
 github.com/sashabaranov/go-openai v1.41.2 h1:vfPRBZNMpnqu8ELsclWcAvF19lDNgh1t6TVfFFOPiSM=
 github.com/sashabaranov/go-openai v1.41.2/go.mod h1:lj5b/K+zjTSFxVLijLSTDZuP7adOgerWeFyZLUhAKRg=
 github.com/scylladb/termtables v0.0.0-20191203121021-c4c0b6d42ff4/go.mod h1:C1a7PQSMz9NShzorzCiG2fk9+xuCgLkPeCvMHYR2OWg=
-github.com/shirou/gopsutil/v4 v4.25.11 h1:X53gB7muL9Gnwwo2evPSE+SfOrltMoR6V3xJAXZILTY=
-github.com/shirou/gopsutil/v4 v4.25.11/go.mod h1:EivAfP5x2EhLp2ovdpKSozecVXn1TmuG7SMzs/Wh4PU=
+github.com/shirou/gopsutil/v4 v4.25.12 h1:e7PvW/0RmJ8p8vPGJH4jvNkOyLmbkXgXW4m6ZPic6CY=
+github.com/shirou/gopsutil/v4 v4.25.12/go.mod h1:EivAfP5x2EhLp2ovdpKSozecVXn1TmuG7SMzs/Wh4PU=
 github.com/shopspring/decimal v1.4.0 h1:bxl37RwXBklmTi0C79JfXCEBD1cqqHt0bbgBAGFp81k=
 github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+DMd9qYNcwME=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
@@ -375,8 +375,8 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05Ut
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
 github.com/siyuan-note/dataparser v0.0.0-20251203120213-59c16535cb56 h1:aKzEVlOOSwvYqpbWTAQpGrpAZT8JrpAvaY9ek4PXIAQ=
 github.com/siyuan-note/dataparser v0.0.0-20251203120213-59c16535cb56/go.mod h1:UGIytXL3Ge9iFj9RVDNAnfEOCPmzMPzpYTZyLtGC6tQ=
-github.com/siyuan-note/dejavu v0.0.0-20251231084441-263b273cf9b8 h1:fCvRF6BR1Hj4+nn6QoZlHvgrqkRnjzCINBTAOR1y4dE=
-github.com/siyuan-note/dejavu v0.0.0-20251231084441-263b273cf9b8/go.mod h1:BsunBSGjXs7qFJSxppgmZHys7PFwTj2bUhvstPEuHlE=
+github.com/siyuan-note/dejavu v0.0.0-20260108100422-990f2c0cc6f2 h1:3KjMAV0nsOUoNYgfaGr7tgwj1dTLJq2X6C/QV0M0gOY=
+github.com/siyuan-note/dejavu v0.0.0-20260108100422-990f2c0cc6f2/go.mod h1:CAO7wN3CKFqCT9UZhpC6/ucSy+4tfKnQwMSq4LINwzs=
 github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f h1:HSgJKIAMgokJDAvBBfRj47SzRSm6mNGssY0Wv7rcEtg=
 github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f/go.mod h1:JE3S9VuJqTggyfhjesNDuqvqrRvwG3IctFjXXchLx1M=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=

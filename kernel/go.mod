@@ -56,9 +56,9 @@ require (
 	github.com/rqlite/sql v0.0.0-20251204023435-65660522892e
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.41.2
-	github.com/shirou/gopsutil/v4 v4.25.11
+	github.com/shirou/gopsutil/v4 v4.25.12
 	github.com/siyuan-note/dataparser v0.0.0-20251203120213-59c16535cb56
-	github.com/siyuan-note/dejavu v0.0.0-20251231084441-263b273cf9b8
+	github.com/siyuan-note/dejavu v0.0.0-20260108100422-990f2c0cc6f2
 	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20251212095217-08318833e008

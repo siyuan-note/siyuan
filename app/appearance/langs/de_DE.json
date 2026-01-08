@@ -1,5 +1,5 @@
 {
-  "uploadFileTooLarge": "Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
+  "uploadFileTooLarge": "⚠\uFE0F Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
   "recentDocsMaxListCount": "Maximale Anzahl an aufgelisteten letzten Dokumenten",
   "recentDocsMaxListCountTip": "Maximale Anzahl der Dokumente, die im Dialog der zuletzt verwendeten Dokumente aufgelistet werden",
   "bazaarNeedVersion": "Erfordert ein Upgrade von SiYuan auf Version v${x} oder höher, um diese Funktion zu nutzen",

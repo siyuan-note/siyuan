@@ -1,5 +1,5 @@
 {
-  "uploadFileTooLarge": "上传的文件 [${x}] 很大 [${y}]，请确认是否继续上传？",
+  "uploadFileTooLarge": "⚠\uFE0F 上传的文件 [${x}] 很大 [${y}]，请确认是否继续上传？",
   "recentDocsMaxListCount": "最近的文档最大数量",
   "recentDocsMaxListCountTip": "最近的文档对话框中列出文档的最大数量",
   "bazaarNeedVersion": "需升级到思源笔记 v${x} 或更高版本才能使用",

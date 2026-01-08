@@ -17,9 +17,12 @@
 package api
 
 import (
+	"os"
+
 	"github.com/88250/clipboard"
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 )
 
 func readFilePaths(c *gin.Context) {
@@ -33,5 +36,21 @@ func readFilePaths(c *gin.Context) {
 	if 1 > len(paths) {
 		paths = []string{}
 	}
-	ret.Data = paths
+
+	data := map[string]map[string]any{}
+	for _, path := range paths {
+		fi, err := os.Stat(path)
+		if nil != err {
+			logging.LogErrorf("stat file failed: %s", err)
+			continue
+		}
+
+		data[path] = map[string]any{
+			"name":    fi.Name(),
+			"size":    fi.Size(),
+			"isDir":   fi.IsDir(),
+			"updated": fi.ModTime().UnixMilli(),
+		}
+	}
+	ret.Data = data
 }

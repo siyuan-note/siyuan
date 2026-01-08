@@ -485,6 +485,7 @@ export class Files extends Model {
             });
             /// #endif
         });
+        let dragoverLiObj: { element: HTMLElement, rect: DOMRect };
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 return;
@@ -496,6 +497,12 @@ export class Files extends Model {
             if (!liElement || !window.siyuan.dragElement) {
                 event.preventDefault();
                 return;
+            }
+            if (!dragoverLiObj || dragoverLiObj.element !== liElement) {
+                dragoverLiObj = {
+                    element: liElement,
+                    rect: liElement.getBoundingClientRect()
+                };
             }
             this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover", "dragover__bottom", "dragover__top");
@@ -538,7 +545,7 @@ export class Files extends Model {
                 (!sourceOnlyRoot && targetType !== "navigation-root" &&
                     (notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")))
             ) {
-                const nodeRect = liElement.getBoundingClientRect();
+                const nodeRect = dragoverLiObj.rect;
                 const dragHeight = nodeRect.height * .2;
                 if (targetType === "navigation-root" && sourceOnlyRoot) {
                     if (event.clientY > nodeRect.top + nodeRect.height / 2) {

@@ -148,7 +148,7 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const pasteAsPlainText = async (protyle: IProtyle) => {
-    let localFiles: string[] = [];
+    let localFiles: ILocalFiles[] = [];
     /// #if !BROWSER
     localFiles = await getLocalFiles();
     if (localFiles.length > 0) {
@@ -214,24 +214,24 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetMark(window.siyuan.config.editor.markdown.inlineMark);
 };
 
-const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
+const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {
     if (protyle && protyle.app && protyle.app.plugins) {
         for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response: { files: string[] } = await new Promise((resolve) => {
+            const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
                 const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
                     protyle,
                     resolve,
                     textHTML: "",
                     textPlain: "",
                     siyuanHTML: "",
-                    files: localFiles
+                    localFiles
                 });
                 if (emitResult) {
                     resolve(undefined);
                 }
             });
-            if (response?.files) {
-                localFiles = response.files;
+            if (response?.localFiles) {
+                localFiles = response.localFiles;
             }
         }
     }
@@ -277,7 +277,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     /// #if !BROWSER
     if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
-        const localFiles: string[] = await getLocalFiles();
+        const localFiles: ILocalFiles[] = await getLocalFiles();
         if (localFiles.length > 0) {
             readLocalFile(protyle, localFiles);
             return;

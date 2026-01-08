@@ -1,5 +1,5 @@
 {
-  "uploadFileTooLarge": "O arquivo enviado [${x}] é muito grande [${y}]。 Tem certeza de que deseja continuar o upload?",
+  "uploadFileTooLarge": "⚠\uFE0F O arquivo enviado [${x}] é muito grande [${y}]。 Tem certeza de que deseja continuar o upload?",
   "recentDocsMaxListCount": "Número máximo de documentos recentes listados",
   "recentDocsMaxListCountTip": "Número máximo de documentos listados na caixa de diálogo Documentos Recentes",
   "bazaarNeedVersion": "É necessário atualizar o SiYuan para a versão v${x} ou superior para usar",

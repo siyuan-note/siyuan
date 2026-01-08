@@ -23,7 +23,8 @@ import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
 import {Backlink} from "../../layout/dock/Backlink";
-import {fetchSyncPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {onGet} from "../util/onGet";
 
 export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
     protyle.observerLoad?.disconnect();
@@ -241,6 +242,25 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             }
         }
         /// #endif
+        // https://github.com/siyuan-note/siyuan/issues/16767
+        setTimeout(() => {
+            if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
+                !protyle.scroll.element.classList.contains("fn__none") &&
+                protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2
+            ) {
+                fetchPost("/api/filetree/getDoc", {
+                    id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                    mode: 2,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
+                }, getResponse => {
+                    onGet({
+                        data: getResponse,
+                        protyle,
+                        action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
+                    });
+                });
+            }
+        }, Constants.TIMEOUT_COUNT);// 需等待滚动阻塞、后台处理完成。否则会加载已删除的内容
         return;
     }
     const blockType = blockElement.getAttribute("data-type");

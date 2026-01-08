@@ -33,9 +33,6 @@ func readFilePaths(c *gin.Context) {
 	if !gulu.OS.IsLinux() { // Linux 端不再支持 `粘贴为纯文本` 时处理文件绝对路径 https://github.com/siyuan-note/siyuan/issues/5825
 		paths, _ = clipboard.ReadFilePaths()
 	}
-	if 1 > len(paths) {
-		paths = []string{}
-	}
 
 	data := map[string]map[string]any{}
 	for _, path := range paths {

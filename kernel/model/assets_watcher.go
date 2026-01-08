@@ -84,7 +84,7 @@ func watchAssets() {
 				}
 				logging.LogErrorf("watch assets failed: %s", err)
 			case <-timer.C:
-				logging.LogInfof("assets changed: %s", lastEvent)
+				//logging.LogInfof("assets changed: %s", lastEvent)
 				if lastEvent.Op&fsnotify.Write == fsnotify.Write {
 					IncSync()
 				}

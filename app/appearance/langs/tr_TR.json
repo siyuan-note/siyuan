@@ -1,4 +1,5 @@
 {
+  "uploadFileTooLarge": "Yüklenen dosya [${x}], boyutu [${y}] kadar büyük. Yüklemeye devam etmek istediğinize emin misiniz?",
   "recentDocsMaxListCount": "Son belgelerin listeleneceği maksimum sayı",
   "recentDocsMaxListCountTip": "Son Belgeler iletişim kutusunda en fazla listelenecek belge sayısı",
   "bazaarNeedVersion": "Bu özelliği kullanmak için SiYuan'ı v${x} veya daha yeni bir sürüme yükseltmeniz gerekir",

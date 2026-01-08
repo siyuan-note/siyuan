@@ -1,4 +1,5 @@
 {
+  "uploadFileTooLarge": "上傳的檔案 [${x}] 很大 [${y}]，請確認是否繼續上傳？",
   "recentDocsMaxListCount": "最近的文檔列出數量",
   "recentDocsMaxListCountTip": "在最近的文檔對話框中最多列出文檔的數量",
   "bazaarNeedVersion": "需升級到思源筆記 v${x} 或更高版本才能使用",

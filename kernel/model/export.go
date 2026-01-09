@@ -2583,7 +2583,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 		// 导出时去掉内容块闪卡样式 https://github.com/siyuan-note/siyuan/issues/7374
 		if n.IsBlock() {
-			n.RemoveIALAttr("custom-riff-decks")
+			n.RemoveIALAttr(NodeAttrRiffDecks)
 		}
 
 		switch n.Type {

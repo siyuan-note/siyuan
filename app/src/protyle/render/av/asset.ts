@@ -427,7 +427,7 @@ export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement:
     const assetPaths: string[] = [];
     files.forEach(item => {
         if (item.size && Constants.SIZE_UPLOAD_TIP_SIZE <= item.size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "jedec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
         }
         assetPaths.push(item.path);
     });

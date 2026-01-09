@@ -373,5 +373,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
             progressBar.style.width = progress + "%";
         };
         xhr.send(formData);
+    }, () => {
+        hideMessage(validateResult.msgId);
     });
 };

@@ -1,4 +1,7 @@
 {
+  "clearTempFiles": "Effacer les fichiers temporaires",
+  "clearTempFilesTip": "Effacez les fichiers temporaires générés lors de l'exécution de l'application pour libérer de l'espace de stockage",
+  "uploadFileTooLarge": "⚠\uFE0F Le fichier envoyé [${x}] est trop volumineux [${y}]. Voulez-vous continuer l'envoi ?",
   "recentDocsMaxListCount": "Nombre maximal de documents récents listés",
   "recentDocsMaxListCountTip": "Nombre maximal de documents répertoriés dans la boîte de dialogue Documents récents",
   "bazaarNeedVersion": "Nécessite la mise à niveau de SiYuan vers la version v${x} ou ultérieure pour l'utiliser",
@@ -1130,7 +1133,7 @@
   "appearance1": "Thème du bloc de codes",
   "appearance10": "Close button settings",
   "appearance11": "shrink to the tray after clicking the close button",
-  "appearance16": "Barre d'état inférieure",
+  "appearance16": "Masquer la barre d'état inférieure",
   "appearance17": "Une fois activé, la barre d'état sera masquée",
   "appearance18": "Configurer l'interrupteur des messages de la barre d'état",
   "min": "Min",
@@ -1317,6 +1320,7 @@
   "edit-mode": "Mode Toggle",
   "emoji": "Emoji",
   "export": "Exporter",
+  "saveCodeBlockAsFile": "Enregistrer le bloc de code en tant que fichier",
   "fileTypeError": "type de fichier est une erreur",
   "fullscreen": "Basculer en plein écran",
   "generate": "Génération en cours",
@@ -1373,6 +1377,7 @@
   "undo": "Retiré",
   "up": "en haut",
   "update": "Mises à jour",
+  "updateVersion": "⬆️ Mettre à jour",
   "insertAsset": "Insérer une image ou un fichier",
   "uploadError": "erreur de transfert",
   "uploading": "Transfert en cours",
@@ -1499,7 +1504,7 @@
     "58": "[%d/%d] Vérification de l'index...",
     "59": "Échec de la définition de la liste des ignores de synchronisation",
     "60": "Échec de la récupération du paquet de mise à jour : %s",
-    "61": "⬆️ Le package d'installation de la nouvelle version est prêt, voulez-vous installer la nouvelle version maintenant ?",
+    "61": "Le package d'installation de la nouvelle version est prêt, voulez-vous installer la nouvelle version maintenant ?<br><br><span class='ft__on-surface'>Veuillez noter que vous devez attendre que SiYuan se ferme complètement avant d'installer</span>",
     "62": "⬆️ Le package d'installation de la nouvelle version est prêt. En quittant, il vous sera demandé si vous souhaitez installer la nouvelle version",
     "63": "Récupération, veuillez patienter...",
     "64": "Il y a [%d] fichiers au total, l'indexation prendra un certain temps, veuillez patienter...",
@@ -1541,7 +1546,7 @@
     "100": "Nettoyage des données...",
     "101": "Rappel de réglage terminé [%s]",
     "102": "Traitement terminé",
-    "103": "Le package d'installation de la mise à jour a été automatiquement téléchargé en arrière-plan. En quittant, il vous sera demandé si vous souhaitez installer la nouvelle version",
+    "103": "Le téléchargement du package d'installation de la mise à jour a été automatiquement démarré, la progression du téléchargement sera affichée dans la barre inférieure",
     "104": "Le package d'installation de la mise à jour n'a pas pu être téléchargé, veuillez vérifier la connexion réseau",
     "105": "Sans titre",
     "106": "La longueur maximale est limitée à 512 caractères",
@@ -1713,6 +1718,8 @@
     "272": "Champ sans nom",
     "273": "Ne créez pas l’espace de travail à la racine de la partition, créez un nouveau dossier comme espace de travail",
     "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail",
-    "275": "Impossible d'ouvrir le document créé par une version plus récente. Veuillez mettre à jour vers la dernière version et réessayer"
+    "275": "Impossible d'ouvrir le document créé par une version plus récente. Veuillez mettre à jour vers la dernière version et réessayer",
+    "276": "Nettoyage des fichiers temporaires...",
+    "277": "Nettoyage des fichiers temporaires terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré"
   }
 }

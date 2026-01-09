@@ -1,4 +1,7 @@
 {
+  "clearTempFiles": "Geçici dosyaları temizle",
+  "clearTempFilesTip": "Uygulama çalışırken oluşan geçici dosyaları temizleyerek depolama alanını boşalt",
+  "uploadFileTooLarge": "⚠\uFE0F Yüklenen dosya [${x}], boyutu [${y}] kadar büyük. Yüklemeye devam etmek istediğinize emin misiniz?",
   "recentDocsMaxListCount": "Son belgelerin listeleneceği maksimum sayı",
   "recentDocsMaxListCountTip": "Son Belgeler iletişim kutusunda en fazla listelenecek belge sayısı",
   "bazaarNeedVersion": "Bu özelliği kullanmak için SiYuan'ı v${x} veya daha yeni bir sürüme yükseltmeniz gerekir",
@@ -1130,7 +1133,7 @@
   "appearance1": "Kod bloğu teması",
   "appearance10": "Kapatma düğmesi ayarları",
   "appearance11": "Kapatma tuşuna tıklayınca simge durumuna küçült",
-  "appearance16": "Alt durum çubuğu",
+  "appearance16": "Alt durum çubuğunu gizle",
   "appearance17": "Etkinleştirildiğinde durum çubuğu gizlenir",
   "appearance18": "Durum çubuğu mesaj geçişlerini yapılandır",
   "min": "Küçült",
@@ -1317,6 +1320,7 @@
   "edit-mode": "Düzenleme modunu değiştir",
   "emoji": "Emoji",
   "export": "Dışa aktar",
+  "saveCodeBlockAsFile": "Kod bloğunu dosya olarak kaydet",
   "fileTypeError": "Dosya türü hatalı",
   "fullscreen": "Tam ekranı aç/kapat",
   "generate": "Oluşturuluyor",
@@ -1373,6 +1377,7 @@
   "undo": "Geri al",
   "up": "Yukarı",
   "update": "Güncelle",
+  "updateVersion": "⬆️ Güncelle",
   "insertAsset": "Görsel veya dosya ekle",
   "uploadError": "Yükleme hatası",
   "uploading": "Yükleniyor...",
@@ -1499,7 +1504,7 @@
     "58": "[%d/%d] Dizin doğrulanıyor...",
     "59": "Senkronizasyon yok sayma listesi ayarlanamadı",
     "60": "Güncelleme paketi alınamadı: %s",
-    "61": "⬆️ Yeni sürüm paketi hazır, şimdi yüklemek ister misin?",
+    "61": "Yeni sürüm paketi hazır, şimdi yüklemek ister misin?<br><br><span class='ft__on-surface'>Lütfen dikkat: Kurulumdan önce SiYuan'ın tamamen kapanmasını beklemeniz gerekir</span>",
     "62": "⬆️ Yeni sürüm paketi hazır, çıkarken yükleme seçeneği sunulacak",
     "63": "Kurtarılıyor, lütfen bekle...",
     "64": "Toplam [%d] dosya var, indeksleme biraz sürebilir, lütfen bekle...",
@@ -1541,7 +1546,7 @@
     "100": "Veri temizleniyor...",
     "101": "Hatırlatıcı ayarlandı [%s]",
     "102": "İşlem tamamlandı",
-    "103": "Güncelleme paketi arka planda indirildi. Çıkarken yeni sürüm kurulumu sorulacak",
+    "103": "Güncelleme paketi indirmesi otomatik olarak başlatıldı, indirme ilerlemesi alt çubukta gösterilecek",
     "104": "Güncelleme paketi indirilemedi, ağ bağlantısını kontrol et",
     "105": "Başlıksız",
     "106": "Maksimum uzunluk 512 karakter ile sınırlı",
@@ -1713,6 +1718,8 @@
     "272": "Adsız alan",
     "273": "Çalışma alanını diskin kök dizinine oluşturma, yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
     "274": "Bu klasör başka dosyalar içeriyor, lütfen yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
-    "275": "Daha yeni bir sürümde oluşturulmuş belgeler açılamıyor. Lütfen en son sürüme yükseltip tekrar deneyin"
+    "275": "Daha yeni bir sürümde oluşturulmuş belgeler açılamıyor. Lütfen en son sürüme yükseltip tekrar deneyin",
+    "276": "Geçici dosyalar temizleniyor...",
+    "277": "Geçici dosyalar temizlendi, [%d] dosya silindi, toplam [%s] boş alan açıldı"
   }
 }

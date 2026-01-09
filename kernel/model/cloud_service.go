@@ -214,10 +214,13 @@ var (
 	subscriptionExpirationReminded bool
 )
 
-func RefreshCheckJob() {
+func RefreshCheckJob2H() {
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
 	go refreshAnnouncement()
+}
+
+func RefreshCheckJob6H() {
 	go refreshCheckDownloadInstallPkg()
 }
 
@@ -272,9 +275,6 @@ func refreshCheckDownloadInstallPkg() {
 
 	time.Sleep(3 * time.Minute)
 	checkDownloadInstallPkg()
-	if "" != getNewVerInstallPkgPath() {
-		util.PushMsg(Conf.Language(62), 15*1000)
-	}
 }
 
 func refreshAnnouncement() {

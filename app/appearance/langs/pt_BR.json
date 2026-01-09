@@ -1,4 +1,7 @@
 {
+  "clearTempFiles": "Limpar arquivos temporários",
+  "clearTempFilesTip": "Limpe os arquivos temporários gerados durante a execução do aplicativo para liberar espaço de armazenamento",
+  "uploadFileTooLarge": "⚠\uFE0F O arquivo enviado [${x}] é muito grande [${y}]。 Tem certeza de que deseja continuar o upload?",
   "recentDocsMaxListCount": "Número máximo de documentos recentes listados",
   "recentDocsMaxListCountTip": "Número máximo de documentos listados na caixa de diálogo Documentos Recentes",
   "bazaarNeedVersion": "É necessário atualizar o SiYuan para a versão v${x} ou superior para usar",
@@ -1130,7 +1133,7 @@
   "appearance1": "Tema do Bloco de Código",
   "appearance10": "Configurações do botão fechar",
   "appearance11": "minimizar para a bandeja após clicar no botão fechar",
-  "appearance16": "Barra de status inferior",
+  "appearance16": "Ocultar a barra de status inferior",
   "appearance17": "Ao ativar, a barra de status será ocultada",
   "appearance18": "Configurar o interruptor de mensagens da barra de status",
   "min": "Mín",
@@ -1317,6 +1320,7 @@
   "edit-mode": "Alternar Modo",
   "emoji": "Emoji",
   "export": "Exportar",
+  "saveCodeBlockAsFile": "Salvar bloco de código como arquivo",
   "fileTypeError": "tipo de arquivo é inválido",
   "fullscreen": "Alternar Tela Cheia",
   "generate": "Gerando",
@@ -1373,6 +1377,7 @@
   "undo": "Desfazer",
   "up": "Para cima",
   "update": "Atualizar",
+  "updateVersion": "⬆️ Atualizar",
   "insertAsset": "Inserir imagem ou arquivo",
   "uploadError": "erro de upload",
   "uploading": "Enviando...",
@@ -1499,7 +1504,7 @@
     "58": "[%d/%d] Verificando índice...",
     "59": "Falha ao definir lista de ignorados de sincronização",
     "60": "Falha ao obter o pacote de atualização: %s",
-    "61": "⬆️ O pacote de instalação da nova versão está pronto, deseja instalar a nova versão agora?",
+    "61": "O pacote de instalação da nova versão está pronto, deseja instalar a nova versão agora?<br><br><span class='ft__on-surface'>Por favor, note que você precisa aguardar o SiYuan fechar completamente antes de instalar</span>",
     "62": "⬆️ O pacote de instalação da nova versão está pronto. Ao sair, você será perguntado se deseja instalar a nova versão",
     "63": "Recuperando, por favor aguarde...",
     "64": "Há [%d] arquivos no total, levará algum tempo para indexar, por favor aguarde...",
@@ -1541,7 +1546,7 @@
     "100": "Limpando dados...",
     "101": "Lembrete definido [%s]",
     "102": "Processamento concluído",
-    "103": "O pacote de instalação da atualização foi baixado automaticamente em segundo plano. Ao sair, você será perguntado se deseja instalar a nova versão",
+    "103": "O download do pacote de instalação da atualização foi iniciado automaticamente, o progresso do download será exibido na barra inferior",
     "104": "Falha ao baixar o pacote de instalação da atualização, por favor verifique a conexão de rede",
     "105": "Sem título",
     "106": "Comprimento máximo limitado a 512 caracteres",
@@ -1713,6 +1718,8 @@
     "272": "Campo sem nome",
     "273": "Não crie o espaço de trabalho na raiz da partição, crie uma nova pasta para o espaço de trabalho",
     "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho",
-    "275": "Não é possível abrir o documento criado por uma versão mais recente. Atualize para a versão mais recente e tente novamente"
+    "275": "Não é possível abrir o documento criado por uma versão mais recente. Atualize para a versão mais recente e tente novamente",
+    "276": "Limpando arquivos temporários...",
+    "277": "Limpeza de arquivos temporários concluída, [%d] arquivos removidos, [%s] de espaço em disco liberado"
   }
 }

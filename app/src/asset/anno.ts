@@ -8,6 +8,8 @@ import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 import {isMobile} from "../util/functions";
+import {confirmDialog} from "../dialog/confirmDialog";
+import prettyBytes from "pretty-bytes";
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
@@ -738,13 +740,19 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                 fetch(imageDataURL).then((response) => {
                     return response.blob();
                 }).then((blob) => {
-                    const formData = new FormData();
                     const imageName = content + ".png";
-                    formData.append("file[]", blob, imageName);
-                    formData.append("skipIfDuplicated", "true");
-                    fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
-                        writeText(`<<${idPath} "${content}">>
+                    let msg = "";
+                    if (Constants.SIZE_UPLOAD_TIP_SIZE <= blob.size) {
+                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", imageName).replace("${y}", prettyBytes(blob.size, {binary: true}));
+                    }
+                    confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+                        const formData = new FormData();
+                        formData.append("file[]", blob, imageName);
+                        formData.append("skipIfDuplicated", "true");
+                        fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
+                            writeText(`<<${idPath} "${content}">>
 ![](${response.data.succMap[imageName]})`);
+                        });
                     });
                 });
             });

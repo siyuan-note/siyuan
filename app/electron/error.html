@@ -3,23 +3,23 @@
 <head>
     <title>Error - SiYuan</title>
     <meta charset="UTF-8">
+    <meta name="color-scheme" content="light dark">
     <style>
         body {
             margin: 0;
             background-color: #fff;
-            color: #202124;
-            font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            color: #222;
+            font-family: BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", arial, "Microsoft Yahei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Twemoji Mozilla", "Android Emoji", "EmojiSymbols";
+            font-size: 16px;
         }
 
         .fn__flex-column {
             display: flex;
             flex-direction: column;
             width: 100%;
-            margin: 0 auto;
-            border: 1px solid rgba(0, 0, 0, .06);
-            min-height: 100vh;
+            min-height: calc(100vh - 32px);
             box-sizing: border-box;
-            padding: 0 calc((100vw - 608px) / 2);
+            padding: 0 max(16px, calc((100vw - 608px) / 2));
         }
 
         .fn__flex-1 {
@@ -28,14 +28,28 @@
             flex-shrink: 0;
         }
 
-        h2 {
-            margin: 0 0 4px 0;
-            line-height: 24px;
-            text-align: center;
+        a {
+            text-decoration: none;
+            color: #3575f0;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .topbar {
+            background: #fff;
+            position: sticky;
+            top: 0;
+            width: 100%;
+            left: 0;
+            display: flex;
+            box-sizing: border-box;
+            line-height: 32px;
+            padding-left: 8px;
         }
 
         .svg {
-            position: fixed;
             right: 32px;
             top: 0;
             width: 13px;
@@ -47,11 +61,10 @@
 
         .svg:hover {
             background: #dfe0e1;
-            fill: #202124;
+            fill: #222;
         }
 
         #close {
-            right: 0;
             width: 10px;
             padding: 11px 11px;
         }
@@ -61,160 +74,172 @@
             fill: #fff;
         }
 
-        a {
-            text-decoration: none;
-            color: #218bff;
-        }
-
-        a:hover {
-            text-decoration: underline;
-            color: #0969da;
-        }
-
-        kbd {
-            padding: 2px 4px;
-            font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            line-height: 1;
-            color: #5f6368;
-            vertical-align: middle;
-            background-color: #f3f3f3;
-            border: solid 1px rgba(0, 0, 0, .06);
-            border-radius: 6px;
-            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .06);
-        }
-
-        .feedback {
-            display: flex;
-            justify-content: space-around;
-            font-size: 14px
+        .topbar img {
+            height: 32px;
+            width: 32px;
+            float: left;
+            margin-right: 8px;
         }
 
         .drag {
             -webkit-app-region: drag;
-            height: 32px;
-            cursor: pointer;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 44px;
+            flex: 1;
+        }
+
+        .title-container {
+            display: flex;
+        }
+
+        .title-container h2 {
+            margin: 8px 0;
+        }
+
+        .title-emoji {
+            font-size: 48px;
+            align-self: center;
+            margin: 0 24px 0 8px;
         }
 
         #content div {
             line-height: 1.6;
-            margin-top: 0;
-            margin-bottom: 16px;
+            margin-top: 16px;
         }
 
-        #content div:last-child {
-            margin-bottom: 0;
+        hr {
+            border: 1px solid #e0e0e0;
+            margin: 16px 0;
         }
 
-        #icon {
-            position: fixed;
-            left: 4px;
-            top: 0;
-            line-height: 32px;
+        .info-section {
+            font-size: 14px;
             color: #5f6368;
         }
 
-        #icon img {
-            height: 32px;
-            width: 32px;
-            vertical-align: top;
+        .info-section div:not(:last-child) {
+            margin-bottom: 8px;
         }
 
-        pre code {
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 85%;
-            font-family: mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
-            color: #5f6368;
-            display: block;
-            margin-top: 8px;
-            word-break: break-all;
-            white-space: pre-wrap;
+        .feedback {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .darwin #min,
+        .darwin #close {
+            display: none;
+        }
+
+        .darwin .topbar {
+            padding-left: 80px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #1e1e1e;
+                color: #dadada;
+            }
+
+            .topbar {
+                background-color: #1e1e1e;
+            }
+
+            hr {
+                border: 1px solid #363636;
+            }
+
+            .info-section {
+                color: #9aa0a6;
+            }
+
+            a {
+                color: #3573f0;
+            }
+
+            .svg {
+                fill: #9aa0a6;
+            }
+
+            .svg:hover {
+                background: rgba(255, 255, 255, .075);
+                fill: #dadada;
+            }
         }
     </style>
 </head>
 <body>
+<div class="topbar">
+    <div id="icon"></div>
+    <div class="drag"></div>
+    <svg class="svg" id="min" viewBox="0 0 32 32">
+        <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
+    </svg>
+    <svg class="svg" id="close" viewBox="0 0 32 32">
+        <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
+    </svg>
+</div>
 <div class="fn__flex-column">
     <div class="fn__flex-1"></div>
-    <h2 id="title"></h2>
-    <div class="fn__flex-1"></div>
-    <div id="content"></div>
-    <div class="fn__flex-1"></div>
-    <div class="feedback">
-        <span><a href="https://ld246.com/article/1649901726096" target="_blank">求助反馈建议</a></span>
-        <span><a href="https://b3log.org/siyuan/download.html" target="_blank">下载最新版</a></span>
+    <div class="title-container">
+        <span class="title-emoji" id="titleEmoji"></span>
+        <div id="titleText"></div>
     </div>
+    <div id="content"></div>
+    <hr>
+    <div class="info-section">
+        <div id="time"></div>
+        <div id="systemInfo"></div>
+    </div>
+    <div class="fn__flex-1"></div>
     <div class="feedback">
-        <span><a href="https://liuyun.io/article/1686530886208" target="_blank">Feedback and support</a></span>
-        <span><a href="https://b3log.org/siyuan/en/download.html" target="_blank">Download the latest version</a></span>
+        <a href="https://ld246.com/article/1649901726096" target="_blank">求助反馈建议</a>
+        <a href="https://b3log.org/siyuan/download.html" target="_blank">下载最新版</a>
+        <a href="https://liuyun.io/article/1686530886208" target="_blank">Feedback and support</a>
+        <a href="https://b3log.org/siyuan/en/download.html" target="_blank">Download the latest version</a>
     </div>
     <div class="fn__flex-1"></div>
 </div>
-<svg class="svg" id="min" viewBox="0 0 32 32">
-    <path d="M1.333 14.667h29.333q1.333 0 1.333 1.333v0q0 1.333-1.333 1.333h-29.333q-1.333 0-1.333-1.333v0q0-1.333 1.333-1.333z"></path>
-</svg>
-<svg class="svg" id="close" viewBox="0 0 32 32">
-    <path d="M32 3.221l-12.779 12.779 12.779 12.779-3.221 3.221-12.779-12.779-12.779 12.779-3.221-3.221 12.779-12.779-12.779-12.779 3.221-3.221 12.779 12.779 12.779-12.779z"></path>
-</svg>
-<div id="icon"></div>
-<div class="drag"></div>
 <script>
-    const getSearch = (key) => {
-        if (window.location.search.indexOf('?') === -1) {
-            return ''
-        }
-        let value = ''
-        const data = window.location.search.split('?')[1].split('&')
-        data.find(item => {
-            const keyValue = item.split('=')
-            if (keyValue[0] === key) {
-                value = keyValue[1]
-                return true
-            }
-        })
-        return value
+    'use strict';
+    const params = new URLSearchParams(window.location.search);
+
+    // 窗口控制按钮
+    if (process.platform === 'darwin') {
+        document.body.classList.add('darwin');
     }
+    document.getElementById('close').addEventListener('click', () => {
+        const {ipcRenderer} = require('electron');
+        ipcRenderer.send("siyuan-cmd", "destroy");
+    });
+    document.getElementById('min').addEventListener('click', () => {
+        const {ipcRenderer} = require('electron');
+        ipcRenderer.send("siyuan-cmd", "minimize");
+    });
 
-    (() => {
-        if (process.platform === 'darwin') {
-            document.getElementById('min').style.display = 'none';
-            document.getElementById('close').style.display = 'none';
-            document.querySelector('.drag').style.right = '0';
-            document.querySelector('#icon').style.left = '74px';
-        } else {
-            document.querySelector('#icon').style.right = '70px';
-        }
+    // LOGO和版本号
+    const version = 'SiYuan v' + params.get('v') || '';
+    document.querySelector('#icon').innerHTML = `<img src="${params.get('icon') || ''}" alt="SiYuan LOGO"> ${version}`;
 
-        const os = require('os')
-        const platformMap = {
-            'darwin': 'macOS',
-            'win32': 'Windows',
-            'linux': 'Linux'
-        }
-        const platform = platformMap[process.platform] || process.platform
-        const release = os.release()
-        const arch = os.arch()
-        const cpus = os.cpus()
-        const cpuModel = cpus.length > 0 ? cpus[0].model : ''
-        const systemInfo = `· ${platform} ${release} · ${arch} · ${cpuModel}`
-        document.querySelector('#icon').innerHTML = `<img src="${decodeURIComponent(getSearch('icon'))}"> SiYuan v${getSearch('v')} ${systemInfo}`
+    // 标题
+    document.getElementById('titleEmoji').textContent = params.get('emoji');
+    document.getElementById('titleText').innerHTML = params.get('title') || '';
 
-        document.getElementById('title').innerHTML = decodeURIComponent(getSearch('title'))
-        document.getElementById('content').innerHTML = decodeURIComponent(getSearch('content'))
+    // 内容
+    document.getElementById('content').innerHTML = params.get('content') || '';
 
-        document.getElementById('close').addEventListener('click', () => {
-            const {ipcRenderer} = require('electron')
-            ipcRenderer.send("siyuan-cmd", "destroy");
-        })
-        document.getElementById('min').addEventListener('click', () => {
-            const {ipcRenderer} = require('electron')
-            ipcRenderer.send("siyuan-cmd", "minimize");
-        })
-    })()
+    // 时间信息
+    const date = new Date();
+    document.getElementById('time').innerHTML = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+
+    // 系统信息
+    const os = require('os');
+    document.getElementById('systemInfo').innerHTML = `${version} · ${{
+        'darwin': 'macOS',
+        'win32': 'Windows',
+        'linux': 'Linux'
+    }[process.platform] || process.platform} ${os.release()} · ${os.arch()} · ${os.cpus()[0]?.model || ''}`;
 </script>
 </body>
 </html>

@@ -111,7 +111,7 @@ export const getContenteditableElement = (element: Element): Element => {
 };
 
 export const isNotEditBlock = (element: Element) => {
-    if (element.classList.contains("sb")) {
+    if (element.classList.contains("li") || element.classList.contains("sb") || element.classList.contains("bq") || element.classList.contains("callout")) {
         let hasEditable = false;
         Array.from(element.querySelectorAll("[data-node-id]")).find(item => {
             if (!isNotEditBlock(item)) {

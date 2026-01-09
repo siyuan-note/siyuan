@@ -1,4 +1,7 @@
 {
+  "clearTempFiles": "Clear temporary files",
+  "clearTempFilesTip": "Clear temporary files generated while the app is running to free up storage space",
+  "uploadFileTooLarge": "⚠\uFE0F The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",
   "recentDocsMaxListCount": "Maximum number of recent documents listed",
   "recentDocsMaxListCountTip": "Maximum number of documents listed in the Recent Documents dialog",
   "bazaarNeedVersion": "Requires upgrading SiYuan to v${x} or later to use",
@@ -1130,7 +1133,7 @@
   "appearance1": "Code Block Theme",
   "appearance10": "Close button settings",
   "appearance11": "shrink to the tray after clicking the close button",
-  "appearance16": "Bottom status bar",
+  "appearance16": "Hide bottom status bar",
   "appearance17": "When enabled, the status bar will be hidden",
   "appearance18": "Configure the status bar message switch",
   "min": "Min",
@@ -1317,6 +1320,7 @@
   "edit-mode": "Toggle Mode",
   "emoji": "Emoji",
   "export": "Export",
+  "saveCodeBlockAsFile": "Save code block as file",
   "fileTypeError": "file type is error",
   "fullscreen": "Toggle Fullscreen",
   "generate": "Generating",
@@ -1373,6 +1377,7 @@
   "undo": "Undo",
   "up": "Up",
   "update": "Update",
+  "updateVersion": "⬆️ Update",
   "insertAsset": "Insert image or file",
   "uploadError": "upload error",
   "uploading": "Uploading...",
@@ -1499,7 +1504,7 @@
     "58": "[%d/%d] Verifying index...",
     "59": "Failed to set sync ignore list",
     "60": "Failed to get the update package: %s",
-    "61": "⬆️ The new version installation package is ready, do you want to install the new version now?",
+    "61": "The new version installation package is ready, do you want to install the new version now?<br><br><span class='ft__on-surface'>Please note that you need to wait for SiYuan to fully exit before installing</span>",
     "62": "⬆️ The new version installation package is ready. When exiting, you will be asked whether to install the new version",
     "63": "Recovering, please wait...",
     "64": "There are [%d] files in total, it will take some time to index, please wait...",
@@ -1541,7 +1546,7 @@
     "100": "Cleaning data...",
     "101": "Done setting reminder [%s]",
     "102": "Processing completed",
-    "103": "The update installation package has been automatically downloaded in the background. When exiting, you will be asked whether to install the new version",
+    "103": "The update installation package has been automatically started downloading, download progress will be displayed in the bottom bar",
     "104": "The update installation package failed to download, please check the network connection",
     "105": "Untitled",
     "106": "Maximum length is limited to 512 characters",
@@ -1713,6 +1718,8 @@
     "272": "Unnamed field",
     "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
     "274": "This folder contains other files, please create a new folder as the workspace",
-    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again"
+    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again",
+    "276": "Cleaning temporary files...",
+    "277": "Temporary files cleaned, [%d] files removed, [%s] disk space freed"
   }
 }

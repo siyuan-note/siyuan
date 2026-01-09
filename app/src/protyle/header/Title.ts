@@ -20,7 +20,7 @@ import {openFileById} from "../../editor/util";
 import {setTitle} from "../../dialog/processSystem";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
-import {code160to32} from "../util/code160to32";
+import {nbsp2space} from "../util/normalizeText";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
@@ -336,17 +336,17 @@ export class Title {
     public setTitle(title: string) {
         /// #if MOBILE
         if (this.editElement) {
-            if (code160to32(title) !== code160to32(this.editElement.textContent)) {
+            if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
                 this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
             }
         } else {
             const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
-            if (code160to32(title) !== code160to32(inputElement.value)) {
+            if (nbsp2space(title) !== nbsp2space(inputElement.value)) {
                 inputElement.value = title === window.siyuan.languages.untitled ? "" : title;
             }
         }
         /// #else
-        if (code160to32(title) !== code160to32(this.editElement.textContent)) {
+        if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
             this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
         }
         /// #endif

@@ -1149,9 +1149,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!avElement) {
                 focusByRange(getRangeByPoint(event.clientX, event.clientY));
                 if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                    const files: string[] = [];
+                    const files: ILocalFiles[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                        files.push({
+                            path: webUtils.getPathForFile(event.dataTransfer.files[i]),
+                            size: event.dataTransfer.files[i].size
+                        });
                     }
                     uploadLocalFiles(files, protyle, !event.altKey);
                 } else {
@@ -1162,9 +1165,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
                     if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                        const files: string[] = [];
+                        const files: ILocalFiles[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                            files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                            files.push({
+                                path: webUtils.getPathForFile(event.dataTransfer.files[i]),
+                                size: event.dataTransfer.files[i].size
+                            });
                         }
                         dragUpload(files, protyle, cellElement);
                         clearSelect(["cell"], avElement);

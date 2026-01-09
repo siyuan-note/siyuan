@@ -122,13 +122,13 @@ export const readText = () => {
 /// #if !BROWSER
 export const getLocalFiles = async () => {
     // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
-    let localFiles: string[] = [];
+    let localFiles: ILocalFiles[] = [];
     if ("darwin" === window.siyuan.config.system.os) {
         const xmlString = clipboard.read("NSFilenamesPboardType");
         const domParser = new DOMParser();
         const xmlDom = domParser.parseFromString(xmlString, "application/xml");
         Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-            localFiles.push(item.childNodes[0].nodeValue);
+            localFiles.push({path: item.childNodes[0].nodeValue, size: null});
         });
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});

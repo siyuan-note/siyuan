@@ -170,6 +170,10 @@
       color: var(--b3-callout-note);
     }
 
+    .callout-icon:empty {
+      display: none;
+    }
+
     &[data-subtype="WARNING"] {
       &::before {
         background-color: var(--b3-callout-warning);

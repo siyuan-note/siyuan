@@ -30,6 +30,7 @@ import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {updateControlAlt} from "../protyle/util/hotKey";
+import {nbsp2space} from "../protyle/util/normalizeText";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -77,7 +78,7 @@ class App {
             const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
             if (copyElement) {
                 let text = copyElement.parentElement.nextElementSibling.textContent.trimEnd();
-                text = text.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+                text = nbsp2space(text); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 writeText(text);
                 showMessage(window.siyuan.languages.copied, 2000);
                 event.preventDefault();

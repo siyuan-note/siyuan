@@ -1,4 +1,7 @@
 {
+  "clearTempFiles": "Temporäre Dateien bereinigen",
+  "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
+  "uploadFileTooLarge": "⚠\uFE0F Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
   "recentDocsMaxListCount": "Maximale Anzahl an aufgelisteten letzten Dokumenten",
   "recentDocsMaxListCountTip": "Maximale Anzahl der Dokumente, die im Dialog der zuletzt verwendeten Dokumente aufgelistet werden",
   "bazaarNeedVersion": "Erfordert ein Upgrade von SiYuan auf Version v${x} oder höher, um diese Funktion zu nutzen",
@@ -1130,7 +1133,7 @@
   "appearance1": "Codeblock-Thema",
   "appearance10": "Einstellungen für die Schaltfläche schließen",
   "appearance11": "Nach dem Klicken auf die Schaltfläche schließen in das Tray minimieren",
-  "appearance16": "Untere Statusleiste",
+  "appearance16": "Statusleiste unten ausblenden",
   "appearance17": "Wenn aktiviert, wird die Statusleiste ausgeblendet",
   "appearance18": "Schalter für Statusleistenmeldungen konfigurieren",
   "min": "Min",
@@ -1317,6 +1320,7 @@
   "edit-mode": "Modus umschalten",
   "emoji": "Emoji",
   "export": "Exportieren",
+  "saveCodeBlockAsFile": "Codeblock als Datei speichern",
   "fileTypeError": "Dateityp ist fehlerhaft",
   "fullscreen": "Vollbildmodus umschalten",
   "generate": "Generierung",
@@ -1373,6 +1377,7 @@
   "undo": "Rückgängig",
   "up": "Nach oben",
   "update": "Aktualisieren",
+  "updateVersion": "⬆️ Aktualisieren",
   "insertAsset": "Bild oder Datei einfügen",
   "uploadError": "Upload-Fehler",
   "uploading": "Hochladen...",
@@ -1499,7 +1504,7 @@
     "58": "[%d/%d] Überprüfen des Index...",
     "59": "Fehler beim Festlegen der Ignorierliste für die Synchronisation",
     "60": "Fehler beim Abrufen des Update-Pakets: %s",
-    "61": "⬆️ Das neue Versionsinstallationspaket ist bereit, möchten Sie die neue Version jetzt installieren?",
+    "61": "Das neue Versionsinstallationspaket ist bereit, möchten Sie die neue Version jetzt installieren?<br><br><span class='ft__on-surface'>Bitte beachten Sie, dass Sie warten müssen, bis SiYuan vollständig beendet ist, bevor Sie die Installation durchführen</span>",
     "62": "⬆️ Das neue Versionsinstallationspaket ist bereit. Beim Beenden werden Sie gefragt, ob Sie die neue Version installieren möchten",
     "63": "Wiederherstellung, bitte warten...",
     "64": "Insgesamt [%d] Dateien, es dauert etwas Zeit, um zu indizieren, bitte warten...",
@@ -1541,7 +1546,7 @@
     "100": "Daten bereinigen...",
     "101": "Erinnerung [%s] eingestellt",
     "102": "Bearbeitung abgeschlossen",
-    "103": "Das Update-Installationspaket wurde automatisch im Hintergrund heruntergeladen. Beim Beenden werden Sie gefragt, ob Sie die neue Version installieren möchten",
+    "103": "Der Download des Update-Installationspakets wurde automatisch gestartet, der Download-Fortschritt wird in der unteren Leiste angezeigt",
     "104": "Das Update-Installationspaket konnte nicht heruntergeladen werden, bitte überprüfen Sie die Netzwerkverbindung",
     "105": "Ohne Titel",
     "106": "Maximale Länge ist auf 512 Zeichen begrenzt",
@@ -1713,6 +1718,8 @@
     "272": "Unbenanntes Feld",
     "273": "Erstellen Sie den Arbeitsbereich nicht im Stammverzeichnis der Partition, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
     "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
-    "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut"
+    "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut",
+    "276": "Temporäre Dateien werden bereinigt...",
+    "277": "Bereinigung der temporären Dateien abgeschlossen, [%d] Dateien entfernt, [%s] Festplattenspeicher freigegeben"
   }
 }

@@ -286,12 +286,17 @@ interface Window {
     destroyTheme(): Promise<void>;
 }
 
+interface ILocalFiles {
+    path: string,
+    size: number
+}
+
 interface IClipboardData {
     textHTML?: string,
     textPlain?: string,
     siyuanHTML?: string,
     files?: File[],
-    localFiles?: string[]
+    localFiles?: ILocalFiles[],
 }
 
 interface IRefDefs {

@@ -1066,7 +1066,7 @@ const removeUnfoldRepeatBlock = (html: string, protyle: IProtyle) => {
     const temp = document.createElement("template");
     temp.innerHTML = html;
     Array.from(temp.content.children).forEach(item => {
-        protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
+        protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
     });
 };
 

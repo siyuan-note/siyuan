@@ -800,6 +800,9 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 			if ast.NodeLinkDest == n.Type {
 				if bytes.HasPrefix(n.Tokens, []byte("file://")) {
 					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"), []byte("/"))
+					if !bytes.HasPrefix(n.Tokens, []byte("file:///")) {
+						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("file://"), []byte("file:///"))
+					}
 				}
 			}
 			return ast.WalkContinue

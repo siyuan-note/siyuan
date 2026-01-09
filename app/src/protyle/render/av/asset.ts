@@ -23,7 +23,7 @@ import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {confirmDialog} from "../../../dialog/confirmDialog";
-import prettyBytes from "pretty-bytes";
+import {filesize} from "filesize";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -427,7 +427,7 @@ export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement:
     const assetPaths: string[] = [];
     files.forEach(item => {
         if (item.size && Constants.SIZE_UPLOAD_TIP_SIZE <= item.size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", prettyBytes(item.size, {binary: true})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "jedec"})) + "<br>";
         }
         assetPaths.push(item.path);
     });

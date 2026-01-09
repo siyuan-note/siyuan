@@ -121,6 +121,14 @@ export const initAbout = () => {
     <div class="b3-label__text">${window.siyuan.languages.rebuildDataIndexTip}</div>
 </div>
 <div class="b3-label">
+    ${window.siyuan.languages.clearTempFiles}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="clearTempFiles">
+       <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.clearTempFiles}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.clearTempFilesTip}</div>
+</div>
+<div class="b3-label">
     ${window.siyuan.languages.systemLog}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="exportLog">
@@ -316,6 +324,11 @@ export const initAbout = () => {
                         break;
                     } else if (target.id === "rebuildDataIndex") {
                         fetchPost("/api/system/rebuildDataIndex", {}, () => {});
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (target.id === "clearTempFiles") {
+                        fetchPost("/api/system/clearTempFiles", {}, () => {});
                         event.preventDefault();
                         event.stopPropagation();
                         break;

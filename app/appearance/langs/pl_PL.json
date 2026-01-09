@@ -1,4 +1,6 @@
 {
+  "clearTempFiles": "Wyczyść pliki tymczasowe",
+  "clearTempFilesTip": "Wyczyść pliki tymczasowe tworzone podczas działania aplikacji, aby zwolnić miejsce na dysku",
   "uploadFileTooLarge": "⚠\uFE0F Przesłany plik [${x}] jest za duży [${y}]. Czy na pewno chcesz kontynuować przesyłanie?",
   "recentDocsMaxListCount": "Maksymalna liczba wyświetlanych ostatnich dokumentów",
   "recentDocsMaxListCountTip": "Maksymalna liczba dokumentów wyświetlanych w oknie dialogowym Ostatnie dokumenty",
@@ -1716,6 +1718,8 @@
     "272": "Nienazwane pole",
     "273": "Nie twórz przestrzeni roboczej w katalogu głównym partycji, utwórz nowy folder jako przestrzeń roboczą",
     "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą",
-    "275": "Nie można otworzyć dokumentu utworzonego w nowszej wersji. Zaktualizuj program do najnowszej wersji i spróbuj ponownie"
+    "275": "Nie można otworzyć dokumentu utworzonego w nowszej wersji. Zaktualizuj program do najnowszej wersji i spróbuj ponownie",
+    "276": "Czyszczenie plików tymczasowych...",
+    "277": "Czyszczenie plików tymczasowych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku"
   }
 }

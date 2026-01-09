@@ -68,6 +68,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/addMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addMicrosoftDefenderExclusion)
 	ginServer.Handle("POST", "/api/system/ignoreAddMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, ignoreAddMicrosoftDefenderExclusion)
 	ginServer.Handle("POST", "/api/system/vacuumDataIndex", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, vacuumDataIndex)
+	ginServer.Handle("POST", "/api/system/clearTempFiles", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearTempFiles)
 	ginServer.Handle("POST", "/api/system/rebuildDataIndex", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rebuildDataIndex)
 
 	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorage) // TODO 请使用 /api/storage/setLocalStorageVal，该端点计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/16664#issuecomment-3694774305

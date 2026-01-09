@@ -35,6 +35,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func clearTempFiles(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.ClearTempFiles()
+}
+
 func vacuumDataIndex(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

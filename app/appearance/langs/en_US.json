@@ -1,4 +1,6 @@
 {
+  "clearTempFiles": "Clear temporary files",
+  "clearTempFilesTip": "Clear temporary files generated while the app is running to free up storage space",
   "uploadFileTooLarge": "⚠\uFE0F The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",
   "recentDocsMaxListCount": "Maximum number of recent documents listed",
   "recentDocsMaxListCountTip": "Maximum number of documents listed in the Recent Documents dialog",
@@ -1716,6 +1718,8 @@
     "272": "Unnamed field",
     "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
     "274": "This folder contains other files, please create a new folder as the workspace",
-    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again"
+    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again",
+    "276": "Cleaning temporary files...",
+    "277": "Temporary files cleaned, [%d] files removed, [%s] disk space freed"
   }
 }

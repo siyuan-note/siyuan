@@ -1,4 +1,6 @@
 {
+  "clearTempFiles": "Limpiar archivos temporales",
+  "clearTempFilesTip": "Limpia los archivos temporales generados durante la ejecución de la aplicación para liberar espacio de almacenamiento",
   "uploadFileTooLarge": "⚠\uFE0F El archivo subido [${x}] es demasiado grande [${y}]，¿estás seguro de que deseas continuar con la subida?",
   "recentDocsMaxListCount": "Número máximo de documentos recientes listados",
   "recentDocsMaxListCountTip": "Número máximo de documentos que se mostrarán en el cuadro de diálogo Documentos recientes",
@@ -1716,6 +1718,8 @@
     "272": "Campo sin nombre",
     "273": "No cree el espacio de trabajo en la ruta raíz de la partición, cree una nueva carpeta como espacio de trabajo",
     "274": "Esta carpeta contiene otros archivos, cree una nueva carpeta como espacio de trabajo",
-    "275": "No se puede abrir el documento creado con una versión más reciente. Actualiza a la última versión e inténtalo de nuevo"
+    "275": "No se puede abrir el documento creado con una versión más reciente. Actualiza a la última versión e inténtalo de nuevo",
+    "276": "Limpiando archivos temporales...",
+    "277": "Limpieza de archivos temporales completada, [%d] archivos eliminados, se liberaron [%s] de espacio en disco"
   }
 }

@@ -265,7 +265,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
     const blockType = blockElement.getAttribute("data-type");
     // 空代码块直接删除
-    if (blockType === "NodeCodeBlock" && getContenteditableElement(blockElement).textContent.trim() === "") {
+    if (blockType === "NodeCodeBlock" && getContenteditableElement(blockElement)?.textContent.trim() === "") {
         blockElement.classList.add("protyle-wysiwyg--select");
         removeBlock(protyle, blockElement, range, type);
         return;

@@ -220,7 +220,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     const assetPaths: string[] = [];
     files.forEach(item => {
         if (item.size && Constants.SIZE_UPLOAD_TIP_SIZE <= item.size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "jedec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
         }
         assetPaths.push(item.path);
     });
@@ -311,7 +311,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     for (let i = 0, iMax = validateResult.files.length; i < iMax; i++) {
         formData.append(protyle.options.upload.fieldName, validateResult.files[i]);
         if (Constants.SIZE_UPLOAD_TIP_SIZE <= validateResult.files[i].size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", validateResult.files[i].name).replace("${y}", filesize(validateResult.files[i].size, {standard: "jedec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", validateResult.files[i].name).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
         }
     }
 

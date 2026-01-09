@@ -743,7 +743,7 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                     const imageName = content + ".png";
                     let msg = "";
                     if (Constants.SIZE_UPLOAD_TIP_SIZE <= blob.size) {
-                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", imageName).replace("${y}", filesize(blob.size, {standard: "jedec"}));
+                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", imageName).replace("${y}", filesize(blob.size, {standard: "iec"}));
                     }
                     confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
                         const formData = new FormData();

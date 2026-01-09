@@ -67,7 +67,7 @@ export abstract class Constants {
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
-    public static readonly SIZE_UPLOAD_TIP_SIZE: number = 256 * 1024 * 1024;
+    public static readonly SIZE_UPLOAD_TIP_SIZE: number = 268435456; // 256 M
     public static readonly SIZE_SCROLL_TB: number = 24;
     public static readonly SIZE_SCROLL_STEP: number = 256;
     public static readonly SIZE_LINK_TEXT_MAX: number = 64;

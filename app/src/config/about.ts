@@ -188,6 +188,16 @@ export const about = {
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.clearTempFiles}
+        <div class="b3-label__text">${window.siyuan.languages.clearTempFilesTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button id="clearTempFiles" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+    </button>
+</div>
+<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
         <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
     </div>
@@ -269,6 +279,9 @@ ${checkUpdateHTML}
         });
         about.element.querySelector("#rebuildDataIndex").addEventListener("click", () => {
             fetchPost("/api/system/rebuildDataIndex", {}, () => {});
+        });
+        about.element.querySelector("#clearTempFiles").addEventListener("click", () => {
+            fetchPost("/api/system/clearTempFiles", {}, () => {});
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {

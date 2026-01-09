@@ -1,4 +1,6 @@
 {
+  "clearTempFiles": "Temporäre Dateien bereinigen",
+  "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
   "uploadFileTooLarge": "⚠\uFE0F Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
   "recentDocsMaxListCount": "Maximale Anzahl an aufgelisteten letzten Dokumenten",
   "recentDocsMaxListCountTip": "Maximale Anzahl der Dokumente, die im Dialog der zuletzt verwendeten Dokumente aufgelistet werden",
@@ -1716,6 +1718,8 @@
     "272": "Unbenanntes Feld",
     "273": "Erstellen Sie den Arbeitsbereich nicht im Stammverzeichnis der Partition, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
     "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
-    "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut"
+    "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut",
+    "276": "Temporäre Dateien werden bereinigt...",
+    "277": "Bereinigung der temporären Dateien abgeschlossen, [%d] Dateien entfernt, [%s] Festplattenspeicher freigegeben"
   }
 }

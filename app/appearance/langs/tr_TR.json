@@ -1,4 +1,6 @@
 {
+  "clearTempFiles": "Geçici dosyaları temizle",
+  "clearTempFilesTip": "Uygulama çalışırken oluşan geçici dosyaları temizleyerek depolama alanını boşalt",
   "uploadFileTooLarge": "⚠\uFE0F Yüklenen dosya [${x}], boyutu [${y}] kadar büyük. Yüklemeye devam etmek istediğinize emin misiniz?",
   "recentDocsMaxListCount": "Son belgelerin listeleneceği maksimum sayı",
   "recentDocsMaxListCountTip": "Son Belgeler iletişim kutusunda en fazla listelenecek belge sayısı",
@@ -1716,6 +1718,8 @@
     "272": "Adsız alan",
     "273": "Çalışma alanını diskin kök dizinine oluşturma, yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
     "274": "Bu klasör başka dosyalar içeriyor, lütfen yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
-    "275": "Daha yeni bir sürümde oluşturulmuş belgeler açılamıyor. Lütfen en son sürüme yükseltip tekrar deneyin"
+    "275": "Daha yeni bir sürümde oluşturulmuş belgeler açılamıyor. Lütfen en son sürüme yükseltip tekrar deneyin",
+    "276": "Geçici dosyalar temizleniyor...",
+    "277": "Geçici dosyalar temizlendi, [%d] dosya silindi, toplam [%s] boş alan açıldı"
   }
 }

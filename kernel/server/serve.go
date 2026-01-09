@@ -265,7 +265,39 @@ func rewritePortJSON(pid, port string) {
 func serveExport(ginServer *gin.Engine) {
 	// Potential data export disclosure security vulnerability https://github.com/siyuan-note/siyuan/issues/12213
 	exportGroup := ginServer.Group("/export/", model.CheckAuth)
-	exportGroup.Static("/", filepath.Join(util.TempDir, "export"))
+	exportBaseDir := filepath.Join(util.TempDir, "export")
+
+	// 应下载而不是查看导出的文件
+	exportGroup.GET("/*filepath", func(c *gin.Context) {
+		filePath := strings.TrimPrefix(c.Request.URL.Path, "/export/")
+
+		decodedPath, err := url.PathUnescape(filePath)
+		if err != nil {
+			decodedPath = filePath
+		}
+
+		fullPath := filepath.Join(exportBaseDir, decodedPath)
+
+		fileInfo, err := os.Stat(fullPath)
+		if os.IsNotExist(err) {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		if fileInfo.IsDir() {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		fileName := filepath.Base(decodedPath)
+		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+
+		c.File(fullPath)
+	})
 }
 
 func serveWidgets(ginServer *gin.Engine) {

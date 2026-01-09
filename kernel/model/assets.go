@@ -1212,7 +1212,7 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 	return
 }
 
-func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
+func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
 	ret = []string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {
@@ -1222,7 +1222,7 @@ func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
 					dest := kv[1]
-					if "" == dest || !util.IsAssetLinkDest([]byte(dest), includePublic) {
+					if "" == dest || !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 						continue
 					}
 					ret = append(ret, dest)
@@ -1238,21 +1238,21 @@ func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !util.IsAssetLinkDest(n.Tokens, includePublic) {
+			if !util.IsAssetLinkDest(n.Tokens, includeServePath) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref), includePublic) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref), includeServePath) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID), includePublic) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID), includeServePath) {
 				return ast.WalkContinue
 			}
 
@@ -1278,7 +1278,7 @@ func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
 
 						for _, asset := range value.MAsset {
 							dest := asset.Content
-							if !util.IsAssetLinkDest([]byte(dest), includePublic) {
+							if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 								continue
 							}
 							ret = append(ret, strings.TrimSpace(dest))
@@ -1288,7 +1288,7 @@ func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
 					for _, value := range keyValues.Values {
 						if nil != value.URL {
 							dest := value.URL.Content
-							if !util.IsAssetLinkDest([]byte(dest), includePublic) {
+							if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 								continue
 							}
 							ret = append(ret, strings.TrimSpace(dest))
@@ -1303,13 +1303,13 @@ func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				if !util.IsAssetLinkDest([]byte(dataAssets), includePublic) {
+				if !util.IsAssetLinkDest([]byte(dataAssets), includeServePath) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
 				dest := treenode.GetNodeSrcTokens(n)
-				if !util.IsAssetLinkDest([]byte(dest), includePublic) {
+				if !util.IsAssetLinkDest([]byte(dest), includeServePath) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dest)

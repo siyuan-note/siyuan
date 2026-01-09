@@ -1304,6 +1304,9 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 	insertedNode.RemoveIALAttr(av.NodeAttrViewNames)
 	insertedNode.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
 
+	// 复制为副本时移除闪卡相关属性 https://github.com/siyuan-note/siyuan/issues/13987
+	insertedNode.RemoveIALAttr(NodeAttrRiffDecks)
+
 	if ast.NodeAttributeView == insertedNode.Type {
 		// 插入数据库块时需要重新绑定其中已经存在的块
 		// 比如剪切操作时，会先进行 delete 数据库解绑块，这里需要重新绑定 https://github.com/siyuan-note/siyuan/issues/13031

@@ -1113,13 +1113,11 @@ func clearCorruptedNotebooks() {
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
-	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
+	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
@@ -1169,7 +1167,9 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.DataDir, ".siyuan", "history"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "backup"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "sync"))
-	os.RemoveAll(filepath.Join(util.DataDir, "%")) // v3.0.6 生成的错误历史文件夹
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
+	os.RemoveAll(filepath.Join(util.DataDir, "%"))                 // v3.0.6 生成的错误历史文件夹
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	logging.LogInfof("cleared workspace temp")
 }

@@ -70,7 +70,6 @@ func initPublishService() {
 	if err := initPublishListener(); err == nil {
 		go startPublishReverseProxyService()
 	}
-	return
 }
 
 func initPublishListener() (err error) {
@@ -93,6 +92,9 @@ func closePublishListener() {
 		return
 	}
 
+	// 关闭所有发布服务的 WebSocket 连接
+	util.ClosePublishServiceSessions()
+
 	if err := server.Shutdown(context.Background()); err != nil {
 		logging.LogErrorf("shutdown server failed: %s", err)
 	}
@@ -101,7 +103,6 @@ func closePublishListener() {
 		logging.LogErrorf("close server failed: %s", err)
 	}
 	server, listener = nil, nil
-	return
 }
 
 func startPublishReverseProxyService() {

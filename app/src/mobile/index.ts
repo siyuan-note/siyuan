@@ -18,6 +18,7 @@ import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
+import {checkPublishServiceClosed} from "../util/processMessage";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
@@ -37,6 +38,9 @@ class App {
     public appId: string;
 
     constructor() {
+        if (checkPublishServiceClosed()) {
+            return;
+        }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
         this.appId = Constants.SIYUAN_APPID;

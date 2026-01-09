@@ -177,7 +177,7 @@ func DocAssets(rootID string) (ret []string, err error) {
 		return
 	}
 
-	ret = getAssetsLinkDests(tree.Root)
+	ret = getAssetsLinkDests(tree.Root, false)
 	return
 }
 
@@ -521,7 +521,7 @@ func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {
 
 	var assets []string
 	for _, n := range nodes {
-		assets = append(assets, getAssetsLinkDests(n)...)
+		assets = append(assets, getAssetsLinkDests(n, false)...)
 		assets = append(assets, getQueryEmbedNodesAssetsLinkDests(n)...)
 	}
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
@@ -937,13 +937,13 @@ func UnusedAssets() (ret []string) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range getAssetsLinkDests(tree.Root) {
+				for _, d := range getAssetsLinkDests(tree.Root, false) {
 					dests[d] = true
 				}
 
 				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
 					// 题头图计入
-					if !util.IsAssetLinkDest([]byte(titleImgPath)) {
+					if !util.IsAssetLinkDest([]byte(titleImgPath), false) {
 						continue
 					}
 					dests[titleImgPath] = true
@@ -1100,13 +1100,13 @@ func MissingAssets() (ret []string) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range getAssetsLinkDests(tree.Root) {
+				for _, d := range getAssetsLinkDests(tree.Root, false) {
 					dests[d] = true
 				}
 
 				if titleImgPath := treenode.GetDocTitleImgPath(tree.Root); "" != titleImgPath {
 					// 题头图计入
-					if !util.IsAssetLinkDest([]byte(titleImgPath)) {
+					if !util.IsAssetLinkDest([]byte(titleImgPath), false) {
 						continue
 					}
 					dests[titleImgPath] = true
@@ -1204,7 +1204,7 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 				continue
 			}
 
-			ret = append(ret, getAssetsLinkDests(embedNode)...)
+			ret = append(ret, getAssetsLinkDests(embedNode, false)...)
 		}
 		return ast.WalkContinue
 	})
@@ -1212,7 +1212,7 @@ func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 	return
 }
 
-func getAssetsLinkDests(node *ast.Node) (ret []string) {
+func getAssetsLinkDests(node *ast.Node, includePublic bool) (ret []string) {
 	ret = []string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {
@@ -1222,7 +1222,7 @@ func getAssetsLinkDests(node *ast.Node) (ret []string) {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
 					dest := kv[1]
-					if "" == dest || !util.IsAssetLinkDest([]byte(dest)) {
+					if "" == dest || !util.IsAssetLinkDest([]byte(dest), includePublic) {
 						continue
 					}
 					ret = append(ret, dest)
@@ -1238,21 +1238,21 @@ func getAssetsLinkDests(node *ast.Node) (ret []string) {
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !util.IsAssetLinkDest(n.Tokens) {
+			if !util.IsAssetLinkDest(n.Tokens, includePublic) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref)) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref), includePublic) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID), includePublic) {
 				return ast.WalkContinue
 			}
 
@@ -1278,7 +1278,7 @@ func getAssetsLinkDests(node *ast.Node) (ret []string) {
 
 						for _, asset := range value.MAsset {
 							dest := asset.Content
-							if !util.IsAssetLinkDest([]byte(dest)) {
+							if !util.IsAssetLinkDest([]byte(dest), includePublic) {
 								continue
 							}
 							ret = append(ret, strings.TrimSpace(dest))
@@ -1288,7 +1288,7 @@ func getAssetsLinkDests(node *ast.Node) (ret []string) {
 					for _, value := range keyValues.Values {
 						if nil != value.URL {
 							dest := value.URL.Content
-							if !util.IsAssetLinkDest([]byte(dest)) {
+							if !util.IsAssetLinkDest([]byte(dest), includePublic) {
 								continue
 							}
 							ret = append(ret, strings.TrimSpace(dest))
@@ -1303,13 +1303,13 @@ func getAssetsLinkDests(node *ast.Node) (ret []string) {
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				if !util.IsAssetLinkDest([]byte(dataAssets)) {
+				if !util.IsAssetLinkDest([]byte(dataAssets), includePublic) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)
 			} else { // HTMLBlock/InlineHTML/IFrame/Audio/Video
 				dest := treenode.GetNodeSrcTokens(n)
-				if !util.IsAssetLinkDest([]byte(dest)) {
+				if !util.IsAssetLinkDest([]byte(dest), includePublic) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dest)
@@ -1379,7 +1379,7 @@ func getRemoteAssetsLinkDests(node *ast.Node, onlyImg bool) (ret []string) {
 	if onlyImg {
 		if ast.NodeLinkDest == node.Type {
 			if node.ParentIs(ast.NodeImage) {
-				if !util.IsAssetLinkDest(node.Tokens) {
+				if !util.IsAssetLinkDest(node.Tokens, false) {
 					ret = append(ret, string(node.Tokens))
 				}
 
@@ -1406,7 +1406,7 @@ func getRemoteAssetsLinkDests(node *ast.Node, onlyImg bool) (ret []string) {
 						}
 
 						dest := asset.Content
-						if !util.IsAssetLinkDest([]byte(dest)) {
+						if !util.IsAssetLinkDest([]byte(dest), false) {
 							ret = append(ret, strings.TrimSpace(dest))
 						}
 					}
@@ -1415,16 +1415,16 @@ func getRemoteAssetsLinkDests(node *ast.Node, onlyImg bool) (ret []string) {
 		}
 	} else {
 		if ast.NodeLinkDest == node.Type {
-			if !util.IsAssetLinkDest(node.Tokens) {
+			if !util.IsAssetLinkDest(node.Tokens, false) {
 				ret = append(ret, string(node.Tokens))
 			}
 		} else if node.IsTextMarkType("a") {
-			if !util.IsAssetLinkDest([]byte(node.TextMarkAHref)) {
+			if !util.IsAssetLinkDest([]byte(node.TextMarkAHref), false) {
 				ret = append(ret, node.TextMarkAHref)
 			}
 		} else if ast.NodeAudio == node.Type || ast.NodeVideo == node.Type {
 			src := treenode.GetNodeSrcTokens(node)
-			if !util.IsAssetLinkDest([]byte(src)) {
+			if !util.IsAssetLinkDest([]byte(src), false) {
 				ret = append(ret, src)
 			}
 		} else if ast.NodeAttributeView == node.Type {
@@ -1445,7 +1445,7 @@ func getRemoteAssetsLinkDests(node *ast.Node, onlyImg bool) (ret []string) {
 
 					for _, asset := range value.MAsset {
 						dest := asset.Content
-						if !util.IsAssetLinkDest([]byte(dest)) {
+						if !util.IsAssetLinkDest([]byte(dest), false) {
 							ret = append(ret, strings.TrimSpace(dest))
 						}
 					}

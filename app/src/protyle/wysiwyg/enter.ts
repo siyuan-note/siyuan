@@ -62,6 +62,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         if (trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
+            range.insertNode(document.createElement("wbr"));
             const oldHTML = blockElement.outerHTML;
             // https://github.com/siyuan-note/siyuan/issues/16744
             range.extractContents();
@@ -352,6 +353,13 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             return true;
         }
     }
+    undoOperation.find((item, index) => {
+        if (item.action === "update") {
+            undoOperation.splice(index, 1);
+            undoOperation.push(item);
+            return true;
+        }
+    });
     transaction(protyle, doOperation, undoOperation);
     if (currentElement.parentElement.classList.contains("sb") &&
         currentElement.parentElement.getAttribute("data-sb-layout") === "col") {

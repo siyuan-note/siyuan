@@ -37,7 +37,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {getContenteditableElement, getParentBlock, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
@@ -2557,8 +2557,9 @@ export class Gutter {
                         dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
                 }
-                if (type === "NodeListItem" && index === 1) {
-                    // 列表项中第一层不显示
+                // - > # 1 \n  > 2
+                if (type === "NodeListItem" && index > 0) {
+                    // 列表项内的块不显示块标
                     html = "";
                 }
                 index += 1;

@@ -811,20 +811,22 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 	assets := getAssetsLinkDests(tree.Root, docx)
 	for _, asset := range assets {
-		if strings.HasPrefix(asset, "assets/") || strings.HasPrefix(asset, "public/") {
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
-			}
+		if !util.IsAssetLinkDest([]byte(asset), docx) {
+			continue
+		}
+		
+		if strings.Contains(asset, "?") {
+			asset = asset[:strings.LastIndex(asset, "?")]
+		}
 
-			srcAbsPath, err := GetAssetAbsPath(asset)
-			if err != nil {
-				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
-				continue
-			}
-			targetAbsPath := filepath.Join(savePath, asset)
-			if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
-				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
-			}
+		srcAbsPath, err := GetAssetAbsPath(asset)
+		if err != nil {
+			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
+			continue
+		}
+		targetAbsPath := filepath.Join(savePath, asset)
+		if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
+			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 		}
 	}
 

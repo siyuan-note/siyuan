@@ -1563,7 +1563,7 @@
     "117": "[%s] n'est pas un exécutable Pandoc valide",
     "118": "Les paramètres actuels ne permettent pas la création de sous-documents sous un document de 7 niveaux de profondeur",
     "119": "Téléchargement du fichier réseau [%s]",
-    "120": "Téléchargement terminé, [%d] fichiers au total",
+    "120": "Téléchargement terminé : au total [%d] fichiers, occupation de [%s] d'espace disque",
     "121": "Il n'y a aucun fichier réseau dans ce document",
     "122": "La fonction de barre latérale fournie avec le plugin doit être configurée sur le bureau (vous pouvez accéder à http://127.0.0.1:6806/stage/build/desktop en utilisant un navigateur mobile, une fois la configuration terminée, veuillez redémarrer SiYuan APP)",
     "123": "Ajouter/sélectionner un répertoire de synchronisation Cloud avant d'activer la synchronisation",

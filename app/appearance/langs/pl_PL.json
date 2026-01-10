@@ -1563,7 +1563,7 @@
     "117": "[%s] nie jest poprawnym plikiem wykonywalnym Pandoc",
     "118": "Bieżące ustawienia nie pozwalają na tworzenie poddokumentów pod dokumentem głębszym niż 7 poziomów",
     "119": "Pobieranie pliku sieciowego [%s]",
-    "120": "Pobranie zakończone, [%d] plików łącznie",
+    "120": "Pobieranie zakończone, łącznie [%d] plików, zajęto [%s] przestrzeni dyskowej",
     "121": "Nie ma pliku sieciowego w tym dokumencie",
     "122": "Funkcja paska bocznego dołączona do wtyczki musi być skonfigurowana na komputerze stacjonarnym (możesz uzyskać dostęp do http://127.0.0.1:6806/stage/build/desktop za pomocą przeglądarki mobilnej, po zakończeniu konfiguracji, należy ponownie uruchomić SiYuan APP)",
     "123": "Funkcjonalność synchronizacji może być aktywowana tylko po dodaniu/wybieraniu katalogu synchronizacji w chmurze",

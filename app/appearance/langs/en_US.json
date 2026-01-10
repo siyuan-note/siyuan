@@ -1563,7 +1563,7 @@
     "117": "[%s] is not a valid Pandoc executable",
     "118": "The current settings do not allow the creation of sub-documents under a document 7 levels deep",
     "119": "Downloading network file [%s]",
-    "120": "Download complete, [%d] files total",
+    "120": "Download completed, a total of [%d] files, occupying [%s] of disk space",
     "121": "There is no network file in this document",
     "122": "The sidebar feature that comes with the plugin needs to be configured on the desktop (you can access http://127.0.0.1:6806/stage/build/desktop using a mobile browser, after the configuration is complete, please restart SiYuan APP)",
     "123": "The synchronization function can only be activated after adding/selecting the cloud synchronization directory",

@@ -1563,7 +1563,7 @@
     "117": "[%s] geçerli bir Pandoc çalıştırılabilir dosyası değil",
     "118": "Mevcut ayarlar 7 seviye alt belge oluşturulmasına izin vermiyor",
     "119": "Ağ dosyası indiriliyor [%s]",
-    "120": "İndirme tamamlandı, toplam [%d] dosya",
+    "120": "İndirme tamamlandı, toplam [%d] dosya, toplamda [%s] disk alanı kullanıldı",
     "121": "Bu belgede ağ dosyası yok",
     "122": "Eklentiyle gelen kenar çubuğu özelliği yalnızca masaüstünde yapılandırılabilir (mobil tarayıcıyla http://127.0.0.1:6806/stage/build/desktop adresine erişip yapılandırabilirsin, ardından SiYuan uygulamasını yeniden başlat)",
     "123": "Senkronizasyon yalnızca bulut senkron klasörü eklendikten/ seçildikten sonra etkinleştirilebilir",

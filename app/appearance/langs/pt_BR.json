@@ -1563,7 +1563,7 @@
     "117": "[%s] não é um executável Pandoc válido",
     "118": "As configurações atuais não permitem a criação de subdocumentos sob um documento com 7 níveis de profundidade",
     "119": "Baixando arquivo da rede [%s]",
-    "120": "Download concluído, [%d] arquivos no total",
+    "120": "Download concluído, ao todo [%d] arquivos, ocupando [%s] de espaço em disco",
     "121": "Não há arquivo de rede neste documento",
     "122": "O recurso de barra lateral que vem com o plugin precisa ser configurado na área de trabalho (você pode acessar http://127.0.0.1:6806/stage/build/desktop usando um navegador móvel, após a configuração, por favor reinicie o SiYuan APP)",
     "123": "A função de sincronização só pode ser ativada após adicionar/selecionar o diretório de sincronização na nuvem",

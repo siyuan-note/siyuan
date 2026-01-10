@@ -188,6 +188,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	}
 
 	var files int
+	var size int64
 	msgId := gulu.Rand.String(7)
 
 	docDirLocalPath := filepath.Join(util.DataDir, tree.Box, path.Dir(tree.Path))
@@ -239,6 +240,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
 				files++
+				size += gulu.File.GetFileSize(writePath)
 				continue
 			}
 
@@ -342,6 +344,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
 				files++
+				size += int64(len(data))
 				continue
 			}
 		}
@@ -353,7 +356,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
 		}
-		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)
+		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files, humanize.BytesCustomCeil(uint64(size), 2)), 5000)
 
 		if 0 < forbiddenCount {
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)

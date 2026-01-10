@@ -235,7 +235,7 @@ export class Protyle {
                                 setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id);
                                 }
                                 /// #endif
                             }
@@ -246,7 +246,7 @@ export class Protyle {
                                 setEmpty(app);
                                 /// #else
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id, false);
+                                    this.protyle.model.parent.parent.removeTab(this.protyle.model.parent.id);
                                 }
                                 /// #endif
                                 delete window.siyuan.storage[Constants.LOCAL_FILEPOSITION][this.protyle.block.rootID];

@@ -38,7 +38,7 @@ export const onGet = (options: {
         // 其他报错
         if (!options.action.includes(Constants.CB_GET_APPEND)) {    // 向下加载时块可能还没有创建 https://github.com/siyuan-note/siyuan/issues/10851
             if (options.protyle.model) {
-                options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id, false);
+                options.protyle.model.parent.parent.removeTab(options.protyle.model.parent.id);
             } else {
                 options.protyle.element.innerHTML = `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`;
             }

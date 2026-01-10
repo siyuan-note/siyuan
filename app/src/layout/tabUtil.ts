@@ -391,9 +391,13 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
         } else if (!item.model) {
             const initTab = item.headElement.getAttribute("data-initdata");
             if (initTab) {
-                const initTabData = JSON.parse(initTab);
-                if (initTabData && initTabData.instance === "Editor" && initTabData.rootId) {
-                    rootID = initTabData.rootId;
+                try {
+                    const initTabData = JSON.parse(initTab);
+                    if (initTabData && initTabData.instance === "Editor" && initTabData.rootId) {
+                        rootID = initTabData.rootId;
+                    }
+                } catch (e) {
+                    console.warn("Failed to parse tab init data:", e);
                 }
             }
         }

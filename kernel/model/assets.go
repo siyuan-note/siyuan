@@ -203,6 +203,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 	forbiddenCount := 0
 	destNodes := getRemoteAssetsLinkDestsInTree(tree, onlyImg)
+	assetsMap := map[string]string{}
 	for _, destNode := range destNodes {
 		dests := getRemoteAssetsLinkDests(destNode, onlyImg)
 		if 1 > len(dests) {
@@ -228,7 +229,13 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 					continue
 				}
 
-				name := filepath.Base(u)
+				name := assetsMap[u]
+				if "" != name {
+					setAssetsLinkDest(destNode, dest, "assets/"+name)
+					continue
+				}
+
+				name = filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = "network-asset-" + name
 				name = util.AssetName(name, ast.NewNodeID())
@@ -239,6 +246,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				}
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
+				assetsMap[u] = name
 				files++
 				size += gulu.File.GetFileSize(writePath)
 				continue
@@ -264,6 +272,12 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 					//} else if strings.Contains(u, "/0?") {
 					//	u = strings.Replace(u, "/0?", "/640?", 1)
 					//}
+				}
+
+				name := assetsMap[u]
+				if "" != name {
+					setAssetsLinkDest(destNode, dest, "assets/"+name)
+					continue
 				}
 
 				displayU := u
@@ -303,7 +317,6 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 					logging.LogErrorf("download network asset [%s] failed: %s", u, repErr)
 					continue
 				}
-				var name string
 				if strings.Contains(u, "?") {
 					name = u[:strings.Index(u, "?")]
 					name = path.Base(name)
@@ -343,6 +356,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				}
 
 				setAssetsLinkDest(destNode, dest, "assets/"+name)
+				assetsMap[u] = name
 				files++
 				size += int64(len(data))
 				continue

@@ -692,7 +692,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 if (getContenteditableElement(rangeBlockElement)) {
                     range.insertNode(document.createElement("wbr"));
                 } else {
-                    getContenteditableElement(updateElements[0]).insertAdjacentHTML("afterbegin", "<wbr>");
+                    getContenteditableElement(updateElements[0])?.insertAdjacentHTML("afterbegin", "<wbr>");
                 }
             }
         }

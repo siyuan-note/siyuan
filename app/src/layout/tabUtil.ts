@@ -360,7 +360,7 @@ export const copyTab = (app: App, tab: Tab) => {
     });
 };
 
-export const closeTabByType = async (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
+export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
     const tabsToClose: Tab[] = [];
     if (type === "closeOthers") {
         for (const item of tab.parent.children) {

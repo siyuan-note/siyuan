@@ -99,15 +99,16 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
     range.collapse(false);
     range.insertNode(document.createElement("wbr"));
     const html = previousElement.parentElement.outerHTML;
-    if (previousElement.lastElementChild.previousElementSibling.getAttribute("data-type") === "NodeList") {
+    const lastPreviousElement = previousElement.lastElementChild.previousElementSibling;
+    if (lastPreviousElement.getAttribute("data-type") === "NodeList") {
         // 上一个列表的最后一项为子列表
-        const previousLastListHTML = previousElement.lastElementChild.previousElementSibling.outerHTML;
+        const previousLastListHTML = lastPreviousElement.outerHTML;
 
         const doOperations: IOperation[] = [];
         const undoOperations: IOperation[] = [];
 
-        const subtype = previousElement.lastElementChild.previousElementSibling.getAttribute("data-subtype");
-        let previousID = previousElement.lastElementChild.previousElementSibling.lastElementChild.previousElementSibling.getAttribute("data-node-id");
+        const subtype = lastPreviousElement.getAttribute("data-subtype");
+        let previousID = lastPreviousElement.lastElementChild.previousElementSibling.getAttribute("data-node-id");
         liItemElements.forEach((item, index) => {
             doOperations.push({
                 action: "move",
@@ -125,23 +126,23 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
             if (subtype === "o") {
                 actionElement.classList.add("protyle-action--order");
                 actionElement.classList.remove("protyle-action--task");
-                previousElement.lastElementChild.previousElementSibling.lastElementChild.before(item);
+                lastPreviousElement.lastElementChild.before(item);
             } else if (subtype === "t") {
                 item.setAttribute("data-marker", "*");
                 actionElement.innerHTML = `<svg><use xlink:href="#icon${item.classList.contains("protyle-task--done") ? "Check" : "Uncheck"}"></use></svg>`;
                 actionElement.classList.remove("protyle-action--order");
                 actionElement.classList.add("protyle-action--task");
-                previousElement.lastElementChild.previousElementSibling.lastElementChild.before(item);
+                lastPreviousElement.lastElementChild.before(item);
             } else {
                 item.setAttribute("data-marker", "*");
                 actionElement.innerHTML = '<svg><use xlink:href="#iconDot"></use></svg>';
                 actionElement.classList.remove("protyle-action--order", "protyle-action--task");
-                previousElement.lastElementChild.previousElementSibling.lastElementChild.before(item);
+                lastPreviousElement.lastElementChild.before(item);
             }
         });
 
         if (subtype === "o") {
-            updateListOrder(previousElement.lastElementChild.previousElementSibling);
+            updateListOrder(lastPreviousElement);
             updateListOrder(previousElement.parentElement);
         } else if (previousElement.getAttribute("data-subtype") === "o") {
             updateListOrder(previousElement.parentElement);
@@ -170,13 +171,21 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
         newListElement.setAttribute("class", "list");
         newListElement.setAttribute("data-subtype", subType);
         newListElement.innerHTML = '<div class="protyle-attr" contenteditable="false"></div>';
+        let foldElement: Element;
+        if (lastPreviousElement.getAttribute("fold") === "1" &&
+            lastPreviousElement.getAttribute("data-type") === "NodeHeading") {
+            foldElement = lastPreviousElement;
+        }
         const doOperations: IOperation[] = [{
             action: "insert",
+            context: {ignoreProcess: foldElement ? "true" : "false"},
             data: newListElement.outerHTML,
             id: newListId,
-            previousID: previousElement.lastElementChild.previousElementSibling.getAttribute("data-node-id")
+            previousID: lastPreviousElement.getAttribute("data-node-id")
         }];
-        previousElement.lastElementChild.before(newListElement);
+        if (!foldElement) {
+            previousElement.lastElementChild.before(newListElement);
+        }
         const undoOperations: IOperation[] = [];
         let previousID: string;
         liItemElements.forEach((item, index) => {
@@ -198,6 +207,54 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
             action: "delete",
             id: newListId
         });
+        if (foldElement) {
+            if (previousElement.getAttribute("data-subtype") === "o") {
+                let nextElement = previousElement.nextElementSibling;
+                while (nextElement && !nextElement.classList.contains("protyle-attr")) {
+                    const nextId = nextElement.getAttribute("data-node-id");
+                    undoOperations.push({
+                        action: "update",
+                        id: nextId,
+                        data: nextElement.outerHTML
+                    });
+                    const count = parseInt(nextElement.getAttribute("data-marker")) - 1 + ".";
+                    nextElement.setAttribute("data-marker", count);
+                    nextElement.querySelector(".protyle-action--order").textContent = count;
+                    doOperations.push({
+                        action: "update",
+                        id: nextId,
+                        data: nextElement.outerHTML
+                    });
+                    nextElement = nextElement.nextElementSibling;
+                }
+
+                Array.from(newListElement.children).forEach((item, index) => {
+                    if (item.classList.contains("protyle-attr")) {
+                        return;
+                    }
+                    const itemId = item.getAttribute("data-node-id");
+                    undoOperations.push({
+                        action: "update",
+                        id: itemId,
+                        data: item.outerHTML
+                    });
+                    const count = index + 1 + ".";
+                    item.setAttribute("data-marker", count);
+                    item.querySelector(".protyle-action--order").textContent = count;
+                    doOperations.push({
+                        action: "update",
+                        id: itemId,
+                        data: item.outerHTML
+                    });
+                });
+            }
+            const foldOperations = setFold(protyle, foldElement, true, false, false, true);
+            doOperations.push(...foldOperations.doOperations);
+            undoOperations.push(...foldOperations.undoOperations);
+            transaction(protyle, doOperations, undoOperations);
+            focusByWbr(previousElement, range);
+            return;
+        }
         if (subType === "o") {
             updateListOrder(newListElement, 1);
             updateListOrder(previousElement.parentElement);

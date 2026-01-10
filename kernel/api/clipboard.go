@@ -34,7 +34,7 @@ func readFilePaths(c *gin.Context) {
 		paths, _ = clipboard.ReadFilePaths()
 	}
 
-	var data []map[string]any
+	data := []map[string]any{}
 	for _, path := range paths {
 		fi, err := os.Stat(path)
 		if nil != err {

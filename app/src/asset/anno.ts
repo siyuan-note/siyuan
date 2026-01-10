@@ -778,9 +778,10 @@ async function getRectImgData(pdfObj: any) {
     const CAPTURE_SCALE_RATIO = 1.5;
 
     const pdfPage = await pdfObj.pdfDocument.getPage(pageNumber);
-    const displayViewport = pageView.viewport.clone({rotation: 0});
-    // displayViewport.scale 等于以前用的 pdfObj.pdfViewer.currentScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS
-    const captureViewport = pdfPage.getViewport({scale: displayViewport.scale * CAPTURE_SCALE_RATIO, rotation: 0});
+    const captureViewport = pdfPage.getViewport({
+        scale: pdfObj.pdfViewer.currentScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS * CAPTURE_SCALE_RATIO,
+        rotation: 0
+    });
     const captureCanvas = document.createElement("canvas");
     captureCanvas.width = Math.floor(captureViewport.width);
     captureCanvas.height = Math.floor(captureViewport.height);
@@ -791,11 +792,7 @@ async function getRectImgData(pdfObj: any) {
         viewport: captureViewport
     }).promise;
 
-    const firstChild = rectElement.firstElementChild as HTMLElement;
-    if (!firstChild) {
-        return;
-    }
-    const rectStyle = firstChild.style;
+    const rectStyle = (rectElement.firstElementChild as HTMLElement).style;
     const captureImageData = captureCtx.getImageData(
         CAPTURE_SCALE_RATIO * parseFloat(rectStyle.left),
         CAPTURE_SCALE_RATIO * parseFloat(rectStyle.top),

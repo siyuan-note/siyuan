@@ -159,3 +159,15 @@ func GetClaimRole(claims jwt.MapClaims) Role {
 	}
 	return RoleVisitor
 }
+
+// IsPublishServiceToken 检查 token 是否来自发布服务
+func IsPublishServiceToken(token *jwt.Token) bool {
+	if token == nil || !token.Valid {
+		return false
+	}
+	claims := GetTokenClaims(token)
+	if tokenIssuer, ok := claims["iss"].(string); ok {
+		return tokenIssuer == iss
+	}
+	return false
+}

@@ -671,6 +671,13 @@ func serveWebSocket(ginServer *gin.Engine) {
 			return
 		}
 
+		// 标记发布服务的连接
+		if token := model.ParseXAuthToken(s.Request); token != nil {
+			if model.IsPublishServiceToken(token) {
+				s.Set("isPublish", true)
+			}
+		}
+
 		util.AddPushChan(s)
 		//sessionId, _ := s.Get("id")
 		//logging.LogInfof("ws [%s] connected", sessionId)

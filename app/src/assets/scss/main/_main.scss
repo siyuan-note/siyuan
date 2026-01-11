@@ -55,7 +55,6 @@ html {
   }
 }
 
-
 .toolbar {
   background-color: var(--b3-toolbar-background);
   box-sizing: border-box;
@@ -182,6 +181,28 @@ html {
     text-overflow: ellipsis;
     white-space: nowrap;
     user-select: none;
+  }
+
+  &,
+  &__window {
+    #maxWindow {
+      display: flex;
+    }
+
+    #restoreWindow {
+      display: none;
+    }
+
+    body.body--maximize &,
+    body.body--fullscreen & {
+      #maxWindow {
+        display: none;
+      }
+
+      #restoreWindow {
+        display: flex;
+      }
+    }
   }
 }
 

@@ -99,6 +99,12 @@ body {
       opacity: .38;
     }
   }
+
+  &.body--fullscreen:not(.body--win32):not(.body--window) {
+    .toolbar {
+      padding-left: 5px;
+    }
+  }
 }
 
 ul,

@@ -736,17 +736,17 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
         if (mode === "rect" ||
             (mode === "" && rectElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
         ) {
-            getRectImgData(pdf).then((imageDataURL: string) => {
-                fetch(imageDataURL).then((response) => {
+            getRectImgData(pdf).then((imageData) => {
+                fetch(imageData.url).then((response) => {
                     return response.blob();
                 }).then((blob) => {
-                    const imageName = content + ".png";
                     let msg = "";
                     if (Constants.SIZE_UPLOAD_TIP_SIZE <= blob.size) {
-                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", imageName).replace("${y}", filesize(blob.size, {standard: "iec"}));
+                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png").replace("${y}", filesize(blob.size, {standard: "iec"}));
                     }
                     confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
                         const formData = new FormData();
+                        const imageName = content.substring(0, content.length - 22) + (imageData.rotation ? `-${imageData.rotation}-` : "") + content.substring(content.length - 22) + ".png";
                         formData.append("file[]", blob, imageName);
                         formData.append("skipIfDuplicated", "true");
                         fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
@@ -824,7 +824,7 @@ async function getRectImgData(pdfObj: any) {
         resultCtx.drawImage(tempCanvas, -tempCanvas.width / 2, -tempCanvas.height / 2);
     }
 
-    return resultCanvas.toDataURL();
+    return {url: resultCanvas.toDataURL(), rotation: totalRotation};
 }
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {

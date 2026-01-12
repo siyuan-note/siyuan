@@ -1,7 +1,7 @@
 {
   "clearTempFiles": "Limpiar archivos temporales",
   "clearTempFilesTip": "Limpia los archivos temporales generados durante la ejecución de la aplicación para liberar espacio de almacenamiento",
-  "uploadFileTooLarge": "⚠\uFE0F El archivo subido [${x}] es demasiado grande [${y}]，¿estás seguro de que deseas continuar con la subida?",
+  "uploadFileTooLarge": "⚠️ El archivo subido [${x}] es demasiado grande [${y}]，¿estás seguro de que deseas continuar con la subida?",
   "recentDocsMaxListCount": "Número máximo de documentos recientes listados",
   "recentDocsMaxListCountTip": "Número máximo de documentos que se mostrarán en el cuadro de diálogo Documentos recientes",
   "bazaarNeedVersion": "Se requiere actualizar SiYuan a la versión v${x} o posterior para usarlo",

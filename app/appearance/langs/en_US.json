@@ -1,7 +1,7 @@
 {
   "clearTempFiles": "Clear temporary files",
   "clearTempFilesTip": "Clear temporary files generated while the app is running to free up storage space",
-  "uploadFileTooLarge": "⚠\uFE0F The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",
+  "uploadFileTooLarge": "⚠️ The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",
   "recentDocsMaxListCount": "Maximum number of recent documents listed",
   "recentDocsMaxListCountTip": "Maximum number of documents listed in the Recent Documents dialog",
   "bazaarNeedVersion": "Requires upgrading SiYuan to v${x} or later to use",

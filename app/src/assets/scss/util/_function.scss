@@ -163,6 +163,26 @@
   &__list {
     padding-left: 2em;
   }
+
+  &__progress  {
+    height: 4px;
+    border-radius: var(--b3-border-radius);
+    overflow: hidden;
+    background-color: #fff;
+    width: 64px;
+    align-self: center;
+    margin: 0 8px 0 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    & > div {
+      background-color: var(--b3-theme-primary-light);
+      height: 4px;
+      background-image: linear-gradient(-45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
+      animation: stripMove 450ms linear infinite;
+      background-size: 50px 50px;
+    }
+  }
 }
 
 .ft {

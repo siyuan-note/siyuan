@@ -72,6 +72,8 @@ type TOperation =
     | "foldAttrViewGroup"
     | "setAttrViewDisplayFieldName"
     | "setAttrViewFillColBackgroundColor"
+    | "setAttrViewUpdatedIncludeTime"
+    | "setAttrViewCreatedIncludeTime"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -108,7 +110,6 @@ type TAVCol =
     | "updated"
     | "checkbox"
     | "lineNumber"
-type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
     | "!="
@@ -226,6 +227,8 @@ interface Window {
             changeStatusBar: { postMessage: (url: string) => void }
             setClipboard: { postMessage: (url: string) => void }
             purchase: { postMessage: (url: string) => void }
+            print: { postMessage: (html: string) => void }
+            exit: { postMessage: (text: string) => void }
         }
     };
     htmlToImage: {
@@ -246,8 +249,9 @@ interface Window {
         readHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
-        print(html: string): void
+        print(title: string, html: string): void
         getScreenWidthPx(): number
+        exit(): void
     };
     JSHarmony: {
         openExternal(url: string): void
@@ -258,8 +262,9 @@ interface Window {
         readClipboard(): string
         readHTMLClipboard(): string
         returnDesktop(): void
-        print(html: string): void
+        print(title: string, html: string): void
         getScreenWidthPx(): number
+        exit(): void
     };
 
     Protyle: import("../protyle/method").default;
@@ -281,12 +286,17 @@ interface Window {
     destroyTheme(): Promise<void>;
 }
 
+interface ILocalFiles {
+    path: string,
+    size: number
+}
+
 interface IClipboardData {
     textHTML?: string,
     textPlain?: string,
     siyuanHTML?: string,
     files?: File[],
-    localFiles?: string[]
+    localFiles?: ILocalFiles[],
 }
 
 interface IRefDefs {
@@ -547,7 +557,7 @@ interface ISiyuan {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
-    context?: IObject,
+    context?: IObject,  // focusId, message, ignoreProcess, setRange
     blockID?: string,
     isTwoWay?: boolean, // 是否双向关联
     backRelationKeyID?: string, // 双向关联的目标关联列 ID
@@ -564,7 +574,7 @@ interface IOperation {
     srcIDs?: string[] // removeAttrViewBlock 专享
     srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
     ignoreDefaultFill?: boolean // insertAttrViewBlock 专享
-    viewID?: string // insertAttrViewBlock 专享
+    viewID?: string // 多个属性视图操作使用，用于推送时不影响其他视图
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享
@@ -614,9 +624,9 @@ interface ILayoutJSON extends ILayoutOptions {
 interface ICommand {
     langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
-    hotkey: string,
+    hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
-    callback?: () => void   // 其余回调存在时将不会触
+    callback?: () => void   // 其余回调存在时将不会触发
     globalCallback?: () => void // 焦点不在应用内时执行的回调
     fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void // 焦点在文档树上时执行的回调
     editorCallback?: (protyle: IProtyle) => void     // 焦点在编辑器上时执行的回调
@@ -660,6 +670,7 @@ interface IOpenFileOptions {
             data: any,
         }) => import("../layout/Model").Model,   // plugin 0.8.3 历史兼容
     }
+    scrollPosition?: ScrollLogicalPosition,
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填
     rootIcon?: string, // 文档图标
@@ -699,6 +710,7 @@ interface IWebSocketData {
     msg: string;
     code: number;
     sid?: string;
+    context?: any;
 }
 
 interface IGraphCommon {
@@ -714,6 +726,7 @@ interface IGraphCommon {
     };
     type: {
         blockquote: boolean
+        callout: boolean
         code: boolean
         heading: boolean
         list: boolean
@@ -835,6 +848,7 @@ interface IBazaarItem {
     incompatible?: boolean;  // 仅 plugin
     enabled: boolean;
     preferredName: string;
+    minAppVersion: string;
     preferredDesc: string;
     preferredReadme: string;
     iconURL: string;
@@ -842,6 +856,7 @@ interface IBazaarItem {
     author: string;
     updated: string;
     downloads: string;
+    disallowInstall: boolean;
     current: false;
     installed: false;
     outdated: false;
@@ -859,6 +874,8 @@ interface IBazaarItem {
     hInstallDate: string;
     hUpdated: string;
     preferredFunding: string;
+    disallowUpdate: boolean;
+    updateRequiredMinAppVer: string;
 }
 
 interface IAV {
@@ -929,11 +946,11 @@ interface IAVFilter {
     operator: TAVFilterOperator,
     quantifier?: string,
     value: IAVCellValue,
-    relativeDate?: relativeDate
-    relativeDate2?: relativeDate
+    relativeDate?: IAVRelativeDate
+    relativeDate2?: IAVRelativeDate
 }
 
-interface relativeDate {
+interface IAVRelativeDate {
     count: number;   // 数量
     unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
     direction: number;   // 方向：-1: 前、0: 现在、1: 后
@@ -969,6 +986,12 @@ interface IAVColumn {
     numberFormat: string,
     template: string,
     calc: IAVCalc,
+    updated?: {
+        includeTime: boolean
+    }
+    created?: {
+        includeTime: boolean
+    }
     date?: {
         autoFillNow: boolean,
         fillSpecificTime: boolean,

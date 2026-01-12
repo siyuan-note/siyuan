@@ -131,6 +131,15 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <input class="b3-switch fn__flex-center" data-type="blockquote" type="checkbox"${config.types.blockquote ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconCallout"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.callout} <sup>[1]</sup>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="callout" type="checkbox"${config.types.callout ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconSuper"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
@@ -446,7 +455,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         label: window.siyuan.languages.searchMethod,
         type: "submenu",
         submenu: [{
-            iconHTML: "",
+            icon: "iconExact",
             label: window.siyuan.languages.keyword,
             current: config.method === 0,
             click() {
@@ -455,7 +464,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconQuote",
             label: window.siyuan.languages.querySyntax,
             current: config.method === 1,
             click() {
@@ -464,7 +473,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconDatabase",
             label: "SQL",
             current: config.method === 2,
             click() {
@@ -473,7 +482,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconRegex",
             label: window.siyuan.languages.regex,
             current: config.method === 3,
             click() {

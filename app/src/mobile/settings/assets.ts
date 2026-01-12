@@ -7,7 +7,7 @@ export const initAssets = () => {
         icon: "iconImage",
         html: image.genHTML(),
         bindEvent(modelMainElement: HTMLElement) {
-            image.element = modelMainElement;
+            image.element = modelMainElement.firstElementChild;
             image.bindEvent();
         }
     });

@@ -1,6 +1,6 @@
 import {focusByWbr, getEditorRange} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {getContenteditableElement, getParentBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -22,7 +22,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
-    let parentID = nodeElement.parentElement.getAttribute("data-node-id");
+    let parentID = getParentBlock(nodeElement)?.getAttribute("data-node-id");
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
         if (protyle.block.showAll || protyle.options.backlinkData) {
@@ -50,7 +50,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
-            nodeElement.replaceWith(nodeElement.firstElementChild);
+            nodeElement.replaceWith(...nodeElement.children);
             if (range) {
                 focusByWbr(protyle.wysiwyg.element, range);
             }
@@ -132,7 +132,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             // https://github.com/siyuan-note/siyuan/issues/14720#issuecomment-2840665326
             if (blockElement.classList.contains("list")) {
                 blockElement = hasClosestByClassName(range.startContainer, "li") as HTMLElement;
-            } else if (blockElement.classList.contains("bq")) {
+            } else if (blockElement.classList.contains("bq") || blockElement.classList.contains("callout")) {
                 blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             }
         }
@@ -191,7 +191,8 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             protyle,
             selectsElement: position === "afterend" ? [blockElement, blockElement.nextElementSibling] : [blockElement.previousElementSibling, blockElement],
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     focusByWbr(protyle.wysiwyg.element, range);

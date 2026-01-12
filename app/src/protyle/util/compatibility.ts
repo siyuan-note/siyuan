@@ -4,6 +4,13 @@ import {Constants} from "../../constants";
 /// #if !BROWSER
 import {clipboard, ipcRenderer} from "electron";
 /// #endif
+/// #if MOBILE
+import {processSYLink} from "../../editor/openLink";
+/// #endif
+
+export const isPhablet = () => {
+    return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
+};
 
 export const encodeBase64 = (text: string): string => {
     if (typeof Buffer !== "undefined") {
@@ -53,6 +60,11 @@ export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
     }
+    /// #if MOBILE
+    if (processSYLink(window.siyuan.ws.app, uri)) {
+        return;
+    }
+    /// #endif
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
             // iOS 16.7 之前的版本，uri 需要 encodeURIComponent
@@ -110,13 +122,13 @@ export const readText = () => {
 /// #if !BROWSER
 export const getLocalFiles = async () => {
     // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
-    let localFiles: string[] = [];
+    let localFiles: ILocalFiles[] = [];
     if ("darwin" === window.siyuan.config.system.os) {
         const xmlString = clipboard.read("NSFilenamesPboardType");
         const domParser = new DOMParser();
         const xmlDom = domParser.parseFromString(xmlString, "application/xml");
         Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-            localFiles.push(item.childNodes[0].nodeValue);
+            localFiles.push({path: item.childNodes[0].nodeValue, size: null});
         });
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
@@ -228,9 +240,9 @@ export const writeText = (text: string) => {
     }
 };
 
-export const copyPlainText = async (text: string) => {
+export const copyPlainText = (text: string) => {
     text = text.replace(new RegExp(Constants.ZWSP, "g"), ""); // `复制纯文本` 时移除所有零宽空格 https://github.com/siyuan-note/siyuan/issues/6674
-    await writeText(text);
+    writeText(text);
 };
 
 // 用户 iPhone 点击延迟/需要双击的处理
@@ -342,7 +354,7 @@ export const updateHotkeyTip = (hotkey: string) => {
     const keys = [];
     if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push("Ctrl");
     if (hotkey.indexOf("⇧") > -1) keys.push("Shift");
-    if (hotkey.indexOf("⌥") > -1) keys.push( "Alt");
+    if (hotkey.indexOf("⌥") > -1) keys.push("Alt");
 
     // 不能去最后一个，需匹配 F2
     const lastKey = hotkey.replace(/[⌘⇧⌥⌃]/g, "");
@@ -428,7 +440,8 @@ export const getLocalStorage = (cb: () => void) => {
             removeAssets: true,
             keepFold: false,
             mergeSubdocs: false,
-            watermark: false
+            watermark: false,
+            paged: true
         };
         defaultStorage[Constants.LOCAL_EXPORTIMG] = {
             keepFold: false,
@@ -559,3 +572,4 @@ export const initFocusFix = () => {
     };
 };
 /// #endif
+

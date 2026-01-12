@@ -19,13 +19,14 @@ package model
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
-	"github.com/88250/lute/lex"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -195,9 +196,7 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 		return
 	}
 
-	if err = tx.writeTree(tree); err != nil {
-		return
-	}
+	tx.writeTree(tree)
 
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
@@ -207,44 +206,59 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 
 func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[string]string, err error) {
 	oldAttrs = parse.IAL2Map(node.KramdownIAL)
-
-	for name := range nameValues {
-		for i := 0; i < len(name); i++ {
-			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				err = errors.New(fmt.Sprintf(Conf.Language(25), node.ID))
-				return
-			}
-		}
-	}
-
-	if tag, ok := nameValues["tags"]; ok {
-		var tags []string
-		tmp := strings.Split(tag, ",")
-		for _, t := range tmp {
-			t = util.RemoveInvalid(t)
-			t = strings.TrimSpace(t)
-			if "" != t {
-				tags = append(tags, t)
-			}
-		}
-		tags = gulu.Str.RemoveDuplicatedElem(tags)
-		if 0 < len(tags) {
-			nameValues["tags"] = strings.Join(tags, ",")
-		}
-	}
+	newAttrs := maps.Clone(oldAttrs)
 
 	for name, value := range nameValues {
 		value = util.RemoveInvalidRetainCtrl(value)
 		value = strings.TrimSpace(value)
-		value = strings.TrimSuffix(value, ",")
+		lowerName := strings.ToLower(name)
+		// 转换为小写再验证属性名
+		if !isValidAttrName(lowerName) {
+			err = errors.New(Conf.Language(25) + " [" + node.ID + "]")
+			return
+		}
+
+		// 处理文档标签 https://github.com/siyuan-note/siyuan/issues/13311
+		if lowerName == "tags" {
+			var tags []string
+			tmp := strings.Split(value, ",")
+			for _, t := range tmp {
+				t = util.RemoveInvalid(t)
+				t = strings.TrimSpace(t)
+				if "" != t {
+					tags = append(tags, t)
+				}
+			}
+			tags = gulu.Str.RemoveDuplicatedElem(tags)
+			if 0 < len(tags) {
+				value = strings.Join(tags, ",")
+			} else {
+				value = ""
+			}
+		}
+
 		if "" == value {
-			node.RemoveIALAttr(name)
+			// 删除属性
+			if name != lowerName {
+				if _, exists := newAttrs[name]; exists {
+					// 仅删除完全匹配的包含大写字母的属性
+					delete(newAttrs, name)
+					continue
+				}
+			}
+			delete(newAttrs, lowerName)
 		} else {
-			node.SetIALAttr(name, value)
+			// 添加或更新属性
+			// 删除大小写完全匹配的属性
+			delete(newAttrs, name)
+			// 保存小写的属性 https://github.com/siyuan-note/siyuan/issues/16447
+			newAttrs[lowerName] = html.EscapeAttrVal(value)
 		}
 	}
 
-	if oldAttrs["tags"] != nameValues["tags"] {
+	node.KramdownIAL = parse.Map2IAL(newAttrs)
+
+	if oldAttrs["tags"] != newAttrs["tags"] {
 		ReloadTag()
 	}
 	return
@@ -277,10 +291,8 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 
 	for name := range nameValues {
-		for i := 0; i < len(name); i++ {
-			if !lex.IsASCIILetterNumHyphen(name[i]) {
-				return errors.New(fmt.Sprintf(Conf.Language(25), id))
-			}
+		if !isValidAttrName(name) {
+			return errors.New(Conf.Language(25) + " [" + id + "]")
 		}
 	}
 
@@ -303,4 +315,49 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	IncSync()
 	cache.RemoveBlockIAL(id)
 	return
+}
+
+// isValidAttrName 验证属性名是否合法
+func isValidAttrName(name string) bool {
+	n := len(name)
+	if n == 0 {
+		return false
+	}
+
+	// 首字符必须是小写字母
+	c := name[0]
+	if c < 'a' || c > 'z' {
+		return false
+	}
+
+	// 后续字符只能是小写字母、数字、连字符
+	if c != 'c' {
+		return validateChars(name, 1, n)
+	}
+
+	// 首字符是 'c'，检查自定义属性 custom- 前缀
+	if n >= 7 && name[1] == 'u' && name[2] == 's' && name[3] == 't' && name[4] == 'o' && name[5] == 'm' && name[6] == '-' {
+		if n == 7 {
+			return false // 不允许只包含前缀
+		}
+
+		if c = name[7]; c < 'a' || c > 'z' {
+			return false // 首字符必须是小写字母
+		}
+		return validateChars(name, 7, n)
+	}
+
+	// 非自定义属性
+	return validateChars(name, 1, n)
+}
+
+// validateChars 验证从指定索引开始的字符是否合法（小写字母、数字、连字符）
+func validateChars(name string, startIdx, n int) bool {
+	for i := startIdx; i < n; i++ {
+		c := name[i]
+		if (c < 'a' || c > 'z') && (c < '0' || c > '9') && c != '-' {
+			return false
+		}
+	}
+	return true
 }

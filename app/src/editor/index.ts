@@ -23,6 +23,7 @@ export class Editor extends Model {
         mode?: TEditorMode,
         action?: TProtyleAction[],
         afterInitProtyle?: (editor: Protyle) => void,
+        scrollPosition?: ScrollLogicalPosition
     }) {
         super({
             app: options.app,
@@ -43,6 +44,7 @@ export class Editor extends Model {
         action?: TProtyleAction[]
         rootId: string,
         mode?: TEditorMode,
+        scrollPosition?: ScrollLogicalPosition,
         afterInitProtyle?: (editor: Protyle) => void,
     }) {
         this.editor = new Protyle(this.app, this.element, {
@@ -56,6 +58,7 @@ export class Editor extends Model {
                 scroll: true,
             },
             typewriterMode: true,
+            scrollPosition: options.scrollPosition,
             after: (editor) => {
                 if (window.siyuan.editorIsFullscreen) {
                     fullscreen(editor.protyle.element);

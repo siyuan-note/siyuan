@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -108,16 +109,24 @@ func SaveAssetsTexts() {
 
 	start := time.Now()
 
+	assetsPath := GetDataAssetsAbsPath()
+	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
+
 	assetsTextsLock.Lock()
+	// OCR 功能未开启且 ocr-texts.json 不存在时，如果 assetsTexts 为空则不创建文件
+	if !TesseractEnabled && !filelock.IsExist(assetsTextsPath) && 0 == len(assetsTexts) {
+		assetsTextsLock.Unlock()
+		assetsTextsChanged.Store(false)
+		return
+	}
 	data, err := gulu.JSON.MarshalIndentJSON(assetsTexts, "", "  ")
 	if err != nil {
 		logging.LogErrorf("marshal assets texts failed: %s", err)
+		assetsTextsLock.Unlock()
 		return
 	}
 	assetsTextsLock.Unlock()
 
-	assetsPath := GetDataAssetsAbsPath()
-	assetsTextsPath := filepath.Join(assetsPath, "ocr-texts.json")
 	if err = filelock.WriteFile(assetsTextsPath, data); err != nil {
 		logging.LogErrorf("write assets texts failed: %s", err)
 		return
@@ -182,9 +191,29 @@ func RemoveAssetText(asset string) {
 	assetsTextsChanged.Store(true)
 }
 
+var tesseractExts = []string{
+	".png",
+	".jpg",
+	".jpeg",
+	".tif",
+	".tiff",
+	".bmp",
+	".gif",
+	".webp",
+	".pbm",
+	".pgm",
+	".ppm",
+	".pnm",
+}
+
 func IsTesseractExtractable(p string) bool {
 	lowerName := strings.ToLower(p)
-	return strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg")
+	for _, ext := range tesseractExts {
+		if strings.HasSuffix(lowerName, ext) {
+			return true
+		}
+	}
+	return false
 }
 
 // tesseractOCRLock 用于 Tesseract OCR 加锁串行执行提升稳定性 https://github.com/siyuan-note/siyuan/issues/7265
@@ -214,14 +243,23 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 
 	defer logging.Recover()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+	timeout := 7000
+	timeoutEnv := os.Getenv("SIYUAN_TESSERACT_TIMEOUT")
+	if "" != timeoutEnv {
+		if timeoutParsed, parseErr := strconv.Atoi(timeoutEnv); nil == parseErr {
+			timeout = timeoutParsed
+		} else {
+			logging.LogWarnf("parse tesseract timeout [%s] failed: %s", timeoutEnv, parseErr)
+		}
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, TesseractBin, "-c", "debug_file=/dev/null", imgAbsPath, "stdout", "-l", strings.Join(TesseractLangs, "+"), "tsv")
 	gulu.CmdAttr(cmd)
 	output, err := cmd.CombinedOutput()
-	if ctx.Err() == context.DeadlineExceeded {
-		logging.LogWarnf("tesseract [path=%s, size=%d] timeout", imgAbsPath, info.Size())
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		logging.LogWarnf("tesseract [path=%s, size=%d] timeout [%dms]", imgAbsPath, info.Size(), timeout)
 		return
 	}
 
@@ -300,7 +338,7 @@ func InitTesseract() {
 
 	langs := getTesseractLangs()
 	if 1 > len(langs) {
-		logging.LogWarnf("no tesseract langs found")
+		logging.LogWarnf("no tesseract langs found, disabling tesseract-ocr")
 		TesseractEnabled = false
 		tesseractInited.Store(true)
 		return
@@ -361,17 +399,21 @@ func getTesseractVer() (ret string) {
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
 	if err != nil {
-		if strings.Contains(err.Error(), "executable file not found") {
+		errMsg := strings.ToLower(err.Error())
+		if strings.Contains(errMsg, "executable file not found") || strings.Contains(errMsg, "no such file or directory") {
 			// macOS 端 Tesseract OCR 安装后不识别 https://github.com/siyuan-note/siyuan/issues/7107
 			TesseractBin = "/usr/local/bin/tesseract"
 			cmd = exec.Command(TesseractBin, "--version")
 			gulu.CmdAttr(cmd)
 			data, err = cmd.CombinedOutput()
-			if err != nil && strings.Contains(err.Error(), "executable file not found") {
-				TesseractBin = "/opt/homebrew/bin/tesseract"
-				cmd = exec.Command(TesseractBin, "--version")
-				gulu.CmdAttr(cmd)
-				data, err = cmd.CombinedOutput()
+			if err != nil {
+				errMsg = strings.ToLower(err.Error())
+				if strings.Contains(errMsg, "executable file not found") || strings.Contains(errMsg, "no such file or directory") {
+					TesseractBin = "/opt/homebrew/bin/tesseract"
+					cmd = exec.Command(TesseractBin, "--version")
+					gulu.CmdAttr(cmd)
+					data, err = cmd.CombinedOutput()
+				}
 			}
 		}
 	}

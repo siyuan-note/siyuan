@@ -116,7 +116,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		av.SaveAttributeView(attrView)
 	}
 
-	// 如果存在分组的话渲染分组视图
+	// 渲染分组视图
+	if nil == view.Groups {
+		genAttrViewGroups(view, attrView)
+		av.SaveAttributeView(attrView)
+	}
 
 	for _, groupView := range view.Groups {
 		groupView.Name = groupView.GetGroupValue()
@@ -414,7 +418,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		gallery.Cards = gallery.Cards[start:end]
 	case av.LayoutTypeKanban:
 		kanban := viewable.(*av.Kanban)
-		kanban.CardCount = 0
+		kanban.CardCount = len(kanban.Cards)
 		kanban.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = kanban.PageSize
@@ -498,7 +502,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 			return
 		}
 
-		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
+		attrView = av.NewAttributeView(avID)
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return
@@ -543,7 +547,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 			return
 		}
 
-		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
+		attrView = av.NewAttributeView(avID)
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return

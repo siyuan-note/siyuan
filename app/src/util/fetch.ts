@@ -5,7 +5,12 @@ import {ipcRenderer} from "electron";
 import {processMessage} from "./processMessage";
 import {kernelError} from "../dialog/processSystem";
 
-export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketData) => void, headers?: IObject) => {
+export const fetchPost = (
+    url: string,
+    data?: any,
+    cb?: (response: IWebSocketData) => void,
+    headers?: IObject,
+    failCallback?: (response: IWebSocketData) => void,) => {
     const init: RequestInit = {
         method: "POST",
     };
@@ -32,6 +37,7 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
     if (headers) {
         init.headers = headers;
     }
+    let isGetFile202 = false;
     fetch(url, init).then((response) => {
         switch (response.status) {
             case 403:
@@ -41,14 +47,21 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
                     msg: response.statusText,
                     code: -response.status,
                 };
+            case 401:
+                // 返回鉴权失败的话直接刷新页面，避免用户在当前页面操作 https://github.com/siyuan-note/siyuan/issues/15163
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+                return {
+                    data: null,
+                    msg: response.statusText,
+                    code: -response.status,
+                };
             default:
-                if (401 == response.status) {
-                    // 返回鉴权失败的话直接刷新页面，避免用户在当前页面操作 https://github.com/siyuan-note/siyuan/issues/15163
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 3000);
+                // /api/file/getFile 接口返回202时表示文件没有正常读取
+                if (response.status === 202 && url === "/api/file/getFile") {
+                    isGetFile202 = true;
                 }
-
                 if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
                     return response.json();
                 } else {
@@ -56,6 +69,10 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
                 }
         }
     }).then((response: IWebSocketData) => {
+        if (failCallback && url === "/api/file/getFile" && isGetFile202) {
+            failCallback(response);
+            return;
+        }
         if (typeof response === "string") {
             if (cb) {
                 cb(response);
@@ -76,6 +93,14 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
             cb(response);
         }
     }).catch((e) => {
+        if (failCallback && url === "/api/file/getFile") {
+            failCallback({
+                data: null,
+                msg: e.message,
+                code: 400,
+            });
+            return;
+        }
         console.warn("fetch post failed [" + e + "], url [" + url + "]");
         if (url === "/api/transactions" && (e.message === "Failed to fetch" || e.message === "Unexpected end of JSON input")) {
             kernelError();

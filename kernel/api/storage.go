@@ -176,12 +176,6 @@ func setLocalStorage(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-
-	app := arg["app"].(string)
-	evt := util.NewCmdResult("setLocalStorage", 0, util.PushModeBroadcastMainExcludeSelfApp)
-	evt.AppId = app
-	evt.Data = val
-	util.PushEvent(evt)
 }
 
 func getLocalStorage(c *gin.Context) {

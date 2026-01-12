@@ -1,10 +1,11 @@
 {
 	"ID": "20211226121633-qa2fjpl",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226121633-qa2fjpl",
 		"title": "圖示",
+		"type": "doc",
 		"updated": "20230821210641"
 	},
 	"Children": [

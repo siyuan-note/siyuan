@@ -67,7 +67,7 @@ type Kanban struct {
 	FillColBackgroundColor bool            `json:"fillColBackgroundColor"`        // 是否填充列背景颜色
 	Fields                 []*KanbanField  `json:"fields"`                        // 卡片字段
 	Cards                  []*KanbanCard   `json:"cards"`                         // 卡片
-	CardCount              int             `json:"rowCount"`                      // 总卡片数
+	CardCount              int             `json:"cardCount"`                     // 总卡片数
 }
 
 // KanbanCard 描述了看板实例卡片的结构。

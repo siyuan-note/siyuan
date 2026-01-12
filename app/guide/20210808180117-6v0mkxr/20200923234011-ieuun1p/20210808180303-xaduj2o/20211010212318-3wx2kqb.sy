@@ -1,10 +1,11 @@
 {
 	"ID": "20211010212318-3wx2kqb",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211010212318-3wx2kqb",
 		"title": "Virtual reference",
+		"type": "doc",
 		"updated": "20240228164101"
 	},
 	"Children": [

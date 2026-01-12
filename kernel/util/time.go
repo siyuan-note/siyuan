@@ -26,6 +26,11 @@ import (
 	"github.com/88250/go-humanize"
 )
 
+func IsTimeStr(str string) bool {
+	_, err := time.Parse("20060102150405", str)
+	return nil == err
+}
+
 func GetTodayStart() (ret time.Time) {
 	ret = time.Now()
 	ret = time.Date(ret.Year(), ret.Month(), ret.Day(), 0, 0, 0, 0, time.Local)
@@ -54,7 +59,7 @@ func WeekdayCN2(date time.Time) string {
 	return weekdayCN2[week]
 }
 
-// ISOWeek returns the ISO 8601 year and week number in which date occurs.
+// ISOWeek returns the ISO 8601 week number in which date occurs.
 // Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to week 52 or 53 of year n-1,
 // and Dec 29 to Dec 31 might belong to week 1 of year n+1.
 func ISOWeek(date time.Time) int {
@@ -68,16 +73,25 @@ func ISOYear(date time.Time) int {
 	return year
 }
 
-// ISOMonth returns the month in which the first day of the ISO 8601 week of date occurs.
+// ISOMonth returns the month in which the Thursday of the ISO 8601 week of date occurs.
 func ISOMonth(date time.Time) int {
-	weekday := int(date.Weekday())
-	if weekday == 0 {
-		weekday = 7
-	}
+	isoYear, isoWeek := date.ISOWeek()
 
-	daysToMonday := weekday - 1
-	monday := date.AddDate(0, 0, -daysToMonday)
-	return int(monday.Month())
+	// 1. 找到该 ISO 年份的 1 月 4 日（它必然属于第 1 周）
+	jan4 := time.Date(isoYear, time.January, 4, 0, 0, 0, 0, date.Location())
+
+	// 2. 找到第 1 周的周四
+	// (jan4.Weekday() + 6) % 7 将周一~周日映射为 0~6
+	daysToMonday := (int(jan4.Weekday()) + 6) % 7
+	mondayOfWeek1 := jan4.AddDate(0, 0, -daysToMonday)
+	thursdayOfWeek1 := mondayOfWeek1.AddDate(0, 0, 3)
+
+	// 3. 计算目标周的周四
+	// 目标周四 = 第一周周四 + (isoWeek-1) * 7天
+	targetThursday := thursdayOfWeek1.AddDate(0, 0, (isoWeek-1)*7)
+
+	// 4. 返回该周四所在的自然月份
+	return int(targetThursday.Month())
 }
 
 // ISOWeekDate returns the date of the specified day of the week in the ISO 8601 week of date.

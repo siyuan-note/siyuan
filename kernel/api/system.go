@@ -35,6 +35,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func clearTempFiles(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.ClearTempFiles()
+}
+
 func vacuumDataIndex(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -785,7 +792,13 @@ func exit(c *gin.Context) {
 		execInstallPkg = int(execInstallPkgArg.(float64))
 	}
 
-	exitCode := model.Close(force, true, execInstallPkg)
+	setCurrentWorkspaceArg := arg["setCurrentWorkspace"]
+	setCurrentWorkspace := true
+	if nil != setCurrentWorkspaceArg {
+		setCurrentWorkspace = setCurrentWorkspaceArg.(bool)
+	}
+
+	exitCode := model.Close(force, setCurrentWorkspace, execInstallPkg)
 	ret.Code = exitCode
 	switch exitCode {
 	case 0:

@@ -4,6 +4,7 @@ import {hasClosestByClassName} from "../../../util/hasClosest";
 import {unicode2Emoji} from "../../../../emoji";
 import {getColIconByType} from "../col";
 import {avContextmenu} from "../action";
+import {Constants} from "../../../../constants";
 
 export const setGalleryCover = (options: {
     view: IAVGallery
@@ -128,6 +129,7 @@ export const setGallerySize = (options: {
     const menu = new Menu();
     const avID = options.nodeElement.getAttribute("data-av-id");
     const blockID = options.nodeElement.getAttribute("data-node-id");
+    const viewID = options.nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const targetNameElement = options.target.querySelector(".b3-menu__accelerator");
     menu.addItem({
         iconHTML: "",
@@ -138,12 +140,14 @@ export const setGallerySize = (options: {
                 action: "setAttrViewCardSize",
                 avID,
                 blockID,
-                data: 0
+                data: 0,
+                viewID
             }], [{
                 action: "setAttrViewCardSize",
                 avID,
                 blockID,
-                data: options.view.cardSize
+                data: options.view.cardSize,
+                viewID
             }]);
             options.view.cardSize = 0;
             targetNameElement.textContent = window.siyuan.languages.small;
@@ -158,12 +162,14 @@ export const setGallerySize = (options: {
                 action: "setAttrViewCardSize",
                 avID,
                 blockID,
-                data: 1
+                data: 1,
+                viewID
             }], [{
                 action: "setAttrViewCardSize",
                 avID,
                 blockID,
-                data: options.view.cardSize
+                data: options.view.cardSize,
+                viewID
             }]);
             options.view.cardSize = 1;
             targetNameElement.textContent = window.siyuan.languages.medium;
@@ -178,12 +184,14 @@ export const setGallerySize = (options: {
                 action: "setAttrViewCardSize",
                 avID,
                 blockID,
-                data: 2
+                data: 2,
+                viewID
             }], [{
                 action: "setAttrViewCardSize",
                 avID,
                 blockID,
-                data: options.view.cardSize
+                data: options.view.cardSize,
+                viewID
             }]);
             options.view.cardSize = 2;
             targetNameElement.textContent = window.siyuan.languages.large;
@@ -222,6 +230,7 @@ export const setGalleryRatio = (options: {
     const menu = new Menu();
     const avID = options.nodeElement.getAttribute("data-av-id");
     const blockID = options.nodeElement.getAttribute("data-node-id");
+    const viewID = options.nodeElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW);
     const targetNameElement = options.target.querySelector(".b3-menu__accelerator");
     [0, 1, 2, 3, 4, 5, 6].forEach(ratio => {
         menu.addItem({
@@ -233,12 +242,14 @@ export const setGalleryRatio = (options: {
                     action: "setAttrViewCardAspectRatio",
                     avID,
                     blockID,
-                    data: ratio
+                    data: ratio,
+                    viewID
                 }], [{
                     action: "setAttrViewCardAspectRatio",
                     avID,
                     blockID,
-                    data: options.view.cardAspectRatio
+                    data: options.view.cardAspectRatio,
+                    viewID
                 }]);
                 options.view.cardAspectRatio = ratio;
                 targetNameElement.textContent = getCardAspectRatio(ratio);

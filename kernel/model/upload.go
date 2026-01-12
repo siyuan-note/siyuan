@@ -84,14 +84,26 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			err = openErr
 			return
 		}
+
 		hash, hashErr := util.GetEtagByHandle(f, fi.Size())
 		if nil != hashErr {
 			f.Close()
 			return
 		}
 
-		if existAssetPath := GetAssetPathByHash(hash); "" != existAssetPath {
-			// 已经存在同样数据的资源文件的话不重复保存
+		if 1 > fi.Size() {
+			hash = "random_1_" + gulu.Rand.String(12)
+		}
+
+		existAssetPath := GetAssetPathByHash(hash)
+		if "" != existAssetPath {
+			originalName := util.RemoveID(filepath.Base(existAssetPath))
+			if strings.ToLower(fName) != strings.ToLower(originalName) {
+				hash = "random_2_" + gulu.Rand.String(12)
+			}
+		}
+
+		if "" != existAssetPath && !strings.HasPrefix(hash, "random_") {
 			succMap[baseName] = existAssetPath
 		} else {
 			fName = util.AssetName(fName, ast.NewNodeID())
@@ -200,8 +212,19 @@ func Upload(c *gin.Context) {
 			break
 		}
 
-		if existAssetPath := GetAssetPathByHash(hash); "" != existAssetPath {
-			// 已经存在同样数据的资源文件的话不重复保存
+		if 1 > file.Size {
+			hash = "random_1_" + gulu.Rand.String(12)
+		}
+
+		existAssetPath := GetAssetPathByHash(hash)
+		if "" != existAssetPath {
+			originalName := util.RemoveID(filepath.Base(existAssetPath))
+			if strings.ToLower(fName) != strings.ToLower(originalName) {
+				hash = "random_2_" + gulu.Rand.String(12)
+			}
+		}
+
+		if "" != existAssetPath && !strings.HasPrefix(hash, "random_") {
 			succMap[baseName] = existAssetPath
 		} else {
 			if skipIfDuplicated {

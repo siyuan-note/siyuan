@@ -539,7 +539,7 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 		if "" == n.IALAttr("id") && (ast.NodeParagraph == n.Type || ast.NodeList == n.Type || ast.NodeListItem == n.Type || ast.NodeBlockquote == n.Type ||
 			ast.NodeMathBlock == n.Type || ast.NodeCodeBlock == n.Type || ast.NodeHeading == n.Type || ast.NodeTable == n.Type || ast.NodeThematicBreak == n.Type ||
 			ast.NodeYamlFrontMatter == n.Type || ast.NodeBlockQueryEmbed == n.Type || ast.NodeSuperBlock == n.Type || ast.NodeAttributeView == n.Type ||
-			ast.NodeHTMLBlock == n.Type || ast.NodeIFrame == n.Type || ast.NodeWidget == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type) {
+			ast.NodeHTMLBlock == n.Type || ast.NodeIFrame == n.Type || ast.NodeWidget == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type || ast.NodeCallout == n.Type) {
 			n.ID = ast.NewNodeID()
 			n.KramdownIAL = [][]string{{"id", n.ID}}
 			n.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: []byte("{: id=\"" + n.ID + "\"}")})
@@ -650,6 +650,21 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 
 				tree.Root.SetIALAttr("custom-"+attrK, fmt.Sprint(attrV))
 			}
+
+			// Import the YAML at the beginning of the Markdown as a code block https://github.com/siyuan-note/siyuan/issues/16488
+			codeBlock := &ast.Node{Type: ast.NodeCodeBlock}
+			openMarker := &ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}
+			codeBlock.AppendChild(openMarker)
+			info := &ast.Node{Type: ast.NodeCodeBlockFenceInfoMarker, CodeBlockInfo: []byte("yaml")}
+			codeBlock.AppendChild(info)
+			content := []byte("---\n")
+			content = append(content, n.Tokens...)
+			content = append(content, []byte("\n---")...)
+			code := &ast.Node{Type: ast.NodeCodeBlockCode, Tokens: content}
+			codeBlock.AppendChild(code)
+			closeMarker := &ast.Node{Type: ast.NodeCodeBlockFenceCloseMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3}
+			codeBlock.AppendChild(closeMarker)
+			tree.Root.PrependChild(codeBlock)
 		}
 
 		if ast.NodeYamlFrontMatter == n.Type {
@@ -665,6 +680,72 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 	rootIAL := parse.Tokens2IAL(tree.Root.LastChild.Tokens)
 	for _, kv := range rootIAL {
 		tree.Root.SetIALAttr(kv[0], kv[1])
+	}
+	return
+}
+
+func ClearTempFiles() {
+	var count int
+	var size int64
+
+	msgId := util.PushMsg(Conf.Language(276), 30*1000)
+	defer func() {
+		msg := fmt.Sprintf(Conf.Language(277), count, humanize.BytesCustomCeil(uint64(size), 2))
+		util.PushUpdateMsg(msgId, msg, 7000)
+	}()
+
+	bazaarTmp := filepath.Join(util.TempDir, "bazaar")
+	clearTempDir(bazaarTmp, &count, &size)
+
+	exportTmp := filepath.Join(util.TempDir, "export")
+	clearTempDir(exportTmp, &count, &size)
+
+	importTmp := filepath.Join(util.TempDir, "import")
+	clearTempDir(importTmp, &count, &size)
+
+	convertTmp := filepath.Join(util.TempDir, "convert")
+	clearTempDir(convertTmp, &count, &size)
+
+	osTmp := filepath.Join(util.TempDir, "os")
+	clearTempDir(osTmp, &count, &size)
+
+	base64Tmp := filepath.Join(util.TempDir, "base64")
+	clearTempDir(base64Tmp, &count, &size)
+
+	installTmp := filepath.Join(util.TempDir, "install")
+	clearTempDir(installTmp, &count, &size)
+
+	thumbnailsTmp := filepath.Join(util.TempDir, "thumbnails")
+	clearTempDir(thumbnailsTmp, &count, &size)
+}
+
+func clearTempDir(dir string, count *int, size *int64) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		entryPath := filepath.Join(dir, entry.Name())
+		info, err := os.Stat(entryPath)
+		if err != nil {
+			continue
+		}
+
+		if info.IsDir() {
+			clearTempDir(entryPath, count, size)
+		} else {
+			if err := os.Remove(entryPath); err != nil {
+				continue
+			}
+
+			*count++
+			*size += info.Size()
+		}
+	}
+
+	if util.IsEmptyDir(dir) {
+		os.Remove(dir)
 	}
 	return
 }
@@ -761,6 +842,14 @@ func ChangeBoxSort(boxIDs []string) {
 		boxConf.Sort = i + 1
 		box.SaveConf(boxConf)
 	}
+
+	var notebookIDs []string
+	for _, box := range Conf.GetOpenedBoxes() {
+		notebookIDs = append(notebookIDs, box.ID)
+	}
+	util.BroadcastByType("main", "notebookSortChanged", 0, "", map[string]any{
+		"notebookIDs": notebookIDs,
+	})
 }
 
 func SetBoxIcon(boxID, icon string) {

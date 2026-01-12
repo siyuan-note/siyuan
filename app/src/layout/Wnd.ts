@@ -273,11 +273,13 @@ export class Wnd {
                 return;
             }
 
-            const nextTabHeaderElement = (Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
+            let nextTabHeaderElement: HTMLElement;
+            Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
                 if (item.style?.opacity === "0.38") {
+                    nextTabHeaderElement = item.nextElementSibling as HTMLElement;
                     return true;
                 }
-            }) as HTMLElement)?.nextElementSibling;
+            });
 
             if (!it.contains(oldTab.headElement)) {
                 // 从其他 Wnd 拖动过来
@@ -335,7 +337,6 @@ export class Wnd {
                 dragElement.removeAttribute("style");
             }
         });
-
         dragElement.addEventListener("dragover", (event: DragEvent & { layerX: number, layerY: number }) => {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                 item.classList.remove("layout-tab-bars--drag");
@@ -362,7 +363,7 @@ export class Wnd {
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 JSONToCenter(app, tabData, this);
                 this.children.find(item => {
-                    if (item.headElement.getAttribute("data-activeTime") === tabData.activeTime) {
+                    if (item.headElement.getAttribute("data-activetime") === tabData.activeTime) {
                         oldTab = item;
                         return true;
                     }

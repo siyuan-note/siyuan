@@ -118,6 +118,12 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     ${window.siyuan.languages.download}
 </span>
 <span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="downloadRollback">
+    <svg><use xlink:href="#iconUndo"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.downloadRollback}
+</span>
+<span class="fn__flex-1"></span>
 <span class="b3-list-item__action" data-type="removeCloudRepoTagSnapshot">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
     <span class="fn__space"></span>
@@ -130,6 +136,12 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     <svg><use xlink:href="#iconDownload"></use></svg>
     <span class="fn__space"></span>
     ${window.siyuan.languages.download}
+</span>
+<span class="fn__flex-1"></span>
+<span class="b3-list-item__action" data-type="downloadRollback">
+    <svg><use xlink:href="#iconUndo"></use></svg>
+    <span class="fn__space"></span>
+    ${window.siyuan.languages.downloadRollback}
 </span>
 <span class="fn__flex-1"></span>`;
     } else if (type === "getRepoTagSnapshots") {
@@ -170,9 +182,11 @@ const renderRepoItem = (response: IWebSocketData, element: Element, type: string
     /// #else
     if (type === "getCloudRepoTagSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
+<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadRollback" aria-label="${window.siyuan.languages.downloadRollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="removeCloudRepoTagSnapshot" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>`;
     } else if (type === "getCloudRepoSnapshots") {
-        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>`;
+        actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadSnapshot" aria-label="${window.siyuan.languages.download}"><svg><use xlink:href="#iconDownload"></use></svg></span>
+<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="downloadRollback" aria-label="${window.siyuan.languages.downloadRollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>`;
     } else if (type === "getRepoTagSnapshots") {
         actionHTML = `<span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="uploadSnapshot" aria-label="${window.siyuan.languages.upload}"><svg><use xlink:href="#iconUpload"></use></svg></span>
 <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}"><svg><use xlink:href="#iconUndo"></use></svg></span>
@@ -224,7 +238,7 @@ ${statHTML}`;
         repoHTML += `<li class="b3-list-item" data-type="repoitem" data-id="${item.id}" data-tag="${item.tag}">
 <div class="fn__flex-1">
     ${infoHTML}
-    <div class="fn__flex" style="height: 26px" data-id="${item.id}" data-tag="${item.tag}">
+    <div class="fn__flex" style="height: 26px" data-type="repoitem"" data-id="${item.id}" data-tag="${item.tag}">
         ${actionHTML}
         <span class="b3-list-item__action" data-type="more">
             <svg><use xlink:href="#iconMore"></use></svg>
@@ -434,7 +448,7 @@ export const openHistory = (app: App) => {
                     </button>
                 </div>    
             </div>
-            <ul class="b3-list b3-list--background fn__flex-1" style="padding-bottom: 8px">
+            <ul class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
                 <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
             </ul>
         </div>
@@ -547,7 +561,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     time = target.parentElement.parentElement.previousElementSibling.textContent.trim();
                 } else if (dataType === "repoitem") {
                     name = window.siyuan.languages.workspaceData;
-                    time = target.parentElement.querySelector("span[data-type='hCreated']").textContent.trim();
+                    time = (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim();
                 }
                 const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", name)
                     .replace("${time}", time);
@@ -783,6 +797,22 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 fetchPost("/api/repo/downloadCloudSnapshot", {
                     tag: target.parentElement.getAttribute("data-tag"),
                     id: target.parentElement.getAttribute("data-id")
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "downloadRollback" && !window.siyuan.config.readonly) {
+                confirmDialog("⚠️ " + window.siyuan.languages.downloadRollback, window.siyuan.languages.rollbackConfirm.replace("${name}", window.siyuan.languages.workspaceData)
+                    .replace("${time}", (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim()), () => {
+                    const repoId = target.parentElement.getAttribute("data-id");
+                    fetchPost("/api/repo/downloadCloudSnapshot", {
+                        tag: target.parentElement.getAttribute("data-tag"),
+                        id: repoId
+                    }, () => {
+                        fetchPost("/api/repo/checkoutRepo", {
+                            id: repoId
+                        });
+                    });
                 });
                 event.stopPropagation();
                 event.preventDefault();

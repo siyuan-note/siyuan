@@ -17,9 +17,12 @@
 package api
 
 import (
+	"os"
+
 	"github.com/88250/clipboard"
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 )
 
 func readFilePaths(c *gin.Context) {
@@ -30,8 +33,22 @@ func readFilePaths(c *gin.Context) {
 	if !gulu.OS.IsLinux() { // Linux 端不再支持 `粘贴为纯文本` 时处理文件绝对路径 https://github.com/siyuan-note/siyuan/issues/5825
 		paths, _ = clipboard.ReadFilePaths()
 	}
-	if 1 > len(paths) {
-		paths = []string{}
+
+	data := []map[string]any{}
+	for _, path := range paths {
+		fi, err := os.Stat(path)
+		if nil != err {
+			logging.LogErrorf("stat file failed: %s", err)
+			continue
+		}
+
+		data = append(data, map[string]any{
+			"name":    fi.Name(),
+			"size":    fi.Size(),
+			"isDir":   fi.IsDir(),
+			"updated": fi.ModTime().UnixMilli(),
+			"path":    path,
+		})
 	}
-	ret.Data = paths
+	ret.Data = data
 }

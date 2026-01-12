@@ -171,10 +171,10 @@ func initHttpClient() {
 }
 
 func ParsePort(portString string) (uint16, error) {
-	if port, err := strconv.ParseUint(portString, 10, 16); err != nil {
+	port, err := strconv.ParseUint(portString, 10, 16)
+	if err != nil {
 		logging.LogErrorf("parse port [%s] failed: %s", portString, err)
 		return 0, err
-	} else {
-		return uint16(port), nil
 	}
+	return uint16(port), nil
 }

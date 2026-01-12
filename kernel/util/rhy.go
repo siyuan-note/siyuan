@@ -26,21 +26,24 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-var cachedRhyResult = map[string]interface{}{}
-var rhyResultCacheTime int64
-var rhyResultLock = sync.Mutex{}
+var (
+	RhyCacheDuration = int64(3600 * 6)
+
+	cachedRhyResult    = map[string]interface{}{}
+	rhyResultCacheTime int64
+	rhyResultLock      = sync.Mutex{}
+)
 
 func GetRhyResult(force bool) (map[string]interface{}, error) {
 	rhyResultLock.Lock()
 	defer rhyResultLock.Unlock()
 
-	cacheDuration := int64(3600 * 6)
 	if ContainerDocker == Container {
-		cacheDuration = int64(3600 * 24)
+		RhyCacheDuration = int64(3600 * 24)
 	}
 
 	now := time.Now().Unix()
-	if cacheDuration >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
+	if RhyCacheDuration >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
 		return cachedRhyResult, nil
 	}
 

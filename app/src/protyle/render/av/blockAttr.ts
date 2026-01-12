@@ -275,9 +275,12 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
                         if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                            const files: string[] = [];
+                            const files: ILocalFiles[] = [];
                             for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                                files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                                files.push({
+                                    path: webUtils.getPathForFile(event.dataTransfer.files[i]),
+                                    size: event.dataTransfer.files[i].size
+                                });
                             }
                             dragUpload(files, protyle, cellElement);
                         }

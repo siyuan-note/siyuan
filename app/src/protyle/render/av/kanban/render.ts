@@ -22,16 +22,16 @@ const getKanbanTitleHTML = (group: IAVView, counter: number) => {
             nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
         });
     } else if (group.groupValue.type === "checkbox") {
-        nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px)"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
+        nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px);margin: 4px 0;float: left;"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
     } else {
         nameHTML = group.name;
     }
     // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
     return `<div class="av__group-title">
     <span class="av__group-name fn__ellipsis" style="white-space: nowrap;">${nameHTML}</span>
-    ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.total}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
+    ${(!counter || counter === 0) ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="fn__flex-1"></span>
-    <span class="av__group-icon ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
+    <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
 
@@ -100,8 +100,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
         });
         galleryHTML += `</div>
     <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+        <span class="protyle-icon protyle-icon--first ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
     </div>
 </div>`;
     });
@@ -155,6 +155,7 @@ export const renderKanban = async (options: {
         editIds,
         selectItemIds,
         pageSizes,
+        left: options.blockElement.querySelector(".av__kanban")?.scrollLeft,
     };
     if (options.blockElement.firstElementChild.innerHTML === "") {
         options.blockElement.style.alignSelf = "";
@@ -188,44 +189,55 @@ export const renderKanban = async (options: {
     }
     if (data.viewType === "gallery") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
-        renderGallery({blockElement: options.blockElement, protyle:options.protyle, cb:options.cb, renderAll:options.renderAll, data});
+        renderGallery({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
         return;
     }
-    const view: IAVGallery = data.view as IAVKanban;
+    const view = data.view as IAVKanban;
     let bodyHTML = "";
     let isSelectGroup = false;
     view.groups.forEach((group: IAVKanban) => {
         if (group.groupHidden === 0) {
             let selectBg = "";
             if (group.fillColBackgroundColor) {
-                let color = "";
                 if (["mSelect", "select"].includes(group.groupValue.type)) {
                     isSelectGroup = true;
-                    color = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${group.groupValue.mSelect[0].color}`);
                 }
                 if (isSelectGroup) {
-                    if (!color) {
-                        color = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
+                    if (group.groupValue.mSelect && group.groupValue.mSelect.length > 0) {
+                        selectBg = `style="--b3-av-kanban-background: var(--b3-font-background${group.groupValue.mSelect[0].color});"`;
+                    } else {
+                        selectBg = 'style="--b3-av-kanban-background: var(--b3-border-color);"';
                     }
-                    selectBg = `style="--b3-av-kanban-border:${color};--b3-av-kanban-bg:${color}29;--b3-av-kanban-content-bg:${color}47;--b3-av-kanban-content-hover-bg:${color}5c;"`;
                 }
             }
             bodyHTML += `<div class="av__kanban-group${group.cardSize === 0 ? " av__kanban-group--small" : (group.cardSize === 2 ? " av__kanban-group--big" : "")}"${selectBg}>
-    ${getKanbanTitleHTML(group, group.cards.length)}
-    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getKanbanHTML(group)}</div>
+    ${getKanbanTitleHTML(group, group.cardCount)}
+    <div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body">${getKanbanHTML(group)}</div>
 </div>`;
         }
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
-    <div class="av__kanban">
+    <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}">
         ${bodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
     } else {
-        options.blockElement.querySelector(".av__kanban").innerHTML = bodyHTML;
+        const kanbanElement = options.blockElement.querySelector(".av__kanban");
+        kanbanElement.innerHTML = bodyHTML;
+        if (isSelectGroup) {
+            kanbanElement.classList.add("av__kanban--bg");
+        } else {
+            kanbanElement.classList.remove("av__kanban--bg");
+        }
     }
     afterRenderGallery({
         resetData,

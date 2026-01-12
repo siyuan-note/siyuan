@@ -87,10 +87,9 @@ func Plugins(frontend string) (plugins []*Plugin) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(plugin.Package) {
-			return
-		}
-
+		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin.Package)
+		plugin.DisallowUpdate = disallowInstallBazaarPackage(plugin.Package)
+		plugin.UpdateRequiredMinAppVer = plugin.MinAppVersion
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 
 		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
@@ -134,7 +133,7 @@ func Plugins(frontend string) (plugins []*Plugin) {
 	return
 }
 
-func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish bool) {
+func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish, disallowInstall bool) {
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
 	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
 		return
@@ -164,11 +163,12 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		displayName = GetPreferredName(plugin.Package)
 		incompatible = isIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
+		disallowInstall = disallowInstallBazaarPackage(plugin.Package)
 	}
 	return
 }
 
-func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
+func InstalledPlugins(frontend string) (ret []*Plugin) {
 	ret = []*Plugin{}
 
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
@@ -182,10 +182,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		return
 	}
 
-	var bazaarPlugins []*Plugin
-	if checkUpdate {
-		bazaarPlugins = Plugins(frontend)
-	}
+	bazaarPlugins := Plugins(frontend)
 
 	for _, pluginDir := range pluginDirs {
 		if !util.IsDirRegularOrSymlink(pluginDir) {
@@ -198,6 +195,12 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			continue
 		}
 
+		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin.Package)
+		if bazaarPkg := getBazaarPlugin(plugin.Name, bazaarPlugins); nil != bazaarPkg {
+			plugin.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+			plugin.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		}
+
 		installPath := filepath.Join(util.DataDir, "plugins", dirName)
 		plugin.Installed = true
 		plugin.RepoURL = plugin.URL
@@ -207,9 +210,9 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.PreferredName = GetPreferredName(plugin.Package)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "plugin.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install plugin.json failed: %s", statErr)
 			continue
 		}
 		plugin.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -221,19 +224,21 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			packageInstallSizeCache.SetDefault(plugin.RepoURL, is)
 		}
 		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
-		readmeFilename := getPreferredReadme(plugin.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
+		plugin.PreferredReadme = loadInstalledReadme(installPath, "/plugins/"+dirName+"/", plugin.Readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)
 	}
 	return
+}
+
+func getBazaarPlugin(name string, plugins []*Plugin) *Plugin {
+	for _, p := range plugins {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
 }
 
 func InstallPlugin(repoURL, repoHash, installPath string, systemID string) error {
@@ -254,9 +259,10 @@ func isIncompatiblePlugin(plugin *Plugin, currentFrontend string) bool {
 		return false
 	}
 
+	currentBackend := getCurrentBackend()
 	backendOk := false
 	for _, backend := range plugin.Backends {
-		if backend == getCurrentBackend() || "all" == backend {
+		if backend == currentBackend || "all" == backend {
 			backendOk = true
 			break
 		}

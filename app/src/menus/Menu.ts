@@ -81,6 +81,7 @@ export class Menu {
 
     private preventDefault(event: KeyboardEvent) {
         if (!hasClosestByClassName(event.target as Element, "b3-menu") &&
+            !hasClosestByClassName(event.target as Element, "tooltip") &&
             // 移动端底部键盘菜单
             !hasClosestByClassName(event.target as Element, "keyboard__bar")) {
             event.preventDefault();

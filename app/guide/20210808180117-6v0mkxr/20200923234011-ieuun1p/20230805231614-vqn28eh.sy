@@ -1,11 +1,12 @@
 {
 	"ID": "20230805231614-vqn28eh",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f451",
 		"id": "20230805231614-vqn28eh",
 		"title": "Member's privileges",
+		"type": "doc",
 		"updated": "20230805231924"
 	},
 	"Children": [

@@ -7,6 +7,9 @@ import {focusByRange} from "../protyle/util/selection";
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
+import {isMobile} from "../util/functions";
+import {confirmDialog} from "../dialog/confirmDialog";
+import {filesize} from "filesize";
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
@@ -314,7 +317,7 @@ const setRelation = (pdf: any) => {
     <div class="fn__hr"></div>
     <ul class="b3-list b3-list--background">${getRelationHTML(configItem.ids)}</ul>
 </div>`,
-        width: "520px",
+        width: isMobile() ? "92vw" : "520px",
     });
 
     const addRelation = () => {
@@ -733,17 +736,23 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
         if (mode === "rect" ||
             (mode === "" && rectElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
         ) {
-            getRectImgData(pdf).then((imageDataURL: string) => {
-                fetch(imageDataURL).then((response) => {
+            getRectImgData(pdf).then((imageData) => {
+                fetch(imageData.url).then((response) => {
                     return response.blob();
                 }).then((blob) => {
-                    const formData = new FormData();
-                    const imageName = content + ".png";
-                    formData.append("file[]", blob, imageName);
-                    formData.append("skipIfDuplicated", "true");
-                    fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
-                        writeText(`<<${idPath} "${content}">>
+                    let msg = "";
+                    if (Constants.SIZE_UPLOAD_TIP_SIZE <= blob.size) {
+                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png").replace("${y}", filesize(blob.size, {standard: "iec"}));
+                    }
+                    confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+                        const formData = new FormData();
+                        const imageName = content.substring(0, content.length - 22) + (imageData.rotation ? `${imageData.rotation}-` : "") + content.substring(content.length - 22) + ".png";
+                        formData.append("file[]", blob, imageName);
+                        formData.append("skipIfDuplicated", "true");
+                        fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
+                            writeText(`<<${idPath} "${content}">>
 ![](${response.data.succMap[imageName]})`);
+                        });
                     });
                 });
             });
@@ -753,43 +762,69 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     }, Constants.TIMEOUT_DBLCLICK);
 };
 
-const getCaptureCanvas = async (pdfObj: any, pageNumber: number) => {
-    const pdfPage = await pdfObj.pdfDocument.getPage(pageNumber);
-    const viewport = pdfPage.getViewport({scale: 1.5 * pdfObj.pdfViewer.currentScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS});
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.floor(viewport.width);
-    canvas.height = Math.floor(viewport.height);
-
-    await pdfPage.render({
-        canvasContext: canvas.getContext("2d"),
-        viewport: viewport
-    }).promise;
-
-    return canvas;
-};
-
 async function getRectImgData(pdfObj: any) {
     const pageElement = hasClosestByClassName(rectElement, "page");
     if (!pageElement) {
         return;
     }
 
-    const captureCanvas = await getCaptureCanvas(pdfObj, parseInt(pageElement.getAttribute("data-page-number")));
+    const pageNumber = parseInt(pageElement.getAttribute("data-page-number"));
+    const pageView = pdfObj.pdfViewer.getPageView(pageNumber - 1);
+    if (!pageView) {
+        return;
+    }
+
+    // PDF 截图时的缩放倍数，用于提高截图清晰度
+    const CAPTURE_SCALE_RATIO = 1.5;
+
+    const pdfPage = await pdfObj.pdfDocument.getPage(pageNumber);
+    const captureViewport = pdfPage.getViewport({
+        scale: pdfObj.pdfViewer.currentScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS * CAPTURE_SCALE_RATIO,
+        rotation: 0
+    });
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = Math.floor(captureViewport.width);
+    captureCanvas.height = Math.floor(captureViewport.height);
+
+    const captureCtx = captureCanvas.getContext("2d");
+    await pdfPage.render({
+        canvasContext: captureCtx,
+        viewport: captureViewport
+    }).promise;
 
     const rectStyle = (rectElement.firstElementChild as HTMLElement).style;
-    const scale = 1.5;
-    const captureImageData = captureCanvas.getContext("2d").getImageData(
-        scale * parseFloat(rectStyle.left),
-        scale * parseFloat(rectStyle.top),
-        scale * parseFloat(rectStyle.width),
-        scale * parseFloat(rectStyle.height));
+    const captureImageData = captureCtx.getImageData(
+        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.left),
+        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.top),
+        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.width),
+        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.height)
+    );
 
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = captureImageData.width;
-    tempCanvas.height = captureImageData.height;
-    const ctx = tempCanvas.getContext("2d");
-    ctx.putImageData(captureImageData, 0, 0);
-    return tempCanvas.toDataURL();
+    const resultCanvas = document.createElement("canvas");
+    resultCanvas.width = captureImageData.width;
+    resultCanvas.height = captureImageData.height;
+    // 页面实际旋转角度 = 用户旋转 + PDF 本身旋转
+    const totalRotation = (pageView.rotation + pageView.pdfPageRotate) % 360;
+    const resultCtx = resultCanvas.getContext("2d");
+    if (totalRotation === 0) {
+        resultCtx.putImageData(captureImageData, 0, 0);
+    } else {
+        // 交换宽高
+        if (totalRotation === 90 || totalRotation === 270) {
+            [resultCanvas.width, resultCanvas.height] = [resultCanvas.height, resultCanvas.width];
+        }
+        resultCtx.translate(resultCanvas.width / 2, resultCanvas.height / 2);
+        resultCtx.rotate((totalRotation * Math.PI) / 180);
+        // 在旋转后的画布坐标系上绘制图片
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = captureImageData.width;
+        tempCanvas.height = captureImageData.height;
+        const tempCtx = tempCanvas.getContext("2d");
+        tempCtx.putImageData(captureImageData, 0, 0);
+        resultCtx.drawImage(tempCanvas, -tempCanvas.width / 2, -tempCanvas.height / 2);
+    }
+
+    return {url: resultCanvas.toDataURL(), rotation: totalRotation};
 }
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {

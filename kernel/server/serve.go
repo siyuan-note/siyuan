@@ -18,6 +18,7 @@ package server
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"mime"
@@ -61,7 +62,7 @@ const (
 )
 
 var (
-	sessionStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	sessionStore cookie.Store
 
 	HttpMethods = []string{
 		http.MethodGet,
@@ -128,7 +129,7 @@ var (
 	}
 )
 
-func Serve(fastMode bool) {
+func Serve(fastMode bool, cookieKey string) {
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
 	ginServer.UseH2C = true
@@ -142,6 +143,7 @@ func Serve(fastMode bool) {
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"})),
 	)
 
+	sessionStore = cookie.NewStore([]byte(cookieKey))
 	sessionStore.Options(sessions.Options{
 		Path:   "/",
 		Secure: util.SSL,
@@ -217,7 +219,15 @@ func Serve(fastMode bool) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
-	if err = http.Serve(ln, ginServer.Handler()); err != nil {
+	util.HttpServer = &http.Server{
+		Handler: ginServer,
+	}
+
+	if err = util.HttpServer.Serve(ln); err != nil {
+		if errors.Is(err, http.ErrServerClosed) {
+			return
+		}
+
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)
@@ -255,7 +265,44 @@ func rewritePortJSON(pid, port string) {
 func serveExport(ginServer *gin.Engine) {
 	// Potential data export disclosure security vulnerability https://github.com/siyuan-note/siyuan/issues/12213
 	exportGroup := ginServer.Group("/export/", model.CheckAuth)
-	exportGroup.Static("/", filepath.Join(util.TempDir, "export"))
+	exportBaseDir := filepath.Join(util.TempDir, "export")
+
+	// 应下载而不是查看导出的文件
+	exportGroup.GET("/*filepath", func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/export/temp/") {
+			c.File(filepath.Join(util.TempDir, c.Request.URL.Path))
+			return
+		}
+
+		filePath := strings.TrimPrefix(c.Request.URL.Path, "/export/")
+
+		decodedPath, err := url.PathUnescape(filePath)
+		if err != nil {
+			decodedPath = filePath
+		}
+
+		fullPath := filepath.Join(exportBaseDir, decodedPath)
+
+		fileInfo, err := os.Stat(fullPath)
+		if os.IsNotExist(err) {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		if fileInfo.IsDir() {
+			c.Status(http.StatusNotFound)
+			return
+		}
+
+		fileName := filepath.Base(decodedPath)
+		c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileName))
+
+		c.File(fullPath)
+	})
 }
 
 func serveWidgets(ginServer *gin.Engine) {
@@ -562,6 +609,7 @@ func serveDebug(ginServer *gin.Engine) {
 }
 
 func serveWebSocket(ginServer *gin.Engine) {
+	util.WebSocketServer = melody.New()
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {
@@ -621,6 +669,13 @@ func serveWebSocket(ginServer *gin.Engine) {
 			s.CloseWithMsg([]byte("  unauthenticated"))
 			logging.LogWarnf("closed an unauthenticated session [%s]", util.GetRemoteAddr(s.Request))
 			return
+		}
+
+		// 标记发布服务的连接
+		if token := model.ParseXAuthToken(s.Request); token != nil {
+			if model.IsPublishServiceToken(token) {
+				s.Set("isPublish", true)
+			}
 		}
 
 		util.AddPushChan(s)

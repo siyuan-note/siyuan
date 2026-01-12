@@ -260,6 +260,14 @@ declare namespace Config {
          * The version number of the theme currently in use
          */
         themeVer: string;
+        statusBar: IAppearanceStatusBar;
+    }
+
+    export interface IAppearanceStatusBar {
+        msgTaskDatabaseIndexCommitDisabled: boolean;
+        msgTaskHistoryDatabaseIndexCommitDisabled: boolean;
+        msgTaskAssetDatabaseIndexCommitDisabled: boolean;
+        msgTaskHistoryGenerateFileDisabled: boolean;
     }
 
     /**
@@ -277,9 +285,11 @@ declare namespace Config {
         | "he_IL"
         | "it_IT"
         | "ja_JP"
+        | "ko_KR"
         | "pl_PL"
         | "pt_BR"
         | "ru_RU"
+        | "tr_TR"
         | "zh_CN"
         | "zh_CHT";
 
@@ -487,6 +497,10 @@ declare namespace Config {
          */
         spellcheck: boolean;
         /**
+         * Support spell check languages
+         */
+        spellcheckLanguages: string[];
+        /**
          * Whether to enable virtual references
          */
         virtualBlockRef: boolean;
@@ -662,6 +676,14 @@ declare namespace Config {
          * The .sy and database .json files larger than this value will prompt a warning (unit: MB)
          */
         largeFileWarningSize: number;
+        /**
+         * Whether to create new documents at the top of the document tree
+         */
+        createDocAtTop: boolean;
+        /**
+         * The maximum number of recent documents listed
+         */
+        recentDocsMaxListCount: number;
     }
 
     /**
@@ -791,6 +813,10 @@ declare namespace Config {
          * Display quote block
          */
         blockquote: boolean;
+        /**
+         * Display callout
+         */
+        callout: boolean;
         /**
          * Display code block
          */
@@ -1204,6 +1230,10 @@ declare namespace Config {
          * Whether to search quote blocks
          */
         blockquote: boolean;
+        /**
+         * Whether to search callout
+         */
+        callout: boolean;
         /**
          * Whether to distinguish between uppercase and lowercase letters when searching
          */
@@ -2290,6 +2320,11 @@ declare namespace Config {
          * @default false
          */
         blockquote: boolean;
+        /**
+         * Search results contain callout blocks
+         * @default false
+         */
+        callout: boolean;
         /**
          * Search results contain code blocks
          * @default false

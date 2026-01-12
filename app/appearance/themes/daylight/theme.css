@@ -36,7 +36,7 @@
     --b3-toolbar-blur-background: #fcfcfc;
     --b3-toolbar-color: var(--b3-theme-on-surface);
     --b3-toolbar-hover: var(--b3-theme-background-light);
-    --b3-toolbar-left-mac: 69px;
+    --b3-toolbar-left-mac: 74px;
 
     /* 线条 */
     --b3-border-color: var(--b3-theme-surface-lighter);
@@ -143,6 +143,7 @@
     --b3-graph-olist-point: #b3005f;
     --b3-graph-listitem-point: #f65b00;
     --b3-graph-bq-point: #8d48e3;
+    --b3-graph-callout-point: var(--b3-theme-success);
     --b3-graph-super-point: #dd79ff;
     --b3-graph-doc-point: #202124;
     --b3-graph-tag-point: #dbf32f;
@@ -183,13 +184,18 @@
     --b3-pdf-background7: #C885DA;
     --b3-pdf-dark: #212224;
 
+    /* callout */
+    --b3-callout-note: var(--b3-theme-primary);
+    --b3-callout-tip: var(--b3-theme-success);
+    --b3-callout-caution: var(--b3-theme-error);
+    --b3-callout-important: var(--b3-protyle-inline-blockref-color);
+    --b3-callout-warning: var(--b3-highlight-current-background);
+
     /* 表格 */
     --b3-table-even-background: rgba(0, 0, 0, .02);
 
     /* 数据库 */
     --b3-av-gallery-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px 0px, var(--b3-border-color) 0px 0px 0px 1px;
-    --b3-av-kanban-border: var(--b3-border-color);
-    --b3-av-kanban-content-hover-bg: var(--b3-theme-surface);
 
     /* 嵌入块 */
     --b3-embed-background: transparent;

@@ -8,6 +8,7 @@
   font-weight: normal;
   align-items: center;
   line-height: 16px;
+  user-select: none;
 
   &--av span:hover {
     color: var(--b3-protyle-inline-blockref-color);

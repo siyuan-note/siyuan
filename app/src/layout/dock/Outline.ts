@@ -70,7 +70,7 @@ export class Outline extends Model {
                                 this.updateDocTitle({
                                     title: data.data.title,
                                     icon: Constants.ZWSP
-                                });
+                                }, -1);
                             }
                             break;
                         case "unmount":
@@ -177,6 +177,7 @@ export class Outline extends Model {
                         openFileById({
                             app: options.app,
                             id,
+                            scrollPosition: "start",
                             action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                         });
                     });
@@ -331,6 +332,9 @@ export class Outline extends Model {
             preview: this.isPreview
         }, response => {
             this.update(response);
+            if (this.blockId) {
+                this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
+            }
         });
     }
 
@@ -475,20 +479,34 @@ export class Outline extends Model {
         });
     }
 
-    public updateDocTitle(ial?: IObject) {
+    public updateDocTitle(ial?: IObject, count?: number) {
         const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
+            if (!ial && typeof count === "undefined") {
+                docTitleElement.classList.add("fn__none");
+                return;
+            }
             if (ial) {
                 let iconHTML = `${unicode2Emoji(ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}`;
                 if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }
-                docTitleElement.innerHTML = `${iconHTML}
-<span class="b3-list-item__text">${escapeHtml(ial.title)}</span>`;
+                docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(ial.title)}</span>${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
                 docTitleElement.setAttribute("title", ial.title);
                 docTitleElement.classList.remove("fn__none");
-            } else {
-                docTitleElement.classList.add("fn__none");
+            }
+            // count 为 -1 时，不对数量进行更新
+            if (typeof count === "number" && count !== -1) {
+                const counterElement = docTitleElement.querySelector(".counter") as HTMLElement;
+                if (count > 0) {
+                    if (counterElement) {
+                        counterElement.textContent = count.toString();
+                    } else {
+                        docTitleElement.insertAdjacentHTML("beforeend", `<span class="counter">${count.toString()}</span>`);
+                    }
+                } else {
+                    counterElement?.remove();
+                }
             }
         } else {
             docTitleElement.classList.add("fn__none");
@@ -532,6 +550,7 @@ export class Outline extends Model {
                     return;
                 }
                 this.update(response);
+                this.updateDocTitle(null, response.data?.length || 0);
                 // https://github.com/siyuan-note/siyuan/issues/8372
                 if (getSelection().rangeCount > 0) {
                     const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
@@ -598,6 +617,9 @@ export class Outline extends Model {
             item.classList.remove("b3-list-item--focus");
         });
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
+        if (!currentElement) {
+            return;
+        }
         if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {
@@ -914,6 +936,7 @@ export class Outline extends Model {
                 openFileById({
                     app: this.app,
                     id,
+                    scrollPosition: "start",
                     action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HTML, Constants.CB_GET_OUTLINE] : [Constants.CB_GET_FOCUS, Constants.CB_GET_OUTLINE, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML],
                 });
             });

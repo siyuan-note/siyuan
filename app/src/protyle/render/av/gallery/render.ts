@@ -33,6 +33,7 @@ interface ITableOptions {
         pageSizes: { [key: string]: string },
         query: string,
         oldOffset: number,
+        left?: number,
     }
 }
 
@@ -103,8 +104,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
         });
         galleryHTML += `</div>
     <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+        <span class="protyle-icon protyle-icon--first ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last ariaLabel" data-position="4north" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
     </div>
 </div>`;
     });
@@ -129,8 +130,8 @@ const renderGroupGallery = (options: ITableOptions) => {
     let avBodyHTML = "";
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
-            avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
+            avBodyHTML += `${getGroupTitleHTML(group, group.cardCount)}
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -163,6 +164,9 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (options.resetData.alignSelf) {
         options.blockElement.style.alignSelf = options.resetData.alignSelf;
     }
+    if (options.resetData.left) {
+        options.blockElement.querySelector(".av__kanban").scrollLeft = options.resetData.left;
+    }
     options.resetData.selectItemIds.find(selectId => {
         let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
         if (!itemElement) {
@@ -179,6 +183,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
         }
         if (itemElement) {
             itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+            itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
         }
     });
     Object.keys(options.resetData.pageSizes).forEach((groupId) => {
@@ -331,7 +336,13 @@ export const renderGallery = async (options: {
     }
     if (data.viewType === "kanban") {
         options.blockElement.setAttribute("data-av-type", data.viewType);
-        renderKanban({blockElement: options.blockElement, protyle:options.protyle, cb:options.cb, renderAll:options.renderAll, data});
+        renderKanban({
+            blockElement: options.blockElement,
+            protyle: options.protyle,
+            cb: options.cb,
+            renderAll: options.renderAll,
+            data
+        });
         return;
     }
     const view: IAVGallery = data.view as IAVGallery;

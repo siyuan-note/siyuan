@@ -229,7 +229,12 @@ const renderEmojiContent = (previousIndex: string, previousContentElement: Eleme
     previousContentElement.removeAttribute("style");
 };
 
-export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, callback?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
+export const openEmojiPanel = (
+    id: string,
+    type: "doc" | "notebook" | "av",
+    position: IPosition,
+    callback?: (emoji: string) => void,
+    dynamicImgElement?: HTMLElement) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
     } else {
@@ -434,7 +439,6 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                     icon: unicode
                 }, () => {
                     dialog.destroy();
-                    addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id, "iconFilesRoot");
                 });
             } else if (type === "doc") {
@@ -443,7 +447,6 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                     attrs: {"icon": unicode}
                 }, () => {
                     dialog.destroy();
-                    addEmoji(unicode);
                     updateFileTreeEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
@@ -451,6 +454,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             if (callback) {
                 callback(unicode);
             }
+            addEmoji(unicode);
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -556,7 +560,6 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                         notebook: id,
                         icon: ""
                     }, () => {
-                        dialog.destroy();
                         updateFileTreeEmoji("", id, "iconFilesRoot");
                     });
                 } else if (type === "doc") {
@@ -564,7 +567,6 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                         id: id,
                         attrs: {"icon": ""}
                     }, () => {
-                        dialog.destroy();
                         updateFileTreeEmoji("", id);
                         updateOutlineEmoji("", id);
                     });
@@ -572,6 +574,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 if (callback) {
                     callback("");
                 }
+                dialog.destroy();
                 break;
             } else if (target.classList.contains("emojis__item") || target.getAttribute("data-action") === "random" || target.classList.contains("emoji__dynamic-item")) {
                 let unicode = "";
@@ -590,7 +593,6 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                         notebook: id,
                         icon: unicode
                     }, () => {
-                        addEmoji(unicode);
                         updateFileTreeEmoji(unicode, id, "iconFilesRoot");
                     });
                 } else if (type === "doc") {
@@ -598,15 +600,14 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                         id,
                         attrs: {"icon": unicode}
                     }, () => {
-                        addEmoji(unicode);
                         updateFileTreeEmoji(unicode, id);
                         updateOutlineEmoji(unicode, id);
-
                     });
                 }
                 if (callback) {
                     callback(unicode);
                 }
+                addEmoji(unicode);
                 break;
             } else if (target.getAttribute("data-type")?.startsWith("tab-")) {
                 dialogElement.querySelectorAll('.emojis__tabheader [data-type|="tab"]').forEach((item: HTMLElement) => {

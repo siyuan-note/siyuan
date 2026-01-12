@@ -99,8 +99,8 @@ func setRecentDocByTree(tree *parse.Tree) {
 	}
 
 	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
-	if 32 < len(recentDocs) {
-		recentDocs = recentDocs[:32]
+	if 256 < len(recentDocs) {
+		recentDocs = recentDocs[:256]
 	}
 
 	err = setRecentDocs(recentDocs)
@@ -192,7 +192,14 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
-	return getRecentDocs(sortBy)
+	ret, err = getRecentDocs(sortBy)
+	if err != nil {
+		return
+	}
+	if len(ret) > Conf.FileTree.RecentDocsMaxListCount {
+		ret = ret[:Conf.FileTree.RecentDocsMaxListCount]
+	}
+	return
 }
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
@@ -338,6 +345,7 @@ type CriterionTypes struct {
 	VideoBlock    bool `json:"videoBlock"`
 	IFrameBlock   bool `json:"iframeBlock"`
 	WidgetBlock   bool `json:"widgetBlock"`
+	Callout       bool `json:"callout"`
 }
 
 type CriterionReplaceTypes struct {

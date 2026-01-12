@@ -61,6 +61,52 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ExportCodeBlock(blockID string) (filePath string, err error) {
+	// Supports exporting a code block as a file https://github.com/siyuan-note/siyuan/pull/16774
+
+	tree, _ := LoadTreeByBlockID(blockID)
+	if nil == tree {
+		err = ErrBlockNotFound
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if ast.NodeCodeBlock != node.Type {
+		err = errors.New("not a code block")
+		return
+	}
+
+	code := node.ChildByType(ast.NodeCodeBlockCode)
+	if nil == code {
+		err = errors.New("code block has no code node")
+		return
+	}
+
+	name := tree.Root.IALAttr("title") + "-" + util.CurrentTimeSecondsStr() + ".txt"
+	name = util.FilterFileName(name)
+	exportFolder := filepath.Join(util.TempDir, "export", "code")
+	if err = os.MkdirAll(exportFolder, 0755); err != nil {
+		logging.LogErrorf("create export temp folder failed: %s", err)
+		return
+	}
+
+	code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
+
+	writePath := filepath.Join(exportFolder, name)
+	err = filelock.WriteFile(writePath, code.Tokens)
+	if nil != err {
+		return
+	}
+
+	filePath = "/export/code/" + url.PathEscape(name)
+	return
+}
+
 func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
@@ -232,11 +278,11 @@ func Export2Liandi(id string) (err error) {
 		return errors.New(Conf.Language(204))
 	}
 
-	assets := getAssetsLinkDests(tree.Root)
+	assets := getAssetsLinkDests(tree.Root, false)
 	embedAssets := getQueryEmbedNodesAssetsLinkDests(tree.Root)
 	assets = append(assets, embedAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
-	_, err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
+	_, err = uploadAssets2Cloud(assets, bizTypeExport2Liandi, false)
 	if err != nil {
 		return
 	}
@@ -245,9 +291,14 @@ func Export2Liandi(id string) (err error) {
 	defer util.PushClearMsg(msgId)
 
 	// 判断帖子是否已经存在，存在则使用更新接口
-	const liandiArticleIdAttrName = "custom-liandi-articleId"
+	const liandiArticleIdAttrName = "custom-liandi-articleid"
+	const liandiArticleIdAttrNameOld = "custom-liandi-articleId" // 兼容旧属性名
 	foundArticle := false
+	// 优先使用新属性名，如果不存在则尝试旧属性名
 	articleId := tree.Root.IALAttr(liandiArticleIdAttrName)
+	if "" == articleId {
+		articleId = tree.Root.IALAttr(liandiArticleIdAttrNameOld)
+	}
 	if "" != articleId {
 		result := gulu.Ret.NewResult()
 		request := httpclient.NewCloudRequest30s()
@@ -586,7 +637,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	return
 }
 
-func Preview(id string, fillCSSVar bool) (retStdHTML string) {
+func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
@@ -640,7 +691,7 @@ func Preview(id string, fillCSSVar bool) (retStdHTML string) {
 		fillThemeStyleVar(tree)
 	}
 	luteEngine.RenderOptions.ProtyleMarkNetImg = false
-	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 
 	if footnotesDefBlock := tree.Root.ChildByType(ast.NodeFootnotesDefBlock); nil != footnotesDefBlock {
 		footnotesDefBlock.Unlink()
@@ -667,7 +718,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	content = strings.ReplaceAll(content, "  \n", "<br>\n")
 
 	tmpDocxPath := filepath.Join(tmpDir, name+".docx")
-	args := []string{ // pandoc -f html --resource-path=请从这里开始 请从这里开始\index.html -o test.docx
+	args := []string{
 		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
@@ -746,22 +797,28 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		return
 	}
 
-	assets := getAssetsLinkDests(tree.Root)
-	for _, asset := range assets {
-		if strings.HasPrefix(asset, "assets/") {
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
-			}
+	if docx {
+		netAssets2LocalAssets0(tree, true, "", filepath.Join(savePath, "assets"), false)
+	}
 
-			srcAbsPath, err := GetAssetAbsPath(asset)
-			if err != nil {
-				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
-				continue
-			}
-			targetAbsPath := filepath.Join(savePath, asset)
-			if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
-				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
-			}
+	assets := getAssetsLinkDests(tree.Root, docx)
+	for _, asset := range assets {
+		if !util.IsAssetLinkDest([]byte(asset), docx) {
+			continue
+		}
+
+		if strings.Contains(asset, "?") {
+			asset = asset[:strings.LastIndex(asset, "?")]
+		}
+
+		srcAbsPath, err := GetAssetAbsPath(asset)
+		if err != nil {
+			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
+			continue
+		}
+		targetAbsPath := filepath.Join(savePath, asset)
+		if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
+			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 		}
 	}
 
@@ -872,11 +929,11 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	})
 
 	if docx {
-		renderer := render.NewProtyleExportDocxRenderer(tree, luteEngine.RenderOptions)
+		renderer := render.NewProtyleExportDocxRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		output := renderer.Render()
 		dom = gulu.Str.FromBytes(output)
 	} else {
-		dom = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
+		dom = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	}
 	return
 }
@@ -891,6 +948,9 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 
 	tree := prepareExportTree(bt)
 	node = treenode.GetNodeInTree(tree, id)
+	if ast.NodeDocument == node.Type {
+		node.RemoveIALAttr("style")
+	}
 
 	if merge {
 		var mergeErr error
@@ -905,7 +965,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				headings = append(headings, n)
 				return ast.WalkSkipChildren
 			}
@@ -939,7 +999,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			return
 		}
 
-		assets := getAssetsLinkDests(tree.Root)
+		assets := getAssetsLinkDests(tree.Root, false)
 		for _, asset := range assets {
 			if strings.Contains(asset, "?") {
 				asset = asset[:strings.LastIndex(asset, "?")]
@@ -1045,7 +1105,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	// 使用属性 `data-export-html` 导出时 `<style></style>` 标签丢失 https://github.com/siyuan-note/siyuan/issues/6228
 	luteEngine.SetSanitize(false)
 
-	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewProtyleExportRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	dom = gulu.Str.FromBytes(renderer.Render())
 	return
 }
@@ -1122,13 +1182,13 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	}
 
 	var headings []*ast.Node
-	assetDests := getAssetsLinkDests(tree.Root)
+	assetDests := getAssetsLinkDests(tree.Root, false)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+		if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 			headings = append(headings, n)
 			return ast.WalkSkipChildren
 		}
@@ -1822,10 +1882,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	copiedAssets := hashset.New()
 	for _, tree := range trees {
 		var assets []string
-		assets = append(assets, getAssetsLinkDests(tree.Root)...)
+		assets = append(assets, getAssetsLinkDests(tree.Root, false)...)
 		titleImgPath := treenode.GetDocTitleImgPath(tree.Root) // Export .sy.zip doc title image is not exported https://github.com/siyuan-note/siyuan/issues/8748
 		if "" != titleImgPath {
-			if util.IsAssetLinkDest([]byte(titleImgPath)) {
+			if util.IsAssetLinkDest([]byte(titleImgPath), false) {
 				assets = append(assets, titleImgPath)
 			}
 		}
@@ -1891,7 +1951,12 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			if ast.NodeAttributeView == n.Type {
 				avIDs = append(avIDs, n.AttributeViewID)
 			}
+
 			avs := n.IALAttr(av.NodeAttrNameAvs)
+			if "" == avs {
+				return ast.WalkContinue
+			}
+
 			for _, avID := range strings.Split(avs, ",") {
 				avIDs = append(avIDs, strings.TrimSpace(avID))
 			}
@@ -1900,6 +1965,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
 	for _, avID := range avIDs {
+		if !ast.IsNodeIDPattern(avID) {
+			continue
+		}
+
 		exportAv(avID, exportStorageAvDir, exportDir, assetPathMap)
 	}
 
@@ -2012,7 +2081,7 @@ func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[st
 		case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 			for _, value := range keyValues.Values {
 				for _, asset := range value.MAsset {
-					if !util.IsAssetLinkDest([]byte(asset.Content)) {
+					if !util.IsAssetLinkDest([]byte(asset.Content), false) {
 						continue
 					}
 
@@ -2157,17 +2226,17 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 			}
 
 			if ast.NodeLinkDest == n.Type {
-				if util.IsAssetLinkDest(n.Tokens) {
+				if util.IsAssetLinkDest(n.Tokens, false) {
 					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(" "), []byte("_"))
 				}
 			} else if n.IsTextMarkType("a") {
 				href := n.TextMarkAHref
-				if util.IsAssetLinkDest([]byte(href)) {
+				if util.IsAssetLinkDest([]byte(href), false) {
 					n.TextMarkAHref = strings.ReplaceAll(href, " ", "_")
 				}
 			} else if ast.NodeIFrame == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
 				dest := treenode.GetNodeSrcTokens(n)
-				if util.IsAssetLinkDest([]byte(dest)) {
+				if util.IsAssetLinkDest([]byte(dest), false) {
 					setAssetsLinkDest(n, dest, strings.ReplaceAll(dest, " ", "_"))
 				}
 			}
@@ -2232,6 +2301,9 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 					}
 
 					sameDir := path.Dir(href) == currentDocDir
+					if strings.HasPrefix(href, "#") {
+						sameDir = true
+					}
 					href = util.FilterFilePath(href)
 					if !sameDir {
 						var relErr error
@@ -2262,7 +2334,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 
 	luteEngine.SetUnorderedListMarker("-")
 	luteEngine.SetImgTag(imgTag)
-	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return
 }
@@ -2439,7 +2511,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			root.IAL["type"] = "doc"
 			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
 			for k, v := range root.IAL {
-				if "type" == k {
+				if "type" == k || "style" == k {
 					continue
 				}
 				title.SetIALAttr(k, v)
@@ -2519,7 +2591,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 		// 导出时去掉内容块闪卡样式 https://github.com/siyuan-note/siyuan/issues/7374
 		if n.IsBlock() {
-			n.RemoveIALAttr("custom-riff-decks")
+			n.RemoveIALAttr(NodeAttrRiffDecks)
 		}
 
 		switch n.Type {
@@ -3289,7 +3361,7 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		// 解析导出后的标准 Markdown，汇总 assets
 		tree = parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
 		var assets []string
-		assets = append(assets, getAssetsLinkDests(tree.Root)...)
+		assets = append(assets, getAssetsLinkDests(tree.Root, false)...)
 		for _, asset := range assets {
 			asset = string(html.DecodeDestination([]byte(asset)))
 			if strings.Contains(asset, "?") {
@@ -3554,14 +3626,14 @@ func adjustHeadingLevel(bt *treenode.BlockTree, tree *parse.Tree) {
 	var firstHeading *ast.Node
 	if !Conf.Export.AddTitle {
 		for n := tree.Root.FirstChild; nil != n; n = n.Next {
-			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				firstHeading = n
 				break
 			}
 		}
 	} else {
 		for n := tree.Root.FirstChild.Next; nil != n; n = n.Next {
-			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				firstHeading = n
 				break
 			}

@@ -1,33 +1,32 @@
 {
 	"ID": "20200812220555-lj3enxa",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f389",
 		"id": "20200812220555-lj3enxa",
 		"title": "请从这里开始",
 		"type": "doc",
-		"updated": "20241125224159"
+		"updated": "20251209211232"
 	},
 	"Children": [
 		{
-			"ID": "20241125224159-8zf3bos",
-			"Type": "NodeBlockquote",
+			"ID": "20251209210725-2e63bop",
+			"Type": "NodeCallout",
 			"Properties": {
-				"id": "20241125224159-8zf3bos",
-				"updated": "20241125224159"
+				"id": "20251209210725-2e63bop",
+				"updated": "20251209211232"
 			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
 			"Children": [
 				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20241125224159-vcaj2bv",
+					"ID": "20251209210728-3n4o2fi",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20241125224159-vcaj2bv",
-						"updated": "20241125224159"
+						"id": "20251209210728-3n4o2fi",
+						"updated": "20251209211232"
 					},
 					"Children": [
 						{
@@ -41,7 +40,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " - "
+							"Data": "​ - "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -50,7 +49,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " 再次查看"
+							"Data": "​ 再次查看"
 						}
 					]
 				}

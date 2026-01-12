@@ -213,6 +213,9 @@ ${padHTML}
         if (!blockElement) {
             blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
         }
+        if (!blockElement) {
+            return;
+        }
         const id = blockElement.getAttribute("data-node-id");
         fetchPost("/api/block/getBlockBreadcrumb", {id, excludeTypes: []}, (response) => {
             response.data.forEach((item: IBreadcrumb) => {
@@ -443,17 +446,7 @@ ${padHTML}
                     accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
                     click: () => {
                         setEditMode(protyle, "wysiwyg");
-                        protyle.scroll.lastScrollTop = 0;
-                        fetchPost("/api/filetree/getDoc", {
-                            id: protyle.block.id,
-                            size: protyle.block.id === protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
-                        }, getResponse => {
-                            onGet({
-                                data: getResponse,
-                                protyle,
-                                action: protyle.block.id === protyle.block.rootID ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HTML, Constants.CB_GET_UNUNDO] : [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO, Constants.CB_GET_HTML]
-                            });
-                        });
+                        reloadProtyle(protyle, true);
                         /// #if !MOBILE
                         saveLayout();
                         /// #endif
@@ -602,6 +595,10 @@ ${padHTML}
         }
         if (!blockElement) {
             blockElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild) || protyle.wysiwyg.element.firstElementChild;
+        }
+        if (!blockElement) {
+            // 浮窗删除单个块后，面包屑无法获取到 blockElement，直接返回即可
+            return;
         }
         const id = blockElement.getAttribute("data-node-id");
         if (id === this.id && !update) {

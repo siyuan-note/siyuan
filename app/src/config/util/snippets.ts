@@ -225,7 +225,6 @@ const setSnippetPost = (dialog: Dialog, snippets: ISnippet[], removeIds: string[
         window.siyuan.config.snippet.enabledCSS = (dialog.element.querySelector('.b3-switch[data-action="toggleCSS"]') as HTMLInputElement).checked;
         window.siyuan.config.snippet.enabledJS = (dialog.element.querySelector('.b3-switch[data-action="toggleJS"]') as HTMLInputElement).checked;
         fetchPost("/api/setting/setSnippet", window.siyuan.config.snippet);
-        renderSnippet();
         dialog.destroy({cancel: "true"});
     });
 };

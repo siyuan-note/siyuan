@@ -6,8 +6,8 @@ import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
-import {appearance} from "../config/appearance";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
+import {setCodeTheme} from "../protyle/render/util";
 
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
@@ -56,20 +56,6 @@ export const loadAssets = (data: Config.IAppearance) => {
         styleElement.remove();
     }
     /// #if !MOBILE
-    setTimeout(() => {
-        document.querySelectorAll(".av__kanban-group").forEach(item => {
-            if (item.getAttribute("style")) {
-                let selectBg;
-                const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
-                if (nameElement) {
-                    selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
-                } else {
-                    selectBg = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
-                }
-                item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
-            }
-        });
-    }, Constants.TIMEOUT_TRANSITION);
     getAllModels().graph.forEach(item => {
         item.searchGraph(false);
     });
@@ -334,29 +320,6 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     return style;
 };
 
-export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
-    const protyleHljsStyle = document.getElementById("protyleHljsStyle") as HTMLLinkElement;
-    let css;
-    if (window.siyuan.config.appearance.mode === 0) {
-        css = window.siyuan.config.appearance.codeBlockThemeLight;
-        if (!Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE.includes(css)) {
-            css = "default";
-        }
-    } else {
-        css = window.siyuan.config.appearance.codeBlockThemeDark;
-        if (!Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE.includes(css)) {
-            css = "github-dark";
-        }
-    }
-    const href = `${cdn}/js/highlight.js/styles/${css}.min.css?v=11.11.1`;
-    if (!protyleHljsStyle) {
-        addStyle(href, "protyleHljsStyle");
-    } else if (!protyleHljsStyle.href.includes(href)) {
-        protyleHljsStyle.remove();
-        addStyle(href, "protyleHljsStyle");
-    }
-};
-
 export const setMode = (modeElementValue: number) => {
     /// #if !MOBILE
     let mode = modeElementValue;
@@ -370,35 +333,7 @@ export const setMode = (modeElementValue: number) => {
     fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
         mode,
         modeOS: modeElementValue === 2,
-    }), async response => {
-        if (window.siyuan.config.appearance.themeJS) {
-            if (response.data.mode !== window.siyuan.config.appearance.mode ||
-                (response.data.mode === window.siyuan.config.appearance.mode && (
-                        (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
-                        (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
-                )
-            ) {
-                if (window.destroyTheme) {
-                    try {
-                        await window.destroyTheme();
-                        window.destroyTheme = undefined;
-                        document.getElementById("themeScript").remove();
-                    } catch (e) {
-                        console.error("destroyTheme error: " + e);
-                    }
-                } else {
-                    exportLayout({
-                        errorExit: false,
-                        cb() {
-                            window.location.reload();
-                        },
-                    });
-                    return;
-                }
-            }
-        }
-        appearance.onSetAppearance(response.data);
-    });
+    }));
     /// #endif
 };
 

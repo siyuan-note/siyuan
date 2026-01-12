@@ -980,7 +980,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         text = `<span class="av__celltext" data-value='${JSON.stringify(dataValue)}'>`;
         if (dataValue && dataValue.isNotEmpty) {
-            text += dayjs(dataValue.content).format("YYYY-MM-DD HH:mm");
+            text += dataValue.formattedContent;
         }
         text += "</span>";
     } else if (["lineNumber"].includes(cellValue.type)) {

@@ -143,7 +143,7 @@ const dockToJSON = (dock: Dock) => {
                 show: item.classList.contains("dock__item--active"),
                 icon: item.querySelector("use").getAttribute("xlink:href").substring(1),
                 hotkey: item.getAttribute("data-hotkey") || "",
-                hotkeyLangId: item.getAttribute("data-hotkeyLangId") || ""
+                hotkeyLangId: item.getAttribute("data-hotkeylangid") || ""
             });
         });
         return data;
@@ -750,6 +750,7 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
+            scrollPosition: json.scrollPosition,
             action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
         });
     }

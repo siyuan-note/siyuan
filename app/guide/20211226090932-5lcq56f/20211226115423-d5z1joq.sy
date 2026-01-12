@@ -1,33 +1,32 @@
 {
 	"ID": "20211226115423-d5z1joq",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f389",
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20241125224503"
+		"updated": "20251209211226"
 	},
 	"Children": [
 		{
-			"ID": "20241125224503-8vqkbc9",
-			"Type": "NodeBlockquote",
+			"ID": "20251209211216-jdw0b6a",
+			"Type": "NodeCallout",
 			"Properties": {
-				"id": "20241125224503-8vqkbc9",
-				"updated": "20241125224503"
+				"id": "20251209211216-jdw0b6a",
+				"updated": "20251209211226"
 			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
 			"Children": [
 				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20241125224503-fqq0875",
+					"ID": "20251209211218-hayh5v3",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"id": "20241125224503-fqq0875",
-						"updated": "20241125224503"
+						"id": "20251209211218-hayh5v3",
+						"updated": "20251209211226"
 					},
 					"Children": [
 						{
@@ -41,7 +40,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " - "
+							"Data": "​ - "
 						},
 						{
 							"Type": "NodeTextMark",
@@ -50,7 +49,7 @@
 						},
 						{
 							"Type": "NodeText",
-							"Data": " ​再次查看"
+							"Data": "​ 再次查看"
 						}
 					]
 				}

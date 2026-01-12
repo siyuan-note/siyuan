@@ -1,10 +1,11 @@
 {
 	"ID": "20211226121503-k3jma6m",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226121503-k3jma6m",
 		"title": "存儲空間",
+		"type": "doc",
 		"updated": "20230912091726"
 	},
 	"Children": [

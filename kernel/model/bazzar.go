@@ -201,6 +201,8 @@ func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 			if pluginConf, err := bazaar.PluginJSON(plugin.Name); err == nil && nil != plugin {
 				plugin.Outdated = 0 > semver.Compare("v"+pluginConf.Version, "v"+plugin.Version)
 			}
+		} else {
+			plugin.Outdated = false
 		}
 	}
 	return
@@ -218,7 +220,7 @@ func filterPlugins(plugins []*bazaar.Plugin, keyword string) (ret []*bazaar.Plug
 }
 
 func InstalledPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
-	plugins = bazaar.InstalledPlugins(frontend, true)
+	plugins = bazaar.InstalledPlugins(frontend)
 	plugins = filterPlugins(plugins, keyword)
 	petals := getPetals()
 	for _, plugin := range plugins {
@@ -256,8 +258,8 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 	petals = tmp
 	savePetals(petals)
 
-	removePluginSet := hashset.New(pluginName)
-	pushReloadPlugin(nil, removePluginSet, "")
+	uninstallPluginSet := hashset.New(pluginName)
+	PushReloadPlugin(nil, nil, nil, uninstallPluginSet, "")
 	return nil
 }
 
@@ -270,6 +272,8 @@ func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 			if widgetConf, err := bazaar.WidgetJSON(widget.Name); err == nil && nil != widget {
 				widget.Outdated = 0 > semver.Compare("v"+widgetConf.Version, "v"+widget.Version)
 			}
+		} else {
+			widget.Outdated = false
 		}
 	}
 	return
@@ -356,6 +360,7 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	Conf.Appearance.Icon = iconName
 	Conf.Save()
 	InitAppearance()
+	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	return nil
 }
 
@@ -431,6 +436,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 	}
 
 	InitAppearance()
+	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	return nil
 }
 
@@ -456,6 +462,8 @@ func BazaarTemplates(keyword string) (templates []*bazaar.Template) {
 			if templateConf, err := bazaar.TemplateJSON(template.Name); err == nil && nil != templateConf {
 				template.Outdated = 0 > semver.Compare("v"+templateConf.Version, "v"+template.Version)
 			}
+		} else {
+			template.Outdated = false
 		}
 	}
 	return

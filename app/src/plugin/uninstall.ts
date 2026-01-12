@@ -8,7 +8,7 @@ import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 
-export const uninstall = (app: App, name: string, isUninstall: boolean) => {
+export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
             try {
@@ -16,7 +16,7 @@ export const uninstall = (app: App, name: string, isUninstall: boolean) => {
             } catch (e) {
                 console.error(`plugin ${plugin.name} onunload error:`, e);
             }
-            if (isUninstall) {
+            if (!isReload) {
                 try {
                     plugin.uninstall();
                 } catch (e) {
@@ -30,7 +30,13 @@ export const uninstall = (app: App, name: string, isUninstall: boolean) => {
             const modelsKeys = Object.keys(plugin.models);
             getAllModels().custom.forEach(custom => {
                 if (modelsKeys.includes(custom.type)) {
-                    custom.parent.parent.removeTab(custom.parent.id);
+                    if (isReload) {
+                        if (custom.update) {
+                            custom.update();
+                        }
+                    } else {
+                        custom.parent.parent.removeTab(custom.parent.id);
+                    }
                 }
             });
             /// #endif
@@ -51,6 +57,10 @@ export const uninstall = (app: App, name: string, isUninstall: boolean) => {
             // rm dock
             const docksKeys = Object.keys(plugin.docks);
             docksKeys.forEach(key => {
+                if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] && window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
+                    window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].show =
+                        !!document.querySelector(`.dock__item[data-type="${key}"]`)?.classList.contains("dock__item--active");
+                }
                 if (Object.keys(window.siyuan.layout.leftDock.data).includes(key)) {
                     window.siyuan.layout.leftDock.remove(key);
                 } else if (Object.keys(window.siyuan.layout.rightDock.data).includes(key)) {

@@ -17,7 +17,7 @@ import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 
@@ -36,8 +36,8 @@ interface ITableOptions {
     resetData: {
         left: number,
         alignSelf: string,
-        headerTransform: string,
-        footerTransform: string,
+        headerTransform: { groupId: string, transform: string },
+        footerTransform: { groupId: string, transform: string },
         isSearching: boolean,
         selectCellId: IIds,
         selectRowIds: IIds[],
@@ -251,7 +251,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     </div>
     <span class="fn__space"></span>
     <span class="av__group-name">${nameHTML}</span>
-    ${counter === 0 ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.total}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
+    ${(!counter || counter === 0) ? '<span class="fn__space"></span>' : `<span aria-label="${window.siyuan.languages.entryNum}" data-position="north" class="av__group-counter ariaLabel">${counter}</span>`}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
@@ -264,8 +264,8 @@ const renderGroupTable = (options: ITableOptions) => {
     let avBodyHTML = "";
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
-            avBodyHTML += `${getGroupTitleHTML(group, group.rows.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content)}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement)}</div>`;
+            avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -292,9 +292,9 @@ const afterRenderTable = (options: ITableOptions) => {
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
     const editRect = options.protyle.contentElement.getBoundingClientRect();
     if (options.resetData.headerTransform) {
-        const headerTransformElement = options.blockElement.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
+        const headerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.headerTransform.groupId}"] .av__row--header`) as HTMLElement;
         if (headerTransformElement) {
-            headerTransformElement.style.transform = options.resetData.headerTransform;
+            headerTransformElement.style.transform = options.resetData.headerTransform.transform;
         }
     } else {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
@@ -303,9 +303,9 @@ const afterRenderTable = (options: ITableOptions) => {
         }, Constants.TIMEOUT_LOAD);
     }
     if (options.resetData.footerTransform) {
-        const footerTransformElement = options.blockElement.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
+        const footerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.footerTransform.groupId}"] .av__row--footer`) as HTMLElement;
         if (footerTransformElement) {
-            footerTransformElement.style.transform = options.resetData.footerTransform;
+            footerTransformElement.style.transform = options.resetData.footerTransform.transform;
         }
     } else {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
@@ -443,7 +443,7 @@ const afterRenderTable = (options: ITableOptions) => {
     });
 };
 
-export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, data?: IAV) => {
+export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -458,19 +458,19 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const e = avElements[i] as HTMLElement;
         e.removeAttribute("data-rendering");
         if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
-            return;
+            continue;
         }
         if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {
             e.classList.add("av--touch");
         }
 
         if (e.getAttribute("data-av-type") === "gallery") {
-            renderGallery({blockElement: e, protyle, cb, renderAll});
-            return;
+            await renderGallery({blockElement: e, protyle, cb, renderAll});
+            continue;
         }
         if (e.getAttribute("data-av-type") === "kanban") {
-            renderKanban({blockElement: e, protyle, cb, renderAll});
-            return;
+            await renderKanban({blockElement: e, protyle, cb, renderAll});
+            continue;
         }
 
         let selectCellId;
@@ -502,7 +502,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             };
         }
         const activeIds: IIds[] = [];
-        e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+        e.querySelectorAll(".av__cell--active").forEach((item) => {
             activeIds.push({
                 groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
                 rowId: (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id,
@@ -514,12 +514,20 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
             pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
         });
+        const headerTransformElement = e.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
+        const footerTransformElement = e.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
         const resetData = {
             selectCellId,
             alignSelf: e.style.alignSelf,
             left: e.querySelector(".av__scroll")?.scrollLeft || 0,
-            headerTransform: (e.querySelector('.av__row--header[style^="transform"]') as HTMLElement)?.style.transform,
-            footerTransform: (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform,
+            headerTransform: headerTransformElement ? {
+                groupId: headerTransformElement.parentElement.getAttribute("data-group-id"),
+                transform: headerTransformElement.style.transform
+            } : null,
+            footerTransform: footerTransformElement ? {
+                groupId: footerTransformElement.parentElement.getAttribute("data-group-id"),
+                transform: footerTransformElement.style.transform
+            } : null,
             isSearching: searchInputElement && document.activeElement === searchInputElement,
             selectRowIds,
             dragFillId,
@@ -544,7 +552,8 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         const created = protyle.options.history?.created;
         const snapshot = protyle.options.history?.snapshot;
         const avPageSize = getPageSize(e);
-        if (!data) {
+        let data: IAV;
+        if (!avData) {
             const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
@@ -556,21 +565,23 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
                 blockID: e.getAttribute("data-node-id"),
             });
             data = response.data;
+        } else {
+            data = avData;
         }
         if (data.viewType === "gallery") {
             e.setAttribute("data-av-type", data.viewType);
-            renderGallery({blockElement: e, protyle, cb, renderAll, data});
-            return;
+            await renderGallery({blockElement: e, protyle, cb, renderAll, data});
+            continue;
         }
         if (data.viewType === "kanban") {
             e.setAttribute("data-av-type", data.viewType);
-            renderKanban({blockElement: e, protyle, cb, renderAll, data});
-            return;
+            await renderKanban({blockElement: e, protyle, cb, renderAll, data});
+            continue;
         }
         const view = data.view as IAVTable;
         if (view.groups?.length > 0) {
             renderGroupTable({blockElement: e, protyle, cb, renderAll, data, resetData});
-            return;
+            continue;
         }
         const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${view.pageSize}" style="float: left">
     ${getTableHTMLs(view, e)}
@@ -613,9 +624,23 @@ const refreshTimeouts: {
     [key: string]: number;
 } = {};
 
+const getAVElements = (protyle: IProtyle, avID: string, viewID?: string): HTMLElement[] => {
+    const elements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avID}"]`)) as HTMLElement[];
+    if (viewID) {
+        return elements.filter((item) => getViewIDByAVElement(item) === viewID);
+    }
+    return elements;
+};
+
+const getViewIDByAVElement = (avElement: HTMLElement): string | null => {
+    return avElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
+        || avElement.querySelector(".layout-tab-bar .item--focus")?.getAttribute("data-id") // 旧版本的数据库块没有 CUSTOM_SY_AV_VIEW 属性，所以在视图元素上获取 viewID
+        || null;
+};
+
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.id).forEach((item) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
             if (!titleElement) {
                 return;
@@ -623,11 +648,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             titleElement.textContent = operation.data;
             titleElement.dataset.title = operation.data;
         });
+        return;
     }
     if (operation.action === "setAttrViewColWidth") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-            if (!cellElement || cellElement.style.width === operation.data || item.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== operation.keyID) {
+            if (!cellElement || cellElement.style.width === operation.data) {
                 return;
             }
             item.querySelectorAll(".av__row").forEach(rowItem => {
@@ -637,7 +663,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewCardSize") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             if (item.getAttribute("data-av-type") === "kanban") {
                 item.querySelectorAll(".av__kanban-group").forEach(galleryItem => {
                     galleryItem.classList.remove("av__kanban-group--small", "av__kanban-group--big");
@@ -661,7 +687,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewCardAspectRatio") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
                 coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
             });
@@ -669,7 +695,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "hideAttrViewName") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             const titleElement = item.querySelector(".av__title");
             if (titleElement) {
                 if (!operation.data) {
@@ -692,7 +718,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewWrapField") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll(".av__cell").forEach(fieldItem => {
                 fieldItem.setAttribute("data-wrap", operation.data.toString());
             });
@@ -700,36 +726,42 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewFillColBackgroundColor") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((avItem: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((avItem: HTMLElement) => {
+            const hasSelect = avItem.querySelector(".av__group-title .b3-chip");
+            const kanbanElement = avItem.querySelector(".av__kanban");
+            if (operation.data && hasSelect) {
+                kanbanElement.classList.add("av__kanban--bg");
+            } else {
+                kanbanElement.classList.remove("av__kanban--bg");
+            }
             avItem.querySelectorAll(".av__kanban-group").forEach(item => {
-                if (!operation.data) {
-                    item.removeAttribute("style");
-                    return;
-                }
-                let selectBg;
-                const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
-                if (nameElement) {
-                    selectBg = getComputedStyle(document.documentElement).getPropertyValue(`--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)}`);
+                if (operation.data && hasSelect) {
+                    const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
+                    if (nameElement) {
+                        item.setAttribute("style", `--b3-av-kanban-background:var(--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)})`);
+                    } else {
+                        item.setAttribute("style", "--b3-av-kanban-background: var(--b3-border-color)");
+                    }
                 } else {
-                    selectBg = getComputedStyle(document.documentElement).getPropertyValue("--b3-border-color");
+                    item.removeAttribute("style");
                 }
-                item.setAttribute("style", `--b3-av-kanban-border:${selectBg};--b3-av-kanban-bg:${selectBg}29;--b3-av-kanban-content-bg:${selectBg}47;--b3-av-kanban-content-hover-bg:${selectBg}5c;`);
             });
         });
         return;
     }
     if (operation.action === "setAttrViewFitImage") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"] .av__gallery-img`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
+            const imgElement = item.querySelector(".av__gallery-img");
             if (operation.data) {
-                item.classList.add("av__gallery-img--fit");
+                imgElement.classList.add("av__gallery-img--fit");
             } else {
-                item.classList.remove("av__gallery-img--fit");
+                imgElement.classList.remove("av__gallery-img--fit");
             }
         });
         return;
     }
     if (operation.action === "setAttrViewShowIcon") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
                 if (operation.data) {
                     cellItem.classList.remove("fn__none");
@@ -741,7 +773,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewColWrap") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
                 cellItem.setAttribute("data-wrap", operation.data.toString());
             });
@@ -749,9 +781,13 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "foldAttrViewGroup") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, operation.avID).forEach((item) => {
             const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
             if (foldElement) {
+                if (foldElement.getAttribute("data-processed") === "true") {
+                    foldElement.removeAttribute("data-processed");
+                    return;
+                }
                 if (operation.data) {
                     foldElement.firstElementChild.classList.remove("av__group-arrow--open");
                     foldElement.parentElement.nextElementSibling.classList.add("fn__none");
@@ -775,12 +811,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             attrElement.removeAttribute("data-rendering");
             renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
         }
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
+        getAVElements(protyle, avID).forEach((item) => {
             item.removeAttribute("data-render");
             if (operation.action === "sortAttrViewRow") {
                 clearSelect(["cell"], item);
             } else if (operation.action === "sortAttrViewCol") {
-                item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                item.querySelectorAll(".av__cell--active").forEach((item) => {
                     item.classList.remove("av__cell--active");
                     item.querySelector(".av__drag-fill")?.remove();
                 });
@@ -798,7 +834,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 });
             } else if (operation.action === "removeAttrViewView") {
                 item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
-                    bodyItem.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
+                    bodyItem.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${getViewIDByAVElement(item)}"]`)?.getAttribute("data-page");
                 });
             } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
                 const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;

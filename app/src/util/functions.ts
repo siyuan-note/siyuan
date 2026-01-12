@@ -1,12 +1,7 @@
 const CONTAINER_BACKEND_SET = new Set(["docker", "ios", "android", "harmony"]);
-const MOBILE_BACKEND_SET = new Set(["ios", "android", "harmony"]);
 
 export const isKernelInContainer = (): boolean => {
     return CONTAINER_BACKEND_SET.has(window.siyuan.config.system.container);
-};
-
-export const isKernelInMobile = (): boolean => {
-    return MOBILE_BACKEND_SET.has(window.siyuan.config.system.container);
 };
 
 export const isMobile = () => {
@@ -21,7 +16,6 @@ export const getBackend = () => {
         return window.siyuan.config.system.os;
     }
 };
-
 
 // "desktop" | "desktop-window" | "mobile" | "browser-desktop" | "browser-mobile"
 export const getFrontend = () => {
@@ -83,8 +77,8 @@ export const isFileAnnotation = (text: string) => {
     return /^<<assets\/.+\/\d{14}-\w{7} ".+">>$/.test(text);
 };
 
-export const isValidAttrName = (name: string) => {
-    return /^[_a-zA-Z][_.\-0-9a-zA-Z]*$/.test(name);
+export const isValidCustomAttrName = (name: string) => {
+    return /^[a-z][\-0-9a-z]*$/.test(name);
 };
 
 // REF https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/eval

@@ -60,7 +60,7 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 	tree, withMath := HTML2Tree(htmlStr, luteEngine)
 
 	var formatted []byte
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
 		renderer.ExtRendererFuncs[nodeType] = rendererFunc
 	}
@@ -78,27 +78,42 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 			return ast.WalkContinue
 		}
 
-		if ast.NodeText == n.Type {
+		switch n.Type {
+		case ast.NodeHTMLBlock:
+			if bytes.HasPrefix(n.Tokens, []byte("<pre ")) && bytes.HasSuffix(n.Tokens, []byte("</pre>")) {
+				if bytes.Contains(n.Tokens, []byte("data:image/svg+xml;base64")) {
+					matches := regexp.MustCompile(`(?sU)<pre [^>]*>(.*)</pre>`).FindSubmatch(n.Tokens)
+					if len(matches) >= 2 {
+						n.Tokens = matches[1]
+					}
+					subTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
+					if nil != subTree && nil != subTree.Root && nil != subTree.Root.FirstChild {
+						n.Type = ast.NodeParagraph
+						var children []*ast.Node
+						for c := subTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+							children = append(children, c)
+						}
+						for _, c := range children {
+							n.AppendChild(c)
+						}
+					}
+				} else if bytes.Contains(n.Tokens, []byte("<svg")) {
+					processHTMLBlockSvgImg(n, assetDirPath)
+				}
+			}
+		case ast.NodeText:
 			if n.ParentIs(ast.NodeTableCell) {
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\|"), []byte("|"))
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("|"), []byte("\\|"))
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<br /\\>"), []byte("<br />"))
 			}
-		}
-
-		if ast.NodeInlineMath == n.Type {
+		case ast.NodeInlineMath:
 			withMath = true
-			return ast.WalkContinue
-		}
-
-		if ast.NodeLinkDest != n.Type {
-			return ast.WalkContinue
-		}
-
-		dest := n.TokensStr()
-		if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-			processBase64Img(n, dest, assetDirPath)
-			return ast.WalkContinue
+		case ast.NodeLinkDest:
+			dest := n.TokensStr()
+			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
+				processBase64Img(n, dest, assetDirPath)
+			}
 		}
 		return ast.WalkContinue
 	})
@@ -247,6 +262,14 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if d == nil {
 				return nil
 			}
+
+			if ".json" == d.Name() { // https://github.com/siyuan-note/siyuan/issues/16637
+				if removeErr := os.RemoveAll(path); nil != removeErr {
+					logging.LogErrorf("remove empty av file [%s] failed: %s", path, removeErr)
+				}
+				return nil
+			}
+
 			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".json")) {
 				return nil
 			}
@@ -403,11 +426,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, tree := range trees {
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 		syPath := filepath.Join(unzipRootPath, tree.Path)
-		if "" == tree.Root.Spec {
-			parse.NestedInlines2FlattedSpans(tree, false)
-			tree.Root.Spec = "1"
-		}
-		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
+		treenode.UpgradeSpec(tree)
+		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		data := renderer.Render()
 
 		if !util.UseSingleLineSave {
@@ -816,8 +836,9 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return nil
 			}
 
-			if !d.IsDir() && strings.Contains(filepath.ToSlash(currentPath), "/assets/") {
-				// assets 文件夹下的文件算作资源文件
+			if !d.IsDir() && (!strings.HasSuffix(currentPath, ".md") && !strings.HasSuffix(currentPath, ".markdown") ||
+				strings.Contains(filepath.ToSlash(currentPath), "/assets/")) {
+				// 非 Markdown 文件作为资源文件处理 https://github.com/siyuan-note/siyuan/issues/13817
 				existName := assetsDone[currentPath]
 				var name string
 				if "" == existName {
@@ -928,7 +949,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			tree.Path = targetPath
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
-			tree.Root.Spec = "1"
+			tree.Root.Spec = treenode.CurrentSpec
 
 			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -1060,7 +1081,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		tree.Box = boxID
 		tree.Path = targetPath
 		tree.HPath = path.Join(baseHPath, title)
-		tree.Root.Spec = "1"
+		tree.Root.Spec = treenode.CurrentSpec
 
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -1213,6 +1234,32 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 	return
 }
 
+func processHTMLBlockSvgImg(n *ast.Node, assetDirPath string) {
+	re := regexp.MustCompile(`(?i)<svg[^>]*>(.*?)</svg>`)
+	matches := re.FindStringSubmatch(string(n.Tokens))
+	if 1 >= len(matches) {
+		return
+	}
+
+	svgContent := matches[0]
+	name := util.AssetName("image.svg", ast.NewNodeID())
+	writePath := filepath.Join(assetDirPath, name)
+	if err := filelock.WriteFile(writePath, []byte(svgContent)); err != nil {
+		logging.LogErrorf("write svg asset file [%s] failed: %s", writePath, err)
+		return
+	}
+
+	n.Type = ast.NodeParagraph
+	img := &ast.Node{Type: ast.NodeImage}
+	img.AppendChild(&ast.Node{Type: ast.NodeBang})
+	img.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+	img.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte("image")})
+	img.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+	img.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+	img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("assets/" + name)})
+	img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+	n.AppendChild(img)
+}
 func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 	base64TmpDir := filepath.Join(util.TempDir, "base64")
 	os.MkdirAll(base64TmpDir, 0755)

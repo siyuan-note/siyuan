@@ -61,11 +61,9 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 		})
 	}
 	heading.SetIALAttr("fold", "1")
-	if err = tx.writeTree(tree); err != nil {
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
-	}
-	IncSync()
 
+	tx.writeTree(tree)
+	IncSync()
 	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
 	for _, child := range children {
 		cache.PutBlockIAL(child.ID, parse.IAL2Map(child.KramdownIAL))
@@ -126,9 +124,8 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	}
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
-	if err = tx.writeTree(tree); err != nil {
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
-	}
+
+	tx.writeTree(tree)
 	IncSync()
 
 	cache.PutBlockIAL(headingID, parse.IAL2Map(heading.KramdownIAL))
@@ -427,11 +424,11 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (sr
 
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	newTree.Root.Spec = "1"
+	newTree.Root.Spec = treenode.CurrentSpec
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else {
-		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
+		box.setSortByConf(path.Dir(newTargetPath), newTree.ID)
 	}
 	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
 		return "", "", err

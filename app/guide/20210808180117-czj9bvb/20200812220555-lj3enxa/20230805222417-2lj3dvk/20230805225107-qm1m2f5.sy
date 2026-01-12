@@ -1,11 +1,12 @@
 {
 	"ID": "20230805225107-qm1m2f5",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f387",
 		"id": "20230805225107-qm1m2f5",
 		"title": "功能特性",
+		"type": "doc",
 		"updated": "20230805230402"
 	},
 	"Children": [

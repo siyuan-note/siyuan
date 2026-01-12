@@ -43,7 +43,7 @@ import (
 func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	tree.ID = ast.NewNodeID()
 	tree.Root.ID = tree.ID
-
+	title := tree.Root.IALAttr("title")
 	if "" != titleSuffix {
 		if t, parseErr := time.Parse("20060102150405", util.TimeFromID(tree.ID)); nil == parseErr {
 			titleSuffix += " " + t.Format("2006-01-02 15:04:05")
@@ -52,9 +52,12 @@ func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 		}
 		titleSuffix = "(" + titleSuffix + ")"
 		titleSuffix = " " + titleSuffix
+		if Conf.language(16) == title {
+			titleSuffix = ""
+		}
 	}
 	tree.Root.SetIALAttr("id", tree.ID)
-	tree.Root.SetIALAttr("title", tree.Root.IALAttr("title")+titleSuffix)
+	tree.Root.SetIALAttr("title", title+titleSuffix)
 	tree.Root.RemoveIALAttr("scroll")
 	p := path.Join(path.Dir(tree.Path), tree.ID) + ".sy"
 	tree.Path = p
@@ -301,4 +304,17 @@ func indexTreeInFilesystem(rootID string) {
 	treenode.UpsertBlockTree(tree)
 	sql.IndexTreeQueue(tree)
 	logging.LogInfof("reindexed tree by filesystem [rootID=%s]", rootID)
+}
+
+func loadParentTree(tree *parse.Tree) (ret *parse.Tree) {
+	boxDir := filepath.Join(util.DataDir, tree.Box)
+	parentDir := path.Dir(tree.Path)
+	if parentDir == boxDir || parentDir == "/" {
+		return
+	}
+
+	luteEngine := lute.New()
+	parentPath := parentDir + ".sy"
+	ret, _ = filesys.LoadTree(tree.Box, parentPath, luteEngine)
+	return
 }

@@ -18,7 +18,6 @@ package model
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -30,7 +29,9 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
@@ -38,26 +39,116 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func refreshDocInfo(tree *parse.Tree, size uint64) {
+func PushReloadSnippet(snippet *conf.Snpt) {
+	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
+}
+
+func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginNameSet, uninstallPluginNameSet *hashset.Set, excludeApp string) {
+	// 集合去重
+	if nil != uninstallPluginNameSet {
+		for _, n := range uninstallPluginNameSet.Values() {
+			pluginName := n.(string)
+			if nil != upsertCodePluginSet {
+				upsertCodePluginSet.Remove(pluginName)
+			}
+			if nil != upsertDataPluginSet {
+				upsertDataPluginSet.Remove(pluginName)
+			}
+			if nil != unloadPluginNameSet {
+				unloadPluginNameSet.Remove(pluginName)
+			}
+		}
+	}
+	if nil != unloadPluginNameSet {
+		for _, n := range unloadPluginNameSet.Values() {
+			pluginName := n.(string)
+			if nil != upsertCodePluginSet {
+				upsertCodePluginSet.Remove(pluginName)
+			}
+			if nil != upsertDataPluginSet {
+				upsertDataPluginSet.Remove(pluginName)
+			}
+		}
+	}
+	if nil != upsertCodePluginSet {
+		for _, n := range upsertCodePluginSet.Values() {
+			pluginName := n.(string)
+			if nil != upsertDataPluginSet {
+				upsertDataPluginSet.Remove(pluginName)
+			}
+		}
+	}
+
+	upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins := []string{}, []string{}, []string{}, []string{}
+	if nil != upsertCodePluginSet {
+		for _, n := range upsertCodePluginSet.Values() {
+			upsertCodePlugins = append(upsertCodePlugins, n.(string))
+		}
+	}
+	if nil != upsertDataPluginSet {
+		for _, n := range upsertDataPluginSet.Values() {
+			upsertDataPlugins = append(upsertDataPlugins, n.(string))
+		}
+	}
+	if nil != unloadPluginNameSet {
+		for _, n := range unloadPluginNameSet.Values() {
+			unloadPlugins = append(unloadPlugins, n.(string))
+		}
+	}
+	if nil != uninstallPluginNameSet {
+		for _, n := range uninstallPluginNameSet.Values() {
+			uninstallPlugins = append(uninstallPlugins, n.(string))
+		}
+	}
+
+	pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins, excludeApp)
+}
+
+func pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins []string, excludeApp string) {
+	logging.LogInfof("reload plugins [codeChanges=%v, dataChanges=%v, unloads=%v, uninstalls=%v]", upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins)
+	if "" == excludeApp {
+		util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
+			"upsertCodePlugins": upsertCodePlugins,
+			"upsertDataPlugins": upsertDataPlugins,
+			"unloadPlugins":     unloadPlugins,
+			"uninstallPlugins":  uninstallPlugins,
+		})
+		return
+	}
+
+	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", map[string]interface{}{
+		"upsertCodePlugins": upsertCodePlugins,
+		"upsertDataPlugins": upsertDataPlugins,
+		"unloadPlugins":     unloadPlugins,
+		"uninstallPlugins":  uninstallPlugins,
+	})
+}
+
+func refreshDocInfo(tree *parse.Tree) {
+	if nil == tree {
+		return
+	}
+
+	refreshDocInfoWithSize(tree, filesys.TreeSize(tree))
+}
+
+func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
+	if nil == tree {
+		return
+	}
+
 	refreshDocInfo0(tree, size)
 	refreshParentDocInfo(tree)
 }
 
 func refreshParentDocInfo(tree *parse.Tree) {
+	parentTree := loadParentTree(tree)
+	if nil == parentTree {
+		return
+	}
+
 	luteEngine := lute.New()
-	boxDir := filepath.Join(util.DataDir, tree.Box)
-	parentDir := path.Dir(tree.Path)
-	if parentDir == boxDir || parentDir == "/" {
-		return
-	}
-
-	parentPath := parentDir + ".sy"
-	parentTree, err := filesys.LoadTree(tree.Box, parentPath, luteEngine)
-	if err != nil {
-		return
-	}
-
-	renderer := render.NewJSONRenderer(parentTree, luteEngine.RenderOptions)
+	renderer := render.NewJSONRenderer(parentTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data := renderer.Render()
 	refreshDocInfo0(parentTree, uint64(len(data)))
 }
@@ -190,14 +281,25 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 
 // refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
-func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
+func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) (changedRootIDs []string) {
+	for t := range updatedTrees {
+		changedRootIDs = append(changedRootIDs, t)
+	}
+
 	for i := 0; i < 7; i++ {
 		updatedRefNodes, updatedRefTrees := refreshDynamicRefTexts0(updatedDefNodes, updatedTrees)
 		if 1 > len(updatedRefNodes) {
 			break
 		}
 		updatedDefNodes, updatedTrees = updatedRefNodes, updatedRefTrees
+
+		for t := range updatedTrees {
+			changedRootIDs = append(changedRootIDs, t)
+		}
 	}
+
+	changedRootIDs = gulu.Str.RemoveDuplicatedElem(changedRootIDs)
+	return
 }
 
 func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) (updatedRefNodes map[string]*ast.Node, updatedRefTrees map[string]*parse.Tree) {
@@ -310,7 +412,7 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 
 			for _, blockValue := range blockValues.Values {
 				if blockValue.Block.ID == updatedDefNode.ID {
-					newIcon, newContent := getNodeAvBlockText(updatedDefNode)
+					newIcon, newContent := getNodeAvBlockText(updatedDefNode, avID)
 					if newIcon != blockValue.Block.Icon {
 						blockValue.Block.Icon = newIcon
 						changedAv = true
@@ -325,6 +427,8 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 			if changedAv {
 				av.SaveAttributeView(attrView)
 				ReloadAttrView(avID)
+
+				refreshRelatedSrcAvs(avID, nil)
 			}
 		}
 	}

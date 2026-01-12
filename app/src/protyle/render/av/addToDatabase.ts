@@ -19,8 +19,11 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
     if (srcs.length > 0) {
         openSearchAV("", fileLiElements[0] as HTMLElement, (listItemElement) => {
             const avID = listItemElement.dataset.avId;
+            const viewID = listItemElement.dataset.viewId;
             transaction(undefined, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: viewID ? false : true,
+                viewID,
                 avID,
                 srcs,
                 blockID: listItemElement.dataset.blockId
@@ -37,8 +40,11 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
     if ((range && protyle.title?.editElement?.contains(range.startContainer)) || type === "title") {
         openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
             const avID = listItemElement.dataset.avId;
+            const viewID = listItemElement.dataset.viewId;
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: viewID ? false : true,
+                viewID,
                 avID,
                 srcs: [{
                     itemID: Lute.NewNodeID(),
@@ -89,8 +95,11 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
                 });
             });
             const avID = listItemElement.dataset.avId;
+            const viewID = listItemElement.dataset.viewId;
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: viewID ? false : true,
+                viewID,
                 avID,
                 srcs,
                 blockID: listItemElement.dataset.blockId

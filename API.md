@@ -480,7 +480,7 @@ Move documents by `id`:
   ```
 
     * `fromIDs`: Source docs' IDs
-    * `toID`: Target parent ID
+    * `toID`: Target parent doc's ID or notebook ID
 * Return value
 
   ```json

@@ -19,6 +19,7 @@ package av
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -56,6 +57,8 @@ type Value struct {
 	Checkbox *ValueCheckbox `json:"checkbox,omitempty"`
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
+
+	IsRenderAutoFill bool `json:"-"` // 标识是否是渲染阶段自动填充的值，保存数据的时候要删掉
 }
 
 func (value *Value) SetUpdatedAt(mills int64) {
@@ -64,6 +67,8 @@ func (value *Value) SetUpdatedAt(mills int64) {
 		value.UpdatedAt += 1000 // 防止更新时间和创建时间一样
 	}
 }
+
+const CheckboxCheckedStr = "√"
 
 func (value *Value) String(format bool) string {
 	if nil == value {
@@ -75,7 +80,7 @@ func (value *Value) String(format bool) string {
 		if nil == value.Block {
 			return ""
 		}
-		return value.Block.Content
+		return strings.TrimSpace(value.Block.Content)
 	case KeyTypeText:
 		if nil == value.Text {
 			return ""
@@ -113,17 +118,17 @@ func (value *Value) String(format bool) string {
 		if nil == value.URL {
 			return ""
 		}
-		return value.URL.Content
+		return strings.TrimSpace(value.URL.Content)
 	case KeyTypeEmail:
 		if nil == value.Email {
 			return ""
 		}
-		return value.Email.Content
+		return strings.TrimSpace(value.Email.Content)
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return ""
 		}
-		return value.Phone.Content
+		return strings.TrimSpace(value.Phone.Content)
 	case KeyTypeMAsset:
 		if 1 > len(value.MAsset) {
 			return ""
@@ -153,7 +158,7 @@ func (value *Value) String(format bool) string {
 			return ""
 		}
 		if value.Checkbox.Checked {
-			return "√"
+			return CheckboxCheckedStr
 		}
 		return ""
 	case KeyTypeRelation:
@@ -220,6 +225,84 @@ func (value *Value) IsEdited() bool {
 	return value.CreatedAt != value.UpdatedAt
 }
 
+func (value *Value) IsBlank() bool {
+	if nil == value {
+		return true
+	}
+
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil == value.Block {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Block.Content)
+	case KeyTypeText:
+		if nil == value.Text {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Text.Content)
+	case KeyTypeNumber:
+		if nil == value.Number {
+			return true
+		}
+		return !value.Number.IsNotEmpty
+	case KeyTypeDate:
+		if nil == value.Date {
+			return true
+		}
+		return !value.Date.IsNotEmpty
+	case KeyTypeSelect:
+		if 1 > len(value.MSelect) {
+			return true
+		}
+		return "" == strings.TrimSpace(value.MSelect[0].Content)
+	case KeyTypeMSelect:
+		return 1 > len(value.MSelect)
+	case KeyTypeURL:
+		if nil == value.URL {
+			return true
+		}
+		return "" == strings.TrimSpace(value.URL.Content)
+	case KeyTypeEmail:
+		if nil == value.Email {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Email.Content)
+	case KeyTypePhone:
+		if nil == value.Phone {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Phone.Content)
+	case KeyTypeMAsset:
+		return 1 > len(value.MAsset)
+	case KeyTypeTemplate:
+		if nil == value.Template {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Template.Content)
+	case KeyTypeCreated:
+		if nil == value.Created {
+			return true
+		}
+		return !value.Created.IsNotEmpty
+	case KeyTypeUpdated:
+		if nil == value.Updated {
+			return true
+		}
+		return !value.Updated.IsNotEmpty
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return true
+		}
+		return false // 复选框不会为空
+	case KeyTypeRelation:
+		return 1 > len(value.Relation.Contents)
+	case KeyTypeRollup:
+		return 1 > len(value.Rollup.Contents)
+	}
+	return false
+}
+
 func (value *Value) IsEmpty() bool {
 	if nil == value {
 		return true
@@ -274,7 +357,7 @@ func (value *Value) IsEmpty() bool {
 		if nil == value.Template {
 			return true
 		}
-		return "" == value.Template.Content
+		return "" == strings.TrimSpace(value.Template.Content)
 	case KeyTypeCreated:
 		if nil == value.Created {
 			return true
@@ -336,6 +419,14 @@ func (value *Value) SetValByType(typ KeyType, val interface{}) {
 }
 
 func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+	// 单独处理汇总
+	if KeyTypeRollup == value.Type {
+		if 1 > len(value.Rollup.Contents) {
+			return nil
+		}
+		return value.Rollup.Contents[0].GetValByType(typ)
+	}
+
 	switch typ {
 	case KeyTypeBlock:
 		return value.Block
@@ -374,11 +465,11 @@ func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
 }
 
 type ValueBlock struct {
-	ID      string `json:"id"` // 绑定的块 ID，非绑定块时为空
-	Icon    string `json:"icon"`
+	ID      string `json:"id,omitempty"` // 绑定的块 ID，非绑定块时为空
+	Icon    string `json:"icon,omitempty"`
 	Content string `json:"content"`
-	Created int64  `json:"created"`
-	Updated int64  `json:"updated"`
+	Created int64  `json:"created,omitempty"`
+	Updated int64  `json:"updated,omitempty"`
 }
 
 type ValueText struct {
@@ -407,6 +498,7 @@ const (
 	NumberFormatRUB NumberFormat = "RUB" // 卢布
 	NumberFormatINR NumberFormat = "INR" // 卢比
 	NumberFormatKRW NumberFormat = "KRW" // 韩元
+	NumberFormatTRY NumberFormat = "TRY" // 土耳其里拉
 	NumberFormatCAD NumberFormat = "CAD" // 加拿大元
 	NumberFormatCHF NumberFormat = "CHF" // 瑞士法郎
 	NumberFormatTHB NumberFormat = "THB" // 泰铢
@@ -416,6 +508,7 @@ const (
 	NumberFormatMOP NumberFormat = "MOP" // 澳门币
 	NumberFormatSGD NumberFormat = "SGD" // 新加坡元
 	NumberFormatNZD NumberFormat = "NZD" // 新西兰元
+	NumberFormatILS NumberFormat = "ILS" // 以色列新谢克尔
 )
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
@@ -437,7 +530,11 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 }
 
 func (number *ValueNumber) FormatNumber() {
-	number.FormattedContent = formatNumber(number.Content, number.Format)
+	if !number.IsNotEmpty {
+		number.FormattedContent = ""
+	} else {
+		number.FormattedContent = formatNumber(number.Content, number.Format)
+	}
 }
 
 func formatNumber(content float64, format NumberFormat) string {
@@ -451,34 +548,37 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatPercent:
 		s := fmt.Sprintf("%.2f", content*100)
 		return strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
-	case NumberFormatUSD:
+	case NumberFormatUSD, "usDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("$%.2f", content)
-	case NumberFormatCNY:
+	case NumberFormatCNY, "yuan":
 		p := message.NewPrinter(language.Chinese)
 		return p.Sprintf("CN¥%.2f", content)
-	case NumberFormatEUR:
+	case NumberFormatEUR, "euro":
 		p := message.NewPrinter(language.German)
 		return p.Sprintf("€%.2f", content)
-	case NumberFormatGBP:
+	case NumberFormatGBP, "pound":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("£%.2f", content)
-	case NumberFormatJPY:
+	case NumberFormatJPY, "yen":
 		p := message.NewPrinter(language.Japanese)
 		return p.Sprintf("¥%.0f", content)
-	case NumberFormatRUB:
+	case NumberFormatRUB, "ruble":
 		p := message.NewPrinter(language.Russian)
 		return p.Sprintf("₽%.2f", content)
-	case NumberFormatINR:
+	case NumberFormatINR, "rupee":
 		p := message.NewPrinter(language.Hindi)
 		return p.Sprintf("₹%.2f", content)
-	case NumberFormatKRW:
+	case NumberFormatKRW, "won":
 		p := message.NewPrinter(language.Korean)
 		return p.Sprintf("₩%.0f", content)
-	case NumberFormatCAD:
+	case NumberFormatTRY, "turkishLira":
+		p := message.NewPrinter(language.Turkish)
+		return p.Sprintf("₺%.2f", content)
+	case NumberFormatCAD, "canadianDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("CA$%.2f", content)
-	case NumberFormatCHF:
+	case NumberFormatCHF, "franc":
 		p := message.NewPrinter(language.French)
 		return p.Sprintf("CHF%.2f", content)
 	case NumberFormatTHB:
@@ -502,6 +602,9 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatNZD:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("NZ$%.2f", content)
+	case NumberFormatILS:
+		p := message.NewPrinter(language.Hebrew)
+		return p.Sprintf("ILS₪%.2f", content)
 	default:
 		return strconv.FormatFloat(content, 'f', -1, 64)
 	}
@@ -592,7 +695,16 @@ func Round(val float64, precision int) float64 {
 
 type ValueSelect struct {
 	Content string `json:"content"`
-	Color   string `json:"color"`
+	Color   string `json:"color"` // 1-14
+}
+
+func MSelectRemoveOption(mSelect []*ValueSelect, opt string) (ret []*ValueSelect) {
+	for _, s := range mSelect {
+		if s.Content != opt {
+			ret = append(ret, s)
+		}
+	}
+	return
 }
 
 func MSelectExistOption(mSelect []*ValueSelect, opt string) bool {
@@ -619,7 +731,7 @@ type ValuePhone struct {
 type AssetType string
 
 const (
-	AssetTypeFile  = "file"
+	AssetTypeFile  = "file" // 链接也使用文件类型
 	AssetTypeImage = "image"
 )
 
@@ -648,8 +760,14 @@ const (
 	CreatedFormatDuration CreatedFormat = "duration"
 )
 
-func NewFormattedValueCreated(content, content2 int64, format CreatedFormat) (ret *ValueCreated) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueCreated(content, content2 int64, format CreatedFormat, isNotTime bool) (ret *ValueCreated) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
 	}
@@ -683,8 +801,14 @@ const (
 	UpdatedFormatDuration UpdatedFormat = "duration"
 )
 
-func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (ret *ValueUpdated) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat, isNotTime bool) (ret *ValueUpdated) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
 	}
@@ -716,13 +840,80 @@ type ValueRollup struct {
 	Contents []*Value `json:"contents"`
 }
 
-func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
+func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relationVal *Value, calc *RollupCalc, furtherCollection Collection) {
+	r.Contents = nil
+	for _, blockID := range relationVal.Relation.BlockIDs {
+		destVal := GetValue(keyValues, destKey.ID, blockID)
+		if nil != furtherCollection && (KeyTypeTemplate == destKey.Type || KeyTypeUpdated == destKey.Type || KeyTypeCreated == destKey.Type) {
+			destVal = furtherCollection.GetValue(blockID, destKey.ID)
+		}
+
+		if nil == destVal {
+			if KeyTypeCheckbox == destKey.Type {
+				// 没有编辑过复选框的时候没有值，没有值等同于未选中，所以这里补一个未选中的值 https://github.com/siyuan-note/siyuan/issues/15858
+				defaultVal := GetAttributeViewDefaultValue(ast.NewNodeID(), destKey.ID, blockID, destKey.Type, false)
+				r.Contents = append(r.Contents, defaultVal)
+			}
+			continue
+		}
+
+		if val := destVal.GetValByType(destKey.Type); nil == val || reflect.ValueOf(val).IsNil() {
+			// 目标字段因为修改类型导致空值
+			continue
+		}
+
+		if KeyTypeNumber == destKey.Type {
+			destVal.Number.Format = destKey.NumberFormat
+			destVal.Number.FormatNumber()
+		}
+
+		r.Contents = append(r.Contents, destVal.Clone())
+	}
+
+	r.calcContents(calc, destKey)
+}
+
+func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	if nil == calc {
 		return
 	}
 
 	switch calc.Operator {
 	case CalcOperatorNone:
+	case CalcOperatorUniqueValues:
+		uniqueValues := map[string]bool{}
+		for _, content := range r.Contents {
+			switch content.Type {
+			case KeyTypeRelation:
+				var newRelationContents []*Value
+				for _, relationVal := range content.Relation.Contents {
+					key := relationVal.String(true)
+					if !uniqueValues[key] {
+						uniqueValues[key] = true
+						newRelationContents = append(newRelationContents, relationVal)
+					}
+				}
+				content.Relation.Contents = newRelationContents
+			case KeyTypeMSelect:
+				var newMSelect []*ValueSelect
+				for _, mSelect := range content.MSelect {
+					if !uniqueValues[mSelect.Content] {
+						uniqueValues[mSelect.Content] = true
+						newMSelect = append(newMSelect, mSelect)
+					}
+				}
+				content.MSelect = newMSelect
+			case KeyTypeMAsset:
+				var newMAsset []*ValueAsset
+				for _, mAsset := range content.MAsset {
+					if !uniqueValues[mAsset.Content] {
+						uniqueValues[mAsset.Content] = true
+						newMAsset = append(newMAsset, mAsset)
+					}
+				}
+				content.MAsset = newMAsset
+			}
+		}
 	case CalcOperatorCountAll:
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(len(r.Contents)), NumberFormatNone)}}
 	case CalcOperatorCountValues:
@@ -790,6 +981,10 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 		for _, v := range r.Contents {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				sum += v.Number.Content
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				sum += f
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum, destKey.NumberFormat)}}
@@ -799,6 +994,11 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 		for _, v := range r.Contents {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				sum += v.Number.Content
+				count++
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				sum += f
 				count++
 			}
 		}
@@ -810,6 +1010,10 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 		for _, v := range r.Contents {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				numbers = append(numbers, v.Number.Content)
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				numbers = append(numbers, f)
 			}
 		}
 		sort.Float64s(numbers)
@@ -827,6 +1031,12 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 				if v.Number.Content < minVal {
 					minVal = v.Number.Content
 				}
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				if f < minVal {
+					minVal = f
+				}
 			}
 		}
 		if math.MaxFloat64 != minVal {
@@ -838,6 +1048,12 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				if v.Number.Content > maxVal {
 					maxVal = v.Number.Content
+				}
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				if f > maxVal {
+					maxVal = f
 				}
 			}
 		}
@@ -873,16 +1089,78 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
+			} else if KeyTypeUpdated == v.Type && nil != v.Updated && v.Updated.IsNotEmpty {
+				if 0 == earliest || v.Updated.Content < earliest {
+					earliest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+				if 0 == latest || v.Updated.Content > latest {
+					latest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else if KeyTypeCreated == v.Type && nil != v.Created && v.Created.IsNotEmpty {
+				if 0 == earliest || v.Created.Content < earliest {
+					earliest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+				if 0 == latest || v.Created.Content > latest {
+					latest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				if f < minVal {
+					minVal = f
+				}
+				if f > maxVal {
+					maxVal = f
+				}
 			}
 		}
 
-		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
-		}
-		if 0 != earliest && 0 != latest {
-			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+		typ := r.Contents[0].Type
+		switch typ {
+		case KeyTypeNumber:
+			if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
+				r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
+			}
+		case KeyTypeDate:
+			if 0 != earliest && 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeUpdated:
+			if 0 != earliest && 0 != latest {
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration, isNotTime)}}
+			}
+		case KeyTypeCreated:
+			if 0 != earliest && 0 != latest {
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration, isNotTime)}}
+			}
+		default:
+			if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
+				r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
+			}
 		}
 	case CalcOperatorEarliest:
+		if 1 > len(r.Contents) {
+			return
+		}
+
 		earliest := int64(0)
 		var isNotTime, hasEndDate bool
 		for _, v := range r.Contents {
@@ -892,12 +1170,51 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
+			} else if KeyTypeUpdated == v.Type && nil != v.Updated && v.Updated.IsNotEmpty {
+				if 0 == earliest || v.Updated.Content < earliest {
+					earliest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else if KeyTypeCreated == v.Type && nil != v.Created && v.Created.IsNotEmpty {
+				if 0 == earliest || v.Created.Content < earliest {
+					earliest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
 			}
 		}
-		if 0 != earliest {
-			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+
+		typ := r.Contents[0].Type
+		switch typ {
+		case KeyTypeDate:
+			if 0 != earliest {
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeUpdated:
+			if 0 != earliest {
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)}}
+			}
+		case KeyTypeCreated:
+			if 0 != earliest {
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)}}
+			}
 		}
 	case CalcOperatorLatest:
+		if 1 > len(r.Contents) {
+			return
+		}
+
 		latest := int64(0)
 		var isNotTime, hasEndDate bool
 		for _, v := range r.Contents {
@@ -907,10 +1224,44 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
+			} else if KeyTypeUpdated == v.Type && nil != v.Updated && v.Updated.IsNotEmpty {
+				if 0 == latest || latest < v.Updated.Content {
+					latest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else if KeyTypeCreated == v.Type && nil != v.Created && v.Created.IsNotEmpty {
+				if 0 == latest || latest < v.Created.Content {
+					latest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
 			}
 		}
-		if 0 != latest {
-			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+
+		typ := r.Contents[0].Type
+		switch typ {
+		case KeyTypeDate:
+			if 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeUpdated:
+			if 0 != latest {
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)}}
+			}
+		case KeyTypeCreated:
+			if 0 != latest {
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)}}
+			}
 		}
 	case CalcOperatorChecked:
 		countChecked := 0
@@ -959,7 +1310,7 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 	}
 }
 
-func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (ret *Value) {
+func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType, keyDateIsTime bool) (ret *Value) {
 	if "" == valueID {
 		valueID = ast.NewNodeID()
 	}
@@ -978,12 +1329,14 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (
 	}
 
 	switch typ {
+	case KeyTypeBlock:
+		ret.Block = &ValueBlock{Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 	case KeyTypeText:
 		ret.Text = &ValueText{}
 	case KeyTypeNumber:
 		ret.Number = &ValueNumber{}
 	case KeyTypeDate:
-		ret.Date = &ValueDate{IsNotTime: true}
+		ret.Date = &ValueDate{IsNotTime: !keyDateIsTime}
 	case KeyTypeSelect:
 		ret.MSelect = []*ValueSelect{}
 	case KeyTypeMSelect:

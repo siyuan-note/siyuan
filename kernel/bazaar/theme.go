@@ -87,9 +87,9 @@ func Themes() (ret []*Theme) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(theme.Package) {
-			return
-		}
+		theme.DisallowInstall = disallowInstallBazaarPackage(theme.Package)
+		theme.DisallowUpdate = disallowInstallBazaarPackage(theme.Package)
+		theme.UpdateRequiredMinAppVer = theme.MinAppVersion
 
 		theme.URL = strings.TrimSuffix(theme.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
@@ -161,8 +161,13 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 
-		installPath := filepath.Join(util.ThemesPath, dirName)
+		theme.DisallowInstall = disallowInstallBazaarPackage(theme.Package)
+		if bazaarPkg := getBazaarTheme(theme.Name, bazaarThemes); nil != bazaarPkg {
+			theme.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+			theme.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		}
 
+		installPath := filepath.Join(util.ThemesPath, dirName)
 		theme.Installed = true
 		theme.RepoURL = theme.URL
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
@@ -171,9 +176,9 @@ func InstalledThemes() (ret []*Theme) {
 		theme.PreferredFunding = getPreferredFunding(theme.Funding)
 		theme.PreferredName = GetPreferredName(theme.Package)
 		theme.PreferredDesc = getPreferredDesc(theme.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "theme.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install theme.json failed: %s", statErr)
 			continue
 		}
 		theme.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -185,14 +190,7 @@ func InstalledThemes() (ret []*Theme) {
 			packageInstallSizeCache.SetDefault(theme.RepoURL, is)
 		}
 		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
-		readmeFilename := getPreferredReadme(theme.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		theme.PreferredReadme, _ = renderLocalREADME("/appearance/themes/"+dirName+"/", readme)
+		theme.PreferredReadme = loadInstalledReadme(installPath, "/appearance/themes/"+dirName+"/", theme.Readme)
 		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
 		ret = append(ret, theme)
 	}
@@ -201,6 +199,15 @@ func InstalledThemes() (ret []*Theme) {
 
 func isBuiltInTheme(dirName string) bool {
 	return "daylight" == dirName || "midnight" == dirName
+}
+
+func getBazaarTheme(name string, themes []*Theme) *Theme {
+	for _, p := range themes {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
 }
 
 func InstallTheme(repoURL, repoHash, installPath string, systemID string) error {

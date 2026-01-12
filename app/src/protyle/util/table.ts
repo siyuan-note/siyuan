@@ -6,7 +6,7 @@ import {isNotCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
-import {hasPreviousSibling} from "../wysiwyg/getBlock";
+import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
@@ -371,6 +371,15 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return false;
     }
 
+    if (event.key === "Backspace" && range.toString() === "") {
+        const previousElement = hasPreviousSibling(range.startContainer) as Element;
+        if (range.startOffset === 1 && previousElement.nodeType === 1 && previousElement.tagName === "BR" &&
+            range.startContainer.textContent.length === 1 && !hasNextSibling(range.startContainer)) {
+            previousElement.insertAdjacentHTML("beforebegin", "<br>");
+            return false;
+        }
+    }
+
     // shift+enter 软换行
     if (event.key === "Enter" && event.shiftKey && isNotCtrl(event) && !event.altKey) {
         const wbrElement = document.createElement("wbr");
@@ -452,8 +461,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
             if (nextElement) {
                 range.selectNodeContents(nextElement);
             } else {
-                insertRow(protyle, range, cellElement, nodeElement);
-                range.selectNodeContents(nodeElement.querySelector("tbody").lastElementChild.firstElementChild);
+                insertRow(protyle, range, cellElement.parentElement.firstElementChild as HTMLTableCellElement, nodeElement);
             }
             event.preventDefault();
             return true;

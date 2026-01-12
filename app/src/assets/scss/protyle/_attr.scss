@@ -8,6 +8,7 @@
   font-weight: normal;
   align-items: center;
   line-height: 16px;
+  user-select: none;
 
   &--av span:hover {
     color: var(--b3-protyle-inline-blockref-color);
@@ -53,6 +54,7 @@
     height: 16px;
     background-color: var(--b3-theme-surface);
     z-index: 1; // 防止被 protyle-scroll 遮挡
+    white-space: nowrap;
 
     &:hover {
       color: var(--b3-theme-on-background);

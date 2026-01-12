@@ -1,10 +1,11 @@
 {
 	"ID": "20211226121329-c5v3dto",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226121329-c5v3dto",
 		"title": "Kernel API",
+		"type": "doc",
 		"updated": "20230820185840"
 	},
 	"Children": [

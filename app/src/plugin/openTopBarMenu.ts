@@ -7,25 +7,31 @@ import {openSetting} from "../config";
 import {Constants} from "../constants";
 
 export const openTopBarMenu = (app: App, target?: Element) => {
-    const menu = new Menu("topBarPlugin");
+    const menu = new Menu(Constants.MENU_BAR_PLUGIN);
     /// #if !MOBILE
-        menu.addItem({
-            id: "manage",
-            icon: "iconSettings",
-            label: window.siyuan.languages.manage,
-            ignore: isHuawei() || window.siyuan.config.readonly,
-            click() {
-                openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-            }
-        });
-        menu.addSeparator({id: "separator_1"}, isHuawei() || window.siyuan.config.readonly);
+    menu.addItem({
+        id: "manage",
+        icon: "iconSettings",
+        label: window.siyuan.languages.manage,
+        ignore: isHuawei() || window.siyuan.config.readonly,
+        click() {
+            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+        }
+    });
+    menu.addSeparator({id: "separator_1", ignore: isHuawei() || window.siyuan.config.readonly});
     /// #endif
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
         // @ts-ignore
         const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
         let hasTopBar = false;
-        plugin.topBarIcons.forEach(item => {
+        for (let i = 0; i < plugin.topBarIcons.length; i++) {
+            const item = plugin.topBarIcons[i];
+            if (!document.contains(item)) {
+                plugin.topBarIcons.splice(i, 1);
+                i--;
+                continue;
+            }
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
                 id: hasUnpin ? "pin" : "unpin",
@@ -85,7 +91,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             menu.addItem(menuOption);
             hasPlugin = true;
             hasTopBar = true;
-        });
+        }
         if (!hasTopBar && hasSetting) {
             hasPlugin = true;
             menu.addItem({

@@ -67,6 +67,7 @@ export abstract class Constants {
 
     // size
     public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
+    public static readonly SIZE_UPLOAD_TIP_SIZE: number = 268435456; // 256 M
     public static readonly SIZE_SCROLL_TB: number = 24;
     public static readonly SIZE_SCROLL_STEP: number = 256;
     public static readonly SIZE_LINK_TEXT_MAX: number = 64;
@@ -130,6 +131,7 @@ export abstract class Constants {
     public static readonly CB_GET_BACKLINK = "cb-get-backlink"; // 悬浮窗为传递型需展示上下文
     public static readonly CB_GET_UNUNDO = "cb-get-unundo"; // 不需要记录历史
     public static readonly CB_GET_SCROLL = "cb-get-scroll"; // 滚动到指定位置，用于直接打开文档，必有 rootID
+    public static readonly CB_GET_SEARCH = "cb-get-search"; // 通过搜索打开
     public static readonly CB_GET_CONTEXT = "cb-get-context"; // 包含上下文
     public static readonly CB_GET_ROOTSCROLL = "cb-get-rootscroll"; // 如果为 rootID 就滚动到指定位置，必有 rootID
     public static readonly CB_GET_HTML = "cb-get-html"; // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
@@ -165,6 +167,7 @@ export abstract class Constants {
     public static readonly LOCAL_IMAGES = "local-images";
     public static readonly LOCAL_EMOJIS = "local-emojis";
     public static readonly LOCAL_MOVE_PATH = "local-move-path";
+    public static readonly LOCAL_RECENT_DOCS = "local-recent-docs";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";
@@ -224,9 +227,74 @@ export abstract class Constants {
     public static readonly DIALOG_OPENWORKSPACE = "dialog-openworkspace"; // 打开工作空间
     public static readonly DIALOG_SAVEWORKSPACE = "dialog-saveworkspace"; // 保存工作空间
 
+    // menu
+    public static readonly MENU_BAR_WORKSPACE = "barWorkspace"; // 顶栏主菜单
+    public static readonly MENU_BAR_PLUGIN = "topBarPlugin"; // 顶栏插件菜单
+    public static readonly MENU_BAR_ZOOM = "barZoom"; // 顶栏缩放菜单
+    public static readonly MENU_BAR_MODE = "barmode"; // 顶栏外观菜单
+    public static readonly MENU_BAR_MORE = "barmore"; // 顶栏更多菜单
+    public static readonly MENU_STATUS_HELP = "statusHelp"; // 状态栏帮助菜单
+    public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
+    public static readonly MENU_DOCK_MOBILE = "dockMobileMenu"; // 移动端侧栏插件选项菜单
+
+    public static readonly MENU_BLOCK_SINGLE = "block-single"; // 单选块菜单
+    public static readonly MENU_BLOCK_MULTI = "block-multi"; // 多选块菜单
+    public static readonly MENU_TITLE = "titleMenu"; // 文档块菜单
+    public static readonly MENU_FROM_TITLE_PROTYLE = "title-protyle"; // 在 Protyle 触发的文档块菜单
+    public static readonly MENU_FROM_TITLE_BREADCRUMB = "title-breadcrumb"; // 在面包屑触发的文档块菜单
+    public static readonly MENU_BREADCRUMB_MORE = "breadcrumbMore"; // 面包屑更多菜单
+    public static readonly MENU_BREADCRUMB_MOBILE_PATH = "breadcrumb-mobile-path"; // 移动端面包屑菜单
+
+    public static readonly MENU_DOC_TREE_MORE = "docTreeMore"; // 侧栏文档树右键菜单
+    public static readonly MENU_FROM_DOC_TREE_MORE_NOTEBOOK = "tree-notebook"; // 侧栏文档树右键菜单，单个笔记本
+    public static readonly MENU_FROM_DOC_TREE_MORE_DOC = "tree-doc"; // 侧栏文档树右键菜单，单个文档
+    public static readonly MENU_FROM_DOC_TREE_MORE_ITEMS = "tree-items"; // 侧栏文档树右键菜单，多个文档或笔记本
+    public static readonly MENU_TAG = "tagMenu"; // 侧栏标签菜单
+    public static readonly MENU_BOOKMARK = "bookmarkMenu"; // 侧栏书签菜单
+    public static readonly MENU_OUTLINE_CONTEXT = "outline-context"; // 大纲标题右键菜单
+    public static readonly MENU_OUTLINE_EXPAND_LEVEL = "outline-expand-level"; // 大纲展开层级菜单
+
+    public static readonly MENU_AV_VIEW = "av-view"; // 数据库视图标题菜单
+    public static readonly MENU_AV_HEADER_CELL = "av-header-cell"; // 数据库字段标题菜单
+    public static readonly MENU_AV_HEADER_ADD = "av-header-add"; // 数据库添加字段菜单
+    public static readonly MENU_AV_ADD_FILTER = "av-add-filter"; // 数据库添加筛选条件菜单
+    public static readonly MENU_AV_ADD_SORT = "av-add-sort"; // 数据库添加排序条件菜单
+    public static readonly MENU_AV_COL_OPTION = "av-col-option"; // 数据库单选多选字段的选项编辑菜单
+    public static readonly MENU_AV_COL_FORMAT_NUMBER = "av-col-format-number"; // 数据库数字字段格式化菜单
+    public static readonly MENU_AV_GROUP_DATE = "avGroupDate"; // 数据库日期字段分组菜单的日期菜单
+    public static readonly MENU_AV_GROUP_SORT = "avGroupSort"; // 数据库日期字段分组菜单的排序菜单
+    public static readonly MENU_AV_ASSET_EDIT = "av-asset-edit"; // 数据库资源字段链接或资源文件菜单
+    public static readonly MENU_AV_CALC = "av-calc"; // 数据库计算菜单
+    public static readonly MENU_AV_PAGE_SIZE = "av-page-size"; // 数据库条目数菜单
+
+    public static readonly MENU_SEARCH_MORE = "searchMore"; // 搜索更多菜单
+    public static readonly MENU_SEARCH_METHOD = "searchMethod"; // 搜索方式菜单
+    public static readonly MENU_SEARCH_ASSET_MORE = "searchAssetMore"; // 资源文件搜索更多菜单
+    public static readonly MENU_SEARCH_ASSET_METHOD = "searchAssetMethod"; // 资源文件搜索方式菜单
+    public static readonly MENU_SEARCH_UNREF_MORE = "searchUnRefMore"; // 列出引用失效的块的更多菜单
+    public static readonly MENU_SEARCH_HISTORY = "search-history"; // 搜索历史菜单
+    public static readonly MENU_SEARCH_REPLACE_HISTORY = "search-replace-history"; // 替换历史菜单
+    public static readonly MENU_SEARCH_ASSET_HISTORY = "search-asset-history"; // 资源文件搜索历史菜单
+    public static readonly MENU_MOVE_PATH_HISTORY = "move-path-history"; // 移动文档窗口搜索历史菜单
+    public static readonly MENU_CALLOUT_SELECT = "callout-select"; // 提示选择菜单
+
+    public static readonly MENU_BACKGROUND_ASSET = "background-asset"; // 资源文件选择器菜单
+    public static readonly MENU_AI = "ai"; // 块 AI 菜单
+    public static readonly MENU_TAB = "tab"; // 页签右键菜单
+    public static readonly MENU_TAB_LIST = "tabList"; // 页签切换菜单
+
+    public static readonly MENU_INLINE_CONTEXT = "inline-context"; // 文本右键菜单
+    public static readonly MENU_INLINE_IMG = "inline-img"; // 图片元素菜单
+    public static readonly MENU_INLINE_FILE_ANNOTATION_REF = "inline-file-annotation-ref"; // PDF 标注元素菜单
+    public static readonly MENU_INLINE_REF = "inline-block-ref"; // 块引用元素菜单
+    public static readonly MENU_INLINE_A = "inline-a"; // 超链接元素菜单
+    public static readonly MENU_INLINE_TAG = "inline-tag"; // 行级标签元素菜单
+    public static readonly MENU_INLINE_MATH = "inline-math"; // 行级公式元素菜单
+
     // timeout
     public static readonly TIMEOUT_OPENDIALOG = 50;
     public static readonly TIMEOUT_DBLCLICK = 190;
+    public static readonly TIMEOUT_RESIZE = 200;
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
     public static readonly TIMEOUT_TRANSITION = 300;
@@ -242,9 +310,11 @@ export abstract class Constants {
         he_IL: "20210808180117-6v0mkxr",
         it_IT: "20210808180117-6v0mkxr",
         ja_JP: "20240530133126-axarxgx",
+        ko_KR: "20210808180117-6v0mkxr",
         pl_PL: "20210808180117-6v0mkxr",
         pt_BR: "20210808180117-6v0mkxr",
         ru_RU: "20210808180117-6v0mkxr",
+        tr_TR: "20210808180117-6v0mkxr",
         zh_CHT: "20211226090932-5lcq56f",
         zh_CN: "20210808180117-czj9bvb",
     };
@@ -390,6 +460,7 @@ export abstract class Constants {
             goToTabPrev: {default: "⇧⌘[", custom: "⇧⌘["},
             goToEditTabNext: {default: "⌃⇥", custom: "⌃⇥"},
             goToEditTabPrev: {default: "⌃⇧⇥", custom: "⌃⇧⇥"},
+            recentClosed: {default: "⇧⌘T", custom: "⇧⌘T"},
             move: {default: "", custom: ""},
             selectOpen1: {default: "", custom: ""},
             toggleDock: {default: "", custom: ""},
@@ -509,10 +580,10 @@ export abstract class Constants {
                 checkToggle: {default: "⌘↩", custom: "⌘↩"},
             },
             table: {
-                insertRowAbove: {default: "⇧⌘T", custom: "⇧⌘T"},
-                insertRowBelow: {default: "⇧⌘D", custom: "⇧⌘D"},
-                insertColumnLeft: {default: "⇧⌘L", custom: "⇧⌘L"},
-                insertColumnRight: {default: "⇧⌘R", custom: "⇧⌘R"},
+                insertRowAbove: {default: "", custom: ""},
+                insertRowBelow: {default: "", custom: ""},
+                insertColumnLeft: {default: "", custom: ""},
+                insertColumnRight: {default: "", custom: ""},
                 moveToUp: {default: "⌥⌘T", custom: "⌥⌘T"},
                 moveToDown: {default: "⌥⌘B", custom: "⌥⌘B"},
                 moveToLeft: {default: "⌥⌘L", custom: "⌥⌘L"},
@@ -697,10 +768,10 @@ export abstract class Constants {
 </svg>`;
 
     // assets
-    public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"];
+    public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif", ".tiff", ".tif"];
     public static readonly SIYUAN_ASSETS_AUDIO: string[] = [".mp3", ".wav", ".ogg", ".m4a", ".aac", ".flac"];
     public static readonly SIYUAN_ASSETS_VIDEO: string[] = [".mov", ".weba", ".mkv", ".mp4", ".webm"];
-    public static readonly SIYUAN_ASSETS_EXTS: string[] = [".pdf"].concat(Constants.SIYUAN_ASSETS_IMAGE).concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO);
+    public static readonly SIYUAN_ASSETS_EXTS: string[] = [".pdf"].concat(Constants.SIYUAN_ASSETS_IMAGE, Constants.SIYUAN_ASSETS_AUDIO, Constants.SIYUAN_ASSETS_VIDEO);
     public static readonly SIYUAN_ASSETS_SEARCH: string[] = [".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".pdf", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",
         ".cpp", ".go", ".rs", ".swift", ".kt", ".py", ".php", ".js", ".css", ".ts", ".sh", ".bat", ".cmd", ".ini", ".yaml",
         ".rst", ".adoc", ".textile", ".opml", ".org", ".wiki", ".epub", ".cs"];
@@ -757,7 +828,7 @@ export abstract class Constants {
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];
     public static readonly BLOCK_HINT_CLOSE_KEYS: IObject = {"((": "))", "[[": "]]", "（（": "））", "【【": "】】"};
     // common: "bash", "c", "csharp", "cpp", "css", "diff", "go", "xml", "json", "java", "javascript", "kotlin", "less", "lua", "makefile", "markdown", "objectivec", "php", "php-template", "perl", "plaintext", "python", "python-repl", "r", "ruby", "rust", "scss", "sql", "shell", "swift", "ini", "typescript", "vbnet", "yaml", "properties", "1c", "armasm", "avrasm", "actionscript", "ada", "angelscript", "accesslog", "apache", "applescript", "arcade", "arduino", "asciidoc", "aspectj", "abnf", "autohotkey", "autoit", "awk", "basic", "bnf", "dos", "brainfuck", "cal", "cmake", "csp", "cos", "capnproto", "ceylon", "clean", "clojure", "clojure-repl", "coffeescript", "coq", "crystal", "d", "dns", "dart", "delphi", "dts", "django", "dockerfile", "dust", "erb", "elixir", "elm", "erlang", "erlang-repl", "excel", "ebnf", "fsharp", "fix", "flix", "fortran", "gcode", "gams", "gauss", "glsl", "gml", "gherkin", "golo", "gradle", "groovy", "haml", "hsp", "http", "handlebars", "haskell", "haxe", "hy", "irpf90", "isbl", "inform7", "x86asm", "jboss-cli", "julia", "julia-repl", "ldif", "llvm", "lsl", "latex", "lasso", "leaf", "lisp", "livecodeserver", "livescript", "mel", "mipsasm", "matlab", "maxima", "mercury", "axapta", "routeros", "mizar", "mojolicious", "monkey", "moonscript", "n1ql", "nsis", "nestedtext", "nginx", "nim", "nix", "node-repl", "ocaml", "openscad", "ruleslanguage", "oxygene", "pf", "parser3", "pony", "pgsql", "powershell", "processing", "prolog", "protobuf", "puppet", "purebasic", "profile", "q", "qml", "reasonml", "rib", "rsl", "roboconf", "sas", "sml", "sqf", "step21", "scala", "scheme", "scilab", "smali", "smalltalk", "stan", "stata", "stylus", "subunit", "tp", "taggerscript", "tcl", "tap", "thrift", "twig", "vbscript", "vbscript-html", "vhdl", "vala", "verilog", "vim", "wasm", "mathematica", "wren", "xl", "xquery", "zephir", "crmsh", "dsconfig", "graphql",
-    // third: "yul", "solidity", "abap", "hlsl", "gdscript"
+    // third: "yul", "solidity", "abap", "hlsl", "gdscript", "moonbit"
     public static readonly ALIAS_CODE_LANGUAGES: string[] = [
         "js", "ts", "html", "toml", "c#", "bat"
     ];

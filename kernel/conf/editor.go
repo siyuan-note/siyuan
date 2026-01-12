@@ -27,7 +27,7 @@ type Editor struct {
 	CodeTabSpaces                   int            `json:"codeTabSpaces"`                   // 代码块中 Tab 转换空格数，配置为 0 则表示不转换
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
 	CodeLigatures                   bool           `json:"codeLigatures"`                   // 代码块是否连字
-	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示书签图标
+	DisplayBookmarkIcon             bool           `json:"displayBookmarkIcon"`             // 是否显示内容块角标
 	DisplayNetImgMark               bool           `json:"displayNetImgMark"`               // 是否显示网络图片角标
 	GenerateHistoryInterval         int            `json:"generateHistoryInterval"`         // 生成历史时间间隔，单位：分钟
 	HistoryRetentionDays            int            `json:"historyRetentionDays"`            // 历史保留天数
@@ -48,10 +48,14 @@ type Editor struct {
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
 	Spellcheck                      bool           `json:"spellcheck"`                      // 是否启用拼写检查
+	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
 	BacklinkContainChildren         bool           `json:"backlinkContainChildren"`         // 反向链接是否包含子块进行计算
+	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
+	BackmentionSort                 *int           `json:"backmentionSort"`                 // 反链提及排序方式
+	HeadingEmbedMode                int            `json:"headingEmbedMode"`                // 标题嵌入块模式，0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
 }
 
@@ -85,9 +89,14 @@ func NewEditor() *Editor {
 		DynamicLoadBlocks:               192,
 		Justify:                         false,
 		RTL:                             false,
+		Spellcheck:                      false,
+		SpellcheckLanguages:             []string{"en-US"},
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          -1,
 		BacklinkContainChildren:         true,
+		BacklinkSort:                    func() *int { v := util.SortModeUpdatedDESC; return &v }(),
+		BackmentionSort:                 func() *int { v := util.SortModeUpdatedDESC; return &v }(),
+		HeadingEmbedMode:                0,
 		Markdown:                        util.MarkdownSettings,
 	}
 }

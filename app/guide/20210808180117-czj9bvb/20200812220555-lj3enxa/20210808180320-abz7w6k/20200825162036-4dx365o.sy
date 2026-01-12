@@ -1,6 +1,6 @@
 {
 	"ID": "20200825162036-4dx365o",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f4f0",
@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20240702222051"
+		"updated": "20251211094029"
 	},
 	"Children": [
 		{
@@ -1823,7 +1823,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604182634-xswb2hw",
-				"updated": "20211120101257"
+				"updated": "20251209210844"
 			},
 			"Children": [
 				{
@@ -1837,7 +1837,7 @@
 			"Type": "NodeBlockquote",
 			"Properties": {
 				"id": "20210604223030-6gapuyv",
-				"updated": "20210604223045"
+				"updated": "20251209210836"
 			},
 			"Children": [
 				{
@@ -1855,6 +1855,156 @@
 						{
 							"Type": "NodeText",
 							"Data": "注意不是内容块引用，而是引述块（Blockquote）。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209210844-rap5wy6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209210844-rap5wy6",
+				"updated": "20251211094029"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提示块"
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-xtkv05z",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-xtkv05z",
+				"updated": "20251211094016"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211093951-ywyj5yp",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-ywyj5yp",
+						"updated": "20251211094016"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "突出显示即使快速浏览也应注意的信息。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-olg8lvt",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-olg8lvt",
+				"updated": "20251211094019"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211093951-nny14nk",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-nny14nk",
+						"updated": "20251211094019"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "可选信息，有助于更顺利地完成任务。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-k74y9ge",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-k74y9ge",
+				"updated": "20251211094024"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251211093951-8rjh25b",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-8rjh25b",
+						"updated": "20251211094024"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "成功完成任务所必需的关键信息。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-580y2vk",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-580y2vk",
+				"updated": "20251211094029"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211093951-l5o9hoe",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-l5o9hoe",
+						"updated": "20251211094029"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "由于存在潜在风险，此重要内容需要立即关注。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211093951-fe1g5ac",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211093951-fe1g5ac",
+				"updated": "20251211093951"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211093951-ppbnywx",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211093951-ppbnywx",
+						"updated": "20251211093951"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "某项操作可能带来的负面后果。"
 						}
 					]
 				}

@@ -67,10 +67,14 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         if (response.data.blocks.length > 0) {
             edit = new Protyle(app, dialog.element.querySelector("#cardPreview") as HTMLElement, {
                 blockId: "",
+                action: [Constants.CB_GET_ALL],
                 render: {
                     gutter: true,
-                    breadcrumbDocName: true
+                    breadcrumbDocName: true,
+                    title: true,
+                    hideTitleOnZoom: true,
                 },
+                typewriterMode: false
             });
             if (window.siyuan.mobile) {
                 window.siyuan.mobile.popEditor = edit;
@@ -309,7 +313,7 @@ const getArticle = (edit: Protyle, id: string) => {
                 updateReadonly: true,
                 data: getResponse,
                 protyle: edit.protyle,
-                action: getResponse.data.rootID === getResponse.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
+                action: getResponse.data.rootID === getResponse.data.id ? [] : [Constants.CB_GET_ALL],
             });
         });
     });

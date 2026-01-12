@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -196,7 +197,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 }
 
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
-	go server.Serve(true)
+	go server.Serve(true, model.Conf.CookieKey)
 }
 
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
@@ -207,7 +208,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	util.BootMobile(container, appDir, workspaceBaseDir, lang)
 
 	model.InitConf()
-	go server.Serve(false)
+	go server.Serve(false, model.Conf.CookieKey)
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)
@@ -289,5 +290,9 @@ func FilterUploadFileName(name string) string {
 }
 
 func AssetName(name string) string {
-	return util.AssetName(name)
+	return util.AssetName(name, ast.NewNodeID())
+}
+
+func Exit() {
+	os.Exit(logging.ExitCodeOk)
 }

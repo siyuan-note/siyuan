@@ -78,7 +78,7 @@
 
   &:disabled {
     opacity: .38;
-    cursor: auto;
+    cursor: not-allowed;
   }
 
   &:active:not(:disabled)::after {

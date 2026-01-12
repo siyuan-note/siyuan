@@ -85,9 +85,9 @@ func Icons() (icons []*Icon) {
 			return
 		}
 
-		if disallowDisplayBazaarPackage(icon.Package) {
-			return
-		}
+		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
+		icon.DisallowUpdate = disallowInstallBazaarPackage(icon.Package)
+		icon.UpdateRequiredMinAppVer = icon.MinAppVersion
 
 		icon.URL = strings.TrimSuffix(icon.URL, "/")
 		repoURLHash := strings.Split(repoURL, "@")
@@ -159,8 +159,13 @@ func InstalledIcons() (ret []*Icon) {
 			continue
 		}
 
-		installPath := filepath.Join(util.IconsPath, dirName)
+		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
+		if bazaarPkg := getBazaarIcon(icon.Name, bazaarIcons); nil != bazaarPkg {
+			icon.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+			icon.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		}
 
+		installPath := filepath.Join(util.IconsPath, dirName)
 		icon.Installed = true
 		icon.RepoURL = icon.URL
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
@@ -169,9 +174,9 @@ func InstalledIcons() (ret []*Icon) {
 		icon.PreferredFunding = getPreferredFunding(icon.Funding)
 		icon.PreferredName = GetPreferredName(icon.Package)
 		icon.PreferredDesc = getPreferredDesc(icon.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "icon.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install icon.json failed: %s", statErr)
 			continue
 		}
 		icon.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -183,14 +188,7 @@ func InstalledIcons() (ret []*Icon) {
 			packageInstallSizeCache.SetDefault(icon.RepoURL, is)
 		}
 		icon.HInstallSize = humanize.BytesCustomCeil(uint64(icon.InstallSize), 2)
-		readmeFilename := getPreferredReadme(icon.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		icon.PreferredReadme, _ = renderLocalREADME("/appearance/icons/"+dirName+"/", readme)
+		icon.PreferredReadme = loadInstalledReadme(installPath, "/appearance/icons/"+dirName+"/", icon.Readme)
 		icon.Outdated = isOutdatedIcon(icon, bazaarIcons)
 		ret = append(ret, icon)
 	}
@@ -199,6 +197,15 @@ func InstalledIcons() (ret []*Icon) {
 
 func isBuiltInIcon(dirName string) bool {
 	return "ant" == dirName || "material" == dirName
+}
+
+func getBazaarIcon(name string, icon []*Icon) *Icon {
+	for _, p := range icon {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
 }
 
 func InstallIcon(repoURL, repoHash, installPath string, systemID string) error {

@@ -2,7 +2,7 @@ import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "..
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
 import {Constants} from "../../../../constants";
-import {clearSelect} from "../../../util/clearSelect";
+import {clearSelect} from "../../../util/clear";
 
 export const insertGalleryItemAnimation = (options: {
     blockElement: HTMLElement;
@@ -11,6 +11,7 @@ export const insertGalleryItemAnimation = (options: {
     previousId: string;
     groupID?: string
 }) => {
+    const type = options.blockElement.getAttribute("data-av-type") as TAVView;
     (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let sideItemElement = options.previousId ? options.blockElement.querySelector(groupQuery + `.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
@@ -21,7 +22,10 @@ export const insertGalleryItemAnimation = (options: {
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
     if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
-        sideItemElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__gallery-add').previousElementSibling;
+        sideItemElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__gallery-add')?.previousElementSibling;
+        if (!sideItemElement) {
+            return;
+        }
     }
     let cellsHTML = "";
     sideItemElement?.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
@@ -33,11 +37,23 @@ export const insertGalleryItemAnimation = (options: {
                 lineNumber = parseInt(lineNumberValue);
             }
         }
-        cellsHTML += `<div class="av__cell${fieldType === "checkbox" ? " av__cell-uncheck" : ""}" data-field-id="${item.dataset.fieldId}" 
+
+        const cellHTML = `<div class="av__cell${fieldType === "checkbox" ? " av__cell-uncheck" : ""}" 
+data-field-id="${item.dataset.fieldId}" 
 data-wrap="${item.dataset.wrap}" 
 data-dtype="${item.dataset.dtype}" 
-data-empty="${item.dataset.empty}"
-${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, "gallery")}</div>`;
+${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, type)}</div>`;
+        if (item.previousElementSibling.classList.contains("av__gallery-name")) {
+            cellsHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${item.parentElement.dataset.empty}">
+    ${item.previousElementSibling.outerHTML}
+    ${cellHTML}
+</div>`;
+        } else {
+            cellsHTML += `<div class="av__gallery-field" data-empty="${item.parentElement.dataset.empty}">
+    ${item.previousElementSibling.outerHTML}
+    ${cellHTML}
+</div>`;
+        }
     });
     clearSelect(["galleryItem"], options.blockElement);
     let html = "";
@@ -51,7 +67,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     if (sideItemElement) {
         sideItemElement.insertAdjacentHTML("afterend", html);
     } else {
-        options.blockElement.querySelector(groupQuery + ".av__gallery").insertAdjacentHTML("afterbegin", html);
+        options.blockElement.querySelector(groupQuery + ".av__gallery")?.insertAdjacentHTML("afterbegin", html);
     }
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
         avID: options.blockElement.getAttribute("data-av-id"),
@@ -69,10 +85,10 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                     }
                     if (updateIds.includes(cellItem.dataset.fieldId)) {
                         const cellValue = response.data.values[cellItem.dataset.fieldId];
-                        if (cellValue.type === "checkbox") {
-                            cellValue.checkbox.content = cellItem.getAttribute("aria-label");
+                        if (cellValue.type === "checkbox" && cellItem.parentElement.querySelector(".av__gallery-tip")) {
+                            cellValue.checkbox.content = cellItem.getAttribute("aria-label").split('<div class="ft__on-surface">')[0];
                         }
-                        cellItem.innerHTML = renderCell(cellValue, undefined, false, "gallery");
+                        cellItem.innerHTML = renderCell(cellValue, undefined, false, type);
                         renderCellAttr(cellItem, cellValue);
                     }
                 });

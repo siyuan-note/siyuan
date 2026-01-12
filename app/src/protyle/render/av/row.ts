@@ -2,22 +2,17 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {
-    genCellValue,
-    genCellValueByElement,
-    getTypeByCellElement,
-    renderCell,
-    renderCellAttr
-} from "./cell";
+import {genCellValue, genCellValueByElement, getTypeByCellElement, renderCell, renderCellAttr} from "./cell";
 import {fetchPost} from "../../../util/fetch";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
-import {clearSelect} from "../../util/clearSelect";
+import {clearSelect} from "../../util/clear";
+import {isCustomAttr} from "./blockAttr";
 
 export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {
-    if (hasClosestByClassName(cellElement, "custom-attr")) {
-        return (hasClosestByClassName(cellElement, "av__row") as HTMLElement).dataset.id;
+    if (isCustomAttr(cellElement)) {
+        return cellElement.getAttribute("data-row-id");
     }
     return (hasClosestByClassName(cellElement, viewType === "table" ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
 };
@@ -130,9 +125,11 @@ export const insertAttrViewBlockAnimation = (options: {
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
     if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
-        previousElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util').previousElementSibling;
+        previousElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util')?.previousElementSibling;
     }
-
+    if (!previousElement) {
+        return;
+    }
     let cellsHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
     if (pinIndex > -1) {
@@ -260,11 +257,25 @@ export const setPageSize = (options: {
     avID: string,
     nodeElement: Element
 }) => {
-    const menu = new Menu("av-page-size");
+    const menu = new Menu(Constants.MENU_AV_PAGE_SIZE);
     if (menu.isOpen) {
         return;
     }
     const currentPageSize = options.target.dataset.size;
+    menu.addItem({
+        iconHTML: "",
+        label: "5",
+        checked: currentPageSize === "5",
+        click() {
+            updatePageSize({
+                currentPageSize,
+                newPageSize: "5",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
+        }
+    });
     menu.addItem({
         iconHTML: "",
         label: "10",
@@ -433,7 +444,7 @@ export const insertRows = (options: {
         id: options.blockElement.dataset.nodeId,
         data: options.blockElement.getAttribute("updated")
     }]);
-    if (options.blockElement.getAttribute("data-av-type") === "gallery") {
+    if (["gallery", "kanban"].includes(options.blockElement.getAttribute("data-av-type"))) {
         insertGalleryItemAnimation({
             blockElement: options.blockElement,
             protyle: options.protyle,

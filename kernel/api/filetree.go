@@ -103,6 +103,7 @@ func listDocTree(c *gin.Context) {
 	}
 
 	p := arg["path"].(string)
+	p = strings.TrimSuffix(p, ".sy")
 	var doctree []*DocFile
 	root := filepath.Join(util.WorkspaceDir, "data", notebook, p)
 	dir, err := os.ReadDir(root)
@@ -114,11 +115,11 @@ func listDocTree(c *gin.Context) {
 
 	ids := map[string]bool{}
 	for _, entry := range dir {
-		if entry.IsDir() {
-			if strings.HasPrefix(entry.Name(), ".") {
-				continue
-			}
+		if strings.HasPrefix(entry.Name(), ".") {
+			continue
+		}
 
+		if entry.IsDir() {
 			if !ast.IsNodeIDPattern(entry.Name()) {
 				continue
 			}
@@ -128,13 +129,18 @@ func listDocTree(c *gin.Context) {
 			doctree = append(doctree, parent)
 
 			subPath := filepath.Join(root, entry.Name())
-			if err = walkDocTree(subPath, parent, &ids); err != nil {
+			if err = walkDocTree(subPath, parent, ids); err != nil {
 				ret.Code = -1
 				ret.Msg = err.Error()
 				return
 			}
 		} else {
-			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
+			id := strings.TrimSuffix(entry.Name(), ".sy")
+			if !ast.IsNodeIDPattern(id) {
+				continue
+			}
+
+			doc := &DocFile{ID: id}
 			if !ids[doc.ID] {
 				doctree = append(doctree, doc)
 			}
@@ -152,7 +158,7 @@ type DocFile struct {
 	Children []*DocFile `json:"children,omitempty"`
 }
 
-func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
+func walkDocTree(p string, docFile *DocFile, ids map[string]bool) (err error) {
 	dir, err := os.ReadDir(p)
 	if err != nil {
 		return
@@ -169,7 +175,7 @@ func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
 			}
 
 			parent := &DocFile{ID: entry.Name()}
-			(*ids)[parent.ID] = true
+			ids[parent.ID] = true
 			docFile.Children = append(docFile.Children, parent)
 
 			subPath := filepath.Join(p, entry.Name())
@@ -178,10 +184,10 @@ func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
 			}
 		} else {
 			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
-			if !(*ids)[doc.ID] {
+			if !ids[doc.ID] {
 				docFile.Children = append(docFile.Children, doc)
 			}
-			(*ids)[doc.ID] = true
+			ids[doc.ID] = true
 		}
 	}
 	return
@@ -219,13 +225,6 @@ func removeIndexes(c *gin.Context) {
 		paths = append(paths, p.(string))
 	}
 	model.RemoveIndexes(paths)
-}
-
-func refreshFiletree(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	model.FullReindex()
 }
 
 func doc2Heading(c *gin.Context) {
@@ -548,15 +547,26 @@ func moveDocsByID(c *gin.Context) {
 	}
 	fromPaths = gulu.Str.RemoveDuplicatedElem(fromPaths)
 
+	var box *model.Box
 	toTree, err := model.LoadTreeByBlockID(toID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
+		box = model.Conf.Box(toID)
+		if nil == box {
+			ret.Code = -1
+			ret.Msg = "can't found box or tree by id [" + toID + "]"
+			ret.Data = map[string]interface{}{"closeTimeout": 7000}
+			return
+		}
 	}
-	toNotebook := toTree.Box
-	toPath := toTree.Path
+
+	var toNotebook, toPath string
+	if nil != toTree {
+		toNotebook = toTree.Box
+		toPath = toTree.Path
+	} else if nil != box {
+		toNotebook = box.ID
+		toPath = "/"
+	}
 	callback := arg["callback"]
 	err = model.MoveDocs(fromPaths, toNotebook, toPath, callback)
 	if err != nil {
@@ -1024,8 +1034,16 @@ func searchDocs(c *gin.Context) {
 		flashcard = arg["flashcard"].(bool)
 	}
 
+	var excludeIDs []string
+	if arg["excludeIDs"] != nil {
+		excludeIDsArg := arg["excludeIDs"].([]interface{})
+		for _, excludeID := range excludeIDsArg {
+			excludeIDs = append(excludeIDs, excludeID.(string))
+		}
+	}
+
 	k := arg["k"].(string)
-	ret.Data = model.SearchDocsByKeyword(k, flashcard)
+	ret.Data = model.SearchDocs(k, flashcard, excludeIDs)
 }
 
 func listDocsByPath(c *gin.Context) {
@@ -1071,7 +1089,11 @@ func listDocsByPath(c *gin.Context) {
 		// API `listDocsByPath` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/10290
 		ignoreMaxListHintArg := arg["ignoreMaxListHint"]
 		if nil == ignoreMaxListHintArg || !ignoreMaxListHintArg.(bool) {
-			util.PushMsg(fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			var app string
+			if nil != arg["app"] {
+				app = arg["app"].(string)
+			}
+			util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
 		}
 	}
 

@@ -82,12 +82,18 @@ type AppConf struct {
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
 	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
+	CookieKey      string           `json:"cookieKey"`      // 用于加密 Cookie 的密钥
 
-	m *sync.Mutex
+	m        *sync.RWMutex // 配置数据锁
+	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
 }
 
 func NewAppConf() *AppConf {
-	return &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
+	return &AppConf{
+		LogLevel: "debug",
+		m:        &sync.RWMutex{},
+		userLock: &sync.RWMutex{},
+	}
 }
 
 func (conf *AppConf) GetUILayout() *conf.UILayout {
@@ -103,14 +109,14 @@ func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
 }
 
 func (conf *AppConf) GetUser() *conf.User {
-	conf.m.Lock()
-	defer conf.m.Unlock()
+	conf.userLock.RLock()
+	defer conf.userLock.RUnlock()
 	return conf.User
 }
 
 func (conf *AppConf) SetUser(user *conf.User) {
-	conf.m.Lock()
-	defer conf.m.Unlock()
+	conf.userLock.Lock()
+	defer conf.userLock.Unlock()
 	conf.User = user
 }
 
@@ -203,6 +209,10 @@ func InitConf() {
 	if "" == Conf.Appearance.CodeBlockThemeLight {
 		Conf.Appearance.CodeBlockThemeLight = "github"
 	}
+	if nil == Conf.Appearance.StatusBar {
+		Conf.Appearance.StatusBar = &util.StatusBar{}
+	}
+	util.StatusBarCfg = Conf.Appearance.StatusBar
 	if nil == Conf.FileTree {
 		Conf.FileTree = conf.NewFileTree()
 	}
@@ -218,6 +228,20 @@ func InitConf() {
 	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
 	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
+	if 2 > Conf.FileTree.LargeFileWarningSize {
+		Conf.FileTree.LargeFileWarningSize = 8
+	}
+	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
+	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
+		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
+	}
+
+	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
+	}
+	if conf.MaxFileTreeRecentDocsListCount < Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
+	}
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 
@@ -225,8 +249,17 @@ func InitConf() {
 		Conf.Tag = conf.NewTag()
 	}
 
+	defaultEditor := conf.NewEditor()
 	if nil == Conf.Editor {
-		Conf.Editor = conf.NewEditor()
+		Conf.Editor = defaultEditor
+	}
+
+	// 新增字段的默认值，使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
+	if nil == Conf.Editor.BacklinkSort {
+		Conf.Editor.BacklinkSort = defaultEditor.BacklinkSort
+	}
+	if nil == Conf.Editor.BackmentionSort {
+		Conf.Editor.BackmentionSort = defaultEditor.BackmentionSort
 	}
 	if 1 > len(Conf.Editor.Emoji) {
 		Conf.Editor.Emoji = []string{}
@@ -256,8 +289,14 @@ func InitConf() {
 	if 1 > Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 30
 	}
+	if 3650 < Conf.Editor.HistoryRetentionDays {
+		Conf.Editor.HistoryRetentionDays = 3650
+	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
+	}
+	if 1 > len(Conf.Editor.SpellcheckLanguages) {
+		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
 	}
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0
@@ -451,6 +490,33 @@ func InitConf() {
 	if "" == Conf.Flashcard.Weights {
 		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
 	}
+	if 19 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights length must be [19]"
+		logging.LogWarnf("%s , given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
+	}
+	isInvalidFlashcardWeights := false
+	for _, w := range strings.Split(Conf.Flashcard.Weights, ",") {
+		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
+			isInvalidFlashcardWeights = true
+			break
+		}
+	}
+	if isInvalidFlashcardWeights {
+		defaultWeights := conf.DefaultFSRSWeights()
+		msg := "fsrs store weights contain invalid number"
+		logging.LogWarnf("%s, given [%s], reset to default weights [%s]", msg, Conf.Flashcard.Weights, defaultWeights)
+		Conf.Flashcard.Weights = defaultWeights
+		go func() {
+			util.WaitForUILoaded()
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushErrMsg, msg, 15000)
+		}()
+	}
 
 	if nil == Conf.AI {
 		Conf.AI = conf.NewAI()
@@ -521,6 +587,15 @@ func InitConf() {
 
 	Conf.DataIndexState = 0
 
+	if cookieKey := readCookieKey(); "" != cookieKey {
+		Conf.CookieKey = cookieKey
+	} else {
+		if "" == Conf.CookieKey {
+			Conf.CookieKey = gulu.Rand.String(16)
+		}
+		writeCookieKey(Conf.CookieKey)
+	}
+
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)
 
@@ -528,6 +603,33 @@ func InitConf() {
 
 	go util.InitPandoc()
 	go util.InitTesseract()
+}
+
+func readCookieKey() (cookieKey string) {
+	cookieKeyPath := filepath.Join(util.HomeDir, ".config", "siyuan", "cookie.key")
+	if !gulu.File.IsExist(cookieKeyPath) {
+		return
+	}
+
+	data, err := os.ReadFile(cookieKeyPath)
+	if err != nil {
+		logging.LogErrorf("read cookie key file [%s] failed: %s", cookieKeyPath, err)
+		return
+	}
+
+	cookieKey = string(bytes.TrimSpace(data))
+	return
+}
+
+func writeCookieKey(cookieKey string) {
+	cookieKeyPath := filepath.Join(util.HomeDir, ".config", "siyuan", "cookie.key")
+	if gulu.File.IsExist(cookieKeyPath) {
+		return
+	}
+
+	if err := os.WriteFile(cookieKeyPath, []byte(cookieKey), 0644); err != nil {
+		logging.LogErrorf("save cookie key file [%s] failed: %s", cookieKeyPath, err)
+	}
 }
 
 func initLang() {
@@ -641,6 +743,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false
+	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
 			waitSecondForExecInstallPkg = true
@@ -689,8 +792,18 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		logging.LogInfof("exited kernel")
-		util.WebSocketServer.Close()
+		if nil != util.WebSocketServer {
+			util.WebSocketServer.Close()
+		}
+		if nil != util.HttpServer {
+			util.HttpServer.Close()
+		}
 		util.HttpServing = false
+
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+			return
+		}
+
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return
@@ -1000,13 +1113,11 @@ func clearCorruptedNotebooks() {
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
-	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
+	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
@@ -1056,7 +1167,9 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.DataDir, ".siyuan", "history"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "backup"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "sync"))
-	os.RemoveAll(filepath.Join(util.DataDir, "%")) // v3.0.6 生成的错误历史文件夹
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
+	os.RemoveAll(filepath.Join(util.DataDir, "%"))                 // v3.0.6 生成的错误历史文件夹
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	logging.LogInfof("cleared workspace temp")
 }
@@ -1122,6 +1235,7 @@ func closeUserGuide() {
 
 		unindex(boxID)
 
+		sql.FlushQueue()
 		if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
 			logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
 		}

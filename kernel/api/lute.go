@@ -79,7 +79,7 @@ func html2BlockDOM(c *gin.Context) {
 	dom := arg["dom"].(string)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
-	luteEngine.SetHTML2MarkdownAttrs([]string{"name", "alias", "memo", "bookmark", "custom-*"})
+	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
 	markdown, withMath, err := model.HTML2Markdown(dom, luteEngine)
 	if err != nil {
 		ret.Data = "Failed to convert"
@@ -189,7 +189,7 @@ func html2BlockDOM(c *gin.Context) {
 	parse.TextMarks2Inlines(tree) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(tree, false)
 
-	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	output := renderer.Render()
 	ret.Data = gulu.Str.FromBytes(output)
 }

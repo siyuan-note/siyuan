@@ -31,6 +31,7 @@
         content: '';
         position: absolute;
         background-color: var(--b3-theme-primary-lighter);
+        pointer-events: none;
       }
 
       &__top::after,
@@ -86,16 +87,16 @@
       & > div {
         padding-left: 100%;
         position: relative;
-        height: 26px;
+        min-height: 1.625em;
 
         &::after {
           position: absolute;
           content: " ";
-          height: 1px;
+          height: calc(1em / 16);
           background-color: var(--b3-theme-background-light);
           width: calc(100% - 1px);
           left: 0;
-          top: 13px;
+          top: calc(1.625em / 2);
         }
       }
     }
@@ -236,6 +237,13 @@
         &--order::after {
           border-radius: var(--b3-border-radius);
         }
+      }
+
+      & > div[fold="1"][data-type="NodeHeading"]::before {
+        left: -6px;
+        height: 7px;
+        width: 7px;
+        margin-top: -4px;
       }
     }
 
@@ -508,14 +516,11 @@
     &.iframe {
       // https://ld246.com/article/1644827326901
       // https://github.com/siyuan-note/siyuan/issues/4172
-      &[data-type="NodeWidget"] .iframe-content,
-      &[data-type="NodeIFrame"] .iframe-content {
-        -webkit-user-modify: read-only;
-      }
-
-      .iframe-content {
-        display: inline-block;
-        position: relative;
+      &[data-type="NodeWidget"],
+      &[data-type="NodeIFrame"] {
+        .iframe-content {
+          -webkit-user-modify: read-only;
+        }
       }
 
       &--drag {
@@ -604,10 +609,20 @@
   &--attr .protyle-attr {
     opacity: 1;
 
-    & > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
-      cursor: pointer;
-      @include mixin.text-clamp(1);
-      max-width: 25vw;
+    & > div {
+      &.protyle-attr--memo {
+        cursor: pointer;
+      }
+
+      &:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
+        cursor: pointer;
+        @include mixin.text-clamp(1);
+        max-width: 25vw;
+      }
+    }
+
+    .b3-tooltips::after {
+      max-width: var(--b3-width-protyle-wysiwyg);
     }
   }
 
@@ -625,16 +640,21 @@
 
   div[fold="1"][data-type="NodeHeading"]::before {
     content: "";
-    height: 16px !important;
+    height: 16px;
     width: 16px;
     background: var(--b3-theme-surface-lighter);
     display: block;
     position: absolute;
-    left: -18px !important;
-    top: 50% !important;
+    left: -18px;
+    top: 50%;
     border-radius: var(--b3-border-radius-b);
     margin-top: -8px;
     border-left: 0 !important;
+  }
+
+  .bq > div[fold="1"][data-type="NodeHeading"]::before,
+  .callout-content > div[fold="1"][data-type="NodeHeading"]::before {
+    left: -26px;
   }
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
@@ -703,8 +723,8 @@
   }
 }
 
-// 只读情况下列表前的圆点需要可以点击进行缩放
 .protyle .protyle-wysiwyg {
+  // 只读情况下列表前的圆点需要可以点击进行缩放
   .li[data-subtype="o"] > .protyle-action,
   .li[data-subtype="u"] > .protyle-action,
   &[data-readonly="false"] .li[data-subtype="t"] > .protyle-action {
@@ -717,6 +737,11 @@
 
       color: var(--b3-theme-on-background);
     }
+  }
+
+  // 复制粘贴序号会状态异常 https://ld246.com/article/1762691143057
+  .li > .protyle-action {
+    user-select: none;
   }
 }
 
@@ -768,6 +793,23 @@
   .protyle-wysiwyg__embed .img:hover .protyle-action__drag,
   .protyle-wysiwyg__embed .iframe:hover .protyle-action__drag {
     display: none;
+  }
+
+  .callout-icon {
+    cursor: pointer;
+    transition: var(--b3-background-transition);
+
+    &:hover {
+      background-color: var(--b3-list-hover);
+    }
+  }
+
+  .callout-title {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 

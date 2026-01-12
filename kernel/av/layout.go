@@ -81,6 +81,9 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 	case LayoutTypeGallery:
 		showIcon = view.Gallery.ShowIcon
 		wrapField = view.Gallery.WrapField
+	case LayoutTypeKanban:
+		showIcon = view.Kanban.ShowIcon
+		wrapField = view.Kanban.WrapField
 	}
 	return &BaseInstance{
 		ID:               view.ID,
@@ -156,6 +159,8 @@ type BaseInstanceField struct {
 	Relation     *Relation       `json:"relation,omitempty"` // 关联字段
 	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总字段
 	Date         *Date           `json:"date,omitempty"`     // 日期设置
+	Created      *Created        `json:"created,omitempty"`  // 创建时间设置
+	Updated      *Updated        `json:"updated,omitempty"`  // 更新时间设置
 }
 
 func (baseInstanceField *BaseInstanceField) GetID() string {

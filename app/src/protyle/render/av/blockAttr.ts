@@ -4,7 +4,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {unicode2Emoji} from "../../../emoji";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
@@ -20,6 +20,7 @@ import {getCompressURL} from "../../../util/image";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
+    const dataValue: IAVCellDateValue = value[value.type as "date"];
     switch (value.type) {
         case "block":
             if (value?.isDetached) {
@@ -35,11 +36,17 @@ const genAVRollupHTML = (value: IAVCellValue) => {
             html = value.number.formattedContent || value.number.content.toString();
             break;
         case "date":
-            if (value[value.type] && value[value.type].isNotEmpty) {
-                html = dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
-            }
-            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
-                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+        case "updated":
+        case "created":
+            if (dataValue.formattedContent) {
+                html = dataValue.formattedContent;
+            } else {
+                if (dataValue && dataValue.isNotEmpty) {
+                    html = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+                }
+                if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+                    html = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+                }
             }
             if (html) {
                 html = `<span class="av__celltext">${html}</span>`;
@@ -127,12 +134,14 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a ${value.email.content ? `href="mailto:${value.email.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
         case "relation":
-            value?.relation?.contents?.forEach((item) => {
+            value?.relation?.contents?.forEach((item, index) => {
                 if (item && item.block) {
+                    const rowID = value.relation.blockIDs[index];
                     if (item?.isDetached) {
-                        html += `<span class="av__cell--relation"><span>➖ </span><span class="av__celltext">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                        html += `<span data-row-id="${rowID}" class="av__cell--relation"><span>➖<span class="fn__space--5"></span></span><span class="av__celltext">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                     } else {
-                        html += `<span class="av__cell--relation"><span data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)} </span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                        // data-block-id 用于更新 emoji
+                        html += `<span data-row-id="${rowID}" class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                     }
                 }
             });
@@ -210,7 +219,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
 
             if (element.innerHTML) {
                 // 防止 blockElement 找不到
-                element.querySelector(`.av[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
+                element.querySelector(`[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
             }
         });
         if (element.innerHTML === "") {
@@ -266,9 +275,12 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
                         if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                            const files: string[] = [];
+                            const files: ILocalFiles[] = [];
                             for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                                files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                                files.push({
+                                    path: webUtils.getPathForFile(event.dataTransfer.files[i]),
+                                    size: event.dataTransfer.files[i].size
+                                });
                             }
                             dragUpload(files, protyle, cellElement);
                         }
@@ -431,7 +443,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 fetchPost("/api/av/setAttributeViewBlockAttr", {
                     avID: item.parentElement.dataset.avId,
                     keyID: item.parentElement.dataset.colId,
-                    rowID: item.parentElement.dataset.rowId,
+                    itemID: item.parentElement.dataset.rowId,
                     value
                 }, (setResponse) => {
                     if (type === "number") {
@@ -456,7 +468,20 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     }
     while (target && element !== target) {
         const type = target.getAttribute("data-type");
-        if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
+        if (target.classList.contains("b3-menu__avemoji")) {
+            const rect = target.getBoundingClientRect();
+            openEmojiPanel(target.nextElementSibling.getAttribute("data-id"), "doc", {
+                x: rect.left,
+                y: rect.bottom,
+                h: rect.height,
+                w: rect.width,
+            }, (unicode) => {
+                target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+            }, target.querySelector("img"));
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
             if (event.type === "contextmenu" || (!target.dataset.url && target.tagName !== "IMG")) {
                 let index = 0;
                 Array.from(target.parentElement.children).find((item, i) => {
@@ -550,4 +575,8 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
         }
         target = target.parentElement;
     }
+};
+
+export const isCustomAttr = (cellElement: Element) => {
+    return !!cellElement.getAttribute("data-av-id");
 };

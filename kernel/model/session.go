@@ -120,7 +120,9 @@ func LoginAuth(c *gin.Context) {
 
 		if err := session.Save(c); err != nil {
 			logging.LogErrorf("save session failed: " + err.Error())
-			c.Status(http.StatusInternalServerError)
+			session.Clear(c)
+			ret.Code = 1
+			ret.Msg = Conf.Language(258)
 			return
 		}
 		return
@@ -181,7 +183,7 @@ func GetCaptcha(c *gin.Context) {
 }
 
 func CheckReadonly(c *gin.Context) {
-	if util.ReadOnly {
+	if util.ReadOnly || IsReadOnlyRole(GetGinContextRole(c)) {
 		result := util.NewResult()
 		result.Code = -1
 		result.Msg = Conf.Language(34)

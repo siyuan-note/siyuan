@@ -131,6 +131,15 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <input class="b3-switch fn__flex-center" data-type="blockquote" type="checkbox"${config.types.blockquote ? " checked" : ""}>
     </label>
     <label class="fn__flex b3-label">
+        <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconCallout"></use></svg>
+        <span class="fn__space"></span>
+        <div class="fn__flex-1 fn__flex-center">
+            ${window.siyuan.languages.callout} <sup>[1]</sup>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" data-type="callout" type="checkbox"${config.types.callout ? " checked" : ""}>
+    </label>
+    <label class="fn__flex b3-label">
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconSuper"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
@@ -188,6 +197,8 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             config.types[item.getAttribute("data-type") as keyof (typeof config.types)] = item.checked;
         });
         cb();
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
 };
@@ -223,18 +234,20 @@ export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             config.replaceTypes[item.getAttribute("data-type") as keyof (typeof config.replaceTypes)] = item.checked;
         });
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
 };
 
 export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMethod") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_SEARCH_METHOD) {
         window.siyuan.menus.menu.remove();
         return;
     }
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMethod");
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_SEARCH_METHOD);
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconExact",
         label: window.siyuan.languages.keyword,
@@ -406,12 +419,12 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                                removeCriterion: () => void,
                                layoutMenu?: () => void) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-        window.siyuan.menus.menu.element.getAttribute("data-name") === "searchMore") {
+        window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_SEARCH_MORE) {
         window.siyuan.menus.menu.remove();
         return;
     }
     window.siyuan.menus.menu.remove();
-    window.siyuan.menus.menu.element.setAttribute("data-name", "searchMore");
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_SEARCH_MORE);
     /// #if MOBILE
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
@@ -442,7 +455,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
         label: window.siyuan.languages.searchMethod,
         type: "submenu",
         submenu: [{
-            iconHTML: "",
+            icon: "iconExact",
             label: window.siyuan.languages.keyword,
             current: config.method === 0,
             click() {
@@ -451,7 +464,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconQuote",
             label: window.siyuan.languages.querySyntax,
             current: config.method === 1,
             click() {
@@ -460,7 +473,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconDatabase",
             label: "SQL",
             current: config.method === 2,
             click() {
@@ -469,7 +482,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
                 updateSearchResult(config, element, true);
             }
         }, {
-            iconHTML: "",
+            icon: "iconRegex",
             label: window.siyuan.languages.regex,
             current: config.method === 3,
             click() {

@@ -69,8 +69,8 @@ func queryBlockHashes(rootID string) (ret map[string]string) {
 	return
 }
 
-func QueryRootBlockByCondition(condition string) (ret []*Block) {
-	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition + " ORDER BY box DESC,lv ASC LIMIT 128"
+func QueryRootBlockByCondition(condition string, limit int) (ret []*Block) {
+	sqlStmt := "SELECT *, length(hpath) - length(replace(hpath, '/', '')) AS lv FROM blocks WHERE type = 'd' AND " + condition + " ORDER BY box DESC,lv ASC LIMIT " + strconv.Itoa(limit)
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -379,6 +379,7 @@ func QueryNoLimit(stmt string) (ret []map[string]interface{}, err error) {
 }
 
 func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
+	originalStmt := stmt
 	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
 	// 这里为了支持 || 操作符，使用了另一个 sql 解析器，但是这个解析器无法处理 UNION https://github.com/siyuan-note/siyuan/issues/8226
 	// 考虑到 UNION 的使用场景不多，这里还是以支持 || 操作符为主
@@ -426,8 +427,11 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 	ret = []map[string]interface{}{}
 	rows, err := query(stmt)
 	if err != nil {
-		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
-		return
+		rows, err = query(originalStmt + " LIMIT " + strconv.Itoa(limit))
+		if err != nil {
+			logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
+			return
+		}
 	}
 	defer rows.Close()
 
@@ -598,6 +602,38 @@ func SelectBlocksRawStmt(stmt string, page, limit int) (ret []*Block) {
 		}
 
 		stmt = sqlparser.String(slct)
+	case *sqlparser.Union:
+		union := parsedStmt.(*sqlparser.Union)
+		if nil == union.Limit {
+			union.Limit = &sqlparser.Limit{
+				Rowcount: &sqlparser.SQLVal{
+					Type: sqlparser.IntVal,
+					Val:  []byte(strconv.Itoa(limit)),
+				},
+			}
+			union.Limit.Offset = &sqlparser.SQLVal{
+				Type: sqlparser.IntVal,
+				Val:  []byte(strconv.Itoa((page - 1) * limit)),
+			}
+		} else {
+			if nil != union.Limit.Rowcount && 0 < len(union.Limit.Rowcount.(*sqlparser.SQLVal).Val) {
+				limit, _ = strconv.Atoi(string(union.Limit.Rowcount.(*sqlparser.SQLVal).Val))
+				if 0 >= limit {
+					limit = 32
+				}
+			}
+
+			union.Limit.Rowcount = &sqlparser.SQLVal{
+				Type: sqlparser.IntVal,
+				Val:  []byte(strconv.Itoa(limit)),
+			}
+			union.Limit.Offset = &sqlparser.SQLVal{
+				Type: sqlparser.IntVal,
+				Val:  []byte(strconv.Itoa((page - 1) * limit)),
+			}
+		}
+
+		stmt = sqlparser.String(union)
 	default:
 		return
 	}

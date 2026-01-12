@@ -6,17 +6,17 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition, setLastNodeRange
+    getSelectionPosition,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath, newFile} from "../../util/newFile";
-import {upDownHint} from "../../util/upDownHint";
+import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
-import {assetMenu, imgMenu} from "../../menus/protyle";
+import {assetMenu, imgMenu, setFold} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
@@ -38,7 +38,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {processRender} from "../util/processCode";
 import {AIChat} from "../../ai/chat";
 import {isMobile} from "../../util/functions";
-import {isIPhone, isNotCtrl, isOnlyMeta} from "../util/compatibility";
+import {isNotCtrl, isOnlyMeta} from "../util/compatibility";
 import {avRender} from "../render/av/render";
 import {genIconHTML} from "../render/util";
 import {updateAttrViewCellAnimation} from "../render/av/action";
@@ -209,8 +209,24 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         if (this.element.classList.contains("fn__none")) {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
-            const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
-            setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+            if (this.source === "av") {
+                const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+                if (cellElement) {
+                    /// #if !MOBILE
+                    const cellRect = cellElement.getBoundingClientRect();
+                    setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
+                    /// #else
+                    setPosition(this.element, 0, 0);
+                    /// #endif
+                }
+            } else {
+                /// #if !MOBILE
+                const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+                setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+                /// #else
+                setPosition(this.element, 0, 0);
+                /// #endif
+            }
         } else {
             this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
         }
@@ -290,6 +306,12 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             /// #endif
         }
         this.element.scrollTop = 0;
+        let currentHintElement = this.element.querySelector(".b3-list-item--focus") as HTMLElement;
+        while (isAbnormalItem(currentHintElement, "b3-list-item")) {
+            currentHintElement.classList.remove("b3-list-item--focus");
+            currentHintElement = currentHintElement.nextElementSibling as HTMLElement;
+            currentHintElement?.classList.add("b3-list-item--focus");
+        }
         this.bindUploadEvent(protyle, this.element);
         if (this.source !== "hint") {
             const searchElement = this.element.querySelector("input.b3-text-field") as HTMLInputElement;
@@ -542,9 +564,7 @@ ${genHintItemHTML(item)}
 
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
-            if (isIPhone()) {
-                focusByRange(range);
-            }
+            focusByRange(range);
         }
         // 新建文件
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newFile ") && value.endsWith(`${Lute.Caret}'))`)) {
@@ -559,16 +579,12 @@ ${genHintItemHTML(item)}
                 }, response => {
                     // https://github.com/siyuan-note/siyuan/issues/10133
                     protyle.toolbar.range = range;
-                    protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                    const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
-                    if (protyle.toolbar.range.endContainer.nodeType === 1 &&
-                        protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
-                        const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
-                        if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
-                            setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
-                        }
+                    if (refElement[0]) {
+                        protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
                     }
                     protyle.toolbar.range.collapse(false);
                 });
@@ -600,16 +616,12 @@ ${genHintItemHTML(item)}
                     tempElement.innerText = dynamicTexts[1];
                 }
             }
-            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+            const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
             });
-            if (protyle.toolbar.range.endContainer.nodeType === 1 &&
-                protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
-                const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
-                if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
-                    setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
-                }
+            if (refElement[0]) {
+                protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
             }
             protyle.toolbar.range.collapse(false);
             return;
@@ -727,7 +739,7 @@ ${genHintItemHTML(item)}
                 focusByRange(range);
                 this.genEmojiHTML(protyle);
                 return;
-            } else if (value.indexOf("style") > -1) {
+            } else if (value.startsWith("style")) {
                 range.deleteContents();
                 this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
@@ -809,8 +821,13 @@ ${genHintItemHTML(item)}
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
-                    nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const oldHTML = nodeElement.outerHTML;
+                    let foldData;
+                    if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+                        nodeElement.getAttribute("fold") === "1") {
+                        foldData = setFold(protyle, nodeElement, true, false, false, true);
+                    }
+                    nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);
                     nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${newId}"]`);
                     // https://github.com/siyuan-note/siyuan/issues/6864
@@ -819,7 +836,7 @@ ${genHintItemHTML(item)}
                             item.style.minWidth = "60px";
                         });
                     }
-                    transaction(protyle, [{
+                    const doOperations: IOperation[] = [{
                         data: oldHTML,
                         id,
                         action: "update"
@@ -828,14 +845,20 @@ ${genHintItemHTML(item)}
                         id: newId,
                         previousID: id,
                         action: "insert"
-                    }], [{
+                    }];
+                    const undoOperations: IOperation[] = [{
                         id: newId,
                         action: "delete"
                     }, {
                         data: html,
                         id,
                         action: "update"
-                    }]);
+                    }];
+                    if (foldData) {
+                        doOperations.push(...foldData.doOperations);
+                        undoOperations.push(...foldData.undoOperations);
+                    }
+                    transaction(protyle, doOperations, undoOperations);
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && (value.length > 3 || nodeElement.classList.contains("render-node")))) {
                     protyle.toolbar.showRender(protyle, nodeElement);
@@ -858,7 +881,11 @@ ${genHintItemHTML(item)}
                     focusBlock(nodeElement);
                 } else if (nodeElement.classList.contains("av")) {
                     avRender(nodeElement, protyle, () => {
-                        (nodeElement.querySelector(".av__title") as HTMLInputElement).focus();
+                        const titleHTMLElement = nodeElement.querySelector(".av__title") as HTMLInputElement;
+                        titleHTMLElement.focus();
+                        range.setStart(titleHTMLElement, 0);
+                        range.collapse(true);
+                        focusByRange(range);
                     });
                 } else {
                     focusByWbr(nodeElement, range);

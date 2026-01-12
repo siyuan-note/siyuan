@@ -1,6 +1,6 @@
 import {focusByWbr, getEditorRange} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
+import {getContenteditableElement, getParentBlock, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
@@ -22,7 +22,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
-    let parentID = nodeElement.parentElement.getAttribute("data-node-id");
+    let parentID = getParentBlock(nodeElement)?.getAttribute("data-node-id");
     // 缩放和反链需要接口获取
     if (!previousId && !parentID) {
         if (protyle.block.showAll || protyle.options.backlinkData) {
@@ -50,11 +50,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
-            // 超级块中的 html 块需要反转义再赋值 https://github.com/siyuan-note/siyuan/issues/13155
-            nodeElement.querySelectorAll("protyle-html").forEach(item => {
-                item.setAttribute("data-content", item.getAttribute("data-content").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
-            });
-            nodeElement.outerHTML = nodeElement.innerHTML;
+            nodeElement.replaceWith(...nodeElement.children);
             if (range) {
                 focusByWbr(protyle.wysiwyg.element, range);
             }
@@ -136,7 +132,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             // https://github.com/siyuan-note/siyuan/issues/14720#issuecomment-2840665326
             if (blockElement.classList.contains("list")) {
                 blockElement = hasClosestByClassName(range.startContainer, "li") as HTMLElement;
-            } else if (blockElement.classList.contains("bq")) {
+            } else if (blockElement.classList.contains("bq") || blockElement.classList.contains("callout")) {
                 blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             }
         }
@@ -150,7 +146,16 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
     if (blockElement.getAttribute("data-type") === "NodeListItem") {
         newElement = genListItemElement(blockElement, 0, true) as HTMLDivElement;
         orderIndex = parseInt(blockElement.parentElement.firstElementChild.getAttribute("data-marker"));
+    } else if (position === "beforebegin" && blockElement.previousElementSibling &&
+        blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
+        blockElement.previousElementSibling.getAttribute("fold") === "1") {
+        newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+    } else if (position === "afterend" && blockElement &&
+        blockElement.getAttribute("data-type") === "NodeHeading" &&
+        blockElement.getAttribute("fold") === "1") {
+        newElement = genHeadingElement(blockElement, false, true) as HTMLDivElement;
     }
+
     const parentOldHTML = blockElement.parentElement.outerHTML;
     const newId = newElement.getAttribute("data-node-id");
     blockElement.insertAdjacentElement(position, newElement);
@@ -186,7 +191,8 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             protyle,
             selectsElement: position === "afterend" ? [blockElement, blockElement.nextElementSibling] : [blockElement.previousElementSibling, blockElement],
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     focusByWbr(protyle.wysiwyg.element, range);
@@ -214,6 +220,17 @@ export const genEmptyElement = (zwsp = true, wbr = true, id?: string) => {
     element.classList.add("p");
     element.innerHTML = `<div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}">${zwsp ? Constants.ZWSP : ""}${wbr ? "<wbr>" : ""}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     return element;
+};
+
+export const genHeadingElement = (headElement: Element, getHTML = false, addWbr = false) => {
+    const html = `<div data-subtype="${headElement.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeHeading" class="${headElement.className}"><div contenteditable="true" spellcheck="false">${addWbr ? "<wbr>" : ""}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+    if (getHTML) {
+        return html;
+    } else {
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = html;
+        return tempElement.content.firstElementChild;
+    }
 };
 
 export const getLangByType = (type: string) => {

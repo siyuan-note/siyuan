@@ -67,9 +67,11 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             !protyle.wysiwyg.element.firstElementChild) {
             return;
         }
-
-        if (protyle.scroll.lastScrollTop - element.scrollTop > 0) {
-            // up
+        if (protyle.scroll.lastScrollTop > element.scrollTop) {
+            if (element.scrollTop === 0) {
+                // 使用鼠标拖拽滚动条中无法准确获取 scrollTop，在此忽略
+                return;
+            }
             if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
                 // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
@@ -93,6 +95,11 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         } else if ((element.scrollTop > element.scrollHeight - element.clientHeight * 1.8) &&
             protyle.wysiwyg.element.lastElementChild &&
             protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
+            if (protyle.scroll.lastScrollTop > 768 && element.scrollTop > protyle.scroll.lastScrollTop * 2) {
+                // 使用鼠标拖拽滚动条时导致加载需进行矫正
+                element.scrollTop = protyle.scroll.lastScrollTop;
+                return;
+            }
             protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
             fetchPost("/api/filetree/getDoc", {
                 id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),

@@ -7,6 +7,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {disabledForeverProtyle, disabledProtyle} from "../util/onGet";
 import {avRender} from "../render/av/render";
+import {hasClosestByAttribute} from "../util/hasClosest";
 
 export const renderBacklink = (protyle: IProtyle, backlinkData: {
     blockPaths: IBreadcrumb[],
@@ -129,9 +130,10 @@ export const improveBreadcrumbAppearance = (element: HTMLElement) => {
             return;
         }
         let jump = false;
+        const isEmbed = hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed");
         while (item.scrollHeight > 30 && !jump && itemElements.length > 1) {
             itemElements.find((item, index) => {
-                if (index > 0) {
+                if (index > (isEmbed ? 0 : -1)) {
                     if (!item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
                         item.classList.add("protyle-breadcrumb__text--ellipsis");
                         return true;

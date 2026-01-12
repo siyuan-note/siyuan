@@ -11,7 +11,7 @@ module.exports = (env, argv) => {
     return {
         mode: argv.mode || "development",
         watch: argv.mode !== "production",
-        devtool: argv.mode !== "production" ? "cheap-source-map" : false,
+        devtool: argv.mode !== "production" ? "eval-source-map" : false,
         output: {
             // 不能使用 auto，否则 ios 导出图片获取不到 css。 https://github.com/siyuan-note/siyuan/issues/8532
             publicPath: "/stage/build/mobile/",

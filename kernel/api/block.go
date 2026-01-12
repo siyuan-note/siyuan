@@ -28,6 +28,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -189,6 +190,20 @@ func getHeadingChildrenIDs(c *gin.Context) {
 	ret.Data = ids
 }
 
+func appendHeadingChildren(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	childrenDOM := arg["childrenDOM"].(string)
+	model.AppendHeadingChildren(id, childrenDOM)
+}
+
 func getHeadingChildrenDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -199,7 +214,11 @@ func getHeadingChildrenDOM(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	dom := model.GetHeadingChildrenDOM(id)
+	removeFoldAttr := true
+	if nil != arg["removeFoldAttr"] {
+		removeFoldAttr = arg["removeFoldAttr"].(bool)
+	}
+	dom := model.GetHeadingChildrenDOM(id, removeFoldAttr)
 	ret.Data = dom
 }
 
@@ -215,6 +234,28 @@ func getHeadingDeleteTransaction(c *gin.Context) {
 	id := arg["id"].(string)
 
 	transaction, err := model.GetHeadingDeleteTransaction(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	ret.Data = transaction
+}
+
+func getHeadingInsertTransaction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+
+	transaction, err := model.GetHeadingInsertTransaction(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -620,6 +661,10 @@ func getBlockInfo(c *gin.Context) {
 		ret.Code = 3
 		ret.Msg = model.Conf.Language(56)
 		return
+	} else if errors.Is(err, treenode.ErrSpecTooNew) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(275)
+		return
 	}
 
 	block, _ := model.GetBlock(id, tree)
@@ -698,6 +743,42 @@ func getBlockDOMs(c *gin.Context) {
 	ret.Data = doms
 }
 
+func getBlockDOMWithEmbed(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	dom := model.GetBlockDOMWithEmbed(id)
+	ret.Data = map[string]string{
+		"id":  id,
+		"dom": dom,
+	}
+}
+
+func getBlockDOMsWithEmbed(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+
+	doms := model.GetBlockDOMsWithEmbed(ids)
+	ret.Data = doms
+}
+
 func getBlockKramdown(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -730,6 +811,42 @@ func getBlockKramdown(c *gin.Context) {
 		"id":       id,
 		"kramdown": kramdown,
 	}
+}
+
+func getBlockKramdowns(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		idStr := id.(string)
+		// 验证 ID 格式，跳过无效的 ID
+		if !util.InvalidIDPattern(idStr, nil) {
+			ids = append(ids, idStr)
+		}
+	}
+
+	// md：Markdown 标记符模式，使用标记符导出
+	// textmark：文本标记模式，使用 span 标签导出
+	// https://github.com/siyuan-note/siyuan/issues/13183
+	mode := "md"
+	if modeArg := arg["mode"]; nil != modeArg {
+		mode = modeArg.(string)
+		if "md" != mode && "textmark" != mode {
+			ret.Code = -1
+			ret.Msg = "Invalid mode"
+			return
+		}
+	}
+
+	kramdowns := model.GetBlockKramdowns(ids, mode)
+	ret.Data = kramdowns
 }
 
 func getChildBlocks(c *gin.Context) {

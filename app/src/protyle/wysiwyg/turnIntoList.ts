@@ -18,6 +18,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
         } else if (contextStartIndex > 0 && contextStar2tIndex > 0) {
             contextStartIndex = Math.min(contextStartIndex, contextStar2tIndex);
         }
+        editElement.removeAttribute("placeholder");
         const isDone = editElement.innerHTML.substring(1, 2).toLowerCase() === "x";
         if (blockElement.parentElement.classList.contains("li") &&
             blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506

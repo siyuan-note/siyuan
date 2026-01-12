@@ -51,6 +51,13 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 	}
 	view.Sorts = tmpSorts
 
+	// 字段删除以后需要删除设置的分组
+	if nil != view.Group {
+		if k, _ := attrView.GetKey(view.Group.Field); nil == k {
+			view.Group = nil
+		}
+	}
+
 	// 订正视图类型
 	for i, v := range attrView.Views {
 		if av.LayoutTypeGallery == v.LayoutType && nil == v.Gallery {
@@ -94,9 +101,9 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 		}
 	}
 
+	attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
 	// 截断超长的数据库标题 Limit the database title to 512 characters https://github.com/siyuan-note/siyuan/issues/15459
 	if 512 < utf8.RuneCountInString(attrView.Name) {
-		attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
 		attrView.Name = gulu.Str.SubStr(attrView.Name, 512)
 		changed = true
 	}

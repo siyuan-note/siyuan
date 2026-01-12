@@ -20,6 +20,7 @@ import (
 	"github.com/88250/gulu"
 	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 )
 
 var WrongAuthCount int
@@ -36,6 +37,14 @@ type SessionData struct {
 type WorkspaceSession struct {
 	AccessAuthCode string
 	Captcha        string
+}
+
+func (sd *SessionData) Clear(c *gin.Context) {
+	session := ginSessions.Default(c)
+	session.Delete("data")
+	if err := session.Save(); err != nil {
+		logging.LogErrorf("clear session failed: %v", err)
+	}
 }
 
 // Save saves the current session of the specified context.

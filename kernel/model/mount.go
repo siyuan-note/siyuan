@@ -50,6 +50,13 @@ func CreateBox(name string) (id string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
+	boxes, _ := ListNotebooks()
+	for i, b := range boxes {
+		c := b.GetConf()
+		c.Sort = i + 1
+		b.SaveConf(c)
+	}
+
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)
@@ -196,6 +203,12 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			return
 		}
 
+		boxes, _ := ListNotebooks()
+		var sort int
+		if len(boxes) > 0 {
+			sort = boxes[0].Sort - 1
+		}
+
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
 		if err = filelock.Copy(p, localPath); err != nil {
 			return
@@ -211,6 +224,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		if box := Conf.Box(boxID); nil != box {
 			boxConf := box.GetConf()
 			boxConf.Closed = true
+			boxConf.Sort = sort
 			box.SaveConf(boxConf)
 		}
 
@@ -242,10 +256,11 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	boxConf.Closed = false
 	box.SaveConf(boxConf)
 
-	box.Index()
 	// 缓存根一级的文档树展开
-	ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
-	util.ClearPushProgress(100)
+	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	if 0 < len(files) {
+		box.Index()
+	}
 
 	if reMountGuide {
 		return true, nil

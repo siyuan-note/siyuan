@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/88250/gulu"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -35,9 +36,9 @@ func loadPetals(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
+	isPublish := model.IsReadOnlyRole(model.GetGinContextRole(c))
 
-	petals := model.LoadPetals(frontend)
-	ret.Data = petals
+	ret.Data = model.LoadPetals(frontend, isPublish)
 }
 
 func setPetalEnabled(c *gin.Context) {
@@ -60,4 +61,16 @@ func setPetalEnabled(c *gin.Context) {
 	}
 
 	ret.Data = data
+
+	var app string
+	if nil != arg["app"] {
+		app = arg["app"].(string)
+	}
+	if enabled {
+		upsertPluginCodeSet := hashset.New(packageName)
+		model.PushReloadPlugin(upsertPluginCodeSet, nil, nil, nil, app)
+	} else {
+		unloadPluginSet := hashset.New(packageName)
+		model.PushReloadPlugin(nil, nil, unloadPluginSet, nil, app)
+	}
 }

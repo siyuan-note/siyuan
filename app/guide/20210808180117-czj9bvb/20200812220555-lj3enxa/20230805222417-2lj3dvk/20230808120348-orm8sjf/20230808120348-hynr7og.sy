@@ -1,10 +1,11 @@
 {
 	"ID": "20230808120348-hynr7og",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230808120348-hynr7og",
 		"title": "收集箱",
+		"type": "doc",
 		"updated": "20231205211419"
 	},
 	"Children": [

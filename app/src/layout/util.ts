@@ -16,7 +16,6 @@ import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/s
 import {hideElements} from "../protyle/ui/hideElements";
 import {fetchPost} from "../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
-import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {Constants} from "../constants";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {Backlink} from "./dock/Backlink";
@@ -65,13 +64,6 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
                 return true;
             }
         });
-        const blockElement = hasClosestBlock(document.activeElement);
-        if (blockElement) {
-            const editElement = getContenteditableElement(blockElement) as HTMLElement;
-            if (editElement) {
-                editElement.blur();
-            }
-        }
     }
 };
 
@@ -151,7 +143,7 @@ const dockToJSON = (dock: Dock) => {
                 show: item.classList.contains("dock__item--active"),
                 icon: item.querySelector("use").getAttribute("xlink:href").substring(1),
                 hotkey: item.getAttribute("data-hotkey") || "",
-                hotkeyLangId: item.getAttribute("data-hotkeyLangId") || ""
+                hotkeyLangId: item.getAttribute("data-hotkeylangid") || ""
             });
         });
         return data;
@@ -578,7 +570,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
         json.blockId = layout.editor.protyle.block.id;
         json.rootId = layout.editor.protyle.block.rootID;
         json.mode = layout.editor.protyle.preview.element.classList.contains("fn__none") ? "wysiwyg" : "preview";
-        json.action = layout.editor.protyle.block.showAll ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
+        json.action = (layout.editor.protyle.block.showAll && layout.editor.protyle.block.id !== layout.editor.protyle.block.rootID) ? Constants.CB_GET_ALL : Constants.CB_GET_SCROLL;
         json.instance = "Editor";
     } else if (layout instanceof Asset) {
         json.path = layout.path;
@@ -723,6 +715,7 @@ export const resizeTopBar = () => {
     });
 };
 
+// TODO: 需支持所有页签类型，避免其他类型页签没有使用到而加载
 export const newModelByInitData = (app: App, tab: Tab, json: any) => {
     let model: Model;
     if (json.instance === "Custom") {
@@ -744,13 +737,21 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             });
         }
     } else if (json.instance === "Editor") {
+        if (json.rootId === json.blockId && json.action) {
+            if (typeof json.action === "string") {
+                json.action = json.action.replace(Constants.CB_GET_ALL, "");
+            } else if (typeof json.action === "object" && Array.isArray(json.action)) {
+                json.action = json.action.filter((item: string) => item !== Constants.CB_GET_ALL);
+            }
+        }
         model = new Editor({
             app,
             tab,
             rootId: json.rootId,
             blockId: json.blockId,
             mode: json.mode,
-            action: typeof json.action === "string" ? [json.action] : json.action,
+            scrollPosition: json.scrollPosition,
+            action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
         });
     }
     return model;
@@ -979,23 +980,21 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             item.element.style.minWidth = "";
         }
     });
-    let lastItem: HTMLElement;
-    let index = Math.floor(window.innerWidth / 24);
-    // +2 由于某些分辨率下 scrollWidth 会大于 clientWidth
-    while (layout.element.scrollWidth > layout.element.clientWidth + 2 && index > 0) {
-        layout.children.find((item: Layout | Wnd) => {
-            if (item.element.style.width && item.element.style.width !== "0px") {
-                item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
-                lastItem = item.element;
+    if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2 ) {
+        let index = Math.ceil(screen.width / 8);
+        while (index > 0) {
+            let width = 0;
+            layout.children.find((item: Layout | Wnd) => {
+                if (item.element.style.width && item.element.style.width !== "0px") {
+                    item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
+                }
+                width += item.element.clientWidth;
+            });
+            index--;
+            if (width <= layout.element.clientWidth) {
+                break;
             }
-            if (layout.element.scrollWidth <= layout.element.clientWidth + 2) {
-                return true;
-            }
-        });
-        index--;
-    }
-    if (lastItem) {
-        lastItem.style.maxWidth = Math.max(Math.min(lastItem.clientWidth, window.innerWidth) - 8, 64) + "px";
+        }
     }
     layout.children.forEach((item: Layout | Wnd) => {
         if (item instanceof Layout && item.size !== "0px") {

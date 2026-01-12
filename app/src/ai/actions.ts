@@ -161,12 +161,12 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     elements.forEach(item => {
         ids.push(item.getAttribute("data-node-id"));
     });
-    const menu = new Menu("ai", () => {
+    const menu = new Menu(Constants.MENU_AI, () => {
         focusByRange(protyle.toolbar.range);
     });
     let customHTML = "";
     window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }, index: number) => {
-        customHTML += `<div data-action="${escapeAttr(item.memo || item.name)}" data-index="${index}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
+        customHTML += `<div data-action="${escapeAttr(item.memo || item.name)}" data-position="10west" data-index="${index}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
     <span data-type="edit" class="b3-list-item__action"><svg><use xlink:href="#iconEdit"></use></svg></span>
 </div>`;

@@ -181,6 +181,24 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 				buf.WriteByte(' ')
 				lastSpace = true
 			}
+			if ast.NodeCallout == n.Type {
+				buf.WriteString(n.CalloutType + " ")
+				if "" != n.CalloutIcon && 0 == n.CalloutIconType {
+					buf.WriteString(n.CalloutIcon + " ")
+				}
+				if "" != n.CalloutTitle {
+					if titleTree := parse.Inline("", []byte(n.CalloutTitle), luteEngine.ParseOptions); nil != titleTree && nil != titleTree.Root.FirstChild.FirstChild {
+						var inlines []*ast.Node
+						for c := titleTree.Root.FirstChild.FirstChild; nil != c; c = c.Next {
+							inlines = append(inlines, c)
+						}
+						for _, inline := range inlines {
+							buf.WriteString(inline.Content())
+						}
+					}
+					buf.WriteByte(' ')
+				}
+			}
 			return ast.WalkContinue
 		}
 

@@ -16,6 +16,8 @@
 
 package conf
 
+import "github.com/siyuan-note/siyuan/kernel/util"
+
 type Appearance struct {
 	Mode                int                `json:"mode"`                // 模式：0：明亮，1：暗黑
 	ModeOS              bool               `json:"modeOS"`              // 模式是否跟随系统
@@ -33,6 +35,7 @@ type Appearance struct {
 	ThemeJS             bool               `json:"themeJS"`             // 是否启用了主题 JavaScript
 	CloseButtonBehavior int                `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
 	HideStatusBar       bool               `json:"hideStatusBar"`       // 是否隐藏底部状态栏
+	StatusBar           *util.StatusBar    `json:"statusBar"`           // 底部状态栏配置
 }
 
 func NewAppearance() *Appearance {
@@ -47,6 +50,7 @@ func NewAppearance() *Appearance {
 		Lang:                "en_US",
 		CloseButtonBehavior: 0,
 		HideStatusBar:       false,
+		StatusBar:           &util.StatusBar{},
 	}
 }
 

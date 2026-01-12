@@ -33,8 +33,10 @@ type FileTree struct {
 	RemoveDocWithoutConfirm bool   `json:"removeDocWithoutConfirm"` // 删除文档时是否不需要确认
 	CloseTabsOnStart        bool   `json:"closeTabsOnStart"`        // 启动时关闭所有页签
 	UseSingleLineSave       bool   `json:"useSingleLineSave"`       // 使用单行保存文档 .sy 和属性视图 .json
-
-	Sort int `json:"sort"` // 排序方式
+	LargeFileWarningSize    int    `json:"largeFileWarningSize"`    // 大文件警告大小（单位：MB）
+	CreateDocAtTop          *bool  `json:"createDocAtTop"`          // 在顶部创建新文档 https://github.com/siyuan-note/siyuan/issues/16327
+	Sort                    int    `json:"sort"`                    // 排序方式
+	RecentDocsMaxListCount  int    `json:"recentDocsMaxListCount"`  // 最近的文档最大列出数量
 }
 
 func NewFileTree() *FileTree {
@@ -47,5 +49,12 @@ func NewFileTree() *FileTree {
 		AllowCreateDeeper:      false,
 		CloseTabsOnStart:       false,
 		UseSingleLineSave:      util.UseSingleLineSave,
+		LargeFileWarningSize:   util.LargeFileWarningSize,
+		CreateDocAtTop:         func() *bool { b := false; return &b }(),
 	}
 }
+
+const (
+	MinFileTreeRecentDocsListCount = 32
+	MaxFileTreeRecentDocsListCount = 256
+)

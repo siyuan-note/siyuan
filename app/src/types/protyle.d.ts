@@ -10,7 +10,9 @@ interface ILuteNode {
     };
 }
 
-type TTurnIntoOne = "BlocksMergeSuperBlock" | "Blocks2ULs" | "Blocks2OLs" | "Blocks2TLs" | "Blocks2Blockquote"
+type THintSource = "search" | "av" | "hint";
+
+type TTurnIntoOne = "BlocksMergeSuperBlock" | "Blocks2ULs" | "Blocks2OLs" | "Blocks2TLs" | "Blocks2Blockquote" | "Blocks2Callout"
 
 type TTurnIntoOneSub = "row" | "col"
 
@@ -32,6 +34,7 @@ type TProtyleAction = "cb-get-append" | // 向下滚动加载
     "cb-get-backlink" | // 悬浮窗为传递型需展示上下文
     "cb-get-unundo" | // 不需要记录历史
     "cb-get-scroll" | // 滚动到指定位置，用于直接打开文档，必有 rootID
+    "cb-get-search" | // 使用搜索打开搜索
     "cb-get-context" | // 包含上下文
     "cb-get-rootscroll" | // 如果为 rootID 就滚动到指定位置，必有 rootID
     "cb-get-html" | // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
@@ -222,6 +225,8 @@ declare class Lute {
 
     public SetSuperBlock(enable: boolean): void;
 
+    public SetCallout(enable: boolean): void;
+
     public SetTag(enable: boolean): void;
 
     public SetInlineMath(enable: boolean): void;
@@ -341,9 +346,9 @@ interface IUpload {
 
 interface IScrollAttr {
     rootId: string,
-    startId: string,
-    endId: string
-    scrollTop: number,
+    startId?: string,
+    endId?: string
+    scrollTop?: number,
     focusId?: string,
     focusStart?: number
     focusEnd?: number
@@ -446,6 +451,7 @@ interface IProtyleOptions {
         expand: boolean
     }[],
     action?: TProtyleAction[],
+    scrollPosition?: ScrollLogicalPosition,
     mode?: TEditorMode,
     blockId?: string
     rootId?: string
@@ -455,6 +461,7 @@ interface IProtyleOptions {
     render?: {
         background?: boolean
         title?: boolean
+        titleShowTop?: boolean
         gutter?: boolean
         scroll?: boolean
         breadcrumb?: boolean
@@ -465,9 +472,6 @@ interface IProtyleOptions {
     _lutePath?: string;
     /** 是否启用打字机模式。默认值: false */
     typewriterMode?: boolean;
-    /** 多语言。默认值: 'zh_CN' */
-    lang?: string;
-    /** @link https://ld246.com/article/1549638745630#options-toolbar */
     toolbar?: Array<string | IMenuItem>;
     /** @link https://ld246.com/article/1549638745630#options-preview */
     preview?: IPreview;

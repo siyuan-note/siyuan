@@ -6,6 +6,7 @@ import {getFieldsByData} from "./view";
 import {fetchSyncPost} from "../../../util/fetch";
 import {Menu} from "../../../plugin/Menu";
 import {objEquals} from "../../../util/functions";
+import {Constants} from "../../../constants";
 
 export const getPageSize = (blockElement: Element) => {
     const groupPageSize: {
@@ -63,9 +64,9 @@ export const setGroupMethod = async (options: {
     setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
 };
 
-export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
+export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup, viewType: TAVView) => {
     const selectHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
-    let html = `<button class="b3-menu__item" data-type="setGroupMethod">
+    let html = viewType === "kanban" ? "" : `<button class="b3-menu__item" data-type="setGroupMethod">
     <div class="b3-menu__label">${window.siyuan.languages.calcOperatorNone}</div>
     ${(!group || !group.field) ? selectHTML : ""}
 </button>`;
@@ -83,7 +84,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     });
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">
-    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goGroups">
+    <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="${(!group || !group.field) ? "go-config" : "goGroups"}">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
     <span class="b3-menu__label ft__center">${window.siyuan.languages.groupMethod}</span>
@@ -194,13 +195,21 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
                 if (item.groupHidden === 0) {
                     showCount++;
                 }
-                groupHTML += `<button class="b3-menu__item${item.groupHidden === 0 ? "" : " b3-menu__item--hidden"}" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
-    ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
-    ${item.groupValue?.mSelect?.length > 0 ? `<div class="fn__flex-1">
+                let titleHTML = `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`;
+                if (item.groupValue?.mSelect?.length > 0) {
+                    titleHTML = `<div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">
             <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
         </span>
-    </div>` : `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`}
+    </div>`;
+                } else if (item.groupValue?.type == "checkbox") {
+                    titleHTML = `<div class="b3-menu__label fn__flex">
+<svg class="b3-menu__icon"><use xlink:href="#icon${item.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg> ${column.name || ""}
+</div>`;
+                }
+                groupHTML += `<button class="b3-menu__item${item.groupHidden === 0 ? "" : " b3-menu__item--hidden"}" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
+    ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
+    ${titleHTML}
     <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });
@@ -229,7 +238,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.order, "sort")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item${["select", "mSelect"].includes(column.type) ? "" : " fn__none"}">
+<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.hideEmptyGroup}</span>
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" class="b3-switch b3-switch--menu"${view.group.hideEmpty ? " checked" : ""}>
@@ -296,7 +305,7 @@ export const goGroupsDate = (options: {
     data: IAV;
     blockElement: Element;
 }) => {
-    const menu = new Menu("avGroupDate");
+    const menu = new Menu(Constants.MENU_AV_GROUP_DATE);
     if (menu.isOpen) {
         return;
     }
@@ -343,7 +352,7 @@ export const goGroupsSort = (options: {
     menuElement: HTMLElement;
     blockElement: Element;
 }) => {
-    const menu = new Menu("avGroupSort");
+    const menu = new Menu(Constants.MENU_AV_GROUP_SORT);
     if (menu.isOpen) {
         return;
     }

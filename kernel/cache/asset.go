@@ -28,14 +28,60 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+type AssetHash struct {
+	Hash string `json:"hash"`
+	Path string `json:"path"`
+}
+
+var (
+	assetHashCache = map[string]*AssetHash{}
+	assetHashLock  = sync.Mutex{}
+)
+
+func RemoveAssetHash(hash string) {
+	assetHashLock.Lock()
+	defer assetHashLock.Unlock()
+
+	delete(assetHashCache, hash)
+}
+
+func SetAssetHash(hash, path string) {
+	assetHashLock.Lock()
+	defer assetHashLock.Unlock()
+
+	assetHashCache[hash] = &AssetHash{
+		Hash: hash,
+		Path: path,
+	}
+}
+
+func GetAssetHash(hash string) *AssetHash {
+	assetHashLock.Lock()
+	defer assetHashLock.Unlock()
+
+	for _, a := range assetHashCache {
+		if a.Hash == hash {
+			if filelock.IsExist(filepath.Join(util.DataDir, a.Path)) {
+				return a
+			}
+
+			delete(assetHashCache, hash)
+			return nil
+		}
+	}
+	return nil
+}
+
 type Asset struct {
 	HName   string `json:"hName"`
 	Path    string `json:"path"`
 	Updated int64  `json:"updated"`
 }
 
-var assetsCache = map[string]*Asset{}
-var assetsLock = sync.Mutex{}
+var (
+	assetsCache = map[string]*Asset{}
+	assetsLock  = sync.Mutex{}
+)
 
 func GetAssets() (ret map[string]*Asset) {
 	assetsLock.Lock()

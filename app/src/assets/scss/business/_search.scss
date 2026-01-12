@@ -18,7 +18,6 @@
 
       .search__preview {
         border-top: 0;
-        border-left: 1px solid var(--b3-theme-surface-lighter);
       }
 
       .search__drag {
@@ -130,6 +129,8 @@
     overflow: auto;
     padding: 8px 0;
     background-color: var(--b3-theme-background);
+    min-width: 88px;
+    min-height: 32px;
 
     .b3-list-item__text {
       user-select: none;

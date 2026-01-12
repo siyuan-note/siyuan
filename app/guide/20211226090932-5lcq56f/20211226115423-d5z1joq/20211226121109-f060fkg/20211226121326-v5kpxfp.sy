@@ -1,10 +1,11 @@
 {
 	"ID": "20211226121326-v5kpxfp",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
+		"type": "doc",
 		"updated": "20230821210822"
 	},
 	"Children": [

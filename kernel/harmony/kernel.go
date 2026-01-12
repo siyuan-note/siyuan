@@ -37,7 +37,7 @@ import (
 
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
-	go server.Serve(true)
+	go server.Serve(true, model.Conf.CookieKey)
 }
 
 //export StartKernel
@@ -49,7 +49,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
 
 	model.InitConf()
-	go server.Serve(false)
+	go server.Serve(false, model.Conf.CookieKey)
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)
@@ -93,18 +93,18 @@ func SetHttpServerPort(port int) {
 }
 
 //export GetCurrentWorkspacePath
-func GetCurrentWorkspacePath() string {
-	return util.WorkspaceDir
+func GetCurrentWorkspacePath() *C.char {
+	return C.CString(util.WorkspaceDir)
 }
 
 //export GetAssetAbsPath
-func GetAssetAbsPath(asset string) (ret string) {
-	ret, err := model.GetAssetAbsPath(asset)
-	if err != nil {
-		logging.LogErrorf("get asset [%s] abs path failed: %s", asset, err)
-		ret = asset
+func GetAssetAbsPath(relativePath *C.char) *C.char {
+	absPath, err := model.GetAssetAbsPath(C.GoString(relativePath))
+	if nil != err {
+		logging.LogErrorf("get asset abs path failed: %s", err)
+		return relativePath
 	}
-	return
+	return C.CString(absPath)
 }
 
 //export GetMimeTypeByExt
@@ -136,6 +136,11 @@ func Unzip(zipFilePath, destination *C.char) {
 	if err := gulu.Zip.Unzip(C.GoString(zipFilePath), C.GoString(destination)); nil != err {
 		logging.LogErrorf("unzip [%s] failed: %s", zipFilePath, err)
 	}
+}
+
+//export Exit
+func Exit() {
+	os.Exit(logging.ExitCodeOk)
 }
 
 func main() {}

@@ -8,6 +8,7 @@ import {setModelsHash} from "../window/setHeader";
 import {countBlockWord} from "../layout/status";
 import {App} from "../index";
 import {fullscreen} from "../protyle/breadcrumb/action";
+import {fetchPost} from "../util/fetch";
 
 export class Editor extends Model {
     public element: HTMLElement;
@@ -22,6 +23,7 @@ export class Editor extends Model {
         mode?: TEditorMode,
         action?: TProtyleAction[],
         afterInitProtyle?: (editor: Protyle) => void,
+        scrollPosition?: ScrollLogicalPosition
     }) {
         super({
             app: options.app,
@@ -33,6 +35,8 @@ export class Editor extends Model {
         this.headElement = options.tab.headElement;
         this.element = options.tab.panelElement;
         this.initProtyle(options);
+        // 当文档第一次加载到页签时更新 openAt 时间
+        fetchPost("/api/storage/updateRecentDocOpenTime", {rootID: options.rootId});
     }
 
     private initProtyle(options: {
@@ -40,6 +44,7 @@ export class Editor extends Model {
         action?: TProtyleAction[]
         rootId: string,
         mode?: TEditorMode,
+        scrollPosition?: ScrollLogicalPosition,
         afterInitProtyle?: (editor: Protyle) => void,
     }) {
         this.editor = new Protyle(this.app, this.element, {
@@ -53,6 +58,7 @@ export class Editor extends Model {
                 scroll: true,
             },
             typewriterMode: true,
+            scrollPosition: options.scrollPosition,
             after: (editor) => {
                 if (window.siyuan.editorIsFullscreen) {
                     fullscreen(editor.protyle.element);

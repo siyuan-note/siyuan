@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -54,6 +53,18 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 		groupView.Gallery.CardSize = view.Gallery.CardSize
 		groupView.Gallery.FitImage = view.Gallery.FitImage
 		groupView.Gallery.DisplayFieldName = view.Gallery.DisplayFieldName
+	case av.LayoutTypeKanban:
+		err = copier.CopyWithOption(&groupView.Kanban.Fields, &view.Kanban.Fields, copier.Option{DeepCopy: true})
+		groupView.Kanban.ShowIcon = view.Kanban.ShowIcon
+		groupView.Kanban.WrapField = view.Kanban.WrapField
+
+		groupView.Kanban.CoverFrom = view.Kanban.CoverFrom
+		groupView.Kanban.CoverFromAssetKeyID = view.Kanban.CoverFromAssetKeyID
+		groupView.Kanban.CardAspectRatio = view.Kanban.CardAspectRatio
+		groupView.Kanban.CardSize = view.Kanban.CardSize
+		groupView.Kanban.FitImage = view.Kanban.FitImage
+		groupView.Kanban.DisplayFieldName = view.Kanban.DisplayFieldName
+		groupView.Kanban.FillColBackgroundColor = view.Kanban.FillColBackgroundColor
 	}
 	if nil != err {
 		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)
@@ -62,6 +73,8 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 			groupView.Table.Columns = view.Table.Columns
 		case av.LayoutTypeGallery:
 			groupView.Gallery.CardFields = view.Gallery.CardFields
+		case av.LayoutTypeKanban:
+			groupView.Kanban.Fields = view.Kanban.Fields
 		}
 	}
 
@@ -73,14 +86,15 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av.Viewable) {
 	depth := 1
 	renderedAttrViews := map[string]*av.AttributeView{}
-	renderedTemplateKeyCollections := map[string]av.Collection{}
 	renderedAttrViews[attrView.ID] = attrView
-	ret = renderView(attrView, view, query, &depth, renderedAttrViews, renderedTemplateKeyCollections)
+	ret = renderView(attrView, view, query, &depth, renderedAttrViews)
+
+	attrView.RenderedViewables[ret.GetID()] = ret
+	renderedAttrViews[attrView.ID] = attrView
 	return
 }
 
-func renderView(attrView *av.AttributeView, view *av.View, query string,
-	depth *int, renderedAttrViews map[string]*av.AttributeView, renderedTemplateKeyCollections map[string]av.Collection) (ret av.Viewable) {
+func renderView(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView) (ret av.Viewable) {
 	if 7 < *depth {
 		return
 	}
@@ -88,14 +102,16 @@ func renderView(attrView *av.AttributeView, view *av.View, query string,
 	*depth++
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
-		ret = RenderAttributeViewTable(attrView, view, query, depth, renderedAttrViews, renderedTemplateKeyCollections)
+		ret = RenderAttributeViewTable(attrView, view, query, depth, cachedAttrViews)
 	case av.LayoutTypeGallery:
-		ret = RenderAttributeViewGallery(attrView, view, query, depth, renderedAttrViews, renderedTemplateKeyCollections)
+		ret = RenderAttributeViewGallery(attrView, view, query, depth, cachedAttrViews)
+	case av.LayoutTypeKanban:
+		ret = RenderAttributeViewKanban(attrView, view, query, depth, cachedAttrViews)
 	}
 	return
 }
 
-func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
+func renderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
 		if nil != block {
@@ -225,6 +241,13 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 				dataModel["entryUpdated"] = time.UnixMilli(v.Block.Updated)
 			}
 			dataModel[keyValue.Key.Name] = v.String(true)
+		} else if av.KeyTypeMSelect == v.Type {
+			dataModel[keyValue.Key.Name+"_str"] = v.String(true)
+			var contents []string
+			for _, s := range v.MSelect {
+				contents = append(contents, s.Content)
+			}
+			dataModel[keyValue.Key.Name] = contents
 		} else {
 			dataModel[keyValue.Key.Name] = v.String(true)
 		}
@@ -244,6 +267,11 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	ret = buf.String()
 	if ret == "<no value>" {
 		ret = ""
+		return
+	}
+
+	if util.HasUnclosedHtmlTag(ret) {
+		ret = util.EscapeHTML(ret)
 	}
 	return
 }
@@ -275,12 +303,12 @@ func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[s
 	return
 }
 
-func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
+func filterNotFoundAttrViewItems(keyValuesMap map[string][]*av.KeyValues) {
 	var notFound []string
 	var toCheckBlockIDs []string
-	for blockID, keyValues := range *keyValuesMap {
+	for blockID, keyValues := range keyValuesMap {
 		blockValue := getBlockValue(keyValues)
-		if nil == blockValue {
+		if nil == blockValue || nil == blockValue.Block {
 			notFound = append(notFound, blockID)
 			continue
 		}
@@ -289,7 +317,7 @@ func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
 			continue
 		}
 
-		if nil != blockValue.Block && "" == blockValue.Block.ID {
+		if "" == blockValue.Block.ID {
 			notFound = append(notFound, blockID)
 			continue
 		}
@@ -303,11 +331,11 @@ func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
 		}
 	}
 	for _, blockID := range notFound {
-		delete(*keyValuesMap, blockID)
+		delete(keyValuesMap, blockID)
 	}
 }
 
-func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string, fieldNumberFormat av.NumberFormat, fieldTemplate string) {
+func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string, fieldNumberFormat av.NumberFormat, fieldTemplate string, fieldDateIsTime bool) {
 	switch baseValue.ValueType {
 	case av.KeyTypeNumber: // 格式化数字
 		if nil != baseValue.Value && nil != baseValue.Value.Number && baseValue.Value.Number.IsNotEmpty {
@@ -323,14 +351,15 @@ func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string,
 	}
 
 	if nil == baseValue.Value {
-		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType)
+		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType, fieldDateIsTime)
 	} else {
 		FillAttributeViewNilValue(baseValue.Value, baseValue.ValueType)
 	}
 }
 
-func fillAttributeViewAutoGeneratedValues(attrView *av.AttributeView, collection av.Collection, ials map[string]map[string]string, items map[string][]*av.KeyValues,
-	depth *int, renderedAttrViews map[string]*av.AttributeView, renderedTemplateKeyCollections map[string]av.Collection) {
+func fillAttributeViewAutoGeneratedValues(attrView *av.AttributeView, collection av.Collection, ials map[string]map[string]string, depth *int, cachedAttrViews map[string]*av.AttributeView) {
+	// 渲染主键、创建时间、更新时间
+
 	for _, item := range collection.GetItems() {
 		for _, value := range item.GetValues() {
 			itemID := item.GetID()
@@ -345,113 +374,13 @@ func fillAttributeViewAutoGeneratedValues(attrView *av.AttributeView, collection
 						}
 					}
 				}
-			case av.KeyTypeRollup: // 渲染汇总
-				rollupKey, _ := attrView.GetKey(value.KeyID)
-				if nil == rollupKey || nil == rollupKey.Rollup {
-					break
-				}
-
-				relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
-				if nil == relKey || nil == relKey.Relation {
-					break
-				}
-
-				relVal := attrView.GetValue(relKey.ID, itemID)
-				if nil == relVal || nil == relVal.Relation {
-					break
-				}
-
-				destAv := renderedAttrViews[relKey.Relation.AvID]
-				if nil == destAv {
-					destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
-					if nil != destAv {
-						renderedAttrViews[relKey.Relation.AvID] = destAv
-					}
-				}
-				if nil == destAv {
-					break
-				}
-
-				destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
-				if nil == destKey {
-					return
-				}
-
-				var furtherCollection av.Collection
-				var ok bool
-				if av.KeyTypeTemplate == destKey.Type {
-					if furtherCollection, ok = renderedTemplateKeyCollections[destKey.ID]; !ok {
-						renderedTemplateKeyCollections[destKey.ID] = collection
-
-						// 渲染目标视图，这样才能汇总渲染后的模板字段值
-						viewable := renderView(destAv, destAv.Views[0], "", depth, renderedAttrViews, renderedTemplateKeyCollections)
-						if nil != viewable {
-							furtherCollection = viewable.(av.Collection)
-							renderedTemplateKeyCollections[destKey.ID] = furtherCollection
-						}
-					}
-				}
-
-				for _, blockID := range relVal.Relation.BlockIDs {
-					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
-					if nil != furtherCollection && av.KeyTypeTemplate == destKey.Type {
-						destVal = furtherCollection.GetValue(blockID, destKey.ID)
-					}
-
-					if nil == destVal {
-						if destAv.ExistItem(blockID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
-							destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
-						}
-						if nil == destVal {
-							continue
-						}
-					}
-					if av.KeyTypeNumber == destKey.Type {
-						destVal.Number.Format = destKey.NumberFormat
-						destVal.Number.FormatNumber()
-					}
-
-					value.Rollup.Contents = append(value.Rollup.Contents, destVal.Clone())
-				}
-
-				value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
-
-				// 将汇总字段的值保存到 rowsValues 中，后续渲染模板字段的时候会用到，下同
-				// Database table view template columns support reading relation, rollup, created and updated columns https://github.com/siyuan-note/siyuan/issues/10442
-				keyValues := items[itemID]
-				keyValues = append(keyValues, &av.KeyValues{Key: rollupKey, Values: []*av.Value{{ID: value.ID, KeyID: rollupKey.ID, BlockID: itemID, Type: av.KeyTypeRollup, Rollup: value.Rollup}}})
-				items[itemID] = keyValues
-			case av.KeyTypeRelation: // 渲染关联
-				value.Relation.Contents = nil
-				relKey, _ := attrView.GetKey(value.KeyID)
-				if nil != relKey && nil != relKey.Relation {
-					destAv := renderedAttrViews[relKey.Relation.AvID]
-					if nil == destAv {
-						destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
-						if nil != destAv {
-							renderedAttrViews[relKey.Relation.AvID] = destAv
-						}
-					}
-					if nil != destAv {
-						blocks := map[string]*av.Value{}
-						blockValues := destAv.GetBlockKeyValues()
-						if nil != blockValues {
-							for _, blockValue := range blockValues.Values {
-								blocks[blockValue.BlockID] = blockValue
-							}
-							for _, blockID := range value.Relation.BlockIDs {
-								if val := blocks[blockID]; nil != val {
-									value.Relation.Contents = append(value.Relation.Contents, val)
-								}
-							}
-						}
-					}
-				}
-
-				keyValues := items[itemID]
-				keyValues = append(keyValues, &av.KeyValues{Key: relKey, Values: []*av.Value{{ID: value.ID, KeyID: relKey.ID, BlockID: itemID, Type: av.KeyTypeRelation, Relation: value.Relation}}})
-				items[itemID] = keyValues
 			case av.KeyTypeCreated: // 渲染创建时间
+				key, _ := attrView.GetKey(value.KeyID)
+				isNotTime := false
+				if nil != key && nil != key.Created {
+					isNotTime = !key.Created.IncludeTime
+				}
+
 				ial := map[string]string{}
 				block := item.GetBlockValue()
 				if nil != block {
@@ -467,17 +396,18 @@ func fillAttributeViewAutoGeneratedValues(attrView *av.AttributeView, collection
 				createdStr := id[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 				if nil == parseErr {
-					value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone, isNotTime)
 					value.Created.IsNotEmpty = true
 				} else {
-					value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+					value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone, isNotTime)
+				}
+			case av.KeyTypeUpdated: // 渲染更新时间
+				key, _ := attrView.GetKey(value.KeyID)
+				isNotTime := false
+				if nil != key && nil != key.Updated {
+					isNotTime = !key.Updated.IncludeTime
 				}
 
-				keyValues := items[itemID]
-				createdKey, _ := attrView.GetKey(value.KeyID)
-				keyValues = append(keyValues, &av.KeyValues{Key: createdKey, Values: []*av.Value{{ID: value.ID, KeyID: createdKey.ID, BlockID: itemID, Type: av.KeyTypeCreated, Created: value.Created}}})
-				items[itemID] = keyValues
-			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := map[string]string{}
 				block := item.GetBlockValue()
 				if nil != block {
@@ -488,28 +418,191 @@ func fillAttributeViewAutoGeneratedValues(attrView *av.AttributeView, collection
 				}
 				updatedStr := ial["updated"]
 				if "" == updatedStr && nil != block {
-					value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
+					value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone, isNotTime)
 					value.Updated.IsNotEmpty = true
 				} else {
 					updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 					if nil == parseErr {
-						value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+						value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone, isNotTime)
 						value.Updated.IsNotEmpty = true
 					} else {
-						value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+						value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone, isNotTime)
 					}
 				}
-
-				keyValues := items[itemID]
-				updatedKey, _ := attrView.GetKey(value.KeyID)
-				keyValues = append(keyValues, &av.KeyValues{Key: updatedKey, Values: []*av.Value{{ID: value.ID, KeyID: updatedKey.ID, BlockID: itemID, Type: av.KeyTypeUpdated, Updated: value.Updated}}})
-				items[itemID] = keyValues
 			}
+		}
+	}
+
+	// 渲染关联
+	for _, item := range collection.GetItems() {
+		for _, value := range item.GetValues() {
+			if av.KeyTypeRelation != value.Type {
+				continue
+			}
+
+			value.Relation.Contents = nil
+			relKey, _ := attrView.GetKey(value.KeyID)
+			if nil != relKey && nil != relKey.Relation {
+				destAv := cachedAttrViews[relKey.Relation.AvID]
+				if nil == destAv {
+					destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+					if nil != destAv {
+						cachedAttrViews[relKey.Relation.AvID] = destAv
+					}
+				}
+				if nil != destAv {
+					blocks := map[string]*av.Value{}
+					blockValues := destAv.GetBlockKeyValues()
+					if nil != blockValues {
+						for _, blockValue := range blockValues.Values {
+							blocks[blockValue.BlockID] = blockValue
+						}
+						for _, blockID := range value.Relation.BlockIDs {
+							if val := blocks[blockID]; nil != val {
+								value.Relation.Contents = append(value.Relation.Contents, val)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// 渲染汇总
+	rollupFurtherCollections := map[string]av.Collection{}
+	for _, field := range collection.GetFields() {
+		if av.KeyTypeRollup != field.GetType() {
+			continue
+		}
+
+		rollupKey, _ := attrView.GetKey(field.GetID())
+		if nil == rollupKey || nil == rollupKey.Rollup {
+			continue
+		}
+
+		relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+		if nil == relKey || nil == relKey.Relation {
+			continue
+		}
+
+		destAv := cachedAttrViews[relKey.Relation.AvID]
+		if nil == destAv {
+			destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+			if nil != destAv {
+				cachedAttrViews[relKey.Relation.AvID] = destAv
+			}
+		}
+		if nil == destAv {
+			continue
+		}
+
+		destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
+		if nil == destKey {
+			continue
+		}
+
+		isSameAv := destAv.ID == attrView.ID
+		var furtherCollection av.Collection
+		if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type || av.KeyTypeRelation == destKey.Type)) {
+			viewable := renderView(destAv, destAv.Views[0], "", depth, cachedAttrViews)
+			if nil != viewable {
+				furtherCollection = viewable.(av.Collection)
+			} else {
+				fillAttributeViewTemplateValues(destAv, destAv.Views[0], collection, ials)
+				furtherCollection = collection
+			}
+		}
+		rollupFurtherCollections[rollupKey.ID] = furtherCollection
+	}
+
+	for _, item := range collection.GetItems() {
+		for _, value := range item.GetValues() {
+			if av.KeyTypeRollup != value.Type {
+				continue
+			}
+
+			rollupKey, _ := attrView.GetKey(value.KeyID)
+			if nil == rollupKey || nil == rollupKey.Rollup {
+				break
+			}
+
+			relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+			if nil == relKey || nil == relKey.Relation {
+				break
+			}
+
+			relVal := attrView.GetValue(relKey.ID, item.GetID())
+			if nil == relVal || nil == relVal.Relation {
+				break
+			}
+
+			destAv := cachedAttrViews[relKey.Relation.AvID]
+			if nil == destAv {
+				destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+				if nil != destAv {
+					cachedAttrViews[relKey.Relation.AvID] = destAv
+				}
+			}
+			if nil == destAv {
+				break
+			}
+
+			destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
+			if nil == destKey {
+				break
+			}
+
+			furtherCollection := rollupFurtherCollections[rollupKey.ID]
+			value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, rollupKey.Rollup.Calc, furtherCollection)
 		}
 	}
 }
 
-func fillAttributeViewTemplateValues(attrView *av.AttributeView, collection av.Collection, ials map[string]map[string]string, items map[string][]*av.KeyValues) (err error) {
+func GetFurtherCollections(attrView *av.AttributeView, cachedAttrViews map[string]*av.AttributeView) (ret map[string]av.Collection) {
+	ret = map[string]av.Collection{}
+	for _, kv := range attrView.KeyValues {
+		if av.KeyTypeRollup != kv.Key.Type {
+			continue
+		}
+
+		if nil == kv.Key.Rollup {
+			continue
+		}
+
+		relKey, _ := attrView.GetKey(kv.Key.Rollup.RelationKeyID)
+		if nil == relKey {
+			continue
+		}
+
+		destAv := cachedAttrViews[relKey.Relation.AvID]
+		if nil == destAv {
+			destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+			if nil == destAv {
+				continue
+			}
+			cachedAttrViews[relKey.Relation.AvID] = destAv
+		}
+
+		destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
+		if nil == destKey {
+			continue
+		}
+		isSameAv := destAv.ID == attrView.ID
+
+		var furtherCollection av.Collection
+		if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type || av.KeyTypeRelation == destKey.Type)) {
+			viewable := RenderView(destAv, destAv.Views[0], "")
+			if nil != viewable {
+				furtherCollection = viewable.(av.Collection)
+			}
+		}
+		ret[kv.Key.ID] = furtherCollection
+	}
+	return
+}
+
+func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, collection av.Collection, ials map[string]map[string]string) (err error) {
+	items := generateAttrViewItems(attrView, view)
 	existTemplateField := false
 	for _, kVals := range attrView.KeyValues {
 		if av.KeyTypeTemplate == kVals.Key.Type {
@@ -525,6 +618,10 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, collection av.C
 	for _, templateKey := range templateKeys {
 		for _, item := range collection.GetItems() {
 			value := item.GetValue(templateKey.ID)
+			if nil == value || nil == value.Template {
+				continue
+			}
+
 			keyValues := items[item.GetID()]
 			var ial map[string]string
 			blockVal := item.GetBlockValue()
@@ -535,7 +632,7 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, collection av.C
 				ial = map[string]string{}
 			}
 
-			content, renderErr := RenderTemplateField(ial, keyValues, value.Template.Content)
+			content, renderErr := renderTemplateField(ial, keyValues, value.Template.Content)
 			if nil != renderErr {
 				key, _ := attrView.GetKey(value.KeyID)
 				keyName := ""
@@ -550,6 +647,32 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, collection av.C
 		}
 	}
 	return
+}
+
+func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collection) {
+	fieldValues := map[string][]*av.Value{}
+	for _, item := range collection.GetItems() {
+		for _, val := range item.GetValues() {
+			keyID := val.KeyID
+			fieldValues[keyID] = append(fieldValues[keyID], val)
+		}
+	}
+	for keyID, values := range fieldValues {
+		keyValues, _ := attrView.GetKeyValues(keyID)
+		for _, val := range values {
+			exist := false
+			for _, kv := range keyValues.Values {
+				if kv.ID == val.ID {
+					exist = true
+					break
+				}
+			}
+			if !exist {
+				val.IsRenderAutoFill = true
+				keyValues.Values = append(keyValues.Values, val)
+			}
+		}
+	}
 }
 
 func FillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
@@ -688,6 +811,16 @@ func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID 
 		for i, cardField := range view.Gallery.CardFields {
 			if cardField.ID == missingKeyID {
 				view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)
+				changed = true
+				break
+			}
+		}
+	}
+
+	if nil != view.Kanban {
+		for i, kanbanField := range view.Kanban.Fields {
+			if kanbanField.ID == missingKeyID {
+				view.Kanban.Fields = append(view.Kanban.Fields[:i], view.Kanban.Fields[i+1:]...)
 				changed = true
 				break
 			}

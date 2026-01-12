@@ -43,6 +43,30 @@ func checkWorkspaceDir(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
+	// 检查路径是否是分区根路径
+	if util.IsPartitionRootPath(path) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(273)
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	// 检查路径是否包含其他文件
+	if !util.IsWorkspaceDir(path) {
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("read dir [%s] failed: %s", path, err)
+			return
+		}
+		if 0 < len(entries) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(274)
+			ret.Data = map[string]interface{}{"closeTimeout": 7000}
+			return
+		}
+	}
+
 	if isInvalidWorkspacePath(path) {
 		ret.Code = -1
 		ret.Msg = "This workspace name is not allowed, please use another name"
@@ -55,32 +79,8 @@ func checkWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf("read workspace dir [%s] failed: %s", path, err)
-	}
-
-	var existsConf, existsData bool
-	for _, entry := range entries {
-		if !existsConf {
-			existsConf = "conf" == entry.Name() && entry.IsDir()
-		}
-		if !existsData {
-			existsData = "data" == entry.Name() && entry.IsDir()
-		}
-
-		if existsConf && existsData {
-			break
-		}
-	}
-
-	if existsConf {
-		existsConf = gulu.File.IsExist(filepath.Join(path, "conf", "conf.json"))
-	}
-
 	ret.Data = map[string]interface{}{
-		"isWorkspace": existsConf && existsData,
+		"isWorkspace": util.IsWorkspaceDir(path),
 	}
 }
 
@@ -300,7 +300,7 @@ func setWorkspaceDir(c *gin.Context) {
 	// 检查路径是否在已有的工作空间路径中
 	pathIsWorkspace := util.IsWorkspaceDir(path)
 	if !pathIsWorkspace {
-		for p := filepath.Dir(path); !util.IsRootPath(p); p = filepath.Dir(p) {
+		for p := filepath.Dir(path); !util.IsPartitionRootPath(p); p = filepath.Dir(p) {
 			if util.IsWorkspaceDir(p) {
 				ret.Code = -1
 				ret.Msg = fmt.Sprintf(model.Conf.Language(256), path, p)
@@ -330,9 +330,7 @@ func setWorkspaceDir(c *gin.Context) {
 
 	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 		util.PushMsg(model.Conf.Language(42), 1000*15)
-		time.Sleep(time.Second * 1)
-		model.Close(false, false, 1)
-		time.Sleep(time.Second * 1)
+		time.Sleep(2 * time.Second)
 	}
 }
 

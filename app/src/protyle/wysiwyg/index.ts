@@ -3080,7 +3080,7 @@ export class WYSIWYG {
                             } else if (subType === "TIP") {
                                 emojiHTML = "💡";
                             } else if (subType === "IMPORTANT") {
-                                emojiHTML = "️❗";
+                                emojiHTML = "❗";
                             } else if (subType === "WARNING") {
                                 emojiHTML = "⚠️";
                             } else if (subType === "CAUTION") {

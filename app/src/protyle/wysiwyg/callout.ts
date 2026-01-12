@@ -112,7 +112,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
                 } else if (textElements[0].value === "TIP") {
                     emojiHTML = "💡";
                 } else if (textElements[0].value === "IMPORTANT") {
-                    emojiHTML = "️❗";
+                    emojiHTML = "❗";
                 } else if (textElements[0].value === "WARNING") {
                     emojiHTML = "⚠️";
                 } else if (textElements[0].value === "CAUTION") {

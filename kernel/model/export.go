@@ -95,6 +95,8 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 		return
 	}
 
+	code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
+
 	writePath := filepath.Join(exportFolder, name)
 	err = filelock.WriteFile(writePath, code.Tokens)
 	if nil != err {

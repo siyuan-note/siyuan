@@ -95,6 +95,8 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 		return
 	}
 
+	code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
+
 	writePath := filepath.Join(exportFolder, name)
 	err = filelock.WriteFile(writePath, code.Tokens)
 	if nil != err {
@@ -716,7 +718,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	content = strings.ReplaceAll(content, "  \n", "<br>\n")
 
 	tmpDocxPath := filepath.Join(tmpDir, name+".docx")
-	args := []string{ // pandoc -f html --resource-path=请从这里开始 请从这里开始\index.html -o test.docx
+	args := []string{
 		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
@@ -796,17 +798,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	}
 
 	if docx {
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if ast.NodeLinkDest == n.Type {
-				if bytes.HasPrefix(n.Tokens, []byte("file://")) {
-					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\"), []byte("/"))
-					if !bytes.HasPrefix(n.Tokens, []byte("file:///")) {
-						n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("file://"), []byte("file:///"))
-					}
-				}
-			}
-			return ast.WalkContinue
-		})
+		netAssets2LocalAssets0(tree, true, "", filepath.Join(savePath, "assets"), false)
 	}
 
 	assets := getAssetsLinkDests(tree.Root, docx)
@@ -814,7 +806,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		if !util.IsAssetLinkDest([]byte(asset), docx) {
 			continue
 		}
-		
+
 		if strings.Contains(asset, "?") {
 			asset = asset[:strings.LastIndex(asset, "?")]
 		}

@@ -488,110 +488,116 @@ export class Files extends Model {
         const dragOverLastObj: {
             element: HTMLElement,
             positionY: number,
-            time: number,
+            rafId: number,
             sourceOnlyRoot: boolean
         } = {
             element: null,
             positionY: null,
-            time: null,
+            rafId: null,
             sourceOnlyRoot: null
         };
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-            if (performance.now() - dragOverLastObj.time < 50) {
-                event.preventDefault();
-                return;
-            }
-            dragOverLastObj.time = performance.now();
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 event.preventDefault();
                 return;
             }
-            let liElement = hasClosestByTag(event.target, "LI");
-            if (!liElement) {
-                liElement = hasClosestByTag(document.elementFromPoint(event.clientX, event.clientY - 1), "LI");
-            }
-            if (!liElement || !window.siyuan.dragElement) {
-                dragOverLastObj.element = null;
+            // 存储最新事件，使用 rAF 合并同帧多次触发
+            if (dragOverLastObj.rafId) {
                 event.preventDefault();
                 return;
             }
-            const targetType = liElement.getAttribute("data-type");
-            if (dragOverLastObj.element !== liElement) {
-                dragOverLastObj.element?.classList.remove("dragover", "dragover__bottom", "dragover__top");
-                let gutterType = "";
-                for (const item of event.dataTransfer.items) {
-                    if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                        gutterType = item.type;
-                    }
+
+            dragOverLastObj.rafId = requestAnimationFrame(() => {
+                dragOverLastObj.rafId = null;
+                let liElement = event.target.closest("li");
+                if (!liElement) {
+                    liElement = document.elementFromPoint(event.clientX, event.clientY - 1).closest("li");
                 }
-                if (gutterType) {
-                    // 块标拖拽
-                    const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
-                    if (!["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                if (!liElement || !window.siyuan.dragElement) {
+                    dragOverLastObj.element = null;
+                    event.preventDefault();
+                    return;
+                }
+                const targetType = liElement.getAttribute("data-type");
+                if (dragOverLastObj.element !== liElement) {
+                    dragOverLastObj.element?.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                    let gutterType = "";
+                    for (const item of event.dataTransfer.items) {
+                        if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                            gutterType = item.type;
+                        }
+                    }
+                    if (gutterType) {
+                        // 块标拖拽
+                        const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
+                        if (!["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                            event.preventDefault();
+                            return;
+                        }
+                    } else if (liElement.classList.contains("b3-list-item--focus")) {
+                        // 选中的文档不能拖拽到自己上，但允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
                         event.preventDefault();
                         return;
                     }
-                } else if (liElement.classList.contains("b3-list-item--focus")) {
-                    // 选中的文档不能拖拽到自己上，但允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
-                    event.preventDefault();
-                    return;
-                }
 
-                dragOverLastObj.sourceOnlyRoot = gutterType ? false : true;
-                if (dragOverLastObj.sourceOnlyRoot) {
-                    Array.from(this.element.querySelectorAll(".b3-list-item--focus")).find((item: HTMLElement) => {
-                        if (item.getAttribute("data-type") === "navigation-file") {
-                            dragOverLastObj.sourceOnlyRoot = false;
-                            return true;
+                    dragOverLastObj.sourceOnlyRoot = gutterType ? false : true;
+                    if (dragOverLastObj.sourceOnlyRoot) {
+                        const focusItems = this.element.querySelectorAll(".b3-list-item--focus");
+                        for (let i = 0; i < focusItems.length; i++) {
+                            if (focusItems[i].getAttribute("data-type") === "navigation-file") {
+                                dragOverLastObj.sourceOnlyRoot = false;
+                                break;
+                            }
                         }
-                    });
-                }
-                if (dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root") {
-                    event.preventDefault();
-                    return;
-                }
-            }
-            if (dragOverLastObj.element && dragOverLastObj.element === liElement && dragOverLastObj.positionY !== event.clientY) {
-                const notebookElement = hasClosestByAttribute(liElement, "data-sortmode", null);
-                if (!notebookElement) {
-                    event.preventDefault();
-                    return;
-                }
-                const notebookSort = notebookElement.getAttribute("data-sortmode");
-                if ((dragOverLastObj.sourceOnlyRoot && targetType === "navigation-root" && window.siyuan.config.fileTree.sort === 6) ||
-                    (!dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root" &&
-                        (notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")))
-                ) {
-                    const nodeRect = liElement.getBoundingClientRect();
-                    const dragHeight = nodeRect.height * .2;
-                    if (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot) {
-                        if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                            liElement.classList.remove("dragover");
-                            liElement.classList.add("dragover__bottom");
-                        } else {
-                            liElement.classList.remove("dragover");
-                            liElement.classList.add("dragover__top");
-                        }
-                    } else if (event.clientY > nodeRect.bottom - dragHeight) {
-                        liElement.classList.remove("dragover");
-                        liElement.classList.add("dragover__bottom");
-                    } else if (event.clientY < nodeRect.top + dragHeight) {
-                        liElement.classList.remove("dragover");
-                        liElement.classList.add("dragover__top");
-                    } else {
-                        liElement.classList.remove("dragover__top", "dragover__bottom");
+                    }
+                    if (dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root") {
+                        event.preventDefault();
+                        return;
                     }
                 }
-                if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
-                    (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot)) {
-                } else {
-                    liElement.classList.add("dragover");
+                if (dragOverLastObj.element && dragOverLastObj.element === liElement && dragOverLastObj.positionY !== event.clientY) {
+                    const notebookElement = hasClosestByAttribute(liElement, "data-sortmode", null);
+                    if (!notebookElement) {
+                        event.preventDefault();
+                        return;
+                    }
+                    const notebookSort = notebookElement.getAttribute("data-sortmode");
+                    if ((dragOverLastObj.sourceOnlyRoot && targetType === "navigation-root" && window.siyuan.config.fileTree.sort === 6) ||
+                        (!dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root" &&
+                            (notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")))
+                    ) {
+                        const nodeRect = liElement.getBoundingClientRect();
+                        const dragHeight = nodeRect.height * .2;
+                        if (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot) {
+                            if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                                liElement.classList.remove("dragover");
+                                liElement.classList.add("dragover__bottom");
+                            } else {
+                                liElement.classList.remove("dragover");
+                                liElement.classList.add("dragover__top");
+                            }
+                        } else if (event.clientY > nodeRect.bottom - dragHeight) {
+                            liElement.classList.remove("dragover");
+                            liElement.classList.add("dragover__bottom");
+                        } else if (event.clientY < nodeRect.top + dragHeight) {
+                            liElement.classList.remove("dragover");
+                            liElement.classList.add("dragover__top");
+                        } else {
+                            liElement.classList.remove("dragover__top", "dragover__bottom");
+                        }
+                    }
+                    if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
+                        (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot)) {
+                    } else {
+                        liElement.classList.add("dragover");
+                    }
                 }
-            }
-            if (dragOverLastObj.element !== liElement) {
-                dragOverLastObj.element = liElement;
-            }
-            dragOverLastObj.positionY = event.clientY;
+                if (dragOverLastObj.element !== liElement) {
+                    dragOverLastObj.element = liElement;
+                }
+                dragOverLastObj.positionY = event.clientY;
+                event.preventDefault();
+            });
             event.preventDefault();
         });
         let counter = 0;

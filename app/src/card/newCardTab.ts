@@ -26,13 +26,14 @@ export const newCardModel = (options: {
         data: options.data,
         async init() {
             if (options.data.cardsData) {
+                let cardsData = options.data.cardsData;
                 for (let i = 0; i < options.app.plugins.length; i++) {
-                    options.data.cardsData = await options.app.plugins[i].updateCards(options.data.cardsData);
+                    cardsData = await options.app.plugins[i].updateCards(options.data.cardsData);
                 }
                 this.element.innerHTML = genCardHTML({
                     id: this.data.id,
                     cardType: this.data.cardType,
-                    cardsData: options.data.cardsData,
+                    cardsData,
                     isTab: true,
                 });
 
@@ -42,7 +43,7 @@ export const newCardModel = (options: {
                     id: this.data.id,
                     title: this.data.title,
                     cardType: this.data.cardType,
-                    cardsData: options.data.cardsData,
+                    cardsData,
                     index: options.data.index,
                 });
                 customObj.editors.push(editor);
@@ -56,9 +57,9 @@ export const newCardModel = (options: {
                     deckID: this.data.id,
                     notebook: this.data.id,
                 }, async (response) => {
-                    let cardsData: ICardData = response.data;
+                    let cardsData = response.data;
                     for (let i = 0; i < options.app.plugins.length; i++) {
-                        cardsData = await options.app.plugins[i].updateCards(response.data);
+                        cardsData = await options.app.plugins[i].updateCards(cardsData);
                     }
                     this.element.innerHTML = genCardHTML({
                         id: this.data.id,
@@ -75,7 +76,6 @@ export const newCardModel = (options: {
                         cardType: this.data.cardType,
                         cardsData,
                     });
-
                     customObj.editors.push(editor);
                 });
             }
@@ -97,15 +97,28 @@ export const newCardModel = (options: {
                 deckID: this.data.id,
                 notebook: this.data.id,
             }, async (response) => {
+                let cardsData = response.data;
                 for (let i = 0; i < options.app.plugins.length; i++) {
-                    options.data.cardsData = await options.app.plugins[i].updateCards(options.data.cardsData);
+                    cardsData = await options.app.plugins[i].updateCards(cardsData);
                 }
+                customObj.editors.forEach(item => {
+                    item.destroy();
+                });
                 this.element.innerHTML = genCardHTML({
                     id: this.data.id,
                     cardType: this.data.cardType,
-                    cardsData: response.data,
+                    cardsData,
                     isTab: true,
                 });
+                editor = await bindCardEvent({
+                    app: options.app,
+                    element: this.element,
+                    id: this.data.id,
+                    title: this.data.title,
+                    cardType: this.data.cardType,
+                    cardsData,
+                });
+                customObj.editors.push(editor);
             });
         }
     });

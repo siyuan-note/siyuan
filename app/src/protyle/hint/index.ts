@@ -16,7 +16,7 @@ import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {insertHTML} from "../util/insertHTML";
 import {highlightRender} from "../render/highlightRender";
-import {assetMenu, imgMenu} from "../../menus/protyle";
+import {assetMenu, imgMenu, setFold} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {getDisplayName, pathPosix} from "../../util/pathName";
@@ -209,8 +209,24 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         if (this.element.classList.contains("fn__none")) {
             this.element.innerHTML = '<div class="fn__loading" style="height: 128px;position: initial"><img width="64px" src="/stage/loading-pure.svg"></div>';
             this.element.classList.remove("fn__none");
-            const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
-            setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+            if (this.source === "av") {
+                const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
+                if (cellElement) {
+                    /// #if !MOBILE
+                    const cellRect = cellElement.getBoundingClientRect();
+                    setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
+                    /// #else
+                    setPosition(this.element, 0, 0);
+                    /// #endif
+                }
+            } else {
+                /// #if !MOBILE
+                const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+                setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+                /// #else
+                setPosition(this.element, 0, 0);
+                /// #endif
+            }
         } else {
             this.element.insertAdjacentHTML("beforeend", '<div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div>');
         }
@@ -805,8 +821,13 @@ ${genHintItemHTML(item)}
                     if (value === "<div>") {
                         newHTML = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeHTMLBlock" class="render-node" data-subtype="block">${genIconHTML()}<div><protyle-html data-content=""></protyle-html><span style="position: absolute">${Constants.ZWSP}</span></div><div class="protyle-attr" contenteditable="false"></div></div>`;
                     }
-                    nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const oldHTML = nodeElement.outerHTML;
+                    let foldData;
+                    if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+                        nodeElement.getAttribute("fold") === "1") {
+                        foldData = setFold(protyle, nodeElement, true, false, false, true);
+                    }
+                    nodeElement.insertAdjacentHTML("afterend", newHTML);
                     const newId = newHTML.substr(newHTML.indexOf('data-node-id="') + 14, 22);
                     nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${newId}"]`);
                     // https://github.com/siyuan-note/siyuan/issues/6864
@@ -815,7 +836,7 @@ ${genHintItemHTML(item)}
                             item.style.minWidth = "60px";
                         });
                     }
-                    transaction(protyle, [{
+                    const doOperations: IOperation[] = [{
                         data: oldHTML,
                         id,
                         action: "update"
@@ -824,14 +845,20 @@ ${genHintItemHTML(item)}
                         id: newId,
                         previousID: id,
                         action: "insert"
-                    }], [{
+                    }];
+                    const undoOperations: IOperation[] = [{
                         id: newId,
                         action: "delete"
                     }, {
                         data: html,
                         id,
                         action: "update"
-                    }]);
+                    }];
+                    if (foldData) {
+                        doOperations.push(...foldData.doOperations);
+                        undoOperations.push(...foldData.undoOperations);
+                    }
+                    transaction(protyle, doOperations, undoOperations);
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && (value.length > 3 || nodeElement.classList.contains("render-node")))) {
                     protyle.toolbar.showRender(protyle, nodeElement);

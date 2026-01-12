@@ -39,12 +39,12 @@ export const initStatus = (isWindow = false) => {
                 break;
             } else if (target.classList.contains("status__backgroundtask")) {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === "statusBackgroundTask") {
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_BACKGROUND_TASK) {
                     window.siyuan.menus.menu.remove();
                     return;
                 }
                 window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", "statusBackgroundTask");
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_BACKGROUND_TASK);
                 JSON.parse(target.getAttribute("data-tasks")).forEach((item: { action: string }) => {
                     window.siyuan.menus.menu.append(new MenuItem({
                         type: "readonly",
@@ -58,12 +58,12 @@ export const initStatus = (isWindow = false) => {
                 break;
             } else if (target.id === "statusHelp") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
-                    window.siyuan.menus.menu.element.getAttribute("data-name") === "statusHelp") {
+                    window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_STATUS_HELP) {
                     window.siyuan.menus.menu.remove();
                     return;
                 }
                 window.siyuan.menus.menu.remove();
-                window.siyuan.menus.menu.element.setAttribute("data-name", "statusHelp");
+                window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_STATUS_HELP);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.userGuide,
                     icon: "iconHelp",

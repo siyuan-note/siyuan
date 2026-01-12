@@ -1,6 +1,6 @@
 {
 	"ID": "20240530101000-f16hpct",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-74jt3rs",
@@ -978,7 +978,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "PDF、HTML、Word などの形式でのエクスポートはサポートしていません"
+									"Data": "PDF や Word などの形式へのエクスポートはサポートされていません"
 								}
 							]
 						}

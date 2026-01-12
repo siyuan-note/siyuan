@@ -1,6 +1,6 @@
 {
 	"ID": "20240530101000-3qhz7br",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-rgsbrsc",
@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20251211094239"
 	},
 	"Children": [
 		{
@@ -1971,7 +1971,7 @@
 			"Properties": {
 				"ID": "20240530101000-2k3sk89",
 				"id": "20240530101000-qg4hn8x",
-				"updated": "20240530101000"
+				"updated": "20251209213443"
 			},
 			"Children": [
 				{
@@ -1986,7 +1986,7 @@
 			"Properties": {
 				"ID": "20240530101000-78fv7al",
 				"id": "20240530101000-jf3juor",
-				"updated": "20240530101000"
+				"updated": "20251209213426"
 			},
 			"Children": [
 				{
@@ -1997,7 +1997,6 @@
 					"ID": "20240530101000-5cczm4i",
 					"Type": "NodeParagraph",
 					"Properties": {
-						"ID": "20240530101000-iznlrms",
 						"id": "20240530101000-5cczm4i",
 						"updated": "20240530101000"
 					},
@@ -2005,6 +2004,156 @@
 						{
 							"Type": "NodeText",
 							"Data": "これはコンテンツのブロック参照ではなく、HTML のブロック引用 (Blockquote) であることに注意してください。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251209213443-j5jhozb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20251209213443-j5jhozb",
+				"updated": "20251211094239"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "吹き出しブロック"
+				}
+			]
+		},
+		{
+			"ID": "20251211094239-hhtrwax",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094239-hhtrwax",
+				"updated": "20251211094239"
+			},
+			"CalloutType": "NOTE",
+			"CalloutTitle": "Note",
+			"CalloutIcon": "✏️",
+			"Children": [
+				{
+					"ID": "20251211094239-8ahrdao",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094239-8ahrdao",
+						"updated": "20251211094239"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "ユーザーがざっと目を通す場合でも考慮すべき情報を強調表示します。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094239-ratz2rv",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094239-ratz2rv",
+				"updated": "20251211094239"
+			},
+			"CalloutType": "TIP",
+			"CalloutTitle": "Tip",
+			"CalloutIcon": "💡",
+			"Children": [
+				{
+					"ID": "20251211094239-3a7eude",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094239-3a7eude",
+						"updated": "20251211094239"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "ユーザーの作業効率を高めるための補足情報です。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094239-rnlp7y4",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094239-rnlp7y4",
+				"updated": "20251211094239"
+			},
+			"CalloutType": "IMPORTANT",
+			"CalloutTitle": "Important",
+			"CalloutIcon": "❗",
+			"Children": [
+				{
+					"ID": "20251211094239-xq36ase",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094239-xq36ase",
+						"updated": "20251211094239"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "ユーザーが作業を成功させるために必要な重要な情報です。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094239-ck7ejz3",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094239-ck7ejz3",
+				"updated": "20251211094239"
+			},
+			"CalloutType": "WARNING",
+			"CalloutTitle": "Warning",
+			"CalloutIcon": "⚠️",
+			"Children": [
+				{
+					"ID": "20251211094239-q5nl8va",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094239-q5nl8va",
+						"updated": "20251211094239"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "潜在的なリスクがあるため、ユーザーが直ちに注意を払う必要がある重要な内容です。"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20251211094239-8enlxly",
+			"Type": "NodeCallout",
+			"Properties": {
+				"id": "20251211094239-8enlxly",
+				"updated": "20251211094239"
+			},
+			"CalloutType": "CAUTION",
+			"CalloutTitle": "Caution",
+			"CalloutIcon": "🚨",
+			"Children": [
+				{
+					"ID": "20251211094239-3wa1x7f",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20251211094239-3wa1x7f",
+						"updated": "20251211094239"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "ある行動によって生じる可能性のある負の結果を示します。"
 						}
 					]
 				}
@@ -3685,7 +3834,7 @@
 			"Properties": {
 				"ID": "20240530101000-7lnq0j6",
 				"id": "20240530101000-jsiuxor",
-				"updated": "20240530101000"
+				"updated": "20251203220656"
 			},
 			"Children": [
 				{
@@ -3737,9 +3886,8 @@
 			"ID": "20240530101000-fjm1gdk",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-8046wgs",
 				"id": "20240530101000-fjm1gdk",
-				"updated": "20240530101000"
+				"updated": "20251203220656"
 			},
 			"Children": [
 				{
@@ -3749,7 +3897,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://mermaid.js.org/",
+					"TextMarkAHref": "https://flowchart.js.org/",
 					"TextMarkTextContent": "flowchart.js"
 				},
 				{

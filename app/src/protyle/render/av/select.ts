@@ -11,6 +11,7 @@ import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import * as dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
+import {Constants} from "../../../constants";
 
 let cellValues: IAVCellValue[];
 
@@ -152,7 +153,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     let desc = target.parentElement.dataset.desc;
     let color = target.parentElement.dataset.color;
     const fields = getFieldsByData(data);
-    const menu = new Menu("av-col-option", () => {
+    const menu = new Menu(Constants.MENU_AV_COL_OPTION, () => {
         if ((name === inputElement.value && desc === descElement.value) || !inputElement.value) {
             return;
         }

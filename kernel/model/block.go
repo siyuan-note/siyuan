@@ -20,12 +20,16 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"html"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/open-spaced-repetition/go-fsrs/v3"
@@ -81,7 +85,7 @@ type RiffCard struct {
 
 func (block *Block) IsContainerBlock() bool {
 	switch block.Type {
-	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock":
+	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock", "NodeCallout":
 		return true
 	}
 	return false
@@ -103,6 +107,7 @@ type Path struct {
 	Children []*Path  `json:"children,omitempty"` // 子路径节点
 	Depth    int      `json:"depth"`              // 层级深度
 	Count    int      `json:"count"`              // 子块计数
+	Folded   bool     `json:"folded"`             // 是否折叠
 
 	Updated string `json:"updated"` // 更新时间
 	Created string `json:"created"` // 创建时间
@@ -200,49 +205,94 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	if nil == current || !current.IsBlock() {
 		return
 	}
+
+	if !current.ParentIs(ast.NodeList) { // 当前块不在列表内的情况
+		parentBlock := treenode.ParentBlock(current)
+		if nil != parentBlock {
+			parent = parentBlock.ID
+			if nil != parentBlock.Previous {
+				previous = parentBlock.Previous.ID
+			}
+			if nil != parentBlock.Next {
+				next = parentBlock.Next.ID
+			}
+		}
+		return
+	}
+
+	if ast.NodeListItem != current.Type && ast.NodeList != current.Parent.Type { // 当前块是列表内的块，但不是列表项或列表的情况
+		var listParent, listParent2 *ast.Node
+		listParentCount := 0
+		for parentBlock := treenode.ParentBlock(current); nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
+			if ast.NodeListItem == parentBlock.Type {
+				listParentCount++
+				if 1 < listParentCount {
+					listParent2 = parentBlock
+					break
+				}
+				listParent = parentBlock
+				continue
+			}
+		}
+
+		if 1 == listParentCount { // 列表只有一层的情况
+			if nil != listParent {
+				parent = listParent.ID
+				previous, next = getPreNext(listParent)
+			}
+			return
+		}
+
+		parent = listParent2.ID
+		if nil == listParent.Previous {
+			if nil != listParent2.Previous {
+				previous = listParent2.Previous.ID
+			}
+		} else {
+			previous = listParent.Previous.ID
+		}
+		if nil == listParent.Next {
+			if nil != listParent2.Next {
+				next = listParent2.Next.ID
+			}
+		} else {
+			next = listParent.Next.ID
+		}
+		return
+	}
+
+	if ast.NodeListItem == current.Type {
+		// 当前块是列表项的情况
+		parentBlock := treenode.ParentBlock(current)
+		if nil != parentBlock {
+			parentBlock = treenode.ParentBlock(parentBlock)
+		}
+		if nil != parentBlock {
+			parent = parentBlock.ID
+			previous, next = getPreNext(current)
+		}
+		return
+	}
+
+	// 当前块是列表的情况
 	parentBlock := treenode.ParentBlock(current)
-	if nil == parentBlock {
-		return
-	}
-
-	parent = parentBlock.ID
-	if ast.NodeDocument == parentBlock.Type {
+	if nil != parentBlock {
 		parent = parentBlock.ID
-
-		if nil != current.Previous && current.Previous.IsBlock() {
-			previous = current.Previous.ID
-			if flb := treenode.FirstChildBlock(current.Previous); nil != flb {
-				previous = flb.ID
-			}
-		}
-
-		if nil != current.Next && current.Next.IsBlock() {
-			next = current.Next.ID
-			if flb := treenode.FirstChildBlock(current.Next); nil != flb {
-				next = flb.ID
-			}
-		}
+		previous, next = getPreNext(current)
 		return
 	}
+	return
+}
 
-	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
-		if nil != parentBlock.Previous && parentBlock.Previous.IsBlock() {
-			previous = parentBlock.Previous.ID
-			if flb := treenode.FirstChildBlock(parentBlock.Previous); nil != flb {
-				previous = flb.ID
-			}
-			break
+func getPreNext(parent *ast.Node) (previous, next string) {
+	if nil != parent {
+		if nil != parent.Previous {
+			previous = parent.Previous.ID
 		}
-	}
-	parentBlock = treenode.ParentBlock(current)
-	for ; nil != parentBlock; parentBlock = treenode.ParentBlock(parentBlock) {
-		if nil != parentBlock.Next && parentBlock.Next.IsBlock() {
-			next = parentBlock.Next.ID
-			if flb := treenode.FirstChildBlock(parentBlock.Next); nil != flb {
-				next = flb.ID
-			}
-			break
+		if nil != parent.Next {
+			next = parent.Next.ID
 		}
+		return
 	}
 	return
 }
@@ -739,6 +789,10 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 	fillBlockRefCount(childrenHeadings)
 
 	transaction = &Transaction{}
+	if "1" == node.IALAttr("fold") {
+		unfoldHeading(node, node)
+	}
+
 	luteEngine := util.NewLute()
 	for _, c := range childrenHeadings {
 		op := &Operation{}
@@ -786,9 +840,169 @@ func GetBlockDOMs(ids []string) (ret map[string]string) {
 		if nil == node {
 			continue
 		}
+
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			if parentFoldedHeading := treenode.GetParentFoldedHeading(n); nil != parentFoldedHeading {
+				n.SetIALAttr("parent-heading", parentFoldedHeading.ID)
+			}
+			return ast.WalkContinue
+		})
+
 		ret[id] = luteEngine.RenderNodeBlockDOM(node)
 	}
 	return
+}
+
+func GetBlockDOMWithEmbed(id string) (ret string) {
+	if "" == id {
+		return
+	}
+
+	doms := GetBlockDOMsWithEmbed([]string{id})
+	ret = doms[id]
+	return
+}
+
+func GetBlockDOMsWithEmbed(ids []string) (ret map[string]string) {
+	ret = map[string]string{}
+	if 0 == len(ids) {
+		return
+	}
+
+	luteEngine := NewLute()
+	trees := filesys.LoadTrees(ids)
+	for id, tree := range trees {
+		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			continue
+		}
+
+		resolveEmbedContent(node, luteEngine)
+
+		// 处理折叠标题
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			if parentFoldedHeading := treenode.GetParentFoldedHeading(n); nil != parentFoldedHeading {
+				n.SetIALAttr("parent-heading", parentFoldedHeading.ID)
+			}
+			return ast.WalkContinue
+		})
+
+		htmlContent := luteEngine.RenderNodeBlockDOM(node)
+
+		htmlContent = processEmbedHTML(htmlContent)
+
+		ret[id] = htmlContent
+	}
+	return
+}
+
+func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
+	ast.Walk(n, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeBlockQueryEmbed != node.Type {
+			return ast.WalkContinue
+		}
+
+		// 获取嵌入块的查询语句
+		scriptNode := node.ChildByType(ast.NodeBlockQueryEmbedScript)
+		if nil == scriptNode {
+			return ast.WalkContinue
+		}
+		stmt := scriptNode.TokensStr()
+		stmt = html.UnescapeString(stmt)
+		stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
+
+		// 执行查询获取嵌入的块
+		sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+
+		// 收集所有嵌入块的内容 HTML
+		var embedContents []string
+		for _, sqlBlock := range sqlBlocks {
+			if "query_embed" == sqlBlock.Type {
+				continue
+			}
+
+			subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+			if nil == subTree {
+				continue
+			}
+
+			// 将内容转换为 HTML，直接使用原始 AST 节点渲染以保持正确的 data-node-id
+			var contentHTML string
+			if "d" == sqlBlock.Type {
+				// 文档块：直接使用原始 AST 节点渲染，保持原始的 data-node-id
+				contentHTML = luteEngine.RenderNodeBlockDOM(subTree.Root)
+			} else if "h" == sqlBlock.Type {
+				// 标题块：使用标题及其子块的原始 AST 节点渲染
+				h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+				if nil == h {
+					continue
+				}
+				var hChildren []*ast.Node
+				hChildren = append(hChildren, h)
+				hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+
+				// 创建一个临时的文档节点来包含所有子节点
+				tempRoot := &ast.Node{Type: ast.NodeDocument}
+				for _, hChild := range hChildren {
+					tempRoot.AppendChild(hChild)
+				}
+				contentHTML = luteEngine.RenderNodeBlockDOM(tempRoot)
+			} else {
+				// 其他块：直接使用原始 AST 节点渲染
+				blockNode := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+				if nil == blockNode {
+					continue
+				}
+				contentHTML = luteEngine.RenderNodeBlockDOM(blockNode)
+			}
+
+			if contentHTML != "" {
+				embedContents = append(embedContents, contentHTML)
+			}
+		}
+
+		// 如果有内容，在嵌入块上添加内容标记
+		if len(embedContents) > 0 {
+			node.SetIALAttr("embed-content", strings.Join(embedContents, ""))
+		}
+
+		return ast.WalkContinue
+	})
+}
+
+func processEmbedHTML(htmlStr string) string {
+	// 使用正则表达式查找所有带有 embed-content 属性的嵌入块
+	embedPattern := `<div[^>]*data-type="NodeBlockQueryEmbed"[^>]*embed-content="[^"]*"[^>]*>`
+	re := regexp.MustCompile(embedPattern)
+
+	return re.ReplaceAllStringFunc(htmlStr, func(match string) string {
+		// 提取 embed-content 属性值
+		contentPattern := `embed-content="([^"]*)"`
+		contentRe := regexp.MustCompile(contentPattern)
+		contentMatches := contentRe.FindStringSubmatch(match)
+
+		if len(contentMatches) > 1 {
+			embedContent := contentMatches[1]
+			// HTML 解码
+			embedContent = html.UnescapeString(embedContent)
+
+			// 移除 embed-content 属性，避免在最终 HTML 中显示
+			cleanMatch := contentRe.ReplaceAllString(match, "")
+
+			// 将内容插入到嵌入块内部
+			return cleanMatch + embedContent + "</div>"
+		}
+
+		return match
+	})
 }
 
 func GetBlockKramdown(id, mode string) (ret string) {
@@ -814,8 +1028,45 @@ func GetBlockKramdown(id, mode string) (ret string) {
 		ret = treenode.ExportNodeStdMd(root, luteEngine)
 	} else {
 		tree.Root = root
-		formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+		formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		ret = string(formatRenderer.Render())
+	}
+	return
+}
+
+func GetBlockKramdowns(ids []string, mode string) (ret map[string]string) {
+	ret = map[string]string{}
+	if 0 == len(ids) {
+		return
+	}
+
+	luteEngine := NewLute()
+	if "md" == mode {
+		// `/api/block/getBlockKramdown` link/image URLs are no longer encoded with spaces https://github.com/siyuan-note/siyuan/issues/15611
+		luteEngine.SetPreventEncodeLinkSpace(true)
+	}
+
+	trees := filesys.LoadTrees(ids)
+	for id, tree := range trees {
+		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			continue
+		}
+
+		addBlockIALNodes(tree, false)
+		root := &ast.Node{Type: ast.NodeDocument}
+		root.AppendChild(node.Next) // IAL
+		root.PrependChild(node)
+
+		var kramdown string
+		if "md" == mode {
+			kramdown = treenode.ExportNodeStdMd(root, luteEngine)
+		} else {
+			tree.Root = root
+			formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+			kramdown = string(formatRenderer.Render())
+		}
+		ret[id] = kramdown
 	}
 	return
 }

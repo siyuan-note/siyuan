@@ -1,10 +1,11 @@
 {
 	"ID": "20210824202056-udkf7wg",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210824202056-udkf7wg",
 		"title": "Widgets",
+		"type": "doc",
 		"updated": "20230820184255"
 	},
 	"Children": [

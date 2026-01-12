@@ -1,5 +1,6 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
+import {Constants} from "../../../constants";
 
 const addFormatItem = (options: {
     menu: Menu,
@@ -40,7 +41,7 @@ export const formatNumber = (options: {
     avID: string,
     oldFormat: string
 }) => {
-    const menu = new Menu("av-col-format-number");
+    const menu = new Menu(Constants.MENU_AV_COL_FORMAT_NUMBER);
     addFormatItem({
         menu,
         protyle: options.protyle,
@@ -145,6 +146,15 @@ export const formatNumber = (options: {
         protyle: options.protyle,
         colId: options.colId,
         avID: options.avID,
+        format:"TRY",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
         format: "CAD",
         oldFormat: options.oldFormat,
         avPanelElement: options.avPanelElement,
@@ -221,6 +231,16 @@ export const formatNumber = (options: {
         oldFormat: options.oldFormat,
         avPanelElement: options.avPanelElement,
     });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format:"ILS",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+
     const rect = options.element.getBoundingClientRect();
     menu.open({
         x: rect.left,

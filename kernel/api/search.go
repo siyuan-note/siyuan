@@ -88,11 +88,6 @@ func fullTextSearchAssetContent(c *gin.Context) {
 		return
 	}
 
-	if !model.IsPaidUser() {
-		ret.Code = 1
-		return
-	}
-
 	page, pageSize, query, types, method, orderBy := parseSearchAssetContentArgs(arg)
 	assetContents, matchedAssetCount, pageCount := model.FullTextSearchAssetContent(query, types, method, orderBy, page, pageSize)
 	ret.Data = map[string]interface{}{
@@ -302,6 +297,9 @@ func searchEmbedBlock(c *gin.Context) {
 	excludeIDsArg := arg["excludeIDs"].([]interface{})
 	var excludeIDs []string
 	for _, excludeID := range excludeIDsArg {
+		if nil == excludeID {
+			continue
+		}
 		excludeIDs = append(excludeIDs, excludeID.(string))
 	}
 	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块

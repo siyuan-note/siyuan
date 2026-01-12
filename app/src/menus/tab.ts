@@ -13,6 +13,7 @@ import {getAllWnds} from "../layout/getAll";
 import {Asset} from "../asset";
 import {writeText} from "../protyle/util/compatibility";
 import {getAssetName, pathPosix} from "../util/pathName";
+import {Constants} from "../constants";
 
 const closeMenu = (tab: Tab) => {
     const unmodifiedTabs: Tab[] = [];
@@ -181,6 +182,7 @@ const splitSubMenu = (app: App, tab: Tab) => {
 
 export const initTabMenu = (app: App, tab: Tab) => {
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TAB);
     closeMenu(tab);
     window.siyuan.menus.menu.append(new MenuItem({
         id: "split",

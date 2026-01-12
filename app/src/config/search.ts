@@ -2,6 +2,7 @@ import {Constants} from "../constants";
 import {genItemPanel} from "./index";
 import {keymap} from "./keymap";
 import {App} from "../index";
+import {isPhablet} from "../protyle/util/compatibility";
 
 const getLang = (keys: string[]) => {
     const langArray: string[] = [];
@@ -33,7 +34,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 文档树
         getLang(["selectOpen", "tabLimit", "fileTree", "fileTree2", "fileTree3", "fileTree4", "fileTree5",
             "fileTree6", "fileTree7", "fileTree8", "fileTree9", "fileTree10", "fileTree12", "fileTree13", "fileTree15",
-            "fileTree16", "fileTree17", "fileTree18", "fileTree19", "fileTree20", "fileTree21", "fileTree22", "fileTree23"]),
+            "fileTree16", "fileTree17", "fileTree18", "fileTree19", "fileTree20", "fileTree21", "fileTree22", "fileTree23",
+            "fileTree24", "fileTree25", "recentDocsMaxListCount", "recentDocsMaxListCountTip"]),
 
         // 闪卡
         getLang(["riffCard", "flashcardNewCardLimit", "flashcardNewCardLimitTip", "flashcardReviewCardLimit",
@@ -59,7 +61,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         // 外观
         getLang(["language", "language1", "appearance", "appearance1", "appearance2", "appearance3", "appearance4",
             "appearance5", "appearance6", "appearance8", "appearance9", "appearance10", "appearance11", "appearance16",
-            "appearance17", "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
+            "appearance17", "appearance18", "resetLayout", "reset", "icon", "themeLight", "themeDark", "close", "themeOS", "theme",
             "theme2", "theme11", "theme12", "customEmoji", "customEmojiTip", "refresh"]),
 
         // 集市
@@ -102,12 +104,14 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "downloadLatestVer", "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
             "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip",
             "dataRepoPurge", "dataRepoPurgeTip", "dataRepoAutoPurgeIndexRetentionDays", "dataRepoAutoPurgeRetentionIndexesDaily",
-            "vacuumDataIndex", "vacuumDataIndexTip", "rebuildDataIndex", "rebuildDataIndexTip"]),
+            "vacuumDataIndex", "vacuumDataIndexTip", "clearTempFiles", "clearTempFilesTip", "rebuildDataIndex", "rebuildDataIndexTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
-    /// #if !BROWSER
-    inputElement.focus();
-    /// #endif
+    if (!isPhablet()) {
+        inputElement.focus();
+    } else {
+        (document.activeElement as HTMLElement)?.blur();
+    }
     const updateTab = () => {
         const indexList: number[] = [];
         const inputValue = inputElement.value;

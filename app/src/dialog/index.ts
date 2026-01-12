@@ -112,18 +112,18 @@ left:${left || "auto"};top:${top || "auto"}">
         inputElement.focus();
         let timeStamp: number;
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (event.isComposing || event.repeat) {
+            if (event.isComposing) {
                 event.preventDefault();
                 return;
             }
-            if (event.key === "Escape") {
+            if (event.key === "Escape" && !event.repeat) {
                 this.destroy();
                 event.preventDefault();
                 event.stopPropagation();
                 return;
             }
-            if (!event.shiftKey && isNotCtrl(event) && event.key === "Enter" && enterEvent && bindEnter) {
-                if (timeStamp && event.timeStamp - timeStamp < 124) {
+            if (!event.shiftKey && isNotCtrl(event) && event.key === "Enter" && enterEvent && bindEnter && !event.repeat) {
+                if (timeStamp && event.timeStamp - timeStamp < Constants.TIMEOUT_INPUT) {
                     return;
                 }
                 timeStamp = event.timeStamp;

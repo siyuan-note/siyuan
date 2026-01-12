@@ -11,6 +11,7 @@ import {loadAssets} from "../util/assets";
 import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {useShell} from "../util/pathName";
+import {setStatusBar} from "./util/setStatusBar";
 
 export const appearance = {
     element: undefined as Element,
@@ -150,14 +151,27 @@ export const appearance = {
         </button>
     </div>
 </div>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.appearance16}
-        <div class="b3-label__text">${window.siyuan.languages.appearance17}</div>
+<div class="b3-label">
+    ${window.siyuan.languages.appearance16}
+    <div class="fn__hr"></div>
+    <label class="fn__flex">
+        <div class="fn__flex-center fn__flex-1 ft__on-surface">
+           ${window.siyuan.languages.appearance17}
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="hideStatusBar" type="checkbox"${window.siyuan.config.appearance.hideStatusBar ? " checked" : ""}>
+    </label>
+    <div class="fn__hr"></div>
+    <div class="fn__flex config__item">
+        <div class="fn__flex-center fn__flex-1 ft__on-surface">
+            ${window.siyuan.languages.appearance18}
+        </div>
+        <span class="fn__space"></span>
+        <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="statusBarSetting">
+            <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
+        </button>
     </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="hideStatusBar" type="checkbox"${window.siyuan.config.appearance.hideStatusBar ? " checked" : ""}>
-</label>
+</div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.appearance10}
@@ -186,43 +200,18 @@ export const appearance = {
             lang: (appearance.element.querySelector("#lang") as HTMLSelectElement).value,
             closeButtonBehavior: (appearance.element.querySelector("#closeButtonBehavior") as HTMLInputElement).checked ? 1 : 0,
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
-        }, async response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                if (response.data.mode !== window.siyuan.config.appearance.mode ||
-                    (response.data.mode === window.siyuan.config.appearance.mode && (
-                            (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
-                            (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
-                    )
-                ) {
-                    if (window.destroyTheme) {
-                        try {
-                            await window.destroyTheme();
-                            window.destroyTheme = undefined;
-                            document.getElementById("themeScript").remove();
-                        } catch (e) {
-                            console.error("destroyTheme error: " + e);
-                        }
-                    } else {
-                        exportLayout({
-                            errorExit: false,
-                            cb() {
-                                window.location.reload();
-                            },
-                        });
-                        return;
-                    }
-                }
+            statusBar: {
+                msgTaskDatabaseIndexCommitDisabled: window.siyuan.config.appearance.statusBar.msgTaskDatabaseIndexCommitDisabled,
+                msgTaskHistoryDatabaseIndexCommitDisabled: window.siyuan.config.appearance.statusBar.msgTaskHistoryDatabaseIndexCommitDisabled,
+                msgTaskAssetDatabaseIndexCommitDisabled: window.siyuan.config.appearance.statusBar.msgTaskAssetDatabaseIndexCommitDisabled,
+                msgTaskHistoryGenerateFileDisabled: window.siyuan.config.appearance.statusBar.msgTaskHistoryGenerateFileDisabled,
             }
-            appearance.onSetAppearance(response.data);
-            if (response.data.hideStatusBar) {
-                document.getElementById("status").classList.add("fn__none");
-            } else {
-                document.getElementById("status").classList.remove("fn__none");
-            }
+        }, () => {
             resetFloatDockSize();
         });
     },
     bindEvent: () => {
+        setStatusBar(appearance.element.querySelector("#statusBarSetting"));
         appearance.element.querySelector("#codeSnippet").addEventListener("click", () => {
             openSnippets();
         });

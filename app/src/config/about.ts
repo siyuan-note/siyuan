@@ -89,10 +89,20 @@ export const about = {
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         ${(() => {
-            const ipv4 = window.siyuan.config.localIPs.filter(ip => !(ip.startsWith("[") && ip.endsWith("]")));
-            const ipv6 = window.siyuan.config.localIPs.filter(ip => (ip.startsWith("[") && ip.endsWith("]")));
-            return `<div class="b3-label__text${ipv4.length > 0 ? "" : " fn__none"}"><code class="fn__code">${ipv4.join("</code> <code class='fn__code'>")}</code></div>
-                    <div class="b3-label__text${ipv6.length > 0 ? "" : " fn__none"}"><code class="fn__code">${ipv6.join("</code> <code class='fn__code'>")}</code></div>`;
+            const ipv4Codes: string[] = [];
+            const ipv6Codes: string[] = [];
+            for (const ip of window.siyuan.config.localIPs) {
+                if (!ip.trim()) {
+                    break;
+                }
+                if (ip.startsWith("[") && ip.endsWith("]")) {
+                    ipv6Codes.push(`<code class="fn__code">${ip}</code>`);
+                } else {
+                    ipv4Codes.push(`<code class="fn__code">${ip}</code>`);
+                }
+            }
+            return `<div class="b3-label__text${ipv4Codes.length ? "" : " fn__none"}">${ipv4Codes.join(" ")}</div>
+                    <div class="b3-label__text${ipv6Codes.length ? "" : " fn__none"}">${ipv6Codes.join(" ")}</div>`;
         })()}
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
     </div>
@@ -178,6 +188,16 @@ export const about = {
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.clearTempFiles}
+        <div class="b3-label__text">${window.siyuan.languages.clearTempFilesTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button id="clearTempFiles" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+    </button>
+</div>
+<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
         <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
     </div>
@@ -200,7 +220,7 @@ ${checkUpdateHTML}
     <div class="b3-label__text">
         ${window.siyuan.languages.about17}
     </div>
-    <div class="b3-label__text fn__flex config__item" style="padding: 4px 0 4px 4px;">
+    <div class="b3-label__text fn__flex config__item">
         <select id="aboutScheme" class="b3-select">
             <option value="" ${window.siyuan.config.system.networkProxy.scheme === "" ? "selected" : ""}>${window.siyuan.languages.directConnection}</option>
             <option value="socks5" ${window.siyuan.config.system.networkProxy.scheme === "socks5" ? "selected" : ""}>SOCKS5</option>
@@ -259,6 +279,9 @@ ${checkUpdateHTML}
         });
         about.element.querySelector("#rebuildDataIndex").addEventListener("click", () => {
             fetchPost("/api/system/rebuildDataIndex", {}, () => {});
+        });
+        about.element.querySelector("#clearTempFiles").addEventListener("click", () => {
+            fetchPost("/api/system/clearTempFiles", {}, () => {});
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {

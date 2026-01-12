@@ -12,6 +12,7 @@ import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import {upDownHint} from "../../../util/upDownHint";
 import {getFieldsByData} from "./view";
+import {Constants} from "../../../constants";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["select", "number", "date", "created", "updated"].includes(type)) {
@@ -431,7 +432,9 @@ export const setFilter = async (options: {
         let value = "";
         if (filterValue) {
             if (filterValue.type === "mAsset") {
-                value = filterValue.mAsset[0]?.content || "";
+                if (filterValue.mAsset) {
+                    value = filterValue.mAsset[0]?.content || "";
+                }
             } else {
                 value = filterValue[filterValue.type as "text"].content || "";
             }
@@ -449,18 +452,21 @@ export const setFilter = async (options: {
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200"><div class="protyle-hint b3-list b3-list--background fn__none"></div>`,
+            label: `<input style="margin: 4px 0" value="${value}" class="b3-text-field fn__size200"><div style="position:fixed" class="protyle-hint b3-list b3-list--background fn__none"></div>`,
             bind(element) {
                 const inputElement = element.querySelector("input");
-                const listElement = inputElement.nextElementSibling;
+                const listElement = inputElement.nextElementSibling as HTMLElement;
                 const renderList = () => {
+                    if (!colData.relation || !colData.relation.avID) {
+                        return;
+                    }
                     fetchPost("/api/av/getAttributeViewPrimaryKeyValues", {
-                        id: options.data.id,
+                        id: colData.relation.avID,
                         keyword: inputElement.value,
                     }, response => {
                         let html = "";
                         (response.data.rows.values as IAVCellValue[] || []).forEach((item, index) => {
-                            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.block.content}</div>`;
+                            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item.block.content || window.siyuan.languages.untitled}</div>`;
                         });
                         listElement.innerHTML = html;
                         if (html === "") {
@@ -468,6 +474,8 @@ export const setFilter = async (options: {
                         } else {
                             listElement.classList.remove("fn__none");
                         }
+                        const inputRect = inputElement.getBoundingClientRect();
+                        setPosition(listElement, inputRect.left, inputRect.bottom + 4, inputRect.height + 4);
                     });
                 };
                 inputElement.addEventListener("input", (event: KeyboardEvent) => {
@@ -496,6 +504,13 @@ export const setFilter = async (options: {
                         }
                         event.preventDefault();
                         event.stopPropagation();
+                    }
+                });
+                listElement.addEventListener("click", (event) => {
+                    const itemElement = hasClosestByClassName(event.target as Element, "b3-list-item");
+                    if (itemElement) {
+                        inputElement.value = itemElement.textContent.replace(/\n/g, " ");
+                        listElement.classList.add("fn__none");
                     }
                 });
             }
@@ -648,10 +663,6 @@ export const setFilter = async (options: {
     }
     toggleEmpty(operationElement, operationElement.value, filterValue.type);
     menu.open({x: rectTarget.left, y: rectTarget.bottom});
-    if (filterValue.type === "relation") {
-        const inputRect = textElements[0].getBoundingClientRect();
-        textElements[0].nextElementSibling.setAttribute("style", `position:fixed;top:${inputRect.bottom}px;left:${inputRect.left}px`);
-    }
     if (textElements.length > 0) {
         textElements[0].select();
     }
@@ -666,7 +677,7 @@ export const addFilter = (options: {
     protyle: IProtyle
     blockElement: Element
 }) => {
-    const menu = new Menu("av-add-filter");
+    const menu = new Menu(Constants.MENU_AV_ADD_FILTER);
     getFieldsByData(options.data).forEach((column) => {
         let filter: IAVFilter;
         options.data.view.filters.find((item) => {
@@ -773,22 +784,29 @@ export const getFiltersHTML = (data: IAV) => {
                             filterText = ` ${filterText}≤ ${dateValue}`;
                         }
                     }
-                } else if (["mSelect", "select"].includes(filterValue.type) && filterValue.mSelect?.length > 0) {
+                } else if (["mSelect", "select"].includes(filterValue.type)) {
                     let selectContent = "";
-                    filterValue.mSelect.forEach((item, index) => {
-                        selectContent += item.content;
-                        if (index !== filterValue.mSelect.length - 1) {
-                            selectContent += ", ";
+                    if (filterValue.mSelect?.length > 0) {
+                        filterValue.mSelect.forEach((item, index) => {
+                            selectContent += item.content;
+                            if (index !== filterValue.mSelect.length - 1) {
+                                selectContent += ", ";
+                            }
+                        });
+                        if (selectContent) {
+                            if ("Contains" === filter.operator) {
+                                filterText = `: ${filterText}${selectContent}`;
+                            } else if (filter.operator === "Does not contains") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
+                            } else if (filter.operator === "=") {
+                                filterText = `: ${filterText}${selectContent}`;
+                            } else if (filter.operator === "!=") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                            }
                         }
-                    });
-                    if ("Contains" === filter.operator) {
-                        filterText = `: ${filterText}${selectContent}`;
-                    } else if (filter.operator === "Does not contains") {
-                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${selectContent}`;
-                    } else if (filter.operator === "=") {
-                        filterText = `: ${filterText}${selectContent}`;
-                    } else if (filter.operator === "!=") {
-                        filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${selectContent}`;
+                    }
+                    if (!selectContent && ["rollup", "mAsset"].includes(item.type) && !["Is empty", "Is not empty"].includes(filter.operator)) {
+                        filterText = "";
                     }
                 } else if (filterValue.type === "number" && filterValue.number && filterValue.number.isNotEmpty) {
                     if (["=", "!=", ">", "<"].includes(filter.operator)) {
@@ -798,33 +816,38 @@ export const getFiltersHTML = (data: IAV) => {
                     } else if ("<=" === filter.operator) {
                         filterText = ` ${filterText}≤ ${filterValue.number.content}`;
                     }
-                } else if (["text", "block", "url", "mAsset", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
+                } else if (["text", "block", "url", "mAsset", "phone", "email", "relation", "template"].includes(filterValue.type)) {
                     let content: string;
-                    if (filterValue.type === "relation") {
-                        content = filterValue.relation.blockIDs[0] || "";
-                    } else if (filterValue.type === "mAsset") {
-                        content = filterValue.mAsset[0]?.content || "";
-                    } else {
-                        content = filterValue[filterValue.type as "text"].content || "";
-                    }
-                    if (content) {
-                        if (["=", "Contains"].includes(filter.operator)) {
-                            filterText = `: ${filterText}${content}`;
-                        } else if (filter.operator === "Does not contains") {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
-                        } else if (filter.operator === "!=") {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${content}`;
-                        } else if ("Starts with" === filter.operator) {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
-                        } else if ("Ends with" === filter.operator) {
-                            filterText = ` ${filterText}${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
-                        } else if ([">", "<"].includes(filter.operator)) {
-                            filterText = ` ${filterText}${filter.operator} ${content}`;
-                        } else if (">=" === filter.operator) {
-                            filterText = ` ${filterText}≥ ${content}`;
-                        } else if ("<=" === filter.operator) {
-                            filterText = ` ${filterText}≤ ${content}`;
+                    if (filterValue[filterValue.type as "text"]) {
+                        if (filterValue.type === "relation") {
+                            content = filterValue.relation.blockIDs[0] || "";
+                        } else if (filterValue.type === "mAsset") {
+                            content = filterValue.mAsset[0]?.content || "";
+                        } else {
+                            content = filterValue[filterValue.type as "text"].content || "";
                         }
+                        if (content) {
+                            if (["=", "Contains"].includes(filter.operator)) {
+                                filterText = `: ${filterText}${content}`;
+                            } else if (filter.operator === "Does not contains") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
+                            } else if (filter.operator === "!=") {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorIsNot} ${content}`;
+                            } else if ("Starts with" === filter.operator) {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
+                            } else if ("Ends with" === filter.operator) {
+                                filterText = ` ${filterText}${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                            } else if ([">", "<"].includes(filter.operator)) {
+                                filterText = ` ${filterText}${filter.operator} ${content}`;
+                            } else if (">=" === filter.operator) {
+                                filterText = ` ${filterText}≥ ${content}`;
+                            } else if ("<=" === filter.operator) {
+                                filterText = ` ${filterText}≤ ${content}`;
+                            }
+                        }
+                    }
+                    if (!content && ["rollup", "mAsset"].includes(item.type) && !["Is empty", "Is not empty"].includes(filter.operator)) {
+                        filterText = "";
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterText ? " b3-chip--primary" : ""}">

@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-<a href="README.md">English</a> | <a href="README_ja_JP.md">日本語</a>
+<a href="README.md">English</a> | <a href="README_ja_JP.md">日本語</a> | <a href="README_tr_TR.md">Türkçe</a>
 </p>
 
 ---
@@ -40,11 +40,13 @@
 * [🚀 下载安装](#-下载安装)
   * [应用市场](#应用市场)
   * [安装包](#安装包)
+  * [包管理器](#包管理器)
   * [Docker 部署](#docker-部署)
   * [Unraid 部署](#unraid-部署)
-  * [宝塔面板 部署](#宝塔面板部署)
-  * [小皮面板 部署](#小皮面板部署)
-  * [1Panel面板 部署](#1Panel面板部署)
+  * [TrueNAS 部署](#trueNAS-部署)
+  * [宝塔面板部署](#宝塔面板部署)
+  * [小皮面板部署](#小皮面板部署)
+  * [1Panel 面板部署](#1Panel-面板部署)
   * [内部预览版](#内部预览版)
 * [🏘️ 社区](#️-社区)
 * [🛠️ 开发指南](#️-开发指南)
@@ -65,9 +67,9 @@
 
 思源笔记是一款隐私优先的个人知识管理系统，支持细粒度块级引用和 Markdown 所见即所得。
 
-![feature0.png](https://b3logfile.com/file/2024/01/feature0-1orBRlI.png)
+![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
 
-![feature51.png](https://b3logfile.com/file/2024/02/feature5-1-uYYjAqy.png)
+![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
 
 欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
 
@@ -164,6 +166,16 @@
 
 * [B3log](https://b3log.org/siyuan/download.html)
 * [GitHub](https://github.com/siyuan-note/siyuan/releases)
+
+### 包管理器
+
+#### `siyuan`
+
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan.svg)](https://repology.org/project/siyuan/versions)
+
+#### `siyuan-note`
+
+[![包状态](https://repology.org/badge/vertical-allrepos/siyuan-note.svg)](https://repology.org/project/siyuan-note/versions)
 
 ### Docker 部署
 
@@ -307,6 +319,42 @@ Publish parameters: --accessAuthCode=******（访问授权码）
 
 </details>
 
+### TrueNAS 部署
+
+<details>
+<summary>TrueNAS 部署文档</summary>
+
+注意：首先在 TrueNAS Shell 中运行下面的命令。请将 `Pool_1/Apps_Data/siyuan` 更新为与你的应用数据集对应的路径。
+
+```shell
+zfs create Pool_1/Apps_Data/siyuan
+chown -R 1001:1002 /mnt/Pool_1/Apps_Data/siyuan
+chmod 755 /mnt/Pool_1/Apps_Data/siyuan
+```
+
+进入 Apps - DiscoverApps - More Options（右上，除 Custom App 外）- 通过 YAML 安装
+
+模板参考：
+
+```yaml
+services:
+  siyuan:
+    image: b3log/siyuan
+    container_name: siyuan
+    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    ports:
+      - 6806:6806
+    volumes:
+      - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Adjust to your dataset path 
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles  # Replace with your timezone if needed
+      - PUID=1001
+      - PGID=1002
+```
+
+</details>
+
 ### 宝塔面板部署
 
 <details>
@@ -362,7 +410,7 @@ Publish parameters: --accessAuthCode=******（访问授权码）
 
 </details>
 
-### 1Panel面板部署
+### 1Panel 面板部署
 
 <details>
 <summary>1Panel面板 部署文档</summary>

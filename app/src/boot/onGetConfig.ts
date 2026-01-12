@@ -7,13 +7,14 @@ import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
 import {onWindowsMsg} from "../window/onWindowsMsg";
+import {initFocusFix} from "../protyle/util/compatibility";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
-import {openFile, openFileById} from "../editor/util";
+import {openFile} from "../editor/util";
 import {exitSiYuan} from "../dialog/processSystem";
 import {isWindow} from "../util/functions";
 import {initStatus} from "../layout/status";
@@ -22,14 +23,14 @@ import {replaceLocalPath} from "../editor/rename";
 import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
 import {openChangelog} from "./openChangelog";
-import {getIdFromSYProtocol, isSYProtocol} from "../util/pathName";
 import {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
-import {checkFold} from "../util/noRelyPCFunction";
 import {correctHotkey} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
+import {processSYLink} from "../editor/openLink";
+import {getAllEditor} from "../layout/getAll";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
@@ -68,6 +69,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initBar(app);
     initStatus();
     initWindow(app);
+    /// #if !BROWSER
+    initFocusFix();
+    /// #endif
     appearance.onSetAppearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
@@ -86,7 +90,15 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             resizeTopBar();
             window.siyuan.menus.menu.resetPosition();
             firstResize = true;
-        }, 200);
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0);
+                getAllEditor().forEach(item => {
+                    if (item.protyle.wysiwyg.element.contains(range.startContainer)) {
+                        item.protyle.toolbar.render(item.protyle, range);
+                    }
+                });
+            }
+        }, Constants.TIMEOUT_RESIZE);
     });
 };
 
@@ -112,6 +124,10 @@ const winOnMaxRestore = async () => {
 
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
+    ipcRenderer.send(Constants.SIYUAN_CMD, {
+        cmd: "setSpellCheckerLanguages",
+        languages: window.siyuan.config.editor.spellcheckLanguages
+    });
     const winOnClose = (close = false) => {
         exportLayout({
             cb() {
@@ -170,75 +186,7 @@ export const initWindow = async (app: App) => {
     });
     if (!isWindow()) {
         ipcRenderer.on(Constants.SIYUAN_OPEN_URL, (event, url) => {
-            let urlObj: URL;
-            try {
-                urlObj = new URL(url);
-                if (urlObj.protocol !== "siyuan:") {
-                    return;
-                }
-            } catch (error) {
-                return;
-            }
-            if (urlObj && urlObj.hostname === "plugins") {
-                const pluginNameType = urlObj.pathname.split("/")[1];
-                if (!pluginNameType) {
-                    return;
-                }
-                app.plugins.find(plugin => {
-                    if (pluginNameType.startsWith(plugin.name)) {
-                        // siyuan://plugins/plugin-name/foo?bar=baz
-                        plugin.eventBus.emit("open-siyuan-url-plugin", {url});
-
-                        // https://github.com/siyuan-note/siyuan/pull/9256
-                        if (pluginNameType.split("/")[0] !== plugin.name) {
-                            // siyuan://plugins/plugin-samplecustom_tab?title=自定义页签&icon=iconFace&data={"text": "This is the custom plugin tab I opened via protocol."}
-                            let data = urlObj.searchParams.get("data");
-                            try {
-                                data = JSON.parse(data || "{}");
-                            } catch (e) {
-                                console.log("Error open plugin tab with protocol:", e);
-                            }
-                            openFile({
-                                app,
-                                custom: {
-                                    title: urlObj.searchParams.get("title"),
-                                    icon: urlObj.searchParams.get("icon"),
-                                    data,
-                                    id: pluginNameType
-                                },
-                            });
-                        }
-                        return true;
-                    }
-                });
-                return;
-            }
-            if (urlObj && isSYProtocol(url)) {
-                const id = getIdFromSYProtocol(url);
-                const focus = urlObj.searchParams.get("focus") === "1";
-                fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
-                    if (existResponse.data) {
-                        checkFold(id, (zoomIn) => {
-                            openFileById({
-                                app,
-                                id,
-                                action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                                zoomIn: zoomIn || focus
-                            });
-                        });
-                        ipcRenderer.send(Constants.SIYUAN_CMD, "show");
-                    }
-                    app.plugins.forEach(plugin => {
-                        plugin.eventBus.emit("open-siyuan-url-block", {
-                            url,
-                            id,
-                            focus,
-                            exist: existResponse.data,
-                        });
-                    });
-                });
-                return;
-            }
+            processSYLink(app, url);
         });
     }
     ipcRenderer.on(Constants.SIYUAN_OPEN_FILE, (event, data) => {
@@ -281,12 +229,13 @@ export const initWindow = async (app: App) => {
             watermark: ipcData.watermark,
             landscape: ipcData.pdfOptions.landscape,
             marginType: ipcData.pdfOptions.marginType,
-            pageSize: ipcData.pdfOptions.pageSize,
+            pageSize: ipcData.pageSize,
             scale: ipcData.pdfOptions.scale,
             marginTop: ipcData.pdfOptions.margins.top,
             marginRight: ipcData.pdfOptions.margins.right,
             marginBottom: ipcData.pdfOptions.margins.bottom,
             marginLeft: ipcData.pdfOptions.margins.left,
+            paged: ipcData.paged,
         };
         setStorageVal(Constants.LOCAL_EXPORTPDF, window.siyuan.storage[Constants.LOCAL_EXPORTPDF]);
         try {

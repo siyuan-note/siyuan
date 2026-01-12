@@ -5,6 +5,7 @@ import {MenuItem} from "../../menus/Menu";
 import {popSearch} from "../menu/search";
 import {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
+import {Constants} from "../../constants";
 
 export class MobileTags {
     public element: HTMLElement;
@@ -128,13 +129,15 @@ export class MobileTags {
                 target = target.parentElement;
             }
         });
-        this.update();
+        this.update(false);
     }
 
-    public update() {
+    public update(ignoreMaxListHint = true) {
         this.element.lastElementChild.classList.remove("fn__none");
         fetchPost("/api/tag/getTag", {
-            sort: window.siyuan.config.tag.sort
+            sort: window.siyuan.config.tag.sort,
+            app: Constants.SIYUAN_APPID,
+            ignoreMaxListHint,
         }, response => {
             if (this.openNodes) {
                 this.openNodes = this.tree.getExpandIds();

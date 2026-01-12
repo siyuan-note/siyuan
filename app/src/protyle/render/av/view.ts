@@ -12,7 +12,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     if (options.protyle.disabled) {
         return;
     }
-    const menu = new Menu("av-view");
+    const menu = new Menu(Constants.MENU_AV_VIEW);
     if (menu.isOpen) {
         return;
     }
@@ -250,6 +250,11 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
                     blockID: options.blockElement.getAttribute("data-node-id"),
                     id: currentElement.dataset.id,
                     avID: options.blockElement.getAttribute("data-av-id"),
+                }], [{
+                    action: "setAttrViewBlockView",
+                    blockID: options.blockElement.getAttribute("data-node-id"),
+                    id: options.blockElement.querySelector(".av__views .item--focus").getAttribute("data-id"),
+                    avID: options.blockElement.getAttribute("data-av-id"),
                 }]);
                 options.menuElement.remove();
                 focusBlock(options.blockElement);
@@ -340,6 +345,25 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         }
     });
     addMenu.addItem({
+        icon: "iconBoard",
+        label: window.siyuan.languages.kanban,
+        click() {
+            transaction(protyle, [{
+                action: "addAttrViewView",
+                avID,
+                layout: "kanban",
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }], [{
+                action: "removeAttrViewView",
+                layout: "kanban",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }]);
+        }
+    });
+    addMenu.addItem({
         icon: "iconGallery",
         label: window.siyuan.languages.gallery,
         click() {
@@ -372,6 +396,8 @@ export const getViewIcon = (type: string) => {
             return "iconTable";
         case "gallery":
             return "iconGallery";
+        case "kanban":
+            return "iconBoard";
     }
 };
 
@@ -381,6 +407,8 @@ export const getViewName = (type: string) => {
             return window.siyuan.languages.table;
         case "gallery":
             return window.siyuan.languages.gallery;
+        case "kanban":
+            return window.siyuan.languages.kanban;
     }
 };
 

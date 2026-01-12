@@ -1433,6 +1433,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.VideoBlock = types["videoBlock"]
 		s.IFrameBlock = types["iframeBlock"]
 		s.WidgetBlock = types["widgetBlock"]
+		s.Callout = types["callout"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -1451,6 +1452,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.VideoBlock = Conf.Search.VideoBlock
 		s.IFrameBlock = Conf.Search.IFrameBlock
 		s.WidgetBlock = Conf.Search.WidgetBlock
+		s.Callout = Conf.Search.Callout
 	}
 	return s.TypeFilter()
 }

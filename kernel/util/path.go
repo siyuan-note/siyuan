@@ -165,6 +165,14 @@ func IsRelativePath(dest string) bool {
 	if '/' == dest[0] {
 		return false
 	}
+
+	// 检查特定协议前缀
+	lowerDest := strings.ToLower(dest)
+	if strings.HasPrefix(lowerDest, "mailto:") ||
+		strings.HasPrefix(lowerDest, "tel:") ||
+		strings.HasPrefix(lowerDest, "sms:") {
+		return false
+	}
 	return !strings.Contains(dest, ":/") && !strings.Contains(dest, ":\\")
 }
 
@@ -308,8 +316,12 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 	return
 }
 
-func IsAssetLinkDest(dest []byte) bool {
-	return bytes.HasPrefix(dest, []byte("assets/"))
+func IsAssetLinkDest(dest []byte, includeServePath bool) bool {
+	return bytes.HasPrefix(dest, []byte("assets/")) ||
+		(includeServePath && (bytes.HasPrefix(dest, []byte("emojis/")) ||
+			bytes.HasPrefix(dest, []byte("plugins/")) ||
+			bytes.HasPrefix(dest, []byte("public/")) ||
+			bytes.HasPrefix(dest, []byte("widgets/"))))
 }
 
 var (

@@ -1,4 +1,7 @@
 import {getAllModels} from "../layout/getAll";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 import {setInlineStyle} from "../util/assets";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -12,6 +15,12 @@ import {Menu} from "../plugin/Menu";
 export const editor = {
     element: undefined as Element,
     genHTML: () => {
+        let spellcheckTip = "";
+        /// #if !BROWSER
+        spellcheckTip = window.siyuan.languages.spellcheckTip2;
+        /// #else
+        spellcheckTip = window.siyuan.languages.spellcheckTip;
+        /// #endif
         return `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fullWidth}
@@ -97,14 +106,17 @@ export const editor = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="listItemDotNumberClickFocus" type="checkbox"${window.siyuan.config.editor.listItemDotNumberClickFocus ? " checked" : ""}/>
 </label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.spellcheck}
-        <div class="b3-label__text">${window.siyuan.languages.spellcheckTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="spellcheck" type="checkbox"${window.siyuan.config.editor.spellcheck ? " checked" : ""}/>
-</label>
+<div class="b3-label">
+    <label class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.spellcheck}
+            <div class="b3-label__text">${spellcheckTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="spellcheck" type="checkbox"${window.siyuan.config.editor.spellcheck ? " checked" : ""}/>
+    </label>
+    <div class="b3-chips fn__none" id="spellcheckLanguages"></div>
+</div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.onlySearchForDoc}
@@ -145,22 +157,22 @@ export const editor = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="virtualBlockRef" type="checkbox"${window.siyuan.config.editor.virtualBlockRef ? " checked" : ""}/>
 </label>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
+<div class="b3-label">
+    <div class="fn__block">
         ${window.siyuan.languages.md9}
         <div class="b3-label__text">${window.siyuan.languages.md36}</div>
+        <div class="fn__hr"></div>
+        <textarea class="b3-text-field fn__block" id="virtualBlockRefInclude">${window.siyuan.config.editor.virtualBlockRefInclude}</textarea>
     </div>
-    <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefInclude" value="${window.siyuan.config.editor.virtualBlockRefInclude}" />
 </div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
+<div class="b3-label">
+    <div class="fn__block">
         ${window.siyuan.languages.md35}
         <div class="b3-label__text">${window.siyuan.languages.md36}</div>
         <div class="b3-label__text">${window.siyuan.languages.md41}</div>
+        <div class="fn__hr"></div>
+        <textarea class="b3-text-field fn__block" id="virtualBlockRefExclude">${window.siyuan.config.editor.virtualBlockRefExclude}</textarea>
     </div>
-    <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="virtualBlockRefExclude" value="${window.siyuan.config.editor.virtualBlockRefExclude}" />
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
@@ -366,7 +378,33 @@ export const editor = {
     <input class="b3-switch fn__flex-center" id="editorMarkdownInlineMark" type="checkbox"${window.siyuan.config.editor.markdown.inlineMark ? " checked" : ""}/>
 </label>`;
     },
-    bindEvent: () => {
+    bindEvent: async () => {
+        /// #if !BROWSER
+        const languages: string[] = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "availableSpellCheckerLanguages",
+        });
+        let spellcheckLanguagesHTML = "";
+        languages.forEach(item => {
+            spellcheckLanguagesHTML += `<div class="fn__pointer b3-chip b3-chip--middle${window.siyuan.config.editor.spellcheckLanguages.includes(item) ? " b3-chip--current" : ""}">${item}</div>`;
+        });
+        const spellcheckLanguagesElement = editor.element.querySelector("#spellcheckLanguages");
+        spellcheckLanguagesElement.innerHTML = spellcheckLanguagesHTML;
+        spellcheckLanguagesElement.addEventListener("click", (event) => {
+            const target = event.target as Element;
+            if (target.classList.contains("b3-chip")) {
+                target.classList.toggle("b3-chip--current");
+                ipcRenderer.send(Constants.SIYUAN_CMD, {
+                    cmd: "setSpellCheckerLanguages",
+                    languages: Array.from(spellcheckLanguagesElement.querySelectorAll(".b3-chip--current")).map(item => item.textContent)
+                });
+                setEditor();
+            }
+        });
+        if (window.siyuan.config.editor.spellcheck) {
+            spellcheckLanguagesElement.classList.remove("fn__none");
+        }
+        /// #endif
+
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
         fontFamilyElement.addEventListener("click", () => {
             fetchPost("/api/system/getSysFonts", {}, (response) => {
@@ -444,14 +482,20 @@ export const editor = {
                 listLogicalOutdent: (editor.element.querySelector("#listLogicalOutdent") as HTMLInputElement).checked,
                 listItemDotNumberClickFocus: (editor.element.querySelector("#listItemDotNumberClickFocus") as HTMLInputElement).checked,
                 spellcheck: (editor.element.querySelector("#spellcheck") as HTMLInputElement).checked,
+                /// #if !BROWSER
+                spellcheckLanguages: Array.from(spellcheckLanguagesElement.querySelectorAll(".b3-chip--current")).map(item => item.textContent),
+                /// #else
+                // @ts-ignore
+                spellcheckLanguages: window.siyuan.config.editor.spellcheckLanguages,
+                /// #endif
                 onlySearchForDoc: (editor.element.querySelector("#onlySearchForDoc") as HTMLInputElement).checked,
                 floatWindowMode: parseInt((editor.element.querySelector("#floatWindowMode") as HTMLSelectElement).value),
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,
                 virtualBlockRef: (editor.element.querySelector("#virtualBlockRef") as HTMLInputElement).checked,
-                virtualBlockRefInclude: (editor.element.querySelector("#virtualBlockRefInclude") as HTMLInputElement).value,
-                virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLInputElement).value,
+                virtualBlockRefInclude: (editor.element.querySelector("#virtualBlockRefInclude") as HTMLTextAreaElement).value,
+                virtualBlockRefExclude: (editor.element.querySelector("#virtualBlockRefExclude") as HTMLTextAreaElement).value,
                 blockRefDynamicAnchorTextMaxLen: parseInt((editor.element.querySelector("#blockRefDynamicAnchorTextMaxLen") as HTMLInputElement).value),
                 backlinkExpandCount: parseInt((editor.element.querySelector("#backlinkExpandCount") as HTMLInputElement).value),
                 backmentionExpandCount: parseInt((editor.element.querySelector("#backmentionExpandCount") as HTMLInputElement).value),
@@ -472,6 +516,11 @@ export const editor = {
         editor.element.querySelectorAll("input.b3-switch, select.b3-select, input.b3-slider").forEach((item) => {
             item.addEventListener("change", () => {
                 setEditor();
+                /// #if !BROWSER
+                if (item.id === "spellcheck") {
+                    spellcheckLanguagesElement.classList.toggle("fn__none");
+                }
+                /// #endif
             });
         });
         editor.element.querySelectorAll("textarea.b3-text-field, input.b3-text-field, input.b3-slider").forEach((item) => {

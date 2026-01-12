@@ -1,10 +1,11 @@
 {
 	"ID": "20220708102441-u6wopo9",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20220708102441-u6wopo9",
 		"title": "資料備份",
+		"type": "doc",
 		"updated": "20220708104039"
 	},
 	"Children": [

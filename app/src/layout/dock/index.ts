@@ -9,7 +9,7 @@ import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
 import {Model} from "../Model";
-import {saveLayout, setPanelFocus} from "../util";
+import {adjustLayout, saveLayout, setPanelFocus} from "../util";
 import {getDockByType, resizeTabs} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
@@ -112,6 +112,13 @@ export class Dock {
 
         if (activeElements.length === 0) {
             this.resizeElement.classList.add("fn__none");
+            // 如果没有打开的侧栏，隐藏 layout 的子元素
+            if (this.layout.children.length > 1) {
+                this.layout.children.forEach(child => {
+                    child.element.classList.add("fn__none");
+                });
+                this.layout.children[0].element.nextElementSibling?.classList.add("fn__none");
+            }
         } else {
             activeElements.forEach(item => {
                 this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
@@ -606,8 +613,8 @@ export class Dock {
                                     blockId: editor?.protyle?.block?.rootID,
                                     isPreview: editor?.protyle?.preview ? !editor.protyle.preview.element.classList.contains("fn__none") : false
                                 });
-                                if (editor?.protyle?.title?.editElement) {
-                                    outline.updateDocTitle(editor.protyle?.background?.ial);
+                                if (editor?.protyle?.block?.rootID) {
+                                    outline.updateDocTitle(editor?.protyle?.background?.ial);
                                 }
                                 tab.addModel(outline);
                             }
@@ -700,7 +707,8 @@ export class Dock {
                 this.layout.element.style.opacity = "";
                 this.hideResizeTimeout = window.setTimeout(() => {
                     this.resizeElement.classList.remove("fn__none");
-                }, 200);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
+                    adjustLayout();
+                }, Constants.TIMEOUT_TRANSITION);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
             }
             if (document.activeElement) {
                 (document.activeElement as HTMLElement).blur();
@@ -861,7 +869,7 @@ export class Dock {
             if (typeof tabIndex === "undefined" && !TYPES.includes(item.type)) {
                 return;
             }
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeyLangId="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;

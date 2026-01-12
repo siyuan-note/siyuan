@@ -419,6 +419,14 @@ func (value *Value) SetValByType(typ KeyType, val interface{}) {
 }
 
 func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+	// 单独处理汇总
+	if KeyTypeRollup == value.Type {
+		if 1 > len(value.Rollup.Contents) {
+			return nil
+		}
+		return value.Rollup.Contents[0].GetValByType(typ)
+	}
+
 	switch typ {
 	case KeyTypeBlock:
 		return value.Block
@@ -490,6 +498,7 @@ const (
 	NumberFormatRUB NumberFormat = "RUB" // 卢布
 	NumberFormatINR NumberFormat = "INR" // 卢比
 	NumberFormatKRW NumberFormat = "KRW" // 韩元
+	NumberFormatTRY NumberFormat = "TRY" // 土耳其里拉
 	NumberFormatCAD NumberFormat = "CAD" // 加拿大元
 	NumberFormatCHF NumberFormat = "CHF" // 瑞士法郎
 	NumberFormatTHB NumberFormat = "THB" // 泰铢
@@ -499,6 +508,7 @@ const (
 	NumberFormatMOP NumberFormat = "MOP" // 澳门币
 	NumberFormatSGD NumberFormat = "SGD" // 新加坡元
 	NumberFormatNZD NumberFormat = "NZD" // 新西兰元
+	NumberFormatILS NumberFormat = "ILS" // 以色列新谢克尔
 )
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
@@ -520,7 +530,11 @@ func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNu
 }
 
 func (number *ValueNumber) FormatNumber() {
-	number.FormattedContent = formatNumber(number.Content, number.Format)
+	if !number.IsNotEmpty {
+		number.FormattedContent = ""
+	} else {
+		number.FormattedContent = formatNumber(number.Content, number.Format)
+	}
 }
 
 func formatNumber(content float64, format NumberFormat) string {
@@ -534,34 +548,37 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatPercent:
 		s := fmt.Sprintf("%.2f", content*100)
 		return strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
-	case NumberFormatUSD:
+	case NumberFormatUSD, "usDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("$%.2f", content)
-	case NumberFormatCNY:
+	case NumberFormatCNY, "yuan":
 		p := message.NewPrinter(language.Chinese)
 		return p.Sprintf("CN¥%.2f", content)
-	case NumberFormatEUR:
+	case NumberFormatEUR, "euro":
 		p := message.NewPrinter(language.German)
 		return p.Sprintf("€%.2f", content)
-	case NumberFormatGBP:
+	case NumberFormatGBP, "pound":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("£%.2f", content)
-	case NumberFormatJPY:
+	case NumberFormatJPY, "yen":
 		p := message.NewPrinter(language.Japanese)
 		return p.Sprintf("¥%.0f", content)
-	case NumberFormatRUB:
+	case NumberFormatRUB, "ruble":
 		p := message.NewPrinter(language.Russian)
 		return p.Sprintf("₽%.2f", content)
-	case NumberFormatINR:
+	case NumberFormatINR, "rupee":
 		p := message.NewPrinter(language.Hindi)
 		return p.Sprintf("₹%.2f", content)
-	case NumberFormatKRW:
+	case NumberFormatKRW, "won":
 		p := message.NewPrinter(language.Korean)
 		return p.Sprintf("₩%.0f", content)
-	case NumberFormatCAD:
+	case NumberFormatTRY, "turkishLira":
+		p := message.NewPrinter(language.Turkish)
+		return p.Sprintf("₺%.2f", content)
+	case NumberFormatCAD, "canadianDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("CA$%.2f", content)
-	case NumberFormatCHF:
+	case NumberFormatCHF, "franc":
 		p := message.NewPrinter(language.French)
 		return p.Sprintf("CHF%.2f", content)
 	case NumberFormatTHB:
@@ -585,6 +602,9 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatNZD:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("NZ$%.2f", content)
+	case NumberFormatILS:
+		p := message.NewPrinter(language.Hebrew)
+		return p.Sprintf("ILS₪%.2f", content)
 	default:
 		return strconv.FormatFloat(content, 'f', -1, 64)
 	}
@@ -678,6 +698,15 @@ type ValueSelect struct {
 	Color   string `json:"color"` // 1-14
 }
 
+func MSelectRemoveOption(mSelect []*ValueSelect, opt string) (ret []*ValueSelect) {
+	for _, s := range mSelect {
+		if s.Content != opt {
+			ret = append(ret, s)
+		}
+	}
+	return
+}
+
 func MSelectExistOption(mSelect []*ValueSelect, opt string) bool {
 	for _, s := range mSelect {
 		if s.Content == opt {
@@ -731,8 +760,14 @@ const (
 	CreatedFormatDuration CreatedFormat = "duration"
 )
 
-func NewFormattedValueCreated(content, content2 int64, format CreatedFormat) (ret *ValueCreated) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueCreated(content, content2 int64, format CreatedFormat, isNotTime bool) (ret *ValueCreated) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
 	}
@@ -766,8 +801,14 @@ const (
 	UpdatedFormatDuration UpdatedFormat = "duration"
 )
 
-func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat) (ret *ValueUpdated) {
-	formatted := time.UnixMilli(content).Format("2006-01-02 15:04")
+func NewFormattedValueUpdated(content, content2 int64, format UpdatedFormat, isNotTime bool) (ret *ValueUpdated) {
+	var formatted string
+	if isNotTime {
+		formatted = time.UnixMilli(content).Format("2006-01-02")
+	} else {
+		formatted = time.UnixMilli(content).Format("2006-01-02 15:04")
+	}
+
 	if 0 < content2 {
 		formatted += " → " + time.UnixMilli(content2).Format("2006-01-02 15:04")
 	}
@@ -1094,11 +1135,21 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest && 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration)}}
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration, isNotTime)}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest && 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration)}}
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration, isNotTime)}}
 			}
 		default:
 			if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
@@ -1142,11 +1193,21 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)}}
 			}
 		}
 	case CalcOperatorLatest:
@@ -1186,11 +1247,20 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Updated {
+					isNotTime = !destKey.Updated.IncludeTime
+				}
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)}}
 			}
 		case KeyTypeCreated:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone)}}
+				isNotTime = false
+				if nil != destKey.Created {
+					isNotTime = !destKey.Created.IncludeTime
+				}
+
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)}}
 			}
 		}
 	case CalcOperatorChecked:

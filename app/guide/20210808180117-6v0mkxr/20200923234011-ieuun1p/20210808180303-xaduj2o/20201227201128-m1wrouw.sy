@@ -1,6 +1,6 @@
 {
 	"ID": "20201227201128-m1wrouw",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20201227201128-m1wrouw",
@@ -858,7 +858,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Does not support exporting to formats such as PDF, HTML, and Word"
+									"Data": "Does not support exporting to formats such as PDF and Word"
 								}
 							]
 						}

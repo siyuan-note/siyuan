@@ -27,23 +27,20 @@ const runCode = (code: string, sourceURL: string) => {
     return window.eval("(function anonymous(require, module, exports){".concat(code, "\n})\n//# sourceURL=").concat(sourceURL, "\n"));
 };
 
-export const loadPlugins = async (app: App, names?: string[]) => {
+export const loadPlugins = async (app: App, names?: string[], init = true) => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
-    let css = '<style id="pluginsStyle"></style>';  // 用于将内联样式插入到插件样式前的标识
-    // 为加快启动速度，不进行 await
-    response.data.forEach((item: IPluginData) => {
+    const pluginsStyle = getPluginsStyle();
+    for (let i = 0; i < response.data.length; i++) {
+        const item = response.data[i] as IPluginData;
         if (!names || (names && names.includes(item.name))) {
-            loadPluginJS(app, item);
+            if (init) {
+                // 初始化时为加快启动速度，已特殊处理，不进行 await
+                loadPluginJS(app, item);
+            } else {
+                await loadPluginJS(app, item);
+            }
+            insertPluginCSS(item, pluginsStyle);
         }
-        if (item.css) {
-            css += `<style id="pluginsStyle${item.name}">${item.css}</style>`;
-        }
-    });
-    const pluginsStyle = document.getElementById("pluginsStyle");
-    if (pluginsStyle) {
-        pluginsStyle.insertAdjacentHTML("afterend", css);
-    } else {
-        document.head.insertAdjacentHTML("beforeend", css);
     }
 };
 
@@ -70,7 +67,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
         displayName: item.displayName,
         name: item.name,
         i18n: item.i18n
-    });
+    }) as Plugin;
     app.plugins.push(plugin);
     try {
         await plugin.onload();
@@ -80,15 +77,30 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     return plugin;
 };
 
+const getPluginsStyle = () => {
+    let pluginsStyle = document.getElementById("pluginsStyle");
+    if (!pluginsStyle) {
+        pluginsStyle = document.createElement("style");
+        pluginsStyle.id = "pluginsStyle"; // 用于将内联样式插入到插件样式前的标识
+        document.head.append(pluginsStyle);
+    }
+    return pluginsStyle;
+};
+
+const insertPluginCSS = (item: IPluginData, pluginsStyle: HTMLElement) => {
+    if (!item.css) {
+        return;
+    }
+    const styleElement = document.createElement("style");
+    styleElement.id = "pluginsStyle" + item.name;
+    styleElement.textContent = item.css;
+    pluginsStyle.insertAdjacentElement("afterend", styleElement);
+};
+
 // 启用插件
 export const loadPlugin = async (app: App, item: IPluginData) => {
     const plugin = await loadPluginJS(app, item);
-    if (item.css) {
-        const styleElement = document.createElement("style");
-        styleElement.id = "pluginsStyle" + item.name;
-        styleElement.textContent = item.css;
-        document.head.append(styleElement);
-    }
+    insertPluginCSS(item, getPluginsStyle());
     afterLoadPlugin(plugin);
     saveLayout();
     getAllEditor().forEach(editor => {
@@ -210,16 +222,42 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     /// #endif
 };
 
-export const reloadPlugin = async (app: App, data: { upsertPlugins: string[], removePlugins: string[] }) => {
-    data.removePlugins.concat(data.upsertPlugins).forEach((item) => {
-        uninstall(app, item);
+export const reloadPlugin = async (app: App, data: {
+    upsertCodePlugins?: string[],
+    upsertDataPlugins?: string[],
+    unloadPlugins?: string[],
+    uninstallPlugins?: string[],
+} = {}) => {
+    const {upsertCodePlugins = [], upsertDataPlugins = [], unloadPlugins = [], uninstallPlugins = []} = data;
+    // 禁用
+    unloadPlugins.forEach((item) => {
+        uninstall(app, item, true);
     });
-    loadPlugins(app, data.upsertPlugins).then(() => {
+    // 卸载
+    uninstallPlugins.forEach((item) => {
+        uninstall(app, item, false);
+    });
+    upsertCodePlugins.forEach((item) => {
+        uninstall(app, item, true);
+    });
+    loadPlugins(app, upsertCodePlugins, false).then(() => {
         app.plugins.forEach(item => {
-            if (data.upsertPlugins.includes(item.name)) {
+            if (upsertCodePlugins.includes(item.name)) {
                 afterLoadPlugin(item);
+                getAllEditor().forEach(editor => {
+                    editor.protyle.toolbar.update(editor.protyle);
+                });
             }
         });
+    });
+    app.plugins.forEach(item => {
+        if (upsertDataPlugins.includes(item.name)) {
+            try {
+                item.onDataChanged();
+            } catch (e) {
+                console.error(`plugin ${item.name} onDataChanged error:`, e);
+            }
+        }
     });
     /// #if !MOBILE
     saveLayout();

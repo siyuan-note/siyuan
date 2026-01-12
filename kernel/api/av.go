@@ -77,7 +77,10 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
-	viewID := arg["viewID"].(string)
+	var viewID string
+	if viewIDArg := arg["viewID"]; nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
 	var groupID string
 	if groupIDArg := arg["groupID"]; nil != groupIDArg {
 		groupID = groupIDArg.(string)
@@ -918,7 +921,7 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	if _, ok := arg["itemID"]; ok {
 		itemID = arg["itemID"].(string)
 	} else if _, ok := arg["rowID"]; ok {
-		// TODO 划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
+		// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
 		itemID = arg["rowID"].(string)
 	}
 	value := arg["value"].(interface{})

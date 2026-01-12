@@ -54,11 +54,11 @@ func AutoGenerateFileHistory() {
 	ChangeHistoryTick(Conf.Editor.GenerateHistoryInterval)
 	for {
 		<-historyTicker.C
-		task.AppendTask(task.HistoryGenerateFile, generateFileHistory)
+		task.AppendTask(task.HistoryGenerateFile, GenerateFileHistory)
 	}
 }
 
-func generateFileHistory() {
+func GenerateFileHistory() {
 	defer logging.Recover()
 
 	if 1 > Conf.Editor.GenerateHistoryInterval {
@@ -219,10 +219,10 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	luteEngine.RenderOptions.ProtyleContenteditable = false
 	if isLargeDoc {
 		util.PushMsg(Conf.Language(36), 5000)
-		formatRenderer := render.NewFormatRenderer(historyTree, luteEngine.RenderOptions)
+		formatRenderer := render.NewFormatRenderer(historyTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		content = gulu.Str.FromBytes(formatRenderer.Render())
 	} else {
-		content = luteEngine.Tree2BlockDOM(historyTree, luteEngine.RenderOptions)
+		content = luteEngine.Tree2BlockDOM(historyTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	}
 	return
 }
@@ -259,7 +259,6 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 		historyDir = filepath.Join(util.HistoryDir, historyDir)
 
-		// 恢复包含的的属性视图 https://github.com/siyuan-note/siyuan/issues/9567
 		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 		for _, avNode := range avNodes {
 			srcAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
@@ -652,15 +651,7 @@ func (box *Box) generateDocHistory0() {
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
 			} else {
-				// 关联的属性视图也要复制到历史中 https://github.com/siyuan-note/siyuan/issues/9567
-				avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
-				for _, avNode := range avNodes {
-					srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
-					destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
-					if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
-						logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
-					}
-				}
+				generateAvHistory(tree, historyDir)
 			}
 		}
 	}
@@ -789,7 +780,20 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		return
 	}
 
+	generateAvHistory(tree, historyDir)
+
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+}
+
+func generateAvHistory(tree *parse.Tree, historyDir string) {
+	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
+	for _, avNode := range avNodes {
+		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
+		destAvPath := filepath.Join(historyDir, "storage", "av", avNode.AttributeViewID+".json")
+		if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+			logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+		}
+	}
 }
 
 func GetHistoryDir(suffix string) (ret string, err error) {

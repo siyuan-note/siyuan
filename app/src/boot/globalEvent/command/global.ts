@@ -8,7 +8,7 @@ import {popSearch} from "../../../mobile/menu/search";
 import {getRecentDocs} from "../../../mobile/menu/getRecentDocs";
 /// #else
 import {openNewWindow} from "../../../window/openNewWindow";
-import {selectOpenTab, toggleDockBar} from "../../../layout/dock/util";
+import {openBacklink, openGraph, openOutline, selectOpenTab, toggleDockBar} from "../../../layout/dock/util";
 import {openGlobalSearch} from "../../../search/util";
 import {workspaceMenu} from "../../../menus/workspace";
 import {isWindow} from "../../../util/functions";
@@ -40,6 +40,7 @@ import {openCard} from "../../../card/openCard";
 import {syncGuide} from "../../../sync/syncGuide";
 import {Wnd} from "../../../layout/Wnd";
 import {unsplitWnd} from "../../../menus/tab";
+import {openFile} from "../../../editor/util";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -147,6 +148,64 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "recentDocs":
             openRecentDocs();
+            return true;
+        case "recentClosed":
+            if (window.siyuan.closedTabs.length > 0) {
+                const closeData = window.siyuan.closedTabs.pop();
+                const childData = closeData.children as ILayoutJSON;
+                if (childData.instance === "Editor") {
+                    openFile({
+                        app,
+                        fileName: closeData.title,
+                        id: childData.blockId,
+                        rootID: childData.rootId,
+                        mode: childData.mode,
+                        action: [childData.action]
+                    });
+                } else if (childData.instance === "Asset") {
+                    openFile({
+                        app,
+                        assetPath: childData.path,
+                        page: childData.page,
+                    });
+                } else if (childData.instance === "Backlink") {
+                    openBacklink({
+                        app,
+                        blockId: childData.blockId,
+                        rootId: childData.rootId,
+                        title: closeData.title,
+                    });
+                } else if (childData.instance === "Graph") {
+                    openGraph({
+                        app,
+                        blockId: childData.blockId,
+                        rootId: childData.rootId,
+                        title: closeData.title
+                    });
+                } else if (childData.instance === "Outline") {
+                    openOutline({
+                        app,
+                        rootId: childData.blockId,
+                        title: closeData.title,
+                        isPreview: childData.isPreview
+                    });
+                } else if (childData.instance === "Search") {
+                    openFile({
+                        app,
+                        searchData: childData.config,
+                    });
+                } else if (childData.instance === "Custom") {
+                    openFile({
+                        app,
+                        custom: {
+                            icon: closeData.icon,
+                            title: closeData.title,
+                            data: childData.customModelData,
+                            id: childData.customModelType
+                        },
+                    });
+                }
+            }
             return true;
         case "toggleDock":
             toggleDockBar(document.querySelector("#barDock use"));

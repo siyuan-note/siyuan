@@ -41,14 +41,6 @@ type Flashcard struct {
 
 func NewFlashcard() *Flashcard {
 	param := fsrs.DefaultParam()
-	weightsBuilder := bytes.Buffer{}
-	for i, w := range param.W {
-		weightsBuilder.WriteString(fmt.Sprintf("%.2f", w))
-		if i < len(param.W)-1 {
-			weightsBuilder.WriteString(", ")
-		}
-	}
-
 	return &Flashcard{
 		NewCardLimit:     20,
 		ReviewCardLimit:  200,
@@ -60,6 +52,18 @@ func NewFlashcard() *Flashcard {
 		ReviewMode:       0,
 		RequestRetention: param.RequestRetention,
 		MaximumInterval:  int(param.MaximumInterval),
-		Weights:          weightsBuilder.String(),
+		Weights:          DefaultFSRSWeights(),
 	}
+}
+
+func DefaultFSRSWeights() string {
+	buf := bytes.Buffer{}
+	defaultWs := fsrs.DefaultWeights()
+	for i, w := range defaultWs {
+		buf.WriteString(fmt.Sprintf("%v", w))
+		if i < len(defaultWs)-1 {
+			buf.WriteString(", ")
+		}
+	}
+	return buf.String()
 }

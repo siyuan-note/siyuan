@@ -72,6 +72,7 @@ type TypeFilter struct {
 	ListItem   bool `json:"listItem"`
 	Blockquote bool `json:"blockquote"`
 	Super      bool `json:"super"`
+	Callout    bool `json:"callout"`
 }
 
 type D3 struct {

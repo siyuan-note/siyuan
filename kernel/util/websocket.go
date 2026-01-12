@@ -26,11 +26,34 @@ import (
 )
 
 var (
-	WebSocketServer = melody.New()
+	WebSocketServer *melody.Melody
 
 	// map[string]map[string]*melody.Session{}
 	sessions = sync.Map{} // {appId, {sessionId, session}}
 )
+
+func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg string, data interface{}) {
+	sessions.Range(func(key, value interface{}) bool {
+		appSessions := value.(*sync.Map)
+		if key == excludeApp {
+			return true
+		}
+
+		appSessions.Range(func(key, value interface{}) bool {
+			session := value.(*melody.Session)
+			if t, ok := session.Get("type"); ok && typ == t {
+				event := NewResult()
+				event.Cmd = cmd
+				event.Code = code
+				event.Msg = msg
+				event.Data = data
+				session.Write(event.Bytes())
+			}
+			return true
+		})
+		return true
+	})
+}
 
 func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data interface{}) {
 	appSessions, ok := sessions.Load(app)
@@ -154,7 +177,6 @@ func PushTxErr(msg string, code int, data interface{}) {
 
 func PushUpdateMsg(msgId string, msg string, timeout int) {
 	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
-	return
 }
 
 func PushMsg(msg string, timeout int) (msgId string) {
@@ -430,4 +452,47 @@ func CountSessions() (ret int) {
 		return true
 	})
 	return
+}
+
+// ClosePublishServiceSessions 关闭所有发布服务的 WebSocket 连接
+func ClosePublishServiceSessions() {
+	if WebSocketServer == nil {
+		return
+	}
+
+	// 收集所有发布服务的会话
+	var publishSessions []*melody.Session
+	sessions.Range(func(key, value interface{}) bool {
+		appSessions := value.(*sync.Map)
+		appSessions.Range(func(key, value interface{}) bool {
+			session := value.(*melody.Session)
+			if isPublish, ok := session.Get("isPublish"); ok && isPublish == true {
+				publishSessions = append(publishSessions, session)
+			}
+			return true
+		})
+		return true
+	})
+
+	// 发送消息通知客户端关闭页面
+	for _, session := range publishSessions {
+		event := NewResult()
+		event.Cmd = "closepublishpage"
+		event.Code = 0
+		event.Msg = "SiYuan publish service closed"
+		event.Data = map[string]interface{}{
+			"reason": "publish service closed",
+		}
+		session.Write(event.Bytes())
+	}
+
+	// 等待一小段时间让消息发送完成、客户端刷新页面之后显示消息
+	time.Sleep(500 * time.Millisecond)
+
+	// 关闭所有发布服务的 WebSocket 连接
+	for _, session := range publishSessions {
+		// 使用 "close websocket" 作为关闭消息，客户端检测到后会停止重连
+		session.CloseWithMsg([]byte("  close websocket: publish service closed"))
+		RemovePushChan(session)
+	}
 }

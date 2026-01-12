@@ -71,6 +71,9 @@ type TOperation =
     | "sortAttrViewGroup"
     | "foldAttrViewGroup"
     | "setAttrViewDisplayFieldName"
+    | "setAttrViewFillColBackgroundColor"
+    | "setAttrViewUpdatedIncludeTime"
+    | "setAttrViewCreatedIncludeTime"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -88,7 +91,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide" |
     "code-language-update" | "code-language-change"
-type TAVView = "table" | "gallery"
+type TAVView = "table" | "gallery" | "kanban"
 type TAVCol =
     "text"
     | "date"
@@ -107,7 +110,6 @@ type TAVCol =
     | "updated"
     | "checkbox"
     | "lineNumber"
-type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
     | "!="
@@ -125,6 +127,8 @@ type TAVFilterOperator =
     | "Is relative to today"
     | "Is true"
     | "Is false"
+
+type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "updated"
 
 declare module "blueimp-md5"
 
@@ -216,10 +220,6 @@ interface Window {
         encode(options: string): string,
     };
     pdfjsLib: any;
-
-    dataLayer: any[];
-
-    siyuan: ISiyuan;
     webkit: {
         messageHandlers: {
             openLink: { postMessage: (url: string) => void }
@@ -227,12 +227,16 @@ interface Window {
             changeStatusBar: { postMessage: (url: string) => void }
             setClipboard: { postMessage: (url: string) => void }
             purchase: { postMessage: (url: string) => void }
+            print: { postMessage: (html: string) => void }
+            exit: { postMessage: (text: string) => void }
         }
     };
     htmlToImage: {
         toCanvas: (element: Element) => Promise<HTMLCanvasElement>
         toBlob: (element: Element) => Promise<Blob>
     };
+
+    siyuan: ISiyuan;
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
@@ -245,6 +249,9 @@ interface Window {
         readHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
+        print(title: string, html: string): void
+        getScreenWidthPx(): number
+        exit(): void
     };
     JSHarmony: {
         openExternal(url: string): void
@@ -255,6 +262,9 @@ interface Window {
         readClipboard(): string
         readHTMLClipboard(): string
         returnDesktop(): void
+        print(title: string, html: string): void
+        getScreenWidthPx(): number
+        exit(): void
     };
 
     Protyle: import("../protyle/method").default;
@@ -276,12 +286,17 @@ interface Window {
     destroyTheme(): Promise<void>;
 }
 
+interface ILocalFiles {
+    path: string,
+    size: number
+}
+
 interface IClipboardData {
     textHTML?: string,
     textPlain?: string,
     siyuanHTML?: string,
     files?: File[],
-    localFiles?: string[]
+    localFiles?: ILocalFiles[],
 }
 
 interface IRefDefs {
@@ -458,6 +473,7 @@ interface ISiyuan {
     storage?: {
         [key: string]: any
     },
+    closedTabs?: ILayoutJSON[]
     transactions?: {
         protyle: IProtyle,
         doOperations: IOperation[],
@@ -541,7 +557,7 @@ interface ISiyuan {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
-    context?: IObject,
+    context?: IObject,  // focusId, message, ignoreProcess, setRange
     blockID?: string,
     isTwoWay?: boolean, // 是否双向关联
     backRelationKeyID?: string, // 双向关联的目标关联列 ID
@@ -558,7 +574,7 @@ interface IOperation {
     srcIDs?: string[] // removeAttrViewBlock 专享
     srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
     ignoreDefaultFill?: boolean // insertAttrViewBlock 专享
-    viewID?: string // insertAttrViewBlock 专享
+    viewID?: string // 多个属性视图操作使用，用于推送时不影响其他视图
     name?: string // addAttrViewCol 专享
     type?: TAVCol // addAttrViewCol 专享
     deckID?: string // add/removeFlashcards 专享
@@ -592,6 +608,8 @@ interface ILayoutJSON extends ILayoutOptions {
     page?: string
     path?: string
     blockId?: string
+    mode?: TEditorMode
+    action?: TProtyleAction
     icon?: string
     rootId?: string
     active?: boolean
@@ -606,9 +624,9 @@ interface ILayoutJSON extends ILayoutOptions {
 interface ICommand {
     langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
-    hotkey: string,
+    hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
-    callback?: () => void   // 其余回调存在时将不会触
+    callback?: () => void   // 其余回调存在时将不会触发
     globalCallback?: () => void // 焦点不在应用内时执行的回调
     fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void // 焦点在文档树上时执行的回调
     editorCallback?: (protyle: IProtyle) => void     // 焦点在编辑器上时执行的回调
@@ -652,6 +670,7 @@ interface IOpenFileOptions {
             data: any,
         }) => import("../layout/Model").Model,   // plugin 0.8.3 历史兼容
     }
+    scrollPosition?: ScrollLogicalPosition,
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填
     rootIcon?: string, // 文档图标
@@ -691,6 +710,7 @@ interface IWebSocketData {
     msg: string;
     code: number;
     sid?: string;
+    context?: any;
 }
 
 interface IGraphCommon {
@@ -706,6 +726,7 @@ interface IGraphCommon {
     };
     type: {
         blockquote: boolean
+        callout: boolean
         code: boolean
         heading: boolean
         list: boolean
@@ -827,6 +848,7 @@ interface IBazaarItem {
     incompatible?: boolean;  // 仅 plugin
     enabled: boolean;
     preferredName: string;
+    minAppVersion: string;
     preferredDesc: string;
     preferredReadme: string;
     iconURL: string;
@@ -834,6 +856,7 @@ interface IBazaarItem {
     author: string;
     updated: string;
     downloads: string;
+    disallowInstall: boolean;
     current: false;
     installed: false;
     outdated: false;
@@ -851,6 +874,8 @@ interface IBazaarItem {
     hInstallDate: string;
     hUpdated: string;
     preferredFunding: string;
+    disallowUpdate: boolean;
+    updateRequiredMinAppVer: string;
 }
 
 interface IAV {
@@ -902,16 +927,30 @@ interface IAVGallery extends IAVView {
     cardCount: number,
 }
 
+interface IAVKanban extends IAVView {
+    coverFrom: number;    // 0：无，1：内容图，2：资源字段，3：内容块
+    coverFromAssetKeyID?: string;
+    cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
+    cardAspectRatio: number;
+    displayFieldName: boolean;
+    fitImage: boolean;
+    cards: IAVGalleryItem[],
+    desc: string
+    fields: IAVColumn[]
+    cardCount: number,
+    fillColBackgroundColor: boolean
+}
+
 interface IAVFilter {
     column: string,
     operator: TAVFilterOperator,
     quantifier?: string,
     value: IAVCellValue,
-    relativeDate?: relativeDate
-    relativeDate2?: relativeDate
+    relativeDate?: IAVRelativeDate
+    relativeDate2?: IAVRelativeDate
 }
 
-interface relativeDate {
+interface IAVRelativeDate {
     count: number;   // 数量
     unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
     direction: number;   // 方向：-1: 前、0: 现在、1: 后
@@ -947,6 +986,12 @@ interface IAVColumn {
     numberFormat: string,
     template: string,
     calc: IAVCalc,
+    updated?: {
+        includeTime: boolean
+    }
+    created?: {
+        includeTime: boolean
+    }
     date?: {
         autoFillNow: boolean,
         fillSpecificTime: boolean,

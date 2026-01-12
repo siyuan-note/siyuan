@@ -216,7 +216,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
 };
 
 export const copyTextByType = async (ids: string[],
-                                     type: "ref" | "blockEmbed" | "protocol" | "protocolMd" | "hPath" | "id") => {
+                                     type: "ref" | "blockEmbed" | "protocol" | "protocolMd" | "hPath" | "id" | "webURL") => {
     let text = "";
     for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
@@ -236,6 +236,8 @@ export const copyTextByType = async (ids: string[],
         } else if (type === "hPath") {
             const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
             text += response.data;
+        } else if (type === "webURL") {
+            text += `${window.location.origin}?id=${id}`;
         } else if (type === "id") {
             text += id;
         }

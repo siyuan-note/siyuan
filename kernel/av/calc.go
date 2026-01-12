@@ -66,7 +66,7 @@ func Calc(viewable Viewable, attrView *AttributeView) {
 			continue
 		}
 
-		calcField(collection, field, i)
+		calcField(collection, field, i, attrView)
 	}
 
 	// 分组计算
@@ -83,7 +83,7 @@ func Calc(viewable Viewable, attrView *AttributeView) {
 				if nil == calcResult {
 					// 在字段上设置计算规则，使用字段结算结果作为分组计算结果，最后再清除字段上的计算规则
 					field.SetCalc(groupCalc.FieldCalc)
-					calcField(collection, field, fieldIndex)
+					calcField(collection, field, fieldIndex, attrView)
 					calcResult = &GroupCalc{Field: groupCalcKey.ID, FieldCalc: field.GetCalc()}
 					field.SetCalc(nil)
 				}
@@ -94,7 +94,7 @@ func Calc(viewable Viewable, attrView *AttributeView) {
 	}
 }
 
-func calcField(collection Collection, field Field, fieldIndex int) {
+func calcField(collection Collection, field Field, fieldIndex int, attrView *AttributeView) {
 	switch field.GetType() {
 	case KeyTypeBlock:
 		calcFieldBlock(collection, field, fieldIndex)
@@ -119,9 +119,9 @@ func calcField(collection Collection, field Field, fieldIndex int) {
 	case KeyTypeTemplate:
 		calcFieldTemplate(collection, field, fieldIndex)
 	case KeyTypeCreated:
-		calcFieldCreated(collection, field, fieldIndex)
+		calcFieldCreated(collection, field, fieldIndex, attrView)
 	case KeyTypeUpdated:
-		calcFieldUpdated(collection, field, fieldIndex)
+		calcFieldUpdated(collection, field, fieldIndex, attrView)
 	case KeyTypeCheckbox:
 		calcFieldCheckbox(collection, field, fieldIndex)
 	case KeyTypeRelation:
@@ -1296,7 +1296,7 @@ func calcFieldBlock(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func calcFieldCreated(collection Collection, field Field, fieldIndex int) {
+func calcFieldCreated(collection Collection, field Field, fieldIndex int, attrView *AttributeView) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1389,7 +1389,13 @@ func calcFieldCreated(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != earliest {
-			calc.Result = &Value{Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone)}
+			key, _ := attrView.GetKey(field.GetID())
+			isNotTime := false
+			if nil != key && nil != key.Created {
+				isNotTime = !key.Created.IncludeTime
+			}
+
+			calc.Result = &Value{Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -1402,7 +1408,13 @@ func calcFieldCreated(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != latest {
-			calc.Result = &Value{Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone)}
+			key, _ := attrView.GetKey(field.GetID())
+			isNotTime := false
+			if nil != key && nil != key.Created {
+				isNotTime = !key.Created.IncludeTime
+			}
+
+			calc.Result = &Value{Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
@@ -1419,12 +1431,18 @@ func calcFieldCreated(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			calc.Result = &Value{Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration)}
+			key, _ := attrView.GetKey(field.GetID())
+			isNotTime := false
+			if nil != key && nil != key.Created {
+				isNotTime = !key.Created.IncludeTime
+			}
+
+			calc.Result = &Value{Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration, isNotTime)}
 		}
 	}
 }
 
-func calcFieldUpdated(collection Collection, field Field, fieldIndex int) {
+func calcFieldUpdated(collection Collection, field Field, fieldIndex int, attrView *AttributeView) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1517,7 +1535,13 @@ func calcFieldUpdated(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != earliest {
-			calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone)}
+			key, _ := attrView.GetKey(field.GetID())
+			isNotTime := false
+			if nil != key && nil != key.Updated {
+				isNotTime = !key.Updated.IncludeTime
+			}
+
+			calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -1530,7 +1554,13 @@ func calcFieldUpdated(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != latest {
-			calc.Result = &Value{Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone)}
+			key, _ := attrView.GetKey(field.GetID())
+			isNotTime := false
+			if nil != key && nil != key.Updated {
+				isNotTime = !key.Updated.IncludeTime
+			}
+
+			calc.Result = &Value{Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
@@ -1547,7 +1577,13 @@ func calcFieldUpdated(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != earliest && 0 != latest {
-			calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration)}
+			key, _ := attrView.GetKey(field.GetID())
+			isNotTime := false
+			if nil != key && nil != key.Updated {
+				isNotTime = !key.Updated.IncludeTime
+			}
+
+			calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration, isNotTime)}
 		}
 	}
 }

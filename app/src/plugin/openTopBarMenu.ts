@@ -7,7 +7,7 @@ import {openSetting} from "../config";
 import {Constants} from "../constants";
 
 export const openTopBarMenu = (app: App, target?: Element) => {
-    const menu = new Menu("topBarPlugin");
+    const menu = new Menu(Constants.MENU_BAR_PLUGIN);
     /// #if !MOBILE
     menu.addItem({
         id: "manage",

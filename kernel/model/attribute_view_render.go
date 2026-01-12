@@ -90,7 +90,15 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]interface{}) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
-		return
+		if view.LayoutType == av.LayoutTypeKanban {
+			preferredGroupKey := getKanbanPreferredGroupKey(attrView)
+			group := &av.ViewGroup{Field: preferredGroupKey.ID}
+			setAttributeViewGroup(attrView, view, group)
+			av.SaveAttributeView(attrView)
+			groupKey = view.GetGroupKey(attrView)
+		} else {
+			return
+		}
 	}
 
 	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组
@@ -108,7 +116,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		av.SaveAttributeView(attrView)
 	}
 
-	// 如果存在分组的话渲染分组视图
+	// 渲染分组视图
+	if nil == view.Groups {
+		genAttrViewGroups(view, attrView)
+		av.SaveAttributeView(attrView)
+	}
 
 	for _, groupView := range view.Groups {
 		groupView.Name = groupView.GetGroupValue()
@@ -406,7 +418,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		gallery.Cards = gallery.Cards[start:end]
 	case av.LayoutTypeKanban:
 		kanban := viewable.(*av.Kanban)
-		kanban.CardCount = 0
+		kanban.CardCount = len(kanban.Cards)
 		kanban.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = kanban.PageSize
@@ -490,7 +502,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 			return
 		}
 
-		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
+		attrView = av.NewAttributeView(avID)
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return
@@ -522,9 +534,11 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	historyDir := matches[0]
 	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 	if !gulu.File.IsExist(avJSONPath) {
+		logging.LogWarnf("attribute view [%s] not found in history data [%s], use current data instead", avID, historyDir)
 		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
 	}
 	if !gulu.File.IsExist(avJSONPath) {
+		logging.LogWarnf("attribute view [%s] not found in current data", avID)
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := os.ReadFile(avJSONPath)
@@ -533,7 +547,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 			return
 		}
 
-		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
+		attrView = av.NewAttributeView(avID)
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return

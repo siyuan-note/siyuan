@@ -16,7 +16,7 @@ export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
     if (!list.replaceKeys || list.replaceKeys.length === 0 || (list.length === 1 && list[0] === replaceInputElement.value)) {
         return;
     }
-    const menu = new Menu("search-replace-history");
+    const menu = new Menu(Constants.MENU_SEARCH_REPLACE_HISTORY);
     if (menu.isOpen) {
         return;
     }
@@ -84,7 +84,7 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
     if (!list.keys || list.keys.length === 0 || (list.length === 1 && list[0] === searchInputElement.value)) {
         return;
     }
-    const menu = new Menu("search-history");
+    const menu = new Menu(Constants.MENU_SEARCH_HISTORY);
     if (menu.isOpen) {
         return;
     }
@@ -158,7 +158,7 @@ export const toggleAssetHistory = (assetElement: Element) => {
     if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === assetInputElement.value)) {
         return;
     }
-    const menu = new Menu("search-asset-history");
+    const menu = new Menu(Constants.MENU_SEARCH_ASSET_HISTORY);
     if (menu.isOpen) {
         return;
     }

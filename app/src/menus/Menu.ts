@@ -105,6 +105,7 @@ export class Menu {
 
     private preventDefault(event: KeyboardEvent) {
         if (!hasClosestByClassName(event.target as Element, "b3-menu") &&
+            !hasClosestByClassName(event.target as Element, "tooltip") &&
             // 移动端底部键盘菜单
             !hasClosestByClassName(event.target as Element, "keyboard__bar")) {
             event.preventDefault();
@@ -113,8 +114,10 @@ export class Menu {
 
     public addItem(option: IMenu) {
         const menuItem = new MenuItem(option);
-        this.append(menuItem.element, option.index);
-        return menuItem.element;
+        if (menuItem) {
+            this.append(menuItem.element, option.index);
+            return menuItem.element;
+        }
     }
 
     public removeScrollEvent() {
@@ -144,7 +147,7 @@ export class Menu {
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
-        this.element.removeAttribute("data-from");    // 标识是否在浮窗内打开
+        this.element.removeAttribute("data-from");    // 标识菜单入口
         this.data = undefined;    // 移除数据
     }
 
@@ -296,7 +299,7 @@ export class MenuItem {
             submenuElement.classList.add("b3-menu__submenu");
             submenuElement.innerHTML = '<div class="b3-menu__items"></div>';
             options.submenu.forEach((item) => {
-                submenuElement.firstElementChild.append(new MenuItem(item).element);
+                submenuElement.firstElementChild.append(new MenuItem(item)?.element || "");
             });
             this.element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>');
             this.element.append(submenuElement);

@@ -21,6 +21,7 @@
             --b3-theme-background: #fff;
             --b3-theme-on-background: #202124;
             --b3-theme-on-primary: #fff;
+            background-color: var(--b3-theme-background);
         }
 
         .dark {
@@ -33,7 +34,6 @@
             --b3-theme-background: #1e1e1e;
             --b3-theme-on-background: #c9d1d9;
             --b3-theme-on-primary: #fff;
-            background-color: var(--b3-theme-background);
         }
 
         .b3-button {
@@ -423,11 +423,22 @@
             const {ipcRenderer} = require('electron')
             ipcRenderer.send('siyuan-quit', window.location.port)
         } catch (e) {
-            if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid || window.JSHarmony) {
-                window.location.href = 'siyuan://api/system/exit'
-            } else {
-                window.location.reload()
+            if (window.JSAndroid) {
+                window.JSAndroid.exit();
+                return;
             }
+
+            if (window.webkit && window.webkit.messageHandlers) {
+                window.webkit.messageHandlers.exit.postMessage("");
+                return;
+            }
+
+            if (window.JSHarmony) {
+                window.JSHarmony.exit();
+                return;
+            }
+
+            window.location.reload()
         }
     }
 
@@ -467,7 +478,7 @@
         }
     }
 
-    const showMessage = (msg)=> {
+    const showMessage = (msg) => {
         document.querySelector('#message').classList.add('b3-snackbar--show')
         document.querySelector('#message').firstElementChild.innerHTML = msg
         setTimeout(() => {
@@ -480,7 +491,7 @@
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
         const rememberMeElement = document.getElementById('rememberMe')
-        let code =  inputElement.value.trim();
+        let code = inputElement.value.trim();
         if ("" === code) {
             showMessage({{.l9}})
             inputElement.value = ''

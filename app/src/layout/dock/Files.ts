@@ -489,7 +489,7 @@ export class Files extends Model {
             element: HTMLElement,
             positionY: number,
             rafId: number,
-            sourceOnlyRoot: boolean
+            sourceOnlyRoot: boolean,
         } = {
             element: null,
             positionY: null,
@@ -497,23 +497,27 @@ export class Files extends Model {
             sourceOnlyRoot: null
         };
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-            if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+            if (window.siyuan.config.readonly || !window.siyuan.dragElement || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 event.preventDefault();
                 return;
             }
-            // 存储最新事件，使用 rAF 合并同帧多次触发
             if (dragOverLastObj.rafId) {
                 event.preventDefault();
                 return;
             }
-
+            let gutterType = "";
+            for (const item of event.dataTransfer.items) {
+                if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                    gutterType = item.type;
+                }
+            }
             dragOverLastObj.rafId = requestAnimationFrame(() => {
                 dragOverLastObj.rafId = null;
                 let liElement = event.target.closest("li");
                 if (!liElement) {
                     liElement = document.elementFromPoint(event.clientX, event.clientY - 1).closest("li");
                 }
-                if (!liElement || !window.siyuan.dragElement) {
+                if (!liElement) {
                     dragOverLastObj.element = null;
                     event.preventDefault();
                     return;
@@ -521,12 +525,6 @@ export class Files extends Model {
                 const targetType = liElement.getAttribute("data-type");
                 if (dragOverLastObj.element !== liElement) {
                     dragOverLastObj.element?.classList.remove("dragover", "dragover__bottom", "dragover__top");
-                    let gutterType = "";
-                    for (const item of event.dataTransfer.items) {
-                        if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                            gutterType = item.type;
-                        }
-                    }
                     if (gutterType) {
                         // 块标拖拽
                         const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);

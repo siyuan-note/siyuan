@@ -485,9 +485,25 @@ export class Files extends Model {
             });
             /// #endif
         });
-        let dragoverLiObj: { element: HTMLElement, rect: DOMRect };
+        const dragOverLastObj: {
+            element: HTMLElement,
+            positionY: number,
+            time: number,
+            sourceOnlyRoot: boolean
+        } = {
+            element: null,
+            positionY: null,
+            time: null,
+            sourceOnlyRoot: null
+        };
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
+            if (performance.now() - dragOverLastObj.time < 50) {
+                event.preventDefault();
+                return;
+            }
+            dragOverLastObj.time = performance.now();
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+                event.preventDefault();
                 return;
             }
             let liElement = hasClosestByTag(event.target, "LI");
@@ -495,77 +511,87 @@ export class Files extends Model {
                 liElement = hasClosestByTag(document.elementFromPoint(event.clientX, event.clientY - 1), "LI");
             }
             if (!liElement || !window.siyuan.dragElement) {
+                dragOverLastObj.element = null;
                 event.preventDefault();
                 return;
             }
-            if (!dragoverLiObj || dragoverLiObj.element !== liElement) {
-                dragoverLiObj = {
-                    element: liElement,
-                    rect: liElement.getBoundingClientRect()
-                };
-            }
-            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
-            });
-            let gutterType = "";
-            for (const item of event.dataTransfer.items) {
-                if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
-                    gutterType = item.type;
+            const targetType = liElement.getAttribute("data-type");
+            if (dragOverLastObj.element !== liElement) {
+                dragOverLastObj.element?.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                let gutterType = "";
+                for (const item of event.dataTransfer.items) {
+                    if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                        gutterType = item.type;
+                    }
                 }
-            }
-            if (gutterType) {
-                // 块标拖拽
-                const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
-                if (!["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                if (gutterType) {
+                    // 块标拖拽
+                    const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
+                    if (!["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                        event.preventDefault();
+                        return;
+                    }
+                } else if (liElement.classList.contains("b3-list-item--focus")) {
+                    // 选中的文档不能拖拽到自己上，但允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
                     event.preventDefault();
                     return;
                 }
-            } else if (liElement.classList.contains("b3-list-item--focus")) {
-                // 选中的文档不能拖拽到自己上，但允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
-                return;
-            }
-            let sourceOnlyRoot = gutterType ? false : true;
-            Array.from(this.element.querySelectorAll(".b3-list-item--focus")).find((item: HTMLElement) => {
-                if (item.getAttribute("data-type") === "navigation-file") {
-                    sourceOnlyRoot = false;
-                    return true;
+
+                dragOverLastObj.sourceOnlyRoot = gutterType ? false : true;
+                if (dragOverLastObj.sourceOnlyRoot) {
+                    Array.from(this.element.querySelectorAll(".b3-list-item--focus")).find((item: HTMLElement) => {
+                        if (item.getAttribute("data-type") === "navigation-file") {
+                            dragOverLastObj.sourceOnlyRoot = false;
+                            return true;
+                        }
+                    });
                 }
-            });
-            const targetType = liElement.getAttribute("data-type");
-            if (sourceOnlyRoot && targetType !== "navigation-root") {
-                event.preventDefault();
-                return;
+                if (dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root") {
+                    event.preventDefault();
+                    return;
+                }
             }
-            const notebookElement = hasClosestByAttribute(liElement, "data-sortmode", null);
-            if (!notebookElement) {
-                return;
-            }
-            const notebookSort = notebookElement.getAttribute("data-sortmode");
-            if ((sourceOnlyRoot && targetType === "navigation-root" && window.siyuan.config.fileTree.sort === 6) ||
-                (!sourceOnlyRoot && targetType !== "navigation-root" &&
-                    (notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")))
-            ) {
-                const nodeRect = dragoverLiObj.rect;
-                const dragHeight = nodeRect.height * .2;
-                if (targetType === "navigation-root" && sourceOnlyRoot) {
-                    if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                        (liElement as HTMLElement).classList.add("dragover__bottom");
+            if (dragOverLastObj.element && dragOverLastObj.element === liElement && dragOverLastObj.positionY !== event.clientY) {
+                const notebookElement = hasClosestByAttribute(liElement, "data-sortmode", null);
+                if (!notebookElement) {
+                    event.preventDefault();
+                    return;
+                }
+                const notebookSort = notebookElement.getAttribute("data-sortmode");
+                if ((dragOverLastObj.sourceOnlyRoot && targetType === "navigation-root" && window.siyuan.config.fileTree.sort === 6) ||
+                    (!dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root" &&
+                        (notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")))
+                ) {
+                    const nodeRect = liElement.getBoundingClientRect();
+                    const dragHeight = nodeRect.height * .2;
+                    if (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot) {
+                        if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                            liElement.classList.remove("dragover");
+                            liElement.classList.add("dragover__bottom");
+                        } else {
+                            liElement.classList.remove("dragover");
+                            liElement.classList.add("dragover__top");
+                        }
+                    } else if (event.clientY > nodeRect.bottom - dragHeight) {
+                        liElement.classList.remove("dragover");
+                        liElement.classList.add("dragover__bottom");
+                    } else if (event.clientY < nodeRect.top + dragHeight) {
+                        liElement.classList.remove("dragover");
+                        liElement.classList.add("dragover__top");
                     } else {
-                        (liElement as HTMLElement).classList.add("dragover__top");
+                        liElement.classList.remove("dragover__top", "dragover__bottom");
                     }
-                } else if (event.clientY > nodeRect.bottom - dragHeight) {
-                    (liElement as HTMLElement).classList.add("dragover__bottom");
-                } else if (event.clientY < nodeRect.top + dragHeight) {
-                    (liElement as HTMLElement).classList.add("dragover__top");
                 }
-                event.preventDefault();
+                if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
+                    (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot)) {
+                } else {
+                    liElement.classList.add("dragover");
+                }
             }
-            if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
-                (targetType === "navigation-root" && sourceOnlyRoot)) {
-                event.preventDefault();
-                return;
+            if (dragOverLastObj.element !== liElement) {
+                dragOverLastObj.element = liElement;
             }
-            liElement.classList.add("dragover");
+            dragOverLastObj.positionY = event.clientY;
             event.preventDefault();
         });
         let counter = 0;

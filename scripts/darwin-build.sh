@@ -9,9 +9,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         *)
-            echo "Error: Unknown option '$1'"
-            echo "Only --variant=value is supported"
-            exit 1
+            # Skip unknown options
+            shift
             ;;
     esac
 done

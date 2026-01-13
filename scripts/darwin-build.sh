@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# SiYuan Darwin Build Script
+# Usage: ./scripts/darwin-build.sh [--variant=<variant>]
+# Options:
+#   --variant=<variant>  Build variant: amd64, arm64, or all (default: all)
+
 VARIANT="all"
 
 while [[ $# -gt 0 ]]; do
@@ -7,6 +12,12 @@ while [[ $# -gt 0 ]]; do
         --variant=*)
             VARIANT="${1#*=}"
             shift
+            ;;
+        --variant)
+            echo "Error: --variant option requires an equal sign and value"
+            echo "Usage: --variant=<variant>"
+            echo "Example: --variant=amd64"
+            exit 1
             ;;
         *)
             # Skip unknown options

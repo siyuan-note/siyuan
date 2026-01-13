@@ -102,8 +102,10 @@ export class Asset extends Model {
             this.element.innerHTML = `<div class="asset"><video controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></video></div>`;
         } else if (type === ".pdf") {
             /// #if !MOBILE
-            if (isInit) {
-                this.element.innerHTML = `<div class="pdf__outer" id="outerContainer">
+            if (!isInit) {
+                this.pdfObject.close();
+            }
+            this.element.innerHTML = `<div class="pdf__outer" id="outerContainer">
       <div id="sidebarContainer">
         <div id="toolbarSidebar">
           <div id="toolbarSidebarLeft">
@@ -478,7 +480,6 @@ export class Asset extends Model {
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;
-            }
             const localPDF = window.siyuan.storage[Constants.LOCAL_PDFTHEME];
             const pdfTheme = window.siyuan.config.appearance.mode === 0 ? localPDF.light : localPDF.dark;
             const darkElement = this.element.querySelector("#pdfDark");

@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # SiYuan Darwin Build Script
-# Usage: ./scripts/darwin-build.sh [--variant=<variant>]
-# Options:
-#   --variant=<variant>  Build variant: amd64, arm64, or all (default: all)
 
-VARIANT="all"
+echo 'TIP: This script must be run from the project root directory'
+echo 'Usage: ./scripts/darwin-build.sh [--variant=<variant>]'
+echo 'Options:'
+echo '  --variant=<variant>  Build variant: amd64, arm64, or all (default: all)'
+echo
+
+VARIANT='all'
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -14,9 +17,9 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --variant)
-            echo "Error: --variant option requires an equal sign and value"
-            echo "Usage: --variant=<variant>"
-            echo "Example: --variant=amd64"
+            echo 'Error: --variant option requires an equal sign and value'
+            echo 'Usage: --variant=<variant>'
+            echo 'Example: --variant=amd64'
             exit 1
             ;;
         *)
@@ -26,9 +29,9 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-if [[ "$VARIANT" != "amd64" && "$VARIANT" != "arm64" && "$VARIANT" != "all" ]]; then
+if [[ "$VARIANT" != 'amd64' && "$VARIANT" != 'arm64' && "$VARIANT" != 'all' ]]; then
     echo "Error: Invalid variant '$VARIANT'"
-    echo "Valid variants are: amd64, arm64, all"
+    echo 'Valid variants are: amd64, arm64, all'
     exit 1
 fi
 
@@ -50,14 +53,14 @@ export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
 
-if [[ "$VARIANT" == "amd64" || "$VARIANT" == "all" ]]; then
+if [[ "$VARIANT" == 'amd64' || "$VARIANT" == 'all' ]]; then
     echo 'Building Kernel amd64'
     export GOOS=darwin
     export GOARCH=amd64
     go build --tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
 fi
 
-if [[ "$VARIANT" == "arm64" || "$VARIANT" == "all" ]]; then
+if [[ "$VARIANT" == 'arm64' || "$VARIANT" == 'all' ]]; then
     echo 'Building Kernel arm64'
     export GOOS=darwin
     export GOARCH=arm64
@@ -67,12 +70,12 @@ cd .. || exit
 
 cd app || exit
 
-if [[ "$VARIANT" == "amd64" || "$VARIANT" == "all" ]]; then
+if [[ "$VARIANT" == 'amd64' || "$VARIANT" == 'all' ]]; then
     echo 'Building Electron App amd64'
     pnpm run dist-darwin
 fi
 
-if [[ "$VARIANT" == "arm64" || "$VARIANT" == "all" ]]; then
+if [[ "$VARIANT" == 'arm64' || "$VARIANT" == 'all' ]]; then
     echo 'Building Electron App arm64'
     pnpm run dist-darwin-arm64
 fi

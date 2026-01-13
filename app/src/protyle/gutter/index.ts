@@ -14,7 +14,6 @@ import {
     copyPlainText,
     isInAndroid,
     isInHarmony,
-    isInIOS,
     isMac,
     isOnlyMeta,
     openByMobile,

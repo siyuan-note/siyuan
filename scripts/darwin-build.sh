@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# SiYuan Darwin Build Script
-
 echo 'TIP: This script must be run from the project root directory'
 echo 'Usage: ./scripts/darwin-build.sh [--variant=<variant>]'
 echo 'Options:'
@@ -10,17 +8,30 @@ echo
 
 VARIANT='all'
 
+validate_variant() {
+    if [[ -z "$1" ]]; then
+        echo 'Error: --variant option requires a value'
+        echo 'Usage: --variant=<variant>'
+        echo 'Examples: --variant=amd64'
+        exit 1
+    elif [[ "$1" != 'amd64' && "$1" != 'arm64' && "$1" != 'all' ]]; then
+        echo "Error: Invalid variant '$1'"
+        echo 'Valid variants are: amd64, arm64, all'
+        exit 1
+    fi
+}
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --variant=*)
             VARIANT="${1#*=}"
+            validate_variant "$VARIANT"
             shift
             ;;
         --variant)
-            echo 'Error: --variant option requires an equal sign and value'
-            echo 'Usage: --variant=<variant>'
-            echo 'Example: --variant=amd64'
-            exit 1
+            VARIANT="$2"
+            validate_variant "$VARIANT"
+            [ -n "$2" ] && shift 2 || shift
             ;;
         *)
             # Skip unknown options
@@ -28,12 +39,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
-
-if [[ "$VARIANT" != 'amd64' && "$VARIANT" != 'arm64' && "$VARIANT" != 'all' ]]; then
-    echo "Error: Invalid variant '$VARIANT'"
-    echo 'Valid variants are: amd64, arm64, all'
-    exit 1
-fi
 
 echo 'Building UI'
 cd app || exit

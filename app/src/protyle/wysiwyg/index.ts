@@ -3048,7 +3048,7 @@ export class WYSIWYG {
 
             const calloutTitleElement = hasTopClosestByClassName(event.target, "callout-title");
             if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutTitleElement) {
-                updateCalloutType(calloutTitleElement, protyle);
+                updateCalloutType([hasClosestBlock(calloutTitleElement) as HTMLElement], protyle);
                 event.preventDefault();
                 event.stopPropagation();
                 return;

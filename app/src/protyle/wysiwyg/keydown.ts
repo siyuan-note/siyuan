@@ -73,6 +73,7 @@ import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
 import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
 import {AIChat} from "../../ai/chat";
+import {updateCalloutType} from "./callout";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -1083,17 +1084,24 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectElements.push(nodeElement);
             }
             if (selectElements.length > 0 && !isIncludesHotKey("⌥↩")) {
-                const otherElement = selectElements.find(item => {
-                    return !item.classList.contains("code-block");
-                });
-                if (!otherElement) {
-                    const languageElements: HTMLElement[] = [];
-                    selectElements.forEach(item => {
+                const languageElements: HTMLElement[] = [];
+                const calloutElements: HTMLElement[] = [];
+                selectElements.forEach(item => {
+                    if (item.classList.contains("code-block")) {
                         languageElements.push(item.querySelector(".protyle-action__language"));
-                    });
+                    } else {
+                        const calloutElement = hasClosestByClassName(item, "callout");
+                        if (calloutElement) {
+                            calloutElements.push(calloutElement);
+                        }
+                    }
+                });
+                if (languageElements.length > 0) {
                     protyle.toolbar.showCodeLanguage(protyle, languageElements);
-                } else {
-                    addSubList(protyle, nodeElement, range);
+                } else if (addSubList(protyle, nodeElement, range)) {
+                    // 函数内部已处理
+                } else if (calloutElements.length > 0) {
+                    updateCalloutType(calloutElements, protyle);
                 }
                 event.stopPropagation();
                 event.preventDefault();

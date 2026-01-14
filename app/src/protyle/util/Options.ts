@@ -79,7 +79,6 @@ export class Options {
                 key: ":" // 必须在最后一个，否则块引用后的 : 不能被解析
             }],
         },
-        lang: window.siyuan.config.appearance.lang,
         preview: {
             actions: ["desktop", "tablet", "mobile", "mp-wechat", "zhihu", "yuque"],
             delay: 0,

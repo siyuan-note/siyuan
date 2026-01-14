@@ -1,28 +1,28 @@
 @echo off
 
 echo TIP: This script must be run from the project root directory
-echo Usage: .\scripts\win-build.bat [--variant=^<variant^>]
-echo Options: 
-echo   --variant=^<variant^>  Build variant: amd64, arm64, appx-amd64, appx-arm64, or all (default: all)
+echo Usage: .\scripts\win-build.bat [--target=^<target^>]
+echo Options:
+echo   --target=^<target^>  Build target: amd64, arm64, appx-amd64, appx-arm64, or all (default: all)
 echo.
 
-set "VARIANT=all"
+set "TARGET=all"
 
 :parse_args
 if "%1"=="" goto :end_parse_args
-if "%1"=="--variant" (
+if "%1"=="--target" (
     if "%2"=="" (
-        echo Error: --variant option requires an equal sign and value
-        echo Usage: --variant=^<variant^>
-        echo Example: --variant=amd64
+        echo Error: --target option requires an equal sign and value
+        echo Usage: --target=^<target^>
+        echo Example: --target=amd64
         exit /b 1
     ) else (
         if not "%2"=="amd64" if not "%2"=="arm64" if not "%2"=="appx-amd64" if not "%2"=="appx-arm64" if not "%2"=="all" (
-            echo Error: Invalid variant '%2'
-            echo Valid variants are: amd64, arm64, appx-amd64, appx-arm64, all
+            echo Error: Invalid target '%2'
+            echo Valid targets are: amd64, arm64, appx-amd64, appx-arm64, all
             exit /b 1
         )
-        set "VARIANT=%2"
+        set "TARGET=%2"
         shift
         shift
         goto :parse_args
@@ -34,13 +34,13 @@ if "%1"=="--variant" (
 )
 :end_parse_args
 
-if "%VARIANT%"=="amd64" (
+if "%TARGET%"=="amd64" (
     set BUILD_AMD64=1
-) else if "%VARIANT%"=="arm64" (
+) else if "%TARGET%"=="arm64" (
     set BUILD_ARM64=1
-) else if "%VARIANT%"=="appx-amd64" (
+) else if "%TARGET%"=="appx-amd64" (
     set BUILD_APPX_AMD64=1
-) else if "%VARIANT%"=="appx-arm64" (
+) else if "%TARGET%"=="appx-arm64" (
     set BUILD_APPX_ARM64=1
 ) else (
     REM all: build everything

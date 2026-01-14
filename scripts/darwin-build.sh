@@ -1,36 +1,36 @@
 #!/bin/bash
 
 echo 'TIP: This script must be run from the project root directory'
-echo 'Usage: ./scripts/darwin-build.sh [--variant=<variant>]'
+echo 'Usage: ./scripts/darwin-build.sh [--target=<target>]'
 echo 'Options:'
-echo '  --variant=<variant>  Build variant: amd64, arm64, or all (default: all)'
+echo '  --target=<target>  Build target: amd64, arm64, or all (default: all)'
 echo
 
-VARIANT='all'
+TARGET='all'
 
-validate_variant() {
+validate_target() {
     if [[ -z "$1" ]]; then
-        echo 'Error: --variant option requires a value'
-        echo 'Usage: --variant=<variant>'
-        echo 'Examples: --variant=amd64'
+        echo 'Error: --target option requires a value'
+        echo 'Usage: --target=<target>'
+        echo 'Examples: --target=amd64'
         exit 1
     elif [[ "$1" != 'amd64' && "$1" != 'arm64' && "$1" != 'all' ]]; then
-        echo "Error: Invalid variant '$1'"
-        echo 'Valid variants are: amd64, arm64, all'
+        echo "Error: Invalid target '$1'"
+        echo 'Valid targets are: amd64, arm64, all'
         exit 1
     fi
 }
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --variant=*)
-            VARIANT="${1#*=}"
-            validate_variant "$VARIANT"
+        --target=*)
+            TARGET="${1#*=}"
+            validate_target "$TARGET"
             shift
             ;;
-        --variant)
-            VARIANT="$2"
-            validate_variant "$VARIANT"
+        --target)
+            TARGET="$2"
+            validate_target "$TARGET"
             [ -n "$2" ] && shift 2 || shift
             ;;
         *)
@@ -58,14 +58,14 @@ export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
 
-if [[ "$VARIANT" == 'amd64' || "$VARIANT" == 'all' ]]; then
+if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo 'Building Kernel amd64'
     export GOOS=darwin
     export GOARCH=amd64
     go build --tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
 fi
 
-if [[ "$VARIANT" == 'arm64' || "$VARIANT" == 'all' ]]; then
+if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo 'Building Kernel arm64'
     export GOOS=darwin
     export GOARCH=arm64
@@ -75,12 +75,12 @@ cd .. || exit
 
 cd app || exit
 
-if [[ "$VARIANT" == 'amd64' || "$VARIANT" == 'all' ]]; then
+if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo 'Building Electron App amd64'
     pnpm run dist-darwin
 fi
 
-if [[ "$VARIANT" == 'arm64' || "$VARIANT" == 'all' ]]; then
+if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo 'Building Electron App arm64'
     pnpm run dist-darwin-arm64
 fi

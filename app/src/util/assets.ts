@@ -8,10 +8,13 @@ import {exportLayout} from "../layout/util";
 import {fetchPost} from "./fetch";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
 import {setCodeTheme} from "../protyle/render/util";
+import {getBackend, getFrontend} from "./functions";
 
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
+    htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
+    htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", getThemeMode());
     htmlElement.setAttribute("data-light-theme", window.siyuan.config.appearance.themeLight);
     htmlElement.setAttribute("data-dark-theme", window.siyuan.config.appearance.themeDark);

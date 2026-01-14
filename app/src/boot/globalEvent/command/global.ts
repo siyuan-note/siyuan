@@ -160,6 +160,7 @@ export const globalCommand = (command: string, app: App) => {
                         id: childData.blockId,
                         rootID: childData.rootId,
                         mode: childData.mode,
+                        rootIcon: closeData.docIcon,
                         action: [childData.action]
                     });
                 } else if (childData.instance === "Asset") {

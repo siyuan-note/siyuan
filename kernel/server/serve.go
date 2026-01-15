@@ -423,7 +423,7 @@ func serveOIDC(ginServer *gin.Engine) {
 		oidc.Login(c, model.Conf.OIDC)
 	})
 	ginServer.GET("/auth/oidc/callback", func(c *gin.Context) {
-		oidc.Callback(c, model.Conf.OIDC)
+		oidc.Callback(c, model.Conf.OIDC, model.Conf.Language)
 	})
 }
 
@@ -463,6 +463,7 @@ func serveAuthPage(c *gin.Context) {
 	}
 	oidcEnabled := oidc.IsEnabled(model.Conf.OIDC)
 	oidcProviderName := oidc.ProviderLabel(model.Conf.OIDC)
+	authError := strings.TrimSpace(c.Query("error"))
 	model := map[string]interface{}{
 		"l0":                     model.Conf.Language(173),
 		"l1":                     model.Conf.Language(174),
@@ -485,6 +486,7 @@ func serveAuthPage(c *gin.Context) {
 		"oidcEnabled":            oidcEnabled,
 		"oidcProviderName":       oidcProviderName,
 		"hasAccessAuthCode":      "" != model.Conf.AccessAuthCode,
+		"authError":              authError,
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); err != nil {

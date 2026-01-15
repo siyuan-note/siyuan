@@ -1282,6 +1282,9 @@
   "about4": "Open browser",
   "about5": "Access authorization code",
   "about6": "After configuration, it will be used as the access authentication password, leave it blank to close the authentication",
+  "accessAuthBypass": "Bypass access authentication",
+  "accessAuthBypassTip": "Skip all access code, OIDC checks and mandatory safety checks (not recommended)",
+  "accessAuthBypassConfirm": "Are you sure you want to bypass all access authentication and security checks? This will allow anyone to access without credentials.",
   "about7": "Follow system lock screen",
   "about8": "When enabled, the application will be automatically locked when locking the system screen",
   "about11": "Network serving",
@@ -1610,7 +1613,7 @@
     "169": "Uploading data repo file %v/%v",
     "170": "Uploading data repo chunk %v/%v",
     "171": "Uploading data repo reference %s",
-    "172": "If you forget the authorization code, please find help <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">here</a>",
+    "172": "If you forget the authorization, please find help <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">here</a>",
     "173": "Please enter the access auth code",
     "174": "Unlock access",
     "175": "Please enter the verification code",
@@ -1713,6 +1716,9 @@
     "272": "Unnamed field",
     "273": "Do not create the workspace in the partition root path, please create a new folder as the workspace",
     "274": "This folder contains other files, please create a new folder as the workspace",
-    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again"
+    "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again",
+    "276": "OIDC authentication failed, please retry.",
+    "277": "OIDC session is invalid or expired, please retry.",
+    "278": "OIDC authentication was rejected by policy."
   }
 }

@@ -173,28 +173,66 @@
             font-size: 12px;
             margin: 16px 0;
         }
+
+        .action-group,
+        .auth-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .action-group {
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .auth-buttons {
+            gap: 6px;
+            width: 100%;
+        }
+
+        .auth-buttons .b3-button {
+            margin: 6px 0;
+        }
     </style>
 </head>
 <body>
 <div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
 <div style="position: relative;z-index: 2;text-align: center">
     <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.workspace}}</h1>
+    {{if .hasAccessAuthCode}}
     <input class="b3-text-field" id="authCode" type="password" placeholder="{{.l0}}"/><br>
     <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
         <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
         <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
     </div>
+    {{end}}
     <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
         <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
         <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
     </div>
-    <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
-    <div class="ft__on-surface">
-        {{.l2}}
-    </div>
-    <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
-    <div class="ft__on-surface">
-        {{.l7}}
+    <div class="action-group">
+        <div class="auth-buttons">
+            {{if .hasAccessAuthCode}}
+            <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
+            {{end}}
+            {{if .oidcEnabled}}
+            <button class="b3-button" onclick="startOIDC()">{{.oidcProviderName}}</button>
+            {{end}}
+            {{if .authError}}
+            <div class="ft__on-surface" style="color: #d93025;">
+                {{.authError}}
+            </div>
+            {{end}}
+            <div class="ft__on-surface">
+                {{.l2}}
+            </div>
+        </div>
+        <div style="height: 8px;"></div>
+        <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
+        <div class="ft__on-surface">
+            {{.l7}}
+        </div>
     </div>
 </div>
 <div style="overflow: hidden;position: absolute;height: 100%;width: 100%;top: 0;left: 0;">
@@ -487,10 +525,27 @@
         }, 6000)
     }
 
+    const startOIDC = () => {
+        const rememberMeElement = document.getElementById('rememberMe')
+        const url = new URL('/auth/oidc/login', window.location.origin)
+        const currentUrl = new URL(window.location.href)
+        const toParam = currentUrl.searchParams.get("to")
+        if (toParam) {
+            url.searchParams.set("to", toParam)
+        }
+        if (rememberMeElement && rememberMeElement.checked) {
+            url.searchParams.set("rememberMe", "1")
+        }
+        window.location.href = url.toString()
+    }
+
     const submitAuth = () => {
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
         const rememberMeElement = document.getElementById('rememberMe')
+        if (!inputElement || !captchaElement) {
+            return
+        }
         let code = inputElement.value.trim();
         if ("" === code) {
             showMessage({{.l9}})
@@ -559,16 +614,18 @@
 
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
-        inputElement.focus()
-        inputElement.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                submitAuth()
-            }
-        })
+        if (inputElement && captchaElement) {
+            inputElement.focus()
+            inputElement.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    submitAuth()
+                }
+            })
 
-        captchaElement.previousElementSibling.addEventListener('click', function () {
-            this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
-        })
+            captchaElement.previousElementSibling.addEventListener('click', function () {
+                this.src = `/api/system/getCaptcha?v=${new Date().getTime()}`
+            })
+        }
 
         // 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
         new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')

@@ -111,7 +111,7 @@ func Login(c *gin.Context, oidcConf *conf.OIDC) {
 	c.Redirect(http.StatusFound, authURL)
 }
 
-func Callback(c *gin.Context, oidcConf *conf.OIDC) {
+func Callback(c *gin.Context, oidcConf *conf.OIDC, lang func(int) string) {
 	if !IsEnabled(oidcConf) {
 		c.Status(http.StatusNotFound)
 		return
@@ -120,28 +120,25 @@ func Callback(c *gin.Context, oidcConf *conf.OIDC) {
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
 	if "" == workspaceSession.OIDC.State || c.Query("state") != workspaceSession.OIDC.State {
-		logging.LogWarnf("invalid oidc state [ip=%s]", util.GetRemoteAddr(c.Request))
-		c.Status(http.StatusUnauthorized)
+		oidcCallbackError(c, workspaceSession, lang, 277, "invalid oidc state", nil)
 		return
 	}
 
 	code := c.Query("code")
 	if "" == code {
-		logging.LogWarnf("missing oidc code [ip=%s]", util.GetRemoteAddr(c.Request))
-		c.Status(http.StatusUnauthorized)
+		oidcCallbackError(c, workspaceSession, lang, 277, "missing oidc code", nil)
 		return
 	}
 
 	p, err := providerInstance(oidcConf)
 	if err != nil {
 		logging.LogErrorf("init oidc provider failed: %s", err)
-		c.Status(http.StatusInternalServerError)
+		oidcCallbackError(c, workspaceSession, lang, 276, "init oidc provider failed", err)
 		return
 	}
 
 	if "" != workspaceSession.OIDC.Provider && workspaceSession.OIDC.Provider != p.ID() {
-		logging.LogWarnf("oidc provider mismatch [ip=%s]", util.GetRemoteAddr(c.Request))
-		c.Status(http.StatusUnauthorized)
+		oidcCallbackError(c, workspaceSession, lang, 277, "oidc provider mismatch", nil)
 		return
 	}
 
@@ -150,20 +147,17 @@ func Callback(c *gin.Context, oidcConf *conf.OIDC) {
 
 	claims, err := p.HandleCallback(ctx, code, workspaceSession.OIDC.Nonce)
 	if err != nil {
-		logging.LogWarnf("oidc callback failed: %s", err)
-		c.Status(http.StatusUnauthorized)
+		oidcCallbackError(c, workspaceSession, lang, 276, "oidc callback failed", err)
 		return
 	}
 
 	if "" == claims.Subject {
-		logging.LogWarnf("oidc subject missing [ip=%s]", util.GetRemoteAddr(c.Request))
-		c.Status(http.StatusUnauthorized)
+		oidcCallbackError(c, workspaceSession, lang, 276, "oidc subject missing", nil)
 		return
 	}
 
 	if !IsAllowed(oidcConf.Filters, claims) {
-		logging.LogWarnf("oidc filter rejected [ip=%s]", util.GetRemoteAddr(c.Request))
-		c.Status(http.StatusUnauthorized)
+		oidcCallbackError(c, workspaceSession, lang, 278, "oidc filter rejected", nil)
 		return
 	}
 
@@ -182,8 +176,7 @@ func Callback(c *gin.Context, oidcConf *conf.OIDC) {
 	})
 
 	if err = session.Save(c); err != nil {
-		logging.LogErrorf("save session failed: %s", err)
-		c.Status(http.StatusInternalServerError)
+		oidcCallbackError(c, workspaceSession, lang, 276, "save session failed", err)
 		return
 	}
 	logging.LogInfof("oidc auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), maxAge)
@@ -237,4 +230,32 @@ func sanitizeRedirectPath(dest string) string {
 	parsed.Host = ""
 	parsed.User = nil
 	return parsed.String()
+}
+
+func oidcCallbackError(c *gin.Context, workspaceSession *util.WorkspaceSession, lang func(int) string, msgID int, logMsg string, err error) {
+	userMsg := lang(msgID)
+	if "" == userMsg {
+		userMsg = "OIDC authentication failed, please retry."
+	}
+	if 200 < len(userMsg) {
+		userMsg = userMsg[:200] + "..."
+	}
+
+	if err != nil {
+		logging.LogWarnf("oidc callback failed: %s [err=%s, ip=%s]", logMsg, err, util.GetRemoteAddr(c.Request))
+	} else {
+		logging.LogWarnf("oidc callback failed: %s [ip=%s]", logMsg, util.GetRemoteAddr(c.Request))
+	}
+
+	location := url.URL{Path: "/check-auth"}
+	queryParams := url.Values{}
+	if workspaceSession != nil && workspaceSession.OIDC != nil {
+		to := sanitizeRedirectPath(workspaceSession.OIDC.To)
+		if "" != to {
+			queryParams.Set("to", to)
+		}
+	}
+	queryParams.Set("error", userMsg)
+	location.RawQuery = queryParams.Encode()
+	c.Redirect(http.StatusFound, location.String())
 }

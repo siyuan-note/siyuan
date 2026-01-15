@@ -129,6 +129,13 @@ func rewrite(r *httputil.ProxyRequest) {
 }
 
 func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
+	// Check Admin Token
+	if token, _ := model.ParseAPIToken(request); "" != token && model.Conf.Api.Token == token {
+		request.Header.Set(model.XAuthTokenKey, token)
+		response, err = http.DefaultTransport.RoundTrip(request)
+		return
+	}
+
 	if model.Conf.Publish.Auth.Enable {
 		// Session Auth
 		sessionIdCookie, cookieErr := request.Cookie(model.SessionIdCookieName)

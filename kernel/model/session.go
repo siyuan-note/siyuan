@@ -17,6 +17,7 @@
 package model
 
 import (
+	"fmt"
 	"image/color"
 	"net/http"
 	"net/url"
@@ -205,41 +206,15 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	// 通过 API token (header: Authorization)
-	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
-		var token string
-		if strings.HasPrefix(authHeader, "Token ") {
-			token = strings.TrimPrefix(authHeader, "Token ")
-		} else if strings.HasPrefix(authHeader, "token ") {
-			token = strings.TrimPrefix(authHeader, "token ")
-		} else if strings.HasPrefix(authHeader, "Bearer ") {
-			token = strings.TrimPrefix(authHeader, "Bearer ")
-		} else if strings.HasPrefix(authHeader, "bearer ") {
-			token = strings.TrimPrefix(authHeader, "bearer ")
-		}
-
-		if "" != token {
-			if Conf.Api.Token == token {
-				c.Set(RoleContextKey, RoleAdministrator)
-				c.Next()
-				return
-			}
-
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
-			c.Abort()
-			return
-		}
-	}
-
-	// 通过 API token (query-params: token)
-	if token := c.Query("token"); "" != token {
+	// Check API Token
+	if token, source := ParseAPIToken(c.Request); "" != token {
 		if Conf.Api.Token == token {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
+		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": fmt.Sprintf("Auth failed [%s]", source)})
 		c.Abort()
 		return
 	}

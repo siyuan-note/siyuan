@@ -21,6 +21,8 @@ import (
 	"net/http"
 	"sync"
 
+	"strings"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/siyuan-note/logging"
@@ -170,4 +172,30 @@ func IsPublishServiceToken(token *jwt.Token) bool {
 		return tokenIssuer == iss
 	}
 	return false
+}
+
+func ParseAPIToken(r *http.Request) (token string, source string) {
+	if authHeader := r.Header.Get("Authorization"); "" != authHeader {
+		if strings.HasPrefix(authHeader, "Token ") {
+			token = strings.TrimPrefix(authHeader, "Token ")
+		} else if strings.HasPrefix(authHeader, "token ") {
+			token = strings.TrimPrefix(authHeader, "token ")
+		} else if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		} else if strings.HasPrefix(authHeader, "bearer ") {
+			token = strings.TrimPrefix(authHeader, "bearer ")
+		}
+
+		if "" != token {
+			source = "header: Authorization"
+		}
+	}
+
+	if "" == token {
+		token = r.URL.Query().Get("token")
+		if "" != token {
+			source = "query: token"
+		}
+	}
+	return
 }

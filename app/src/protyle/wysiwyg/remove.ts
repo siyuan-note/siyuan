@@ -272,7 +272,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     const isCallout = blockElement.parentElement.classList.contains("callout-content");
-    if (!blockElement.previousElementSibling && (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout)) {
+    if (!blockElement.previousElementSibling && blockType !== "NodeHeading" &&
+        (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout)) {
         if (type !== "Delete") {
             range.insertNode(document.createElement("wbr"));
         }
@@ -320,7 +321,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
 
-    if (blockElement.parentElement.classList.contains("li") && blockElement.getAttribute("data-type") !== "NodeHeading" &&
+    if (blockElement.parentElement.classList.contains("li") && blockType !== "NodeHeading" &&
         blockElement.previousElementSibling.classList.contains("protyle-action")) {
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
@@ -356,7 +357,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             blockElement.previousElementSibling.getAttribute("fold") === "1") {
             setFold(protyle, blockElement.previousElementSibling, true, false, false);
         }
-        if (blockElement.getAttribute("data-type") === "NodeHeading" &&
+        if (blockType === "NodeHeading" &&
             blockElement.getAttribute("fold") === "1") {
             setFold(protyle, blockElement, true, false, false);
         }

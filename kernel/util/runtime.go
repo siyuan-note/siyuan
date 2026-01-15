@@ -107,26 +107,32 @@ func logBootInfo() {
 		logging.LogInfof("disabled features [%s]", strings.Join(DisabledFeatures, ", "))
 	}
 
-	if gulu.OS.IsWindows() || gulu.OS.IsLinux() {
-		go func() {
-			if ghw.DriveTypeSSD.String() != getWorkspaceDriveType() {
-				logging.LogWarnf("workspace dir [%s] is not in SSD drive, performance may be affected", WorkspaceDir)
-				WaitForUILoaded()
-				time.Sleep(3 * time.Second)
-				PushErrMsg(Langs[Lang][278], 15000)
-			}
-		}()
-	}
+	go func() {
+		if ghw.DriveTypeSSD.String() != getWorkspaceDriveType() {
+			logging.LogWarnf("workspace dir [%s] is not in SSD drive, performance may be affected", WorkspaceDir)
+			WaitForUILoaded()
+			time.Sleep(3 * time.Second)
+			PushErrMsg(Langs[Lang][278], 15000)
+		}
+	}()
 }
 
 func getWorkspaceDriveType() string {
-	block, err := ghw.Block()
-	if err != nil {
-		logging.LogWarnf("get block storage info failed: %s", err)
-		return ""
+	if gulu.OS.IsDarwin() {
+		return ghw.DriveTypeSSD.String()
+	}
+
+	if ContainerAndroid == Container || ContainerIOS == Container || ContainerHarmony == Container {
+		return ghw.DriveTypeSSD.String()
 	}
 
 	if gulu.OS.IsWindows() {
+		block, err := ghw.Block()
+		if err != nil {
+			logging.LogWarnf("get block storage info failed: %s", err)
+			return ""
+		}
+
 		part := filepath.VolumeName(WorkspaceDir)
 		for _, disk := range block.Disks {
 			for _, partition := range disk.Partitions {
@@ -136,6 +142,12 @@ func getWorkspaceDriveType() string {
 			}
 		}
 	} else if gulu.OS.IsLinux() {
+		block, err := ghw.Block()
+		if err != nil {
+			logging.LogWarnf("get block storage info failed: %s", err)
+			return ""
+		}
+
 		for _, disk := range block.Disks {
 			for _, partition := range disk.Partitions {
 				if strings.HasPrefix(WorkspaceDir, partition.MountPoint) {

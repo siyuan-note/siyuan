@@ -29,16 +29,32 @@ else
 fi
 
 # Parse command line arguments for --workspace option or SIYUAN_WORKSPACE_PATH env variable
-# Store other arguments in ARGS for later use
+# Delete --workspace argument for no duplication and keep other arguments for later exec
 if [[ -n "${SIYUAN_WORKSPACE_PATH}" ]]; then
     WORKSPACE_DIR="${SIYUAN_WORKSPACE_PATH}"
 fi
-ARGS=""
-while [[ "$#" -gt 0 ]]; do
+# in POSIX sh, we don't have arrays, so we use a Argument Rotation trick
+arg_count=$#
+while [ "$arg_count" -gt 0 ]; do
     case $1 in
-        --workspace=*) WORKSPACE_DIR="${1#*=}"; shift ;;
-        *) ARGS="$ARGS $1"; shift ;;
+        --workspace=*)
+            WORKSPACE_DIR="${1#*=}"
+            shift
+            ;;
+        --workspace)
+            WORKSPACE_DIR="$2"
+            shift 2
+            # there are 2 arguments, we need to decrease one more here
+            arg_count=$((arg_count - 1))
+            ;;
+        *)
+            # Core idea of Argument Rotation: move argument to the end of the list
+            set -- "$@" "$1"
+            shift
+            ;;
     esac
+
+    arg_count=$((arg_count - 1))
 done
 
 # Change ownership of relevant directories, including the workspace directory
@@ -49,4 +65,4 @@ chown -R "${PUID}:${PGID}" "${WORKSPACE_DIR}"
 
 # Switch to the newly created user and start the main process with all arguments
 echo "Starting Siyuan with UID:${PUID} and GID:${PGID} in workspace ${WORKSPACE_DIR}"
-exec su-exec "${PUID}:${PGID}" /opt/siyuan/kernel --workspace="${WORKSPACE_DIR}" ${ARGS}
+exec su-exec "${PUID}:${PGID}" /opt/siyuan/kernel --workspace="${WORKSPACE_DIR}" "$@"

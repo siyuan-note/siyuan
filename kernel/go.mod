@@ -57,7 +57,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.41.2
 	github.com/shirou/gopsutil/v4 v4.25.12
-	github.com/siyuan-note/dataparser v0.0.0-20251203120213-59c16535cb56
+	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
 	github.com/siyuan-note/dejavu v0.0.0-20260108100422-990f2c0cc6f2
 	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
@@ -77,7 +77,7 @@ require (
 	golang.org/x/mod v0.31.0
 	golang.org/x/net v0.48.0
 	golang.org/x/sys v0.39.0
-	golang.org/x/text v0.32.0
+	golang.org/x/text v0.33.0
 	golang.org/x/time v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )

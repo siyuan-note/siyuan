@@ -382,7 +382,7 @@
     font-size: .75rem;
     margin-left: 16px;
     color: var(--b3-theme-on-surface);
-    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    font-family: var(--b3-font-family-kbd);
   }
 
   // for protyle hint

@@ -306,7 +306,7 @@ func (ctx *authContext) stepExistingRole() authResult {
 
 // stepSkipAuth 绕过所有认证步骤
 func (ctx *authContext) stepSkipAuth() authResult {
-	if util.SiyuanAccessAuthCodeBypass {
+	if Conf.AccessAuthBypass {
 		return authGrant(RoleAdministrator)
 	}
 	return authContinue()

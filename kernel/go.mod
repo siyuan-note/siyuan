@@ -18,6 +18,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
+	github.com/coreos/go-oidc/v3 v3.16.0
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/dgraph-io/ristretto v0.2.0
 	github.com/disintegration/imaging v1.6.2
@@ -76,6 +77,7 @@ require (
 	golang.org/x/mobile v0.0.0-20251209145715-2553ed8ce294
 	golang.org/x/mod v0.31.0
 	golang.org/x/net v0.48.0
+	golang.org/x/oauth2 v0.30.0
 	golang.org/x/sys v0.39.0
 	golang.org/x/text v0.33.0
 	golang.org/x/time v0.14.0
@@ -126,6 +128,7 @@ require (
 	github.com/fatih/set v0.2.1 // indirect
 	github.com/gammazero/toposort v0.1.1 // indirect
 	github.com/gigawattio/window v0.0.0-20180317192513-0f5467e35573 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.28.0 // indirect

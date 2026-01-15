@@ -37,6 +37,57 @@ type SessionData struct {
 type WorkspaceSession struct {
 	AccessAuthCode string
 	Captcha        string
+	OIDC           *OIDCSession
+}
+
+type OIDCSession struct {
+	Provider string
+	Subject  string
+	Email    string
+	State    string
+	Nonce    string
+	To       string
+	Remember bool
+}
+
+func (s *OIDCSession) Challenge(providerID, to string, rememberMe bool) {
+	s.State = gulu.Rand.String(32)
+	s.Nonce = gulu.Rand.String(32)
+	s.Provider = providerID
+	s.Subject = ""
+	s.Email = ""
+	s.To = to
+	s.Remember = rememberMe
+}
+
+func (s *OIDCSession) Complete(subject, email string) (redirectTo string, rememberMe bool) {
+	s.Subject = subject
+	s.Email = email
+	redirectTo = s.To
+	rememberMe = s.Remember
+
+	s.State = ""
+	s.Nonce = ""
+	s.To = ""
+	s.Remember = false
+	return
+}
+
+func (s *OIDCSession) IsValid(expectedProviderID string) bool {
+	if s.Provider != expectedProviderID {
+		return false
+	}
+	return "" != s.Subject
+}
+
+func (s *OIDCSession) Clear() {
+	s.Provider = ""
+	s.Subject = ""
+	s.Email = ""
+	s.State = ""
+	s.Nonce = ""
+	s.To = ""
+	s.Remember = false
 }
 
 func (sd *SessionData) Clear(c *gin.Context) {
@@ -78,7 +129,6 @@ func GetSession(c *gin.Context) *SessionData {
 }
 
 func GetWorkspaceSession(session *SessionData) (ret *WorkspaceSession) {
-	ret = &WorkspaceSession{}
 	if nil == session.Workspaces {
 		session.Workspaces = map[string]*WorkspaceSession{}
 	}
@@ -86,6 +136,9 @@ func GetWorkspaceSession(session *SessionData) (ret *WorkspaceSession) {
 	if nil == ret {
 		ret = &WorkspaceSession{}
 		session.Workspaces[WorkspaceDir] = ret
+	}
+	if nil == ret.OIDC {
+		ret.OIDC = &OIDCSession{}
 	}
 	return
 }

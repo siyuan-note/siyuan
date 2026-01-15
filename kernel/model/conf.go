@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -38,6 +39,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -50,39 +52,41 @@ var Conf *AppConf
 
 // AppConf 维护应用元数据，保存在 ~/.siyuan/conf.json。
 type AppConf struct {
-	LogLevel       string           `json:"logLevel"`       // 日志级别：off, trace, debug, info, warn, error, fatal
-	Appearance     *conf.Appearance `json:"appearance"`     // 外观
-	Langs          []*conf.Lang     `json:"langs"`          // 界面语言列表
-	Lang           string           `json:"lang"`           // 选择的界面语言，同 Appearance.Lang
-	FileTree       *conf.FileTree   `json:"fileTree"`       // 文档面板
-	Tag            *conf.Tag        `json:"tag"`            // 标签面板
-	Editor         *conf.Editor     `json:"editor"`         // 编辑器配置
-	Export         *conf.Export     `json:"export"`         // 导出配置
-	Graph          *conf.Graph      `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
-	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
-	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
-	Account        *conf.Account    `json:"account"`        // 帐号配置
-	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
-	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
-	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
-	System         *conf.System     `json:"system"`         // 系统配置
-	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
-	Sync           *conf.Sync       `json:"sync"`           // 同步配置
-	Search         *conf.Search     `json:"search"`         // 搜索配置
-	Flashcard      *conf.Flashcard  `json:"flashcard"`      // 闪卡配置
-	AI             *conf.AI         `json:"ai"`             // 人工智能配置
-	Bazaar         *conf.Bazaar     `json:"bazaar"`         // 集市配置
-	Stat           *conf.Stat       `json:"stat"`           // 统计
-	Api            *conf.API        `json:"api"`            // API
-	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
-	Publish        *conf.Publish    `json:"publish"`        // 发布服务
-	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
-	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
-	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
-	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
-	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
-	CookieKey      string           `json:"cookieKey"`      // 用于加密 Cookie 的密钥
+	LogLevel         string           `json:"logLevel"`         // 日志级别：off, trace, debug, info, warn, error, fatal
+	Appearance       *conf.Appearance `json:"appearance"`       // 外观
+	Langs            []*conf.Lang     `json:"langs"`            // 界面语言列表
+	Lang             string           `json:"lang"`             // 选择的界面语言，同 Appearance.Lang
+	FileTree         *conf.FileTree   `json:"fileTree"`         // 文档面板
+	Tag              *conf.Tag        `json:"tag"`              // 标签面板
+	Editor           *conf.Editor     `json:"editor"`           // 编辑器配置
+	Export           *conf.Export     `json:"export"`           // 导出配置
+	Graph            *conf.Graph      `json:"graph"`            // 关系图配置
+	UILayout         *conf.UILayout   `json:"uiLayout"`         // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
+	UserData         string           `json:"userData"`         // 社区用户信息，对 User 加密存储
+	User             *conf.User       `json:"-"`                // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
+	Account          *conf.Account    `json:"account"`          // 帐号配置
+	ReadOnly         bool             `json:"readonly"`         // 是否是以只读模式运行
+	LocalIPs         []string         `json:"localIPs"`         // 本地 IP 列表
+	AccessAuthBypass bool             `json:"accessAuthBypass"` // 跳过一切访问认证和安全检查
+	AccessAuthCode   string           `json:"accessAuthCode"`   // 访问授权码
+	OIDC             *conf.OIDC       `json:"oidc"`             // OIDC 登录配置
+	System           *conf.System     `json:"system"`           // 系统配置
+	Keymap           *conf.Keymap     `json:"keymap"`           // 快捷键配置
+	Sync             *conf.Sync       `json:"sync"`             // 同步配置
+	Search           *conf.Search     `json:"search"`           // 搜索配置
+	Flashcard        *conf.Flashcard  `json:"flashcard"`        // 闪卡配置
+	AI               *conf.AI         `json:"ai"`               // 人工智能配置
+	Bazaar           *conf.Bazaar     `json:"bazaar"`           // 集市配置
+	Stat             *conf.Stat       `json:"stat"`             // 统计
+	Api              *conf.API        `json:"api"`              // API
+	Repo             *conf.Repo       `json:"repo"`             // 数据仓库
+	Publish          *conf.Publish    `json:"publish"`          // 发布服务
+	OpenHelp         bool             `json:"openHelp"`         // 启动后是否需要打开用户指南
+	ShowChangelog    bool             `json:"showChangelog"`    // 是否显示版本更新日志
+	CloudRegion      int              `json:"cloudRegion"`      // 云端区域，0：中国大陆，1：北美
+	Snippet          *conf.Snpt       `json:"snippet"`          // 代码片段
+	DataIndexState   int              `json:"dataIndexState"`   // 数据索引状态，0：已索引，1：未索引
+	CookieKey        string           `json:"cookieKey"`        // 用于加密 Cookie 的密钥
 
 	m        *sync.RWMutex // 配置数据锁
 	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
@@ -134,6 +138,51 @@ func InitConf() {
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
 			}
+		}
+	}
+
+	// 合并命令行和环境变量提供的认证配置项。 CLI 优先级高于 配置文件。
+	// CLI 只存在于桌面端/容器化构建版本，移动平台不会设置这些全局变量。
+	if "" != util.AuthCLI.AccessCode {
+		Conf.AccessAuthCode = util.RemoveInvalid(strings.TrimSpace(util.AuthCLI.AccessCode))
+	} else {
+		Conf.AccessAuthCode = util.RemoveInvalid(strings.TrimSpace(Conf.AccessAuthCode))
+	}
+
+	if true == util.AuthCLI.AccessAuthBypass {
+		Conf.AccessAuthBypass = true
+	}
+
+	if nil == Conf.OIDC {
+		Conf.OIDC = conf.NewOIDC()
+	}
+
+	if "" != util.AuthCLI.OIDCProvider {
+		Conf.OIDC.Provider = util.AuthCLI.OIDCProvider
+	}
+
+	if "" != util.AuthCLI.OIDCProviders {
+		providers := map[string]*conf.OIDCProviderConf{}
+		if err := json.Unmarshal([]byte(util.AuthCLI.OIDCProviders), &providers); err != nil {
+			logging.LogErrorf("parse oidc providers from cli failed: %s", err)
+		} else {
+			Conf.OIDC.Providers = providers
+		}
+	}
+
+	if "" != util.AuthCLI.OIDCFilters {
+		filters := map[string][]string{}
+		if err := json.Unmarshal([]byte(util.AuthCLI.OIDCFilters), &filters); err != nil {
+			logging.LogErrorf("parse oidc filters from cli failed: %s", err)
+		} else {
+			Conf.OIDC.Filters = filters
+		}
+	}
+
+	if util.ContainerDocker == util.Container && !Conf.AccessAuthBypass {
+		if "" == Conf.AccessAuthCode && !oidc.IsEnabled(Conf.OIDC) {
+			fmt.Println("in Docker mode, you must set (or set --accessAuthBypass [not recommended]) at least one auth method: accessAuthCode or OIDC")
+			os.Exit(logging.ExitCodeSecurityRisk)
 		}
 	}
 
@@ -564,12 +613,6 @@ func InitConf() {
 	}
 
 	Conf.ReadOnly = util.ReadOnly
-
-	if "" != util.AccessAuthCode {
-		Conf.AccessAuthCode = util.AccessAuthCode
-	}
-	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
-	Conf.AccessAuthCode = util.RemoveInvalid(Conf.AccessAuthCode)
 
 	Conf.LocalIPs = util.GetLocalIPs()
 
@@ -1012,6 +1055,7 @@ func IsPaidUser() bool {
 const (
 	MaskedUserData       = ""
 	MaskedAccessAuthCode = "*******"
+	MaskedSecret         = "*******"
 )
 
 func GetMaskedConf() (ret *AppConf, err error) {
@@ -1031,6 +1075,16 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
+	if nil != ret.OIDC && nil != ret.OIDC.Providers {
+		for _, provider := range ret.OIDC.Providers {
+			if nil == provider {
+				continue
+			}
+			if "" != provider.ClientSecret {
+				provider.ClientSecret = MaskedSecret
+			}
+		}
+	}
 	return
 }
 
@@ -1041,6 +1095,7 @@ func HideConfSecret(c *AppConf) {
 	c.Api = &conf.API{}
 	c.Flashcard = &conf.Flashcard{}
 	c.LocalIPs = []string{}
+	c.OIDC = &conf.OIDC{}
 	c.Publish = &conf.Publish{}
 	c.Repo = &conf.Repo{}
 	c.Sync = &conf.Sync{}

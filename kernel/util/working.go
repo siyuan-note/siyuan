@@ -53,24 +53,38 @@ const (
 	SIYUAN_ACCESS_AUTH_CODE = "SIYUAN_ACCESS_AUTH_CODE"
 	SIYUAN_WORKSPACE        = "SIYUAN_WORKSPACE_PATH"
 	SIYUAN_LANG             = "SIYUAN_LANG"
+
+	ContainerStd     = "std"     // 桌面端
+	ContainerDocker  = "docker"  // Docker 容器端
+	ContainerAndroid = "android" // Android 端
+	ContainerIOS     = "ios"     // iOS 端
+	ContainerHarmony = "harmony" // 鸿蒙端
+
+	LocalHost = "127.0.0.1" // 伺服地址
+	FixedPort = "6806"      // 固定端口
 )
 
-var (
-	RunInContainer                = false // 是否运行在容器中
-	SiyuanAccessAuthCodeBypass    = false // 是否跳过空访问授权码检查
-	SiyuanAccessAuthCodeViaEnvvar = ""    // Fallback auth code via env var (SIYUAN_ACCESS_AUTH_CODE)
-)
-
-func initEnvVars() {
-	RunInContainer = isRunningInDockerContainer()
-	var err error
-	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); err != nil {
-		SiyuanAccessAuthCodeBypass = false
-	}
-	SiyuanAccessAuthCodeViaEnvvar = os.Getenv("SIYUAN_ACCESS_AUTH_CODE")
+type AuthCLIArgs struct {
+	AccessCode       string
+	AccessAuthBypass bool
+	OIDCProvider     string
+	OIDCProviders    string
+	OIDCFilters      string
 }
 
 var (
+	ServerURL  *url.URL // 内核服务 URL
+	ServerPort = "0"    // HTTP/WebSocket 端口，0 为使用随机端口
+
+	ReadOnly bool
+	Lang     = ""
+
+	AuthCLI = AuthCLIArgs{}
+
+	Container        string  // docker, android, ios, harmony, std
+	RunInContainer   = false // 是否运行在容器中
+	ISMicrosoftStore bool    // 桌面端是否是微软商店版
+
 	bootProgress = atomic.Int32{} // 启动进度，从 0 到 100
 	bootDetails  string           // 启动细节描述
 	HttpServer   *http.Server     // HTTP 伺服器实例
@@ -91,7 +105,6 @@ func coalesceToEnvVar(fromCLI *string, envVarName string) *string {
 }
 
 func Boot() {
-	initEnvVars()
 	IncBootProgress(3, "Booting kernel...")
 	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
@@ -101,7 +114,11 @@ func Boot() {
 	wdPath := flag.String("wd", WorkingDir, "working directory of SiYuan")
 	port := flag.String("port", "0", "port of the HTTP server")
 	readOnly := flag.String("readonly", "false", "read-only mode")
-	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
+	accessAuthCode := flag.String("access-auth-code", "", "access auth code")
+	accessAuthBypass := flag.Bool("access-auth-bypass", false, "bypass all access authentication and security checks (not recommended)")
+	oidcProvider := flag.String("oidc-provider", "", "OIDC provider id")
+	oidcProviders := flag.String("oidc-providers", "", "OIDC providers configuration (JSON)")
+	oidcFilters := flag.String("oidc-filters", "", "OIDC filter configuration (JSON)")
 	ssl := flag.Bool("ssl", false, "for https and wss")
 	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/it_IT/ja_JP/ko_KR/pl_PL/pt_BR/ru_RU/tr_TR/zh_CHT/zh_CN")
 	mode := flag.String("mode", "prod", "dev/prod")
@@ -112,7 +129,14 @@ func Boot() {
 	// others have explicit (sane) defaults
 	workspacePath = coalesceToEnvVar(workspacePath, SIYUAN_WORKSPACE)
 	accessAuthCode = coalesceToEnvVar(accessAuthCode, SIYUAN_ACCESS_AUTH_CODE)
+	oidcProvider = coalesceToEnvVar(oidcProvider, "SIYUAN_OIDC_PROVIDER")
+	oidcProviders = coalesceToEnvVar(oidcProviders, "SIYUAN_OIDC_PROVIDERS")
+	oidcFilters = coalesceToEnvVar(oidcFilters, "SIYUAN_OIDC_FILTERS")
 	lang = coalesceToEnvVar(lang, SIYUAN_LANG)
+	RunInContainer = isRunningInDockerContainer()
+	if parsed, err := strconv.ParseBool(strings.TrimSpace(os.Getenv("SIYUAN_ACCESS_AUTH_BYPASS"))); err == nil {
+		*accessAuthBypass = parsed
+	}
 
 	if "" != *wdPath {
 		WorkingDir = *wdPath
@@ -123,30 +147,17 @@ func Boot() {
 	Mode = *mode
 	ServerPort = *port
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
-	AccessAuthCode = *accessAuthCode
-	AccessAuthCode = strings.TrimSpace(AccessAuthCode)
-	AccessAuthCode = RemoveInvalid(AccessAuthCode)
+
+	AuthCLI = AuthCLIArgs{
+		AccessCode:       RemoveInvalid(strings.TrimSpace(*accessAuthCode)),
+		AccessAuthBypass: *accessAuthBypass,
+		OIDCProvider:     strings.TrimSpace(*oidcProvider),
+		OIDCProviders:    strings.TrimSpace(*oidcProviders),
+		OIDCFilters:      strings.TrimSpace(*oidcFilters),
+	}
 	Container = ContainerStd
 	if RunInContainer {
 		Container = ContainerDocker
-		if "" == AccessAuthCode { // Still empty?
-			interruptBoot := true
-
-			// Set the env `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` to skip checking empty access auth code https://github.com/siyuan-note/siyuan/issues/9709
-			if SiyuanAccessAuthCodeBypass {
-				interruptBoot = false
-				fmt.Println("bypass access auth code check since the env [SIYUAN_ACCESS_AUTH_CODE_BYPASS] is set to [true]")
-			}
-
-			if interruptBoot {
-				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
-				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker\n")
-				fmt.Printf("or you can set the SIYUAN_ACCESS_AUTH_CODE env var")
-				os.Exit(logging.ExitCodeSecurityRisk)
-			}
-		}
-	}
-	if ContainerStd != Container {
 		ServerPort = FixedPort
 	}
 
@@ -386,29 +397,6 @@ func WriteWorkspacePaths(workspacePaths []string) (err error) {
 	}
 	return
 }
-
-var (
-	ServerURL  *url.URL // 内核服务 URL
-	ServerPort = "0"    // HTTP/WebSocket 端口，0 为使用随机端口
-
-	ReadOnly       bool
-	AccessAuthCode string
-	Lang           = ""
-
-	Container        string // docker, android, ios, harmony, std
-	ISMicrosoftStore bool   // 桌面端是否是微软商店版
-)
-
-const (
-	ContainerStd     = "std"     // 桌面端
-	ContainerDocker  = "docker"  // Docker 容器端
-	ContainerAndroid = "android" // Android 端
-	ContainerIOS     = "ios"     // iOS 端
-	ContainerHarmony = "harmony" // 鸿蒙端
-
-	LocalHost = "127.0.0.1" // 伺服地址
-	FixedPort = "6806"      // 固定端口
-)
 
 func initPathDir() {
 	if err := os.MkdirAll(ConfDir, 0755); err != nil && !os.IsExist(err) {

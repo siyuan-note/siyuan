@@ -45,6 +45,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/net/webdav"
@@ -168,6 +169,7 @@ func Serve(fastMode bool, cookieKey string) {
 	serveSnippets(ginServer)
 	serveRepoDiff(ginServer)
 	serveCheckAuth(ginServer)
+	serveOIDC(ginServer)
 	serveFixedStaticFiles(ginServer)
 	api.ServeAPI(ginServer)
 
@@ -453,6 +455,15 @@ func serveCheckAuth(ginServer *gin.Engine) {
 	ginServer.GET("/check-auth", serveAuthPage)
 }
 
+func serveOIDC(ginServer *gin.Engine) {
+	ginServer.GET("/auth/oidc/login", func(c *gin.Context) {
+		oidc.Login(c, model.Conf.OIDC)
+	})
+	ginServer.GET("/auth/oidc/callback", func(c *gin.Context) {
+		oidc.Callback(c, model.Conf.OIDC)
+	})
+}
+
 func serveAuthPage(c *gin.Context) {
 	data, err := os.ReadFile(filepath.Join(util.WorkingDir, "stage/auth.html"))
 	if err != nil {
@@ -487,6 +498,8 @@ func serveAuthPage(c *gin.Context) {
 			keymapHideWindow = "⌥M"
 		}
 	}
+	oidcEnabled := oidc.IsEnabled(model.Conf.OIDC)
+	oidcProviderName := oidc.ProviderLabel(model.Conf.OIDC)
 	model := map[string]interface{}{
 		"l0":                     model.Conf.Language(173),
 		"l1":                     model.Conf.Language(174),
@@ -506,6 +519,9 @@ func serveAuthPage(c *gin.Context) {
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
 		"workspaceDir":           util.WorkspaceDir,
+		"oidcEnabled":            oidcEnabled,
+		"oidcProviderName":       oidcProviderName,
+		"hasAccessAuthCode":      "" != model.Conf.AccessAuthCode,
 	}
 	buf := &bytes.Buffer{}
 	if err = tpl.Execute(buf, model); err != nil {
@@ -613,7 +629,12 @@ func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {
-		if err := util.WebSocketServer.HandleRequest(c.Writer, c.Request); err != nil {
+		ctxKey := make(map[string]any)
+		// Websocket 前端 API 因安全设计原因，无法读取到握手时的 HTTP 信息
+		// 因此即使鉴权失败，也必须先允许握手成功，再拒绝。
+		ctxKey["auth"] = model.CheckWebsocketAuth(c)
+
+		if err := util.WebSocketServer.HandleRequestWithKeys(c.Writer, c.Request, ctxKey); err != nil {
 			logging.LogErrorf("handle command failed: %s", err)
 		}
 	})
@@ -624,50 +645,9 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 	util.WebSocketServer.HandleConnect(func(s *melody.Session) {
 		//logging.LogInfof("ws check auth for [%s]", s.Request.RequestURI)
-		authOk := true
 
-		if "" != model.Conf.AccessAuthCode {
-			session, err := sessionStore.Get(s.Request, "siyuan")
-			if err != nil {
-				authOk = false
-				logging.LogErrorf("get cookie failed: %s", err)
-			} else {
-				val := session.Values["data"]
-				if nil == val {
-					authOk = false
-				} else {
-					sess := &util.SessionData{}
-					err = gulu.JSON.UnmarshalJSON([]byte(val.(string)), sess)
-					if err != nil {
-						authOk = false
-						logging.LogErrorf("unmarshal cookie failed: %s", err)
-					} else {
-						workspaceSess := util.GetWorkspaceSession(sess)
-						authOk = workspaceSess.AccessAuthCode == model.Conf.AccessAuthCode
-					}
-				}
-			}
-		}
-
-		// REF: https://github.com/siyuan-note/siyuan/issues/11364
-		if !authOk {
-			if token := model.ParseXAuthToken(s.Request); token != nil {
-				authOk = token.Valid && model.IsValidRole(model.GetClaimRole(model.GetTokenClaims(token)), []model.Role{
-					model.RoleAdministrator,
-					model.RoleEditor,
-					model.RoleReader,
-				})
-			}
-		}
-
-		if !authOk {
-			// 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-			authOk = strings.Contains(s.Request.RequestURI, "/ws?app=siyuan&id=auth")
-		}
-
-		if !authOk {
+		if authOk, ok := s.Keys["auth"].(bool); !ok || !authOk {
 			s.CloseWithMsg([]byte("  unauthenticated"))
-			logging.LogWarnf("closed an unauthenticated session [%s]", util.GetRemoteAddr(s.Request))
 			return
 		}
 

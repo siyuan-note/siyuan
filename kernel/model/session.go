@@ -31,6 +31,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/steambap/captcha"
 )
@@ -194,183 +195,430 @@ func CheckReadonly(c *gin.Context) {
 	}
 }
 
-func CheckAuth(c *gin.Context) {
-	// 已通过 JWT 认证
-	if role := GetGinContextRole(c); IsValidRole(role, []Role{
+type authAction int
+
+const (
+	authActionContinue authAction = iota
+	authActionGrant
+	authActionPass
+	authActionDeny
+	authActionRedirect
+	authActionHeaderStatus
+)
+
+type authResult struct {
+	action      authAction
+	role        Role
+	status      int
+	payload     map[string]interface{}
+	redirectTo  string
+	headerKey   string
+	headerValue string
+}
+
+type authStep struct {
+	name    string
+	handler func(*authContext) authResult
+}
+
+type authContext struct {
+	ginCtx          *gin.Context
+	session         *util.SessionData
+	workspace       *util.WorkspaceSession
+	isLocalhostConn bool
+	hasAccessCode   bool
+	oidcEnabled     bool
+	hasAnyAuth      bool
+}
+
+func newAuthContext(c *gin.Context) *authContext {
+	session := util.GetSession(c)
+	oidcEnabled := oidc.IsEnabled(Conf.OIDC)
+	hasAccessCode := "" != Conf.AccessAuthCode
+	return &authContext{
+		ginCtx:          c,
+		session:         session,
+		workspace:       util.GetWorkspaceSession(session),
+		isLocalhostConn: util.IsLocalHost(c.Request.RemoteAddr),
+		hasAccessCode:   hasAccessCode,
+		oidcEnabled:     oidcEnabled,
+		hasAnyAuth:      hasAccessCode || oidcEnabled,
+	}
+}
+
+// authContinue 继续下一个鉴权步骤
+func authContinue() authResult {
+	return authResult{action: authActionContinue}
+}
+
+// authPass 放行请求，但不修改角色。
+// 也就是说保留当前已有的角色：如果前面 JWT 中间件写了管理员/访客，就保持那个；
+// 如果没人写过，则是默认 RoleVisitor
+func authPass() authResult {
+	return authResult{action: authActionPass}
+}
+
+// authGrant 放行请求，并赋予指定角色
+func authGrant(role Role) authResult {
+	return authResult{action: authActionGrant, role: role}
+}
+
+// authUnauthorized 拒绝请求，返回 401 状态码和指定消息
+func authUnauthorized(msg string) authResult {
+	return authResult{
+		action:  authActionDeny,
+		status:  http.StatusUnauthorized,
+		payload: map[string]any{"code": -1, "msg": msg},
+	}
+}
+
+// authRedirect 重定向到指定路径
+func authRedirect(to string) authResult {
+	return authResult{action: authActionRedirect, redirectTo: to}
+}
+
+// authRedirectToCheckAuth 重定向到 /check-auth 并携带当前请求路径作为参数
+func (ctx *authContext) authRedirectToCheckAuth() authResult {
+	location := url.URL{}
+	queryParams := url.Values{}
+	queryParams.Set("to", ctx.ginCtx.Request.URL.String())
+	location.RawQuery = queryParams.Encode()
+	location.Path = "/check-auth"
+	return authRedirect(location.String())
+}
+
+// authHeaderStatus 返回指定 header 和状态码
+func authHeaderStatus(key, val string, status int) authResult {
+	return authResult{action: authActionHeaderStatus, headerKey: key, headerValue: val, status: status}
+}
+
+// stepExistingRole 放行前面中间件已放行的请求，如已通过 JWT 的请求
+func (ctx *authContext) stepExistingRole() authResult {
+	if IsValidRole(GetGinContextRole(ctx.ginCtx), []Role{
 		RoleAdministrator,
 		RoleEditor,
 		RoleReader,
 	}) {
-		c.Next()
-		return
+		return authPass()
+	}
+	return authContinue()
+}
+
+// stepSkipAuth 绕过所有认证步骤
+func (ctx *authContext) stepSkipAuth() authResult {
+	if util.SiyuanAccessAuthCodeBypass {
+		return authGrant(RoleAdministrator)
+	}
+	return authContinue()
+}
+
+// stepAuthorizationHeaderToken 通过 API Token (header: Authorization) 认证
+func (ctx *authContext) stepAuthorizationHeaderToken() authResult {
+	authHeader := ctx.ginCtx.GetHeader("Authorization")
+	if "" == authHeader {
+		return authContinue()
 	}
 
-	// 通过 API token (header: Authorization)
-	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
-		var token string
-		if strings.HasPrefix(authHeader, "Token ") {
-			token = strings.TrimPrefix(authHeader, "Token ")
-		} else if strings.HasPrefix(authHeader, "token ") {
-			token = strings.TrimPrefix(authHeader, "token ")
-		} else if strings.HasPrefix(authHeader, "Bearer ") {
-			token = strings.TrimPrefix(authHeader, "Bearer ")
-		} else if strings.HasPrefix(authHeader, "bearer ") {
-			token = strings.TrimPrefix(authHeader, "bearer ")
-		}
-
-		if "" != token {
-			if Conf.Api.Token == token {
-				c.Set(RoleContextKey, RoleAdministrator)
-				c.Next()
-				return
-			}
-
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
-			c.Abort()
-			return
-		}
+	token := ""
+	switch {
+	case strings.HasPrefix(authHeader, "Token "):
+		token = strings.TrimPrefix(authHeader, "Token ")
+	case strings.HasPrefix(authHeader, "token "):
+		token = strings.TrimPrefix(authHeader, "token ")
+	case strings.HasPrefix(authHeader, "Bearer "):
+		token = strings.TrimPrefix(authHeader, "Bearer ")
+	case strings.HasPrefix(authHeader, "bearer "):
+		token = strings.TrimPrefix(authHeader, "bearer ")
 	}
 
-	// 通过 API token (query-params: token)
-	if token := c.Query("token"); "" != token {
-		if Conf.Api.Token == token {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
+	if "" == token {
+		return authContinue()
+	}
+	if Conf.Api.Token == token {
+		return authGrant(RoleAdministrator)
+	}
+	return authUnauthorized("Auth failed [header: Authorization]")
+}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
-		c.Abort()
-		return
+// stepQueryToken 通过 API Token (query: token) 认证
+func (ctx *authContext) stepQueryToken() authResult {
+	token := ctx.ginCtx.Query("token")
+	if "" == token {
+		return authContinue()
+	}
+	if Conf.Api.Token == token {
+		return authGrant(RoleAdministrator)
+	}
+	return authUnauthorized("Auth failed [query: token]")
+}
+
+// stepAuthPageWhitelist 放行鉴权相关页面（登录页/ OIDC 回调 Websocket连接）
+func (ctx *authContext) stepAuthPageWhitelist() authResult {
+	reqURI := ctx.ginCtx.Request.RequestURI
+
+	switch {
+	case "/check-auth" == reqURI:
+		return authPass()
+	case strings.HasPrefix(reqURI, "/auth/oidc/"):
+		return authPass()
+	// 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
+	case strings.Contains(reqURI, "/ws?app=siyuan&id=auth"):
+		return authPass()
 	}
 
-	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
-	localhost := util.IsLocalHost(c.Request.RemoteAddr)
+	return authContinue()
+}
 
-	// 未设置访问授权码
-	if "" == Conf.AccessAuthCode {
-		// Skip the empty access authorization code check https://github.com/siyuan-note/siyuan/issues/9709
-		if util.SiyuanAccessAuthCodeBypass {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
+// stepAuthLocalGuard 远程访问需开启至少一种认证
+func (ctx *authContext) stepAuthLocalGuard() authResult {
+	// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
+	clientIP := ctx.ginCtx.ClientIP()
+	host := ctx.ginCtx.GetHeader("Host")
+	origin := ctx.ginCtx.GetHeader("Origin")
+	forwardedHost := ctx.ginCtx.GetHeader("X-Forwarded-Host")
 
-		// Authenticate requests with the Origin header other than 127.0.0.1 https://github.com/siyuan-note/siyuan/issues/9180
-		clientIP := c.ClientIP()
-		host := c.GetHeader("Host")
-		origin := c.GetHeader("Origin")
-		forwardedHost := c.GetHeader("X-Forwarded-Host")
-		if !localhost ||
-			("" != clientIP && !util.IsLocalHostname(clientIP)) ||
-			("" != host && !util.IsLocalHost(host)) ||
-			("" != origin && !util.IsLocalOrigin(origin) && !strings.HasPrefix(origin, "chrome-extension://")) ||
-			("" != forwardedHost && !util.IsLocalHost(forwardedHost)) {
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed: for security reasons, please set [Access authorization code] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [访问授权码]"})
-			c.Abort()
-			return
-		}
+	remote := !ctx.isLocalhostConn ||
+		("" != clientIP && !util.IsLocalHostname(clientIP)) ||
+		("" != host && !util.IsLocalHost(host)) ||
+		("" != origin && !util.IsLocalOrigin(origin) && !strings.HasPrefix(origin, "chrome-extension://")) ||
+		("" != forwardedHost && !util.IsLocalHost(forwardedHost))
 
-		c.Set(RoleContextKey, RoleAdministrator)
-		c.Next()
-		return
+	if remote && !ctx.hasAnyAuth {
+		return authUnauthorized("Auth failed: for security reasons, please set at least one authentication method when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请至少设置一种认证方式")
 	}
 
-	// 放过 /appearance/ 等（不要扩大到 /stage/ 否则鉴权会有问题）
-	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||
-		strings.HasPrefix(c.Request.RequestURI, "/stage/build/export/") ||
-		strings.HasPrefix(c.Request.RequestURI, "/stage/protyle/") {
-		c.Next()
-		return
-	}
+	return authContinue()
+}
 
-	// 放过来自本机的某些请求
-	if localhost {
-		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/export/") {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") || strings.HasPrefix(c.Request.RequestURI, "/api/system/getWorkspaceInfo") {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/sync/performSync") {
-			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
-				c.Set(RoleContextKey, RoleAdministrator)
-				c.Next()
-				return
-			}
-		}
+// stepLocalhostNoAuth 本地请求且无认证配置时直接放行
+func (ctx *authContext) stepLocalhostNoAuth() authResult {
+	if ctx.isLocalhostConn && !ctx.hasAnyAuth {
+		return authGrant(RoleAdministrator)
 	}
+	return authContinue()
+}
 
-	// 通过 Cookie
-	session := util.GetSession(c)
-	workspaceSession := util.GetWorkspaceSession(session)
-	if workspaceSession.AccessAuthCode == Conf.AccessAuthCode {
-		c.Set(RoleContextKey, RoleAdministrator)
-		c.Next()
-		return
+// stepSessionAccessCode 通过会话中的访问授权码
+func (ctx *authContext) stepSessionAccessCode() authResult {
+	if ctx.workspace.AccessAuthCode == Conf.AccessAuthCode && "" != Conf.AccessAuthCode {
+		return authGrant(RoleAdministrator)
 	}
+	return authContinue()
+}
 
-	// 通过 BasicAuth (header: Authorization)
-	if username, password, ok := c.Request.BasicAuth(); ok {
-		// 使用访问授权码作为密码
+// stepOIDCSession 通过 OIDC 会话
+func (ctx *authContext) stepOIDCSession() authResult {
+	if oidc.IsSessionValid(Conf.OIDC, ctx.workspace) {
+		return authGrant(RoleAdministrator)
+	}
+	return authContinue()
+}
+
+// stepBasicAuth 使用 BasicAuth 校验访问授权码
+func (ctx *authContext) stepBasicAuth() authResult {
+	if username, password, ok := ctx.ginCtx.Request.BasicAuth(); ok {
 		if util.WorkspaceName == username && Conf.AccessAuthCode == password {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
+			return authGrant(RoleAdministrator)
 		}
 	}
+	return authContinue()
+}
 
-	// WebDAV BasicAuth Authenticate
-	if strings.HasPrefix(c.Request.RequestURI, "/webdav") ||
-		strings.HasPrefix(c.Request.RequestURI, "/caldav") ||
-		strings.HasPrefix(c.Request.RequestURI, "/carddav") {
-		c.Header(BasicAuthHeaderKey, BasicAuthHeaderValue)
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
+// stepLocalhostWhitelist 本机特定路径直接赋予管理员（满足后续权限校验）
+func (ctx *authContext) stepLocalhostWhitelist() authResult {
+	if !ctx.isLocalhostConn {
+		return authContinue()
 	}
 
-	// 跳过访问授权页
-	if "/check-auth" == c.Request.URL.Path {
+	reqURI := ctx.ginCtx.Request.RequestURI
+	switch {
+	case strings.HasPrefix(reqURI, "/assets/") || strings.HasPrefix(reqURI, "/export/"):
+		return authGrant(RoleAdministrator)
+	case strings.HasPrefix(reqURI, "/api/system/exit"):
+		return authGrant(RoleAdministrator)
+	case strings.HasPrefix(reqURI, "/api/system/getNetwork") || strings.HasPrefix(reqURI, "/api/system/getWorkspaceInfo"):
+		return authGrant(RoleAdministrator)
+	case strings.HasPrefix(reqURI, "/api/sync/performSync"):
+		if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
+			return authGrant(RoleAdministrator)
+		}
+	}
+	return authContinue()
+}
+
+// stepStaticWhitelist 放行静态资源
+func (ctx *authContext) stepStaticWhitelist() authResult {
+	reqURI := ctx.ginCtx.Request.RequestURI
+	// 放过 /appearance/ 等（不要扩大到 /stage/ 否则鉴权会有问题）
+	if strings.HasPrefix(reqURI, "/appearance/") ||
+		strings.HasPrefix(reqURI, "/stage/build/export/") ||
+		strings.HasPrefix(reqURI, "/stage/protyle/") {
+		return authPass()
+	}
+	return authContinue()
+}
+
+// stepFailWebDAV 确保 WebDAV 返回 Basic 401
+func (ctx *authContext) stepFailWebDAV() authResult {
+	reqURI := ctx.ginCtx.Request.RequestURI
+	if strings.HasPrefix(reqURI, "/webdav") ||
+		strings.HasPrefix(reqURI, "/caldav") ||
+		strings.HasPrefix(reqURI, "/carddav") {
+		return authHeaderStatus(BasicAuthHeaderKey, BasicAuthHeaderValue, http.StatusUnauthorized)
+	}
+	return authContinue()
+}
+
+// stepFail 兜底处理：浏览器/客户端重定向，其余 401
+func (ctx *authContext) stepFail() authResult {
+	logging.LogWarnf("auth failed [ip=%s, path=%s]", util.GetRemoteAddr(ctx.ginCtx.Request), ctx.ginCtx.Request.URL.Path)
+	userAgentHeader := ctx.ginCtx.GetHeader("User-Agent")
+	if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
+		if http.MethodGet != ctx.ginCtx.Request.Method || ctx.ginCtx.IsWebsocket() {
+			return authUnauthorized(Conf.Language(156))
+		}
+		return ctx.authRedirectToCheckAuth()
+	}
+
+	return authUnauthorized("Auth failed [session]")
+}
+
+func handleAuthResult(c *gin.Context, res authResult) bool {
+	switch res.action {
+	case authActionGrant:
+		c.Set(RoleContextKey, res.role)
 		c.Next()
-		return
+		return true
+	case authActionPass:
+		c.Next()
+		return true
+	case authActionRedirect:
+		target := res.redirectTo
+		if "" == target {
+			target = "/"
+		}
+		c.Redirect(http.StatusFound, target)
+		c.Abort()
+		return true
+	case authActionDeny:
+		status := res.status
+		if 0 == status {
+			status = http.StatusUnauthorized
+		}
+		if nil != res.payload {
+			c.JSON(status, res.payload)
+			c.Abort()
+			return true
+		}
+		c.AbortWithStatus(status)
+		return true
+	case authActionHeaderStatus:
+		if "" != res.headerKey {
+			c.Header(res.headerKey, res.headerValue)
+		}
+		status := res.status
+		if 0 == status {
+			status = http.StatusUnauthorized
+		}
+		c.AbortWithStatus(status)
+		return true
+	default:
+		return false
+	}
+}
+
+// CheckAuth 鉴权逻辑
+func CheckAuth(c *gin.Context) {
+	ctx := newAuthContext(c)
+	steps := []authStep{
+		{name: "existing-role", handler: (*authContext).stepExistingRole},
+
+		{name: "skip-auth", handler: (*authContext).stepSkipAuth},
+
+		// API Token 认证
+		{name: "authorization-header-token", handler: (*authContext).stepAuthorizationHeaderToken},
+		{name: "query-token", handler: (*authContext).stepQueryToken},
+
+		// 提前放行鉴权相关页面，避免被 auth local guard阻断
+		{name: "auth-page-whitelist", handler: (*authContext).stepAuthPageWhitelist},
+
+		{name: "auth-local-guard", handler: (*authContext).stepAuthLocalGuard},
+
+		// stepLocalhostNoAuth 务必放在 stepAuthLocalGuard 之后，以防 非Local的远程请求无认证配置时 放行
+		// 并且 localGuard 检查是否是 本地请求 的逻辑更严格
+		{name: "localhost-no-auth", handler: (*authContext).stepLocalhostNoAuth},
+		{name: "session-access-code", handler: (*authContext).stepSessionAccessCode},
+		{name: "session-oidc", handler: (*authContext).stepOIDCSession},
+		{name: "basic-auth", handler: (*authContext).stepBasicAuth},
+
+		// 放行特定路径
+		{name: "localhost-whitelist", handler: (*authContext).stepLocalhostWhitelist},
+		{name: "static-whitelist", handler: (*authContext).stepStaticWhitelist},
+
+		// 错误处理
+		{name: "webdav-auth-fail", handler: (*authContext).stepFailWebDAV},
+		{name: "fail", handler: (*authContext).stepFail},
 	}
 
-	if workspaceSession.AccessAuthCode != Conf.AccessAuthCode {
-		userAgentHeader := c.GetHeader("User-Agent")
-		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
-			if "GET" != c.Request.Method || c.IsWebsocket() {
-				c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": Conf.Language(156)})
-				c.Abort()
-				return
-			}
-
-			location := url.URL{}
-			queryParams := url.Values{}
-			queryParams.Set("to", c.Request.URL.String())
-			location.RawQuery = queryParams.Encode()
-			location.Path = "/check-auth"
-
-			c.Redirect(http.StatusFound, location.String())
-			c.Abort()
+	for _, step := range steps {
+		if handled := handleAuthResult(c, step.handler(ctx)); handled {
 			return
 		}
-
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [session]"})
-		c.Abort()
-		return
 	}
 
-	c.Set(RoleContextKey, RoleAdministrator)
-	c.Next()
+	// 不应该到达这里
+	logging.LogErrorf("auth logic error")
+	c.AbortWithStatus(http.StatusUnauthorized)
+}
+
+func handleAuthResultWebsocket(res authResult, pass *bool) bool {
+	switch res.action {
+	case authActionGrant:
+		*pass = true
+		return true
+	case authActionPass:
+		*pass = true
+		return true
+	case authActionRedirect:
+		panic("websocket auth cannot redirect")
+	case authActionDeny:
+		*pass = false
+		return true
+	case authActionHeaderStatus:
+		panic("websocket auth cannot return header status")
+	default:
+		return false
+	}
+}
+
+// CheckWebsocketAuth WebSocket 鉴权逻辑
+func CheckWebsocketAuth(c *gin.Context) (pass bool) {
+	ctx := newAuthContext(c)
+	steps := []authStep{
+		{name: "existing-role", handler: (*authContext).stepExistingRole},
+
+		//{name: "skip-auth", handler: (*authContext).stepSkipAuth},
+
+		// 提前放行鉴权相关页面，避免被 auth local guard阻断
+		{name: "auth-page-whitelist", handler: (*authContext).stepAuthPageWhitelist},
+
+		{name: "auth-local-guard", handler: (*authContext).stepAuthLocalGuard},
+
+		// stepLocalhostNoAuth 务必放在 stepAuthLocalGuard 之后，以防 非Local的远程请求无认证配置时 放行
+		// 并且 localGuard 检查是否是 本地请求 的逻辑更严格
+		{name: "localhost-no-auth", handler: (*authContext).stepLocalhostNoAuth},
+		{name: "session-access-code", handler: (*authContext).stepSessionAccessCode},
+		{name: "session-oidc", handler: (*authContext).stepOIDCSession},
+	}
+
+	for _, step := range steps {
+		if handled := handleAuthResultWebsocket(step.handler(ctx), &pass); handled {
+			return
+		}
+	}
+
+	logging.LogWarnf("closed an unauthenticated session [%s]", util.GetRemoteAddr(c.Request))
+	return false
 }
 
 func CheckAdminRole(c *gin.Context) {

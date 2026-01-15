@@ -271,14 +271,22 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
 
-    const isCallout = blockElement.parentElement.classList.contains("callout-content");
-    if (!blockElement.previousElementSibling &&
-        (blockType !== "NodeHeading" || (blockType === "NodeHeading" && type === "Delete")) &&
-        (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout)) {
+    let isCallout = blockElement.parentElement.classList.contains("callout-content");
+    if (type === "Delete") {
+        const bqCaElement = hasClosestByClassName(blockElement, "bq") || hasClosestByClassName(blockElement, "callout");
+        if (bqCaElement) {
+            isCallout = bqCaElement.classList.contains("callout");
+            blockElement = isCallout ? bqCaElement.querySelector(".callout-content").firstElementChild : bqCaElement.firstElementChild;
+        }
+    }
+    const blockParentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
+    if (!blockElement.previousElementSibling && (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout) && (
+        (type !== "Delete" && blockType !== "NodeHeading") ||
+        (type === "Delete" && blockParentElement.parentElement.classList.contains("protyle-wysiwyg"))
+    )) {
         if (type !== "Delete") {
             range.insertNode(document.createElement("wbr"));
         }
-        const blockParentElement = isCallout ? blockElement.parentElement.parentElement : blockElement.parentElement;
         blockParentElement.insertAdjacentElement("beforebegin", blockElement);
         if (isCallout ? blockParentElement.querySelector(".callout-content").childElementCount === 0 :
             blockParentElement.childElementCount === 1) {
@@ -326,6 +334,13 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         blockElement.previousElementSibling.classList.contains("protyle-action")) {
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
+    }
+    if (type === "Delete") {
+        const liElement = hasClosestByClassName(blockElement, "li");
+        if (liElement) {
+            removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
+            return;
+        }
     }
     const previousElement = getPreviousBlock(blockElement) as HTMLElement;
     // 设置 bq 和代码块光标

@@ -1720,6 +1720,7 @@
     "274": "Bu klasör başka dosyalar içeriyor, lütfen yeni bir klasör oluştur ve onu çalışma alanı olarak kullan",
     "275": "Daha yeni bir sürümde oluşturulmuş belgeler açılamıyor. Lütfen en son sürüme yükseltip tekrar deneyin",
     "276": "Geçici dosyalar temizleniyor...",
-    "277": "Geçici dosyalar temizlendi, [%d] dosya silindi, toplam [%s] boş alan açıldı"
+    "277": "Geçici dosyalar temizlendi, [%d] dosya silindi, toplam [%s] boş alan açıldı",
+    "278": "Çalışma alanı katı hal sürücüsünde (SSD) değil, bu belirgin bir performans düşüşüne yol açabilir, çalışma alanınızı SSD'de tutmanız önerilir"
   }
 }

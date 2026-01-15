@@ -1720,6 +1720,7 @@
     "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail",
     "275": "Impossible d'ouvrir le document créé par une version plus récente. Veuillez mettre à jour vers la dernière version et réessayer",
     "276": "Nettoyage des fichiers temporaires...",
-    "277": "Nettoyage des fichiers temporaires terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré"
+    "277": "Nettoyage des fichiers temporaires terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré",
+    "278": "L'espace de travail n'est pas placé sur un disque SSD, ce qui peut entraîner une baisse significative des performances, il est recommandé de placer l'espace de travail sur un SSD"
   }
 }

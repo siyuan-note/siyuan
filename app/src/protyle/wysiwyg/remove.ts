@@ -272,7 +272,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     const isCallout = blockElement.parentElement.classList.contains("callout-content");
-    if (!blockElement.previousElementSibling && blockType !== "NodeHeading" &&
+    if (!blockElement.previousElementSibling &&
+        (blockType !== "NodeHeading" || (blockType === "NodeHeading" && type === "Delete")) &&
         (blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote" || isCallout)) {
         if (type !== "Delete") {
             range.insertNode(document.createElement("wbr"));
@@ -563,9 +564,13 @@ export const moveToPrevious = (blockElement: Element, range: Range, isDelete: bo
     if (isDelete) {
         const previousBlockElement = getPreviousBlock(blockElement);
         if (previousBlockElement) {
-            const previousEditElement = getContenteditableElement(getLastBlock(previousBlockElement));
-            if (previousEditElement) {
-                return setLastNodeRange(previousEditElement, range, false);
+            if (previousBlockElement.querySelector("wbr")) {
+                return focusByWbr(previousBlockElement, range);
+            } else {
+                const previousEditElement = getContenteditableElement(getLastBlock(previousBlockElement));
+                if (previousEditElement) {
+                    return setLastNodeRange(previousEditElement, range, false);
+                }
             }
         }
     }

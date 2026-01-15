@@ -1720,6 +1720,7 @@
     "274": "Questa cartella contiene altri file, crea una nuova cartella come spazio di lavoro",
     "275": "Impossibile aprire il documento creato con una versione più recente. Aggiorna all'ultima versione e riprova",
     "276": "Pulizia dei file temporanei in corso...",
-    "277": "Pulizia dei file temporanei completata, [%d] file rimossi, liberati [%s] di spazio su disco"
+    "277": "Pulizia dei file temporanei completata, [%d] file rimossi, liberati [%s] di spazio su disco",
+    "278": "Lo spazio di lavoro non è su un disco a stato solido (SSD), ciò può causare una diminuzione significativa delle prestazioni, si consiglia di posizionare lo spazio di lavoro su un SSD"
   }
 }

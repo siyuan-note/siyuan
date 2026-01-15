@@ -1720,6 +1720,7 @@
     "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą",
     "275": "Nie można otworzyć dokumentu utworzonego w nowszej wersji. Zaktualizuj program do najnowszej wersji i spróbuj ponownie",
     "276": "Czyszczenie plików tymczasowych...",
-    "277": "Czyszczenie plików tymczasowych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku"
+    "277": "Czyszczenie plików tymczasowych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
+    "278": "Obszar roboczy nie znajduje się na dysku SSD, co może spowodować znaczny spadek wydajności, zaleca się umieszczenie obszaru roboczego na dysku SSD"
   }
 }

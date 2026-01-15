@@ -1720,6 +1720,7 @@
     "274": "Esta pasta contém outros arquivos, crie uma nova pasta para o espaço de trabalho",
     "275": "Não é possível abrir o documento criado por uma versão mais recente. Atualize para a versão mais recente e tente novamente",
     "276": "Limpando arquivos temporários...",
-    "277": "Limpeza de arquivos temporários concluída, [%d] arquivos removidos, [%s] de espaço em disco liberado"
+    "277": "Limpeza de arquivos temporários concluída, [%d] arquivos removidos, [%s] de espaço em disco liberado",
+    "278": "O espaço de trabalho não está em um disco de estado sólido (SSD), o que pode causar uma queda significativa de desempenho, recomenda-se colocar o espaço de trabalho em um SSD"
   }
 }

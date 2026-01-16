@@ -553,10 +553,6 @@ declare namespace Config {
          */
         blockRefTextRight: string;
         /**
-         * The path of the template file used when exporting to Docx
-         */
-        docxTemplate: string;
-        /**
          * File annotation reference export mode
          * - `0`: File name - page number - anchor text
          * - `1`: Anchor text only
@@ -586,6 +582,10 @@ declare namespace Config {
          * Pandoc executable file path
          */
         pandocBin: string;
+        /**
+         * Pandoc parameters
+         */
+        pandocParams: string;
         /**
          * Whether the beginning of the paragraph is empty two spaces.
          * Insert two full-width spaces `U+3000` at the beginning of the paragraph.

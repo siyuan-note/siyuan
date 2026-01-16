@@ -33,11 +33,11 @@ type Export struct {
 	TagCloseMarker        string `json:"tagCloseMarker"`        // 标签结束标记符，默认是 #
 	FileAnnotationRefMode int    `json:"fileAnnotationRefMode"` // 文件标注引用导出模式，0：文件名 - 页码 - 锚文本，1：仅锚文本
 	PandocBin             string `json:"pandocBin"`             // Pandoc 可执行文件路径
+	PandocParams          string `json:"pandocParams"`          // Pandoc 额外参数
 	RemoveAssetsID        bool   `json:"removeAssetsID"`        // Markdown 导出时是否移除资源文件名 ID 部分 https://github.com/siyuan-note/siyuan/issues/16065
 	MarkdownYFM           bool   `json:"markdownYFM"`           // Markdown 导出时是否添加 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/7727
 	InlineMemo            bool   `json:"inlineMemo"`            // 是否导出行级备注 https://github.com/siyuan-note/siyuan/issues/14605
 	PDFFooter             string `json:"pdfFooter"`             // PDF 导出时页脚内容
-	DocxTemplate          string `json:"docxTemplate"`          // Docx 导出时模板文件路径
 	PDFWatermarkStr       string `json:"pdfWatermarkStr"`       // PDF 导出时水印文本或水印文件路径
 	PDFWatermarkDesc      string `json:"pdfWatermarkDesc"`      // PDF 导出时水印位置、大小和样式等
 	ImageWatermarkStr     string `json:"imageWatermarkStr"`     // 图片导出时水印文本或水印文件路径

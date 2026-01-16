@@ -1353,6 +1353,23 @@ func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
 	return
 }
 
+func getAssetsLinkDestsInTree(tree *parse.Tree, includeServePath bool) (nodes []*ast.Node) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		dests := getAssetsLinkDests(n, includeServePath)
+		if 1 > len(dests) {
+			return ast.WalkContinue
+		}
+
+		nodes = append(nodes, n)
+		return ast.WalkContinue
+	})
+	return
+}
+
 func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
 	if ast.NodeLinkDest == node.Type {
 		if bytes.HasPrefix(node.Tokens, []byte("//")) {

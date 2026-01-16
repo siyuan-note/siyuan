@@ -41,6 +41,14 @@ export const exportConfig = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.removeAssetsID}
+        <div class="b3-label__text">${window.siyuan.languages.removeAssetsIDTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="removeAssetsID" type="checkbox"${window.siyuan.config.export.removeAssetsID ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.export31}
         <div class="b3-label__text">${window.siyuan.languages.export32}</div>
     </div>
@@ -207,6 +215,7 @@ export const exportConfig = {
             fetchPost("/api/setting/setExport", {
                 paragraphBeginningSpace: (exportConfig.element.querySelector("#paragraphBeginningSpace") as HTMLInputElement).checked,
                 addTitle: (exportConfig.element.querySelector("#addTitle") as HTMLInputElement).checked,
+                removeAssetsID: (exportConfig.element.querySelector("#removeAssetsID") as HTMLInputElement).checked,
                 markdownYFM: (exportConfig.element.querySelector("#markdownYFM") as HTMLInputElement).checked,
                 inlineMemo: (exportConfig.element.querySelector("#inlineMemo") as HTMLInputElement).checked,
                 blockRefMode: parseInt((exportConfig.element.querySelector("#blockRefMode") as HTMLSelectElement).value, 10),

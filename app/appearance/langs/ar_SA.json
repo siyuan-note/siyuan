@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "إزالة الـ ID من أسماء ملفات الموارد",
+  "removeAssetsIDTip": "عند التفعيل سيتم إزالة جزء الـ ID من أسماء ملفات الموارد عند تصدير Markdown",
   "clearTempFiles": "Temporäre Dateien bereinigen",
   "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
   "uploadFileTooLarge": "⚠️ الملف الذي تم رفعه [${x}] كبير جدًا [${y}]，هل تؤكد المتابعة بالرفع？",
@@ -128,6 +130,8 @@
   "click": "نقر",
   "allowHTMLBLockScript": "‫السماح بتنفيذ البرامج النصية في كتل HTML‬",
   "allowHTMLBLockScriptTip": "‫بعد التمكين، لن يتم تصحيح البرنامج النصي في كتلة HTML، يرجى إدراك المخاطر المحتملة لهجمات XSS‬",
+  "allowSVGScript": "السماح بتشغيل السكربتات داخل SVG",
+  "allowSVGScriptTip": "عند التفعيل، لن يتم تصفية الكود داخل SVG لأغراض الأمان. يرجى الانتباه إلى مخاطر XSS المحتملة",
   "autoLaunchMode0": "عدم التشغيل تلقائيًا",
   "autoLaunchMode1": "التشغيل التلقائي بعد الإقلاع",
   "autoLaunchMode2": "التشغيل التلقائي وتقليل الواجهة الرئيسية بعد الإقلاع",

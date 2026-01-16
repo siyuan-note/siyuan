@@ -315,6 +315,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/export/exportNotebookMd", model.CheckAuth, model.CheckAdminRole, exportNotebookMd)
 	ginServer.Handle("POST", "/api/export/exportMds", model.CheckAuth, model.CheckAdminRole, exportMds)
 	ginServer.Handle("POST", "/api/export/exportMd", model.CheckAuth, model.CheckAdminRole, exportMd)
+	ginServer.Handle("POST", "/api/export/exportSYs", model.CheckAuth, model.CheckAdminRole, exportSYs)
 	ginServer.Handle("POST", "/api/export/exportSY", model.CheckAuth, model.CheckAdminRole, exportSY)
 	ginServer.Handle("POST", "/api/export/exportNotebookSY", model.CheckAuth, model.CheckAdminRole, exportNotebookSY)
 	ginServer.Handle("POST", "/api/export/exportMdContent", model.CheckAuth, model.CheckAdminRole, exportMdContent)

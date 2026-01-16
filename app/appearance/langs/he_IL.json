@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "הסר את ה‑ID משמות קבצי המשאבים",
+  "removeAssetsIDTip": "כאשר מופעל, בעת ייצוא ל‑Markdown יוסר חלק ה‑ID משמות קבצי המשאבים",
   "clearTempFiles": "ניקוי קבצים זמניים",
   "clearTempFilesTip": "נקה קבצים זמניים שנוצרו במהלך הפעלת היישום כדי לפנות מקום אחסון",
   "uploadFileTooLarge": "⚠️ הקובץ שהועלה [${x}] גדול מאוד [${y}]，אשר האם להמשיך בהעלאה？",
@@ -128,6 +130,8 @@
   "click": "לחץ",
   "allowHTMLBLockScript": "אפשר הפעלת סקריפטים בתוך בלוקים של HTML",
   "allowHTMLBLockScriptTip": "לאחר הפעלה, הסקריפט בבלוק HTML לא יחוטא, שים לב לסיכון פוטנציאלי של התקפות XSS",
+  "allowSVGScript": "לאפשר הרצת סקריפטים בתוך SVG",
+  "allowSVGScriptTip": "בהפעלת האפשרות, הקוד בתוך SVG לא יסונן מבחינה בטיחותית — יש לשים לב לסיכון אפשרי של XSS",
   "autoLaunchMode0": "אל תצא אוטומטית",
   "autoLaunchMode1": "צא אוטומטית לאחר אתחול",
   "autoLaunchMode2": "צא אוטומטית ומזער את הממשק העיקרי לאחר אתחול",

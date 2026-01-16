@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "ID aus Asset-Dateinamen entfernen",
+  "removeAssetsIDTip": "Wenn aktiviert, wird beim Export nach Markdown der ID-Teil aus den Asset-Dateinamen entfernt",
   "clearTempFiles": "Temporäre Dateien bereinigen",
   "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
   "uploadFileTooLarge": "⚠️ Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
@@ -128,6 +130,8 @@
   "click": "Klick",
   "allowHTMLBLockScript": "Die Ausführung von Skripten innerhalb von HTML-Blöcken zulassen",
   "allowHTMLBLockScriptTip": "Nach der Aktivierung wird das Skript im HTML-Block nicht bereinigt. Bitte seien Sie sich des potenziellen Risikos von XSS-Angriffen bewusst.",
+  "allowSVGScript": "Ausführen von Skripten innerhalb von SVG erlauben",
+  "allowSVGScriptTip": "Wenn aktiviert, wird der Code im SVG nicht sicherheitsgefiltert。Achten Sie auf mögliche XSS-Risiken",
   "autoLaunchMode0": "Nicht automatisch starten",
   "autoLaunchMode1": "Automatisch nach dem Booten starten",
   "autoLaunchMode2": "Automatisch starten und die Hauptoberfläche minimieren nach dem Booten",

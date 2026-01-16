@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "리소스 파일 이름의 ID 제거",
+  "removeAssetsIDTip": "활성화하면 Markdown 내보내기 시 리소스 파일 이름의 ID 부분을 제거합니다",
   "clearTempFiles": "임시 파일 정리",
   "clearTempFilesTip": "앱 실행 중 생성된 임시 파일을 정리하여 저장 공간을 확보합니다",
   "uploadFileTooLarge": "⚠️ 업로드한 파일 [${x}]의 크기가 [${y}]로 너무 큽니다. 계속 업로드하시겠습니까?",
@@ -128,6 +130,8 @@
   "click": "클릭",
   "allowHTMLBLockScript": "HTML 블록 내 스크립트 실행 허용",
   "allowHTMLBLockScriptTip": "활성화하면 HTML 블록의 스크립트가 삭제되지 않습니다. XSS 공격의 잠재적 위험에 주의하세요",
+  "allowSVGScript": "SVG 내부 스크립트 실행 허용",
+  "allowSVGScriptTip": "활성화하면 SVG 내의 코드는 보안 필터링 대상이 되지 않습니다。잠재적 XSS 공격에 주의하세요",
   "autoLaunchMode0": "자동으로 시작하지 않음",
   "autoLaunchMode1": "부팅 후 자동 시작",
   "autoLaunchMode2": "부팅 후 자동 시작 및 메인 인터페이스 최소화",

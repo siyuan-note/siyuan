@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "Rimuovi l'ID dai nomi dei file delle risorse",
+  "removeAssetsIDTip": "Se abilitato, durante l'esportazione in Markdown verrà rimossa la parte ID dai nomi dei file delle risorse",
   "clearTempFiles": "Elimina file temporanei",
   "clearTempFilesTip": "Elimina i file temporanei creati durante l'esecuzione dell'app per liberare spazio di archiviazione",
   "uploadFileTooLarge": "⚠️ Il file caricato [${x}] è troppo grande [${y}]. Sei sicuro di voler continuare il caricamento?",
@@ -128,6 +130,8 @@
   "click": "Clicca",
   "allowHTMLBLockScript": "Consenti l'esecuzione di script nei blocchi HTML",
   "allowHTMLBLockScriptTip": "Dopo l'abilitazione, lo script nel blocco HTML non verrà sanificato. Si prega di essere consapevoli del potenziale rischio di attacchi XSS.",
+  "allowSVGScript": "Consenti l'esecuzione di script all'interno di SVG",
+  "allowSVGScriptTip": "Se abilitato, il codice all'interno dell'SVG non sarà filtrato per motivi di sicurezza. Prestare attenzione al rischio potenziale di XSS",
   "autoLaunchMode0": "Non avviare automaticamente",
   "autoLaunchMode1": "Avvio automatico dopo l'accensione",
   "autoLaunchMode2": "Avvio automatico e minimizzazione dell'interfaccia principale dopo l'accensione",

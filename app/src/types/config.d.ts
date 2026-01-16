@@ -351,6 +351,11 @@ declare namespace Config {
     export interface IEditor {
 
         /**
+         * Whether to allow to execute javascript in the SVG
+         */
+        allowSVGScript: boolean;
+
+        /**
          * Whether to allow to execute javascript in the HTML block
          */
         allowHTMLBLockScript: boolean;
@@ -569,6 +574,10 @@ declare namespace Config {
          * Whether to add YAML Front Matter when exporting to Markdown
          */
         markdownYFM: boolean;
+        /**
+         * Whether to remove the asset ID when exporting to Markdown
+         */
+        removeAssetsID: boolean;
         /**
          * Whether to export the inline memo
          */

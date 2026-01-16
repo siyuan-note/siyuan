@@ -27,6 +27,7 @@ import (
 	"unicode"
 
 	"github.com/88250/lute/html"
+	"github.com/siyuan-note/logging"
 )
 
 func init() {
@@ -219,4 +220,53 @@ func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
 	}
 	ret = strs
 	return
+}
+
+// RemoveScriptsInSVG 移除 SVG 中的 <script> 标签及其内部所有内容
+func RemoveScriptsInSVG(svgInput string) string {
+	// 1. 将字符串解析为节点树
+	doc, err := html.Parse(strings.NewReader(svgInput))
+	if err != nil {
+		logging.LogWarnf("parse svg failed: %v", err)
+		return svgInput
+	}
+
+	// 2. 定义递归移除逻辑
+	var walk func(*html.Node)
+	walk = func(n *html.Node) {
+		// 倒序遍历子节点，确保删除操作不影响后续迭代
+		for c := n.FirstChild; c != nil; {
+			next := c.NextSibling
+			// 检查标签名是否为 script
+			if c.Type == html.ElementNode && strings.EqualFold(c.Data, "script") {
+				n.RemoveChild(c)
+			} else {
+				// 递归处理子节点
+				walk(c)
+			}
+			c = next
+		}
+	}
+
+	// 3. 执行移除
+	walk(doc)
+
+	// 4. 将处理后的树重新渲染回字符串
+	var buf bytes.Buffer
+	if err = html.Render(&buf, doc); err != nil {
+		logging.LogWarnf("render svg failed: %v", err)
+		return svgInput
+	}
+
+	// 5. 提取 SVG 部分 (html.Render 会自动加上 <html><body> 标签)
+	return extractSVG(buf.String())
+}
+
+func extractSVG(fullHTML string) string {
+	start := strings.Index(fullHTML, "<svg")
+	end := strings.LastIndex(fullHTML, "</svg>")
+	if start == -1 || end == -1 {
+		return fullHTML
+	}
+	return fullHTML[start : end+6]
 }

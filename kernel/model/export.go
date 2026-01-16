@@ -721,17 +721,9 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		"-o", tmpDocxPath,
 	}
 
-	// Pandoc template for exporting docx https://github.com/siyuan-note/siyuan/issues/8740
-	docxTemplate := util.RemoveInvalid(Conf.Export.DocxTemplate)
-	docxTemplate = strings.TrimSpace(docxTemplate)
-	if "" != docxTemplate {
-		if !gulu.File.IsExist(docxTemplate) {
-			logging.LogErrorf("docx template [%s] not found", docxTemplate)
-			err = errors.New(fmt.Sprintf(Conf.Language(197), docxTemplate))
-			return
-		}
-
-		args = append(args, "--reference-doc", docxTemplate)
+	params := util.RemoveInvalid(Conf.Export.PandocParams)
+	if "" != params {
+		args = append(args, strings.Split(params, " ")...)
 	}
 
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)

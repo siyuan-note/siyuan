@@ -451,27 +451,24 @@ func ExportNotebookSY(id string) (zipPath string) {
 	return
 }
 
-func ExportSY(id string) (name, zipPath string) {
-	block := treenode.GetBlockTree(id)
-	if nil == block {
-		logging.LogErrorf("not found block [%s]", id)
-		return
-	}
-
-	boxID := block.BoxID
-	box := Conf.Box(boxID)
+func ExportSYs(ids []string) (zipPath string) {
+	block := treenode.GetBlockTree(ids[0])
+	box := Conf.Box(block.BoxID)
 	baseFolderName := path.Base(block.HPath)
 	if "." == baseFolderName {
 		baseFolderName = path.Base(block.Path)
 	}
-	rootPath := block.Path
-	docPaths := []string{rootPath}
-	docFiles := box.ListFiles(strings.TrimSuffix(block.Path, ".sy"))
-	for _, docFile := range docFiles {
-		docPaths = append(docPaths, docFile.path)
+
+	var docPaths []string
+	bts := treenode.GetBlockTrees(ids)
+	for _, bt := range bts {
+		docPaths = append(docPaths, bt.Path)
+		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+		for _, docFile := range docFiles {
+			docPaths = append(docPaths, docFile.path)
+		}
 	}
-	zipPath = exportSYZip(boxID, path.Dir(rootPath), baseFolderName, docPaths)
-	name = util.GetTreeID(block.Path)
+	zipPath = exportSYZip(block.BoxID, path.Dir(block.Path), baseFolderName, docPaths)
 	return
 }
 

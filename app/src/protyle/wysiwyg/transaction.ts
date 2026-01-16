@@ -692,7 +692,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 if (getContenteditableElement(rangeBlockElement)) {
                     range.insertNode(document.createElement("wbr"));
                 } else {
-                    getContenteditableElement(updateElements[0]).insertAdjacentHTML("afterbegin", "<wbr>");
+                    getContenteditableElement(updateElements[0])?.insertAdjacentHTML("afterbegin", "<wbr>");
                 }
             }
         }
@@ -1066,7 +1066,7 @@ const removeUnfoldRepeatBlock = (html: string, protyle: IProtyle) => {
     const temp = document.createElement("template");
     temp.innerHTML = html;
     Array.from(temp.content.children).forEach(item => {
-        protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
+        protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
     });
 };
 

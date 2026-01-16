@@ -3048,7 +3048,7 @@ export class WYSIWYG {
 
             const calloutTitleElement = hasTopClosestByClassName(event.target, "callout-title");
             if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutTitleElement) {
-                updateCalloutType(calloutTitleElement, protyle);
+                updateCalloutType([hasClosestBlock(calloutTitleElement) as HTMLElement], protyle);
                 event.preventDefault();
                 event.stopPropagation();
                 return;
@@ -3080,7 +3080,7 @@ export class WYSIWYG {
                             } else if (subType === "TIP") {
                                 emojiHTML = "💡";
                             } else if (subType === "IMPORTANT") {
-                                emojiHTML = "️❗";
+                                emojiHTML = "❗";
                             } else if (subType === "WARNING") {
                                 emojiHTML = "⚠️";
                             } else if (subType === "CAUTION") {

@@ -1,7 +1,7 @@
 {
   "clearTempFiles": "Temporäre Dateien bereinigen",
   "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
-  "uploadFileTooLarge": "⚠\uFE0F Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
+  "uploadFileTooLarge": "⚠️ Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",
   "recentDocsMaxListCount": "Maximale Anzahl an aufgelisteten letzten Dokumenten",
   "recentDocsMaxListCountTip": "Maximale Anzahl der Dokumente, die im Dialog der zuletzt verwendeten Dokumente aufgelistet werden",
   "bazaarNeedVersion": "Erfordert ein Upgrade von SiYuan auf Version v${x} oder höher, um diese Funktion zu nutzen",
@@ -1563,7 +1563,7 @@
     "117": "[%s] ist keine gültige Pandoc ausführbare Datei",
     "118": "Die aktuellen Einstellungen erlauben nicht das Erstellen von Unterdokumenten unter einem Dokument in mehr als 7 Ebenen tief",
     "119": "Herunterladen der Netzwerkdatei [%s]",
-    "120": "Download abgeschlossen, insgesamt [%d] Dateien",
+    "120": "Download abgeschlossen: insgesamt [%d] Dateien, belegen [%s] Festplattenspeicher",
     "121": "Es gibt keine Netzwerkdatei in diesem Dokument",
     "122": "Die Sidebar-Funktion, die mit dem Plugin geliefert wird, muss auf dem Desktop konfiguriert werden (Sie können http://127.0.0.1:6806/stage/build/desktop mit einem mobilen Browser aufrufen, bitte starten Sie SiYuan APP nach Abschluss der Konfiguration neu)",
     "123": "Die Synchronisierungsfunktion kann nur nach dem Hinzufügen/Auswählen des Cloud-Synchronisationsverzeichnisses aktiviert werden.",
@@ -1687,8 +1687,8 @@
     "241": "Ziehen zu seiner Unterüberschrift wird nicht unterstützt",
     "242": "Derzeit verfügbarer Speicherplatz beträgt [%s], mindestens [%s] sind erforderlich, um diese Operation auszuführen",
     "243": "Nur die ersten [%d] Tags (einschließlich Untertags) auflisten, falls Sie anpassen müssen, bitte ändern [Einstellungen - Dokumentbaum - Maximale Anzahl aufzulistender]",
-    "244": "Die Datenindizierung wurde nach der letzten Nutzung nicht abgeschlossen. Bitte führen Sie [Dokumentbaum - Index neu aufbauen] aus. Bitte beenden Sie das Programm vollständig, bevor Sie den Computer herunterfahren",
-    "245": "Die Datenindizierung wurde nach der letzten Nutzung nicht abgeschlossen. Bitte führen Sie [Dokumentbaum - Index neu aufbauen] aus. Bitte verwenden Sie [Anwendung beenden] im rechten Spaltenpanel, um normal zu beenden.",
+    "244": "Die Datenindizierung wurde nach der letzten Nutzung nicht abgeschlossen. Bitte führen Sie [Einstellungen - Über - Index neu aufbauen] aus. Bitte beenden Sie das Programm vollständig, bevor Sie den Computer herunterfahren",
+    "245": "Die Datenindizierung wurde nach der letzten Nutzung nicht abgeschlossen. Bitte führen Sie [Einstellungen - Über - Index neu aufbauen] aus. Bitte verwenden Sie [Anwendung beenden] im rechten Spaltenpanel, um normal zu beenden.",
     "246": "Der Dokumenttitel darf das /-Zeichen nicht enthalten und wurde durch _ ersetzt.",
     "247": "Datei [%s] ist größer als die maximale Grenze [%s] und wurde beim Hochladen in die Cloud ignoriert.",
     "248": "Die Zielfüberschrift befindet sich im Containerblock und kann nicht als Ablagepunkt verwendet werden.",
@@ -1720,6 +1720,7 @@
     "274": "Dieser Ordner enthält andere Dateien, erstellen Sie bitte einen neuen Ordner als Arbeitsbereich",
     "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut",
     "276": "Temporäre Dateien werden bereinigt...",
-    "277": "Bereinigung der temporären Dateien abgeschlossen, [%d] Dateien entfernt, [%s] Festplattenspeicher freigegeben"
+    "277": "Bereinigung der temporären Dateien abgeschlossen, [%d] Dateien entfernt, [%s] Festplattenspeicher freigegeben",
+    "278": "Der Arbeitsbereich befindet sich nicht auf einer SSD, was zu erheblichen Leistungseinbußen führen kann, es wird empfohlen, den Arbeitsbereich auf einer SSD zu platzieren"
   }
 }

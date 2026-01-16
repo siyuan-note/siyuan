@@ -14,7 +14,6 @@ import {
     copyPlainText,
     isInAndroid,
     isInHarmony,
-    isInIOS,
     isMac,
     isOnlyMeta,
     openByMobile,
@@ -37,7 +36,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {getContenteditableElement, getParentBlock, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
@@ -2546,19 +2545,20 @@ export class Gutter {
                     }
                     listItem = topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
-                    if (isInEmbedBlock(listItem) || isInAVBlock(listItem)) {
+                    if (isInEmbedBlock(listItem) || isInAVBlock(listItem) || hasClosestByClassName(nodeElement, "callout")) {
                         listItem = undefined;
                     }
-                    // 标题必须显示
-                    if (topElement !== nodeElement && type !== "NodeHeading" && !topElement.classList.contains("callout")) {
+                    // 标题（除列表下的）、提示下的块必须显示
+                    if (topElement !== nodeElement && type !== "NodeHeading" && !hasClosestByClassName(nodeElement, "callout")) {
                         nodeElement = topElement;
                         parentElement = hasClosestBlock(nodeElement.parentElement);
                         type = nodeElement.getAttribute("data-type");
                         dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
                 }
-                if (type === "NodeListItem" && index === 1) {
-                    // 列表项中第一层不显示
+                // - > # 1 \n  > 2
+                if (type === "NodeListItem" && index > 0) {
+                    // 列表项内的块不显示块标
                     html = "";
                 }
                 index += 1;
@@ -2647,9 +2647,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         const contentTop = protyle.contentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
-        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl" &&
-            // 提示下有列表
-            !element.classList.contains("callout")) {
+        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {
             rect = listItem.firstElementChild.getBoundingClientRect();
             space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {

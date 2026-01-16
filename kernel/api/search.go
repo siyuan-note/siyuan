@@ -297,6 +297,9 @@ func searchEmbedBlock(c *gin.Context) {
 	excludeIDsArg := arg["excludeIDs"].([]interface{})
 	var excludeIDs []string
 	for _, excludeID := range excludeIDsArg {
+		if nil == excludeID {
+			continue
+		}
 		excludeIDs = append(excludeIDs, excludeID.(string))
 	}
 	headingMode := 0 // 0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块

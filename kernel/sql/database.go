@@ -631,7 +631,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		// assetsLinkDestsInTree
 
-		if !util.IsAssetLinkDest(destNode.Tokens) {
+		if !util.IsAssetLinkDest(destNode.Tokens, false) {
 			return
 		}
 
@@ -686,7 +686,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		if n.IsTextMarkType("a") {
 			dest := n.TextMarkAHref
-			if util.IsAssetLinkDest([]byte(dest)) {
+			if util.IsAssetLinkDest([]byte(dest), false) {
 				var title string
 				if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 					title = gulu.Str.FromBytes(titleNode.Tokens)
@@ -776,7 +776,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			return
 		}
 
-		if !util.IsAssetLinkDest(src) {
+		if !util.IsAssetLinkDest(src, false) {
 			walkStatus = ast.WalkContinue
 			return
 		}

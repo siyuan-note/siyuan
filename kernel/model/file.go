@@ -985,15 +985,19 @@ func DuplicateDoc(tree *parse.Tree) {
 	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
 
-	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
 		}
 
+		// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
 		n.RemoveIALAttr(av.NodeAttrNameAvs)
 		n.RemoveIALAttr(av.NodeAttrViewNames)
 		n.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
+
+		// 复制为副本时移除闪卡相关属性 https://github.com/siyuan-note/siyuan/issues/13987
+		n.RemoveIALAttr(NodeAttrRiffDecks)
+
 		return ast.WalkContinue
 	})
 

@@ -1,7 +1,7 @@
 {
   "clearTempFiles": "Wyczyść pliki tymczasowe",
   "clearTempFilesTip": "Wyczyść pliki tymczasowe tworzone podczas działania aplikacji, aby zwolnić miejsce na dysku",
-  "uploadFileTooLarge": "⚠\uFE0F Przesłany plik [${x}] jest za duży [${y}]. Czy na pewno chcesz kontynuować przesyłanie?",
+  "uploadFileTooLarge": "⚠️ Przesłany plik [${x}] jest za duży [${y}]. Czy na pewno chcesz kontynuować przesyłanie?",
   "recentDocsMaxListCount": "Maksymalna liczba wyświetlanych ostatnich dokumentów",
   "recentDocsMaxListCountTip": "Maksymalna liczba dokumentów wyświetlanych w oknie dialogowym Ostatnie dokumenty",
   "bazaarNeedVersion": "Wymagane jest uaktualnienie SiYuan do wersji v${x} lub nowszej, aby używać",
@@ -1563,7 +1563,7 @@
     "117": "[%s] nie jest poprawnym plikiem wykonywalnym Pandoc",
     "118": "Bieżące ustawienia nie pozwalają na tworzenie poddokumentów pod dokumentem głębszym niż 7 poziomów",
     "119": "Pobieranie pliku sieciowego [%s]",
-    "120": "Pobranie zakończone, [%d] plików łącznie",
+    "120": "Pobieranie zakończone, łącznie [%d] plików, zajęto [%s] przestrzeni dyskowej",
     "121": "Nie ma pliku sieciowego w tym dokumencie",
     "122": "Funkcja paska bocznego dołączona do wtyczki musi być skonfigurowana na komputerze stacjonarnym (możesz uzyskać dostęp do http://127.0.0.1:6806/stage/build/desktop za pomocą przeglądarki mobilnej, po zakończeniu konfiguracji, należy ponownie uruchomić SiYuan APP)",
     "123": "Funkcjonalność synchronizacji może być aktywowana tylko po dodaniu/wybieraniu katalogu synchronizacji w chmurze",
@@ -1687,8 +1687,8 @@
     "241": "Przeciąganie do podtytułu nie jest obsługiwane",
     "242": "Obecnie dostępna przestrzeń to [%s], co najmniej [%s] jest wymagane do wykonania tej operacji",
     "243": "Tylko wymień pierwsze [%d] tagów (w tym podtagi), jeśli potrzebujesz dostosować, proszę zmodyfikować [Ustawienia - Drzewo dokumentów - Maksymalna liczba do wyświetlenia]",
-    "244": "Indeksowanie danych nie zostało zakończone po ostatnim użyciu. Proszę wykonać [Drzewo dokumentów - Przebudowa indeksu]. Proszę całkowicie wyjść z programu przed zamknięciem komputera",
-    "245": "Indeksowanie danych nie zostało zakończone po ostatnim użyciu. Proszę wykonać [Drzewo dokumentów - Przebudowa indeksu]. Proszę użyć [Zamknij aplikację] w prawym panelu bocznym, aby wyjść normalnie",
+    "244": "Indeksowanie danych nie zostało zakończone po ostatnim użyciu. Proszę wykonać [Ustawienia - O programie - Przebudowa indeksu]. Proszę całkowicie wyjść z programu przed zamknięciem komputera",
+    "245": "Indeksowanie danych nie zostało zakończone po ostatnim użyciu. Proszę wykonać [Ustawienia - O programie - Przebudowa indeksu]. Proszę użyć [Zamknij aplikację] w prawym panelu bocznym, aby wyjść normalnie",
     "246": "Tytuł dokumentu nie może zawierać / i został zastąpiony _",
     "247": "Plik [%s] jest większy niż maksymalne ograniczenie [%s], i został zignorowany przy przesyłaniu do chmury",
     "248": "Docelowy nagłówek znajduje się w bloku kontenera i nie może być użyty jako punkt upuszczenia",
@@ -1720,6 +1720,7 @@
     "274": "Ten folder zawiera inne pliki, utwórz nowy folder jako przestrzeń roboczą",
     "275": "Nie można otworzyć dokumentu utworzonego w nowszej wersji. Zaktualizuj program do najnowszej wersji i spróbuj ponownie",
     "276": "Czyszczenie plików tymczasowych...",
-    "277": "Czyszczenie plików tymczasowych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku"
+    "277": "Czyszczenie plików tymczasowych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
+    "278": "Obszar roboczy nie znajduje się na dysku SSD, co może spowodować znaczny spadek wydajności, zaleca się umieszczenie obszaru roboczego na dysku SSD"
   }
 }

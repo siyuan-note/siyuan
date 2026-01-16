@@ -140,6 +140,21 @@ hljs.registerLanguage("gdscript",function(){"use strict";var e=e||{};function r(
 //https://github.com/Kaida-Amethyst/highlightjs-moonbit/blob/master/dist/moonbit.min.js
 !function(e,n){"object"==typeof exports&&"object"==typeof module?module.exports=n():"function"==typeof define&&define.amd?define([],n):"object"==typeof exports?exports.hljsDefineMoonBit=n():e.hljsDefineMoonBit=n()}(this,()=>{return e={44:(e,n,t)=>{const a=t(212);e.exports=a,"undefined"!=typeof window&&window.hljs&&window.hljs.registerLanguage("moonbit",a)},212:e=>{e.exports=function(e){const n=e.regex,t=/[a-zA-Z_][a-zA-Z0-9_]*/,a=["_","derive","as","lexmatch","async","break","catch","const","continue","derive","else","enum","extern","fn","fnalias","for","guard","if","impl","is","in","let","loop","match","mut","Self","newtype","priv","pub","raise","return","struct","suberror","test","trait","traitalias","try","type","typealias","while","with","noraise"],i=["true","false","None","Some","Ok","Err"],s=["Unit","Bool","Int","Int64","UInt","UInt64","Double","Float","String","Char","Byte","Bytes","Array","FixedArray","Map","Ref","Option","Result","BigInt","Show","Default","Eq","Compare","Hash","Some","None","Error"],o=s,r="([Uu]([Ll]|L|N)|L|N)?",l={className:"number",variants:[{begin:"\\b0b([01_]+)"+r},{begin:"\\b0o([0-7_]+)"+r},{begin:"\\b0x([A-Fa-f0-9_]+)"+r},{begin:"\\b(\\d[\\d_]*(\\.[0-9_]+)?([eE][+-]?[0-9_]+)?)"+r}]},b=e.COMMENT("//","$",{contains:[{begin:"///",relevance:0}]}),c={className:"subst",begin:/\\\{/,end:/\}/,keywords:{keyword:a,literal:i,built_in:s},contains:[]},d={className:"string",variants:[{begin:'"',end:'"',contains:[e.BACKSLASH_ESCAPE,c]},{begin:"b'",end:"'",contains:[e.BACKSLASH_ESCAPE]},{begin:"'",end:"'",contains:[e.BACKSLASH_ESCAPE]}]};c.contains=[l,d];const u={className:"function",begin:n.concat(/\b/,/(?!let|for|while|if|else|match|is|pub|derive\b)/,t,n.lookahead(/\s*\(/))};return{name:"MoonBit",aliases:["mbt","moonbit"],keywords:{keyword:a,literal:i,built_in:s,type:o},contains:[{begin:/\bpub\s*\(/,end:/\)/,contains:[{className:"keyword",begin:/\ball\b/}]},{className:"keyword",begin:/\bwith\s+longest\b/},b,{className:"string",begin:"#\\|",end:"$",contains:[{begin:"\\\\."}]},d,l,{className:"meta",begin:"@[a-zA-Z_][a-zA-Z0-9_]*"},{begin:[/fn/,/\s+/,t],className:{1:"keyword",3:"title.function"}},{begin:[/let/,/\s+/,/(?:mut\s+)?/,t],className:{1:"keyword",3:"keyword",4:"variable"}},{begin:[/for/,/\s+/,t,/\s+/,/in/],className:{1:"keyword",3:"variable",5:"keyword"}},{begin:[/(?:trait|enum|struct|type|typealias)/,/\s+/,t],className:{1:"keyword",3:"title.class"}},{className:"type",begin:/\b[A-Z][a-zA-Z0-9_]*/,relevance:0},{begin:n.concat(t,"::"),keywords:{keyword:"Self",built_in:s,type:o}},u,{className:"operator",begin:/=>|->|~|\.\.\.|\.\.|::|=|!|\?|!=|[<>]=?|&&|\|\||!|>>|<<|[+\-*/%]=?|[&|]/},{className:"punctuation",begin:/\.|,|:/}]}}}},n={},function t(a){var i=n[a];if(void 0!==i)return i.exports;var s=n[a]={exports:{}};return e[a](s,s.exports,t),s.exports}(44).default;var e,n});
 
+// https://github.com/highlightjs/highlightjs-mlir
+hljs.registerLanguage("mlir",function(){"use strict";return function(e){
+    var s="[\\w\\d_$.]+",n={className:"type",
+        begin:"[x\\b\\s]*(i\\d+|f(16|32|64)|bf16)"},a={className:"attr",
+        begin:"\\([^)>]*\\)\\s*->\\s*\\([^)>]*\\)"},r={className:"type",variants:[a]}
+    ;return{name:"MLIR",keywords:"func module br cond_br return",contains:[n,{
+            className:"type",begin:"!"+s},e.C_LINE_COMMENT_MODE,e.QUOTE_STRING_MODE,{
+            className:"type",begin:"(memref|tensor|vector)<\\b",end:">",
+            keywords:"memref tensor vector",contains:[{className:"number",variants:[{
+                    begin:"[*]x"},{begin:"((\\?|\\d+)\\s*x\\s*)+"}]},"self",n,r]},{
+            className:"keyword",begin:"affine_map<",end:">",keywords:"affine_map",
+            contains:[a]},{className:"title",variants:[{begin:"@"+s},{begin:"@\\d+"}]},{
+            className:"symbol",variants:[{begin:"%"+s+"([:#]\\d+)?"},{begin:"\\^"+s},{
+                begin:"#"+s}]},e.C_NUMBER_MODE]}}}());
+
 // https://github.com/siyuan-note/siyuan/pull/15345
 hljs.registerLanguage('template', function (hljs) {
 

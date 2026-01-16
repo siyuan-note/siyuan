@@ -931,6 +931,9 @@ export const openSearchEditor = (options: {
 }) => {
     let currentRange = (options.rootId === options.protyle.block.rootID && options.id === options.protyle.block.id) ?
         options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex] : null;
+    if (options.protyle.block.scroll) {
+        currentRange = null;
+    }
     if (currentRange) {
         const rangeBlockElement = hasClosestBlock(currentRange.startContainer);
         if (rangeBlockElement) {
@@ -1166,45 +1169,47 @@ export const getArticle = (options: {
                     data: getResponse,
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
+                    afterCB() {
+                        const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
+                        if (isSupportCSSHL()) {
+                            let observer: ResizeObserver;
+                            searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
+                                const highlightKeys = () => {
+                                    const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];
+                                    if (options.edit.protyle.highlight.ranges.length > 0 && currentRange) {
+                                        if (!currentRange.toString()) {
+                                            highlightById(options.edit.protyle, options.id, "center");
+                                        } else {
+                                            scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
+                                        }
+                                    } else {
+                                        highlightById(options.edit.protyle, options.id, "center");
+                                    }
+                                };
+                                if (observer) {
+                                    observer.disconnect();
+                                }
+                                highlightKeys();
+                                observer = new ResizeObserver(() => {
+                                    highlightKeys();
+                                });
+                                observer.observe(options.edit.protyle.wysiwyg.element);
+                                setTimeout(() => {
+                                    observer.disconnect();
+                                }, Constants.TIMEOUT_COUNT);
+                            });
+                        } else {
+                            const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
+                            if (matchElements.length === 0) {
+                                return;
+                            }
+                            matchElements[0].classList.add("search-mark--hl");
+                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElements[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                        }
+                    }
                 });
                 if (options.edit.protyle.options.render.title) {
                     options.edit.protyle.title.render(options.edit.protyle, response);
-                }
-                const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                if (isSupportCSSHL()) {
-                    let observer: ResizeObserver;
-                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
-                        const highlightKeys = () => {
-                            const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];
-                            if (options.edit.protyle.highlight.ranges.length > 0 && currentRange) {
-                                if (!currentRange.toString()) {
-                                    highlightById(options.edit.protyle, options.id, "center");
-                                } else {
-                                    scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
-                                }
-                            } else {
-                                highlightById(options.edit.protyle, options.id, "center");
-                            }
-                        };
-                        if (observer) {
-                            observer.disconnect();
-                        }
-                        highlightKeys();
-                        observer = new ResizeObserver(() => {
-                            highlightKeys();
-                        });
-                        observer.observe(options.edit.protyle.wysiwyg.element);
-                        setTimeout(() => {
-                            observer.disconnect();
-                        }, Constants.TIMEOUT_COUNT);
-                    });
-                } else {
-                    const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
-                    if (matchElements.length === 0) {
-                        return;
-                    }
-                    matchElements[0].classList.add("search-mark--hl");
-                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElements[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
                 }
             });
         });

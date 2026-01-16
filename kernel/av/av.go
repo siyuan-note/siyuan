@@ -410,11 +410,12 @@ type Viewable interface {
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
-		Spec:      CurrentSpec,
-		ID:        id,
-		KeyValues: []*KeyValues{{Key: blockKey}, {Key: selectKey}},
-		ViewID:    view.ID,
-		Views:     []*View{view},
+		Spec:              CurrentSpec,
+		ID:                id,
+		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
+		ViewID:            view.ID,
+		Views:             []*View{view},
+		RenderedViewables: map[string]Viewable{},
 	}
 	return
 }

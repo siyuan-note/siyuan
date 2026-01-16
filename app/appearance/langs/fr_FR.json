@@ -1,7 +1,7 @@
 {
   "clearTempFiles": "Effacer les fichiers temporaires",
   "clearTempFilesTip": "Effacez les fichiers temporaires générés lors de l'exécution de l'application pour libérer de l'espace de stockage",
-  "uploadFileTooLarge": "⚠\uFE0F Le fichier envoyé [${x}] est trop volumineux [${y}]. Voulez-vous continuer l'envoi ?",
+  "uploadFileTooLarge": "⚠️ Le fichier envoyé [${x}] est trop volumineux [${y}]. Voulez-vous continuer l'envoi ?",
   "recentDocsMaxListCount": "Nombre maximal de documents récents listés",
   "recentDocsMaxListCountTip": "Nombre maximal de documents répertoriés dans la boîte de dialogue Documents récents",
   "bazaarNeedVersion": "Nécessite la mise à niveau de SiYuan vers la version v${x} ou ultérieure pour l'utiliser",
@@ -1563,7 +1563,7 @@
     "117": "[%s] n'est pas un exécutable Pandoc valide",
     "118": "Les paramètres actuels ne permettent pas la création de sous-documents sous un document de 7 niveaux de profondeur",
     "119": "Téléchargement du fichier réseau [%s]",
-    "120": "Téléchargement terminé, [%d] fichiers au total",
+    "120": "Téléchargement terminé : au total [%d] fichiers, occupation de [%s] d'espace disque",
     "121": "Il n'y a aucun fichier réseau dans ce document",
     "122": "La fonction de barre latérale fournie avec le plugin doit être configurée sur le bureau (vous pouvez accéder à http://127.0.0.1:6806/stage/build/desktop en utilisant un navigateur mobile, une fois la configuration terminée, veuillez redémarrer SiYuan APP)",
     "123": "Ajouter/sélectionner un répertoire de synchronisation Cloud avant d'activer la synchronisation",
@@ -1687,8 +1687,8 @@
     "241": "Le glisser vers son sous-titre n'est pas pris en charge",
     "242": "Espace actuellement disponible [%s], au moins [%s] est requis pour effectuer cette opération",
     "243": "Répertorier uniquement les [%d] premières balises (y compris les sous-balises). veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister].",
-    "244": "L'indexation des données n'a pas été terminée depuis la dernière utilisation. Veuillez exécuter [Arborescence des documents - Reconstruire l'index] une fois. À l'avenir, veuillez quitter complètement le programme avant d'éteindre l'ordinateur.",
-    "245": "L'indexation des données n'a pas été terminée depuis la dernière utilisation. Veuillez exécuter [Arborescence des documents - Reconstruire l'index] une fois. Veuillez utiliser [Quitter l'application] dans le panneau de la colonne de droite pour quitter normalement",
+    "244": "L'indexation des données n'a pas été terminée depuis la dernière utilisation. Veuillez exécuter [Paramètres - À propos de - Reconstruire l'index] une fois. À l'avenir, veuillez quitter complètement le programme avant d'éteindre l'ordinateur.",
+    "245": "L'indexation des données n'a pas été terminée depuis la dernière utilisation. Veuillez exécuter [Paramètres - À propos de - Reconstruire l'index] une fois. Veuillez utiliser [Quitter l'application] dans le panneau de la colonne de droite pour quitter normalement",
     "246": "Le titre du document ne peut pas contenir / et a été remplacé par _",
     "247": "Le fichier [%s] est plus grand que la limite maximale [%s] et a été ignoré pour le téléchargement vers le cloud",
     "248": "Le cap cible est situé dans le bloc conteneur et ne peut pas être utilisé comme point de dépôt",
@@ -1720,6 +1720,7 @@
     "274": "Ce dossier contient d’autres fichiers, créez un nouveau dossier comme espace de travail",
     "275": "Impossible d'ouvrir le document créé par une version plus récente. Veuillez mettre à jour vers la dernière version et réessayer",
     "276": "Nettoyage des fichiers temporaires...",
-    "277": "Nettoyage des fichiers temporaires terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré"
+    "277": "Nettoyage des fichiers temporaires terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré",
+    "278": "L'espace de travail n'est pas placé sur un disque SSD, ce qui peut entraîner une baisse significative des performances, il est recommandé de placer l'espace de travail sur un SSD"
   }
 }

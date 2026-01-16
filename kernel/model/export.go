@@ -95,6 +95,8 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 		return
 	}
 
+	code.Tokens = bytes.ReplaceAll(code.Tokens, []byte(editor.Zwj+"```"), []byte("```"))
+
 	writePath := filepath.Join(exportFolder, name)
 	err = filelock.WriteFile(writePath, code.Tokens)
 	if nil != err {
@@ -276,7 +278,7 @@ func Export2Liandi(id string) (err error) {
 		return errors.New(Conf.Language(204))
 	}
 
-	assets := getAssetsLinkDests(tree.Root)
+	assets := getAssetsLinkDests(tree.Root, false)
 	embedAssets := getQueryEmbedNodesAssetsLinkDests(tree.Root)
 	assets = append(assets, embedAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
@@ -716,7 +718,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	content = strings.ReplaceAll(content, "  \n", "<br>\n")
 
 	tmpDocxPath := filepath.Join(tmpDir, name+".docx")
-	args := []string{ // pandoc -f html --resource-path=请从这里开始 请从这里开始\index.html -o test.docx
+	args := []string{
 		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
@@ -795,22 +797,28 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		return
 	}
 
-	assets := getAssetsLinkDests(tree.Root)
-	for _, asset := range assets {
-		if strings.HasPrefix(asset, "assets/") {
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
-			}
+	if docx {
+		netAssets2LocalAssets0(tree, true, "", filepath.Join(savePath, "assets"), false)
+	}
 
-			srcAbsPath, err := GetAssetAbsPath(asset)
-			if err != nil {
-				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
-				continue
-			}
-			targetAbsPath := filepath.Join(savePath, asset)
-			if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
-				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
-			}
+	assets := getAssetsLinkDests(tree.Root, docx)
+	for _, asset := range assets {
+		if !util.IsAssetLinkDest([]byte(asset), docx) {
+			continue
+		}
+
+		if strings.Contains(asset, "?") {
+			asset = asset[:strings.LastIndex(asset, "?")]
+		}
+
+		srcAbsPath, err := GetAssetAbsPath(asset)
+		if err != nil {
+			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
+			continue
+		}
+		targetAbsPath := filepath.Join(savePath, asset)
+		if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
+			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 		}
 	}
 
@@ -991,7 +999,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			return
 		}
 
-		assets := getAssetsLinkDests(tree.Root)
+		assets := getAssetsLinkDests(tree.Root, false)
 		for _, asset := range assets {
 			if strings.Contains(asset, "?") {
 				asset = asset[:strings.LastIndex(asset, "?")]
@@ -1174,7 +1182,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	}
 
 	var headings []*ast.Node
-	assetDests := getAssetsLinkDests(tree.Root)
+	assetDests := getAssetsLinkDests(tree.Root, false)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1874,10 +1882,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	copiedAssets := hashset.New()
 	for _, tree := range trees {
 		var assets []string
-		assets = append(assets, getAssetsLinkDests(tree.Root)...)
+		assets = append(assets, getAssetsLinkDests(tree.Root, false)...)
 		titleImgPath := treenode.GetDocTitleImgPath(tree.Root) // Export .sy.zip doc title image is not exported https://github.com/siyuan-note/siyuan/issues/8748
 		if "" != titleImgPath {
-			if util.IsAssetLinkDest([]byte(titleImgPath)) {
+			if util.IsAssetLinkDest([]byte(titleImgPath), false) {
 				assets = append(assets, titleImgPath)
 			}
 		}
@@ -2073,7 +2081,7 @@ func exportAv(avID, exportStorageAvDir, exportFolder string, assetPathMap map[st
 		case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 			for _, value := range keyValues.Values {
 				for _, asset := range value.MAsset {
-					if !util.IsAssetLinkDest([]byte(asset.Content)) {
+					if !util.IsAssetLinkDest([]byte(asset.Content), false) {
 						continue
 					}
 
@@ -2218,17 +2226,17 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 			}
 
 			if ast.NodeLinkDest == n.Type {
-				if util.IsAssetLinkDest(n.Tokens) {
+				if util.IsAssetLinkDest(n.Tokens, false) {
 					n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(" "), []byte("_"))
 				}
 			} else if n.IsTextMarkType("a") {
 				href := n.TextMarkAHref
-				if util.IsAssetLinkDest([]byte(href)) {
+				if util.IsAssetLinkDest([]byte(href), false) {
 					n.TextMarkAHref = strings.ReplaceAll(href, " ", "_")
 				}
 			} else if ast.NodeIFrame == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
 				dest := treenode.GetNodeSrcTokens(n)
-				if util.IsAssetLinkDest([]byte(dest)) {
+				if util.IsAssetLinkDest([]byte(dest), false) {
 					setAssetsLinkDest(n, dest, strings.ReplaceAll(dest, " ", "_"))
 				}
 			}
@@ -2583,7 +2591,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 		// 导出时去掉内容块闪卡样式 https://github.com/siyuan-note/siyuan/issues/7374
 		if n.IsBlock() {
-			n.RemoveIALAttr("custom-riff-decks")
+			n.RemoveIALAttr(NodeAttrRiffDecks)
 		}
 
 		switch n.Type {
@@ -3353,7 +3361,7 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		// 解析导出后的标准 Markdown，汇总 assets
 		tree = parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
 		var assets []string
-		assets = append(assets, getAssetsLinkDests(tree.Root)...)
+		assets = append(assets, getAssetsLinkDests(tree.Root, false)...)
 		for _, asset := range assets {
 			asset = string(html.DecodeDestination([]byte(asset)))
 			if strings.Contains(asset, "?") {

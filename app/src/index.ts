@@ -27,6 +27,7 @@ import {initMessage} from "./dialog/message";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage} from "./protyle/util/compatibility";
 import {getSearch} from "./util/functions";
+import {checkPublishServiceClosed} from "./util/processMessage";
 import {hideAllElements} from "./protyle/ui/hideElements";
 import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
@@ -46,6 +47,9 @@ export class App {
     public appId: string;
 
     constructor() {
+        if (checkPublishServiceClosed()) {
+            return;
+        }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
 

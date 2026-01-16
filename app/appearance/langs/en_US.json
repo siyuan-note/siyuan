@@ -1,7 +1,7 @@
 {
   "clearTempFiles": "Clear temporary files",
   "clearTempFilesTip": "Clear temporary files generated while the app is running to free up storage space",
-  "uploadFileTooLarge": "⚠\uFE0F The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",
+  "uploadFileTooLarge": "⚠️ The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",
   "recentDocsMaxListCount": "Maximum number of recent documents listed",
   "recentDocsMaxListCountTip": "Maximum number of documents listed in the Recent Documents dialog",
   "bazaarNeedVersion": "Requires upgrading SiYuan to v${x} or later to use",
@@ -1563,7 +1563,7 @@
     "117": "[%s] is not a valid Pandoc executable",
     "118": "The current settings do not allow the creation of sub-documents under a document 7 levels deep",
     "119": "Downloading network file [%s]",
-    "120": "Download complete, [%d] files total",
+    "120": "Download completed, a total of [%d] files, occupying [%s] of disk space",
     "121": "There is no network file in this document",
     "122": "The sidebar feature that comes with the plugin needs to be configured on the desktop (you can access http://127.0.0.1:6806/stage/build/desktop using a mobile browser, after the configuration is complete, please restart SiYuan APP)",
     "123": "The synchronization function can only be activated after adding/selecting the cloud synchronization directory",
@@ -1687,8 +1687,8 @@
     "241": "Drag to its subheading is not supported",
     "242": "Currently available space is [%s], at least [%s] is required to perform this operation",
     "243": "Only list the first [%d] tags (including subtags), if you need to adjust, please modify [Settings - Doc Tree - Maximum number to list]",
-    "244": "Data indexing was not completed after the last use. Please execute [Doc Tree - Rebuild Index]. Please exit the program completely before shutting down the computer",
-    "245": "Data indexing was not completed after the last use. Please execute [Doc Tree - Rebuild Index]. Please use [Exit Application] in the right column panel to exit normally",
+    "244": "Data indexing was not completed after the last use. Please execute [Settings - About - Rebuild Index]. Please exit the program completely before shutting down the computer",
+    "245": "Data indexing was not completed after the last use. Please execute [Settings - About - Rebuild Index]. Please use [Exit Application] in the right column panel to exit normally",
     "246": "The document title cannot contain / and has been replaced with _",
     "247": "File [%s] is larger than the maximum limit [%s], and has been ignored for uploading to the cloud",
     "248": "The target heading is located in the container block and cannot be used as a drop point",
@@ -1720,6 +1720,7 @@
     "274": "This folder contains other files, please create a new folder as the workspace",
     "275": "Cannot open documents created by a newer version. Please upgrade to the latest version and try again",
     "276": "Cleaning temporary files...",
-    "277": "Temporary files cleaned, [%d] files removed, [%s] disk space freed"
+    "277": "Temporary files cleaned, [%d] files removed, [%s] disk space freed",
+    "278": "The workspace is not located on a solid-state drive (SSD), which can cause significant performance degradation, it is recommended to place the workspace on an SSD"
   }
 }

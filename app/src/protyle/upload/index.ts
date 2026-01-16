@@ -11,7 +11,7 @@ import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {getTypeByCellElement, updateCellsValue} from "../render/av/cell";
 import {scrollCenter} from "../../util/highlightById";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import prettyBytes from "pretty-bytes";
+import {filesize} from "filesize";
 
 interface FileWithPath extends File {
     path: string;
@@ -220,7 +220,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     const assetPaths: string[] = [];
     files.forEach(item => {
         if (item.size && Constants.SIZE_UPLOAD_TIP_SIZE <= item.size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", prettyBytes(item.size, {binary: true})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
         }
         assetPaths.push(item.path);
     });
@@ -311,7 +311,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     for (let i = 0, iMax = validateResult.files.length; i < iMax; i++) {
         formData.append(protyle.options.upload.fieldName, validateResult.files[i]);
         if (Constants.SIZE_UPLOAD_TIP_SIZE <= validateResult.files[i].size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", validateResult.files[i].name).replace("${y}", prettyBytes(validateResult.files[i].size, {binary: true})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", validateResult.files[i].name).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
         }
     }
 
@@ -373,5 +373,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
             progressBar.style.width = progress + "%";
         };
         xhr.send(formData);
+    }, () => {
+        hideMessage(validateResult.msgId);
     });
 };

@@ -804,7 +804,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
-		deckAttrs := node.IALAttr("custom-riff-decks")
+		deckAttrs := node.IALAttr(NodeAttrRiffDecks)
 		var deckIDs []string
 		if "" != deckID {
 			availableDeckIDs := getDeckIDs()
@@ -820,9 +820,9 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 		val = strings.TrimPrefix(val, ",")
 		val = strings.TrimSuffix(val, ",")
 		if "" == val {
-			node.RemoveIALAttr("custom-riff-decks")
+			node.RemoveIALAttr(NodeAttrRiffDecks)
 		} else {
-			node.SetIALAttr("custom-riff-decks", val)
+			node.SetIALAttr(NodeAttrRiffDecks, val)
 		}
 
 		tx.writeTree(tree)
@@ -910,14 +910,14 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
-		deckAttrs := node.IALAttr("custom-riff-decks")
+		deckAttrs := node.IALAttr(NodeAttrRiffDecks)
 		deckIDs := strings.Split(deckAttrs, ",")
 		deckIDs = append(deckIDs, deckID)
 		deckIDs = gulu.Str.RemoveDuplicatedElem(deckIDs)
 		val := strings.Join(deckIDs, ",")
 		val = strings.TrimPrefix(val, ",")
 		val = strings.TrimSuffix(val, ",")
-		node.SetIALAttr("custom-riff-decks", val)
+		node.SetIALAttr(NodeAttrRiffDecks, val)
 
 		tx.writeTree(tree)
 
@@ -1195,3 +1195,7 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 	}
 	return
 }
+
+const (
+	NodeAttrRiffDecks = "custom-riff-decks"
+)

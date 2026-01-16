@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -249,19 +250,45 @@ func FilterUploadFileName(name string) string {
 func TruncateLenFileName(name string) (ret string) {
 	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
 	ext := filepath.Ext(name)
+	extLen := len(ext)
 	var byteCount int
 	truncated := false
 	buf := bytes.Buffer{}
+	maxLen := 189 - extLen
+	var pdfAnnoPngPart string
+	if ".png" == ext {
+		// PNG 图片可能是 PDF 标注的截图，包含页面和旋转角度（name--P1--270-id.png），所以允许的长度更短一些
+		// https://github.com/siyuan-note/siyuan/pull/16714#issuecomment-3737987302
+
+		pdfAnnoPngPattern := "-{0,1}P{0,1}[0-9]{0,4}-{0,1}[0-9]{1,3}-[0-9]{14}-[0-9a-zA-Z]{7}\\.png$"
+		regx := regexp.MustCompile(pdfAnnoPngPattern)
+		pdfAnnoPngPart = regx.FindString(name)
+		if "" != pdfAnnoPngPart {
+			maxLen -= len(pdfAnnoPngPart) + len(".png")
+			name = strings.TrimSuffix(name, pdfAnnoPngPart)
+		}
+	}
+
+	// 深入理解计算机系统原书第3版彩色扫描 -- 美兰德尔 E_布莱恩特Randal,E_·Bryant,等 龚奕利,贺莲 -- 计算机科学丛书, 3rd, 2016 -- 机械工业出版社123-P57-90-20260113113402-prc0u4k.png
+
 	for _, r := range name {
 		byteCount += utf8.RuneLen(r)
-		if 189-len(ext) < byteCount {
+		if maxLen < byteCount {
 			truncated = true
 			break
 		}
 		buf.WriteRune(r)
 	}
 	if truncated {
-		buf.WriteString(ext)
+		if "" != pdfAnnoPngPart {
+			buf.WriteString(pdfAnnoPngPart)
+		} else {
+			buf.WriteString(ext)
+		}
+	} else {
+		if "" != pdfAnnoPngPart {
+			buf.WriteString(pdfAnnoPngPart)
+		}
 	}
 	ret = buf.String()
 	return

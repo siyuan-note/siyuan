@@ -316,8 +316,12 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 	return
 }
 
-func IsAssetLinkDest(dest []byte) bool {
-	return bytes.HasPrefix(dest, []byte("assets/"))
+func IsAssetLinkDest(dest []byte, includeServePath bool) bool {
+	return bytes.HasPrefix(dest, []byte("assets/")) ||
+		(includeServePath && (bytes.HasPrefix(dest, []byte("emojis/")) ||
+			bytes.HasPrefix(dest, []byte("plugins/")) ||
+			bytes.HasPrefix(dest, []byte("public/")) ||
+			bytes.HasPrefix(dest, []byte("widgets/"))))
 }
 
 var (

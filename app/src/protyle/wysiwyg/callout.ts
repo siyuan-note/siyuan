@@ -1,5 +1,4 @@
-import {hasClosestBlock} from "../util/hasClosest";
-import {updateTransaction} from "./transaction";
+import {transaction} from "./transaction";
 import {focusBlock} from "../util/selection";
 import {Dialog} from "../../dialog";
 import {Menu} from "../../plugin/Menu";
@@ -7,12 +6,11 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 
-export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) => {
-    const blockElement = hasClosestBlock(titleElement);
-    if (!blockElement) {
+export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyle) => {
+    if (blockElements.length === 0) {
         return;
     }
-    const blockCalloutElement = blockElement.querySelector(".callout-icon");
+    const blockCalloutElement = blockElements[0].querySelector(".callout-icon");
     const dialog = new Dialog({
         title: window.siyuan.languages.callout,
         content: `<div class="b3-dialog__content">
@@ -32,7 +30,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
         </div>
         <span class="fn__space"></span>
         <div class="b3-form__icona fn__flex-1">
-            <input value="${blockElement.getAttribute("data-subtype")}" type="text" class="b3-text-field fn__block b3-form__icona-input">
+            <input value="${blockElements[0].getAttribute("data-subtype")}" type="text" class="b3-text-field fn__block b3-form__icona-input">
             <svg class="b3-form__icona-icon"><use xlink:href="#iconDown"></use></svg>
         </div>
     </label>
@@ -56,19 +54,34 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
         dialog.destroy();
     });
     btnElements[1].addEventListener("click", () => {
-        const oldHTML = blockElement.outerHTML;
-        blockElement.setAttribute("data-subtype", textElements[0].value.trim());
-        let title = textElements[1].value.trim();
-        if (title) {
-            const template = document.createElement("template");
-            template.innerHTML = protyle.lute.Md2BlockDOM(textElements[1].value.trim());
-            title = template.content.firstElementChild.firstElementChild.innerHTML;
-        }
-        titleElement.innerHTML = title ||
-            (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase());
-        blockCalloutElement.innerHTML = dialogCalloutIconElement.innerHTML;
-        updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
-        focusBlock(blockElement);
+        const doOperations: IOperation[] = [];
+        const undoOperations: IOperation[] = [];
+        blockElements.filter(item => {
+            const id = item.getAttribute("data-node-id");
+            const oldHTML = item.outerHTML;
+            item.setAttribute("data-subtype", textElements[0].value.trim());
+            let title = textElements[1].value.trim();
+            if (title) {
+                const template = document.createElement("template");
+                template.innerHTML = protyle.lute.Md2BlockDOM(textElements[1].value.trim());
+                title = template.content.firstElementChild.firstElementChild.innerHTML;
+            }
+            item.querySelector(".callout-title").innerHTML = title ||
+                (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase());
+            item.querySelector(".callout-icon").innerHTML = dialogCalloutIconElement.innerHTML;
+            doOperations.push({
+                id,
+                data: item.outerHTML,
+                action: "update"
+            });
+            undoOperations.push({
+                id,
+                data: oldHTML,
+                action: "update"
+            });
+        });
+        transaction(protyle, doOperations, undoOperations);
+        focusBlock(blockElements[0]);
         dialog.destroy();
     });
     const textElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll(".b3-text-field");
@@ -88,7 +101,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
     });
     textElements[0].focus();
     textElements[0].select();
-    textElements[1].value = protyle.lute.BlockDOM2StdMd(titleElement.innerHTML);
+    textElements[1].value = protyle.lute.BlockDOM2StdMd(blockElements[0].querySelector(".callout-title").innerHTML);
     const dialogCalloutIconElement = dialog.element.querySelector(".callout-icon");
     dialogCalloutIconElement.addEventListener("click", () => {
         const emojiRect = dialogCalloutIconElement.getBoundingClientRect();
@@ -112,7 +125,7 @@ export const updateCalloutType = (titleElement: HTMLElement, protyle: IProtyle) 
                 } else if (textElements[0].value === "TIP") {
                     emojiHTML = "💡";
                 } else if (textElements[0].value === "IMPORTANT") {
-                    emojiHTML = "️❗";
+                    emojiHTML = "❗";
                 } else if (textElements[0].value === "WARNING") {
                     emojiHTML = "⚠️";
                 } else if (textElements[0].value === "CAUTION") {

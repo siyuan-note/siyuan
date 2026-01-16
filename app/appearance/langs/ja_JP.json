@@ -128,6 +128,8 @@
   "click": "クリック",
   "allowHTMLBLockScript": "HTML ブロック内のスクリプトの実行を許可",
   "allowHTMLBLockScriptTip": "HTML ブロック内のスクリプトはサニタイズされません。XSS 攻撃の潜在的なリスクに十分注意してください",
+  "allowSVGScript": "SVG 内のスクリプトを実行許可",
+  "allowSVGScriptTip": "有効にすると SVG 内のコードはセキュリティフィルタの対象になりません。潜在的な XSS 攻撃に注意してください",
   "autoLaunchMode0": "自動的に起動しない",
   "autoLaunchMode1": "システムの起動後に自動的に起動する",
   "autoLaunchMode2": "システムの起動後にインターフェースを最小化して自動的に起動する",

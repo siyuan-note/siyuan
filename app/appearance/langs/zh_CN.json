@@ -128,6 +128,8 @@
   "click": "点击",
   "allowHTMLBLockScript": "允许执行 HTML 块内脚本",
   "allowHTMLBLockScriptTip": "启用后将不对 HTML 块中的代码进行安全过滤，请注意潜在的 XSS 攻击风险",
+  "allowSVGScript": "允许执行 SVG 内脚本",
+  "allowSVGScriptTip": "启用后将不对 SVG 中的代码进行安全过滤，请注意潜在的 XSS 攻击风险",
   "autoLaunchMode0": "不自动启动",
   "autoLaunchMode1": "开机后自动启动",
   "autoLaunchMode2": "开机后自动启动并最小化主界面",

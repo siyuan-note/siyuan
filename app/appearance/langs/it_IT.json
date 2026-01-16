@@ -128,6 +128,8 @@
   "click": "Clicca",
   "allowHTMLBLockScript": "Consenti l'esecuzione di script nei blocchi HTML",
   "allowHTMLBLockScriptTip": "Dopo l'abilitazione, lo script nel blocco HTML non verrà sanificato. Si prega di essere consapevoli del potenziale rischio di attacchi XSS.",
+  "allowSVGScript": "Consenti l'esecuzione di script all'interno di SVG",
+  "allowSVGScriptTip": "Se abilitato, il codice all'interno dell'SVG non sarà filtrato per motivi di sicurezza. Prestare attenzione al rischio potenziale di XSS",
   "autoLaunchMode0": "Non avviare automaticamente",
   "autoLaunchMode1": "Avvio automatico dopo l'accensione",
   "autoLaunchMode2": "Avvio automatico e minimizzazione dell'interfaccia principale dopo l'accensione",

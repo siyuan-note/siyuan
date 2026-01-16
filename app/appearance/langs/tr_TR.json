@@ -128,6 +128,8 @@
   "click": "Tıkla",
   "allowHTMLBLockScript": "HTML bloklarındaki betiklerin çalıştırılmasına izin ver",
   "allowHTMLBLockScriptTip": "Etkinleştirildiğinde, HTML bloğundaki betikler filtrelenmez. XSS saldırısı riski olduğunu unutma",
+  "allowSVGScript": "SVG içindeki betiklerin çalıştırılmasına izin ver",
+  "allowSVGScriptTip": "Etkinleştirildiğinde SVG içindeki kod güvenlik filtresinden geçirilmez, potansiyel XSS saldırılarına karşı dikkatli olun",
   "autoLaunchMode0": "Otomatik başlatma",
   "autoLaunchMode1": "Açılışta otomatik başlat",
   "autoLaunchMode2": "Açılışta otomatik başlat ve ana arayüzü küçült",

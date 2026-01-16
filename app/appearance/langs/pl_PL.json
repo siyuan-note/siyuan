@@ -128,6 +128,8 @@
   "click": "Kliknij",
   "allowHTMLBLockScript": "Zezwalaj na wykonywanie skryptów w blokach HTML",
   "allowHTMLBLockScriptTip": "Po włączeniu skrypt w bloku HTML nie będzie czyszczony, proszę być świadomym potencjalnego ryzyka ataków XSS",
+  "allowSVGScript": "Zezwól na wykonywanie skryptów w SVG",
+  "allowSVGScriptTip": "Po włączeniu kod w SVG nie będzie filtrowany pod kątem bezpieczeństwa — uważaj na potencjalne ataki XSS",
   "autoLaunchMode0": "Nie uruchamiaj automatycznie",
   "autoLaunchMode1": "Uruchom automatycznie po włączeniu",
   "autoLaunchMode2": "Uruchom automatycznie i zminimalizuj główny interfejs po włączeniu",

@@ -128,6 +128,8 @@
   "click": "לחץ",
   "allowHTMLBLockScript": "אפשר הפעלת סקריפטים בתוך בלוקים של HTML",
   "allowHTMLBLockScriptTip": "לאחר הפעלה, הסקריפט בבלוק HTML לא יחוטא, שים לב לסיכון פוטנציאלי של התקפות XSS",
+  "allowSVGScript": "לאפשר הרצת סקריפטים בתוך SVG",
+  "allowSVGScriptTip": "בהפעלת האפשרות, הקוד בתוך SVG לא יסונן מבחינה בטיחותית — יש לשים לב לסיכון אפשרי של XSS",
   "autoLaunchMode0": "אל תצא אוטומטית",
   "autoLaunchMode1": "צא אוטומטית לאחר אתחול",
   "autoLaunchMode2": "צא אוטומטית ומזער את הממשק העיקרי לאחר אתחול",

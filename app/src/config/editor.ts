@@ -307,6 +307,14 @@ export const editor = {
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.allowSVGScript}
+        <div class="b3-label__text">${window.siyuan.languages.allowSVGScriptTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="allowSVGScript" type="checkbox"${window.siyuan.config.editor.allowSVGScript ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.allowHTMLBLockScript}
         <div class="b3-label__text">${window.siyuan.languages.allowHTMLBLockScriptTip}</div>
     </div>
@@ -470,6 +478,7 @@ export const editor = {
                     inlineStrikethrough: (editor.element.querySelector("#editorMarkdownInlineStrikethrough") as HTMLInputElement).checked,
                     inlineMark: (editor.element.querySelector("#editorMarkdownInlineMark") as HTMLInputElement).checked
                 },
+                allowSVGScript: (editor.element.querySelector("#allowSVGScript") as HTMLInputElement).checked,
                 allowHTMLBLockScript: (editor.element.querySelector("#allowHTMLBLockScript") as HTMLInputElement).checked,
                 justify: (editor.element.querySelector("#justify") as HTMLInputElement).checked,
                 rtl: (editor.element.querySelector("#rtl") as HTMLInputElement).checked,

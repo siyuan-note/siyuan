@@ -128,6 +128,8 @@
   "click": "Click",
   "allowHTMLBLockScript": "Allow execution of scripts within HTML blocks",
   "allowHTMLBLockScriptTip": "When enabled, the script in the HTML block will not be sanitized, Please be aware of the potential risk of XSS attacks",
+  "allowSVGScript": "Allow execution of scripts inside SVG",
+  "allowSVGScriptTip": "When enabled, code inside SVG will not be security-filtered. Be aware of potential XSS risks",
   "autoLaunchMode0": "Do not launch automatically",
   "autoLaunchMode1": "Auto launch after booting",
   "autoLaunchMode2": "Auto launch and minimize the main interface after booting",

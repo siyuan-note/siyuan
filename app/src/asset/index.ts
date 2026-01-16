@@ -15,6 +15,7 @@ import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
+import {getDisplayName} from "../util/pathName";
 
 export class Asset extends Model {
     public path: string;
@@ -47,6 +48,12 @@ export class Asset extends Model {
             this.pdfPage = this.pdfId;
         }
         this.render();
+    }
+
+    public update(path: string) {
+        this.path = path;
+        this.parent.updateTitle(getDisplayName(path));
+        this.render(false);
     }
 
     private getPdfId(cb: () => void) {
@@ -85,7 +92,7 @@ export class Asset extends Model {
         /// #endif
     }
 
-    private render() {
+    private render(isInit = true) {
         const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase().split("?")[0];
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
             this.element.innerHTML = `<div class="asset"><img src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></div>`;
@@ -95,6 +102,9 @@ export class Asset extends Model {
             this.element.innerHTML = `<div class="asset"><video controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></video></div>`;
         } else if (type === ".pdf") {
             /// #if !MOBILE
+            if (!isInit) {
+                this.pdfObject.close();
+            }
             this.element.innerHTML = `<div class="pdf__outer" id="outerContainer">
       <div id="sidebarContainer">
         <div id="toolbarSidebar">

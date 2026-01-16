@@ -252,8 +252,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	tree.Root.SetIALAttr("type", "doc")
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
-	data = bytes.ReplaceAll(data, []byte("\u0000"), []byte(""))
-
+	data = bytes.ReplaceAll(data, []byte(`\u0000`), []byte(""))
 	if !util.UseSingleLineSave {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)

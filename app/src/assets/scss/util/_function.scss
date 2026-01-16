@@ -150,7 +150,7 @@
 
   &__kbd {
     padding: 2px 4px;
-    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    font: 75% var(--b3-font-family-kbd);
     line-height: 1;
     color: var(--b3-theme-on-surface);
     vertical-align: middle;
@@ -164,7 +164,7 @@
     padding-left: 2em;
   }
 
-  &__progress  {
+  &__progress {
     height: 4px;
     border-radius: var(--b3-border-radius);
     overflow: hidden;

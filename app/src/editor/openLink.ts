@@ -63,6 +63,7 @@ export const processSYLink = (app: App, url: string) => {
     if (urlObj && isSYProtocol(url)) {
         const id = getIdFromSYProtocol(url);
         const focus = urlObj.searchParams.get("focus") === "1";
+        window.siyuan.editorIsFullscreen = urlObj.searchParams.get("fullscreen") === "1";
         fetchPost("/api/block/checkBlockExist", {id}, existResponse => {
             if (existResponse.data) {
                 checkFold(id, (zoomIn) => {

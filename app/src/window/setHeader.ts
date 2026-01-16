@@ -16,9 +16,12 @@ export const setTabPosition = () => {
         const rect = headerElement.getBoundingClientRect();
         const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
         if (rect.top <= 0) {
+            dragElement.parentElement.parentElement.style.minWidth = "95px";
             dragElement.style.height = dragElement.parentElement.clientHeight + "px";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
         } else {
+            dragElement.parentElement.parentElement.style.minWidth = "";
+            dragElement.style.height = "";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "";
         }
         const headersLastElement = headerElement.lastElementChild as HTMLElement;

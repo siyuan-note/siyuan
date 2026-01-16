@@ -392,6 +392,9 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
     fetchPost("/api/search/searchTag", {
         k: key,
     }, (response) => {
+        if (protyle.hint.element.classList.contains("fn__none")) {
+            return;
+        }
         const dataList: IHintData[] = [];
         let hasKey = false;
         response.data.tags.forEach((item: string) => {

@@ -187,10 +187,6 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 		return
 	}
 
-	var files int
-	var size int64
-	msgId := gulu.Rand.String(7)
-
 	docDirLocalPath := filepath.Join(util.DataDir, tree.Box, path.Dir(tree.Path))
 	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, tree.Box), docDirLocalPath)
 	if !gulu.File.IsExist(assetsDirPath) {
@@ -198,6 +194,15 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 			return
 		}
 	}
+
+	err = netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, true)
+	return
+}
+
+func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, assetsDirPath string, needWriteTree bool) (err error) {
+	var files int
+	var size int64
+	msgId := gulu.Rand.String(7)
 
 	browserClient := util.NewCustomReqClient() // 自定义了 TLS 指纹，增加下载成功率
 
@@ -284,6 +289,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				if 64 < len(displayU) {
 					displayU = displayU[:64] + "..."
 				}
+
 				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), displayU), 15000)
 				request := browserClient.R()
 				request.SetRetryCount(1).SetRetryFixedInterval(3 * time.Second)
@@ -365,21 +371,24 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	}
 
 	util.PushClearMsg(msgId)
-	if 0 < files {
-		msgId = util.PushMsg(Conf.Language(113), 7000)
-		if err = writeTreeUpsertQueue(tree); err != nil {
-			return
-		}
-		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files, humanize.BytesCustomCeil(uint64(size), 2)), 5000)
 
-		if 0 < forbiddenCount {
-			util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)
-		}
-	} else {
-		if 0 < forbiddenCount {
-			util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)
+	if needWriteTree {
+		if 0 < files {
+			msgId = util.PushMsg(Conf.Language(113), 7000)
+			if err = writeTreeUpsertQueue(tree); err != nil {
+				return
+			}
+			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files, humanize.BytesCustomCeil(uint64(size), 2)), 5000)
+
+			if 0 < forbiddenCount {
+				util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)
+			}
 		} else {
-			util.PushMsg(Conf.Language(121), 3000)
+			if 0 < forbiddenCount {
+				util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)
+			} else {
+				util.PushMsg(Conf.Language(121), 3000)
+			}
 		}
 	}
 	return
@@ -1341,6 +1350,23 @@ func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
 			ret[i] = dest + "/"
 		}
 	}
+	return
+}
+
+func getAssetsLinkDestsInTree(tree *parse.Tree, includeServePath bool) (nodes []*ast.Node) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		dests := getAssetsLinkDests(n, includeServePath)
+		if 1 > len(dests) {
+			return ast.WalkContinue
+		}
+
+		nodes = append(nodes, n)
+		return ast.WalkContinue
+	})
 	return
 }
 

@@ -545,8 +545,7 @@ func serveAssets(ginServer *gin.Engine) {
 			}
 		}
 
-		if serveThumbnail(context, p, requestPath) {
-			// 如果请求缩略图服务成功则返回
+		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
 			return
 		}
 
@@ -560,6 +559,24 @@ func serveAssets(ginServer *gin.Engine) {
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})
+}
+
+func serveSVG(context *gin.Context, assetAbsPath string) bool {
+	if strings.HasSuffix(assetAbsPath, ".svg") {
+		data, err := os.ReadFile(assetAbsPath)
+		if err != nil {
+			logging.LogErrorf("read svg file failed: %s", err)
+			return false
+		}
+
+		if !model.Conf.Editor.AllowSVGScript {
+			data = []byte(util.RemoveScriptsInSVG(string(data)))
+		}
+
+		context.Data(200, "image/svg+xml", data)
+		return true
+	}
+	return false
 }
 
 func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {

@@ -128,8 +128,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             }
         };
     });
-
-    element.addEventListener("click", (event) => {
+    element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
         let processed = false;
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {
@@ -746,7 +745,7 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                     }
                     confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
                         const formData = new FormData();
-                        const imageName = content.substring(0, content.length - 22) + (imageData.rotation ? `-${imageData.rotation}-` : "") + content.substring(content.length - 22) + ".png";
+                        const imageName = content.substring(0, content.length - 22) + (imageData.rotation ? `${imageData.rotation}-` : "") + content.substring(content.length - 22) + ".png";
                         formData.append("file[]", blob, imageName);
                         formData.append("skipIfDuplicated", "true");
                         fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {

@@ -406,6 +406,27 @@ func exportNotebookSY(c *gin.Context) {
 	}
 }
 
+func exportSYs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+
+	zipPath := model.ExportSYs(ids)
+	ret.Data = map[string]interface{}{
+		"zip": zipPath,
+	}
+}
+
 func exportSY(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -416,10 +437,9 @@ func exportSY(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportSY(id)
+	zipPath := model.ExportSYs([]string{id})
 	ret.Data = map[string]interface{}{
-		"name": name,
-		"zip":  zipPath,
+		"zip": zipPath,
 	}
 }
 

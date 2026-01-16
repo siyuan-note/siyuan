@@ -52,11 +52,11 @@ export const genListItemElement = (listItemElement: Element, offset = 0, wbr = f
 export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range) => {
     const parentItemElement = hasClosestByClassName(nodeElement, "li");
     if (!parentItemElement) {
-        return;
+        return false;
     }
     const lastSubItem = parentItemElement.querySelector(".list")?.lastElementChild.previousElementSibling;
     if (!lastSubItem) {
-        return;
+        return false;
     }
     const newListElement = genListItemElement(lastSubItem, 0, true);
     const id = newListElement.getAttribute("data-node-id");
@@ -78,6 +78,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
         id,
     }]);
     focusByWbr(newListElement, range);
+    return true;
 };
 
 export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {

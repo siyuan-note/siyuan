@@ -481,13 +481,14 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             }
         }
     });
+
     const idZoomIn = getIdZoomInByPath();
     if (idZoomIn.id) {
         openFileById({
             app,
             id: idZoomIn.id,
             action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-            zoomIn: idZoomIn.isZoomIn
+            zoomIn: idZoomIn.isZoomIn,
         });
     } else {
         let latestTabHeaderElement: HTMLElement;
@@ -980,7 +981,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             item.element.style.minWidth = "";
         }
     });
-    if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2 ) {
+    if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2) {
         let index = Math.ceil(screen.width / 8);
         while (index > 0) {
             let width = 0;

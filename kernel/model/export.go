@@ -2840,6 +2840,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 									img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
 									img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 									mdTableCell.AppendChild(img)
+									height := "height: 128px;"
+									spanIAL := &ast.Node{Type: ast.NodeKramdownSpanIAL, Tokens: []byte("style=\"" + height + "\"")}
+									mdTableCell.AppendChild(spanIAL)
+									img.SetIALAttr("style", height)
 								} else if av.AssetTypeFile == a.Type {
 									linkText := strings.TrimSpace(a.Name)
 									if "" == linkText {

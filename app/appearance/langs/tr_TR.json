@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "Varlık dosya adlarındaki ID'yi kaldır",
+  "removeAssetsIDTip": "Etkinleştirildiğinde Markdown dışa aktarılırken varlık dosya adlarındaki ID kısmı kaldırılacaktır",
   "clearTempFiles": "Geçici dosyaları temizle",
   "clearTempFilesTip": "Uygulama çalışırken oluşan geçici dosyaları temizleyerek depolama alanını boşalt",
   "uploadFileTooLarge": "⚠️ Yüklenen dosya [${x}], boyutu [${y}] kadar büyük. Yüklemeye devam etmek istediğinize emin misiniz?",

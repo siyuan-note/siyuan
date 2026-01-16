@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "ID aus Asset-Dateinamen entfernen",
+  "removeAssetsIDTip": "Wenn aktiviert, wird beim Export nach Markdown der ID-Teil aus den Asset-Dateinamen entfernt",
   "clearTempFiles": "Temporäre Dateien bereinigen",
   "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
   "uploadFileTooLarge": "⚠️ Die hochgeladene Datei [${x}] ist zu groß [${y}]. Sind Sie sicher, dass Sie den Upload fortsetzen möchten?",

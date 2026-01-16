@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "Supprimer l'ID des noms de fichiers des ressources",
+  "removeAssetsIDTip": "Une fois activé, lors de l'export en Markdown, la partie ID dans le nom des fichiers de ressources sera supprimée",
   "clearTempFiles": "Effacer les fichiers temporaires",
   "clearTempFilesTip": "Effacez les fichiers temporaires générés lors de l'exécution de l'application pour libérer de l'espace de stockage",
   "uploadFileTooLarge": "⚠️ Le fichier envoyé [${x}] est trop volumineux [${y}]. Voulez-vous continuer l'envoi ?",

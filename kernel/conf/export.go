@@ -33,6 +33,7 @@ type Export struct {
 	TagCloseMarker        string `json:"tagCloseMarker"`        // 标签结束标记符，默认是 #
 	FileAnnotationRefMode int    `json:"fileAnnotationRefMode"` // 文件标注引用导出模式，0：文件名 - 页码 - 锚文本，1：仅锚文本
 	PandocBin             string `json:"pandocBin"`             // Pandoc 可执行文件路径
+	RemoveAssetsID        bool   `json:"removeAssetsID"`        // Markdown 导出时是否移除资源文件名 ID 部分 https://github.com/siyuan-note/siyuan/issues/16065
 	MarkdownYFM           bool   `json:"markdownYFM"`           // Markdown 导出时是否添加 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/7727
 	InlineMemo            bool   `json:"inlineMemo"`            // 是否导出行级备注 https://github.com/siyuan-note/siyuan/issues/14605
 	PDFFooter             string `json:"pdfFooter"`             // PDF 导出时页脚内容
@@ -55,6 +56,7 @@ func NewExport() *Export {
 		TagCloseMarker:          "#",
 		FileAnnotationRefMode:   0,
 		PandocBin:               "",
+		RemoveAssetsID:          false,
 		MarkdownYFM:             false,
 		InlineMemo:              false,
 		PDFFooter:               "%page / %pages",

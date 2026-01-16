@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "移除資源檔名中的 ID",
+  "removeAssetsIDTip": "啟用後在匯出 Markdown 時會移除資源檔名中的 ID 部分",
   "clearTempFiles": "清理臨時檔案",
   "clearTempFilesTip": "清理應用運行過程中產生的臨時檔案以釋放儲存空間",
   "uploadFileTooLarge": "⚠️ 上傳的檔案 [${x}] 很大 [${y}]，請確認是否繼續上傳？",

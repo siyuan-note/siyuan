@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "Remove ID from asset file names",
+  "removeAssetsIDTip": "When enabled, the ID part will be removed from asset file names when exporting Markdown",
   "clearTempFiles": "Clear temporary files",
   "clearTempFilesTip": "Clear temporary files generated while the app is running to free up storage space",
   "uploadFileTooLarge": "⚠️ The uploaded file [${x}] is too large [${y}]. Are you sure you want to continue uploading?",

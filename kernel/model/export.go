@@ -1449,7 +1449,9 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 	now := types.StringLiteral(types.DateString(time.Now()))
 	for _, link := range assetLinks {
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
+		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":6806/export/temp/", "")
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/", "") // Exporting PDF embedded asset files as attachments fails https://github.com/siyuan-note/siyuan/issues/7414#issuecomment-1704573557
+		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":6806/", "")
 		link.URI, _ = url.PathUnescape(link.URI)
 		if idx := strings.Index(link.URI, "?"); 0 < idx {
 			link.URI = link.URI[:idx]
@@ -3324,6 +3326,7 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		return
 	}
 
+	assetsOldNew, assetsNewOld := map[string]string{}, map[string]string{}
 	luteEngine := util.NewLute()
 	for i, p := range docPaths {
 		id := util.GetTreeID(p)
@@ -3361,29 +3364,40 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 
 		// 解析导出后的标准 Markdown，汇总 assets
 		tree = parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
-		var assets []string
-		assets = append(assets, getAssetsLinkDests(tree.Root, false)...)
-		for _, asset := range assets {
-			asset = string(html.DecodeDestination([]byte(asset)))
-			if strings.Contains(asset, "?") {
-				asset = asset[:strings.LastIndex(asset, "?")]
+		removeAssetsID(tree, assetsOldNew, assetsNewOld)
+
+		newAssets := getAssetsLinkDests(tree.Root, false)
+		for _, newAsset := range newAssets {
+			newAsset = string(html.DecodeDestination([]byte(newAsset)))
+			if strings.Contains(newAsset, "?") {
+				newAsset = newAsset[:strings.LastIndex(newAsset, "?")]
 			}
 
-			if !strings.HasPrefix(asset, "assets/") {
+			if !strings.HasPrefix(newAsset, "assets/") {
 				continue
 			}
 
-			srcPath := assetsPathMap[asset]
+			oldAsset := assetsNewOld[newAsset]
+			if "" == oldAsset {
+				logging.LogWarnf("get asset old path for new asset [%s] failed", newAsset)
+				continue
+			}
+
+			srcPath := assetsPathMap[oldAsset]
 			if "" == srcPath {
-				logging.LogWarnf("get asset [%s] abs path failed", asset)
+				logging.LogWarnf("get asset [%s] abs path failed", oldAsset)
 				continue
 			}
 
-			destPath := filepath.Join(writeFolder, asset)
+			destPath := filepath.Join(writeFolder, newAsset)
 			if copyErr := filelock.Copy(srcPath, destPath); copyErr != nil {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
 				continue
 			}
+		}
+
+		for assetsOld, assetsNew := range assetsOldNew {
+			md = strings.ReplaceAll(md, assetsOld, assetsNew)
 		}
 
 		// 调用 Pandoc 进行格式转换
@@ -3435,6 +3449,47 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 	os.RemoveAll(exportFolder)
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
 	return
+}
+
+func removeAssetsID(tree *parse.Tree, assetsOldNew, assetsNewOld map[string]string) {
+	assetNodes := getAssetsLinkDestsInTree(tree, false)
+	for _, node := range assetNodes {
+		dests := getAssetsLinkDests(node, false)
+		if 1 > len(dests) {
+			continue
+		}
+
+		for _, dest := range dests {
+			if !Conf.Export.RemoveAssetsID {
+				assetsOldNew[dest] = dest
+				assetsNewOld[dest] = dest
+				continue
+			}
+
+			if newDest := assetsOldNew[dest]; "" != newDest {
+				setAssetsLinkDest(node, dest, newDest)
+				continue
+			}
+
+			name := path.Base(dest)
+			name = util.RemoveID(name)
+			newDest := "assets/" + name
+			if existOld := assetsNewOld[newDest]; "" != existOld {
+				if existOld == dest { // 已存在相同资源路径
+					setAssetsLinkDest(node, dest, newDest)
+				} else {
+					// 存在同名但内容不同的资源文件，保留 ID
+					assetsNewOld[dest] = dest
+					assetsOldNew[dest] = dest
+				}
+				continue
+			}
+
+			setAssetsLinkDest(node, dest, newDest)
+			assetsOldNew[dest] = newDest
+			assetsNewOld[newDest] = dest
+		}
+	}
 }
 
 func getExportBlockRefLinkText(blockRef *ast.Node, blockRefTextLeft, blockRefTextRight string) (defID, linkText string) {

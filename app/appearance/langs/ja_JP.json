@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "リソースファイル名から ID を削除",
+  "removeAssetsIDTip": "有効にすると Markdown をエクスポートする際にリソースファイル名の ID 部分を削除します",
   "clearTempFiles": "一時ファイルを削除",
   "clearTempFilesTip": "アプリの実行中に生成された一時ファイルを削除して、ストレージ領域を解放します",
   "uploadFileTooLarge": "⚠️ アップロードしたファイル [${x}] は [${y}] で大きすぎます。アップロードを続行しますか？",

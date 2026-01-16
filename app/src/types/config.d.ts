@@ -575,6 +575,10 @@ declare namespace Config {
          */
         markdownYFM: boolean;
         /**
+         * Whether to remove the asset ID when exporting to Markdown
+         */
+        removeAssetsID: boolean;
+        /**
          * Whether to export the inline memo
          */
         inlineMemo: boolean;

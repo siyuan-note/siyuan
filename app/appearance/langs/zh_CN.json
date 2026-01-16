@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "移除资源文件名中的 ID",
+  "removeAssetsIDTip": "启用后在导出 Markdown 时将移除资源文件名中的 ID 部分",
   "clearTempFiles": "清理临时文件",
   "clearTempFilesTip": "清理应用运行过程中产生的临时文件以释放存储空间",
   "uploadFileTooLarge": "⚠️ 上传的文件 [${x}] 很大 [${y}]，请确认是否继续上传？",

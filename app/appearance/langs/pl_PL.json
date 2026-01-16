@@ -1,4 +1,6 @@
 {
+  "removeAssetsID": "Usuń ID z nazw plików zasobów",
+  "removeAssetsIDTip": "Po włączeniu podczas eksportu do Markdown zostanie usunięta część nazwy pliku zasobu zawierająca ID",
   "clearTempFiles": "Wyczyść pliki tymczasowe",
   "clearTempFilesTip": "Wyczyść pliki tymczasowe tworzone podczas działania aplikacji, aby zwolnić miejsce na dysku",
   "uploadFileTooLarge": "⚠️ Przesłany plik [${x}] jest za duży [${y}]. Czy na pewno chcesz kontynuować przesyłanie?",

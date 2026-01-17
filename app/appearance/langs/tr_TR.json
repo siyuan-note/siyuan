@@ -1503,7 +1503,7 @@
     "53": "Veri senkronizasyonu etkin değil",
     "54": "Referanslar indeksleniyor...",
     "55": "[%d] belge referansları indekslendi",
-    "56": "Yeniden indeksleniyor, tamamlanana kadar açmayı deneme",
+    "56": "Veri dizinleme işlemi sürüyor. Lütfen açmayı denemeden önce dizinlemenin tamamlanmasını bekleyin",
     "57": "Geçici anahtar oluşturulamadı",
     "58": "[%d/%d] Dizin doğrulanıyor...",
     "59": "Senkronizasyon yok sayma listesi ayarlanamadı",

@@ -1503,7 +1503,7 @@
     "53": "La sincronizzazione dei dati non è stata abilitata",
     "54": "Indicizzazione dei riferimenti in corso...",
     "55": "Indicizzati i riferimenti di [%d] documenti",
-    "56": "Reindicizzazione in corso, attendere che la ricostruzione sia completata prima di aprire",
+    "56": "L'indicizzazione dei dati è in corso. Attendere il completamento dell'indicizzazione prima di provare ad aprire",
     "57": "Impossibile creare la chiave temporanea",
     "58": "[%d/%d] Verifica dell'indice in corso...",
     "59": "Impossibile impostare la lista di ignoranza della sincronizzazione",

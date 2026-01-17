@@ -1503,7 +1503,7 @@
     "53": "Die Datensynchronisation wurde nicht aktiviert",
     "54": "Indizierung der Referenzen...",
     "55": "Indizierte Referenzen von [%d] Dokumenten",
-    "56": "Reindizierung, bitte warten, bis der Wiederaufbau abgeschlossen ist, bevor Sie versuchen zu öffnen",
+    "56": "Die Indexierung der Daten läuft. Bitte warten Sie, bis die Indexierung abgeschlossen ist, bevor Sie versuchen, sie zu öffnen",
     "57": "Fehler beim Erstellen des temp-Schlüssels",
     "58": "[%d/%d] Überprüfen des Index...",
     "59": "Fehler beim Festlegen der Ignorierliste für die Synchronisation",

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package provider
+package oidcprovider
 
 import (
 	"errors"
@@ -91,9 +91,14 @@ func NewMicrosoft(cfg *conf.OIDCProviderConf) (Provider, error) {
 		scopes = []string{"openid", "email", "profile"}
 	}
 
+	label := strings.TrimSpace(cfg.ProviderLabel)
+	if label == "" {
+		label = "Login with Microsoft"
+	}
+
 	p := &BaseOIDC{
 		IDStr:           "microsoft",
-		ProviderName:    strings.TrimSpace(cfg.ProviderName),
+		ProviderLabel:   label,
 		IssuerURLStr:    issuerURL,
 		ClientIDStr:     clientID,
 		ClientSecretStr: clientSecret,

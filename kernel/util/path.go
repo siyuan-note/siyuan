@@ -20,11 +20,13 @@ import (
 	"bytes"
 	"io/fs"
 	"net"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -408,4 +410,41 @@ func IsPartitionRootPath(path string) bool {
 		// On Unix-like systems, the root path is "/"
 		return cleanPath == "/"
 	}
+}
+
+// SanitizeRedirectPath sanitizes the given redirect path to prevent open redirect vulnerabilities.
+// it ensures that the path is relative and does not contain any malicious components.
+func SanitizeRedirectPath(dest string) string {
+	if "" == dest {
+		return "/"
+	}
+	parsed, err := url.Parse(dest)
+	if err != nil || parsed.IsAbs() || "" != parsed.Host {
+		return "/"
+	}
+	if strings.HasPrefix(parsed.Path, "//") {
+		return "/"
+	}
+	if "" == parsed.Path {
+		parsed.Path = "/"
+	}
+	if !strings.HasPrefix(parsed.Path, "/") {
+		return "/"
+	}
+	parsed.Scheme = ""
+	parsed.Host = ""
+	parsed.User = nil
+	return parsed.String()
+}
+
+func ParseBoolQuery(val string) bool {
+	val = strings.TrimSpace(val)
+	if "" == val {
+		return false
+	}
+	if "1" == val {
+		return true
+	}
+	parsed, err := strconv.ParseBool(val)
+	return err == nil && parsed
 }

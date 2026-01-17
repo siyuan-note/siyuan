@@ -45,7 +45,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/net/webdav"
@@ -419,12 +418,8 @@ func serveCheckAuth(ginServer *gin.Engine) {
 }
 
 func serveOIDC(ginServer *gin.Engine) {
-	ginServer.GET("/auth/oidc/login", func(c *gin.Context) {
-		oidc.Login(c, model.Conf.OIDC)
-	})
-	ginServer.GET("/auth/oidc/callback", func(c *gin.Context) {
-		oidc.Callback(c, model.Conf.OIDC, model.Conf.Language)
-	})
+	ginServer.GET("/auth/oidc/login", model.OIDCLogin)
+	ginServer.GET("/auth/oidc/callback", model.OIDCCallback)
 }
 
 func serveAuthPage(c *gin.Context) {
@@ -461,8 +456,8 @@ func serveAuthPage(c *gin.Context) {
 			keymapHideWindow = "⌥M"
 		}
 	}
-	oidcEnabled := oidc.IsEnabled(model.Conf.OIDC)
-	oidcProviderName := oidc.ProviderLabel(model.Conf.OIDC)
+	oidcEnabled := model.OIDCIsEnabled(model.Conf.OIDC)
+	oidcProviderName := model.OIDCProviderLabel(model.Conf.OIDC)
 	authError := strings.TrimSpace(c.Query("error"))
 	model := map[string]interface{}{
 		"l0":                     model.Conf.Language(173),

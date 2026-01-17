@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package provider
+package oidcprovider
 
 import (
 	"errors"
@@ -24,22 +24,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
-const oidcGoogleIssuer = "https://accounts.google.com"
+func NewCasdoor(cfg *conf.OIDCProviderConf) (Provider, error) {
+	issuerURL := strings.TrimSpace(cfg.IssuerURL)
+	if issuerURL == "" {
+		return nil, errors.New("Casdoor issuerURL is required")
+	}
 
-func NewGoogle(cfg *conf.OIDCProviderConf) (Provider, error) {
 	clientID := strings.TrimSpace(cfg.ClientID)
 	if clientID == "" {
-		return nil, errors.New("Google clientID is required")
+		return nil, errors.New("Casdoor clientID is required")
 	}
 
 	clientSecret := strings.TrimSpace(cfg.ClientSecret)
 	if clientSecret == "" {
-		return nil, errors.New("Google clientSecret is required")
+		return nil, errors.New("Casdoor clientSecret is required")
 	}
 
 	redirectURL := formatRedirectURL(cfg.RedirectURL)
 	if redirectURL == "" {
-		return nil, errors.New("Google redirectURL is required")
+		return nil, errors.New("Casdoor redirectURL is required")
 	}
 
 	scopes := cfg.Scopes
@@ -48,9 +51,9 @@ func NewGoogle(cfg *conf.OIDCProviderConf) (Provider, error) {
 	}
 
 	p := &BaseOIDC{
-		IDStr:           "google",
-		ProviderName:    strings.TrimSpace(cfg.ProviderName),
-		IssuerURLStr:    oidcGoogleIssuer,
+		IDStr:           "casdoor",
+		ProviderLabel:   "Login with Casdoor",
+		IssuerURLStr:    issuerURL,
 		ClientIDStr:     clientID,
 		ClientSecretStr: clientSecret,
 		RedirectURLStr:  redirectURL,
@@ -59,7 +62,7 @@ func NewGoogle(cfg *conf.OIDCProviderConf) (Provider, error) {
 
 	p.Normalizer = func(raw map[string]any, idToken *oidc.IDToken) (*OIDCClaims, error) {
 		claims := &OIDCClaims{
-			Provider:          "google",
+			Provider:          "casdoor",
 			Subject:           idToken.Subject,
 			Issuer:            idToken.Issuer,
 			Audience:          idToken.Audience,
@@ -67,7 +70,6 @@ func NewGoogle(cfg *conf.OIDCProviderConf) (Provider, error) {
 			EmailVerified:     claimBool(raw, OIDCClaimEmailVerified),
 			PreferredUsername: claimString(raw, OIDCClaimPreferredUsername),
 			Name:              claimString(raw, OIDCClaimName),
-			HostedDomain:      claimString(raw, OIDCClaimHostedDomain),
 		}
 		return claims, nil
 	}

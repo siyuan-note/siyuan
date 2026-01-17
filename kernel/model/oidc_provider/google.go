@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package provider
+package oidcprovider
 
 import (
 	"errors"
@@ -24,25 +24,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
-func NewCustom(cfg *conf.OIDCProviderConf) (Provider, error) {
+const oidcGoogleIssuer = "https://accounts.google.com"
+
+func NewGoogle(cfg *conf.OIDCProviderConf) (Provider, error) {
 	clientID := strings.TrimSpace(cfg.ClientID)
-	if "" == clientID {
-		return nil, errors.New("custom OIDC clientID is required")
+	if clientID == "" {
+		return nil, errors.New("Google clientID is required")
 	}
 
 	clientSecret := strings.TrimSpace(cfg.ClientSecret)
-	if "" == clientSecret {
-		return nil, errors.New("custom OIDC clientSecret is required")
-	}
-
-	issuerURL := strings.TrimSpace(cfg.IssuerURL)
-	if "" == issuerURL {
-		return nil, errors.New("custom OIDC issuerURL is required")
+	if clientSecret == "" {
+		return nil, errors.New("Google clientSecret is required")
 	}
 
 	redirectURL := formatRedirectURL(cfg.RedirectURL)
 	if redirectURL == "" {
-		return nil, errors.New("custom OIDC redirectURL is required")
+		return nil, errors.New("Google redirectURL is required")
 	}
 
 	scopes := cfg.Scopes
@@ -50,10 +47,15 @@ func NewCustom(cfg *conf.OIDCProviderConf) (Provider, error) {
 		scopes = []string{"openid", "email", "profile"}
 	}
 
+	label := strings.TrimSpace(cfg.ProviderLabel)
+	if label == "" {
+		label = "Login with Google"
+	}
+
 	p := &BaseOIDC{
-		IDStr:           "custom",
-		ProviderName:    strings.TrimSpace(cfg.ProviderName),
-		IssuerURLStr:    issuerURL,
+		IDStr:           "google",
+		ProviderLabel:   label,
+		IssuerURLStr:    oidcGoogleIssuer,
 		ClientIDStr:     clientID,
 		ClientSecretStr: clientSecret,
 		RedirectURLStr:  redirectURL,
@@ -62,30 +64,18 @@ func NewCustom(cfg *conf.OIDCProviderConf) (Provider, error) {
 
 	p.Normalizer = func(raw map[string]any, idToken *oidc.IDToken) (*OIDCClaims, error) {
 		claims := &OIDCClaims{
-			Provider:          "custom",
+			Provider:          "google",
 			Subject:           idToken.Subject,
 			Issuer:            idToken.Issuer,
 			Audience:          idToken.Audience,
-			Email:             claimString(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimEmail)),
-			EmailVerified:     claimBool(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimEmailVerified)),
-			PreferredUsername: claimString(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimPreferredUsername)),
-			Name:              claimString(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimName)),
-			HostedDomain:      claimString(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimHostedDomain)),
-			TenantID:          claimString(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimTenantID)),
-			Groups:            claimStringArray(raw, claimKeyFromMap(cfg.ClaimMap, OIDCClaimGroups)),
+			Email:             claimString(raw, OIDCClaimEmail),
+			EmailVerified:     claimBool(raw, OIDCClaimEmailVerified),
+			PreferredUsername: claimString(raw, OIDCClaimPreferredUsername),
+			Name:              claimString(raw, OIDCClaimName),
+			HostedDomain:      claimString(raw, OIDCClaimHostedDomain),
 		}
 		return claims, nil
 	}
 
 	return p, nil
-}
-
-func claimKeyFromMap(m map[string]string, key string) string {
-	if nil == m {
-		return key
-	}
-	if v, ok := m[key]; ok && "" != v {
-		return v
-	}
-	return key
 }

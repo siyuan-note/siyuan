@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package provider
+package oidcprovider
 
 import (
 	"context"
@@ -29,14 +29,14 @@ import (
 type ClaimNormalizer func(raw map[string]any, idToken *oidc.IDToken) (*OIDCClaims, error)
 
 type BaseOIDC struct {
-	IDStr        string
-	ProviderName string
-	IssuerURLStr string
-	ClientIDStr  string
+	IDStr           string
+	ProviderLabel   string
+	IssuerURLStr    string
+	ClientIDStr     string
 	ClientSecretStr string
 	RedirectURLStr  string
-	ScopesList   []string
-	Normalizer   ClaimNormalizer
+	ScopesList      []string
+	Normalizer      ClaimNormalizer
 }
 
 func (p *BaseOIDC) ID() string {
@@ -44,8 +44,8 @@ func (p *BaseOIDC) ID() string {
 }
 
 func (p *BaseOIDC) Label() string {
-	if "" != p.ProviderName {
-		return p.ProviderName
+	if "" != p.ProviderLabel {
+		return p.ProviderLabel
 	}
 	return "Login with OIDC"
 }

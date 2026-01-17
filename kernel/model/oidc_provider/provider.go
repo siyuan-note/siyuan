@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package provider
+package oidcprovider
 
 import (
 	"context"
@@ -53,8 +53,6 @@ func New(name string, cfg *conf.OIDCProviderConf) (Provider, error) {
 		return NewMicrosoft(cfg)
 	case "github":
 		return NewGitHub(cfg)
-	case "casdoor":
-		return NewCasdoor(cfg)
 	default:
 		return nil, errors.New("oidc provider is not supported")
 	}
@@ -98,15 +96,15 @@ func defaultRedirectURL() string {
 
 const (
 	OIDCClaimProvider          = "provider"
-	OIDCClaimSubject           = "sub"
+	OIDCClaimSubject           = "subject"
 	OIDCClaimEmail             = "email"
 	OIDCClaimEmailVerified     = "email_verified"
 	OIDCClaimPreferredUsername = "preferred_username"
 	OIDCClaimName              = "name"
-	OIDCClaimIssuer            = "iss"
-	OIDCClaimAudience          = "aud"
-	OIDCClaimHostedDomain      = "hd"
-	OIDCClaimTenantID          = "tid"
+	OIDCClaimIssuer            = "issuer"
+	OIDCClaimAudience          = "audience"
+	OIDCClaimHostedDomain      = "hosted_domain"
+	OIDCClaimTenantID          = "tenant_id"
 	OIDCClaimGroups            = "groups"
 )
 

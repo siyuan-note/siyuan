@@ -31,7 +31,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/steambap/captcha"
 )
@@ -233,7 +232,7 @@ type authContext struct {
 
 func newAuthContext(c *gin.Context) *authContext {
 	session := util.GetSession(c)
-	oidcEnabled := oidc.IsEnabled(Conf.OIDC)
+	oidcEnabled := OIDCIsEnabled(Conf.OIDC)
 	hasAccessCode := "" != Conf.AccessAuthCode
 	return &authContext{
 		ginCtx:          c,
@@ -408,7 +407,7 @@ func (ctx *authContext) stepSessionAccessCode() authResult {
 
 // stepOIDCSession 通过 OIDC 会话
 func (ctx *authContext) stepOIDCSession() authResult {
-	if oidc.IsSessionValid(Conf.OIDC, ctx.workspace) {
+	if OIDCIsValid(Conf.OIDC, ctx.workspace) {
 		return authGrant(RoleAdministrator)
 	}
 	return authContinue()

@@ -41,53 +41,9 @@ type WorkspaceSession struct {
 }
 
 type OIDCSession struct {
-	Provider string
-	Subject  string
-	Email    string
-	State    string
-	Nonce    string
-	To       string
-	Remember bool
-}
-
-func (s *OIDCSession) Challenge(providerID, to string, rememberMe bool) {
-	s.State = gulu.Rand.String(32)
-	s.Nonce = gulu.Rand.String(32)
-	s.Provider = providerID
-	s.Subject = ""
-	s.Email = ""
-	s.To = to
-	s.Remember = rememberMe
-}
-
-func (s *OIDCSession) Complete(subject, email string) (redirectTo string, rememberMe bool) {
-	s.Subject = subject
-	s.Email = email
-	redirectTo = s.To
-	rememberMe = s.Remember
-
-	s.State = ""
-	s.Nonce = ""
-	s.To = ""
-	s.Remember = false
-	return
-}
-
-func (s *OIDCSession) IsValid(expectedProviderID string) bool {
-	if s.Provider != expectedProviderID {
-		return false
-	}
-	return "" != s.Subject
-}
-
-func (s *OIDCSession) Clear() {
-	s.Provider = ""
-	s.Subject = ""
-	s.Email = ""
-	s.State = ""
-	s.Nonce = ""
-	s.To = ""
-	s.Remember = false
+	ProviderID   string
+	ProviderHash string
+	FilterHash   string
 }
 
 func (sd *SessionData) Clear(c *gin.Context) {

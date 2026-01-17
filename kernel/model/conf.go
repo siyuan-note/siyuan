@@ -39,7 +39,6 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/model/oidc"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -187,8 +186,10 @@ func InitConf() {
 		}
 	}
 
+	Conf.UpdateOIDCConfig(Conf.OIDC)
+
 	if util.ContainerDocker == util.Container && !Conf.AccessAuthBypass {
-		if "" == Conf.AccessAuthCode && !oidc.IsEnabled(Conf.OIDC) {
+		if "" == Conf.AccessAuthCode && !OIDCIsEnabled(Conf.OIDC) {
 			fmt.Println("in Docker mode, you must set (or set --accessAuthBypass [not recommended]) at least one auth method: accessAuthCode or OIDC")
 			os.Exit(logging.ExitCodeSecurityRisk)
 		}
@@ -701,6 +702,77 @@ func initLang() {
 		util.TrayMenuLangs[name] = langMap["_trayMenu"].(map[string]interface{})
 		util.AttrViewLangs[name] = langMap["_attrView"].(map[string]interface{})
 	}
+}
+
+func (appConf *AppConf) UpdateOIDCConfig(new *conf.OIDC) {
+	if nil == new {
+		new = conf.NewOIDC()
+	}
+
+	new.Provider = strings.TrimSpace(new.Provider)
+	if nil == new.Providers {
+		new.Providers = map[string]*conf.OIDCProviderConf{}
+	}
+	if nil == new.Filters {
+		new.Filters = map[string][]string{}
+	}
+
+	new.ProviderHash = oidcProviderHash(new)
+	new.FilterHash = oidcFilterHash(new.Filters)
+	appConf.OIDC = new
+}
+
+func oidcProviderHash(oidcConf *conf.OIDC) string {
+	if nil == oidcConf {
+		return ""
+	}
+	providerID := strings.TrimSpace(oidcConf.Provider)
+	if "" == providerID {
+		return ""
+	}
+	providerConf := oidcConf.Providers[providerID]
+	if nil == providerConf {
+		return ""
+	}
+
+	// json.Marshal 会自动按字典顺序序列化map，因此可以直接使用它来生成哈希值
+	data, err := json.Marshal(providerConf)
+	if err != nil {
+		return ""
+	}
+
+	input := append([]byte(providerID+":"), data...)
+	sum := sha1.Sum(input)
+	return fmt.Sprintf("%x", sum)
+}
+
+func oidcFilterHash(filters map[string][]string) string {
+	if 0 == len(filters) {
+		return ""
+	}
+	normalized := map[string][]string{}
+	for key, patterns := range filters {
+		key = strings.TrimSpace(key)
+		if "" == key {
+			continue
+		}
+		normalizedPatterns := make([]string, 0, len(patterns))
+		for _, pattern := range patterns {
+			pattern = strings.TrimSpace(pattern)
+			if "" == pattern {
+				continue
+			}
+			normalizedPatterns = append(normalizedPatterns, pattern)
+		}
+		sort.Strings(normalizedPatterns)
+		normalized[key] = normalizedPatterns
+	}
+	data, err := json.Marshal(normalized)
+	if err != nil {
+		return ""
+	}
+	sum := sha1.Sum(data)
+	return fmt.Sprintf("%x", sum)
 }
 
 func loadLangs() (ret []*conf.Lang) {

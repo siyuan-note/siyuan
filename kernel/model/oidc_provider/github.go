@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package provider
+package oidcprovider
 
 import (
 	"context"
@@ -31,7 +31,7 @@ import (
 )
 
 type oidcProviderGitHub struct {
-	providerName string
+	providerLabel string
 	scopes       []string
 	clientID     string
 	clientSecret string
@@ -49,8 +49,13 @@ func NewGitHub(cfg *conf.OIDCProviderConf) (Provider, error) {
 		return nil, errors.New("GitHub clientSecret is required")
 	}
 
+	label := strings.TrimSpace(cfg.ProviderLabel)
+	if label == "" {
+		label = "Login with GitHub"
+	}
+
 	return &oidcProviderGitHub{
-		providerName: strings.TrimSpace(cfg.ProviderName),
+		providerLabel: label,
 		scopes:       cfg.Scopes,
 		clientID:     clientID,
 		clientSecret: clientSecret,
@@ -63,10 +68,7 @@ func (p *oidcProviderGitHub) ID() string {
 }
 
 func (p *oidcProviderGitHub) Label() string {
-	if "" != p.providerName {
-		return p.providerName
-	}
-	return "Login with GitHub"
+	return p.providerLabel
 }
 
 func (p *oidcProviderGitHub) AuthURL(state, nonce string) string {

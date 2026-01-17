@@ -17,9 +17,11 @@
 package conf
 
 type OIDC struct {
-	Provider  string                       `json:"provider"`
-	Providers map[string]*OIDCProviderConf `json:"providers"`
-	Filters   map[string][]string          `json:"filters"`
+	Provider     string                       `json:"provider"`
+	Providers    map[string]*OIDCProviderConf `json:"providers"`
+	Filters      map[string][]string          `json:"filters"`
+	ProviderHash string                       `json:"providerHash"`
+	FilterHash   string                       `json:"filterHash"`
 }
 
 type OIDCProviderConf struct {
@@ -29,7 +31,7 @@ type OIDCProviderConf struct {
 	IssuerURL    string            `json:"issuerURL"`
 	Scopes       []string          `json:"scopes"`
 	Tenant       string            `json:"tenant"`
-	ProviderName string            `json:"providerName"`
+	ProviderLabel string           `json:"providerLabel"`
 	ClaimMap     map[string]string `json:"claimMap"`
 }
 
@@ -38,24 +40,11 @@ func NewOIDC() *OIDC {
 		Provider: "",
 		Providers: map[string]*OIDCProviderConf{
 			"custom": {
-				ProviderName: "Login with SSO",
-				Scopes:       []string{"openid", "email", "profile"},
+				Scopes: []string{"openid", "email", "profile"},
 			},
-			"google": {
-				ProviderName: "Login with Google",
-			},
-			"microsoft": {
-				ProviderName: "Login with Microsoft",
-			},
-			"github": {
-				ProviderName: "Login with GitHub",
-			},
-			"dingtalk": {
-				ProviderName: "Login with DingTalk",
-			},
-			"casdoor": {
-				ProviderName: "Login with Casdoor",
-			},
+			"google":    {},
+			"microsoft": {},
+			"github":    {},
 		},
 		Filters: map[string][]string{},
 	}

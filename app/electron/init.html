@@ -9,9 +9,9 @@
             margin: 0;
             background-color: #fff;
             text-align: center;
-            color: #202124;
-            user-select: none;
-            font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+            color: #222;
+            font-size: 16px;
+            font-family: BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", arial, "Microsoft Yahei", "Hiragino Sans GB", "Source Han Sans SC", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Twemoji Mozilla", "Android Emoji", "EmojiSymbols";
         }
 
         .fn__flex-column {
@@ -19,7 +19,6 @@
             flex-direction: column;
             width: 100%;
             margin: 0 auto;
-            border: 1px solid rgba(0, 0, 0, .06);
             min-height: 100vh;
             box-sizing: border-box;
             padding: 0 calc((100vw - 608px) * 0.3);
@@ -27,41 +26,44 @@
 
         .fn__flex-1 {
             flex: 1;
-            min-height: 16px;
+            min-height: 32px;
             flex-shrink: 0;
+            min-width: 8px;
         }
 
         h2 {
-            margin: 0 0 12px 0;
-            line-height: 24px;
+            margin: 0 0 16px 0;
+            font-size: 28px;
         }
 
         .b3-select {
-            border: 1px solid rgba(0, 0, 0, .06);
             border-radius: 6px;
-            padding: 4px 8px;
-            line-height: 20px;
-            box-sizing: border-box;
-            color: #202124;
-            transition: box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1);
-            background-color: #fff;
+            color: #222;
             height: 28px;
-            font-size: 14px;
             width: 96px;
+            border: 0;
+            padding: 4px 26px 4px 8px;
+            box-sizing: border-box;
+            line-height: 20px;
+            transition: box-shadow 120ms 0ms cubic-bezier(0, 0, 0.2, 1), background-color 0.2s cubic-bezier(0, 0, 0.2, 1) 0ms;
+            font-size: 14px;
+            box-shadow: inset 0 0 0 0.6px #5f6368;
+            background: url("data:image/svg+xml;utf8,<svg fill='rgba(95, 99, 104, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #fff;
+            appearance: none;
+            cursor: pointer;
+            overflow: hidden;
         }
 
         .b3-select:focus {
-            border: 1px solid #218bff;
-            outline: none;
+            box-shadow: inset 0 0 0 1px #3575f0, 0 0 0 3px rgba(53, 117, 240, .12);
         }
 
         .b3-button {
-            cursor: pointer;
             color: #fff;
             border-radius: 6px;
             line-height: 20px;
             padding: 4px 8px;
-            background-color: #218bff;
+            background-color: #3575f0;
             white-space: nowrap;
             display: inline-flex;
             align-items: center;
@@ -71,35 +73,32 @@
             box-sizing: border-box;
             text-align: center;
             width: 96px;
+            cursor: pointer;
         }
 
         .b3-button:hover, .b3-button:focus {
             text-decoration: none;
-            background-color: #0969da;
-            box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12)
+            box-shadow: 0 5px 5px -3px rgb(0 0 0 / .2), 0 8px 10px 1px rgb(0 0 0 / .14), 0 3px 14px 2px rgb(0 0 0 / .12);
         }
 
         .b3-button:active {
-            box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12)
+            box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
         }
 
         .b3-label {
-            padding: 12px 24px;
-            line-height: 20px;
+            padding: 16px 24px 0;
+            margin-bottom: 16px;
             display: flex;
             text-align: left;
-            border-bottom: 1px solid rgba(0, 0, 0, .06);
+            box-shadow: 0 15px 0 0 #fff, 0 16px 0 0 #e0e0e0;
         }
 
         .b3-label__text {
             color: #5f6368;
             font-size: 14px;
             margin-top: 4px;
-        }
-
-        .fn__space {
-            width: 8px;
-            flex-shrink: 0;
+            overflow: hidden;
+            line-height: 1.65;
         }
 
         .fn__flex-center {
@@ -119,7 +118,7 @@
 
         .svg:hover {
             background: #dfe0e1;
-            fill: #202124;
+            fill: #222;
         }
 
         #close {
@@ -135,12 +134,11 @@
 
         a {
             text-decoration: none;
-            color: #218bff;
+            color: #3575f0;
         }
 
         a:hover {
             text-decoration: underline;
-            color: #0969da;
         }
 
         .fn__none {
@@ -158,20 +156,20 @@
         }
 
         .icon {
-            width: 88px;
-            margin: 0 auto
+            width: 96px;
+            margin: 0 auto 16px;
         }
 
         kbd {
-            padding: 2px 4px;
             font: 75% SFMono-Regular, Consolas, "Liberation Mono";
             line-height: 1;
+            border-radius: 6px;
+            padding: 2px 4px;
             color: #5f6368;
             vertical-align: middle;
-            background-color: #f3f3f3;
-            border: solid 1px rgba(0, 0, 0, .06);
-            border-radius: 6px;
-            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .06);
+            background-color: #f6f6f6;
+            border: solid 1px #e0e0e0;
+            box-shadow: inset 0 -1px 0 #e0e0e0;
         }
 
         .feedback {
@@ -187,16 +185,11 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 64px;
         }
 
         .darwin #min,
         .darwin #close {
             display: none;
-        }
-
-        .darwin .drag {
-            left: 74px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -205,22 +198,22 @@
                 color: #dadada;
             }
 
-            .fn__flex-column {
-                border: 1px solid rgba(255, 255, 255, .06);
-            }
-
             .b3-select {
-                border: 1px solid rgba(255, 255, 255, .06);
                 color: #dadada;
-                background-color: #2d2d2d;
+                box-shadow: inset 0 0 0 0.6px #9aa0a6;
+                background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center #1e1e1e;
             }
 
             .b3-select:focus {
-                border: 1px solid #3573f0;
+                box-shadow: inset 0 0 0 1px #3573f0, 0 0 0 3px rgba(53, 115, 240, .24);
+            }
+
+            .b3-button {
+                background-color: #3573f0;
             }
 
             .b3-label {
-                border-bottom: 1px solid rgba(255, 255, 255, .06);
+                box-shadow: 0 15px 0 0 #1e1e1e, 0 16px 0 0 #363636;
             }
 
             .b3-label__text {
@@ -236,17 +229,8 @@
                 fill: #dadada;
             }
 
-            #close:hover {
-                background-color: #d23f31;
-                fill: #fff;
-            }
-
             a {
                 color: #3573f0;
-            }
-
-            a:hover {
-                color: #4a8aff;
             }
 
             .slogan {
@@ -259,9 +243,9 @@
 
             kbd {
                 color: #9aa0a6;
-                background-color: #2d2d2d;
-                border: solid 1px rgba(255, 255, 255, .06);
-                box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .06);
+                background-color: #262626;
+                border: solid 1px rgba(230, 230, 230, .06);
+                box-shadow: inset 0 -1px 0 rgba(230, 230, 230, .06);
             }
         }
     </style>
@@ -278,7 +262,6 @@
             🌐 外观语言
             <div class="b3-label__text">用户界面语言，后续可以在 <kbd>设置</kbd> - <kbd>外观</kbd> 中进行切换</div>
         </div>
-        <div class="fn__space"></div>
         <div class="fn__flex-1"></div>
         <select class="b3-select lang">
             <option value="ar_SA">العربية</option>
@@ -303,7 +286,6 @@
             🗂️ 工作空间
             <div class="b3-label__text"> 工作空间用于存放数据，后续可以在顶栏左上角的主菜单中进行切换</div>
         </div>
-        <div class="fn__space"></div>
         <div class="fn__flex-1"></div>
         <button class="b3-button fn__flex-center choosePath">选择</button>
     </label>
@@ -331,7 +313,6 @@
                 <kbd>Appearance</kbd>
             </div>
         </div>
-        <div class="fn__space"></div>
         <div class="fn__flex-1"></div>
         <select class="b3-select lang">
             <option value="ar_SA">العربية</option>
@@ -358,7 +339,6 @@
                 menu later
             </div>
         </div>
-        <div class="fn__space"></div>
         <div class="fn__flex-1"></div>
         <button class="b3-button fn__flex-center choosePath">Select</button>
     </label>
@@ -531,8 +511,7 @@
         const fs = require('fs')
         let files;
         try {
-            files = fs.readdirSync(absPath)
-            files = files.filter(file => file !== '.DS_Store')
+            files = fs.readdirSync(absPath).filter(file => file !== '.DS_Store')
         } catch (err) {
             return false
         }

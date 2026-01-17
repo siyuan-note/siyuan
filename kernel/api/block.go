@@ -667,7 +667,7 @@ func getBlockInfo(c *gin.Context) {
 		return
 	} else if errors.Is(err, model.ErrBoxUnindexed) {
 		ret.Code = -1
-		ret.Msg = ""
+		ret.Msg = "" // 加载的时候已经推送过提示了，这里不需要再提示
 		return
 	}
 

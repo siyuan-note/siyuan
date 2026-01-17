@@ -376,6 +376,8 @@ func SetCaseSensitive(b bool) {
 	} else {
 		db.Exec("PRAGMA case_sensitive_like = OFF;")
 	}
+
+	util.SearchCaseSensitive = b
 }
 
 func SetIndexAssetPath(b bool) {

@@ -846,9 +846,16 @@ func filterByQuery(query string, collection av.Collection) {
 			for _, cell := range item.GetValues() {
 				allKeywordsHit := true
 				for _, keyword := range keywords {
-					if !strings.Contains(strings.ToLower(cell.String(true)), strings.ToLower(keyword)) {
-						allKeywordsHit = false
-						break
+					if !util.SearchCaseSensitive {
+						if !strings.Contains(strings.ToLower(cell.String(true)), strings.ToLower(keyword)) {
+							allKeywordsHit = false
+							break
+						}
+					} else {
+						if !strings.Contains(cell.String(true), keyword) {
+							allKeywordsHit = false
+							break
+						}
 					}
 				}
 				if allKeywordsHit {

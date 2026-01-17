@@ -1644,7 +1644,7 @@
     "194": "<a href=\"https://help.jianguoyun.com/?p=2064\" target=\"_blank\">Zamienniki interfejsu Nutstore są ograniczone</a>, proszę używać innych usług WebDAV",
     "195": "Czas systemowy jest nieprawidłowy, proszę skalibrować czas systemowy i spróbować ponownie",
     "196": "Nie ustawiaj obszaru roboczego pod ścieżką zewnętrznego dysku synchronizującego, w przeciwnym razie dane ulegną uszkodzeniu (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun itp.)",
-    "197": "",
+    "197": "Proszę otworzyć notatnik [%s] i spróbować ponownie",
     "198": "To nie jest ważny archiwum. Jeśli archiwum zostało wyeksportowane z [Drzewa dokumentów], proszę zaimportować je iz [Drzewa dokumentów]",
     "199": "To nie jest ważny archiwum .sy.zip. Jeśli archiwum zostało wyeksportowane z [Ustawień], proszę zaimportować je z [Ustawień]",
     "200": "Czas reakcji wyszukiwania globalnego jest wolny, zaleca się dodanie filtrów typów lub słów kluczowych w celu zawężenia zakresu wyszukiwania",

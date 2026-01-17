@@ -1644,7 +1644,7 @@
     "194": "<a href=\"https://help.jianguoyun.com/?p=2064\" target=\"_blank\">Há restrições na interface do Nutstore</a>, por favor use outros serviços WebDAV",
     "195": "O horário do sistema está incorreto, por favor calibre o horário do sistema e tente novamente",
     "196": "Não defina o espaço de trabalho sob o caminho de um disco de sincronização de terceiros, caso contrário os dados serão danificados (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu Netdisk/Tencent Weiyun, etc.)",
-    "197": "",
+    "197": "Por favor, abra o caderno [%s] e tente novamente",
     "198": "Este não é um arquivo de dados válido. Se o arquivo foi exportado de [Árvore de Documentos], por favor importe de [Árvore de Documentos]",
     "199": "Este não é um arquivo .sy.zip válido. Se o arquivo foi exportado de [Configurações], por favor importe de [Configurações]",
     "200": "O tempo de resposta da busca global está lento, recomenda-se adicionar filtros de tipo ou palavras-chave para reduzir o escopo da busca",

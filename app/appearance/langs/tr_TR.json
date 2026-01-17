@@ -1644,7 +1644,7 @@
     "194": "<a href=\"https://help.jianguoyun.com/?p=2064\" target=\"_blank\">Nutstore arayüzünde kısıtlamalar vardır</a>, lütfen başka bir WebDAV hizmeti kullan",
     "195": "Sistem saati hatalı, lütfen düzeltip tekrar dene",
     "196": "Çalışma alanını üçüncü taraf senkron disk (iCloud/OneDrive/Dropbox/Google Drive/Nutstore/Baidu/Tencent vb.) altına koyma, aksi halde veri bozulur",
-    "197": "",
+    "197": "Lütfen [%s] defterini açtıktan sonra tekrar deneyin",
     "198": "Bu geçerli bir Veri arşivi değil. [Belge ağacı]ndan dışa aktardıysan aynı yerden içe aktar",
     "199": "Bu geçerli bir .sy.zip arşivi değil. [Ayarlar]dan dışa aktardıysan aynı yerden içe aktar",
     "200": "Genel arama yanıt süresi yavaş, arama kapsamını daraltmak için tür filtresi veya anahtar kelime eklemen önerilir",

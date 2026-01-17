@@ -68,7 +68,7 @@ func GetServerAddrs() (ret []string) {
 	if ContainerAndroid != Container && ContainerHarmony != Container {
 		ret = GetPrivateIPv4s()
 	} else {
-		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
+		// Android/鸿蒙上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
 		ret = LocalIPs
 	}
 

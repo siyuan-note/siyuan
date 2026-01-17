@@ -47,14 +47,17 @@ html {
     min-width: 32px;
     height: 100%;
     box-sizing: border-box;
-    border-radius: var(--b3-border-radius-b);
-
-    &:hover {
-      background-color: var(--b3-theme-surface-light);
-    }
   }
 }
 
+html[data-frontend="browser-desktop"] {
+  .fullscreen > .protyle-breadcrumb,
+  .fullscreen > .block__icons {
+    padding-left: calc(env(titlebar-area-x, 0px) + 8px);
+    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 8px);
+    height: calc(env(titlebar-area-height, 31px) + 1px);
+  }
+}
 
 .toolbar {
   background-color: var(--b3-toolbar-background);
@@ -66,8 +69,8 @@ html {
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
-    padding-left: env(titlebar-area-x, 5px);
-    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, -5px));
+    padding-left: calc(env(titlebar-area-x, 0px) + 5px);
+    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 5px);
     height: calc(env(titlebar-area-height, 31px) + 1px);
   }
 

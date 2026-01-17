@@ -1272,8 +1272,11 @@ app.whenReady().then(() => {
         const firstOpenWindow = new BrowserWindow({
             width: Math.floor(screen.getPrimaryDisplay().size.width * 0.6),
             height: Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8),
-            frame: false,
+            frame: "darwin" === process.platform,
+            titleBarStyle: "hidden",
+            fullscreenable: false,
             icon: path.join(appDir, "stage", "icon-large.png"),
+            transparent: "darwin" === process.platform,
             webPreferences: {
                 nodeIntegration: true, webviewTag: true, webSecurity: false, contextIsolation: false,
             },

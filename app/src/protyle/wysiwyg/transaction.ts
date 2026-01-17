@@ -1130,7 +1130,7 @@ export const turnsIntoTransaction = (options: {
         const id = item.getAttribute("data-node-id");
 
         const tempElement = document.createElement("template");
-        if (!options.isContinue) {
+        if (!options.isContinue || options.level) {
             // @ts-ignore
             let newHTML = options.protyle.lute[options.type](item.outerHTML, options.level);
             tempElement.innerHTML = newHTML;

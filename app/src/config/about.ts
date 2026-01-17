@@ -89,25 +89,20 @@ export const about = {
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         ${(() => {
-            const ipv4Codes: string[] = [];
-            const ipv6Codes: string[] = [];
-            for (const ip of window.siyuan.config.localIPs) {
-                if (!ip.trim()) {
+            const serverAddrs: string[] = [];
+            for (const serverAddr of window.siyuan.config.serverAddrs) {
+                if (!serverAddr.trim()) {
                     break;
                 }
-                if (ip.startsWith("[") && ip.endsWith("]")) {
-                    ipv6Codes.push(`<code class="fn__code">${ip}</code>`);
-                } else {
-                    ipv4Codes.push(`<code class="fn__code">${ip}</code>`);
-                }
+
+                serverAddrs.push(`<code class="fn__code">${serverAddr}</code>`);
             }
-            return `<div class="b3-label__text${ipv4Codes.length ? "" : " fn__none"}">${ipv4Codes.join(" ")}</div>
-                    <div class="b3-label__text${ipv6Codes.length ? "" : " fn__none"}">${ipv6Codes.join(" ")}</div>`;
+            return `<div class="b3-label__text">${serverAddrs.join(" ")}</div>`;
         })()}
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
     </div>
     <div class="fn__space"></div>
-    <button data-type="open" data-url="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+    <button data-type="open" data-url="${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "http://127.0.0.1:"+ location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
     </button>
 </div>
@@ -275,13 +270,16 @@ ${checkUpdateHTML}
             });
         });
         about.element.querySelector("#vacuumDataIndex").addEventListener("click", () => {
-            fetchPost("/api/system/vacuumDataIndex", {}, () => {});
+            fetchPost("/api/system/vacuumDataIndex", {}, () => {
+            });
         });
         about.element.querySelector("#rebuildDataIndex").addEventListener("click", () => {
-            fetchPost("/api/system/rebuildDataIndex", {}, () => {});
+            fetchPost("/api/system/rebuildDataIndex", {}, () => {
+            });
         });
         about.element.querySelector("#clearTempFiles").addEventListener("click", () => {
-            fetchPost("/api/system/clearTempFiles", {}, () => {});
+            fetchPost("/api/system/clearTempFiles", {}, () => {
+            });
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {

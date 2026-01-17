@@ -61,6 +61,24 @@ import (
 // convertingTasks 用于并发控制，避免同一文件重复转换
 var convertingTasks sync.Map // map[string]*sync.Once
 
+func GetAssetImgSize(assetPath string) (width, height int) {
+	absPath, err := GetAssetAbsPath(assetPath)
+	if err != nil {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", assetPath, err)
+		return
+	}
+
+	img, err := imaging.Open(absPath)
+	if err != nil {
+		logging.LogErrorf("open asset image [%s] failed: %s", absPath, err)
+		return
+	}
+
+	width = img.Bounds().Dx()
+	height = img.Bounds().Dy()
+	return
+}
+
 func GetAssetPathByHash(hash string) string {
 	assetHash := cache.GetAssetHash(hash)
 	if nil == assetHash {
@@ -1559,6 +1577,23 @@ func getAssetsLinkDests(node *ast.Node, includeServePath bool) (ret []string) {
 			ret[i] = dest + "/"
 		}
 	}
+	return
+}
+
+func getAssetsLinkDestsInTree(tree *parse.Tree, includeServePath bool) (nodes []*ast.Node) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		dests := getAssetsLinkDests(n, includeServePath)
+		if 1 > len(dests) {
+			return ast.WalkContinue
+		}
+
+		nodes = append(nodes, n)
+		return ast.WalkContinue
+	})
 	return
 }
 

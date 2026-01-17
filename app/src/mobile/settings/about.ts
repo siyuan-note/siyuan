@@ -12,11 +12,6 @@ import {setKey} from "../../sync/syncGuide";
 import {isBrowser} from "../../util/functions";
 
 export const initAbout = () => {
-    if (!window.siyuan.config.localIPs || window.siyuan.config.localIPs.length === 0 ||
-        (window.siyuan.config.localIPs.length === 1 && window.siyuan.config.localIPs[0] === "")) {
-        window.siyuan.config.localIPs = ["127.0.0.1"];
-    }
-
     openModel({
         title: window.siyuan.languages.about,
         icon: "iconInfo",
@@ -32,24 +27,20 @@ export const initAbout = () => {
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>
-        <input class="b3-text-field fn__block" readonly value="http://${window.siyuan.config.system.networkServe ? window.siyuan.config.localIPs[0] : "127.0.0.1"}:${location.port}">
+        <a target="_blank" href="${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "http://127.0.0.1:" + location.port}" class="b3-button b3-button--outline fn__block">
+            <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
+        </a>
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
         <div class="fn__hr"></div>
         ${(() => {
-            const ipv4Codes: string[] = [];
-            const ipv6Codes: string[] = [];
-            for (const ip of window.siyuan.config.localIPs) {
-                if (!ip.trim()) {
+            const serverAddrs: string[] = [];
+            for (const serverAddr of window.siyuan.config.serverAddrs) {
+                if (!serverAddr.trim()) {
                     break;
                 }
-                if (ip.startsWith("[") && ip.endsWith("]")) {
-                    ipv6Codes.push(`<code class="fn__code">${ip}</code>`);
-                } else {
-                    ipv4Codes.push(`<code class="fn__code">${ip}</code>`);
-                }
+                serverAddrs.push(`<code class="fn__code">${serverAddr}</code>`);
             }
-            return `<div class="b3-label__text${ipv4Codes.length ? "" : " fn__none"}">${ipv4Codes.join(" ")}</div>
-                    <div class="b3-label__text${ipv6Codes.length ? "" : " fn__none"}">${ipv6Codes.join(" ")}</div>`;
+            return `<div class="b3-label__text">${serverAddrs.join(" ")}</div>`;
         })()}
         <div class="fn__hr"></div>
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
@@ -207,7 +198,7 @@ export const initAbout = () => {
         </div>
     </div>
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
-    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
+    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container ? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
 </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
@@ -318,17 +309,20 @@ export const initAbout = () => {
                         event.stopPropagation();
                         break;
                     } else if (target.id === "vacuumDataIndex") {
-                        fetchPost("/api/system/vacuumDataIndex", {}, () => {});
+                        fetchPost("/api/system/vacuumDataIndex", {}, () => {
+                        });
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     } else if (target.id === "rebuildDataIndex") {
-                        fetchPost("/api/system/rebuildDataIndex", {}, () => {});
+                        fetchPost("/api/system/rebuildDataIndex", {}, () => {
+                        });
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     } else if (target.id === "clearTempFiles") {
-                        fetchPost("/api/system/clearTempFiles", {}, () => {});
+                        fetchPost("/api/system/clearTempFiles", {}, () => {
+                        });
                         event.preventDefault();
                         event.stopPropagation();
                         break;

@@ -33,6 +33,10 @@ export const initMessage = () => {
 
 // type: info/error; timeout: 0 手动关闭；-1 永不关闭
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
+    if (!message) {
+        return;
+    }
+
     const messagesElement = document.getElementById("message").firstElementChild;
     if (!messagesElement) {
         let tempMessages = document.getElementById("tempMessage");

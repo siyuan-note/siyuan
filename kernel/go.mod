@@ -66,7 +66,7 @@ require (
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20251212095217-08318833e008
 	github.com/siyuan-note/httpclient v0.0.0-20260115093840-2754d8028f22
-	github.com/siyuan-note/logging v0.0.0-20251209020516-52f1a2f65ec5
+	github.com/siyuan-note/logging v0.0.0-20260117134552-88b424dfe7f1
 	github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754
 	github.com/spf13/cast v1.10.0
 	github.com/steambap/captcha v1.4.1

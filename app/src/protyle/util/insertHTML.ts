@@ -349,7 +349,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 选中 ref**bbb** 后 alt+[
             range.deleteContents();
             // https://github.com/siyuan-note/siyuan/issues/14035
-            if (range.startContainer.nodeType !== 3 && range.startContainer.textContent === "") {
+            if (range.startContainer.nodeType !== 3 && (range.startContainer as Element).tagName === "SPAN" &&
+                range.startContainer.textContent === "") {
                 // ref 选中处理 https://ld246.com/article/1629214377537
                 (range.startContainer as HTMLElement).remove();
             }

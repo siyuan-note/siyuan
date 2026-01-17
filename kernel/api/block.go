@@ -665,6 +665,10 @@ func getBlockInfo(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(275)
 		return
+	} else if errors.Is(err, model.ErrBoxUnindexed) {
+		ret.Code = -1
+		ret.Msg = "" // 加载的时候已经推送过提示了，这里不需要再提示
+		return
 	}
 
 	block, _ := model.GetBlock(id, tree)

@@ -1,5 +1,5 @@
 import {transaction} from "./transaction";
-import {focusBlock} from "../util/selection";
+import {focusByRange} from "../util/selection";
 import {Dialog} from "../../dialog";
 import {Menu} from "../../plugin/Menu";
 import {isMobile} from "../../util/functions";
@@ -10,6 +10,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
     if (blockElements.length === 0) {
         return;
     }
+    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
     const blockCalloutElement = blockElements[0].querySelector(".callout-icon");
     const dialog = new Dialog({
         title: window.siyuan.languages.callout,
@@ -48,6 +49,11 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         width: isMobile() ? "92vw" : "520px",
+        destroyCallback() {
+            if (range) {
+                focusByRange(range);
+            }
+        }
     });
     const btnElements = dialog.element.querySelectorAll(".b3-button");
     btnElements[0].addEventListener("click", () => {
@@ -81,7 +87,6 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
             });
         });
         transaction(protyle, doOperations, undoOperations);
-        focusBlock(blockElements[0]);
         dialog.destroy();
     });
     const textElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll(".b3-text-field");

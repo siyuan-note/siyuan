@@ -198,6 +198,9 @@ func Serve(fastMode bool, cookieKey string) {
 	}
 	util.ServerPort = port
 
+	model.Conf.ServerAddrs = util.GetServerAddrs()
+	model.Conf.Save()
+
 	util.ServerURL, err = url.Parse("http://127.0.0.1:" + port)
 	if err != nil {
 		logging.LogErrorf("parse server url failed: %s", err)
@@ -550,6 +553,11 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
+    if serveSVG(context, p) {
+      // 如果 SVG 处理成功则返回
+			return
+    }
+
 		if serveHeifConversion(context, p) {
 			// 如果 HEIF 转换服务成功则返回
 			return
@@ -633,6 +641,24 @@ func serveHeifThumbnail(context *gin.Context, assetAbsPath string) bool {
 
 	http.ServeFile(context.Writer, context.Request, thumbnailPath)
 	return true
+}
+                
+func serveSVG(context *gin.Context, assetAbsPath string) bool {
+	if strings.HasSuffix(assetAbsPath, ".svg") {
+		data, err := os.ReadFile(assetAbsPath)
+		if err != nil {
+			logging.LogErrorf("read svg file failed: %s", err)
+			return false
+		}
+
+		if !model.Conf.Editor.AllowSVGScript {
+			data = []byte(util.RemoveScriptsInSVG(string(data)))
+		}
+
+		context.Data(200, "image/svg+xml", data)
+		return true
+	}
+	return false
 }
 
 func serveThumbnail(context *gin.Context, assetAbsPath string) bool {

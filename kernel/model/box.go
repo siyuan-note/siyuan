@@ -822,7 +822,7 @@ func fullReindex() {
 	FlushTxQueue()
 
 	if err := sql.InitDatabase(true); err != nil {
-		os.Exit(logging.ExitCodeReadOnlyDatabase)
+		os.Exit(logging.ExitCodeUnavailableDatabase)
 		return
 	}
 

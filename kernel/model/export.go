@@ -164,6 +164,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 		return
 	}
 
+	var assets []string
 	rowNum := 1
 	for _, row := range table.Rows {
 		var rowVal []string
@@ -204,12 +205,18 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 								buf.WriteString("](")
 								buf.WriteString(a.Content)
 								buf.WriteString(") ")
+								if util.IsAssetLinkDest([]byte(a.Content), true) {
+									assets = append(assets, a.Content)
+								}
 							} else if av.AssetTypeFile == a.Type {
 								buf.WriteString("[")
 								buf.WriteString(a.Name)
 								buf.WriteString("](")
 								buf.WriteString(a.Content)
 								buf.WriteString(") ")
+								if util.IsAssetLinkDest([]byte(a.Content), true) {
+									assets = append(assets, a.Content)
+								}
 							} else {
 								buf.WriteString(a.Content)
 								buf.WriteString(" ")
@@ -219,6 +226,37 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 					}
 				} else if av.KeyTypeLineNumber == cell.Value.Type {
 					val = strconv.Itoa(rowNum)
+				} else if av.KeyTypeRollup == cell.Value.Type {
+					for _, content := range cell.Value.Rollup.Contents {
+						if av.KeyTypeMAsset == content.Type {
+							buf := &bytes.Buffer{}
+							for _, a := range content.MAsset {
+								if av.AssetTypeImage == a.Type {
+									buf.WriteString("![")
+									buf.WriteString(a.Name)
+									buf.WriteString("](")
+									buf.WriteString(a.Content)
+									buf.WriteString(") ")
+									if util.IsAssetLinkDest([]byte(a.Content), true) {
+										assets = append(assets, a.Content)
+									}
+								} else if av.AssetTypeFile == a.Type {
+									buf.WriteString("[")
+									buf.WriteString(a.Name)
+									buf.WriteString("](")
+									buf.WriteString(a.Content)
+									buf.WriteString(") ")
+									if util.IsAssetLinkDest([]byte(a.Content), true) {
+										assets = append(assets, a.Content)
+									}
+								} else {
+									buf.WriteString(a.Content)
+									buf.WriteString(" ")
+								}
+							}
+							val = strings.TrimSpace(buf.String())
+						}
+					}
 				}
 
 				if "" == val {
@@ -236,6 +274,18 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 		rowNum++
 	}
 	writer.Flush()
+
+	for _, asset := range assets {
+		srcAbsPath, getErr := GetAssetAbsPath(asset)
+		if getErr != nil {
+			logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, getErr)
+			continue
+		}
+		targetAbsPath := filepath.Join(exportFolder, asset)
+		if copyErr := filelock.Copy(srcAbsPath, targetAbsPath); copyErr != nil {
+			logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, copyErr)
+		}
+	}
 
 	zipPath = exportFolder + ".db.zip"
 	zip, err := gulu.Zip.Create(zipPath)
@@ -2831,10 +2881,14 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 									img.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
 									img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 									mdTableCell.AppendChild(img)
-									height := "height: 128px;"
-									spanIAL := &ast.Node{Type: ast.NodeKramdownSpanIAL, Tokens: []byte("style=\"" + height + "\"")}
-									mdTableCell.AppendChild(spanIAL)
-									img.SetIALAttr("style", height)
+									img.SetIALAttr("style", "max-height: 128px;")
+
+									width, height := GetAssetImgSize(a.Content)
+									if height > 128 {
+										img.SetIALAttr("height", "128px")
+										newWidth := int(float64(width) * (128.0 / float64(height)))
+										img.SetIALAttr("width", strconv.Itoa(newWidth)+"px")
+									}
 								} else if av.AssetTypeFile == a.Type {
 									linkText := strings.TrimSpace(a.Name)
 									if "" == linkText {

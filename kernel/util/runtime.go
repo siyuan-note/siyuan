@@ -479,3 +479,5 @@ const (
 	EvtSQLHistoryRebuild      = "sql.history.rebuild"
 	EvtSQLAssetContentRebuild = "sql.assetContent.rebuild"
 )
+
+var SearchCaseSensitive bool

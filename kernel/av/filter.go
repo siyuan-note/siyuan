@@ -749,32 +749,50 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		return valueContent == otherValueContent
+		if util.SearchCaseSensitive {
+			return valueContent == otherValueContent
+		}
+		return strings.EqualFold(valueContent, otherValueContent)
 	case FilterOperatorIsNotEqual:
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		return valueContent != otherValueContent
+		if util.SearchCaseSensitive {
+			return valueContent != otherValueContent
+		}
+		return !strings.EqualFold(valueContent, otherValueContent)
 	case FilterOperatorContains:
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		return strings.Contains(valueContent, otherValueContent)
+		if util.SearchCaseSensitive {
+			return strings.Contains(valueContent, otherValueContent)
+		}
+		return strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
 	case FilterOperatorDoesNotContain:
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		return !strings.Contains(valueContent, otherValueContent)
+		if util.SearchCaseSensitive {
+			return !strings.Contains(valueContent, otherValueContent)
+		}
+		return !strings.Contains(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
 	case FilterOperatorStartsWith:
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		return strings.HasPrefix(valueContent, otherValueContent)
+		if util.SearchCaseSensitive {
+			return strings.HasPrefix(valueContent, otherValueContent)
+		}
+		return strings.HasPrefix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
 	case FilterOperatorEndsWith:
 		if "" == strings.TrimSpace(otherValueContent) {
 			return true
 		}
-		return strings.HasSuffix(valueContent, otherValueContent)
+		if util.SearchCaseSensitive {
+			return strings.HasSuffix(valueContent, otherValueContent)
+		}
+		return strings.HasSuffix(strings.ToLower(valueContent), strings.ToLower(otherValueContent))
 	case FilterOperatorIsEmpty:
 		return "" == strings.TrimSpace(valueContent)
 	case FilterOperatorIsNotEmpty:

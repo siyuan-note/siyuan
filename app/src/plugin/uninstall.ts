@@ -53,7 +53,6 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             plugin.statusBarIcons.forEach(item => {
                 item.remove();
             });
-            /// #endif
             // rm dock
             const docksKeys = Object.keys(plugin.docks);
             docksKeys.forEach(key => {
@@ -69,6 +68,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                     window.siyuan.layout.bottomDock.remove(key);
                 }
             });
+            /// #endif
             // rm listen
             Array.from(document.childNodes).find(item => {
                 if (item.nodeType === 8 && item.textContent === name) {

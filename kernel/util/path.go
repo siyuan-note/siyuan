@@ -64,18 +64,20 @@ func ShortPathForBootingDisplay(p string) string {
 
 var LocalIPs []string
 
-func GetLocalIPs() (ret []string) {
-	if ContainerAndroid == Container || ContainerHarmony == Container {
-		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
-		LocalIPs = append(LocalIPs, LocalHost)
-		LocalIPs = gulu.Str.RemoveDuplicatedElem(LocalIPs)
-		return LocalIPs
+func GetServerAddrs() (ret []string) {
+	if ContainerAndroid != Container && ContainerHarmony != Container {
+		ret = GetPrivateIPv4s()
+	} else {
+		// Android/鸿蒙上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
+		ret = LocalIPs
 	}
 
-	ret = []string{}
-	ret = append(ret, GetPrivateIPv4s()...)
 	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
+
+	for i, _ := range ret {
+		ret[i] = "http://" + ret[i] + ":" + ServerPort
+	}
 	return
 }
 

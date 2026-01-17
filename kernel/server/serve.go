@@ -198,6 +198,9 @@ func Serve(fastMode bool, cookieKey string) {
 	}
 	util.ServerPort = port
 
+	model.Conf.ServerAddrs = util.GetServerAddrs()
+	model.Conf.Save()
+
 	util.ServerURL, err = url.Parse("http://127.0.0.1:" + port)
 	if err != nil {
 		logging.LogErrorf("parse server url failed: %s", err)

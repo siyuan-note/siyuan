@@ -1503,7 +1503,7 @@
     "53": "Data synchronization has not been enabled",
     "54": "Indexing references...",
     "55": "Indexed references of [%d] documents",
-    "56": "Reindexing, please wait until rebuilding is complete before trying to open",
+    "56": "Data indexing is in progress. Please wait until indexing completes before trying to open",
     "57": "Failed to create temp key",
     "58": "[%d/%d] Verifying index...",
     "59": "Failed to set sync ignore list",

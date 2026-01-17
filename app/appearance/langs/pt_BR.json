@@ -1503,7 +1503,7 @@
     "53": "A sincronização de dados não foi ativada",
     "54": "Indexando referências...",
     "55": "Referências indexadas de [%d] documentos",
-    "56": "Reindexando, por favor aguarde até que a reconstrução esteja completa antes de tentar abrir",
+    "56": "O índice de dados está em andamento. Por favor, aguarde até que a indexação seja concluída antes de tentar abrir",
     "57": "Falha ao criar chave temporária",
     "58": "[%d/%d] Verificando índice...",
     "59": "Falha ao definir lista de ignorados de sincronização",

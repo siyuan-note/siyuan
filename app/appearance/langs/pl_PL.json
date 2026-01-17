@@ -1503,7 +1503,7 @@
     "53": "Synchronizacja danych nie została włączona",
     "54": "Indeksowanie odniesień...",
     "55": "Indeksowane odniesienia [%d] dokumentów",
-    "56": "Reindeksowanie, proszę czekać, aż przebudowa zostanie zakończona, zanim spróbujesz otworzyć",
+    "56": "Trwa indeksowanie danych. Proszę poczekać, aż indeksowanie zostanie zakończone, zanim spróbujesz otworzyć",
     "57": "Nie udało się utworzyć tymczasowego klucza",
     "58": "[%d/%d] Weryfikacja indeksu...",
     "59": "Nie udało się ustawić listy pomijania synchronizacji",

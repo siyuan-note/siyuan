@@ -17,12 +17,14 @@
 package util
 
 import (
+	"bytes"
 	"io"
 	"io/fs"
 	"mime"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -246,103 +248,49 @@ func FilterUploadFileName(name string) string {
 }
 
 func TruncateLenFileName(name string) (ret string) {
-	// 插入资源文件时文件名长度最大限制 189 字节
-	const maxTotal = 189
-
+	// 插入资源文件时文件名长度最大限制 189 字节 https://github.com/siyuan-note/siyuan/issues/7099
 	ext := filepath.Ext(name)
-	base := name[:len(name)-len(ext)]
+	extLen := len(ext)
+	var byteCount int
+	truncated := false
+	buf := bytes.Buffer{}
+	maxLen := 189 - extLen
+	var pdfAnnoPngPart string
+	if ".png" == ext {
+		// PNG 图片可能是 PDF 标注的截图，包含页面和旋转角度（name--P1--270-id.png），所以允许的长度更短一些
+		// https://github.com/siyuan-note/siyuan/pull/16714#issuecomment-3737987302
 
-	id := ast.NewNodeID()
-	// 预留 "-" + id + "-" 的字节数
-	reservedForID := len(id) + 2
-
-	available := maxTotal - len(ext) - reservedForID
-	if available <= 0 {
-		// 空间不足以保留 base，退回到 "-id-" + ext（若仍超限则只返回扩展名）
-		candidate := "-" + id + "-" + ext
-		if len(candidate) <= maxTotal {
-			return candidate
+		pdfAnnoPngPattern := "-{0,1}P{0,1}[0-9]{0,4}-{0,1}[0-9]{1,3}-[0-9]{14}-[0-9a-zA-Z]{7}\\.png$"
+		regx := regexp.MustCompile(pdfAnnoPngPattern)
+		pdfAnnoPngPart = regx.FindString(name)
+		if "" != pdfAnnoPngPart {
+			maxLen -= len(pdfAnnoPngPart) + len(".png")
+			name = strings.TrimSuffix(name, pdfAnnoPngPart)
 		}
-		if len(ext) <= maxTotal {
-			return ext
-		}
-		return ext
 	}
 
-	// 若 base 整体在可用字节内，直接返回原名
-	if len(base) <= available {
-		return name
-	}
+	// 深入理解计算机系统原书第3版彩色扫描 -- 美兰德尔 E_布莱恩特Randal,E_·Bryant,等 龚奕利,贺莲 -- 计算机科学丛书, 3rd, 2016 -- 机械工业出版社123-P57-90-20260113113402-prc0u4k.png
 
-	runes := []rune(base)
-	n := len(runes)
-	if n == 0 {
-		candidate := "-" + id + "-" + ext
-		if len(candidate) <= maxTotal {
-			return candidate
+	for _, r := range name {
+		byteCount += utf8.RuneLen(r)
+		if maxLen < byteCount {
+			truncated = true
+			break
 		}
-		if len(ext) <= maxTotal {
-			return ext
-		}
-		return ext
+		buf.WriteRune(r)
 	}
-
-	// 计算每个 rune 的字节长度
-	runeBytes := make([]int, n)
-	for i, r := range runes {
-		runeBytes[i] = utf8.RuneLen(r)
-	}
-
-	// 从后往前尝试最多保留 3 个 rune，找到最大的 tailSize 使得 tailBytes <= available
-	tailSize := 0
-	tailBytes := 0
-	for t := 1; t <= 3 && t <= n; t++ {
-		b := 0
-		for i := n - t; i < n; i++ {
-			b += runeBytes[i]
-		}
-		if b <= available {
-			tailSize = t
-			tailBytes = b
+	if truncated {
+		if "" != pdfAnnoPngPart {
+			buf.WriteString(pdfAnnoPngPart)
 		} else {
-			break
+			buf.WriteString(ext)
+		}
+	} else {
+		if "" != pdfAnnoPngPart {
+			buf.WriteString(pdfAnnoPngPart)
 		}
 	}
-
-	if tailSize == 0 {
-		// 连一个尾部 rune 都放不下，回退到 "-id-" 或扩展名
-		candidate := "-" + id + "-" + ext
-		if len(candidate) <= maxTotal {
-			return candidate
-		}
-		if len(ext) <= maxTotal {
-			return ext
-		}
-		return ext
-	}
-
-	// 可用于前缀的字节
-	availFront := available - tailBytes
-	// 前缀最多不能覆盖到尾部
-	maxFrontCount := n - tailSize
-
-	var frontRunes []rune
-	frontBytes := 0
-	for i := 0; i < maxFrontCount; i++ {
-		if frontBytes+runeBytes[i] > availFront {
-			break
-		}
-		frontBytes += runeBytes[i]
-		frontRunes = append(frontRunes, runes[i])
-	}
-
-	// 若前缀与尾部合并能覆盖全部 runes，则说明无需截断（理论上前面已判断过，但再验证一次）
-	if len(frontRunes) == maxFrontCount {
-		return name
-	}
-
-	tailRunes := runes[n-tailSize:]
-	ret = string(frontRunes) + string(tailRunes) + "-" + id + "-" + ext
+	ret = buf.String()
 	return
 }
 

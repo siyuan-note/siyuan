@@ -27,7 +27,6 @@ import {newDailyNote} from "../../util/mount";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {fetchPost} from "../../util/fetch";
 import {goBack, goForward} from "../../util/backForward";
-import {onGet} from "../../protyle/util/onGet";
 import {getDisplayName, getNotebookName} from "../../util/pathName";
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";

@@ -64,7 +64,7 @@ type AppConf struct {
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	Account        *conf.Account    `json:"account"`        // 帐号配置
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
-	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
+	ServerAddrs    []string         `json:"serverAddrs"`    // 本地服务器地址列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
 	System         *conf.System     `json:"system"`         // 系统配置
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
@@ -321,6 +321,17 @@ func InitConf() {
 		Conf.Export.PandocBin = util.PandocBinPath
 	}
 
+	docxTemplate := util.RemoveInvalid(Conf.Export.DocxTemplate)
+	if "" != docxTemplate {
+		params := util.RemoveInvalid(Conf.Export.PandocParams)
+		if gulu.File.IsExist(docxTemplate) && !strings.Contains(params, "--reference-doc") {
+			params += " --reference-doc " + docxTemplate
+			Conf.Export.PandocParams = strings.TrimSpace(params)
+		}
+		Conf.Export.DocxTemplate = ""
+		Conf.Save()
+	}
+
 	if nil == Conf.Graph || nil == Conf.Graph.Local || nil == Conf.Graph.Global {
 		Conf.Graph = conf.NewGraph()
 	}
@@ -570,8 +581,6 @@ func InitConf() {
 	}
 	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
 	Conf.AccessAuthCode = util.RemoveInvalid(Conf.AccessAuthCode)
-
-	Conf.LocalIPs = util.GetLocalIPs()
 
 	if 1 == Conf.DataIndexState {
 		// 上次未正常完成数据索引
@@ -1034,13 +1043,13 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	return
 }
 
-// REF: https://github.com/siyuan-note/siyuan/issues/11364
 // HideConfSecret 隐藏设置中的秘密信息
+// REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
 	c.Api = &conf.API{}
 	c.Flashcard = &conf.Flashcard{}
-	c.LocalIPs = []string{}
+	c.ServerAddrs = []string{}
 	c.Publish = &conf.Publish{}
 	c.Repo = &conf.Repo{}
 	c.Sync = &conf.Sync{}

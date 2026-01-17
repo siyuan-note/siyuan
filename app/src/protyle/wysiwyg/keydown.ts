@@ -73,6 +73,7 @@ import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
 import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
 import {AIChat} from "../../ai/chat";
+import {updateCalloutType} from "./callout";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -296,6 +297,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return false;
         }
 
+        const nodeType = nodeElement.getAttribute("data-type");
         if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) && !event.repeat) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
@@ -307,7 +309,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     } else {
                         setFold(protyle, nodeElement);
                     }
-                } else if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+                } else if (nodeType === "NodeHeading") {
                     setFold(protyle, nodeElement);
                 } else {
                     setFold(protyle, getTopAloneElement(nodeElement));
@@ -329,7 +331,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     } else {
                         setFold(protyle, nodeElement, true);
                     }
-                } else if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+                } else if (nodeType === "NodeHeading") {
                     setFold(protyle, nodeElement, true);
                 } else {
                     setFold(protyle, getTopAloneElement(nodeElement), true);
@@ -633,8 +635,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 需使用 innerText 否则表格内 br 无法传唤为 /n
             if (event.key === "ArrowDown" && nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 && (
-                (tdElement && !tdElement.parentElement.nextElementSibling && nodeElement.getAttribute("data-type") === "NodeTable" && !getNextBlock(nodeElement)) ||
-                (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
+                (tdElement && !tdElement.parentElement.nextElementSibling && nodeType === "NodeTable" && !getNextBlock(nodeElement)) ||
+                (nodeType === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
                 (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && nodeElement.nextElementSibling.classList.contains("protyle-attr") && !getNextBlock(nodeElement.parentElement)) ||
                 (nodeElement.parentElement.classList.contains("callout-content") && !nodeElement.nextElementSibling && !getNextBlock(nodeElement.parentElement.parentElement))
             )) {
@@ -899,7 +901,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             event.preventDefault();
                             return;
                         }
-                    } else if (position.end === editElement.innerText.length - 1 && nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
+                    } else if (position.end === editElement.innerText.length - 1 && nodeType === "NodeCodeBlock") {
                         event.stopPropagation();
                         event.preventDefault();
                         return;
@@ -952,7 +954,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     }
                     if (range.startContainer.nodeType !== 3 &&
-                        nodeElement.getAttribute("data-type") === "NodeTable" &&
+                        nodeType === "NodeTable" &&
                         (range.startContainer as HTMLElement).children[range.startOffset - 1]?.tagName === "TABLE") {
                         nodeElement.classList.add("protyle-wysiwyg--select");
                         removeBlock(protyle, nodeElement, range, "Backspace");
@@ -1076,8 +1078,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        // 代码块语言选择 https://github.com/siyuan-note/siyuan/issues/14126
         // 列表插入末尾子项 https://github.com/siyuan-note/siyuan/issues/11164
+        // 代码块修改语言 https://github.com/siyuan-note/siyuan/issues/14126
+        // 提示块修改类型和标题 https://github.com/siyuan-note/siyuan/issues/16678
         if (selectText === "" && matchHotKey("⌥↩", event) && !isIncludesHotKey("⌥↩")) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
@@ -1108,10 +1111,25 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 return;
             }
+
+            const calloutElements: HTMLElement[] = [];
+            selectElements.forEach(item => {
+                const calloutElement = hasClosestByClassName(item, "callout");
+                if (calloutElement) {
+                    calloutElements.push(calloutElement);
+                }
+            });
+            if (calloutElements.length > 0) {
+                updateCalloutType(calloutElements, protyle);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
         }
 
         // 回车
-        if (matchHotKey("↩", event)) {
+        if (matchHotKey("↩", event) ||
+            (matchHotKey("⇧↩", event) && nodeType === "NodeHeading")) {
             enter(nodeElement, range, protyle);
             event.stopPropagation();
             event.preventDefault();
@@ -1482,7 +1500,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return true;
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.code.custom, event) &&
-            !["NodeCodeBlock", "NodeHeading", "NodeTable"].includes(nodeElement.getAttribute("data-type"))) {
+            !["NodeCodeBlock", "NodeHeading", "NodeTable"].includes(nodeType)) {
             const editElement = getContenteditableElement(nodeElement);
             if (editElement) {
                 const id = nodeElement.getAttribute("data-node-id");
@@ -1561,7 +1579,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
-            } else if (nodeElement.parentElement.classList.contains("li") && nodeElement.getAttribute("data-type") !== "NodeCodeBlock") {
+            } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
                 listOutdent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
                 event.stopPropagation();
@@ -1587,7 +1605,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
-            } else if (nodeElement.parentElement.classList.contains("li") && nodeElement.getAttribute("data-type") !== "NodeCodeBlock") {
+            } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
                 listIndent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
                 event.stopPropagation();
@@ -1861,7 +1879,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
             const tabSpace = window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " ");
-            if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && selectText !== "") {
+            if (nodeType === "NodeCodeBlock" && selectText !== "") {
                 // https://github.com/siyuan-note/siyuan/issues/12650
                 if (!hasNextSibling(range.endContainer) && range.endContainer.textContent.endsWith("\n") && range.endOffset > 0) {
                     range.setEnd(range.endContainer, range.endOffset - 1);

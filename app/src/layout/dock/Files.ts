@@ -586,6 +586,7 @@ export class Files extends Model {
                     }
                     if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
                         (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot)) {
+                        // do nothing
                     } else {
                         liElement.classList.add("dragover");
                     }

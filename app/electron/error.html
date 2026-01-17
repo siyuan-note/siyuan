@@ -235,11 +235,27 @@
 
     // 系统信息
     const os = require('os');
-    document.getElementById('systemInfo').innerHTML = `${version} · ${{
+    let platformName = {
         'darwin': 'macOS',
         'win32': 'Windows',
         'linux': 'Linux'
-    }[process.platform] || process.platform} ${os.release()} · ${os.arch()} · ${os.cpus()[0]?.model || ''}`;
+    }[process.platform] || process.platform;
+
+    // Windows 系统版本判断
+    const release = os.release();
+    if (process.platform === 'win32') {
+        const versionParts = release.split('.'); // 10.0.22000
+        if (versionParts.length >= 3) {
+            const buildNumber = parseInt(versionParts[2], 10);
+            if (buildNumber >= 22000) {
+                platformName = 'Windows 11';
+            } else {
+                platformName = 'Windows 10';
+            }
+        }
+    }
+
+    document.getElementById('systemInfo').innerHTML = `${version} · ${platformName} (${release}) · ${os.arch()} · ${os.cpus()[0]?.model || ''}`;
 </script>
 </body>
 </html>

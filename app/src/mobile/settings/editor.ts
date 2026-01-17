@@ -24,6 +24,7 @@ const setEditor = (modelMainElement: Element) => {
         inlineStrikethrough: (modelMainElement.querySelector("#editorMarkdownInlineStrikethrough") as HTMLInputElement).checked,
         inlineMark: (modelMainElement.querySelector("#editorMarkdownInlineMark") as HTMLInputElement).checked
     };
+    window.siyuan.config.editor.allowSVGScript = (modelMainElement.querySelector("#allowSVGScript") as HTMLInputElement).checked;
     window.siyuan.config.editor.allowHTMLBLockScript = (modelMainElement.querySelector("#allowHTMLBLockScript") as HTMLInputElement).checked;
     window.siyuan.config.editor.dynamicLoadBlocks = dynamicLoadBlocks;
     window.siyuan.config.editor.justify = (modelMainElement.querySelector("#justify") as HTMLInputElement).checked;
@@ -279,6 +280,14 @@ export const initEditor = () => {
     <textarea class="b3-text-field fn__block" id="katexMacros">${window.siyuan.config.editor.katexMacros}</textarea>
     <div class="b3-label__text">${window.siyuan.languages.katexMacrosTip}</div>
 </div>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+       ${window.siyuan.languages.allowSVGScript}
+        <div class="b3-label__text">${window.siyuan.languages.allowSVGScriptTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="allowSVGScript" type="checkbox"${window.siyuan.config.editor.allowSVGScript ? " checked" : ""}/>
+</label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
        ${window.siyuan.languages.allowHTMLBLockScript}

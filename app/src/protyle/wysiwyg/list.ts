@@ -67,11 +67,11 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
     const liElement = hasClosestByClassName(nodeElement, "li");
     if (!liElement) {
         // 上层必须有列表项块才插入子列表
-        return;
+        return false;
     }
     if (nodeElement.classList.contains("list") || nodeElement.classList.contains("li")) {
         // 不存在 nodeElement 为列表块或列表项块的情况，如果以后需要的话再实现
-        return;
+        return false;
     }
 
     let listElement: Element | null | false = null;
@@ -94,7 +94,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
     if (!listElement) {
         const lastChildBlock = getLastChildBlock(liElement);
         if (!lastChildBlock) {
-            return;
+            return false;
         }
         const subType = liElement.getAttribute("data-subtype") || "u";
         const id = Lute.NewNodeID();
@@ -111,7 +111,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
             id,
         }]);
         focusByWbr(lastChildBlock.nextElementSibling, range);
-        return;
+        return true;
     }
 
     // 有列表块：在列表块的最后一个列表项块后插入新的列表项块
@@ -140,8 +140,10 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
             id,
         }]);
         focusByWbr(newListElement, range);
-        return;
+        return true;
     }
+
+    return false;
 };
 
 export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {

@@ -35,6 +35,7 @@ import (
 	"github.com/denisbrodbeck/machineid"
 	"github.com/go-ole/go-ole"
 	"github.com/go-ole/go-ole/oleutil"
+	"github.com/jaypipes/ghw"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 )
@@ -105,6 +106,57 @@ func logBootInfo() {
 	if 0 < len(DisabledFeatures) {
 		logging.LogInfof("disabled features [%s]", strings.Join(DisabledFeatures, ", "))
 	}
+
+	go func() {
+		if ghw.DriveTypeSSD.String() != getWorkspaceDriveType() {
+			logging.LogWarnf("workspace dir [%s] is not in SSD drive, performance may be affected", WorkspaceDir)
+			WaitForUILoaded()
+			time.Sleep(3 * time.Second)
+			PushErrMsg(Langs[Lang][278], 15000)
+		}
+	}()
+}
+
+func getWorkspaceDriveType() string {
+	if gulu.OS.IsDarwin() {
+		return ghw.DriveTypeSSD.String()
+	}
+
+	if ContainerAndroid == Container || ContainerIOS == Container || ContainerHarmony == Container {
+		return ghw.DriveTypeSSD.String()
+	}
+
+	if gulu.OS.IsWindows() {
+		block, err := ghw.Block()
+		if err != nil {
+			logging.LogWarnf("get block storage info failed: %s", err)
+			return ""
+		}
+
+		part := filepath.VolumeName(WorkspaceDir)
+		for _, disk := range block.Disks {
+			for _, partition := range disk.Partitions {
+				if partition.MountPoint == part {
+					return partition.Disk.DriveType.String()
+				}
+			}
+		}
+	} else if gulu.OS.IsLinux() {
+		block, err := ghw.Block()
+		if err != nil {
+			logging.LogWarnf("get block storage info failed: %s", err)
+			return ""
+		}
+
+		for _, disk := range block.Disks {
+			for _, partition := range disk.Partitions {
+				if strings.HasPrefix(WorkspaceDir, partition.MountPoint) {
+					return partition.Disk.DriveType.String()
+				}
+			}
+		}
+	}
+	return ""
 }
 
 func RandomSleep(minMills, maxMills int) {
@@ -427,3 +479,5 @@ const (
 	EvtSQLHistoryRebuild      = "sql.history.rebuild"
 	EvtSQLAssetContentRebuild = "sql.assetContent.rebuild"
 )
+
+var SearchCaseSensitive bool

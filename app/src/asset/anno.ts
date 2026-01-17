@@ -128,8 +128,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             }
         };
     });
-
-    element.addEventListener("click", (event) => {
+    element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
         let processed = false;
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {

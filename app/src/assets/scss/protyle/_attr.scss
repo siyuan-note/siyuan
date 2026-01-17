@@ -8,7 +8,7 @@
   font-weight: normal;
   align-items: center;
   line-height: 16px;
-  user-select: none;
+  // 会导致 https://github.com/siyuan-note/siyuan/issues/16829 先移除 user-select: none;
 
   &--av span:hover {
     color: var(--b3-protyle-inline-blockref-color);

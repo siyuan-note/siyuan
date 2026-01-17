@@ -603,6 +603,12 @@ func setAccessAuthCode(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	if util.ContainerDocker == util.Container {
+		ret.Code = -1
+		ret.Msg = "access auth code cannot be set in Docker container"
+		return
+	}
+
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
 		return

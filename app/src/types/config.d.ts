@@ -52,9 +52,9 @@ declare namespace Config {
          */
         langs: ILang[];
         /**
-         * A list of the IP addresses of the devices on which the kernel resides
+         * A list of the kernel server addresses
          */
-        localIPs: string[];
+        serverAddrs: string[];
         /**
          * Log level
          */
@@ -351,6 +351,11 @@ declare namespace Config {
     export interface IEditor {
 
         /**
+         * Whether to allow to execute javascript in the SVG
+         */
+        allowSVGScript: boolean;
+
+        /**
          * Whether to allow to execute javascript in the HTML block
          */
         allowHTMLBLockScript: boolean;
@@ -548,10 +553,6 @@ declare namespace Config {
          */
         blockRefTextRight: string;
         /**
-         * The path of the template file used when exporting to Docx
-         */
-        docxTemplate: string;
-        /**
          * File annotation reference export mode
          * - `0`: File name - page number - anchor text
          * - `1`: Anchor text only
@@ -570,6 +571,10 @@ declare namespace Config {
          */
         markdownYFM: boolean;
         /**
+         * Whether to remove the asset ID when exporting to Markdown
+         */
+        removeAssetsID: boolean;
+        /**
          * Whether to export the inline memo
          */
         inlineMemo: boolean;
@@ -577,6 +582,10 @@ declare namespace Config {
          * Pandoc executable file path
          */
         pandocBin: string;
+        /**
+         * Pandoc parameters
+         */
+        pandocParams: string;
         /**
          * Whether the beginning of the paragraph is empty two spaces.
          * Insert two full-width spaces `U+3000` at the beginning of the paragraph.

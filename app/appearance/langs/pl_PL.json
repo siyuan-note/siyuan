@@ -1285,7 +1285,7 @@
   "about": "O programie",
   "about1": "Copyright (c) 2020-tera • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>Polityka prywatności</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>Umowa użytkownika</a>",
   "about2": "Użyj w przeglądarce",
-  "about3": "Proszę używać przeglądarki Chrome i utrzymać ją w tej samej sieci, co komputer, port <code class='fn__code'>${port}</code>(Oprócz losowego portu, pierwszy uruchomiony obszar roboczy będzie także automatycznie nasłuchiwał na <code class='fn__code'>6806</code> jako stały port, aby ułatwić przeglądarki współprace z rozszerzeniami oraz innymi zewnętrznymi programami do wywoływania interfejsu jądra), możliwe połączenia to:",
+  "about3": "Użyj przeglądarki Chrome i pozostaw w tej samej sieci co komputer, port <code class='fn__code'>${port}</code> (pierwsze uruchomione środowisko robocze, oprócz losowego portu, będzie także automatycznie nasłuchiwać <code class='fn__code'>6806</code> jako portu stałego, aby rozszerzenie do zapisywania z przeglądarki lub inne zewnętrzne programy mogły wywoływać interfejs jądra), możliwe dostępne adresy sieciowe losowych portów:",
   "about4": "Otwórz przeglądarkę",
   "about5": "Kod autoryzacji dostępu",
   "about6": "Po skonfigurowaniu, będzie używany jako hasło do autoryzacji dostępu, zostaw puste, aby wyłączyć autoryzację",

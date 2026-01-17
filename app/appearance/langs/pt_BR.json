@@ -1285,7 +1285,7 @@
   "about": "Sobre",
   "about1": "Copyright (c) 2020-presente • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>Política de Privacidade</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>Contrato do Usuário</a>",
   "about2": "Usar no navegador",
-  "about3": "Por favor, use o navegador Chrome e mantenha-o na mesma rede que o computador, porta <code class='fn__code'>${port}</code>(Além da porta aleatória, o primeiro espaço de trabalho iniciado também escutará automaticamente <code class='fn__code'>6806</code> como uma porta fixa, para que seja conveniente para o navegador recortar extensões ou outros programas externos chamarem a interface do kernel), os endereços que podem ser conectados são os seguintes: ",
+  "about3": "Por favor, use o navegador Chrome e mantenha-se na mesma rede que o computador, porta <code class='fn__code'>${port}</code> (o primeiro espaço de trabalho iniciado, além da porta aleatória, também passará a escutar automaticamente a porta <code class='fn__code'>6806</code> como porta fixa, para facilitar que a extensão de recorte do navegador ou outros programas externos chamem a interface do kernel), endereços de rede de portas aleatórias possíveis:",
   "about4": "Abrir navegador",
   "about5": "Código de autorização de acesso",
   "about6": "Após configurar, será usado como senha de autenticação de acesso, deixe em branco para fechar a autenticação",

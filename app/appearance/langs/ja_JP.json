@@ -1285,7 +1285,7 @@
   "about": "情報",
   "about1": "Copyright (c) 2020-present • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>プライバシーポリシー</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>利用規約</a>",
   "about2": "ブラウザで使用",
-  "about3": "Chrome ブラウザを使用してコンピュータと同じネットワークに接続してください。ポートは <code class='fn__code'>${port}</code> です (ランダムなポートに加えて最初に起動したワークスペースは 6806 という固定ポートでも自動的にリッスンが行われ、これによりブラウザが拡張機能や他の外部プログラムからカーネルインターフェースが呼び出されます)。接続可能なアドレスは次の通りです: ",
+  "about3": "Chrome ブラウザを使用し、PC と同じネットワーク内にいるようにしてください。ポート <code class='fn__code'>${port}</code>（最初に起動したワークスペースはランダムポートに加えて、ブラウザのクリップ拡張やその他の外部プログラムがカーネルのインターフェースを呼び出せるように固定ポートとして <code class='fn__code'>6806</code> も自動的にリッスンします）、接続可能なランダムポートのネットワークアドレス：",
   "about4": "ブラウザで開く",
   "about5": "アクセス認証コード",
   "about6": "設定したコードがアクセス認証パスワードとして使用されます",

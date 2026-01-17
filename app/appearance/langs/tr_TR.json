@@ -1285,7 +1285,7 @@
   "about": "Hakkında",
   "about1": "Telif hakkı (c) 2020-günümüz • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>Gizlilik Politikası</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>Kullanıcı Sözleşmesi</a>",
   "about2": "Tarayıcıda kullan",
-  "about3": "Lütfen Chrome tarayıcısını kullan ve bilgisayar ile aynı ağda kal. Port <code class='fn__code'>${port}</code> (Rastgele portun yanı sıra, ilk başlatılan çalışma alanı ayrıca sabit <code class='fn__code'>6806</code> portunu da dinler; böylece tarayıcı eklentileri veya dış uygulamalar çekirdek arayüzüne kolayca erişebilir). Olası bağlantı adresleri şunlardır:",
+  "about3": "Lütfen Chrome tarayıcısını kullanın ve bilgisayarınızla aynı ağda olun, port <code class='fn__code'>${port}</code> (ilk başlatılan çalışma alanı, rastgele porta ek olarak tarayıcı kırpma uzantısının veya diğer dış uygulamaların çekirdek arayüzünü çağırabilmesi için sabit port olarak <code class='fn__code'>6806</code>'ı da otomatik olarak dinleyecektir), bağlantı kurulabilecek rastgele port ağ adresleri:",
   "about4": "Tarayıcıyı aç",
   "about5": "Erişim yetkilendirme kodu",
   "about6": "Yapılandırmadan sonra erişim kimlik doğrulama parolası olarak kullanılacaktır, boş bırakırsan kimlik doğrulama kapatılır",

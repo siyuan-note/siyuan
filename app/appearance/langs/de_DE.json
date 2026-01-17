@@ -1285,7 +1285,7 @@
   "about": "Über",
   "about1": "Urheberrecht (c) 2020-heute • Yunnan Liandi Technology Co., Ltd. • <a target='_blank' href='https://b3log.org/siyuan/en/privacy.html'>Datenschutzrichtlinie</a> • <a target='_blank' href='https://b3log.org/siyuan/en/eula.html'>Nutzervereinbarung</a>",
   "about2": "Verwendung im Browser",
-  "about3": "Bitte verwenden Sie den Chrome-Browser und halten Sie ihn im selben Netzwerk wie den Computer, Port <code class='fn__code'>${port}</code> (Neben dem zufälligen Port wird das zuerst gestartete Arbeitsbereichsdokument außerdem automatisch <code class='fn__code'>6806</code> als festen Port abhören, um zu ermöglichen, dass der Browser Erweiterungen oder andere externe Programme auf die Kernel-Schnittstelle aufruft), die möglicherweise verbundenen Adressen sind wie folgt:",
+  "about3": "Bitte verwenden Sie den Chrome-Browser und bleiben Sie im selben Netzwerk wie der Computer, Port <code class='fn__code'>${port}</code> (der zuerst gestartete Arbeitsbereich wird neben dem zufälligen Port auch automatisch auf <code class='fn__code'>6806</code> als festen Port lauschen, um der Browser-Clipper-Erweiterung oder anderen externen Programmen das Aufrufen der Kernel-Schnittstelle zu erleichtern), mögliche erreichbare Netzwerkadressen zufälliger Ports:",
   "about4": "Browser öffnen",
   "about5": "Zugriffsautorisierungscode",
   "about6": "Nach der Konfiguration wird es als Zugangsauthentifizierungspasswort verwendet, lassen Sie es leer, um die Authentifizierung zu schließen",

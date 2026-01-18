@@ -1,5 +1,6 @@
 import {Constants} from "../../constants";
 import {setAccessAuthCode} from "../../config/util/about";
+import {setOIDCConfig} from "../../config/util/oidc";
 import {Dialog} from "../../dialog";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
@@ -55,12 +56,30 @@ export const initAbout = () => {
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
 </div>
 <div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
+    <div class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.accessAuthBypass}
+            <div class="b3-label__text">${window.siyuan.languages.accessAuthBypassTip}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="accessAuthBypass" type="checkbox"${window.siyuan.config.accessAuthBypass ? " checked" : ""}>
+    </div>
+    <div class="fn__hr"></div>
     ${window.siyuan.languages.about5}
     <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="authCode">
+    <button class="b3-button b3-button--outline fn__block" id="authCode"${window.siyuan.config.accessAuthBypass ? " disabled" : ""}>
         <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
     </button>
-    <div class="b3-label__text">${window.siyuan.languages.about6}</div>
+    <div class="b3-label__text"${window.siyuan.config.accessAuthBypass ? ' style="color: var(--b3-theme-on-surface-light); opacity: .6"' : ""}>${window.siyuan.languages.about6}</div>
+    <div class="b3-label__text${window.siyuan.config.accessAuthBypass ? "" : " fn__none"}">${window.siyuan.languages.accessAuthBypassAuthCodeDisabledTip}</div>
+    <div class="fn__hr"></div>
+    ${window.siyuan.languages.oidc}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="oidcSetting"${window.siyuan.config.accessAuthBypass ? " disabled" : ""}>
+        <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
+    </button>
+    <div class="b3-label__text"${window.siyuan.config.accessAuthBypass ? ' style="color: var(--b3-theme-on-surface-light); opacity: .6"' : ""}>${window.siyuan.languages.oidcTip}</div>
+    <div class="b3-label__text${window.siyuan.config.accessAuthBypass ? "" : " fn__none"}">${window.siyuan.languages.accessAuthBypassOIDCDisabledTip}</div>
 </div>
 <div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
     ${window.siyuan.languages.dataRepoKey}
@@ -206,11 +225,44 @@ export const initAbout = () => {
             const workspaceDirElement = modelMainElement.querySelector("#workspaceDir");
             genWorkspace(workspaceDirElement);
             const importKeyElement = modelMainElement.querySelector("#importKey");
+            const authCodeElement = modelMainElement.querySelector("#authCode") as HTMLButtonElement;
+            const accessAuthBypassElement = modelMainElement.querySelector("#accessAuthBypass") as HTMLInputElement;
+            const oidcSettingElement = modelMainElement.querySelector("#oidcSetting") as HTMLButtonElement;
+            const setAuthControlsDisabled = (disabled: boolean) => {
+                authCodeElement?.toggleAttribute("disabled", disabled);
+                oidcSettingElement?.toggleAttribute("disabled", disabled);
+            };
+            const applyAccessAuthBypassChange = (enabled: boolean) => {
+                fetchPost("/api/system/setAccessAuthBypass", {accessAuthBypass: enabled}, () => {
+                    window.siyuan.config.accessAuthBypass = enabled;
+                    setAuthControlsDisabled(enabled);
+                });
+            };
+            setAuthControlsDisabled(window.siyuan.config.accessAuthBypass);
+            if (accessAuthBypassElement) {
+                accessAuthBypassElement.addEventListener("change", () => {
+                    const nextChecked = accessAuthBypassElement.checked;
+                    if (nextChecked) {
+                        accessAuthBypassElement.checked = false;
+                        confirmDialog("⚠️ " + window.siyuan.languages.accessAuthBypass, window.siyuan.languages.accessAuthBypassConfirm, () => {
+                            accessAuthBypassElement.checked = true;
+                            applyAccessAuthBypassChange(true);
+                        });
+                    } else {
+                        applyAccessAuthBypassChange(false);
+                    }
+                });
+            }
             modelMainElement.firstElementChild.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 while (target && (target !== modelMainElement)) {
                     if (target.id === "authCode") {
                         setAccessAuthCode();
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (target.id === "oidcSetting") {
+                        setOIDCConfig();
                         event.preventDefault();
                         event.stopPropagation();
                         break;

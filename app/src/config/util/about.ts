@@ -9,6 +9,7 @@ export const setAccessAuthCode = () => {
         content: `<div class="b3-dialog__content">
     <input class="b3-text-field fn__block" placeholder="${window.siyuan.languages.about5}" value="${window.siyuan.config.accessAuthCode}">
     <div class="b3-label__text">${window.siyuan.languages.about6}</div>
+    <div class="b3-label__text ft__error">${window.siyuan.languages.accessAuthCodeDisableWarning}</div>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>

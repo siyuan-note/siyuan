@@ -40,6 +40,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)
 	ginServer.Handle("POST", "/api/system/setAPIToken", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAPIToken)
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccessAuthCode)
+	ginServer.Handle("POST", "/api/system/setAccessAuthBypass", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccessAuthBypass)
+	ginServer.Handle("POST", "/api/system/setOIDCConfig", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOIDCConfig)
 	ginServer.Handle("POST", "/api/system/setFollowSystemLockScreen", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFollowSystemLockScreen)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServe)
 	ginServer.Handle("POST", "/api/system/setAutoLaunch", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAutoLaunch)

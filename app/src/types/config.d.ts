@@ -25,6 +25,14 @@ declare namespace Config {
          * Access authorization code
          */
         accessAuthCode: TAccessAuthCode;
+        /**
+         * Whether to bypass all access authentication checks
+         */
+        accessAuthBypass: boolean;
+        /**
+         * OIDC login configuration
+         */
+        oidc: IOIDC;
         account: IAccount;
         ai: IAI;
         api: IAPI;
@@ -95,6 +103,34 @@ declare namespace Config {
      * Access authorization code
      */
     export type TAccessAuthCode = "" | "*******";
+
+    /**
+     * OIDC login configuration
+     */
+    export interface IOIDC {
+        provider: string;
+        providers: Record<string, IOIDCProviderConf>;
+        filters: IOIDCFilter;
+        /**
+         *  kernel used fields, frontend ignored
+         * 
+         * providerHash?: string;
+         * filterHash?: string;
+         */
+    }
+
+    export interface IOIDCProviderConf {
+        clientID: string;
+        clientSecret: string;
+        redirectURL: string;
+        issuerURL: string;
+        scopes: string[];
+        tenant: string;
+        providerLabel: string;
+        claimMap: Record<string, string>;
+    }
+
+    export type IOIDCFilter = Record<string, string[]>;
 
     /**
      * Account configuration

@@ -323,6 +323,8 @@ func exportConf(c *gin.Context) {
 	clonedConf.UserData = ""
 	clonedConf.Account = nil
 	clonedConf.AccessAuthCode = ""
+	clonedConf.AccessAuthBypass = false
+	clonedConf.OIDC = nil
 	if nil != clonedConf.System {
 		clonedConf.System.ID = ""
 		clonedConf.System.Name = ""
@@ -609,6 +611,15 @@ func setAccessAuthCode(c *gin.Context) {
 	aac = strings.TrimSpace(aac)
 	aac = util.RemoveInvalid(aac)
 
+	if util.ContainerDocker == util.Container && !model.Conf.AccessAuthBypass {
+		if "" == aac && !model.OIDCIsEnabled(model.Conf.OIDC) {
+			ret.Code = -1
+			// At least one auth method required in Docker mode
+			ret.Msg = model.Conf.Language(279)
+			return
+		}
+	}
+
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()
 
@@ -621,6 +632,97 @@ func setAccessAuthCode(c *gin.Context) {
 		util.ReloadUI()
 	}()
 	return
+}
+
+func setAccessAuthBypass(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	accessAuthBypass, ok := arg["accessAuthBypass"].(bool)
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "accessAuthBypass is required"
+		return
+	}
+
+	model.Conf.AccessAuthBypass = accessAuthBypass
+	model.Conf.Save()
+
+	go func() {
+		time.Sleep(200 * time.Millisecond)
+		util.ReloadUI()
+	}()
+}
+
+func setOIDCConfig(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	oidcArg, ok := arg["oidc"]
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "oidc is required"
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(oidcArg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	oidcConf := &conf.OIDC{}
+	if err = gulu.JSON.UnmarshalJSON(param, oidcConf); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if nil != oidcConf.Providers {
+		for providerID, provider := range oidcConf.Providers {
+			if nil == provider {
+				continue
+			}
+			// convert masked client secret to the existing one
+			if strings.TrimSpace(provider.ClientSecret) == model.MaskedSecret {
+				if nil != model.Conf.OIDC && nil != model.Conf.OIDC.Providers {
+					if existing := model.Conf.OIDC.Providers[providerID]; nil != existing {
+						provider.ClientSecret = existing.ClientSecret
+						continue
+					}
+				}
+				provider.ClientSecret = ""
+			}
+		}
+	}
+
+	if util.ContainerDocker == util.Container && !model.Conf.AccessAuthBypass {
+		if "" == strings.TrimSpace(model.Conf.AccessAuthCode) && !model.OIDCIsEnabled(oidcConf) {
+			ret.Code = -1
+			// At least one auth method required in Docker mode
+			ret.Msg = model.Conf.Language(279)
+			return
+		}
+	}
+
+	model.Conf.UpdateOIDCConfig(oidcConf)
+	model.Conf.Save()
+
+	go func() {
+		time.Sleep(200 * time.Millisecond)
+		util.ReloadUI()
+	}()
 }
 
 func setFollowSystemLockScreen(c *gin.Context) {

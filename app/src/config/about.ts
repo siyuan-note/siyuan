@@ -5,6 +5,7 @@ import {ipcRenderer, shell} from "electron";
 import {isBrowser} from "../util/functions";
 import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/about";
+import {setOIDCConfig} from "./util/oidc";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
@@ -64,26 +65,44 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
-<div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
-    <div class="fn__flex">
-        <div class="fn__flex-1">
-            ${window.siyuan.languages.about5}
-            <div class="b3-label__text">${window.siyuan.languages.about6}</div>
-        </div>
-        <div class="fn__space"></div>
-        <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="authCode">
-            <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
-        </button>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.accessAuthBypass}
+        <div class="b3-label__text">${window.siyuan.languages.accessAuthBypassTip}</div>
     </div>
-    <label class="b3-label fn__flex${!window.siyuan.config.accessAuthCode || isBrowser() ? " fn__none" : ""}">
-        <div class="fn__flex-1">
-            ${window.siyuan.languages.about7}
-            <div class="b3-label__text">${window.siyuan.languages.about8}</div>
-        </div>
-        <div class="fn__space"></div>
-        <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
-    </label>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="accessAuthBypass" type="checkbox"${window.siyuan.config.accessAuthBypass ? " checked" : ""}>
+</label>
+<div class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.about5}
+        <div class="b3-label__text"${window.siyuan.config.accessAuthBypass ? ' style="color: var(--b3-theme-on-surface-light); opacity: .6"' : ""}>${window.siyuan.languages.about6}</div>
+        <div class="b3-label__text${window.siyuan.config.accessAuthBypass ? "" : " fn__none"}">${window.siyuan.languages.accessAuthBypassAuthCodeDisabledTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="authCode"${window.siyuan.config.accessAuthBypass ? " disabled" : ""}>
+        <svg><use xlink:href="#iconLock"></use></svg>${window.siyuan.languages.config}
+    </button>
 </div>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.oidc}
+        <div class="b3-label__text"${window.siyuan.config.accessAuthBypass ? ' style="color: var(--b3-theme-on-surface-light); opacity: .6"' : ""}>${window.siyuan.languages.oidcTip}</div>
+        <div class="b3-label__text${window.siyuan.config.accessAuthBypass ? "" : " fn__none"}">${window.siyuan.languages.accessAuthBypassOIDCDisabledTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="fn__flex-center b3-button b3-button--outline fn__size200" id="oidcSetting"${window.siyuan.config.accessAuthBypass ? " disabled" : ""}>
+        <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
+    </button>
+</label>
+<label class="b3-label fn__flex${!window.siyuan.config.accessAuthCode ? " fn__none" : ""}">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.about7}
+        <div class="b3-label__text">${window.siyuan.languages.about8}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}${window.siyuan.config.accessAuthBypass ? " disabled" : ""}>
+</label>
 <div class="b3-label config__item${(isBrowser() && !isInAndroid() && !isInIOS() && !isInHarmony()) ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
@@ -242,6 +261,35 @@ ${checkUpdateHTML}
         if (window.siyuan.config.system.isInsider) {
             about.element.querySelector("#isInsider").innerHTML = "<span class='ft__secondary'>Insider Preview</span>";
         }
+        const authCodeElement = about.element.querySelector("#authCode") as HTMLButtonElement;
+        const oidcSettingElement = about.element.querySelector("#oidcSetting") as HTMLButtonElement;
+        const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;
+        const setAuthControlsDisabled = (disabled: boolean) => {
+            authCodeElement?.toggleAttribute("disabled", disabled);
+            oidcSettingElement?.toggleAttribute("disabled", disabled);
+            lockScreenModeElement?.toggleAttribute("disabled", disabled);
+        };
+        const applyAccessAuthBypassChange = (enabled: boolean) => {
+            fetchPost("/api/system/setAccessAuthBypass", {accessAuthBypass: enabled}, () => {
+                window.siyuan.config.accessAuthBypass = enabled;
+                setAuthControlsDisabled(enabled);
+            });
+        };
+        setAuthControlsDisabled(window.siyuan.config.accessAuthBypass);
+        const accessAuthBypassElement = about.element.querySelector("#accessAuthBypass") as HTMLInputElement;
+        if (accessAuthBypassElement) {
+            accessAuthBypassElement.addEventListener("change", () => {
+                if (accessAuthBypassElement.checked) {
+                    accessAuthBypassElement.checked = false;
+                    confirmDialog("⚠️ " + window.siyuan.languages.accessAuthBypass, window.siyuan.languages.accessAuthBypassConfirm, () => {
+                        accessAuthBypassElement.checked = true;
+                        applyAccessAuthBypassChange(true);
+                    });
+                } else {
+                    applyAccessAuthBypassChange(false);
+                }
+            });
+        }
         const indexRetentionDaysElement = about.element.querySelector("#indexRetentionDays") as HTMLInputElement;
         indexRetentionDaysElement.addEventListener("change", () => {
             fetchPost("/api/repo/setRepoIndexRetentionDays", {days: parseInt(indexRetentionDaysElement.value)}, () => {
@@ -302,6 +350,9 @@ ${checkUpdateHTML}
 
         about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();
+        });
+        about.element.querySelector("#oidcSetting").addEventListener("click", () => {
+            setOIDCConfig();
         });
         const importKeyElement = about.element.querySelector("#importKey");
         importKeyElement.addEventListener("click", () => {
@@ -376,8 +427,7 @@ ${checkUpdateHTML}
                 });
             });
         });
-        const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;
-        lockScreenModeElement.addEventListener("change", () => {
+        lockScreenModeElement?.addEventListener("change", () => {
             fetchPost("/api/system/setFollowSystemLockScreen", {lockScreenMode: lockScreenModeElement.checked ? 1 : 0}, () => {
                 window.siyuan.config.system.lockScreenMode = lockScreenModeElement.checked ? 1 : 0;
             });

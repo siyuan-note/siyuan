@@ -57,7 +57,7 @@
     box-sizing: border-box;
     box-shadow: var(--b3-tooltips-shadow);
     word-break: break-word;
-    max-width: 20vw;
+    max-width: min(calc(100vw - 60px), 360px);
     text-align: left;
     display: inline-block;
 

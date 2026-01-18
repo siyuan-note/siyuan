@@ -126,6 +126,53 @@ const hotKey2Electron = (key) => {
     return electronKey + key.replace("⌘", "").replace("⇧", "").replace("⌥", "").replace("⌃", "");
 };
 
+/**
+ * 将 RFC 5646 格式的语言标签解析为应用支持的语言代码
+ * https://www.rfc-editor.org/info/rfc5646
+ * @param {string[]} languageTags - 语言标签数组（如 ["zh-Hans-CN", "en-US"]）
+ * @returns {string} 应用支持的语言代码
+ */
+const resolveAppLanguage = (languageTags) => {
+    if (!languageTags || languageTags.length === 0) {
+        return "en_US";
+    }
+
+    const tag = languageTags[0].toLowerCase();
+    const parts = tag.replace(/_/g, "-").split("-");
+    const language = parts[0];
+
+    if (language === "zh") {
+        if (tag.includes("hant")) {
+            return "zh_CHT";
+        }
+        if (tag.includes("hans") || tag.includes("cn") || tag.includes("sg")) {
+            return "zh_CN";
+        }
+        if (tag.includes("tw") || tag.includes("hk") || tag.includes("mo")) {
+            return "zh_CHT";
+        }
+        return "zh_CN";
+    }
+
+    const languageMapping = {
+        "en": "en_US",
+        "ar": "ar_SA",
+        "de": "de_DE",
+        "es": "es_ES",
+        "fr": "fr_FR",
+        "he": "he_IL",
+        "it": "it_IT",
+        "ja": "ja_JP",
+        "ko": "ko_KR",
+        "pl": "pl_PL",
+        "pt": "pt_BR",
+        "ru": "ru_RU",
+        "tr": "tr_TR"
+    };
+
+    return languageMapping[language] || "en_US";
+};
+
 const exitApp = (port, errorWindowId) => {
     let tray;
     let mainWindow;
@@ -1287,8 +1334,8 @@ app.whenReady().then(() => {
         }
 
         // 改进桌面端初始化时使用的外观语言 https://github.com/siyuan-note/siyuan/issues/6803
-        let languages = app.getPreferredSystemLanguages();
-        let language = languages && 0 < languages.length && "zh-Hans-CN" === languages[0] ? "zh_CN" : "en_US";
+        const languages = app.getPreferredSystemLanguages();
+        const language = resolveAppLanguage(languages);
         firstOpenWindow.loadFile(initHTMLPath, {
             query: {
                 lang: language,

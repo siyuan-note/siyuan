@@ -251,6 +251,10 @@ func updateRecentDocViewTime(c *gin.Context) {
 		return
 	}
 
+	if nil == arg["rootID"] {
+		return
+	}
+
 	rootID := arg["rootID"].(string)
 	err := model.UpdateRecentDocViewTime(rootID)
 	if err != nil {
@@ -266,6 +270,10 @@ func updateRecentDocOpenTime(c *gin.Context) {
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		return
+	}
+
+	if nil == arg["rootID"] {
 		return
 	}
 

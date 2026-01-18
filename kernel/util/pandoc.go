@@ -101,7 +101,8 @@ func Pandoc(from, to, o, content string) (err error) {
 }
 
 var (
-	PandocBinPath string // Pandoc 可执行文件路径
+	PandocBinPath      string // Pandoc 可执行文件路径
+	PandocTemplatePath string // Pandoc Docx 模板文件路径
 )
 
 func InitPandoc() {
@@ -126,6 +127,18 @@ func InitPandoc() {
 				}
 			}
 		}
+	}
+
+	PandocTemplatePath = filepath.Join(pandocDir, "pandoc-template.docx")
+	if !gulu.File.IsExist(PandocTemplatePath) {
+		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-template.docx")
+		if "dev" == Mode || !gulu.File.IsExist(PandocTemplatePath) {
+			PandocTemplatePath = filepath.Join(WorkingDir, "pandoc/pandoc-template.docx")
+		}
+	}
+	if !gulu.File.IsExist(PandocTemplatePath) {
+		PandocTemplatePath = ""
+		logging.LogWarnf("pandoc template file [%s] not found", PandocTemplatePath)
 	}
 
 	defer eventbus.Publish(EvtConfPandocInitialized)

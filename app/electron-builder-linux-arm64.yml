@@ -68,3 +68,5 @@ extraResources:
     filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-linux-arm64.zip"
     to: "pandoc.zip"
+  - from: "pandoc/pandoc-template.docx"
+    to: "pandoc-template.docx"

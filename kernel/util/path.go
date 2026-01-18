@@ -416,6 +416,7 @@ func IsSensitivePath(p string) bool {
 		"passwd":          {},
 		"shadow":          {},
 		"pgpass":          {},
+		"hosts":           {},
 		"credentials":     {}, // 如 aws credentials
 		"config.json":     {}, // docker config.json 可能含 token
 	}

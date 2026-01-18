@@ -539,35 +539,53 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
 };
 
 /// #if !BROWSER
-export const initFocusFix = () => {
-    if (!isWindows()) {
-        return;
-    }
+export const initNativeDialogOverride = () => {
     const originalAlert = window.alert;
     const originalConfirm = window.confirm;
-    const fixFocusAfterDialog = () => {
-        ipcRenderer.send("siyuan-focus-fix");
-    };
+    
     window.alert = function (message: string) {
         try {
-            const result = originalAlert.call(this, message);
-            fixFocusAfterDialog();
-            return result;
-        } catch (error) {
-            console.error("alert error:", error);
-            fixFocusAfterDialog();
+            ipcRenderer.sendSync("siyuan-alert-dialog", {
+                title: window.siyuan?.languages?.siyuanNote || "SiYuan",
+                message,
+                buttons: [window.siyuan?.languages?.confirm || "OK"],
+                noLink: true,
+            });
+            
             return undefined;
+        } catch (error) {
+            console.error("SiYuan alert error:", error);
+            try {
+                const result = originalAlert.call(this, message);
+                return result;
+            } catch (e) {
+                console.error("Original alert error:", e);
+                return undefined;
+            }
         }
     };
-    window.confirm = function (message: string) {
+    
+    window.confirm = function (message: string): boolean {
         try {
-            const result = originalConfirm.call(this, message);
-            fixFocusAfterDialog();
-            return result;
+            const buttonIndex = ipcRenderer.sendSync("siyuan-confirm-dialog", {
+                title: window.siyuan?.languages?.siyuanNote || "SiYuan",
+                message,
+                buttons: [window.siyuan?.languages?.cancel || "Cancel", window.siyuan?.languages?.confirm || "OK"],
+                cancelId: 0,
+                defaultId: 1,
+                noLink: true,
+            });
+            
+            return buttonIndex === 1;
         } catch (error) {
-            console.error("confirm error:", error);
-            fixFocusAfterDialog();
-            return false;
+            console.error("SiYuan confirm error:", error);
+            try {
+                const result = originalConfirm.call(this, message);
+                return result;
+            } catch (e) {
+                console.error("Original confirm error:", e);
+                return false;
+            }
         }
     };
 };

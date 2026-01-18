@@ -167,6 +167,13 @@ func getFile(c *gin.Context) {
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
+	if !filelock.IsExist(fileAbsPath) {
+		ret.Code = http.StatusNotFound
+		ret.Msg = "file does not exist"
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+
 	info, err := os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
@@ -190,19 +197,8 @@ func getFile(c *gin.Context) {
 	}
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
-	if role := model.GetGinContextRole(c); !model.IsValidRole(role, []model.Role{
-		model.RoleAdministrator,
-	}) {
-		if relPath, err := filepath.Rel(util.ConfDir, fileAbsPath); err != nil {
-			logging.LogErrorf("Get a relative path from [%s] to [%s] failed: %s", util.ConfDir, fileAbsPath, err)
-			ret.Code = http.StatusInternalServerError
-			ret.Msg = err.Error()
-			c.JSON(http.StatusAccepted, ret)
-			return
-		} else if relPath == "conf.json" {
-			ret.Code = http.StatusForbidden
-			ret.Msg = http.StatusText(http.StatusForbidden)
-			c.JSON(http.StatusAccepted, ret)
+	if !model.IsAdminRoleContext(c) {
+		if refuseToAccess(c, fileAbsPath, ret) {
 			return
 		}
 	}
@@ -226,6 +222,33 @@ func getFile(c *gin.Context) {
 		contentType = "application/octet-stream"
 	}
 	c.Data(http.StatusOK, contentType, data)
+}
+
+func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
+	// 禁止访问配置文件 conf/conf.json
+	if filepath.Join(util.ConfDir, "conf.json") == fileAbsPath {
+		ret.Code = http.StatusForbidden
+		ret.Msg = http.StatusText(http.StatusForbidden)
+		c.JSON(http.StatusAccepted, ret)
+		return true
+	}
+
+	// 禁止访问 data/snippets/conf.json
+	if filepath.Join(util.DataDir, "snippets", "conf.json") == fileAbsPath {
+		ret.Code = http.StatusForbidden
+		ret.Msg = http.StatusText(http.StatusForbidden)
+		c.JSON(http.StatusAccepted, ret)
+		return true
+	}
+
+	// 禁止访问 data/templates 目录
+	if util.IsSubPath(filepath.Join(util.DataDir, "templates"), fileAbsPath) {
+		ret.Code = http.StatusForbidden
+		ret.Msg = http.StatusText(http.StatusForbidden)
+		c.JSON(http.StatusAccepted, ret)
+		return true
+	}
+	return false
 }
 
 func readDir(c *gin.Context) {

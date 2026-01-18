@@ -248,7 +248,18 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 					u = u[:strings.Index(u, "?")]
 				}
 
-				if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
+				if !gulu.File.IsExist(u) {
+					logging.LogErrorf("local file asset [%s] not exist", u)
+					continue
+				}
+
+				if gulu.File.IsDir(u) {
+					logging.LogWarnf("ignore converting directory path [%s] to local asset", u)
+					continue
+				}
+
+				if util.IsSensitivePath(u) {
+					logging.LogWarnf("ignore converting sensitive path [%s] to local asset", u)
 					continue
 				}
 

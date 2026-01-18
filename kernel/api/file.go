@@ -66,14 +66,26 @@ func globalCopyFiles(c *gin.Context) {
 		srcs = append(srcs, s.(string))
 	}
 
-	for _, src := range srcs {
-		if !filelock.IsExist(src) {
+	for i, src := range srcs {
+		absSrc, _ := filepath.Abs(src)
+
+		if !filelock.IsExist(absSrc) {
 			msg := fmt.Sprintf("file [%s] does not exist", src)
 			logging.LogErrorf(msg)
 			ret.Code = -1
 			ret.Msg = msg
 			return
 		}
+
+		if util.IsSensitivePath(absSrc) {
+			msg := fmt.Sprintf("refuse to copy sensitive file [%s]", src)
+			logging.LogErrorf(msg)
+			ret.Code = -2
+			ret.Msg = msg
+			return
+		}
+
+		srcs[i] = absSrc
 	}
 
 	destDir := arg["destDir"].(string) // 相对于工作空间的路径

@@ -1262,6 +1262,14 @@ func subscribeConfEvents() {
 	eventbus.Subscribe(util.EvtConfPandocInitialized, func() {
 		logging.LogInfof("pandoc initialized, set pandoc bin to [%s]", util.PandocBinPath)
 		Conf.Export.PandocBin = util.PandocBinPath
+
+		params := util.RemoveInvalid(Conf.Export.PandocParams)
+		if !strings.Contains(params, "--reference-doc") && "" != util.PandocTemplatePath {
+			params += " --reference-doc"
+			params += " \"" + util.PandocTemplatePath + "\""
+			Conf.Export.PandocParams = strings.TrimSpace(params)
+		}
+
 		Conf.Save()
 	})
 }

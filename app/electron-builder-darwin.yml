@@ -64,3 +64,5 @@ extraResources:
     filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-darwin-amd64.zip"
     to: "pandoc.zip"
+  - from: "pandoc/pandoc-template.docx"
+    to: "pandoc-template.docx"

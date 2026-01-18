@@ -45,6 +45,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/imroc/req/v3"
+	shellquote "github.com/kballard/go-shellquote"
 	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/pdfcpu/pdfcpu/pkg/font"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
@@ -773,7 +774,12 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 
 	params := util.RemoveInvalid(Conf.Export.PandocParams)
 	if "" != params {
-		args = append(args, strings.Split(params, " ")...)
+		customArgs, parseErr := shellquote.Split(params)
+		if nil != parseErr {
+			logging.LogErrorf("parse pandoc custom params [%s] failed: %s", params, parseErr)
+		} else {
+			args = append(args, customArgs...)
+		}
 	}
 
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)

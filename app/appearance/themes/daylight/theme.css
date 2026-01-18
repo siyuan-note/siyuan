@@ -29,7 +29,7 @@
     --b3-font-family-graph: arial;
     --b3-font-family-emoji: "Emojis Additional", emojis;
     --b3-font-family-math: KaTeX_Math;
-    --b3-font-family-kbd: SFMono-Regular, Consolas, "Liberation Mono", var(--b3-font-family);
+    --b3-font-family-kbd: SFMono-Regular, Consolas, "Liberation Mono";
     --b3-font-size: 14px;
 
     /* 顶部工具栏 */

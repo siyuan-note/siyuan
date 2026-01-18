@@ -175,8 +175,14 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
         textPlain = textPlain.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
 
+        // 对 <<assets/...>> 进行内部转义 https://github.com/siyuan-note/siyuan/issues/11992
+        textPlain = textPlain.replace(/<<assets\//g, "__@lt2assets/@__").replace(/>>/g, "__@gt2@__");
+
         // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+
+        // 反转义 <<assets/...>>
+        textPlain = textPlain.replace(/__@lt2assets\/@__/g, "<<assets/").replace(/__@gt2@__/g, ">>");
 
         // 反转义内置需要解析的 HTML 标签
         textPlain = textPlain.replace(/__@sub@__/g, "<sub>").replace(/__@\/sub@__/g, "</sub>");

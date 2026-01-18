@@ -38,6 +38,8 @@ type Export struct {
 	RemoveAssetsID        bool   `json:"removeAssetsID"`        // Markdown 导出时是否移除资源文件名 ID 部分 https://github.com/siyuan-note/siyuan/issues/16065
 	MarkdownYFM           bool   `json:"markdownYFM"`           // Markdown 导出时是否添加 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/7727
 	InlineMemo            bool   `json:"inlineMemo"`            // 是否导出行级备注 https://github.com/siyuan-note/siyuan/issues/14605
+	IncludeSubDocs        bool   `json:"includeSubDocs"`        // 是否导出子文档 https://github.com/siyuan-note/siyuan/issues/13635
+	IncludeRelatedDocs    bool   `json:"includeRelatedDocs"`    // 是否导出关联文档 https://github.com/siyuan-note/siyuan/issues/13635
 	PDFFooter             string `json:"pdfFooter"`             // PDF 导出时页脚内容
 	PDFWatermarkStr       string `json:"pdfWatermarkStr"`       // PDF 导出时水印文本或水印文件路径
 	PDFWatermarkDesc      string `json:"pdfWatermarkDesc"`      // PDF 导出时水印位置、大小和样式等

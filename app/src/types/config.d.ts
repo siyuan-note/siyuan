@@ -579,6 +579,14 @@ declare namespace Config {
          */
         inlineMemo: boolean;
         /**
+         * Whether to include sub-documents when exporting
+         */
+        includeSubDocs: boolean;
+        /**
+         * Whether to include related documents when exporting
+         */
+        includeRelatedDocs: boolean;
+        /**
          * Pandoc executable file path
          */
         pandocBin: string;

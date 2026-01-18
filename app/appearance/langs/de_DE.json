@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "Unterdokumente einbeziehen",
+  "includeSubDocsTip": "Wenn aktiviert, werden beim Export alle Unterdokumente des aktuellen Dokuments einbezogen",
+  "includeRelatedDocs": "Verwandte Dokumente einbeziehen",
+  "includeRelatedDocsTip": "Wenn aktiviert, werden beim Export die im aktuellen Dokument referenzierten oder an Datenbanken gebundenen Dokumente einbezogen",
   "removeAssetsID": "ID aus Asset-Dateinamen entfernen",
   "removeAssetsIDTip": "Wenn aktiviert, wird beim Export nach Markdown der ID-Teil aus den Asset-Dateinamen entfernt",
   "clearTempFiles": "Temporäre Dateien bereinigen",

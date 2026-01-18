@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "Alt belgeleri dahil et",
+  "includeSubDocsTip": "Etkinleştirildiğinde, dışa aktarım sırasında mevcut belgenin tüm alt belgeleri dahil edilir",
+  "includeRelatedDocs": "İlişkili belgeleri dahil et",
+  "includeRelatedDocsTip": "Etkinleştirildiğinde, dışa aktarım sırasında mevcut belgede referans verilen veya veritabanına bağlı belgeler dahil edilir",
   "removeAssetsID": "Varlık dosya adlarındaki ID'yi kaldır",
   "removeAssetsIDTip": "Etkinleştirildiğinde Markdown dışa aktarılırken varlık dosya adlarındaki ID kısmı kaldırılacaktır",
   "clearTempFiles": "Geçici dosyaları temizle",

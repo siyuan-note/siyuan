@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "包含子文檔",
+  "includeSubDocsTip": "啟用後將在匯出時包含當前文檔的所有子文檔",
+  "includeRelatedDocs": "包含關聯文檔",
+  "includeRelatedDocsTip": "啟用後將在匯出時包含當前文檔中引用、資料庫綁定的文檔",
   "removeAssetsID": "移除資源檔名中的 ID",
   "removeAssetsIDTip": "啟用後在匯出 Markdown 時會移除資源檔名中的 ID 部分",
   "clearTempFiles": "清理臨時檔案",

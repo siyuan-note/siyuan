@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "Inclure les sous-documents",
+  "includeSubDocsTip": "Si activé, tous les sous-documents du document courant seront inclus lors de l'export",
+  "includeRelatedDocs": "Inclure les documents liés",
+  "includeRelatedDocsTip": "Si activé, les documents référencés ou liés par la base de données dans le document courant seront inclus lors de l'export",
   "removeAssetsID": "Supprimer l'ID des noms de fichiers des ressources",
   "removeAssetsIDTip": "Une fois activé, lors de l'export en Markdown, la partie ID dans le nom des fichiers de ressources sera supprimée",
   "clearTempFiles": "Effacer les fichiers temporaires",

@@ -514,9 +514,12 @@ func ExportSYs(ids []string) (zipPath string) {
 	bts := treenode.GetBlockTrees(ids)
 	for _, bt := range bts {
 		docPaths = append(docPaths, bt.Path)
-		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
-		for _, docFile := range docFiles {
-			docPaths = append(docPaths, docFile.path)
+
+		if Conf.Export.IncludeSubDocs {
+			docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+			for _, docFile := range docFiles {
+				docPaths = append(docPaths, docFile.path)
+			}
 		}
 	}
 	zipPath = exportSYZip(block.BoxID, path.Dir(block.Path), baseFolderName, docPaths)
@@ -1705,9 +1708,12 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 	bts := treenode.GetBlockTrees(ids)
 	for _, bt := range bts {
 		docPaths = append(docPaths, bt.Path)
-		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
-		for _, docFile := range docFiles {
-			docPaths = append(docPaths, docFile.path)
+
+		if Conf.Export.IncludeSubDocs {
+			docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+			for _, docFile := range docFiles {
+				docPaths = append(docPaths, docFile.path)
+			}
 		}
 	}
 
@@ -3617,6 +3623,9 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			}
 			*defBlockIDs = append(*defBlockIDs, defID)
 
+			if !Conf.Export.IncludeRelatedDocs {
+				return ast.WalkSkipChildren
+			}
 			exportRefTrees(defTree, defBlockIDs, retTrees, treeCache)
 		} else if treenode.IsBlockLink(n) {
 			defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
@@ -3641,6 +3650,9 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			}
 			*defBlockIDs = append(*defBlockIDs, defID)
 
+			if !Conf.Export.IncludeRelatedDocs {
+				return ast.WalkSkipChildren
+			}
 			exportRefTrees(defTree, defBlockIDs, retTrees, treeCache)
 		} else if ast.NodeAttributeView == n.Type {
 			// 导出数据库所在文档时一并导出绑定块所在文档
@@ -3684,6 +3696,9 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 				}
 				*defBlockIDs = append(*defBlockIDs, val.BlockID)
 
+				if !Conf.Export.IncludeRelatedDocs {
+					return ast.WalkSkipChildren
+				}
 				exportRefTrees(defTree, defBlockIDs, retTrees, treeCache)
 			}
 		}

@@ -55,6 +55,22 @@ export const exportConfig = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="inlineMemo" type="checkbox"${window.siyuan.config.export.inlineMemo ? " checked" : ""}/>
 </label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.includeSubDocs}
+        <div class="b3-label__text">${window.siyuan.languages.includeSubDocsTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="includeSubDocs" type="checkbox"${window.siyuan.config.export.includeSubDocs ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.includeRelatedDocs}
+        <div class="b3-label__text">${window.siyuan.languages.includeRelatedDocsTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="includeRelatedDocs" type="checkbox"${window.siyuan.config.export.includeRelatedDocs ? " checked" : ""}/>
+</label>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.ref}
@@ -218,6 +234,8 @@ export const exportConfig = {
                 removeAssetsID: (exportConfig.element.querySelector("#removeAssetsID") as HTMLInputElement).checked,
                 markdownYFM: (exportConfig.element.querySelector("#markdownYFM") as HTMLInputElement).checked,
                 inlineMemo: (exportConfig.element.querySelector("#inlineMemo") as HTMLInputElement).checked,
+                includeSubDocs: (exportConfig.element.querySelector("#includeSubDocs") as HTMLInputElement).checked,
+                includeRelatedDocs: (exportConfig.element.querySelector("#includeRelatedDocs") as HTMLInputElement).checked,
                 blockRefMode: parseInt((exportConfig.element.querySelector("#blockRefMode") as HTMLSelectElement).value, 10),
                 blockEmbedMode: parseInt((exportConfig.element.querySelector("#blockEmbedMode") as HTMLSelectElement).value, 10),
                 fileAnnotationRefMode: parseInt((exportConfig.element.querySelector("#fileAnnotationRefMode") as HTMLSelectElement).value, 10),

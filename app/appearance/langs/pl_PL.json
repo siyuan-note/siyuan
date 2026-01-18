@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "Uwzględnij poddokumenty",
+  "includeSubDocsTip": "Po włączeniu podczas eksportu zostaną uwzględnione wszystkie poddokumenty bieżącego dokumentu",
+  "includeRelatedDocs": "Uwzględnij powiązane dokumenty",
+  "includeRelatedDocsTip": "Po włączeniu podczas eksportu zostaną uwzględnione dokumenty odwoływane lub powiązane przez bazę danych w bieżącym dokumencie",
   "removeAssetsID": "Usuń ID z nazw plików zasobów",
   "removeAssetsIDTip": "Po włączeniu podczas eksportu do Markdown zostanie usunięta część nazwy pliku zasobu zawierająca ID",
   "clearTempFiles": "Wyczyść pliki tymczasowe",

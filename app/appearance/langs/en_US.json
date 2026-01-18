@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "Include sub-documents",
+  "includeSubDocsTip": "When enabled, all sub-documents of the current document will be included during export",
+  "includeRelatedDocs": "Include related documents",
+  "includeRelatedDocsTip": "When enabled, documents referenced or bound by databases in the current document will be included during export",
   "removeAssetsID": "Remove ID from asset file names",
   "removeAssetsIDTip": "When enabled, the ID part will be removed from asset file names when exporting Markdown",
   "clearTempFiles": "Clear temporary files",

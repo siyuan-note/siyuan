@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "כלול מסמכים משניים",
+  "includeSubDocsTip": "בעת הפעלה, בעת ייצוא יכלול את כל תת‑המסמכים של המסמך הנוכחי",
+  "includeRelatedDocs": "כלול מסמכים קשורים",
+  "includeRelatedDocsTip": "בעת הפעלה, בעת ייצוא יכלול מסמכים שמופנים או מקושרים על‑ידי מסד הנתונים במסמך הנוכחי",
   "removeAssetsID": "הסר את ה‑ID משמות קבצי המשאבים",
   "removeAssetsIDTip": "כאשר מופעל, בעת ייצוא ל‑Markdown יוסר חלק ה‑ID משמות קבצי המשאבים",
   "clearTempFiles": "ניקוי קבצים זמניים",

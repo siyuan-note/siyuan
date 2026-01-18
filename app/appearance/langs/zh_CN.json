@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "包含子文档",
+  "includeSubDocsTip": "启用后将在导出时包含当前文档的所有子文档",
+  "includeRelatedDocs": "包含关联文档",
+  "includeRelatedDocsTip": "启用后将在导出时包含当前文档中引用、数据库绑定的文档",
   "removeAssetsID": "移除资源文件名中的 ID",
   "removeAssetsIDTip": "启用后在导出 Markdown 时将移除资源文件名中的 ID 部分",
   "clearTempFiles": "清理临时文件",

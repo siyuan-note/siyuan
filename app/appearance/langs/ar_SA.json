@@ -1,7 +1,11 @@
 {
+  "includeSubDocs": "تضمين المستندات الفرعية",
+  "includeSubDocsTip": "عند التفعيل، سيتم تضمين جميع المستندات الفرعية للمستند الحالي أثناء التصدير",
+  "includeRelatedDocs": "تضمين المستندات المرتبطة",
+  "includeRelatedDocsTip": "عند التفعيل، سيتم تضمين المستندات المشار إليها أو المرتبطة بقاعدة البيانات في المستند الحالي أثناء التصدير",
   "removeAssetsID": "إزالة الـ ID من أسماء ملفات الموارد",
   "removeAssetsIDTip": "عند التفعيل سيتم إزالة جزء الـ ID من أسماء ملفات الموارد عند تصدير Markdown",
-  "clearTempFiles": "Temporäre Dateien bereinigen",
+  "clearTempFiles": "مسح الملفات المؤقتة",
   "clearTempFilesTip": "Bereinigen Sie temporäre Dateien, die während der Ausführung der Anwendung erstellt wurden, um Speicherplatz freizugeben",
   "uploadFileTooLarge": "⚠️ الملف الذي تم رفعه [${x}] كبير جدًا [${y}]，هل تؤكد المتابعة بالرفع？",
   "recentDocsMaxListCount": "الحد الأقصى لعدد المستندات الحديثة المعروضة",

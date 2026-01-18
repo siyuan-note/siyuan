@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "Includi sottodocumenti",
+  "includeSubDocsTip": "Se abilitato, durante l'esportazione verranno inclusi tutti i sottodocumenti del documento corrente",
+  "includeRelatedDocs": "Includi documenti correlati",
+  "includeRelatedDocsTip": "Se abilitato, durante l'esportazione verranno inclusi i documenti riferiti o collegati tramite database nel documento corrente",
   "removeAssetsID": "Rimuovi l'ID dai nomi dei file delle risorse",
   "removeAssetsIDTip": "Se abilitato, durante l'esportazione in Markdown verrà rimossa la parte ID dai nomi dei file delle risorse",
   "clearTempFiles": "Elimina file temporanei",

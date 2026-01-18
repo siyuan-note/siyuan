@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "子ドキュメントを含める",
+  "includeSubDocsTip": "有効にすると、エクスポート時に現在のドキュメントのすべての子ドキュメントが含まれます",
+  "includeRelatedDocs": "関連ドキュメントを含める",
+  "includeRelatedDocsTip": "有効にすると、エクスポート時に現在のドキュメントで参照されているドキュメントやデータベースにバインドされたドキュメントを含めます",
   "removeAssetsID": "リソースファイル名から ID を削除",
   "removeAssetsIDTip": "有効にすると Markdown をエクスポートする際にリソースファイル名の ID 部分を削除します",
   "clearTempFiles": "一時ファイルを削除",

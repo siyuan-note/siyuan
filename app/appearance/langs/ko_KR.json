@@ -1,4 +1,8 @@
 {
+  "includeSubDocs": "하위 문서 포함",
+  "includeSubDocsTip": "활성화하면 내보낼 때 현재 문서의 모든 하위 문서를 포함합니다",
+  "includeRelatedDocs": "관련 문서 포함",
+  "includeRelatedDocsTip": "활성화하면 내보낼 때 현재 문서에서 참조되거나 데이터베이스에 바인딩된 문서를 포함합니다",
   "removeAssetsID": "리소스 파일 이름의 ID 제거",
   "removeAssetsIDTip": "활성화하면 Markdown 내보내기 시 리소스 파일 이름의 ID 부분을 제거합니다",
   "clearTempFiles": "임시 파일 정리",

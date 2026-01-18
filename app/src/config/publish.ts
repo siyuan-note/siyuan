@@ -233,7 +233,7 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
                 window.siyuan.config.serverAddrs
                     .map(serverAddr => {
                         serverAddr = serverAddr.substring(0, serverAddr.lastIndexOf(":"));
-                        return `<code class="fn__code">${serverAddr}:${port}</code>`
+                        return `<code class="fn__code">${serverAddr}:${port}</code>`;
                     }).join(" ")
             }</div>`;
         }

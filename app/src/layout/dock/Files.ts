@@ -810,6 +810,8 @@ export class Files extends Model {
             liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
             if (data.data.subFileCount === 0) {
                 liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
+            } else {
+                liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
             }
         }
     }

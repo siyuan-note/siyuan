@@ -926,7 +926,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
                                 // 光标需在图片前 https://github.com/siyuan-note/siyuan/issues/12452
                                 const textPosition = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range);
-                                if (textPosition.start === range.startContainer.textContent.length) {
+                                if (textPosition.start === range.startContainer.textContent.length ||
+                                    (textPosition.start === 0 && range.startContainer.textContent === Constants.ZWSP)) {
                                     removeImage(nextSibling as Element, nodeElement, range, protyle);
                                     event.stopPropagation();
                                     event.preventDefault();

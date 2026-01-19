@@ -1124,12 +1124,12 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     const value = (event.target as HTMLInputElement).value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim();
                     imgElement.setAttribute("src", value);
                     imgElement.setAttribute("data-src", value);
+                    const imgNetElement = assetElement.querySelector(".img__net");
                     if (value.startsWith("assets/")) {
-                        const imgNetElement = assetElement.querySelector(".img__net");
                         if (imgNetElement) {
                             imgNetElement.remove();
                         }
-                    } else if (window.siyuan.config.editor.displayNetImgMark) {
+                    } else if (window.siyuan.config.editor.displayNetImgMark && !imgNetElement) {
                         assetElement.querySelector(".protyle-action__drag").insertAdjacentHTML("afterend", '<span class="img__net"><svg><use xlink:href="#iconLanguage"></use></svg></span>');
                     }
                 });

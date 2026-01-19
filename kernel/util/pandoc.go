@@ -101,8 +101,9 @@ func Pandoc(from, to, o, content string) (err error) {
 }
 
 var (
-	PandocBinPath      string // Pandoc 可执行文件路径
-	PandocTemplatePath string // Pandoc Docx 模板文件路径
+	PandocBinPath         string // Pandoc 可执行文件路径
+	PandocTemplatePath    string // Pandoc Docx 模板文件路径
+	PandocColorFilterPath string // Pandoc 颜色过滤器路径
 )
 
 func InitPandoc() {
@@ -129,16 +130,28 @@ func InitPandoc() {
 		}
 	}
 
-	PandocTemplatePath = filepath.Join(pandocDir, "pandoc-template.docx")
+	PandocTemplatePath = filepath.Join(pandocDir, "pandoc-resources", "pandoc-template.docx")
 	if !gulu.File.IsExist(PandocTemplatePath) {
-		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-template.docx")
+		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc-template.docx")
 		if "dev" == Mode || !gulu.File.IsExist(PandocTemplatePath) {
-			PandocTemplatePath = filepath.Join(WorkingDir, "pandoc/pandoc-template.docx")
+			PandocTemplatePath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc-template.docx")
 		}
 	}
 	if !gulu.File.IsExist(PandocTemplatePath) {
 		PandocTemplatePath = ""
 		logging.LogWarnf("pandoc template file [%s] not found", PandocTemplatePath)
+	}
+
+	PandocColorFilterPath = filepath.Join(pandocDir, "pandoc-resources", "pandoc_color_filter.lua")
+	if !gulu.File.IsExist(PandocColorFilterPath) {
+		PandocColorFilterPath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc_color_filter.lua")
+		if "dev" == Mode || !gulu.File.IsExist(PandocColorFilterPath) {
+			PandocColorFilterPath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc_color_filter.lua")
+		}
+	}
+	if !gulu.File.IsExist(PandocColorFilterPath) {
+		PandocColorFilterPath = ""
+		logging.LogWarnf("pandoc color filter file [%s] not found", PandocColorFilterPath)
 	}
 
 	defer eventbus.Publish(EvtConfPandocInitialized)

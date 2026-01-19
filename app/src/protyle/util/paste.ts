@@ -16,6 +16,7 @@ import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
+import {base64ToURL} from "../../util/image";
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
@@ -593,7 +594,25 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
-            const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
+            let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
+            if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = textPlainDom;
+                const imgSrcList: string[] = [];
+                const imageElements = tempElement.content.querySelectorAll("img");
+                imageElements.forEach((item) => {
+                    if (item.getAttribute("data-src").startsWith("data:image/")) {
+                        imgSrcList.push(item.getAttribute("data-src"));
+                    }
+                });
+                const base64SrcList = await base64ToURL(imgSrcList);
+                base64SrcList.forEach((item, index) => {
+                    imageElements[index].setAttribute("src", item);
+                    imageElements[index].setAttribute("data-src", item);
+                    imageElements[index].parentElement.querySelector(".img__net")?.remove();
+                });
+                textPlainDom = tempElement.innerHTML;
+            }
             insertHTML(textPlainDom, protyle, false, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);

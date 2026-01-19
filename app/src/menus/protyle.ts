@@ -1443,7 +1443,32 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         } else {
             textElements[0].select();
         }
-        window.siyuan.menus.menu.removeCB = () => {
+        window.siyuan.menus.menu.removeCB = async () => {
+            const srcPart = textElements[0].value.split(",");
+            if (src !== textElements[0].value && srcPart.length > 1 && srcPart[0].startsWith("data:image/")) {
+                // data:image/svg+xml;base64,XXX
+                const mimeMatch = srcPart[0].match(/data:([^;]+);/);
+                const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+                const binary = atob(srcPart[1]);
+                const u8arr = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    u8arr[i] = binary.charCodeAt(i);
+                }
+                const formData = new FormData();
+                formData.append("file[]", new File([u8arr], `base64image.${{
+                    "image/png": "png",
+                    "image/jpeg": "jpg",
+                    "image/webp": "webp",
+                    "image/gif": "gif",
+                    "image/svg+xml": "svg"
+                }[mime] || "png"}`, {type: mime}));
+                const response = await fetchSyncPost(Constants.UPLOAD_ADDRESS, formData);
+                const base64Src = response.data.succMap[Object.keys(response.data.succMap)[0]];
+                imgElement.setAttribute("src", base64Src);
+                imgElement.setAttribute("data-src", base64Src);
+                assetElement.querySelector(".img__net")?.remove();
+            }
+
             const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
             if (ocrElement && ocrElement.dataset.ocrText !== ocrElement.value) {
                 fetchPost("/api/asset/setImageOCRText", {

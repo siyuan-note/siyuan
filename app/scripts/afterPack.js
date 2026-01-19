@@ -29,7 +29,7 @@ async function removeLanguagePacks(appOutDir, packager, platform) {
     );
     fileExtension = ".lproj";
     isDirectory = true;
-  } else if (platform === "win32") {
+  } else if (platform === "win32" || platform === "linux") {
     resourcePath = path.join(appOutDir, "locales");
     fileExtension = ".pak";
     isDirectory = false;

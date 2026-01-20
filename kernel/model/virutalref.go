@@ -45,9 +45,6 @@ var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
 	BufferItems: 64,
 })
 
-// newlineRegexp 用于匹配连续或单个换行符的正则表达式
-var newlineRegexp = regexp.MustCompile(`[\r\n]+`)
-
 func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 	val, ok := virtualBlockRefCache.Get(root.ID)
 	if !ok {
@@ -256,7 +253,7 @@ func parseKeywords(keywordsStr string) (keywords []string) {
 	// 先处理转义的逗号
 	keywordsStr = strings.ReplaceAll(keywordsStr, "\\,", "__comma@sep__")
 	// 再将连续或单个换行符替换为一个逗号，避免把 `\\\n` 转换为 `\,`
-	keywordsStr = newlineRegexp.ReplaceAllString(keywordsStr, ",")
+	keywordsStr = util.ReplaceNewline(keywordsStr, ",")
 	// 按逗号分隔
 	for part := range strings.SplitSeq(keywordsStr, ",") {
 		part = strings.TrimSpace(part) // 剔除前后的空白字符

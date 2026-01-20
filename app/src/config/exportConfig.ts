@@ -165,12 +165,11 @@ export const exportConfig = {
     <span class="fn__space"></span>
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="pandocBin"><svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}</button>
 </div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.export25}
-        <div class="b3-label__text">${window.siyuan.languages.export26}</div>
-    </div>
-    <input class="b3-text-field fn__flex-center fn__size200" id="pandocParams">
+<div class="b3-label config__item">
+    ${window.siyuan.languages.export25}
+    <div class="b3-label__text">${window.siyuan.languages.export26}</div>
+    <div class="fn__hr"></div>
+    <textarea class="b3-text-field fn__block" id="pandocParams"></textarea>
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1 fn__flex-center">

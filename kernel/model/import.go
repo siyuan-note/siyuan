@@ -1282,6 +1282,11 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 	case "image/png":
 		img, decodeErr = png.Decode(dataReader)
 		ext = ".png"
+		if nil != decodeErr {
+			dataReader.Seek(0, 0)
+			img, decodeErr = jpeg.Decode(dataReader)
+			ext = ".jpg"
+		}
 	case "image/jpeg":
 		img, decodeErr = jpeg.Decode(dataReader)
 		ext = ".jpg"

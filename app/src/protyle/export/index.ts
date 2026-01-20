@@ -735,8 +735,8 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
             }, exportResponse => {
                 if (option.type === "word") {
                     if (exportResponse.code === 1) {
-                        showMessage(exportResponse.msg, undefined, "error");
                         hideMessage(msgId);
+                        showMessage(exportResponse.msg, 0, "error");
                         return;
                     }
                     afterExport(exportResponse.data.path, msgId);

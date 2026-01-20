@@ -773,6 +773,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
+		"--lua-filter", util.PandocColorFilterPath,
 	}
 
 	params := util.RemoveInvalid(Conf.Export.PandocParams)
@@ -946,6 +947,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 	if docx {
 		processIFrame(tree)
+		fillThemeStyleVar(tree)
 	}
 
 	luteEngine := NewLute()

@@ -325,6 +325,9 @@ func InitConf() {
 	if "" != docxTemplate {
 		params := util.RemoveInvalid(Conf.Export.PandocParams)
 		if gulu.File.IsExist(docxTemplate) && !strings.Contains(params, "--reference-doc") {
+			if !strings.HasPrefix(docxTemplate, "\"") {
+				docxTemplate = "\"" + docxTemplate + "\""
+			}
 			params += " --reference-doc " + docxTemplate
 			Conf.Export.PandocParams = strings.TrimSpace(params)
 		}

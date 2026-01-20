@@ -21,7 +21,7 @@ import {renameAsset} from "../../../editor/rename";
 import * as dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
-import {getCompressURL, removeCompressURL} from "../../../util/image";
+import {base64ToURL, getCompressURL, removeCompressURL} from "../../../util/image";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {filesize} from "filesize";
 
@@ -201,11 +201,17 @@ export const editAssetItem = (options: {
 }) => {
     const linkAddress = removeCompressURL(options.content);
     const type = options.type as "image" | "file";
-    const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, () => {
-        if ((!textElements[1] && textElements[0].value === linkAddress) ||
-            (textElements[1] && textElements[0].value === linkAddress && textElements[1].value === options.name)) {
+    const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, async () => {
+        let currentLink = textElements[0].value;
+        if ((!textElements[1] && currentLink === linkAddress) ||
+            (textElements[1] && currentLink === linkAddress && textElements[1].value === options.name)) {
             return;
         }
+        if (type === "image" && currentLink.startsWith("data:image/")) {
+            const base64Src = await base64ToURL([currentLink]);
+            currentLink = base64Src[0];
+        }
+
         updateAssetCell({
             protyle: options.protyle,
             cellElements: options.cellElements,
@@ -213,7 +219,7 @@ export const editAssetItem = (options: {
             updateValue: {
                 index: options.index,
                 value: {
-                    content: textElements[0].value,
+                    content: currentLink,
                     name: textElements[1] ? textElements[1].value : "",
                     type
                 }

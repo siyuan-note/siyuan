@@ -1272,9 +1272,9 @@ func subscribeConfEvents() {
 			params += " \"" + util.PandocTemplatePath + "\""
 			Conf.Export.PandocParams = strings.TrimSpace(params)
 		}
-		
+
 		logging.LogInfof("pandoc params set to [%s]", Conf.Export.PandocParams)
-		logging.LogInfof("pandoc template [%s], color filter [%s]", util.PandocTemplatePath, util.PandocColorFilterPath)
+		logging.LogInfof("pandoc resources [%s, %s]", util.PandocTemplatePath, util.PandocColorFilterPath)
 		Conf.Save()
 	})
 }

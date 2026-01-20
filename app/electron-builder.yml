@@ -74,3 +74,4 @@ extraResources:
     to: "pandoc.zip"
   - from: "pandoc/pandoc-resources"
     to: "pandoc-resources"
+    filter: "!**/{.DS_Store}"

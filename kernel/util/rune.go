@@ -27,6 +27,10 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+func ReplaceNewline(text, replaceWith string) string {
+	return regexp.MustCompile(`[\r\n]+`).ReplaceAllString(text, replaceWith)
+}
+
 func ContainsCJK(text string) bool {
 	for _, r := range text {
 		ret := unicode.Is(unicode.Han, r) || unicode.Is(unicode.Lm, r) ||

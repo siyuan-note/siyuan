@@ -626,6 +626,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && !event.isComposing && (event.key.indexOf("Arrow") > -1)) {
             // 需使用 editabled，否则代码块会把语言字数算入
             const tdElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+            let tdStatus;
+            if (tdElement) {
+                const cells = nodeElement.querySelectorAll('td, th');
+                if (cells[cells.length - 1] === tdElement) {
+                    tdStatus = "last";
+                }
+            }
             const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
             if (nodeElement.classList.contains("code-block") && position.end === nodeEditableElement.innerText.length) {
@@ -635,7 +642,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             // 需使用 innerText 否则表格内 br 无法传唤为 /n
             if (event.key === "ArrowDown" && nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 && (
-                (tdElement && !tdElement.parentElement.nextElementSibling && nodeType === "NodeTable" && !getNextBlock(nodeElement)) ||
+                (tdElement && tdStatus === "last" && nodeType === "NodeTable" && !getNextBlock(nodeElement)) ||
                 (nodeType === "NodeCodeBlock" && !getNextBlock(nodeElement)) ||
                 (nodeElement.parentElement.getAttribute("data-type") === "NodeBlockquote" && nodeElement.nextElementSibling.classList.contains("protyle-attr") && !getNextBlock(nodeElement.parentElement)) ||
                 (nodeElement.parentElement.classList.contains("callout-content") && !nodeElement.nextElementSibling && !getNextBlock(nodeElement.parentElement.parentElement))
@@ -731,7 +738,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             if (event.key === "ArrowDown") {
                 if (nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 &&
-                    nodeElement === protyle.wysiwyg.element.lastElementChild) {
+                    nodeElement === protyle.wysiwyg.element.lastElementChild && !tdElement) {
                     setLastNodeRange(getContenteditableElement(nodeEditableElement), range, false);
                     range.collapse(false);
                     event.stopPropagation();

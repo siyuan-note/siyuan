@@ -111,7 +111,7 @@ func InitPandoc() {
 		return
 	}
 
-	pandocDir := filepath.Join(TempDir, "pandoc")
+	tempPandocDir := filepath.Join(TempDir, "pandoc")
 
 	if confPath := filepath.Join(ConfDir, "conf.json"); gulu.File.IsExist(confPath) {
 		// Workspace built-in Pandoc is no longer initialized after customizing Pandoc path https://github.com/siyuan-note/siyuan/issues/8377
@@ -119,7 +119,7 @@ func InitPandoc() {
 			conf := map[string]interface{}{}
 			if err = gulu.JSON.UnmarshalJSON(data, &conf); err == nil && nil != conf["export"] {
 				export := conf["export"].(map[string]interface{})
-				if customPandocBinPath := export["pandocBin"].(string); !strings.HasPrefix(customPandocBinPath, pandocDir) {
+				if customPandocBinPath := export["pandocBin"].(string); !strings.HasPrefix(customPandocBinPath, tempPandocDir) {
 					if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
 						PandocBinPath = customPandocBinPath
 						logging.LogInfof("custom pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
@@ -130,24 +130,18 @@ func InitPandoc() {
 		}
 	}
 
-	PandocTemplatePath = filepath.Join(pandocDir, "pandoc-resources", "pandoc-template.docx")
+	PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc-template.docx")
 	if !gulu.File.IsExist(PandocTemplatePath) {
-		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc-template.docx")
-		if "dev" == Mode || !gulu.File.IsExist(PandocTemplatePath) {
-			PandocTemplatePath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc-template.docx")
-		}
+		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc-template.docx")
 	}
 	if !gulu.File.IsExist(PandocTemplatePath) {
 		PandocTemplatePath = ""
 		logging.LogWarnf("pandoc template file [%s] not found", PandocTemplatePath)
 	}
 
-	PandocColorFilterPath = filepath.Join(pandocDir, "pandoc-resources", "pandoc_color_filter.lua")
+	PandocColorFilterPath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc_color_filter.lua")
 	if !gulu.File.IsExist(PandocColorFilterPath) {
-		PandocColorFilterPath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc_color_filter.lua")
-		if "dev" == Mode || !gulu.File.IsExist(PandocColorFilterPath) {
-			PandocColorFilterPath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc_color_filter.lua")
-		}
+		PandocColorFilterPath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc_color_filter.lua")
 	}
 	if !gulu.File.IsExist(PandocColorFilterPath) {
 		PandocColorFilterPath = ""
@@ -158,13 +152,13 @@ func InitPandoc() {
 
 	if gulu.OS.IsWindows() {
 		if "amd64" == runtime.GOARCH {
-			PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")
+			PandocBinPath = filepath.Join(tempPandocDir, "bin", "pandoc.exe")
 		}
 	} else if gulu.OS.IsDarwin() {
-		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc")
+		PandocBinPath = filepath.Join(tempPandocDir, "bin", "pandoc")
 	} else if gulu.OS.IsLinux() {
 		if "amd64" == runtime.GOARCH {
-			PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc")
+			PandocBinPath = filepath.Join(tempPandocDir, "bin", "pandoc")
 		}
 	}
 	pandocVer := getPandocVer(PandocBinPath)
@@ -174,22 +168,22 @@ func InitPandoc() {
 	}
 
 	pandocZip := filepath.Join(WorkingDir, "pandoc.zip")
-	if "dev" == Mode || !gulu.File.IsExist(pandocZip) {
+	if !gulu.File.IsExist(pandocZip) {
 		if gulu.OS.IsWindows() {
 			if "amd64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-windows-amd64.zip")
+				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-windows-amd64.zip")
 			}
 		} else if gulu.OS.IsDarwin() {
 			if "amd64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-amd64.zip")
+				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-darwin-amd64.zip")
 			} else if "arm64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-arm64.zip")
+				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-darwin-arm64.zip")
 			}
 		} else if gulu.OS.IsLinux() {
 			if "amd64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-amd64.zip")
+				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-linux-amd64.zip")
 			} else if "arm64" == runtime.GOARCH {
-				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-arm64.zip")
+				pandocZip = filepath.Join(WorkingDir, "pandoc", "pandoc-linux-arm64.zip")
 			}
 		}
 	}
@@ -200,7 +194,7 @@ func InitPandoc() {
 		return
 	}
 
-	if err := gulu.Zip.Unzip(pandocZip, pandocDir); err != nil {
+	if err := gulu.Zip.Unzip(pandocZip, tempPandocDir); err != nil {
 		logging.LogErrorf("unzip pandoc failed: %s", err)
 		return
 	}

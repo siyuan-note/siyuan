@@ -250,7 +250,29 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
             } else if (range.startContainer.childNodes.length > 0) {
                 // in table or code block
                 const cloneRange = range.cloneRange();
-                range.selectNode(range.startContainer.childNodes[Math.max(0, range.startOffset - 1)]);
+                if (range.startOffset === 0) {
+                    let firstNode = range.startContainer.childNodes[range.startOffset] || range.startContainer.firstChild;
+                    while (firstNode) {
+                        if (firstNode.textContent === "" && firstNode.nodeType === 3) {
+                            firstNode = firstNode.previousSibling;
+                        } else {
+                            break;
+                        }
+                    }
+                    range.selectNodeContents(firstNode);
+                    range.collapse(true);
+                } else {
+                    let lastNode = range.startContainer.childNodes[range.startOffset] || range.startContainer.lastChild;
+                    while (lastNode) {
+                        if (lastNode.textContent === "" && lastNode.nodeType === 3) {
+                            lastNode = lastNode.previousSibling;
+                        } else {
+                            break;
+                        }
+                    }
+                    range.selectNodeContents(lastNode);
+                    range.collapse(false);
+                }
                 cursorRect = range.getClientRects()[0];
                 range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
                 range.setStart(cloneRange.startContainer, cloneRange.startOffset);

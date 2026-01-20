@@ -1,5 +1,11 @@
 import {updateTransaction} from "../wysiwyg/transaction";
-import {getSelectionOffset, focusByWbr, focusByRange, focusBlock} from "./selection";
+import {
+    getSelectionOffset,
+    focusByWbr,
+    focusByRange,
+    focusBlock,
+    getSelectionPosition,
+} from "./selection";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
@@ -468,20 +474,23 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         }
 
         if (event.key === "ArrowUp" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            const startContainer = range.startContainer as HTMLElement;
-            let previousBrElement;
-            if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
-                previousBrElement = (startContainer.childNodes[Math.min(range.startOffset, startContainer.childNodes.length - 1)] as HTMLElement);
-            } else if (startContainer.parentElement.tagName === "SPAN") {
-                previousBrElement = startContainer.parentElement.previousElementSibling;
-            } else {
-                previousBrElement = startContainer.previousElementSibling;
-            }
-            while (previousBrElement) {
-                if (previousBrElement.tagName === "BR" && hasPreviousSibling(previousBrElement)) {
+            if (cellElement.firstChild) {
+                let firstChild = cellElement.firstChild;
+                while (firstChild) {
+                    if (firstChild.textContent === "" && firstChild.nodeType === 3) {
+                        firstChild = firstChild.nextSibling;
+                    } else {
+                        break;
+                    }
+                }
+                const rangeTemp = document.createRange();
+                rangeTemp.selectNodeContents(firstChild);
+                rangeTemp.collapse(true);
+                const rangeRects = range.getClientRects().length === 0 ? getSelectionPosition(cellElement, range) : range.getClientRects()[0];
+                const rangeTempRects = rangeTemp.getClientRects().length === 0 ? getSelectionPosition(cellElement, rangeTemp) : rangeTemp.getClientRects()[0];
+                if (rangeTempRects.top < rangeRects.top) {
                     return false;
                 }
-                previousBrElement = previousBrElement.previousElementSibling;
             }
             const trElement = cellElement.parentElement as HTMLTableRowElement;
             let previousElement = trElement.previousElementSibling as HTMLTableRowElement;
@@ -499,20 +508,21 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         }
 
         if (event.key === "ArrowDown" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-            const endContainer = range.endContainer as HTMLElement;
-            let nextBrElement;
-            if (endContainer.nodeType !== 3 && (endContainer.tagName === "TH" || endContainer.tagName === "TD")) {
-                nextBrElement = (endContainer.childNodes[Math.max(0, range.endOffset - 1)] as HTMLElement)?.nextElementSibling;
-            } else if (endContainer.parentElement.tagName === "SPAN") {
-                nextBrElement = endContainer.parentElement.nextElementSibling;
-            } else {
-                nextBrElement = endContainer.nextElementSibling;
-            }
-            while (nextBrElement) {
-                if (nextBrElement.tagName === "BR" && nextBrElement.nextSibling) {
+            if (cellElement.lastChild) {
+                let lastChild = cellElement.lastChild;
+                while (lastChild) {
+                    if (lastChild.textContent === "" && lastChild.nodeType === 3) {
+                        lastChild = lastChild.previousSibling;
+                    } else {
+                        break;
+                    }
+                }
+                const rangeTemp = document.createRange();
+                rangeTemp.selectNodeContents(lastChild);
+                rangeTemp.collapse(false);
+                if (getSelectionPosition(cellElement, rangeTemp).top > getSelectionPosition(cellElement, range).top) {
                     return false;
                 }
-                nextBrElement = nextBrElement.nextElementSibling;
             }
             const trElement = cellElement.parentElement as HTMLTableRowElement;
             if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||

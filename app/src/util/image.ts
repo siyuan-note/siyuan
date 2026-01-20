@@ -30,7 +30,7 @@ export const base64ToURL = async (base64SrcList: string[]) => {
         for (let i = 0; i < binary.length; i++) {
             u8arr[i] = binary.charCodeAt(i);
         }
-        formData.append("file[]", new File([u8arr], `base64image.${{
+        formData.append("file[]", new File([u8arr], `base64image-${Lute.NewNodeID()}.${{
             "image/png": "png",
             "image/jpeg": "jpg",
             "image/webp": "webp",

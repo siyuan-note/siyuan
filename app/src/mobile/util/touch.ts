@@ -260,8 +260,6 @@ export const handleTouchMove = (event: TouchEvent) => {
                 scrollElement.scrollLeft = 1;
                 if (scrollElement.scrollLeft === 0) {
                     noScroll = true;
-                } else {
-                    scrollElement.scrollLeft = 0;
                 }
             }
             if (!noScroll) {

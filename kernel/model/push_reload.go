@@ -139,7 +139,7 @@ func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
 
 	refreshDocInfo0(tree, size)
 	go func() {
-		time.Sleep(512 * time.Millisecond)
+		time.Sleep(128 * time.Millisecond)
 		refreshParentDocInfo(tree)
 	}()
 }

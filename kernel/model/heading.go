@@ -281,7 +281,6 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		logging.LogWarnf("remove tree [%s] failed: %s", srcTree.Path, removeErr)
 	}
 	box.removeSort([]string{srcTree.ID})
-	RemoveRecentDoc([]string{srcTree.ID})
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"ids": []string{srcTree.ID},

@@ -1,4 +1,4 @@
-[中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
+[中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)| [日本語](https://github.com/siyuan-note/siyuan/blob/master/API_ja_JP.md)
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)

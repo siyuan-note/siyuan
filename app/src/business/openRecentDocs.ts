@@ -20,18 +20,14 @@ const renderRecentDocsContent = async (data: {
 }[], element: Element, key?: string) => {
     let tabHtml = "";
     let index = 0;
-
-    if (key) {
-        data = data.filter((item) => {
-            return item.title.toLowerCase().includes(key.toLowerCase());
-        });
-    }
     data.forEach((item) => {
-        tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+        if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
+            tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
 </li>`;
-        index++;
+            index++;
+        }
     });
     let switchPath = "";
     if (tabHtml) {
@@ -49,10 +45,10 @@ const renderRecentDocsContent = async (data: {
     <span class="b3-list-item__text">${window.siyuan.languages.riffCard}</span>
     <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.riffCard.custom)}</span>
 </li>`;
+            docIndex++;
             if (!switchPath) {
                 switchPath = window.siyuan.languages.riffCard;
             }
-            docIndex++;
         }
         getAllDocks().forEach((item) => {
             if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
@@ -153,7 +149,6 @@ export const openRecentDocs = () => {
         sortSelect.addEventListener("change", () => {
             // 重新调用 API 获取排序后的数据
             fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
-                response = newResponse;
                 renderRecentDocsContent(newResponse.data, dialog.element, searchElement.value);
             });
             window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type = sortSelect.value;

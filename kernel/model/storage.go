@@ -372,7 +372,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	switch sortBy {
 	case "updated": // 按更新时间排序
 		// 从数据库查询最近修改的文档
-		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, 32)
+		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
 		ret = []*RecentDoc{}
 		if 1 > len(sqlBlocks) {
 			return

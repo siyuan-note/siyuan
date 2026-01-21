@@ -361,62 +361,40 @@ export const copyTab = (app: App, tab: Tab) => {
 };
 
 export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
-    const tabsToClose: Tab[] = [];
+    const rootIDs: string[] = [];
     if (type === "closeOthers") {
-        for (const item of tab.parent.children) {
+        for (let index = 0; index < tab.parent.children.length; index++) {
+            const item = tab.parent.children[index];
             if (item.id !== tab.id && !item.headElement.classList.contains("item--pin")) {
-                tabsToClose.push(item);
+                if (item.model instanceof Editor) {
+                    rootIDs.push(item.model.editor.protyle.block.rootID);
+                }
+                item.parent.removeTab(item.id, true, false);
+                index--;
             }
         }
     } else if (type === "closeAll") {
-        for (const item of tab.parent.children) {
+        for (let index = 0; index < tab.parent.children.length; index++) {
+            const item = tab.parent.children[index];
             if (!item.headElement.classList.contains("item--pin")) {
-                tabsToClose.push(item);
-            }
-        }
-    } else if (tabs && tabs.length > 0) {
-        for (const item of tabs) {
-            if (!item.headElement.classList.contains("item--pin")) {
-                tabsToClose.push(item);
-            }
-        }
-    }
-
-    // 收集所有需要关闭的文档 rootID 并批量关闭页签
-    const rootIDs: string[] = [];
-    for (const item of tabsToClose) {
-        let rootID;
-        if (item.model instanceof Editor) {
-            rootID = item.model.editor.protyle.block.rootID;
-        } else if (!item.model) {
-            const initTab = item.headElement.getAttribute("data-initdata");
-            if (initTab) {
-                try {
-                    const initTabData = JSON.parse(initTab);
-                    if (initTabData && initTabData.instance === "Editor" && initTabData.rootId) {
-                        rootID = initTabData.rootId;
-                    }
-                } catch (e) {
-                    console.warn("Failed to parse tab init data:", e);
+                if (item.model instanceof Editor) {
+                    rootIDs.push(item.model.editor.protyle.block.rootID);
                 }
+                item.parent.removeTab(item.id, true);
+                index--;
             }
         }
-        if (rootID) {
-            rootIDs.push(rootID);
-        }
-
-        if (type === "closeOthers") {
-            item.parent.removeTab(item.id, true, false);
-        } else {
-            item.parent.removeTab(item.id, true);
+    } else if (tabs.length > 0) {
+        for (let index = 0; index < tabs.length; index++) {
+            if (!tabs[index].headElement.classList.contains("item--pin")) {
+                tabs[index].parent.removeTab(tabs[index].id);
+            }
         }
     }
-
     // 批量更新文档关闭时间
     if (rootIDs.length > 0) {
         fetchPost("/api/storage/batchUpdateRecentDocCloseTime", {rootIDs});
     }
-
     if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
         tab.parent.switchTab(tab.headElement, true);
     } else if (tab.parent.children.length > 0) {

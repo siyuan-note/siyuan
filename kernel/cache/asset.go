@@ -83,15 +83,51 @@ var (
 	assetsLock  = sync.Mutex{}
 )
 
+// GetAssets 返回所有资源的副本
 func GetAssets() (ret map[string]*Asset) {
 	assetsLock.Lock()
 	defer assetsLock.Unlock()
 
-	ret = map[string]*Asset{}
+	// 指定长度避免分配新内存时扩容和迁移
+	ret = make(map[string]*Asset, len(assetsCache))
 	for k, v := range assetsCache {
 		ret[k] = v
 	}
 	return
+}
+
+// IterateAssets 遍历所有资源，适合只读场景
+func IterateAssets(fn func(path string, asset *Asset) bool) {
+	assetsLock.Lock()
+	defer assetsLock.Unlock()
+
+	for path, asset := range assetsCache {
+		if !fn(path, asset) {
+			break
+		}
+	}
+}
+
+// FilterAssets 根据过滤函数返回符合条件的资源
+func FilterAssets(filter func(path string, asset *Asset) bool) (ret map[string]*Asset) {
+	assetsLock.Lock()
+	defer assetsLock.Unlock()
+
+	ret = make(map[string]*Asset)
+	for path, asset := range assetsCache {
+		if filter(path, asset) {
+			ret[path] = asset
+		}
+	}
+	return
+}
+
+// GetAssetByPath 根据路径获取资源
+func GetAssetByPath(path string) *Asset {
+	assetsLock.Lock()
+	defer assetsLock.Unlock()
+
+	return assetsCache[path]
 }
 
 func RemoveAsset(path string) {

@@ -149,6 +149,7 @@ export const openRecentDocs = () => {
         sortSelect.addEventListener("change", () => {
             // 重新调用 API 获取排序后的数据
             fetchPost("/api/storage/getRecentDocs", {sortBy: sortSelect.value}, (newResponse) => {
+                response = newResponse;
                 renderRecentDocsContent(newResponse.data, dialog.element, searchElement.value);
             });
             window.siyuan.storage[Constants.LOCAL_RECENT_DOCS].type = sortSelect.value;

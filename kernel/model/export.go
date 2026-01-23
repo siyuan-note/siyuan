@@ -776,6 +776,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	}
 
 	params := util.RemoveInvalid(Conf.Export.PandocParams)
+	params = util.ReplaceNewline(params, " ")
 	if "" != params {
 		customArgs, parseErr := shellquote.Split(params)
 		if nil != parseErr {

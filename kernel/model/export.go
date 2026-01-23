@@ -773,7 +773,6 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
-		"--lua-filter", util.PandocColorFilterPath,
 	}
 
 	params := util.RemoveInvalid(Conf.Export.PandocParams)
@@ -784,6 +783,17 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		} else {
 			args = append(args, customArgs...)
 		}
+	}
+
+	hasLuaFilter := false
+	for i := 0; i < len(args)-1; i++ {
+		if "--lua-filter" == args[i] {
+			hasLuaFilter = true
+			break
+		}
+	}
+	if !hasLuaFilter {
+		args = append(args, "--lua-filter", util.PandocColorFilterPath)
 	}
 
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)

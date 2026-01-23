@@ -670,9 +670,11 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 			continue
 		}
 
-		msg := fmt.Sprintf(Conf.Language(27), html.EscapeString(absAsset))
-		util.PushStatusBar(msg)
-		util.PushUpdateMsg(msgId, msg, 3000)
+		if !ignorePushMsg {
+			msg := fmt.Sprintf(Conf.Language(27), html.EscapeString(absAsset))
+			util.PushStatusBar(msg)
+			util.PushUpdateMsg(msgId, msg, 3000)
+		}
 
 		requestResult := gulu.Ret.NewResult()
 		request := httpclient.NewCloudFileRequest2m()

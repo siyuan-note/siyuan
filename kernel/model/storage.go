@@ -66,11 +66,6 @@ func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 	}
 
 	if len(deduplicated) <= maxCount {
-		// 清空 Title 和 Icon
-		for _, doc := range deduplicated {
-			doc.Title = ""
-			doc.Icon = ""
-		}
 		return deduplicated
 	}
 
@@ -129,9 +124,6 @@ func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 
 	result := make([]*RecentDoc, 0, len(docMap))
 	for _, doc := range docMap {
-		// 清空 Title 和 Icon
-		doc.Title = ""
-		doc.Icon = ""
 		result = append(result, doc)
 	}
 

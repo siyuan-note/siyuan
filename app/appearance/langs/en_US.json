@@ -1297,6 +1297,8 @@
   "about8": "When enabled, the application will be automatically locked when locking the system screen",
   "about11": "Network serving",
   "about12": "When enabled, other devices in the same LAN will be allowed to access. The application will be closed automatically after modification, please restart manually",
+  "networkServeTLS": "Enable HTTPS",
+  "networkServeTLSTip": "When enabled, network connections will be encrypted with TLS using auto-generated self-signed certificates. Browsers will show a security warning that must be accepted. Requires restart",
   "about13": "API token",
   "about14": "The token needs to be authenticated when calling the API<br>HTTP request header <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "Do not enable proxy when set to <code class='fn__code'>Direct connection</code>",

@@ -24,10 +24,18 @@ export const initAbout = () => {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
+<label class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.networkServeTLS}
+        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
+</label>
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>
-        <a target="_blank" href="${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "http://127.0.0.1:" + location.port}" class="b3-button b3-button--outline fn__block">
+        <a target="_blank" href="${window.siyuan.config.system.networkServeTLS ? "https" : "http"}://${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__block">
             <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
         </a>
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
@@ -451,8 +459,18 @@ export const initAbout = () => {
                 });
             });
             const networkServeElement = modelMainElement.querySelector("#networkServe") as HTMLInputElement;
+            const networkServeTLSElement = modelMainElement.querySelector("#networkServeTLS") as HTMLInputElement;
             networkServeElement.addEventListener("change", () => {
+                networkServeTLSElement.disabled = !networkServeElement.checked;
+                if (!networkServeElement.checked) {
+                    networkServeTLSElement.checked = false;
+                }
                 fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
+                    exitSiYuan();
+                });
+            });
+            networkServeTLSElement.addEventListener("change", () => {
+                fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
                     exitSiYuan();
                 });
             });

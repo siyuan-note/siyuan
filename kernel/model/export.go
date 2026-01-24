@@ -60,6 +60,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	windows "golang.org/x/sys/windows"
+	ianaindex "golang.org/x/text/encoding/ianaindex"
 )
 
 func ExportCodeBlock(blockID string) (filePath string, err error) {
@@ -775,8 +777,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		"-o", tmpDocxPath,
 	}
 
-	params := util.RemoveInvalid(Conf.Export.PandocParams)
-	params = util.ReplaceNewline(params, " ")
+	params := util.ReplaceNewline(Conf.Export.PandocParams, " ")
 	if "" != params {
 		customArgs, parseErr := shellquote.Split(params)
 		if nil != parseErr {
@@ -802,8 +803,9 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
 	if err != nil {
-		logging.LogErrorf("export docx failed: %s", gulu.Str.FromBytes(output))
-		err = errors.New(fmt.Sprintf(Conf.Language(14), gulu.Str.FromBytes(output)))
+		msg := DecodeCmdOutput(output)
+		logging.LogErrorf("export docx failed: %s", msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(14), msg))
 		return
 	}
 
@@ -823,6 +825,34 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		}
 	}
 	return
+}
+
+func DecodeCmdOutput(output []byte) string {
+	if !gulu.OS.IsWindows() {
+		return string(output)
+	}
+
+	// 1. 检查是否已经是 UTF-8
+	if utf8.Valid(output) {
+		return string(output)
+	}
+
+	// 2. 获取当前系统 ANSI 代码页 (例如: 950 是 Big5, 932 是日文 Shift-JIS)
+	acp := windows.GetACP()
+
+	// 3. 将代码页 ID 转为编码格式 (例如 "CP950")
+	encodingName := fmt.Sprintf("CP%d", acp)
+	e, err := ianaindex.MIB.Encoding(encodingName)
+	if err != nil {
+		return string(output) // 找不到对应编码则返回原始字节转换
+	}
+
+	// 4. 执行解码
+	decoded, err := e.NewDecoder().Bytes(output)
+	if err != nil {
+		return string(output)
+	}
+	return string(decoded)
 }
 
 func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string) {

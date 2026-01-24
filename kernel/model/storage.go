@@ -378,6 +378,11 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		bts := treenode.GetBlockTrees(rootIDs)
 
 		for _, sqlBlock := range sqlBlocks {
+			bt := bts[sqlBlock.ID]
+			if nil == bt {
+				continue
+			}
+
 			// 解析 IAL 获取 icon
 			icon := ""
 			if sqlBlock.IAL != "" {
@@ -392,19 +397,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 				}
 			}
 			// 获取文档标题
-			title := ""
-			if bt := bts[sqlBlock.ID]; nil != bt {
-				title = path.Base(bt.HPath)
-			}
-			if title == "" {
-				title = sqlBlock.Content
-				if title == "" {
-					title = sqlBlock.HPath
-					if title == "" {
-						title = sqlBlock.ID
-					}
-				}
-			}
+			title := path.Base(bt.HPath)
 			doc := &RecentDoc{
 				RootID: sqlBlock.ID,
 				Icon:   icon,

@@ -72,6 +72,16 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
 </label>
+<div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCACertSection">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.exportCACert}
+        <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200 fn__flex-center" id="exportCACert">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+</div>
 <div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
     <div class="fn__flex">
         <div class="fn__flex-1">
@@ -401,11 +411,25 @@ ${checkUpdateHTML}
             });
         });
         networkServeTLSElement.addEventListener("change", () => {
+            // Show/hide Export CA Cert button based on TLS state
+            const exportCACertSection = about.element.querySelector("#exportCACertSection");
+            if (exportCACertSection) {
+                if (networkServeTLSElement.checked) {
+                    exportCACertSection.classList.remove("fn__none");
+                } else {
+                    exportCACertSection.classList.add("fn__none");
+                }
+            }
             fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
                 exportLayout({
                     errorExit: true,
                     cb: exitSiYuan
                 });
+            });
+        });
+        about.element.querySelector("#exportCACert")?.addEventListener("click", () => {
+            fetchPost("/api/system/exportTLSCACert", {}, (response) => {
+                openByMobile(response.data.path);
             });
         });
         const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;

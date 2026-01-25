@@ -796,6 +796,17 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		args = append(args, "--lua-filter", util.PandocColorFilterPath)
 	}
 
+	hasReferenceDoc := false
+	for i := 0; i < len(args)-1; i++ {
+		if "--reference-doc" == args[i] {
+			hasReferenceDoc = true
+			break
+		}
+	}
+	if !hasReferenceDoc {
+		args = append(args, "--reference-doc", util.PandocTemplatePath)
+	}
+
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)
 	gulu.CmdAttr(pandoc)
 	pandoc.Stdin = bytes.NewBufferString(content)

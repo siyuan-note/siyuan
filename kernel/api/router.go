@@ -43,6 +43,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setFollowSystemLockScreen", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFollowSystemLockScreen)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServe)
 	ginServer.Handle("POST", "/api/system/setNetworkServeTLS", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServeTLS)
+	ginServer.Handle("POST", "/api/system/exportTLSCACert", model.CheckAuth, model.CheckAdminRole, exportTLSCACert)
 	ginServer.Handle("POST", "/api/system/setAutoLaunch", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAutoLaunch)
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkProxy)

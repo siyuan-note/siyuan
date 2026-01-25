@@ -737,6 +737,36 @@ func setNetworkServeTLS(c *gin.Context) {
 	time.Sleep(time.Second * 3)
 }
 
+func exportTLSCACert(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	caCertPath := filepath.Join(util.ConfDir, util.TLSCACertFilename)
+	if !gulu.File.IsExist(caCertPath) {
+		ret.Code = -1
+		ret.Msg = "CA certificate not found"
+		return
+	}
+
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	exportPath := filepath.Join(tmpDir, util.TLSCACertFilename)
+	if err := gulu.File.CopyFile(caCertPath, exportPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"path": "/export/" + util.TLSCACertFilename,
+	}
+}
+
 func setAutoLaunch(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

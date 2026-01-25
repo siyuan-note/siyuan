@@ -32,6 +32,14 @@ export const initAbout = () => {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
 </label>
+<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCACertSection">
+    ${window.siyuan.languages.exportCACert}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="exportCACert">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
+</div>
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>
@@ -470,8 +478,21 @@ export const initAbout = () => {
                 });
             });
             networkServeTLSElement.addEventListener("change", () => {
+                const exportCACertSection = modelMainElement.querySelector("#exportCACertSection");
+                if (exportCACertSection) {
+                    if (networkServeTLSElement.checked) {
+                        exportCACertSection.classList.remove("fn__none");
+                    } else {
+                        exportCACertSection.classList.add("fn__none");
+                    }
+                }
                 fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
                     exitSiYuan();
+                });
+            });
+            modelMainElement.querySelector("#exportCACert")?.addEventListener("click", () => {
+                fetchPost("/api/system/exportTLSCACert", {}, (response) => {
+                    openByMobile(response.data.path);
                 });
             });
             const tokenElement = modelMainElement.querySelector("#token") as HTMLInputElement;

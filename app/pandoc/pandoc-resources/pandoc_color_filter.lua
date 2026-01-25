@@ -1,5 +1,5 @@
 function Span(el)
-  -- 辅助：解析颜色字符串为 6 位大写十六进制（不带 #），支持颜色名、#hex、rgb()/rgba()
+  -- 辅助：解析颜色字符串为 6 位大写十六进制（不带 #），支持颜色名、#hex、#rgb、rgb()/rgba()
   local function parse_color(s)
     if not s then return nil end
     s = s:gsub("%s+", "")
@@ -8,20 +8,37 @@ function Span(el)
     local named = {
       red = "FF0000", blue = "0000FF", green = "008000",
       yellow = "FFFF00", orange = "FFA500", purple = "800080",
-      black = "000000", white = "FFFFFF"
+      black = "000000", white = "FFFFFF", gray = "808080", grey = "808080"
     }
     if named[lower] then return named[lower] end
 
-    local hex = s:match("#?(%x%x%x%x%x%x)")
-    if hex then return hex:upper() end
+    -- 6-digit hex
+    local hex6 = s:match("#?(%x%x%x%x%x%x)")
+    if hex6 then return hex6:upper() end
 
-    local r,g,b = s:match("rgb%((%d+),%s*(%d+),%s*(%d+)%)")
+    -- 3-digit hex (#rgb -> rrggbb)
+    local hex3 = s:match("#?(%x%x%x)")
+    if hex3 then
+      local r = hex3:sub(1,1)
+      local g = hex3:sub(2,2)
+      local b = hex3:sub(3,3)
+      return (r..r..g..g..b..b):upper()
+    end
+
+    -- rgb(r,g,b) with integer components
+    local r,g,b = s:match("rgb%((%d+),(%d+),(%d+)%)")
     if r and g and b then
-      local function h(n) return string.format("%02X", tonumber(n) or 0) end
+      local function h(n)
+        local nv = tonumber(n) or 0
+        if nv < 0 then nv = 0 end
+        if nv > 255 then nv = 255 end
+        return string.format("%02X", nv)
+      end
       return h(r)..h(g)..h(b)
     end
 
-    local ra,ga,ba,aa = s:match("rgba%((%d+),%s*(%d+),%s*(%d+),%s*([%d%.]+)%)")
+    -- rgba(r,g,b,a) -> 与白（或背景）合成，返回合成后的 hex
+    local ra,ga,ba,aa = s:match("rgba%((%d+),(%d+),(%d+),([%d%.]+)%)")
     if ra and ga and ba and aa then
       local R = tonumber(ra) or 0
       local G = tonumber(ga) or 0

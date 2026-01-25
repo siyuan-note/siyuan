@@ -487,7 +487,16 @@ func exportMdContent(c *gin.Context) {
 		imgTag = arg["imgTag"].(bool)
 	}
 
-	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar, adjustHeadingLevel, imgTag)
+	addTitleMode := 0 // 0：未指定（遵循全局设置 Conf.Export.AddTitle），1：添加标题，2：不添加标题
+	if nil != arg["addTitle"] {
+		if arg["addTitle"].(bool) {
+			addTitleMode = 1
+		} else {
+			addTitleMode = 2
+		}
+	}
+
+	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, addTitleMode, yfm, fillCSSVar, adjustHeadingLevel, imgTag)
 	ret.Data = map[string]interface{}{
 		"hPath":   hPath,
 		"content": content,

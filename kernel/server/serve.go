@@ -210,7 +210,25 @@ func Serve(fastMode bool, cookieKey string) {
 	if !fastMode {
 		rewritePortJSON(pid, port)
 	}
-	logging.LogInfof("kernel [pid=%s] http server [%s] is booting", pid, host+":"+port)
+
+	// Prepare TLS if enabled
+	var certPath, keyPath string
+	useTLS := model.Conf.System.NetworkServeTLS && model.Conf.System.NetworkServe
+	if useTLS {
+		// Ensure TLS certificates exist (proxy will use them directly)
+		var tlsErr error
+		certPath, keyPath, tlsErr = util.GetOrCreateTLSCert()
+		if tlsErr != nil {
+			logging.LogErrorf("failed to get TLS certificates: %s", tlsErr)
+			if !fastMode {
+				os.Exit(logging.ExitCodeUnavailablePort)
+			}
+			return
+		}
+		logging.LogInfof("kernel [pid=%s] http server [%s] is booting (TLS will be enabled on fixed port proxy)", pid, host+":"+port)
+	} else {
+		logging.LogInfof("kernel [pid=%s] http server [%s] is booting", pid, host+":"+port)
+	}
 	util.HttpServing = true
 
 	go util.HookUILoaded()

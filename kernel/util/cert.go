@@ -277,6 +277,57 @@ func writeCertAndKey(certPath, keyPath string, certDER []byte, privateKey *ecdsa
 	return nil
 }
 
+// Imports a CA certificate and private key from PEM-encoded strings.
+func ImportCABundle(caCertPEM, caKeyPEM string) error {
+	certBlock, _ := pem.Decode([]byte(caCertPEM))
+	if certBlock == nil {
+		return fmt.Errorf("failed to decode CA certificate PEM")
+	}
+
+	caCert, err := x509.ParseCertificate(certBlock.Bytes)
+	if err != nil {
+		return fmt.Errorf("failed to parse CA certificate: %w", err)
+	}
+
+	if !caCert.IsCA {
+		return fmt.Errorf("the provided certificate is not a CA certificate")
+	}
+
+	keyBlock, _ := pem.Decode([]byte(caKeyPEM))
+	if keyBlock == nil {
+		return fmt.Errorf("failed to decode CA private key PEM")
+	}
+
+	_, err = x509.ParseECPrivateKey(keyBlock.Bytes)
+	if err != nil {
+		return fmt.Errorf("failed to parse CA private key: %w", err)
+	}
+
+	caCertPath := filepath.Join(ConfDir, TLSCACertFilename)
+	caKeyPath := filepath.Join(ConfDir, TLSCAKeyFilename)
+
+	if err := os.WriteFile(caCertPath, []byte(caCertPEM), 0644); err != nil {
+		return fmt.Errorf("failed to write CA certificate: %w", err)
+	}
+
+	if err := os.WriteFile(caKeyPath, []byte(caKeyPEM), 0600); err != nil {
+		return fmt.Errorf("failed to write CA private key: %w", err)
+	}
+
+	certPath := filepath.Join(ConfDir, TLSCertFilename)
+	keyPath := filepath.Join(ConfDir, TLSKeyFilename)
+
+	if gulu.File.IsExist(certPath) {
+		os.Remove(certPath)
+	}
+	if gulu.File.IsExist(keyPath) {
+		os.Remove(keyPath)
+	}
+
+	logging.LogInfof("imported CA bundle, server certificate will be regenerated on next TLS initialization")
+	return nil
+}
+
 // trimIPv6Brackets removes brackets from IPv6 address strings like "[::1]"
 func trimIPv6Brackets(ip string) string {
 	if len(ip) > 2 && ip[0] == '[' && ip[len(ip)-1] == ']' {

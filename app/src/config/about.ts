@@ -82,6 +82,26 @@ export const about = {
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
 </div>
+<div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCABundleSection">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.exportCABundle}
+        <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200 fn__flex-center" id="exportCABundle">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+</div>
+<div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="importCABundleSection">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.importCABundle}
+        <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200 fn__flex-center" id="importCABundle">
+        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+    </button>
+</div>
 <div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
     <div class="fn__flex">
         <div class="fn__flex-1">
@@ -411,13 +431,18 @@ ${checkUpdateHTML}
             });
         });
         networkServeTLSElement.addEventListener("change", () => {
-            // Show/hide Export CA Cert button based on TLS state
             const exportCACertSection = about.element.querySelector("#exportCACertSection");
-            if (exportCACertSection) {
+            const exportCABundleSection = about.element.querySelector("#exportCABundleSection");
+            const importCABundleSection = about.element.querySelector("#importCABundleSection");
+            if (exportCACertSection && exportCABundleSection && importCABundleSection) {
                 if (networkServeTLSElement.checked) {
                     exportCACertSection.classList.remove("fn__none");
+                    exportCABundleSection.classList.remove("fn__none");
+                    importCABundleSection.classList.remove("fn__none");
                 } else {
                     exportCACertSection.classList.add("fn__none");
+                    exportCABundleSection.classList.add("fn__none");
+                    importCABundleSection.classList.add("fn__none");
                 }
             }
             fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
@@ -431,6 +456,33 @@ ${checkUpdateHTML}
             fetchPost("/api/system/exportTLSCACert", {}, (response) => {
                 openByMobile(response.data.path);
             });
+        });
+        about.element.querySelector("#exportCABundle")?.addEventListener("click", () => {
+            fetchPost("/api/system/exportTLSCABundle", {}, (response) => {
+                openByMobile(response.data.path);
+            });
+        });
+        about.element.querySelector("#importCABundle")?.addEventListener("click", () => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".zip";
+            input.onchange = () => {
+                if (input.files && input.files[0]) {
+                    const formData = new FormData();
+                    formData.append("file", input.files[0]);
+                    fetch("/api/system/importTLSCABundle", {
+                        method: "POST",
+                        body: formData,
+                    }).then(res => res.json()).then((response) => {
+                        if (response.code === 0) {
+                            showMessage(window.siyuan.languages.importCABundleSuccess);
+                        } else {
+                            showMessage(response.msg, 6000, "error");
+                        }
+                    });
+                }
+            };
+            input.click();
         });
         const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;
         lockScreenModeElement.addEventListener("change", () => {

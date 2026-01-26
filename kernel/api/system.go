@@ -767,6 +767,126 @@ func exportTLSCACert(c *gin.Context) {
 	}
 }
 
+func exportTLSCABundle(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	caCertPath := filepath.Join(util.ConfDir, util.TLSCACertFilename)
+	caKeyPath := filepath.Join(util.ConfDir, util.TLSCAKeyFilename)
+
+	if !gulu.File.IsExist(caCertPath) || !gulu.File.IsExist(caKeyPath) {
+		ret.Code = -1
+		ret.Msg = "CA certificate not found, please enable TLS first"
+		return
+	}
+
+	tmpDir := filepath.Join(util.TempDir, "export", "ca-bundle")
+	os.RemoveAll(tmpDir)
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer os.RemoveAll(tmpDir)
+
+	if err := gulu.File.CopyFile(caCertPath, filepath.Join(tmpDir, util.TLSCACertFilename)); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err := gulu.File.CopyFile(caKeyPath, filepath.Join(tmpDir, util.TLSCAKeyFilename)); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := filepath.Join(util.TempDir, "export", "ca-bundle.zip")
+	zipFile, err := gulu.Zip.Create(zipPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err := zipFile.AddDirectory("", tmpDir); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err := zipFile.Close(); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"path": "/export/ca-bundle.zip",
+	}
+}
+
+func importTLSCABundle(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = "file is required: " + err.Error()
+		return
+	}
+
+	tmpDir := filepath.Join(util.TempDir, "import")
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmpZipPath := filepath.Join(tmpDir, "ca-bundle.zip")
+	if err := c.SaveUploadedFile(file, tmpZipPath); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	defer os.Remove(tmpZipPath)
+
+	extractDir := filepath.Join(tmpDir, "ca-bundle")
+	os.RemoveAll(extractDir)
+	if err := gulu.Zip.Unzip(tmpZipPath, extractDir); err != nil {
+		ret.Code = -1
+		ret.Msg = "failed to extract zip file: " + err.Error()
+		return
+	}
+	defer os.RemoveAll(extractDir)
+
+	caCertPath := filepath.Join(extractDir, util.TLSCACertFilename)
+	caCertPEM, err := os.ReadFile(caCertPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = "ca.crt not found in zip file"
+		return
+	}
+
+	caKeyPath := filepath.Join(extractDir, util.TLSCAKeyFilename)
+	caKeyPEM, err := os.ReadFile(caKeyPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = "ca.key not found in zip file"
+		return
+	}
+
+	if err := util.ImportCABundle(string(caCertPEM), string(caKeyPEM)); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"msg": "CA bundle imported successfully. Please restart to apply changes.",
+	}
+}
+
 func setAutoLaunch(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

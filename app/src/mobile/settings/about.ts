@@ -40,6 +40,22 @@ export const initAbout = () => {
     </button>
     <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
 </div>
+<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCABundleSection">
+    ${window.siyuan.languages.exportCABundle}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="exportCABundle">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
+</div>
+<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="importCABundleSection">
+    ${window.siyuan.languages.importCABundle}
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" id="importCABundle">
+        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>
+</div>
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>
@@ -479,11 +495,17 @@ export const initAbout = () => {
             });
             networkServeTLSElement.addEventListener("change", () => {
                 const exportCACertSection = modelMainElement.querySelector("#exportCACertSection");
-                if (exportCACertSection) {
+                const exportCABundleSection = modelMainElement.querySelector("#exportCABundleSection");
+                const importCABundleSection = modelMainElement.querySelector("#importCABundleSection");
+                if (exportCACertSection && exportCABundleSection && importCABundleSection) {
                     if (networkServeTLSElement.checked) {
                         exportCACertSection.classList.remove("fn__none");
+                        exportCABundleSection.classList.remove("fn__none");
+                        importCABundleSection.classList.remove("fn__none");
                     } else {
                         exportCACertSection.classList.add("fn__none");
+                        exportCABundleSection.classList.add("fn__none");
+                        importCABundleSection.classList.add("fn__none");
                     }
                 }
                 fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
@@ -494,6 +516,33 @@ export const initAbout = () => {
                 fetchPost("/api/system/exportTLSCACert", {}, (response) => {
                     openByMobile(response.data.path);
                 });
+            });
+            modelMainElement.querySelector("#exportCABundle")?.addEventListener("click", () => {
+                fetchPost("/api/system/exportTLSCABundle", {}, (response) => {
+                    openByMobile(response.data.path);
+                });
+            });
+            modelMainElement.querySelector("#importCABundle")?.addEventListener("click", () => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = ".zip";
+                input.onchange = () => {
+                    if (input.files && input.files[0]) {
+                        const formData = new FormData();
+                        formData.append("file", input.files[0]);
+                        fetch("/api/system/importTLSCABundle", {
+                            method: "POST",
+                            body: formData,
+                        }).then(res => res.json()).then((response) => {
+                            if (response.code === 0) {
+                                showMessage(window.siyuan.languages.importCABundleSuccess);
+                            } else {
+                                showMessage(response.msg, 6000, "error");
+                            }
+                        });
+                    }
+                };
+                input.click();
             });
             const tokenElement = modelMainElement.querySelector("#token") as HTMLInputElement;
             tokenElement.addEventListener("change", () => {

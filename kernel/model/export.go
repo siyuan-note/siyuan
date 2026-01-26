@@ -2221,17 +2221,10 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 	}
 }
 
-func ExportMarkdownContent(id string, refMode, embedMode, addTitleMode int, addYfm, fillCSSVar, adjustHeadingLv, imgTag bool) (hPath, exportedMd string) {
+func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar, adjustHeadingLv, imgTag, addTitle bool) (hPath, exportedMd string) {
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
-	}
-
-	addTitle := Conf.Export.AddTitle
-	if 1 == addTitleMode { // 0：未指定（遵循全局设置 Conf.Export.AddTitle），1：添加标题，2：不添加标题
-		addTitle = true
-	} else if 2 == addTitleMode {
-		addTitle = false
 	}
 
 	tree := prepareExportTree(bt)

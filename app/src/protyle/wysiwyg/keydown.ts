@@ -628,7 +628,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const tdElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
             let tdStatus;
             if (tdElement) {
-                const cells = nodeElement.querySelectorAll('td, th');
+                const cells = nodeElement.querySelectorAll("td, th");
                 if (cells[cells.length - 1] === tdElement) {
                     tdStatus = "last";
                 }

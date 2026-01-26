@@ -1126,7 +1126,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     imgElement.setAttribute("src", value);
                     imgElement.setAttribute("data-src", value);
                     const imgNetElement = assetElement.querySelector(".img__net");
-                    if (value.startsWith("assets/")) {
+                    if (value.startsWith("assets/") || value.startsWith("data:image/")) {
                         if (imgNetElement) {
                             imgNetElement.remove();
                         }

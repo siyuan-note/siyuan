@@ -10,7 +10,7 @@ export const fetchPost = (
     data?: any,
     cb?: (response: IWebSocketData) => void,
     headers?: IObject,
-    failCallback?: (response: IWebSocketData) => void,) => {
+    failCallback?: (response: IWebSocketData) => void) => {
     const init: RequestInit = {
         method: "POST",
     };

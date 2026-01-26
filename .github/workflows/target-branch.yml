@@ -7,8 +7,10 @@ on:
 jobs:
   check-branch:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - uses: Vankka/pr-target-branch-action@v2
+      - uses: Vankka/pr-target-branch-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -16,5 +18,5 @@ jobs:
           exclude: dev
           change-to: dev
           comment: |
-              Your PR was set to target `master`, PRs should be target `dev`
-              The base branch of this PR has been automatically changed to `dev`, please check that there are no merge conflicts
+              The base branch of this PR has been automatically changed to `dev`, please check that there are no merge conflicts.
+              此 PR 的基础分支已自动更改为 `dev`，请检查是否存在合并冲突。

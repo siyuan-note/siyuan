@@ -6,6 +6,7 @@ on:
 
 jobs:
   build:
+    if: ${{ github.repository_owner == 'siyuan-note' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check tag aka check release type

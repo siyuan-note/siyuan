@@ -773,10 +773,9 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		"-f", "html+tex_math_dollars",
 		"--resource-path", tmpDir,
 		"-o", tmpDocxPath,
-		"--lua-filter", util.PandocColorFilterPath,
 	}
 
-	params := util.RemoveInvalid(Conf.Export.PandocParams)
+	params := util.ReplaceNewline(Conf.Export.PandocParams, " ")
 	if "" != params {
 		customArgs, parseErr := shellquote.Split(params)
 		if nil != parseErr {
@@ -786,13 +785,36 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		}
 	}
 
+	hasLuaFilter := false
+	for i := 0; i < len(args)-1; i++ {
+		if "--lua-filter" == args[i] {
+			hasLuaFilter = true
+			break
+		}
+	}
+	if !hasLuaFilter {
+		args = append(args, "--lua-filter", util.PandocColorFilterPath)
+	}
+
+	hasReferenceDoc := false
+	for i := 0; i < len(args)-1; i++ {
+		if "--reference-doc" == args[i] {
+			hasReferenceDoc = true
+			break
+		}
+	}
+	if !hasReferenceDoc {
+		args = append(args, "--reference-doc", util.PandocTemplatePath)
+	}
+
 	pandoc := exec.Command(Conf.Export.PandocBin, args...)
 	gulu.CmdAttr(pandoc)
 	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
 	if err != nil {
-		logging.LogErrorf("export docx failed: %s", gulu.Str.FromBytes(output))
-		err = errors.New(fmt.Sprintf(Conf.Language(14), gulu.Str.FromBytes(output)))
+		msg := gulu.DecodeCmdOutput(output)
+		logging.LogErrorf("export docx failed: %s", msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(14), msg))
 		return
 	}
 
@@ -2199,7 +2221,7 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 	}
 }
 
-func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar, adjustHeadingLv, imgTag bool) (hPath, exportedMd string) {
+func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar, adjustHeadingLv, imgTag, addTitle bool) (hPath, exportedMd string) {
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
@@ -2211,7 +2233,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 		".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, Conf.Export.InlineMemo, nil, true, fillCSSVar, map[string]*parse.Tree{})
+		addTitle, Conf.Export.InlineMemo, nil, true, fillCSSVar, map[string]*parse.Tree{})
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	if addYfm {
 		exportedMd = yfm(docIAL) + exportedMd
@@ -3400,6 +3422,11 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		name = util.FilterFileName(name)
 		hPath = path.Join(dir, name)
 		p = hPath + ext
+		if 1 == len(docPaths) {
+			// 如果仅导出单个文档则使用文档标题作为文件名，不使用父路径 https://github.com/siyuan-note/siyuan/issues/13635#issuecomment-3794560233
+			p = name + ext
+		}
+
 		writePath := filepath.Join(exportFolder, p)
 		hash := fmt.Sprintf("%x", sha1.Sum([]byte(md)))
 		if gulu.File.IsExist(writePath) && hash != wrotePathHash[writePath] {

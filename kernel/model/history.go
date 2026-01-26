@@ -680,8 +680,19 @@ func clearOutdatedHistoryDir(historyDir string) {
 			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
+
 		if dirInfo.ModTime().Unix() < ago {
 			removes = append(removes, filepath.Join(historyDir, dir.Name()))
+			continue
+		}
+
+		if dirName := dirInfo.Name(); len(dirName) > len("2006-01-02-150405") {
+			if t, parseErr := time.Parse("2006-01-02-150405", dirName[:len("2006-01-02-150405")]); nil == parseErr {
+				if nameTime := t.Unix(); 0 != nameTime && nameTime < ago {
+					removes = append(removes, filepath.Join(historyDir, dir.Name()))
+					continue
+				}
+			}
 		}
 	}
 	for _, dir := range removes {

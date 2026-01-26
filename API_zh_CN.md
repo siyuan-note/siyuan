@@ -1,4 +1,4 @@
-[English](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+[English](https://github.com/siyuan-note/siyuan/blob/master/API.md)| [日本語](https://github.com/siyuan-note/siyuan/blob/master/API_ja_JP.md)
 
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)

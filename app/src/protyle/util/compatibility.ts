@@ -469,6 +469,7 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
         defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // IFilesPath[]
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
+            removed: true,
             page: 1,
             sort: 0,
             group: 0,

@@ -777,7 +777,7 @@ export class Toolbar {
                             currentNode.textContent = currentNode.textContent.substring(1);
                         }
                         if (previousElement.textContent.endsWith(Constants.ZWSP)) {
-                            previousElement.textContent = previousElement.textContent.substring(0, previousElement.textContent.length - 2);
+                            previousElement.textContent = previousElement.textContent.substring(0, previousElement.textContent.length - 1);
                         }
                     } else {
                         const previousType = previousElement ? (previousElement.getAttribute("data-type") || "").split(" ") : [];

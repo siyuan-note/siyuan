@@ -686,15 +686,13 @@ func clearOutdatedHistoryDir(historyDir string) {
 			continue
 		}
 
-		var nameTime int64
 		if dirName := dirInfo.Name(); len(dirName) > len("2006-01-02-150405") {
 			if t, parseErr := time.Parse("2006-01-02-150405", dirName[:len("2006-01-02-150405")]); nil == parseErr {
-				nameTime = t.Unix()
+				if nameTime := t.Unix(); 0 != nameTime && nameTime < ago {
+					removes = append(removes, filepath.Join(historyDir, dir.Name()))
+					continue
+				}
 			}
-		}
-
-		if 0 != nameTime && nameTime < ago {
-			removes = append(removes, filepath.Join(historyDir, dir.Name()))
 		}
 	}
 	for _, dir := range removes {

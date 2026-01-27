@@ -56,7 +56,6 @@ echo 'Building UI'
 cd "$PROJECT_ROOT/app"
 pnpm install
 pnpm run build
-cd "$PROJECT_ROOT"
 
 echo
 echo 'Building Kernel'
@@ -65,11 +64,11 @@ go version
 export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
+export GOOS=linux
 
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel amd64'
-    export GOOS=linux
     export GOARCH=amd64
     export CC=~/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc
     go build -buildmode=pie --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
@@ -77,7 +76,6 @@ fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel arm64'
-    export GOOS=linux
     export GOARCH=arm64
     export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
     go build -buildmode=pie --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
@@ -97,11 +95,10 @@ if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     pnpm run dist-linux-arm64
 fi
 
-cd "$PROJECT_ROOT"
-# 尝试返回初始目录
-cd "$INITIAL_DIR" 2>/dev/null || true
-
 echo
 echo '=============================='
 echo '      Build successful!'
 echo '=============================='
+
+# 返回初始目录
+cd "$INITIAL_DIR"

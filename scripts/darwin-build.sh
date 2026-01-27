@@ -56,7 +56,6 @@ echo 'Building UI'
 cd "$PROJECT_ROOT/app"
 pnpm install
 pnpm run build
-cd "$PROJECT_ROOT"
 
 echo
 echo 'Building Kernel'
@@ -65,18 +64,17 @@ go version
 export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
+export GOOS=darwin
 
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel amd64'
-    export GOOS=darwin
     export GOARCH=amd64
     go build --tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
 fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel arm64'
-    export GOOS=darwin
     export GOARCH=arm64
     go build --tags fts5 -v -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
 fi
@@ -95,11 +93,10 @@ if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     pnpm run dist-darwin-arm64
 fi
 
-cd "$PROJECT_ROOT"
-# 尝试返回初始目录
-cd "$INITIAL_DIR" 2>/dev/null || true
-
 echo
 echo '=============================='
 echo '      Build successful!'
 echo '=============================='
+
+# 返回初始目录
+cd "$INITIAL_DIR"

@@ -860,7 +860,7 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
-        hideElements(["hint"], protyle);
+        hideElements(["hint", "select"], protyle);
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const types = (renderElement.getAttribute("data-type") || "").split(" ");
@@ -1103,8 +1103,19 @@ export class Toolbar {
             }
         });
         this.subElementCloseCB = () => {
+            protyle.wysiwyg.element.focus({ preventScroll: true});
             if (!renderElement.parentElement || protyle.disabled ||
                 (oldTextValue === textElement.value && textElement.value)) {
+                if (renderElement.tagName === "SPAN") {
+                    if (renderElement.parentElement) {
+                        this.range.setStartAfter(renderElement);
+                        this.range.collapse(true);
+                        focusByRange(this.range);
+                    }
+                } else {
+                    focusBlock(renderElement);
+                    renderElement.classList.add("protyle-wysiwyg--select");
+                }
                 return;
             }
             let inlineLastNode: Element;

@@ -278,10 +278,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     let isCallout = blockElement.parentElement.classList.contains("callout-content");
-    if (type === "Delete" &&
-        (!blockElement.previousElementSibling || blockElement.previousElementSibling.classList.contains("protyle-action"))) {
+    if (type === "Delete") {
         const bqCaElement = hasClosestByClassName(blockElement, "bq") || hasClosestByClassName(blockElement, "callout");
-        if (bqCaElement) {
+        if (bqCaElement && getContenteditableElement(bqCaElement) === getContenteditableElement(blockElement)) {
             isCallout = bqCaElement.classList.contains("callout");
             blockElement = isCallout ? bqCaElement.querySelector(".callout-content").firstElementChild : bqCaElement.firstElementChild;
         }
@@ -342,10 +341,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
-    if (type === "Delete" &&
-        (!blockElement.previousElementSibling || blockElement.previousElementSibling.classList.contains("protyle-action"))) {
+    if (type === "Delete") {
         const liElement = hasClosestByClassName(blockElement, "li");
-        if (liElement) {
+        if (liElement && getContenteditableElement(liElement) === getContenteditableElement(blockElement)) {
             removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
             return;
         }

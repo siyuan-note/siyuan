@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/88250/gulu"
@@ -26,6 +27,24 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func getUnusedAttributeViews(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	unusedAttributeViews := model.UnusedAttributeViews()
+	total := len(unusedAttributeViews)
+
+	const maxUnusedAttributeViews = 512
+	if total > maxUnusedAttributeViews {
+		unusedAttributeViews = unusedAttributeViews[:maxUnusedAttributeViews]
+		util.PushMsg(fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAttributeViews), 5000)
+	}
+
+	ret.Data = map[string]interface{}{
+		"unusedAttributeViews": unusedAttributeViews,
+	}
+}
 
 func getAttributeViewItemIDsByBoundIDs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

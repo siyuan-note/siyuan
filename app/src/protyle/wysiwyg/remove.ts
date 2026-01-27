@@ -1,4 +1,10 @@
-import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
+import {
+    focusBlock,
+    focusByRange,
+    focusByWbr,
+    getSelectionOffset,
+    setLastNodeRange
+} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
@@ -272,7 +278,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     let isCallout = blockElement.parentElement.classList.contains("callout-content");
-    if (type === "Delete") {
+    if (type === "Delete" &&
+        (!blockElement.previousElementSibling || blockElement.previousElementSibling.classList.contains("protyle-action"))) {
         const bqCaElement = hasClosestByClassName(blockElement, "bq") || hasClosestByClassName(blockElement, "callout");
         if (bqCaElement) {
             isCallout = bqCaElement.classList.contains("callout");
@@ -335,7 +342,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         removeLi(protyle, blockElement, range, type === "Delete");
         return;
     }
-    if (type === "Delete") {
+    if (type === "Delete" &&
+        (!blockElement.previousElementSibling || blockElement.previousElementSibling.classList.contains("protyle-action"))) {
         const liElement = hasClosestByClassName(blockElement, "li");
         if (liElement) {
             removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);

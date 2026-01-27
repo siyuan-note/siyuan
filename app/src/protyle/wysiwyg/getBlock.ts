@@ -82,6 +82,9 @@ export const getContenteditableElement = (element: Element): Element => {
     if (!element) {
         return element;
     }
+    if (element.classList.contains("protyle-title__input")) {
+        return  element;
+    }
     let blockElement = element;
     if (!blockElement.getAttribute("data-node-id")) {
         blockElement = element.querySelector("[data-node-id]");

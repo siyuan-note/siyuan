@@ -1,13 +1,19 @@
 #!/bin/bash
 
-echo 'TIP: This script must be run from the project root directory'
-echo 'Usage: ./scripts/linux-build.sh [--target=<target>]'
+# 启用错误处理：任何命令失败立即退出，并打印错误信息
+set -e
+trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"; exit 1' ERR
+
+echo 'Usage: ./linux-build.sh [--target=<target>]'
 echo 'Options:'
 echo '  --target=<target>  Build target: amd64, arm64, or all (default: all)'
 echo
 
-TARGET='all'
+INITIAL_DIR="$(pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+TARGET='all'
 validate_target() {
     if [[ -z "$1" ]]; then
         echo 'Error: --target option requires a value'
@@ -40,50 +46,62 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo 'Building UI'
-cd app || exit
-pnpm install && pnpm run build
-cd .. || exit
-
 echo 'Cleaning Builds'
-rm -rf app/build
-rm -rf app/kernel-linux
-rm -rf app/kernel-linux-arm64
+rm -rf "$PROJECT_ROOT/app/build" 2>/dev/null || true
+rm -rf "$PROJECT_ROOT/app/kernel-linux" 2>/dev/null || true
+rm -rf "$PROJECT_ROOT/app/kernel-linux-arm64" 2>/dev/null || true
 
+echo
+echo 'Building UI'
+cd "$PROJECT_ROOT/app"
+pnpm install
+pnpm run build
+cd "$PROJECT_ROOT"
+
+echo
 echo 'Building Kernel'
-
-cd kernel || exit
+cd "$PROJECT_ROOT/kernel"
 go version
 export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
 
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Kernel amd64'
     export GOOS=linux
     export GOARCH=amd64
     export CC=~/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc
     go build -buildmode=pie --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
 fi
-
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Kernel arm64'
+    export GOOS=linux
     export GOARCH=arm64
     export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
     go build -buildmode=pie --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
 fi
-cd .. || exit
 
-cd app || exit
-
+echo
+echo 'Building Electron App'
+cd "$PROJECT_ROOT/app"
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Electron App amd64'
     pnpm run dist-linux
 fi
-
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Electron App arm64'
     pnpm run dist-linux-arm64
 fi
 
-cd .. || exit
+cd "$PROJECT_ROOT"
+# 尝试返回初始目录
+cd "$INITIAL_DIR" 2>/dev/null || true
+
+echo
+echo '=============================='
+echo '      Build successful!'
+echo '=============================='

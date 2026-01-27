@@ -747,6 +747,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(config.method, "searchSyntaxCheck");
                     config.page = 1;
                     inputEvent(element, config, edit, true);
+                    window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = JSON.parse(JSON.stringify(config));
+                    setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
                 });
                 const rect = target.getBoundingClientRect();
                 window.siyuan.menus.menu.popup({x: rect.right, y: rect.bottom, isLeft: true});
@@ -893,7 +895,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     searchInputElement.addEventListener("blur", () => {
         if (config.removed) {
             config.k = searchInputElement.value;
-            window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = JSON.parse(JSON.stringify(config));
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
         saveKeyList("keys", searchInputElement.value);

@@ -1624,10 +1624,6 @@ declare namespace Config {
          */
         networkServe: boolean;
         /**
-         * Whether to enable HTTPS for network serve (TLS encryption)
-         */
-        networkServeTLS: boolean;
-        /**
          * The operating system name determined at compile time (obtained using the command `go tool
          * dist list`)
          * - `android`: Android

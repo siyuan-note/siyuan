@@ -24,42 +24,10 @@ export const initAbout = () => {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
-<label class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.networkServeTLS}
-        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
-    </div>
-    <div class="fn__space"></div>
-    <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
-</label>
-<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCACertSection">
-    ${window.siyuan.languages.exportCACert}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="exportCACert">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
-</div>
-<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCABundleSection">
-    ${window.siyuan.languages.exportCABundle}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="exportCABundle">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
-</div>
-<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="importCABundleSection">
-    ${window.siyuan.languages.importCABundle}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="importCABundle">
-        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>
-</div>
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>
-        <a target="_blank" href="${window.siyuan.config.system.networkServeTLS ? "https" : "http"}://${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "127.0.0.1"}:${location.port}" class="b3-button b3-button--outline fn__block">
+        <a target="_blank" href="${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "http://127.0.0.1:" + location.port}" class="b3-button b3-button--outline fn__block">
             <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
         </a>
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>
@@ -483,66 +451,10 @@ export const initAbout = () => {
                 });
             });
             const networkServeElement = modelMainElement.querySelector("#networkServe") as HTMLInputElement;
-            const networkServeTLSElement = modelMainElement.querySelector("#networkServeTLS") as HTMLInputElement;
             networkServeElement.addEventListener("change", () => {
-                networkServeTLSElement.disabled = !networkServeElement.checked;
-                if (!networkServeElement.checked) {
-                    networkServeTLSElement.checked = false;
-                }
                 fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                     exitSiYuan();
                 });
-            });
-            networkServeTLSElement.addEventListener("change", () => {
-                const exportCACertSection = modelMainElement.querySelector("#exportCACertSection");
-                const exportCABundleSection = modelMainElement.querySelector("#exportCABundleSection");
-                const importCABundleSection = modelMainElement.querySelector("#importCABundleSection");
-                if (exportCACertSection && exportCABundleSection && importCABundleSection) {
-                    if (networkServeTLSElement.checked) {
-                        exportCACertSection.classList.remove("fn__none");
-                        exportCABundleSection.classList.remove("fn__none");
-                        importCABundleSection.classList.remove("fn__none");
-                    } else {
-                        exportCACertSection.classList.add("fn__none");
-                        exportCABundleSection.classList.add("fn__none");
-                        importCABundleSection.classList.add("fn__none");
-                    }
-                }
-                fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
-                    exitSiYuan();
-                });
-            });
-            modelMainElement.querySelector("#exportCACert")?.addEventListener("click", () => {
-                fetchPost("/api/system/exportTLSCACert", {}, (response) => {
-                    openByMobile(response.data.path);
-                });
-            });
-            modelMainElement.querySelector("#exportCABundle")?.addEventListener("click", () => {
-                fetchPost("/api/system/exportTLSCABundle", {}, (response) => {
-                    openByMobile(response.data.path);
-                });
-            });
-            modelMainElement.querySelector("#importCABundle")?.addEventListener("click", () => {
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = ".zip";
-                input.onchange = () => {
-                    if (input.files && input.files[0]) {
-                        const formData = new FormData();
-                        formData.append("file", input.files[0]);
-                        fetch("/api/system/importTLSCABundle", {
-                            method: "POST",
-                            body: formData,
-                        }).then(res => res.json()).then((response) => {
-                            if (response.code === 0) {
-                                showMessage(window.siyuan.languages.importCABundleSuccess);
-                            } else {
-                                showMessage(response.msg, 6000, "error");
-                            }
-                        });
-                    }
-                };
-                input.click();
             });
             const tokenElement = modelMainElement.querySelector("#token") as HTMLInputElement;
             tokenElement.addEventListener("change", () => {

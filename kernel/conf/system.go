@@ -36,9 +36,8 @@ type System struct {
 	ConfDir      string `json:"confDir"`
 	DataDir      string `json:"dataDir"`
 
-	NetworkServe    bool          `json:"networkServe"`    // 是否开启网络伺服
-	NetworkServeTLS bool          `json:"networkServeTLS"` // 是否开启 HTTPS 网络伺服
-	NetworkProxy    *NetworkProxy `json:"networkProxy"`
+	NetworkServe bool          `json:"networkServe"` // 是否开启网络伺服
+	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
 	DownloadInstallPkg bool `json:"downloadInstallPkg"`
 	AutoLaunch2        int  `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口

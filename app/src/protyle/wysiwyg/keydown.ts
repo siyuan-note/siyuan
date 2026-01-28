@@ -1942,15 +1942,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     range.setEndAfter(inlineElement);
                     range.collapse(false);
                 }
-                const wbrElement = document.createElement("wbr");
-                range.insertNode(wbrElement);
-                const oldHTML = nodeElement.outerHTML;
-                range.extractContents();
-                range.insertNode(document.createTextNode(tabSpace));
-                range.collapse(false);
-                focusByRange(range);
-                wbrElement.remove();
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                if (range.startContainer.nodeType === 3) {
+                    // Mac 简体拼音输入法按 Tab 之后继续输入中文会直接写入首字母 https://ld246.com/article/1749558626317
+                    document.execCommand("insertText", false, tabSpace);
+                } else {
+                    const wbrElement = document.createElement("wbr");
+                    range.insertNode(wbrElement);
+                    const oldHTML = nodeElement.outerHTML;
+                    range.extractContents();
+                    range.insertNode(document.createTextNode(tabSpace));
+                    range.collapse(false);
+                    focusByRange(range);
+                    wbrElement.remove();
+                    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                }
                 return true;
             }
         }

@@ -6,6 +6,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+import * as path from "path";
 /// #endif
 import {openBy} from "../editor/util";
 import {renderAssetsPreview} from "../asset/renderAssets";
@@ -20,6 +21,11 @@ export const image = {
         <div class="item item--full item--focus" data-type="remove">
             <span class="fn__flex-1"></span>
             <span class="item__text">${window.siyuan.languages.unreferencedAssets}</span>
+            <span class="fn__flex-1"></span>
+        </div>
+        <div class="item item--full" data-type="removeAV">
+            <span class="fn__flex-1"></span>
+                <span class="item__text">${window.siyuan.languages.unreferencedAV}</span>
             <span class="fn__flex-1"></span>
         </div>
         <div class="item item--full" data-type="missing">
@@ -44,6 +50,21 @@ export const image = {
             </ul>
             <div class="config-assets__preview"></div>
         </div>
+        <div class="config-assets${isM ? " b3-list--mobile" : ""}" data-type="removeAV">
+            <div class="fn__hr--b"></div>
+            <div class="fn__flex">
+                <div class="fn__space"></div>
+                <button id="removeAVAll" class="b3-button b3-button--outline fn__flex-center fn__size200">
+                    <svg class="svg"><use xlink:href="#iconTrashcan"></use></svg>
+                    ${window.siyuan.languages.delete}
+                </button>
+            </div>
+            <div class="fn__hr"></div>
+            <ul class="b3-list b3-list--background config-assets__list">
+                <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
+            </ul>
+            <div class="config-assets__preview"></div>
+        </div>
         <div class="fn__none config-assets${isM ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
@@ -55,7 +76,8 @@ export const image = {
 </div>`;
     },
     bindEvent: () => {
-        const assetsListElement = image.element.querySelector(".config-assets__list");
+        const assetsListElement = image.element.querySelector('.config-assets[data-type="remove"] .config-assets__list');
+        const avListElement = image.element.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
         image.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(image.element)) {
@@ -71,7 +93,14 @@ export const image = {
                             });
                             /// #endif
                             assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            image.element.querySelector(".config-assets__preview").innerHTML = "";
+                            assetsListElement.nextElementSibling.innerHTML = "";
+                        });
+                    }, undefined, true);
+                } else if (target.id === "removeAVAll") {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
+                        fetchPost("/api/asset/removeUnusedAttributeViews", {}, () => {
+                            avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                            avListElement.nextElementSibling.innerHTML = "";
                         });
                     }, undefined, true);
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
@@ -81,9 +110,15 @@ export const image = {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
                             if (!item.getAttribute("data-init")) {
-                                fetchPost("/api/asset/getMissingAssets", {}, response => {
-                                    image._renderList(response.data.missingAssets, item.querySelector(".config-assets__list"), false);
-                                });
+                                if (type === "removeAV") {
+                                    fetchPost("/api/av/getUnusedAttributeViews", {}, response => {
+                                        image._renderList(response.data.unusedAttributeViews, avListElement, "unRefAV");
+                                    });
+                                } else {
+                                    fetchPost("/api/asset/getMissingAssets", {}, response => {
+                                        image._renderList(response.data.missingAssets, item.querySelector(".config-assets__list"), "lostAssets");
+                                    });
+                                }
                                 item.setAttribute("data-init", "true");
                             }
                         } else {
@@ -94,7 +129,11 @@ export const image = {
                     event.stopPropagation();
                     break;
                 } else if (type === "copy") {
-                    writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim().replace("assets/", ""));
+                    if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
+                        writeText(`<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.previousElementSibling.textContent}" data-type="NodeAttributeView" data-av-type="table"></div>`);
+                    } else {
+                        writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim().replace("assets/", ""));
+                    }
                 } else if (type === "open") {
                     /// #if !BROWSER
                     openBy(target.parentElement.getAttribute("data-path"), "folder");
@@ -102,24 +141,38 @@ export const image = {
                 } else if (type === "clear") {
                     const pathString = target.parentElement.getAttribute("data-path");
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {
-                        fetchPost("/api/asset/removeUnusedAsset", {
-                            path: pathString,
-                        }, response => {
-                            /// #if !MOBILE
-                            getAllModels().asset.forEach(item => {
-                                if (response.data.path === item.path) {
-                                    item.parent.parent.removeTab(item.parent.id);
-                                }
-                            });
-                            /// #endif
+                        if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
                             const liElement = target.parentElement;
-                            if (liElement.parentElement.querySelectorAll("li").length === 1) {
-                                liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                            } else {
-                                liElement.remove();
-                            }
-                            image.element.querySelector(".config-assets__preview").innerHTML = "";
-                        });
+                            fetchPost("/api/asset/removeUnusedAttributeView", {
+                                id: liElement.querySelector(".b3-list-item__text").textContent,
+                            }, () => {
+                                if (liElement.parentElement.querySelectorAll("li").length === 1) {
+                                    liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                                } else {
+                                    liElement.remove();
+                                }
+                                avListElement.nextElementSibling.innerHTML = "";
+                            });
+                        } else {
+                            fetchPost("/api/asset/removeUnusedAsset", {
+                                path: pathString,
+                            }, response => {
+                                /// #if !MOBILE
+                                getAllModels().asset.forEach(item => {
+                                    if (response.data.path === item.path) {
+                                        item.parent.parent.removeTab(item.parent.id);
+                                    }
+                                });
+                                /// #endif
+                                const liElement = target.parentElement;
+                                if (liElement.parentElement.querySelectorAll("li").length === 1) {
+                                    liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+                                } else {
+                                    liElement.remove();
+                                }
+                                assetsListElement.nextElementSibling.innerHTML = "";
+                            });
+                        }
                     }, undefined, true);
                     event.preventDefault();
                     event.stopPropagation();
@@ -138,19 +191,19 @@ export const image = {
             }
         });
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
-            image._renderList(response.data.unusedAssets, assetsListElement);
+            image._renderList(response.data.unusedAssets, assetsListElement, "unrefAssets");
         });
     },
-    _renderList: (data: string[], element: Element, action = true) => {
+    _renderList: (data: string[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
         let boxOpenHTML = "";
-        if (!isBrowser() && action) {
+        if (!isBrowser() && type !== "lostAssets") {
             boxOpenHTML = `<span data-type="open" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.showInFolder}">
     <svg><use xlink:href="#iconFolder"></use></svg>
 </span>`;
         }
         let boxClearHTML = "";
-        if (action) {
+        if (type !== "lostAssets") {
             boxClearHTML = `<span data-type="clear" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.delete}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>`;
@@ -158,8 +211,8 @@ export const image = {
         const isM = isMobile();
         data.forEach((item) => {
             const idx = item.indexOf("assets/");
-            const dataPath = item.substr(idx);
-            html += `<li data-path="${dataPath}"  class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}">
+            const dataPath = type === "unRefAV" ? path.join(window.siyuan.config.system.dataDir, "storage", "av", item) + ".json" : item.substr(idx);
+            html += `<li data-tab-type="${type}" data-path="${dataPath}"  class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}">
     <span class="b3-list-item__text">${escapeHtml(item)}</span>
     <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>

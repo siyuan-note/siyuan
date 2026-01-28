@@ -1730,6 +1730,8 @@
     "275": "Dokumente, die mit einer neueren Version erstellt wurden, können nicht geöffnet werden. Bitte aktualisieren Sie auf die neueste Version und versuchen Sie es erneut",
     "276": "Temporäre Dateien werden bereinigt...",
     "277": "Bereinigung der temporären Dateien abgeschlossen, [%d] Dateien entfernt, [%s] Festplattenspeicher freigegeben",
-    "278": "Der Arbeitsbereich befindet sich nicht auf einer SSD, was zu erheblichen Leistungseinbußen führen kann, es wird empfohlen, den Arbeitsbereich auf einer SSD zu platzieren"
+    "278": "Der Arbeitsbereich befindet sich nicht auf einer SSD, was zu erheblichen Leistungseinbußen führen kann, es wird empfohlen, den Arbeitsbereich auf einer SSD zu platzieren",
+    "279": "Insgesamt [%d] nicht referenzierte Datenbanken, hier werden nur [%d] aufgelistet",
+    "280": "Bereinigung nicht referenzierter Datenbanken abgeschlossen, [%d] Dateien gelöscht, [%s] Festplattenspeicher freigegeben"
   }
 }

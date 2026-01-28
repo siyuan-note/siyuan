@@ -64,7 +64,7 @@ func getUnusedAttributeViews(c *gin.Context) {
 	const maxUnusedAttributeViews = 512
 	if total > maxUnusedAttributeViews {
 		unusedAttributeViews = unusedAttributeViews[:maxUnusedAttributeViews]
-		util.PushMsg(fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAttributeViews), 5000)
+		util.PushMsg(fmt.Sprintf(model.Conf.Language(279), total, maxUnusedAttributeViews), 5000)
 	}
 
 	ret.Data = map[string]interface{}{

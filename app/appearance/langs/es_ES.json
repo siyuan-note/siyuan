@@ -1730,6 +1730,8 @@
     "275": "No se puede abrir el documento creado con una versión más reciente. Actualiza a la última versión e inténtalo de nuevo",
     "276": "Limpiando archivos temporales...",
     "277": "Limpieza de archivos temporales completada, [%d] archivos eliminados, se liberaron [%s] de espacio en disco",
-    "278": "El espacio de trabajo no está ubicado en un disco de estado sólido (SSD), esto puede provocar una disminución notable del rendimiento, se recomienda colocar el espacio de trabajo en un SSD"
+    "278": "El espacio de trabajo no está ubicado en un disco de estado sólido (SSD), esto puede provocar una disminución notable del rendimiento, se recomienda colocar el espacio de trabajo en un SSD",
+    "279": "Hay [%d] bases de datos sin referencias en total, aquí se muestran solo [%d]",
+    "280": "Limpieza de bases de datos sin referencias completada, [%d] archivos eliminados, se liberaron [%s] de espacio en disco"
   }
 }

@@ -323,40 +323,60 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 		return
 	}
 
-	// 去重
-	seen := make(map[string]struct{}, len(recentDocs))
-	var deduplicated []*RecentDoc
+	IDs := make([]string, 0, len(recentDocs))
 	for _, doc := range recentDocs {
-		if _, ok := seen[doc.RootID]; !ok {
-			seen[doc.RootID] = struct{}{}
-			deduplicated = append(deduplicated, doc)
-		}
+		IDs = append(IDs, doc.RootID)
 	}
+	bts := treenode.GetBlockTrees(IDs)
+	mergedDocs := make(map[string]*RecentDoc, len(recentDocs))
+	rootIDs := make([]string, 0, len(recentDocs))
+	changed := false
 
-	var rootIDs []string
-	for _, doc := range deduplicated {
-		rootIDs = append(rootIDs, doc.RootID)
-	}
-	bts := treenode.GetBlockTrees(rootIDs)
-	var notExists []string
-	for _, doc := range deduplicated {
-		if bt := bts[doc.RootID]; nil != bt {
-			// 获取最新的文档标题和图标
+	for _, doc := range recentDocs {
+		bt := bts[doc.RootID]
+		if nil == bt {
+			changed = true
+			continue
+		}
+
+		// 文档块可能已经转换成标题块 https://github.com/siyuan-note/siyuan/pull/16727#issuecomment-3810081850
+		if doc.RootID != bt.RootID {
+			changed = true
+			doc.RootID = bt.RootID
+		}
+
+		if merged, ok := mergedDocs[bt.RootID]; !ok {
 			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
-			ial := sql.GetBlockAttrs(doc.RootID)
-			if "" != ial["icon"] {
-				doc.Icon = ial["icon"]
-			}
-			ret = append(ret, doc)
+			mergedDocs[bt.RootID] = doc
+			rootIDs = append(rootIDs, bt.RootID)
 		} else {
-			notExists = append(notExists, doc.RootID)
+			// 合并重复记录
+			changed = true
+			if doc.ViewedAt > merged.ViewedAt {
+				merged.ViewedAt = doc.ViewedAt
+			}
+			if doc.OpenAt > merged.OpenAt {
+				merged.OpenAt = doc.OpenAt
+			}
+			if doc.ClosedAt > merged.ClosedAt {
+				merged.ClosedAt = doc.ClosedAt
+			}
 		}
 	}
 
-	if 0 < len(notExists) {
-		err = setRecentDocs(ret)
-		if err != nil {
-			return
+	attrs := sql.BatchGetBlockAttrs(rootIDs)
+	for rootID, doc := range mergedDocs {
+		if ial, ok := attrs[rootID]; ok {
+			if icon, ok := ial["icon"]; ok && icon != "" {
+				doc.Icon = icon
+			}
+		}
+		ret = append(ret, doc)
+	}
+
+	if changed {
+		if errSet := setRecentDocs(ret); errSet != nil {
+			logging.LogErrorf("update storage [recent-doc] failed in getRecentDocs: %s", errSet)
 		}
 	}
 
@@ -406,7 +426,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			ret = append(ret, doc)
 		}
 	case "closedAt": // 按关闭时间排序
-		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+		filtered := make([]*RecentDoc, 0, len(ret))
 		for _, doc := range ret {
 			if doc.ClosedAt > 0 {
 				filtered = append(filtered, doc)
@@ -419,7 +439,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			})
 		}
 	case "openAt": // 按打开时间排序
-		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+		filtered := make([]*RecentDoc, 0, len(ret))
 		for _, doc := range ret {
 			if doc.OpenAt > 0 {
 				filtered = append(filtered, doc)
@@ -434,7 +454,7 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	case "viewedAt": // 按浏览时间排序
 		fallthrough
 	default:
-		filtered := []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
+		filtered := make([]*RecentDoc, 0, len(ret))
 		for _, doc := range ret {
 			if doc.ViewedAt > 0 {
 				filtered = append(filtered, doc)

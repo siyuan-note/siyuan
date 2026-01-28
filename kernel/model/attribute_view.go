@@ -174,6 +174,9 @@ func UnusedAttributeViews() (ret []string) {
 	}
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	if 1 > len(ret) {
+		ret = []string{}
+	}
 	return
 }
 

@@ -98,7 +98,7 @@ export const image = {
                     }, undefined, true);
                 } else if (target.id === "removeAVAll") {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
-                        fetchPost("/api/asset/removeUnusedAttributeViews", {}, () => {
+                        fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
                             avListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             avListElement.nextElementSibling.innerHTML = "";
                         });
@@ -143,7 +143,7 @@ export const image = {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {
                         if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
                             const liElement = target.parentElement;
-                            fetchPost("/api/asset/removeUnusedAttributeView", {
+                            fetchPost("/api/av/removeUnusedAttributeView", {
                                 id: liElement.querySelector(".b3-list-item__text").textContent,
                             }, () => {
                                 if (liElement.parentElement.querySelectorAll("li").length === 1) {

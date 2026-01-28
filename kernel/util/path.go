@@ -373,6 +373,7 @@ func IsSensitivePath(p string) bool {
 		"/etc/ssh",
 		"/root",
 		"/etc/ssl",
+		"/etc/cron.d/",
 		"/etc/letsencrypt",
 		"/var/lib/docker",
 		"/.gnupg",
@@ -404,6 +405,7 @@ func IsSensitivePath(p string) bool {
 	base := filepath.Base(pp)
 	n := strings.ToLower(base)
 	sensitiveNames := map[string]struct{}{
+		".bashrc":         {},
 		".env":            {},
 		".env.local":      {},
 		".npmrc":          {},

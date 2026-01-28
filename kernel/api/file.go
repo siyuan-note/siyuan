@@ -141,6 +141,14 @@ func copyFile(c *gin.Context) {
 	}
 
 	dest := arg["dest"].(string)
+	if util.IsSensitivePath(dest) {
+		msg := fmt.Sprintf("refuse to copy sensitive file [%s]", dest)
+		logging.LogErrorf(msg)
+		ret.Code = -2
+		ret.Msg = msg
+		return
+	}
+
 	if err = filelock.Copy(src, dest); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1

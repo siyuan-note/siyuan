@@ -378,7 +378,6 @@ const getRootID = (item: Tab) => {
     }
 };
 
-
 export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
     const rootIDs: string[] = [];
     if (type === "closeOthers") {

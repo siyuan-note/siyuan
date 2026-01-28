@@ -196,44 +196,40 @@ export const globalCommand = (command: string, app: App) => {
                     }
                     return true;
                 }
-                fetchPost("/api/block/checkBlockExist", {id: childData.rootId || childData.blockId}, (response) => {
-                    if (response.data) {
-                        fetchPost("/api/block/getBlockInfo", {id: childData.rootId || childData.blockId}, (infoResponse) => {
-                            if (infoResponse.data.rootID === (childData.rootId || childData.blockId)) {
-                                if (childData.instance === "Editor") {
-                                    openFile({
-                                        app,
-                                        fileName: closeData.title,
-                                        id: childData.blockId,
-                                        rootID: childData.rootId,
-                                        mode: childData.mode,
-                                        rootIcon: closeData.docIcon,
-                                        action: [childData.action]
-                                    });
-                                } else if (childData.instance === "Backlink") {
-                                    openBacklink({
-                                        app,
-                                        blockId: childData.blockId,
-                                        rootId: childData.rootId,
-                                        title: closeData.title,
-                                    });
-                                } else if (childData.instance === "Graph") {
-                                    openGraph({
-                                        app,
-                                        blockId: childData.blockId,
-                                        rootId: childData.rootId,
-                                        title: closeData.title
-                                    });
-                                } else if (childData.instance === "Outline") {
-                                    openOutline({
-                                        app,
-                                        rootId: childData.blockId,
-                                        title: closeData.title,
-                                        isPreview: childData.isPreview
-                                    });
-                                }
-                            }
-                        });
+                fetchPost("/api/block/getBlockInfo", {id: childData.rootId || childData.blockId}, (infoResponse) => {
+                    if (infoResponse.data.rootID === (childData.rootId || childData.blockId)) {
+                        if (childData.instance === "Editor") {
+                            openFile({
+                                app,
+                                fileName: closeData.title,
+                                id: childData.blockId,
+                                rootID: childData.rootId,
+                                mode: childData.mode,
+                                rootIcon: closeData.docIcon,
+                                action: [childData.action]
+                            });
+                        } else if (childData.instance === "Backlink") {
+                            openBacklink({
+                                app,
+                                blockId: childData.blockId,
+                                rootId: childData.rootId,
+                                title: closeData.title,
+                            });
+                        } else if (childData.instance === "Graph") {
+                            openGraph({
+                                app,
+                                blockId: childData.blockId,
+                                rootId: childData.rootId,
+                                title: closeData.title
+                            });
+                        } else if (childData.instance === "Outline") {
+                            openOutline({
+                                app,
+                                rootId: childData.blockId,
+                                title: closeData.title,
+                                isPreview: childData.isPreview
+                            });
+                        }
                     }
                 });
             }

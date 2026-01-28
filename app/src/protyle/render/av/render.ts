@@ -270,7 +270,7 @@ const renderGroupTable = (options: ITableOptions) => {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, options.protyle ? (!options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed")) : false)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -290,13 +290,13 @@ const afterRenderTable = (options: ITableOptions) => {
     options.blockElement.setAttribute("data-render", "true");
     options.blockElement.querySelector(".av__scroll").scrollLeft = options.resetData.left;
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
-    const editRect = options.protyle.contentElement.getBoundingClientRect();
+    const editRect = options.protyle ? options.protyle.contentElement.getBoundingClientRect() : null;
     if (options.resetData.headerTransform) {
         const headerTransformElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.headerTransform.groupId}"] .av__row--header`) as HTMLElement;
         if (headerTransformElement) {
             headerTransformElement.style.transform = options.resetData.headerTransform.transform;
         }
-    } else {
+    } else if (editRect) {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
             stickyRow(options.blockElement, editRect, "top");
@@ -307,7 +307,7 @@ const afterRenderTable = (options: ITableOptions) => {
         if (footerTransformElement) {
             footerTransformElement.style.transform = options.resetData.footerTransform.transform;
         }
-    } else {
+    } else if (editRect) {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
             stickyRow(options.blockElement, editRect, "bottom");
@@ -549,11 +549,11 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
             });
             e.firstElementChild.innerHTML = html;
         }
-        const created = protyle.options.history?.created;
-        const snapshot = protyle.options.history?.snapshot;
         const avPageSize = getPageSize(e);
         let data: IAV;
         if (!avData) {
+            const created = protyle ? protyle.options.history?.created : false;
+            const snapshot = protyle ? protyle.options.history?.snapshot : false;
             const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
@@ -588,7 +588,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
 </div>`;
         if (renderAll) {
             e.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, protyle ? (!protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed")) : false)}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>

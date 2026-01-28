@@ -11,6 +11,8 @@ import * as path from "path";
 import {openBy} from "../editor/util";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {writeText} from "../protyle/util/compatibility";
+import {Constants} from "../constants";
+import {avRender} from "../protyle/render/av/render";
 
 export const image = {
     element: undefined as Element,
@@ -63,7 +65,7 @@ export const image = {
             <ul class="b3-list b3-list--background config-assets__list">
                 <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>
             </ul>
-            <div class="config-assets__preview"></div>
+            <div class="config-assets__preview" style="display: block;padding: 8px;"></div>
         </div>
         <div class="fn__none config-assets${isM ? " b3-list--mobile" : ""}" data-type="missing">
             <div class="fn__hr"></div>
@@ -96,6 +98,9 @@ export const image = {
                             assetsListElement.nextElementSibling.innerHTML = "";
                         });
                     }, undefined, true);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (target.id === "removeAVAll") {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
                         fetchPost("/api/av/removeUnusedAttributeViews", {}, () => {
@@ -103,6 +108,9 @@ export const image = {
                             avListElement.nextElementSibling.innerHTML = "";
                         });
                     }, undefined, true);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
                     image.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
@@ -128,16 +136,28 @@ export const image = {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (target.getAttribute("data-tab-type") === "unRefAV") {
+                    avListElement.nextElementSibling.innerHTML = `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                    avRender(avListElement.nextElementSibling.firstElementChild, null);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "copy") {
                     if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
                         writeText(`<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.previousElementSibling.textContent}" data-type="NodeAttributeView" data-av-type="table"></div>`);
                     } else {
                         writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim().replace("assets/", ""));
                     }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "open") {
                     /// #if !BROWSER
                     openBy(target.parentElement.getAttribute("data-path"), "folder");
                     /// #endif
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "clear") {
                     const pathString = target.parentElement.getAttribute("data-path");
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {

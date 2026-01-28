@@ -84,7 +84,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 
 	msgId := util.PushMsg(Conf.Language(100), 30*1000)
 	defer func() {
-		msg := fmt.Sprintf(Conf.Language(91), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
+		msg := fmt.Sprintf(Conf.Language(280), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
 

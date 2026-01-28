@@ -124,7 +124,8 @@ const hotKey2Electron = (key) => {
         electronKey += "Alt+";
     }
     return electronKey + key.replace("⌘", "").replace("⇧", "").replace("⌥", "").replace("⌃", "")
-        .replace("←", "Left").replace("→", "Right").replace("↑", "Up").replace("↓", "Down");
+        .replace("←", "Left").replace("→", "Right").replace("↑", "Up").replace("↓", "Down").replace(" ", "Space")
+        .replace("+", "Plus").replace("⇥", "Tab").replace("⌫", "Backspace").replace("⌦", "Delete").replace("↩", "Return");
 };
 
 /**

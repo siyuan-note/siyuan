@@ -391,7 +391,7 @@ export const openHistory = (app: App) => {
                         <option value="0" ${localHistory.type === 0 ? "selected" : ""}>${window.siyuan.languages.docName}</option>
                         <option value="1" ${localHistory.type === 1 ? "selected" : ""}>${window.siyuan.languages.docNameAndContent}</option>
                         <option value="2" ${localHistory.type === 2 ? "selected" : ""}>${window.siyuan.languages.assets}</option>
-                        <option value="2" ${localHistory.type === 3 ? "selected" : ""}>${window.siyuan.languages.database}</option>
+                        <option value="3" ${localHistory.type === 3 ? "selected" : ""}>${window.siyuan.languages.database}</option>
                     </select>
                     <span class="fn__space"></span>
                     <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : ""}">

@@ -42,6 +42,7 @@ import {Wnd} from "../../../layout/Wnd";
 import {unsplitWnd} from "../../../menus/tab";
 import {openFile} from "../../../editor/util";
 import {fetchPost} from "../../../util/fetch";
+import {setStorageVal} from "../../../protyle/util/compatibility";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -151,8 +152,9 @@ export const globalCommand = (command: string, app: App) => {
             openRecentDocs();
             return true;
         case "recentClosed":
-            if (window.siyuan.closedTabs.length > 0) {
-                const closeData = window.siyuan.closedTabs.pop();
+            if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > 0) {
+                const closeData = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
+                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
                 const childData = closeData.children as ILayoutJSON;
                 if (childData.instance === "Search") {
                     openFile({

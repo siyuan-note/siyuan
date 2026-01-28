@@ -467,6 +467,7 @@ export const getLocalStorage = (cb: () => void) => {
             currentTab: "emoji"
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
+        defaultStorage[Constants.LOCAL_CLOSED_TABS] = [];
         defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // IFilesPath[]
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
             removed: true,
@@ -506,7 +507,8 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS].forEach((key) => {
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
+            Constants.LOCAL_CLOSED_TABS].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

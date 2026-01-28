@@ -52,6 +52,7 @@ import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
+import {setStorageVal} from "../protyle/util/compatibility";
 
 export class Wnd {
     private app: App;
@@ -783,13 +784,13 @@ export class Wnd {
         clearCounter();
         this.children.find((item, index) => {
             if (item.id === id) {
-                if (window.siyuan.closedTabs.length > Constants.SIZE_UNDO) {
-                    window.siyuan.closedTabs.pop();
+                if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
+                    window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
                 }
                 const tabJSON = {};
                 layoutToJSON(item, tabJSON);
-                window.siyuan.closedTabs.push(tabJSON);
-
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
+                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
                 if (item.model instanceof Custom && item.model.beforeDestroy) {
                     item.model.beforeDestroy();
                 }

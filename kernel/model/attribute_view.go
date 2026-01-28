@@ -96,18 +96,20 @@ func RemoveUnusedAttributeViews() (ret []string) {
 		return
 	}
 
-	for _, unusedAvID := range unusedAttributeViews {
-		srcPath := filepath.Join(util.DataDir, "storage", "av", unusedAvID+".json")
+	for _, unusedAv := range unusedAttributeViews {
+		id := unusedAv["id"].(string)
+		srcPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
 		if filelock.IsExist(srcPath) {
-			historyPath := filepath.Join(historyDir, "storage", "av", unusedAvID+".json")
+			historyPath := filepath.Join(historyDir, "storage", "av", id+".json")
 			if err = filelock.Copy(srcPath, historyPath); err != nil {
 				return
 			}
 		}
 	}
 
-	for _, unusedAvID := range unusedAttributeViews {
-		absPath := filepath.Join(util.DataDir, "storage", "av", unusedAvID+".json")
+	for _, unusedAv := range unusedAttributeViews {
+		id := unusedAv["id"].(string)
+		absPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
 		if filelock.IsExist(absPath) {
 			info, statErr := os.Stat(absPath)
 			if statErr == nil {
@@ -130,9 +132,9 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	return
 }
 
-func UnusedAttributeViews() (ret []string) {
+func UnusedAttributeViews() (ret []map[string]any) {
 	defer logging.Recover()
-	ret = []string{}
+	ret = []map[string]any{}
 
 	allAvIDs, err := getAllAvIDs()
 	if err != nil {
@@ -169,13 +171,16 @@ func UnusedAttributeViews() (ret []string) {
 	checkedAvIDs := map[string]bool{}
 	for _, id := range allAvIDs {
 		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
-			ret = append(ret, id)
+			name, _ := av.GetAttributeViewName(id)
+			ret = append(ret, map[string]any{
+				"id":   id,
+				"name": name,
+			})
 		}
 	}
 
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	if 1 > len(ret) {
-		ret = []string{}
+		ret = []map[string]any{}
 	}
 	return
 }

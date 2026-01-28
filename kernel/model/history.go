@@ -508,6 +508,8 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 			stmt += " id = '" + query + "'"
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
+		case HistoryTypeDatabase:
+			stmt += " id = '" + query + "'"
 		}
 	} else {
 		stmt += "1=1"
@@ -526,6 +528,8 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		}
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
+	} else if HistoryTypeDatabase == typ {
+		stmt += " AND path LIKE '%/storage/av/%'"
 	}
 
 	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
@@ -849,10 +853,11 @@ func fullReindexHistory() {
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace, HistoryOpOutline}
 
 const (
-	HistoryTypeDocName = 0 // Search docs by doc name
-	HistoryTypeDoc     = 1 // Search docs by doc name and content
-	HistoryTypeAsset   = 2 // Search assets
-	HistoryTypeDocID   = 3 // Search docs by doc id
+	HistoryTypeDocName  = 0 // Search docs by doc name
+	HistoryTypeDoc      = 1 // Search docs by doc name and content
+	HistoryTypeAsset    = 2 // Search assets
+	HistoryTypeDocID    = 3 // Search docs by doc id
+	HistoryTypeDatabase = 4 // Search databases by database id
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {
@@ -872,12 +877,14 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	created := fmt.Sprintf("%d", tt.Unix())
 
 	entryPath := filepath.Join(util.HistoryDir, name)
-	var docs, assets []string
+	var docs, assets, databases []string
 	filelock.Walk(entryPath, func(path string, d fs.DirEntry, err error) error {
 		if strings.HasSuffix(d.Name(), ".sy") {
 			docs = append(docs, path)
 		} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
 			assets = append(assets, path)
+		} else if strings.Contains(path, "storage"+string(os.PathSeparator)+"av"+string(os.PathSeparator)) {
+			databases = append(databases, path)
 		}
 		return nil
 	})
@@ -920,6 +927,24 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 			Type:    HistoryTypeAsset,
 			Op:      op,
 			Title:   filepath.Base(asset),
+			Path:    p,
+			Created: created,
+		})
+	}
+
+	for _, database := range databases {
+		id := filepath.Base(database)
+		id = strings.TrimSuffix(id, ".json")
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+		p := strings.TrimPrefix(database, util.HistoryDir)
+		p = filepath.ToSlash(p[1:])
+		histories = append(histories, &sql.History{
+			ID:      id,
+			Type:    HistoryTypeDatabase,
+			Op:      op,
+			Title:   id,
 			Path:    p,
 			Created: created,
 		})

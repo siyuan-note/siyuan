@@ -1,4 +1,5 @@
 {
+  "unreferencedAV": "Database non referenziato",
   "includeSubDocs": "Includi sottodocumenti",
   "includeSubDocsTip": "Se abilitato, durante l'esportazione verranno inclusi tutti i sottodocumenti del documento corrente",
   "includeRelatedDocs": "Includi documenti correlati",

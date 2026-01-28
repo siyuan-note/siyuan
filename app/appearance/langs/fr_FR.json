@@ -1,4 +1,5 @@
 {
+  "unreferencedAV": "Base de données non référencée",
   "includeSubDocs": "Inclure les sous-documents",
   "includeSubDocsTip": "Si activé, tous les sous-documents du document courant seront inclus lors de l'export",
   "includeRelatedDocs": "Inclure les documents liés",

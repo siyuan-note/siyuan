@@ -46,10 +46,10 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func RemoveUnusedAttributeView(p string) (ret string) {
-	absPath := filepath.Join(util.DataDir, "storage", "av", p+".json")
+func RemoveUnusedAttributeView(id string) {
+	absPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
 	if !filelock.IsExist(absPath) {
-		return absPath
+		return
 	}
 
 	historyDir, err := GetHistoryDir(HistoryOpClean)
@@ -71,7 +71,6 @@ func RemoveUnusedAttributeView(p string) (ret string) {
 		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
 		return
 	}
-	ret = absPath
 
 	IncSync()
 

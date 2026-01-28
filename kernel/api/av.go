@@ -37,10 +37,10 @@ func removeUnusedAttributeView(c *gin.Context) {
 		return
 	}
 
-	p := arg["path"].(string)
-	asset := model.RemoveUnusedAttributeView(p)
+	avID := arg["id"].(string)
+	model.RemoveUnusedAttributeView(avID)
 	ret.Data = map[string]interface{}{
-		"path": asset,
+		"id": avID,
 	}
 }
 

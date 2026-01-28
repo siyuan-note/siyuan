@@ -29,6 +29,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -45,6 +46,58 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func RemoveUnusedAttributeViews() (ret []string) {
+	ret = []string{}
+	var size int64
+
+	msgId := util.PushMsg(Conf.Language(100), 30*1000)
+	defer func() {
+		msg := fmt.Sprintf(Conf.Language(91), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
+		util.PushUpdateMsg(msgId, msg, 7000)
+	}()
+
+	unusedAttributeViews := UnusedAttributeViews()
+
+	historyDir, err := GetHistoryDir(HistoryOpClean)
+	if err != nil {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+
+	for _, unusedAvID := range unusedAttributeViews {
+		srcPath := filepath.Join(util.DataDir, "storage", "av", unusedAvID+".json")
+		if filelock.IsExist(srcPath) {
+			historyPath := filepath.Join(historyDir, "storage", "av", unusedAvID+".json")
+			if err = filelock.Copy(srcPath, historyPath); err != nil {
+				return
+			}
+		}
+	}
+
+	for _, unusedAvID := range unusedAttributeViews {
+		absPath := filepath.Join(util.DataDir, "storage", "av", unusedAvID+".json")
+		if filelock.IsExist(absPath) {
+			info, statErr := os.Stat(absPath)
+			if statErr == nil {
+				size += info.Size()
+			}
+
+			if removeErr := filelock.RemoveWithoutFatal(absPath); removeErr != nil {
+				logging.LogErrorf("remove unused av [%s] failed: %s", absPath, removeErr)
+				util.PushErrMsg(fmt.Sprintf("%s", removeErr), 7000)
+				return
+			}
+		}
+		ret = append(ret, absPath)
+	}
+	if 0 < len(ret) {
+		IncSync()
+	}
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	return
+}
+
 func UnusedAttributeViews() (ret []string) {
 	defer logging.Recover()
 	ret = []string{}
@@ -54,7 +107,7 @@ func UnusedAttributeViews() (ret []string) {
 		return
 	}
 
-	referencedAvIDs := map[string]bool{}
+	docReferencedAvIDs := map[string]bool{}
 	luteEngine := util.NewLute()
 	boxes := Conf.GetBoxes()
 	for _, box := range boxes {
@@ -70,7 +123,7 @@ func UnusedAttributeViews() (ret []string) {
 			}
 			for _, tree := range trees {
 				for _, id := range getAvIDs(tree, allAvIDs) {
-					referencedAvIDs[id] = true
+					docReferencedAvIDs[id] = true
 				}
 			}
 		}
@@ -78,17 +131,48 @@ func UnusedAttributeViews() (ret []string) {
 
 	templateAvIDs := search.FindAllMatchedTargets(filepath.Join(util.DataDir, "templates"), allAvIDs)
 	for _, id := range templateAvIDs {
-		referencedAvIDs[id] = true
+		docReferencedAvIDs[id] = true
 	}
 
+	checkedAvIDs := map[string]bool{}
 	for _, id := range allAvIDs {
-		if !referencedAvIDs[id] {
+		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
 			ret = append(ret, id)
 		}
 	}
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
+}
+
+func isRelatedSrcAvDocReferenced(destAvID string, docReferencedAvIDs, checkedAvIDs map[string]bool) bool {
+	if checkedAvIDs[destAvID] {
+		if docReferencedAvIDs[destAvID] {
+			return true
+		}
+		return false
+	}
+	checkedAvIDs[destAvID] = true
+
+	srcAvIDs := av.GetSrcAvIDs(destAvID)
+	srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID) // 忽略自身关联
+	if 1 > len(srcAvIDs) {
+		return false
+	}
+
+	for _, srcAvID := range srcAvIDs {
+		if docReferencedAvIDs[srcAvID] {
+			return true
+		}
+	}
+
+	// 递归检查间接关联的 av
+	for _, srcAvID := range srcAvIDs {
+		if isRelatedSrcAvDocReferenced(srcAvID, docReferencedAvIDs, checkedAvIDs) {
+			return true
+		}
+	}
+	return false
 }
 
 func getAvIDs(tree *parse.Tree, allAvIDs []string) (ret []string) {

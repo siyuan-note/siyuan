@@ -46,6 +46,39 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func RemoveUnusedAttributeView(p string) (ret string) {
+	absPath := filepath.Join(util.DataDir, "storage", "av", p+".json")
+	if !filelock.IsExist(absPath) {
+		return absPath
+	}
+
+	historyDir, err := GetHistoryDir(HistoryOpClean)
+	if err != nil {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+
+	newP := strings.TrimPrefix(absPath, util.DataDir)
+	historyPath := filepath.Join(historyDir, newP)
+	if filelock.IsExist(absPath) {
+		if err = filelock.Copy(absPath, historyPath); err != nil {
+			return
+		}
+	}
+
+	if err = filelock.RemoveWithoutFatal(absPath); err != nil {
+		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
+		util.PushErrMsg(fmt.Sprintf("%s", err), 7000)
+		return
+	}
+	ret = absPath
+
+	IncSync()
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	return
+}
+
 func RemoveUnusedAttributeViews() (ret []string) {
 	ret = []string{}
 	var size int64

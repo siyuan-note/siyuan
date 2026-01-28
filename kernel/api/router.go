@@ -490,6 +490,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeViewBoundBlockIDsByItemIDs", model.CheckAuth, getAttributeViewBoundBlockIDsByItemIDs)
 	ginServer.Handle("POST", "/api/av/getAttributeViewItemIDsByBoundIDs", model.CheckAuth, getAttributeViewItemIDsByBoundIDs)
 	ginServer.Handle("POST", "/api/av/getUnusedAttributeViews", model.CheckAuth, getUnusedAttributeViews)
+	ginServer.Handle("POST", "/api/av/removeUnusedAttributeViews", model.CheckAuth, removeUnusedAttributeViews)
+	ginServer.Handle("POST", "/api/av/removeUnusedAttributeView", model.CheckAuth, removeUnusedAttributeView)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckAdminRole, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckAdminRole, chatGPTWithAction)

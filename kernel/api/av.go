@@ -28,6 +28,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func removeUnusedAttributeView(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	p := arg["path"].(string)
+	asset := model.RemoveUnusedAttributeView(p)
+	ret.Data = map[string]interface{}{
+		"path": asset,
+	}
+}
+
 func removeUnusedAttributeViews(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

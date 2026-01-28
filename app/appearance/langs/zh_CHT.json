@@ -1,4 +1,5 @@
 {
+  "unreferencedAV": "未引用的資料庫",
   "includeSubDocs": "包含子文檔",
   "includeSubDocsTip": "啟用後將在匯出時包含當前文檔的所有子文檔",
   "includeRelatedDocs": "包含關聯文檔",

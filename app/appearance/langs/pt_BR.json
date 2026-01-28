@@ -1,4 +1,5 @@
 {
+  "unreferencedAV": "Banco de dados não referenciado",
   "includeSubDocs": "Incluir subdocumentos",
   "includeSubDocsTip": "Ao ativar, todos os subdocumentos do documento atual serão incluídos na exportação",
   "includeRelatedDocs": "Incluir documentos relacionados",

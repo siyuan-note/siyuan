@@ -1,4 +1,5 @@
 {
+  "unreferencedAV": "Baza danych bez odwołań",
   "includeSubDocs": "Uwzględnij poddokumenty",
   "includeSubDocsTip": "Po włączeniu podczas eksportu zostaną uwzględnione wszystkie poddokumenty bieżącego dokumentu",
   "includeRelatedDocs": "Uwzględnij powiązane dokumenty",

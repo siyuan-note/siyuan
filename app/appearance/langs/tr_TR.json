@@ -1,4 +1,5 @@
 {
+  "unreferencedAV": "Başvurulmayan veritabanı",
   "includeSubDocs": "Alt belgeleri dahil et",
   "includeSubDocsTip": "Etkinleştirildiğinde, dışa aktarım sırasında mevcut belgenin tüm alt belgeleri dahil edilir",
   "includeRelatedDocs": "İlişkili belgeleri dahil et",

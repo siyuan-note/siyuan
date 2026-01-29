@@ -579,6 +579,12 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             notebook: target.parentElement.getAttribute("data-notebook-id"),
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
+                    } else if (dataType === "av") {
+                        // TODO
+                        fetchPost("/api/history/rollbackDocHistory", {
+                            notebook: target.parentElement.getAttribute("data-notebook-id"),
+                            historyPath: target.parentElement.getAttribute("data-path")
+                        });
                     } else if (dataType === "notebook") {
                         fetchPost("/api/history/rollbackNotebookHistory", {
                             historyPath: target.parentElement.getAttribute("data-path")
@@ -653,7 +659,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                     chipClass += "b3-chip--warning ";
                                     ariaLabel = window.siyuan.languages.historyOutline;
                                 }
-                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc")}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
     <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
@@ -709,7 +715,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
+            } else if (target.classList.contains("b3-list-item") && ["assets", "doc", "av"].includes(type)) {
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
                     assetElement.classList.remove("fn__none");
@@ -736,6 +742,21 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             });
                             searchMarkRender(historyEditor.protyle, k.split(" "));
                         }
+                    });
+                } else if (type === "av") {
+                    mdElement.classList.add("fn__none");
+                    docElement.classList.remove("fn__none");
+                    historyEditor.protyle.options.history.created = target.dataset.created;
+                    onGet({
+                        data: {
+                            data: {
+                                content: `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`,
+                                id: Lute.NewNodeID(),
+                                rootID: Lute.NewNodeID(),
+                            }
+                        },
+                        protyle: historyEditor.protyle,
+                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                     });
                 }
                 titleElement.classList.remove("fn__none");

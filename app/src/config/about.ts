@@ -64,6 +64,45 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
+<label class="b3-label fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.networkServeTLS}
+        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
+        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip2}</div>
+    </div>
+    <div class="fn__space"></div>
+    <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
+</label>
+<div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCACertSection">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.exportCACert}
+        <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200 fn__flex-center" id="exportCACert">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+</div>
+<div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCABundleSection">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.exportCABundle}
+        <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200 fn__flex-center" id="exportCABundle">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+    </button>
+</div>
+<div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="importCABundleSection">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.importCABundle}
+        <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>
+    </div>
+    <div class="fn__space"></div>
+    <button class="b3-button b3-button--outline fn__size200 fn__flex-center" id="importCABundle">
+        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+    </button>
+</div>
 <div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
     <div class="fn__flex">
         <div class="fn__flex-1">
@@ -102,7 +141,7 @@ export const about = {
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
     </div>
     <div class="fn__space"></div>
-    <button data-type="open" data-url="${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "http://127.0.0.1:"+ location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+    <button data-type="open" data-url="${"http://127.0.0.1:"+ location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
     </button>
 </div>
@@ -379,13 +418,72 @@ ${checkUpdateHTML}
             });
         });
         const networkServeElement = about.element.querySelector("#networkServe") as HTMLInputElement;
+        const networkServeTLSElement = about.element.querySelector("#networkServeTLS") as HTMLInputElement;
         networkServeElement.addEventListener("change", () => {
+            networkServeTLSElement.disabled = !networkServeElement.checked;
+            if (!networkServeElement.checked) {
+                networkServeTLSElement.checked = false;
+            }
             fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                 exportLayout({
                     errorExit: true,
                     cb: exitSiYuan
                 });
             });
+        });
+        networkServeTLSElement.addEventListener("change", () => {
+            const exportCACertSection = about.element.querySelector("#exportCACertSection");
+            const exportCABundleSection = about.element.querySelector("#exportCABundleSection");
+            const importCABundleSection = about.element.querySelector("#importCABundleSection");
+            if (exportCACertSection && exportCABundleSection && importCABundleSection) {
+                if (networkServeTLSElement.checked) {
+                    exportCACertSection.classList.remove("fn__none");
+                    exportCABundleSection.classList.remove("fn__none");
+                    importCABundleSection.classList.remove("fn__none");
+                } else {
+                    exportCACertSection.classList.add("fn__none");
+                    exportCABundleSection.classList.add("fn__none");
+                    importCABundleSection.classList.add("fn__none");
+                }
+            }
+            fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
+                exportLayout({
+                    errorExit: true,
+                    cb: exitSiYuan
+                });
+            });
+        });
+        about.element.querySelector("#exportCACert")?.addEventListener("click", () => {
+            fetchPost("/api/system/exportTLSCACert", {}, (response) => {
+                openByMobile(response.data.path);
+            });
+        });
+        about.element.querySelector("#exportCABundle")?.addEventListener("click", () => {
+            fetchPost("/api/system/exportTLSCABundle", {}, (response) => {
+                openByMobile(response.data.path);
+            });
+        });
+        about.element.querySelector("#importCABundle")?.addEventListener("click", () => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = ".zip";
+            input.onchange = () => {
+                if (input.files && input.files[0]) {
+                    const formData = new FormData();
+                    formData.append("file", input.files[0]);
+                    fetch("/api/system/importTLSCABundle", {
+                        method: "POST",
+                        body: formData,
+                    }).then(res => res.json()).then((response) => {
+                        if (response.code === 0) {
+                            showMessage(window.siyuan.languages.importCABundleSuccess);
+                        } else {
+                            showMessage(response.msg, 6000, "error");
+                        }
+                    });
+                }
+            };
+            input.click();
         });
         const lockScreenModeElement = about.element.querySelector("#lockScreenMode") as HTMLInputElement;
         lockScreenModeElement.addEventListener("change", () => {

@@ -349,9 +349,7 @@ func getUnusedAssets(c *gin.Context) {
 		util.PushMsg(fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
 	}
 
-	ret.Data = map[string]interface{}{
-		"unusedAssets": unusedAssets,
-	}
+	ret.Data = unusedAssets
 }
 
 func getMissingAssets(c *gin.Context) {
@@ -359,9 +357,7 @@ func getMissingAssets(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	missingAssets := model.MissingAssets()
-	ret.Data = map[string]interface{}{
-		"missingAssets": missingAssets,
-	}
+	ret.Data = missingAssets
 }
 
 func resolveAssetPath(c *gin.Context) {

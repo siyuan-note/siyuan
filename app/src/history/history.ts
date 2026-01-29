@@ -580,9 +580,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
                     } else if (dataType === "av") {
-                        // TODO
-                        fetchPost("/api/history/rollbackDocHistory", {
-                            notebook: target.parentElement.getAttribute("data-notebook-id"),
+                        fetchPost("/api/history/rollbackAttributeViewHistory", {
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
                     } else if (dataType === "notebook") {

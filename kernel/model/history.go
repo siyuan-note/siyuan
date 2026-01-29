@@ -426,6 +426,24 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	return nil
 }
 
+func RollbackAttributeViewHistory(historyPath string) (err error) {
+	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("av history [%s] not exist", historyPath)
+		return
+	}
+
+	from := historyPath
+	to := filepath.Join(util.DataDir, "storage", "av", filepath.Base(historyPath))
+
+	if err = filelock.CopyNewtimes(from, to); err != nil {
+		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+		return
+	}
+	IncSync()
+	util.PushMsg(Conf.Language(102), 3000)
+	return nil
+}
+
 type History struct {
 	HCreated string         `json:"hCreated"`
 	Items    []*HistoryItem `json:"items"`

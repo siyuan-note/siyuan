@@ -146,6 +146,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/format/netImg2LocalAssets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, netImg2LocalAssets)
 	ginServer.Handle("POST", "/api/format/netAssets2LocalAssets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, netAssets2LocalAssets)
 
+	ginServer.Handle("POST", "/api/history/rollbackAttributeViewHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackAttributeViewHistory)
 	ginServer.Handle("POST", "/api/history/getNotebookHistory", model.CheckAuth, model.CheckAdminRole, getNotebookHistory)
 	ginServer.Handle("POST", "/api/history/rollbackNotebookHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackNotebookHistory)
 	ginServer.Handle("POST", "/api/history/rollbackAssetsHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackAssetsHistory)

@@ -222,3 +222,21 @@ func rollbackNotebookHistory(c *gin.Context) {
 		return
 	}
 }
+
+func rollbackAttributeViewHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	historyPath := arg["historyPath"].(string)
+	err := model.RollbackAttributeViewHistory(historyPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

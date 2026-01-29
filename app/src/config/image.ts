@@ -120,11 +120,11 @@ export const image = {
                             if (!item.getAttribute("data-init")) {
                                 if (type === "removeAV") {
                                     fetchPost("/api/av/getUnusedAttributeViews", {}, response => {
-                                        image._renderList(response.data.unusedAttributeViews, avListElement, "unRefAV");
+                                        image._renderList(response.data, avListElement, "unRefAV");
                                     });
                                 } else {
                                     fetchPost("/api/asset/getMissingAssets", {}, response => {
-                                        image._renderList(response.data.missingAssets, item.querySelector(".config-assets__list"), "lostAssets");
+                                        image._renderList(response.data, item.querySelector(".config-assets__list"), "lostAssets");
                                     });
                                 }
                                 item.setAttribute("data-init", "true");
@@ -144,27 +144,30 @@ export const image = {
                     break;
                 } else if (type === "copy") {
                     if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
-                        writeText(`<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.previousElementSibling.textContent}" data-type="NodeAttributeView" data-av-type="table"></div>`);
+                        writeText(`<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.parentElement.dataset.item}" data-type="NodeAttributeView" data-av-type="table"></div>`);
                     } else {
-                        writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim().replace("assets/", ""));
+                        writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim());
                     }
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "open") {
                     /// #if !BROWSER
-                    openBy(target.parentElement.getAttribute("data-path"), "folder");
+                    if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
+                        openBy(path.join(window.siyuan.config.system.dataDir, "storage", "av", target.parentElement.dataset.item) + ".json", "folder");
+                    } else {
+                        openBy(target.parentElement.dataset.item, "folder");
+                    }
                     /// #endif
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "clear") {
-                    const pathString = target.parentElement.getAttribute("data-path");
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${pathPosix().basename(pathString)}</b>`, () => {
-                        if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
-                            const liElement = target.parentElement;
+                    const liElement = target.parentElement;
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${liElement.querySelector(".b3-list-item__text").textContent}</b>`, () => {
+                        if (liElement.getAttribute("data-tab-type") === "unRefAV") {
                             fetchPost("/api/av/removeUnusedAttributeView", {
-                                id: liElement.querySelector(".b3-list-item__text").textContent,
+                                id: liElement.getAttribute("data-item"),
                             }, () => {
                                 if (liElement.parentElement.querySelectorAll("li").length === 1) {
                                     liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
@@ -175,7 +178,7 @@ export const image = {
                             });
                         } else {
                             fetchPost("/api/asset/removeUnusedAsset", {
-                                path: pathString,
+                                path: liElement.getAttribute("data-item"),
                             }, response => {
                                 /// #if !MOBILE
                                 getAllModels().asset.forEach(item => {
@@ -184,7 +187,6 @@ export const image = {
                                     }
                                 });
                                 /// #endif
-                                const liElement = target.parentElement;
                                 if (liElement.parentElement.querySelectorAll("li").length === 1) {
                                     liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                                 } else {
@@ -211,10 +213,13 @@ export const image = {
             }
         });
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
-            image._renderList(response.data.unusedAssets, assetsListElement, "unrefAssets");
+            image._renderList(response.data, assetsListElement, "unrefAssets");
         });
     },
-    _renderList: (data: string[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
+    _renderList: (data: {
+        item: string,
+        name: string
+    }[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
         let boxOpenHTML = "";
         if (!isBrowser() && type !== "lostAssets") {
@@ -230,10 +235,8 @@ export const image = {
         }
         const isM = isMobile();
         data.forEach((item) => {
-            const idx = item.indexOf("assets/");
-            const dataPath = type === "unRefAV" ? path.join(window.siyuan.config.system.dataDir, "storage", "av", item) + ".json" : item.substr(idx);
-            html += `<li data-tab-type="${type}" data-path="${dataPath}"  class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}">
-    <span class="b3-list-item__text">${escapeHtml(item)}</span>
+            html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}">
+    <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
     <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>

@@ -75,9 +75,6 @@ func GenerateFileHistory() {
 	// 生成资源文件历史
 	generateAssetsHistory()
 
-	// 生成数据库历史
-	generateAttributeViewHistory()
-
 	historyDir := util.HistoryDir
 	clearOutdatedHistoryDir(historyDir)
 
@@ -625,35 +622,6 @@ func generateAssetsHistory() {
 
 	for _, file := range assets {
 		historyPath := filepath.Join(historyDir, "assets", strings.TrimPrefix(file, filepath.Join(util.DataDir, "assets")))
-		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
-			logging.LogErrorf("generate history failed: %s", err)
-			return
-		}
-
-		if err = filelock.Copy(file, historyPath); err != nil {
-			logging.LogErrorf("copy file [%s] to [%s] failed: %s", file, historyPath, err)
-			return
-		}
-	}
-
-	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
-	return
-}
-
-func generateAttributeViewHistory() {
-	attributeViews := recentModifiedAttributeViews()
-	if 1 > len(attributeViews) {
-		return
-	}
-
-	historyDir, err := GetHistoryDir(HistoryOpUpdate)
-	if err != nil {
-		logging.LogErrorf("get history dir failed: %s", err)
-		return
-	}
-
-	for _, file := range attributeViews {
-		historyPath := filepath.Join(historyDir, "storage", "av", strings.TrimPrefix(file, filepath.Join(util.DataDir, "storage", "av")))
 		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return

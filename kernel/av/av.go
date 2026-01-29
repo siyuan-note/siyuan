@@ -455,7 +455,19 @@ func GetAttributeViewContent(avID string) (content string) {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	return getAttributeViewContent0(attrView)
+}
 
+func GetAttributeViewContentByPath(avJSONPath string) (content string) {
+	attrView, err := ParseAttributeViewByPath(avJSONPath)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avJSONPath, err)
+		return
+	}
+	return getAttributeViewContent0(attrView)
+}
+
+func getAttributeViewContent0(attrView *AttributeView) (content string) {
 	buf := bytes.Buffer{}
 	buf.WriteString(attrView.Name)
 	buf.WriteByte(' ')
@@ -486,11 +498,17 @@ func IsAttributeViewExist(avID string) bool {
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := GetAttributeViewDataPath(avID)
+	return ParseAttributeViewByPath(avJSONPath)
+}
+
+func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error) {
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
 	}
 
+	avID := filepath.Base(avJSONPath)
+	avID = strings.TrimSuffix(avID, filepath.Ext(avID))
 	data, readErr := filelock.ReadFile(avJSONPath)
 	if nil != readErr {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)

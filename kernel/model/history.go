@@ -75,6 +75,9 @@ func GenerateFileHistory() {
 	// 生成资源文件历史
 	generateAssetsHistory()
 
+	// 生成数据库历史
+	generateAttributeViewHistory()
+
 	historyDir := util.HistoryDir
 	clearOutdatedHistoryDir(historyDir)
 
@@ -637,6 +640,35 @@ func generateAssetsHistory() {
 	return
 }
 
+func generateAttributeViewHistory() {
+	attributeViews := recentModifiedAttributeViews()
+	if 1 > len(attributeViews) {
+		return
+	}
+
+	historyDir, err := GetHistoryDir(HistoryOpUpdate)
+	if err != nil {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+
+	for _, file := range attributeViews {
+		historyPath := filepath.Join(historyDir, "storage", "av", strings.TrimPrefix(file, filepath.Join(util.DataDir, "storage", "av")))
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
+			logging.LogErrorf("generate history failed: %s", err)
+			return
+		}
+
+		if err = filelock.Copy(file, historyPath); err != nil {
+			logging.LogErrorf("copy file [%s] to [%s] failed: %s", file, historyPath, err)
+			return
+		}
+	}
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	return
+}
+
 func (box *Box) generateDocHistory0() {
 	files := box.recentModifiedDocs()
 	if 1 > len(files) {
@@ -673,7 +705,7 @@ func (box *Box) generateDocHistory0() {
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
 			} else {
-				generateAvHistory(tree, historyDir)
+				generateAvHistoryInTree(tree, historyDir)
 			}
 		}
 	}
@@ -779,6 +811,34 @@ func recentModifiedAssets() (ret []string) {
 	return
 }
 
+var attributeViewLatestHistoryTime = time.Now().Unix()
+
+func recentModifiedAttributeViews() (ret []string) {
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
+	if nil != err {
+		logging.LogErrorf("read attribute view dir failed: %s", err)
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+
+		info, err := entry.Info()
+		if nil != err {
+			logging.LogErrorf("read attribute view file info failed: %s", err)
+			continue
+		}
+
+		if info.ModTime().Unix() > attributeViewLatestHistoryTime {
+			ret = append(ret, filepath.Join(util.DataDir, "storage", "av", entry.Name()))
+		}
+	}
+	attributeViewLatestHistoryTime = time.Now().Unix()
+	return
+}
+
 const (
 	HistoryOpClean   = "clean"
 	HistoryOpUpdate  = "update"
@@ -813,12 +873,12 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		return
 	}
 
-	generateAvHistory(tree, historyDir)
+	generateAvHistoryInTree(tree, historyDir)
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 }
 
-func generateAvHistory(tree *parse.Tree, historyDir string) {
+func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
 	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 	for _, avNode := range avNodes {
 		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")

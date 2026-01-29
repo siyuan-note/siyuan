@@ -97,7 +97,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	}
 
 	for _, unusedAv := range unusedAttributeViews {
-		id := unusedAv["id"].(string)
+		id := unusedAv.Item
 		srcPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
 		if filelock.IsExist(srcPath) {
 			historyPath := filepath.Join(historyDir, "storage", "av", id+".json")
@@ -108,7 +108,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	}
 
 	for _, unusedAv := range unusedAttributeViews {
-		id := unusedAv["id"].(string)
+		id := unusedAv.Item
 		absPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
 		if filelock.IsExist(absPath) {
 			info, statErr := os.Stat(absPath)
@@ -132,9 +132,9 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	return
 }
 
-func UnusedAttributeViews() (ret []map[string]any) {
+func UnusedAttributeViews() (ret []*UnusedItem) {
 	defer logging.Recover()
-	ret = []map[string]any{}
+	ret = []*UnusedItem{}
 
 	allAvIDs, err := getAllAvIDs()
 	if err != nil {
@@ -172,15 +172,8 @@ func UnusedAttributeViews() (ret []map[string]any) {
 	for _, id := range allAvIDs {
 		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
 			name, _ := av.GetAttributeViewName(id)
-			ret = append(ret, map[string]any{
-				"item": id,
-				"name": name,
-			})
+			ret = append(ret, &UnusedItem{Item: id, Name: name})
 		}
-	}
-
-	if 1 > len(ret) {
-		ret = []map[string]any{}
 	}
 	return
 }

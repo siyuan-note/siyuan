@@ -1300,6 +1300,7 @@
   "about12": "활성화하면 동일한 LAN에 있는 다른 장치의 액세스가 허용됩니다. 수정 후 애플리케이션이 자동으로 닫히므로 수동으로 다시 시작하세요",
   "networkServeTLS": "HTTPS 활성화",
   "networkServeTLSTip": "활성화하면 네트워크 연결이 TLS 암호화를 위해 자동 생성된 자체 서명 인증서를 사용합니다. 브라우저에 보안 경고가 표시되며 수동으로 수락해야 합니다. 변경 시 애플리케이션이 자동으로 종료되므로 수동으로 다시 시작하세요",
+  "networkServeTLSTip2": "HTTPS는 고정 포트 6806에서만 작동하며, 임의 포트는 HTTPS를 지원하지 않습니다",
   "exportCACert": "CA 인증서 내보내기",
   "exportCACertTip": "CA 인증서（ca.crt）파일을 내보냅니다. 클라이언트 장치에 이 인증서를 설치하여 자체 서명된 HTTPS 연결을 신뢰하도록 하십시오",
   "exportCABundle": "CA 번들 내보내기",

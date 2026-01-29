@@ -1300,6 +1300,7 @@
   "about12": "启用后将允许同一局域网内的其他设备进行访问。修改后会自动关闭应用，请手动重启",
   "networkServeTLS": "启用 HTTPS",
   "networkServeTLSTip": "启用后网络连接将使用自动生成的自签名证书进行 TLS 加密。浏览器会显示安全警告，需要手动接受。修改后会自动关闭应用，请手动重启",
+  "networkServeTLSTip2": "HTTPS 仅在固定端口 6806 上生效，随机端口不支持 HTTPS",
   "exportCACert": "导出 CA 证书",
   "exportCACertTip": "导出 CA 证书（ca.crt）文件。将此证书安装到客户端设备以信任自签名 HTTPS 连接",
   "exportCABundle": "导出 CA 证书包",

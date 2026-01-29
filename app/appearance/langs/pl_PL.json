@@ -1300,6 +1300,7 @@
   "about12": "Po włączeniu, inne urządzenia w tej samej sieci LAN będą miały możliwość dostępu. Aplikacja zostanie automatycznie zamknięta po modyfikacji, proszę uruchomić ponownie ręcznie",
   "networkServeTLS": "Włącz HTTPS",
   "networkServeTLSTip": "Po włączeniu połączenia sieciowe będą używać automatycznie wygenerowanego, samopodpisanego certyfikatu do szyfrowania TLS. Przeglądarka wyświetli ostrzeżenie bezpieczeństwa, które trzeba zaakceptować ręcznie. Po zmianie aplikacja zostanie automatycznie zamknięta — uruchom ją ponownie ręcznie",
+  "networkServeTLSTip2": "HTTPS działa tylko na stałym porcie 6806, losowe porty nie obsługują HTTPS",
   "exportCACert": "Eksportuj certyfikat CA",
   "exportCACertTip": "Eksportuj certyfikat CA（ca.crt）. Zainstaluj ten certyfikat na urządzeniach klienckich, aby ufać samopodpisanemu połączeniu HTTPS",
   "exportCABundle": "Eksportuj pakiet CA",

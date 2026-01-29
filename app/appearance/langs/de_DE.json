@@ -1300,6 +1300,7 @@
   "about12": "Nach der Aktivierung dürfen andere Geräte im selben LAN zugreifen. Die Anwendung wird nach der Modifikation automatisch geschlossen, bitte manuell neu starten",
   "networkServeTLS": "HTTPS aktivieren",
   "networkServeTLSTip": "Wenn aktiviert, verwenden Netzwerkverbindungen ein automatisch generiertes selbstsigniertes Zertifikat zur TLS‑Verschlüsselung. Der Browser zeigt eine Sicherheitswarnung an, die manuell akzeptiert werden muss. Nach der Änderung wird die Anwendung automatisch geschlossen — bitte manuell neu starten",
+  "networkServeTLSTip2": "HTTPS funktioniert nur am festen Port 6806, zufällige Ports unterstützen HTTPS nicht",
   "exportCACert": "CA‑Zertifikat exportieren",
   "exportCACertTip": "Das CA‑Zertifikat（ca.crt）exportieren. Installieren Sie dieses Zertifikat auf Client‑Geräten, um der selbstsignierten HTTPS‑Verbindung zu vertrauen",
   "exportCABundle": "CA‑Bundle exportieren",

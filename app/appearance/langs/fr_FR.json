@@ -1300,6 +1300,7 @@
   "about12": "Après l'activation, les autres appareils du même réseau local seront autorisés à accéder. L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "networkServeTLS": "Activer HTTPS",
   "networkServeTLSTip": "Une fois activé, les connexions réseau utiliseront un certificat auto-signé généré automatiquement pour chiffrer TLS. Le navigateur affichera un avertissement de sécurité qu'il faudra accepter manuellement. Après modification l'application se fermera automatiquement, veuillez la redémarrer manuellement",
+  "networkServeTLSTip2": "HTTPS est actif uniquement sur le port fixe 6806, les ports aléatoires ne prennent pas en charge HTTPS",
   "exportCACert": "Exporter le certificat CA",
   "exportCACertTip": "Exporter le certificat CA（ca.crt）. Installez ce certificat sur les appareils clients pour faire confiance à la connexion HTTPS auto-signée",
   "exportCABundle": "Exporter le bundle CA",

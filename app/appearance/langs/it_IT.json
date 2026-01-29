@@ -1300,6 +1300,7 @@
   "about12": "Dopo l'abilitazione, altri dispositivi nella stessa LAN potranno accedere. L'applicazione verrà chiusa automaticamente dopo la modifica, si prega di riavviarla manualmente",
   "networkServeTLS": "Abilita HTTPS",
   "networkServeTLSTip": "Se abilitato, le connessioni di rete utilizzeranno un certificato autofirmato generato automaticamente per la crittografia TLS. Il browser mostrerà un avviso di sicurezza che deve essere accettato manualmente. Dopo la modifica l'app verrà chiusa automaticamente; riavviare manualmente",
+  "networkServeTLSTip2": "HTTPS è attivo solo sulla porta fissa 6806, le porte casuali non supportano HTTPS",
   "exportCACert": "Esporta certificato CA",
   "exportCACertTip": "Esporta il certificato CA（ca.crt）. Installa questo certificato sui dispositivi client per fidarsi della connessione HTTPS autofirmata",
   "exportCABundle": "Esporta bundle CA",

@@ -68,6 +68,7 @@ export const about = {
     <div class="fn__flex-1">
         ${window.siyuan.languages.networkServeTLS}
         <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
+        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip2}</div>
     </div>
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
@@ -140,7 +141,7 @@ export const about = {
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
     </div>
     <div class="fn__space"></div>
-    <button data-type="open" data-url="${window.siyuan.config.system.networkServe ? window.siyuan.config.serverAddrs[0] : "http://127.0.0.1:"+ location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+    <button data-type="open" data-url="${"http://127.0.0.1:"+ location.port}" class="b3-button b3-button--outline fn__size200 fn__flex-center">
         <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
     </button>
 </div>

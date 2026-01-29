@@ -787,10 +787,12 @@ export class Wnd {
                 if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
                     window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
                 }
-                const tabJSON = {};
-                layoutToJSON(item, tabJSON);
-                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
-                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
+                if (item.headElement) {
+                    const tabJSON = {};
+                    layoutToJSON(item, tabJSON);
+                    window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
+                    setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
+                }
                 if (item.model instanceof Custom && item.model.beforeDestroy) {
                     item.model.beforeDestroy();
                 }

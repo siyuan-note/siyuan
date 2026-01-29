@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -527,7 +528,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		case HistoryTypeDatabase:
-			stmt += " id = '" + query + "'"
+			stmt += table + " MATCH '{title}:(" + query + ")'"
 		}
 	} else {
 		stmt += "1=1"
@@ -986,11 +987,12 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		}
 		p := strings.TrimPrefix(database, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
+		avName, _ := av.GetAttributeViewName(id)
 		histories = append(histories, &sql.History{
 			ID:      id,
 			Type:    HistoryTypeDatabase,
 			Op:      op,
-			Title:   id,
+			Title:   id + avName,
 			Path:    p,
 			Created: created,
 		})

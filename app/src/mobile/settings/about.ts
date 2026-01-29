@@ -10,52 +10,55 @@ import {pathPosix} from "../../util/pathName";
 import {openModel} from "../menu/model";
 import {setKey} from "../../sync/syncGuide";
 import {isBrowser} from "../../util/functions";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 
 export const initAbout = () => {
     openModel({
         title: window.siyuan.languages.about,
         icon: "iconInfo",
         html: `<div>
-<label class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.about11}
-        <div class="b3-label__text">${window.siyuan.languages.about12}</div>
+<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
+    <label class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.about11}
+            <div class="b3-label__text">${window.siyuan.languages.about12}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
+    </label>
+    <label class="b3-label fn__flex${window.siyuan.config.system.networkServe ? "" : " fn__none"}${(window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe) ? "" : " b3-label--noborder"}">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.networkServeTLS}
+            <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
+            <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip2}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
+    </label>
+    <div class="b3-label${(window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe) ? "" : " fn__none"}">
+        ${window.siyuan.languages.exportCACert}
+        <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__block" id="exportCACert">
+            <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+        </button>
+        <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
     </div>
-    <div class="fn__space"></div>
-    <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
-</label>
-<label class="b3-label fn__flex${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.networkServeTLS}
-        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
-        <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip2}</div>
+    <div class="b3-label${(window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe) ? "" : " fn__none"}">
+        ${window.siyuan.languages.exportCABundle}
+        <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__block" id="exportCABundle">
+            <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
+        </button>
+        <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
     </div>
-    <div class="fn__space"></div>
-    <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
-</label>
-<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCACertSection">
-    ${window.siyuan.languages.exportCACert}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="exportCACert">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
-</div>
-<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCABundleSection">
-    ${window.siyuan.languages.exportCABundle}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="exportCABundle">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
-</div>
-<div class="b3-label${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="importCABundleSection">
-    ${window.siyuan.languages.importCABundle}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="importCABundle">
-        <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>
+    <div class="b3-label${(window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe) ? "" : " fn__none"}">
+        ${window.siyuan.languages.importCABundle}
+        <div class="fn__hr"></div>
+        <button class="b3-button b3-button--outline fn__block" id="importCABundle">
+            <svg><use xlink:href="#iconDownload"></use></svg>${window.siyuan.languages.import}
+        </button>
+        <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>
+    </div>
 </div>
 <div class="b3-label">
         ${window.siyuan.languages.about2}
@@ -485,29 +488,50 @@ export const initAbout = () => {
             });
             const networkServeElement = modelMainElement.querySelector("#networkServe") as HTMLInputElement;
             const networkServeTLSElement = modelMainElement.querySelector("#networkServeTLS") as HTMLInputElement;
+            const networkServeContainElement = hasClosestByClassName(networkServeElement, "b3-label") as HTMLElement;
             networkServeElement.addEventListener("change", () => {
                 networkServeTLSElement.disabled = !networkServeElement.checked;
                 if (!networkServeElement.checked) {
                     networkServeTLSElement.checked = false;
+                }
+                Array.from(networkServeContainElement.children).forEach((item: HTMLElement, index) => {
+                    if (index === 1) {
+                        if (networkServeElement.checked) {
+                            item.classList.remove("fn__none");
+                        } else {
+                            item.classList.add("fn__none");
+                        }
+                    } else if (index > 1) {
+                        if (networkServeTLSElement.checked) {
+                            item.classList.remove("fn__none");
+                        } else {
+                            item.classList.add("fn__none");
+                        }
+                    }
+                });
+                if (networkServeTLSElement.checked) {
+                    networkServeTLSElement.parentElement.classList.remove("b3-label--noborder");
+                } else {
+                    networkServeTLSElement.parentElement.classList.add("b3-label--noborder");
                 }
                 fetchPost("/api/system/setNetworkServe", {networkServe: networkServeElement.checked}, () => {
                     exitSiYuan();
                 });
             });
             networkServeTLSElement.addEventListener("change", () => {
-                const exportCACertSection = modelMainElement.querySelector("#exportCACertSection");
-                const exportCABundleSection = modelMainElement.querySelector("#exportCABundleSection");
-                const importCABundleSection = modelMainElement.querySelector("#importCABundleSection");
-                if (exportCACertSection && exportCABundleSection && importCABundleSection) {
-                    if (networkServeTLSElement.checked) {
-                        exportCACertSection.classList.remove("fn__none");
-                        exportCABundleSection.classList.remove("fn__none");
-                        importCABundleSection.classList.remove("fn__none");
-                    } else {
-                        exportCACertSection.classList.add("fn__none");
-                        exportCABundleSection.classList.add("fn__none");
-                        importCABundleSection.classList.add("fn__none");
+                Array.from(networkServeContainElement.children).forEach((item: HTMLElement, index) => {
+                    if (index > 1) {
+                        if (networkServeTLSElement.checked) {
+                            item.classList.remove("fn__none");
+                        } else {
+                            item.classList.add("fn__none");
+                        }
                     }
+                });
+                if (networkServeTLSElement.checked) {
+                    networkServeTLSElement.parentElement.classList.remove("b3-label--noborder");
+                } else {
+                    networkServeTLSElement.parentElement.classList.add("b3-label--noborder");
                 }
                 fetchPost("/api/system/setNetworkServeTLS", {networkServeTLS: networkServeTLSElement.checked}, () => {
                     exitSiYuan();

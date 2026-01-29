@@ -18,6 +18,7 @@
 package av
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -441,6 +442,40 @@ func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
 		return
 	}
 	ret = val.ToString()
+	return
+}
+
+func GetAttributeViewContent(avID string) (content string) {
+	if "" == avID {
+		return
+	}
+
+	attrView, err := ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	buf := bytes.Buffer{}
+	buf.WriteString(attrView.Name)
+	buf.WriteByte(' ')
+	for _, v := range attrView.Views {
+		buf.WriteString(v.Name)
+		buf.WriteByte(' ')
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		buf.WriteString(keyValues.Key.Name)
+		buf.WriteByte(' ')
+		for _, value := range keyValues.Values {
+			if nil != value {
+				buf.WriteString(value.String(true))
+				buf.WriteByte(' ')
+			}
+		}
+	}
+
+	content = strings.TrimSpace(buf.String())
 	return
 }
 

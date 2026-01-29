@@ -528,7 +528,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		case HistoryTypeDatabase:
-			stmt += table + " MATCH '{title}:(" + query + ")'"
+			stmt += table + " MATCH '{content}:(" + query + ")'"
 		}
 	} else {
 		stmt += "1=1"
@@ -987,12 +987,13 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		}
 		p := strings.TrimPrefix(database, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
-		avName, _ := av.GetAttributeViewNameByPath(database)
+		content := av.GetAttributeViewContent(id)
 		histories = append(histories, &sql.History{
 			ID:      id,
 			Type:    HistoryTypeDatabase,
 			Op:      op,
-			Title:   id + avName,
+			Title:   id,
+			Content: content,
 			Path:    p,
 			Created: created,
 		})

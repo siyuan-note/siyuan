@@ -737,7 +737,8 @@ func RemoveUnusedAssets() (ret []string) {
 	}
 
 	var hashes []string
-	for _, p := range unusedAssets {
+	for _, unusedAsset := range unusedAssets {
+		p := unusedAsset["item"].(string)
 		historyPath := filepath.Join(historyDir, p)
 		if p = filepath.Join(util.DataDir, p); filelock.IsExist(p) {
 			if filelock.IsHidden(p) {
@@ -757,7 +758,8 @@ func RemoveUnusedAssets() (ret []string) {
 	sql.BatchRemoveAssetsQueue(hashes)
 
 	for _, unusedAsset := range unusedAssets {
-		absPath := filepath.Join(util.DataDir, unusedAsset)
+		p := unusedAsset["item"].(string)
+		absPath := filepath.Join(util.DataDir, p)
 		if filelock.IsExist(absPath) {
 			info, statErr := os.Stat(absPath)
 			if statErr == nil {
@@ -779,7 +781,7 @@ func RemoveUnusedAssets() (ret []string) {
 				return
 			}
 
-			util.RemoveAssetText(unusedAsset)
+			util.RemoveAssetText(p)
 		}
 		ret = append(ret, absPath)
 	}
@@ -965,9 +967,9 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	return
 }
 
-func UnusedAssets() (ret []string) {
+func UnusedAssets() (ret []map[string]any) {
 	defer logging.Recover()
-	ret = []string{}
+	ret = []map[string]any{}
 
 	assetsPathMap, err := allAssetAbsPaths()
 	if err != nil {
@@ -1121,15 +1123,18 @@ func UnusedAssets() (ret []string) {
 		if strings.HasPrefix(p, "/") {
 			p = p[1:]
 		}
-		ret = append(ret, p)
+		name := util.RemoveID(path.Base(p))
+		ret = append(ret, map[string]any{
+			"item": p,
+			"name": name,
+		})
 	}
-	sort.Strings(ret)
 	return
 }
 
-func MissingAssets() (ret []string) {
+func MissingAssets() (ret []map[string]any) {
 	defer logging.Recover()
-	ret = []string{}
+	ret = []map[string]any{}
 
 	assetsPathMap, err := allAssetAbsPaths()
 	if err != nil {
@@ -1197,17 +1202,23 @@ func MissingAssets() (ret []string) {
 				if strings.HasPrefix(dest, "assets/.") {
 					// Assets starting with `.` should not be considered missing assets https://github.com/siyuan-note/siyuan/issues/8821
 					if !filelock.IsExist(filepath.Join(util.DataDir, dest)) {
-						ret = append(ret, dest)
+						name := util.RemoveID(path.Base(dest))
+						ret = append(ret, map[string]any{
+							"item": dest,
+							"name": name,
+						})
 					}
 				} else {
-					ret = append(ret, dest)
+					name := util.RemoveID(path.Base(dest))
+					ret = append(ret, map[string]any{
+						"item": dest,
+						"name": name,
+					})
 				}
 				continue
 			}
 		}
 	}
-
-	sort.Strings(ret)
 	return
 }
 

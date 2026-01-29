@@ -173,7 +173,7 @@ func UnusedAttributeViews() (ret []map[string]any) {
 		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
 			name, _ := av.GetAttributeViewName(id)
 			ret = append(ret, map[string]any{
-				"id":   id,
+				"item": id,
 				"name": name,
 			})
 		}

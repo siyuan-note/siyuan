@@ -67,9 +67,7 @@ func getUnusedAttributeViews(c *gin.Context) {
 		util.PushMsg(fmt.Sprintf(model.Conf.Language(279), total, maxUnusedAttributeViews), 5000)
 	}
 
-	ret.Data = map[string]interface{}{
-		"unusedAttributeViews": unusedAttributeViews,
-	}
+	ret.Data = unusedAttributeViews
 }
 
 func getAttributeViewItemIDsByBoundIDs(c *gin.Context) {

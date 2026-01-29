@@ -43,9 +43,9 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     assetElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
     docElement.classList.add("fn__none");
-    if (typeElement.value === "2") {
+    if (typeElement.value === "2" || typeElement.value === "4") {
         notebookElement.setAttribute("disabled", "disabled");
-        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2) {
+        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2 && window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 4) {
             opElement.value = "all";
         }
         opElement.querySelector('option[value="clean"]').classList.remove("fn__none");
@@ -57,7 +57,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         opElement.querySelector('option[value="outline"]').classList.add("fn__none");
     } else {
         notebookElement.removeAttribute("disabled");
-        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type === 2) {
+        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type === 2 || window.siyuan.storage[Constants.LOCAL_HISTORY].type === 4) {
             opElement.value = "all";
         }
         opElement.querySelector('option[value="clean"]').classList.add("fn__none");

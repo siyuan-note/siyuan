@@ -987,7 +987,7 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		}
 		p := strings.TrimPrefix(database, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
-		avName, _ := av.GetAttributeViewName(id)
+		avName, _ := av.GetAttributeViewNameByPath(database)
 		histories = append(histories, &sql.History{
 			ID:      id,
 			Type:    HistoryTypeDatabase,

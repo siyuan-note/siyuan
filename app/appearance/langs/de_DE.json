@@ -1,4 +1,5 @@
 {
+  "clearAllAV": "Bestätigen Sie das Löschen aller nicht referenzierten Datenbanken?",
   "unreferencedAV": "Nicht referenzierte Datenbank",
   "includeSubDocs": "Unterdokumente einbeziehen",
   "includeSubDocsTip": "Wenn aktiviert, werden beim Export alle Unterdokumente des aktuellen Dokuments einbezogen",

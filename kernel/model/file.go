@@ -1561,7 +1561,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 		return
 	}
 
-	generateAvHistory(tree, historyDir)
+	generateAvHistoryInTree(tree, historyDir)
 	copyDocAssetsToDataAssets(box.ID, p)
 
 	removeIDs := treenode.RootChildIDs(tree.ID)

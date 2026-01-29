@@ -1,4 +1,5 @@
 {
+  "clearAllAV": "모든 참조되지 않은 데이터베이스를 정리하시겠습니까?",
   "unreferencedAV": "참조되지 않은 데이터베이스",
   "includeSubDocs": "하위 문서 포함",
   "includeSubDocsTip": "활성화하면 내보낼 때 현재 문서의 모든 하위 문서를 포함합니다",

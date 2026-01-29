@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -527,7 +528,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
 		case HistoryTypeDatabase:
-			stmt += " id = '" + query + "'"
+			stmt += table + " MATCH '{content}:(" + query + ")'"
 		}
 	} else {
 		stmt += "1=1"
@@ -673,7 +674,7 @@ func (box *Box) generateDocHistory0() {
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
 			} else {
-				generateAvHistory(tree, historyDir)
+				generateAvHistoryInTree(tree, historyDir)
 			}
 		}
 	}
@@ -779,6 +780,34 @@ func recentModifiedAssets() (ret []string) {
 	return
 }
 
+var attributeViewLatestHistoryTime = time.Now().Unix()
+
+func recentModifiedAttributeViews() (ret []string) {
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
+	if nil != err {
+		logging.LogErrorf("read attribute view dir failed: %s", err)
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+
+		info, err := entry.Info()
+		if nil != err {
+			logging.LogErrorf("read attribute view file info failed: %s", err)
+			continue
+		}
+
+		if info.ModTime().Unix() > attributeViewLatestHistoryTime {
+			ret = append(ret, filepath.Join(util.DataDir, "storage", "av", entry.Name()))
+		}
+	}
+	attributeViewLatestHistoryTime = time.Now().Unix()
+	return
+}
+
 const (
 	HistoryOpClean   = "clean"
 	HistoryOpUpdate  = "update"
@@ -813,12 +842,12 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		return
 	}
 
-	generateAvHistory(tree, historyDir)
+	generateAvHistoryInTree(tree, historyDir)
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 }
 
-func generateAvHistory(tree *parse.Tree, historyDir string) {
+func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
 	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 	for _, avNode := range avNodes {
 		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
@@ -958,11 +987,13 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 		}
 		p := strings.TrimPrefix(database, util.HistoryDir)
 		p = filepath.ToSlash(p[1:])
+		content := av.GetAttributeViewContentByPath(database)
 		histories = append(histories, &sql.History{
 			ID:      id,
 			Type:    HistoryTypeDatabase,
 			Op:      op,
 			Title:   id,
+			Content: content,
 			Path:    p,
 			Created: created,
 		})

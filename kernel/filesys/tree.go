@@ -252,7 +252,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	tree.Root.SetIALAttr("type", "doc")
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
-	data = bytes.ReplaceAll(data, []byte(`\u0000`), []byte(""))
+	data = removeUnescapedUnicodeNull(data)
 	if !util.UseSingleLineSave {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
@@ -267,6 +267,46 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		return
 	}
 	return
+}
+
+// removeUnescapedUnicodeNull 只移除未被转义的 `\u0000` 字面序列。
+// 判断方法：在匹配到 `\u0000` 时向前数连续的 `\` 个数，若为偶数则视为未转义并移除。
+func removeUnescapedUnicodeNull(data []byte) []byte {
+	patLen := 6 // len(`\u0000`)
+	n := len(data)
+	if n < patLen {
+		return data
+	}
+
+	dst := make([]byte, 0, n)
+	i := 0
+	for i < n {
+		// 快速检查是否可能匹配 `\u0000`
+		if i+patLen <= n &&
+			data[i] == '\\' &&
+			data[i+1] == 'u' &&
+			data[i+2] == '0' &&
+			data[i+3] == '0' &&
+			data[i+4] == '0' &&
+			data[i+5] == '0' {
+			// 统计当前 `\` 之前连续的反斜杠数量
+			j := i - 1
+			backslashes := 0
+			for j >= 0 && data[j] == '\\' {
+				backslashes++
+				j--
+			}
+			// 若为偶数，则当前 `\` 未被转义，跳过整个 `\u0000`
+			if backslashes%2 == 0 {
+				i += patLen
+				continue
+			}
+		}
+		// 否则保留当前字节
+		dst = append(dst, data[i])
+		i++
+	}
+	return dst
 }
 
 func afterWriteTree(tree *parse.Tree) {

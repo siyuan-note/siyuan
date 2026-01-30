@@ -48,11 +48,16 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2 && window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 4) {
             opElement.value = "all";
         }
+        if (typeElement.value === "4") {
+            opElement.querySelector('option[value="update"]').classList.add("fn__none");
+            opElement.querySelector('option[value="sync"]').classList.add("fn__none");
+        } else {
+            opElement.querySelector('option[value="update"]').classList.remove("fn__none");
+            opElement.querySelector('option[value="sync"]').classList.remove("fn__none");
+        }
         opElement.querySelector('option[value="clean"]').classList.remove("fn__none");
-        opElement.querySelector('option[value="update"]').classList.remove("fn__none");
         opElement.querySelector('option[value="delete"]').classList.add("fn__none");
         opElement.querySelector('option[value="format"]').classList.add("fn__none");
-        opElement.querySelector('option[value="sync"]').classList.remove("fn__none");
         opElement.querySelector('option[value="replace"]').classList.add("fn__none");
         opElement.querySelector('option[value="outline"]').classList.add("fn__none");
     } else {
@@ -751,7 +756,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 content: `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`,
                                 id: Lute.NewNodeID(),
                                 rootID: Lute.NewNodeID(),
-                            }
+                            },
+                            msg: "",
+                            code: 0
                         },
                         protyle: historyEditor.protyle,
                         action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],

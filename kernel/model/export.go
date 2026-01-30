@@ -3069,10 +3069,15 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	for _, foot := range *refFootnotes {
 		t, err := loadTreeWithCache(foot.defID, treeCache)
 		if nil != err {
-			return
+			logging.LogErrorf("load tree for footnote def [%s] refNum [%s] failed: %s", foot.defID, foot.refNum, err)
+			continue
 		}
 
 		defNode := treenode.GetNodeInTree(t, foot.defID)
+		if nil == defNode {
+			logging.LogErrorf("not found node [%s] in tree for footnote refNum [%s]", foot.defID, foot.refNum)
+			continue
+		}
 		docID := util.GetTreeID(defNode.Path)
 		var nodes []*ast.Node
 		if ast.NodeHeading == defNode.Type {
@@ -3282,10 +3287,6 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes
 		if treenode.IsBlockRef(n) {
 			defID, refText, _ := treenode.GetBlockRef(n)
 			if nil == getRefAsFootnotes(defID, refFootnotes) {
-				if isNodeInTree(defID, currentTree) {
-					// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
-					return ast.WalkSkipChildren
-				}
 				anchorText := refText
 				if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
 					anchorText = gulu.Str.SubStr(anchorText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
@@ -3295,6 +3296,10 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes
 					refNum:        strconv.Itoa(len(*refFootnotes) + 1),
 					refAnchorText: anchorText,
 				})
+				if isNodeInTree(defID, currentTree) {
+					// 当前文档内也占位编号，正文处会输出 [^refNum] 且为锚点链接，保持序号连续
+					return ast.WalkSkipChildren
+				}
 				collectFootnotesDefs(currentTree, defID, refFootnotes, treeCache, depth)
 			}
 			return ast.WalkSkipChildren

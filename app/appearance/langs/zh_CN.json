@@ -111,7 +111,7 @@
   "publish": "发布",
   "publishService": "发布服务",
   "publishServiceNotStarted": "发布服务未启动",
-  "publishServiceTip": "启用后将启动发布服务。该服务以只读模式在局域网中发布当前工作空间的内容",
+  "publishServiceTip": "启用后将启动发布服务。该服务以只读模式在局域网中发布当前工作空间的内容，请确保工作空间中不包含敏感信息",
   "publishServicePort": "服务端口号",
   "publishServicePortTip": "使用指定的端口号启用发布服务。若设置为 <code class='fn__code'>0</code> 则使用随机端口",
   "publishServiceAddresses": "服务访问地址",

@@ -111,7 +111,7 @@
   "publish": "Publicar",
   "publishService": "Publicar servicio",
   "publishServiceNotStarted": "Servicio de publicación no iniciado",
-  "publishServiceTip": "Al activar esto, se iniciará el servicio de publicación. Este servicio publicará el contenido del espacio de trabajo actual en modo de solo lectura en la LAN",
+  "publishServiceTip": "Al activar esto, se iniciará el servicio de publicación. Este servicio publicará el contenido del espacio de trabajo actual en modo de solo lectura en la LAN. Asegúrese de que el espacio de trabajo no contenga información sensible.",
   "publishServicePort": "Número de puerto del servicio",
   "publishServicePortTip": "Activar el servicio de publicación con el número de puerto especificado. Si se establece en 0, se utilizará un puerto aleatorio",
   "publishServiceAddresses": "Direcciones de acceso al servicio",

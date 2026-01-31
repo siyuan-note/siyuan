@@ -111,7 +111,7 @@
   "publish": "公開する",
   "publishService": "サービスを公開",
   "publishServiceNotStarted": "サービスが開始されていません",
-  "publishServiceTip": "有効にすると、サービスを開始します。このサービスは、現在のワークスペースの内容を読み取り専用モードでローカルネットワークに公開します",
+  "publishServiceTip": "有効にすると、サービスを開始します。このサービスは、現在のワークスペースの内容を読み取り専用モードでローカルネットワークに公開します。ワークスペースに機密情報が含まれていないことを確認してください。",
   "publishServicePort": "サービスポート",
   "publishServicePortTip": "指定したポート番号を使用してサービスを有効にします。0 に設定するとランダムなポートが使用されます",
   "publishServiceAddresses": "サービスアドレス",

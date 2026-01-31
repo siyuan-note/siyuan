@@ -163,44 +163,6 @@ export const initAbout = () => {
     </button>
     <div class="b3-label__text">${window.siyuan.languages.systemLogTip}</div>
 </div>
-<div class="b3-label">
-    ${window.siyuan.languages.export} Data
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="exportData">
-       <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.exportDataTip}</div>
-</div>
-<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <div class="fn__flex">
-        ${window.siyuan.languages.import} Data
-    </div>
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" style="position: relative">
-        <input id="importData" class="b3-form__upload" type="file">
-        <svg><use xlink:href="#iconDownload"></use></svg> ${window.siyuan.languages.import}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.importDataTip}</div>
-</div>
-<div class="b3-label">
-    ${window.siyuan.languages.exportConf}
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" id="exportConf">
-       <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.exportConfTip}</div>
-</div>
-<div class="b3-label${window.siyuan.config.readonly ? " fn__none" : ""}">
-    <div class="fn__flex">
-        ${window.siyuan.languages.importConf}
-    </div>
-    <div class="fn__hr"></div>
-    <button class="b3-button b3-button--outline fn__block" style="position: relative">
-        <input id="importConf" class="b3-form__upload" type="file">
-        <svg><use xlink:href="#iconDownload"></use></svg> ${window.siyuan.languages.import}
-    </button>
-    <div class="b3-label__text">${window.siyuan.languages.importConfTip}</div>
-</div>
 <div class="b3-label${(!window.siyuan.config.readonly && (isInAndroid() || isInIOS() || isInHarmony())) ? "" : " fn__none"}">
     ${window.siyuan.languages.workspaceList}
     <div class="fn__hr"></div>
@@ -330,20 +292,6 @@ export const initAbout = () => {
                         event.preventDefault();
                         event.stopPropagation();
                         break;
-                    } else if (target.id === "exportData") {
-                        fetchPost("/api/export/exportData", {}, response => {
-                            openByMobile(response.data.zip);
-                        });
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
-                    } else if (target.id === "exportConf") {
-                        fetchPost("/api/system/exportConf", {}, response => {
-                            openByMobile(response.data.zip);
-                        });
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
                     } else if (target.id === "vacuumDataIndex") {
                         fetchPost("/api/system/vacuumDataIndex", {}, () => {
                         });
@@ -464,27 +412,6 @@ export const initAbout = () => {
                     }
                     target = target.parentElement;
                 }
-            });
-            modelMainElement.querySelector("#importData").addEventListener("change", (event: InputEvent & {
-                target: HTMLInputElement
-            }) => {
-                const formData = new FormData();
-                formData.append("file", event.target.files[0]);
-                fetchPost("/api/import/importData", formData);
-            });
-            modelMainElement.querySelector("#importConf").addEventListener("change", (event: InputEvent & {
-                target: HTMLInputElement
-            }) => {
-                const formData = new FormData();
-                formData.append("file", event.target.files[0]);
-                fetchPost("/api/system/importConf", formData, (response) => {
-                    if (response.code !== 0) {
-                        showMessage(response.msg);
-                        return;
-                    }
-
-                    exitSiYuan();
-                });
             });
             const networkServeElement = modelMainElement.querySelector("#networkServe") as HTMLInputElement;
             const networkServeTLSElement = modelMainElement.querySelector("#networkServeTLS") as HTMLInputElement;

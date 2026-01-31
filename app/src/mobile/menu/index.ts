@@ -31,6 +31,7 @@ import {afterLoadPlugin} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../../plugin/openTopBarMenu";
 import {initFileTree} from "../settings/fileTree";
+import {initExport} from "../settings/export";
 
 export const popMenu = () => {
     activeBlur();
@@ -115,6 +116,9 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAssets">
         <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg><span class="b3-menu__label">${window.siyuan.languages.assets}</span>
     </div>
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuExport">
+        <svg class="b3-menu__icon"><use xlink:href="#iconUpload"></use></svg><span class="b3-menu__label">${window.siyuan.languages.export}</span>
+    </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAppearance">
         <svg class="b3-menu__icon"><use xlink:href="#iconTheme"></use></svg><span class="b3-menu__label">${window.siyuan.languages.appearance}</span>
     </div>
@@ -175,6 +179,11 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuAssets") {
                 initAssets();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuExport") {
+                initExport();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

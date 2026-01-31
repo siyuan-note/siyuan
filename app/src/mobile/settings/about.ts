@@ -63,7 +63,7 @@ export const initAbout = () => {
 <div class="b3-label">
         ${window.siyuan.languages.about2}
         <div class="fn__hr"></div>
-        <a target="_blank" href="${"http://127.0.0.1:" + location.port}" class="b3-button b3-button--outline fn__block">
+        <a target="_blank" href="${"http://127.0.0.1:" + location.port}?openExternal" class="b3-button b3-button--outline fn__block">
             <svg><use xlink:href="#iconLink"></use></svg>${window.siyuan.languages.about4}
         </a>
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>

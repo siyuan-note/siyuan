@@ -111,7 +111,7 @@
   "publish": "Publier",
   "publishService": "Publier le service",
   "publishServiceNotStarted": "Service de publication non démarré",
-  "publishServiceTip": "Lorsqu'activé, le service de publication démarre. Ce service publie en mode lecture seule le contenu de l'espace de travail actuel dans le réseau local.",
+  "publishServiceTip": "Lorsqu'activé, le service de publication démarre. Ce service publie en mode lecture seule le contenu de l'espace de travail actuel dans le réseau local. Veuillez vous assurer que l'espace de travail ne contient pas d'informations sensibles.",
   "publishServicePort": "Numéro de port du service",
   "publishServicePortTip": "Active le service de publication avec le numéro de port spécifié. Si défini sur 0, un port aléatoire sera utilisé.",
   "publishServiceAddresses": "Adresses d'accès au service",

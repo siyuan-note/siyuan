@@ -111,7 +111,7 @@
   "publish": "Pubblica",
   "publishService": "Servizio di pubblicazione",
   "publishServiceNotStarted": "Servizio di pubblicazione non avviato",
-  "publishServiceTip": "Quando abilitato, il servizio di pubblicazione verrà avviato. Questo servizio pubblica il contenuto dell'attuale area di lavoro in modalità di sola lettura sulla rete locale.",
+  "publishServiceTip": "Quando abilitato, il servizio di pubblicazione verrà avviato. Questo servizio pubblica il contenuto dell'attuale area di lavoro in modalità di sola lettura sulla rete locale. Assicurarsi che l'area di lavoro non contenga informazioni sensibili.",
   "publishServicePort": "Porta del servizio",
   "publishServicePortTip": "Abilita il servizio di pubblicazione utilizzando il numero di porta specificato. Se impostato su <code class='fn__code'>0</code>, verrà utilizzata una porta casuale.",
   "publishServiceAddresses": "Indirizzi di accesso al servizio",

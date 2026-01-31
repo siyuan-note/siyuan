@@ -111,7 +111,7 @@
   "publish": "Yayınla",
   "publishService": "Yayın servisi",
   "publishServiceNotStarted": "Yayın Servisi Başlatılmadı",
-  "publishServiceTip": "Etkinleştirildiğinde, yayın servisi başlatılır. Bu servis, geçerli çalışma alanı içeriğini yerel ağda salt okunur olarak yayınlar.",
+  "publishServiceTip": "Etkinleştirildiğinde, yayın servisi başlatılır. Bu servis, geçerli çalışma alanı içeriğini yerel ağda salt okunur olarak yayınlar. Lütfen çalışma alanında hassas bilgi bulunmadığından emin olun.",
   "publishServicePort": "Servis portu",
   "publishServicePortTip": "Belirtilen port numarasıyla yayın servisini etkinleştir. <code class='fn__code'>0</code> olarak ayarlanırsa rastgele bir port kullanılır.",
   "publishServiceAddresses": "Servis erişim adresleri",

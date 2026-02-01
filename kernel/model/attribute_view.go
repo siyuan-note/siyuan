@@ -175,6 +175,16 @@ func UnusedAttributeViews() (ret []*UnusedItem) {
 			ret = append(ret, &UnusedItem{Item: id, Name: name})
 		}
 	}
+
+	// 按文件更新时间排序
+	sort.Slice(ret, func(i, j int) bool {
+		iInfo, iErr := os.Stat(filepath.Join(util.DataDir, "storage", "av", ret[i].Item+".json"))
+		jInfo, jErr := os.Stat(filepath.Join(util.DataDir, "storage", "av", ret[j].Item+".json"))
+		if iErr != nil || jErr != nil {
+			return iInfo.ModTime().After(jInfo.ModTime())
+		}
+		return ret[i].Item > ret[j].Item
+	})
 	return
 }
 

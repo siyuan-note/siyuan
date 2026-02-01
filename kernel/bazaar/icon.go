@@ -159,15 +159,16 @@ func InstalledIcons() (ret []*Icon) {
 			continue
 		}
 
+		icon.RepoURL = icon.URL
 		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
 		if bazaarPkg := getBazaarIcon(icon.Name, bazaarIcons); nil != bazaarPkg {
 			icon.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			icon.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			icon.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.IconsPath, dirName)
 		icon.Installed = true
-		icon.RepoURL = icon.URL
 		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
 		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
 		icon.IconURL = "/appearance/icons/" + dirName + "/icon.png"

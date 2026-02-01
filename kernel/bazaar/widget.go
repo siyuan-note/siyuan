@@ -157,15 +157,16 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 
+		widget.RepoURL = widget.URL
 		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
 		if bazaarPkg := getBazaarWidget(widget.Name, bazaarWidgets); nil != bazaarPkg {
 			widget.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			widget.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			widget.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.DataDir, "widgets", dirName)
 		widget.Installed = true
-		widget.RepoURL = widget.URL
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"

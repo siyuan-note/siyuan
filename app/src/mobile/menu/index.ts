@@ -1,6 +1,6 @@
 import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
-import {initAssets} from "../settings/assets";
+import {initConfigAssets} from "../settings/assets";
 import {closePanel} from "../util/closePanel";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {repos} from "../../config/repos";
@@ -178,7 +178,7 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuAssets") {
-                initAssets();
+                initConfigAssets(app);
                 event.preventDefault();
                 event.stopPropagation();
                 break;

@@ -864,7 +864,7 @@ export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement)
     fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
         nodeElement.classList.remove("protyle-wysiwyg--select");
         const tempElement = document.createElement("template");
-        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`);
+        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div class="av" data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`);
         const cloneElement = tempElement.content.firstElementChild;
         nodeElement.after(cloneElement);
         avRender(cloneElement, protyle, () => {

@@ -12,8 +12,11 @@ import {openBy} from "../editor/util";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {writeText} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
-import {avRender} from "../protyle/render/av/render";
 import {showMessage} from "../dialog/message";
+import {Protyle} from "../protyle";
+import {App} from "../index";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import {removeLoading} from "../protyle/ui/initUI";
 
 export const image = {
     element: undefined as Element,
@@ -78,9 +81,22 @@ export const image = {
     </div>
 </div>`;
     },
-    bindEvent: () => {
+    bindEvent: (app: App) => {
         const assetsListElement = image.element.querySelector('.config-assets[data-type="remove"] .config-assets__list');
         const avListElement = image.element.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
+        const editor = new Protyle(app, avListElement.nextElementSibling as HTMLElement, {
+            blockId: "",
+            action: [Constants.CB_GET_HISTORY],
+            render: {
+                background: false,
+                gutter: false,
+                breadcrumb: false,
+                breadcrumbDocName: false,
+            },
+            typewriterMode: false,
+        });
+        disabledProtyle(editor.protyle);
+        removeLoading(editor.protyle);
         image.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(image.element)) {
@@ -138,14 +154,25 @@ export const image = {
                     event.stopPropagation();
                     break;
                 } else if (target.getAttribute("data-tab-type") === "unRefAV") {
-                    avListElement.nextElementSibling.innerHTML = `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.dataset.item}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
-                    avRender(avListElement.nextElementSibling.firstElementChild, null);
+                    onGet({
+                        data: {
+                            data: {
+                                content: `<div class="av" data-node-id="${Lute.NewNodeID()}" data-av-id="${target.dataset.item}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`,
+                                id: Lute.NewNodeID(),
+                                rootID: Lute.NewNodeID(),
+                            },
+                            msg: "",
+                            code: 0
+                        },
+                        protyle: editor.protyle,
+                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "copy") {
                     if (target.parentElement.getAttribute("data-tab-type") === "unRefAV") {
-                        writeText(`<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.parentElement.dataset.item}" data-type="NodeAttributeView" data-av-type="table"></div>`);
+                        writeText(`<div class="av" data-node-id="${Lute.NewNodeID()}" data-av-id="${target.parentElement.dataset.item}" data-type="NodeAttributeView" data-av-type="table"></div>`);
                     } else {
                         writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim());
                     }

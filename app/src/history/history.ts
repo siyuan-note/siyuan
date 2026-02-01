@@ -753,7 +753,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     onGet({
                         data: {
                             data: {
-                                content: `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`,
+                                content: `<div class="av" data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`,
                                 id: Lute.NewNodeID(),
                                 rootID: Lute.NewNodeID(),
                             },

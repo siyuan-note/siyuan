@@ -195,15 +195,16 @@ func InstalledPlugins(frontend string) (ret []*Plugin) {
 			continue
 		}
 
+		plugin.RepoURL = plugin.URL
 		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin.Package)
 		if bazaarPkg := getBazaarPlugin(plugin.Name, bazaarPlugins); nil != bazaarPkg {
 			plugin.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			plugin.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			plugin.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.DataDir, "plugins", dirName)
 		plugin.Installed = true
-		plugin.RepoURL = plugin.URL
 		plugin.PreviewURL = "/plugins/" + dirName + "/preview.png"
 		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"

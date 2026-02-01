@@ -177,11 +177,18 @@ func UnusedAttributeViews() (ret []*UnusedItem) {
 	}
 
 	// 按文件更新时间排序
+	modTimes := make([]time.Time, len(ret))
+	for i := range ret {
+		p := filepath.Join(util.DataDir, "storage", "av", ret[i].Item+".json")
+		if info, statErr := os.Stat(p); nil != statErr {
+			modTimes[i] = info.ModTime()
+		} else {
+			modTimes[i] = time.Time{}
+		}
+	}
 	sort.Slice(ret, func(i, j int) bool {
-		iInfo, iErr := os.Stat(filepath.Join(util.DataDir, "storage", "av", ret[i].Item+".json"))
-		jInfo, jErr := os.Stat(filepath.Join(util.DataDir, "storage", "av", ret[j].Item+".json"))
-		if iErr != nil || jErr != nil {
-			return iInfo.ModTime().After(jInfo.ModTime())
+		if !modTimes[i].Equal(modTimes[j]) {
+			return modTimes[i].After(modTimes[j])
 		}
 		return ret[i].Item > ret[j].Item
 	})

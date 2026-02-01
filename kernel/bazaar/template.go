@@ -160,15 +160,16 @@ func InstalledTemplates() (ret []*Template) {
 			continue
 		}
 
+		template.RepoURL = template.URL
 		template.DisallowInstall = disallowInstallBazaarPackage(template.Package)
 		if bazaarPkg := getBazaarTemplate(template.Name, bazaarTemplates); nil != bazaarPkg {
 			template.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			template.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			template.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.DataDir, "templates", dirName)
 		template.Installed = true
-		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
 		template.IconURL = "/templates/" + dirName + "/icon.png"

@@ -161,15 +161,16 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 
+		theme.RepoURL = theme.URL
 		theme.DisallowInstall = disallowInstallBazaarPackage(theme.Package)
 		if bazaarPkg := getBazaarTheme(theme.Name, bazaarThemes); nil != bazaarPkg {
 			theme.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			theme.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			theme.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.ThemesPath, dirName)
 		theme.Installed = true
-		theme.RepoURL = theme.URL
 		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
 		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
 		theme.IconURL = "/appearance/themes/" + dirName + "/icon.png"

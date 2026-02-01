@@ -67,7 +67,8 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
     const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
-        if (isXScroll && firstDirection === "toRight" && !lastClientX) {
+        if (isXScroll && firstDirection === "toRight" && !lastClientX &&
+            !hasClosestByClassName(target, "protyle-wysiwyg", true)) {
             closeModel();
         }
         return;

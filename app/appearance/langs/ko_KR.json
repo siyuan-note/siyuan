@@ -137,7 +137,7 @@
   "allowHTMLBLockScript": "HTML 블록 내 스크립트 실행 허용",
   "allowHTMLBLockScriptTip": "활성화하면 HTML 블록의 스크립트가 삭제되지 않습니다. XSS 공격의 잠재적 위험에 주의하세요",
   "allowSVGScript": "SVG 내부 스크립트 실행 허용",
-  "allowSVGScriptTip": "활성화하면 SVG 내의 코드는 보안 필터링 대상이 되지 않습니다。잠재적 XSS 공격에 주의하세요",
+  "allowSVGScriptTip": "활성화하면 SVG 내의 코드는 보안 필터링 대상이 되지 않습니다. 잠재적 XSS 공격에 주의하세요",
   "autoLaunchMode0": "자동으로 시작하지 않음",
   "autoLaunchMode1": "부팅 후 자동 시작",
   "autoLaunchMode2": "부팅 후 자동 시작 및 메인 인터페이스 최소화",

@@ -95,12 +95,13 @@ func InitDatabase(forceRebuild bool) (err error) {
 
 	// 不存在库或者版本不一致都会走到这里
 
-	closeDatabase()
+	if err = closeDatabase(); nil != err {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "close database failed: %s", err)
+	}
+
 	if gulu.File.IsExist(util.DBPath) {
 		if err = removeDatabaseFile(); err != nil {
-			logging.LogErrorf("remove database file [%s] failed: %s", util.DBPath, err)
-			util.PushClearProgress()
-			err = nil
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", util.DBPath, err)
 		}
 	}
 

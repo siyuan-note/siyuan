@@ -298,6 +298,10 @@ func indexTreeInFilesystem(blockID string) error {
 }
 
 func loadParentTree(tree *parse.Tree) (ret *parse.Tree) {
+	if nil == tree {
+		return
+	}
+
 	boxDir := filepath.Join(util.DataDir, tree.Box)
 	parentDir := path.Dir(tree.Path)
 	if parentDir == boxDir || parentDir == "/" {

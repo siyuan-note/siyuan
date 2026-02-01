@@ -120,6 +120,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if plugin.Outdated {
 				plugins = append(plugins, plugin)
 			}
+			plugin.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
 		}
 	}()
 
@@ -130,6 +131,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if widget.Outdated {
 				widgets = append(widgets, widget)
 			}
+			widget.PreferredReadme = ""
 		}
 	}()
 
@@ -140,6 +142,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if icon.Outdated {
 				icons = append(icons, icon)
 			}
+			icon.PreferredReadme = ""
 		}
 	}()
 
@@ -150,6 +153,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if theme.Outdated {
 				themes = append(themes, theme)
 			}
+			theme.PreferredReadme = ""
 		}
 	}()
 
@@ -160,6 +164,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if template.Outdated {
 				templates = append(templates, template)
 			}
+			template.PreferredReadme = ""
 		}
 	}()
 

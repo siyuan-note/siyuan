@@ -145,6 +145,10 @@ func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
 }
 
 func refreshParentDocInfo(tree *parse.Tree) {
+	if nil == tree {
+		return
+	}
+
 	parentTree := loadParentTree(tree)
 	if nil == parentTree {
 		return

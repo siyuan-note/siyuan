@@ -877,9 +877,10 @@ func GetAttributeViewI18n(key string) string {
 }
 
 var (
-	ErrViewNotFound    = errors.New("view not found")
-	ErrKeyNotFound     = errors.New("key not found")
-	ErrWrongLayoutType = errors.New("wrong layout type")
+	ErrAttributeViewNotFound = errors.New("attribute view not found")
+	ErrViewNotFound          = errors.New("view not found")
+	ErrKeyNotFound           = errors.New("key not found")
+	ErrWrongLayoutType       = errors.New("wrong layout type")
 )
 
 const (

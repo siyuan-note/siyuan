@@ -132,25 +132,18 @@ func loadThemes() {
 		modes := themeConf.Modes
 		for _, mode := range modes {
 			t := &conf.AppearanceTheme{Name: name}
-			if "zh_CN" == util.Lang {
-				if "midnight" == name {
-					t.Label = name + "（默认主题）"
-				} else if "daylight" == name {
-					t.Label = name + "（默认主题）"
-				} else {
-					if nil != themeConf.DisplayName && "" != themeConf.DisplayName.ZhCN && name != themeConf.DisplayName.ZhCN {
-						t.Label = themeConf.DisplayName.ZhCN + "（" + name + "）"
-					} else {
-						t.Label = name
-					}
-				}
+			if "midnight" == name || "daylight" == name {
+				t.Label = name + Conf.Language(281)
 			} else {
-				if "midnight" == name {
-					t.Label = name + " (Default)"
-				} else if "daylight" == name {
-					t.Label = name + " (Default)"
-				} else {
-					t.Label = name
+				t.Label = name
+				if len(themeConf.DisplayName) > 0 {
+					v := strings.TrimSpace(themeConf.DisplayName[util.Lang])
+					if "" == v {
+						v = strings.TrimSpace(themeConf.DisplayName["default"])
+					}
+					if "" != v && name != v {
+						t.Label = v + " (" + name + ")"
+					}
 				}
 			}
 

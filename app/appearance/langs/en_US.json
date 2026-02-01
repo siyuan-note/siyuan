@@ -1743,6 +1743,7 @@
     "277": "Temporary files cleaned, [%d] files removed, [%s] disk space freed",
     "278": "The workspace is not located on a solid-state drive (SSD), which can cause significant performance degradation, it is recommended to place the workspace on an SSD",
     "279": "There are [%d] unreferenced databases in total, only [%d] are listed here",
-    "280": "Cleanup of unreferenced databases completed, [%d] files removed, [%s] of disk space freed"
+    "280": "Cleanup of unreferenced databases completed, [%d] files removed, [%s] of disk space freed",
+    "281": " (Default)"
   }
 }

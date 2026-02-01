@@ -562,7 +562,7 @@
   "sortByRankAsc": "רלוונטיות ASC",
   "saveCriterion": "שמור קריטריוני שאילתה",
   "useCriterion": "השאילתה הבאה לא תשתמש יותר בקריטריוני השאילתה הנוכחיים",
-  "removeCriterion": "הסר קריטריוני שאילתה",
+  "removeCriterion": "איפוס תנאי השאילתה",
   "group": "קבוצה",
   "noGroupBy": "ללא קבוצות",
   "groupByDoc": "קבוצה לפי מסמך",

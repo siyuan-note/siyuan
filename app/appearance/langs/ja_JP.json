@@ -562,7 +562,7 @@
   "sortByRankAsc": "関連性 (昇順)",
   "saveCriterion": "検索条件を保存",
   "useCriterion": "次回の検索条件を現在の検索条件で使用しない",
-  "removeCriterion": "検索条件を削除",
+  "removeCriterion": "検索条件をリセット",
   "group": "グループ ",
   "noGroupBy": "グループ化なし",
   "groupByDoc": "ドキュメントごとにグループ化",

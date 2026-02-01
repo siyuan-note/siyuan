@@ -562,7 +562,7 @@
   "sortByRankAsc": "Relevance ASC",
   "saveCriterion": "Save query criteria",
   "useCriterion": "The next query will no longer use the current query criteria",
-  "removeCriterion": "Remove query criteria",
+  "removeCriterion": "Reset query criteria",
   "group": "Group",
   "noGroupBy": "No grouping",
   "groupByDoc": "Group by document",

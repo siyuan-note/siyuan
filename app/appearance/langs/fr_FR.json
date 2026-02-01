@@ -562,7 +562,7 @@
   "sortByRankAsc": "ASC de pertinence",
   "saveCriterion": "Enregistrer les critères de requête",
   "useCriterion": "Les conditions de requête actuelles ne seront plus utilisées pour la prochaine requête",
-  "removeCriterion": "Supprimer les critères de requête",
+  "removeCriterion": "Réinitialiser les critères de recherche",
   "group": "Groupe",
   "noGroupBy": "Aucun regroupement",
   "groupByDoc": "Regrouper par document",

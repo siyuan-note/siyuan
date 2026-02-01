@@ -562,7 +562,7 @@
   "sortByRankAsc": "Alaka düzeyi (artan)",
   "saveCriterion": "Sorgu ölçütünü kaydet",
   "useCriterion": "Sonraki sorguda geçerli ölçüt kullanılmayacak",
-  "removeCriterion": "Sorgu ölçütünü kaldır",
+  "removeCriterion": "Sorgu kriterlerini sıfırla",
   "group": "Grup",
   "noGroupBy": "Gruplama yok",
   "groupByDoc": "Belgeye göre grupla",

@@ -562,7 +562,7 @@
   "sortByRankAsc": "관련성 오름차순",
   "saveCriterion": "쿼리 기준 저장",
   "useCriterion": "다음 쿼리에서는 더 이상 현재 쿼리 기준을 사용하지 않습니다",
-  "removeCriterion": "쿼리 기준 제거",
+  "removeCriterion": "검색 조건 초기화",
   "group": "그룹",
   "noGroupBy": "그룹화 안 함",
   "groupByDoc": "문서별 그룹화",

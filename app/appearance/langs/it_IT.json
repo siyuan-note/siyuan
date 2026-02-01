@@ -562,7 +562,7 @@
   "sortByRankAsc": "Rilevanza ASC",
   "saveCriterion": "Salva criteri di ricerca",
   "useCriterion": "La prossima ricerca non utilizzerà più i criteri di ricerca correnti",
-  "removeCriterion": "Rimuovi criteri di ricerca",
+  "removeCriterion": "Reimposta i criteri di ricerca",
   "group": "Gruppo",
   "noGroupBy": "Nessun raggruppamento",
   "groupByDoc": "Raggruppa per documento",

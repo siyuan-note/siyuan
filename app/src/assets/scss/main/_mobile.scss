@@ -255,8 +255,8 @@
       justify-content: center;
       overflow: auto;
       flex: 1;
-      margin-top: 8px;
-      padding: 0 8px;
+      padding: 8px;
+      background-color: var(--b3-theme-background);
     }
   }
 }

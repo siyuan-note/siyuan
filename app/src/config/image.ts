@@ -13,6 +13,7 @@ import {renderAssetsPreview} from "../asset/renderAssets";
 import {writeText} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {avRender} from "../protyle/render/av/render";
+import {showMessage} from "../dialog/message";
 
 export const image = {
     element: undefined as Element,
@@ -52,7 +53,7 @@ export const image = {
             </ul>
             <div class="config-assets__preview"></div>
         </div>
-        <div class="config-assets${isM ? " b3-list--mobile" : ""}" data-type="removeAV">
+        <div class="fn__none config-assets${isM ? " b3-list--mobile" : ""}" data-type="removeAV">
             <div class="fn__hr--b"></div>
             <div class="fn__flex">
                 <div class="fn__space"></div>
@@ -137,7 +138,7 @@ export const image = {
                     event.stopPropagation();
                     break;
                 } else if (target.getAttribute("data-tab-type") === "unRefAV") {
-                    avListElement.nextElementSibling.innerHTML = `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                    avListElement.nextElementSibling.innerHTML = `<div data-node-id="${Lute.NewNodeID()}" data-av-id="${target.dataset.item}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
                     avRender(avListElement.nextElementSibling.firstElementChild, null);
                     event.preventDefault();
                     event.stopPropagation();
@@ -148,6 +149,7 @@ export const image = {
                     } else {
                         writeText(target.parentElement.querySelector(".b3-list-item__text").textContent.trim());
                     }
+                    showMessage(window.siyuan.languages.copied);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -206,9 +208,9 @@ export const image = {
 
         assetsListElement.addEventListener("mouseover", (event) => {
             const liElement = hasClosestByClassName(event.target as Element, "b3-list-item");
-            if (liElement && liElement.getAttribute("data-path") !== assetsListElement.nextElementSibling.getAttribute("data-path")) {
-                const item = liElement.getAttribute("data-path");
-                assetsListElement.nextElementSibling.setAttribute("data-path", item);
+            if (liElement && liElement.getAttribute("data-item") !== assetsListElement.nextElementSibling.getAttribute("data-item")) {
+                const item = liElement.getAttribute("data-item");
+                assetsListElement.nextElementSibling.setAttribute("data-item", item);
                 assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(item);
             }
         });
@@ -237,7 +239,7 @@ export const image = {
         data.forEach((item) => {
             html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}">
     <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
-    <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages.copy}">
+    <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages[type === "unRefAV" ? "copyMirror" : "copy"]}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>
     ${boxOpenHTML}

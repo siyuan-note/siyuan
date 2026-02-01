@@ -126,10 +126,10 @@ export class WYSIWYG {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
         this.bindCommonEvent(protyle);
+        this.bindEvent(protyle);
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
-        this.bindEvent(protyle);
         keydown(protyle, this.element);
         dropEvent(protyle, this.element);
     }

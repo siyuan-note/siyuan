@@ -66,7 +66,7 @@ export const about = {
         <div class="fn__space"></div>
         <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
     </label>
-    <label class="b3-label fn__flex">
+    <label class="b3-label fn__flex${window.siyuan.config.system.networkServe ? "" : " fn__none"}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.networkServeTLS}
             <div class="b3-label__text">${window.siyuan.languages.networkServeTLSTip}</div>
@@ -75,7 +75,7 @@ export const about = {
         <div class="fn__space"></div>
         <input class="b3-switch fn__flex-center" id="networkServeTLS" type="checkbox"${window.siyuan.config.system.networkServeTLS ? " checked" : ""}${!window.siyuan.config.system.networkServe ? " disabled" : ""}>
     </label>
-    <div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCACertSection">
+    <div class="fn__flex b3-label config__item${(window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe) ? "" : " fn__none"}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.exportCACert}
             <div class="b3-label__text">${window.siyuan.languages.exportCACertTip}</div>
@@ -85,7 +85,7 @@ export const about = {
             <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
         </button>
     </div>
-    <div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="exportCABundleSection">
+    <div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe ? "" : " fn__none"}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.exportCABundle}
             <div class="b3-label__text">${window.siyuan.languages.exportCABundleTip}</div>
@@ -95,7 +95,7 @@ export const about = {
             <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
         </button>
     </div>
-    <div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS ? "" : " fn__none"}" id="importCABundleSection">
+    <div class="fn__flex b3-label config__item${window.siyuan.config.system.networkServeTLS && window.siyuan.config.system.networkServe ? "" : " fn__none"}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.importCABundle}
             <div class="b3-label__text">${window.siyuan.languages.importCABundleTip}</div>

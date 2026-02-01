@@ -277,6 +277,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
+            } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)){
+                blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
+                blockElement.removeAttribute("data-render");
+                avRender(blockElement, protyle);
             } else {
                 transaction(protyle, [{
                     action: "setAttrViewBlockView",

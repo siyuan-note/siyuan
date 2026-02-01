@@ -182,6 +182,7 @@ var (
 	ErrTreeNotFound  = errors.New("tree not found")
 	ErrIndexing      = errors.New("indexing")
 	ErrBoxUnindexed  = errors.New("notebook unindexed")
+	ErrInvalidID     = errors.New("invalid id")
 )
 
 func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {

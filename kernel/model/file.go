@@ -1647,6 +1647,7 @@ func removeDoc0(tree *parse.Tree, childrenDir string) {
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
 	sql.RemoveTreePathQueue(tree.Box, childrenDir)
 	cache.RemoveDocIAL(tree.Path)
+	cache.RemoveTreeData(tree.ID)
 	return
 }
 

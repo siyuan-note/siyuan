@@ -2355,8 +2355,8 @@ export class WYSIWYG {
                     });
                 } else if (event.deltaY > 0 && protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
                     fetchPost("/api/filetree/getDoc", {
-                        id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-                        mode: 3,
+                        id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                        mode: 2,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,
                     }, getResponse => {
                         preventGetTopHTML = false;

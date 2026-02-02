@@ -115,14 +115,23 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 }
 
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	rootID := util.GetTreeID(p)
+	if raw, ok := cache.GetTreeData(rootID); ok {
+		ret, err = LoadTreeByData(raw, boxID, p, luteEngine)
+		return
+	}
+
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
-	if err != nil {
+	if nil != err {
 		logging.LogErrorf("load tree [%s] failed: %s", p, err)
 		return
 	}
 
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
+	if nil != err {
+		cache.SetTreeData(rootID, data)
+	}
 	return
 }
 
@@ -146,7 +155,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 	// 构造 HPath
 	hPathBuilder := bytes.Buffer{}
 	hPathBuilder.WriteString("/")
-	for i, _ := range parts {
+	for i := range parts {
 		var parentAbsPath string
 		if 0 < i {
 			parentAbsPath = strings.Join(parts[:i+1], "/")
@@ -232,6 +241,7 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		util.PushErrMsg(msg, 7000)
 	}
 
+	cache.SetTreeData(tree.ID, data)
 	afterWriteTree(tree)
 	return
 }

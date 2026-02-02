@@ -77,7 +77,6 @@ func GenerateFileHistory() {
 	generateAssetsHistory()
 
 	historyDir := util.HistoryDir
-	clearOutdatedHistoryDir(historyDir)
 
 	// 以下部分是老版本的历史数据，不再保留
 	for _, box := range Conf.GetBoxes() {
@@ -683,7 +682,12 @@ func (box *Box) generateDocHistory0() {
 	return
 }
 
-func clearOutdatedHistoryDir(historyDir string) {
+func ClearOutdatedHistoryDirJob() {
+	clearOutdatedHistoryDir()
+}
+
+func clearOutdatedHistoryDir() {
+	historyDir := util.HistoryDir
 	if !gulu.File.IsExist(historyDir) {
 		return
 	}

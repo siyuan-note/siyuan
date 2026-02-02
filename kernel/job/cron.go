@@ -46,6 +46,7 @@ func StartCron() {
 	go every(30*time.Second, model.HookDesktopUIProcJob)
 	go every(24*time.Hour, model.AutoPurgeRepoJob)
 	go every(30*time.Minute, model.AutoCheckMicrosoftDefenderJob)
+	go every(24*time.Hour, model.ClearOutdatedHistoryDirJob)
 
 	// TODO: 移除旧方案 https://github.com/siyuan-note/siyuan/issues/14414 实现新的刷新机制
 	//go every(3*time.Second, model.WatchLocalShorthands)

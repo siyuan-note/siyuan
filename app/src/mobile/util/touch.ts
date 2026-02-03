@@ -5,6 +5,7 @@ import {activeBlur} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
+import {Constants} from "../../constants";
 
 let clientX: number;
 let clientY: number;
@@ -42,7 +43,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
                 setTimeout(() => {
                     editElement.focus();
                     window.JSAndroid?.showKeyboard();
-                }, 100);
+                }, Constants.TIMEOUT_TRANSITION);
             } else {
                 editElement.focus();
                 window.JSAndroid?.showKeyboard();

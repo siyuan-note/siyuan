@@ -327,11 +327,20 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
             }
-            setTimeout(() => {
+            /// #if MOBILE
+            if (searchElement.getAttribute("virtualkeyboardpolicy") !== "manual") {
+                searchElement.setAttribute("virtualkeyboardpolicy", "manual");
+                setTimeout(() => {
+                    searchElement.focus();
+                    window.JSAndroid?.showKeyboard();
+                }, Constants.TIMEOUT_TRANSITION);
+            } else {
                 searchElement.focus();
-                // TODO
                 window.JSAndroid?.showKeyboard();
-            }, Constants.TIMEOUT_TRANSITION);
+            }
+            /// #else
+            searchElement.focus();
+            /// #endif
             event.preventDefault();
             event.stopPropagation();
             return true;

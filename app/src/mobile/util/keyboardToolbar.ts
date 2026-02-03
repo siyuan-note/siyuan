@@ -654,9 +654,7 @@ export const initKeyboardToolbar = () => {
                 const oldScrollTop = protyle.contentElement.scrollTop;
                 renderTextMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
-                if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
-                    window.JSAndroid.hideKeyboard();
-                }
+                window.JSAndroid?.hideKeyboard();
             }
             return;
         } else if (type === "moveup") {
@@ -682,9 +680,7 @@ export const initKeyboardToolbar = () => {
                 const oldScrollTop = protyle.contentElement.scrollTop;
                 renderSlashMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
-                if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
-                    window.JSAndroid.hideKeyboard();
-                }
+                window.JSAndroid?.hideKeyboard();
             }
             return;
         } else if (type === "block") {

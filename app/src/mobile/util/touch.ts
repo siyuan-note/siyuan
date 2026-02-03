@@ -28,13 +28,14 @@ const popSide = (render = true) => {
 
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const target = event.target as HTMLElement;
-    console.log(event.target);
     const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
-    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
-        (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false")) {
-        window.JSAndroid.showKeyboard();
-    } else {
-        window.JSAndroid.hideKeyboard();
+    if (!yDiff) {
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+            (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false")) {
+            window.JSAndroid?.showKeyboard();
+        } else {
+            window.JSAndroid?.hideKeyboard();
+        }
     }
 
     if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {

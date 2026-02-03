@@ -30,17 +30,21 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const target = event.target as HTMLElement;
     const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
     if (!yDiff || Math.abs(yDiff) < 10) {
-        if ((["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "true") ||
-            (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false")) {
-            if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
-                target.setAttribute("virtualkeyboardpolicy", "manual");
+        let editElement;
+        if (["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "true") {
+            editElement = target;
+        } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
+            editElement = hasClosestByAttribute(target, "contenteditable", "true") as HTMLElement;
+        }
+        if (editElement) {
+            if (editElement.getAttribute("virtualkeyboardpolicy") !== "manual") {
+                editElement.setAttribute("virtualkeyboardpolicy", "manual");
+                setTimeout(() => {
+                    window.JSAndroid?.showKeyboard();
+                }, 100);
             } else {
-                const editElement = hasClosestByAttribute(target, "contenteditable", "true");
-                if (editElement) {
-                    editElement.setAttribute("virtualkeyboardpolicy", "manual");
-                }
+                window.JSAndroid?.showKeyboard();
             }
-            window.JSAndroid?.showKeyboard();
         } else {
             window.JSAndroid?.hideKeyboard();
         }

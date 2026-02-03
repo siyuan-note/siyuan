@@ -235,7 +235,6 @@ interface Window {
         toCanvas: (element: Element) => Promise<HTMLCanvasElement>
         toBlob: (element: Element) => Promise<Blob>
     };
-
     siyuan: ISiyuan;
     JSAndroid: {
         returnDesktop(): void
@@ -249,6 +248,7 @@ interface Window {
         readHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
+        showKeyboard(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
         exit(): void

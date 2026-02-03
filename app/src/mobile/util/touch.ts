@@ -27,13 +27,22 @@ const popSide = (render = true) => {
 };
 
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
+    const target = event.target as HTMLElement;
+    console.log(event.target);
+    const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
+    if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+        (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false")) {
+        window.JSAndroid.showKeyboard();
+    } else {
+        window.JSAndroid.hideKeyboard();
+    }
+
     if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
         event.stopImmediatePropagation();
         event.preventDefault();
         return;
     }
     isFirstMove = true;
-    const target = event.target as HTMLElement;
     if (!clientY || typeof yDiff === "undefined" ||
         target.tagName === "AUDIO" ||
         hasClosestByClassName(target, "b3-dialog", true) ||
@@ -67,8 +76,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
     const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
-        if (isXScroll && firstDirection === "toRight" && !lastClientX &&
-            !hasClosestByClassName(target, "protyle-wysiwyg", true)) {
+        if (isXScroll && firstDirection === "toRight" && !lastClientX && !wysisygElement) {
             closeModel();
         }
         return;

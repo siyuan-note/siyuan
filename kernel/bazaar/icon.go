@@ -21,11 +21,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/88250/go-humanize"
-	ants "github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -34,100 +31,67 @@ type Icon struct {
 	*Package
 }
 
+// Icons 返回集市图标列表
 func Icons() (icons []*Icon) {
 	icons = []*Icon{}
+	result := getStageAndBazaar("icons")
 
-	isOnline := isBazzarOnline()
-	if !isOnline {
+	if !result.Online {
+		return
+	}
+	if result.StageErr != nil {
+		return
+	}
+	if 1 > len(result.BazaarIndex) {
 		return
 	}
 
-	stageIndex, err := getStageIndex("icons")
-	if err != nil {
-		return
+	for _, repo := range result.StageIndex.Repos {
+		if nil == repo.Package {
+			continue
+		}
+		icon := buildIconFromStageRepo(repo, result.BazaarIndex)
+		if nil != icon {
+			icons = append(icons, icon)
+		}
 	}
-	bazaarIndex := getBazaarIndex()
-	if 1 > len(bazaarIndex) {
-		return
-	}
-
-	requestFailed := false
-	waitGroup := &sync.WaitGroup{}
-	lock := &sync.Mutex{}
-	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
-		defer waitGroup.Done()
-
-		repo := arg.(*StageRepo)
-		repoURL := repo.URL
-
-		if pkg, found := packageCache.Get(repoURL); found {
-			lock.Lock()
-			icons = append(icons, pkg.(*Icon))
-			lock.Unlock()
-			return
-		}
-
-		if requestFailed {
-			return
-		}
-
-		icon := &Icon{}
-		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(icon).Get(innerU)
-		if nil != innerErr {
-			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
-			requestFailed = true
-			return
-		}
-		if 200 != innerResp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
-			requestFailed = true
-			return
-		}
-
-		icon.DisallowInstall = disallowInstallBazaarPackage(icon.Package)
-		icon.DisallowUpdate = disallowInstallBazaarPackage(icon.Package)
-		icon.UpdateRequiredMinAppVer = icon.MinAppVersion
-
-		icon.URL = strings.TrimSuffix(icon.URL, "/")
-		repoURLHash := strings.Split(repoURL, "@")
-		icon.RepoURL = "https://github.com/" + repoURLHash[0]
-		icon.RepoHash = repoURLHash[1]
-		icon.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
-		icon.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
-		icon.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		icon.Funding = repo.Package.Funding
-		icon.PreferredFunding = getPreferredFunding(icon.Funding)
-		icon.PreferredName = GetPreferredName(icon.Package)
-		icon.PreferredDesc = getPreferredDesc(icon.Description)
-		icon.Updated = repo.Updated
-		icon.Stars = repo.Stars
-		icon.OpenIssues = repo.OpenIssues
-		icon.Size = repo.Size
-		icon.HSize = humanize.BytesCustomCeil(uint64(icon.Size), 2)
-		icon.InstallSize = repo.InstallSize
-		icon.HInstallSize = humanize.BytesCustomCeil(uint64(icon.InstallSize), 2)
-		packageInstallSizeCache.SetDefault(icon.RepoURL, icon.InstallSize)
-		icon.HUpdated = formatUpdated(icon.Updated)
-		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
-		if nil != pkg {
-			icon.Downloads = pkg.Downloads
-		}
-		lock.Lock()
-		icons = append(icons, icon)
-		lock.Unlock()
-
-		packageCache.SetDefault(repoURL, icon)
-	})
-	for _, repo := range stageIndex.Repos {
-		waitGroup.Add(1)
-		p.Invoke(repo)
-	}
-	waitGroup.Wait()
-	p.Release()
 
 	sort.Slice(icons, func(i, j int) bool { return icons[i].Updated > icons[j].Updated })
 	return
+}
+
+// buildIconFromStageRepo 使用 stage 内嵌的 package 构建 *Icon，不发起 HTTP 请求。
+func buildIconFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage) *Icon {
+	pkg := *repo.Package
+	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
+	repoURLHash := strings.Split(repo.URL, "@")
+	if 2 != len(repoURLHash) {
+		return nil
+	}
+	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
+	pkg.RepoHash = repoURLHash[1]
+	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
+	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
+	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
+	pkg.Updated = repo.Updated
+	pkg.Stars = repo.Stars
+	pkg.OpenIssues = repo.OpenIssues
+	pkg.Size = repo.Size
+	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
+	pkg.InstallSize = repo.InstallSize
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+	pkg.HUpdated = formatUpdated(pkg.Updated)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+	pkg.PreferredName = GetPreferredName(&pkg)
+	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
+	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
+	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
+	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
+		pkg.Downloads = bp.Downloads
+	}
+	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
+	return &Icon{Package: &pkg}
 }
 
 func InstalledIcons() (ret []*Icon) {

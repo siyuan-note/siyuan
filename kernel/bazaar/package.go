@@ -18,6 +18,7 @@ package bazaar
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -36,6 +37,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
+	"golang.org/x/sync/singleflight"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -96,16 +98,6 @@ type Package struct {
 	Incompatible bool `json:"incompatible"`
 }
 
-type StagePackage struct {
-	Author      string        `json:"author"`
-	URL         string        `json:"url"`
-	Version     string        `json:"version"`
-	Description LocaleStrings `json:"description"`
-	Readme      LocaleStrings `json:"readme"`
-	I18N        []string      `json:"i18n"`
-	Funding     *Funding      `json:"funding"`
-}
-
 type StageRepo struct {
 	URL         string `json:"url"`
 	Updated     string `json:"updated"`
@@ -114,7 +106,8 @@ type StageRepo struct {
 	Size        int64  `json:"size"`
 	InstallSize int64  `json:"installSize"`
 
-	Package *StagePackage `json:"package"`
+	// Package 与 stage/*.json 内嵌的完整 package 一致，可直接用于构建列表
+	Package *Package `json:"package"`
 }
 
 type StageIndex struct {
@@ -283,38 +276,120 @@ func ThemeJSON(themeDirName string) (ret *Theme, err error) {
 
 var cachedStageIndex = map[string]*StageIndex{}
 var stageIndexCacheTime int64
-var stageIndexLock = sync.Mutex{}
+var stageIndexLock = sync.RWMutex{}
 
-func getStageIndex(pkgType string) (ret *StageIndex, err error) {
-	rhyRet, err := util.GetRhyResult(false)
+type StageBazaarResult struct {
+	StageIndex  *StageIndex               // stage 索引
+	BazaarIndex map[string]*bazaarPackage // bazaar 索引
+	Online      bool                      // online 状态
+	StageErr    error                     // stage 错误
+}
+
+var stageBazaarFlight singleflight.Group
+
+// getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
+func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
+	key := "stageBazaar:" + pkgType
+	v, err, _ := stageBazaarFlight.Do(key, func() (interface{}, error) {
+		return getStageAndBazaar0(pkgType), nil
+	})
 	if err != nil {
+		return
+	}
+	result = v.(StageBazaarResult)
+	return
+}
+
+// getStageAndBazaar0 执行一次 stage 和 bazaar 索引拉取
+func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
+	stageIndex, stageErr := getStageIndexFromCache(pkgType)
+	bazaarIndex := getBazaarIndexFromCache()
+	if nil != stageIndex && nil != bazaarIndex {
+		// 两者都从缓存返回，不需要 online 检查
+		return StageBazaarResult{
+			StageIndex:  stageIndex,
+			BazaarIndex: bazaarIndex,
+			Online:      true,
+			StageErr:    stageErr,
+		}
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var onlineResult bool
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		onlineResult = isBazzarOnline()
+		if !onlineResult {
+			cancel()
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		stageIndex, stageErr = getStageIndex(ctx, pkgType)
+	}()
+	go func() {
+		defer wg.Done()
+		bazaarIndex = getBazaarIndex(ctx)
+	}()
+	wg.Wait()
+
+	return StageBazaarResult{
+		StageIndex:  stageIndex,
+		BazaarIndex: bazaarIndex,
+		Online:      onlineResult,
+		StageErr:    stageErr,
+	}
+}
+
+// getStageIndexFromCache 仅从缓存获取 stage 索引，过期或无缓存时返回 nil
+func getStageIndexFromCache(pkgType string) (ret *StageIndex, err error) {
+	stageIndexLock.RLock()
+	cacheTime := stageIndexCacheTime
+	cached := cachedStageIndex[pkgType]
+	stageIndexLock.RUnlock()
+	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && nil != cached {
+		ret = cached
+	}
+	return
+}
+
+// getStageIndex 获取 stage 索引
+func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err error) {
+	if cached, cacheErr := getStageIndexFromCache(pkgType); nil != cached {
+		ret = cached
+		err = cacheErr
+		return
+	}
+
+	var rhyRet map[string]interface{}
+	rhyRet, err = util.GetRhyResult(false)
+	if nil != err {
 		return
 	}
 
 	stageIndexLock.Lock()
 	defer stageIndexLock.Unlock()
 
-	now := time.Now().Unix()
-	if util.RhyCacheDuration >= now-stageIndexCacheTime && nil != cachedStageIndex[pkgType] {
-		ret = cachedStageIndex[pkgType]
-		return
-	}
-
 	bazaarHash := rhyRet["bazaar"].(string)
 	ret = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
-	resp, reqErr := request.SetSuccessResult(ret).Get(u)
+	resp, reqErr := request.SetContext(ctx).SetSuccessResult(ret).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		err = reqErr
 		return
 	}
 	if 200 != resp.StatusCode {
 		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		err = errors.New("get stage index failed")
 		return
 	}
 
-	stageIndexCacheTime = now
+	stageIndexCacheTime = time.Now().Unix()
 	cachedStageIndex[pkgType] = ret
 	return
 }
@@ -421,7 +496,7 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 
 func isBazzarOnline() (ret bool) {
 	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
-	ret = util.IsOnline(util.BazaarOSSServer, true, 3000)
+	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
 	if !ret {
 		util.PushErrMsg(util.Langs[util.Lang][24], 5000)
 	}
@@ -431,7 +506,9 @@ func isBazzarOnline() (ret bool) {
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 
+	stageIndexLock.RLock()
 	stageIndex := cachedStageIndex[packageType]
+	stageIndexLock.RUnlock()
 	if nil == stageIndex {
 		return
 	}
@@ -444,7 +521,7 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 			break
 		}
 	}
-	if nil == repo {
+	if nil == repo || nil == repo.Package {
 		return
 	}
 
@@ -683,20 +760,35 @@ type bazaarPackage struct {
 
 var cachedBazaarIndex = map[string]*bazaarPackage{}
 var bazaarIndexCacheTime int64
-var bazaarIndexLock = sync.Mutex{}
+var bazaarIndexLock = sync.RWMutex{}
 
-func getBazaarIndex() map[string]*bazaarPackage {
+// getBazaarIndexFromCache 仅从缓存获取 bazaar 索引，过期或无缓存时返回 nil
+func getBazaarIndexFromCache() (ret map[string]*bazaarPackage) {
+	bazaarIndexLock.RLock()
+	cacheTime := bazaarIndexCacheTime
+	cached := cachedBazaarIndex
+	hasData := 0 < len(cached)
+	bazaarIndexLock.RUnlock()
+	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && hasData {
+		ret = cached
+	} else {
+		ret = nil
+	}
+	return
+}
+
+// getBazaarIndex 获取 bazaar 索引
+func getBazaarIndex(ctx context.Context) map[string]*bazaarPackage {
+	if cached := getBazaarIndexFromCache(); nil != cached {
+		return cached
+	}
+
 	bazaarIndexLock.Lock()
 	defer bazaarIndexLock.Unlock()
 
-	now := time.Now().Unix()
-	if 3600 >= now-bazaarIndexCacheTime {
-		return cachedBazaarIndex
-	}
-
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
-	resp, reqErr := request.SetSuccessResult(&cachedBazaarIndex).Get(u)
+	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
 		return cachedBazaarIndex
@@ -705,19 +797,18 @@ func getBazaarIndex() map[string]*bazaarPackage {
 		logging.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
 		return cachedBazaarIndex
 	}
-	bazaarIndexCacheTime = now
+	bazaarIndexCacheTime = time.Now().Unix()
 	return cachedBazaarIndex
 }
 
-// defaultMinAppVersion 如果集市包中缺失 minAppVersion 项，则使用该值作为最低支持的版本号，小于该版本号时不显示集市包
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
-const defaultMinAppVersion = "2.9.0"
-
 func disallowInstallBazaarPackage(pkg *Package) bool {
+	// 如果包没有指定 minAppVersion，则允许安装
 	if "" == pkg.MinAppVersion {
-		pkg.MinAppVersion = defaultMinAppVersion
+		return false
 	}
 
+	// 如果包要求的 minAppVersion 大于当前版本，则不允许安装
 	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
 		return true
 	}

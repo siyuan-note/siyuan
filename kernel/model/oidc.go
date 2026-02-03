@@ -17,12 +17,16 @@
 package model
 
 import (
+	"bytes"
 	"container/heap"
 	"context"
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
@@ -39,32 +43,134 @@ import (
 )
 
 const (
-	oidcLoginTimeout = 10 * time.Second
+	oidcFlowWeb     = "web"
+	oidcFlowDesktop = "desktop"
+	oidcFlowMobile  = "mobile"
 )
 
-func OIDCLogin(c *gin.Context) {
-	redirectTo := util.SanitizeRedirectPath(c.Query("to"))
+const (
+	oidcStatusPending = "pending"
+	oidcStatusOK      = "ok"
+	oidcStatusError   = "error"
+)
 
-	if !OIDCIsEnabled(Conf.OIDC) {
-		OIDCAuthError(c, redirectTo, Conf.Language(280), "oidc not enabled", nil)
-		return
+type oidcStateReason int
+
+const (
+	oidcStateReasonOK oidcStateReason = iota
+	oidcStateReasonSessionInvalid
+	oidcStateReasonSessionExpired
+	oidcStateReasonSessionHandled
+	oidcStateReasonCallbackParamsMissing
+	oidcStateReasonProviderMismatch
+	oidcStateReasonFilterRejected
+	oidcStateReasonAuthFailed
+	oidcStateReasonSessionSaveFailed
+	oidcStateReasonNotEnabled
+	oidcStateReasonProviderInitFailed
+)
+
+func oidcReasonMessage(reason oidcStateReason, args ...any) string {
+	switch reason {
+	case oidcStateReasonSessionInvalid:
+		return Conf.Language(277)
+	case oidcStateReasonSessionExpired:
+		return Conf.Language(284)
+	case oidcStateReasonSessionHandled:
+		return Conf.Language(285)
+	case oidcStateReasonCallbackParamsMissing:
+		return Conf.Language(286)
+	case oidcStateReasonProviderMismatch:
+		return Conf.Language(287)
+	case oidcStateReasonFilterRejected:
+		return Conf.Language(278)
+	case oidcStateReasonSessionSaveFailed:
+		return Conf.Language(288)
+	case oidcStateReasonNotEnabled:
+		return Conf.Language(280)
+	case oidcStateReasonProviderInitFailed:
+		return fmt.Sprintf(Conf.Language(281), args...)
+	case oidcStateReasonAuthFailed:
+		return Conf.Language(276)
+	default:
+		return Conf.Language(276)
 	}
-
-	p, err := OIDCProviderInstance(Conf.OIDC)
-	if err != nil {
-		OIDCAuthError(c, redirectTo, fmt.Sprintf(Conf.Language(281), Conf.OIDC.Provider), "init oidc provider failed", err)
-		return
-	}
-
-	state, nonce := OIDCChallenge(p.ID(), redirectTo, util.ParseBoolQuery(c.Query("rememberMe")))
-
-	authURL := p.AuthURL(state, nonce)
-	if "" == authURL {
-		OIDCAuthError(c, redirectTo, Conf.Language(276), "oidc auth url is empty", nil)
-		return
-	}
-	c.Redirect(http.StatusFound, authURL)
 }
+
+func OIDCLogin(c *gin.Context) {
+	if !OIDCIsEnabled(Conf.OIDC) {
+		oidcLoginError(c, oidcStateReasonNotEnabled, "oidc not enabled", nil)
+		return
+	}
+
+	p, err := oidcProvider(Conf.OIDC)
+	if err != nil {
+		oidcLoginError(c, oidcStateReasonProviderInitFailed, "init oidc provider failed", err, Conf.OIDC.Provider)
+		return
+	}
+
+	entry := oidcChallenge(p.ID(), oidcFlowFromQuery(c), util.SanitizeRedirectPath(c.Query("to")), util.ParseBoolQuery(c.Query("rememberMe")))
+	authURL, extra, err := p.AuthURL(entry.state, entry.nonce)
+	entry.extra = extra
+	if err != nil {
+		oidcLoginError(c, oidcStateReasonAuthFailed, "oidc auth url failed", err)
+		return
+	} else if "" == authURL {
+		oidcLoginError(c, oidcStateReasonAuthFailed, "oidc auth url is empty", nil)
+		return
+	}
+	stateStore().put(entry)
+
+	oidcLoginSuccess(c, authURL, entry.state)
+}
+
+func oidcFlowFromQuery(c *gin.Context) string {
+	flow := strings.ToLower(strings.TrimSpace(c.Query("flow")))
+
+	// Unknown flow, default to web flow for maximum compatibility
+	if oidcFlowDesktop != flow && oidcFlowMobile != flow && oidcFlowWeb != flow {
+		logging.LogWarnf("unknown oidc flow [%s], default to web flow", flow)
+		flow = oidcFlowWeb
+	}
+
+	return flow
+}
+
+func oidcLoginError(c *gin.Context, reason oidcStateReason, logMsg string, err error, args ...any) {
+	ret := util.NewResult()
+	ret.Code = -1
+	ret.Msg = oidcReasonMessage(reason, args...)
+	c.JSON(http.StatusOK, ret)
+	logOIDCFailure(logMsg, err, c.Request)
+}
+
+func oidcChallenge(providerID, flow, to string, rememberMe bool) *stateEntry {
+	if "" == flow {
+		flow = oidcFlowWeb
+	}
+	entry := &stateEntry{
+		state:      gulu.Rand.String(32),
+		nonce:      gulu.Rand.String(32),
+		providerID: providerID,
+		to:         to,
+		remember:   rememberMe,
+		flow:       flow,
+		status:     oidcStatusPending,
+		expiresAt:  time.Now().Add(oidcStateTTL),
+	}
+	return entry
+}
+
+func oidcLoginSuccess(c *gin.Context, authURL, state string) {
+	ret := util.NewResult()
+	ret.Data = map[string]any{
+		"authUrl": authURL,
+		"state":   state,
+	}
+	c.JSON(http.StatusOK, ret)
+}
+
+const oidcLoginTimeout = 10 * time.Second
 
 func OIDCCallback(c *gin.Context) {
 	if !OIDCIsEnabled(Conf.OIDC) {
@@ -74,46 +180,163 @@ func OIDCCallback(c *gin.Context) {
 
 	state := strings.TrimSpace(c.Query("state"))
 	if "" == state {
-		OIDCAuthError(c, "", Conf.Language(277), "missing oidc state", nil)
-		return
-	}
-	entry, ok := stateStore().take(state)
-	if !ok {
-		OIDCAuthError(c, "", Conf.Language(277), "invalid oidc state", nil)
+		oidcCallbackError(c, nil, oidcStateReasonCallbackParamsMissing, "missing oidc state", nil)
 		return
 	}
 
 	code := strings.TrimSpace(c.Query("code"))
 	if "" == code {
-		OIDCAuthError(c, entry.to, Conf.Language(277), "missing oidc code", nil)
+		oidcCallbackError(c, nil, oidcStateReasonCallbackParamsMissing, "missing oidc code", nil)
 		return
 	}
 
-	p, err := OIDCProviderInstance(Conf.OIDC)
+	entry, reason := stateStore().do(state, func(entry *stateEntry) bool {
+		return oidcFlowDesktop != entry.flow
+	})
+	if nil == entry {
+		oidcCallbackError(c, entry, reason, "get entry failed", nil)
+		return
+	}
+
+	p, err := oidcProvider(Conf.OIDC)
 	if err != nil {
-		OIDCAuthError(c, entry.to, fmt.Sprintf(Conf.Language(281), Conf.OIDC.Provider), "init oidc provider failed", err)
+		oidcCallbackError(c, entry, oidcStateReasonProviderInitFailed, "init oidc provider failed", err, Conf.OIDC.Provider)
 		return
 	}
 
 	if entry.providerID != p.ID() {
-		OIDCAuthError(c, entry.to, Conf.Language(277), "oidc provider mismatch", nil)
+		oidcCallbackError(c, entry, oidcStateReasonProviderMismatch, "oidc provider mismatch", nil)
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), oidcLoginTimeout)
 	defer cancel()
 
-	claims, err := p.HandleCallback(ctx, code, entry.nonce)
+	claims, err := p.HandleCallback(ctx, code, entry.nonce, entry.extra)
 	if err != nil {
-		OIDCAuthError(c, entry.to, Conf.Language(276), "oidc callback failed", err)
+		oidcCallbackError(c, entry, oidcStateReasonAuthFailed, "oidc callback failed", err)
 		return
 	}
 
 	if !IsAllowed(Conf.OIDC.Filters, claims) {
-		OIDCAuthError(c, entry.to, Conf.Language(278), "oidc filter rejected", nil)
+		oidcCallbackError(c, entry, oidcStateReasonFilterRejected, "oidc filter rejected", nil)
 		return
 	}
 
+	oidcCallbackSuccess(c, entry)
+}
+
+func oidcCallbackError(c *gin.Context, entry *stateEntry, reason oidcStateReason, logMsg string, err error, args ...any) {
+	userMsg := oidcReasonMessage(reason, args...)
+	flow := ""
+	to := ""
+	state := ""
+	if nil != entry {
+		flow = entry.flow
+		to = entry.to
+		state = entry.state
+	}
+
+	if oidcFlowDesktop == flow {
+		oidcRenderCallbackResult(c, false, state, userMsg, logMsg, err)
+		return
+	}
+
+	oidcRedirectToCheckAuthError(c, to, userMsg, logMsg, err)
+}
+
+func oidcCallbackSuccess(c *gin.Context, entry *stateEntry) {
+	if oidcFlowDesktop == entry.flow {
+		oidcRenderCallbackResult(c, true, entry.state, "", "oidc auth success", nil)
+		return
+	}
+
+	if err := applyOIDCSession(c, entry); nil != err {
+		oidcRedirectToCheckAuthError(c, entry.to, oidcReasonMessage(oidcStateReasonSessionSaveFailed), "save session failed", err)
+		return
+	}
+
+	logging.LogInfof("oidc auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), oidcRememberMaxAge(entry.remember))
+	c.Redirect(http.StatusFound, entry.to)
+}
+
+func OIDCCheck(c *gin.Context) {
+	ret := util.NewResult()
+
+	state := strings.TrimSpace(c.Query("state"))
+	if "" == state {
+		oidcCheckInvalid(c, ret, oidcStateReasonSessionInvalid)
+		return
+	}
+
+	entry, reason := stateStore().do(state, func(entry *stateEntry) bool {
+		return entry.status != oidcStatusPending
+	})
+	if entry == nil {
+		oidcCheckInvalid(c, ret, reason)
+		return
+	}
+
+	if entry.status == oidcStatusPending {
+		oidcCheckPending(c, ret)
+		return
+	}
+
+	if oidcStatusError == entry.status {
+		oidcCheckError(c, ret, oidcStateReasonAuthFailed, entry.msg)
+		return
+	}
+
+	if err := applyOIDCSession(c, entry); nil != err {
+		oidcCheckError(c, ret, oidcStateReasonSessionSaveFailed, "")
+		return
+	}
+
+	logging.LogInfof("oidc auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), oidcRememberMaxAge(entry.remember))
+	oidcCheckOK(c, ret, entry.to)
+}
+
+func oidcCheckInvalid(c *gin.Context, ret *util.Result, reason oidcStateReason) {
+	ret.Code = -1
+	ret.Msg = oidcReasonMessage(reason)
+	ret.Data = map[string]any{
+		"status": oidcStatusError,
+	}
+	c.JSON(http.StatusOK, ret)
+}
+
+func oidcCheckPending(c *gin.Context, ret *util.Result) {
+	ret.Code = 1
+	ret.Msg = "Pending"
+	ret.Data = map[string]any{
+		"status": oidcStatusPending,
+	}
+	c.JSON(http.StatusOK, ret)
+}
+
+func oidcCheckError(c *gin.Context, ret *util.Result, reason oidcStateReason, msg string) {
+	if msg == "" {
+		msg = oidcReasonMessage(reason)
+	}
+	ret.Code = -1
+	ret.Msg = oidcDefaultErrorMsg(msg)
+	ret.Data = map[string]any{
+		"status": oidcStatusError,
+	}
+	c.JSON(http.StatusOK, ret)
+}
+
+func oidcCheckOK(c *gin.Context, ret *util.Result, to string) {
+	ret.Code = 0
+	ret.Msg = "OK"
+	ret.Data = map[string]any{
+		"status": oidcStatusOK,
+		"to":     to,
+	}
+	c.JSON(http.StatusOK, ret)
+}
+
+func applyOIDCSession(c *gin.Context, entry *stateEntry) error {
 	session := util.GetSession(c)
 	workspaceSession := util.GetWorkspaceSession(session)
 
@@ -121,24 +344,86 @@ func OIDCCallback(c *gin.Context) {
 	workspaceSession.OIDC.ProviderHash = Conf.OIDC.ProviderHash
 	workspaceSession.OIDC.FilterHash = Conf.OIDC.FilterHash
 
-	maxAge := 0
-	if entry.remember {
-		maxAge = 60 * 60 * 24 * 30
-	}
 	ginSessions.Default(c).Options(ginSessions.Options{
 		Path:     "/",
 		Secure:   util.SSL,
-		MaxAge:   maxAge,
+		MaxAge:   oidcRememberMaxAge(entry.remember),
 		HttpOnly: true,
 	})
 
-	if err = session.Save(c); err != nil {
-		OIDCAuthError(c, entry.to, Conf.Language(276), "save session failed", err)
+	return session.Save(c)
+}
+
+func oidcRememberMaxAge(remember bool) int {
+	if remember {
+		return 60 * 60 * 24 * 30
+	}
+	return 0
+}
+
+func oidcRenderCallbackResult(c *gin.Context, ok bool, state, userMsg, logMsg string, err error) {
+	status := ""
+
+	if ok {
+		status = oidcStatusOK
+	} else {
+		status = oidcStatusError
+		userMsg = oidcDefaultErrorMsg(userMsg)
+		logOIDCFailure(logMsg, err, c.Request)
+	}
+
+	if "" != state {
+		stateStore().setResult(state, status, userMsg)
+	}
+	oidcRenderAppCallbackPage(c, ok, userMsg)
+}
+
+func oidcDefaultErrorMsg(msg string) string {
+	if "" == msg {
+		return oidcReasonMessage(oidcStateReasonAuthFailed)
+	}
+	return msg
+}
+
+func oidcRenderAppCallbackPage(c *gin.Context, ok bool, msg string) {
+	title := Conf.Language(283)
+	if ok {
+		title = Conf.Language(282)
+	}
+
+	detail := strings.TrimSpace(msg)
+
+	data, err := os.ReadFile(filepath.Join(util.WorkingDir, "stage/oidc-callback.html"))
+	if err != nil {
+		logging.LogErrorf("load oidc callback page failed: %s", err)
+		c.String(http.StatusOK, detail)
 		return
 	}
-	logging.LogInfof("oidc auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), maxAge)
 
-	c.Redirect(http.StatusFound, entry.to)
+	tpl, err := template.New("oidc-callback").Parse(string(data))
+	if err != nil {
+		logging.LogErrorf("parse oidc callback page failed: %s", err)
+		c.String(http.StatusOK, detail)
+		return
+	}
+
+	safeDetail := template.HTMLEscapeString(detail)
+	safeDetail = strings.ReplaceAll(safeDetail, "\n", "<br>")
+	model := map[string]any{
+		"title":            title,
+		"ok":               ok,
+		"detail":           template.HTML(safeDetail),
+		"appearanceMode":   Conf.Appearance.Mode,
+		"appearanceModeOS": Conf.Appearance.ModeOS,
+	}
+
+	buf := &bytes.Buffer{}
+	if err = tpl.Execute(buf, model); err != nil {
+		logging.LogErrorf("execute oidc callback page failed: %s", err)
+		c.String(http.StatusOK, detail)
+		return
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", buf.Bytes())
 }
 
 func OIDCIsEnabled(oidcConf *conf.OIDC) bool {
@@ -154,26 +439,13 @@ func OIDCIsEnabled(oidcConf *conf.OIDC) bool {
 	return true
 }
 
-func OIDCChallenge(providerID, to string, rememberMe bool) (state, nonce string) {
-	entry := &stateEntry{
-		state:      gulu.Rand.String(32),
-		nonce:      gulu.Rand.String(32),
-		providerID: providerID,
-		to:         to,
-		remember:   rememberMe,
-		expiresAt:  time.Now().Add(oidcStateTTL),
-	}
-	stateStore().put(entry)
-	return entry.state, entry.nonce
-}
-
 const defaultProviderLabel = "Login with SSO"
 
 func OIDCProviderLabel(oidcConf *conf.OIDC) string {
 	if !OIDCIsEnabled(oidcConf) {
 		return defaultProviderLabel
 	}
-	p, err := OIDCProviderInstance(oidcConf)
+	p, err := oidcProvider(oidcConf)
 	if err != nil {
 		return defaultProviderLabel
 	}
@@ -207,7 +479,7 @@ func providerConf(oidcConf *conf.OIDC) *conf.OIDCProviderConf {
 	return oidcConf.Providers[providerID]
 }
 
-func OIDCProviderInstance(oidcConf *conf.OIDC) (oidcprovider.Provider, error) {
+func oidcProvider(oidcConf *conf.OIDC) (oidcprovider.Provider, error) {
 	pc := providerConf(oidcConf)
 	if nil == pc {
 		return nil, errors.New("OIDC provider config not found")
@@ -215,19 +487,21 @@ func OIDCProviderInstance(oidcConf *conf.OIDC) (oidcprovider.Provider, error) {
 	return oidcprovider.New(oidcConf.Provider, pc)
 }
 
-func OIDCAuthError(c *gin.Context, redirectTo string, userMsg string, logMsg string, err error) {
-	if "" == userMsg {
-		userMsg = "OIDC authentication failed, please retry."
+func logOIDCFailure(logMsg string, err error, req *http.Request) {
+	if err != nil {
+		logging.LogWarnf("oidc auth failed: %s [err=%s, ip=%s]", logMsg, err, util.GetRemoteAddr(req))
+	} else {
+		logging.LogWarnf("oidc auth failed: %s [ip=%s]", logMsg, util.GetRemoteAddr(req))
 	}
+}
+
+func oidcRedirectToCheckAuthError(c *gin.Context, redirectTo string, userMsg string, logMsg string, err error) {
+	userMsg = oidcDefaultErrorMsg(userMsg)
 	if 200 < len(userMsg) {
 		userMsg = userMsg[:200] + "..."
 	}
 
-	if err != nil {
-		logging.LogWarnf("oidc auth failed: %s [err=%s, ip=%s]", logMsg, err, util.GetRemoteAddr(c.Request))
-	} else {
-		logging.LogWarnf("oidc auth failed: %s [ip=%s]", logMsg, util.GetRemoteAddr(c.Request))
-	}
+	logOIDCFailure(logMsg, err, c.Request)
 
 	location := url.URL{Path: "/check-auth"}
 	queryParams := url.Values{}
@@ -352,15 +626,19 @@ func (m *stringMatcher) Match(value string) bool {
 }
 
 // long enough for user to complete OIDC login, maybe?
-const oidcStateTTL = 10 * time.Minute
+const oidcStateTTL = 15 * time.Minute
 
 // stateEntry tracks the transient OIDC login state.
 type stateEntry struct {
 	state      string
 	nonce      string
+	extra      any
 	providerID string
 	to         string
 	remember   bool
+	flow       string
+	status     string
+	msg        string
 	expiresAt  time.Time
 
 	// current position in heap, internally used by heap.Fix/Remove
@@ -409,44 +687,67 @@ func (s *oidcStateStore) signal() {
 
 // put inserts or updates a state entry.
 func (s *oidcStateStore) put(entry *stateEntry) {
+	defer s.signal()
+
 	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	if existing, ok := s.entries[entry.state]; ok {
 		idx := existing.index
 		*existing = *entry
 		existing.index = idx
 		heap.Fix(&s.heap, existing.index)
-		s.mu.Unlock()
-		s.signal()
 		return
 	}
+
 	heap.Push(&s.heap, entry)
 	s.entries[entry.state] = entry
-
-	s.mu.Unlock()
-	s.signal()
 }
 
-// take removes and returns a state entry if it exists and is not expired.
-func (s *oidcStateStore) take(state string) (*stateEntry, bool) {
+// do returns a copy of the entry and removes it when decide returns true.
+func (s *oidcStateStore) do(state string, decide func(entry *stateEntry) bool) (*stateEntry, oidcStateReason) {
+	remove := false
+	defer func() {
+		if remove {
+			s.signal()
+		}
+	}()
+
 	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	entry, ok := s.entries[state]
 	if !ok {
-		s.mu.Unlock()
-		return nil, false
+		return nil, oidcStateReasonSessionInvalid
 	}
-	heap.Remove(&s.heap, entry.index)
-	delete(s.entries, state)
-
-	s.mu.Unlock()
-
-	s.signal()
-
 	if time.Now().After(entry.expiresAt) {
-		return nil, false
+		s.mu.Unlock()
+		return nil, oidcStateReasonSessionExpired
 	}
-	return entry, true
+
+	copied := *entry
+	remove = decide(&copied)
+	if remove {
+		heap.Remove(&s.heap, entry.index)
+		delete(s.entries, state)
+	}
+
+	return &copied, oidcStateReasonOK
+}
+
+// setResult marks a state entry as finished and extends its TTL for polling.
+func (s *oidcStateStore) setResult(state, status, msg string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	entry, ok := s.entries[state]
+	if !ok {
+		logging.LogErrorf("oidc set result [state: %s, status: %s, msg: %s] failed: cannot find entry", state, status, msg)
+		return
+	}
+
+	entry.status = status
+	entry.msg = msg
 }
 
 // resetTimerLocked restarts the timer with the next delay.

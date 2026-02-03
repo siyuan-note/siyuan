@@ -18,11 +18,13 @@ package oidcprovider
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/siyuan-note/logging"
 	"golang.org/x/oauth2"
 )
 
@@ -36,6 +38,7 @@ type BaseOIDC struct {
 	ClientSecretStr string
 	RedirectURLStr  string
 	ScopesList      []string
+	PKCE            bool
 	Normalizer      ClaimNormalizer
 }
 
@@ -50,26 +53,48 @@ func (p *BaseOIDC) Label() string {
 	return "Login with OIDC"
 }
 
-func (p *BaseOIDC) AuthURL(state, nonce string) string {
+func (p *BaseOIDC) AuthURL(state, nonce string) (string, any, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	oauthConfig, _, err := p.discover(ctx)
 	if err != nil {
-		logging.LogErrorf("oidc discovery failed: %s", err)
-		return ""
+		return "", nil, err
 	}
 
-	return oauthConfig.AuthCodeURL(state, oidc.Nonce(nonce))
+	if p.PKCE {
+		pkceState, err := newPKCEState()
+		if err != nil {
+			return "", nil, err
+		}
+
+		return oauthConfig.AuthCodeURL(
+			state,
+			oidc.Nonce(nonce),
+			oauth2.SetAuthURLParam("code_challenge", pkceState.challenge),
+			oauth2.SetAuthURLParam("code_challenge_method", "S256"),
+		), pkceState, nil
+	}
+
+	return oauthConfig.AuthCodeURL(state, oidc.Nonce(nonce)), nil, nil
 }
 
-func (p *BaseOIDC) HandleCallback(ctx context.Context, code, nonce string) (*OIDCClaims, error) {
+func (p *BaseOIDC) HandleCallback(ctx context.Context, code, nonce string, extra any) (*OIDCClaims, error) {
 	oauthConfig, oidcProvider, err := p.discover(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := oauthConfig.Exchange(ctx, code)
+	var token *oauth2.Token
+	if p.PKCE {
+		pkceState, ok := extra.(*pkceState)
+		if !ok || pkceState == nil || pkceState.Verifier == "" {
+			return nil, errors.New("oidc pkce verifier missing")
+		}
+		token, err = oauthConfig.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", pkceState.Verifier))
+	} else {
+		token, err = oauthConfig.Exchange(ctx, code)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -128,4 +153,22 @@ func DefaultNormalizeClaims(raw map[string]any, idToken *oidc.IDToken) (*OIDCCla
 		Name:              claimString(raw, OIDCClaimName),
 	}
 	return claims, nil
+}
+
+type pkceState struct {
+	Verifier  string
+	challenge string
+}
+
+func newPKCEState() (*pkceState, error) {
+	entropy := make([]byte, 32)
+	if _, err := rand.Read(entropy); err != nil {
+		return nil, err
+	}
+
+	verifier := base64.RawURLEncoding.EncodeToString(entropy)
+	sum := sha256.Sum256([]byte(verifier))
+	challenge := base64.RawURLEncoding.EncodeToString(sum[:])
+
+	return &pkceState{Verifier: verifier, challenge: challenge}, nil
 }

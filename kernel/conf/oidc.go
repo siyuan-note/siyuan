@@ -25,23 +25,22 @@ type OIDC struct {
 }
 
 type OIDCProviderConf struct {
-	ClientID     string            `json:"clientID"`
-	ClientSecret string            `json:"clientSecret"`
-	RedirectURL  string            `json:"redirectURL"`
-	IssuerURL    string            `json:"issuerURL"`
-	Scopes       []string          `json:"scopes"`
-	Tenant       string            `json:"tenant"`
-	ProviderLabel string           `json:"providerLabel"`
-	ClaimMap     map[string]string `json:"claimMap"`
+	ClientID      string            `json:"clientID"`
+	ClientSecret  string            `json:"clientSecret"`
+	PKCE          bool              `json:"pkce"`
+	RedirectURL   string            `json:"redirectURL"`
+	IssuerURL     string            `json:"issuerURL"`
+	Scopes        []string          `json:"scopes"`
+	Tenant        string            `json:"tenant"`
+	ProviderLabel string            `json:"providerLabel"`
+	ClaimMap      map[string]string `json:"claimMap"`
 }
 
 func NewOIDC() *OIDC {
 	return &OIDC{
 		Provider: "",
 		Providers: map[string]*OIDCProviderConf{
-			"custom": {
-				Scopes: []string{"openid", "email", "profile"},
-			},
+			"custom":    {},
 			"google":    {},
 			"microsoft": {},
 			"github":    {},

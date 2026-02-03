@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <title>{{.title}}</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-main: #202124;
+            --text-secondary: #5f6368;
+            --theme-primary: #3573f0;
+            --success-color: #13ce66;
+            --error-color: #d93025;
+            --shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .dark {
+            --bg-color: #121212;
+            --card-bg: #2d2d2d;
+            --text-main: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            margin: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-stack);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .callback-card {
+            background-color: var(--card-bg);
+            padding: 64px 48px;
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .callback-title {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            text-wrap: balance;
+        }
+
+        .callback-detail {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            overflow-wrap: break-word;
+            text-wrap: pretty;
+        }
+
+        .icon-container {
+            width: 80px;
+            height: 80px;
+        }
+
+        .state-icon {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .ok .icon-success {
+            display: block;
+        }
+
+        .error .icon-error {
+            display: block;
+        }
+
+        a {
+            color: var(--theme-primary);
+            text-decoration: none;
+            outline: 0;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations for icons */
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: var(--success-color);
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            stroke: var(--success-color);
+            stroke-width: 3;
+            fill: none;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        .cross__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: var(--error-color);
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) 0.3s forwards;
+        }
+
+        .cross__path {
+            stroke: var(--error-color);
+            stroke-width: 3;
+            fill: none;
+            transform-origin: 50% 50%;
+            animation: scaleIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Drag region for Electron */
+        .drag-region {
+            -webkit-app-region: drag;
+            height: 32px;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="{{if .ok}}ok{{else}}error{{end}}">
+<div class="drag-region"></div>
+<div class="callback-card">
+    <div class="icon-container">
+        <svg class="state-icon icon-success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+        <svg class="state-icon icon-error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle class="cross__circle" cx="26" cy="26" r="25" fill="none"/>
+            <path class="cross__path" fill="none" d="M16 16 36 36"/>
+            <path class="cross__path cross__path--right" fill="none" d="M36 16 16 36"/>
+        </svg>
+    </div>
+    <h1 class="callback-title">{{.title}}</h1>
+    {{if .detail}}
+    <div class="callback-detail">{{.detail}}</div>
+    {{end}}
+</div>
+
+<script>
+    if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} === 1) {
+        document.body.classList.add('dark')
+    }
+</script>
+</body>
+</html>

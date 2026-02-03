@@ -40,6 +40,8 @@ func NewGoogle(cfg *conf.OIDCProviderConf) (Provider, error) {
 	redirectURL := formatRedirectURL(cfg.RedirectURL)
 	if redirectURL == "" {
 		return nil, errors.New("Google redirectURL is required")
+	} else if strings.HasPrefix(redirectURL, "siyuan://") {
+		return nil, errors.New("Google does not support custom uri scheme (siyuan://) now")
 	}
 
 	scopes := cfg.Scopes

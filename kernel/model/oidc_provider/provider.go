@@ -19,7 +19,6 @@ package oidcprovider
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -35,12 +34,14 @@ type Provider interface {
 	// AuthURL generates the login URL.
 	// state: used for CSRF protection.
 	// nonce: used for OIDC replay protection (optional for pure OAuth2).
-	AuthURL(state, nonce string) string
+	// extra: optional provider-specific data to be stored with the state.
+	AuthURL(state, nonce string) (authURL string, extra any, err error)
 
 	// HandleCallback processes the code returned by the provider.
 	// It exchanges the code for a token and retrieves user claims.
 	// nonce: passed to verify OIDC ID Token (if applicable).
-	HandleCallback(ctx context.Context, code, nonce string) (*OIDCClaims, error)
+	// extra: provider-specific data stored during AuthURL (optional).
+	HandleCallback(ctx context.Context, code, nonce string, extra any) (*OIDCClaims, error)
 }
 
 func New(name string, cfg *conf.OIDCProviderConf) (Provider, error) {
@@ -60,23 +61,25 @@ func New(name string, cfg *conf.OIDCProviderConf) (Provider, error) {
 
 func formatRedirectURL(rawURL string) string {
 	rawURL = strings.TrimSpace(rawURL)
-	if rawURL == "" {
+	if "" == rawURL {
 		return defaultRedirectURL()
 	}
 
 	u, err := url.Parse(rawURL)
-	if err != nil {
+	if nil != err {
 		// If parsing fails, try prepending http:// if it looks like a host:port
 		if !strings.HasPrefix(rawURL, "http") {
 			u, err = url.Parse("http://" + rawURL)
 		}
 	}
 
-	if err == nil {
-		// If no path is specified (or just /), append the default callback path
-		if u.Path == "" || u.Path == "/" {
-			u.Path = "/auth/oidc/callback"
-			return u.String()
+	if nil == err {
+		// For http/https scehme, If no path is specified (or just /), append the default callback path
+		if "http" == u.Scheme || "https" == u.Scheme {
+			if "" == u.Path || "/" == u.Path {
+				u.Path = "/auth/oidc/callback"
+				return u.String()
+			}
 		}
 	}
 
@@ -88,7 +91,7 @@ func defaultRedirectURL() string {
 	case util.ContainerAndroid, util.ContainerIOS, util.ContainerHarmony:
 		return "siyuan://oidc-callback"
 	case util.ContainerStd:
-		return fmt.Sprintf("http://127.0.0.1:%s/auth/oidc/callback", util.ServerPort)
+		return "http://127.0.0.1:6806/auth/oidc/callback"
 	default:
 		return ""
 	}

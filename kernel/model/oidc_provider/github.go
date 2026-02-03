@@ -32,10 +32,10 @@ import (
 
 type oidcProviderGitHub struct {
 	providerLabel string
-	scopes       []string
-	clientID     string
-	clientSecret string
-	redirectURL  string
+	scopes        []string
+	clientID      string
+	clientSecret  string
+	redirectURL   string
 }
 
 func NewGitHub(cfg *conf.OIDCProviderConf) (Provider, error) {
@@ -49,6 +49,11 @@ func NewGitHub(cfg *conf.OIDCProviderConf) (Provider, error) {
 		return nil, errors.New("GitHub clientSecret is required")
 	}
 
+	redirectURL := formatRedirectURL(cfg.RedirectURL)
+	if "" == redirectURL {
+		return nil, errors.New("GitHub redirectURL is required")
+	}
+
 	label := strings.TrimSpace(cfg.ProviderLabel)
 	if label == "" {
 		label = "Login with GitHub"
@@ -56,10 +61,10 @@ func NewGitHub(cfg *conf.OIDCProviderConf) (Provider, error) {
 
 	return &oidcProviderGitHub{
 		providerLabel: label,
-		scopes:       cfg.Scopes,
-		clientID:     clientID,
-		clientSecret: clientSecret,
-		redirectURL:  strings.TrimSpace(cfg.RedirectURL),
+		scopes:        cfg.Scopes,
+		clientID:      clientID,
+		clientSecret:  clientSecret,
+		redirectURL:   redirectURL,
 	}, nil
 }
 
@@ -71,13 +76,13 @@ func (p *oidcProviderGitHub) Label() string {
 	return p.providerLabel
 }
 
-func (p *oidcProviderGitHub) AuthURL(state, nonce string) string {
+func (p *oidcProviderGitHub) AuthURL(state, nonce string) (string, any, error) {
 	conf := p.oauthConfig()
 	// GitHub does not support nonce in the standard way OIDC does, so we just use state
-	return conf.AuthCodeURL(state)
+	return conf.AuthCodeURL(state), nil, nil
 }
 
-func (p *oidcProviderGitHub) HandleCallback(ctx context.Context, code, nonce string) (*OIDCClaims, error) {
+func (p *oidcProviderGitHub) HandleCallback(ctx context.Context, code, nonce string, extra any) (*OIDCClaims, error) {
 	conf := p.oauthConfig()
 	token, err := conf.Exchange(ctx, code)
 	if err != nil {

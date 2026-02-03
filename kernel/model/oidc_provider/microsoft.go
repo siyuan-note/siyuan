@@ -33,15 +33,21 @@ func NewMicrosoft(cfg *conf.OIDCProviderConf) (Provider, error) {
 		return nil, errors.New("Microsoft clientID is required")
 	}
 
+	usePKCE := cfg.PKCE
 	clientSecret := strings.TrimSpace(cfg.ClientSecret)
-	if "" == clientSecret {
+	if !usePKCE && "" == clientSecret {
 		return nil, errors.New("Microsoft clientSecret is required")
+	}
+	if usePKCE {
+		clientSecret = ""
 	}
 
 	redirectURL := formatRedirectURL(cfg.RedirectURL)
 	if "" != redirectURL {
-		// Microsoft small quirk:
-		// for http, microsoft only accepts "http://localhost:port/..."
+		// OIDC best practice prefer 127.0.0.1 over localhost which has potencial dns hijack problem.
+		// but in Microsoft Azure portal, the UI only accepts "http://localhost:port/..." for http scheme.
+		// though you can passby UI restriction by directly modify manifest, see: https://learn.microsoft.com/en-us/entra/identity-platform/reply-url#prefer-127001-over-localhost
+		// but this is tedious to normal users, overall we sacrifice a little security for easy configuration.
 		if after, ok := strings.CutPrefix(redirectURL, "http://127.0.0.1"); ok {
 			redirectURL = "http://localhost" + after
 		}
@@ -104,6 +110,7 @@ func NewMicrosoft(cfg *conf.OIDCProviderConf) (Provider, error) {
 		ClientSecretStr: clientSecret,
 		RedirectURLStr:  redirectURL,
 		ScopesList:      scopes,
+		PKCE:            usePKCE,
 	}
 
 	p.Normalizer = func(raw map[string]any, idToken *oidc.IDToken) (*OIDCClaims, error) {

@@ -122,6 +122,7 @@ declare namespace Config {
     export interface IOIDCProviderConf {
         clientID: string;
         clientSecret: string;
+        pkce: boolean;
         redirectURL: string;
         issuerURL: string;
         scopes: string[];

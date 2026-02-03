@@ -420,6 +420,7 @@ func serveCheckAuth(ginServer *gin.Engine) {
 func serveOIDC(ginServer *gin.Engine) {
 	ginServer.GET("/auth/oidc/login", model.OIDCLogin)
 	ginServer.GET("/auth/oidc/callback", model.OIDCCallback)
+	ginServer.GET("/auth/oidc/check", model.OIDCCheck)
 }
 
 func serveAuthPage(c *gin.Context) {
@@ -471,6 +472,9 @@ func serveAuthPage(c *gin.Context) {
 		"l8":                     model.Conf.Language(95),
 		"l9":                     model.Conf.Language(83),
 		"l10":                    model.Conf.Language(257),
+		"l11":                    model.Conf.Language(289),
+		"l12":                    model.Conf.Language(290),
+		"l13":                    model.Conf.Language(291),
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
 		"workspace":              util.WorkspaceName,

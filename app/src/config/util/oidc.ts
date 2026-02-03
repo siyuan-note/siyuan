@@ -31,6 +31,7 @@ const cloneProviders = (providers: Record<string, Config.IOIDCProviderConf> | un
         cloned[id] = {
             clientID: provider.clientID || "",
             clientSecret: provider.clientSecret || "",
+            pkce: !!provider.pkce,
             redirectURL: provider.redirectURL || "",
             issuerURL: provider.issuerURL || "",
             scopes: provider.scopes ? [...provider.scopes] : [],
@@ -47,6 +48,7 @@ const ensureProvider = (providers: Record<string, Config.IOIDCProviderConf>, id:
         providers[id] = {
             clientID: "",
             clientSecret: "",
+            pkce: false,
             redirectURL: "",
             issuerURL: "",
             scopes: [],
@@ -252,6 +254,14 @@ export const setOIDCConfig = () => {
             <span class="fn__space"></span>
             <input class="b3-text-field fn__size200" id="oidcClientSecret" type="password">
         </div>
+        <div class="fn__flex b3-label config__item fn__none" id="oidcPKCERow">
+            <div class="fn__flex-1">
+                PKCE
+                <div class="b3-label__text">${window.siyuan.languages.oidcPKCETip}</div>
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch fn__flex-center" id="oidcPKCE" type="checkbox">
+        </div>
         <div class="fn__flex b3-label config__item" id="oidcIssuerRow">
             <div class="fn__flex-1">
                 ${window.siyuan.languages.oidcIssuerURL}
@@ -324,6 +334,7 @@ export const setOIDCConfig = () => {
     const providerLabelInput = dialog.element.querySelector("#oidcProviderLabel") as HTMLInputElement;
     const clientIDInput = dialog.element.querySelector("#oidcClientID") as HTMLInputElement;
     const clientSecretInput = dialog.element.querySelector("#oidcClientSecret") as HTMLInputElement;
+    const pkceInput = dialog.element.querySelector("#oidcPKCE") as HTMLInputElement;
     const issuerInput = dialog.element.querySelector("#oidcIssuerURL") as HTMLInputElement;
     const redirectInput = dialog.element.querySelector("#oidcRedirectURL") as HTMLInputElement;
     const scopesInput = dialog.element.querySelector("#oidcScopes") as HTMLInputElement;
@@ -338,6 +349,7 @@ export const setOIDCConfig = () => {
     const providerLabelRow = dialog.element.querySelector("#oidcProviderLabelRow") as HTMLElement;
     const scopesRow = dialog.element.querySelector("#oidcScopesRow") as HTMLElement;
     const tenantRow = dialog.element.querySelector("#oidcTenantRow") as HTMLElement;
+    const pkceRow = dialog.element.querySelector("#oidcPKCERow") as HTMLElement;
     const claimMapRow = dialog.element.querySelector("#oidcClaimMapRow") as HTMLElement;
     const buttons = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
 
@@ -346,6 +358,7 @@ export const setOIDCConfig = () => {
         const showAll = !isKnownProvider;
         const showIssuer = showAll || id === "custom";
         const showTenant = showAll || id === "microsoft";
+        const showPKCE = id === "microsoft";
         const showClaimMap = showAll || id === "custom";
         const showScopes = showAll || id === "custom";
         const showProviderLabel = showAll || id === "custom";
@@ -353,6 +366,7 @@ export const setOIDCConfig = () => {
         scopesRow.classList.toggle("fn__none", !showScopes);
         providerLabelRow.classList.toggle("fn__none", !showProviderLabel);
         tenantRow.classList.toggle("fn__none", !showTenant);
+        pkceRow.classList.toggle("fn__none", !showPKCE);
         claimMapRow.classList.toggle("fn__none", !showClaimMap);
     };
 
@@ -366,11 +380,20 @@ export const setOIDCConfig = () => {
 
     let claimMapRows: OIDCClaimMapRow[] = [];
 
+    const syncPKCEState = (id: string) => {
+        const enablePKCE = id === "microsoft" && pkceInput.checked;
+        if (enablePKCE) {
+            clientSecretInput.value = "";
+        }
+        clientSecretInput.disabled = enablePKCE;
+    };
+
     const setProviderForm = (id: string) => {
         const provider = providers[id];
         providerLabelInput.value = provider.providerLabel || "";
         clientIDInput.value = provider.clientID || "";
         clientSecretInput.value = provider.clientSecret || "";
+        pkceInput.checked = id === "microsoft" && !!provider.pkce;
         issuerInput.value = provider.issuerURL || "";
         redirectInput.value = provider.redirectURL || "";
         scopesInput.value = provider.scopes && provider.scopes.length ? provider.scopes.join(", ") : "";
@@ -378,6 +401,7 @@ export const setOIDCConfig = () => {
         claimMapRows = claimMapToRows(provider.claimMap);
         renderClaimMapRows();
         setProviderVisibility(id);
+        syncPKCEState(id);
     };
 
     const readProviderForm = () => {
@@ -393,7 +417,8 @@ export const setOIDCConfig = () => {
         }
         return {
             clientID: clientIDInput.value.trim(),
-            clientSecret: clientSecretInput.value,
+            clientSecret: currentProvider === "microsoft" && pkceInput.checked ? "" : clientSecretInput.value,
+            pkce: currentProvider === "microsoft" && pkceInput.checked,
             redirectURL: redirectInput.value.trim(),
             issuerURL: issuerInput.value.trim(),
             scopes: parseScopes(scopesInput.value),
@@ -544,6 +569,10 @@ export const setOIDCConfig = () => {
     setProviderConfigVisible(!!enabledProvider);
     setFiltersVisible(!!enabledProvider);
     renderFilterRows();
+
+    pkceInput.addEventListener("change", () => {
+        syncPKCEState(currentProvider);
+    });
 
     claimMapAddButton.addEventListener("click", () => {
         const defaultClaim = claimOptions[0] || "";

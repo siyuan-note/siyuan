@@ -73,6 +73,30 @@
             box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, .12);
         }
 
+        .b3-button:disabled,
+        .b3-button.fn__disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .b3-button[data-loading="true"]::after {
+            content: "";
+            width: 12px;
+            height: 12px;
+            margin-left: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: b3-loading-spin 0.8s linear infinite;
+        }
+
+        @keyframes b3-loading-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         .b3-button--white {
             color: rgb(13, 60, 97);
             background-color: #d6eaf9;
@@ -217,13 +241,11 @@
             <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
             {{end}}
             {{if .oidcEnabled}}
-            <button class="b3-button" onclick="startOIDC()">{{.oidcProviderName}}</button>
+            <button class="b3-button" onclick="startOIDC()" id="oidcLoginButton">{{.oidcProviderName}}</button>
             {{end}}
-            {{if .authError}}
-            <div class="ft__on-surface" style="color: #d93025;">
+            <div class="ft__on-surface" id="oidcError" style="color: #d93025;{{if not .authError}}display:none;{{end}}">
                 {{.authError}}
             </div>
-            {{end}}
             <div class="ft__on-surface">
                 {{.l2}}
             </div>
@@ -455,6 +477,26 @@
 <script>
     window.showKeyboardToolbar = function () {}
     window.hideKeyboardToolbar = function () {}
+    
+    // Called by native layer to pass the OIDC callback custom URI.
+    window.handleOidcCallbackLink = (link) => {
+        if (!link) {
+            return
+        }
+
+        let query = ''
+        try {
+            query = new URL(link).search
+        } catch (e) {
+            console.log('invalid oidc callback link', link)
+        }
+
+        if (!query) {
+            return
+        }
+        
+        window.location.href = `/auth/oidc/callback${query}`
+    }
 
     const exitApp = () => {
         try {
@@ -525,18 +567,207 @@
         }, 6000)
     }
 
+    const oidcFlowWeb = "web"
+    const oidcFlowDesktop = "desktop"
+    const oidcFlowMobile = "mobile"
+
+    // global loading state for OIDC login button
+    let oidcLoading = false
+    // allow cancel only for desktop polling flow (used by cancel button state)
+    let oidcAllowCancel = false
+
     const startOIDC = () => {
-        const rememberMeElement = document.getElementById('rememberMe')
+        stopOIDCPolling()
+        setOIDCError('')
+
+        if (oidcLoading && oidcAllowCancel) {
+            setOIDCLoading(false)
+            return
+        }
+
+        const flow = getOIDCFlow()
+
+        setOIDCLoading(true, flow === oidcFlowDesktop)
+
         const url = new URL('/auth/oidc/login', window.location.origin)
-        const currentUrl = new URL(window.location.href)
-        const toParam = currentUrl.searchParams.get("to")
+        const toParam = new URL(window.location.href).searchParams.get("to")
+        url.searchParams.set("flow", flow)
         if (toParam) {
             url.searchParams.set("to", toParam)
         }
+        const rememberMeElement = document.getElementById('rememberMe')
         if (rememberMeElement && rememberMeElement.checked) {
             url.searchParams.set("rememberMe", "1")
         }
-        window.location.href = url.toString()
+
+        fetch(url.toString()).then((response) => {
+            return response.json()
+        }).then((response) => {
+            if (response.code !== 0) {
+                setOIDCLoading(false)
+                setOIDCError(response.msg || '')
+                return
+            }
+
+            openAuthURL(response.data.authUrl, flow)
+
+            if (flow === oidcFlowDesktop) {
+                startOIDCPolling(response.data.state)
+            } else {
+                setOIDCLoading(false)
+            }
+        }).catch((e) => {
+            console.log('oidc login failed', e)
+            setOIDCLoading(false)
+            setOIDCError({{.l11}})
+        })
+    }
+
+    // OIDC URL handling
+    const openAuthURL = (url, flow) => {
+        if (oidcFlowDesktop == flow) {
+            try {
+                const {shell} = require('electron')
+                shell.openExternal(url)
+                return
+            } catch (e) {
+                // fallthrough to location
+                console.log("openAuthURL failed to open external url in electron", e)
+            }
+        }else if (oidcFlowMobile == flow) {
+            if (isAndroid()) {
+                window.JSAndroid.openAuthURL(url)
+                return
+            }
+        }
+
+        // oidcFlowWeb and fallback
+        window.location.href = url
+    }
+
+    // in desktop flow, the interval to poll OIDC login result
+    const oidcPollIntervalMs = 2000
+    let oidcPollTimer = null
+
+    // in desktop flow, the timeout to stop polling OIDC login result, after which we consider the login failed
+    // here we set it to 10 minutes
+    const oidcPollTimeoutMs = 10 * 60 * 1000
+    let oidcPollTimeout = null
+
+    // Start OIDC polling (desktop)
+    const startOIDCPolling = (state) => {
+        oidcPollTimeout = setTimeout(() => {
+            stopOIDCPolling()
+            setOIDCError({{.l12}})
+            setOIDCLoading(false)
+        }, oidcPollTimeoutMs)
+
+        oidcPollTimer = setInterval(() => {
+            fetch(`/auth/oidc/check?state=${encodeURIComponent(state)}`).then((response) => {
+                return response.json()
+            }).then((response) => {
+                // pending
+                if (response.code === 1) {
+                    // continue
+                    return
+                }
+
+                stopOIDCPolling()
+                setOIDCLoading(false)
+                // success
+                if (response.code === 0) {
+                    window.location.href = response.data.to || '/'
+                    return
+                }
+                // failed
+                setOIDCError(response.msg || '')
+            }).catch(() => {
+                showMessage({{.l13}})
+            })
+        }, oidcPollIntervalMs)
+    }
+
+    // Stop OIDC polling (desktop)
+    const stopOIDCPolling = () => {
+        if (oidcPollTimer) {
+            clearInterval(oidcPollTimer)
+            oidcPollTimer = null
+        }
+        if (oidcPollTimeout) {
+            clearTimeout(oidcPollTimeout)
+            oidcPollTimeout = null
+        }
+    }
+
+
+    /* 
+     * Environment detection
+     */
+
+    function isElectron () {
+        return /Electron/i.test(navigator.userAgent)
+    }
+    // Desktop client runs on Electron, so this is equivalent.
+    const isDesktop = isElectron
+
+    function isAndroid() {
+        return !!window.JSAndroid
+    }
+
+    function isHarmonyOS() {
+        return !!window.JSHarmony
+    }
+
+    function isIOS() {
+        return !!(window.webkit && window.webkit.messageHandlers)
+    }
+
+    function isMobile() {
+        return isAndroid() || isIOS() || isHarmonyOS()
+    }
+
+    function getOIDCFlow() {
+        if (isMobile()) {
+            return oidcFlowMobile
+        }
+        if (isDesktop()) {
+            return oidcFlowDesktop
+        }
+        return oidcFlowWeb
+    }
+
+    /* 
+     * OIDC UI helpers
+     */ 
+    
+    const setOIDCError = (msg) => {
+        const errorElement = document.getElementById('oidcError')
+        if (!errorElement) {
+            return
+        }
+
+        if (msg) {
+            errorElement.textContent = msg
+            errorElement.style.display = ''
+        } else {
+            errorElement.textContent = ''
+            errorElement.style.display = 'none'
+        }
+    }
+
+    const setOIDCLoading = (loading, allowCancel = false) => {
+        const button = document.getElementById('oidcLoginButton')
+        if (!button) {
+            return
+        }
+
+        button.toggleAttribute('data-loading', loading)
+        const buttonCanCancel = loading && !allowCancel
+        button.disabled = buttonCanCancel
+        button.classList.toggle('fn__disabled', buttonCanCancel)
+
+        oidcLoading = loading
+        oidcAllowCancel = loading && allowCancel
     }
 
     const submitAuth = () => {

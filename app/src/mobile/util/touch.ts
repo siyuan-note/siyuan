@@ -29,10 +29,25 @@ const popSide = (render = true) => {
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const target = event.target as HTMLElement;
     const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
-    if (!yDiff) {
-        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" ||
+    if (!yDiff || Math.abs(yDiff) < 10) {
+        if ((["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "true") ||
             (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false")) {
-            window.JSAndroid?.showKeyboard();
+            if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+                target.setAttribute("readonly", "false");
+                setTimeout(() => {
+                    target.removeAttribute("readonly");
+                    window.JSAndroid?.showKeyboard();
+                }, 0);
+            } else {
+                const editElement = hasClosestByAttribute(target, "contenteditable", "true");
+                if (editElement) {
+                    editElement.setAttribute("contenteditable", "false");
+                    setTimeout(() => {
+                        editElement.setAttribute("contenteditable", "true");
+                        window.JSAndroid?.showKeyboard();
+                    }, 0);
+                }
+            }
         } else {
             window.JSAndroid?.hideKeyboard();
         }

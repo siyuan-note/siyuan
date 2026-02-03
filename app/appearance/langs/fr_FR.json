@@ -1743,6 +1743,7 @@
     "277": "Nettoyage des fichiers temporaires terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré",
     "278": "L'espace de travail n'est pas placé sur un disque SSD, ce qui peut entraîner une baisse significative des performances, il est recommandé de placer l'espace de travail sur un SSD",
     "279": "Au total [%d] bases de données non référencées, ici n'en sont listées que [%d]",
-    "280": "Nettoyage des bases de données non référencées terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré"
+    "280": "Nettoyage des bases de données non référencées terminé, [%d] fichiers supprimés, [%s] d'espace disque libéré",
+    "281": " (Default)"
   }
 }

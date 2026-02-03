@@ -1743,6 +1743,7 @@
     "277": "Geçici dosyalar temizlendi, [%d] dosya silindi, toplam [%s] boş alan açıldı",
     "278": "Çalışma alanı katı hal sürücüsünde (SSD) değil, bu belirgin bir performans düşüşüne yol açabilir, çalışma alanınızı SSD'de tutmanız önerilir",
     "279": "Kullanılmayan veritabanı toplam [%d] adet, burada yalnızca [%d] tanesi listeleniyor",
-    "280": "Kullanılmayan veritabanları temizlendi, [%d] dosya kaldırıldı, toplam [%s] disk alanı boşaltıldı"
+    "280": "Kullanılmayan veritabanları temizlendi, [%d] dosya kaldırıldı, toplam [%s] disk alanı boşaltıldı",
+    "281": " (Varsayılan)"
   }
 }

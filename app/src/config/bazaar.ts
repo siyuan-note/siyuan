@@ -385,9 +385,10 @@ export const bazaar = {
         } else if (bazaarType === "plugins") {
             url = "/api/bazaar/getInstalledPlugin";
         }
+        const keyword = (contentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement)?.value?.trim() || "";
         fetchPost(url, {
             frontend: getFrontend(),
-            keyword: (contentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement)?.value || "",
+            ...(keyword ? { keyword } : {}),
         }, response => {
             contentElement.removeAttribute("data-loading");
             let html = "";
@@ -690,8 +691,9 @@ type="checkbox">
                         } else if (bazaarType === "plugins") {
                             url = "/api/bazaar/installBazaarPlugin";
                         }
+                        const keyword = (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value.trim();
                         fetchPost(url, {
-                            keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
+                            ...(keyword ? { keyword } : {}),
                             repoURL: dataObj.repoURL,
                             packageName: dataObj.name,
                             repoHash: dataObj.repoHash,
@@ -750,8 +752,9 @@ type="checkbox">
                             if (!target.classList.contains("b3-button")) {
                                 target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                             }
+                            const keyword = (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value.trim();
                             fetchPost(url, {
-                                keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
+                                ...(keyword ? { keyword } : {}),
                                 repoURL: dataObj.repoURL,
                                 packageName: dataObj.name,
                                 repoHash: dataObj.repoHash,
@@ -803,9 +806,10 @@ type="checkbox">
                         showMessage(window.siyuan.languages.uninstallTip);
                     } else {
                         confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
+                            const keyword = (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value.trim();
                             fetchPost(url, {
                                 packageName,
-                                keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
+                                ...(keyword ? { keyword } : {}),
                                 frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(bazaarType, app);
@@ -997,29 +1001,29 @@ type="checkbox">
                     const keyword = inputElement.value.trim();
                     const type = (hasClosestByClassName(inputElement, "config-bazaar__panel") as HTMLElement).getAttribute("data-type");
                     if (type === "template") {
-                        fetchPost("/api/bazaar/getBazaarTemplate", {keyword}, response => {
+                        fetchPost("/api/bazaar/getBazaarTemplate", keyword ? { keyword } : {}, response => {
                             bazaar._onBazaar(response, "templates");
                             bazaar._data.templates = response.data.packages;
                         });
                     } else if (type === "icon") {
-                        fetchPost("/api/bazaar/getBazaarIcon", {keyword}, response => {
+                        fetchPost("/api/bazaar/getBazaarIcon", keyword ? { keyword } : {}, response => {
                             bazaar._onBazaar(response, "icons");
                             bazaar._data.icons = response.data.packages;
                         });
                     } else if (type === "widget") {
-                        fetchPost("/api/bazaar/getBazaarWidget", {keyword}, response => {
+                        fetchPost("/api/bazaar/getBazaarWidget", keyword ? { keyword } : {}, response => {
                             bazaar._onBazaar(response, "widgets");
                             bazaar._data.widgets = response.data.packages;
                         });
                     } else if (type === "theme") {
-                        fetchPost("/api/bazaar/getBazaarTheme", {keyword}, response => {
+                        fetchPost("/api/bazaar/getBazaarTheme", keyword ? { keyword } : {}, response => {
                             bazaar._onBazaar(response, "themes");
                             bazaar._data.themes = response.data.packages;
                         });
                     } else if (type === "plugin") {
                         fetchPost("/api/bazaar/getBazaarPlugin", {
                             frontend: getFrontend(),
-                            keyword
+                            ...(keyword ? { keyword } : {}),
                         }, response => {
                             bazaar._onBazaar(response, "plugins");
                             bazaar._data.plugins = response.data.packages;

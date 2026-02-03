@@ -514,34 +514,41 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 		return true
 	}
 
-	if nil == pkg || nil == pkg.DisplayName || nil == pkg.Description {
+	if nil == pkg {
 		return false
 	}
 
-	hits := map[string]bool{}
-	for _, keyword := range keywords {
-		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
-			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||
-			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCHT), keyword) ||
-			strings.Contains(strings.ToLower(pkg.DisplayName.EnUS), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.Default), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.ZhCN), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.ZhCHT), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) ||
-			strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Author), keyword) {
-			hits[keyword] = true
-			continue
-		}
-
-		for _, pkgKeyword := range pkg.Keywords {
-			if strings.Contains(strings.ToLower(pkgKeyword), keyword) {
-				hits[keyword] = true
-				break
-			}
+	for _, kw := range keywords {
+		if !packageContainsKeyword(pkg, kw) {
+			return false
 		}
 	}
-	return len(hits) == len(keywords)
+
+	// 全部关键词匹配
+	return true
+}
+
+func packageContainsKeyword(pkg *bazaar.Package, kw string) bool {
+	if strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), kw) ||
+		strings.Contains(strings.ToLower(pkg.Author), kw) {
+		return true
+	}
+	for _, s := range pkg.DisplayName {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Description {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Keywords {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	return false
 }
 
 func getSearchKeywords(query string) (ret []string) {

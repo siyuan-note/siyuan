@@ -13,6 +13,7 @@ import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
+import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -346,14 +347,17 @@ const renderKeyboardToolbar = () => {
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
-        if (!isProtyle) {
+        const nodeElement = hasClosestBlock(range.startContainer);
+        if (!isProtyle || !nodeElement) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.add("fn__none");
             return;
         }
 
         const selectText = range.toString();
-        if (selectText || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current")) {
+
+        if (!nodeElement.classList.contains("code-block") &&
+            (selectText  || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current"))) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.remove("fn__none");
         } else {
@@ -374,16 +378,20 @@ const renderKeyboardToolbar = () => {
             } else {
                 dynamicElements[0].querySelector('[data-type="redo"]').removeAttribute("disabled");
             }
-            const nodeElement = hasClosestBlock(range.startContainer);
-            if (nodeElement) {
-                const outdentElement = dynamicElements[0].querySelector('[data-type="outdent"]');
-                if (nodeElement.parentElement.classList.contains("li")) {
-                    outdentElement.classList.remove("fn__none");
-                    outdentElement.nextElementSibling.classList.remove("fn__none");
-                } else {
-                    outdentElement.classList.add("fn__none");
-                    outdentElement.nextElementSibling.classList.add("fn__none");
-                }
+            const outdentElement = dynamicElements[0].querySelector('[data-type="outdent"]');
+            const goinlineElement = dynamicElements[0].querySelector('[data-type="goinline"]');
+            if (nodeElement.classList.contains("code-block")) {
+                goinlineElement.classList.add("fn__none");
+            } else {
+                goinlineElement.classList.remove("fn__none");
+            }
+            if (nodeElement.parentElement.classList.contains("li") ||
+                nodeElement.classList.contains("code-block")) {
+                outdentElement.classList.remove("fn__none");
+                outdentElement.nextElementSibling.classList.remove("fn__none");
+            } else {
+                outdentElement.classList.add("fn__none");
+                outdentElement.nextElementSibling.classList.add("fn__none");
             }
         }
 
@@ -689,11 +697,23 @@ export const initKeyboardToolbar = () => {
             activeBlur();
             return;
         } else if (type === "outdent") {
-            listOutdent(protyle, [nodeElement.parentElement], range);
+            if (nodeElement.classList.contains("code-block")) {
+                if (range.toString() !== "") {
+                    tabCodeBlock(protyle, nodeElement, range, true);
+                }
+            } else {
+                listOutdent(protyle, [nodeElement.parentElement], range);
+            }
             focusByRange(range);
             return;
         } else if (type === "indent") {
-            listIndent(protyle, [nodeElement.parentElement], range);
+            if (nodeElement.classList.contains("code-block")) {
+                if (range.toString() !== "") {
+                    tabCodeBlock(protyle, nodeElement, range);
+                }
+            } else {
+                listIndent(protyle, [nodeElement.parentElement], range);
+            }
             focusByRange(range);
             return;
         }

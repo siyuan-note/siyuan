@@ -330,14 +330,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             /// #if MOBILE
             if (searchElement.getAttribute("virtualkeyboardpolicy") !== "manual") {
                 searchElement.setAttribute("virtualkeyboardpolicy", "manual");
-                setTimeout(() => {
-                    searchElement.focus();
-                    window.JSAndroid?.showKeyboard();
-                }, Constants.TIMEOUT_TRANSITION);
-            } else {
+            }
+            setTimeout(() => {
                 searchElement.focus();
                 window.JSAndroid?.showKeyboard();
-            }
+            }, Constants.TIMEOUT_TRANSITION);
             /// #else
             searchElement.focus();
             /// #endif

@@ -30,7 +30,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const target = event.target as HTMLElement;
     const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
     if (!yDiff || Math.abs(yDiff) < 10) {
-        let editElement;
+        let editElement: HTMLElement;
         if (["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "true") {
             editElement = target;
         } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
@@ -40,9 +40,11 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
             if (editElement.getAttribute("virtualkeyboardpolicy") !== "manual") {
                 editElement.setAttribute("virtualkeyboardpolicy", "manual");
                 setTimeout(() => {
+                    editElement.focus();
                     window.JSAndroid?.showKeyboard();
                 }, 100);
             } else {
+                editElement.focus();
                 window.JSAndroid?.showKeyboard();
             }
         } else {

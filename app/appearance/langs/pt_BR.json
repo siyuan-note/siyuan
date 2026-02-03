@@ -1743,6 +1743,7 @@
     "277": "Limpeza de arquivos temporários concluída, [%d] arquivos removidos, [%s] de espaço em disco liberado",
     "278": "O espaço de trabalho não está em um disco de estado sólido (SSD), o que pode causar uma queda significativa de desempenho, recomenda-se colocar o espaço de trabalho em um SSD",
     "279": "Há [%d] bancos de dados não referenciados no total, aqui são listados apenas [%d]",
-    "280": "Limpeza de bancos de dados não referenciados concluída, [%d] arquivos removidos, [%s] de espaço em disco liberados"
+    "280": "Limpeza de bancos de dados não referenciados concluída, [%d] arquivos removidos, [%s] de espaço em disco liberados",
+    "281": " (Padrão)"
   }
 }

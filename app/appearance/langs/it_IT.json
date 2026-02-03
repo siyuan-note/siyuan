@@ -1743,6 +1743,7 @@
     "277": "Pulizia dei file temporanei completata, [%d] file rimossi, liberati [%s] di spazio su disco",
     "278": "Lo spazio di lavoro non è su un disco a stato solido (SSD), ciò può causare una diminuzione significativa delle prestazioni, si consiglia di posizionare lo spazio di lavoro su un SSD",
     "279": "Database non referenziati in totale: [%d], qui ne vengono elencati solo [%d]",
-    "280": "Pulizia dei database non referenziati completata, eliminati [%d] file, liberato [%s] di spazio su disco"
+    "280": "Pulizia dei database non referenziati completata, eliminati [%d] file, liberato [%s] di spazio su disco",
+    "281": " (Predefinito)"
   }
 }

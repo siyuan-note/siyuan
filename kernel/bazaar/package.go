@@ -42,62 +42,8 @@ import (
 	"golang.org/x/text/transform"
 )
 
-type DisplayName struct {
-	Default string `json:"default"`
-	ArSA    string `json:"ar_SA"`
-	DeDE    string `json:"de_DE"`
-	EnUS    string `json:"en_US"`
-	EsES    string `json:"es_ES"`
-	FrFR    string `json:"fr_FR"`
-	HeIL    string `json:"he_IL"`
-	ItIT    string `json:"it_IT"`
-	JaJP    string `json:"ja_JP"`
-	KoKR    string `json:"ko_KR"`
-	PlPL    string `json:"pl_PL"`
-	PtBR    string `json:"pt_BR"`
-	RuRU    string `json:"ru_RU"`
-	TrTR    string `json:"tr_TR"`
-	ZhCHT   string `json:"zh_CHT"`
-	ZhCN    string `json:"zh_CN"`
-}
-
-type Description struct {
-	Default string `json:"default"`
-	ArSA    string `json:"ar_SA"`
-	DeDE    string `json:"de_DE"`
-	EnUS    string `json:"en_US"`
-	EsES    string `json:"es_ES"`
-	FrFR    string `json:"fr_FR"`
-	HeIL    string `json:"he_IL"`
-	ItIT    string `json:"it_IT"`
-	JaJP    string `json:"ja_JP"`
-	KoKR    string `json:"ko_KR"`
-	PlPL    string `json:"pl_PL"`
-	PtBR    string `json:"pt_BR"`
-	RuRU    string `json:"ru_RU"`
-	TrTR    string `json:"tr_TR"`
-	ZhCHT   string `json:"zh_CHT"`
-	ZhCN    string `json:"zh_CN"`
-}
-
-type Readme struct {
-	Default string `json:"default"`
-	ArSA    string `json:"ar_SA"`
-	DeDE    string `json:"de_DE"`
-	EnUS    string `json:"en_US"`
-	EsES    string `json:"es_ES"`
-	FrFR    string `json:"fr_FR"`
-	HeIL    string `json:"he_IL"`
-	ItIT    string `json:"it_IT"`
-	JaJP    string `json:"ja_JP"`
-	KoKR    string `json:"ko_KR"`
-	PlPL    string `json:"pl_PL"`
-	PtBR    string `json:"pt_BR"`
-	RuRU    string `json:"ru_RU"`
-	TrTR    string `json:"tr_TR"`
-	ZhCHT   string `json:"zh_CHT"`
-	ZhCN    string `json:"zh_CN"`
-}
+// LocaleStrings 表示按语种 key 的字符串表，key 为语种如 "default"、"en_US"、"zh_CN" 等
+type LocaleStrings map[string]string
 
 type Funding struct {
 	OpenCollective string   `json:"openCollective"`
@@ -107,18 +53,18 @@ type Funding struct {
 }
 
 type Package struct {
-	Author            string       `json:"author"`
-	URL               string       `json:"url"`
-	Version           string       `json:"version"`
-	MinAppVersion     string       `json:"minAppVersion"`
-	DisabledInPublish bool         `json:"disabledInPublish"`
-	Backends          []string     `json:"backends"`
-	Frontends         []string     `json:"frontends"`
-	DisplayName       *DisplayName `json:"displayName"`
-	Description       *Description `json:"description"`
-	Readme            *Readme      `json:"readme"`
-	Funding           *Funding     `json:"funding"`
-	Keywords          []string     `json:"keywords"`
+	Author            string        `json:"author"`
+	URL               string        `json:"url"`
+	Version           string        `json:"version"`
+	MinAppVersion     string        `json:"minAppVersion"`
+	DisabledInPublish bool          `json:"disabledInPublish"`
+	Backends          []string      `json:"backends"`
+	Frontends         []string      `json:"frontends"`
+	DisplayName       LocaleStrings `json:"displayName"`
+	Description       LocaleStrings `json:"description"`
+	Readme            LocaleStrings `json:"readme"`
+	Funding           *Funding      `json:"funding"`
+	Keywords          []string      `json:"keywords"`
 
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredName    string `json:"preferredName"`
@@ -168,259 +114,33 @@ type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
 }
 
-func getPreferredReadme(readme *Readme) string {
-	if nil == readme {
-		return "README.md"
+// getPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
+func getPreferredLocaleString(m LocaleStrings, fallback string) string {
+	if len(m) == 0 {
+		return fallback
 	}
-
-	var ret string
-	switch util.Lang {
-	case "ar_SA":
-		if "" != readme.ArSA {
-			ret = readme.ArSA
-		}
-	case "de_DE":
-		if "" != readme.DeDE {
-			ret = readme.DeDE
-		}
-	case "en_US":
-		if "" != readme.EnUS {
-			ret = readme.EnUS
-		}
-	case "es_ES":
-		if "" != readme.EsES {
-			ret = readme.EsES
-		}
-	case "fr_FR":
-		if "" != readme.FrFR {
-			ret = readme.FrFR
-		}
-	case "he_IL":
-		if "" != readme.HeIL {
-			ret = readme.HeIL
-		}
-	case "it_IT":
-		if "" != readme.ItIT {
-			ret = readme.ItIT
-		}
-	case "ja_JP":
-		if "" != readme.JaJP {
-			ret = readme.JaJP
-		}
-	case "ko_KR":
-		if "" != readme.KoKR {
-			ret = readme.KoKR
-		}
-	case "pl_PL":
-		if "" != readme.PlPL {
-			ret = readme.PlPL
-		}
-	case "pt_BR":
-		if "" != readme.PtBR {
-			ret = readme.PtBR
-		}
-	case "ru_RU":
-		if "" != readme.RuRU {
-			ret = readme.RuRU
-		}
-	case "tr_TR":
-		if "" != readme.TrTR {
-			ret = readme.TrTR
-		}
-	case "zh_CHT":
-		if "" != readme.ZhCHT {
-			ret = readme.ZhCHT
-		}
-	case "zh_CN":
-		if "" != readme.ZhCN {
-			ret = readme.ZhCN
-		}
+	if v := strings.TrimSpace(m[util.Lang]); "" != v {
+		return v
 	}
-	if "" != strings.TrimSpace(ret) {
-		return ret
+	if v := strings.TrimSpace(m["default"]); "" != v {
+		return v
 	}
-
-	defaultReadme := strings.TrimSpace(readme.Default)
-	if "" != defaultReadme {
-		return defaultReadme
+	if v := strings.TrimSpace(m["en_US"]); "" != v {
+		return v
 	}
-
-	enUSReadme := strings.TrimSpace(readme.EnUS)
-	if "" != enUSReadme {
-		return enUSReadme
-	}
-
-	return "README.md"
+	return fallback
 }
 
 func GetPreferredName(pkg *Package) string {
-	if nil == pkg.DisplayName {
-		return pkg.Name
-	}
-
-	var ret string
-	switch util.Lang {
-	case "ar_SA":
-		if "" != pkg.DisplayName.ArSA {
-			ret = pkg.DisplayName.ArSA
-		}
-	case "de_DE":
-		if "" != pkg.DisplayName.DeDE {
-			ret = pkg.DisplayName.DeDE
-		}
-	case "en_US":
-		if "" != pkg.DisplayName.EnUS {
-			ret = pkg.DisplayName.EnUS
-		}
-	case "es_ES":
-		if "" != pkg.DisplayName.EsES {
-			ret = pkg.DisplayName.EsES
-		}
-	case "fr_FR":
-		if "" != pkg.DisplayName.FrFR {
-			ret = pkg.DisplayName.FrFR
-		}
-	case "he_IL":
-		if "" != pkg.DisplayName.HeIL {
-			ret = pkg.DisplayName.HeIL
-		}
-	case "it_IT":
-		if "" != pkg.DisplayName.ItIT {
-			ret = pkg.DisplayName.ItIT
-		}
-	case "ja_JP":
-		if "" != pkg.DisplayName.JaJP {
-			ret = pkg.DisplayName.JaJP
-		}
-	case "ko_KR":
-		if "" != pkg.DisplayName.KoKR {
-			ret = pkg.DisplayName.KoKR
-		}
-	case "pl_PL":
-		if "" != pkg.DisplayName.PlPL {
-			ret = pkg.DisplayName.PlPL
-		}
-	case "pt_BR":
-		if "" != pkg.DisplayName.PtBR {
-			ret = pkg.DisplayName.PtBR
-		}
-	case "ru_RU":
-		if "" != pkg.DisplayName.RuRU {
-			ret = pkg.DisplayName.RuRU
-		}
-	case "tr_TR":
-		if "" != pkg.DisplayName.TrTR {
-			ret = pkg.DisplayName.TrTR
-		}
-	case "zh_CHT":
-		if "" != pkg.DisplayName.ZhCHT {
-			ret = pkg.DisplayName.ZhCHT
-		}
-	case "zh_CN":
-		if "" != pkg.DisplayName.ZhCN {
-			ret = pkg.DisplayName.ZhCN
-		}
-	}
-	if "" != strings.TrimSpace(ret) {
-		return ret
-	}
-
-	defaultName := strings.TrimSpace(pkg.DisplayName.Default)
-	if "" != defaultName {
-		return defaultName
-	}
-
-	enUSName := strings.TrimSpace(pkg.DisplayName.EnUS)
-	if "" != enUSName {
-		return enUSName
-	}
-
-	return pkg.Name
+	return getPreferredLocaleString(pkg.DisplayName, pkg.Name)
 }
 
-func getPreferredDesc(desc *Description) string {
-	if nil == desc {
-		return ""
-	}
+func getPreferredDesc(desc LocaleStrings) string {
+	return getPreferredLocaleString(desc, "")
+}
 
-	var ret string
-	switch util.Lang {
-	case "ar_SA":
-		if "" != desc.ArSA {
-			ret = desc.ArSA
-		}
-	case "de_DE":
-		if "" != desc.DeDE {
-			ret = desc.DeDE
-		}
-	case "en_US":
-		if "" != desc.EnUS {
-			ret = desc.EnUS
-		}
-	case "es_ES":
-		if "" != desc.EsES {
-			ret = desc.EsES
-		}
-	case "fr_FR":
-		if "" != desc.FrFR {
-			ret = desc.FrFR
-		}
-	case "he_IL":
-		if "" != desc.HeIL {
-			ret = desc.HeIL
-		}
-	case "it_IT":
-		if "" != desc.ItIT {
-			ret = desc.ItIT
-		}
-	case "ja_JP":
-		if "" != desc.JaJP {
-			ret = desc.JaJP
-		}
-	case "ko_KR":
-		if "" != desc.KoKR {
-			ret = desc.KoKR
-		}
-	case "pl_PL":
-		if "" != desc.PlPL {
-			ret = desc.PlPL
-		}
-	case "pt_BR":
-		if "" != desc.PtBR {
-			ret = desc.PtBR
-		}
-	case "ru_RU":
-		if "" != desc.RuRU {
-			ret = desc.RuRU
-		}
-	case "tr_TR":
-		if "" != desc.TrTR {
-			ret = desc.TrTR
-		}
-	case "zh_CHT":
-		if "" != desc.ZhCHT {
-			ret = desc.ZhCHT
-		}
-	case "zh_CN":
-		if "" != desc.ZhCN {
-			ret = desc.ZhCN
-		}
-	}
-	if "" != strings.TrimSpace(ret) {
-		return ret
-	}
-
-	defaultDesc := strings.TrimSpace(desc.Default)
-	if "" != defaultDesc {
-		return defaultDesc
-	}
-
-	enUSDesc := strings.TrimSpace(desc.EnUS)
-	if "" != enUSDesc {
-		return enUSDesc
-	}
-
-	return ""
+func getPreferredReadme(readme LocaleStrings) string {
+	return getPreferredLocaleString(readme, "README.md")
 }
 
 func getPreferredFunding(funding *Funding) string {
@@ -812,8 +532,8 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 		ret = fmt.Sprintf("Load bazaar package's preferred README(%s) failed: %s", readme, err.Error())
 		// 回退到 Default README
 		var defaultReadme string
-		if nil != repo.Package.Readme {
-			defaultReadme = repo.Package.Readme.Default
+		if len(repo.Package.Readme) > 0 {
+			defaultReadme = repo.Package.Readme["default"]
 		}
 		if "" == strings.TrimSpace(defaultReadme) {
 			defaultReadme = "README.md"
@@ -848,7 +568,7 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	return
 }
 
-func loadInstalledReadme(installPath, basePath string, readme *Readme) (ret string) {
+func loadInstalledReadme(installPath, basePath string, readme LocaleStrings) (ret string) {
 	readmeFilename := getPreferredReadme(readme)
 	readmeData, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
 	if nil == readErr {
@@ -860,8 +580,8 @@ func loadInstalledReadme(installPath, basePath string, readme *Readme) (ret stri
 	ret = fmt.Sprintf("File %s not found", readmeFilename)
 	// 回退到 Default README
 	var defaultReadme string
-	if nil != readme {
-		defaultReadme = strings.TrimSpace(readme.Default)
+	if len(readme) > 0 {
+		defaultReadme = strings.TrimSpace(readme["default"])
 	}
 	if "" == defaultReadme {
 		defaultReadme = "README.md"

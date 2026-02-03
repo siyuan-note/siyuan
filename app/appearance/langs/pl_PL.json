@@ -1743,6 +1743,7 @@
     "277": "Czyszczenie plików tymczasowych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
     "278": "Obszar roboczy nie znajduje się na dysku SSD, co może spowodować znaczny spadek wydajności, zaleca się umieszczenie obszaru roboczego na dysku SSD",
     "279": "Nieodwołane bazy danych łącznie: [%d], tutaj wyświetlono tylko [%d]",
-    "280": "Czyszczenie nieodwołanych baz danych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku"
+    "280": "Czyszczenie nieodwołanych baz danych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
+    "281": " (Domyślny)"
   }
 }

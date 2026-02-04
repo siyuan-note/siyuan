@@ -53,7 +53,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 		widgets = append(widgets, widget)
 	}
 
-	widgets = filterWidgets(widgets, k)
+	widgets = filterPackages(widgets, k)
 	for _, widget := range widgets {
 		b := &Block{
 			Name:    bazaar.GetPreferredName(widget),

@@ -91,7 +91,7 @@ func getBazaarPlugin(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarPlugins(frontend, keyword),
+		"packages": model.BazaarPackages("plugins", frontend, keyword),
 	}
 }
 
@@ -132,7 +132,7 @@ func installBazaarPlugin(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarPlugin(repoURL, repoHash, packageName)
+	err := model.InstallBazaarPackage("plugin", repoURL, repoHash, packageName)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -143,7 +143,7 @@ func installBazaarPlugin(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarPlugins(frontend, keyword),
+		"packages": model.BazaarPackages("plugins", frontend, keyword),
 	}
 }
 
@@ -163,7 +163,7 @@ func uninstallBazaarPlugin(c *gin.Context) {
 
 	frontend := arg["frontend"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarPlugin(packageName, frontend)
+	err := model.UninstallBazaarPlugin(packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -171,7 +171,7 @@ func uninstallBazaarPlugin(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarPlugins(frontend, keyword),
+		"packages": model.BazaarPackages("plugins", frontend, keyword),
 	}
 }
 
@@ -190,7 +190,7 @@ func getBazaarWidget(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarWidgets(keyword),
+		"packages": model.BazaarPackages("widgets", "", keyword),
 	}
 }
 
@@ -230,7 +230,7 @@ func installBazaarWidget(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarWidget(repoURL, repoHash, packageName)
+	err := model.InstallBazaarPackage("widget", repoURL, repoHash, packageName)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -239,7 +239,7 @@ func installBazaarWidget(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarWidgets(keyword),
+		"packages": model.BazaarPackages("widgets", "", keyword),
 	}
 }
 
@@ -258,7 +258,7 @@ func uninstallBazaarWidget(c *gin.Context) {
 	}
 
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarWidget(packageName)
+	err := model.UninstallBazaarPackage("widget", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -266,7 +266,7 @@ func uninstallBazaarWidget(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarWidgets(keyword),
+		"packages": model.BazaarPackages("widgets", "", keyword),
 	}
 }
 
@@ -382,7 +382,7 @@ func getBazaarTemplate(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarTemplates(keyword),
+		"packages": model.BazaarPackages("templates", "", keyword),
 	}
 }
 
@@ -422,7 +422,7 @@ func installBazaarTemplate(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarTemplate(repoURL, repoHash, packageName)
+	err := model.InstallBazaarPackage("template", repoURL, repoHash, packageName)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -430,7 +430,7 @@ func installBazaarTemplate(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarTemplates(keyword),
+		"packages": model.BazaarPackages("templates", "", keyword),
 	}
 
 	util.PushMsg(model.Conf.Language(69), 3000)
@@ -451,7 +451,7 @@ func uninstallBazaarTemplate(c *gin.Context) {
 	}
 
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarTemplate(packageName)
+	err := model.UninstallBazaarPackage("template", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -459,7 +459,7 @@ func uninstallBazaarTemplate(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarTemplates(keyword),
+		"packages": model.BazaarPackages("templates", "", keyword),
 	}
 }
 

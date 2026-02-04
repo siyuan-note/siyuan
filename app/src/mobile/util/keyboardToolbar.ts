@@ -288,7 +288,8 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     showUtil = true;
 
     const toolbarElement = document.getElementById("keyboardToolbar");
-    const keyboardHeight = document.documentElement.clientHeight - window.visualViewport.height + "px";
+    const keyboardHeight = ((document.documentElement.clientHeight - window.visualViewport.height) ||
+        (window.outerHeight / 2 - 42)) + "px";
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight;

@@ -53,6 +53,17 @@ class App {
             dialogs: [],
             blockPanels: [],
             mobile: {
+                size: {
+                    isLandscape: window.matchMedia && window.matchMedia("(orientation: landscape)").matches,
+                    landscape: {
+                        height1: window.innerHeight,
+                        height2: window.innerHeight,
+                    }, // 横屏
+                    portrait: {
+                        height1: window.innerHeight,
+                        height2: window.innerHeight,
+                    }
+                },
                 docks: {
                     outline: null,
                     file: null,

@@ -288,8 +288,8 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     showUtil = true;
 
     const toolbarElement = document.getElementById("keyboardToolbar");
-    const keyboardHeight = ((document.documentElement.clientHeight - window.visualViewport.height) ||
-        (window.outerHeight / 2 - 42)) + "px";
+    const keyboardHeight = ((window.siyuan.mobile.size.isLandscape ? window.siyuan.mobile.size.landscape.height1 - window.siyuan.mobile.size.landscape.height2 : window.siyuan.mobile.size.portrait.height1 - window.siyuan.mobile.size.portrait.height2) ||
+        (window.innerHeight / 2 - 42)) + "px";
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight;

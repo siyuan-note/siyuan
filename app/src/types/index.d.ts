@@ -488,6 +488,17 @@ interface ISiyuan {
     emojis?: IEmoji[],
     backStack?: IBackStack[],
     mobile?: {
+        size: {
+            isLandscape:boolean,
+            landscape: {
+                height1: number,
+                height2: number,    // 键盘弹起时的高度
+            }, // 横屏
+            portrait: {
+                height1: number,
+                height2: number,
+            }
+        }
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
         docks?: {

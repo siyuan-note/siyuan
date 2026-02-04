@@ -28,19 +28,6 @@ const popSide = (render = true) => {
 
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const target = event.target as HTMLElement;
-    const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
-    if (!yDiff || Math.abs(yDiff) < 8) {
-        let editElement: HTMLElement;
-        if (["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "readonly") {
-            editElement = target;
-        } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
-            editElement = hasClosestByAttribute(target, "contenteditable", "true") as HTMLElement;
-        }
-        if (editElement) {
-            window.JSAndroid?.showKeyboard();
-        }
-    }
-
     if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
         event.stopImmediatePropagation();
         event.preventDefault();
@@ -80,7 +67,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
     const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
-        if (isXScroll && firstDirection === "toRight" && !lastClientX && !wysisygElement) {
+        if (isXScroll && firstDirection === "toRight" && !lastClientX && !hasClosestByClassName(target, "protyle-wysiwyg", true)) {
             closeModel();
         }
         return;

@@ -2,7 +2,12 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
-import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../protyle/util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasTopClosestByClassName
+} from "../protyle/util/hasClosest";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
@@ -14,7 +19,7 @@ import {initAssets, loadAssets} from "../util/assets";
 import {bootSync} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
+import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {getLocalStorage, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
@@ -88,6 +93,17 @@ class App {
                 showMessage(window.siyuan.languages.copied, 2000);
                 event.preventDefault();
             }
+
+            const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
+            let editElement: HTMLElement;
+            if (["INPUT", "TEXTAREA"].includes(event.target.tagName) && event.target.getAttribute("readonly") !== "readonly") {
+                editElement = event.target;
+            } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
+                editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
+            }
+            if (editElement) {
+                window.JSAndroid?.showKeyboard();
+            }
         });
         window.addEventListener("beforeunload", () => {
             saveScroll(window.siyuan.mobile.editor.protyle);
@@ -98,6 +114,50 @@ class App {
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
             updateCardHV();
+            activeBlur();
+        });
+        window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+        if (window.siyuan.mobile.size.isLandscape) {
+            window.siyuan.mobile.size.landscape = {
+                height1: window.innerHeight,
+                height2: window.innerHeight,
+            }
+        } else {
+            window.siyuan.mobile.size.portrait = {
+                height1: window.innerHeight,
+                height2: window.innerHeight,
+            }
+        }
+        window.addEventListener("resize", () => {
+            // 获取键盘高度
+            window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+            if (window.siyuan.mobile.size.isLandscape) {
+                if (!window.siyuan.mobile.size.landscape) {
+                    window.siyuan.mobile.size.landscape = {
+                        height1: window.innerHeight,
+                        height2: window.innerHeight,
+                    }
+                }
+                if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
+                    window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
+                }
+                if (window.innerHeight > window.siyuan.mobile.size.landscape.height1) {
+                    window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
+                }
+            } else {
+                if (!window.siyuan.mobile.size.portrait) {
+                    window.siyuan.mobile.size.portrait = {
+                        height1: window.innerHeight,
+                        height2: window.innerHeight,
+                    }
+                }
+                if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
+                    window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
+                }
+                if (window.innerHeight > window.siyuan.mobile.size.portrait.height1) {
+                    window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
+                }
+            }
         });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
@@ -160,19 +220,6 @@ class App {
                 }
             });
         });
-
-        window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
-        if (window.siyuan.mobile.size.isLandscape) {
-            window.siyuan.mobile.size.landscape = {
-                height1: window.innerHeight,
-                height2: window.innerHeight,
-            }
-        } else {
-            window.siyuan.mobile.size.portrait = {
-                height1: window.innerHeight,
-                height2: window.innerHeight,
-            }
-        }
     }
 }
 
@@ -198,34 +245,3 @@ window.openFileByURL = (openURL) => {
     }
     return false;
 };
-window.addEventListener("resize", () => {
-    // 获取键盘高度
-    window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
-    if (window.siyuan.mobile.size.isLandscape) {
-        if (!window.siyuan.mobile.size.landscape) {
-            window.siyuan.mobile.size.landscape = {
-                height1: window.innerHeight,
-                height2: window.innerHeight,
-            }
-        }
-        if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
-            window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
-        }
-        if (window.innerHeight > window.siyuan.mobile.size.landscape.height1) {
-            window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
-        }
-    } else {
-        if (!window.siyuan.mobile.size.portrait) {
-            window.siyuan.mobile.size.portrait = {
-                height1: window.innerHeight,
-                height2: window.innerHeight,
-            }
-        }
-        if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
-            window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
-        }
-        if (window.innerHeight > window.siyuan.mobile.size.portrait.height1) {
-            window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
-        }
-    }
-});

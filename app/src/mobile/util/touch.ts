@@ -31,7 +31,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
     if (!yDiff || Math.abs(yDiff) < 10) {
         let editElement: HTMLElement;
-        if (["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "true") {
+        if (["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "readonly") {
             editElement = target;
         } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
             editElement = hasClosestByAttribute(target, "contenteditable", "true") as HTMLElement;

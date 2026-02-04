@@ -415,11 +415,11 @@ const renderKeyboardToolbar = () => {
 };
 
 export const showKeyboardToolbar = () => {
-    if (!showUtil || getSelection().rangeCount === 0) {
+    if (!showUtil) {
         hideKeyboardToolbarUtil();
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
-    if (!toolbarElement.classList.contains("fn__none")) {
+    if (!toolbarElement.classList.contains("fn__none") || getSelection().rangeCount === 0) {
         return;
     }
     toolbarElement.classList.remove("fn__none");

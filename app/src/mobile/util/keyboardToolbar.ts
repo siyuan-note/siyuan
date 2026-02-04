@@ -346,7 +346,8 @@ const renderKeyboardToolbar = () => {
         const range = getSelection().getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
         const nodeElement = hasClosestBlock(range.startContainer);
-        if (!isProtyle || !nodeElement) {
+        if (!isProtyle || !nodeElement ||
+            hasClosestByAttribute(range.startContainer, "data-type", "av-search")) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.add("fn__none");
             return;

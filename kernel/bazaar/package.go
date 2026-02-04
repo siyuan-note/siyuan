@@ -286,6 +286,7 @@ type StageBazaarResult struct {
 }
 
 var stageBazaarFlight singleflight.Group
+var onlineCheckFlight singleflight.Group
 
 // getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
 func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
@@ -317,14 +318,13 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	var onlineResult bool
+	onlineDone := make(chan bool, 1)
 	wg := &sync.WaitGroup{}
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
 		onlineResult = isBazzarOnline()
-		if !onlineResult {
-			cancel()
-		}
+		onlineDone <- true
 	}()
 	go func() {
 		defer wg.Done()
@@ -334,6 +334,20 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 		defer wg.Done()
 		bazaarIndex = getBazaarIndex(ctx)
 	}()
+
+	<-onlineDone
+	if !onlineResult {
+		// 不在线时立即取消其他请求并返回结果，避免等待 HTTP 请求超时
+		cancel()
+		return StageBazaarResult{
+			StageIndex:  stageIndex,
+			BazaarIndex: bazaarIndex,
+			Online:      false,
+			StageErr:    stageErr,
+		}
+	}
+
+	// 在线时等待所有请求完成
 	wg.Wait()
 
 	return StageBazaarResult{
@@ -365,7 +379,7 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 	}
 
 	var rhyRet map[string]interface{}
-	rhyRet, err = util.GetRhyResult(false)
+	rhyRet, err = util.GetRhyResult(ctx, false)
 	if nil != err {
 		return
 	}
@@ -494,7 +508,17 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 	return false
 }
 
-func isBazzarOnline() (ret bool) {
+func isBazzarOnline() bool {
+	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (interface{}, error) {
+		return isBazzarOnline0(), nil
+	})
+	if err != nil {
+		return false
+	}
+	return v.(bool)
+}
+
+func isBazzarOnline0() (ret bool) {
 	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
 	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
 	if !ret {

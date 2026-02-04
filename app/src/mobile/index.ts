@@ -195,3 +195,20 @@ window.openFileByURL = (openURL) => {
     }
     return false;
 };
+window.addEventListener("resize", () => {
+    // 获取键盘高度
+    window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+    if (window.siyuan.mobile.size.isLandscape) {
+        if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
+            window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
+        } else {
+            window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
+        }
+    } else {
+        if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
+            window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
+        } else {
+            window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
+        }
+    }
+});

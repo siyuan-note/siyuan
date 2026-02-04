@@ -79,23 +79,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     let resizeTimeout = 0;
     let firstResize = true;
     window.addEventListener("resize", () => {
-        /// #if MOBILE
-        // 获取键盘高度
-        window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
-        if (window.siyuan.mobile.size.isLandscape) {
-            if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
-                window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
-            } else {
-                window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
-            }
-        } else {
-            if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
-                window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
-            } else {
-                window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
-            }
-        }
-        /// #endif
         if (firstResize) {
             recordBeforeResizeTop();
             firstResize = false;

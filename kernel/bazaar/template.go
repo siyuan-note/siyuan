@@ -19,86 +19,14 @@ package bazaar
 import (
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
-	"time"
 
 	"github.com/88250/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-type Template struct {
-	*Package
-}
-
-// Templates 返回集市模板列表
-func Templates() (templates []*Template) {
-	templates = []*Template{}
-	result := getStageAndBazaar("templates")
-
-	if !result.Online {
-		return
-	}
-	if result.StageErr != nil {
-		return
-	}
-	if 1 > len(result.BazaarIndex) {
-		return
-	}
-
-	for _, repo := range result.StageIndex.Repos {
-		if nil == repo.Package {
-			continue
-		}
-		template := buildTemplateFromStageRepo(repo, result.BazaarIndex)
-		if nil != template {
-			templates = append(templates, template)
-		}
-	}
-
-	templates = filterLegacyTemplates(templates)
-
-	sort.Slice(templates, func(i, j int) bool { return templates[i].Updated > templates[j].Updated })
-	return
-}
-
-// buildTemplateFromStageRepo 使用 stage 内嵌的 package 构建 *Template，不发起 HTTP 请求。
-func buildTemplateFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage) *Template {
-	pkg := *repo.Package
-	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
-	repoURLHash := strings.Split(repo.URL, "@")
-	if 2 != len(repoURLHash) {
-		return nil
-	}
-	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
-	pkg.RepoHash = repoURLHash[1]
-	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
-	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
-	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
-	pkg.Updated = repo.Updated
-	pkg.Stars = repo.Stars
-	pkg.OpenIssues = repo.OpenIssues
-	pkg.Size = repo.Size
-	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
-	pkg.InstallSize = repo.InstallSize
-	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
-	pkg.HUpdated = formatUpdated(pkg.Updated)
-	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
-	pkg.PreferredName = GetPreferredName(&pkg)
-	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
-	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
-	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
-	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
-	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
-		pkg.Downloads = bp.Downloads
-	}
-	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
-	return &Template{Package: &pkg}
-}
-
-func InstalledTemplates() (ret []*Template) {
-	ret = []*Template{}
+func InstalledTemplates() (ret []*Package) {
+	ret = []*Package{}
 
 	templatesPath := filepath.Join(util.DataDir, "templates")
 	if !util.IsPathRegularDirOrSymlinkDir(templatesPath) {
@@ -111,7 +39,7 @@ func InstalledTemplates() (ret []*Template) {
 		return
 	}
 
-	bazaarTemplates := Templates()
+	bazaarTemplates := Packages("templates", "")
 
 	for _, templateDir := range templateDirs {
 		if !util.IsDirRegularOrSymlink(templateDir) {
@@ -119,15 +47,15 @@ func InstalledTemplates() (ret []*Template) {
 		}
 		dirName := templateDir.Name()
 
-		template, parseErr := TemplateJSON(dirName)
+		template, parseErr := ParsePackageJSON("template", dirName)
 		if nil != parseErr || nil == template {
 			continue
 		}
 
 		template.RepoURL = template.URL
-		template.DisallowInstall = disallowInstallBazaarPackage(template.Package)
-		if bazaarPkg := getBazaarTemplate(template.Name, bazaarTemplates); nil != bazaarPkg {
-			template.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+		template.DisallowInstall = disallowInstallBazaarPackage(template)
+		if bazaarPkg := getBazaarPackageByName(bazaarTemplates, template.Name); nil != bazaarPkg {
+			template.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
 			template.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
 			template.RepoURL = bazaarPkg.RepoURL
 		}
@@ -138,7 +66,7 @@ func InstalledTemplates() (ret []*Template) {
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
 		template.IconURL = "/templates/" + dirName + "/icon.png"
 		template.PreferredFunding = getPreferredFunding(template.Funding)
-		template.PreferredName = GetPreferredName(template.Package)
+		template.PreferredName = GetPreferredName(template)
 		template.PreferredDesc = getPreferredDesc(template.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "template.json"))
 		if nil != statErr {
@@ -155,48 +83,8 @@ func InstalledTemplates() (ret []*Template) {
 		}
 		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
 		template.PreferredReadme = loadInstalledReadme(installPath, "/templates/"+dirName+"/", template.Readme)
-		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
+		template.Outdated = isOutdatedPackage(bazaarTemplates, template)
 		ret = append(ret, template)
-	}
-	return
-}
-
-func getBazaarTemplate(name string, templates []*Template) *Template {
-	for _, p := range templates {
-		if p.Name == name {
-			return p
-		}
-	}
-	return nil
-}
-
-func InstallTemplate(repoURL, repoHash, installPath string, systemID string) error {
-	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, true, systemID)
-	if err != nil {
-		return err
-	}
-	return installPackage(data, installPath, repoURLHash)
-}
-
-func UninstallTemplate(installPath string) error {
-	return uninstallPackage(installPath)
-}
-
-func filterLegacyTemplates(templates []*Template) (ret []*Template) {
-	verTime, _ := time.Parse("2006-01-02T15:04:05", "2021-05-12T00:00:00")
-	for _, theme := range templates {
-		if "" != theme.Updated {
-			updated := theme.Updated[:len("2006-01-02T15:04:05")]
-			t, err := time.Parse("2006-01-02T15:04:05", updated)
-			if err != nil {
-				logging.LogErrorf("convert update time [%s] failed: %s", updated, err)
-				continue
-			}
-			if t.After(verTime) {
-				ret = append(ret, theme)
-			}
-		}
 	}
 	return
 }

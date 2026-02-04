@@ -23,10 +23,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/araddon/dateparse"
@@ -95,7 +97,10 @@ type Package struct {
 	DisallowUpdate          bool   `json:"disallowUpdate"`
 	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer"`
 
-	Incompatible bool `json:"incompatible"`
+	// 专用字段，nil 时不序列化
+	Incompatible *bool     `json:"incompatible,omitempty"` // Plugin：是否不兼容
+	Enabled      *bool     `json:"enabled,omitempty"`      // Plugin：是否启用
+	Modes        *[]string `json:"modes,omitempty"`        // Theme：支持的模式列表
 }
 
 type StageRepo struct {
@@ -112,6 +117,90 @@ type StageRepo struct {
 
 type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
+}
+
+// Packages 返回指定类型的集市包列表（plugin 类型需要传递 frontend 参数）
+func Packages(pkgType string, frontend string) (packages []*Package) {
+	result := getStageAndBazaar(pkgType)
+	packages = make([]*Package, 0, len(result.StageIndex.Repos))
+
+	if !result.Online {
+		return
+	}
+	if result.StageErr != nil {
+		return
+	}
+	if 1 > len(result.BazaarIndex) {
+		return
+	}
+
+	for _, repo := range result.StageIndex.Repos {
+		pkg := buildPackageFromStageRepo(repo, result.BazaarIndex, pkgType, frontend)
+		if nil == pkg {
+			continue
+		}
+		packages = append(packages, pkg)
+	}
+
+	// 通用排序
+	sort.Slice(packages, func(i, j int) bool {
+		return packages[i].Updated > packages[j].Updated
+	})
+
+	return
+}
+
+// buildPackageFromStageRepo 从 StageRepo 构建通用的 Package 信息
+func buildPackageFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage, pkgType string, frontend string) *Package {
+	if nil == repo || nil == repo.Package {
+		return nil
+	}
+
+	pkg := *repo.Package
+	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
+	repoURLHash := strings.Split(repo.URL, "@")
+	if 2 != len(repoURLHash) {
+		return nil
+	}
+	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
+	pkg.RepoHash = repoURLHash[1]
+	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
+	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
+	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
+	pkg.Updated = repo.Updated
+	pkg.Stars = repo.Stars
+	pkg.OpenIssues = repo.OpenIssues
+	pkg.Size = repo.Size
+	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
+	pkg.InstallSize = repo.InstallSize
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+	pkg.HUpdated = formatUpdated(pkg.Updated)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+	pkg.PreferredName = GetPreferredName(&pkg)
+	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
+	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
+	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
+
+	if "plugins" == pkgType {
+		incompatible := isIncompatiblePlugin(&pkg, frontend)
+		pkg.Incompatible = &incompatible
+	}
+
+	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
+		pkg.Downloads = bp.Downloads
+	}
+	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
+	return &pkg
+}
+
+func getBazaarPackageByName(packages []*Package, name string) *Package {
+	for _, pkg := range packages {
+		if pkg.Name == name {
+			return pkg
+		}
+	}
+	return nil
 }
 
 // getPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
@@ -172,101 +261,36 @@ func getPreferredFunding(funding *Funding) string {
 	return ""
 }
 
-func PluginJSON(pluginDirName string) (ret *Plugin, err error) {
-	p := filepath.Join(util.DataDir, "plugins", pluginDirName, "plugin.json")
-	if !filelock.IsExist(p) {
+// ParsePackageJSON 解析包 JSON 文件的通用函数
+func ParsePackageJSON(packageType, dirName string) (ret *Package, err error) {
+	var filePath string
+	switch packageType {
+	case "plugin":
+		filePath = filepath.Join(util.DataDir, "plugins", dirName, "plugin.json")
+	case "theme":
+		filePath = filepath.Join(util.ThemesPath, dirName, "theme.json")
+	case "icon":
+		filePath = filepath.Join(util.IconsPath, dirName, "icon.json")
+	case "template":
+		filePath = filepath.Join(util.DataDir, "templates", dirName, "template.json")
+	case "widget":
+		filePath = filepath.Join(util.DataDir, "widgets", dirName, "widget.json")
+	default:
+		err = errors.New("invalid package type: " + packageType)
+		return
+	}
+
+	if !filelock.IsExist(filePath) {
 		err = os.ErrNotExist
 		return
 	}
-	data, err := filelock.ReadFile(p)
+	data, err := filelock.ReadFile(filePath)
 	if err != nil {
-		logging.LogErrorf("read plugin.json [%s] failed: %s", p, err)
+		logging.LogErrorf("read [%s] failed: %s", filePath, err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse plugin.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func WidgetJSON(widgetDirName string) (ret *Widget, err error) {
-	p := filepath.Join(util.DataDir, "widgets", widgetDirName, "widget.json")
-	if !filelock.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := filelock.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func IconJSON(iconDirName string) (ret *Icon, err error) {
-	p := filepath.Join(util.IconsPath, iconDirName, "icon.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func TemplateJSON(templateDirName string) (ret *Template, err error) {
-	p := filepath.Join(util.DataDir, "templates", templateDirName, "template.json")
-	if !filelock.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := filelock.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func ThemeJSON(themeDirName string) (ret *Theme, err error) {
-	p := filepath.Join(util.ThemesPath, themeDirName, "theme.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret = &Theme{}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
+		logging.LogErrorf("parse [%s] failed: %s", filePath, err)
 		return
 	}
 
@@ -408,100 +432,20 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 	return
 }
 
-func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
-	if !strings.HasPrefix(theme.URL, "https://github.com/") {
+func isOutdatedPackage(bazaarPackages []*Package, pkg *Package) bool {
+	if !strings.HasPrefix(pkg.URL, "https://github.com/") {
 		return false
 	}
 
-	repo := strings.TrimPrefix(theme.URL, "https://github.com/")
+	repo := strings.TrimPrefix(pkg.URL, "https://github.com/")
 	parts := strings.Split(repo, "/")
 	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
 		return false
 	}
 
-	for _, pkg := range bazaarThemes {
-		if theme.Name == pkg.Name && 0 > semver.Compare("v"+theme.Version, "v"+pkg.Version) {
-			theme.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
-	if !strings.HasPrefix(icon.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(icon.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarIcons {
-		if icon.Name == pkg.Name && 0 > semver.Compare("v"+icon.Version, "v"+pkg.Version) {
-			icon.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedPlugin(plugin *Plugin, bazaarPlugins []*Plugin) bool {
-	if !strings.HasPrefix(plugin.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(plugin.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarPlugins {
-		if plugin.Name == pkg.Name && 0 > semver.Compare("v"+plugin.Version, "v"+pkg.Version) {
-			plugin.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
-	if !strings.HasPrefix(widget.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(widget.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarWidgets {
-		if widget.Name == pkg.Name && 0 > semver.Compare("v"+widget.Version, "v"+pkg.Version) {
-			widget.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
-	if !strings.HasPrefix(template.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(template.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarTemplates {
-		if template.Name == pkg.Name && 0 > semver.Compare("v"+template.Version, "v"+pkg.Version) {
-			template.RepoHash = pkg.RepoHash
+	for _, bazaarPkg := range bazaarPackages {
+		if pkg.Name == bazaarPkg.Name && 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
+			pkg.RepoHash = bazaarPkg.RepoHash
 			return true
 		}
 	}
@@ -711,13 +655,13 @@ func incPackageDownloads(repoURLHash, systemID string) {
 		}).Post(u)
 }
 
-func uninstallPackage(installPath string) (err error) {
-	if err = os.RemoveAll(installPath); err != nil {
-		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
-		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
+func InstallPackage(repoURL, repoHash, installPath string, systemID string) error {
+	repoURLHash := repoURL + "@" + repoHash
+	data, err := downloadPackage(repoURLHash, true, systemID)
+	if err != nil {
+		return err
 	}
-	packageCache.Flush()
-	return
+	return installPackage(data, installPath, repoURLHash)
 }
 
 func installPackage(data []byte, installPath, repoURLHash string) (err error) {
@@ -760,6 +704,15 @@ func installPackage0(data []byte, installPath string) (err error) {
 	if err = filelock.Copy(srcPath, installPath); err != nil {
 		return
 	}
+	return
+}
+
+func UninstallPackage(installPath string) (err error) {
+	if err = os.RemoveAll(installPath); err != nil {
+		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
+		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
+	}
+	packageCache.Flush()
 	return
 }
 

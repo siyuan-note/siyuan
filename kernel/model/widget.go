@@ -36,7 +36,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 	}
 
 	k := strings.ToLower(keyword)
-	var widgets []*bazaar.Widget
+	var widgets []*bazaar.Package
 	for _, entry := range entries {
 		if !util.IsDirRegularOrSymlink(entry) {
 			continue
@@ -45,7 +45,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 			continue
 		}
 
-		widget, _ := bazaar.WidgetJSON(entry.Name())
+		widget, _ := bazaar.ParsePackageJSON("widget", entry.Name())
 		if nil == widget {
 			continue
 		}
@@ -56,7 +56,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 	widgets = filterWidgets(widgets, k)
 	for _, widget := range widgets {
 		b := &Block{
-			Name:    bazaar.GetPreferredName(widget.Package),
+			Name:    bazaar.GetPreferredName(widget),
 			Content: widget.Name,
 		}
 		ret = append(ret, b)

@@ -19,83 +19,14 @@ package bazaar
 import (
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
 
 	"github.com/88250/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-type Widget struct {
-	*Package
-}
-
-// Widgets 返回集市挂件列表
-func Widgets() (widgets []*Widget) {
-	widgets = []*Widget{}
-	result := getStageAndBazaar("widgets")
-
-	if !result.Online {
-		return
-	}
-	if result.StageErr != nil {
-		return
-	}
-	if 1 > len(result.BazaarIndex) {
-		return
-	}
-
-	for _, repo := range result.StageIndex.Repos {
-		if nil == repo.Package {
-			continue
-		}
-		widget := buildWidgetFromStageRepo(repo, result.BazaarIndex)
-		if nil != widget {
-			widgets = append(widgets, widget)
-		}
-	}
-
-	sort.Slice(widgets, func(i, j int) bool { return widgets[i].Updated > widgets[j].Updated })
-	return
-}
-
-// buildWidgetFromStageRepo 使用 stage 内嵌的 package 构建 *Widget，不发起 HTTP 请求。
-func buildWidgetFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage) *Widget {
-	pkg := *repo.Package
-	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
-	repoURLHash := strings.Split(repo.URL, "@")
-	if 2 != len(repoURLHash) {
-		return nil
-	}
-	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
-	pkg.RepoHash = repoURLHash[1]
-	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
-	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
-	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
-	pkg.Updated = repo.Updated
-	pkg.Stars = repo.Stars
-	pkg.OpenIssues = repo.OpenIssues
-	pkg.Size = repo.Size
-	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
-	pkg.InstallSize = repo.InstallSize
-	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
-	pkg.HUpdated = formatUpdated(pkg.Updated)
-	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
-	pkg.PreferredName = GetPreferredName(&pkg)
-	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
-	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
-	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
-	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
-	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
-		pkg.Downloads = bp.Downloads
-	}
-	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
-	return &Widget{Package: &pkg}
-}
-
-func InstalledWidgets() (ret []*Widget) {
-	ret = []*Widget{}
+func InstalledWidgets() (ret []*Package) {
+	ret = []*Package{}
 
 	widgetsPath := filepath.Join(util.DataDir, "widgets")
 	if !util.IsPathRegularDirOrSymlinkDir(widgetsPath) {
@@ -108,7 +39,7 @@ func InstalledWidgets() (ret []*Widget) {
 		return
 	}
 
-	bazaarWidgets := Widgets()
+	bazaarWidgets := Packages("widgets", "")
 
 	for _, widgetDir := range widgetDirs {
 		if !util.IsDirRegularOrSymlink(widgetDir) {
@@ -116,15 +47,15 @@ func InstalledWidgets() (ret []*Widget) {
 		}
 		dirName := widgetDir.Name()
 
-		widget, parseErr := WidgetJSON(dirName)
+		widget, parseErr := ParsePackageJSON("widget", dirName)
 		if nil != parseErr || nil == widget {
 			continue
 		}
 
 		widget.RepoURL = widget.URL
-		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
-		if bazaarPkg := getBazaarWidget(widget.Name, bazaarWidgets); nil != bazaarPkg {
-			widget.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+		widget.DisallowInstall = disallowInstallBazaarPackage(widget)
+		if bazaarPkg := getBazaarPackageByName(bazaarWidgets, widget.Name); nil != bazaarPkg {
+			widget.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
 			widget.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
 			widget.RepoURL = bazaarPkg.RepoURL
 		}
@@ -135,7 +66,7 @@ func InstalledWidgets() (ret []*Widget) {
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"
 		widget.PreferredFunding = getPreferredFunding(widget.Funding)
-		widget.PreferredName = GetPreferredName(widget.Package)
+		widget.PreferredName = GetPreferredName(widget)
 		widget.PreferredDesc = getPreferredDesc(widget.Description)
 		info, statErr := os.Stat(filepath.Join(installPath, "widget.json"))
 		if nil != statErr {
@@ -152,30 +83,8 @@ func InstalledWidgets() (ret []*Widget) {
 		}
 		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
 		widget.PreferredReadme = loadInstalledReadme(installPath, "/widgets/"+dirName+"/", widget.Readme)
-		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
+		widget.Outdated = isOutdatedPackage(bazaarWidgets, widget)
 		ret = append(ret, widget)
 	}
 	return
-}
-
-func getBazaarWidget(name string, widgets []*Widget) *Widget {
-	for _, p := range widgets {
-		if p.Name == name {
-			return p
-		}
-	}
-	return nil
-}
-
-func InstallWidget(repoURL, repoHash, installPath string, systemID string) error {
-	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, true, systemID)
-	if err != nil {
-		return err
-	}
-	return installPackage(data, installPath, repoURLHash)
-}
-
-func UninstallWidget(installPath string) error {
-	return uninstallPackage(installPath)
 }

@@ -59,7 +59,7 @@ func InitAppearance() {
 		Conf.Appearance.ThemeJS = false
 	}
 
-	loadIcons()
+	LoadIcons()
 	if !gulu.Str.Contains(Conf.Appearance.Icon, Conf.Appearance.Icons) {
 		Conf.Appearance.Icon = "material"
 	}
@@ -124,15 +124,18 @@ func loadThemes() {
 			continue
 		}
 		name := themeDir.Name()
-		themeConf, parseErr := bazaar.ThemeJSON(name)
+		themeConf, parseErr := bazaar.ParsePackageJSON("theme", name)
 		if nil != parseErr || nil == themeConf {
 			continue
 		}
 
-		modes := themeConf.Modes
+		var modes []string
+		if nil != themeConf.Modes {
+			modes = *themeConf.Modes
+		}
 		for _, mode := range modes {
 			t := &conf.AppearanceTheme{Name: name}
-			if "midnight" == name || "daylight" == name {
+			if bazaar.IsBuiltInTheme(name) {
 				t.Label = name + Conf.Language(281)
 			} else {
 				t.Label = name
@@ -181,7 +184,7 @@ func loadThemes() {
 	Conf.Appearance.DarkThemes = append([]*conf.AppearanceTheme{midnightTheme}, Conf.Appearance.DarkThemes...)
 }
 
-func loadIcons() {
+func LoadIcons() {
 	iconDirs, err := os.ReadDir(util.IconsPath)
 	if err != nil {
 		logging.LogErrorf("read appearance icons folder failed: %s", err)
@@ -195,7 +198,7 @@ func loadIcons() {
 			continue
 		}
 		name := iconDir.Name()
-		iconConf, err := bazaar.IconJSON(name)
+		iconConf, err := bazaar.ParsePackageJSON("icon", name)
 		if err != nil || nil == iconConf {
 			continue
 		}
@@ -204,10 +207,6 @@ func loadIcons() {
 			Conf.Appearance.IconVer = iconConf.Version
 		}
 	}
-}
-
-func ReloadIcon() {
-	loadIcons()
 }
 
 func unwatchTheme(folder string) {

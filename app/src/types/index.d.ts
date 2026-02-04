@@ -862,8 +862,6 @@ interface IMenu {
 }
 
 interface IBazaarItem {
-    incompatible?: boolean;  // 仅 plugin
-    enabled: boolean;
     preferredName: string;
     minAppVersion: string;
     preferredDesc: string;
@@ -885,7 +883,6 @@ interface IBazaarItem {
     url: string;
     openIssues: number;
     version: string;
-    modes: string[];
     hSize: string;
     hInstallSize: string;
     hInstallDate: string;
@@ -893,6 +890,9 @@ interface IBazaarItem {
     preferredFunding: string;
     disallowUpdate: boolean;
     updateRequiredMinAppVer: string;
+    incompatible?: boolean;  // 仅 plugin
+    enabled?: boolean;       // 仅 plugin
+    modes?: string[];        // 仅 theme
 }
 
 interface IAV {

@@ -489,12 +489,12 @@ interface ISiyuan {
     backStack?: IBackStack[],
     mobile?: {
         size: {
-            isLandscape:boolean,
-            landscape: {
+            isLandscape?: boolean,
+            landscape?: {
                 height1: number,
                 height2: number,    // 键盘弹起时的高度
             }, // 横屏
-            portrait: {
+            portrait?: {
                 height1: number,
                 height2: number,
             }

@@ -53,17 +53,7 @@ class App {
             dialogs: [],
             blockPanels: [],
             mobile: {
-                size: {
-                    isLandscape: window.matchMedia && window.matchMedia("(orientation: landscape)").matches,
-                    landscape: {
-                        height1: window.innerWidth,
-                        height2: window.innerWidth,
-                    }, // 横屏
-                    portrait: {
-                        height1: window.innerHeight,
-                        height2: window.innerHeight,
-                    }
-                },
+                size: {},
                 docks: {
                     outline: null,
                     file: null,
@@ -170,6 +160,19 @@ class App {
                 }
             });
         });
+
+        window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+        if (window.siyuan.mobile.size.isLandscape) {
+            window.siyuan.mobile.size.landscape = {
+                height1: window.innerHeight,
+                height2: window.innerHeight,
+            }
+        } else {
+            window.siyuan.mobile.size.portrait = {
+                height1: window.innerHeight,
+                height2: window.innerHeight,
+            }
+        }
     }
 }
 
@@ -199,15 +202,29 @@ window.addEventListener("resize", () => {
     // 获取键盘高度
     window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
     if (window.siyuan.mobile.size.isLandscape) {
+        if (!window.siyuan.mobile.size.landscape) {
+            window.siyuan.mobile.size.landscape = {
+                height1: window.innerHeight,
+                height2: window.innerHeight,
+            }
+        }
         if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
             window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
-        } else {
+        }
+        if (window.innerHeight > window.siyuan.mobile.size.landscape.height1) {
             window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
         }
     } else {
+        if (!window.siyuan.mobile.size.portrait) {
+            window.siyuan.mobile.size.portrait = {
+                height1: window.innerHeight,
+                height2: window.innerHeight,
+            }
+        }
         if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
             window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
-        } else {
+        }
+        if (window.innerHeight > window.siyuan.mobile.size.portrait.height1) {
             window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
         }
     }

@@ -288,15 +288,23 @@ export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     showUtil = true;
 
     const toolbarElement = document.getElementById("keyboardToolbar");
-    const keyboardHeight = ((window.siyuan.mobile.size.isLandscape ? window.siyuan.mobile.size.landscape.height1 - window.siyuan.mobile.size.landscape.height2 : window.siyuan.mobile.size.portrait.height1 - window.siyuan.mobile.size.portrait.height2) ||
-        (window.innerHeight / 2 - 42)) + "px";
+    let keyboardHeight = window.innerHeight / 2 - 42;
+    if (window.siyuan.mobile.size.isLandscape) {
+        if (window.siyuan.mobile.size.landscape.height1 !== window.siyuan.mobile.size.landscape.height2) {
+            keyboardHeight = window.siyuan.mobile.size.landscape.height1 - window.siyuan.mobile.size.landscape.height2 + 42;
+        }
+    } else {
+        if (window.siyuan.mobile.size.portrait.height1 !== window.siyuan.mobile.size.portrait.height2) {
+            keyboardHeight = window.siyuan.mobile.size.portrait.height1 - window.siyuan.mobile.size.portrait.height2 + 42;
+        }
+    }
     const editor = getCurrentEditor();
     if (editor) {
-        editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight;
+        editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight + "px";
         editor.protyle.contentElement.scrollTop = oldScrollTop;
     }
     setTimeout(() => {
-        toolbarElement.style.height = keyboardHeight;
+        toolbarElement.style.height = keyboardHeight + "px";
     }, Constants.TIMEOUT_TRANSITION); // 防止抖动
     setTimeout(() => {
         showUtil = false;

@@ -328,12 +328,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 viewsElement.classList.add("av__views--show");
             }
             /// #if MOBILE
-            if (searchElement.getAttribute("virtualkeyboardpolicy") !== "manual") {
-                searchElement.setAttribute("virtualkeyboardpolicy", "manual");
-            }
             setTimeout(() => {
-                searchElement.focus();
                 window.JSAndroid?.showKeyboard();
+                searchElement.focus();
             }, Constants.TIMEOUT_TRANSITION);
             /// #else
             searchElement.focus();

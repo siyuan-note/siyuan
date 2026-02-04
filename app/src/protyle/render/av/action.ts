@@ -319,7 +319,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-search-icon") {
-            const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
+            const searchElement = blockElement.querySelector('div[data-type="av-search"]') as HTMLInputElement;
             searchElement.style.width = "128px";
             searchElement.style.paddingLeft = "";
             searchElement.style.paddingRight = "";
@@ -327,14 +327,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
             }
-            /// #if MOBILE
-            setTimeout(() => {
-                window.JSAndroid?.showKeyboard();
-                searchElement.focus();
-            }, Constants.TIMEOUT_TRANSITION);
-            /// #else
             searchElement.focus();
-            /// #endif
             event.preventDefault();
             event.stopPropagation();
             return true;

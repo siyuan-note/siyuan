@@ -357,7 +357,7 @@ const renderKeyboardToolbar = () => {
         const selectText = range.toString();
 
         if (!nodeElement.classList.contains("code-block") &&
-            (selectText  || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current"))) {
+            (selectText || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current"))) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.remove("fn__none");
         } else {
@@ -415,7 +415,7 @@ const renderKeyboardToolbar = () => {
 };
 
 export const showKeyboardToolbar = () => {
-    if (!showUtil) {
+    if (!showUtil || getSelection().rangeCount === 0) {
         hideKeyboardToolbarUtil();
     }
     const toolbarElement = document.getElementById("keyboardToolbar");

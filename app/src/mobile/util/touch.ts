@@ -29,7 +29,7 @@ const popSide = (render = true) => {
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
     const target = event.target as HTMLElement;
     const wysisygElement = hasClosestByClassName(target, "protyle-wysiwyg", true);
-    if (!yDiff || Math.abs(yDiff) < 10) {
+    if (!yDiff || Math.abs(yDiff) < 24) {
         let editElement: HTMLElement;
         if (["INPUT", "TEXTAREA"].includes(target.tagName) && target.getAttribute("readonly") !== "readonly") {
             editElement = target;

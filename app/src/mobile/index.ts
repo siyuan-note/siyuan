@@ -174,10 +174,7 @@ window.reconnectWebSocket = () => {
 window.goBack = goBack;
 window.showMessage = showMessage;
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
-window.showKeyboardToolbar = (height) => {
-    document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.outerHeight / 2 - 42).toString());
-    showKeyboardToolbar();
-};
+window.showKeyboardToolbar = showKeyboardToolbar;
 window.hideKeyboardToolbar = hideKeyboardToolbar;
 window.openFileByURL = (openURL) => {
     if (openURL && isSYProtocol(openURL)) {

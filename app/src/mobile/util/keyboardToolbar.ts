@@ -683,7 +683,7 @@ export const initKeyboardToolbar = () => {
                 hideKeyboardToolbarUtil();
                 focusByRange(range);
             } else {
-                document.activeElement.blur();
+                (document.activeElement as HTMLElement)?.blur();
                 buttonElement.classList.add("protyle-toolbar__item--current");
                 toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
                 const oldScrollTop = protyle.contentElement.scrollTop;

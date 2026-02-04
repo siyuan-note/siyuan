@@ -49,9 +49,13 @@ import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
-    bindGroupsEvent, bindGroupsNumber,
+    bindGroupsEvent,
+    bindGroupsNumber,
     getGroupsHTML,
-    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex, getPageSize,
+    getGroupsMethodHTML,
+    getGroupsNumberHTML,
+    getLanguageByIndex,
+    getPageSize,
     goGroupsDate,
     goGroupsSort,
     setGroupMethod
@@ -79,7 +83,7 @@ export const openMenuPanel = (options: {
     const avPageSize = getPageSize(options.blockElement);
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
-        query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
+        query: options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "",
         pageSize: avPageSize.unGroupPageSize,
         groupPaging: avPageSize.groupPageSize,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
@@ -1360,7 +1364,7 @@ export const openMenuPanel = (options: {
                     const suffix = pathPosix().extname(assetLink);
                     if (assetType === "image") {
                         previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                            (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "");
+                            options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
                     } else if (isLocalPath(assetLink) && assetType === "file" && (
                         (suffix === ".pdf" && !assetLink.startsWith("file://")) ||
                         Constants.SIYUAN_ASSETS_AUDIO.concat(Constants.SIYUAN_ASSETS_VIDEO, Constants.SIYUAN_ASSETS_IMAGE).includes(suffix)
@@ -1372,7 +1376,7 @@ export const openMenuPanel = (options: {
                     /// #else
                     if (assetType === "image") {
                         previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                            (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "");
+                            options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
                     } else {
                         window.open(assetLink);
                     }

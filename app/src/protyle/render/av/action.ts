@@ -302,7 +302,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 removeCompressURL((target as HTMLImageElement).getAttribute("src")),
                 blockElement.getAttribute("data-av-id"),
                 blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
+                blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
             );
             event.preventDefault();
             event.stopPropagation();

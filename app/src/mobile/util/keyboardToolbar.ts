@@ -286,16 +286,16 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
-
+    const toolHeight = document.querySelector(".keyboard__bar").clientHeight
     const toolbarElement = document.getElementById("keyboardToolbar");
-    let keyboardHeight = window.innerHeight / 2 - 42;
+    let keyboardHeight = window.innerHeight / 2 - toolHeight;
     if (window.siyuan.mobile.size.isLandscape) {
         if (window.siyuan.mobile.size.landscape.height1 !== window.siyuan.mobile.size.landscape.height2) {
-            keyboardHeight = window.siyuan.mobile.size.landscape.height1 - window.siyuan.mobile.size.landscape.height2 + 42;
+            keyboardHeight = window.siyuan.mobile.size.landscape.height1 - window.siyuan.mobile.size.landscape.height2 + toolHeight;
         }
     } else {
         if (window.siyuan.mobile.size.portrait.height1 !== window.siyuan.mobile.size.portrait.height2) {
-            keyboardHeight = window.siyuan.mobile.size.portrait.height1 - window.siyuan.mobile.size.portrait.height2 + 42;
+            keyboardHeight = window.siyuan.mobile.size.portrait.height1 - window.siyuan.mobile.size.portrait.height2 + toolHeight;
         }
     }
     const editor = getCurrentEditor();

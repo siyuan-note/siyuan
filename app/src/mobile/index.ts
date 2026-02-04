@@ -56,8 +56,8 @@ class App {
                 size: {
                     isLandscape: window.matchMedia && window.matchMedia("(orientation: landscape)").matches,
                     landscape: {
-                        height1: window.innerHeight,
-                        height2: window.innerHeight,
+                        height1: window.innerWidth,
+                        height2: window.innerWidth,
                     }, // 横屏
                     portrait: {
                         height1: window.innerHeight,

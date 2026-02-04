@@ -257,7 +257,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
 };
 
 const renderGroupTable = (options: ITableOptions) => {
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";
 

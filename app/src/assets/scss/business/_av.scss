@@ -97,6 +97,8 @@
 
     .b3-text-field {
       transition: var(--b3-width-transition);
+      overflow-x: hidden;
+      outline: none;
     }
   }
 

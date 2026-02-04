@@ -62,8 +62,29 @@ NPM 镜像：
 
 ### Harmony
 
-仅支持在 Linux 下编译，需要安装鸿蒙 SDK，并且需要修改 Go 源码，详情请参考 https://github.com/siyuan-note/siyuan/issues/13184
+仅支持在 Linux 下编译，需要安装鸿蒙 SDK，并且需要修改 Go 源码。
 
 * `cd kernel/harmony`
 * `./build.sh` （Windows 模拟器使用 `./build-win.sh`）
 * https://github.com/siyuan-note/siyuan-harmony
+
+修改 Go 源码：
+
+1. go/src/runtime/tls_arm64.s
+
+   结尾 `DATA runtime·tls_g+0(SB)/8, $16` 改为 `DATA runtime·tls_g+0(SB)/8, $-144`
+
+2. go/src/runtime/cgo/gcc_android.c
+
+   清空 inittls 函数
+
+   ```c
+   inittls(void **tlsg, void **tlsbase)
+   {
+     return;
+   }
+   ```
+3. go/src/net/cgo_resold.go
+   `C.size_t(len(b))` 改为 `C.socklen_t(len(b))`
+
+其他细节请参考 https://github.com/siyuan-note/siyuan/issues/13184

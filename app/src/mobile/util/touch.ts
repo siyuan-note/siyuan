@@ -5,7 +5,6 @@ import {activeBlur} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
-import {Constants} from "../../constants";
 
 let clientX: number;
 let clientY: number;
@@ -38,18 +37,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
             editElement = hasClosestByAttribute(target, "contenteditable", "true") as HTMLElement;
         }
         if (editElement) {
-            if (editElement.getAttribute("virtualkeyboardpolicy") !== "manual") {
-                editElement.setAttribute("virtualkeyboardpolicy", "manual");
-                setTimeout(() => {
-                    editElement.focus();
-                    window.JSAndroid?.showKeyboard();
-                }, Constants.TIMEOUT_TRANSITION);
-            } else {
-                editElement.focus();
-                window.JSAndroid?.showKeyboard();
-            }
-        } else {
-            window.JSAndroid?.hideKeyboard();
+            window.JSAndroid?.showKeyboard();
         }
     }
 

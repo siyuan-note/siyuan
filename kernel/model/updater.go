@@ -18,6 +18,7 @@ package model
 
 import (
 	"bufio"
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"io"
@@ -120,7 +121,7 @@ func checkDownloadInstallPkg() {
 
 func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	defer logging.Recover()
-	result, err := util.GetRhyResult(false)
+	result, err := util.GetRhyResult(context.TODO(), false)
 	if err != nil {
 		return
 	}
@@ -246,7 +247,7 @@ type Announcement struct {
 }
 
 func getAnnouncements() (ret []*Announcement) {
-	result, err := util.GetRhyResult(false)
+	result, err := util.GetRhyResult(context.TODO(), false)
 	if err != nil {
 		logging.LogErrorf("get announcement failed: %s", err)
 		return
@@ -278,7 +279,7 @@ func CheckUpdate(showMsg bool) {
 		return
 	}
 
-	result, err := util.GetRhyResult(showMsg)
+	result, err := util.GetRhyResult(context.TODO(), showMsg)
 	if err != nil {
 		return
 	}

@@ -609,12 +609,12 @@ export const initKeyboardToolbar = () => {
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
                 hideKeyboardToolbarUtil();
-                focusByRange(range);
                 if (window.JSAndroid && window.JSAndroid.showKeyboard) {
                     window.JSAndroid.showKeyboard();
                 } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
                     window.JSHarmony.showKeyboard();
                 }
+                setTimeout(() => focusByRange(range), 256);
             } else {
                 activeBlur();
             }
@@ -696,7 +696,12 @@ export const initKeyboardToolbar = () => {
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil();
-                focusByRange(range);
+                if (window.JSAndroid && window.JSAndroid.showKeyboard) {
+                    window.JSAndroid.showKeyboard();
+                } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
+                    window.JSHarmony.showKeyboard();
+                }
+                setTimeout(() => focusByRange(range), 256);
             } else {
                 (document.activeElement as HTMLElement)?.blur();
                 buttonElement.classList.add("protyle-toolbar__item--current");

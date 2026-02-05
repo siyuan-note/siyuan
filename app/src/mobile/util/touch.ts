@@ -233,12 +233,18 @@ export const handleTouchMove = (event: TouchEvent) => {
             return;
         }
         if (sideMaskElement.classList.contains("fn__none")) {
-            let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock") ||
-                hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
-                hasClosestByAttribute(target, "data-type", "NodeMathBlock") ||
-                hasClosestByAttribute(target, "data-type", "NodeTable") ||
-                hasTopClosestByClassName(target, "list") ||
-                hasTopClosestByClassName(target, "protyle-breadcrumb__bar--nowrap");
+            let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock");
+            if (event.touches.length > 1 || (scrollElement && !scrollElement.classList.contains("code-block"))) {
+                scrollBlock = true;
+                return;
+            }
+            if (!scrollElement) {
+                scrollElement = hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
+                    hasClosestByAttribute(target, "data-type", "NodeMathBlock") ||
+                    hasClosestByAttribute(target, "data-type", "NodeTable") ||
+                    hasTopClosestByClassName(target, "list") ||
+                    hasTopClosestByClassName(target, "protyle-breadcrumb__bar--nowrap");
+            }
             if (scrollElement) {
                 if (scrollElement.classList.contains("table")) {
                     scrollElement = scrollElement.firstElementChild as HTMLElement;
@@ -274,7 +280,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                         return;
                     }
                 }
-                if (scrollBlock || event.touches.length > 1) {
+                if (scrollBlock) {
                     return;
                 }
             }

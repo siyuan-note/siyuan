@@ -108,22 +108,6 @@ func BatchUpdateBazaarPackages(frontend string) {
 	task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, fmt.Sprintf(Conf.language(237), total), 5000)
 }
 
-// getOutdatedPackages 获取过时的包
-func getOutdatedPackages(packages []*bazaar.Package) []*bazaar.Package {
-	var outdated []*bazaar.Package
-	for _, pkg := range packages {
-		if pkg.Outdated {
-			outdated = append(outdated, pkg)
-		}
-		pkg.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
-	}
-	// 确保返回空切片而非 nil
-	if len(outdated) == 0 {
-		return []*bazaar.Package{}
-	}
-	return outdated
-}
-
 func UpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*bazaar.Package) {
 	wg := &sync.WaitGroup{}
 	wg.Add(5)
@@ -153,30 +137,31 @@ func UpdatedPackages(frontend string) (plugins, widgets, icons, themes, template
 	return
 }
 
+// getOutdatedPackages 获取过时的包
+func getOutdatedPackages(packages []*bazaar.Package) []*bazaar.Package {
+	var outdated []*bazaar.Package
+	for _, pkg := range packages {
+		if pkg.Outdated {
+			outdated = append(outdated, pkg)
+		}
+		pkg.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
+	}
+	// 确保返回空切片而非 nil
+	if len(outdated) == 0 {
+		return []*bazaar.Package{}
+	}
+	return outdated
+}
+
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	ret = bazaar.GetPackageREADME(repoURL, repoHash, packageType)
 	return
 }
 
 // getInstalledPackagesMap 获取已安装集市包的映射表
-func getInstalledPackagesMap(packageType, frontend string) map[string]*bazaar.Package {
+func getInstalledPackagesMap(pkgType, frontend string) map[string]*bazaar.Package {
 	installedMap := make(map[string]*bazaar.Package)
-	var installedPackages []*bazaar.Package
-
-	switch packageType {
-	case "plugins":
-		installedPackages = bazaar.InstalledPlugins(frontend)
-	case "widgets":
-		installedPackages = bazaar.InstalledWidgets()
-	case "icons":
-		installedPackages = bazaar.InstalledIcons()
-	case "themes":
-		installedPackages = bazaar.InstalledThemes()
-	case "templates":
-		installedPackages = bazaar.InstalledTemplates()
-	default:
-		return installedMap
-	}
+	installedPackages := bazaar.InstalledPackages(pkgType, frontend)
 
 	for _, pkg := range installedPackages {
 		installedMap[pkg.Name] = pkg
@@ -185,11 +170,11 @@ func getInstalledPackagesMap(packageType, frontend string) map[string]*bazaar.Pa
 }
 
 // BazaarPackages 获取在线集市包列表
-func BazaarPackages(packageType, frontend, keyword string) (packages []*bazaar.Package) {
-	packages = bazaar.Packages(packageType, frontend)
+func BazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Package) {
+	packages = bazaar.Packages(pkgType, frontend)
 	packages = filterPackages(packages, keyword)
 
-	installedMap := getInstalledPackagesMap(packageType, frontend)
+	installedMap := getInstalledPackagesMap(pkgType, frontend)
 	for _, pkg := range packages {
 		if installedPkg, ok := installedMap[pkg.Name]; ok {
 			pkg.Installed = true
@@ -217,7 +202,7 @@ func filterPackages(packages []*bazaar.Package, keyword string) (ret []*bazaar.P
 }
 
 func InstalledPlugins(frontend, keyword string) (plugins []*bazaar.Package) {
-	plugins = bazaar.InstalledPlugins(frontend)
+	plugins = bazaar.InstalledPackages("plugin", frontend)
 	plugins = filterPackages(plugins, keyword)
 	petals := getPetals()
 	for _, plugin := range plugins {
@@ -281,7 +266,7 @@ func UninstallBazaarPlugin(pluginName string) error {
 }
 
 func InstalledWidgets(keyword string) (widgets []*bazaar.Package) {
-	widgets = bazaar.InstalledWidgets()
+	widgets = bazaar.InstalledPackages("widget", "")
 	widgets = filterPackages(widgets, keyword)
 	return
 }
@@ -300,7 +285,7 @@ func UninstallBazaarPackage(packageType, packageName string) error {
 }
 
 func BazaarIcons(keyword string) (icons []*bazaar.Package) {
-	icons = bazaar.Packages("icons", "")
+	icons = bazaar.Packages("icon", "")
 	icons = filterPackages(icons, keyword)
 	for _, installed := range Conf.Appearance.Icons {
 		for _, icon := range icons {
@@ -317,7 +302,7 @@ func BazaarIcons(keyword string) (icons []*bazaar.Package) {
 }
 
 func InstalledIcons(keyword string) (icons []*bazaar.Package) {
-	icons = bazaar.InstalledIcons()
+	icons = bazaar.InstalledPackages("icon", "")
 	icons = filterPackages(icons, keyword)
 	for _, icon := range icons {
 		icon.Current = icon.Name == Conf.Appearance.Icon
@@ -346,7 +331,7 @@ func UninstallBazaarIcon(iconName string) error {
 }
 
 func BazaarThemes(keyword string) (ret []*bazaar.Package) {
-	ret = bazaar.Packages("themes", "")
+	ret = bazaar.Packages("theme", "")
 	ret = filterPackages(ret, keyword)
 	installs := Conf.Appearance.DarkThemes
 	installs = append(installs, Conf.Appearance.LightThemes...)
@@ -365,7 +350,7 @@ func BazaarThemes(keyword string) (ret []*bazaar.Package) {
 }
 
 func InstalledThemes(keyword string) (ret []*bazaar.Package) {
-	ret = bazaar.InstalledThemes()
+	ret = bazaar.InstalledPackages("theme", "")
 	ret = filterPackages(ret, keyword)
 	for _, theme := range ret {
 		theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
@@ -409,7 +394,7 @@ func UninstallBazaarTheme(themeName string) error {
 }
 
 func InstalledTemplates(keyword string) (templates []*bazaar.Package) {
-	templates = bazaar.InstalledTemplates()
+	templates = bazaar.InstalledPackages("template", "")
 	templates = filterPackages(templates, keyword)
 	return
 }

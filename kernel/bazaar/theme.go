@@ -16,51 +16,6 @@
 
 package bazaar
 
-import (
-	"os"
-	"path/filepath"
-
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/util"
-)
-
-func InstalledThemes() (ret []*Package) {
-	ret = []*Package{}
-
-	themeDirs, err := readInstalledPackageDirs(util.ThemesPath)
-	if err != nil {
-		logging.LogWarnf("read appearance themes folder failed: %s", err)
-		return
-	}
-	if len(themeDirs) == 0 {
-		return
-	}
-
-	// 过滤内置主题
-	var filteredDirs []os.DirEntry
-	for _, dir := range themeDirs {
-		if !IsBuiltInTheme(dir.Name()) {
-			filteredDirs = append(filteredDirs, dir)
-		}
-	}
-
-	bazaarThemesMap := buildBazaarPackagesMap("themes", "")
-	installedThemeInfos := getInstalledPackageInfos(filteredDirs, "theme")
-
-	for _, info := range installedThemeInfos {
-		theme := info.Pkg
-		dirName := info.DirName
-		installPath := filepath.Join(util.ThemesPath, dirName)
-
-		if !setPackageMetadata(theme, installPath, "theme.json", "/appearance/themes/"+dirName, bazaarThemesMap) {
-			continue
-		}
-
-		ret = append(ret, theme)
-	}
-	return
-}
-
 func IsBuiltInTheme(dirName string) bool {
 	return "daylight" == dirName || "midnight" == dirName
 }

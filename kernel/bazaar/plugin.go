@@ -60,39 +60,6 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 	return
 }
 
-func InstalledPlugins(frontend string) (ret []*Package) {
-	ret = []*Package{}
-
-	pluginsPath := filepath.Join(util.DataDir, "plugins")
-	pluginDirs, err := readInstalledPackageDirs(pluginsPath)
-	if err != nil {
-		logging.LogWarnf("read plugins folder failed: %s", err)
-		return
-	}
-	if len(pluginDirs) == 0 {
-		return
-	}
-
-	bazaarPluginsMap := buildBazaarPackagesMap("plugins", frontend)
-	installedPluginInfos := getInstalledPackageInfos(pluginDirs, "plugin")
-
-	for _, info := range installedPluginInfos {
-		plugin := info.Pkg
-		dirName := info.DirName
-		installPath := filepath.Join(pluginsPath, dirName)
-
-		if !setPackageMetadata(plugin, installPath, "plugin.json", "/plugins/"+dirName, bazaarPluginsMap) {
-			continue
-		}
-
-		// 插件不兼容性检查
-		incompatible := isIncompatiblePlugin(plugin, frontend)
-		plugin.Incompatible = &incompatible
-		ret = append(ret, plugin)
-	}
-	return
-}
-
 func isIncompatiblePlugin(plugin *Package, frontend string) bool {
 	backend := getCurrentBackend()
 	if !isTargetSupported(plugin.Backends, backend) {

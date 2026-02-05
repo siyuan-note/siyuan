@@ -179,7 +179,7 @@ func buildPackageFromStageRepo(repo *StageRepo, bazaarStats map[string]*bazaarSt
 	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
 	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
 
-	if "plugins" == pkgType {
+	if "plugin" == pkgType {
 		incompatible := isIncompatiblePlugin(&pkg, frontend)
 		pkg.Incompatible = &incompatible
 	}
@@ -250,9 +250,9 @@ func getPreferredFunding(funding *Funding) string {
 }
 
 // ParsePackageJSON 解析包 JSON 文件的通用函数
-func ParsePackageJSON(packageType, dirName string) (ret *Package, err error) {
+func ParsePackageJSON(pkgType, dirName string) (ret *Package, err error) {
 	var filePath string
-	switch packageType {
+	switch pkgType {
 	case "plugin":
 		filePath = filepath.Join(util.DataDir, "plugins", dirName, "plugin.json")
 	case "theme":
@@ -264,7 +264,7 @@ func ParsePackageJSON(packageType, dirName string) (ret *Package, err error) {
 	case "widget":
 		filePath = filepath.Join(util.DataDir, "widgets", dirName, "widget.json")
 	default:
-		err = errors.New("invalid package type: " + packageType)
+		err = errors.New("invalid package type: " + pkgType)
 		return
 	}
 
@@ -450,11 +450,11 @@ func isBazzarOnline0() (ret bool) {
 	return
 }
 
-func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
+func GetPackageREADME(repoURL, repoHash, pkgType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 
 	var stageIndex *StageIndex
-	if val, found := cachedStageIndex.Get(packageType); found {
+	if val, found := cachedStageIndex.Get(pkgType); found {
 		stageIndex = val.(*StageIndex)
 	}
 	if nil == stageIndex {
@@ -475,7 +475,7 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 
 	readme := getPreferredReadme(repo.Package.Readme)
 
-	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
+	data, err := downloadPackage(repoURLHash+"/"+readme, false)
 	if err != nil {
 		ret = fmt.Sprintf("Load bazaar package's preferred README(%s) failed: %s", readme, err.Error())
 		// 回退到 Default README
@@ -487,14 +487,14 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 			defaultReadme = "README.md"
 		}
 		if readme != defaultReadme {
-			data, err = downloadPackage(repoURLHash+"/"+defaultReadme, false, "")
+			data, err = downloadPackage(repoURLHash+"/"+defaultReadme, false)
 			if err != nil {
 				ret += fmt.Sprintf("<br>Load bazaar package's default README(%s) failed: %s", defaultReadme, err.Error())
 			}
 		}
 		// 回退到 README.md
 		if err != nil && readme != "README.md" && defaultReadme != "README.md" {
-			data, err = downloadPackage(repoURLHash+"/README.md", false, "")
+			data, err = downloadPackage(repoURLHash+"/README.md", false)
 			if err != nil {
 				ret += fmt.Sprintf("<br>Load bazaar package's README.md failed: %s", err.Error())
 				return
@@ -578,55 +578,43 @@ func renderLocalREADME(basePath string, mdData []byte) (ret string, err error) {
 	return
 }
 
-var (
-	packageLocks     = map[string]*sync.Mutex{}
-	packageLocksLock = sync.Mutex{}
-)
+var downloadPackageFlight singleflight.Group
 
-func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (data []byte, err error) {
-	packageLocksLock.Lock()
-	defer packageLocksLock.Unlock()
-
-	// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc
-	repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
-	lock, ok := packageLocks[repoURLHash]
-	if !ok {
-		lock = &sync.Mutex{}
-		packageLocks[repoURLHash] = lock
-	}
-	lock.Lock()
-	defer lock.Unlock()
-
-	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
-	u := util.BazaarOSSServer + "/package/" + repoURLHash
-	buf := &bytes.Buffer{}
-	resp, err := httpclient.NewCloudFileRequest2m().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
-		if pushProgress {
-			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
-			//logging.LogDebugf("downloading bazaar package [%f]", progress)
-			util.PushDownloadProgress(repoURL, progress)
+func downloadPackage(repoURLHash string, pushProgress bool) (data []byte, err error) {
+	repoURLHashTrimmed := strings.TrimPrefix(repoURLHash, "https://github.com/")
+	v, err, _ := downloadPackageFlight.Do(repoURLHash, func() (interface{}, error) {
+		// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc 或带路径 /README.md
+		repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
+		u := util.BazaarOSSServer + "/package/" + repoURLHashTrimmed
+		buf := &bytes.Buffer{}
+		resp, err := httpclient.NewCloudFileRequest2m().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
+			if pushProgress {
+				progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
+				util.PushDownloadProgress(repoURL, progress)
+			}
+		}).Get(u)
+		if err != nil {
+			logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
+			return nil, errors.New("get bazaar package failed, please check your network")
 		}
-	}).Get(u)
+		if 200 != resp.StatusCode {
+			logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
+			return nil, errors.New("get bazaar package failed: " + resp.Status)
+		}
+		data := buf.Bytes()
+		return data, nil
+	})
 	if err != nil {
-		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
-		return nil, errors.New("get bazaar package failed, please check your network")
+		return nil, err
 	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
-		return nil, errors.New("get bazaar package failed: " + resp.Status)
-	}
-	data = buf.Bytes()
-
-	go incPackageDownloads(repoURLHash, systemID)
-	return
+	return v.([]byte), nil
 }
 
-func incPackageDownloads(repoURLHash, systemID string) {
-	if strings.Contains(repoURLHash, ".md") || "" == systemID {
+func incPackageDownloads(repoURL, systemID string) {
+	if "" == systemID {
 		return
 	}
-
-	repo := strings.Split(repoURLHash, "@")[0]
+	repo := strings.TrimPrefix(repoURL, "https://github.com/")
 	u := util.GetCloudServer() + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
 	httpclient.NewCloudRequest30s().SetBody(
 		map[string]interface{}{
@@ -635,25 +623,20 @@ func incPackageDownloads(repoURLHash, systemID string) {
 		}).Post(u)
 }
 
-func InstallPackage(repoURL, repoHash, installPath string, systemID string) error {
+func InstallPackage(repoURL, repoHash, installPath, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
-	data, err := downloadPackage(repoURLHash, true, systemID)
+	data, err := downloadPackage(repoURLHash, true)
 	if err != nil {
 		return err
 	}
-	return installPackage(data, installPath)
+	if err = installPackage(data, installPath); err != nil {
+		return err
+	}
+	go incPackageDownloads(repoURL, systemID)
+	return nil
 }
 
 func installPackage(data []byte, installPath string) (err error) {
-	err = installPackage0(data, installPath)
-	if err != nil {
-		return
-	}
-
-	return
-}
-
-func installPackage0(data []byte, installPath string) (err error) {
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
 	if err = os.MkdirAll(tmpPackage, 0755); err != nil {
 		return
@@ -854,3 +837,114 @@ func setPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath str
 }
 
 var packageInstallSizeCache = gcache.New(48*time.Hour, 6*time.Hour) // [repoURL]*int64
+
+// InstalledPackages 获取已安装的指定类型集市包列表
+func InstalledPackages(pkgType, frontend string) (ret []*Package) {
+	ret = []*Package{}
+
+	var basePath string
+	var jsonFileName string
+	var baseURLPathPrefix string
+	var bazaarPkgType string
+	var filterFunc func([]os.DirEntry) []os.DirEntry
+	var postProcessFunc func(*Package, string)
+
+	switch pkgType {
+	case "plugin":
+		basePath = filepath.Join(util.DataDir, "plugins")
+		jsonFileName = "plugin.json"
+		baseURLPathPrefix = "/plugins/"
+		bazaarPkgType = "plugins"
+		filterFunc = nil
+		postProcessFunc = func(pkg *Package, frontend string) {
+			// 插件不兼容性检查
+			incompatible := isIncompatiblePlugin(pkg, frontend)
+			pkg.Incompatible = &incompatible
+		}
+	case "widget":
+		basePath = filepath.Join(util.DataDir, "widgets")
+		jsonFileName = "widget.json"
+		baseURLPathPrefix = "/widgets/"
+		bazaarPkgType = "widgets"
+		filterFunc = nil
+		postProcessFunc = nil
+	case "icon":
+		basePath = util.IconsPath
+		jsonFileName = "icon.json"
+		baseURLPathPrefix = "/appearance/icons/"
+		bazaarPkgType = "icons"
+		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
+			// 过滤内置图标
+			var filteredDirs []os.DirEntry
+			for _, dir := range dirs {
+				if !isBuiltInIcon(dir.Name()) {
+					filteredDirs = append(filteredDirs, dir)
+				}
+			}
+			return filteredDirs
+		}
+		postProcessFunc = nil
+	case "theme":
+		basePath = util.ThemesPath
+		jsonFileName = "theme.json"
+		baseURLPathPrefix = "/appearance/themes/"
+		bazaarPkgType = "themes"
+		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
+			// 过滤内置主题
+			var filteredDirs []os.DirEntry
+			for _, dir := range dirs {
+				if !IsBuiltInTheme(dir.Name()) {
+					filteredDirs = append(filteredDirs, dir)
+				}
+			}
+			return filteredDirs
+		}
+		postProcessFunc = nil
+	case "template":
+		basePath = filepath.Join(util.DataDir, "templates")
+		jsonFileName = "template.json"
+		baseURLPathPrefix = "/templates/"
+		bazaarPkgType = "templates"
+		filterFunc = nil
+		postProcessFunc = nil
+	default:
+		logging.LogWarnf("invalid package type: %s", pkgType)
+		return
+	}
+
+	dirs, err := readInstalledPackageDirs(basePath)
+	if err != nil {
+		logging.LogWarnf("read %s folder failed: %s", pkgType, err)
+		return
+	}
+	if len(dirs) == 0 {
+		return
+	}
+
+	// 过滤
+	if filterFunc != nil {
+		dirs = filterFunc(dirs)
+	}
+
+	bazaarPackagesMap := buildBazaarPackagesMap(bazaarPkgType, frontend)
+	installedPackageInfos := getInstalledPackageInfos(dirs, pkgType)
+
+	for _, info := range installedPackageInfos {
+		pkg := info.Pkg
+		dirName := info.DirName
+		installPath := filepath.Join(basePath, dirName)
+		baseURLPath := baseURLPathPrefix + dirName
+
+		if !setPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
+			continue
+		}
+
+		// 额外处理
+		if postProcessFunc != nil {
+			postProcessFunc(pkg, frontend)
+		}
+
+		ret = append(ret, pkg)
+	}
+	return
+}

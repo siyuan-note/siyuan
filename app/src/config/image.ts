@@ -1,6 +1,5 @@
 import {escapeHtml} from "../util/escape";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {pathPosix} from "../util/pathName";
 import {isBrowser, isMobile} from "../util/functions";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";

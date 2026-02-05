@@ -286,7 +286,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
-    const toolHeight = document.querySelector(".keyboard__bar").clientHeight
+    const toolHeight = document.querySelector(".keyboard__bar").clientHeight;
     const toolbarElement = document.getElementById("keyboardToolbar");
     let keyboardHeight = window.innerHeight / 2 - toolHeight;
     if (window.siyuan.mobile.size.isLandscape) {

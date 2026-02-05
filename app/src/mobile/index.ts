@@ -20,7 +20,7 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, writeText} from "../protyle/util/compatibility";
+import {getLocalStorage, isInIOS, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {checkPublishServiceClosed} from "../util/processMessage";
@@ -94,6 +94,9 @@ class App {
                 event.preventDefault();
             }
 
+            if (isInIOS()) {
+                return;
+            }
             const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
             let editElement: HTMLElement;
             if (["INPUT", "TEXTAREA"].includes(event.target.tagName) && event.target.getAttribute("readonly") !== "readonly") {
@@ -102,7 +105,11 @@ class App {
                 editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
             }
             if (editElement) {
-                window.JSAndroid?.showKeyboard();
+                if (window.JSAndroid && window.JSAndroid.showKeyboard) {
+                    window.JSAndroid.showKeyboard();
+                } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
+                    window.JSHarmony.showKeyboard();
+                }
             }
         });
         window.addEventListener("beforeunload", () => {

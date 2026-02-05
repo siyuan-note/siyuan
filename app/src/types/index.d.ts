@@ -254,6 +254,8 @@ interface Window {
         exit(): void
     };
     JSHarmony: {
+        showKeyboard(): void
+        hideKeyboard(): void
         openExternal(url: string): void
         exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void

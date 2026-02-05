@@ -487,6 +487,8 @@ export const hideKeyboardToolbar = () => {
 export const activeBlur = () => {
     if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
         window.JSAndroid.hideKeyboard();
+    } else if (window.JSHarmony && window.JSHarmony.hideKeyboard) {
+        window.JSHarmony.hideKeyboard();
     }
     hideKeyboardToolbar();
     (document.activeElement as HTMLElement).blur();

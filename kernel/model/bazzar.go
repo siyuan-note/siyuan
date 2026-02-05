@@ -153,8 +153,8 @@ func getOutdatedPackages(packages []*bazaar.Package) []*bazaar.Package {
 	return outdated
 }
 
-func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
-	ret = bazaar.GetPackageREADME(repoURL, repoHash, packageType)
+func GetBazaarPackageREADME(repoURL, repoHash, packageType string) (ret string) {
+	ret = bazaar.GetOnlinePackageREADME(repoURL, repoHash, packageType)
 	return
 }
 
@@ -169,8 +169,8 @@ func getInstalledPackagesMap(pkgType, frontend string) map[string]*bazaar.Packag
 	return installedMap
 }
 
-// BazaarPackages 获取在线集市包列表
-func BazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Package) {
+// GetBazaarPackages 获取在线集市包列表
+func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Package) {
 	packages = bazaar.Packages(pkgType, frontend)
 	packages = filterPackages(packages, keyword)
 

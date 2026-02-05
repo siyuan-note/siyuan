@@ -55,7 +55,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		displayName = GetPreferredName(plugin)
 		incompatible = isIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
-		disallowInstall = disallowInstallBazaarPackage(plugin)
+		disallowInstall = isBelowRequiredAppVersion(plugin)
 	}
 	return
 }

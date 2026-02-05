@@ -1,6 +1,6 @@
 import {setEditMode} from "../util/setEditMode";
 import {scrollEvent} from "../scroll/event";
-import {isMobile} from "../../util/functions";
+import {isMobile, isTouchDevice} from "../../util/functions";
 import {Constants} from "../../constants";
 import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
@@ -184,7 +184,9 @@ export const initUI = (protyle: IProtyle) => {
         });
     });
     let overAttr = false;
-    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & { target: HTMLElement }) => {
+    protyle.element.addEventListener(isTouchDevice() ? "touchend" : "mouseover", (event: KeyboardEvent & {
+        target: HTMLElement
+    }) => {
         // attr
         const attrElement = hasClosestByClassName(event.target, "protyle-attr");
         if (attrElement && !attrElement.parentElement.classList.contains("protyle-title")) {

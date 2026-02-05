@@ -956,10 +956,10 @@ func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction Relative
 			// 结束时间：今天的 23:59:59.999999999
 			end = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
 		case RelativeDateDirectionAfter:
-			// 开始时间：今天的 23:59:59.999999999
-			start = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 999999999, now.Location())
-			// 结束时间：开始时间加上 count 天
-			end = start.AddDate(0, 0, count)
+			// 开始时间：今天的 0 点加上 count 天
+			start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, count)
+			// 结束时间：开始时间的 23:59:59.999999999
+			end = time.Date(start.Year(), start.Month(), start.Day(), 23, 59, 59, 999999999, now.Location())
 		}
 	case RelativeDateUnitWeek:
 		weekday := int(now.Weekday())

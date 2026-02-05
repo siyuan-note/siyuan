@@ -254,31 +254,18 @@ export const handleTouchMove = (event: TouchEvent) => {
                     scrollElement = hasClosestByClassName(target, "layout-tab-bar") || hasClosestByClassName(target, "av__scroll") ||
                         hasClosestByClassName(target, "av__kanban");
                 } else if (scrollElement.dataset.type === "NodeMathBlock") {
-                    scrollElement = target;
-                    while (scrollElement && scrollElement.dataset.type !== "NodeMathBlock") {
-                        if (scrollElement.nodeType === 1 && scrollElement.scrollWidth > scrollElement.clientWidth) {
-                            if (scrollElement.parentElement.scrollWidth === scrollElement.parentElement.clientWidth) {
-                                break;
-                            }
+                    while (scrollElement && scrollElement.nodeType === 1) {
+                        if (scrollElement.scrollWidth > scrollElement.clientWidth) {
+                            break;
                         }
-                        scrollElement = scrollElement.parentElement;
+                        scrollElement = scrollElement.firstElementChild as HTMLElement;
                     }
                 }
-                let noScroll = false;
-                if (scrollElement && scrollElement.scrollLeft === 0) {
-                    scrollElement.scrollLeft = 1;
-                    if (scrollElement.scrollLeft === 0) {
-                        noScroll = true;
-                    }
-                }
-                if (!noScroll) {
-                    if (scrollElement && (
-                        (xDiff < 0 && scrollElement.scrollLeft > 1) ||
-                        (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
-                    )) {
-                        scrollBlock = true;
-                        return;
-                    }
+                if (scrollElement && (
+                    (xDiff < 0 && scrollElement.scrollLeft > 0) ||
+                    (xDiff > 0 && Math.ceil(scrollElement.clientWidth + scrollElement.scrollLeft) < scrollElement.scrollWidth)
+                )) {
+                    scrollBlock = true;
                 }
                 if (scrollBlock) {
                     return;

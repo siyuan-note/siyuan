@@ -42,16 +42,9 @@ func InstalledTemplates() (ret []*Package) {
 	for _, info := range installedTemplateInfos {
 		template := info.Pkg
 		dirName := info.DirName
+		installPath := filepath.Join(templatesPath, dirName)
 
-		config := PackageMetadataConfig{
-			BasePath:          templatesPath,
-			DirName:           dirName,
-			JSONFileName:      "template.json",
-			BaseURLPath:       "/templates/" + dirName,
-			BazaarPackagesMap: bazaarTemplatesMap,
-		}
-
-		if !setPackageMetadata(template, config) {
+		if !setPackageMetadata(template, installPath, "template.json", "/templates/"+dirName, bazaarTemplatesMap) {
 			continue
 		}
 

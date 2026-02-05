@@ -79,16 +79,9 @@ func InstalledPlugins(frontend string) (ret []*Package) {
 	for _, info := range installedPluginInfos {
 		plugin := info.Pkg
 		dirName := info.DirName
+		installPath := filepath.Join(pluginsPath, dirName)
 
-		config := PackageMetadataConfig{
-			BasePath:          pluginsPath,
-			DirName:           dirName,
-			JSONFileName:      "plugin.json",
-			BaseURLPath:       "/plugins/" + dirName,
-			BazaarPackagesMap: bazaarPluginsMap,
-		}
-
-		if !setPackageMetadata(plugin, config) {
+		if !setPackageMetadata(plugin, installPath, "plugin.json", "/plugins/"+dirName, bazaarPluginsMap) {
 			continue
 		}
 

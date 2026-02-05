@@ -18,6 +18,7 @@ package bazaar
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -49,16 +50,9 @@ func InstalledThemes() (ret []*Package) {
 	for _, info := range installedThemeInfos {
 		theme := info.Pkg
 		dirName := info.DirName
+		installPath := filepath.Join(util.ThemesPath, dirName)
 
-		config := PackageMetadataConfig{
-			BasePath:          util.ThemesPath,
-			DirName:           dirName,
-			JSONFileName:      "theme.json",
-			BaseURLPath:       "/appearance/themes/" + dirName,
-			BazaarPackagesMap: bazaarThemesMap,
-		}
-
-		if !setPackageMetadata(theme, config) {
+		if !setPackageMetadata(theme, installPath, "theme.json", "/appearance/themes/"+dirName, bazaarThemesMap) {
 			continue
 		}
 

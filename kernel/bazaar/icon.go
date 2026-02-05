@@ -18,6 +18,7 @@ package bazaar
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -49,16 +50,9 @@ func InstalledIcons() (ret []*Package) {
 	for _, info := range installedIconInfos {
 		icon := info.Pkg
 		dirName := info.DirName
+		installPath := filepath.Join(util.IconsPath, dirName)
 
-		config := PackageMetadataConfig{
-			BasePath:          util.IconsPath,
-			DirName:           dirName,
-			JSONFileName:      "icon.json",
-			BaseURLPath:       "/appearance/icons/" + dirName,
-			BazaarPackagesMap: bazaarIconsMap,
-		}
-
-		if !setPackageMetadata(icon, config) {
+		if !setPackageMetadata(icon, installPath, "icon.json", "/appearance/icons/"+dirName, bazaarIconsMap) {
 			continue
 		}
 

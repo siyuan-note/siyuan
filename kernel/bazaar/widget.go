@@ -42,16 +42,9 @@ func InstalledWidgets() (ret []*Package) {
 	for _, info := range installedWidgetInfos {
 		widget := info.Pkg
 		dirName := info.DirName
+		installPath := filepath.Join(widgetsPath, dirName)
 
-		config := PackageMetadataConfig{
-			BasePath:          widgetsPath,
-			DirName:           dirName,
-			JSONFileName:      "widget.json",
-			BaseURLPath:       "/widgets/" + dirName,
-			BazaarPackagesMap: bazaarWidgetsMap,
-		}
-
-		if !setPackageMetadata(widget, config) {
+		if !setPackageMetadata(widget, installPath, "widget.json", "/widgets/"+dirName, bazaarWidgetsMap) {
 			continue
 		}
 

@@ -811,42 +811,32 @@ func buildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package
 	return result
 }
 
-type PackageMetadataConfig struct {
-	BasePath          string              // 基础路径
-	DirName           string              // 目录名
-	JSONFileName      string              // JSON 文件名
-	BaseURLPath       string              // 基础 URL 路径
-	BazaarPackagesMap map[string]*Package // 在线集市包映射，key 为包名
-}
-
 // setPackageMetadata 设置包的元数据
-func setPackageMetadata(pkg *Package, config PackageMetadataConfig) bool {
-	installPath := filepath.Join(config.BasePath, config.DirName)
-
-	info, statErr := os.Stat(filepath.Join(installPath, config.JSONFileName))
+func setPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
+	info, statErr := os.Stat(filepath.Join(installPath, jsonFileName))
 	if nil != statErr {
-		logging.LogWarnf("stat install %s failed: %s", config.JSONFileName, statErr)
+		logging.LogWarnf("stat install %s failed: %s", jsonFileName, statErr)
 		return false
 	}
 
 	// 展示信息
-	pkg.PreviewURL = config.BaseURLPath + "/preview.png"
-	pkg.PreviewURLThumb = config.BaseURLPath + "/preview.png"
-	pkg.IconURL = config.BaseURLPath + "/icon.png"
+	pkg.PreviewURL = baseURLPath + "/preview.png"
+	pkg.PreviewURLThumb = baseURLPath + "/preview.png"
+	pkg.IconURL = baseURLPath + "/icon.png"
 	pkg.PreferredName = GetPreferredName(pkg)
 	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
-	pkg.PreferredReadme = loadInstalledReadme(installPath, config.BaseURLPath+"/", pkg.Readme)
+	pkg.PreferredReadme = loadInstalledReadme(installPath, baseURLPath+"/", pkg.Readme)
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
 	// 更新信息
 	pkg.RepoURL = pkg.URL
 	pkg.DisallowInstall = disallowInstallBazaarPackage(pkg)
-	if bazaarPkg := config.BazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
+	if bazaarPkg := bazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
 		pkg.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
 		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
 		pkg.RepoURL = bazaarPkg.RepoURL
 	}
-	pkg.Outdated = isOutdatedPackage(config.BazaarPackagesMap, pkg)
+	pkg.Outdated = isOutdatedPackage(bazaarPackagesMap, pkg)
 	pkg.Installed = true
 
 	// 安装信息

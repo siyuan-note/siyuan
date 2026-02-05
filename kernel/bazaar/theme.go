@@ -18,9 +18,7 @@ package bazaar
 
 import (
 	"os"
-	"path/filepath"
 
-	"github.com/88250/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -28,64 +26,42 @@ import (
 func InstalledThemes() (ret []*Package) {
 	ret = []*Package{}
 
-	if !util.IsPathRegularDirOrSymlinkDir(util.ThemesPath) {
-		return
-	}
-
-	themeDirs, err := os.ReadDir(util.ThemesPath)
+	themeDirs, err := readInstalledPackageDirs(util.ThemesPath)
 	if err != nil {
 		logging.LogWarnf("read appearance themes folder failed: %s", err)
 		return
 	}
+	if len(themeDirs) == 0 {
+		return
+	}
 
-	bazaarThemes := Packages("themes", "")
+	// 过滤内置主题
+	var filteredDirs []os.DirEntry
+	for _, dir := range themeDirs {
+		if !IsBuiltInTheme(dir.Name()) {
+			filteredDirs = append(filteredDirs, dir)
+		}
+	}
 
-	for _, themeDir := range themeDirs {
-		if !util.IsDirRegularOrSymlink(themeDir) {
+	bazaarThemesMap := buildBazaarPackagesMap("themes", "")
+	installedThemeInfos := getInstalledPackageInfos(filteredDirs, "theme")
+
+	for _, info := range installedThemeInfos {
+		theme := info.Pkg
+		dirName := info.DirName
+
+		config := PackageMetadataConfig{
+			BasePath:          util.ThemesPath,
+			DirName:           dirName,
+			JSONFileName:      "theme.json",
+			BaseURLPath:       "/appearance/themes/" + dirName,
+			BazaarPackagesMap: bazaarThemesMap,
+		}
+
+		if !setPackageMetadata(theme, config) {
 			continue
 		}
-		dirName := themeDir.Name()
-		if IsBuiltInTheme(dirName) {
-			continue
-		}
 
-		theme, parseErr := ParsePackageJSON("theme", dirName)
-		if nil != parseErr || nil == theme {
-			continue
-		}
-
-		theme.RepoURL = theme.URL
-		theme.DisallowInstall = disallowInstallBazaarPackage(theme)
-		if bazaarPkg := getBazaarPackageByName(bazaarThemes, theme.Name); nil != bazaarPkg {
-			theme.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
-			theme.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
-			theme.RepoURL = bazaarPkg.RepoURL
-		}
-
-		installPath := filepath.Join(util.ThemesPath, dirName)
-		theme.Installed = true
-		theme.PreviewURL = "/appearance/themes/" + dirName + "/preview.png"
-		theme.PreviewURLThumb = "/appearance/themes/" + dirName + "/preview.png"
-		theme.IconURL = "/appearance/themes/" + dirName + "/icon.png"
-		theme.PreferredFunding = getPreferredFunding(theme.Funding)
-		theme.PreferredName = GetPreferredName(theme)
-		theme.PreferredDesc = getPreferredDesc(theme.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "theme.json"))
-		if nil != statErr {
-			logging.LogWarnf("stat install theme.json failed: %s", statErr)
-			continue
-		}
-		theme.HInstallDate = info.ModTime().Format("2006-01-02")
-		if installSize, ok := packageInstallSizeCache.Get(theme.RepoURL); ok {
-			theme.InstallSize = installSize.(int64)
-		} else {
-			is, _ := util.SizeOfDirectory(installPath)
-			theme.InstallSize = is
-			packageInstallSizeCache.SetDefault(theme.RepoURL, is)
-		}
-		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
-		theme.PreferredReadme = loadInstalledReadme(installPath, "/appearance/themes/"+dirName+"/", theme.Readme)
-		theme.Outdated = isOutdatedPackage(bazaarThemes, theme)
 		ret = append(ret, theme)
 	}
 	return

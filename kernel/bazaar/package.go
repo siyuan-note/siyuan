@@ -130,12 +130,9 @@ func Packages(pkgType string, frontend string) (packages []*Package) {
 	if result.StageErr != nil {
 		return
 	}
-	if 1 > len(result.BazaarIndex) {
-		return
-	}
 
 	for _, repo := range result.StageIndex.Repos {
-		pkg := buildPackageFromStageRepo(repo, result.BazaarIndex, pkgType, frontend)
+		pkg := buildPackageFromStageRepo(repo, result.BazaarStats, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}
@@ -151,7 +148,7 @@ func Packages(pkgType string, frontend string) (packages []*Package) {
 }
 
 // buildPackageFromStageRepo 从 StageRepo 构建通用的 Package 信息
-func buildPackageFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage, pkgType string, frontend string) *Package {
+func buildPackageFromStageRepo(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
 	if nil == repo || nil == repo.Package {
 		return nil
 	}
@@ -187,20 +184,11 @@ func buildPackageFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPa
 		pkg.Incompatible = &incompatible
 	}
 
-	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
-		pkg.Downloads = bp.Downloads
+	if stats := bazaarStats[repoURLHash[0]]; nil != stats {
+		pkg.Downloads = stats.Downloads
 	}
 	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
 	return &pkg
-}
-
-func getBazaarPackageByName(packages []*Package, name string) *Package {
-	for _, pkg := range packages {
-		if pkg.Name == name {
-			return pkg
-		}
-	}
-	return nil
 }
 
 // getPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
@@ -298,15 +286,14 @@ func ParsePackageJSON(packageType, dirName string) (ret *Package, err error) {
 	return
 }
 
-var cachedStageIndex = map[string]*StageIndex{}
-var stageIndexCacheTime int64
-var stageIndexLock = sync.RWMutex{}
+// cachedStageIndex 缓存 stage 索引
+var cachedStageIndex = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6)
 
 type StageBazaarResult struct {
-	StageIndex  *StageIndex               // stage 索引
-	BazaarIndex map[string]*bazaarPackage // bazaar 索引
-	Online      bool                      // online 状态
-	StageErr    error                     // stage 错误
+	StageIndex  *StageIndex             // stage 索引
+	BazaarStats map[string]*bazaarStats // 统计信息
+	Online      bool                    // online 状态
+	StageErr    error                   // stage 错误
 }
 
 var stageBazaarFlight singleflight.Group
@@ -328,12 +315,12 @@ func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
 // getStageAndBazaar0 执行一次 stage 和 bazaar 索引拉取
 func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	stageIndex, stageErr := getStageIndexFromCache(pkgType)
-	bazaarIndex := getBazaarIndexFromCache()
-	if nil != stageIndex && nil != bazaarIndex {
+	bazaarStats := getBazaarStatsFromCache()
+	if nil != stageIndex && nil != bazaarStats {
 		// 两者都从缓存返回，不需要 online 检查
 		return StageBazaarResult{
 			StageIndex:  stageIndex,
-			BazaarIndex: bazaarIndex,
+			BazaarStats: bazaarStats,
 			Online:      true,
 			StageErr:    stageErr,
 		}
@@ -356,7 +343,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	}()
 	go func() {
 		defer wg.Done()
-		bazaarIndex = getBazaarIndex(ctx)
+		bazaarStats = getBazaarStats(ctx)
 	}()
 
 	<-onlineDone
@@ -365,7 +352,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 		cancel()
 		return StageBazaarResult{
 			StageIndex:  stageIndex,
-			BazaarIndex: bazaarIndex,
+			BazaarStats: bazaarStats,
 			Online:      false,
 			StageErr:    stageErr,
 		}
@@ -376,7 +363,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 
 	return StageBazaarResult{
 		StageIndex:  stageIndex,
-		BazaarIndex: bazaarIndex,
+		BazaarStats: bazaarStats,
 		Online:      onlineResult,
 		StageErr:    stageErr,
 	}
@@ -384,12 +371,8 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 
 // getStageIndexFromCache 仅从缓存获取 stage 索引，过期或无缓存时返回 nil
 func getStageIndexFromCache(pkgType string) (ret *StageIndex, err error) {
-	stageIndexLock.RLock()
-	cacheTime := stageIndexCacheTime
-	cached := cachedStageIndex[pkgType]
-	stageIndexLock.RUnlock()
-	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && nil != cached {
-		ret = cached
+	if val, found := cachedStageIndex.Get(pkgType); found {
+		ret = val.(*StageIndex)
 	}
 	return
 }
@@ -408,9 +391,6 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 		return
 	}
 
-	stageIndexLock.Lock()
-	defer stageIndexLock.Unlock()
-
 	bazaarHash := rhyRet["bazaar"].(string)
 	ret = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
@@ -427,12 +407,11 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 		return
 	}
 
-	stageIndexCacheTime = time.Now().Unix()
-	cachedStageIndex[pkgType] = ret
+	cachedStageIndex.SetDefault(pkgType, ret)
 	return
 }
 
-func isOutdatedPackage(bazaarPackages []*Package, pkg *Package) bool {
+func isOutdatedPackage(bazaarPackagesMap map[string]*Package, pkg *Package) bool {
 	if !strings.HasPrefix(pkg.URL, "https://github.com/") {
 		return false
 	}
@@ -443,8 +422,8 @@ func isOutdatedPackage(bazaarPackages []*Package, pkg *Package) bool {
 		return false
 	}
 
-	for _, bazaarPkg := range bazaarPackages {
-		if pkg.Name == bazaarPkg.Name && 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
+	if bazaarPkg, ok := bazaarPackagesMap[pkg.Name]; ok {
+		if 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
 			pkg.RepoHash = bazaarPkg.RepoHash
 			return true
 		}
@@ -474,9 +453,10 @@ func isBazzarOnline0() (ret bool) {
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 
-	stageIndexLock.RLock()
-	stageIndex := cachedStageIndex[packageType]
-	stageIndexLock.RUnlock()
+	var stageIndex *StageIndex
+	if val, found := cachedStageIndex.Get(packageType); found {
+		stageIndex = val.(*StageIndex)
+	}
 	if nil == stageIndex {
 		return
 	}
@@ -661,16 +641,15 @@ func InstallPackage(repoURL, repoHash, installPath string, systemID string) erro
 	if err != nil {
 		return err
 	}
-	return installPackage(data, installPath, repoURLHash)
+	return installPackage(data, installPath)
 }
 
-func installPackage(data []byte, installPath, repoURLHash string) (err error) {
+func installPackage(data []byte, installPath string) (err error) {
 	err = installPackage0(data, installPath)
 	if err != nil {
 		return
 	}
 
-	packageCache.Delete(strings.TrimPrefix(repoURLHash, "https://github.com/"))
 	return
 }
 
@@ -712,7 +691,6 @@ func UninstallPackage(installPath string) (err error) {
 		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
 		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
 	}
-	packageCache.Flush()
 	return
 }
 
@@ -730,52 +708,43 @@ func formatUpdated(updated string) (ret string) {
 	return
 }
 
-type bazaarPackage struct {
-	Name      string `json:"name"`
-	Downloads int    `json:"downloads"`
+// bazaarStats 集市包统计信息
+type bazaarStats struct {
+	Name      string `json:"name"`      // owner/repo 形式，等于键名，目前没有用法
+	Downloads int    `json:"downloads"` // 下载次数
 }
 
-var cachedBazaarIndex = map[string]*bazaarPackage{}
-var bazaarIndexCacheTime int64
-var bazaarIndexLock = sync.RWMutex{}
+// cachedBazaarStats 缓存集市包统计信息
+var cachedBazaarStats = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6)
 
-// getBazaarIndexFromCache 仅从缓存获取 bazaar 索引，过期或无缓存时返回 nil
-func getBazaarIndexFromCache() (ret map[string]*bazaarPackage) {
-	bazaarIndexLock.RLock()
-	cacheTime := bazaarIndexCacheTime
-	cached := cachedBazaarIndex
-	hasData := 0 < len(cached)
-	bazaarIndexLock.RUnlock()
-	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && hasData {
-		ret = cached
-	} else {
-		ret = nil
+// getBazaarStatsFromCache 仅从缓存获取集市包统计信息，过期或无缓存时返回 nil
+func getBazaarStatsFromCache() (ret map[string]*bazaarStats) {
+	if val, found := cachedBazaarStats.Get("index"); found {
+		ret = val.(map[string]*bazaarStats)
 	}
 	return
 }
 
-// getBazaarIndex 获取 bazaar 索引
-func getBazaarIndex(ctx context.Context) map[string]*bazaarPackage {
-	if cached := getBazaarIndexFromCache(); nil != cached {
+// getBazaarStats 获取集市包统计信息
+func getBazaarStats(ctx context.Context) map[string]*bazaarStats {
+	if cached := getBazaarStatsFromCache(); nil != cached {
 		return cached
 	}
 
-	bazaarIndexLock.Lock()
-	defer bazaarIndexLock.Unlock()
-
+	var result map[string]*bazaarStats
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
-	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&cachedBazaarIndex).Get(u)
+	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&result).Get(u)
 	if nil != reqErr {
-		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
-		return cachedBazaarIndex
+		logging.LogErrorf("get bazaar stats [%s] failed: %s", u, reqErr)
+		return result
 	}
 	if 200 != resp.StatusCode {
-		logging.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
-		return cachedBazaarIndex
+		logging.LogErrorf("get bazaar stats [%s] failed: %d", u, resp.StatusCode)
+		return result
 	}
-	bazaarIndexCacheTime = time.Now().Unix()
-	return cachedBazaarIndex
+	cachedBazaarStats.SetDefault("index", result)
+	return result
 }
 
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
@@ -792,10 +761,106 @@ func disallowInstallBazaarPackage(pkg *Package) bool {
 	return false
 }
 
-var packageCache = gcache.New(6*time.Hour, 30*time.Minute) // [repoURL]*Package
+// readInstalledPackageDirs 读取已安装包的目录列表
+func readInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
+	if !util.IsPathRegularDirOrSymlinkDir(basePath) {
+		return []os.DirEntry{}, nil
+	}
 
-func CleanBazaarPackageCache() {
-	packageCache.Flush()
+	dirs, err := os.ReadDir(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return dirs, nil
+}
+
+type InstalledPackageInfo struct {
+	Pkg     *Package
+	DirName string
+}
+
+// getInstalledPackageInfos 获取已安装包信息
+func getInstalledPackageInfos(dirs []os.DirEntry, parsePkgType string) []InstalledPackageInfo {
+	var result []InstalledPackageInfo
+	for _, dir := range dirs {
+		if !util.IsDirRegularOrSymlink(dir) {
+			continue
+		}
+		dirName := dir.Name()
+
+		pkg, parseErr := ParsePackageJSON(parsePkgType, dirName)
+		if nil != parseErr || nil == pkg {
+			continue
+		}
+
+		result = append(result, InstalledPackageInfo{Pkg: pkg, DirName: dirName})
+	}
+	return result
+}
+
+// buildBazaarPackagesMap 获取指定类型的集市包并转换为按包名索引的映射表
+func buildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package {
+	packages := Packages(pkgType, frontend)
+	result := make(map[string]*Package, len(packages))
+	for _, pkg := range packages {
+		if "" != pkg.Name {
+			result[pkg.Name] = pkg
+		}
+	}
+	return result
+}
+
+type PackageMetadataConfig struct {
+	BasePath          string              // 基础路径
+	DirName           string              // 目录名
+	JSONFileName      string              // JSON 文件名
+	BaseURLPath       string              // 基础 URL 路径
+	BazaarPackagesMap map[string]*Package // 在线集市包映射，key 为包名
+}
+
+// setPackageMetadata 设置包的元数据
+func setPackageMetadata(pkg *Package, config PackageMetadataConfig) bool {
+	installPath := filepath.Join(config.BasePath, config.DirName)
+
+	info, statErr := os.Stat(filepath.Join(installPath, config.JSONFileName))
+	if nil != statErr {
+		logging.LogWarnf("stat install %s failed: %s", config.JSONFileName, statErr)
+		return false
+	}
+
+	// 展示信息
+	pkg.PreviewURL = config.BaseURLPath + "/preview.png"
+	pkg.PreviewURLThumb = config.BaseURLPath + "/preview.png"
+	pkg.IconURL = config.BaseURLPath + "/icon.png"
+	pkg.PreferredName = GetPreferredName(pkg)
+	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.PreferredReadme = loadInstalledReadme(installPath, config.BaseURLPath+"/", pkg.Readme)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+
+	// 更新信息
+	pkg.RepoURL = pkg.URL
+	pkg.DisallowInstall = disallowInstallBazaarPackage(pkg)
+	if bazaarPkg := config.BazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
+		pkg.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
+		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		pkg.RepoURL = bazaarPkg.RepoURL
+	}
+	pkg.Outdated = isOutdatedPackage(config.BazaarPackagesMap, pkg)
+	pkg.Installed = true
+
+	// 安装信息
+	pkg.HInstallDate = info.ModTime().Format("2006-01-02")
+	if installSize, ok := packageInstallSizeCache.Get(pkg.RepoURL); ok {
+		pkg.InstallSize = installSize.(int64)
+	} else {
+		size, _ := util.SizeOfDirectory(installPath)
+		pkg.InstallSize = size
+		packageInstallSizeCache.SetDefault(pkg.RepoURL, size)
+	}
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+
+	return true
 }
 
 var packageInstallSizeCache = gcache.New(48*time.Hour, 6*time.Hour) // [repoURL]*int64

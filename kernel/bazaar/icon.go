@@ -18,9 +18,7 @@ package bazaar
 
 import (
 	"os"
-	"path/filepath"
 
-	"github.com/88250/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -28,64 +26,42 @@ import (
 func InstalledIcons() (ret []*Package) {
 	ret = []*Package{}
 
-	if !util.IsPathRegularDirOrSymlinkDir(util.IconsPath) {
-		return
-	}
-
-	iconDirs, err := os.ReadDir(util.IconsPath)
+	iconDirs, err := readInstalledPackageDirs(util.IconsPath)
 	if err != nil {
 		logging.LogWarnf("read icons folder failed: %s", err)
 		return
 	}
+	if len(iconDirs) == 0 {
+		return
+	}
 
-	bazaarIcons := Packages("icons", "")
+	// 过滤内置图标
+	var filteredDirs []os.DirEntry
+	for _, dir := range iconDirs {
+		if !isBuiltInIcon(dir.Name()) {
+			filteredDirs = append(filteredDirs, dir)
+		}
+	}
 
-	for _, iconDir := range iconDirs {
-		if !util.IsDirRegularOrSymlink(iconDir) {
+	bazaarIconsMap := buildBazaarPackagesMap("icons", "")
+	installedIconInfos := getInstalledPackageInfos(filteredDirs, "icon")
+
+	for _, info := range installedIconInfos {
+		icon := info.Pkg
+		dirName := info.DirName
+
+		config := PackageMetadataConfig{
+			BasePath:          util.IconsPath,
+			DirName:           dirName,
+			JSONFileName:      "icon.json",
+			BaseURLPath:       "/appearance/icons/" + dirName,
+			BazaarPackagesMap: bazaarIconsMap,
+		}
+
+		if !setPackageMetadata(icon, config) {
 			continue
 		}
-		dirName := iconDir.Name()
-		if isBuiltInIcon(dirName) {
-			continue
-		}
 
-		icon, parseErr := ParsePackageJSON("icon", dirName)
-		if nil != parseErr || nil == icon {
-			continue
-		}
-
-		icon.RepoURL = icon.URL
-		icon.DisallowInstall = disallowInstallBazaarPackage(icon)
-		if bazaarPkg := getBazaarPackageByName(bazaarIcons, icon.Name); nil != bazaarPkg {
-			icon.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
-			icon.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
-			icon.RepoURL = bazaarPkg.RepoURL
-		}
-
-		installPath := filepath.Join(util.IconsPath, dirName)
-		icon.Installed = true
-		icon.PreviewURL = "/appearance/icons/" + dirName + "/preview.png"
-		icon.PreviewURLThumb = "/appearance/icons/" + dirName + "/preview.png"
-		icon.IconURL = "/appearance/icons/" + dirName + "/icon.png"
-		icon.PreferredFunding = getPreferredFunding(icon.Funding)
-		icon.PreferredName = GetPreferredName(icon)
-		icon.PreferredDesc = getPreferredDesc(icon.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "icon.json"))
-		if nil != statErr {
-			logging.LogWarnf("stat install icon.json failed: %s", statErr)
-			continue
-		}
-		icon.HInstallDate = info.ModTime().Format("2006-01-02")
-		if installSize, ok := packageInstallSizeCache.Get(icon.RepoURL); ok {
-			icon.InstallSize = installSize.(int64)
-		} else {
-			is, _ := util.SizeOfDirectory(installPath)
-			icon.InstallSize = is
-			packageInstallSizeCache.SetDefault(icon.RepoURL, is)
-		}
-		icon.HInstallSize = humanize.BytesCustomCeil(uint64(icon.InstallSize), 2)
-		icon.PreferredReadme = loadInstalledReadme(installPath, "/appearance/icons/"+dirName+"/", icon.Readme)
-		icon.Outdated = isOutdatedPackage(bazaarIcons, icon)
 		ret = append(ret, icon)
 	}
 	return

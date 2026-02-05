@@ -21,7 +21,6 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/88250/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -65,61 +64,35 @@ func InstalledPlugins(frontend string) (ret []*Package) {
 	ret = []*Package{}
 
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
-	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
-		return
-	}
-
-	pluginDirs, err := os.ReadDir(pluginsPath)
+	pluginDirs, err := readInstalledPackageDirs(pluginsPath)
 	if err != nil {
 		logging.LogWarnf("read plugins folder failed: %s", err)
 		return
 	}
+	if len(pluginDirs) == 0 {
+		return
+	}
 
-	bazaarPlugins := Packages("plugins", frontend)
+	bazaarPluginsMap := buildBazaarPackagesMap("plugins", frontend)
+	installedPluginInfos := getInstalledPackageInfos(pluginDirs, "plugin")
 
-	for _, pluginDir := range pluginDirs {
-		if !util.IsDirRegularOrSymlink(pluginDir) {
+	for _, info := range installedPluginInfos {
+		plugin := info.Pkg
+		dirName := info.DirName
+
+		config := PackageMetadataConfig{
+			BasePath:          pluginsPath,
+			DirName:           dirName,
+			JSONFileName:      "plugin.json",
+			BaseURLPath:       "/plugins/" + dirName,
+			BazaarPackagesMap: bazaarPluginsMap,
+		}
+
+		if !setPackageMetadata(plugin, config) {
 			continue
 		}
-		dirName := pluginDir.Name()
 
-		plugin, parseErr := ParsePackageJSON("plugin", dirName)
-		if nil != parseErr || nil == plugin {
-			continue
-		}
-
-		plugin.RepoURL = plugin.URL
-		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin)
-		if bazaarPkg := getBazaarPackageByName(bazaarPlugins, plugin.Name); nil != bazaarPkg {
-			plugin.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
-			plugin.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
-			plugin.RepoURL = bazaarPkg.RepoURL
-		}
-
-		installPath := filepath.Join(util.DataDir, "plugins", dirName)
-		plugin.Installed = true
-		plugin.PreviewURL = "/plugins/" + dirName + "/preview.png"
-		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
-		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
-		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
-		plugin.PreferredName = GetPreferredName(plugin)
-		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "plugin.json"))
-		if nil != statErr {
-			logging.LogWarnf("stat install plugin.json failed: %s", statErr)
-			continue
-		}
-		plugin.HInstallDate = info.ModTime().Format("2006-01-02")
-		if installSize, ok := packageInstallSizeCache.Get(plugin.RepoURL); ok {
-			plugin.InstallSize = installSize.(int64)
-		} else {
-			is, _ := util.SizeOfDirectory(installPath)
-			plugin.InstallSize = is
-			packageInstallSizeCache.SetDefault(plugin.RepoURL, is)
-		}
-		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
-		plugin.PreferredReadme = loadInstalledReadme(installPath, "/plugins/"+dirName+"/", plugin.Readme)
-		plugin.Outdated = isOutdatedPackage(bazaarPlugins, plugin)
+		// 插件不兼容性检查
 		incompatible := isIncompatiblePlugin(plugin, frontend)
 		plugin.Incompatible = &incompatible
 		ret = append(ret, plugin)

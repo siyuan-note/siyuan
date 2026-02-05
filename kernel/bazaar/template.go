@@ -17,10 +17,8 @@
 package bazaar
 
 import (
-	"os"
 	"path/filepath"
 
-	"github.com/88250/go-humanize"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -29,61 +27,34 @@ func InstalledTemplates() (ret []*Package) {
 	ret = []*Package{}
 
 	templatesPath := filepath.Join(util.DataDir, "templates")
-	if !util.IsPathRegularDirOrSymlinkDir(templatesPath) {
-		return
-	}
-
-	templateDirs, err := os.ReadDir(templatesPath)
+	templateDirs, err := readInstalledPackageDirs(templatesPath)
 	if err != nil {
 		logging.LogWarnf("read templates folder failed: %s", err)
 		return
 	}
+	if len(templateDirs) == 0 {
+		return
+	}
 
-	bazaarTemplates := Packages("templates", "")
+	bazaarTemplatesMap := buildBazaarPackagesMap("templates", "")
+	installedTemplateInfos := getInstalledPackageInfos(templateDirs, "template")
 
-	for _, templateDir := range templateDirs {
-		if !util.IsDirRegularOrSymlink(templateDir) {
+	for _, info := range installedTemplateInfos {
+		template := info.Pkg
+		dirName := info.DirName
+
+		config := PackageMetadataConfig{
+			BasePath:          templatesPath,
+			DirName:           dirName,
+			JSONFileName:      "template.json",
+			BaseURLPath:       "/templates/" + dirName,
+			BazaarPackagesMap: bazaarTemplatesMap,
+		}
+
+		if !setPackageMetadata(template, config) {
 			continue
 		}
-		dirName := templateDir.Name()
 
-		template, parseErr := ParsePackageJSON("template", dirName)
-		if nil != parseErr || nil == template {
-			continue
-		}
-
-		template.RepoURL = template.URL
-		template.DisallowInstall = disallowInstallBazaarPackage(template)
-		if bazaarPkg := getBazaarPackageByName(bazaarTemplates, template.Name); nil != bazaarPkg {
-			template.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg)
-			template.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
-			template.RepoURL = bazaarPkg.RepoURL
-		}
-
-		installPath := filepath.Join(util.DataDir, "templates", dirName)
-		template.Installed = true
-		template.PreviewURL = "/templates/" + dirName + "/preview.png"
-		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
-		template.IconURL = "/templates/" + dirName + "/icon.png"
-		template.PreferredFunding = getPreferredFunding(template.Funding)
-		template.PreferredName = GetPreferredName(template)
-		template.PreferredDesc = getPreferredDesc(template.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "template.json"))
-		if nil != statErr {
-			logging.LogWarnf("stat install template.json failed: %s", statErr)
-			continue
-		}
-		template.HInstallDate = info.ModTime().Format("2006-01-02")
-		if installSize, ok := packageInstallSizeCache.Get(template.RepoURL); ok {
-			template.InstallSize = installSize.(int64)
-		} else {
-			is, _ := util.SizeOfDirectory(installPath)
-			template.InstallSize = is
-			packageInstallSizeCache.SetDefault(template.RepoURL, is)
-		}
-		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
-		template.PreferredReadme = loadInstalledReadme(installPath, "/templates/"+dirName+"/", template.Readme)
-		template.Outdated = isOutdatedPackage(bazaarTemplates, template)
 		ret = append(ret, template)
 	}
 	return

@@ -1121,6 +1121,7 @@ type="checkbox">
             element.querySelectorAll("img[data-type='img-loading']").forEach((item) => {
                 item.remove();
             });
+            return;
         }
         let html = "";
         response.data.packages.forEach((item: IBazaarItem) => {

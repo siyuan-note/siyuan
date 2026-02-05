@@ -121,12 +121,12 @@ class App {
             window.siyuan.mobile.size.landscape = {
                 height1: window.innerHeight,
                 height2: window.innerHeight,
-            }
+            };
         } else {
             window.siyuan.mobile.size.portrait = {
                 height1: window.innerHeight,
                 height2: window.innerHeight,
-            }
+            };
         }
         window.addEventListener("resize", () => {
             // 获取键盘高度
@@ -136,7 +136,7 @@ class App {
                     window.siyuan.mobile.size.landscape = {
                         height1: window.innerHeight,
                         height2: window.innerHeight,
-                    }
+                    };
                 }
                 if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
                     window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
@@ -149,7 +149,7 @@ class App {
                     window.siyuan.mobile.size.portrait = {
                         height1: window.innerHeight,
                         height2: window.innerHeight,
-                    }
+                    };
                 }
                 if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
                     window.siyuan.mobile.size.portrait.height2 = window.innerHeight;

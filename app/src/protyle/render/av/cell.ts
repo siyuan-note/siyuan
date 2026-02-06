@@ -418,7 +418,16 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     /// #if MOBILE
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
     if (contentElement && cellElement.getAttribute("data-dtype") !== "checkbox") {
-        const keyboardToolbarTop = (window.siyuan.mobile.size.isLandscape ? window.siyuan.mobile.size.landscape.height2 : window.siyuan.mobile.size.portrait.height2) - 48;
+        let keyboardToolbarTop = window.innerHeight / 2 - 48;
+        if (window.siyuan.mobile.size.isLandscape) {
+            if (window.siyuan.mobile.size.landscape.height1 !== window.siyuan.mobile.size.landscape.height2) {
+                keyboardToolbarTop = window.siyuan.mobile.size.landscape.height2 - 48;
+            }
+        } else {
+            if (window.siyuan.mobile.size.portrait.height1 !== window.siyuan.mobile.size.portrait.height2) {
+                keyboardToolbarTop = window.siyuan.mobile.size.portrait.height2 - 48;
+            }
+        }
         if (cellRect.bottom > keyboardToolbarTop) {
             contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - keyboardToolbarTop);
         } else if (cellRect.top < 110) {

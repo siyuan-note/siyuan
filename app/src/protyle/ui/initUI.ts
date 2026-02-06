@@ -333,11 +333,7 @@ export const getPadding = (protyle: IProtyle) => {
     let left = 24;
     let bottom = 16;
     if (protyle.options.typewriterMode) {
-        if (isMobile()) {
-            bottom = window.innerHeight / 5;
-        } else {
-            bottom = protyle.element.clientHeight / 2;
-        }
+        bottom = protyle.element.clientHeight / 2;
     }
     if (!isMobile()) {
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);

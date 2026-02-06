@@ -49,7 +49,9 @@ func InitAppearance() {
 		return
 	}
 	loadThemes()
+	LoadIcons()
 
+	Conf.m.Lock()
 	if !containTheme(Conf.Appearance.ThemeDark, Conf.Appearance.DarkThemes) {
 		Conf.Appearance.ThemeDark = "midnight"
 		Conf.Appearance.ThemeJS = false
@@ -58,11 +60,10 @@ func InitAppearance() {
 		Conf.Appearance.ThemeLight = "daylight"
 		Conf.Appearance.ThemeJS = false
 	}
-
-	LoadIcons()
 	if !gulu.Str.Contains(Conf.Appearance.Icon, Conf.Appearance.Icons) {
 		Conf.Appearance.Icon = "material"
 	}
+	Conf.m.Unlock()
 
 	Conf.Save()
 
@@ -116,9 +117,14 @@ func loadThemes() {
 		return
 	}
 
-	Conf.Appearance.DarkThemes = nil
-	Conf.Appearance.LightThemes = nil
+	var darkThemes, lightThemes []*conf.AppearanceTheme
 	var daylightTheme, midnightTheme *conf.AppearanceTheme
+	var themeVer string
+	var themeJS bool
+	mode := Conf.Appearance.Mode
+	themeLight := Conf.Appearance.ThemeLight
+	themeDark := Conf.Appearance.ThemeDark
+
 	for _, themeDir := range themeDirs {
 		if !util.IsDirRegularOrSymlink(themeDir) {
 			continue
@@ -159,29 +165,36 @@ func loadThemes() {
 			}
 
 			if "dark" == mode {
-				Conf.Appearance.DarkThemes = append(Conf.Appearance.DarkThemes, t)
+				darkThemes = append(darkThemes, t)
 			} else if "light" == mode {
-				Conf.Appearance.LightThemes = append(Conf.Appearance.LightThemes, t)
+				lightThemes = append(lightThemes, t)
 			}
 		}
 
-		if 0 == Conf.Appearance.Mode {
-			if Conf.Appearance.ThemeLight == name {
-				Conf.Appearance.ThemeVer = themeConf.Version
-				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
+		if 0 == mode {
+			if themeLight == name {
+				themeVer = themeConf.Version
+				themeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
 			}
 		} else {
-			if Conf.Appearance.ThemeDark == name {
-				Conf.Appearance.ThemeVer = themeConf.Version
-				Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
+			if themeDark == name {
+				themeVer = themeConf.Version
+				themeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
 			}
 		}
 
 		go watchTheme(filepath.Join(util.ThemesPath, name))
 	}
 
-	Conf.Appearance.LightThemes = append([]*conf.AppearanceTheme{daylightTheme}, Conf.Appearance.LightThemes...)
-	Conf.Appearance.DarkThemes = append([]*conf.AppearanceTheme{midnightTheme}, Conf.Appearance.DarkThemes...)
+	lightThemes = append([]*conf.AppearanceTheme{daylightTheme}, lightThemes...)
+	darkThemes = append([]*conf.AppearanceTheme{midnightTheme}, darkThemes...)
+
+	Conf.m.Lock()
+	Conf.Appearance.DarkThemes = darkThemes
+	Conf.Appearance.LightThemes = lightThemes
+	Conf.Appearance.ThemeVer = themeVer
+	Conf.Appearance.ThemeJS = themeJS
+	Conf.m.Unlock()
 }
 
 func LoadIcons() {
@@ -192,7 +205,10 @@ func LoadIcons() {
 		return
 	}
 
-	Conf.Appearance.Icons = nil
+	var icons []string
+	var iconVer string
+	currentIcon := Conf.Appearance.Icon
+
 	for _, iconDir := range iconDirs {
 		if !util.IsDirRegularOrSymlink(iconDir) {
 			continue
@@ -202,11 +218,16 @@ func LoadIcons() {
 		if err != nil || nil == iconConf {
 			continue
 		}
-		Conf.Appearance.Icons = append(Conf.Appearance.Icons, name)
-		if Conf.Appearance.Icon == name {
-			Conf.Appearance.IconVer = iconConf.Version
+		icons = append(icons, name)
+		if currentIcon == name {
+			iconVer = iconConf.Version
 		}
 	}
+
+	Conf.m.Lock()
+	Conf.Appearance.Icons = icons
+	Conf.Appearance.IconVer = iconVer
+	Conf.m.Unlock()
 }
 
 func unwatchTheme(folder string) {

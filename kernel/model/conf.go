@@ -1026,9 +1026,12 @@ const (
 	MaskedAccessAuthCode = "*******"
 )
 
+// GetMaskedConf 获取脱敏后的 Conf
 func GetMaskedConf() (ret *AppConf, err error) {
-	// 脱敏处理
-	data, err := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	// 序列化时持锁，避免与 loadThemes/LoadIcons 等写操作并发导致 slice 在编码过程中被改写而 panic
+	Conf.m.Lock()
+	data, err := gulu.JSON.MarshalJSON(Conf)
+	Conf.m.Unlock()
 	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)
 		return

@@ -184,7 +184,8 @@ export const initUI = (protyle: IProtyle) => {
         });
     });
     let overAttr = false;
-    protyle.element.addEventListener(isTouchDevice() ? "touchend" : "mouseover", (event: KeyboardEvent & {
+    const isTouch = isTouchDevice();
+    protyle.element.addEventListener(isTouch ? "touchend" : "mouseover", (event: KeyboardEvent & {
         target: HTMLElement
     }) => {
         // attr
@@ -222,7 +223,7 @@ export const initUI = (protyle: IProtyle) => {
 
         // gutter
         const buttonElement = hasClosestByTag(event.target, "BUTTON");
-        if (buttonElement && buttonElement.parentElement.classList.contains("protyle-gutters")) {
+        if (!isTouch && buttonElement && buttonElement.parentElement.classList.contains("protyle-gutters")) {
             const type = buttonElement.getAttribute("data-type");
             if (type === "fold" || type === "NodeAttributeViewRow") {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {

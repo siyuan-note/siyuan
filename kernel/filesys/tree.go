@@ -129,7 +129,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	}
 
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
-	if nil != err {
+	if nil == err {
 		cache.SetTreeData(rootID, data)
 	}
 	return

@@ -132,17 +132,14 @@ func ParsePackageJSON(filePath string) (ret *Package, err error) {
 // Packages 返回指定类型的集市包列表（plugins 类型需要传递 frontend 参数）
 func Packages(pkgType string, frontend string) (packages []*Package) {
 	result := getStageAndBazaar(pkgType)
+
+	if !result.Online || nil != result.StageErr || nil == result.StageIndex {
+		return make([]*Package, 0)
+	}
+
 	packages = make([]*Package, 0, len(result.StageIndex.Repos))
-
-	if !result.Online {
-		return
-	}
-	if result.StageErr != nil {
-		return
-	}
-
 	for _, repo := range result.StageIndex.Repos {
-		pkg := buildPackageFromStageRepo(repo, result.BazaarStats, pkgType, frontend)
+		pkg := buildPackageWithOnlineMetadata(repo, result.BazaarStats, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}
@@ -157,8 +154,8 @@ func Packages(pkgType string, frontend string) (packages []*Package) {
 	return
 }
 
-// buildPackageFromStageRepo 从 StageRepo 构建通用的 Package 信息
-func buildPackageFromStageRepo(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
+// buildPackageWithOnlineMetadata 从 StageRepo 构建带有在线元数据的集市包
+func buildPackageWithOnlineMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
 	if nil == repo || nil == repo.Package {
 		return nil
 	}
@@ -171,31 +168,34 @@ func buildPackageFromStageRepo(repo *StageRepo, bazaarStats map[string]*bazaarSt
 	}
 	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
 	pkg.RepoHash = repoURLHash[1]
+
+	// 展示信息
+	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
 	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
 	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
-	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
+	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
+	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+
+	// 更新信息
+	disallow := isBelowRequiredAppVersion(&pkg)
+	pkg.DisallowInstall = disallow
+	pkg.DisallowUpdate = disallow
+	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
+	if "plugins" == pkgType {
+		incompatible := isIncompatiblePlugin(&pkg, frontend)
+		pkg.Incompatible = &incompatible
+	}
+
+	// 统计信息
 	pkg.Updated = repo.Updated
+	pkg.HUpdated = formatUpdated(pkg.Updated)
 	pkg.Stars = repo.Stars
 	pkg.OpenIssues = repo.OpenIssues
 	pkg.Size = repo.Size
 	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
 	pkg.InstallSize = repo.InstallSize
 	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
-	pkg.HUpdated = formatUpdated(pkg.Updated)
-	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
-	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
-	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
-	disallow := isBelowRequiredAppVersion(&pkg)
-	pkg.DisallowInstall = disallow
-	pkg.DisallowUpdate = disallow
-
-	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
-
-	if "plugins" == pkgType {
-		incompatible := isIncompatiblePlugin(&pkg, frontend)
-		pkg.Incompatible = &incompatible
-	}
-
 	if stats := bazaarStats[repoURLHash[0]]; nil != stats {
 		pkg.Downloads = stats.Downloads
 	}

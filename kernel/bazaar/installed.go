@@ -128,7 +128,7 @@ func InstalledPackages(pkgType, frontend string) (ret []*Package) {
 		installPath := filepath.Join(basePath, dirName)
 		baseURLPath := baseURLPathPrefix + dirName
 
-		if !setPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
+		if !setPackageLocalMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
 			continue
 		}
 
@@ -186,8 +186,8 @@ func getInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string)
 	return result
 }
 
-// setPackageMetadata 设置包的元数据
-func setPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
+// setPackageLocalMetadata 设置集市包的本地元数据
+func setPackageLocalMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
 	info, statErr := os.Stat(filepath.Join(installPath, jsonFileName))
 	if nil != statErr {
 		logging.LogWarnf("stat install %s failed: %s", jsonFileName, statErr)
@@ -195,9 +195,9 @@ func setPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath str
 	}
 
 	// 展示信息
+	pkg.IconURL = baseURLPath + "/icon.png"
 	pkg.PreviewURL = baseURLPath + "/preview.png"
 	pkg.PreviewURLThumb = baseURLPath + "/preview.png"
-	pkg.IconURL = baseURLPath + "/icon.png"
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
 	pkg.PreferredReadme = getPackageLocalREADME(installPath, baseURLPath+"/", pkg.Readme)

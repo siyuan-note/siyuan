@@ -120,7 +120,7 @@ func InstalledPackages(pkgType, frontend string) (ret []*Package) {
 	}
 
 	bazaarPackagesMap := buildBazaarPackagesMap(pkgType, frontend)
-	installedPackageInfos := getInstalledPackageInfos(dirs, pkgType)
+	installedPackageInfos := getInstalledPackageInfos(dirs, basePath, jsonFileName)
 
 	for _, info := range installedPackageInfos {
 		pkg := info.Pkg
@@ -169,15 +169,14 @@ func buildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package
 }
 
 // getInstalledPackageInfos 获取已安装包信息
-func getInstalledPackageInfos(dirs []os.DirEntry, parsePkgType string) []InstalledPackageInfo {
+func getInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string) []InstalledPackageInfo {
 	var result []InstalledPackageInfo
 	for _, dir := range dirs {
 		if !util.IsDirRegularOrSymlink(dir) {
 			continue
 		}
 		dirName := dir.Name()
-
-		pkg, parseErr := ParsePackageJSON(parsePkgType, dirName)
+		pkg, parseErr := ParsePackageJSON(filepath.Join(basePath, dirName, jsonFileName))
 		if nil != parseErr || nil == pkg {
 			continue
 		}

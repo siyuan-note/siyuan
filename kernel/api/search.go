@@ -188,10 +188,10 @@ func searchWidget(c *gin.Context) {
 	}
 
 	keyword := arg["k"].(string)
-	blocks := model.SearchWidget(keyword)
+	widgets := model.SearchWidget(keyword)
 	ret.Data = map[string]interface{}{
-		"blocks": blocks,
-		"k":      keyword,
+		"widgets": widgets,
+		"k":       keyword,
 	}
 }
 
@@ -223,10 +223,10 @@ func searchTemplate(c *gin.Context) {
 	}
 
 	keyword := arg["k"].(string)
-	blocks := model.SearchTemplate(keyword)
+	templates := model.SearchTemplate(keyword)
 	ret.Data = map[string]interface{}{
-		"blocks": blocks,
-		"k":      keyword,
+		"templates": templates,
+		"k":         keyword,
 	}
 }
 

@@ -17,9 +17,7 @@
 package bazaar
 
 import (
-	"errors"
 	"os"
-	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
@@ -111,25 +109,8 @@ type StageIndex struct {
 	reposOnce  sync.Once
 }
 
-// ParsePackageJSON 解析包 JSON 文件的通用函数
-func ParsePackageJSON(pkgType, dirName string) (ret *Package, err error) {
-	var filePath string
-	switch pkgType {
-	case "plugins":
-		filePath = filepath.Join(util.DataDir, "plugins", dirName, "plugin.json")
-	case "themes":
-		filePath = filepath.Join(util.ThemesPath, dirName, "theme.json")
-	case "icons":
-		filePath = filepath.Join(util.IconsPath, dirName, "icon.json")
-	case "templates":
-		filePath = filepath.Join(util.DataDir, "templates", dirName, "template.json")
-	case "widgets":
-		filePath = filepath.Join(util.DataDir, "widgets", dirName, "widget.json")
-	default:
-		err = errors.New("invalid package type: " + pkgType)
-		return
-	}
-
+// ParsePackageJSON 解析集市包 JSON 文件
+func ParsePackageJSON(filePath string) (ret *Package, err error) {
 	if !filelock.IsExist(filePath) {
 		err = os.ErrNotExist
 		return

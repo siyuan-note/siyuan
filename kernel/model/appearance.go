@@ -124,7 +124,7 @@ func loadThemes() {
 			continue
 		}
 		name := themeDir.Name()
-		themeConf, parseErr := bazaar.ParsePackageJSON("themes", name)
+		themeConf, parseErr := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, name, "theme.json"))
 		if nil != parseErr || nil == themeConf {
 			continue
 		}
@@ -198,7 +198,7 @@ func LoadIcons() {
 			continue
 		}
 		name := iconDir.Name()
-		iconConf, err := bazaar.ParsePackageJSON("icons", name)
+		iconConf, err := bazaar.ParsePackageJSON(filepath.Join(util.IconsPath, name, "icon.json"))
 		if err != nil || nil == iconConf {
 			continue
 		}

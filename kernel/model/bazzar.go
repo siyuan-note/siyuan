@@ -292,7 +292,7 @@ func BazaarIcons(keyword string) (icons []*bazaar.Package) {
 		for _, icon := range icons {
 			if installed == icon.Name {
 				icon.Installed = true
-				if iconConf, err := bazaar.ParsePackageJSON("icons", icon.Name); err == nil {
+				if iconConf, err := bazaar.ParsePackageJSON(filepath.Join(util.IconsPath, icon.Name, "icon.json")); err == nil {
 					icon.Outdated = 0 > semver.Compare("v"+iconConf.Version, "v"+icon.Version)
 				}
 			}
@@ -340,7 +340,7 @@ func BazaarThemes(keyword string) (ret []*bazaar.Package) {
 		for _, theme := range ret {
 			if installed.Name == theme.Name {
 				theme.Installed = true
-				if themeConf, err := bazaar.ParsePackageJSON("themes", theme.Name); err == nil {
+				if themeConf, err := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, theme.Name, "theme.json")); err == nil {
 					theme.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+theme.Version)
 				}
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight

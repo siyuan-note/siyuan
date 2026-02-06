@@ -46,7 +46,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 			continue
 		}
 
-		plugin, parseErr := ParsePackageJSON("plugins", dirName)
+		plugin, parseErr := ParsePackageJSON(filepath.Join(util.DataDir, "plugins", dirName, "plugin.json"))
 		if nil != parseErr || nil == plugin {
 			return
 		}

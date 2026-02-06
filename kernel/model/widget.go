@@ -26,36 +26,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SearchWidget(keyword string) (ret []*Block) {
-	ret = []*Block{}
-	widgetsDir := filepath.Join(util.DataDir, "widgets")
-	entries, err := os.ReadDir(widgetsDir)
+// WidgetSearchResult 描述了挂件搜索结果
+type WidgetSearchResult struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func SearchWidget(keyword string) (ret []*WidgetSearchResult) {
+	ret = []*WidgetSearchResult{}
+	widgetsDirPath := filepath.Join(util.DataDir, "widgets")
+	widgetsDir, err := os.ReadDir(widgetsDirPath)
 	if err != nil {
-		logging.LogErrorf("read dir [%s] failed: %s", widgetsDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", widgetsDirPath, err)
 		return
 	}
 
-	k := strings.ToLower(keyword)
 	var widgets []*bazaar.Package
-	for _, entry := range entries {
-		if !util.IsDirRegularOrSymlink(entry) {
+	for _, dir := range widgetsDir {
+		if !util.IsDirRegularOrSymlink(dir) {
 			continue
 		}
-		if strings.HasPrefix(entry.Name(), ".") {
+		dirName := dir.Name()
+		if strings.HasPrefix(dirName, ".") {
 			continue
 		}
-
-		widget, _ := bazaar.ParsePackageJSON("widgets", entry.Name())
+		widget, _ := bazaar.ParsePackageJSON(filepath.Join(widgetsDirPath, dirName, "widget.json"))
 		if nil == widget {
 			continue
 		}
-
 		widgets = append(widgets, widget)
 	}
 
-	widgets = filterPackages(widgets, k)
+	widgets = filterPackages(widgets, keyword)
 	for _, widget := range widgets {
-		b := &Block{
+		b := &WidgetSearchResult{
 			Name:    bazaar.GetPreferredLocaleString(widget.DisplayName, widget.Name),
 			Content: widget.Name,
 		}

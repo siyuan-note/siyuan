@@ -1895,15 +1895,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     range.setEndAfter(inlineElement);
                     range.collapse(false);
                 }
-                const wbrElement = document.createElement("wbr");
-                range.insertNode(wbrElement);
-                const oldHTML = nodeElement.outerHTML;
-                range.extractContents();
-                range.insertNode(document.createTextNode(window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " ")));
-                range.collapse(false);
-                focusByRange(range);
-                wbrElement.remove();
-                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                document.execCommand("insertText", false, window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " "));
                 return true;
             }
         }

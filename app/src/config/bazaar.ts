@@ -598,7 +598,7 @@ type="checkbox">
             mdElement.innerHTML = data.preferredReadme;
             highlightRender(mdElement);
         } else {
-            fetchPost("/api/bazaar/getBazaarPackageREAME", {
+            fetchPost("/api/bazaar/getBazaarPackageREADME", {
                 repoURL: data.repoURL,
                 repoHash: data.repoHash,
                 packageType: bazaarType

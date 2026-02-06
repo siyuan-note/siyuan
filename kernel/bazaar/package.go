@@ -107,7 +107,7 @@ type StageRepo struct {
 type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
 
-	reposByURL map[string]*StageRepo `json:"-"` // 不序列化，首次按 URL 查找时懒构建
+	reposByURL map[string]*StageRepo // 不序列化，首次按 URL 查找时懒构建
 	reposOnce  sync.Once
 }
 
@@ -201,9 +201,9 @@ func buildPackageFromStageRepo(repo *StageRepo, bazaarStats map[string]*bazaarSt
 	pkg.InstallSize = repo.InstallSize
 	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
 	pkg.HUpdated = formatUpdated(pkg.Updated)
-	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 	disallow := isBelowRequiredAppVersion(&pkg)
 	pkg.DisallowInstall = disallow
 	pkg.DisallowUpdate = disallow
@@ -235,4 +235,51 @@ func formatUpdated(updated string) (ret string) {
 		}
 	}
 	return
+}
+
+// GetPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
+func GetPreferredLocaleString(m LocaleStrings, fallback string) string {
+	if len(m) == 0 {
+		return fallback
+	}
+	if v := strings.TrimSpace(m[util.Lang]); "" != v {
+		return v
+	}
+	if v := strings.TrimSpace(m["default"]); "" != v {
+		return v
+	}
+	if v := strings.TrimSpace(m["en_US"]); "" != v {
+		return v
+	}
+	return fallback
+}
+
+// getPreferredFunding 获取包的首选赞助链接
+func getPreferredFunding(funding *Funding) string {
+	if nil == funding {
+		return ""
+	}
+	if v := normalizeFundingURL(funding.OpenCollective, "https://opencollective.com/"); "" != v {
+		return v
+	}
+	if v := normalizeFundingURL(funding.Patreon, "https://www.patreon.com/"); "" != v {
+		return v
+	}
+	if v := normalizeFundingURL(funding.GitHub, "https://github.com/sponsors/"); "" != v {
+		return v
+	}
+	if 0 < len(funding.Custom) {
+		return funding.Custom[0]
+	}
+	return ""
+}
+
+func normalizeFundingURL(s, base string) string {
+	if "" == s {
+		return ""
+	}
+	if strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://") {
+		return s
+	}
+	return base + s
 }

@@ -41,6 +41,7 @@ type StageBazaarResult struct {
 
 var stageBazaarFlight singleflight.Group
 var onlineCheckFlight singleflight.Group
+var bazaarStatsFlight singleflight.Group
 
 // getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
 func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
@@ -77,7 +78,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		onlineResult = isBazzarOnline()
+		onlineResult = isBazaarOnline()
 		onlineDone <- true
 	}()
 	go func() {
@@ -112,9 +113,9 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	}
 }
 
-func isBazzarOnline() bool {
+func isBazaarOnline() bool {
 	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (interface{}, error) {
-		return isBazzarOnline0(), nil
+		return isBazaarOnline0(), nil
 	})
 	if err != nil {
 		return false
@@ -122,7 +123,7 @@ func isBazzarOnline() bool {
 	return v.(bool)
 }
 
-func isBazzarOnline0() (ret bool) {
+func isBazaarOnline0() (ret bool) {
 	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
 	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
 	if !ret {
@@ -211,6 +212,13 @@ func getBazaarStats(ctx context.Context) map[string]*bazaarStats {
 		return cached
 	}
 
+	v, _, _ := bazaarStatsFlight.Do("bazaarStats", func() (interface{}, error) {
+		return getBazaarStats0(ctx), nil
+	})
+	return v.(map[string]*bazaarStats)
+}
+
+func getBazaarStats0(ctx context.Context) map[string]*bazaarStats {
 	var result map[string]*bazaarStats
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"

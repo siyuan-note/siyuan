@@ -530,14 +530,14 @@ export const setTitle = (title: string) => {
 };
 
 export const downloadProgress = (data: { id: string, percent: number }) => {
-    const bazzarSideElement = document.querySelector("#configBazaarReadme .item__side");
-    if (!bazzarSideElement) {
+    const bazaarSideElement = document.querySelector("#configBazaarReadme .item__side");
+    if (!bazaarSideElement) {
         return;
     }
-    if (data.id !== JSON.parse(bazzarSideElement.getAttribute("data-obj")).repoURL) {
+    if (data.id !== JSON.parse(bazaarSideElement.getAttribute("data-obj")).repoURL) {
         return;
     }
-    const btnElement = bazzarSideElement.querySelector('[data-type="install"]') as HTMLElement;
+    const btnElement = bazaarSideElement.querySelector('[data-type="install"]') as HTMLElement;
     if (btnElement) {
         if (data.percent >= 1) {
             btnElement.parentElement.classList.add("fn__none");

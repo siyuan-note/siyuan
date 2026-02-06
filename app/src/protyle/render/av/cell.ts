@@ -19,6 +19,7 @@ import {electronUndo} from "../../undo";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
+import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -557,6 +558,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         inputElement.select();
         inputElement.focus();
+        callMobileAppShowKeyboard();
         if (type === "template") {
             fetchPost("/api/av/renderAttributeView", {
                 id: blockElement.dataset.avId,

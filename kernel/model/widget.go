@@ -45,7 +45,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 			continue
 		}
 
-		widget, _ := bazaar.ParsePackageJSON("widget", entry.Name())
+		widget, _ := bazaar.ParsePackageJSON("widgets", entry.Name())
 		if nil == widget {
 			continue
 		}
@@ -56,7 +56,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 	widgets = filterPackages(widgets, k)
 	for _, widget := range widgets {
 		b := &Block{
-			Name:    bazaar.GetPreferredName(widget),
+			Name:    bazaar.GetPreferredLocaleString(widget.DisplayName, widget.Name),
 			Content: widget.Name,
 		}
 		ret = append(ret, b)

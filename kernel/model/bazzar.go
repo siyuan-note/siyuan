@@ -17,6 +17,7 @@
 package model
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"path/filepath"
@@ -153,8 +154,8 @@ func getOutdatedPackages(packages []*bazaar.Package) []*bazaar.Package {
 	return outdated
 }
 
-func GetBazaarPackageREADME(repoURL, repoHash, packageType string) (ret string) {
-	ret = bazaar.GetOnlinePackageREADME(repoURL, repoHash, packageType)
+func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType string) (ret string) {
+	ret = bazaar.GetPackageOnlineREADME(ctx, repoURL, repoHash, packageType)
 	return
 }
 
@@ -202,7 +203,7 @@ func filterPackages(packages []*bazaar.Package, keyword string) (ret []*bazaar.P
 }
 
 func InstalledPlugins(frontend, keyword string) (plugins []*bazaar.Package) {
-	plugins = bazaar.InstalledPackages("plugin", frontend)
+	plugins = bazaar.InstalledPackages("plugins", frontend)
 	plugins = filterPackages(plugins, keyword)
 	petals := getPetals()
 	for _, plugin := range plugins {
@@ -217,15 +218,15 @@ func InstalledPlugins(frontend, keyword string) (plugins []*bazaar.Package) {
 
 func getPackageInstallPath(packageType, packageName string) (string, error) {
 	switch packageType {
-	case "plugin":
+	case "plugins":
 		return filepath.Join(util.DataDir, "plugins", packageName), nil
-	case "theme":
+	case "themes":
 		return filepath.Join(util.ThemesPath, packageName), nil
-	case "icon":
+	case "icons":
 		return filepath.Join(util.IconsPath, packageName), nil
-	case "template":
+	case "templates":
 		return filepath.Join(util.DataDir, "templates", packageName), nil
-	case "widget":
+	case "widgets":
 		return filepath.Join(util.DataDir, "widgets", packageName), nil
 	default:
 		return "", fmt.Errorf("invalid package type: %s", packageType)
@@ -246,7 +247,7 @@ func InstallBazaarPackage(packageType, repoURL, repoHash, packageName string) er
 }
 
 func UninstallBazaarPlugin(pluginName string) error {
-	if err := UninstallBazaarPackage("plugin", pluginName); err != nil {
+	if err := UninstallBazaarPackage("plugins", pluginName); err != nil {
 		return err
 	}
 
@@ -266,7 +267,7 @@ func UninstallBazaarPlugin(pluginName string) error {
 }
 
 func InstalledWidgets(keyword string) (widgets []*bazaar.Package) {
-	widgets = bazaar.InstalledPackages("widget", "")
+	widgets = bazaar.InstalledPackages("widgets", "")
 	widgets = filterPackages(widgets, keyword)
 	return
 }
@@ -285,13 +286,13 @@ func UninstallBazaarPackage(packageType, packageName string) error {
 }
 
 func BazaarIcons(keyword string) (icons []*bazaar.Package) {
-	icons = bazaar.Packages("icon", "")
+	icons = bazaar.Packages("icons", "")
 	icons = filterPackages(icons, keyword)
 	for _, installed := range Conf.Appearance.Icons {
 		for _, icon := range icons {
 			if installed == icon.Name {
 				icon.Installed = true
-				if iconConf, err := bazaar.ParsePackageJSON("icon", icon.Name); err == nil {
+				if iconConf, err := bazaar.ParsePackageJSON("icons", icon.Name); err == nil {
 					icon.Outdated = 0 > semver.Compare("v"+iconConf.Version, "v"+icon.Version)
 				}
 			}
@@ -302,7 +303,7 @@ func BazaarIcons(keyword string) (icons []*bazaar.Package) {
 }
 
 func InstalledIcons(keyword string) (icons []*bazaar.Package) {
-	icons = bazaar.InstalledPackages("icon", "")
+	icons = bazaar.InstalledPackages("icons", "")
 	icons = filterPackages(icons, keyword)
 	for _, icon := range icons {
 		icon.Current = icon.Name == Conf.Appearance.Icon
@@ -311,7 +312,7 @@ func InstalledIcons(keyword string) (icons []*bazaar.Package) {
 }
 
 func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
-	if err := InstallBazaarPackage("icon", repoURL, repoHash, iconName); err != nil {
+	if err := InstallBazaarPackage("icons", repoURL, repoHash, iconName); err != nil {
 		return err
 	}
 	Conf.Appearance.Icon = iconName
@@ -322,7 +323,7 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 }
 
 func UninstallBazaarIcon(iconName string) error {
-	if err := UninstallBazaarPackage("icon", iconName); err != nil {
+	if err := UninstallBazaarPackage("icons", iconName); err != nil {
 		return err
 	}
 
@@ -331,7 +332,7 @@ func UninstallBazaarIcon(iconName string) error {
 }
 
 func BazaarThemes(keyword string) (ret []*bazaar.Package) {
-	ret = bazaar.Packages("theme", "")
+	ret = bazaar.Packages("themes", "")
 	ret = filterPackages(ret, keyword)
 	installs := Conf.Appearance.DarkThemes
 	installs = append(installs, Conf.Appearance.LightThemes...)
@@ -339,7 +340,7 @@ func BazaarThemes(keyword string) (ret []*bazaar.Package) {
 		for _, theme := range ret {
 			if installed.Name == theme.Name {
 				theme.Installed = true
-				if themeConf, err := bazaar.ParsePackageJSON("theme", theme.Name); err == nil {
+				if themeConf, err := bazaar.ParsePackageJSON("themes", theme.Name); err == nil {
 					theme.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+theme.Version)
 				}
 				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
@@ -350,7 +351,7 @@ func BazaarThemes(keyword string) (ret []*bazaar.Package) {
 }
 
 func InstalledThemes(keyword string) (ret []*bazaar.Package) {
-	ret = bazaar.InstalledPackages("theme", "")
+	ret = bazaar.InstalledPackages("themes", "")
 	ret = filterPackages(ret, keyword)
 	for _, theme := range ret {
 		theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
@@ -361,7 +362,7 @@ func InstalledThemes(keyword string) (ret []*bazaar.Package) {
 func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bool) error {
 	closeThemeWatchers()
 
-	if err := InstallBazaarPackage("theme", repoURL, repoHash, themeName); err != nil {
+	if err := InstallBazaarPackage("themes", repoURL, repoHash, themeName); err != nil {
 		return err
 	}
 
@@ -385,7 +386,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 func UninstallBazaarTheme(themeName string) error {
 	closeThemeWatchers()
 
-	if err := UninstallBazaarPackage("theme", themeName); err != nil {
+	if err := UninstallBazaarPackage("themes", themeName); err != nil {
 		return err
 	}
 
@@ -394,7 +395,7 @@ func UninstallBazaarTheme(themeName string) error {
 }
 
 func InstalledTemplates(keyword string) (templates []*bazaar.Package) {
-	templates = bazaar.InstalledPackages("template", "")
+	templates = bazaar.InstalledPackages("templates", "")
 	templates = filterPackages(templates, keyword)
 	return
 }

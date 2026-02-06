@@ -46,13 +46,13 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 			continue
 		}
 
-		plugin, parseErr := ParsePackageJSON("plugin", dirName)
+		plugin, parseErr := ParsePackageJSON("plugins", dirName)
 		if nil != parseErr || nil == plugin {
 			return
 		}
 
 		found = true
-		displayName = GetPreferredName(plugin)
+		displayName = GetPreferredLocaleString(plugin.DisplayName, plugin.Name)
 		incompatible = isIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
 		disallowInstall = isBelowRequiredAppVersion(plugin)

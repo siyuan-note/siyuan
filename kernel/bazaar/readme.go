@@ -17,11 +17,13 @@
 package bazaar
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -29,116 +31,78 @@ import (
 	"golang.org/x/text/transform"
 )
 
-// GetOnlinePackageREADME 获取集市包的在线 README
-func GetOnlinePackageREADME(repoURL, repoHash, pkgType string) (ret string) {
+// getReadmeFileCandidates 根据包的 readme 配置返回去重的按优先级排序的 README 候选文件名列表：当前语言首选、default、README.md
+func getReadmeFileCandidates(readme LocaleStrings) []string {
+	preferred := GetPreferredLocaleString(readme, "README.md")
+	defaultName := "README.md"
+	if v := strings.TrimSpace(readme["default"]); v != "" {
+		defaultName = v
+	}
+	return gulu.Str.RemoveDuplicatedElem([]string{preferred, defaultName, "README.md"})
+}
+
+// GetPackageOnlineREADME 获取集市包的在线 README
+func GetPackageOnlineREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
-
-	var stageIndex *StageIndex
-	if val, found := cachedStageIndex.Get(pkgType); found {
-		stageIndex = val.(*StageIndex)
-	}
-	if nil == stageIndex {
-		return
-	}
-
 	url := strings.TrimPrefix(repoURLHash, "https://github.com/")
-	var repo *StageRepo
-	for _, r := range stageIndex.Repos {
-		if r.URL == url {
-			repo = r
-			break
-		}
-	}
+	repo := getStageRepoByURL(ctx, pkgType, url)
 	if nil == repo || nil == repo.Package {
 		return
 	}
 
-	readme := getPreferredReadme(repo.Package.Readme)
-
-	data, err := downloadBazaarFile(repoURLHash+"/"+readme, false)
-	if err != nil {
-		ret = fmt.Sprintf("Load bazaar package's preferred README(%s) failed: %s", readme, err.Error())
-		// 回退到 Default README
-		var defaultReadme string
-		if len(repo.Package.Readme) > 0 {
-			defaultReadme = repo.Package.Readme["default"]
+	candidates := getReadmeFileCandidates(repo.Package.Readme)
+	var data []byte
+	var loadErr error
+	var errMsgs []string
+	for _, name := range candidates {
+		data, loadErr = downloadBazaarFile(repoURLHash+"/"+name, false)
+		if loadErr == nil {
+			break
 		}
-		if "" == strings.TrimSpace(defaultReadme) {
-			defaultReadme = "README.md"
-		}
-		if readme != defaultReadme {
-			data, err = downloadBazaarFile(repoURLHash+"/"+defaultReadme, false)
-			if err != nil {
-				ret += fmt.Sprintf("<br>Load bazaar package's default README(%s) failed: %s", defaultReadme, err.Error())
-			}
-		}
-		// 回退到 README.md
-		if err != nil && readme != "README.md" && defaultReadme != "README.md" {
-			data, err = downloadBazaarFile(repoURLHash+"/README.md", false)
-			if err != nil {
-				ret += fmt.Sprintf("<br>Load bazaar package's README.md failed: %s", err.Error())
-				return
-			}
-		} else if err != nil {
-			return
-		}
+		errMsgs = append(errMsgs, fmt.Sprintf("Load bazaar package's README(%s) failed: %s", name, loadErr.Error()))
 	}
-
-	if 2 < len(data) {
-		if 255 == data[0] && 254 == data[1] {
-			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.LittleEndian, textUnicode.ExpectBOM).NewDecoder(), data)
-		} else if 254 == data[0] && 255 == data[1] {
-			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.ExpectBOM).NewDecoder(), data)
-		}
-	}
-
-	ret, err = renderOnlineREADME(repoURL, data)
-	return
-}
-
-// getLocalPackageREADME 获取集市包的本地 README
-func getLocalPackageREADME(installPath, basePath string, readme LocaleStrings) (ret string) {
-	readmeFilename := getPreferredReadme(readme)
-	readmeData, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-	if nil == readErr {
-		ret, _ = renderLocalREADME(basePath, readmeData)
+	if loadErr != nil {
+		ret = strings.Join(errMsgs, "<br>")
 		return
 	}
 
-	logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
-	ret = fmt.Sprintf("File %s not found", readmeFilename)
-	// 回退到 Default README
-	var defaultReadme string
-	if len(readme) > 0 {
-		defaultReadme = strings.TrimSpace(readme["default"])
+	// 解码 UTF-16 BOM
+	if 2 < len(data) {
+		var decoded []byte
+		var err error
+		if 0xFF == data[0] && 0xFE == data[1] {
+			decoded, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.LittleEndian, textUnicode.ExpectBOM).NewDecoder(), data)
+		} else if 0xFE == data[0] && 0xFF == data[1] {
+			decoded, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.ExpectBOM).NewDecoder(), data)
+		}
+		if decoded != nil && err == nil {
+			data = decoded
+		}
 	}
-	if "" == defaultReadme {
-		defaultReadme = "README.md"
-	}
-	if readmeFilename != defaultReadme {
-		readmeData, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
-		if nil == readErr {
-			ret, _ = renderLocalREADME(basePath, readmeData)
+
+	ret = renderOnlineREADME(repoURL, data)
+	return
+}
+
+// getPackageLocalREADME 获取集市包的本地 README
+func getPackageLocalREADME(installPath, basePath string, readme LocaleStrings) (ret string) {
+	candidates := getReadmeFileCandidates(readme)
+	var errMsgs []string
+	for _, name := range candidates {
+		readmeData, readErr := os.ReadFile(filepath.Join(installPath, name))
+		if readErr == nil {
+			ret = renderLocalREADME(basePath, readmeData)
 			return
 		}
-		logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
-		ret += fmt.Sprintf("<br>File %s not found", defaultReadme)
+		logging.LogWarnf("read installed %s failed: %s", name, readErr)
+		errMsgs = append(errMsgs, fmt.Sprintf("File [%s] not found", name))
 	}
-	// 回退到 README.md
-	if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
-		readmeData, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
-		if nil == readErr {
-			ret, _ = renderLocalREADME(basePath, readmeData)
-			return
-		}
-		logging.LogWarnf("read installed README.md failed: %s", readErr)
-		ret += "<br>File README.md not found"
-	}
+	ret = strings.Join(errMsgs, "<br>")
 	return
 }
 
 // renderOnlineREADME 渲染在线 README Markdown 为 HTML
-func renderOnlineREADME(repoURL string, mdData []byte) (ret string, err error) {
+func renderOnlineREADME(repoURL string, mdData []byte) (ret string) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)
@@ -150,7 +114,7 @@ func renderOnlineREADME(repoURL string, mdData []byte) (ret string, err error) {
 }
 
 // renderLocalREADME 渲染本地 README Markdown 为 HTML
-func renderLocalREADME(basePath string, mdData []byte) (ret string, err error) {
+func renderLocalREADME(basePath string, mdData []byte) (ret string) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)

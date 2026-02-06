@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/go-humanize"
@@ -92,7 +93,7 @@ type Package struct {
 }
 
 type StageRepo struct {
-	URL         string `json:"url"`
+	URL         string `json:"url"` // owner/repo@hash 形式
 	Updated     string `json:"updated"`
 	Stars       int    `json:"stars"`
 	OpenIssues  int    `json:"openIssues"`
@@ -105,21 +106,24 @@ type StageRepo struct {
 
 type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
+
+	reposByURL map[string]*StageRepo `json:"-"` // 不序列化，首次按 URL 查找时懒构建
+	reposOnce  sync.Once
 }
 
 // ParsePackageJSON 解析包 JSON 文件的通用函数
 func ParsePackageJSON(pkgType, dirName string) (ret *Package, err error) {
 	var filePath string
 	switch pkgType {
-	case "plugin":
+	case "plugins":
 		filePath = filepath.Join(util.DataDir, "plugins", dirName, "plugin.json")
-	case "theme":
+	case "themes":
 		filePath = filepath.Join(util.ThemesPath, dirName, "theme.json")
-	case "icon":
+	case "icons":
 		filePath = filepath.Join(util.IconsPath, dirName, "icon.json")
-	case "template":
+	case "templates":
 		filePath = filepath.Join(util.DataDir, "templates", dirName, "template.json")
-	case "widget":
+	case "widgets":
 		filePath = filepath.Join(util.DataDir, "widgets", dirName, "widget.json")
 	default:
 		err = errors.New("invalid package type: " + pkgType)
@@ -144,7 +148,7 @@ func ParsePackageJSON(pkgType, dirName string) (ret *Package, err error) {
 	return
 }
 
-// Packages 返回指定类型的集市包列表（plugin 类型需要传递 frontend 参数）
+// Packages 返回指定类型的集市包列表（plugins 类型需要传递 frontend 参数）
 func Packages(pkgType string, frontend string) (packages []*Package) {
 	result := getStageAndBazaar(pkgType)
 	packages = make([]*Package, 0, len(result.StageIndex.Repos))
@@ -198,15 +202,15 @@ func buildPackageFromStageRepo(repo *StageRepo, bazaarStats map[string]*bazaarSt
 	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
 	pkg.HUpdated = formatUpdated(pkg.Updated)
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
-	pkg.PreferredName = GetPreferredName(&pkg)
-	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
+	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
 	disallow := isBelowRequiredAppVersion(&pkg)
 	pkg.DisallowInstall = disallow
 	pkg.DisallowUpdate = disallow
 
 	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
 
-	if "plugin" == pkgType {
+	if "plugins" == pkgType {
 		incompatible := isIncompatiblePlugin(&pkg, frontend)
 		pkg.Incompatible = &incompatible
 	}

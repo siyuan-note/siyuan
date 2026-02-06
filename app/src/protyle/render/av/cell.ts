@@ -417,9 +417,9 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     /// #if MOBILE
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
     if (contentElement && cellElement.getAttribute("data-dtype") !== "checkbox") {
-        const keyboardToolbarHeight = document.querySelector("#keyboardToolbar").clientHeight;
-        if (cellRect.bottom > keyboardToolbarHeight) {
-            contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - keyboardToolbarHeight);
+        const keyboardToolbarTop = document.querySelector("#keyboardToolbar").getBoundingClientRect().top || (window.innerHeight - 48);
+        if (cellRect.bottom > keyboardToolbarTop) {
+            contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - keyboardToolbarTop);
         } else if (cellRect.top < 110) {
             contentElement.scrollTop -= 110 - cellRect.top;
         }

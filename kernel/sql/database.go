@@ -649,16 +649,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			title = gulu.Str.FromBytes(titleNode.Tokens)
 		}
 
-		var hash string
-		var hashErr error
-		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			if !gulu.File.IsDir(lp) {
-				hash, hashErr = util.GetEtag(lp)
-				if nil != hashErr {
-					logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-				}
-			}
-		}
+		hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
 		name, _ := util.LastID(dest)
 		asset := &Asset{
 			ID:      ast.NewNodeID(),
@@ -700,16 +691,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 					title = gulu.Str.FromBytes(titleNode.Tokens)
 				}
 
-				var hash string
-				var hashErr error
-				if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-					if !gulu.File.IsDir(lp) {
-						hash, hashErr = util.GetEtag(lp)
-						if nil != hashErr {
-							logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-						}
-					}
-				}
+				hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
 				name, _ := util.LastID(dest)
 				asset := &Asset{
 					ID:      ast.NewNodeID(),
@@ -790,15 +772,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		dest := string(src)
-		var hash string
-		var hashErr error
-		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			hash, hashErr = util.GetEtag(lp)
-			if nil != hashErr {
-				logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-			}
-		}
-
+		hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
 		parentBlock := treenode.ParentBlock(n)
 		if ast.NodeInlineHTML != n.Type {
 			parentBlock = n

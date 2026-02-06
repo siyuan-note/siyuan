@@ -34,25 +34,45 @@ type AssetHash struct {
 }
 
 var (
-	assetHashCache = map[string]*AssetHash{}
-	assetHashLock  = sync.Mutex{}
+	assetHashCache     = map[string]*AssetHash{}
+	assetPathHashCache = map[string]*AssetHash{}
+	assetHashLock      = sync.Mutex{}
 )
 
 func RemoveAssetHash(hash string) {
 	assetHashLock.Lock()
 	defer assetHashLock.Unlock()
 
-	delete(assetHashCache, hash)
+	asset := assetHashCache[hash]
+	if nil != asset {
+		delete(assetHashCache, hash)
+		delete(assetPathHashCache, asset.Path)
+	}
 }
 
 func SetAssetHash(hash, path string) {
 	assetHashLock.Lock()
 	defer assetHashLock.Unlock()
 
-	assetHashCache[hash] = &AssetHash{
-		Hash: hash,
-		Path: path,
+	assetHashCache[hash] = &AssetHash{Hash: hash, Path: path}
+	assetPathHashCache[path] = &AssetHash{Hash: hash, Path: path}
+}
+
+func GetAssetHashByPath(path string) *AssetHash {
+	assetHashLock.Lock()
+	defer assetHashLock.Unlock()
+
+	asset, exists := assetPathHashCache[path]
+	if exists {
+		if filelock.IsExist(filepath.Join(util.DataDir, asset.Path)) {
+			return asset
+		}
+
+		delete(assetHashCache, asset.Hash)
+		delete(assetPathHashCache, path)
+		return nil
 	}
+	return nil
 }
 
 func GetAssetHash(hash string) *AssetHash {
@@ -66,6 +86,7 @@ func GetAssetHash(hash string) *AssetHash {
 			}
 
 			delete(assetHashCache, hash)
+			delete(assetPathHashCache, a.Path)
 			return nil
 		}
 	}

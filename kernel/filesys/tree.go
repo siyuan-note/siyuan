@@ -32,6 +32,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	mmap "github.com/edsrzf/mmap-go"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/dataparser"
@@ -228,12 +229,10 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		return
 	}
 
-	size = uint64(len(data))
-	if err = filelock.WriteFile(filePath, data); err != nil {
-		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
-		err = errors.New(msg)
-		return
+	if err = writeTreeByMmap(filePath, data); nil != err {
+		if err = writeTreeByWriteFile(filePath, data); nil != err {
+			return
+		}
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
@@ -243,6 +242,50 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 
 	cache.SetTreeData(tree.ID, data)
 	afterWriteTree(tree)
+	size = uint64(len(data))
+	return
+}
+
+func writeTreeByWriteFile(filePath string, data []byte) (err error) {
+	if err = filelock.WriteFile(filePath, data); err != nil {
+		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
+}
+
+func writeTreeByMmap(filePath string, data []byte) (err error) {
+	f, err := filelock.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+	defer filelock.CloseFile(f)
+
+	if err = f.Truncate(int64(len(data))); err != nil {
+		msg := fmt.Sprintf("truncate file [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	m, err := mmap.Map(f, mmap.RDWR, 0)
+	if err != nil {
+		msg := fmt.Sprintf("map file [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	defer m.Unmap()
+
+	copy(m, data)
+	if err = m.Flush(); err != nil {
+		msg := fmt.Sprintf("flush data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
 	return
 }
 

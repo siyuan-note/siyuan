@@ -93,6 +93,13 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 
 	removeIndexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
+
+	hash, err := util.GetEtag(assetAbsPath)
+	if nil != err {
+		logging.LogErrorf("calc asset [%s] hash failed: %s", assetAbsPath, err)
+	} else {
+		cache.RemoveAssetHash(hash)
+	}
 }
 
 func HandleAssetsChangeEvent(assetAbsPath string) {
@@ -106,6 +113,15 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 
 	indexAssetContent(assetAbsPath)
 	removeAssetThumbnail(assetAbsPath)
+
+	hash, err := util.GetEtag(assetAbsPath)
+	if nil != err {
+		logging.LogErrorf("calc asset [%s] hash failed: %s", assetAbsPath, err)
+	} else {
+		p := strings.TrimPrefix(assetAbsPath, util.DataDir)
+		p = filepath.ToSlash(p)
+		cache.SetAssetHash(hash, p)
+	}
 }
 
 func removeAssetThumbnail(assetAbsPath string) {

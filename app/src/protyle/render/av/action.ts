@@ -38,6 +38,7 @@ import {escapeHtml} from "../../../util/escape";
 import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
+import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
@@ -327,7 +328,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
             }
-            searchElement.focus();
+            callMobileAppShowKeyboard();
+            setTimeout(() => {
+                searchElement.focus();
+            }, Constants.TIMEOUT_TRANSITION);
             event.preventDefault();
             event.stopPropagation();
             return true;

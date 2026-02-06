@@ -37,6 +37,7 @@ import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {updateControlAlt} from "../protyle/util/hotKey";
 import {nbsp2space} from "../protyle/util/normalizeText";
+import {callMobileAppShowKeyboard} from "./util/mobileAppUtil";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -105,11 +106,7 @@ class App {
                 editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
             }
             if (editElement) {
-                if (window.JSAndroid && window.JSAndroid.showKeyboard) {
-                    window.JSAndroid.showKeyboard();
-                } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
-                    window.JSHarmony.showKeyboard();
-                }
+                callMobileAppShowKeyboard();
             }
         });
         window.addEventListener("beforeunload", () => {

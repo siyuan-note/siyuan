@@ -14,6 +14,7 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
+import {callMobileAppShowKeyboard} from "./mobileAppUtil";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -609,11 +610,7 @@ export const initKeyboardToolbar = () => {
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
                 hideKeyboardToolbarUtil();
-                if (window.JSAndroid && window.JSAndroid.showKeyboard) {
-                    window.JSAndroid.showKeyboard();
-                } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
-                    window.JSHarmony.showKeyboard();
-                }
+                callMobileAppShowKeyboard();
                 setTimeout(() => focusByRange(range), 256);
             } else {
                 activeBlur();
@@ -696,11 +693,7 @@ export const initKeyboardToolbar = () => {
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil();
-                if (window.JSAndroid && window.JSAndroid.showKeyboard) {
-                    window.JSAndroid.showKeyboard();
-                } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
-                    window.JSHarmony.showKeyboard();
-                }
+                callMobileAppShowKeyboard();
                 setTimeout(() => focusByRange(range), 256);
             } else {
                 (document.activeElement as HTMLElement)?.blur();

@@ -79,16 +79,7 @@ func containTheme(name string, themes []*conf.AppearanceTheme) bool {
 	return false
 }
 
-var themeWatchers = sync.Map{} // [string]*fsnotify.Watcher{}
-
-func closeThemeWatchers() {
-	themeWatchers.Range(func(key, value interface{}) bool {
-		if err := value.(*fsnotify.Watcher).Close(); err != nil {
-			logging.LogErrorf("close file watcher failed: %s", err)
-		}
-		return true
-	})
-}
+var themeWatchers = sync.Map{} // [string]*fsnotify.Watcher
 
 func unloadThemes() {
 	if !util.IsPathRegularDirOrSymlinkDir(util.ThemesPath) {
@@ -233,28 +224,30 @@ func LoadIcons() {
 func unwatchTheme(folder string) {
 	val, _ := themeWatchers.Load(folder)
 	if nil != val {
-		themeWatcher := val.(*fsnotify.Watcher)
-		themeWatcher.Close()
+		val.(*fsnotify.Watcher).Close()
+		themeWatchers.Delete(folder)
 	}
 }
 
 func watchTheme(folder string) {
-	val, _ := themeWatchers.Load(folder)
-	var themeWatcher *fsnotify.Watcher
-	if nil != val {
-		themeWatcher = val.(*fsnotify.Watcher)
-		themeWatcher.Close()
+	unwatchTheme(folder)
+
+	themeWatcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		logging.LogErrorf("add theme file watcher for folder [%s] failed: %s", folder, err)
+		return
 	}
 
-	var err error
-	if themeWatcher, err = fsnotify.NewWatcher(); err != nil {
-		logging.LogErrorf("add theme file watcher for folder [%s] failed: %s", folder, err)
+	if err = themeWatcher.Add(folder); err != nil {
+		logging.LogErrorf("add theme files watcher for folder [%s] failed: %s", folder, err)
+		themeWatcher.Close()
 		return
 	}
 	themeWatchers.Store(folder, themeWatcher)
 
-	done := make(chan bool)
 	go func() {
+		defer logging.Recover()
+
 		for {
 			select {
 			case event, ok := <-themeWatcher.Events:
@@ -284,12 +277,16 @@ func watchTheme(folder string) {
 			}
 		}
 	}()
+}
 
-	//logging.LogInfof("add file watcher [%s]", folder)
-	if err := themeWatcher.Add(folder); err != nil {
-		logging.LogErrorf("add theme files watcher for folder [%s] failed: %s", folder, err)
-	}
-	<-done
+func closeThemeWatchers() {
+	themeWatchers.Range(func(folder, value interface{}) bool {
+		if err := value.(*fsnotify.Watcher).Close(); err != nil {
+			logging.LogErrorf("close file watcher failed: %s", err)
+		}
+		themeWatchers.Delete(folder)
+		return true
+	})
 }
 
 func isCurrentUseTheme(themePath string) string {

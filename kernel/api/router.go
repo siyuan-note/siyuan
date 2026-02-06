@@ -410,7 +410,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/getInstalledTheme", model.CheckAuth, getInstalledTheme)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarTheme", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, installBazaarTheme)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarTheme", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, uninstallBazaarTheme)
-	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREAME", model.CheckAuth, getBazaarPackageREAME)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREADME", model.CheckAuth, getBazaarPackageREADME)
 	ginServer.Handle("POST", "/api/bazaar/getUpdatedPackage", model.CheckAuth, getUpdatedPackage)
 	ginServer.Handle("POST", "/api/bazaar/batchUpdatePackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchUpdatePackage)
 

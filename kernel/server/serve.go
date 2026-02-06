@@ -566,22 +566,101 @@ func serveAssets(ginServer *gin.Engine) {
 			}
 		}
 
-		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
+		if serveThumbnail(context, p) {
+			// 如果请求缩略图服务成功则返回
+			return
+		}
+
+    if serveSVG(context, p) {
+      // 如果 SVG 处理成功则返回
+			return
+    }
+
+		if serveHeifConversion(context, p) {
+			// 如果 HEIF 转换服务成功则返回
 			return
 		}
 
 		// 返回原始文件
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 
 	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 }
 
+// isHeifSupported 检测客户端是否支持 HEIF 格式
+func isHeifSupported(c *gin.Context) bool {
+	userAgentStr := c.GetHeader("User-Agent")
+	if userAgentStr == "" {
+		return false
+	}
+
+	// iOS 应用的 WKWebView 支持 HEIF
+	if strings.Contains(userAgentStr, "SiYuan/") {
+		if strings.Contains(userAgentStr, "iOS") {
+			return true
+		}
+		// 其他移动端不支持 HEIF
+		return false
+	}
+
+	// 排除 Electron
+	if strings.Contains(userAgentStr, "Electron") {
+		return false
+	}
+
+	// Safari 浏览器支持 HEIF
+	ua := useragent.New(userAgentStr)
+	name, _ := ua.Browser()
+	return name == "Safari"
+}
+
+// serveHeifConversion 处理 HEIF 转换请求
+func serveHeifConversion(context *gin.Context, assetAbsPath string) bool {
+	if !util.IsHeifImage(assetAbsPath) {
+		return false
+	}
+
+	if isHeifSupported(context) {
+		// 客户端原生支持 HEIF，直接返回原始文件
+		return false
+	}
+
+	hash := model.GetFilenameHash(assetAbsPath)
+	cachePath := filepath.Join(util.TempDir, "assets-cache", "heif", hash+".jpg")
+
+	// 转换 HEIF 为 JPEG，保持原始尺寸
+	err := model.ConvertHeifToJpeg(assetAbsPath, cachePath, hash, 85)
+	if err != nil {
+		logging.LogErrorf("convert HEIF to JPEG failed [%s]: %s", assetAbsPath, err)
+		// 转换失败时返回原始文件
+		return false
+	}
+
+	// 返回转换后的文件
+	http.ServeFile(context.Writer, context.Request, cachePath)
+	return true
+}
+
+// serveHeifThumbnail 处理 HEIF 缩略图请求
+func serveHeifThumbnail(context *gin.Context, assetAbsPath string) bool {
+	hash := model.GetFilenameHash(assetAbsPath)
+	thumbnailPath := filepath.Join(util.TempDir, "assets-cache", "thumb", hash+".jpg")
+
+	// 生成 HEIF 缩略图
+	err := model.GenerateHeifThumbnail(assetAbsPath, thumbnailPath, hash)
+	if err != nil {
+		logging.LogErrorf("generate HEIF thumbnail failed: %s", err)
+		return false
+	}
+
+	http.ServeFile(context.Writer, context.Request, thumbnailPath)
+	return true
+}
+                
 func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	if strings.HasSuffix(assetAbsPath, ".svg") {
 		data, err := os.ReadFile(assetAbsPath)
@@ -600,16 +679,27 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 	return false
 }
 
-func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {
-	if style := context.Query("style"); style == "thumb" && model.NeedGenerateAssetsThumbnail(assetAbsPath) { // 请求缩略图
-		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", requestPath)
-		if !gulu.File.IsExist(thumbnailPath) {
-			// 如果缩略图不存在，则生成缩略图
-			err := model.GenerateAssetsThumbnail(assetAbsPath, thumbnailPath)
-			if err != nil {
-				logging.LogErrorf("generate thumbnail failed: %s", err)
-				return false
-			}
+func serveThumbnail(context *gin.Context, assetAbsPath string) bool {
+	style := context.Query("style")
+	if style != "thumb" {
+		return false
+	}
+
+	// HEIF 图片缩略图
+	if util.IsHeifImage(assetAbsPath) && serveHeifThumbnail(context, assetAbsPath) {
+		return true
+	}
+
+	// 普通图片缩略图
+	if model.NeedGenerateAssetsThumbnail(assetAbsPath) {
+		hash := model.GetFilenameHash(assetAbsPath)
+		thumbnailPath := filepath.Join(util.TempDir, "assets-cache", "thumb", hash+filepath.Ext(assetAbsPath))
+
+		// 如果缩略图不存在，则生成缩略图
+		err := model.GenerateAssetsThumbnail(assetAbsPath, thumbnailPath)
+		if err != nil {
+			logging.LogErrorf("generate thumbnail failed [%s]: %s", assetAbsPath, err)
+			return false
 		}
 
 		http.ServeFile(context.Writer, context.Request, thumbnailPath)
@@ -623,7 +713,6 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		requestPath := context.Param("path")
 		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 }
 
@@ -976,7 +1065,6 @@ func jwtMiddleware(c *gin.Context) {
 	}
 	c.Set(model.RoleContextKey, model.RoleVisitor)
 	c.Next()
-	return
 }
 
 func serveFixedStaticFiles(ginServer *gin.Engine) {

@@ -1182,6 +1182,7 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
 	os.RemoveAll(filepath.Join(util.DataDir, "%"))                 // v3.0.6 生成的错误历史文件夹
 	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
+	os.RemoveAll(filepath.Join(util.TempDir, "thumbnails"))        // 旧版的缩略图目录
 
 	logging.LogInfof("cleared workspace temp")
 }

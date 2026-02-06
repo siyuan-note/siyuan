@@ -349,10 +349,16 @@ func IsSubPath(absPath, toCheckPath string) bool {
 	return false
 }
 
-func IsCompressibleAssetImage(p string) bool {
+// IsDirectThumbnailableImage 检查文件是否为具有直接生成缩略图能力的图片格式（PNG、JPG、JPEG）
+func IsDirectThumbnailableImage(p string) bool {
 	lowerName := strings.ToLower(p)
-	return strings.HasPrefix(lowerName, "assets/") &&
-		(strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg"))
+	return strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg")
+}
+
+// IsHeifImage 检查文件是否为 HEIF 图像格式
+func IsHeifImage(p string) bool {
+	lowerName := strings.ToLower(p)
+	return strings.HasSuffix(lowerName, ".heic") || strings.HasSuffix(lowerName, ".heif")
 }
 
 func SizeOfDirectory(path string) (size int64, err error) {

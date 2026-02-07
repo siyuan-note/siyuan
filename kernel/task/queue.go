@@ -183,7 +183,6 @@ func areArgsEqual(a, b interface{}) bool {
 	return reflect.DeepEqual(a, b)
 }
 
-
 func getCurrentTasks() (ret []*Task) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
@@ -387,7 +386,6 @@ func popAsyncTasks() (ret []*Task) {
 
 		// 判断是否应该弹出此任务
 		shouldPop := task.Async && time.Since(task.Created) > task.Delay
-
 		if shouldPop {
 			ret = append(ret, task)
 			// 不写入 taskQueue，相当于删除
@@ -405,7 +403,6 @@ func popAsyncTasks() (ret []*Task) {
 		taskQueue[i] = nil
 	}
 	taskQueue = taskQueue[:writeIdx]
-
 	return
 }
 

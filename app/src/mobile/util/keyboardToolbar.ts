@@ -609,9 +609,13 @@ export const initKeyboardToolbar = () => {
         const range = getSelection().getRangeAt(0);
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
+                if (isInHarmony() || isInAndroid()) {
+                    setTimeout(() => focusByRange(range), Constants.TIMEOUT_TRANSITION);
+                } else {
+                    focusByRange(range);
+                }
                 hideKeyboardToolbarUtil();
                 callMobileAppShowKeyboard();
-                setTimeout(() => focusByRange(range), 256);
             } else {
                 activeBlur();
             }
@@ -692,9 +696,13 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
+                if (isInHarmony() || isInAndroid()) {
+                    setTimeout(() => focusByRange(range), Constants.TIMEOUT_TRANSITION);
+                } else {
+                    focusByRange(range);
+                }
                 hideKeyboardToolbarUtil();
                 callMobileAppShowKeyboard();
-                setTimeout(() => focusByRange(range), 256);
             } else {
                 (document.activeElement as HTMLElement)?.blur();
                 buttonElement.classList.add("protyle-toolbar__item--current");

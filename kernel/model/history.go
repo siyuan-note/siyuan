@@ -770,15 +770,21 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 var assetsLatestHistoryTime = time.Now().Unix()
 
 func recentModifiedAssets() (ret []string) {
-	assets := cache.GetAssets()
-	for _, asset := range assets {
-		if asset.Updated > assetsLatestHistoryTime {
-			absPath := filepath.Join(util.DataDir, asset.Path)
-			if filelock.IsHidden(absPath) {
-				continue
-			}
-			ret = append(ret, absPath)
+	// 只获取最近修改的资源
+	recentAssets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
+		if asset.Updated <= assetsLatestHistoryTime {
+			return false
 		}
+		absPath := filepath.Join(util.DataDir, asset.Path)
+		if filelock.IsHidden(absPath) {
+			return false
+		}
+		return true
+	})
+
+	for _, asset := range recentAssets {
+		absPath := filepath.Join(util.DataDir, asset.Path)
+		ret = append(ret, absPath)
 	}
 	assetsLatestHistoryTime = time.Now().Unix()
 	return

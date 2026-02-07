@@ -65,17 +65,15 @@ func WaitFlushTx() {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
-	var printLog bool
-	var lastPrintLog bool
+	var printLog, lastPrintLog bool
 	var i int
 
 	for len(operationQueue) > 0 || flushingTx.Load() {
-		// 使用条件变量等待,避免轮询浪费 CPU
 		if i == 0 {
-			// 第一次等待时使用较短的超时,与原逻辑保持一致
+			// 第一次等待时使用较短的超时
 			dbQueueCond.Wait()
 		} else {
-			// 后续等待添加超时检测,用于打印警告日志
+			// 后续等待添加超时检测，用于打印警告日志
 			timer := time.AfterFunc(50*time.Millisecond, func() {
 				dbQueueCond.Broadcast()
 			})
@@ -93,20 +91,6 @@ func WaitFlushTx() {
 			lastPrintLog = true
 		}
 	}
-}
-
-func isWritingDatabase(d time.Duration) bool {
-	// 等待指定时间后再检查状态
-	if d > 0 {
-		time.Sleep(d)
-	}
-
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-	if 0 < len(operationQueue) || flushingTx.Load() {
-		return true
-	}
-	return false
 }
 
 func ClearQueue() {

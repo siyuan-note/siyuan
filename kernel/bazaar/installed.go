@@ -35,7 +35,8 @@ type InstalledPackageInfo struct {
 	DirName string
 }
 
-var packageInstallSizeCache = gcache.New(48*time.Hour, 6*time.Hour) // [repoURL]*int64
+// packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
+var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
 
 // InstalledPackages 获取已安装的指定类型集市包列表
 func InstalledPackages(pkgType, frontend string) (ret []*Package) {
@@ -216,6 +217,8 @@ func setPackageLocalMetadata(pkg *Package, installPath, jsonFileName, baseURLPat
 
 	// 安装信息
 	pkg.HInstallDate = info.ModTime().Format("2006-01-02")
+	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示
+	// 目前优先使用在线 stage 数据：不耗时，但可能不准确，比如本地旧版本与云端最新版本的安装大小可能不一致；其次使用本地目录大小：耗时，但准确
 	if installSize, ok := packageInstallSizeCache.Get(pkg.RepoURL); ok {
 		pkg.InstallSize = installSize.(int64)
 	} else {

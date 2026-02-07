@@ -448,7 +448,9 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	}
 	pathHitCount := map[string]int{}
 	filterByExt := 0 < len(exts)
-	for _, asset := range cache.GetAssets() {
+	matchedAssets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
+
+		// 扩展名过滤
 		if filterByExt {
 			ext := filepath.Ext(asset.HName)
 			includeExt := false
@@ -459,10 +461,11 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 				}
 			}
 			if !includeExt {
-				continue
+				return false
 			}
 		}
 
+		// 关键字匹配
 		lowerHName := strings.ToLower(asset.HName)
 		lowerPath := strings.ToLower(asset.Path)
 		var hitNameCount, hitPathCount int
@@ -485,13 +488,21 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 			}
 		}
 
+		// 只返回有匹配的资源
 		if 1 > hitNameCount+hitPathCount {
-			continue
+			return false
 		}
-		pathHitCount[asset.Path] += hitNameCount + hitPathCount
 
+		// 记录命中次数用于排序
+		pathHitCount[asset.Path] = hitNameCount + hitPathCount
+		return true
+	})
+
+	// 添加高亮
+	for _, asset := range matchedAssets {
+		hitCount := pathHitCount[asset.Path]
 		hName := asset.HName
-		if 0 < hitNameCount {
+		if hitCount > 0 {
 			_, hName = search.MarkText(asset.HName, strings.Join(keywords, search.TermSep), 64, Conf.Search.CaseSensitive)
 		}
 		ret = append(ret, &cache.Asset{

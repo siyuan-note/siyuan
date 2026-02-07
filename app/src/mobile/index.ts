@@ -120,49 +120,6 @@ class App {
             updateCardHV();
             activeBlur();
         });
-        window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
-        if (window.siyuan.mobile.size.isLandscape) {
-            window.siyuan.mobile.size.landscape = {
-                height1: window.innerHeight,
-                height2: window.innerHeight,
-            };
-        } else {
-            window.siyuan.mobile.size.portrait = {
-                height1: window.innerHeight,
-                height2: window.innerHeight,
-            };
-        }
-        window.addEventListener("resize", () => {
-            // 获取键盘高度
-            window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
-            if (window.siyuan.mobile.size.isLandscape) {
-                if (!window.siyuan.mobile.size.landscape) {
-                    window.siyuan.mobile.size.landscape = {
-                        height1: window.innerHeight,
-                        height2: window.innerHeight,
-                    };
-                }
-                if (window.innerHeight < window.siyuan.mobile.size.landscape.height1) {
-                    window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
-                }
-                if (window.innerHeight > window.siyuan.mobile.size.landscape.height1) {
-                    window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
-                }
-            } else {
-                if (!window.siyuan.mobile.size.portrait) {
-                    window.siyuan.mobile.size.portrait = {
-                        height1: window.innerHeight,
-                        height2: window.innerHeight,
-                    };
-                }
-                if (window.innerHeight < window.siyuan.mobile.size.portrait.height1) {
-                    window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
-                }
-                if (window.innerHeight > window.siyuan.mobile.size.portrait.height1) {
-                    window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
-                }
-            }
-        });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");

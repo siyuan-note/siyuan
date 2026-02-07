@@ -348,6 +348,11 @@ export const isInHarmony = () => {
     return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 };
 
+export const isInEdge = () => {
+    const ua = navigator.userAgent;
+    return ua.indexOf("EdgA/") > -1 || ua.indexOf("Edge/") > -1;
+};
+
 export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
     if (hotkey) {
         return split + updateHotkeyTip(hotkey);

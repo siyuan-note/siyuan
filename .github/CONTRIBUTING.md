@@ -7,17 +7,17 @@
 
 ## NPM dependencies
 
-Install pnpm: `npm install -g pnpm@10.28.0`
+Install pnpm: `npm install -g pnpm@10.28.2`
 
 <details>
 <summary>For China mainland</summary>
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@39.2.7 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@39.5.1 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@39.2.7 -D`
+  * `pnpm install electron@39.5.1 -D`
 
 NPM mirror:
 
@@ -27,7 +27,7 @@ NPM mirror:
 
 Enter the app folder and execute:
 
-* `pnpm install electron@39.2.7 -D`
+* `pnpm install electron@39.5.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 
@@ -62,8 +62,29 @@ Note: In the development environment, the kernel process will not be automatical
 
 ### Harmony
 
-Only support compilation under Linux, need to install Harmony SDK, and need to modify Go source code, please refer to https://github.com/siyuan-note/siyuan/issues/13184
+Only support compilation under Linux, need to install Harmony SDK, and need to modify Go source code.
 
 * `cd kernel/harmony`
 * `./build.sh` (`./build-win.sh` for Windows Emulator)
 * https://github.com/siyuan-note/siyuan-harmony
+
+Modify Go source code:
+
+1. go/src/runtime/vim tls_arm64.s
+
+   Change the ending `DATA runtime·tls_g+0(SB)/8, $16` to `DATA runtime·tls_g+0(SB)/8, $-144`
+
+2. go/src/runtime/cgo/gcc_android.c
+
+   Clear the inittls function
+
+   ```c
+   inittls(void **tlsg, void **tlsbase)
+   {
+     return;
+   }
+   ```
+3. go/src/net/cgo_resold.go
+   `C.size_t(len(b))` to `C.socklen_t(len(b))`
+
+For other details, please refer to https://github.com/siyuan-note/siyuan/issues/13184

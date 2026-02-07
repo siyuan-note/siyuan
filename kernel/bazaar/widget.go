@@ -21,11 +21,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/88250/go-humanize"
-	ants "github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -34,100 +31,67 @@ type Widget struct {
 	*Package
 }
 
+// Widgets 返回集市挂件列表
 func Widgets() (widgets []*Widget) {
 	widgets = []*Widget{}
+	result := getStageAndBazaar("widgets")
 
-	isOnline := isBazzarOnline()
-	if !isOnline {
+	if !result.Online {
+		return
+	}
+	if result.StageErr != nil {
+		return
+	}
+	if 1 > len(result.BazaarIndex) {
 		return
 	}
 
-	stageIndex, err := getStageIndex("widgets")
-	if err != nil {
-		return
+	for _, repo := range result.StageIndex.Repos {
+		if nil == repo.Package {
+			continue
+		}
+		widget := buildWidgetFromStageRepo(repo, result.BazaarIndex)
+		if nil != widget {
+			widgets = append(widgets, widget)
+		}
 	}
-	bazaarIndex := getBazaarIndex()
-	if 1 > len(bazaarIndex) {
-		return
-	}
-
-	requestFailed := false
-	waitGroup := &sync.WaitGroup{}
-	lock := &sync.Mutex{}
-	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
-		defer waitGroup.Done()
-
-		repo := arg.(*StageRepo)
-		repoURL := repo.URL
-
-		if pkg, found := packageCache.Get(repoURL); found {
-			lock.Lock()
-			widgets = append(widgets, pkg.(*Widget))
-			lock.Unlock()
-			return
-		}
-
-		if requestFailed {
-			return
-		}
-
-		widget := &Widget{}
-		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/widget.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(widget).Get(innerU)
-		if nil != innerErr {
-			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
-			requestFailed = true
-			return
-		}
-		if 200 != innerResp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
-			requestFailed = true
-			return
-		}
-
-		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
-		widget.DisallowUpdate = disallowInstallBazaarPackage(widget.Package)
-		widget.UpdateRequiredMinAppVer = widget.MinAppVersion
-
-		widget.URL = strings.TrimSuffix(widget.URL, "/")
-		repoURLHash := strings.Split(repoURL, "@")
-		widget.RepoURL = "https://github.com/" + repoURLHash[0]
-		widget.RepoHash = repoURLHash[1]
-		widget.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
-		widget.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
-		widget.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		widget.Funding = repo.Package.Funding
-		widget.PreferredFunding = getPreferredFunding(widget.Funding)
-		widget.PreferredName = GetPreferredName(widget.Package)
-		widget.PreferredDesc = getPreferredDesc(widget.Description)
-		widget.Updated = repo.Updated
-		widget.Stars = repo.Stars
-		widget.OpenIssues = repo.OpenIssues
-		widget.Size = repo.Size
-		widget.HSize = humanize.BytesCustomCeil(uint64(widget.Size), 2)
-		widget.InstallSize = repo.InstallSize
-		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
-		packageInstallSizeCache.SetDefault(widget.RepoURL, widget.InstallSize)
-		widget.HUpdated = formatUpdated(widget.Updated)
-		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
-		if nil != pkg {
-			widget.Downloads = pkg.Downloads
-		}
-		lock.Lock()
-		widgets = append(widgets, widget)
-		lock.Unlock()
-
-		packageCache.SetDefault(repoURL, widget)
-	})
-	for _, repo := range stageIndex.Repos {
-		waitGroup.Add(1)
-		p.Invoke(repo)
-	}
-	waitGroup.Wait()
-	p.Release()
 
 	sort.Slice(widgets, func(i, j int) bool { return widgets[i].Updated > widgets[j].Updated })
 	return
+}
+
+// buildWidgetFromStageRepo 使用 stage 内嵌的 package 构建 *Widget，不发起 HTTP 请求。
+func buildWidgetFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage) *Widget {
+	pkg := *repo.Package
+	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
+	repoURLHash := strings.Split(repo.URL, "@")
+	if 2 != len(repoURLHash) {
+		return nil
+	}
+	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
+	pkg.RepoHash = repoURLHash[1]
+	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
+	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
+	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
+	pkg.Updated = repo.Updated
+	pkg.Stars = repo.Stars
+	pkg.OpenIssues = repo.OpenIssues
+	pkg.Size = repo.Size
+	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
+	pkg.InstallSize = repo.InstallSize
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+	pkg.HUpdated = formatUpdated(pkg.Updated)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+	pkg.PreferredName = GetPreferredName(&pkg)
+	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
+	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
+	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
+	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
+		pkg.Downloads = bp.Downloads
+	}
+	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
+	return &Widget{Package: &pkg}
 }
 
 func InstalledWidgets() (ret []*Widget) {
@@ -157,15 +121,16 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 
+		widget.RepoURL = widget.URL
 		widget.DisallowInstall = disallowInstallBazaarPackage(widget.Package)
 		if bazaarPkg := getBazaarWidget(widget.Name, bazaarWidgets); nil != bazaarPkg {
 			widget.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			widget.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			widget.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.DataDir, "widgets", dirName)
 		widget.Installed = true
-		widget.RepoURL = widget.URL
 		widget.PreviewURL = "/widgets/" + dirName + "/preview.png"
 		widget.PreviewURLThumb = "/widgets/" + dirName + "/preview.png"
 		widget.IconURL = "/widgets/" + dirName + "/icon.png"

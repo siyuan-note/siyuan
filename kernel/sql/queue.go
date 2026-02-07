@@ -95,6 +95,9 @@ func ClearQueue() {
 var flushingTx = atomic.Bool{}
 
 func FlushQueue() {
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+
 	ops := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {

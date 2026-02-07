@@ -120,6 +120,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if plugin.Outdated {
 				plugins = append(plugins, plugin)
 			}
+			plugin.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
 		}
 	}()
 
@@ -130,6 +131,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if widget.Outdated {
 				widgets = append(widgets, widget)
 			}
+			widget.PreferredReadme = ""
 		}
 	}()
 
@@ -140,6 +142,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if icon.Outdated {
 				icons = append(icons, icon)
 			}
+			icon.PreferredReadme = ""
 		}
 	}()
 
@@ -150,6 +153,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if theme.Outdated {
 				themes = append(themes, theme)
 			}
+			theme.PreferredReadme = ""
 		}
 	}()
 
@@ -160,6 +164,7 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 			if template.Outdated {
 				templates = append(templates, template)
 			}
+			template.PreferredReadme = ""
 		}
 	}()
 
@@ -209,8 +214,11 @@ func BazaarPlugins(frontend, keyword string) (plugins []*bazaar.Plugin) {
 }
 
 func filterPlugins(plugins []*bazaar.Plugin, keyword string) (ret []*bazaar.Plugin) {
-	ret = []*bazaar.Plugin{}
 	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return plugins
+	}
+	ret = []*bazaar.Plugin{}
 	for _, plugin := range plugins {
 		if matchPackage(keywords, plugin.Package) {
 			ret = append(ret, plugin)
@@ -280,8 +288,11 @@ func BazaarWidgets(keyword string) (widgets []*bazaar.Widget) {
 }
 
 func filterWidgets(widgets []*bazaar.Widget, keyword string) (ret []*bazaar.Widget) {
-	ret = []*bazaar.Widget{}
 	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return widgets
+	}
+	ret = []*bazaar.Widget{}
 	for _, w := range widgets {
 		if matchPackage(keywords, w.Package) {
 			ret = append(ret, w)
@@ -332,8 +343,11 @@ func BazaarIcons(keyword string) (icons []*bazaar.Icon) {
 }
 
 func filterIcons(icons []*bazaar.Icon, keyword string) (ret []*bazaar.Icon) {
-	ret = []*bazaar.Icon{}
 	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return icons
+	}
+	ret = []*bazaar.Icon{}
 	for _, i := range icons {
 		if matchPackage(keywords, i.Package) {
 			ret = append(ret, i)
@@ -395,8 +409,11 @@ func BazaarThemes(keyword string) (ret []*bazaar.Theme) {
 }
 
 func filterThemes(themes []*bazaar.Theme, keyword string) (ret []*bazaar.Theme) {
-	ret = []*bazaar.Theme{}
 	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return themes
+	}
+	ret = []*bazaar.Theme{}
 	for _, t := range themes {
 		if matchPackage(keywords, t.Package) {
 			ret = append(ret, t)
@@ -470,8 +487,11 @@ func BazaarTemplates(keyword string) (templates []*bazaar.Template) {
 }
 
 func filterTemplates(templates []*bazaar.Template, keyword string) (ret []*bazaar.Template) {
-	ret = []*bazaar.Template{}
 	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return templates
+	}
+	ret = []*bazaar.Template{}
 	for _, t := range templates {
 		if matchPackage(keywords, t.Package) {
 			ret = append(ret, t)
@@ -509,34 +529,41 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 		return true
 	}
 
-	if nil == pkg || nil == pkg.DisplayName || nil == pkg.Description {
+	if nil == pkg {
 		return false
 	}
 
-	hits := map[string]bool{}
-	for _, keyword := range keywords {
-		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
-			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||
-			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCHT), keyword) ||
-			strings.Contains(strings.ToLower(pkg.DisplayName.EnUS), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.Default), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.ZhCN), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.ZhCHT), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) ||
-			strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), keyword) ||
-			strings.Contains(strings.ToLower(pkg.Author), keyword) {
-			hits[keyword] = true
-			continue
-		}
-
-		for _, pkgKeyword := range pkg.Keywords {
-			if strings.Contains(strings.ToLower(pkgKeyword), keyword) {
-				hits[keyword] = true
-				break
-			}
+	for _, kw := range keywords {
+		if !packageContainsKeyword(pkg, kw) {
+			return false
 		}
 	}
-	return len(hits) == len(keywords)
+
+	// 全部关键词匹配
+	return true
+}
+
+func packageContainsKeyword(pkg *bazaar.Package, kw string) bool {
+	if strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), kw) ||
+		strings.Contains(strings.ToLower(pkg.Author), kw) {
+		return true
+	}
+	for _, s := range pkg.DisplayName {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Description {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Keywords {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	return false
 }
 
 func getSearchKeywords(query string) (ret []string) {

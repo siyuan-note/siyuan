@@ -38,6 +38,7 @@ import {escapeHtml} from "../../../util/escape";
 import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clear";
 import {removeCompressURL} from "../../../util/image";
+import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 
 let foldTimeout: number;
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
@@ -277,6 +278,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
+            } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
+                blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
+                blockElement.removeAttribute("data-render");
+                avRender(blockElement, protyle);
             } else {
                 transaction(protyle, [{
                     action: "setAttrViewBlockView",
@@ -298,7 +303,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 removeCompressURL((target as HTMLImageElement).getAttribute("src")),
                 blockElement.getAttribute("data-av-id"),
                 blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
+                blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
             );
             event.preventDefault();
             event.stopPropagation();
@@ -315,7 +320,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-search-icon") {
-            const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
+            const searchElement = blockElement.querySelector('div[data-type="av-search"]') as HTMLInputElement;
             searchElement.style.width = "128px";
             searchElement.style.paddingLeft = "";
             searchElement.style.paddingRight = "";
@@ -323,6 +328,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
             }
+            callMobileAppShowKeyboard();
             setTimeout(() => {
                 searchElement.focus();
             }, Constants.TIMEOUT_TRANSITION);
@@ -864,7 +870,7 @@ export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement)
     fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
         nodeElement.classList.remove("protyle-wysiwyg--select");
         const tempElement = document.createElement("template");
-        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`);
+        tempElement.innerHTML = protyle.lute.SpinBlockDOM(`<div class="av" data-node-id="${response.data.blockID}" data-av-id="${response.data.avID}" data-type="NodeAttributeView" data-av-type="table"></div>`);
         const cloneElement = tempElement.content.firstElementChild;
         nodeElement.after(cloneElement);
         avRender(cloneElement, protyle, () => {

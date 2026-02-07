@@ -32,6 +32,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	mmap "github.com/edsrzf/mmap-go"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/dataparser"
@@ -115,14 +116,23 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 }
 
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	rootID := util.GetTreeID(p)
+	if raw, ok := cache.GetTreeData(rootID); ok {
+		ret, err = LoadTreeByData(raw, boxID, p, luteEngine)
+		return
+	}
+
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
-	if err != nil {
+	if nil != err {
 		logging.LogErrorf("load tree [%s] failed: %s", p, err)
 		return
 	}
 
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
+	if nil == err {
+		cache.SetTreeData(rootID, data)
+	}
 	return
 }
 
@@ -146,7 +156,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 	// 构造 HPath
 	hPathBuilder := bytes.Buffer{}
 	hPathBuilder.WriteString("/")
-	for i, _ := range parts {
+	for i := range parts {
 		var parentAbsPath string
 		if 0 < i {
 			parentAbsPath = strings.Join(parts[:i+1], "/")
@@ -219,12 +229,10 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		return
 	}
 
-	size = uint64(len(data))
-	if err = filelock.WriteFile(filePath, data); err != nil {
-		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-		logging.LogErrorf(msg)
-		err = errors.New(msg)
-		return
+	if err = writeTreeByMmap(filePath, data); nil != err {
+		if err = writeTreeByWriteFile(filePath, data); nil != err {
+			return
+		}
 	}
 
 	if util.ExceedLargeFileWarningSize(len(data)) {
@@ -232,7 +240,52 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		util.PushErrMsg(msg, 7000)
 	}
 
+	cache.SetTreeData(tree.ID, data)
 	afterWriteTree(tree)
+	size = uint64(len(data))
+	return
+}
+
+func writeTreeByWriteFile(filePath string, data []byte) (err error) {
+	if err = filelock.WriteFile(filePath, data); err != nil {
+		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	return
+}
+
+func writeTreeByMmap(filePath string, data []byte) (err error) {
+	f, err := filelock.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+	defer filelock.CloseFile(f)
+
+	if err = f.Truncate(int64(len(data))); err != nil {
+		msg := fmt.Sprintf("truncate file [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
+	m, err := mmap.Map(f, mmap.RDWR, 0)
+	if err != nil {
+		msg := fmt.Sprintf("map file [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+	defer m.Unmap()
+
+	copy(m, data)
+	if err = m.Flush(); err != nil {
+		msg := fmt.Sprintf("flush data [%s] failed: %s", filePath, err)
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
 	return
 }
 
@@ -252,7 +305,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	tree.Root.SetIALAttr("type", "doc")
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
-	data = bytes.ReplaceAll(data, []byte(`\u0000`), []byte(""))
+	data = removeUnescapedUnicodeNull(data)
 	if !util.UseSingleLineSave {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
@@ -267,6 +320,46 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		return
 	}
 	return
+}
+
+// removeUnescapedUnicodeNull 只移除未被转义的 `\u0000` 字面序列。
+// 判断方法：在匹配到 `\u0000` 时向前数连续的 `\` 个数，若为偶数则视为未转义并移除。
+func removeUnescapedUnicodeNull(data []byte) []byte {
+	patLen := 6 // len(`\u0000`)
+	n := len(data)
+	if n < patLen {
+		return data
+	}
+
+	dst := make([]byte, 0, n)
+	i := 0
+	for i < n {
+		// 快速检查是否可能匹配 `\u0000`
+		if i+patLen <= n &&
+			data[i] == '\\' &&
+			data[i+1] == 'u' &&
+			data[i+2] == '0' &&
+			data[i+3] == '0' &&
+			data[i+4] == '0' &&
+			data[i+5] == '0' {
+			// 统计当前 `\` 之前连续的反斜杠数量
+			j := i - 1
+			backslashes := 0
+			for j >= 0 && data[j] == '\\' {
+				backslashes++
+				j--
+			}
+			// 若为偶数，则当前 `\` 未被转义，跳过整个 `\u0000`
+			if backslashes%2 == 0 {
+				i += patLen
+				continue
+			}
+		}
+		// 否则保留当前字节
+		dst = append(dst, data[i])
+		i++
+	}
+	return dst
 }
 
 func afterWriteTree(tree *parse.Tree) {

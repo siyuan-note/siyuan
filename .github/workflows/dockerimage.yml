@@ -22,6 +22,7 @@ env:
 
 jobs:
   build:
+    if: ${{ github.repository_owner == 'siyuan-note' }}
     name: build
     runs-on: ubuntu-latest
     permissions:

@@ -235,7 +235,6 @@ interface Window {
         toCanvas: (element: Element) => Promise<HTMLCanvasElement>
         toBlob: (element: Element) => Promise<Blob>
     };
-
     siyuan: ISiyuan;
     JSAndroid: {
         returnDesktop(): void
@@ -249,11 +248,14 @@ interface Window {
         readHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
+        showKeyboard(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
         exit(): void
     };
     JSHarmony: {
+        showKeyboard(): void
+        hideKeyboard(): void
         openExternal(url: string): void
         exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void
@@ -488,6 +490,17 @@ interface ISiyuan {
     emojis?: IEmoji[],
     backStack?: IBackStack[],
     mobile?: {
+        size: {
+            isLandscape?: boolean,
+            landscape?: {
+                height1: number,
+                height2: number,    // 键盘弹起时的高度
+            }, // 横屏
+            portrait?: {
+                height1: number,
+                height2: number,
+            }
+        }
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
         docks?: {

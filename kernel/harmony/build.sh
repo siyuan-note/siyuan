@@ -25,3 +25,4 @@ export CGO_CFLAGS="-I${LOG_ADAPTOR_HOME}/include -g -O2 `$LLVMCONFIG --cflags` -
 export CGO_LDFLAGS="--target=aarch64-linux-ohos -fuse-ld=lld -L${LOG_ADAPTOR_HOME}/dist/arm64-v8a"
 
 go build --tags fts5 -ldflags "-s -w" -buildmode=c-shared -v -o libkernel.so .
+#go build --tags fts5 -buildmode=c-shared -v -o libkernel.so .

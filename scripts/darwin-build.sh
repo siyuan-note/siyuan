@@ -1,13 +1,19 @@
 #!/bin/bash
 
-echo 'TIP: This script must be run from the project root directory'
-echo 'Usage: ./scripts/darwin-build.sh [--target=<target>]'
+# 启用错误处理：任何命令失败立即退出，并打印错误信息
+set -e
+trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"; exit 1' ERR
+
+echo 'Usage: ./darwin-build.sh [--target=<target>]'
 echo 'Options:'
 echo '  --target=<target>  Build target: amd64, arm64, or all (default: all)'
 echo
 
-TARGET='all'
+INITIAL_DIR="$(pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+TARGET='all'
 validate_target() {
     if [[ -z "$1" ]]; then
         echo 'Error: --target option requires a value'
@@ -40,49 +46,57 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo 'Building UI'
-cd app || exit
-pnpm install && pnpm run build
-cd .. || exit
-
 echo 'Cleaning Builds'
-rm -rf app/build
-rm -rf app/kernel-darwin
-rm -rf app/kernel-darwin-arm64
+rm -rf "$PROJECT_ROOT/app/build" 2>/dev/null || true
+rm -rf "$PROJECT_ROOT/app/kernel-darwin" 2>/dev/null || true
+rm -rf "$PROJECT_ROOT/app/kernel-darwin-arm64" 2>/dev/null || true
 
+echo
+echo 'Building UI'
+cd "$PROJECT_ROOT/app"
+pnpm install
+pnpm run build
+
+echo
 echo 'Building Kernel'
-
-cd kernel || exit
+cd "$PROJECT_ROOT/kernel"
 go version
 export GO111MODULE=on
 export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
+export GOOS=darwin
 
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Kernel amd64'
-    export GOOS=darwin
     export GOARCH=amd64
     go build --tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
 fi
-
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Kernel arm64'
-    export GOOS=darwin
     export GOARCH=arm64
     go build --tags fts5 -v -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
 fi
-cd .. || exit
 
-cd app || exit
-
+echo
+echo 'Building Electron App'
+cd "$PROJECT_ROOT/app"
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Electron App amd64'
     pnpm run dist-darwin
 fi
-
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
+    echo
     echo 'Building Electron App arm64'
     pnpm run dist-darwin-arm64
 fi
 
-cd .. || exit
+echo
+echo '=============================='
+echo '      Build successful!'
+echo '=============================='
+
+# 返回初始目录
+cd "$INITIAL_DIR"

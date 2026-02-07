@@ -379,7 +379,6 @@ func setExport(c *gin.Context) {
 		}
 	}
 
-	export.PandocParams = util.ReplaceNewline(export.PandocParams, " ")
 	model.Conf.Export = export
 	model.Conf.Save()
 

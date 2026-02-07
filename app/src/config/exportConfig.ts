@@ -3,13 +3,13 @@ import {fetchPost} from "../util/fetch";
 import {afterExport} from "../protyle/export/util";
 import {ipcRenderer} from "electron";
 import * as path from "path";
+import {exportLayout} from "../layout/util";
 /// #endif
 import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {useShell} from "../util/pathName";
 import {Constants} from "../constants";
 import {openByMobile} from "../protyle/util/compatibility";
-import {exportLayout} from "../layout/util";
 import {exitSiYuan} from "../dialog/processSystem";
 
 export const exportConfig = {
@@ -277,10 +277,14 @@ export const exportConfig = {
                         }
 
                         showMessage(window.siyuan.languages.imported);
+                        /// #if MOBILE
+                        exitSiYuan();
+                        /// #else
                         exportLayout({
                             errorExit: true,
                             cb: exitSiYuan
                         });
+                        /// #endif
                     });
                 });
             } else {

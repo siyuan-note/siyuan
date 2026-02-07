@@ -42,6 +42,10 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/setAccessAuthCode", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAccessAuthCode)
 	ginServer.Handle("POST", "/api/system/setFollowSystemLockScreen", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setFollowSystemLockScreen)
 	ginServer.Handle("POST", "/api/system/setNetworkServe", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServe)
+	ginServer.Handle("POST", "/api/system/setNetworkServeTLS", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkServeTLS)
+	ginServer.Handle("POST", "/api/system/exportTLSCACert", model.CheckAuth, model.CheckAdminRole, exportTLSCACert)
+	ginServer.Handle("POST", "/api/system/exportTLSCABundle", model.CheckAuth, model.CheckAdminRole, exportTLSCABundle)
+	ginServer.Handle("POST", "/api/system/importTLSCABundle", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importTLSCABundle)
 	ginServer.Handle("POST", "/api/system/setAutoLaunch", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAutoLaunch)
 	ginServer.Handle("POST", "/api/system/setDownloadInstallPkg", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setDownloadInstallPkg)
 	ginServer.Handle("POST", "/api/system/setNetworkProxy", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNetworkProxy)
@@ -142,6 +146,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/format/netImg2LocalAssets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, netImg2LocalAssets)
 	ginServer.Handle("POST", "/api/format/netAssets2LocalAssets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, netAssets2LocalAssets)
 
+	ginServer.Handle("POST", "/api/history/rollbackAttributeViewHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackAttributeViewHistory)
 	ginServer.Handle("POST", "/api/history/getNotebookHistory", model.CheckAuth, model.CheckAdminRole, getNotebookHistory)
 	ginServer.Handle("POST", "/api/history/rollbackNotebookHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackNotebookHistory)
 	ginServer.Handle("POST", "/api/history/rollbackAssetsHistory", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rollbackAssetsHistory)
@@ -405,7 +410,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/bazaar/getInstalledTheme", model.CheckAuth, getInstalledTheme)
 	ginServer.Handle("POST", "/api/bazaar/installBazaarTheme", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, installBazaarTheme)
 	ginServer.Handle("POST", "/api/bazaar/uninstallBazaarTheme", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, uninstallBazaarTheme)
-	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREAME", model.CheckAuth, getBazaarPackageREAME)
+	ginServer.Handle("POST", "/api/bazaar/getBazaarPackageREADME", model.CheckAuth, getBazaarPackageREADME)
 	ginServer.Handle("POST", "/api/bazaar/getUpdatedPackage", model.CheckAuth, getUpdatedPackage)
 	ginServer.Handle("POST", "/api/bazaar/batchUpdatePackage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchUpdatePackage)
 
@@ -489,6 +494,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeViewAddingBlockDefaultValues", model.CheckAuth, getAttributeViewAddingBlockDefaultValues)
 	ginServer.Handle("POST", "/api/av/getAttributeViewBoundBlockIDsByItemIDs", model.CheckAuth, getAttributeViewBoundBlockIDsByItemIDs)
 	ginServer.Handle("POST", "/api/av/getAttributeViewItemIDsByBoundIDs", model.CheckAuth, getAttributeViewItemIDsByBoundIDs)
+	ginServer.Handle("POST", "/api/av/getUnusedAttributeViews", model.CheckAuth, getUnusedAttributeViews)
+	ginServer.Handle("POST", "/api/av/removeUnusedAttributeViews", model.CheckAuth, removeUnusedAttributeViews)
+	ginServer.Handle("POST", "/api/av/removeUnusedAttributeView", model.CheckAuth, removeUnusedAttributeView)
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckAdminRole, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckAdminRole, chatGPTWithAction)

@@ -126,10 +126,10 @@ export class WYSIWYG {
             this.element.classList.add("protyle-wysiwyg--attr");
         }
         this.bindCommonEvent(protyle);
+        this.bindEvent(protyle);
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
-        this.bindEvent(protyle);
         keydown(protyle, this.element);
         dropEvent(protyle, this.element);
     }
@@ -2338,22 +2338,35 @@ export class WYSIWYG {
             hideTooltip();
             // https://ld246.com/article/1648865235549
             // 不能使用上一版本的 timeStamp，否则一直滚动将导致间隔不够 https://ld246.com/article/1662852664926
-            if (!preventGetTopHTML &&
-                event.deltaY < 0 && !protyle.scroll.element.classList.contains("fn__none") &&
-                protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight &&
-                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-                    mode: 1,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    preventGetTopHTML = false;
-                    onGet({
-                        data: getResponse,
-                        protyle,
-                        action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
+            if (!preventGetTopHTML && !protyle.scroll.element.classList.contains("fn__none") &&
+                protyle.contentElement.clientHeight === protyle.contentElement.scrollHeight) {
+                if (event.deltaY < 0 && protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
+                    fetchPost("/api/filetree/getDoc", {
+                        id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+                        mode: 1,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
+                    }, getResponse => {
+                        preventGetTopHTML = false;
+                        onGet({
+                            data: getResponse,
+                            protyle,
+                            action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
+                        });
                     });
-                });
+                } else if (event.deltaY > 0 && protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
+                    fetchPost("/api/filetree/getDoc", {
+                        id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+                        mode: 2,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
+                    }, getResponse => {
+                        preventGetTopHTML = false;
+                        onGet({
+                            data: getResponse,
+                            protyle,
+                            action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
+                        });
+                    });
+                }
                 preventGetTopHTML = true;
             }
             if (event.deltaX === 0) {

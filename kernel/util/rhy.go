@@ -17,6 +17,7 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"golang.org/x/sync/singleflight"
 )
 
 var (
@@ -32,23 +34,34 @@ var (
 	cachedRhyResult    = map[string]interface{}{}
 	rhyResultCacheTime int64
 	rhyResultLock      = sync.Mutex{}
+	rhyResultFlight    singleflight.Group
 )
 
-func GetRhyResult(force bool) (map[string]interface{}, error) {
-	rhyResultLock.Lock()
-	defer rhyResultLock.Unlock()
-
+func GetRhyResult(ctx context.Context, force bool) (map[string]interface{}, error) {
 	if ContainerDocker == Container {
 		RhyCacheDuration = int64(3600 * 24)
 	}
 
-	now := time.Now().Unix()
-	if RhyCacheDuration >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
+	if RhyCacheDuration >= time.Now().Unix()-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
 		return cachedRhyResult, nil
 	}
 
+	// 并发调用只执行一次实际请求
+	v, err, _ := rhyResultFlight.Do("rhyResult", func() (interface{}, error) {
+		return getRhyResult0(ctx)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return v.(map[string]interface{}), nil
+}
+
+func getRhyResult0(ctx context.Context) (map[string]interface{}, error) {
+	rhyResultLock.Lock()
+	defer rhyResultLock.Unlock()
+
 	request := httpclient.NewCloudRequest30s()
-	resp, err := request.SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
+	resp, err := request.SetContext(ctx).SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
 	if err != nil {
 		logging.LogErrorf("get version info failed: %s", err)
 		return nil, err
@@ -58,17 +71,17 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 		logging.LogErrorf(msg)
 		return nil, errors.New(msg)
 	}
-	rhyResultCacheTime = now
+	rhyResultCacheTime = time.Now().Unix()
 	return cachedRhyResult, nil
 }
 
 func RefreshRhyResultJob() {
-	_, err := GetRhyResult(true)
+	_, err := GetRhyResult(context.TODO(), true)
 	if nil != err {
 		// 系统唤醒后可能还没有网络连接，这里等待后再重试
 		go func() {
 			time.Sleep(7 * time.Second)
-			GetRhyResult(true)
+			GetRhyResult(context.TODO(), true)
 		}()
 	}
 }

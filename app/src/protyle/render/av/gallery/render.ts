@@ -123,9 +123,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 };
 
 const renderGroupGallery = (options: ITableOptions) => {
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
-    const query = searchInputElement?.value || "";
+    const query = searchInputElement?.textContent || "";
 
     let avBodyHTML = "";
     options.data.view.groups.forEach((group: IAVGallery) => {
@@ -210,8 +210,8 @@ export const afterRenderGallery = (options: ITableOptions) => {
         return;
     }
     const viewsElement = options.blockElement.querySelector(".av__views") as HTMLElement;
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    searchInputElement.value = options.resetData.query || "";
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLElement;
+    searchInputElement.textContent = options.resetData.query || "";
     if (options.resetData.isSearching) {
         searchInputElement.focus();
     }
@@ -229,7 +229,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
         if (event.isComposing) {
             return;
         }
-        if (searchInputElement.value || document.activeElement === searchInputElement) {
+        if (searchInputElement.textContent || document.activeElement === searchInputElement) {
             viewsElement.classList.add("av__views--show");
         } else {
             viewsElement.classList.remove("av__views--show");
@@ -243,7 +243,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
         if (event.isComposing) {
             return;
         }
-        if (!searchInputElement.value) {
+        if (!searchInputElement.textContent) {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
@@ -273,7 +273,7 @@ export const renderGallery = async (options: {
     renderAll: boolean,
     data?: IAV,
 }) => {
-    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const editIds: IIds[] = [];
     options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
         editIds.push({
@@ -297,7 +297,7 @@ export const renderGallery = async (options: {
     });
     const resetData = {
         isSearching: searchInputElement && document.activeElement === searchInputElement,
-        query: searchInputElement?.value || "",
+        query: searchInputElement?.textContent || "",
         alignSelf: options.blockElement.style.alignSelf,
         oldOffset: options.protyle.contentElement.scrollTop,
         editIds,

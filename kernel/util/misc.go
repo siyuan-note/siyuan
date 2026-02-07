@@ -207,6 +207,15 @@ func ContainsSubStr(s string, subStrs []string) bool {
 	return false
 }
 
+func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
+	for _, v := range subStrs {
+		if strings.Contains(s, v) {
+			ret = append(ret, v)
+		}
+	}
+	return
+}
+
 func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
 	if old == new {
 		return strs, false

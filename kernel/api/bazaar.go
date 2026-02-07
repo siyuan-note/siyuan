@@ -58,7 +58,7 @@ func getUpdatedPackage(c *gin.Context) {
 	}
 }
 
-func getBazaarPackageREAME(c *gin.Context) {
+func getBazaarPackageREADME(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

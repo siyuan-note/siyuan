@@ -17,17 +17,13 @@
 package model
 
 import (
-	"bufio"
-	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/lute"
@@ -38,6 +34,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -185,6 +182,7 @@ var (
 	ErrTreeNotFound  = errors.New("tree not found")
 	ErrIndexing      = errors.New("indexing")
 	ErrBoxUnindexed  = errors.New("notebook unindexed")
+	ErrInvalidID     = errors.New("invalid id")
 )
 
 func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
@@ -301,6 +299,10 @@ func indexTreeInFilesystem(blockID string) error {
 }
 
 func loadParentTree(tree *parse.Tree) (ret *parse.Tree) {
+	if nil == tree {
+		return
+	}
+
 	boxDir := filepath.Join(util.DataDir, tree.Box)
 	parentDir := path.Dir(tree.Path)
 	if parentDir == boxDir || parentDir == "/" {
@@ -317,7 +319,7 @@ func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 	boxes := Conf.GetBoxes()
 	for _, box := range boxes {
 		root := filepath.Join(util.DataDir, box.ID)
-		paths := findAllOccurrences(root, id)
+		paths := search.FindAllMatchedPaths(root, []string{id})
 		var rootIDs []string
 		rootIDPaths := map[string]string{}
 		for _, p := range paths {
@@ -334,89 +336,4 @@ func findUnindexedTreePathInAllBoxes(id string) (ret string) {
 		}
 	}
 	return
-}
-
-func findAllOccurrences(root string, target string) []string {
-	if root == "" || target == "" {
-		return nil
-	}
-
-	searchBytes := []byte(target)
-	jobs := make(chan string, 256)    // 任务通道
-	results := make(chan string, 256) // 结果通道
-
-	// 用于等待所有 Worker 完成
-	var wg sync.WaitGroup
-	// 用于等待结果收集器完成
-	var collectWg sync.WaitGroup
-
-	// 1. 启动结果收集协程
-	var matchedPaths []string
-	collectWg.Add(1)
-	go func() {
-		defer collectWg.Done()
-		for path := range results {
-			matchedPaths = append(matchedPaths, path)
-		}
-	}()
-
-	// 2. 启动并发 Worker Pool (基于 CPU 核心数)
-	numWorkers := runtime.NumCPU()
-	for i := 0; i < numWorkers; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for path := range jobs {
-				if containsTarget(path, searchBytes) {
-					results <- path
-				}
-			}
-		}()
-	}
-
-	// 3. 遍历文件夹并分发任务
-	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
-		if err == nil && d.Type().IsRegular() {
-			jobs <- path
-		}
-		return nil
-	})
-
-	// 4. 关闭通道并等待结束
-	close(jobs)      // 停止分发任务
-	wg.Wait()        // 等待所有 Worker 处理完
-	close(results)   // 停止收集结果
-	collectWg.Wait() // 等待切片组装完成
-
-	return matchedPaths
-}
-
-// containsTarget 针对大文件优化的字节流匹配函数
-func containsTarget(path string, target []byte) bool {
-	f, err := os.Open(path)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-
-	// 1MB 缓冲区
-	reader := bufio.NewReaderSize(f, 1024*1024)
-	for {
-		// 使用 ReadSlice 实现零拷贝读取
-		line, err := reader.ReadSlice('\n')
-		if len(line) > 0 && bytes.Contains(line, target) {
-			return true
-		}
-		if err != nil {
-			if err == bufio.ErrBufferFull {
-				// 处理超过 1MB 的超长行，直接跳过当前行剩余部分
-				for err == bufio.ErrBufferFull {
-					_, err = reader.ReadSlice('\n')
-				}
-				continue
-			}
-			break // EOF 或其他错误
-		}
-	}
-	return false
 }

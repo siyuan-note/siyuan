@@ -1,4 +1,10 @@
-import {focusBlock, focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
+import {
+    focusBlock,
+    focusByRange,
+    focusByWbr,
+    getSelectionOffset,
+    setLastNodeRange
+} from "../util/selection";
 import {
     getContenteditableElement,
     getLastBlock,
@@ -274,7 +280,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     let isCallout = blockElement.parentElement.classList.contains("callout-content");
     if (type === "Delete") {
         const bqCaElement = hasClosestByClassName(blockElement, "bq") || hasClosestByClassName(blockElement, "callout");
-        if (bqCaElement) {
+        if (bqCaElement && getContenteditableElement(bqCaElement) === getContenteditableElement(blockElement)) {
             isCallout = bqCaElement.classList.contains("callout");
             blockElement = isCallout ? bqCaElement.querySelector(".callout-content").firstElementChild : bqCaElement.firstElementChild;
         }
@@ -337,7 +343,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
     if (type === "Delete") {
         const liElement = hasClosestByClassName(blockElement, "li");
-        if (liElement) {
+        if (liElement && getContenteditableElement(liElement) === getContenteditableElement(blockElement)) {
             removeLi(protyle, liElement.firstElementChild.nextElementSibling, range, true);
             return;
         }
@@ -357,7 +363,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     action: "insert",
                     data: previousElement.outerHTML,
                     id: previousElement.getAttribute("data-node-id"),
-                    parentID: previousElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID,
+                    parentID: getParentBlock(previousElement).getAttribute("data-node-id") || protyle.block.parentID,
                     previousID: (ppElement && (!previousElement.previousElementSibling || !previousElement.previousElementSibling.classList.contains("protyle-action"))) ? ppElement.getAttribute("data-node-id") : undefined
                 }]);
                 previousElement.remove();
@@ -408,7 +414,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         return;
     }
 
-    const parentElement = hasClosestBlock(blockElement.parentElement);
+    const parentElement = hasClosestBlock(getParentBlock(blockElement));
     const editableElement = getContenteditableElement(blockElement);
     const previousLastElement = getLastBlock(previousElement) as HTMLElement;
     if (range.toString() === "" && isMobile() && previousLastElement && previousLastElement.classList.contains("hr") && getSelectionOffset(editableElement).start === 0) {
@@ -420,7 +426,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             data: previousLastElement.outerHTML,
             id: previousLastElement.getAttribute("data-node-id"),
             previousID: previousLastElement.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: previousLastElement.parentElement.getAttribute("data-node-id")
+            parentID: getParentBlock(previousLastElement).getAttribute("data-node-id")
         }]);
         previousLastElement.remove();
         return;
@@ -446,7 +452,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     data: blockElement.outerHTML,
                     id: id,
                     previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: blockElement.parentElement.getAttribute("data-node-id")
+                    parentID: getParentBlock(blockElement).getAttribute("data-node-id")
                 }];
                 blockElement.remove();
                 // 取消超级块
@@ -673,7 +679,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
                 id: item.getAttribute("data-node-id"),
                 data: item.outerHTML,
                 previousID: index === 0 ? listElement.previousElementSibling?.getAttribute("data-node-id") : doOperations[index - 1].id,
-                parentID: listElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: getParentBlock(listElement).getAttribute("data-node-id") || protyle.block.parentID
             });
             undoOperations.push({
                 action: "delete",

@@ -1,6 +1,6 @@
 import {setEditMode} from "../util/setEditMode";
 import {scrollEvent} from "../scroll/event";
-import {isMobile} from "../../util/functions";
+import {isMobile, isTouchDevice} from "../../util/functions";
 import {Constants} from "../../constants";
 import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
@@ -184,7 +184,10 @@ export const initUI = (protyle: IProtyle) => {
         });
     });
     let overAttr = false;
-    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & { target: HTMLElement }) => {
+    const isTouch = isTouchDevice();
+    protyle.element.addEventListener(isTouch ? "touchend" : "mouseover", (event: KeyboardEvent & {
+        target: HTMLElement
+    }) => {
         // attr
         const attrElement = hasClosestByClassName(event.target, "protyle-attr");
         if (attrElement && !attrElement.parentElement.classList.contains("protyle-title")) {
@@ -220,7 +223,7 @@ export const initUI = (protyle: IProtyle) => {
 
         // gutter
         const buttonElement = hasClosestByTag(event.target, "BUTTON");
-        if (buttonElement && buttonElement.parentElement.classList.contains("protyle-gutters")) {
+        if (!isTouch && buttonElement && buttonElement.parentElement.classList.contains("protyle-gutters")) {
             const type = buttonElement.getAttribute("data-type");
             if (type === "fold" || type === "NodeAttributeViewRow") {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
@@ -330,11 +333,7 @@ export const getPadding = (protyle: IProtyle) => {
     let left = 24;
     let bottom = 16;
     if (protyle.options.typewriterMode) {
-        if (isMobile()) {
-            bottom = window.innerHeight / 5;
-        } else {
-            bottom = protyle.element.clientHeight / 2;
-        }
+        bottom = protyle.element.clientHeight / 2;
     }
     if (!isMobile()) {
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);

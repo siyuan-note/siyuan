@@ -357,7 +357,7 @@ export const editAssetItem = (options: {
                     linkAddress,
                     options.blockElement.getAttribute("data-av-id"),
                     options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
+                    options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || ""
                 );
             }
         });

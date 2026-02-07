@@ -7,6 +7,7 @@ import {clipboard, ipcRenderer} from "electron";
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
 /// #endif
+import {getDefaultType} from "../../search/getDefault";
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
@@ -467,8 +468,10 @@ export const getLocalStorage = (cb: () => void) => {
             currentTab: "emoji"
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
+        defaultStorage[Constants.LOCAL_CLOSED_TABS] = [];
         defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // IFilesPath[]
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
+            removed: true,
             page: 1,
             sort: 0,
             group: 0,
@@ -478,21 +481,7 @@ export const getLocalStorage = (cb: () => void) => {
             idPath: [],
             k: "",
             r: "",
-            types: {
-                document: window.siyuan.config.search.document,
-                heading: window.siyuan.config.search.heading,
-                list: window.siyuan.config.search.list,
-                listItem: window.siyuan.config.search.listItem,
-                codeBlock: window.siyuan.config.search.codeBlock,
-                htmlBlock: window.siyuan.config.search.htmlBlock,
-                mathBlock: window.siyuan.config.search.mathBlock,
-                table: window.siyuan.config.search.table,
-                blockquote: window.siyuan.config.search.blockquote,
-                superBlock: window.siyuan.config.search.superBlock,
-                paragraph: window.siyuan.config.search.paragraph,
-                embedBlock: window.siyuan.config.search.embedBlock,
-                databaseBlock: window.siyuan.config.search.databaseBlock,
-            },
+            types: getDefaultType(),
             replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
@@ -505,7 +494,8 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS].forEach((key) => {
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH, Constants.LOCAL_RECENT_DOCS,
+            Constants.LOCAL_CLOSED_TABS].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

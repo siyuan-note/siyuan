@@ -35,10 +35,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}, createIfNotExist bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
+		if !createIfNotExist {
+			err = av.ErrAttributeViewNotFound
+			return
+		}
+
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
 		attrView = av.NewAttributeView(avID)
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -494,11 +504,21 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 
 	if nil == avFile {
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := repo.OpenFile(avFile)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
 			return
 		}
 
@@ -539,11 +559,21 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	}
 	if !gulu.File.IsExist(avJSONPath) {
 		logging.LogWarnf("attribute view [%s] not found in current data", avID)
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := os.ReadFile(avJSONPath)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
 			return
 		}
 

@@ -44,6 +44,10 @@ func getDocOutline(c *gin.Context) {
 	}
 
 	rootID := arg["id"].(string)
+	if util.InvalidIDPattern(rootID, ret) {
+		return
+	}
+
 	headings, err := model.Outline(rootID, preview)
 	if err != nil {
 		ret.Code = 1

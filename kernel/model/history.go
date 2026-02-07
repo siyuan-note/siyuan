@@ -39,6 +39,7 @@ import (
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -76,7 +77,6 @@ func GenerateFileHistory() {
 	generateAssetsHistory()
 
 	historyDir := util.HistoryDir
-	clearOutdatedHistoryDir(historyDir)
 
 	// 以下部分是老版本的历史数据，不再保留
 	for _, box := range Conf.GetBoxes() {
@@ -426,6 +426,24 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	return nil
 }
 
+func RollbackAttributeViewHistory(historyPath string) (err error) {
+	if !gulu.File.IsExist(historyPath) {
+		logging.LogWarnf("av history [%s] not exist", historyPath)
+		return
+	}
+
+	from := historyPath
+	to := filepath.Join(util.DataDir, "storage", "av", filepath.Base(historyPath))
+
+	if err = filelock.CopyNewtimes(from, to); err != nil {
+		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+		return
+	}
+	IncSync()
+	util.PushMsg(Conf.Language(102), 3000)
+	return nil
+}
+
 type History struct {
 	HCreated string         `json:"hCreated"`
 	Items    []*HistoryItem `json:"items"`
@@ -508,6 +526,8 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 			stmt += " id = '" + query + "'"
 		case HistoryTypeAsset:
 			stmt += table + " MATCH '{title content}:(" + query + ")'"
+		case HistoryTypeDatabase:
+			stmt += table + " MATCH '{content}:(" + query + ")'"
 		}
 	} else {
 		stmt += "1=1"
@@ -526,6 +546,8 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		}
 	} else if HistoryTypeAsset == typ {
 		stmt += " AND path LIKE '%/assets/%'"
+	} else if HistoryTypeDatabase == typ {
+		stmt += " AND path LIKE '%/storage/av/%'"
 	}
 
 	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
@@ -651,7 +673,7 @@ func (box *Box) generateDocHistory0() {
 			if nil != loadErr {
 				logging.LogErrorf("load tree [%s] failed: %s", file, loadErr)
 			} else {
-				generateAvHistory(tree, historyDir)
+				generateAvHistoryInTree(tree, historyDir)
 			}
 		}
 	}
@@ -660,7 +682,12 @@ func (box *Box) generateDocHistory0() {
 	return
 }
 
-func clearOutdatedHistoryDir(historyDir string) {
+func ClearOutdatedHistoryDirJob() {
+	clearOutdatedHistoryDir()
+}
+
+func clearOutdatedHistoryDir() {
+	historyDir := util.HistoryDir
 	if !gulu.File.IsExist(historyDir) {
 		return
 	}
@@ -680,8 +707,19 @@ func clearOutdatedHistoryDir(historyDir string) {
 			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
+
 		if dirInfo.ModTime().Unix() < ago {
 			removes = append(removes, filepath.Join(historyDir, dir.Name()))
+			continue
+		}
+
+		if dirName := dirInfo.Name(); len(dirName) > len("2006-01-02-150405") {
+			if t, parseErr := time.Parse("2006-01-02-150405", dirName[:len("2006-01-02-150405")]); nil == parseErr {
+				if nameTime := t.Unix(); 0 != nameTime && nameTime < ago {
+					removes = append(removes, filepath.Join(historyDir, dir.Name()))
+					continue
+				}
+			}
 		}
 	}
 	for _, dir := range removes {
@@ -732,17 +770,51 @@ func (box *Box) recentModifiedDocs() (ret []string) {
 var assetsLatestHistoryTime = time.Now().Unix()
 
 func recentModifiedAssets() (ret []string) {
-	assets := cache.GetAssets()
-	for _, asset := range assets {
-		if asset.Updated > assetsLatestHistoryTime {
-			absPath := filepath.Join(util.DataDir, asset.Path)
-			if filelock.IsHidden(absPath) {
-				continue
-			}
-			ret = append(ret, absPath)
+	// 只获取最近修改的资源
+	recentAssets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
+		if asset.Updated <= assetsLatestHistoryTime {
+			return false
 		}
+		absPath := filepath.Join(util.DataDir, asset.Path)
+		if filelock.IsHidden(absPath) {
+			return false
+		}
+		return true
+	})
+
+	for _, asset := range recentAssets {
+		absPath := filepath.Join(util.DataDir, asset.Path)
+		ret = append(ret, absPath)
 	}
 	assetsLatestHistoryTime = time.Now().Unix()
+	return
+}
+
+var attributeViewLatestHistoryTime = time.Now().Unix()
+
+func recentModifiedAttributeViews() (ret []string) {
+	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
+	if nil != err {
+		logging.LogErrorf("read attribute view dir failed: %s", err)
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
+			continue
+		}
+
+		info, err := entry.Info()
+		if nil != err {
+			logging.LogErrorf("read attribute view file info failed: %s", err)
+			continue
+		}
+
+		if info.ModTime().Unix() > attributeViewLatestHistoryTime {
+			ret = append(ret, filepath.Join(util.DataDir, "storage", "av", entry.Name()))
+		}
+	}
+	attributeViewLatestHistoryTime = time.Now().Unix()
 	return
 }
 
@@ -780,12 +852,12 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		return
 	}
 
-	generateAvHistory(tree, historyDir)
+	generateAvHistoryInTree(tree, historyDir)
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 }
 
-func generateAvHistory(tree *parse.Tree, historyDir string) {
+func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {
 	avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 	for _, avNode := range avNodes {
 		srcAvPath := filepath.Join(util.DataDir, "storage", "av", avNode.AttributeViewID+".json")
@@ -838,10 +910,11 @@ func fullReindexHistory() {
 var validOps = []string{HistoryOpClean, HistoryOpUpdate, HistoryOpDelete, HistoryOpFormat, HistoryOpSync, HistoryOpReplace, HistoryOpOutline}
 
 const (
-	HistoryTypeDocName = 0 // Search docs by doc name
-	HistoryTypeDoc     = 1 // Search docs by doc name and content
-	HistoryTypeAsset   = 2 // Search assets
-	HistoryTypeDocID   = 3 // Search docs by doc id
+	HistoryTypeDocName  = 0 // Search docs by doc name
+	HistoryTypeDoc      = 1 // Search docs by doc name and content
+	HistoryTypeAsset    = 2 // Search assets
+	HistoryTypeDocID    = 3 // Search docs by doc id
+	HistoryTypeDatabase = 4 // Search databases by database id
 )
 
 func indexHistoryDir(name string, luteEngine *lute.Lute) {
@@ -861,12 +934,14 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 	created := fmt.Sprintf("%d", tt.Unix())
 
 	entryPath := filepath.Join(util.HistoryDir, name)
-	var docs, assets []string
+	var docs, assets, databases []string
 	filelock.Walk(entryPath, func(path string, d fs.DirEntry, err error) error {
 		if strings.HasSuffix(d.Name(), ".sy") {
 			docs = append(docs, path)
 		} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
 			assets = append(assets, path)
+		} else if strings.Contains(path, "storage"+string(os.PathSeparator)+"av"+string(os.PathSeparator)) {
+			databases = append(databases, path)
 		}
 		return nil
 	})
@@ -909,6 +984,26 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 			Type:    HistoryTypeAsset,
 			Op:      op,
 			Title:   filepath.Base(asset),
+			Path:    p,
+			Created: created,
+		})
+	}
+
+	for _, database := range databases {
+		id := filepath.Base(database)
+		id = strings.TrimSuffix(id, ".json")
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+		p := strings.TrimPrefix(database, util.HistoryDir)
+		p = filepath.ToSlash(p[1:])
+		content := av.GetAttributeViewContentByPath(database)
+		histories = append(histories, &sql.History{
+			ID:      id,
+			Type:    HistoryTypeDatabase,
+			Op:      op,
+			Title:   id,
+			Content: content,
 			Path:    p,
 			Created: created,
 		})

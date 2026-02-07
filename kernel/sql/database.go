@@ -95,12 +95,13 @@ func InitDatabase(forceRebuild bool) (err error) {
 
 	// 不存在库或者版本不一致都会走到这里
 
-	closeDatabase()
+	if err = closeDatabase(); nil != err {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "close database failed: %s", err)
+	}
+
 	if gulu.File.IsExist(util.DBPath) {
 		if err = removeDatabaseFile(); err != nil {
-			logging.LogErrorf("remove database file [%s] failed: %s", util.DBPath, err)
-			util.PushClearProgress()
-			err = nil
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", util.DBPath, err)
 		}
 	}
 
@@ -144,6 +145,11 @@ func initDBTables() {
 	_, err = db.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocks_root_id] failed: %s", err)
+	}
+
+	_, err = db.Exec("CREATE INDEX idx_blocks_root_id_id_hash ON blocks(root_id, id, hash)")
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocks_root_id_id_hash] failed: %s", err)
 	}
 
 	_, err = db.Exec("DROP TABLE IF EXISTS blocks_fts")
@@ -643,16 +649,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			title = gulu.Str.FromBytes(titleNode.Tokens)
 		}
 
-		var hash string
-		var hashErr error
-		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			if !gulu.File.IsDir(lp) {
-				hash, hashErr = util.GetEtag(lp)
-				if nil != hashErr {
-					logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-				}
-			}
-		}
+		hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
 		name, _ := util.LastID(dest)
 		asset := &Asset{
 			ID:      ast.NewNodeID(),
@@ -694,16 +691,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 					title = gulu.Str.FromBytes(titleNode.Tokens)
 				}
 
-				var hash string
-				var hashErr error
-				if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-					if !gulu.File.IsDir(lp) {
-						hash, hashErr = util.GetEtag(lp)
-						if nil != hashErr {
-							logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-						}
-					}
-				}
+				hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
 				name, _ := util.LastID(dest)
 				asset := &Asset{
 					ID:      ast.NewNodeID(),
@@ -784,15 +772,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		dest := string(src)
-		var hash string
-		var hashErr error
-		if lp := assetLocalPath(dest, boxLocalPath, docDirLocalPath); "" != lp {
-			hash, hashErr = util.GetEtag(lp)
-			if nil != hashErr {
-				logging.LogErrorf("calc asset [%s] hash failed: %s", lp, hashErr)
-			}
-		}
-
+		hash := assetHashByLocalPath(dest, boxLocalPath, docDirLocalPath)
 		parentBlock := treenode.ParentBlock(n)
 		if ast.NodeInlineHTML != n.Type {
 			parentBlock = n

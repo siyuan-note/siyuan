@@ -360,15 +360,31 @@ export const copyTab = (app: App, tab: Tab) => {
     });
 };
 
+const getRootID = (item: Tab) => {
+    if (item.model instanceof Editor) {
+        return item.model.editor.protyle.block.rootID;
+    } else if (!item.model) {
+        const initTab = item.headElement.getAttribute("data-initdata");
+        if (initTab) {
+            try {
+                const initTabData = JSON.parse(initTab);
+                if (initTabData && initTabData.instance === "Editor" && initTabData.rootId) {
+                    return initTabData.rootId;
+                }
+            } catch (e) {
+                console.warn("Failed to parse tab init data:", e);
+            }
+        }
+    }
+};
+
 export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "other", tabs?: Tab[]) => {
     const rootIDs: string[] = [];
     if (type === "closeOthers") {
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
             if (item.id !== tab.id && !item.headElement.classList.contains("item--pin")) {
-                if (item.model instanceof Editor) {
-                    rootIDs.push(item.model.editor.protyle.block.rootID);
-                }
+                rootIDs.push(getRootID(item));
                 item.parent.removeTab(item.id, true, false);
                 index--;
             }
@@ -377,9 +393,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
             if (!item.headElement.classList.contains("item--pin")) {
-                if (item.model instanceof Editor) {
-                    rootIDs.push(item.model.editor.protyle.block.rootID);
-                }
+                rootIDs.push(getRootID(item));
                 item.parent.removeTab(item.id, true);
                 index--;
             }

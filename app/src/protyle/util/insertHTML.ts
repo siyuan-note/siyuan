@@ -292,7 +292,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         return;
     }
 
-    if (blockElement.classList.contains("av")) {
+    if (blockElement.classList.contains("av") && !isBlock) {
         range.deleteContents();
         processAV(range, html, protyle, blockElement as HTMLElement);
         return;

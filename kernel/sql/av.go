@@ -741,40 +741,6 @@ func FillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
 	}
 }
 
-func getAttributeViewContent(avID string) (content string) {
-	if "" == avID {
-		return
-	}
-
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	buf := bytes.Buffer{}
-	buf.WriteString(attrView.Name)
-	buf.WriteByte(' ')
-	for _, v := range attrView.Views {
-		buf.WriteString(v.Name)
-		buf.WriteByte(' ')
-	}
-
-	for _, keyValues := range attrView.KeyValues {
-		buf.WriteString(keyValues.Key.Name)
-		buf.WriteByte(' ')
-		for _, value := range keyValues.Values {
-			if nil != value {
-				buf.WriteString(value.String(true))
-				buf.WriteByte(' ')
-			}
-		}
-	}
-
-	content = strings.TrimSpace(buf.String())
-	return
-}
-
 func getBlockValue(keyValues []*av.KeyValues) (ret *av.Value) {
 	for _, kv := range keyValues {
 		if av.KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {

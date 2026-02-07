@@ -21,12 +21,9 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/go-humanize"
-	"github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -35,102 +32,69 @@ type Template struct {
 	*Package
 }
 
+// Templates 返回集市模板列表
 func Templates() (templates []*Template) {
 	templates = []*Template{}
+	result := getStageAndBazaar("templates")
 
-	isOnline := isBazzarOnline()
-	if !isOnline {
+	if !result.Online {
+		return
+	}
+	if result.StageErr != nil {
+		return
+	}
+	if 1 > len(result.BazaarIndex) {
 		return
 	}
 
-	stageIndex, err := getStageIndex("templates")
-	if err != nil {
-		return
+	for _, repo := range result.StageIndex.Repos {
+		if nil == repo.Package {
+			continue
+		}
+		template := buildTemplateFromStageRepo(repo, result.BazaarIndex)
+		if nil != template {
+			templates = append(templates, template)
+		}
 	}
-	bazaarIndex := getBazaarIndex()
-	if 1 > len(bazaarIndex) {
-		return
-	}
-
-	requestFailed := false
-	waitGroup := &sync.WaitGroup{}
-	lock := &sync.Mutex{}
-	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
-		defer waitGroup.Done()
-
-		repo := arg.(*StageRepo)
-		repoURL := repo.URL
-
-		if pkg, found := packageCache.Get(repoURL); found {
-			lock.Lock()
-			templates = append(templates, pkg.(*Template))
-			lock.Unlock()
-			return
-		}
-
-		if requestFailed {
-			return
-		}
-
-		template := &Template{}
-		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(template).Get(innerU)
-		if nil != innerErr {
-			logging.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
-			requestFailed = true
-			return
-		}
-		if 200 != innerResp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
-			requestFailed = true
-			return
-		}
-
-		template.DisallowInstall = disallowInstallBazaarPackage(template.Package)
-		template.DisallowUpdate = disallowInstallBazaarPackage(template.Package)
-		template.UpdateRequiredMinAppVer = template.MinAppVersion
-
-		template.URL = strings.TrimSuffix(template.URL, "/")
-		repoURLHash := strings.Split(repoURL, "@")
-		template.RepoURL = "https://github.com/" + repoURLHash[0]
-		template.RepoHash = repoURLHash[1]
-		template.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
-		template.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
-		template.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		template.Funding = repo.Package.Funding
-		template.PreferredFunding = getPreferredFunding(template.Funding)
-		template.PreferredName = GetPreferredName(template.Package)
-		template.PreferredDesc = getPreferredDesc(template.Description)
-		template.Updated = repo.Updated
-		template.Stars = repo.Stars
-		template.OpenIssues = repo.OpenIssues
-		template.Size = repo.Size
-		template.HSize = humanize.BytesCustomCeil(uint64(template.Size), 2)
-		template.InstallSize = repo.InstallSize
-		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
-		packageInstallSizeCache.SetDefault(template.RepoURL, template.InstallSize)
-		template.HUpdated = formatUpdated(template.Updated)
-		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
-		if nil != pkg {
-			template.Downloads = pkg.Downloads
-		}
-		lock.Lock()
-		templates = append(templates, template)
-		lock.Unlock()
-
-		packageCache.SetDefault(repoURL, template)
-	})
-	for _, repo := range stageIndex.Repos {
-		waitGroup.Add(1)
-		p.Invoke(repo)
-	}
-	waitGroup.Wait()
-	p.Release()
 
 	templates = filterLegacyTemplates(templates)
 
 	sort.Slice(templates, func(i, j int) bool { return templates[i].Updated > templates[j].Updated })
 	return
+}
+
+// buildTemplateFromStageRepo 使用 stage 内嵌的 package 构建 *Template，不发起 HTTP 请求。
+func buildTemplateFromStageRepo(repo *StageRepo, bazaarIndex map[string]*bazaarPackage) *Template {
+	pkg := *repo.Package
+	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
+	repoURLHash := strings.Split(repo.URL, "@")
+	if 2 != len(repoURLHash) {
+		return nil
+	}
+	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
+	pkg.RepoHash = repoURLHash[1]
+	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
+	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
+	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
+	pkg.Updated = repo.Updated
+	pkg.Stars = repo.Stars
+	pkg.OpenIssues = repo.OpenIssues
+	pkg.Size = repo.Size
+	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
+	pkg.InstallSize = repo.InstallSize
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+	pkg.HUpdated = formatUpdated(pkg.Updated)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+	pkg.PreferredName = GetPreferredName(&pkg)
+	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
+	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
+	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
+	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
+		pkg.Downloads = bp.Downloads
+	}
+	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
+	return &Template{Package: &pkg}
 }
 
 func InstalledTemplates() (ret []*Template) {
@@ -160,15 +124,16 @@ func InstalledTemplates() (ret []*Template) {
 			continue
 		}
 
+		template.RepoURL = template.URL
 		template.DisallowInstall = disallowInstallBazaarPackage(template.Package)
 		if bazaarPkg := getBazaarTemplate(template.Name, bazaarTemplates); nil != bazaarPkg {
 			template.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
 			template.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			template.RepoURL = bazaarPkg.RepoURL
 		}
 
 		installPath := filepath.Join(util.DataDir, "templates", dirName)
 		template.Installed = true
-		template.RepoURL = template.URL
 		template.PreviewURL = "/templates/" + dirName + "/preview.png"
 		template.PreviewURLThumb = "/templates/" + dirName + "/preview.png"
 		template.IconURL = "/templates/" + dirName + "/icon.png"

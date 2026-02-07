@@ -6,12 +6,14 @@ import {fetchPost} from "../../util/fetch";
 import {getEditorRange} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
-import {hasClosestBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {getTypeByCellElement, updateCellsValue} from "../render/av/cell";
 import {scrollCenter} from "../../util/highlightById";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {filesize} from "filesize";
+import {transaction} from "../wysiwyg/transaction";
+import * as dayjs from "dayjs";
 
 interface FileWithPath extends File {
     path: string;
@@ -85,7 +87,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
     return {files: uploadFileList, msgId};
 };
 
-const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
+const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
     const response = JSON.parse(responseText);
     let errorTip = "";
 
@@ -200,12 +202,50 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
                 }
             });
         }
-        if (cellElements.length > 0) {
+        if (cellElements.length === 1) {
             updateCellsValue(protyle, nodeElement, avAssets, cellElements);
-            return;
-        } else {
-            return;
+        } else if (cellElements.length > 1) {
+            const doOperations: IOperation[] = [];
+            const undoOperations: IOperation[] = [];
+            let currentRowElement;
+            const colId = cellElements[0].getAttribute("data-col-id");
+            for (let i = 0; i < avAssets.length; i++) {
+                let cellElement = cellElements[i];
+                if (!cellElement) {
+                    if (!currentRowElement) {
+                        currentRowElement = hasClosestByClassName(cellElements[i - 1], "av__row") as HTMLElement;
+                    }
+                    if (currentRowElement) {
+                        currentRowElement = currentRowElement.nextElementSibling;
+                        if (currentRowElement && currentRowElement.classList.contains("av__row")) {
+                            cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${colId}"]`);
+                        }
+                    }
+                }
+                if (!cellElement) {
+                    break;
+                }
+                const operations = await updateCellsValue(protyle, nodeElement,
+                    [avAssets[i]], [cellElement], null, null, true);
+                doOperations.push(...operations.doOperations);
+                undoOperations.push(...operations.undoOperations);
+            }
+            if (doOperations.length > 0) {
+                const id = nodeElement.dataset.nodeId;
+                doOperations.push({
+                    action: "doUpdateUpdated",
+                    id,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
+                });
+                undoOperations.push({
+                    action: "doUpdateUpdated",
+                    id,
+                    data: nodeElement.getAttribute("updated"),
+                });
+                transaction(protyle, doOperations, undoOperations);
+            }
         }
+        return;
     }
     // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
     insertHTML(successFileText, protyle, insertBlock);

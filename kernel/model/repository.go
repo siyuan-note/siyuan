@@ -2263,13 +2263,14 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchan
 		b.HSize = humanize.BytesCustomCeil(uint64(backupSize), 2)
 		hAssetSize = humanize.BytesCustomCeil(uint64(assetSize), 2)
 		hSize = humanize.BytesCustomCeil(uint64(totalSize), 2)
-		u := Conf.GetUser()
-		hTotalSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2)
-		hExchangeSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanPointExchangeRepoSize), 2)
-		hTrafficUploadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficUpload), 2)
-		hTrafficDownloadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficDownload), 2)
-		hTrafficAPIGet = humanize.SIWithDigits(u.UserTrafficAPIGet, 2, "")
-		hTrafficAPIPut = humanize.SIWithDigits(u.UserTrafficAPIPut, 2, "")
+		if u := Conf.GetUser(); nil != u {
+			hTotalSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanRepoSize), 2)
+			hExchangeSize = humanize.BytesCustomCeil(uint64(u.UserSiYuanPointExchangeRepoSize), 2)
+			hTrafficUploadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficUpload), 2)
+			hTrafficDownloadSize = humanize.BytesCustomCeil(uint64(u.UserTrafficDownload), 2)
+			hTrafficAPIGet = humanize.SIWithDigits(u.UserTrafficAPIGet, 2, "")
+			hTrafficAPIPut = humanize.SIWithDigits(u.UserTrafficAPIPut, 2, "")
+		}
 	}
 	return
 }

@@ -370,6 +370,7 @@ export const keymap = {
         keymap.element.querySelector("#clearSearchBtn").addEventListener("click", () => {
             searchElement.value = "";
             searchKeymapElement.value = "";
+            searchKeymapElement.dataset.keymap = "";
             keymap.search("", "");
         });
         keymap.element.querySelector("#keymapResetBtn").addEventListener("click", () => {

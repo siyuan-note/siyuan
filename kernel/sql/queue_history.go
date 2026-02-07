@@ -20,7 +20,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 
@@ -83,6 +86,15 @@ func FlushHistoryQueue() {
 		if err = execHistoryOp(op, tx, context); err != nil {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
+
+			if 0 < len(op.histories) {
+				dir := op.histories[0].Path[:strings.Index(op.histories[0].Path, "/")]
+				dirPath := filepath.Join(util.HistoryDir, dir)
+				if removeErr := os.RemoveAll(dirPath); nil != removeErr {
+					logging.LogErrorf("remove corrupted history dir [%s] failed: %s", dirPath, removeErr)
+				}
+			}
+
 			eventbus.Publish(util.EvtSQLHistoryRebuild)
 			return
 		}

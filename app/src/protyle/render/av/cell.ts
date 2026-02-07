@@ -19,6 +19,7 @@ import {electronUndo} from "../../undo";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
+import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -417,10 +418,18 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     /// #if MOBILE
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
     if (contentElement && cellElement.getAttribute("data-dtype") !== "checkbox") {
-        const keyboardToolbarElement = document.getElementById("keyboardToolbar");
-        const keyboardH = parseInt(keyboardToolbarElement.getAttribute("data-keyboardheight")) || (window.outerHeight / 2 - 42);
-        if (cellRect.bottom > window.innerHeight - keyboardH - 42) {
-            contentElement.scrollTop += cellRect.bottom - window.innerHeight + 42 + keyboardH;
+        let keyboardToolbarTop = window.innerHeight / 2 - 48;
+        if (window.siyuan.mobile.size.isLandscape) {
+            if (window.siyuan.mobile.size.landscape.height1 !== window.siyuan.mobile.size.landscape.height2) {
+                keyboardToolbarTop = window.siyuan.mobile.size.landscape.height2 - 48;
+            }
+        } else {
+            if (window.siyuan.mobile.size.portrait.height1 !== window.siyuan.mobile.size.portrait.height2) {
+                keyboardToolbarTop = window.siyuan.mobile.size.portrait.height2 - 48;
+            }
+        }
+        if (cellRect.bottom > keyboardToolbarTop) {
+            contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - keyboardToolbarTop);
         } else if (cellRect.top < 110) {
             contentElement.scrollTop -= 110 - cellRect.top;
         }
@@ -558,6 +567,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         }
         inputElement.select();
         inputElement.focus();
+        callMobileAppShowKeyboard();
         if (type === "template") {
             fetchPost("/api/av/renderAttributeView", {
                 id: blockElement.dataset.avId,

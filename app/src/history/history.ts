@@ -43,21 +43,26 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     assetElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
     docElement.classList.add("fn__none");
-    if (typeElement.value === "2") {
+    if (typeElement.value === "2" || typeElement.value === "4") {
         notebookElement.setAttribute("disabled", "disabled");
-        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2) {
+        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 2 && window.siyuan.storage[Constants.LOCAL_HISTORY].type !== 4) {
             opElement.value = "all";
         }
+        if (typeElement.value === "4") {
+            opElement.querySelector('option[value="update"]').classList.add("fn__none");
+            opElement.querySelector('option[value="sync"]').classList.add("fn__none");
+        } else {
+            opElement.querySelector('option[value="update"]').classList.remove("fn__none");
+            opElement.querySelector('option[value="sync"]').classList.remove("fn__none");
+        }
         opElement.querySelector('option[value="clean"]').classList.remove("fn__none");
-        opElement.querySelector('option[value="update"]').classList.remove("fn__none");
         opElement.querySelector('option[value="delete"]').classList.add("fn__none");
         opElement.querySelector('option[value="format"]').classList.add("fn__none");
-        opElement.querySelector('option[value="sync"]').classList.remove("fn__none");
         opElement.querySelector('option[value="replace"]').classList.add("fn__none");
         opElement.querySelector('option[value="outline"]').classList.add("fn__none");
     } else {
         notebookElement.removeAttribute("disabled");
-        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type === 2) {
+        if (window.siyuan.storage[Constants.LOCAL_HISTORY].type === 2 || window.siyuan.storage[Constants.LOCAL_HISTORY].type === 4) {
             opElement.value = "all";
         }
         opElement.querySelector('option[value="clean"]').classList.add("fn__none");
@@ -391,6 +396,7 @@ export const openHistory = (app: App) => {
                         <option value="0" ${localHistory.type === 0 ? "selected" : ""}>${window.siyuan.languages.docName}</option>
                         <option value="1" ${localHistory.type === 1 ? "selected" : ""}>${window.siyuan.languages.docNameAndContent}</option>
                         <option value="2" ${localHistory.type === 2 ? "selected" : ""}>${window.siyuan.languages.assets}</option>
+                        <option value="4" ${localHistory.type === 4 ? "selected" : ""}>${window.siyuan.languages.database}</option>
                     </select>
                     <span class="fn__space"></span>
                     <select data-type="opselect" class="b3-select${isMobile() ? " fn__size96" : ""}">
@@ -578,6 +584,10 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             notebook: target.parentElement.getAttribute("data-notebook-id"),
                             historyPath: target.parentElement.getAttribute("data-path")
                         });
+                    } else if (dataType === "av") {
+                        fetchPost("/api/history/rollbackAttributeViewHistory", {
+                            historyPath: target.parentElement.getAttribute("data-path")
+                        });
                     } else if (dataType === "notebook") {
                         fetchPost("/api/history/rollbackNotebookHistory", {
                             historyPath: target.parentElement.getAttribute("data-path")
@@ -652,7 +662,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                     chipClass += "b3-chip--warning ";
                                     ariaLabel = window.siyuan.languages.historyOutline;
                                 }
-                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc")}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
     <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
@@ -708,7 +718,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (target.classList.contains("b3-list-item") && (type === "assets" || type === "doc")) {
+            } else if (target.classList.contains("b3-list-item") && ["assets", "doc", "av"].includes(type)) {
                 const dataPath = target.getAttribute("data-path");
                 if (type === "assets") {
                     assetElement.classList.remove("fn__none");
@@ -735,6 +745,23 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             });
                             searchMarkRender(historyEditor.protyle, k.split(" "));
                         }
+                    });
+                } else if (type === "av") {
+                    mdElement.classList.add("fn__none");
+                    docElement.classList.remove("fn__none");
+                    historyEditor.protyle.options.history.created = target.dataset.created;
+                    onGet({
+                        data: {
+                            data: {
+                                content: `<div class="av" data-node-id="${Lute.NewNodeID()}" data-av-id="${target.querySelector(".b3-list-item__text").textContent}" data-type="NodeAttributeView" data-av-type="table"><div spellcheck="true"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`,
+                                id: Lute.NewNodeID(),
+                                rootID: Lute.NewNodeID(),
+                            },
+                            msg: "",
+                            code: 0
+                        },
+                        protyle: historyEditor.protyle,
+                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                     });
                 }
                 titleElement.classList.remove("fn__none");

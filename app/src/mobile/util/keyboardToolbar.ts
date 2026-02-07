@@ -13,6 +13,8 @@ import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
+import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
+import {callMobileAppShowKeyboard} from "./mobileAppUtil";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -285,17 +287,25 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 export const showKeyboardToolbarUtil = (oldScrollTop: number) => {
     window.siyuan.menus.menu.remove();
     showUtil = true;
-
+    const toolHeight = document.querySelector(".keyboard__bar").clientHeight;
     const toolbarElement = document.getElementById("keyboardToolbar");
-    let keyboardHeight = toolbarElement.getAttribute("data-keyboardheight");
-    keyboardHeight = (keyboardHeight ? (parseInt(keyboardHeight) + 42) : window.outerHeight / 2) + "px";
+    let keyboardHeight = window.innerHeight / 2 - toolHeight;
+    if (window.siyuan.mobile.size.isLandscape) {
+        if (window.siyuan.mobile.size.landscape.height1 !== window.siyuan.mobile.size.landscape.height2) {
+            keyboardHeight = window.siyuan.mobile.size.landscape.height1 - window.siyuan.mobile.size.landscape.height2 + toolHeight;
+        }
+    } else {
+        if (window.siyuan.mobile.size.portrait.height1 !== window.siyuan.mobile.size.portrait.height2) {
+            keyboardHeight = window.siyuan.mobile.size.portrait.height1 - window.siyuan.mobile.size.portrait.height2 + toolHeight;
+        }
+    }
     const editor = getCurrentEditor();
     if (editor) {
-        editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight;
+        editor.protyle.element.parentElement.style.paddingBottom = keyboardHeight + "px";
         editor.protyle.contentElement.scrollTop = oldScrollTop;
     }
     setTimeout(() => {
-        toolbarElement.style.height = keyboardHeight;
+        toolbarElement.style.height = keyboardHeight + "px";
     }, Constants.TIMEOUT_TRANSITION); // 防止抖动
     setTimeout(() => {
         showUtil = false;
@@ -320,7 +330,6 @@ const renderKeyboardToolbar = () => {
         if (getSelection().rangeCount === 0 ||
             window.siyuan.config.readonly ||
             document.getElementById("toolbarName").getAttribute("readonly") === "readonly" ||
-            window.screen.height - window.innerHeight < 160 ||  // reloadSync 会导致 selectionchange，从而导致键盘没有弹起的情况下出现工具栏
             !document.activeElement || (
                 document.activeElement &&
                 !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) &&
@@ -346,14 +355,18 @@ const renderKeyboardToolbar = () => {
         const dynamicElements = document.querySelectorAll("#keyboardToolbar .keyboard__dynamic");
         const range = getSelection().getRangeAt(0);
         const isProtyle = hasClosestByClassName(range.startContainer, "protyle-wysiwyg", true);
-        if (!isProtyle) {
+        const nodeElement = hasClosestBlock(range.startContainer);
+        if (!isProtyle || !nodeElement ||
+            hasClosestByAttribute(range.startContainer, "data-type", "av-search")) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.add("fn__none");
             return;
         }
 
         const selectText = range.toString();
-        if (selectText || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current")) {
+
+        if (!nodeElement.classList.contains("code-block") &&
+            (selectText || dynamicElements[0].querySelector('[data-type="goinline"]').classList.contains("protyle-toolbar__item--current"))) {
             dynamicElements[0].classList.add("fn__none");
             dynamicElements[1].classList.remove("fn__none");
         } else {
@@ -374,16 +387,20 @@ const renderKeyboardToolbar = () => {
             } else {
                 dynamicElements[0].querySelector('[data-type="redo"]').removeAttribute("disabled");
             }
-            const nodeElement = hasClosestBlock(range.startContainer);
-            if (nodeElement) {
-                const outdentElement = dynamicElements[0].querySelector('[data-type="outdent"]');
-                if (nodeElement.parentElement.classList.contains("li")) {
-                    outdentElement.classList.remove("fn__none");
-                    outdentElement.nextElementSibling.classList.remove("fn__none");
-                } else {
-                    outdentElement.classList.add("fn__none");
-                    outdentElement.nextElementSibling.classList.add("fn__none");
-                }
+            const outdentElement = dynamicElements[0].querySelector('[data-type="outdent"]');
+            const goinlineElement = dynamicElements[0].querySelector('[data-type="goinline"]');
+            if (nodeElement.classList.contains("code-block")) {
+                goinlineElement.classList.add("fn__none");
+            } else {
+                goinlineElement.classList.remove("fn__none");
+            }
+            if (nodeElement.parentElement.classList.contains("li") ||
+                nodeElement.classList.contains("code-block")) {
+                outdentElement.classList.remove("fn__none");
+                outdentElement.nextElementSibling.classList.remove("fn__none");
+            } else {
+                outdentElement.classList.add("fn__none");
+                outdentElement.nextElementSibling.classList.add("fn__none");
             }
         }
 
@@ -411,7 +428,7 @@ export const showKeyboardToolbar = () => {
         hideKeyboardToolbarUtil();
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
-    if (!toolbarElement.classList.contains("fn__none")) {
+    if (!toolbarElement.classList.contains("fn__none") || getSelection().rangeCount === 0) {
         return;
     }
     toolbarElement.classList.remove("fn__none");
@@ -471,6 +488,8 @@ export const hideKeyboardToolbar = () => {
 export const activeBlur = () => {
     if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
         window.JSAndroid.hideKeyboard();
+    } else if (window.JSHarmony && window.JSHarmony.hideKeyboard) {
+        window.JSHarmony.hideKeyboard();
     }
     hideKeyboardToolbar();
     (document.activeElement as HTMLElement).blur();
@@ -591,7 +610,8 @@ export const initKeyboardToolbar = () => {
         if (type === "done") {
             if (toolbarElement.clientHeight > 100) {
                 hideKeyboardToolbarUtil();
-                focusByRange(range);
+                callMobileAppShowKeyboard();
+                setTimeout(() => focusByRange(range), 256);
             } else {
                 activeBlur();
             }
@@ -654,9 +674,7 @@ export const initKeyboardToolbar = () => {
                 const oldScrollTop = protyle.contentElement.scrollTop;
                 renderTextMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
-                if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
-                    window.JSAndroid.hideKeyboard();
-                }
+                window.JSAndroid?.hideKeyboard();
             }
             return;
         } else if (type === "moveup") {
@@ -675,16 +693,16 @@ export const initKeyboardToolbar = () => {
         } else if (type === "add") {
             if (buttonElement.classList.contains("protyle-toolbar__item--current")) {
                 hideKeyboardToolbarUtil();
-                focusByRange(range);
+                callMobileAppShowKeyboard();
+                setTimeout(() => focusByRange(range), 256);
             } else {
+                (document.activeElement as HTMLElement)?.blur();
                 buttonElement.classList.add("protyle-toolbar__item--current");
                 toolbarElement.querySelector('.keyboard__action[data-type="done"] use').setAttribute("xlink:href", "#iconCloseRound");
                 const oldScrollTop = protyle.contentElement.scrollTop;
                 renderSlashMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
-                if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
-                    window.JSAndroid.hideKeyboard();
-                }
+                window.JSAndroid?.hideKeyboard();
             }
             return;
         } else if (type === "block") {
@@ -693,11 +711,23 @@ export const initKeyboardToolbar = () => {
             activeBlur();
             return;
         } else if (type === "outdent") {
-            listOutdent(protyle, [nodeElement.parentElement], range);
+            if (nodeElement.classList.contains("code-block")) {
+                if (range.toString() !== "") {
+                    tabCodeBlock(protyle, nodeElement, range, true);
+                }
+            } else {
+                listOutdent(protyle, [nodeElement.parentElement], range);
+            }
             focusByRange(range);
             return;
         } else if (type === "indent") {
-            listIndent(protyle, [nodeElement.parentElement], range);
+            if (nodeElement.classList.contains("code-block")) {
+                if (range.toString() !== "") {
+                    tabCodeBlock(protyle, nodeElement, range);
+                }
+            } else {
+                listIndent(protyle, [nodeElement.parentElement], range);
+            }
             focusByRange(range);
             return;
         }

@@ -79,18 +79,19 @@ func GetAssetHash(hash string) *AssetHash {
 	assetHashLock.Lock()
 	defer assetHashLock.Unlock()
 
-	for _, a := range assetHashCache {
-		if a.Hash == hash {
-			if filelock.IsExist(filepath.Join(util.DataDir, a.Path)) {
-				return a
-			}
-
-			delete(assetHashCache, hash)
-			delete(assetPathHashCache, a.Path)
-			return nil
-		}
+	// 直接使用 hash 作为 key 进行查找
+	asset, exists := assetHashCache[hash]
+	if !exists {
+		return nil
 	}
-	return nil
+
+	// 验证文件是否存在
+	if !filelock.IsExist(filepath.Join(util.DataDir, asset.Path)) {
+		// 文件不存在，清理缓存
+		delete(assetHashCache, hash)
+		return nil
+	}
+	return asset
 }
 
 type Asset struct {

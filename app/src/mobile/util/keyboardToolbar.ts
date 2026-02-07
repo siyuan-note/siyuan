@@ -12,7 +12,7 @@ import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
-import {isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
+import {isInAndroid, isInEdge, isInHarmony} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {callMobileAppShowKeyboard} from "./mobileAppUtil";
 
@@ -502,7 +502,61 @@ export const initKeyboardToolbar = () => {
             renderKeyboardToolbar();
         }
     }, false);
-
+    window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+    if (window.siyuan.mobile.size.isLandscape) {
+        window.siyuan.mobile.size.landscape = {
+            height1: window.innerHeight,
+            height2: window.innerHeight,
+        };
+    } else {
+        window.siyuan.mobile.size.portrait = {
+            height1: window.innerHeight,
+            height2: window.innerHeight,
+        };
+    }
+    if (!isInEdge()) {
+        window.addEventListener("resize", () => {
+            // 获取键盘高度
+            window.siyuan.mobile.size.isLandscape = window.matchMedia && window.matchMedia("(orientation: landscape)").matches;
+            if (window.siyuan.mobile.size.isLandscape) {
+                if (!window.siyuan.mobile.size.landscape) {
+                    window.siyuan.mobile.size.landscape = {
+                        height1: window.innerHeight,
+                        height2: window.innerHeight,
+                    };
+                }
+                if (window.innerHeight < window.siyuan.mobile.size.landscape.height1 - 100) {
+                    window.siyuan.mobile.size.landscape.height2 = window.innerHeight;
+                }
+                if (window.innerHeight > window.siyuan.mobile.size.landscape.height1) {
+                    window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
+                }
+                if (window.siyuan.mobile.size.landscape.height2 < window.innerHeight) {
+                    activeBlur()
+                } else if (!preventRender) {
+                    renderKeyboardToolbar();
+                }
+            } else {
+                if (!window.siyuan.mobile.size.portrait) {
+                    window.siyuan.mobile.size.portrait = {
+                        height1: window.innerHeight,
+                        height2: window.innerHeight,
+                    };
+                }
+                if (window.innerHeight < window.siyuan.mobile.size.portrait.height1 - 100) {
+                    window.siyuan.mobile.size.portrait.height2 = window.innerHeight;
+                }
+                if (window.innerHeight > window.siyuan.mobile.size.portrait.height1) {
+                    window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
+                }
+                if (window.siyuan.mobile.size.portrait.height2 < window.innerHeight) {
+                    activeBlur()
+                } else if (!preventRender) {
+                    renderKeyboardToolbar();
+                }
+            }
+        });
+    }
     const toolbarElement = document.getElementById("keyboardToolbar");
     toolbarElement.innerHTML = `<div class="fn__flex keyboard__bar">
     <div class="fn__flex-1">

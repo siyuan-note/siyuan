@@ -317,7 +317,7 @@ const hideKeyboardToolbarUtil = () => {
     toolbarElement.style.height = "";
     const editor = getCurrentEditor();
     if (editor) {
-        editor.protyle.element.parentElement.style.paddingBottom = "42px";
+        editor.protyle.element.parentElement.style.paddingBottom = "48px";
     }
     toolbarElement.querySelector('.keyboard__action[data-type="add"]').classList.remove("protyle-toolbar__item--current");
     toolbarElement.querySelector('.keyboard__action[data-type="text"]').classList.remove("protyle-toolbar__item--current");
@@ -435,12 +435,12 @@ export const showKeyboardToolbar = () => {
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
-        modelElement.style.paddingBottom = "42px";
+        modelElement.style.paddingBottom = "48px";
     }
     const range = getSelection().getRangeAt(0);
     const editor = getCurrentEditor();
     if (editor && editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-        editor.protyle.element.parentElement.style.paddingBottom = "42px";
+        editor.protyle.element.parentElement.style.paddingBottom = "48px";
     }
     getCurrentEditor().protyle.app.plugins.forEach(item => {
         item.eventBus.emit("mobile-keyboard-show");

@@ -3069,10 +3069,16 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	for _, foot := range *refFootnotes {
 		t, err := loadTreeWithCache(foot.defID, treeCache)
 		if nil != err {
-			return
+			logging.LogWarnf("load tree for footnote def [%s] refNum [%s] failed: %s", foot.defID, foot.refNum, err)
+			continue
 		}
 
 		defNode := treenode.GetNodeInTree(t, foot.defID)
+		if nil == defNode {
+			logging.LogErrorf("not found node [%s] in tree for footnote refNum [%s]", foot.defID, foot.refNum)
+			continue
+		}
+
 		docID := util.GetTreeID(defNode.Path)
 		var nodes []*ast.Node
 		if ast.NodeHeading == defNode.Type {

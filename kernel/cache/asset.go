@@ -89,6 +89,7 @@ func GetAssetHash(hash string) *AssetHash {
 	if !filelock.IsExist(filepath.Join(util.DataDir, asset.Path)) {
 		// 文件不存在，清理缓存
 		delete(assetHashCache, hash)
+		delete(assetPathHashCache, asset.Path)
 		return nil
 	}
 	return asset

@@ -157,6 +157,9 @@ export const readClipboard = async () => {
         const textObj = getTextSiyuanFromTextHTML(text.textHTML);
         text.textHTML = textObj.textHtml;
         text.siyuanHTML = textObj.textSiyuan;
+        if (!text.siyuanHTML) {
+            text.siyuanHTML = window.JSAndroid.readSiYuanHTMLClipboard();
+        }
         return text;
     }
     if (isInHarmony()) {
@@ -165,6 +168,9 @@ export const readClipboard = async () => {
         const textObj = getTextSiyuanFromTextHTML(text.textHTML);
         text.textHTML = textObj.textHtml;
         text.siyuanHTML = textObj.textSiyuan;
+        if (!text.siyuanHTML) {
+            text.siyuanHTML = window.JSHarmony.readSiYuanHTMLClipboard();
+        }
         return text;
     }
     if (typeof navigator.clipboard === "undefined") {

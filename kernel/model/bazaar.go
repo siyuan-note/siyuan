@@ -18,6 +18,7 @@ package model
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,6 +34,26 @@ import (
 	"golang.org/x/mod/semver"
 )
 
+// updateBazaarPackages 更新一组集市包
+func updateBazaarPackages(packages []*bazaar.Package, packageType string, count *int, total int) bool {
+	for _, pkg := range packages {
+		installPath, err := getPackageInstallPath(packageType, pkg.Name)
+		if err != nil {
+			return false
+		}
+		err = bazaar.InstallPackage(pkg.RepoURL, pkg.RepoHash, installPath, Conf.System.ID)
+		if err != nil {
+			logging.LogErrorf("update %s [%s] failed: %s", packageType, pkg.Name, err)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238), pkg.Name), 5000)
+			return false
+		}
+		*count++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *count, total, pkg.Name))
+	}
+	return true
+}
+
+// BatchUpdateBazaarPackages 更新所有集市包
 func BatchUpdateBazaarPackages(frontend string) {
 	plugins, widgets, icons, themes, templates := UpdatedPackages(frontend)
 
@@ -44,64 +65,21 @@ func BatchUpdateBazaarPackages(frontend string) {
 	util.PushEndlessProgress(fmt.Sprintf(Conf.language(235), 1, total))
 	defer util.PushClearProgress()
 	count := 1
-	for _, plugin := range plugins {
-		err := bazaar.InstallPackage(plugin.RepoURL, plugin.RepoHash, filepath.Join(util.DataDir, "plugins", plugin.Name), Conf.System.ID)
-		if err != nil {
-			logging.LogErrorf("update plugin [%s] failed: %s", plugin.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238), plugin.Name), 5000)
-			return
-		}
 
-		count++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, plugin.Name))
+	if !updateBazaarPackages(plugins, "plugins", &count, total) {
+		return
 	}
-
-	for _, widget := range widgets {
-		err := bazaar.InstallPackage(widget.RepoURL, widget.RepoHash, filepath.Join(util.DataDir, "widgets", widget.Name), Conf.System.ID)
-		if err != nil {
-			logging.LogErrorf("update widget [%s] failed: %s", widget.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238), widget.Name), 5000)
-			return
-		}
-
-		count++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, widget.Name))
+	if !updateBazaarPackages(themes, "themes", &count, total) {
+		return
 	}
-
-	for _, icon := range icons {
-		err := bazaar.InstallPackage(icon.RepoURL, icon.RepoHash, filepath.Join(util.IconsPath, icon.Name), Conf.System.ID)
-		if err != nil {
-			logging.LogErrorf("update icon [%s] failed: %s", icon.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238), icon.Name), 5000)
-			return
-		}
-
-		count++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, icon.Name))
+	if !updateBazaarPackages(icons, "icons", &count, total) {
+		return
 	}
-
-	for _, template := range templates {
-		err := bazaar.InstallPackage(template.RepoURL, template.RepoHash, filepath.Join(util.DataDir, "templates", template.Name), Conf.System.ID)
-		if err != nil {
-			logging.LogErrorf("update template [%s] failed: %s", template.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238), template.Name), 5000)
-			return
-		}
-
-		count++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, template.Name))
+	if !updateBazaarPackages(templates, "templates", &count, total) {
+		return
 	}
-
-	for _, theme := range themes {
-		err := bazaar.InstallPackage(theme.RepoURL, theme.RepoHash, filepath.Join(util.ThemesPath, theme.Name), Conf.System.ID)
-		if err != nil {
-			logging.LogErrorf("update theme [%s] failed: %s", theme.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238), theme.Name), 5000)
-			return
-		}
-
-		count++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), count, total, theme.Name))
+	if !updateBazaarPackages(widgets, "widgets", &count, total) {
+		return
 	}
 
 	util.ReloadUI()
@@ -118,7 +96,7 @@ func UpdatedPackages(frontend string) (plugins, widgets, icons, themes, template
 	}()
 	go func() {
 		defer wg.Done()
-		widgets = getOutdatedPackages("widgets", "", "")
+		themes = getOutdatedPackages("themes", "", "")
 	}()
 	go func() {
 		defer wg.Done()
@@ -126,11 +104,11 @@ func UpdatedPackages(frontend string) (plugins, widgets, icons, themes, template
 	}()
 	go func() {
 		defer wg.Done()
-		themes = getOutdatedPackages("themes", "", "")
+		templates = getOutdatedPackages("templates", "", "")
 	}()
 	go func() {
 		defer wg.Done()
-		templates = getOutdatedPackages("templates", "", "")
+		widgets = getOutdatedPackages("widgets", "", "")
 	}()
 
 	wg.Wait()
@@ -310,7 +288,8 @@ func getPackageInstallPath(packageType, packageName string) (string, error) {
 	case "widgets":
 		return filepath.Join(util.DataDir, "widgets", packageName), nil
 	default:
-		return "", fmt.Errorf("invalid package type: %s", packageType)
+		logging.LogErrorf("invalid package type: %s", packageType)
+		return "", errors.New("invalid package type")
 	}
 }
 

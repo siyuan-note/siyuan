@@ -243,9 +243,11 @@ interface Window {
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
+        writeSiYuanHTMLClipboard(text: string, html: string, siyuanHTML: string): void
         writeImageClipboard(uri: string): void
         readClipboard(): string
         readHTMLClipboard(): string
+        readSiYuanHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
         showKeyboard(): void
@@ -261,8 +263,10 @@ interface Window {
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
+        writeSiYuanHTMLClipboard(text: string, html: string, siyuanHTML: string): void
         readClipboard(): string
         readHTMLClipboard(): string
+        readSiYuanHTMLClipboard(): string
         returnDesktop(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number

@@ -18,6 +18,7 @@ package bazaar
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -38,113 +39,75 @@ type InstalledPackageInfo struct {
 // packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
 var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
 
-// InstalledPackages 获取已安装的指定类型集市包列表
-func InstalledPackages(pkgType, frontend string) (ret []*Package) {
-	ret = []*Package{}
+// FilterPackages 按关键词过滤集市包列表
+func FilterPackages(packages []*Package, keyword string) []*Package {
+	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return packages
+	}
+	ret := []*Package{}
+	for _, pkg := range packages {
+		if matchPackage(keywords, pkg) {
+			ret = append(ret, pkg)
+		}
+	}
+	return ret
+}
 
-	var basePath string
-	var jsonFileName string
-	var baseURLPathPrefix string
-	var filterFunc func([]os.DirEntry) []os.DirEntry
-	var postProcessFunc func(*Package, string)
-
-	switch pkgType {
-	case "plugins":
-		basePath = filepath.Join(util.DataDir, "plugins")
-		jsonFileName = "plugin.json"
-		baseURLPathPrefix = "/plugins/"
-		filterFunc = nil
-		postProcessFunc = func(pkg *Package, frontend string) {
-			// 插件不兼容性检查
-			incompatible := isIncompatiblePlugin(pkg, frontend)
-			pkg.Incompatible = &incompatible
-		}
-	case "widgets":
-		basePath = filepath.Join(util.DataDir, "widgets")
-		jsonFileName = "widget.json"
-		baseURLPathPrefix = "/widgets/"
-		filterFunc = nil
-		postProcessFunc = nil
-	case "icons":
-		basePath = util.IconsPath
-		jsonFileName = "icon.json"
-		baseURLPathPrefix = "/appearance/icons/"
-		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
-			// 过滤内置图标
-			var filteredDirs []os.DirEntry
-			for _, dir := range dirs {
-				if !isBuiltInIcon(dir.Name()) {
-					filteredDirs = append(filteredDirs, dir)
-				}
-			}
-			return filteredDirs
-		}
-		postProcessFunc = nil
-	case "themes":
-		basePath = util.ThemesPath
-		jsonFileName = "theme.json"
-		baseURLPathPrefix = "/appearance/themes/"
-		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
-			// 过滤内置主题
-			var filteredDirs []os.DirEntry
-			for _, dir := range dirs {
-				if !IsBuiltInTheme(dir.Name()) {
-					filteredDirs = append(filteredDirs, dir)
-				}
-			}
-			return filteredDirs
-		}
-		postProcessFunc = nil
-	case "templates":
-		basePath = filepath.Join(util.DataDir, "templates")
-		jsonFileName = "template.json"
-		baseURLPathPrefix = "/templates/"
-		filterFunc = nil
-		postProcessFunc = nil
-	default:
-		logging.LogWarnf("invalid package type: %s", pkgType)
+func getSearchKeywords(query string) (ret []string) {
+	query = strings.TrimSpace(query)
+	if "" == query {
 		return
 	}
-
-	dirs, err := readInstalledPackageDirs(basePath)
-	if err != nil {
-		logging.LogWarnf("read %s folder failed: %s", pkgType, err)
-		return
-	}
-	if len(dirs) == 0 {
-		return
-	}
-
-	// 过滤
-	if filterFunc != nil {
-		dirs = filterFunc(dirs)
-	}
-
-	bazaarPackagesMap := buildBazaarPackagesMap(pkgType, frontend)
-	installedPackageInfos := getInstalledPackageInfos(dirs, basePath, jsonFileName)
-
-	for _, info := range installedPackageInfos {
-		pkg := info.Pkg
-		dirName := info.DirName
-		installPath := filepath.Join(basePath, dirName)
-		baseURLPath := baseURLPathPrefix + dirName
-
-		if !setPackageLocalMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
-			continue
+	keywords := strings.Split(query, " ")
+	for _, k := range keywords {
+		if "" != k {
+			ret = append(ret, strings.ToLower(k))
 		}
-
-		// 额外处理
-		if postProcessFunc != nil {
-			postProcessFunc(pkg, frontend)
-		}
-
-		ret = append(ret, pkg)
 	}
 	return
 }
 
-// readInstalledPackageDirs 读取已安装包的目录列表
-func readInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
+func matchPackage(keywords []string, pkg *Package) bool {
+	if 1 > len(keywords) {
+		return true
+	}
+	if nil == pkg {
+		return false
+	}
+	for _, kw := range keywords {
+		if !packageContainsKeyword(pkg, kw) {
+			return false
+		}
+	}
+	return true
+}
+
+func packageContainsKeyword(pkg *Package, kw string) bool {
+	if strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), kw) ||
+		strings.Contains(strings.ToLower(pkg.Author), kw) {
+		return true
+	}
+	for _, s := range pkg.DisplayName {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Description {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Keywords {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	return false
+}
+
+// ReadInstalledPackageDirs 读取已安装包的目录列表
+func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	if !util.IsPathRegularDirOrSymlinkDir(basePath) {
 		return []os.DirEntry{}, nil
 	}
@@ -157,8 +120,8 @@ func readInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	return dirs, nil
 }
 
-// buildBazaarPackagesMap 获取指定类型的集市包并转换为按包名索引的映射表
-func buildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package {
+// BuildBazaarPackagesMap 获取指定类型的集市包并转换为按包名索引的映射表
+func BuildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package {
 	packages := Packages(pkgType, frontend)
 	result := make(map[string]*Package, len(packages))
 	for _, pkg := range packages {
@@ -169,8 +132,8 @@ func buildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package
 	return result
 }
 
-// getInstalledPackageInfos 获取已安装包信息
-func getInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string) []InstalledPackageInfo {
+// GetInstalledPackageInfos 获取已安装包信息
+func GetInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string) []InstalledPackageInfo {
 	var result []InstalledPackageInfo
 	for _, dir := range dirs {
 		if !util.IsDirRegularOrSymlink(dir) {
@@ -187,8 +150,8 @@ func getInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string)
 	return result
 }
 
-// setPackageLocalMetadata 设置集市包的本地元数据
-func setPackageLocalMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
+// SetPackageLocalMetadata 设置集市包的本地元数据
+func SetPackageLocalMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
 	info, statErr := os.Stat(filepath.Join(installPath, jsonFileName))
 	if nil != statErr {
 		logging.LogWarnf("stat install %s failed: %s", jsonFileName, statErr)
@@ -265,10 +228,12 @@ func isOutdatedPackage(bazaarPackagesMap map[string]*Package, pkg *Package) bool
 	return false
 }
 
+// IsBuiltInTheme 判断是否为内置主题
 func IsBuiltInTheme(dirName string) bool {
 	return "daylight" == dirName || "midnight" == dirName
 }
 
-func isBuiltInIcon(dirName string) bool {
+// IsBuiltInIcon 判断是否为内置图标
+func IsBuiltInIcon(dirName string) bool {
 	return "ant" == dirName || "material" == dirName
 }

@@ -53,14 +53,15 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 
 		found = true
 		displayName = GetPreferredLocaleString(plugin.DisplayName, plugin.Name)
-		incompatible = isIncompatiblePlugin(plugin, frontend)
+		incompatible = IsIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
 		disallowInstall = isBelowRequiredAppVersion(plugin)
 	}
 	return
 }
 
-func isIncompatiblePlugin(plugin *Package, frontend string) bool {
+// IsIncompatiblePlugin 判断插件是否与当前环境不兼容
+func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
 	backend := getCurrentBackend()
 	if !isTargetSupported(plugin.Backends, backend) {
 		return true

@@ -183,7 +183,7 @@ func buildPackageWithOnlineMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	pkg.DisallowUpdate = disallow
 	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
 	if "plugins" == pkgType {
-		incompatible := isIncompatiblePlugin(&pkg, frontend)
+		incompatible := IsIncompatiblePlugin(&pkg, frontend)
 		pkg.Incompatible = &incompatible
 	}
 

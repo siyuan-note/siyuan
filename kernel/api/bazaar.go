@@ -111,7 +111,7 @@ func getInstalledPlugin(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPlugins(frontend, keyword),
+		"packages": model.InstalledPackages("plugins", frontend, keyword),
 	}
 }
 
@@ -209,7 +209,7 @@ func getInstalledWidget(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledWidgets(keyword),
+		"packages": model.InstalledPackages("widgets", "", keyword),
 	}
 }
 
@@ -304,7 +304,7 @@ func getInstalledIcon(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledIcons(keyword),
+		"packages": model.InstalledPackages("icons", "", keyword),
 	}
 }
 
@@ -401,7 +401,7 @@ func getInstalledTemplate(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledTemplates(keyword),
+		"packages": model.InstalledPackages("templates", "", keyword),
 	}
 }
 
@@ -497,7 +497,7 @@ func getInstalledTheme(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledThemes(keyword),
+		"packages": model.InstalledPackages("themes", "", keyword),
 	}
 }
 

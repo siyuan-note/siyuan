@@ -57,7 +57,7 @@ func SearchWidget(keyword string) (ret []*WidgetSearchResult) {
 		widgets = append(widgets, widget)
 	}
 
-	widgets = filterPackages(widgets, keyword)
+	widgets = bazaar.FilterPackages(widgets, keyword)
 	for _, widget := range widgets {
 		b := &WidgetSearchResult{
 			Name:    bazaar.GetPreferredLocaleString(widget.DisplayName, widget.Name),

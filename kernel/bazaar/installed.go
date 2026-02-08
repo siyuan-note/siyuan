@@ -120,18 +120,6 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	return dirs, nil
 }
 
-// BuildBazaarPackagesMap 获取指定类型的在线集市包并转换为按包名索引的映射表
-func BuildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package {
-	packages := GetBazaarPackages(pkgType, frontend)
-	result := make(map[string]*Package, len(packages))
-	for _, pkg := range packages {
-		if "" != pkg.Name {
-			result[pkg.Name] = pkg
-		}
-	}
-	return result
-}
-
 // GetInstalledPackageInfos 获取已安装包信息
 func GetInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string) []InstalledPackageInfo {
 	var result []InstalledPackageInfo

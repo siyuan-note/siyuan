@@ -138,15 +138,106 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType 
 	return
 }
 
-// getInstalledPackagesMap 获取已安装集市包的映射表
-func getInstalledPackagesMap(pkgType, frontend string) map[string]*bazaar.Package {
-	installedMap := make(map[string]*bazaar.Package)
-	installedPackages := GetInstalledPackages(pkgType, frontend, "")
+// getInstalledPackagesWithBazaarMap 获取已安装的集市包列表，并给 bazaarPackagesMap（可能经过过滤）中的集市包设置元数据
+func getInstalledPackagesWithBazaarMap(pkgType, frontend string, bazaarPackagesMap map[string]*bazaar.Package) (ret []*bazaar.Package) {
+	ret = []*bazaar.Package{}
+	var basePath string
+	var jsonFileName string
+	var baseURLPathPrefix string
+	var filterFunc func([]os.DirEntry) []os.DirEntry // 过滤器：过滤内置包
+	var postProcessFunc func(*bazaar.Package)        // 后处理器：添加额外字段
 
-	for _, pkg := range installedPackages {
-		installedMap[pkg.Name] = pkg
+	switch pkgType {
+	case "plugins":
+		basePath = filepath.Join(util.DataDir, "plugins")
+		jsonFileName = "plugin.json"
+		baseURLPathPrefix = "/plugins/"
+		postProcessFunc = func(pkg *bazaar.Package) {
+			incompatible := bazaar.IsIncompatiblePlugin(pkg, frontend)
+			pkg.Incompatible = &incompatible
+			petals := getPetals()
+			petal := getPetalByName(pkg.Name, petals)
+			if nil != petal {
+				enabled := petal.Enabled
+				pkg.Enabled = &enabled
+			}
+		}
+	case "themes":
+		basePath = util.ThemesPath
+		jsonFileName = "theme.json"
+		baseURLPathPrefix = "/appearance/themes/"
+		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
+			var filtered []os.DirEntry
+			for _, d := range dirs {
+				if bazaar.IsBuiltInTheme(d.Name()) {
+					continue
+				}
+				filtered = append(filtered, d)
+			}
+			return filtered
+		}
+		postProcessFunc = func(pkg *bazaar.Package) {
+			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
+		}
+	case "icons":
+		basePath = util.IconsPath
+		jsonFileName = "icon.json"
+		baseURLPathPrefix = "/appearance/icons/"
+		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
+			var filtered []os.DirEntry
+			for _, d := range dirs {
+				if bazaar.IsBuiltInIcon(d.Name()) {
+					continue
+				}
+				filtered = append(filtered, d)
+			}
+			return filtered
+		}
+		postProcessFunc = func(pkg *bazaar.Package) {
+			pkg.Current = pkg.Name == Conf.Appearance.Icon
+		}
+	case "templates":
+		basePath = filepath.Join(util.DataDir, "templates")
+		jsonFileName = "template.json"
+		baseURLPathPrefix = "/templates/"
+	case "widgets":
+		basePath = filepath.Join(util.DataDir, "widgets")
+		jsonFileName = "widget.json"
+		baseURLPathPrefix = "/widgets/"
+	default:
+		logging.LogWarnf("invalid package type: %s", pkgType)
+		return
 	}
-	return installedMap
+
+	dirs, err := bazaar.ReadInstalledPackageDirs(basePath)
+	if err != nil {
+		logging.LogWarnf("read %s folder failed: %s", pkgType, err)
+		return
+	}
+	if len(dirs) == 0 {
+		return
+	}
+	if filterFunc != nil {
+		dirs = filterFunc(dirs)
+	}
+
+	infos := bazaar.GetInstalledPackageInfos(dirs, basePath, jsonFileName)
+	for _, info := range infos {
+		pkg := info.Pkg
+		dirName := info.DirName
+		installPath := filepath.Join(basePath, dirName)
+		baseURLPath := baseURLPathPrefix + dirName
+
+		// 给必要的集市包设置元数据
+		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
+			continue
+		}
+		if postProcessFunc != nil {
+			postProcessFunc(pkg)
+		}
+		ret = append(ret, pkg)
+	}
+	return
 }
 
 // GetBazaarPackages 获取在线集市包列表
@@ -189,7 +280,18 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Pa
 			pkg.Current = pkg.Name == Conf.Appearance.Icon
 		}
 	default:
-		installedMap := getInstalledPackagesMap(pkgType, frontend)
+		// 复用过滤后的 packages 构建 map：最终只对过滤后的 packages 设置字段，故 map 仅需覆盖过滤后的包名即可，无需完整的 packages
+		bazaarPackagesMap := make(map[string]*bazaar.Package, len(packages))
+		for _, pkg := range packages {
+			if "" != pkg.Name {
+				bazaarPackagesMap[pkg.Name] = pkg
+			}
+		}
+		installedPackages := getInstalledPackagesWithBazaarMap(pkgType, frontend, bazaarPackagesMap)
+		installedMap := make(map[string]*bazaar.Package, len(installedPackages))
+		for _, pkg := range installedPackages {
+			installedMap[pkg.Name] = pkg
+		}
 		for _, pkg := range packages {
 			if installedPkg, ok := installedMap[pkg.Name]; ok {
 				pkg.Installed = true
@@ -205,109 +307,14 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Pa
 
 // GetInstalledPackages 获取已安装的指定类型集市包列表
 func GetInstalledPackages(pkgType, frontend, keyword string) (ret []*bazaar.Package) {
-	ret = []*bazaar.Package{}
-
-	var basePath string
-	var jsonFileName string
-	var baseURLPathPrefix string
-	var filterFunc func([]os.DirEntry) []os.DirEntry // 用于过滤内置包
-	var postProcessFunc func(*bazaar.Package)        // 用于添加额外字段
-
-	switch pkgType {
-	case "plugins":
-		basePath = filepath.Join(util.DataDir, "plugins")
-		jsonFileName = "plugin.json"
-		baseURLPathPrefix = "/plugins/"
-		postProcessFunc = func(pkg *bazaar.Package) {
-			incompatible := bazaar.IsIncompatiblePlugin(pkg, frontend)
-			pkg.Incompatible = &incompatible
-			petals := getPetals()
-			petal := getPetalByName(pkg.Name, petals)
-			if nil != petal {
-				enabled := petal.Enabled
-				pkg.Enabled = &enabled
-			}
+	packages := bazaar.GetBazaarPackages(pkgType, frontend)
+	bazaarPackagesMap := make(map[string]*bazaar.Package, len(packages))
+	for _, pkg := range packages {
+		if "" != pkg.Name {
+			bazaarPackagesMap[pkg.Name] = pkg
 		}
-	case "widgets":
-		basePath = filepath.Join(util.DataDir, "widgets")
-		jsonFileName = "widget.json"
-		baseURLPathPrefix = "/widgets/"
-	case "icons":
-		basePath = util.IconsPath
-		jsonFileName = "icon.json"
-		baseURLPathPrefix = "/appearance/icons/"
-		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
-			var filtered []os.DirEntry
-			for _, d := range dirs {
-				if bazaar.IsBuiltInIcon(d.Name()) {
-					continue
-				}
-				filtered = append(filtered, d)
-			}
-			return filtered
-		}
-		postProcessFunc = func(pkg *bazaar.Package) {
-			pkg.Current = pkg.Name == Conf.Appearance.Icon
-		}
-	case "themes":
-		basePath = util.ThemesPath
-		jsonFileName = "theme.json"
-		baseURLPathPrefix = "/appearance/themes/"
-		filterFunc = func(dirs []os.DirEntry) []os.DirEntry {
-			var filtered []os.DirEntry
-			for _, d := range dirs {
-				if bazaar.IsBuiltInTheme(d.Name()) {
-					continue
-				}
-				filtered = append(filtered, d)
-			}
-			return filtered
-		}
-		postProcessFunc = func(pkg *bazaar.Package) {
-			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
-		}
-	case "templates":
-		basePath = filepath.Join(util.DataDir, "templates")
-		jsonFileName = "template.json"
-		baseURLPathPrefix = "/templates/"
-	default:
-		logging.LogWarnf("invalid package type: %s", pkgType)
-		return
 	}
-
-	dirs, err := bazaar.ReadInstalledPackageDirs(basePath)
-	if err != nil {
-		logging.LogWarnf("read %s folder failed: %s", pkgType, err)
-		return
-	}
-	if len(dirs) == 0 {
-		return
-	}
-
-	if filterFunc != nil {
-		dirs = filterFunc(dirs)
-	}
-
-	bazaarPackagesMap := bazaar.BuildBazaarPackagesMap(pkgType, frontend)
-	infos := bazaar.GetInstalledPackageInfos(dirs, basePath, jsonFileName)
-
-	for _, info := range infos {
-		pkg := info.Pkg
-		dirName := info.DirName
-		installPath := filepath.Join(basePath, dirName)
-		baseURLPath := baseURLPathPrefix + dirName
-
-		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
-			continue
-		}
-
-		if postProcessFunc != nil {
-			postProcessFunc(pkg)
-		}
-
-		ret = append(ret, pkg)
-	}
-
+	ret = getInstalledPackagesWithBazaarMap(pkgType, frontend, bazaarPackagesMap)
 	ret = bazaar.FilterPackages(ret, keyword)
 	return
 }

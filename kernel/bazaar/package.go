@@ -41,6 +41,7 @@ type Funding struct {
 	Custom         []string `json:"custom"`
 }
 
+// 如果某个集市包 json 文件内需要新增字段，需要同步修改 bazaar 的工作流 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
 type Package struct {
 	Author            string        `json:"author"`
 	URL               string        `json:"url"`

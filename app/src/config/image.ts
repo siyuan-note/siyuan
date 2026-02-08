@@ -202,7 +202,19 @@ export const image = {
                                 } else {
                                     liElement.remove();
                                 }
-                                avListElement.nextElementSibling.innerHTML = "";
+                                onGet({
+                                    data: {
+                                        data: {
+                                            content: "",
+                                            id: Lute.NewNodeID(),
+                                            rootID: Lute.NewNodeID(),
+                                        },
+                                        msg: "",
+                                        code: 0
+                                    },
+                                    protyle: editor.protyle,
+                                    action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                                });
                             });
                         } else {
                             fetchPost("/api/asset/removeUnusedAsset", {

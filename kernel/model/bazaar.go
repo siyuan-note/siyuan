@@ -337,7 +337,13 @@ func getPackageInstallPath(packageType, packageName string) (string, error) {
 	}
 }
 
-func InstallBazaarPackage(packageType, repoURL, repoHash, packageName string) error {
+// InstallBazaarPackage 安装集市包。update 为 true 表示更新已有包、themeMode 仅在 packageType 为 "themes" 时生效
+func InstallBazaarPackage(packageType, repoURL, repoHash, packageName string, update bool, themeMode int) error {
+	switch packageType {
+	case "themes":
+		closeThemeWatchers()
+	}
+
 	installPath, err := getPackageInstallPath(packageType, packageName)
 	if err != nil {
 		return err
@@ -346,6 +352,31 @@ func InstallBazaarPackage(packageType, repoURL, repoHash, packageName string) er
 	err = bazaar.InstallPackage(repoURL, repoHash, installPath, Conf.System.ID)
 	if err != nil {
 		return fmt.Errorf(Conf.Language(46), packageName, err)
+	}
+
+	switch packageType {
+	case "themes":
+		if !update {
+			// 更新主题后不需要切换到该主题 https://github.com/siyuan-note/siyuan/issues/4966
+			if 0 == themeMode {
+				Conf.Appearance.ThemeLight = packageName
+			} else {
+				Conf.Appearance.ThemeDark = packageName
+			}
+			Conf.Appearance.Mode = themeMode
+			Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, packageName, "theme.js"))
+			Conf.Save()
+		}
+		InitAppearance()
+		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
+	case "icons":
+		if !update {
+			// 更新图标后不需要切换到该图标
+			Conf.Appearance.Icon = packageName
+			Conf.Save()
+		}
+		InitAppearance()
+		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	}
 	return nil
 }
@@ -384,40 +415,5 @@ func UninstallPackage(packageType, packageName string) error {
 		InitAppearance()
 	}
 
-	return nil
-}
-
-func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
-	if err := InstallBazaarPackage("icons", repoURL, repoHash, iconName); err != nil {
-		return err
-	}
-	Conf.Appearance.Icon = iconName
-	Conf.Save()
-	InitAppearance()
-	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
-	return nil
-}
-
-func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bool) error {
-	closeThemeWatchers()
-
-	if err := InstallBazaarPackage("themes", repoURL, repoHash, themeName); err != nil {
-		return err
-	}
-
-	if !update {
-		// 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
-		if 0 == mode {
-			Conf.Appearance.ThemeLight = themeName
-		} else {
-			Conf.Appearance.ThemeDark = themeName
-		}
-		Conf.Appearance.Mode = mode
-		Conf.Appearance.ThemeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, themeName, "theme.js"))
-		Conf.Save()
-	}
-
-	InitAppearance()
-	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	return nil
 }

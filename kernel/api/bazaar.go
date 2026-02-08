@@ -132,7 +132,11 @@ func installBazaarPlugin(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarPackage("plugins", repoURL, repoHash, packageName)
+	update := false
+	if nil != arg["update"] {
+		update = arg["update"].(bool)
+	}
+	err := model.InstallBazaarPackage("plugins", repoURL, repoHash, packageName, update, 0)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -230,7 +234,11 @@ func installBazaarWidget(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarPackage("widgets", repoURL, repoHash, packageName)
+	update := false
+	if nil != arg["update"] {
+		update = arg["update"].(bool)
+	}
+	err := model.InstallBazaarPackage("widgets", repoURL, repoHash, packageName, update, 0)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -325,7 +333,11 @@ func installBazaarIcon(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarIcon(repoURL, repoHash, packageName)
+	update := false
+	if nil != arg["update"] {
+		update = arg["update"].(bool)
+	}
+	err := model.InstallBazaarPackage("icons", repoURL, repoHash, packageName, update, 0)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -422,7 +434,11 @@ func installBazaarTemplate(c *gin.Context) {
 	repoURL := arg["repoURL"].(string)
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.InstallBazaarPackage("templates", repoURL, repoHash, packageName)
+	update := false
+	if nil != arg["update"] {
+		update = arg["update"].(bool)
+	}
+	err := model.InstallBazaarPackage("templates", repoURL, repoHash, packageName, update, 0)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -523,7 +539,7 @@ func installBazaarTheme(c *gin.Context) {
 	if nil != arg["update"] {
 		update = arg["update"].(bool)
 	}
-	err := model.InstallBazaarTheme(repoURL, repoHash, packageName, int(mode), update)
+	err := model.InstallBazaarPackage("themes", repoURL, repoHash, packageName, update, int(mode))
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()

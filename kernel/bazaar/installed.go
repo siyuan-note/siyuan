@@ -120,9 +120,9 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	return dirs, nil
 }
 
-// BuildBazaarPackagesMap 获取指定类型的集市包并转换为按包名索引的映射表
+// BuildBazaarPackagesMap 获取指定类型的在线集市包并转换为按包名索引的映射表
 func BuildBazaarPackagesMap(pkgType string, frontend string) map[string]*Package {
-	packages := Packages(pkgType, frontend)
+	packages := GetBazaarPackages(pkgType, frontend)
 	result := make(map[string]*Package, len(packages))
 	for _, pkg := range packages {
 		if "" != pkg.Name {
@@ -150,8 +150,8 @@ func GetInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string)
 	return result
 }
 
-// SetPackageLocalMetadata 设置集市包的本地元数据
-func SetPackageLocalMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
+// SetInstalledPackageMetadata 设置本地集市包的本地元数据
+func SetInstalledPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
 	info, statErr := os.Stat(filepath.Join(installPath, jsonFileName))
 	if nil != statErr {
 		logging.LogWarnf("stat install %s failed: %s", jsonFileName, statErr)
@@ -164,7 +164,7 @@ func SetPackageLocalMetadata(pkg *Package, installPath, jsonFileName, baseURLPat
 	pkg.PreviewURLThumb = baseURLPath + "/preview.png"
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
-	pkg.PreferredReadme = getPackageLocalREADME(installPath, baseURLPath+"/", pkg.Readme)
+	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath+"/", pkg.Readme)
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
 	// 更新信息

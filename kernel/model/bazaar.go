@@ -34,8 +34,8 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-// updateBazaarPackages 更新一组集市包
-func updateBazaarPackages(packages []*bazaar.Package, packageType string, count *int, total int) bool {
+// updatePackages 更新一组集市包
+func updatePackages(packages []*bazaar.Package, packageType string, count *int, total int) bool {
 	for _, pkg := range packages {
 		installPath, err := getPackageInstallPath(packageType, pkg.Name)
 		if err != nil {
@@ -53,9 +53,9 @@ func updateBazaarPackages(packages []*bazaar.Package, packageType string, count 
 	return true
 }
 
-// BatchUpdateBazaarPackages 更新所有集市包
-func BatchUpdateBazaarPackages(frontend string) {
-	plugins, widgets, icons, themes, templates := UpdatedPackages(frontend)
+// BatchUpdatePackages 更新所有集市包
+func BatchUpdatePackages(frontend string) {
+	plugins, widgets, icons, themes, templates := GetUpdatedPackages(frontend)
 
 	total := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
 	if 1 > total {
@@ -66,19 +66,19 @@ func BatchUpdateBazaarPackages(frontend string) {
 	defer util.PushClearProgress()
 	count := 1
 
-	if !updateBazaarPackages(plugins, "plugins", &count, total) {
+	if !updatePackages(plugins, "plugins", &count, total) {
 		return
 	}
-	if !updateBazaarPackages(themes, "themes", &count, total) {
+	if !updatePackages(themes, "themes", &count, total) {
 		return
 	}
-	if !updateBazaarPackages(icons, "icons", &count, total) {
+	if !updatePackages(icons, "icons", &count, total) {
 		return
 	}
-	if !updateBazaarPackages(templates, "templates", &count, total) {
+	if !updatePackages(templates, "templates", &count, total) {
 		return
 	}
-	if !updateBazaarPackages(widgets, "widgets", &count, total) {
+	if !updatePackages(widgets, "widgets", &count, total) {
 		return
 	}
 
@@ -86,40 +86,41 @@ func BatchUpdateBazaarPackages(frontend string) {
 	task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, fmt.Sprintf(Conf.language(237), total), 5000)
 }
 
-func UpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*bazaar.Package) {
+// GetUpdatedPackages 获取所有类型集市包的更新列表
+func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*bazaar.Package) {
 	wg := &sync.WaitGroup{}
 	wg.Add(5)
 
 	go func() {
 		defer wg.Done()
-		plugins = getOutdatedPackages("plugins", frontend, "")
+		plugins = getUpdatedPackages("plugins", frontend, "")
 	}()
 	go func() {
 		defer wg.Done()
-		themes = getOutdatedPackages("themes", "", "")
+		themes = getUpdatedPackages("themes", "", "")
 	}()
 	go func() {
 		defer wg.Done()
-		icons = getOutdatedPackages("icons", "", "")
+		icons = getUpdatedPackages("icons", "", "")
 	}()
 	go func() {
 		defer wg.Done()
-		templates = getOutdatedPackages("templates", "", "")
+		templates = getUpdatedPackages("templates", "", "")
 	}()
 	go func() {
 		defer wg.Done()
-		widgets = getOutdatedPackages("widgets", "", "")
+		widgets = getUpdatedPackages("widgets", "", "")
 	}()
 
 	wg.Wait()
 	return
 }
 
-// getOutdatedPackages 获取过时的包
-func getOutdatedPackages(pkgType, frontend, keyword string) []*bazaar.Package {
-	packages := InstalledPackages(pkgType, frontend, keyword)
+// getUpdatedPackages 获取单个类型集市包的更新列表
+func getUpdatedPackages(pkgType, frontend, keyword string) []*bazaar.Package {
+	installedPackages := GetInstalledPackages(pkgType, frontend, keyword)
 	var outdated []*bazaar.Package
-	for _, pkg := range packages {
+	for _, pkg := range installedPackages {
 		if pkg.Outdated {
 			outdated = append(outdated, pkg)
 		}
@@ -133,14 +134,14 @@ func getOutdatedPackages(pkgType, frontend, keyword string) []*bazaar.Package {
 }
 
 func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType string) (ret string) {
-	ret = bazaar.GetPackageOnlineREADME(ctx, repoURL, repoHash, packageType)
+	ret = bazaar.GetBazaarPackageREADME(ctx, repoURL, repoHash, packageType)
 	return
 }
 
 // getInstalledPackagesMap 获取已安装集市包的映射表
 func getInstalledPackagesMap(pkgType, frontend string) map[string]*bazaar.Package {
 	installedMap := make(map[string]*bazaar.Package)
-	installedPackages := InstalledPackages(pkgType, frontend, "")
+	installedPackages := GetInstalledPackages(pkgType, frontend, "")
 
 	for _, pkg := range installedPackages {
 		installedMap[pkg.Name] = pkg
@@ -150,7 +151,7 @@ func getInstalledPackagesMap(pkgType, frontend string) map[string]*bazaar.Packag
 
 // GetBazaarPackages 获取在线集市包列表
 func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Package) {
-	packages = bazaar.Packages(pkgType, frontend)
+	packages = bazaar.GetBazaarPackages(pkgType, frontend)
 	packages = bazaar.FilterPackages(packages, keyword)
 
 	installedMap := getInstalledPackagesMap(pkgType, frontend)
@@ -166,8 +167,8 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Pa
 	return
 }
 
-// InstalledPackages 获取已安装的指定类型集市包列表
-func InstalledPackages(pkgType, frontend, keyword string) (ret []*bazaar.Package) {
+// GetInstalledPackages 获取已安装的指定类型集市包列表
+func GetInstalledPackages(pkgType, frontend, keyword string) (ret []*bazaar.Package) {
 	ret = []*bazaar.Package{}
 
 	var basePath string
@@ -260,7 +261,7 @@ func InstalledPackages(pkgType, frontend, keyword string) (ret []*bazaar.Package
 		installPath := filepath.Join(basePath, dirName)
 		baseURLPath := baseURLPathPrefix + dirName
 
-		if !bazaar.SetPackageLocalMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
+		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
 			continue
 		}
 
@@ -306,27 +307,12 @@ func InstallBazaarPackage(packageType, repoURL, repoHash, packageName string) er
 	return nil
 }
 
-func UninstallBazaarPlugin(pluginName string) error {
-	if err := UninstallBazaarPackage("plugins", pluginName); err != nil {
-		return err
+func UninstallPackage(packageType, packageName string) error {
+	switch packageType {
+	case "themes":
+		closeThemeWatchers()
 	}
 
-	petals := getPetals()
-	var tmp []*Petal
-	for i, petal := range petals {
-		if petal.Name != pluginName {
-			tmp = append(tmp, petals[i])
-		}
-	}
-	petals = tmp
-	savePetals(petals)
-
-	uninstallPluginSet := hashset.New(pluginName)
-	PushReloadPlugin(nil, nil, nil, uninstallPluginSet, "")
-	return nil
-}
-
-func UninstallBazaarPackage(packageType, packageName string) error {
 	installPath, err := getPackageInstallPath(packageType, packageName)
 	if err != nil {
 		return err
@@ -336,11 +322,30 @@ func UninstallBazaarPackage(packageType, packageName string) error {
 	if err != nil {
 		return fmt.Errorf(Conf.Language(47), err.Error())
 	}
+
+	switch packageType {
+	case "plugins":
+		petals := getPetals()
+		var tmp []*Petal
+		for i, petal := range petals {
+			if petal.Name != packageName {
+				tmp = append(tmp, petals[i])
+			}
+		}
+		petals = tmp
+		savePetals(petals)
+
+		uninstallPluginSet := hashset.New(packageName)
+		PushReloadPlugin(nil, nil, nil, uninstallPluginSet, "")
+	case "icons", "themes":
+		InitAppearance()
+	}
+
 	return nil
 }
 
 func BazaarIcons(keyword string) (icons []*bazaar.Package) {
-	icons = bazaar.Packages("icons", "")
+	icons = bazaar.GetBazaarPackages("icons", "")
 	icons = bazaar.FilterPackages(icons, keyword)
 	for _, installed := range Conf.Appearance.Icons {
 		for _, icon := range icons {
@@ -367,17 +372,8 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	return nil
 }
 
-func UninstallBazaarIcon(iconName string) error {
-	if err := UninstallBazaarPackage("icons", iconName); err != nil {
-		return err
-	}
-
-	InitAppearance()
-	return nil
-}
-
 func BazaarThemes(keyword string) (ret []*bazaar.Package) {
-	ret = bazaar.Packages("themes", "")
+	ret = bazaar.GetBazaarPackages("themes", "")
 	ret = bazaar.FilterPackages(ret, keyword)
 	installs := Conf.Appearance.DarkThemes
 	installs = append(installs, Conf.Appearance.LightThemes...)
@@ -416,16 +412,5 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 
 	InitAppearance()
 	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
-	return nil
-}
-
-func UninstallBazaarTheme(themeName string) error {
-	closeThemeWatchers()
-
-	if err := UninstallBazaarPackage("themes", themeName); err != nil {
-		return err
-	}
-
-	InitAppearance()
 	return nil
 }

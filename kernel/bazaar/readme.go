@@ -41,8 +41,8 @@ func getReadmeFileCandidates(readme LocaleStrings) []string {
 	return gulu.Str.RemoveDuplicatedElem([]string{preferred, defaultName, "README.md"})
 }
 
-// GetPackageOnlineREADME 获取集市包的在线 README
-func GetPackageOnlineREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {
+// GetBazaarPackageREADME 获取集市包的在线 README
+func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 	url := strings.TrimPrefix(repoURLHash, "https://github.com/")
 	repo := getStageRepoByURL(ctx, pkgType, url)
@@ -80,18 +80,18 @@ func GetPackageOnlineREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 		}
 	}
 
-	ret = renderOnlineREADME(repoURL, data)
+	ret = renderBazaarPackageREADME(repoURL, data)
 	return
 }
 
-// getPackageLocalREADME 获取集市包的本地 README
-func getPackageLocalREADME(installPath, basePath string, readme LocaleStrings) (ret string) {
+// getInstalledPackageREADME 获取集市包的本地 README
+func getInstalledPackageREADME(installPath, basePath string, readme LocaleStrings) (ret string) {
 	candidates := getReadmeFileCandidates(readme)
 	var errMsgs []string
 	for _, name := range candidates {
 		readmeData, readErr := os.ReadFile(filepath.Join(installPath, name))
 		if readErr == nil {
-			ret = renderLocalREADME(basePath, readmeData)
+			ret = renderInstalledPackageREADME(basePath, readmeData)
 			return
 		}
 		logging.LogWarnf("read installed %s failed: %s", name, readErr)
@@ -101,8 +101,8 @@ func getPackageLocalREADME(installPath, basePath string, readme LocaleStrings) (
 	return
 }
 
-// renderOnlineREADME 渲染在线 README Markdown 为 HTML
-func renderOnlineREADME(repoURL string, mdData []byte) (ret string) {
+// renderBazaarPackageREADME 渲染在线 README Markdown 为 HTML
+func renderBazaarPackageREADME(repoURL string, mdData []byte) (ret string) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)
@@ -113,8 +113,8 @@ func renderOnlineREADME(repoURL string, mdData []byte) (ret string) {
 	return
 }
 
-// renderLocalREADME 渲染本地 README Markdown 为 HTML
-func renderLocalREADME(basePath string, mdData []byte) (ret string) {
+// renderInstalledPackageREADME 渲染本地 README Markdown 为 HTML
+func renderInstalledPackageREADME(basePath string, mdData []byte) (ret string) {
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)

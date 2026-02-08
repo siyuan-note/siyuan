@@ -35,7 +35,7 @@ func batchUpdatePackage(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
-	model.BatchUpdateBazaarPackages(frontend)
+	model.BatchUpdatePackages(frontend)
 }
 
 func getUpdatedPackage(c *gin.Context) {
@@ -48,7 +48,7 @@ func getUpdatedPackage(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
-	plugins, widgets, icons, themes, templates := model.UpdatedPackages(frontend)
+	plugins, widgets, icons, themes, templates := model.GetUpdatedPackages(frontend)
 	ret.Data = map[string]interface{}{
 		"plugins":   plugins,
 		"widgets":   widgets,
@@ -111,7 +111,7 @@ func getInstalledPlugin(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPackages("plugins", frontend, keyword),
+		"packages": model.GetInstalledPackages("plugins", frontend, keyword),
 	}
 }
 
@@ -163,7 +163,7 @@ func uninstallBazaarPlugin(c *gin.Context) {
 
 	frontend := arg["frontend"].(string)
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarPlugin(packageName)
+	err := model.UninstallPackage("plugins", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -209,7 +209,7 @@ func getInstalledWidget(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPackages("widgets", "", keyword),
+		"packages": model.GetInstalledPackages("widgets", "", keyword),
 	}
 }
 
@@ -258,7 +258,7 @@ func uninstallBazaarWidget(c *gin.Context) {
 	}
 
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarPackage("widgets", packageName)
+	err := model.UninstallPackage("widgets", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -304,7 +304,7 @@ func getInstalledIcon(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPackages("icons", "", keyword),
+		"packages": model.GetInstalledPackages("icons", "", keyword),
 	}
 }
 
@@ -354,7 +354,7 @@ func uninstallBazaarIcon(c *gin.Context) {
 	}
 
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarIcon(packageName)
+	err := model.UninstallPackage("icons", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -401,7 +401,7 @@ func getInstalledTemplate(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPackages("templates", "", keyword),
+		"packages": model.GetInstalledPackages("templates", "", keyword),
 	}
 }
 
@@ -451,7 +451,7 @@ func uninstallBazaarTemplate(c *gin.Context) {
 	}
 
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarPackage("templates", packageName)
+	err := model.UninstallPackage("templates", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -497,7 +497,7 @@ func getInstalledTheme(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.InstalledPackages("themes", "", keyword),
+		"packages": model.GetInstalledPackages("themes", "", keyword),
 	}
 }
 
@@ -556,7 +556,7 @@ func uninstallBazaarTheme(c *gin.Context) {
 	}
 
 	packageName := arg["packageName"].(string)
-	err := model.UninstallBazaarTheme(packageName)
+	err := model.UninstallPackage("themes", packageName)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -129,8 +129,8 @@ func ParsePackageJSON(filePath string) (ret *Package, err error) {
 	return
 }
 
-// Packages 返回指定类型的集市包列表（plugins 类型需要传递 frontend 参数）
-func Packages(pkgType string, frontend string) (packages []*Package) {
+// GetBazaarPackages 返回指定类型的在线集市包列表（plugins 类型需要传递 frontend 参数）
+func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 	result := getStageAndBazaar(pkgType)
 
 	if !result.Online || nil != result.StageErr || nil == result.StageIndex {
@@ -139,7 +139,7 @@ func Packages(pkgType string, frontend string) (packages []*Package) {
 
 	packages = make([]*Package, 0, len(result.StageIndex.Repos))
 	for _, repo := range result.StageIndex.Repos {
-		pkg := buildPackageWithOnlineMetadata(repo, result.BazaarStats, pkgType, frontend)
+		pkg := buildBazaarPackageMetadata(repo, result.BazaarStats, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}
@@ -154,8 +154,8 @@ func Packages(pkgType string, frontend string) (packages []*Package) {
 	return
 }
 
-// buildPackageWithOnlineMetadata 从 StageRepo 构建带有在线元数据的集市包
-func buildPackageWithOnlineMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
+// buildBazaarPackageMetadata 从 StageRepo 构建带有在线元数据的集市包
+func buildBazaarPackageMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
 	if nil == repo || nil == repo.Package {
 		return nil
 	}

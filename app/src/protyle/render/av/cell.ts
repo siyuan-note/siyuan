@@ -877,31 +877,29 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             }
             cellValue.date.formattedContent = oldValue.date.formattedContent;
         }
-        if (objEquals(cellValue, oldValue)) {
-            break;
-        }
+        if (!objEquals(cellValue, oldValue)) {
+            doOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: cellValue
+            });
 
-        doOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
-            avID,
-            keyID: colId,
-            rowID,
-            data: cellValue
-        });
-
-        undoOperations.push({
-            action: "updateAttrViewCell",
-            id: cellId,
-            avID,
-            keyID: colId,
-            rowID,
-            data: oldValue
-        });
-        if (isCustomAttr) {
-            item.innerHTML = genAVValueHTML(cellValue);
-        } else {
-            updateAttrViewCellAnimation(item, cellValue);
+            undoOperations.push({
+                action: "updateAttrViewCell",
+                id: cellId,
+                avID,
+                keyID: colId,
+                rowID,
+                data: oldValue
+            });
+            if (isCustomAttr) {
+                item.innerHTML = genAVValueHTML(cellValue);
+            } else {
+                updateAttrViewCellAnimation(item, cellValue);
+            }
         }
     }
     if (getOperations) {

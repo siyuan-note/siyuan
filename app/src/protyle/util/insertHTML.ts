@@ -188,7 +188,8 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                             break;
                         }
                         const cellValue = textJSON[i][j];
-                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, tempElement.content.children[i].outerHTML, true);
+                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns,
+                            cellElement.getAttribute("data-dtype") === "mAsset" ? (tempElement.content.children[i * (j + 1) + j]?.outerHTML || "") : html, true);
                         if (operations.doOperations.length > 0) {
                             doOperations.push(...operations.doOperations);
                             undoOperations.push(...operations.undoOperations);

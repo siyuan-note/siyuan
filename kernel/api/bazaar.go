@@ -285,7 +285,7 @@ func getBazaarIcon(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarIcons(keyword),
+		"packages": model.GetBazaarPackages("icons", "", keyword),
 	}
 }
 
@@ -334,7 +334,7 @@ func installBazaarIcon(c *gin.Context) {
 	util.PushMsg(model.Conf.Language(69), 3000)
 
 	ret.Data = map[string]interface{}{
-		"packages":   model.BazaarIcons(keyword),
+		"packages":   model.GetBazaarPackages("icons", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
 }
@@ -362,7 +362,7 @@ func uninstallBazaarIcon(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages":   model.BazaarIcons(keyword),
+		"packages":   model.GetBazaarPackages("icons", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
 }
@@ -478,7 +478,7 @@ func getBazaarTheme(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages": model.BazaarThemes(keyword),
+		"packages": model.GetBazaarPackages("themes", "", keyword),
 	}
 }
 
@@ -536,7 +536,7 @@ func installBazaarTheme(c *gin.Context) {
 
 	util.PushMsg(model.Conf.Language(69), 3000)
 	ret.Data = map[string]interface{}{
-		"packages":   model.BazaarThemes(keyword),
+		"packages":   model.GetBazaarPackages("themes", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
 }
@@ -564,7 +564,7 @@ func uninstallBazaarTheme(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"packages":   model.BazaarThemes(keyword),
+		"packages":   model.GetBazaarPackages("themes", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
 }

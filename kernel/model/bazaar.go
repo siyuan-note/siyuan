@@ -154,14 +154,50 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Pa
 	packages = bazaar.GetBazaarPackages(pkgType, frontend)
 	packages = bazaar.FilterPackages(packages, keyword)
 
-	installedMap := getInstalledPackagesMap(pkgType, frontend)
-	for _, pkg := range packages {
-		if installedPkg, ok := installedMap[pkg.Name]; ok {
+	switch pkgType {
+	case "themes":
+		installedSet := make(map[string]struct{}, len(Conf.Appearance.DarkThemes)+len(Conf.Appearance.LightThemes))
+		for _, t := range Conf.Appearance.DarkThemes {
+			installedSet[t.Name] = struct{}{}
+		}
+		for _, t := range Conf.Appearance.LightThemes {
+			installedSet[t.Name] = struct{}{}
+		}
+		for _, pkg := range packages {
+			if _, installed := installedSet[pkg.Name]; !installed {
+				continue
+			}
 			pkg.Installed = true
-			pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
-		} else {
-			pkg.Installed = false
-			pkg.Outdated = false
+			if themeConf, err := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, pkg.Name, "theme.json")); err == nil {
+				pkg.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+pkg.Version)
+			}
+			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
+		}
+	case "icons":
+		installedSet := make(map[string]struct{}, len(Conf.Appearance.Icons))
+		for _, name := range Conf.Appearance.Icons {
+			installedSet[name] = struct{}{}
+		}
+		for _, pkg := range packages {
+			if _, installed := installedSet[pkg.Name]; !installed {
+				continue
+			}
+			pkg.Installed = true
+			if iconConf, err := bazaar.ParsePackageJSON(filepath.Join(util.IconsPath, pkg.Name, "icon.json")); err == nil {
+				pkg.Outdated = 0 > semver.Compare("v"+iconConf.Version, "v"+pkg.Version)
+			}
+			pkg.Current = pkg.Name == Conf.Appearance.Icon
+		}
+	default:
+		installedMap := getInstalledPackagesMap(pkgType, frontend)
+		for _, pkg := range packages {
+			if installedPkg, ok := installedMap[pkg.Name]; ok {
+				pkg.Installed = true
+				pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
+			} else {
+				pkg.Installed = false
+				pkg.Outdated = false
+			}
 		}
 	}
 	return
@@ -344,23 +380,6 @@ func UninstallPackage(packageType, packageName string) error {
 	return nil
 }
 
-func BazaarIcons(keyword string) (icons []*bazaar.Package) {
-	icons = bazaar.GetBazaarPackages("icons", "")
-	icons = bazaar.FilterPackages(icons, keyword)
-	for _, installed := range Conf.Appearance.Icons {
-		for _, icon := range icons {
-			if installed == icon.Name {
-				icon.Installed = true
-				if iconConf, err := bazaar.ParsePackageJSON(filepath.Join(util.IconsPath, icon.Name, "icon.json")); err == nil {
-					icon.Outdated = 0 > semver.Compare("v"+iconConf.Version, "v"+icon.Version)
-				}
-			}
-			icon.Current = icon.Name == Conf.Appearance.Icon
-		}
-	}
-	return
-}
-
 func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	if err := InstallBazaarPackage("icons", repoURL, repoHash, iconName); err != nil {
 		return err
@@ -370,25 +389,6 @@ func InstallBazaarIcon(repoURL, repoHash, iconName string) error {
 	InitAppearance()
 	util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	return nil
-}
-
-func BazaarThemes(keyword string) (ret []*bazaar.Package) {
-	ret = bazaar.GetBazaarPackages("themes", "")
-	ret = bazaar.FilterPackages(ret, keyword)
-	installs := Conf.Appearance.DarkThemes
-	installs = append(installs, Conf.Appearance.LightThemes...)
-	for _, installed := range installs {
-		for _, theme := range ret {
-			if installed.Name == theme.Name {
-				theme.Installed = true
-				if themeConf, err := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, theme.Name, "theme.json")); err == nil {
-					theme.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+theme.Version)
-				}
-				theme.Current = theme.Name == Conf.Appearance.ThemeDark || theme.Name == Conf.Appearance.ThemeLight
-			}
-		}
-	}
-	return
 }
 
 func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bool) error {

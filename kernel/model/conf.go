@@ -345,10 +345,11 @@ func InitConf() {
 			Conf.OpenHelp = true
 		}
 	} else {
-		if 0 < semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion) {
+		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
+		if 0 < cmp {
 			logging.LogInfof("upgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
 			Conf.ShowChangelog = true
-		} else if 0 > semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion) {
+		} else if 0 > cmp {
 			logging.LogInfof("downgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
 		}
 

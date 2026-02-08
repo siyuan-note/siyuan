@@ -777,50 +777,42 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
             if (Array.isArray(value)) {
                 newValue = oldValue.mAsset.concat(value);
             } else if (typeof value !== "undefined" && typeof value !== "object") { // 不传入为删除，传入字符串不进行处理
+                const htmlValue: IAVCellAssetValue[] = [];
                 let link = protyle.lute.GetLinkDest(value);
                 let name = "";
-                let imgSrc = "";
                 // https://github.com/siyuan-note/siyuan/issues/13892
                 if (!link && value.startsWith("assets/")) {
                     link = value;
                     name = getAssetName(value) + pathPosix().extname(value);
                 }
-                if (html) {
-                    const tempElement = document.createElement("template");
-                    tempElement.innerHTML = html;
-                    const aElement = tempElement.content.querySelector('[data-type~="a"]');
-                    if (aElement) {
-                        link = aElement.getAttribute("data-href");
-                        name = aElement.textContent;
-                    } else {
-                        const imgElement = tempElement.content.querySelector(".img img");
-                        if (imgElement) {
-                            imgSrc = imgElement.getAttribute("data-src");
-                        }
-                    }
-                }
                 // https://github.com/siyuan-note/siyuan/issues/12308
-                if (!link) {
-                    name = value;
-                }
-                if (!link && !name && !imgSrc) {
-                    break;
-                }
-                if (imgSrc) {
-                    // 支持解析 ![]() https://github.com/siyuan-note/siyuan/issues/11487
-                    newValue = oldValue.mAsset.concat({
-                        type: "image",
-                        content: imgSrc,
-                        name: ""
-                    });
-                } else {
-                    // 支持解析 https://github.com/siyuan-note/siyuan/issues/11463
-                    newValue = oldValue.mAsset.concat({
+                if (link) {
+                    htmlValue.push({
                         type: "file",
                         content: link,
                         name
                     });
                 }
+                if (html) {
+                    const tempElement = document.createElement("template");
+                    tempElement.innerHTML = html;
+                    tempElement.content.querySelectorAll('[data-type~="a"], .img img').forEach(item => {
+                        if (item.tagName === "IMG") {
+                            htmlValue.push({
+                                type: "image",
+                                content: item.getAttribute("data-src"),
+                                name: ""
+                            });
+                        } else {
+                            htmlValue.push({
+                                type: "file",
+                                content: item.getAttribute("data-href"),
+                                name: item.textContent
+                            });
+                        }
+                    });
+                }
+                newValue = oldValue.mAsset.concat(htmlValue);
             }
         } else if (type === "mSelect" || type === "select") {
             // 不传入为删除

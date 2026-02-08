@@ -62,6 +62,8 @@ func NewExport() *Export {
 		RemoveAssetsID:          false,
 		MarkdownYFM:             false,
 		InlineMemo:              false,
+		IncludeSubDocs:          true,
+		IncludeRelatedDocs:      false,
 		PDFFooter:               "%page / %pages",
 	}
 }

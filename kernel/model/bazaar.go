@@ -139,9 +139,19 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	return
 }
 
-// getInstalledPackagesWithBazaarMap 获取已安装的集市包列表，并给 bazaarPackagesMap（可能经过过滤）中的集市包设置元数据
-func getInstalledPackagesWithBazaarMap(pkgType, frontend string, bazaarPackagesMap map[string]*bazaar.Package) (ret []*bazaar.Package) {
-	ret = []*bazaar.Package{}
+// getPackages 获取在线集市包列表与本地集市包列表。isBazaar 为 true 时表示调用方为 GetBazaarPackages，仅需已安装包的 name/version 用于合并，不设置完整元数据
+func getPackages(pkgType, frontend string, isBazaar bool) (bazaarPackages []*bazaar.Package, installedPackages []*bazaar.Package) {
+	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)
+	var bazaarPackagesMap map[string]*bazaar.Package
+	if !isBazaar {
+		bazaarPackagesMap = make(map[string]*bazaar.Package, len(bazaarPackages))
+		for _, pkg := range bazaarPackages {
+			if "" != pkg.Name {
+				bazaarPackagesMap[pkg.Name] = pkg
+			}
+		}
+	}
+
 	var basePath string
 	var jsonFileName string
 	var baseURLPathPrefix string
@@ -203,18 +213,60 @@ func getInstalledPackagesWithBazaarMap(pkgType, frontend string, bazaarPackagesM
 		dirs = filtered
 	}
 
+	installedPackages = []*bazaar.Package{}
 	infos := bazaar.GetInstalledPackageInfos(dirs, basePath, jsonFileName)
+	if isBazaar {
+		for _, info := range infos {
+			installedPackages = append(installedPackages, info.Pkg)
+		}
+		return
+	}
 	for _, info := range infos {
 		pkg := info.Pkg
 		dirName := info.DirName
 		installPath := filepath.Join(basePath, dirName)
 		baseURLPath := baseURLPathPrefix + dirName + "/"
 
-		// 设置元数据
+		// 设置本地集市包的通用元数据
 		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
 			continue
 		}
-		// 添加额外信息
+		installedPackages = append(installedPackages, pkg)
+	}
+	return
+}
+
+// GetBazaarPackages 获取在线集市包列表
+func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*bazaar.Package) {
+	bazaarPackages, installedPackages := getPackages(pkgType, frontend, true)
+	bazaarPackages = bazaar.FilterPackages(bazaarPackages, keyword)
+	installedMap := make(map[string]*bazaar.Package, len(installedPackages))
+	for _, pkg := range installedPackages {
+		installedMap[pkg.Name] = pkg
+	}
+	for _, pkg := range bazaarPackages {
+		installedPkg, ok := installedMap[pkg.Name]
+		if !ok {
+			continue
+		}
+		pkg.Installed = true
+		pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
+		switch pkgType {
+		case "themes":
+			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
+		case "icons":
+			pkg.Current = pkg.Name == Conf.Appearance.Icon
+		}
+	}
+	return
+}
+
+// GetInstalledPackages 获取本地集市包列表
+func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
+	_, installedPackages = getPackages(pkgType, frontend, false)
+	installedPackages = bazaar.FilterPackages(installedPackages, keyword)
+	// 设置本地集市包的额外元数据
+	for _, pkg := range installedPackages {
 		switch pkgType {
 		case "plugins":
 			incompatible := bazaar.IsIncompatiblePlugin(pkg, frontend)
@@ -230,87 +282,7 @@ func getInstalledPackagesWithBazaarMap(pkgType, frontend string, bazaarPackagesM
 		case "icons":
 			pkg.Current = pkg.Name == Conf.Appearance.Icon
 		}
-		ret = append(ret, pkg)
 	}
-	return
-}
-
-// GetBazaarPackages 获取在线集市包列表
-func GetBazaarPackages(pkgType, frontend, keyword string) (packages []*bazaar.Package) {
-	packages = bazaar.GetBazaarPackages(pkgType, frontend)
-	packages = bazaar.FilterPackages(packages, keyword)
-
-	switch pkgType {
-	case "themes":
-		installedSet := make(map[string]struct{}, len(Conf.Appearance.DarkThemes)+len(Conf.Appearance.LightThemes))
-		for _, t := range Conf.Appearance.DarkThemes {
-			installedSet[t.Name] = struct{}{}
-		}
-		for _, t := range Conf.Appearance.LightThemes {
-			installedSet[t.Name] = struct{}{}
-		}
-		for _, pkg := range packages {
-			if _, installed := installedSet[pkg.Name]; !installed {
-				continue
-			}
-			pkg.Installed = true
-			if themeConf, err := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, pkg.Name, "theme.json")); err == nil {
-				pkg.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+pkg.Version)
-			}
-			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
-		}
-	case "icons":
-		installedSet := make(map[string]struct{}, len(Conf.Appearance.Icons))
-		for _, name := range Conf.Appearance.Icons {
-			installedSet[name] = struct{}{}
-		}
-		for _, pkg := range packages {
-			if _, installed := installedSet[pkg.Name]; !installed {
-				continue
-			}
-			pkg.Installed = true
-			if iconConf, err := bazaar.ParsePackageJSON(filepath.Join(util.IconsPath, pkg.Name, "icon.json")); err == nil {
-				pkg.Outdated = 0 > semver.Compare("v"+iconConf.Version, "v"+pkg.Version)
-			}
-			pkg.Current = pkg.Name == Conf.Appearance.Icon
-		}
-	default:
-		// 复用过滤后的 packages 构建 map：最终只对过滤后的 packages 设置字段，故 map 仅需覆盖过滤后的包名即可，无需完整的 packages
-		bazaarPackagesMap := make(map[string]*bazaar.Package, len(packages))
-		for _, pkg := range packages {
-			if "" != pkg.Name {
-				bazaarPackagesMap[pkg.Name] = pkg
-			}
-		}
-		installedPackages := getInstalledPackagesWithBazaarMap(pkgType, frontend, bazaarPackagesMap)
-		installedMap := make(map[string]*bazaar.Package, len(installedPackages))
-		for _, pkg := range installedPackages {
-			installedMap[pkg.Name] = pkg
-		}
-		for _, pkg := range packages {
-			if installedPkg, ok := installedMap[pkg.Name]; ok {
-				pkg.Installed = true
-				pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
-			} else {
-				pkg.Installed = false
-				pkg.Outdated = false
-			}
-		}
-	}
-	return
-}
-
-// GetInstalledPackages 获取已安装的指定类型集市包列表
-func GetInstalledPackages(pkgType, frontend, keyword string) (ret []*bazaar.Package) {
-	packages := bazaar.GetBazaarPackages(pkgType, frontend)
-	bazaarPackagesMap := make(map[string]*bazaar.Package, len(packages))
-	for _, pkg := range packages {
-		if "" != pkg.Name {
-			bazaarPackagesMap[pkg.Name] = pkg
-		}
-	}
-	ret = getInstalledPackagesWithBazaarMap(pkgType, frontend, bazaarPackagesMap)
-	ret = bazaar.FilterPackages(ret, keyword)
 	return
 }
 

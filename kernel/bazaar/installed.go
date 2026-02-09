@@ -141,7 +141,7 @@ func GetInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string)
 	return result
 }
 
-// SetInstalledPackageMetadata 设置本地集市包的本地元数据
+// SetInstalledPackageMetadata 设置本地集市包的通用元数据
 func SetInstalledPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
 	info, statErr := os.Stat(filepath.Join(installPath, jsonFileName))
 	if nil != statErr {

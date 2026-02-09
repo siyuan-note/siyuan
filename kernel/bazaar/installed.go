@@ -30,12 +30,6 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-// InstalledPackageInfo 表示已安装包的信息
-type InstalledPackageInfo struct {
-	Pkg     *Package
-	DirName string
-}
-
 // packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
 var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
 
@@ -124,21 +118,6 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 		}
 	}
 	return dirs, nil
-}
-
-// GetInstalledPackageInfos 获取已安装包信息
-func GetInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string) []InstalledPackageInfo {
-	var result []InstalledPackageInfo
-	for _, dir := range dirs {
-		dirName := dir.Name()
-		pkg, parseErr := ParsePackageJSON(filepath.Join(basePath, dirName, jsonFileName))
-		if nil != parseErr || nil == pkg {
-			continue
-		}
-
-		result = append(result, InstalledPackageInfo{Pkg: pkg, DirName: dirName})
-	}
-	return result
 }
 
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据

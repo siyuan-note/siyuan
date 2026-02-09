@@ -139,7 +139,7 @@ func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 
 	packages = make([]*Package, 0, len(result.StageIndex.Repos))
 	for _, repo := range result.StageIndex.Repos {
-		pkg := buildBazaarPackageMetadata(repo, result.BazaarStats, pkgType, frontend)
+		pkg := buildBazaarPackageWithMetadata(repo, result.BazaarStats, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}
@@ -154,8 +154,8 @@ func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 	return
 }
 
-// buildBazaarPackageMetadata 从 StageRepo 构建带有在线元数据的集市包
-func buildBazaarPackageMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
+// buildBazaarPackageWithMetadata 从 StageRepo 构建带有在线元数据的集市包
+func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
 	if nil == repo || nil == repo.Package {
 		return nil
 	}

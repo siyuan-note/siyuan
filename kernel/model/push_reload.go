@@ -43,85 +43,50 @@ func PushReloadSnippet(snippet *conf.Snpt) {
 	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
 }
 
-func PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginNameSet, uninstallPluginNameSet *hashset.Set, excludeApp string) {
-	// 集合去重
-	if nil != uninstallPluginNameSet {
-		for _, n := range uninstallPluginNameSet.Values() {
-			pluginName := n.(string)
-			if nil != upsertCodePluginSet {
-				upsertCodePluginSet.Remove(pluginName)
-			}
-			if nil != upsertDataPluginSet {
-				upsertDataPluginSet.Remove(pluginName)
-			}
-			if nil != unloadPluginNameSet {
-				unloadPluginNameSet.Remove(pluginName)
-			}
-		}
-	}
-	if nil != unloadPluginNameSet {
-		for _, n := range unloadPluginNameSet.Values() {
-			pluginName := n.(string)
-			if nil != upsertCodePluginSet {
-				upsertCodePluginSet.Remove(pluginName)
-			}
-			if nil != upsertDataPluginSet {
-				upsertDataPluginSet.Remove(pluginName)
+func PushReloadPlugin(uninstallPluginNameSet, unloadPluginNameSet, reloadPluginSet, dataChangePluginSet *hashset.Set, excludeApp string) {
+	// 按优先级从高到低排列，同一插件只保留在优先级最高的集合中
+	orderedSets := []*hashset.Set{uninstallPluginNameSet, unloadPluginNameSet, reloadPluginSet, dataChangePluginSet}
+	slices := make([][]string, len(orderedSets))
+	// 按顺序遍历所有集合
+	for i, set := range orderedSets {
+		if nil != set {
+			// 遍历当前集合的所有插件名称
+			for _, n := range set.Values() {
+				name := n.(string)
+				// 将该插件从所有后续集合中移除
+				for _, lowerSet := range orderedSets[i+1:] {
+					if nil != lowerSet {
+						lowerSet.Remove(name)
+					}
+				}
 			}
 		}
-	}
-	if nil != upsertCodePluginSet {
-		for _, n := range upsertCodePluginSet.Values() {
-			pluginName := n.(string)
-			if nil != upsertDataPluginSet {
-				upsertDataPluginSet.Remove(pluginName)
+
+		// 将当前集合转换为字符串切片
+		if nil == set {
+			slices[i] = []string{}
+		} else {
+			strs := make([]string, 0, set.Size())
+			for _, n := range set.Values() {
+				strs = append(strs, n.(string))
 			}
+			slices[i] = strs
 		}
 	}
 
-	upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins := []string{}, []string{}, []string{}, []string{}
-	if nil != upsertCodePluginSet {
-		for _, n := range upsertCodePluginSet.Values() {
-			upsertCodePlugins = append(upsertCodePlugins, n.(string))
-		}
-	}
-	if nil != upsertDataPluginSet {
-		for _, n := range upsertDataPluginSet.Values() {
-			upsertDataPlugins = append(upsertDataPlugins, n.(string))
-		}
-	}
-	if nil != unloadPluginNameSet {
-		for _, n := range unloadPluginNameSet.Values() {
-			unloadPlugins = append(unloadPlugins, n.(string))
-		}
-	}
-	if nil != uninstallPluginNameSet {
-		for _, n := range uninstallPluginNameSet.Values() {
-			uninstallPlugins = append(uninstallPlugins, n.(string))
-		}
+	logging.LogInfof("reload plugins, uninstalls=%v, unloads=%v, reloads=%v, dataChanges=%v", slices[0], slices[1], slices[2], slices[3])
+	payload := map[string]interface{}{
+		"uninstallPlugins":  slices[0], // 插件卸载
+		"unloadPlugins":     slices[1], // 插件禁用
+		"reloadPlugins":     slices[2], // 插件启用，或插件代码变更
+		"dataChangePlugins": slices[3], // 插件存储数据变更
 	}
 
-	pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins, excludeApp)
-}
-
-func pushReloadPlugin0(upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins []string, excludeApp string) {
-	logging.LogInfof("reload plugins [codeChanges=%v, dataChanges=%v, unloads=%v, uninstalls=%v]", upsertCodePlugins, upsertDataPlugins, unloadPlugins, uninstallPlugins)
 	if "" == excludeApp {
-		util.BroadcastByType("main", "reloadPlugin", 0, "", map[string]interface{}{
-			"upsertCodePlugins": upsertCodePlugins,
-			"upsertDataPlugins": upsertDataPlugins,
-			"unloadPlugins":     unloadPlugins,
-			"uninstallPlugins":  uninstallPlugins,
-		})
+		util.BroadcastByType("main", "reloadPlugin", 0, "", payload)
 		return
 	}
-
-	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", map[string]interface{}{
-		"upsertCodePlugins": upsertCodePlugins,
-		"upsertDataPlugins": upsertDataPlugins,
-		"unloadPlugins":     unloadPlugins,
-		"uninstallPlugins":  uninstallPlugins,
-	})
+	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", payload)
 }
 
 func refreshDocInfo(tree *parse.Tree) {

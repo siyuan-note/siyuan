@@ -368,7 +368,7 @@ func UninstallPackage(pkgType, packageName string) error {
 		savePetals(petals)
 
 		uninstallPluginSet := hashset.New(packageName)
-		PushReloadPlugin(nil, nil, nil, uninstallPluginSet, "")
+		PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "")
 	case "icons", "themes":
 		InitAppearance()
 	}

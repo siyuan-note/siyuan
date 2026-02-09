@@ -546,6 +546,7 @@ func installBazaarTheme(c *gin.Context) {
 		return
 	}
 
+	// TODO 安装新主题之后，不应该始终取消外观模式“跟随系统” https://github.com/siyuan-note/siyuan/issues/16990
 	// 安装集市主题后不跟随系统切换外观模式
 	model.Conf.Appearance.ModeOS = false
 	model.Conf.Save()

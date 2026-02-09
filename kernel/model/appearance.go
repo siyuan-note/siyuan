@@ -132,7 +132,7 @@ func loadThemes() {
 		}
 		for _, mode := range modes {
 			t := &conf.AppearanceTheme{Name: name}
-			if bazaar.IsBuiltInTheme(name) {
+			if isBuiltInTheme(name) {
 				t.Label = name + Conf.Language(281)
 			} else {
 				t.Label = name

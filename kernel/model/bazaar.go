@@ -40,6 +40,24 @@ type installedPackageInfo struct {
 	DirName string
 }
 
+func getPackageInstallPath(pkgType, packageName string) (string, error) {
+	switch pkgType {
+	case "plugins":
+		return filepath.Join(util.DataDir, "plugins", packageName), nil
+	case "themes":
+		return filepath.Join(util.ThemesPath, packageName), nil
+	case "icons":
+		return filepath.Join(util.IconsPath, packageName), nil
+	case "templates":
+		return filepath.Join(util.DataDir, "templates", packageName), nil
+	case "widgets":
+		return filepath.Join(util.DataDir, "widgets", packageName), nil
+	default:
+		logging.LogErrorf("invalid package type: %s", pkgType)
+		return "", errors.New("invalid package type")
+	}
+}
+
 // updatePackages 更新一组集市包
 func updatePackages(packages []*bazaar.Package, pkgType string, count *int, total int) bool {
 	for _, pkg := range packages {
@@ -123,25 +141,16 @@ func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templ
 }
 
 // getUpdatedPackages 获取单个类型集市包的更新列表
-func getUpdatedPackages(pkgType, frontend, keyword string) []*bazaar.Package {
+func getUpdatedPackages(pkgType, frontend, keyword string) (updatedPackages []*bazaar.Package) {
 	installedPackages := GetInstalledPackages(pkgType, frontend, keyword)
-	var outdated []*bazaar.Package
+	updatedPackages = []*bazaar.Package{} // 确保返回空切片而非 nil
 	for _, pkg := range installedPackages {
 		if !pkg.Outdated {
 			continue
 		}
-		outdated = append(outdated, pkg)
+		updatedPackages = append(updatedPackages, pkg)
 		pkg.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
 	}
-	// 确保返回空切片而非 nil
-	if len(outdated) == 0 {
-		return []*bazaar.Package{}
-	}
-	return outdated
-}
-
-func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {
-	ret = bazaar.GetBazaarPackageREADME(ctx, repoURL, repoHash, pkgType)
 	return
 }
 
@@ -178,7 +187,7 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 	case "themes":
 		filtered := make([]os.DirEntry, 0, len(dirs))
 		for _, d := range dirs {
-			if bazaar.IsBuiltInTheme(d.Name()) {
+			if isBuiltInTheme(d.Name()) {
 				continue
 			}
 			filtered = append(filtered, d)
@@ -187,7 +196,7 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 	case "icons":
 		filtered := make([]os.DirEntry, 0, len(dirs))
 		for _, d := range dirs {
-			if bazaar.IsBuiltInIcon(d.Name()) {
+			if isBuiltInIcon(d.Name()) {
 				continue
 			}
 			filtered = append(filtered, d)
@@ -202,35 +211,6 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 			continue
 		}
 		installedPackageInfos = append(installedPackageInfos, installedPackageInfo{Pkg: pkg, DirName: dirName})
-	}
-	return
-}
-
-// GetBazaarPackages 获取在线集市包列表
-func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*bazaar.Package) {
-	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)
-	bazaarPackages = bazaar.FilterPackages(bazaarPackages, keyword)
-	installedInfos, _, _, _, err := GetInstalledPackageInfos(pkgType)
-	if err != nil {
-		return
-	}
-	installedMap := make(map[string]*bazaar.Package, len(installedInfos))
-	for _, info := range installedInfos {
-		installedMap[info.Pkg.Name] = info.Pkg
-	}
-	for _, pkg := range bazaarPackages {
-		installedPkg, ok := installedMap[pkg.Name]
-		if !ok {
-			continue
-		}
-		pkg.Installed = true
-		pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
-		switch pkgType {
-		case "themes":
-			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
-		case "icons":
-			pkg.Current = pkg.Name == Conf.Appearance.Icon
-		}
 	}
 	return
 }
@@ -281,22 +261,38 @@ func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages 
 	return
 }
 
-func getPackageInstallPath(pkgType, packageName string) (string, error) {
-	switch pkgType {
-	case "plugins":
-		return filepath.Join(util.DataDir, "plugins", packageName), nil
-	case "themes":
-		return filepath.Join(util.ThemesPath, packageName), nil
-	case "icons":
-		return filepath.Join(util.IconsPath, packageName), nil
-	case "templates":
-		return filepath.Join(util.DataDir, "templates", packageName), nil
-	case "widgets":
-		return filepath.Join(util.DataDir, "widgets", packageName), nil
-	default:
-		logging.LogErrorf("invalid package type: %s", pkgType)
-		return "", errors.New("invalid package type")
+// GetBazaarPackages 获取在线集市包列表
+func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*bazaar.Package) {
+	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)
+	bazaarPackages = bazaar.FilterPackages(bazaarPackages, keyword)
+	installedInfos, _, _, _, err := GetInstalledPackageInfos(pkgType)
+	if err != nil {
+		return
 	}
+	installedMap := make(map[string]*bazaar.Package, len(installedInfos))
+	for _, info := range installedInfos {
+		installedMap[info.Pkg.Name] = info.Pkg
+	}
+	for _, pkg := range bazaarPackages {
+		installedPkg, ok := installedMap[pkg.Name]
+		if !ok {
+			continue
+		}
+		pkg.Installed = true
+		pkg.Outdated = 0 > semver.Compare("v"+installedPkg.Version, "v"+pkg.Version)
+		switch pkgType {
+		case "themes":
+			pkg.Current = pkg.Name == Conf.Appearance.ThemeDark || pkg.Name == Conf.Appearance.ThemeLight
+		case "icons":
+			pkg.Current = pkg.Name == Conf.Appearance.Icon
+		}
+	}
+	return
+}
+
+func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {
+	ret = bazaar.GetBazaarPackageREADME(ctx, repoURL, repoHash, pkgType)
+	return
 }
 
 // InstallBazaarPackage 安装集市包。update 为 true 表示更新已有包、themeMode 仅在 pkgType 为 "themes" 时生效
@@ -378,4 +374,14 @@ func UninstallPackage(pkgType, packageName string) error {
 	}
 
 	return nil
+}
+
+// isBuiltInTheme 通过包名或目录名判断是否为内置主题
+func isBuiltInTheme(name string) bool {
+	return "daylight" == name || "midnight" == name
+}
+
+// isBuiltInIcon 通过包名或目录名判断是否为内置图标
+func isBuiltInIcon(name string) bool {
+	return "ant" == name || "material" == name
 }

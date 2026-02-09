@@ -18,6 +18,7 @@ package bazaar
 
 import (
 	"os"
+	"path"
 	"strings"
 	"sync"
 
@@ -37,7 +38,7 @@ type Funding struct {
 	Custom         []string `json:"custom"`
 }
 
-// 如果某个集市包 json 文件内需要新增字段，需要同步修改 bazaar 的工作流 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
+// 如果某个类型的集市包 json 新增字段，需要同步修改 bazaar 的工作流，参考 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
 type Package struct {
 	Author            string        `json:"author"`
 	URL               string        `json:"url"`
@@ -57,8 +58,8 @@ type Package struct {
 	PreferredDesc    string `json:"preferredDesc"`
 	PreferredReadme  string `json:"preferredReadme"`
 
-	Name       string `json:"name"`
-	RepoURL    string `json:"repoURL"`
+	Name       string `json:"name"`    // 包名，不一定是仓库名
+	RepoURL    string `json:"repoURL"` // 形式为 https://github.com/owner/repo
 	RepoHash   string `json:"repoHash"`
 	PreviewURL string `json:"previewURL"`
 	IconURL    string `json:"iconURL"`
@@ -170,4 +171,74 @@ func normalizeFundingURL(s, base string) string {
 		return s
 	}
 	return base + s
+}
+
+// FilterPackages 按关键词过滤集市包列表
+func FilterPackages(packages []*Package, keyword string) []*Package {
+	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return packages
+	}
+	ret := []*Package{}
+	for _, pkg := range packages {
+		if packageContainsKeywords(pkg, keywords) {
+			ret = append(ret, pkg)
+		}
+	}
+	return ret
+}
+
+func getSearchKeywords(query string) (ret []string) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return
+	}
+	keywords := strings.Split(query, " ")
+	for _, k := range keywords {
+		if "" != k {
+			ret = append(ret, strings.ToLower(k))
+		}
+	}
+	return
+}
+
+func packageContainsKeywords(pkg *Package, keywords []string) bool {
+	if 0 == len(keywords) {
+		return true
+	}
+	if nil == pkg {
+		return false
+	}
+	for _, kw := range keywords {
+		if !packageContainsKeyword(pkg, kw) {
+			return false
+		}
+	}
+	return true
+}
+
+func packageContainsKeyword(pkg *Package, kw string) bool {
+	if strings.Contains(strings.ToLower(pkg.Name), kw) || // https://github.com/siyuan-note/siyuan/issues/10515
+		strings.Contains(strings.ToLower(pkg.Author), kw) { // https://github.com/siyuan-note/siyuan/issues/11673
+		return true
+	}
+	for _, s := range pkg.DisplayName {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Description {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Keywords {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	if strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), kw) { // 仓库名，不一定是包名
+		return true
+	}
+	return false
 }

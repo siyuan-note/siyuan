@@ -74,6 +74,19 @@ func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
 	return false
 }
 
+var cachedBackend string
+
+func getCurrentBackend() string {
+	if cachedBackend == "" {
+		if util.Container == util.ContainerStd {
+			cachedBackend = runtime.GOOS
+		} else {
+			cachedBackend = util.Container
+		}
+	}
+	return cachedBackend
+}
+
 // isTargetSupported 检查 platforms 中是否包含 target 或 "all"
 func isTargetSupported(platforms []string, target string) bool {
 	// 缺失字段时跳过检查，相当于 all
@@ -86,17 +99,4 @@ func isTargetSupported(platforms []string, target string) bool {
 		}
 	}
 	return false
-}
-
-var cachedBackend string
-
-func getCurrentBackend() string {
-	if cachedBackend == "" {
-		if util.Container == util.ContainerStd {
-			cachedBackend = runtime.GOOS
-		} else {
-			cachedBackend = util.Container
-		}
-	}
-	return cachedBackend
 }

@@ -17,7 +17,6 @@
 package bazaar
 
 import (
-	"sort"
 	"strings"
 	"time"
 
@@ -42,12 +41,6 @@ func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 		}
 		packages = append(packages, pkg)
 	}
-
-	// 通用排序
-	sort.Slice(packages, func(i, j int) bool {
-		return packages[i].Updated > packages[j].Updated
-	})
-
 	return
 }
 
@@ -99,7 +92,7 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	return &pkg
 }
 
-// formatUpdated 格式化更新时间字符串
+// formatUpdated 格式化发布日期字符串
 func formatUpdated(updated string) (ret string) {
 	t, e := dateparse.ParseIn(updated, time.Now().Location())
 	if nil == e {

@@ -18,9 +18,7 @@ package bazaar
 
 import (
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/88250/go-humanize"
@@ -33,74 +31,7 @@ import (
 // packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
 var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
 
-// FilterPackages 按关键词过滤集市包列表
-func FilterPackages(packages []*Package, keyword string) []*Package {
-	keywords := getSearchKeywords(keyword)
-	if 0 == len(keywords) {
-		return packages
-	}
-	ret := []*Package{}
-	for _, pkg := range packages {
-		if matchPackage(keywords, pkg) {
-			ret = append(ret, pkg)
-		}
-	}
-	return ret
-}
-
-func getSearchKeywords(query string) (ret []string) {
-	query = strings.TrimSpace(query)
-	if "" == query {
-		return
-	}
-	keywords := strings.Split(query, " ")
-	for _, k := range keywords {
-		if "" != k {
-			ret = append(ret, strings.ToLower(k))
-		}
-	}
-	return
-}
-
-func matchPackage(keywords []string, pkg *Package) bool {
-	if 1 > len(keywords) {
-		return true
-	}
-	if nil == pkg {
-		return false
-	}
-	for _, kw := range keywords {
-		if !packageContainsKeyword(pkg, kw) {
-			return false
-		}
-	}
-	return true
-}
-
-func packageContainsKeyword(pkg *Package, kw string) bool {
-	if strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), kw) ||
-		strings.Contains(strings.ToLower(pkg.Author), kw) {
-		return true
-	}
-	for _, s := range pkg.DisplayName {
-		if strings.Contains(strings.ToLower(s), kw) {
-			return true
-		}
-	}
-	for _, s := range pkg.Description {
-		if strings.Contains(strings.ToLower(s), kw) {
-			return true
-		}
-	}
-	for _, s := range pkg.Keywords {
-		if strings.Contains(strings.ToLower(s), kw) {
-			return true
-		}
-	}
-	return false
-}
-
-// ReadInstalledPackageDirs 读取已安装包的目录列表
+// ReadInstalledPackageDirs 读取本地集市包的目录列表
 func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	if !util.IsPathRegularDirOrSymlinkDir(basePath) {
 		return []os.DirEntry{}, nil
@@ -137,19 +68,24 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, jsonFileName, baseUR
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
 	// 更新信息
-	pkg.RepoURL = pkg.URL
+	pkg.Installed = true
 	pkg.DisallowInstall = isBelowRequiredAppVersion(pkg)
 	if bazaarPkg := bazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
 		pkg.DisallowUpdate = isBelowRequiredAppVersion(bazaarPkg)
 		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
-		pkg.RepoURL = bazaarPkg.RepoURL
+		pkg.RepoURL = bazaarPkg.RepoURL // 更新链接使用在线数据，避免本地元数据的链接错误
+
+		if 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
+			pkg.RepoHash = bazaarPkg.RepoHash
+			pkg.Outdated = true
+		}
+	} else {
+		pkg.RepoURL = pkg.URL
 	}
-	pkg.Outdated = isOutdatedPackage(bazaarPackagesMap, pkg)
-	pkg.Installed = true
 
 	// 安装信息
 	pkg.HInstallDate = info.ModTime().Format("2006-01-02")
-	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示
+	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示 https://github.com/siyuan-note/siyuan/issues/16983
 	// 目前优先使用在线 stage 数据：不耗时，但可能不准确，比如本地旧版本与云端最新版本的安装大小可能不一致；其次使用本地目录大小：耗时，但准确
 	if installSize, ok := packageInstallSizeCache.Get(pkg.RepoURL); ok {
 		pkg.InstallSize = installSize.(int64)
@@ -175,34 +111,4 @@ func isBelowRequiredAppVersion(pkg *Package) bool {
 		return true
 	}
 	return false
-}
-
-func isOutdatedPackage(bazaarPackagesMap map[string]*Package, pkg *Package) bool {
-	if !strings.HasPrefix(pkg.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(pkg.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	if bazaarPkg, ok := bazaarPackagesMap[pkg.Name]; ok {
-		if 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
-			pkg.RepoHash = bazaarPkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-// IsBuiltInTheme 通过包名或目录名判断是否为内置主题
-func IsBuiltInTheme(name string) bool {
-	return "daylight" == name || "midnight" == name
-}
-
-// IsBuiltInIcon 通过包名或目录名判断是否为内置图标
-func IsBuiltInIcon(name string) bool {
-	return "ant" == name || "material" == name
 }

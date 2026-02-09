@@ -446,6 +446,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		srcEmptyList = srcNode.Parent
 	}
 
+	if nil != operation.Context && "true" == operation.Context["removeFold"] {
+		srcNode.RemoveIALAttr("heading-fold")
+		srcNode.RemoveIALAttr("fold")
+	}
+
 	targetPreviousID := operation.PreviousID
 	targetParentID := operation.ParentID
 	if "" != targetPreviousID {

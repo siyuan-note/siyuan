@@ -1166,6 +1166,9 @@ export const getArticle = (options: {
                     method: options.config?.method || null,
                     types: options.config?.types || null,
                 };
+                if (options.edit.protyle.options.render.title) {
+                    options.edit.protyle.title.render(options.edit.protyle, response);
+                }
                 onGet({
                     updateReadonly: true,
                     data: getResponse,
@@ -1210,9 +1213,6 @@ export const getArticle = (options: {
                         }
                     }
                 });
-                if (options.edit.protyle.options.render.title) {
-                    options.edit.protyle.title.render(options.edit.protyle, response);
-                }
             });
         });
     });

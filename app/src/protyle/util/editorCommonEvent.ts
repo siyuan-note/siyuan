@@ -346,6 +346,9 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const undoOperations: IOperation[] = [];
     const targetMoveUndo: IOperation = {
         action: "move",
+        context: {
+            removeFold: "true"
+        },
         id: targetElement.getAttribute("data-node-id"),
         previousID: targetElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: getParentBlock(targetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
@@ -400,35 +403,38 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         action: "delete",
         id: sbElement.getAttribute("data-node-id"),
     });
-    let hasFoldHeading = false;
+    const foldElements: Element[] = [];
     newSourceParentElement.forEach(item => {
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            hasFoldHeading = true;
-            if (item.nextElementSibling && (
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
+            item.nextElementSibling && (
                 item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                item.nextElementSibling.getAttribute("data-subtype") > item.getAttribute("data-subtype")
+                (item.nextElementSibling.getAttribute("data-subtype") || "") > item.getAttribute("data-subtype")
             )) {
-                const foldOperations = setFold(protyle, item, true, false, false, true);
-                doOperations.push(...foldOperations.doOperations);
-                // 不折叠，否则无法撤销 undoOperations.push(...foldOperations.undoOperations);
-            }
-            return true;
+            foldElements.push(item);
         }
+    });
+    if ((newSourceParentElement.length > 1 || foldElements.length > 0) && direct === "col") {
+        const mergeOperations = await turnsIntoOneTransaction({
+            protyle,
+            selectsElement: newSourceParentElement.reverse(),
+            type: "BlocksMergeSuperBlock",
+            level: "row",
+            unfocus: true,
+            getOperations: true
+        });
+        doOperations.push(...mergeOperations.doOperations);
+        undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+    }
+    foldElements.forEach(item => {
+        const foldOperations = setFold(protyle, item, true, false, false, true);
+        doOperations.push(...foldOperations.doOperations);
+        undoOperations.splice(0, 0, ...foldOperations.undoOperations);
     });
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {
         // 跨文档或插入折叠标题下不支持撤销
         transaction(protyle, doOperations);
-    }
-    if ((newSourceParentElement.length > 1 || hasFoldHeading) && direct === "col") {
-        turnsIntoOneTransaction({
-            protyle,
-            selectsElement: newSourceParentElement.reverse(),
-            type: "BlocksMergeSuperBlock",
-            level: "row",
-            unfocus: true,
-        });
     }
     if (document.contains(sourceElements[0])) {
         focusBlock(sourceElements[0]);

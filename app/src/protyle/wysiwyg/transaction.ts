@@ -684,6 +684,17 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             });
         }
         /// #endif
+        // 折叠标题移动到横向超级块的第一个块上后撤销
+        if (updateElements.length === 0) {
+            const tempEl = document.createElement("div");
+            tempEl.setAttribute("data-node-id", operation.id);
+            updateElements.push(tempEl);
+            fetchPost("/api/block/getBlockDOM", {
+                id: operation.id,
+            }, (response) => {
+                document.querySelector(`[data-node-id="${operation.id}"]`).outerHTML = response.data.dom;
+            });
+        }
         let range;
         if (isUndo && getSelection().rangeCount > 0) {
             range = getSelection().getRangeAt(0);
@@ -940,7 +951,8 @@ export const turnsIntoOneTransaction = async (options: {
     selectsElement: Element[],
     type: TTurnIntoOne,
     level?: TTurnIntoOneSub,
-    unfocus?: boolean
+    unfocus?: boolean,
+    getOperations?: boolean,
 }) => {
     let parentElement: Element;
     const id = Lute.NewNodeID();
@@ -1054,6 +1066,12 @@ export const turnsIntoOneTransaction = async (options: {
         const cancelOperations = await cancelSB(options.protyle, parentElement.parentElement);
         doOperations.push(...cancelOperations.doOperations);
         undoOperations.splice(0, 0, ...cancelOperations.undoOperations);
+    }
+    if (options.getOperations) {
+        return {
+            doOperations,
+            undoOperations,
+        };
     }
     transaction(options.protyle, doOperations, undoOperations);
     if (!options.unfocus) {

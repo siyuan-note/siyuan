@@ -112,11 +112,17 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 		return []os.DirEntry{}, nil
 	}
 
-	dirs, err := os.ReadDir(basePath)
+	entries, err := os.ReadDir(basePath)
 	if err != nil {
 		return nil, err
 	}
 
+	dirs := make([]os.DirEntry, 0, len(entries))
+	for _, e := range entries {
+		if util.IsDirRegularOrSymlink(e) {
+			dirs = append(dirs, e)
+		}
+	}
 	return dirs, nil
 }
 
@@ -124,9 +130,6 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 func GetInstalledPackageInfos(dirs []os.DirEntry, basePath, jsonFileName string) []InstalledPackageInfo {
 	var result []InstalledPackageInfo
 	for _, dir := range dirs {
-		if !util.IsDirRegularOrSymlink(dir) {
-			continue
-		}
 		dirName := dir.Name()
 		pkg, parseErr := ParsePackageJSON(filepath.Join(basePath, dirName, jsonFileName))
 		if nil != parseErr || nil == pkg {
@@ -216,12 +219,12 @@ func isOutdatedPackage(bazaarPackagesMap map[string]*Package, pkg *Package) bool
 	return false
 }
 
-// IsBuiltInTheme 判断是否为内置主题
-func IsBuiltInTheme(dirName string) bool {
-	return "daylight" == dirName || "midnight" == dirName
+// IsBuiltInTheme 通过包名或目录名判断是否为内置主题
+func IsBuiltInTheme(name string) bool {
+	return "daylight" == name || "midnight" == name
 }
 
-// IsBuiltInIcon 判断是否为内置图标
-func IsBuiltInIcon(dirName string) bool {
-	return "ant" == dirName || "material" == dirName
+// IsBuiltInIcon 通过包名或目录名判断是否为内置图标
+func IsBuiltInIcon(name string) bool {
+	return "ant" == name || "material" == name
 }

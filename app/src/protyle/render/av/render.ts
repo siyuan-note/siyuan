@@ -19,6 +19,9 @@ import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
 import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
+/// #if MOBILE
+import {activeBlur} from "../../../mobile/util/keyboardToolbar";
+/// #endif
 import {renderKanban} from "./kanban/render";
 
 interface IIds {
@@ -439,6 +442,9 @@ const afterRenderTable = (options: ITableOptions) => {
             searchInputElement.style.paddingRight = "0";
             focusBlock(options.blockElement);
             updateSearch(options.blockElement, options.protyle);
+            /// #if MOBILE
+            activeBlur();
+            /// #endif
         }
     });
 };

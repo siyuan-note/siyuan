@@ -139,46 +139,30 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	return
 }
 
-// getPackages 获取在线集市包列表与本地集市包列表。isBazaar 为 true 时表示调用方为 GetBazaarPackages，仅需已安装包的 name/version 用于合并，不设置完整元数据
-func getPackages(pkgType, frontend string, isBazaar bool) (bazaarPackages []*bazaar.Package, installedPackages []*bazaar.Package) {
-	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)
-	var bazaarPackagesMap map[string]*bazaar.Package
-	if !isBazaar {
-		bazaarPackagesMap = make(map[string]*bazaar.Package, len(bazaarPackages))
-		for _, pkg := range bazaarPackages {
-			if "" != pkg.Name {
-				bazaarPackagesMap[pkg.Name] = pkg
-			}
-		}
-	}
-
-	var basePath string
-	var jsonFileName string
-	var baseURLPathPrefix string
-
+// getPackagePaths 获取包类型路径、元数据文件名、URL 前缀
+func getPackagePaths(pkgType string) (basePath, jsonFileName, baseURLPathPrefix string, err error) {
 	switch pkgType {
 	case "plugins":
-		basePath = filepath.Join(util.DataDir, "plugins")
-		jsonFileName = "plugin.json"
-		baseURLPathPrefix = "/plugins/"
+		return filepath.Join(util.DataDir, "plugins"), "plugin.json", "/plugins/", nil
 	case "themes":
-		basePath = util.ThemesPath
-		jsonFileName = "theme.json"
-		baseURLPathPrefix = "/appearance/themes/"
+		return util.ThemesPath, "theme.json", "/appearance/themes/", nil
 	case "icons":
-		basePath = util.IconsPath
-		jsonFileName = "icon.json"
-		baseURLPathPrefix = "/appearance/icons/"
+		return util.IconsPath, "icon.json", "/appearance/icons/", nil
 	case "templates":
-		basePath = filepath.Join(util.DataDir, "templates")
-		jsonFileName = "template.json"
-		baseURLPathPrefix = "/templates/"
+		return filepath.Join(util.DataDir, "templates"), "template.json", "/templates/", nil
 	case "widgets":
-		basePath = filepath.Join(util.DataDir, "widgets")
-		jsonFileName = "widget.json"
-		baseURLPathPrefix = "/widgets/"
+		return filepath.Join(util.DataDir, "widgets"), "widget.json", "/widgets/", nil
 	default:
-		logging.LogWarnf("invalid package type: %s", pkgType)
+		logging.LogErrorf("invalid package type: %s", pkgType)
+		return "", "", "", errors.New("invalid package type")
+	}
+}
+
+// getPackages 获取在线集市包列表与已安装包信息列表，由调用方根据需求合并或设置元数据
+func getPackages(pkgType, frontend string) (bazaarPackages []*bazaar.Package, installedInfos []bazaar.InstalledPackageInfo) {
+	bazaarPackages = bazaar.GetBazaarPackages(pkgType, frontend)
+	basePath, jsonFileName, _, err := getPackagePaths(pkgType)
+	if err != nil {
 		return
 	}
 
@@ -213,36 +197,17 @@ func getPackages(pkgType, frontend string, isBazaar bool) (bazaarPackages []*baz
 		dirs = filtered
 	}
 
-	installedPackages = []*bazaar.Package{}
-	infos := bazaar.GetInstalledPackageInfos(dirs, basePath, jsonFileName)
-	if isBazaar {
-		for _, info := range infos {
-			installedPackages = append(installedPackages, info.Pkg)
-		}
-		return
-	}
-	for _, info := range infos {
-		pkg := info.Pkg
-		dirName := info.DirName
-		installPath := filepath.Join(basePath, dirName)
-		baseURLPath := baseURLPathPrefix + dirName + "/"
-
-		// 设置本地集市包的通用元数据
-		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
-			continue
-		}
-		installedPackages = append(installedPackages, pkg)
-	}
+	installedInfos = bazaar.GetInstalledPackageInfos(dirs, basePath, jsonFileName)
 	return
 }
 
 // GetBazaarPackages 获取在线集市包列表
 func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*bazaar.Package) {
-	bazaarPackages, installedPackages := getPackages(pkgType, frontend, true)
+	bazaarPackages, installedInfos := getPackages(pkgType, frontend)
 	bazaarPackages = bazaar.FilterPackages(bazaarPackages, keyword)
-	installedMap := make(map[string]*bazaar.Package, len(installedPackages))
-	for _, pkg := range installedPackages {
-		installedMap[pkg.Name] = pkg
+	installedMap := make(map[string]*bazaar.Package, len(installedInfos))
+	for _, info := range installedInfos {
+		installedMap[info.Pkg.Name] = info.Pkg
 	}
 	for _, pkg := range bazaarPackages {
 		installedPkg, ok := installedMap[pkg.Name]
@@ -263,7 +228,29 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*baz
 
 // GetInstalledPackages 获取本地集市包列表
 func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
-	_, installedPackages = getPackages(pkgType, frontend, false)
+	installedPackages = []*bazaar.Package{}
+	bazaarPackages, installedInfos := getPackages(pkgType, frontend)
+	basePath, jsonFileName, baseURLPathPrefix, err := getPackagePaths(pkgType)
+	if err != nil {
+		return
+	}
+	bazaarPackagesMap := make(map[string]*bazaar.Package, len(bazaarPackages))
+	for _, pkg := range bazaarPackages {
+		if "" != pkg.Name {
+			bazaarPackagesMap[pkg.Name] = pkg
+		}
+	}
+	for _, info := range installedInfos {
+		pkg := info.Pkg
+		installPath := filepath.Join(basePath, info.DirName)
+		baseURLPath := baseURLPathPrefix + info.DirName + "/"
+		// 设置本地集市包的通用元数据
+		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {
+			continue
+		}
+		installedPackages = append(installedPackages, pkg)
+	}
+	// TODO 设置通用元数据之前就需要过滤掉，不执行多余的代码
 	installedPackages = bazaar.FilterPackages(installedPackages, keyword)
 	// 设置本地集市包的额外元数据
 	for _, pkg := range installedPackages {

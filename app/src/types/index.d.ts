@@ -877,7 +877,6 @@ interface IBazaarItem {
     outdated: false;
     name: string;
     previewURL: string;
-    previewURLThumb: string;
     repoHash: string;
     repoURL: string;
     url: string;

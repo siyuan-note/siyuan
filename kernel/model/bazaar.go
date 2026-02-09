@@ -121,9 +121,10 @@ func getUpdatedPackages(pkgType, frontend, keyword string) []*bazaar.Package {
 	installedPackages := GetInstalledPackages(pkgType, frontend, keyword)
 	var outdated []*bazaar.Package
 	for _, pkg := range installedPackages {
-		if pkg.Outdated {
-			outdated = append(outdated, pkg)
+		if !pkg.Outdated {
+			continue
 		}
+		outdated = append(outdated, pkg)
 		pkg.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
 	}
 	// 确保返回空切片而非 nil
@@ -207,7 +208,7 @@ func getInstalledPackagesWithBazaarMap(pkgType, frontend string, bazaarPackagesM
 		pkg := info.Pkg
 		dirName := info.DirName
 		installPath := filepath.Join(basePath, dirName)
-		baseURLPath := baseURLPathPrefix + dirName
+		baseURLPath := baseURLPathPrefix + dirName + "/"
 
 		// 设置元数据
 		if !bazaar.SetInstalledPackageMetadata(pkg, installPath, jsonFileName, baseURLPath, bazaarPackagesMap) {

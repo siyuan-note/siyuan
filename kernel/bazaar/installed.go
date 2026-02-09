@@ -150,12 +150,11 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, jsonFileName, baseUR
 	}
 
 	// 展示信息
-	pkg.IconURL = baseURLPath + "/icon.png"
-	pkg.PreviewURL = baseURLPath + "/preview.png"
-	pkg.PreviewURLThumb = baseURLPath + "/preview.png"
+	pkg.IconURL = baseURLPath + "icon.png"
+	pkg.PreviewURL = baseURLPath + "preview.png"
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
-	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath+"/", pkg.Readme)
+	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath, pkg.Readme)
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
 	// 更新信息

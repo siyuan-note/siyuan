@@ -61,12 +61,11 @@ type Package struct {
 	PreferredDesc    string `json:"preferredDesc"`
 	PreferredReadme  string `json:"preferredReadme"`
 
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-	IconURL         string `json:"iconURL"`
+	Name       string `json:"name"`
+	RepoURL    string `json:"repoURL"`
+	RepoHash   string `json:"repoHash"`
+	PreviewURL string `json:"previewURL"`
+	IconURL    string `json:"iconURL"`
 
 	Installed               bool   `json:"installed"`
 	Outdated                bool   `json:"outdated"`
@@ -173,7 +172,6 @@ func buildBazaarPackageMetadata(repo *StageRepo, bazaarStats map[string]*bazaarS
 	// 展示信息
 	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
 	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
-	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)

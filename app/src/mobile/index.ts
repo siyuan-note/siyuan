@@ -96,7 +96,9 @@ class App {
             }
             if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) {
                 setTimeout(() => {
-                    event.target.scrollIntoView();
+                    event.target.scrollIntoView({
+                        block: "center",
+                    });
                 }, Constants.TIMEOUT_TRANSITION);
             }
             if (isInIOS()) {

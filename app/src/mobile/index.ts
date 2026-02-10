@@ -20,7 +20,7 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, isInAndroid, isInHarmony, writeText} from "../protyle/util/compatibility";
+import {getLocalStorage, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {checkPublishServiceClosed} from "../util/processMessage";
@@ -101,7 +101,7 @@ class App {
                     });
                 }, Constants.TIMEOUT_TRANSITION);
             }
-            if (isInAndroid() || isInHarmony()) {
+            if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
                 const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
                 let editElement: HTMLElement;
                 if ((event.target.tagName === "TEXTAREA" ||
@@ -116,7 +116,7 @@ class App {
                 }
             }
         });
-        if (isInAndroid() || isInHarmony()) {
+        if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
             const __siyuan_original_focus = HTMLElement.prototype.focus;
             HTMLElement.prototype.focus = function (this: HTMLElement, ...args) {
                 try {

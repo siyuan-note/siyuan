@@ -2,12 +2,7 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
-import {
-    hasClosestBlock,
-    hasClosestByAttribute,
-    hasClosestByClassName,
-    hasTopClosestByClassName
-} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../protyle/util/hasClosest";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
@@ -37,7 +32,7 @@ import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {updateControlAlt} from "../protyle/util/hotKey";
 import {nbsp2space} from "../protyle/util/normalizeText";
-import {callMobileAppShowKeyboard} from "./util/mobileAppUtil";
+import {callMobileAppShowKeyboard, canInput} from "./util/mobileAppUtil";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -102,16 +97,7 @@ class App {
                 }, Constants.TIMEOUT_TRANSITION);
             }
             if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
-                const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
-                let editElement: HTMLElement;
-                if ((event.target.tagName === "TEXTAREA" ||
-                        (event.target.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(event.target.getAttribute("type")))) &&
-                    event.target.getAttribute("readonly") !== "readonly") {
-                    editElement = event.target;
-                } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
-                    editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
-                }
-                if (editElement) {
+                if (canInput(event.target)) {
                     callMobileAppShowKeyboard();
                 }
             }
@@ -126,16 +112,8 @@ class App {
                 } catch (e) {
                     console.error("Error in focus event:", e);
                 }
-                const wysisygElement = hasClosestByClassName(this, "protyle-wysiwyg", true);
-                if ((this.tagName === "TEXTAREA" ||
-                        (this.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(this.getAttribute("type")))) &&
-                    this.getAttribute("readonly") !== "readonly") {
+                if (canInput(this)) {
                     callMobileAppShowKeyboard();
-                } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
-                    const editElement = hasClosestByAttribute(this, "contenteditable", "true") as HTMLElement;
-                    if (editElement) {
-                        callMobileAppShowKeyboard();
-                    }
                 }
             };
         }

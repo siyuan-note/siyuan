@@ -14,7 +14,7 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInEdge, isInHarmony} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
-import {callMobileAppShowKeyboard} from "./mobileAppUtil";
+import {callMobileAppShowKeyboard, canInput} from "./mobileAppUtil";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -327,24 +327,7 @@ const hideKeyboardToolbarUtil = () => {
 const renderKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     renderKeyboardToolbarTimeout = window.setTimeout(() => {
-        if (getSelection().rangeCount === 0 ||
-            window.siyuan.config.readonly ||
-            document.getElementById("toolbarName").getAttribute("readonly") === "readonly" ||
-            !document.activeElement || (
-                document.activeElement &&
-                !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) &&
-                !document.activeElement.classList.contains("protyle-wysiwyg") &&
-                document.activeElement.getAttribute("contenteditable") !== "true"
-            )) {
-            hideKeyboardToolbar();
-            return;
-        }
-        // 编辑器设置界面点击空白或关闭，焦点不知何故会飘移到编辑器上
-        if (document.activeElement &&
-            !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) && (
-                document.getElementById("menu").style.transform === "translateX(0px)" ||
-                document.getElementById("model").style.transform === "translateY(0px)"
-            )) {
+        if (!canInput(document.activeElement)) {
             hideKeyboardToolbar();
             return;
         }

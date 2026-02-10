@@ -32,6 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
+	"golang.org/x/sync/singleflight"
 )
 
 // installedPackageInfo 描述了本地集市包的包与目录名信息
@@ -215,20 +216,40 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 	return
 }
 
+var getInstalledPackagesFlight singleflight.Group
+
 // GetInstalledPackages 获取本地集市包列表
 func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
+	key := "getInstalledPackages:" + pkgType + ":" + frontend + ":" + keyword
+	v, err, _ := getInstalledPackagesFlight.Do(key, func() (interface{}, error) {
+		return getInstalledPackages0(pkgType, frontend, keyword), nil
+	})
+	if err != nil {
+		return []*bazaar.Package{}
+	}
+	return v.([]*bazaar.Package)
+}
+
+func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
 	installedPackages = []*bazaar.Package{}
-	bazaarPackages := bazaar.GetBazaarPackages(pkgType, frontend)
+
 	installedInfos, basePath, jsonFileName, baseURLPathPrefix, err := GetInstalledPackageInfos(pkgType)
 	if err != nil {
 		return
 	}
+	// 本地没有该类型的集市包时，直接返回，避免请求云端数据
+	if len(installedInfos) == 0 {
+		return
+	}
+
+	bazaarPackages := bazaar.GetBazaarPackages(pkgType, frontend)
 	bazaarPackagesMap := make(map[string]*bazaar.Package, len(bazaarPackages))
 	for _, pkg := range bazaarPackages {
 		if "" != pkg.Name {
 			bazaarPackagesMap[pkg.Name] = pkg
 		}
 	}
+
 	for _, info := range installedInfos {
 		pkg := info.Pkg
 		installPath := filepath.Join(basePath, info.DirName)
@@ -239,14 +260,19 @@ func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages 
 		}
 		installedPackages = append(installedPackages, pkg)
 	}
+
 	installedPackages = bazaar.FilterPackages(installedPackages, keyword)
+
 	// 设置本地集市包的额外元数据
+	var petals []*Petal
+	if pkgType == "plugins" {
+		petals = getPetals()
+	}
 	for _, pkg := range installedPackages {
 		switch pkgType {
 		case "plugins":
 			incompatible := bazaar.IsIncompatiblePlugin(pkg, frontend)
 			pkg.Incompatible = &incompatible
-			petals := getPetals()
 			petal := getPetalByName(pkg.Name, petals)
 			if nil != petal {
 				enabled := petal.Enabled

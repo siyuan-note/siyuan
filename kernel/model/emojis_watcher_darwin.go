@@ -19,9 +19,11 @@
 package model
 
 import (
+	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/radovskyb/watcher"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -34,14 +36,23 @@ func WatchEmojis() {
 }
 
 func watchEmojis() {
-	if nil != emojisWatcher {
-		emojisWatcher.Close()
-	}
-	emojisWatcher = watcher.New()
-
+	CloseWatchEmojis()
 	emojisDir := filepath.Join(util.DataDir, "emojis")
 
+	emojisWatcher = watcher.New()
+
+	if !gulu.File.IsDir(emojisDir) {
+		os.MkdirAll(emojisDir, 0755)
+	}
+
+	if err := emojisWatcher.Add(emojisDir); err != nil {
+		logging.LogErrorf("add emojis watcher for folder [%s] failed: %s", emojisDir, err)
+		return
+	}
+
 	go func() {
+		defer logging.Recover()
+
 		for {
 			select {
 			case _, ok := <-emojisWatcher.Event:
@@ -60,12 +71,6 @@ func watchEmojis() {
 		}
 	}()
 
-	if err := emojisWatcher.Add(emojisDir); err != nil {
-		logging.LogErrorf("add emojis watcher for folder [%s] failed: %s", emojisDir, err)
-		return
-	}
-
-	//logging.LogInfof("added file watcher [%s]", emojisDir)
 	if err := emojisWatcher.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start emojis watcher for folder [%s] failed: %s", emojisDir, err)
 		return
@@ -75,5 +80,6 @@ func watchEmojis() {
 func CloseWatchEmojis() {
 	if nil != emojisWatcher {
 		emojisWatcher.Close()
+		emojisWatcher = nil
 	}
 }

@@ -19,9 +19,12 @@
 package model
 
 import (
+	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/radovskyb/watcher"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -35,14 +38,23 @@ func WatchAssets() {
 }
 
 func watchAssets() {
-	if nil != assetsWatcher {
-		assetsWatcher.Close()
-	}
-	assetsWatcher = watcher.New()
-
+	CloseWatchAssets()
 	assetsDir := filepath.Join(util.DataDir, "assets")
 
+	assetsWatcher = watcher.New()
+
+	if !gulu.File.IsDir(assetsDir) {
+		os.MkdirAll(assetsDir, 0755)
+	}
+
+	if err := assetsWatcher.Add(assetsDir); err != nil {
+		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
+		return
+	}
+
 	go func() {
+		defer logging.Recover()
+
 		for {
 			select {
 			case event, ok := <-assetsWatcher.Event:
@@ -50,7 +62,10 @@ func watchAssets() {
 					return
 				}
 
-				//logging.LogInfof("assets changed: %s", event)
+				if strings.HasSuffix(event.Path, ".tmp") {
+					continue
+				}
+
 				if watcher.Write == event.Op {
 					IncSync()
 				}
@@ -74,12 +89,6 @@ func watchAssets() {
 		}
 	}()
 
-	if err := assetsWatcher.Add(assetsDir); err != nil {
-		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
-		return
-	}
-
-	//logging.LogInfof("added file watcher [%s]", assetsDir)
 	if err := assetsWatcher.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
@@ -89,5 +98,6 @@ func watchAssets() {
 func CloseWatchAssets() {
 	if nil != assetsWatcher {
 		assetsWatcher.Close()
+		assetsWatcher = nil
 	}
 }

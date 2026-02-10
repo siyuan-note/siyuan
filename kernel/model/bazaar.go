@@ -297,11 +297,6 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 
 // InstallBazaarPackage 安装集市包。update 为 true 表示更新已有包、themeMode 仅在 pkgType 为 "themes" 时生效
 func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, update bool, themeMode int) error {
-	switch pkgType {
-	case "themes":
-		closeThemeWatchers()
-	}
-
 	installPath, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {
 		return err
@@ -326,6 +321,7 @@ func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, update
 			Conf.Save()
 		}
 		InitAppearance()
+		WatchThemes()
 		util.BroadcastByType("main", "setAppearance", 0, "", Conf.Appearance)
 	case "icons":
 		if !update {
@@ -340,11 +336,6 @@ func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, update
 }
 
 func UninstallPackage(pkgType, packageName string) error {
-	switch pkgType {
-	case "themes":
-		closeThemeWatchers()
-	}
-
 	installPath, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {
 		return err
@@ -369,7 +360,10 @@ func UninstallPackage(pkgType, packageName string) error {
 
 		uninstallPluginSet := hashset.New(packageName)
 		PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "")
-	case "icons", "themes":
+	case "themes":
+		InitAppearance()
+		WatchThemes()
+	case "icons":
 		InitAppearance()
 	}
 

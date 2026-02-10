@@ -55,5 +55,6 @@ func main() {
 
 	model.WatchAssets()
 	model.WatchEmojis()
+	model.WatchThemes()
 	model.HandleSignal()
 }

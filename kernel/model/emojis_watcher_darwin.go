@@ -30,9 +30,7 @@ import (
 var emojisWatcher *watcher.Watcher
 
 func WatchEmojis() {
-	go func() {
-		watchEmojis()
-	}()
+	go watchEmojis()
 }
 
 func watchEmojis() {

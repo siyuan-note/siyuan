@@ -31,9 +31,7 @@ import (
 var assetsWatcher *watcher.Watcher
 
 func WatchAssets() {
-	go func() {
-		watchAssets()
-	}()
+	go watchAssets()
 }
 
 func watchAssets() {

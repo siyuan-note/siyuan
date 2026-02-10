@@ -21,11 +21,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
@@ -41,7 +39,6 @@ func InitAppearance() {
 		return
 	}
 
-	unloadThemes()
 	from := filepath.Join(util.WorkingDir, "appearance")
 	if err := filelock.Copy(from, util.AppearancePath); err != nil {
 		logging.LogErrorf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
@@ -77,27 +74,6 @@ func containTheme(name string, themes []*conf.AppearanceTheme) bool {
 		}
 	}
 	return false
-}
-
-var themeWatchers = sync.Map{} // [string]*fsnotify.Watcher
-
-func unloadThemes() {
-	if !util.IsPathRegularDirOrSymlinkDir(util.ThemesPath) {
-		return
-	}
-
-	themeDirs, err := os.ReadDir(util.ThemesPath)
-	if err != nil {
-		logging.LogErrorf("read appearance themes folder failed: %s", err)
-		return
-	}
-
-	for _, themeDir := range themeDirs {
-		if !util.IsDirRegularOrSymlink(themeDir) {
-			continue
-		}
-		unwatchTheme(filepath.Join(util.ThemesPath, themeDir.Name()))
-	}
 }
 
 func loadThemes() {
@@ -173,8 +149,6 @@ func loadThemes() {
 				themeJS = gulu.File.IsExist(filepath.Join(util.ThemesPath, name, "theme.js"))
 			}
 		}
-
-		go watchTheme(filepath.Join(util.ThemesPath, name))
 	}
 
 	lightThemes = append([]*conf.AppearanceTheme{daylightTheme}, lightThemes...)
@@ -221,74 +195,6 @@ func LoadIcons() {
 	Conf.m.Unlock()
 }
 
-func unwatchTheme(folder string) {
-	val, _ := themeWatchers.Load(folder)
-	if nil != val {
-		val.(*fsnotify.Watcher).Close()
-		themeWatchers.Delete(folder)
-	}
-}
-
-func watchTheme(folder string) {
-	unwatchTheme(folder)
-
-	themeWatcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		logging.LogErrorf("add theme file watcher for folder [%s] failed: %s", folder, err)
-		return
-	}
-
-	if err = themeWatcher.Add(folder); err != nil {
-		logging.LogErrorf("add theme files watcher for folder [%s] failed: %s", folder, err)
-		themeWatcher.Close()
-		return
-	}
-	themeWatchers.Store(folder, themeWatcher)
-
-	go func() {
-		defer logging.Recover()
-
-		for {
-			select {
-			case event, ok := <-themeWatcher.Events:
-				if !ok {
-					return
-				}
-
-				//logging.LogInfof(event.String())
-				if event.Op&fsnotify.Write == fsnotify.Write && (strings.HasSuffix(event.Name, "theme.css")) {
-					var themeName string
-					if themeName = isCurrentUseTheme(event.Name); "" == themeName {
-						break
-					}
-
-					if strings.HasSuffix(event.Name, "theme.css") {
-						util.BroadcastByType("main", "refreshtheme", 0, "", map[string]interface{}{
-							"theme": "/appearance/themes/" + themeName + "/theme.css?" + fmt.Sprintf("%d", time.Now().Unix()),
-						})
-						break
-					}
-				}
-			case err, ok := <-themeWatcher.Errors:
-				if !ok {
-					return
-				}
-				logging.LogErrorf("watch theme file failed: %s", err)
-			}
-		}
-	}()
-}
-
-func closeThemeWatchers() {
-	themeWatchers.Range(func(folder, value interface{}) bool {
-		if err := value.(*fsnotify.Watcher).Close(); err != nil {
-			logging.LogErrorf("close file watcher failed: %s", err)
-		}
-		themeWatchers.Delete(folder)
-		return true
-	})
-}
-
 func isCurrentUseTheme(themePath string) string {
 	themeName := filepath.Base(filepath.Dir(themePath))
 	if 0 == Conf.Appearance.Mode { // 明亮
@@ -301,4 +207,23 @@ func isCurrentUseTheme(themePath string) string {
 		}
 	}
 	return ""
+}
+
+func broadcastRefreshThemeIfCurrent(themeCssPath string) {
+	if !strings.HasSuffix(themeCssPath, "theme.css") {
+		return
+	}
+	// 只处理主题根目录中的 theme.css
+	themeDir := filepath.Clean(filepath.Dir(themeCssPath))
+	themesRoot := filepath.Clean(util.ThemesPath)
+	if themeDir != filepath.Join(themesRoot, filepath.Base(themeDir)) {
+		return
+	}
+	themeName := isCurrentUseTheme(themeCssPath)
+	if themeName == "" {
+		return
+	}
+	util.BroadcastByType("main", "refreshtheme", 0, "", map[string]interface{}{
+		"theme": "/appearance/themes/" + themeName + "/theme.css?" + fmt.Sprintf("%d", time.Now().Unix()),
+	})
 }

@@ -576,7 +576,7 @@
     init();
     window.addEventListener("click", (event) => {
         if (event.target.tagName === "INPUT" &&
-            ["email", "number", "password", "search", "tel", "text", "url", ""].includes(event.target.getAttribute("type")) &&
+            ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(event.target.getAttribute("type")) &&
             event.target.getAttribute("readonly") !== "readonly") {
             if (window.JSAndroid && window.JSAndroid.showKeyboard) {
                 window.JSAndroid.showKeyboard();

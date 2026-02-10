@@ -328,9 +328,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
             }
-            setTimeout(() => {
+            if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
+                callMobileAppShowKeyboard();
+                setTimeout(() => {
+                    searchElement.focus();
+                }, Constants.TIMEOUT_TRANSITION);
+            } else {
                 searchElement.focus();
-            }, Constants.TIMEOUT_TRANSITION);
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;

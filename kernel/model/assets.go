@@ -936,6 +936,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					return
 				}
 
+				cache.RemoveTreeData(util.GetTreeID(treeAbsPath))
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, notebook.ID)))
 				tree, parseErr := filesys.LoadTreeByData(data, notebook.ID, p, luteEngine)
 				if nil != parseErr {

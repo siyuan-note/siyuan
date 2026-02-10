@@ -439,12 +439,14 @@ export const showKeyboardToolbar = () => {
     }
     const range = getSelection().getRangeAt(0);
     const editor = getCurrentEditor();
-    if (editor && editor.protyle.wysiwyg.element.contains(range.startContainer)) {
-        editor.protyle.element.parentElement.style.paddingBottom = "48px";
+    if (editor) {
+        if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
+            editor.protyle.element.parentElement.style.paddingBottom = "48px";
+        }
+        editor.protyle.app.plugins.forEach(item => {
+            item.eventBus.emit("mobile-keyboard-show");
+        });
     }
-    getCurrentEditor().protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("mobile-keyboard-show");
-    });
     setTimeout(() => {
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
         if (contentElement) {
@@ -475,14 +477,14 @@ export const hideKeyboardToolbar = () => {
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "";
+        editor.protyle.app.plugins.forEach(item => {
+            item.eventBus.emit("mobile-keyboard-hide");
+        });
     }
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {
         modelElement.style.paddingBottom = "";
     }
-    getCurrentEditor().protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("mobile-keyboard-hide");
-    });
 };
 
 export const activeBlur = () => {

@@ -574,6 +574,20 @@
         new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
     }
     init();
+    window.addEventListener("click", (event) => {
+        if (event.target.tagName === "INPUT" &&
+            ["email", "number", "password", "search", "tel", "text", "url", ""].includes(event.target.getAttribute("type")) &&
+            event.target.getAttribute("readonly") !== "readonly") {
+            setTimeout(() => {
+                event.target.scrollIntoView();
+            }, Constants.TIMEOUT_TRANSITION);
+            if (window.JSAndroid && window.JSAndroid.showKeyboard) {
+                window.JSAndroid.showKeyboard();
+            } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
+                window.JSHarmony.showKeyboard();
+            }
+        }
+    })
 </script>
 </body>
 </html>

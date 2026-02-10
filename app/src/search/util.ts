@@ -1166,8 +1166,9 @@ export const getArticle = (options: {
                     method: options.config?.method || null,
                     types: options.config?.types || null,
                 };
+                // https://ld246.com/article/1770132984152
                 if (options.edit.protyle.options.render.title) {
-                    options.edit.protyle.title.render(options.edit.protyle, response);
+                    options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
                 }
                 onGet({
                     updateReadonly: true,
@@ -1213,6 +1214,10 @@ export const getArticle = (options: {
                         }
                     }
                 });
+                // 只能放在 onGet 后，否则 title 不会更新 https://github.com/siyuan-note/siyuan/issues/16739
+                if (options.edit.protyle.options.render.title) {
+                    options.edit.protyle.title.render(options.edit.protyle, response);
+                }
             });
         });
     });

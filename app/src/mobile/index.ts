@@ -94,7 +94,11 @@ class App {
                 showMessage(window.siyuan.languages.copied, 2000);
                 event.preventDefault();
             }
-
+            if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) {
+                setTimeout(() => {
+                    event.target.scrollIntoView();
+                }, Constants.TIMEOUT_TRANSITION);
+            }
             if (isInIOS()) {
                 return;
             }
@@ -104,9 +108,6 @@ class App {
                     (event.target.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", ""].includes(event.target.getAttribute("type")))) &&
                 event.target.getAttribute("readonly") !== "readonly") {
                 editElement = event.target;
-                setTimeout(() => {
-                    editElement.scrollIntoView();
-                }, Constants.TIMEOUT_TRANSITION);
             } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
                 editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
             }

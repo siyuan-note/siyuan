@@ -532,7 +532,7 @@ export const initKeyboardToolbar = () => {
                     window.siyuan.mobile.size.landscape.height1 = window.innerHeight;
                 }
                 if (window.siyuan.mobile.size.landscape.height2 < window.innerHeight) {
-                    activeBlur()
+                    activeBlur();
                 } else if (!preventRender) {
                     renderKeyboardToolbar();
                 }
@@ -550,7 +550,7 @@ export const initKeyboardToolbar = () => {
                     window.siyuan.mobile.size.portrait.height1 = window.innerHeight;
                 }
                 if (window.siyuan.mobile.size.portrait.height2 < window.innerHeight) {
-                    activeBlur()
+                    activeBlur();
                 } else if (!preventRender) {
                     renderKeyboardToolbar();
                 }

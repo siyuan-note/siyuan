@@ -328,7 +328,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
             }
-            callMobileAppShowKeyboard();
             setTimeout(() => {
                 searchElement.focus();
             }, Constants.TIMEOUT_TRANSITION);

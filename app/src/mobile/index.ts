@@ -20,7 +20,7 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, isInIOS, writeText} from "../protyle/util/compatibility";
+import {getLocalStorage, isInAndroid, isInHarmony, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {checkPublishServiceClosed} from "../util/processMessage";
@@ -101,22 +101,44 @@ class App {
                     });
                 }, Constants.TIMEOUT_TRANSITION);
             }
-            if (isInIOS()) {
-                return;
-            }
-            const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
-            let editElement: HTMLElement;
-            if ((event.target.tagName === "TEXTAREA" ||
-                    (event.target.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", ""].includes(event.target.getAttribute("type")))) &&
-                event.target.getAttribute("readonly") !== "readonly") {
-                editElement = event.target;
-            } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
-                editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
-            }
-            if (editElement) {
-                callMobileAppShowKeyboard();
+            if (isInAndroid() || isInHarmony()) {
+                const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
+                let editElement: HTMLElement;
+                if ((event.target.tagName === "TEXTAREA" ||
+                        (event.target.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(event.target.getAttribute("type")))) &&
+                    event.target.getAttribute("readonly") !== "readonly") {
+                    editElement = event.target;
+                } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
+                    editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;
+                }
+                if (editElement) {
+                    callMobileAppShowKeyboard();
+                }
             }
         });
+        if (isInAndroid() || isInHarmony()) {
+            const __siyuan_original_focus = HTMLElement.prototype.focus;
+            HTMLElement.prototype.focus = function (this: HTMLElement, ...args) {
+                try {
+                    if (typeof __siyuan_original_focus === "function") {
+                        __siyuan_original_focus.apply(this, args);
+                    }
+                } catch (e) {
+                    console.error("Error in focus event:", e);
+                }
+                const wysisygElement = hasClosestByClassName(this, "protyle-wysiwyg", true);
+                if ((this.tagName === "TEXTAREA" ||
+                        (this.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(this.getAttribute("type")))) &&
+                    this.getAttribute("readonly") !== "readonly") {
+                    callMobileAppShowKeyboard();
+                } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
+                    const editElement = hasClosestByAttribute(this, "contenteditable", "true") as HTMLElement;
+                    if (editElement) {
+                        callMobileAppShowKeyboard();
+                    }
+                }
+            };
+        }
         window.addEventListener("beforeunload", () => {
             saveScroll(window.siyuan.mobile.editor.protyle);
         }, false);

@@ -100,7 +100,9 @@ class App {
             }
             const wysisygElement = hasClosestByClassName(event.target, "protyle-wysiwyg", true);
             let editElement: HTMLElement;
-            if (["INPUT", "TEXTAREA"].includes(event.target.tagName) && event.target.getAttribute("readonly") !== "readonly") {
+            if ((event.target.tagName === "TEXTAREA" ||
+                    (event.target.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", ""].includes(event.target.getAttribute("type")))) &&
+                event.target.getAttribute("readonly") !== "readonly") {
                 editElement = event.target;
             } else if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
                 editElement = hasClosestByAttribute(event.target, "contenteditable", "true") as HTMLElement;

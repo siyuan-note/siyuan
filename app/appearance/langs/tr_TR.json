@@ -1,4 +1,5 @@
 {
+  "useChrome": "Sadece Chromium tabanlı tarayıcılarda (ör. Chrome/Edge) kullanılabilir; diğer tarayıcılarda çözülemeyen uyumluluk sorunlarıyla karşılaşılabilir",
   "clearAllAV": "Tüm atıfta bulunulmayan veritabanlarını temizlemek istediğinize emin misiniz?",
   "unreferencedAV": "Başvurulmayan veritabanı",
   "includeSubDocs": "Alt belgeleri dahil et",

@@ -1,4 +1,5 @@
 {
+  "useChrome": "Pris en charge uniquement dans les navigateurs basés sur le moteur Chromium (par exemple Chrome/Edge), l'utilisation d'autres navigateurs peut engendrer des problèmes de compatibilité insolubles",
   "clearAllAV": "Confirmer le nettoyage de toutes les bases de données non référencées ?",
   "unreferencedAV": "Base de données non référencée",
   "includeSubDocs": "Inclure les sous-documents",

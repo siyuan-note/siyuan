@@ -1,4 +1,5 @@
 {
+  "useChrome": "Only supported in browsers based on the Chromium engine (e.g., Chrome/Edge), using other browsers may encounter compatibility issues that cannot be resolved",
   "clearAllAV": "Confirm clearing all unreferenced databases?",
   "unreferencedAV": "Unreferenced database",
   "includeSubDocs": "Include sub-documents",

@@ -1,4 +1,5 @@
 {
+  "useChrome": "Chromium 엔진 기반 브라우저(예: Chrome/Edge)에서만 지원되며, 다른 브라우저를 사용할 경우 해결할 수 없는 호환성 문제가 발생할 수 있습니다",
   "clearAllAV": "모든 참조되지 않은 데이터베이스를 정리하시겠습니까?",
   "unreferencedAV": "참조되지 않은 데이터베이스",
   "includeSubDocs": "하위 문서 포함",

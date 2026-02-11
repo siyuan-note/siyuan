@@ -1,4 +1,5 @@
 {
+  "useChrome": "Nur in Browsern mit Chromium-Engine (z. B. Chrome/Edge) unterstützt, die Verwendung anderer Browser kann zu nicht löschbaren Kompatibilitätsproblemen führen",
   "clearAllAV": "Bestätigen Sie das Löschen aller nicht referenzierten Datenbanken?",
   "unreferencedAV": "Nicht referenzierte Datenbank",
   "includeSubDocs": "Unterdokumente einbeziehen",

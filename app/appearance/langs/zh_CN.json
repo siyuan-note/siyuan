@@ -1,5 +1,5 @@
 {
-  "useChrome": "为了更好的体检，建议使用 Chrome 进行浏览",
+  "useChrome": "仅支持在基于 Chromium 内核的浏览器（比如 Chrome/Edge）中使用，使用其他浏览器会遇到无法解决的兼容性问题",
   "clearAllAV": "确认清理所有未引用的数据库？",
   "unreferencedAV": "未引用的数据库",
   "includeSubDocs": "包含子文档",

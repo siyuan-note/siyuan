@@ -1,4 +1,5 @@
 {
+  "useChrome": "Chromium ベースのブラウザ（例えば Chrome/Edge）でのみ使用可能で、他のブラウザでは解決できない互換性の問題が発生することがあります",
   "clearAllAV": "すべての参照されていないデータベースを削除してもよろしいですか？",
   "unreferencedAV": "参照されていないデータベース",
   "includeSubDocs": "子ドキュメントを含める",

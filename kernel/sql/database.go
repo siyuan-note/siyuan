@@ -95,13 +95,11 @@ func InitDatabase(forceRebuild bool) (err error) {
 
 	// 不存在库或者版本不一致都会走到这里
 
-	if err = closeDatabase(); nil != err {
-		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "close database failed: %s", err)
-	}
-
+	closeDatabase()
 	if gulu.File.IsExist(util.DBPath) {
 		if err = removeDatabaseFile(); err != nil {
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", util.DBPath, err)
+			logging.LogErrorf("remove database file failed: %s", err)
+			err = nil
 		}
 	}
 
@@ -271,6 +269,8 @@ func InitHistoryDatabase(forceRebuild bool) {
 	}
 
 	historyDB.Close()
+	historyDB = nil
+	runtime.GC()
 	if err := os.RemoveAll(util.HistoryDBPath); err != nil {
 		logging.LogErrorf("remove history database file [%s] failed: %s", util.HistoryDBPath, err)
 		return
@@ -283,6 +283,8 @@ func InitHistoryDatabase(forceRebuild bool) {
 func initHistoryDBConnection() {
 	if nil != historyDB {
 		historyDB.Close()
+		historyDB = nil
+		runtime.GC()
 	}
 
 	util.LogDatabaseSize(util.HistoryDBPath)
@@ -327,6 +329,8 @@ func InitAssetContentDatabase(forceRebuild bool) {
 	}
 
 	assetContentDB.Close()
+	assetContentDB = nil
+	runtime.GC()
 	if err := os.RemoveAll(util.AssetContentDBPath); err != nil {
 		logging.LogErrorf("remove assets database file [%s] failed: %s", util.AssetContentDBPath, err)
 		return
@@ -339,6 +343,8 @@ func InitAssetContentDatabase(forceRebuild bool) {
 func initAssetContentDBConnection() {
 	if nil != assetContentDB {
 		assetContentDB.Close()
+		assetContentDB = nil
+		runtime.GC()
 	}
 
 	util.LogDatabaseSize(util.AssetContentDBPath)
@@ -1282,17 +1288,14 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]interface
 }
 
 func CloseDatabase() {
-	if err := closeDatabase(); err != nil {
+	if err := db.Close(); err != nil {
 		logging.LogErrorf("close database failed: %s", err)
-		return
 	}
 	if err := historyDB.Close(); err != nil {
 		logging.LogErrorf("close history database failed: %s", err)
-		return
 	}
 	if err := assetContentDB.Close(); err != nil {
 		logging.LogErrorf("close asset content database failed: %s", err)
-		return
 	}
 	treenode.CloseDatabase()
 	logging.LogInfof("closed database")
@@ -1544,14 +1547,15 @@ func removeDatabaseFile() (err error) {
 	return
 }
 
-func closeDatabase() (err error) {
+func closeDatabase() {
 	if nil == db {
 		return
 	}
 
-	err = db.Close()
+	db.Close()
 	debug.FreeOSMemory()
-	runtime.GC() // 没有这句的话文件句柄不会释放，后面就无法删除文件
+	db = nil
+	runtime.GC()
 	return
 }
 

@@ -18,6 +18,7 @@ import {clearOBG} from "../layout/dock/util";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {afterLoadPlugin, loadPlugins} from "./loader";
+import {normalizeStoragePath} from "../util/pathName";
 
 export class Plugin {
     private app: App;
@@ -259,12 +260,20 @@ export class Plugin {
     }
 
     public loadData(storageName: string): Promise<any> {
+        const safePath = normalizeStoragePath(storageName);
+        if (safePath === null) {
+            return Promise.reject({
+                code: 403,
+                msg: `For plugin [${this.name}], storage path [${storageName}] is invalid: empty or path traversal not allowed.`,
+                data: null
+            } as IWebSocketData);
+        }
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
         return new Promise((resolve) => {
             fetchPost("/api/file/getFile", {
-                path: `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`
+                path: `/data/storage/petal/${this.name}/${safePath}`
             }, (response) => {
                 this.data[storageName] = response;
                 resolve(this.data[storageName]);
@@ -282,16 +291,25 @@ export class Plugin {
                 data: null
             });
         }
+        const safePath = normalizeStoragePath(storageName);
+        if (safePath === null) {
+            return Promise.reject({
+                code: 403,
+                msg: `For plugin [${this.name}], storage path [${storageName}] is invalid: empty or path traversal not allowed.`,
+                data: null
+            } as IWebSocketData);
+        }
         return new Promise((resolve, reject) => {
-            const pathString = `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`;
+            const pathString = `/data/storage/petal/${this.name}/${safePath}`;
             let file: File;
             try {
+                const fileName = safePath.split("/").pop();
                 if (typeof data === "object") {
                     file = new File([new Blob([JSON.stringify(data)], {
                         type: "application/json"
-                    })], pathString.split("/").pop());
+                    })], fileName);
                 } else {
-                    file = new File([new Blob([data])], pathString.split("/").pop());
+                    file = new File([new Blob([data])], fileName);
                 }
             } catch (e) {
                 reject({
@@ -320,12 +338,20 @@ export class Plugin {
                 data: null
             } as IWebSocketData);
         }
+        const safePath = normalizeStoragePath(storageName);
+        if (safePath === null) {
+            return Promise.reject({
+                code: 403,
+                msg: `For plugin [${this.name}], storage path [${storageName}] is invalid: empty or path traversal not allowed.`,
+                data: null
+            } as IWebSocketData);
+        }
 
         return new Promise((resolve) => {
             if (!this.data) {
                 this.data = {};
             }
-            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${storageName.replace(/[\/\\]+/g, "")}`}, (response) => {
+            fetchPost("/api/file/removeFile", {path: `/data/storage/petal/${this.name}/${safePath}`}, (response) => {
                 delete this.data[storageName];
                 resolve(response);
             });

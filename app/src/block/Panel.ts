@@ -129,7 +129,8 @@ export class BlockPanel {
                                 id: this.refDefs[0].refID,
                                 action,
                                 zoomIn,
-                                openNewTab: true
+                                openNewTab: true,
+                                scrollPosition: "start"
                             });
                         });
                         this.destroy();

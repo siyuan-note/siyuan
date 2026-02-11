@@ -719,22 +719,19 @@ export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = fa
 /**
  * 规范化并校验相对路径：允许子目录，但禁止通过 ".." 穿越到根外。
  * 用于插件存储，确保路径不逃出指定根目录。
- * @returns 规范化后的相对路径（使用 /），若路径非法则返回 null
+ * @returns 规范化后的相对路径（使用 /），若路径非法则返回替换后的合法路径
  */
 export const normalizeStoragePath = (storageName: string): string | null => {
-    const normalized = storageName.replace(/\\/g, "/");
-    const parts = normalized.split("/").filter(Boolean);
+    const parts = storageName.replace(/\\/g, "/").split("/");
     const resolved: string[] = [];
     for (const part of parts) {
         if (part === "..") {
             if (resolved.length > 0) {
                 resolved.pop();
-            } else {
-                return null;
             }
-        } else if (part !== ".") {
+        } else if (part && part !== ".") {
             resolved.push(part);
         }
     }
-    return resolved.length > 0 ? resolved.join("/") : null;
+    return resolved.length > 0 ? resolved.join("/") : storageName.replace(/[\/\\]+/g, "");
 };

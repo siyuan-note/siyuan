@@ -213,7 +213,7 @@ export class App {
                         setTitle(window.siyuan.languages.siyuanNote);
                         initMessage();
                         /// #if BROWSER && !MOBILE
-                        if (!isChromeBrowser()) {
+                        if ((window.siyuan.config.readonly || window.siyuan.isPublish) && !isChromeBrowser()) {
                             showMessage(window.siyuan.languages.useChrome, 0, "error");
                         }
                         /// #endif

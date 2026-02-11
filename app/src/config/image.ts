@@ -133,7 +133,11 @@ export const image = {
                     image.element.querySelectorAll(".config-assets").forEach(item => {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
-                            if (!item.getAttribute("data-init")) {
+                            if (type === "remove") {
+                                fetchPost("/api/asset/getUnusedAssets", {}, response => {
+                                    image._renderList(response.data, assetsListElement, "unrefAssets");
+                                });
+                            } else if (!item.getAttribute("data-init")) {
                                 if (type === "removeAV") {
                                     fetchPost("/api/av/getUnusedAttributeViews", {}, response => {
                                         image._renderList(response.data, avListElement, "unRefAV");

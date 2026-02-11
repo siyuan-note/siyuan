@@ -274,7 +274,11 @@ export const getAllLayout = () => {
 };
 
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
-    dockItem.forEach((existSubItem) => {
+    dockItem.forEach((existSubItem, index) => {
+        if (window.siyuan.isPublish && existSubItem.type === "inbox") {
+            dockItem.splice(index, 1);
+            return;
+        }
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
             existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom;

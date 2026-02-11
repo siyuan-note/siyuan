@@ -372,6 +372,7 @@ func renameFile(c *gin.Context) {
 	}
 
 	destPath := arg["newPath"].(string)
+	destPath = strings.TrimSpace(destPath)
 	destAbsPath, err := util.GetAbsPathInWorkspace(destPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -437,8 +438,12 @@ func putFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	isDirStr := c.PostForm("isDir")
+	isDir, _ := strconv.ParseBool(isDirStr)
+
 	var err error
 	filePath := c.PostForm("path")
+	filePath = strings.TrimSpace(filePath)
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -453,10 +458,20 @@ func putFile(c *gin.Context) {
 			ret.Msg = "invalid file path, please check https://github.com/siyuan-note/siyuan/issues/14658 for more details"
 			return
 		}
+	} else {
+		info, statErr := os.Stat(fileAbsPath)
+		if statErr != nil {
+			logging.LogErrorf("stat file [%s] failed: %s", fileAbsPath, statErr)
+			ret.Code = http.StatusInternalServerError
+			ret.Msg = statErr.Error()
+			return
+		}
+		if info.IsDir() && !isDir {
+			ret.Code = http.StatusBadRequest
+			ret.Msg = "the path is a directory"
+			return
+		}
 	}
-
-	isDirStr := c.PostForm("isDir")
-	isDir, _ := strconv.ParseBool(isDirStr)
 
 	if isDir {
 		err = os.MkdirAll(fileAbsPath, 0755)

@@ -1,4 +1,5 @@
 {
+  "useChrome": "为了更好的体检，建议使用 Chrome 进行浏览",
   "clearAllAV": "确认清理所有未引用的数据库？",
   "unreferencedAV": "未引用的数据库",
   "includeSubDocs": "包含子文档",

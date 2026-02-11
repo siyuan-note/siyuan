@@ -21,7 +21,6 @@ package model
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -70,10 +69,6 @@ func watchAssets() {
 			case event, ok := <-assetsWatcher.Events:
 				if !ok {
 					return
-				}
-
-				if strings.HasSuffix(event.Name, ".tmp") {
-					continue
 				}
 
 				lastEvent = event

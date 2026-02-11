@@ -86,8 +86,10 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 	if !filelock.IsExist(assetAbsPath) {
 		return
 	}
-
-	if ".DS_Store" == filepath.Base(assetAbsPath) {
+	if gulu.File.IsDir(assetAbsPath) {
+		return
+	}
+	if filelock.IsHidden(assetAbsPath) {
 		return
 	}
 
@@ -106,8 +108,10 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 	if !filelock.IsExist(assetAbsPath) {
 		return
 	}
-
-	if ".DS_Store" == filepath.Base(assetAbsPath) {
+	if gulu.File.IsDir(assetAbsPath) {
+		return
+	}
+	if filelock.IsHidden(assetAbsPath) {
 		return
 	}
 

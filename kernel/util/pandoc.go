@@ -111,6 +111,8 @@ func InitPandoc() {
 		return
 	}
 
+	defer eventbus.Publish(EvtConfPandocInitialized)
+
 	PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc-template.docx")
 	if !gulu.File.IsExist(PandocTemplatePath) {
 		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc-template.docx")
@@ -129,10 +131,7 @@ func InitPandoc() {
 		logging.LogWarnf("pandoc color filter file [%s] not found", PandocColorFilterPath)
 	}
 
-	defer eventbus.Publish(EvtConfPandocInitialized)
-
 	tempPandocDir := filepath.Join(TempDir, "pandoc")
-
 	if confPath := filepath.Join(ConfDir, "conf.json"); gulu.File.IsExist(confPath) {
 		// Workspace built-in Pandoc is no longer initialized after customizing Pandoc path https://github.com/siyuan-note/siyuan/issues/8377
 		if data, err := os.ReadFile(confPath); err == nil {

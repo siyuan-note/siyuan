@@ -797,6 +797,8 @@ func VacuumDataIndex() {
 }
 
 func FullReindex() {
+	util.PushEndlessProgress(Conf.language(35))
+
 	cache.ClearTreeCache()
 	cache.ClearDocsIAL()
 	cache.ClearBlocksIAL()
@@ -817,9 +819,6 @@ func fullReindex() {
 		sql.FlushQueue()
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
-
-	util.PushEndlessProgress(Conf.language(35))
-	defer util.PushClearProgress()
 
 	FlushTxQueue()
 

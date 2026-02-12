@@ -113,7 +113,8 @@ openTab = (options: {
             afterOpen: options.afterOpen,
             id: options.doc.id,
             action: options.doc.action,
-            zoomIn: options.doc.zoomIn
+            zoomIn: options.doc.zoomIn,
+            scrollPosition: "start"
         });
     }
     if (options.asset) {

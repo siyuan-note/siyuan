@@ -111,25 +111,6 @@ func InitPandoc() {
 		return
 	}
 
-	tempPandocDir := filepath.Join(TempDir, "pandoc")
-
-	if confPath := filepath.Join(ConfDir, "conf.json"); gulu.File.IsExist(confPath) {
-		// Workspace built-in Pandoc is no longer initialized after customizing Pandoc path https://github.com/siyuan-note/siyuan/issues/8377
-		if data, err := os.ReadFile(confPath); err == nil {
-			conf := map[string]interface{}{}
-			if err = gulu.JSON.UnmarshalJSON(data, &conf); err == nil && nil != conf["export"] {
-				export := conf["export"].(map[string]interface{})
-				if customPandocBinPath := export["pandocBin"].(string); !strings.HasPrefix(customPandocBinPath, tempPandocDir) {
-					if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
-						PandocBinPath = customPandocBinPath
-						logging.LogInfof("custom pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
-						return
-					}
-				}
-			}
-		}
-	}
-
 	PandocTemplatePath = filepath.Join(WorkingDir, "pandoc-resources", "pandoc-template.docx")
 	if !gulu.File.IsExist(PandocTemplatePath) {
 		PandocTemplatePath = filepath.Join(WorkingDir, "pandoc", "pandoc-resources", "pandoc-template.docx")
@@ -149,6 +130,25 @@ func InitPandoc() {
 	}
 
 	defer eventbus.Publish(EvtConfPandocInitialized)
+
+	tempPandocDir := filepath.Join(TempDir, "pandoc")
+
+	if confPath := filepath.Join(ConfDir, "conf.json"); gulu.File.IsExist(confPath) {
+		// Workspace built-in Pandoc is no longer initialized after customizing Pandoc path https://github.com/siyuan-note/siyuan/issues/8377
+		if data, err := os.ReadFile(confPath); err == nil {
+			conf := map[string]interface{}{}
+			if err = gulu.JSON.UnmarshalJSON(data, &conf); err == nil && nil != conf["export"] {
+				export := conf["export"].(map[string]interface{})
+				if customPandocBinPath := export["pandocBin"].(string); !strings.HasPrefix(customPandocBinPath, tempPandocDir) {
+					if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
+						PandocBinPath = customPandocBinPath
+						logging.LogInfof("custom pandoc [ver=%s, bin=%s]", pandocVer, PandocBinPath)
+						return
+					}
+				}
+			}
+		}
+	}
 
 	if gulu.OS.IsWindows() {
 		if "amd64" == runtime.GOARCH {

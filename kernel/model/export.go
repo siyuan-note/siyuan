@@ -812,8 +812,9 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
 	if err != nil {
+		argStr := strings.Join(args, " ")
 		msg := gulu.DecodeCmdOutput(output)
-		logging.LogErrorf("export docx failed: %s", msg)
+		logging.LogErrorf("export docx [%s] failed: %s", argStr, msg)
 		err = errors.New(fmt.Sprintf(Conf.Language(14), msg))
 		return
 	}

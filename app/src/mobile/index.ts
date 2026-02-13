@@ -83,9 +83,6 @@ class App {
                 }
             })
         };
-        if (!isInAndroid() && !isInHarmony() && !isInIOS && isChromeBrowser()) {
-            document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
-        }
         // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞
         window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
@@ -198,6 +195,9 @@ class App {
                     }
                 }
             });
+            if (!isInAndroid() && !isInHarmony() && !isInIOS && isChromeBrowser()) {
+                document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
+            }
         });
     }
 }

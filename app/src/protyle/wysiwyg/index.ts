@@ -2388,7 +2388,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
             // https://github.com/siyuan-note/siyuan/issues/11241
-            if (event.target.localName === "input" && event.target.getAttribute("data-type") === "av-search") {
+            if (event.target.getAttribute("data-type") === "av-search") {
                 return;
             }
             if (protyle.disabled) {

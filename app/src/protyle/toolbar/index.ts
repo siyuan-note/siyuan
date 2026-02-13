@@ -1103,7 +1103,6 @@ export class Toolbar {
             }
         });
         this.subElementCloseCB = () => {
-            protyle.wysiwyg.element.focus({ preventScroll: true});
             if (!renderElement.parentElement || protyle.disabled ||
                 (oldTextValue === textElement.value && textElement.value)) {
                 if (renderElement.tagName === "SPAN") {
@@ -1116,6 +1115,7 @@ export class Toolbar {
                     focusBlock(renderElement);
                     renderElement.classList.add("protyle-wysiwyg--select");
                 }
+                protyle.wysiwyg.element.focus({ preventScroll: true});
                 return;
             }
             let inlineLastNode: Element;
@@ -1221,6 +1221,7 @@ export class Toolbar {
                 }
             }
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
+            protyle.wysiwyg.element.focus({ preventScroll: true});
         };
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");

@@ -193,8 +193,12 @@ class App {
                     }
                 }
             });
-            if (!isInMobileApp() && isChromeBrowser()) {
-                document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
+            if (!isInMobileApp()) {
+                if (isChromeBrowser()) {
+                    document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
+                } else if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
+                    showMessage(window.siyuan.languages.useChrome, 0, "error");
+                }
             }
         });
     }

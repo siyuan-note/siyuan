@@ -6,7 +6,16 @@ import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
-import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    isInIOS,
+    isInMobileApp,
+    isIPad,
+    isIPhone,
+    isMac,
+    isWin11
+} from "../protyle/util/compatibility";
 import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
 
@@ -363,7 +372,7 @@ const rgba2hex = (rgba: string) => {
 };
 
 const updateMobileTheme = (OSTheme: string) => {
-    if (isInIOS() || isInAndroid() || isInHarmony()) {
+    if (isInMobileApp()) {
         setTimeout(() => {
             const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim());
             let mode = window.siyuan.config.appearance.mode;

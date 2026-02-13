@@ -350,6 +350,13 @@ export const isInIOS = () => {
     return window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers;
 };
 
+export const isInMobileApp = () => {
+    if (isInAndroid() || isInHarmony() || isInIOS()) {
+        return true;
+    }
+    return false;
+};
+
 export const isInHarmony = () => {
     return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 };

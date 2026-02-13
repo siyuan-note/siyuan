@@ -18,9 +18,7 @@ import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keybo
 import {
     getLocalStorage,
     isChromeBrowser,
-    isInAndroid,
-    isInHarmony,
-    isInIOS,
+    isInMobileApp,
     writeText
 } from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
@@ -195,7 +193,7 @@ class App {
                     }
                 }
             });
-            if (!isInAndroid() && !isInHarmony() && !isInIOS && isChromeBrowser()) {
+            if (!isInMobileApp() && isChromeBrowser()) {
                 document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
             }
         });

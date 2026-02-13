@@ -7,7 +7,14 @@ import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/p
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {isInAndroid, isInHarmony, isInIOS, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    isInMobileApp,
+    isIPad,
+    setStorageVal,
+    writeText
+} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -318,7 +325,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 });
             });
             /// #endif
-            if (!isBrowser() || isInIOS() || isInAndroid() || isInHarmony()) {
+            if (!isBrowser() || isInMobileApp()) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "workspaceList",
                     label: window.siyuan.languages.workspaceList,

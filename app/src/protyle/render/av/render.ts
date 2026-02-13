@@ -11,7 +11,7 @@ import {renderAVAttribute} from "./blockAttr";
 import {addClearButton} from "../../../util/addClearButton";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
-import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
+import {isInMobileApp} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
@@ -466,7 +466,7 @@ export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: 
         if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
             continue;
         }
-        if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {
+        if (isMobile() || isInMobileApp()) {
             e.classList.add("av--touch");
         }
 

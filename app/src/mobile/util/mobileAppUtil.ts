@@ -17,11 +17,11 @@ export const canInput = (element: Element) => {
         element.tagName === "TEXTAREA" ||
         (element.tagName === "INPUT" && ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(element.getAttribute("type")))
     ) && element.getAttribute("readonly") !== "readonly") {
-        return element
+        return element;
     }
     const wysisygElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
     if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
-        return hasClosestByAttribute(element, "contenteditable", "true")
+        return hasClosestByAttribute(element, "contenteditable", "true");
     }
     return false;
-}
+};

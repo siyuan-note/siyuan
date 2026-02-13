@@ -23,7 +23,7 @@ win:
   signtoolOptions:
     #certificateSubjectName: "Yunnan Liandi Technology Co., Ltd."
     signingHashAlgorithms: [ 'sha256' ]
-    rfc3161TimeStampServer: "http://timestamp.entrust.net/TSS/RFC3161sha2TS"
+    rfc3161TimeStampServer: "http://timestamp.acs.microsoft.com/"
   target:
     - target: "nsis"
       arch: "arm64"

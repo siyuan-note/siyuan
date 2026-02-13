@@ -15,7 +15,14 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, isChromeBrowser, writeText} from "../protyle/util/compatibility";
+import {
+    getLocalStorage,
+    isChromeBrowser,
+    isInAndroid,
+    isInHarmony,
+    isInIOS,
+    writeText
+} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {checkPublishServiceClosed} from "../util/processMessage";
@@ -76,7 +83,7 @@ class App {
                 }
             })
         };
-        if (isChromeBrowser()) {
+        if (!isInAndroid() && !isInHarmony() && !isInIOS && isChromeBrowser()) {
             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
         }
         // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞

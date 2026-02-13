@@ -52,3 +52,7 @@ func SetTreeData(rootID string, raw []byte) {
 func RemoveTreeData(rootID string) {
 	treeCache.Del(rootID)
 }
+
+func ClearTreeCache() {
+	treeCache.Clear()
+}

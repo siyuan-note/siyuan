@@ -797,6 +797,12 @@ func VacuumDataIndex() {
 }
 
 func FullReindex() {
+	util.PushEndlessProgress(Conf.language(35))
+
+	cache.ClearTreeCache()
+	cache.ClearDocsIAL()
+	cache.ClearBlocksIAL()
+
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	go func() {
@@ -804,8 +810,6 @@ func FullReindex() {
 		ResetVirtualBlockRefCache()
 	}()
 	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock)
-	cache.ClearDocsIAL()
-	cache.ClearBlocksIAL()
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
 
@@ -815,9 +819,6 @@ func fullReindex() {
 		sql.FlushQueue()
 		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
-
-	util.PushEndlessProgress(Conf.language(35))
-	defer util.PushClearProgress()
 
 	FlushTxQueue()
 

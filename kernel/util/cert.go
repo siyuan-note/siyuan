@@ -28,6 +28,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -104,7 +105,7 @@ func validateCert(certPath string) bool {
 	}
 
 	// Check if certificate contains all current IP addresses
-	currentIPs := GetServerAddrs()
+	currentIPs := extractIPsFromServerAddrs()
 	certIPMap := make(map[string]bool)
 	for _, ip := range cert.IPAddresses {
 		certIPMap[ip.String()] = true
@@ -182,7 +183,7 @@ func generateServerCert(certPath, keyPath string, caCert *x509.Certificate, caKe
 		net.IPv6loopback,
 	}
 
-	localIPs := GetServerAddrs()
+	localIPs := extractIPsFromServerAddrs()
 	for _, ipStr := range localIPs {
 		ipStr = trimIPv6Brackets(ipStr)
 		if ip := net.ParseIP(ipStr); ip != nil {
@@ -334,4 +335,34 @@ func trimIPv6Brackets(ip string) string {
 		return ip[1 : len(ip)-1]
 	}
 	return ip
+}
+
+// extractIPsFromServerAddrs extracts IP addresses from server URLs returned by GetServerAddrs()
+// GetServerAddrs() returns URLs like "http://192.168.1.1:6806", this function extracts just the IP part
+func extractIPsFromServerAddrs() []string {
+	serverAddrs := GetServerAddrs()
+	var ips []string
+	for _, addr := range serverAddrs {
+		addr = strings.TrimPrefix(addr, "http://")
+		addr = strings.TrimPrefix(addr, "https://")
+
+		if strings.HasPrefix(addr, "[") {
+			// IPv6 address with brackets
+			if idx := strings.Index(addr, "]:"); idx != -1 {
+				addr = addr[1:idx]
+			} else if strings.HasSuffix(addr, "]") {
+				addr = addr[1 : len(addr)-1]
+			}
+		} else {
+			// IPv4 address or IPv6 without brackets
+			if idx := strings.LastIndex(addr, ":"); idx != -1 {
+				if strings.Count(addr, ":") == 1 {
+					// IPv4 with port
+					addr = addr[:idx]
+				}
+			}
+		}
+		ips = append(ips, addr)
+	}
+	return ips
 }

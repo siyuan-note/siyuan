@@ -166,7 +166,7 @@ if defined BUILD_APPX_AMD64 (
     if errorlevel 1 (
         exit /b %errorlevel%
     )
-    call electron-windows-store --input-directory "%PROJECT_ROOT%\app\build\win-unpacked" --output-directory "%PROJECT_ROOT%\app\build\" --package-version 1.0.0.0 --package-name SiYuan --manifest "%PROJECT_ROOT%\app\appx\AppxManifest.xml" --assets "%PROJECT_ROOT%\app\appx\assets\" --make-pri true
+    call electron-windows-store --input-directory "%PROJECT_ROOT%\app\build\win-unpacked" --output-directory "%PROJECT_ROOT%\app\build" --package-version 1.0.0.0 --package-name SiYuan --manifest "%PROJECT_ROOT%\app\appx\AppxManifest.xml" --assets "%PROJECT_ROOT%\app\appx\assets" --make-pri true
 
     rmdir /S /Q "%PROJECT_ROOT%\app\build\pre-appx" 1>nul
 )
@@ -178,7 +178,7 @@ if defined BUILD_APPX_ARM64 (
     if errorlevel 1 (
         exit /b %errorlevel%
     )
-    call electron-windows-store --input-directory "%PROJECT_ROOT%\app\build\win-arm64-unpacked" --output-directory "%PROJECT_ROOT%\app\build\" --package-version 1.0.0.0 --package-name SiYuan-arm64 --manifest "%PROJECT_ROOT%\app\appx\AppxManifest-arm64.xml" --assets "%PROJECT_ROOT%\app\appx\assets\" --make-pri true
+    call electron-windows-store --input-directory "%PROJECT_ROOT%\app\build\win-arm64-unpacked" --output-directory "%PROJECT_ROOT%\app\build" --package-version 1.0.0.0 --package-name SiYuan-arm64 --manifest "%PROJECT_ROOT%\app\appx\AppxManifest-arm64.xml" --assets "%PROJECT_ROOT%\app\appx\assets" --make-pri true
 
     rmdir /S /Q "%PROJECT_ROOT%\app\build\pre-appx" 1>nul
 )

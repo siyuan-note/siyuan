@@ -864,7 +864,7 @@ export class Files extends Model {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item b3-list-item--hide-action" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""} 
 style="--file-toggle-width:22px" 
-data-type="navigation-root" data-path="/">
+data-type="navigation-root" data-path="/" data-tooltips-delay="200">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1314,7 +1314,7 @@ data-type="navigation-root" data-path="/">
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 
-class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
+class="b3-list-item b3-list-item--hide-action" data-path="${item.path}" data-tooltips-delay="200">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>

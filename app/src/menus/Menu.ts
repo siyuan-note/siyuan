@@ -61,6 +61,9 @@ export class Menu {
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
+        subMenuElement.querySelectorAll(".b3-list-item--focus").forEach((item) => {
+            item.classList.remove("b3-list-item--focus");
+        });
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
         subMenuElement.style.top = (itemRect.top - 8) + "px";
         subMenuElement.style.left = (itemRect.right + 8) + "px";

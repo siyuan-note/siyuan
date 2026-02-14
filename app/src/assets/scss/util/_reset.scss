@@ -17,6 +17,7 @@ body {
   background-color: var(--b3-theme-background);
   -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: var(--b3-list-hover);
   height: 100%;
   box-sizing: border-box;
   max-height: 100%;

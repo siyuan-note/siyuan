@@ -246,11 +246,11 @@ export const bazaar = {
         let themeMode = "";
         if (bazaarType === "themes") {
             const themeValue = (bazaar.element.querySelector("#bazaarSelect") as HTMLSelectElement).value;
-            if ((themeValue === "0" && item.modes.includes("dark")) ||
-                themeValue === "1" && item.modes.includes("light")) {
+            if ((themeValue === "0" && item.modes?.includes("dark")) ||
+                themeValue === "1" && item.modes?.includes("light")) {
                 hide = true;
             }
-            themeMode = item.modes.toString();
+            themeMode = item.modes?.toString() || "";
         }
         let showSwitch = false;
         if (["icons", "themes"].includes(bazaarType)) {
@@ -771,7 +771,7 @@ type="checkbox">
                                     app.plugins.find((item: Plugin) => {
                                         if (item.name === dataObj.name) {
                                             reloadPlugin(app, {
-                                                upsertCodePlugins: [dataObj.name],
+                                                reloadPlugins: [dataObj.name],
                                             });
                                             return true;
                                         }
@@ -1121,6 +1121,7 @@ type="checkbox">
             element.querySelectorAll("img[data-type='img-loading']").forEach((item) => {
                 item.remove();
             });
+            return;
         }
         let html = "";
         response.data.packages.forEach((item: IBazaarItem) => {

@@ -1468,7 +1468,7 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
+                response.data.templates.forEach((item: { path: string, content: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 <span class="b3-list-item__text">${item.content}</span>`;
                     /// #if !BROWSER
@@ -1481,7 +1481,7 @@ export class Toolbar {
 </span></div>`;
                 });
                 listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                const currentPath = response.data.blocks[0]?.path;
+                const currentPath = response.data.templates[0]?.path;
                 if (previewPath === currentPath) {
                     return;
                 }
@@ -1556,7 +1556,7 @@ export class Toolbar {
             k: "",
         }, (response) => {
             let html = "";
-            response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
+            response.data.templates.forEach((item: { path: string, content: string }, index: number) => {
                 html += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 <span class="b3-list-item__text">${item.content}</span>`;
                 /// #if !BROWSER
@@ -1614,8 +1614,8 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string, name: string }, index: number) => {
-                    searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+                response.data.widgets.forEach((item: { content: string, name: string }, index: number) => {
+                    searchHTML += `<div data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${item.name}
     <span class="b3-list-item__meta">${item.content}</span>
 </div>`;
@@ -1640,7 +1640,7 @@ export class Toolbar {
             k: "",
         }, (response) => {
             let html = "";
-            response.data.blocks.forEach((item: { content: string, name: string }, index: number) => {
+            response.data.widgets.forEach((item: { content: string, name: string }, index: number) => {
                 html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-content="${item.content}">
 ${item.name}
 <span class="b3-list-item__meta">${item.content}</span>

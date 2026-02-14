@@ -42,6 +42,12 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+// TemplateSearchResult 描述了模板搜索结果
+type TemplateSearchResult struct {
+	Path    string `json:"path"`
+	Content string `json:"content"`
+}
+
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
@@ -70,8 +76,8 @@ func RemoveTemplate(p string) (err error) {
 	return
 }
 
-func SearchTemplate(keyword string) (ret []*Block) {
-	ret = []*Block{}
+func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
+	ret = []*TemplateSearchResult{}
 
 	templates := filepath.Join(util.DataDir, "templates")
 	if !util.IsPathRegularDirOrSymlinkDir(templates) {
@@ -90,7 +96,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 
 	keyword = strings.TrimSpace(keyword)
 	type result struct {
-		block *Block
+		item  *TemplateSearchResult
 		score float64
 	}
 	var results []*result
@@ -133,8 +139,8 @@ func SearchTemplate(keyword string) (ret []*Block) {
 					content = strings.TrimSuffix(content, ".md")
 					content = filepath.ToSlash(content)
 					_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.CaseSensitive)
-					b := &Block{Path: path, Content: content}
-					results = append(results, &result{block: b, score: score})
+					b := &TemplateSearchResult{Path: path, Content: content}
+					results = append(results, &result{item: b, score: score})
 				}
 				return nil
 			})
@@ -159,8 +165,8 @@ func SearchTemplate(keyword string) (ret []*Block) {
 			if hit {
 				content = filepath.ToSlash(content)
 				_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.CaseSensitive)
-				b := &Block{Path: filepath.Join(templates, group.Name()), Content: content}
-				results = append(results, &result{block: b, score: score})
+				b := &TemplateSearchResult{Path: filepath.Join(templates, group.Name()), Content: content}
+				results = append(results, &result{item: b, score: score})
 			}
 		}
 	}
@@ -169,7 +175,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 		return results[i].score > results[j].score
 	})
 	for _, r := range results {
-		ret = append(ret, r.block)
+		ret = append(ret, r.item)
 	}
 	return
 }

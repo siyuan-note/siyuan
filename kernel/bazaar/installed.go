@@ -1,0 +1,114 @@
+// SiYuan - Refactor your thinking
+// Copyright (c) 2020-present, b3log.org
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+package bazaar
+
+import (
+	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/88250/go-humanize"
+	gcache "github.com/patrickmn/go-cache"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
+)
+
+// packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
+var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
+
+// ReadInstalledPackageDirs 读取本地集市包的目录列表
+func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
+	if !util.IsPathRegularDirOrSymlinkDir(basePath) {
+		return []os.DirEntry{}, nil
+	}
+
+	entries, err := os.ReadDir(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	dirs := make([]os.DirEntry, 0, len(entries))
+	for _, e := range entries {
+		if util.IsDirRegularOrSymlink(e) {
+			dirs = append(dirs, e)
+		}
+	}
+	return dirs, nil
+}
+
+// SetInstalledPackageMetadata 设置本地集市包的通用元数据
+func SetInstalledPackageMetadata(pkg *Package, installPath, jsonFileName, baseURLPath string, bazaarPackagesMap map[string]*Package) bool {
+	info, statErr := os.Stat(filepath.Join(installPath, jsonFileName))
+	if nil != statErr {
+		logging.LogWarnf("stat install %s failed: %s", jsonFileName, statErr)
+		return false
+	}
+
+	// 展示信息
+	pkg.IconURL = baseURLPath + "icon.png"
+	pkg.PreviewURL = baseURLPath + "preview.png"
+	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
+	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
+	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath, pkg.Readme)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+
+	// 更新信息
+	pkg.Installed = true
+	pkg.DisallowInstall = isBelowRequiredAppVersion(pkg)
+	if bazaarPkg := bazaarPackagesMap[pkg.Name]; nil != bazaarPkg {
+		pkg.DisallowUpdate = isBelowRequiredAppVersion(bazaarPkg)
+		pkg.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+		pkg.RepoURL = bazaarPkg.RepoURL // 更新链接使用在线数据，避免本地元数据的链接错误
+
+		if 0 > semver.Compare("v"+pkg.Version, "v"+bazaarPkg.Version) {
+			pkg.RepoHash = bazaarPkg.RepoHash
+			pkg.Outdated = true
+		}
+	} else {
+		pkg.RepoURL = pkg.URL
+	}
+
+	// 安装信息
+	pkg.HInstallDate = info.ModTime().Format("2006-01-02")
+	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示 https://github.com/siyuan-note/siyuan/issues/16983
+	// 目前优先使用在线 stage 数据：不耗时，但可能不准确，比如本地旧版本与云端最新版本的安装大小可能不一致；其次使用本地目录大小：耗时，但准确
+	if installSize, ok := packageInstallSizeCache.Get(pkg.RepoURL); ok {
+		pkg.InstallSize = installSize.(int64)
+	} else {
+		size, _ := util.SizeOfDirectory(installPath)
+		pkg.InstallSize = size
+		packageInstallSizeCache.SetDefault(pkg.RepoURL, size)
+	}
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+
+	return true
+}
+
+// Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
+func isBelowRequiredAppVersion(pkg *Package) bool {
+	// 如果包没有指定 minAppVersion，则允许安装
+	if "" == pkg.MinAppVersion {
+		return false
+	}
+
+	// 如果包要求的 minAppVersion 大于当前版本，则不允许安装
+	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
+		return true
+	}
+	return false
+}

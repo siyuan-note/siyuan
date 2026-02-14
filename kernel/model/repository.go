@@ -749,6 +749,10 @@ func checkoutRepo(id string) {
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
+	// 主题暂不支持同步，无需关闭监听器
+	// CloseWatchThemes()
+	// defer WatchThemes()
+
 	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
 	syncEnabled := Conf.Sync.Enabled
 	Conf.Sync.Enabled = false
@@ -1596,8 +1600,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	var upsertTrees int
 	// 可能需要重新加载部分功能
 	var needReloadFlashcard, needReloadOcrTexts, needReloadPlugin, needReloadSnippet bool
-	upsertCodePluginSet := hashset.New() // 插件代码变更 data/plugins/
-	upsertDataPluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
+	reloadPluginSet := hashset.New()     // 插件代码变更 data/plugins/
+	dataChangePluginSet := hashset.New() // 插件存储数据变更 data/storage/petal/
 	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
@@ -1620,7 +1624,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadPlugin = true
 			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
 				if pluginName := parts[3]; "petals.json" != pluginName {
-					upsertDataPluginSet.Add(pluginName)
+					dataChangePluginSet.Add(pluginName)
 				}
 			}
 		}
@@ -1628,7 +1632,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if strings.HasPrefix(file.Path, "/plugins/") {
 			if parts := strings.Split(file.Path, "/"); 2 < len(parts) {
 				needReloadPlugin = true
-				upsertCodePluginSet.Add(parts[2])
+				reloadPluginSet.Add(parts[2])
 			}
 		}
 
@@ -1667,7 +1671,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			needReloadPlugin = true
 			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
 				if pluginName := parts[3]; "petals.json" != pluginName {
-					upsertDataPluginSet.Add(pluginName)
+					dataChangePluginSet.Add(pluginName)
 				}
 			}
 		}
@@ -1698,7 +1702,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	for _, upsertPetal := range mergeResult.UpsertPetals {
 		needReloadPlugin = true
-		upsertCodePluginSet.Add(upsertPetal)
+		reloadPluginSet.Add(upsertPetal)
 	}
 	for _, removePetal := range mergeResult.RemovePetals {
 		needReloadPlugin = true
@@ -1715,7 +1719,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	}
 
 	if needReloadPlugin {
-		PushReloadPlugin(upsertCodePluginSet, upsertDataPluginSet, unloadPluginSet, uninstallPluginSet, "")
+		PushReloadPlugin(uninstallPluginSet, unloadPluginSet, reloadPluginSet, dataChangePluginSet, "")
 	}
 
 	if needReloadSnippet {

@@ -169,7 +169,6 @@
   }
 
   &__items {
-    max-height: 80vh;
     overflow: auto;
     padding: 0 8px;
   }
@@ -367,7 +366,6 @@
   &__submenu {
     overflow: auto;
     display: none;
-    max-height: 80vh;
     border: 1px solid var(--b3-theme-surface-lighter);
     border-radius: var(--b3-border-radius-b);
     background-color: var(--b3-menu-background);

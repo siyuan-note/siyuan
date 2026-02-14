@@ -1333,6 +1333,7 @@
   "column": "العمود",
   "copied": "تم النسخ",
   "copy": "نسخ",
+  "copyFile": "نسخ الملف",
   "copyText": "نسخ النص *",
   "delete-column": "حذف العمود",
   "delete-row": "حذف الصف",

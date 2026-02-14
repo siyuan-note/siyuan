@@ -1333,6 +1333,7 @@
   "column": "עמודה",
   "copied": "הועתק",
   "copy": "העתק",
+  "copyFile": "העתק קובץ",
   "copyText": "העתק טקסט *",
   "delete-column": "מחק עמודה",
   "delete-row": "מחק שורה",

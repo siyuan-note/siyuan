@@ -1333,6 +1333,7 @@
   "column": "Spalte",
   "copied": "Kopiert",
   "copy": "Kopieren",
+  "copyFile": "Datei kopieren",
   "copyText": "Text kopieren *",
   "delete-column": "Spalte löschen",
   "delete-row": "Zeile löschen",

@@ -1333,6 +1333,7 @@
   "column": "Columna",
   "copied": "Copiado",
   "copy": "Copiar",
+  "copyFile": "Copiar archivo",
   "copyText": "Copiar texto *",
   "delete-column": "Borrar columna",
   "delete-row": "Borrar fila",

@@ -44,7 +44,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
 import {electronUndo} from "../protyle/undo";
 import {pushBack} from "../mobile/util/MobileBackFoward";
-import {copyPNGByLink, exportAsset} from "./util";
+import {copyAsset, copyPNGByLink, exportAsset} from "./util";
 import {removeInlineType} from "../protyle/toolbar/util";
 import {alignImgCenter, alignImgLeft} from "../protyle/wysiwyg/commonHotkey";
 import {checkFold, renameTag} from "../util/noRelyPCFunction";
@@ -1418,6 +1418,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     const dataSrc = imgElement.getAttribute("data-src");
     if (dataSrc && dataSrc.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(dataSrc)).element);
+        /// #if !BROWSER
+        if (["windows", "darwin"].includes(window.siyuan.config.system.os)) {
+            window.siyuan.menus.menu.append(new MenuItem(copyAsset(dataSrc)).element);
+        }
+        /// #endif
     }
     if (protyle?.app?.plugins) {
         emitOpenMenu({
@@ -1691,6 +1696,11 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         openMenu(protyle.app, linkAddress, false, true);
         if (linkAddress?.startsWith("assets/")) {
             window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
+            /// #if !BROWSER
+            if (["windows", "darwin"].includes(window.siyuan.config.system.os)) {
+                window.siyuan.menus.menu.append(new MenuItem(copyAsset(linkAddress)).element);
+            }
+            /// #endif
         }
     }
 
@@ -2114,6 +2124,11 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     }
     if (src && src.startsWith("assets/")) {
         subMenus.push(exportAsset(src));
+        /// #if !BROWSER
+        if (["windows", "darwin"].includes(window.siyuan.config.system.os)) {
+            subMenus.push(copyAsset(src));
+        }
+        /// #endif
     }
     return subMenus;
 };

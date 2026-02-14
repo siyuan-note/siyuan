@@ -1333,6 +1333,7 @@
   "column": "열",
   "copied": "복사됨",
   "copy": "복사",
+  "copyFile": "파일 복사",
   "copyText": "텍스트 복사 *",
   "delete-column": "열 삭제",
   "delete-row": "행 삭제",

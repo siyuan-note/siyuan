@@ -17,17 +17,20 @@
 package api
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/88250/clipboard"
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func readFilePaths(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(200, ret)
+	defer c.JSON(http.StatusOK, ret)
 
 	var paths []string
 	if !gulu.OS.IsLinux() { // Linux 端不再支持 `粘贴为纯文本` 时处理文件绝对路径 https://github.com/siyuan-note/siyuan/issues/5825
@@ -51,4 +54,38 @@ func readFilePaths(c *gin.Context) {
 		})
 	}
 	ret.Data = data
+}
+
+func writeFilePath(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	pathArg, ok := arg["path"].(string)
+	if !ok || pathArg == "" {
+		ret.Code = -1
+		ret.Msg = "path is required"
+		return
+	}
+
+	absPath, err := model.GetAssetAbsPath(pathArg)
+	if err != nil {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", pathArg, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	if err = util.WriteFilePaths([]string{absPath}); err != nil {
+		logging.LogErrorf("write file path to clipboard failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
 }

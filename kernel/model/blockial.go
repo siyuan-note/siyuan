@@ -280,6 +280,12 @@ func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
 }
 
 func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
+	if util.ReadOnly {
+		return
+	}
+
+	FlushTxQueue()
+
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return err
@@ -290,30 +296,27 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
-	for name := range nameValues {
-		if !isValidAttrName(name) {
-			return errors.New(Conf.Language(25) + " [" + id + "]")
-		}
-	}
-
+	oldAttrs := parse.IAL2Map(node.KramdownIAL)
 	node.ClearIALAttrs()
-	for name, value := range nameValues {
-		if "" != value {
-			node.SetIALAttr(name, value)
-		}
-	}
 
-	if ast.NodeDocument == node.Type {
-		// 修改命名文档块后引用动态锚文本未跟随 https://github.com/siyuan-note/siyuan/issues/6398
-		// 使用重命名文档队列来刷新引用锚文本
-		updateRefTextRenameDoc(tree)
+	_, err = setNodeAttrs0(node, nameValues)
+	if err != nil {
+		return
 	}
 
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
 	}
+
 	IncSync()
-	cache.RemoveBlockIAL(id)
+	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+
+	pushBroadcastAttrTransactions(oldAttrs, node)
+
+	go func() {
+		sql.FlushQueue()
+		refreshDynamicRefText(node, tree)
+	}()
 	return
 }
 

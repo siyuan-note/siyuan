@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/88250/gulu"
@@ -96,7 +97,13 @@ func setBlockAttrs(c *gin.Context) {
 		if nil == value { // API `setBlockAttrs` 中如果存在属性值设置为 `null` 时移除该属性 https://github.com/siyuan-note/siyuan/issues/5577
 			nameValues[name] = ""
 		} else {
-			nameValues[name] = value.(string)
+			strValue, ok := value.(string)
+			if !ok {
+				ret.Code = -1
+				ret.Msg = fmt.Sprintf("the value of attr [%s] must be a string", name)
+				return
+			}
+			nameValues[name] = strValue
 		}
 	}
 	err := model.SetBlockAttrs(id, nameValues)
@@ -131,7 +138,13 @@ func batchSetBlockAttrs(c *gin.Context) {
 			if nil == value {
 				nameValues[name] = ""
 			} else {
-				nameValues[name] = value.(string)
+				strValue, ok := value.(string)
+				if !ok {
+					ret.Code = -1
+					ret.Msg = fmt.Sprintf("the value of attr [%s] must be a string", name)
+					return
+				}
+				nameValues[name] = strValue
 			}
 		}
 
@@ -162,7 +175,17 @@ func resetBlockAttrs(c *gin.Context) {
 	attrs := arg["attrs"].(map[string]interface{})
 	nameValues := map[string]string{}
 	for name, value := range attrs {
-		nameValues[name] = value.(string)
+		if nil == value {
+			// 接口会先清空所有属性，nil 值可忽略
+			continue
+		}
+		strValue, ok := value.(string)
+		if !ok {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("the value of attr [%s] must be a string", name)
+			return
+		}
+		nameValues[name] = strValue
 	}
 	err := model.ResetBlockAttrs(id, nameValues)
 	if err != nil {

@@ -31,23 +31,29 @@ import {emitOpenMenu} from "../plugin/EventBus";
 import {openByMobile} from "../protyle/util/compatibility";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 
-const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
+const initMultiMenu = (selectItemElements: Element[], app: App) => {
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_ITEMS);
-    const fileItemElement = Array.from(selectItemElements).find(item => {
-        if (item.getAttribute("data-type") === "navigation-file") {
-            return true;
-        }
-    });
-    if (!fileItemElement) {
-        return window.siyuan.menus.menu;
-    }
+    const items: { id: string, path: string }[] = [];
     const blockIDs: string[] = [];
-    selectItemElements.forEach(item => {
+    const fileItemElements = selectItemElements.filter(item => {
+      if (item.getAttribute("data-type") === "navigation-file") {
         const id = item.getAttribute("data-node-id");
-        if (id) {
+        const path = item.getAttribute("data-path");
+        if (id && path) {
+            items.push({
+                id: id,
+                path: path,
+            });
             blockIDs.push(id);
         }
+        return true;
+      }
+      return false;
     });
+    
+    if (fileItemElements.length === 0) {
+        return window.siyuan.menus.menu;
+    }
 
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -70,11 +76,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             }])
         }).element);
     }
-
-    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
-        Array.from(selectItemElements)
-    )));
-
+    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(fileItemElements)));
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "addToDatabase",
@@ -82,7 +84,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
             click: () => {
-                addFilesToDatabase(Array.from(selectItemElements));
+                addFilesToDatabase(fileItemElements);
             }
         }).element);
     }
@@ -92,13 +94,14 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         label: window.siyuan.languages.delete,
         accelerator: "⌦",
         click: () => {
-            deleteFiles(Array.from(selectItemElements));
+            deleteFiles(fileItemElements);
         }
     }).element);
 
     if (blockIDs.length === 0) {
         return window.siyuan.menus.menu;
     }
+
     window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
     if (!window.siyuan.config.readonly) {
         const riffCardMenu = [{
@@ -190,8 +193,9 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             plugins: app.plugins,
             type: "open-menu-doctree",
             detail: {
-                elements: selectItemElements,
-                type: "docs"
+                elements: fileItemElements,
+                type: "docs",
+                items,
             },
             separatorPosition: "top",
         });
@@ -214,7 +218,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         });
         liElement.classList.add("b3-list-item--focus");
     }
-    const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus");
+    const selectItemElements = Array.from(fileElement.querySelectorAll(".b3-list-item--focus"));
     if (selectItemElements.length > 1) {
         return initMultiMenu(selectItemElements, app);
     }
@@ -423,7 +427,8 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             type: "open-menu-doctree",
             detail: {
                 elements: selectItemElements,
-                type: "notebook"
+                type: "notebook",
+                items: [{id: notebookId, path: "/"}],
             },
             separatorPosition: "top",
         });
@@ -446,11 +451,12 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         });
         liElement.classList.add("b3-list-item--focus");
     }
-    const selectItemElements = fileElement.querySelectorAll(".b3-list-item--focus");
+    const selectItemElements = Array.from(fileElement.querySelectorAll(".b3-list-item--focus"));
     if (selectItemElements.length > 1) {
         return initMultiMenu(selectItemElements, app);
     }
     const id = liElement.getAttribute("data-node-id");
+    const path = liElement.getAttribute("data-path");
     let name = liElement.getAttribute("data-name");
     name = getDisplayName(name, false, true);
     if (!window.siyuan.config.readonly) {
@@ -718,7 +724,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             type: "open-menu-doctree",
             detail: {
                 elements: selectItemElements,
-                type: "doc"
+                type: "doc",
+                items: [{id, path}],
             },
             separatorPosition: "top",
         });

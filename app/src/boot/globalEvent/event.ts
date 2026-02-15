@@ -55,11 +55,13 @@ export const initWindowEvent = (app: App) => {
             return;
         }
         const fileElement = hasClosestByClassName(event.target, "sy__file");
-        const protyleElement = hasClosestByClassName(event.target, "protyle");
+        const protyleElement = hasClosestByClassName(event.target, "protyle", true);
         if (!scrollTarget) {
             scrollTarget = fileElement || protyleElement;
         }
-        if (scrollTarget && scrollTarget.classList.contains("sy__file") && protyleElement) {
+        if (scrollTarget && protyleElement && (
+            scrollTarget.classList.contains("sy__file") || protyleElement !== scrollTarget
+        )) {
             scrollTarget = protyleElement;
         } else if (scrollTarget && scrollTarget.classList.contains("protyle") && fileElement) {
             scrollTarget = fileElement;
@@ -76,9 +78,9 @@ export const initWindowEvent = (app: App) => {
             scrollElement = scrollTarget.querySelector(".protyle-content");
         }
         if (scrollTarget && scrollElement) {
-            if ((event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) &&
-                    hasClosestByClassName(event.target, "layout-tab-bar")) ||
-                (event.dataTransfer.types.includes("Files") && scrollTarget.classList.contains("sy__file"))) {
+            if ((event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && hasClosestByClassName(event.target, "layout-tab-bar")) ||
+                (event.dataTransfer.types.includes("Files") && scrollTarget.classList.contains("sy__file")) ||
+                (scrollTarget.classList.contains("protyle") && hasClosestByClassName(event.target, "file-tree"))) {
                 stopScrollAnimation();
             } else {
                 dragOverScroll(event, scrollElement.getBoundingClientRect(), scrollElement);

@@ -101,26 +101,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     });
 };
 
-const winOnMaxRestore = async () => {
-    /// #if !BROWSER
-    const maxBtnElement = document.getElementById("maxWindow");
-    const restoreBtnElement = document.getElementById("restoreWindow");
-    const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-        cmd: "isFullScreen",
-    });
-    const isMaximized = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-        cmd: "isMaximized",
-    });
-    if (isMaximized || isFullScreen) {
-        restoreBtnElement.style.display = "flex";
-        maxBtnElement.style.display = "none";
-    } else {
-        restoreBtnElement.style.display = "none";
-        maxBtnElement.style.display = "flex";
-    }
-    /// #endif
-};
-
 export const initWindow = async (app: App) => {
     /// #if !BROWSER
     ipcRenderer.send(Constants.SIYUAN_CMD, {
@@ -158,29 +138,23 @@ export const initWindow = async (app: App) => {
         } else if (cmd === "blur") {
             document.body.classList.add("body--blur");
         } else if (cmd === "enter-full-screen") {
+            document.body.classList.add("body--fullscreen");
             if ("darwin" === window.siyuan.config.system.os) {
                 if (isWindow()) {
                     setTabPosition();
-                } else {
-                    document.getElementById("toolbar").style.paddingLeft = "0";
                 }
-            } else {
-                winOnMaxRestore();
             }
         } else if (cmd === "leave-full-screen") {
+            document.body.classList.remove("body--fullscreen");
             if ("darwin" === window.siyuan.config.system.os) {
                 if (isWindow()) {
                     setTabPosition();
-                } else {
-                    document.getElementById("toolbar").setAttribute("style", "");
                 }
-            } else {
-                winOnMaxRestore();
             }
         } else if (cmd === "maximize") {
-            winOnMaxRestore();
+            document.body.classList.add("body--maximize");
         } else if (cmd === "unmaximize") {
-            winOnMaxRestore();
+            document.body.classList.remove("body--maximize");
         }
     });
     if (!isWindow()) {
@@ -330,6 +304,20 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             }
         });
     }
+
+    const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "isFullScreen",
+    });
+    if (isFullScreen) {
+        document.body.classList.add("body--fullscreen");
+    }
+    const isMaximized = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "isMaximized",
+    });
+    if (isMaximized) {
+        document.body.classList.add("body--maximize");
+    }
+
     if ("darwin" !== window.siyuan.config.system.os) {
         document.body.classList.add("body--win32");
 
@@ -369,7 +357,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             ipcRenderer.send(Constants.SIYUAN_CMD, "maximize");
         });
 
-        winOnMaxRestore();
         const minBtnElement = document.getElementById("minWindow");
         const closeBtnElement = document.getElementById("closeWindow");
         minBtnElement.addEventListener("click", () => {
@@ -385,14 +372,6 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 winOnClose();
             }
         });
-    } else {
-        const toolbarElement = document.getElementById("toolbar");
-        const isFullScreen = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: "isFullScreen",
-        });
-        if (isFullScreen && !isWindow()) {
-            toolbarElement.style.paddingLeft = "0";
-        }
     }
     /// #else
     if (!isWindow()) {

@@ -293,6 +293,13 @@ func AssetName(name string) string {
 	return util.AssetName(name, ast.NewNodeID())
 }
 
+func Unzip(zipFilePath, destination string) {
+	if err := gulu.Zip.Unzip(zipFilePath, destination); nil != err {
+		logging.LogErrorf("unzip [%s] failed: %s", zipFilePath, err)
+		panic(err)
+	}
+}
+
 func Exit() {
 	os.Exit(logging.ExitCodeOk)
 }

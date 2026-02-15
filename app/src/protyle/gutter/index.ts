@@ -65,6 +65,7 @@ import * as path from "path";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
+import {chartRender} from "../render/chartRender";
 
 export class Gutter {
     public element: HTMLElement;
@@ -2300,6 +2301,10 @@ export class Gutter {
                     id: e.getAttribute("data-node-id"),
                     data: e.outerHTML
                 });
+                if (e.getAttribute("data-subtype") === "echarts") {
+                    e.removeAttribute("data-render");
+                    chartRender(e);
+                }
             });
             transaction(protyle, operations, undoOperations);
             window.siyuan.menus.menu.remove();
@@ -2337,6 +2342,10 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         e.style.width = item;
                         e.style.flex = "none";
+                        if (e.getAttribute("data-subtype") === "echarts") {
+                            e.removeAttribute("data-render");
+                            chartRender(e);
+                        }
                     });
                 }
             });
@@ -2377,6 +2386,10 @@ export class Gutter {
                         if (e.style.width) {
                             e.style.width = "";
                             e.style.flex = "";
+                            if (e.getAttribute("data-subtype") === "echarts") {
+                                e.removeAttribute("data-render");
+                                chartRender(e);
+                            }
                         }
                     });
                 }

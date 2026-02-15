@@ -105,12 +105,20 @@ export const genCardHTML = (options: {
             ${!isMobile() ? "(p / q)" : ""}
         </button>
         <span class="fn__space"></span>
-        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer}${!isMobile() ? " (" + window.siyuan.languages.space + " / " + window.siyuan.languages.enterKey + ")" : ""}</button>
+        <button data-type="-3" aria-label="0 / x" class="b3-button b3-button--white b3-tooltips__n b3-tooltips">
+            <div class="card__icon">💤</div>
+            ${window.siyuan.languages.skip}${!isMobile() ? " (0)" : ""}
+        </button>
+        <span class="fn__space"></span>
+        <button data-type="-1" aria-label="${window.siyuan.languages.space}/${window.siyuan.languages.enterKey}" class="b3-button b3-tooltips__n b3-tooltips">
+            <div class="card__icon">👀</div>
+            ${window.siyuan.languages.cardShowAnswer}
+        </button>
     </div>
     <div class="fn__flex card__action fn__none">
         <div>
             <button class="b3-button b3-button--cancel" disabled="disabled" style="display: flex;margin-bottom: 8px;height: 28px;padding: 0;" data-type="-2"><svg><use xlink:href="#iconLeft"></use></svg>${!isMobile() ? "(p / q)" : ""}</button>
-            <button data-type="-3" aria-label="0 / x" class="b3-button b3-button--cancel b3-tooltips__n b3-tooltips">
+            <button data-type="-3" aria-label="0 / x" class="b3-button b3-button--white b3-tooltips__n b3-tooltips">
                 <div class="card__icon">💤</div>
                 ${window.siyuan.languages.skip}${!isMobile() ? " (0)" : ""}
             </button>
@@ -704,7 +712,7 @@ export const bindCardEvent = async (options: {
             }
             return;
         }
-        if (["1", "2", "3", "4", "-3"].includes(type) && actionElements[0].classList.contains("fn__none")) {
+        if ("-3" === type || (["1", "2", "3", "4"].includes(type) && actionElements[0].classList.contains("fn__none"))) {
             fetchPost(type === "-3" ? "/api/riff/skipReviewRiffCard" : "/api/riff/reviewRiffCard", {
                 deckID: currentCard.deckID,
                 cardID: currentCard.cardID,

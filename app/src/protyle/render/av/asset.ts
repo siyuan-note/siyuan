@@ -240,17 +240,13 @@ export const editAssetItem = (options: {
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>
-<div class="fn__hr"></div>
-<div class="fn__flex">
+</div><textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"};resize: vertical;" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.title}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;resize: vertical;" rows="1" class="b3-text-field"></textarea>`,
+</div><textarea style="width: ${isMobile() ? "100%" : "360px"};margin: 4px 0;resize: vertical;" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.addEventListener("click", (event) => {
                     let target = event.target as HTMLElement;
@@ -285,8 +281,7 @@ export const editAssetItem = (options: {
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>`,
+</div><textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"};resize: vertical;" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.addEventListener("click", (event) => {
                     let target = event.target as HTMLElement;
@@ -374,12 +369,16 @@ export const editAssetItem = (options: {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }
     const rect = options.rect;
+    /// #if MOBILE
+    menu.fullscreen();
+    /// #else
     menu.open({
         x: rect.right,
         y: rect.top,
         w: rect.width,
         h: rect.height,
     });
+    /// #endif
     const textElements = menu.element.querySelectorAll("textarea");
     textElements[0].value = linkAddress;
     textElements[0].focus();

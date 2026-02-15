@@ -2302,7 +2302,10 @@ export class Gutter {
                     data: e.outerHTML
                 });
                 if (e.getAttribute("data-subtype") === "echarts") {
-                    e.removeAttribute("data-render");
+                    const chartInstance = window.echarts.getInstanceById(e.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
+                    if (chartInstance) {
+                        chartInstance.resize();
+                    }
                     chartRender(e);
                 }
             });
@@ -2343,8 +2346,10 @@ export class Gutter {
                         e.style.width = item;
                         e.style.flex = "none";
                         if (e.getAttribute("data-subtype") === "echarts") {
-                            e.removeAttribute("data-render");
-                            chartRender(e);
+                            const chartInstance = window.echarts.getInstanceById(e.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
+                            if (chartInstance) {
+                                chartInstance.resize();
+                            }
                         }
                     });
                 }
@@ -2387,8 +2392,10 @@ export class Gutter {
                             e.style.width = "";
                             e.style.flex = "";
                             if (e.getAttribute("data-subtype") === "echarts") {
-                                e.removeAttribute("data-render");
-                                chartRender(e);
+                                const chartInstance = window.echarts.getInstanceById(e.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
+                                if (chartInstance) {
+                                    chartInstance.resize();
+                                }
                             }
                         }
                     });

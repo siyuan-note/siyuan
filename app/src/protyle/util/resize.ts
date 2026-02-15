@@ -67,7 +67,7 @@ export const resize = (protyle: IProtyle) => {
         if (abs.width > MIN_ABS || isNaN(abs.width)) {
             if (typeof window.echarts !== "undefined") {
                 protyle.wysiwyg.element.querySelectorAll('[data-subtype="echarts"], [data-subtype="mindmap"]').forEach((chartItem: HTMLElement) => {
-                    const chartInstance = window.echarts.getInstanceById(chartItem.firstElementChild.nextElementSibling.getAttribute("_echarts_instance_"));
+                    const chartInstance = window.echarts.getInstanceById(chartItem.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
                     if (chartInstance) {
                         chartInstance.resize();
                     }

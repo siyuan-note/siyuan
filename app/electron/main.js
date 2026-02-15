@@ -349,8 +349,7 @@ const initMainWindow = () => {
 
     writeLog("window stat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], " +
         "default [x=0, y=0, width=" + defaultWidth + ", height=" + defaultHeight + "], " +
-        "old [x=" + oldWindowState.x + ", y=" + oldWindowState.y + ", width=" + oldWindowState.width + ", height=" + oldWindowState.height + "], " +
-        "workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
+        "old [x=" + oldWindowState.x + ", y=" + oldWindowState.y + ", width=" + oldWindowState.width + ", height=" + oldWindowState.height + "]");
 
     let resetToCenter = false;
     let x = windowState.x;

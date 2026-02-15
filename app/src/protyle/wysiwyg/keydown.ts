@@ -1090,38 +1090,55 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 软换行
-        if (matchHotKey("⇧↩", event) && selectText === "" && softEnter(range, nodeElement, protyle)) {
+        if (selectText === "" && matchHotKey("⇧↩", event) && softEnter(range, nodeElement, protyle)) {
             event.stopPropagation();
             event.preventDefault();
             return;
         }
 
-        // 代码块语言选择 https://github.com/siyuan-note/siyuan/issues/14126
-        if (matchHotKey("⌥↩", event) && selectText === "") {
+        // 列表插入末尾子项 https://github.com/siyuan-note/siyuan/issues/11164
+        // 代码块修改语言 https://github.com/siyuan-note/siyuan/issues/14126
+        // 提示块修改类型和标题 https://github.com/siyuan-note/siyuan/issues/16678
+        if (selectText === "" && matchHotKey("⌥↩", event) && !isIncludesHotKey("⌥↩")) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            if (selectElements.length > 0 && !isIncludesHotKey("⌥↩")) {
+
+            const codeBlockElements = selectElements.filter(item => {
+                return item.classList.contains("code-block");
+            });
+            if (codeBlockElements.length > 0) {
                 const languageElements: HTMLElement[] = [];
-                const calloutElements: HTMLElement[] = [];
-                selectElements.forEach(item => {
-                    if (item.classList.contains("code-block")) {
-                        languageElements.push(item.querySelector(".protyle-action__language"));
-                    } else {
-                        const calloutElement = hasClosestByClassName(item, "callout");
-                        if (calloutElement) {
-                            calloutElements.push(calloutElement);
-                        }
-                    }
+                codeBlockElements.forEach(item => {
+                    languageElements.push(item.querySelector(".protyle-action__language"));
                 });
-                if (languageElements.length > 0) {
-                    protyle.toolbar.showCodeLanguage(protyle, languageElements);
-                } else if (addSubList(protyle, nodeElement, range)) {
-                    // 函数内部已处理
-                } else if (calloutElements.length > 0) {
-                    updateCalloutType(calloutElements, protyle);
+                protyle.toolbar.showCodeLanguage(protyle, languageElements);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
+            const liBlockElement = hasClosestByClassName(nodeElement, "li");
+            if (liBlockElement) {
+                selectElements.forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--select");
+                });
+                addSubList(protyle, nodeElement, range);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
+            const calloutElements: HTMLElement[] = [];
+            selectElements.forEach(item => {
+                const calloutElement = hasClosestByClassName(item, "callout");
+                if (calloutElement) {
+                    calloutElements.push(calloutElement);
                 }
+            });
+            if (calloutElements.length > 0) {
+                updateCalloutType(calloutElements, protyle);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

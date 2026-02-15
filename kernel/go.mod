@@ -38,6 +38,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0
 	github.com/gofrs/flock v0.13.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/gonutz/w32/v2 v2.12.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3

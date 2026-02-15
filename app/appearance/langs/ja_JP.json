@@ -1333,6 +1333,7 @@
   "column": "列",
   "copied": "コピーしました",
   "copy": "コピー",
+  "copyFile": "ファイルをコピー",
   "copyText": "テキストをコピー *",
   "delete-column": "列を削除",
   "delete-row": "行を削除",

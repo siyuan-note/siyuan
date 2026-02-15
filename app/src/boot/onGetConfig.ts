@@ -7,7 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {afterExport} from "../protyle/export/util";
 import {onWindowsMsg} from "../window/onWindowsMsg";
-import {initFocusFix} from "../protyle/util/compatibility";
+import {initNativeDialogOverride} from "../protyle/util/compatibility";
 /// #endif
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
@@ -70,7 +70,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     initStatus();
     initWindow(app);
     /// #if !BROWSER
-    initFocusFix();
+    initNativeDialogOverride();
     /// #endif
     appearance.onSetAppearance(window.siyuan.config.appearance);
     initAssets();

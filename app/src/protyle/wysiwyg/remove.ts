@@ -174,7 +174,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         if (sideElement) {
             if (protyle.block.showAll && sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0) {
                 setTimeout(() => {
-                    zoomOut({protyle, id: protyle.block.parent2ID, focusId: protyle.block.parent2ID});
+                    if (document.contains(protyle.element)) {
+                        zoomOut({protyle, id: protyle.block.parent2ID, focusId: protyle.block.parent2ID});
+                    }
                 }, Constants.TIMEOUT_INPUT * 2 + 100);
             } else {
                 if ((sideElement.classList.contains("protyle-wysiwyg") && protyle.wysiwyg.element.childElementCount === 0)) {
@@ -250,6 +252,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         /// #endif
         // https://github.com/siyuan-note/siyuan/issues/16767
         setTimeout(() => {
+            if (!document.contains(protyle.element)) {
+                return;
+            }
             if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
                 !protyle.scroll.element.classList.contains("fn__none") &&
                 protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2

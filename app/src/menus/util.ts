@@ -42,7 +42,7 @@ export const exportAsset = (src: string) => {
 // 复制资源文件到系统剪贴板，在文件资源管理器中可粘贴为文件（仅 Windows、macOS 桌面端支持）
 export const copyAsset = (src: string) => {
     return {
-        id: "copy",
+        id: "copyFile",
         label: window.siyuan.languages.copyFile,
         icon: "iconCopy",
         click: () => {

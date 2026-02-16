@@ -7,7 +7,7 @@ import {uploadFiles} from "../../upload";
 import {pathPosix} from "../../../util/pathName";
 import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
-import {copyPNGByLink, exportAsset} from "../../../menus/util";
+import {copyAsset, copyPNGByLink, exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
 import {previewAttrViewImages} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
@@ -367,6 +367,11 @@ export const editAssetItem = (options: {
     }
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
+        /// #if !BROWSER
+        if (["windows", "darwin"].includes(window.siyuan.config.system.os)) {
+            window.siyuan.menus.menu.append(new MenuItem(copyAsset(linkAddress)).element);
+        }
+        /// #endif
     }
     const rect = options.rect;
     /// #if MOBILE

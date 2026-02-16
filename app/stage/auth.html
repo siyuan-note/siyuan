@@ -639,6 +639,11 @@
                 window.JSAndroid.openAuthURL(url)
                 return
             }
+            // iOS: call native to open auth URL using SFSafariViewController
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAuthURL) {
+                window.webkit.messageHandlers.openAuthURL.postMessage(url)
+                return
+            }
         }
 
         // oidcFlowWeb and fallback

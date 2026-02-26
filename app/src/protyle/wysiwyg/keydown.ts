@@ -1221,6 +1221,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         notebookId: protyle.notebookId,
                         path: protyle.path,
                         name: response.data.ial.title,
+                        empty: response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true",
                         range,
                         type: "file",
                     });

@@ -1088,7 +1088,10 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	return
 }
 
-const DailyNoteAttrPrefix = "custom-dailynote-"
+const (
+	DailyNoteAttrPrefix = "custom-dailynote-"
+	NodeAttrTitleEmpty  = "custom-sy-title-empty"
+)
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	createDocLock.Lock()
@@ -1672,35 +1675,59 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	oldTitle := tree.Root.IALAttr("title")
-	if oldTitle == title {
-		return
-	}
-	if "" == title {
-		title = Conf.language(16)
-	}
-	title = strings.ReplaceAll(title, "/", "")
+	var titleChanged, markCleared bool
 
-	tree.HPath = path.Join(path.Dir(tree.HPath), title)
-	tree.Root.SetIALAttr("title", title)
-	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	if err = renameWriteJSONQueue(tree); err != nil {
-		return
+	// 标题改变
+	if oldTitle != title {
+		var isEmpty bool
+		if "" == title {
+			title = Conf.language(16)
+			isEmpty = true
+		}
+		title = strings.ReplaceAll(title, "/", "")
+
+		tree.HPath = path.Join(path.Dir(tree.HPath), title)
+		tree.Root.SetIALAttr("title", title)
+		if isEmpty {
+			tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")
+		} else {
+			tree.Root.RemoveIALAttr(NodeAttrTitleEmpty)
+			markCleared = true
+		}
+		titleChanged = true
 	}
 
-	refText := getNodeRefText(tree.Root)
-	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
-		"box":     boxID,
-		"id":      tree.Root.ID,
-		"path":    p,
-		"title":   title,
-		"refText": refText,
+	// 标题没变但需要清除标记
+	if !titleChanged && "" != title && "" != tree.Root.IALAttr(NodeAttrTitleEmpty) {
+		tree.Root.RemoveIALAttr(NodeAttrTitleEmpty)
+		markCleared = true
 	}
-	util.PushEvent(evt)
 
-	box.renameSubTrees(tree)
-	updateRefTextRenameDoc(tree)
-	IncSync()
+	if titleChanged || markCleared {
+		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+		if err = renameWriteJSONQueue(tree); err != nil {
+			return
+		}
+
+		refText := getNodeRefText(tree.Root)
+		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
+		evt.Data = map[string]interface{}{
+			"box":     boxID,
+			"id":      tree.Root.ID,
+			"path":    p,
+			"title":   title,
+			"empty":   tree.Root.IALAttr(NodeAttrTitleEmpty),
+			"refText": refText,
+		}
+		util.PushEvent(evt)
+	}
+	if titleChanged {
+		box.renameSubTrees(tree)
+		updateRefTextRenameDoc(tree)
+	}
+	if titleChanged || markCleared {
+		IncSync()
+	}
 	return
 }
 
@@ -1713,8 +1740,10 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	}
 	title = strings.ReplaceAll(title, "/", "")
 	title = strings.TrimSpace(title)
+	var isEmpty bool
 	if "" == title {
 		title = Conf.Language(16)
+		isEmpty = true
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))
@@ -1776,6 +1805,9 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	tree.Root.Spec = treenode.CurrentSpec
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
+	if isEmpty {
+		tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")
+	}
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph(""))
 	}

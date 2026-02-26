@@ -212,7 +212,7 @@ export class Protyle {
                                     this.protyle.title.editElement?.contains(getSelection().getRangeAt(0).startContainer)) {
                                     // 标题编辑中的不用更新 https://github.com/siyuan-note/siyuan/issues/6565
                                 } else {
-                                    this.protyle.title.setTitle(data.data.title);
+                                    this.protyle.title.setTitle(data.data.title, data.data.empty === "true");
                                 }
                             }
                             // update ref

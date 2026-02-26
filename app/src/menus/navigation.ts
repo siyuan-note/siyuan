@@ -549,7 +549,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             path: pathString,
             notebookId,
             name,
-            type: "file"
+            type: "file",
+            docId: id,
         }));
         window.siyuan.menus.menu.append(new MenuItem({
             id: "attr",

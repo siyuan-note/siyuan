@@ -967,6 +967,7 @@ export const renameMenu = (options: {
     notebookId: string
     name: string,
     type: "notebook" | "file"
+    docId?: string | null
 }) => {
     return new MenuItem({
         id: "rename",
@@ -974,7 +975,18 @@ export const renameMenu = (options: {
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click: () => {
-            rename(options);
+            if (options.type === "file" && options.docId) {
+                fetchPost("/api/block/getDocInfo", {
+                    id: options.docId
+                }, (response) => {
+                    rename({
+                        ...options,
+                        empty: response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true",
+                    });
+                });
+            } else {
+                rename(options);
+            }
         }
     }).element;
 };

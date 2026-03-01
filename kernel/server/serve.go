@@ -47,6 +47,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/soheilhy/cmux"
 	"golang.org/x/net/webdav"
 )
 
@@ -242,6 +243,20 @@ func Serve(fastMode bool, cookieKey string) {
 
 	util.HttpServer = &http.Server{
 		Handler: ginServer,
+	}
+
+	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {
+		if err = util.ServeMultiplexed(ln, ginServer, certPath, keyPath, util.HttpServer); err != nil {
+			if errors.Is(err, http.ErrServerClosed) || err == cmux.ErrListenerClosed {
+				return
+			}
+
+			if !fastMode {
+				logging.LogErrorf("boot kernel failed: %s", err)
+				os.Exit(logging.ExitCodeUnavailablePort)
+			}
+		}
+		return
 	}
 
 	if err = util.HttpServer.Serve(ln); err != nil {

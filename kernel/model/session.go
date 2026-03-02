@@ -58,6 +58,8 @@ func LogoutAuth(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = "save session failed"
 	}
+
+	util.BroadcastByType("main", "logoutAuth", 0, "", nil)
 }
 
 func LoginAuth(c *gin.Context) {

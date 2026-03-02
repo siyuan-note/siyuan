@@ -790,6 +790,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
+	util.BroadcastByType("main", "exit", 0, "", nil)
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)

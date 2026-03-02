@@ -26,7 +26,7 @@ import {
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp} from "./protyle/util/compatibility";
-import {getSearch} from "./util/functions";
+import {getSearch, isBrowser} from "./util/functions";
 import {checkPublishServiceClosed} from "./util/processMessage";
 import {hideAllElements} from "./protyle/ui/hideElements";
 import {loadPlugins, reloadPlugin} from "./plugin/loader";
@@ -191,6 +191,10 @@ export class App {
                             case "openFileById":
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
+                            case "exit":
+                                if (isBrowser()) {
+                                    window.location.href = "about:blank";
+                                }
                         }
                     }
                 }

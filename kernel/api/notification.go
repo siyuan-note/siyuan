@@ -40,14 +40,36 @@ func sendDeviceNotification(c *gin.Context) {
 		return
 	}
 
-	title := arg["title"].(string)
-	body := arg["body"].(string)
-	evt := util.NewCmdResult("sendDeviceNotification", 0, util.PushModeSingleSelf)
-	evt.Data = map[string]interface{}{
-		"title": title,
-		"body":  body,
+	var title string
+	if nil != arg["title"] {
+		title = strings.TrimSpace(arg["title"].(string))
+	} else {
+		ret.Code = -1
+		ret.Msg = "title can't be empty"
+		return
 	}
-	util.PushEvent(evt)
+
+	var body string
+	if nil != arg["body"] {
+		body = strings.TrimSpace(arg["body"].(string))
+	} else {
+		ret.Code = -1
+		ret.Msg = "body can't be empty"
+		return
+	}
+
+	var delayInSeconds int
+	if nil != arg["delayInSeconds"] {
+		delayInSeconds = int(arg["delayInSeconds"].(float64))
+	} else {
+		delayInSeconds = 1
+	}
+
+	util.BroadcastByType("main", "sendDeviceNotification", 0, "", map[string]interface{}{
+		"title":          title,
+		"body":           body,
+		"delayInSeconds": delayInSeconds,
+	})
 }
 
 func pushMsg(c *gin.Context) {

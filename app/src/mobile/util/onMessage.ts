@@ -2,7 +2,9 @@ import {openMobileFileById} from "../editor";
 import {
     processSync,
     progressLoading,
-    reloadSync, setDefRefCount, setRefDynamicText,
+    reloadSync,
+    setDefRefCount,
+    setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
 import {App} from "../../index";
@@ -24,7 +26,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "sendDeviceNotification":
                 if (window.JSAndroid.sendNotification) {
-                    window.JSAndroid.sendNotification(data.data.title, data.data.body);
+                    window.JSAndroid.sendNotification(data.data.title, data.data.body, data.data.delayInSeconds);
                 }
                 break;
             case "backgroundtask":

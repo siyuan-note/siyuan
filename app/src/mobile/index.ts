@@ -15,12 +15,7 @@ import {bootSync} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {
-    getLocalStorage,
-    isChromeBrowser,
-    isInMobileApp,
-    writeText
-} from "../protyle/util/compatibility";
+import {getLocalStorage, isChromeBrowser, isInMobileApp, writeText} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
 import {getSearch} from "../util/functions";
 import {checkPublishServiceClosed} from "../util/processMessage";

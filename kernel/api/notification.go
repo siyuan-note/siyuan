@@ -58,9 +58,17 @@ func sendDeviceNotification(c *gin.Context) {
 		return
 	}
 
+	var delayInSeconds int
+	if nil != arg["delayInSeconds"] {
+		delayInSeconds = int(arg["delayInSeconds"].(float64))
+	} else {
+		delayInSeconds = 1
+	}
+
 	util.BroadcastByType("main", "sendDeviceNotification", 0, "", map[string]interface{}{
-		"title": title,
-		"body":  body,
+		"title":          title,
+		"body":           body,
+		"delayInSeconds": delayInSeconds,
 	})
 }
 

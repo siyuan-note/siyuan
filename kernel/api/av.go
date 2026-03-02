@@ -58,7 +58,7 @@ func getUnusedAttributeViews(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	unusedAttributeViews := model.UnusedAttributeViews()
+	unusedAttributeViews := model.UnusedAttributeViews(true)
 	total := len(unusedAttributeViews)
 
 	const maxUnusedAttributeViews = 512

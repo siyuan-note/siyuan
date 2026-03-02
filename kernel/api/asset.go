@@ -344,7 +344,7 @@ func getUnusedAssets(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	unusedAssets := model.UnusedAssets()
+	unusedAssets := model.UnusedAssets(true)
 	total := len(unusedAssets)
 
 	// List only 512 unreferenced assets https://github.com/siyuan-note/siyuan/issues/13075

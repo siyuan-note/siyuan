@@ -292,6 +292,12 @@ func InitConf() {
 	if 3650 < Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 3650
 	}
+	if nil == Conf.Editor.FloatWindowDelay {
+		v := 620
+		Conf.Editor.FloatWindowDelay = &v
+	} else {
+		*Conf.Editor.FloatWindowDelay = max(0, min(10000, *Conf.Editor.FloatWindowDelay))
+	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}

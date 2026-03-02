@@ -442,6 +442,11 @@ declare namespace Config {
          */
         floatWindowMode: number;
         /**
+         * Hover delay of the floating window in milliseconds.
+         * Only takes effect when `floatWindowMode` is `0`.
+         */
+        floatWindowDelay: number;
+        /**
          * The font used in the editor
          */
         fontFamily: string;

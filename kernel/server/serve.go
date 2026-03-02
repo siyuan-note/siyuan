@@ -369,6 +369,13 @@ func servePublic(ginServer *gin.Engine) {
 func serveSnippets(ginServer *gin.Engine) {
 	ginServer.Handle("GET", "/snippets/*filepath", model.CheckAuth, func(c *gin.Context) {
 		filePath := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
+		if !model.IsAdminRoleContext(c) {
+			if "conf.json" == filePath {
+				c.Status(http.StatusUnauthorized)
+				return
+			}
+		}
+
 		ext := filepath.Ext(filePath)
 		name := strings.TrimSuffix(filePath, ext)
 		confSnippets, err := model.LoadSnippets()

@@ -152,6 +152,8 @@ func LoginAuth(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
+
+	util.BroadcastByType("main", "loginAuth", 0, "", nil)
 }
 
 func GetCaptcha(c *gin.Context) {

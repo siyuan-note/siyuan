@@ -234,7 +234,7 @@ export const setDefRefCount = (data: {
 };
 
 export const lockScreen = async (app: App) => {
-    if (window.siyuan.config.readonly || window.siyuan.config.publish.enable) {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
     app.plugins.forEach(item => {

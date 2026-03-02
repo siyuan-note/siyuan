@@ -175,7 +175,7 @@ class App {
                 window.siyuan.shiftIsPressed = false;
                 window.siyuan.altIsPressed = false;
             });
-            window.addEventListener("blur", (event) => {
+            window.addEventListener("blur", () => {
                 setWebViewFocusable();
             });
             // 移动端删除键 https://github.com/siyuan-note/siyuan/issues/9259

@@ -1,6 +1,5 @@
-import {exportLayout, getInstanceById} from "../layout/util";
+import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
-import {fetchPost} from "../util/fetch";
 import {redirectToCheckAuth} from "../util/pathName";
 import {isWindow} from "../util/functions";
 

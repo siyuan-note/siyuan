@@ -16,7 +16,7 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
-import {redirectToCheckAuth, setNoteBook} from "../util/pathName";
+import {setNoteBook} from "../util/pathName";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";

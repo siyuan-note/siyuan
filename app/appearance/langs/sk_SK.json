@@ -1751,6 +1751,7 @@
     "278": "Workspace nie je na SSD, čo spomaľuje výkon",
     "279": "Celkom %d databáz bez odkazov",
     "280": "Vymazanie nepotrebných databáz dokončené, uvoľnených %s",
-    "281": " (Predvolené)"
+    "281": " (Predvolené)",
+    "282": "Zavrieť okno"
   }
 }

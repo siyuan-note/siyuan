@@ -3,6 +3,9 @@
 <!--
 Please provide a summary of the change and the issue being fixed. Include relevant motivation and context.
 请说明更改的摘要以及修复了哪个问题，包含相关的动机和上下文。
+
+Note: A PR should only have one purpose, such as never putting multiple changes like refactoring, feature improvement, or bug fixes in one PR, otherwise the PR will be rejected.
+注意：一个 PR 应该只包含一个目的，比如切勿将重构、功能改进或者修复缺陷等多个变更放在一个 PR 中，否则提交将被拒。
 -->
 
 ## Type of change / 变更类型

@@ -603,6 +603,8 @@
   "floatWindowMode0": "Prejdenie myšou (Hover)",
   "floatWindowMode1": "Podržanie ${hotkey} + Prejdenie myšou",
   "floatWindowMode2": "Neaktivovať",
+  "floatWindowDelay": "Oneskorenie spúšťača plávajúceho okna pri prejdení myšou",
+  "floatWindowDelayTip": "Platí iba vtedy, keď je spúšťač plávajúceho okna nastavený na Prejdenie myšou",
   "codeSnippet": "Útržok kódu (Snippet)",
   "codeSnippetTip": "Upravte rozhranie alebo funkcie pomocou vlastného kódu",
   "expandDown": "Rozbaliť dole",

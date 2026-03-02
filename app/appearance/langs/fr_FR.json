@@ -603,6 +603,8 @@
   "floatWindowMode0": "Flotter",
   "floatWindowMode1": "Appuyez et maintenez ${hotkey} + Flotter",
   "floatWindowMode2": "Ne pas déclencher",
+  "floatWindowDelay": "Délai d'activation de la fenêtre flottante au survol",
+  "floatWindowDelayTip": "N'a d'effet que lorsque la méthode de déclenchement de la fenêtre flottante est Flotter",
   "codeSnippet": "Extrait de code",
   "codeSnippetTip": "Affiner l'interface ou les fonctionnalités grâce à des extraits de code",
   "expandDown": "Développer vers le bas",

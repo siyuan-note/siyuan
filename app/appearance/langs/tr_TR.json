@@ -603,6 +603,8 @@
   "floatWindowMode0": "Üzerine gelince",
   "floatWindowMode1": "${hotkey} tuşuna basılı tut + üzerine gel",
   "floatWindowMode2": "Tetikleme yok",
+  "floatWindowDelay": "İmleç üzerine gelindiğinde kayan pencere tetikleme gecikmesi",
+  "floatWindowDelayTip": "Yalnızca kayan pencere tetikleme yöntemi Üzerine gelince olduğunda etkili olur",
   "codeSnippet": "Kod Parçası",
   "codeSnippetTip": "Arayüzü veya işlevselliği kod parçacıklarıyla ince ayarla",
   "expandDown": "Aşağı genişlet",

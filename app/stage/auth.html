@@ -442,7 +442,16 @@
         }
     }
 
+    const url = new URL(window.location)
+    toPath = url.searchParams.get("to") || "/"
+
     const exitSiYuan = () => {
+        if (toPath.indexOf("/stage/build/app/window.html") > -1) {
+            const {ipcRenderer} = require('electron');
+            ipcRenderer.send("siyuan-cmd", "destroy");
+            return;
+        }
+
         document.querySelector('#message').classList.add('b3-snackbar--show')
         document.querySelector('#message').firstElementChild.innerHTML = "{{.l8}}"
         try {
@@ -511,8 +520,7 @@
             return response.json()
         }).then((response) => {
             if (0 === response.code) {
-                const url = new URL(window.location)
-                window.location.href = url.searchParams.get("to") || "/"
+                window.location.href = toPath
                 return
             }
 
@@ -537,6 +545,8 @@
         }
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             document.querySelector('.b3-button--white').remove()
+        } else if (toPath.indexOf("/stage/build/app/window.html") > -1) {
+            document.querySelector('.b3-button--white').textContent = "{{.l11}}"
         }
 
         try {

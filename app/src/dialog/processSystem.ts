@@ -240,13 +240,7 @@ export const lockScreen = (app: App) => {
     app.plugins.forEach(item => {
         item.eventBus.emit("lock-screen");
     });
-    /// #if BROWSER
-    fetchPost("/api/system/logoutAuth", {}, () => {
-        redirectToCheckAuth();
-    });
-    /// #else
-    ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "lockscreen"});
-    /// #endif
+    fetchPost("/api/system/logoutAuth");
 };
 
 export const kernelError = () => {

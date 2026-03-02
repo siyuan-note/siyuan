@@ -9,11 +9,15 @@ import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
+/// #if !MOBILE
+import {exportLayout} from "../layout/util";
+/// #endif
 import {showMessage} from "../dialog/message";
 import {isOnlyMeta, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
@@ -60,11 +64,26 @@ export const getIdFromSYProtocol = (url: string) => {
 };
 
 /* redirect to auth page */
-export const redirectToCheckAuth = (to: string = window.location.href) => {
+export const redirectToCheckAuth = async (to: string = window.location.href) => {
+    /// #if !MOBILE
+    exportLayout({
+        errorExit: false,
+        cb() {
+            const url = new URL(window.location.origin);
+            url.pathname = "/check-auth";
+            url.searchParams.set("to", to);
+            window.location.href = url.href;
+        }
+    });
+    /// #else
+    if (window.siyuan.mobile.editor) {
+        await saveScroll(window.siyuan.mobile.editor.protyle);
+    }
     const url = new URL(window.location.origin);
     url.pathname = "/check-auth";
     url.searchParams.set("to", to);
     window.location.href = url.href;
+    /// #endif
 };
 
 export const addBaseURL = () => {

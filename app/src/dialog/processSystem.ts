@@ -233,14 +233,27 @@ export const setDefRefCount = (data: {
     }
 };
 
-export const lockScreen = (app: App) => {
+export const lockScreen = async (app: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
     app.plugins.forEach(item => {
         item.eventBus.emit("lock-screen");
     });
-    fetchPost("/api/system/logoutAuth");
+    /// #if !MOBILE
+    exportLayout({
+        errorExit: false,
+        cb() {
+            fetchPost("/api/system/logoutAuth");
+        }
+    });
+    /// #else
+    if (window.siyuan.mobile.editor) {
+        await saveScroll(window.siyuan.mobile.editor.protyle);
+        fetchPost("/api/system/logoutAuth");
+    }
+    /// #endif
+
 };
 
 export const kernelError = () => {

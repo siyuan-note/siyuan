@@ -1,7 +1,8 @@
 import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
-import {redirectToCheckAuth} from "../util/pathName";
 import {isWindow} from "../util/functions";
+import {lockScreen} from "../dialog/processSystem";
+import {App} from "../index";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);
@@ -9,7 +10,7 @@ const closeTab = (ipcData: IWebSocketData) => {
         tab.parent.removeTab(ipcData.data);
     }
 };
-export const onWindowsMsg = (ipcData: IWebSocketData) => {
+export const onWindowsMsg = (ipcData: IWebSocketData, app: App) => {
     switch (ipcData.cmd) {
         case "closetab":
             closeTab(ipcData);
@@ -37,7 +38,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
             break;
         case "lockscreenByMode":
             if (window.siyuan.config.system.lockScreenMode === 1) {
-                redirectToCheckAuth();
+                lockScreen(app);
             }
             break;
     }

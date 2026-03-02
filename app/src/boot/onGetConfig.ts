@@ -202,7 +202,7 @@ export const initWindow = async (app: App) => {
         }
     });
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
-        onWindowsMsg(ipcData);
+        onWindowsMsg(ipcData, app);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
         let matchCommand = false;

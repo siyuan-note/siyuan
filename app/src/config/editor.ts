@@ -268,7 +268,7 @@ export const editor = {
     </div>
     <span class="fn__space"></span>
     <div class="fn__size200 fn__flex-center fn__flex">
-        <input class="b3-text-field fn__flex-1" id="floatWindowDelay" type="number" min="0" max="10000" value="${window.siyuan.config.editor.floatWindowDelay}"/>
+        <input class="b3-text-field fn__flex-1" id="floatWindowDelay" type="number" min="0" max="2000" value="${window.siyuan.config.editor.floatWindowDelay}"/>
         <span class="fn__space"></span>
         <span class="ft__on-surface fn__flex-center">ms</span>
     </div>
@@ -488,9 +488,9 @@ export const editor = {
             if (floatWindowDelay < 0 || isNaN(floatWindowDelay)) {
                 floatWindowDelay = 0;
                 (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "0";
-            } else if (floatWindowDelay > 10000) {
-                floatWindowDelay = 10000;
-                (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "10000";
+            } else if (floatWindowDelay > 2000) {
+                floatWindowDelay = 2000;
+                (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "2000";
             }
 
             fetchPost("/api/setting/setEditor", {

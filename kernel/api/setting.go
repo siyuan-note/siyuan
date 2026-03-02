@@ -321,7 +321,7 @@ func setEditor(c *gin.Context) {
 		v := 620
 		editor.FloatWindowDelay = &v
 	} else {
-		*editor.FloatWindowDelay = max(0, min(10000, *editor.FloatWindowDelay))
+		*editor.FloatWindowDelay = max(0, min(2000, *editor.FloatWindowDelay))
 	}
 
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef

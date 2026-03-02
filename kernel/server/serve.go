@@ -342,19 +342,23 @@ func serveExport(ginServer *gin.Engine) {
 }
 
 func serveWidgets(ginServer *gin.Engine) {
-	ginServer.Static("/widgets/", filepath.Join(util.DataDir, "widgets"))
+	widgets := ginServer.Group("/widgets/", model.CheckAuth)
+	widgets.Static("", filepath.Join(util.DataDir, "widgets"))
 }
 
 func servePlugins(ginServer *gin.Engine) {
-	ginServer.Static("/plugins/", filepath.Join(util.DataDir, "plugins"))
+	plugins := ginServer.Group("/plugins/", model.CheckAuth)
+	plugins.Static("", filepath.Join(util.DataDir, "plugins"))
 }
 
 func serveEmojis(ginServer *gin.Engine) {
-	ginServer.Static("/emojis/", filepath.Join(util.DataDir, "emojis"))
+	emojis := ginServer.Group("/emojis/", model.CheckAuth)
+	emojis.Static("", filepath.Join(util.DataDir, "emojis"))
 }
 
 func serveTemplates(ginServer *gin.Engine) {
-	ginServer.Static("/templates/", filepath.Join(util.DataDir, "templates"))
+	templates := ginServer.Group("/templates/", model.CheckAuth)
+	templates.Static("", filepath.Join(util.DataDir, "templates"))
 }
 
 func servePublic(ginServer *gin.Engine) {
@@ -363,7 +367,7 @@ func servePublic(ginServer *gin.Engine) {
 }
 
 func serveSnippets(ginServer *gin.Engine) {
-	ginServer.Handle("GET", "/snippets/*filepath", func(c *gin.Context) {
+	ginServer.Handle("GET", "/snippets/*filepath", model.CheckAuth, func(c *gin.Context) {
 		filePath := strings.TrimPrefix(c.Request.URL.Path, "/snippets/")
 		ext := filepath.Ext(filePath)
 		name := strings.TrimSuffix(filePath, ext)

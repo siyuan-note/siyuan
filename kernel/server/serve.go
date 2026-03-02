@@ -539,6 +539,7 @@ func serveAuthPage(c *gin.Context) {
 		"l8":                     model.Conf.Language(95),
 		"l9":                     model.Conf.Language(83),
 		"l10":                    model.Conf.Language(257),
+		"l11":                    model.Conf.Language(282),
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
 		"workspace":              util.WorkspaceName,

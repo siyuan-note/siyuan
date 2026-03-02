@@ -603,6 +603,8 @@
   "floatWindowMode0": "تحويم",
   "floatWindowMode1": "‫اضغط مع الاستمرار على ${hotkey} + تحويم‬",
   "floatWindowMode2": "عدم تشغيل",
+  "floatWindowDelay": "تأخير تشغيل النافذة العائمة عند التحويم",
+  "floatWindowDelayTip": "يعمل فقط عندما تكون طريقة تشغيل النافذة العائمة هي التحويم",
   "codeSnippet": "أجزاء من الكود",
   "codeSnippetTip": "صقل واجهة أو وظيفة من خلال التعليمات البرمجية",
   "expandDown": "تمديد للأسفل",

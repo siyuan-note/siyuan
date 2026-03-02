@@ -603,6 +603,8 @@
   "floatWindowMode0": "מרחף",
   "floatWindowMode1": "לחץ והחזק ${hotkey} + מרחף",
   "floatWindowMode2": "אל תניע",
+  "floatWindowDelay": "השהיית הפעלת החלון הצף בעת ריחוף",
+  "floatWindowDelayTip": "חל רק כאשר שיטת הפעלת החלון הצף היא ריחוף",
   "codeSnippet": "קטע קוד",
   "codeSnippetTip": "שפר את הממשק או הפונקציה באמצעות קטעי קוד",
   "expandDown": "הרחב מטה",

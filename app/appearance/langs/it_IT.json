@@ -603,6 +603,8 @@
   "floatWindowMode0": "Passa il mouse",
   "floatWindowMode1": "Tieni premuto ${hotkey} + Passa il mouse",
   "floatWindowMode2": "Non attivare",
+  "floatWindowDelay": "Ritardo di attivazione della finestra flottante al passaggio del mouse",
+  "floatWindowDelayTip": "Ha effetto solo quando il metodo di attivazione della finestra flottante è Passa il mouse",
   "codeSnippet": "Snippet di codice",
   "codeSnippetTip": "Affina l'interfaccia o la funzionalità tramite frammenti di codice",
   "expandDown": "Espandi verso il basso",

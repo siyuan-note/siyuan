@@ -603,6 +603,8 @@
   "floatWindowMode0": "Schweben",
   "floatWindowMode1": "Drücken und halten Sie ${hotkey} + Schwellen",
   "floatWindowMode2": "Nicht auslösen",
+  "floatWindowDelay": "Verzögerung beim Auslösen des schwebenden Fensters beim Schweben",
+  "floatWindowDelayTip": "Wirkt nur, wenn die Auslösermethode des schwebenden Fensters Schweben ist",
   "codeSnippet": "Code-Schnipsel",
   "codeSnippetTip": "Feinabstimmung der Oberfläche oder Funktionalität durch Code-Schnipsel",
   "expandDown": "Nach unten erweitern",

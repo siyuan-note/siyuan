@@ -603,6 +603,8 @@
   "floatWindowMode0": "Hover",
   "floatWindowMode1": "Press and hold ${hotkey} + Hover",
   "floatWindowMode2": "Do not trigger",
+  "floatWindowDelay": "Floating window hover delay",
+  "floatWindowDelayTip": "Only takes effect when the floating window trigger method is Hover",
   "codeSnippet": "Code Snippet",
   "codeSnippetTip": "Fine-tune the interface or functionality through code snippets",
   "expandDown": "Expand Down",

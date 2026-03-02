@@ -603,6 +603,8 @@
   "floatWindowMode0": "Passar o mouse",
   "floatWindowMode1": "Pressionar e segurar ${hotkey} + Passar o mouse",
   "floatWindowMode2": "Não acionar",
+  "floatWindowDelay": "Atraso de acionamento da janela flutuante ao passar o mouse",
+  "floatWindowDelayTip": "Só tem efeito quando o método de acionamento da janela flutuante é Passar o mouse",
   "codeSnippet": "Snippet de Código",
   "codeSnippetTip": "Ajuste fino da interface ou funcionalidade através de snippets de código",
   "expandDown": "Expandir para Baixo",

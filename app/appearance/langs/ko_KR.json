@@ -603,6 +603,8 @@
   "floatWindowMode0": "호버(Hover)",
   "floatWindowMode1": "${hotkey} 누른 채 호버",
   "floatWindowMode2": "트리거하지 않음",
+  "floatWindowDelay": "호버 시 플로팅 창 트리거 지연",
+  "floatWindowDelayTip": "플로팅 창 트리거 방식이 호버(Hover)일 때만 적용됩니다",
   "codeSnippet": "코드 스니펫",
   "codeSnippetTip": "코드 스니펫을 통해 인터페이스나 기능을 미세 조정합니다",
   "expandDown": "아래로 확장",

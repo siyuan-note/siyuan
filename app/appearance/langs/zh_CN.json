@@ -603,6 +603,8 @@
   "floatWindowMode0": "悬停",
   "floatWindowMode1": "按住 ${hotkey}+悬停",
   "floatWindowMode2": "不触发浮窗",
+  "floatWindowDelay": "浮窗悬停触发延迟",
+  "floatWindowDelayTip": "仅在“浮窗触发方式”为“悬停”时生效",
   "codeSnippet": "代码片段",
   "codeSnippetTip": "通过代码片段对界面或功能进行微调",
   "expandDown": "向下扩选",

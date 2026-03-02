@@ -259,7 +259,19 @@ export const editor = {
       <option value="0" ${window.siyuan.config.editor.floatWindowMode === 0 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode0}</option>
       <option value="1" ${window.siyuan.config.editor.floatWindowMode === 1 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode1.replace("${hotkey}", updateHotkeyTip("⌘"))}</option>
       <option value="2" ${window.siyuan.config.editor.floatWindowMode === 2 ? "selected" : ""}>${window.siyuan.languages.floatWindowMode2}</option>
-    </select>    
+    </select>
+</div>
+<div class="fn__flex b3-label config__item${window.siyuan.config.editor.floatWindowMode !== 0 ? " fn__none" : ""}" id="floatWindowDelayWrap">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.floatWindowDelay}
+        <div class="b3-label__text">${window.siyuan.languages.floatWindowDelayTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <div class="fn__size200 fn__flex-center fn__flex">
+        <input class="b3-text-field fn__flex-1" id="floatWindowDelay" type="number" min="0" max="10000" value="${window.siyuan.config.editor.floatWindowDelay}"/>
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">ms</span>
+    </div>
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
@@ -466,6 +478,21 @@ export const editor = {
                 (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "48";
             }
 
+            const floatWindowModeElement = editor.element.querySelector("#floatWindowMode") as HTMLSelectElement;
+            const floatWindowDelayWrapElement = editor.element.querySelector("#floatWindowDelayWrap") as HTMLElement;
+            if (floatWindowDelayWrapElement && floatWindowModeElement) {
+                floatWindowDelayWrapElement.classList.toggle("fn__none", parseInt(floatWindowModeElement.value) !== 0);
+            }
+
+            let floatWindowDelay = parseInt((editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value);
+            if (floatWindowDelay < 0 || isNaN(floatWindowDelay)) {
+                floatWindowDelay = 0;
+                (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "0";
+            } else if (floatWindowDelay > 10000) {
+                floatWindowDelay = 10000;
+                (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "10000";
+            }
+
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
                 markdown: {
@@ -499,6 +526,7 @@ export const editor = {
                 /// #endif
                 onlySearchForDoc: (editor.element.querySelector("#onlySearchForDoc") as HTMLInputElement).checked,
                 floatWindowMode: parseInt((editor.element.querySelector("#floatWindowMode") as HTMLSelectElement).value),
+                floatWindowDelay: floatWindowDelay,
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,

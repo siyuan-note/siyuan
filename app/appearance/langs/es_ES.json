@@ -603,6 +603,8 @@
   "floatWindowMode0": "Flotar",
   "floatWindowMode1": "Presione y mantenga presionado ${hotkey} + Flotar",
   "floatWindowMode2": "No activar",
+  "floatWindowDelay": "Retardo de activación de la ventana flotante al pasar el mouse",
+  "floatWindowDelayTip": "Solo tiene efecto cuando el método de activación de la ventana flotante es Flotar",
   "codeSnippet": "Fragmento de código",
   "codeSnippetTip": "Ajusta la interfaz o la funcionalidad mediante fragmentos de código",
   "expandDown": "Expandir hacia abajo",

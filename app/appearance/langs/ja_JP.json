@@ -603,6 +603,8 @@
   "floatWindowMode0": "ホバー",
   "floatWindowMode1": "${hotkey} を押しながらホバー",
   "floatWindowMode2": "表示しない",
+  "floatWindowDelay": "ホバー時のフローティングウィンドウ表示遅延",
+  "floatWindowDelayTip": "フローティングウィンドウのトリガー方法がホバーのときのみ有効です",
   "codeSnippet": "コードスニペット",
   "codeSnippetTip": "コードスニペットを使用してインターフェースや機能を微調整します",
   "expandDown": "選択範囲を下に拡張",

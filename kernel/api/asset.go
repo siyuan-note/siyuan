@@ -65,6 +65,11 @@ func statAsset(c *gin.Context) {
 		return
 	}
 
+	if !util.IsAbsPathInWorkspace(p) {
+		ret.Code = 1
+		return
+	}
+
 	info, err := os.Stat(p)
 	if err != nil {
 		ret.Code = 1

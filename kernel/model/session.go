@@ -153,7 +153,7 @@ func LoginAuth(c *gin.Context) {
 		return
 	}
 
-	util.BroadcastByType("main", "loginAuth", 0, "", nil)
+	util.BroadcastByType("auth", "loginAuth", 0, "", nil)
 }
 
 func GetCaptcha(c *gin.Context) {

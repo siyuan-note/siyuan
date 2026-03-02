@@ -727,7 +727,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 		if !authOk {
 			// 用于授权页保持连接，避免非常驻内存内核自动退出 https://github.com/siyuan-note/insider/issues/1099
-			authOk = strings.Contains(s.Request.RequestURI, "/ws?app=siyuan&id=auth")
+			authOk = strings.Contains(s.Request.RequestURI, "/ws?app=siyuan") && strings.Contains(s.Request.RequestURI, "&id=auth&type=auth")
 		}
 
 		if !authOk {

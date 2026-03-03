@@ -68,11 +68,31 @@ export class Undo {
         hideElements(["hint", "gutter"], protyle);
         protyle.wysiwyg.lastHTMLs = {};
         if (!redo) {
-            state.undoOperations.forEach(item => {
+            for (let i = state.undoOperations.length - 1; i >= 0; i--) {
+                if (state.undoOperations[i].action === "insert") {
+                    if (state.undoOperations[i].context) {
+                        state.undoOperations[i].context.setRange = "true";
+                    } else {
+                        state.undoOperations[i].context = {setRange: "true"};
+                    }
+                    break;
+                }
+            }
+            state.undoOperations.forEach((item) => {
                 onTransaction(protyle, item, true);
             });
             transaction(protyle, state.undoOperations);
         } else {
+            for (let i = state.doOperations.length - 1; i >= 0; i--) {
+                if (state.doOperations[i].action === "insert") {
+                    if (state.doOperations[i].context) {
+                        state.doOperations[i].context.setRange = "true";
+                    } else {
+                        state.doOperations[i].context = {setRange: "true"};
+                    }
+                    break;
+                }
+            }
             state.doOperations.forEach(item => {
                 onTransaction(protyle, item, true);
             });

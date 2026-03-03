@@ -13,6 +13,10 @@ import {App} from "../index";
 import {afterLoadPlugin} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
 import {initWindowEvent} from "../boot/globalEvent/event";
+import {getAllEditor} from "../layout/getAll";
+/// #if !BROWSER
+import {initNativeDialogOverride} from "../protyle/util/compatibility";
+/// #endif
 
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
@@ -51,6 +55,9 @@ export const init = (app: App) => {
     });
     initStatus(true);
     initWindow(app);
+    /// #if !BROWSER
+    initNativeDialogOverride();
+    /// #endif
     appearance.onSetAppearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
@@ -61,7 +68,15 @@ export const init = (app: App) => {
         resizeTimeout = window.setTimeout(() => {
             adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
-        }, 200);
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0);
+                getAllEditor().forEach(item => {
+                    if (item.protyle.wysiwyg.element.contains(range.startContainer)) {
+                        item.protyle.toolbar.render(item.protyle, range);
+                    }
+                });
+            }
+        }, Constants.TIMEOUT_RESIZE);
     });
 };
 

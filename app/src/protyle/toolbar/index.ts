@@ -12,7 +12,7 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
@@ -69,8 +69,11 @@ export class Toolbar {
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = item.updateProtyleToolbar(options.toolbar);
             pluginToolbar.forEach(toolbarItem => {
-                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                     return;
+                }
+                if (typeof toolbarItem.hotkey !== "string") {
+                    toolbarItem.hotkey = "";
                 }
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
@@ -90,8 +93,11 @@ export class Toolbar {
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar);
             pluginToolbar.forEach(toolbarItem => {
-                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                     return;
+                }
+                if (typeof toolbarItem.hotkey !== "string") {
+                    toolbarItem.hotkey = "";
                 }
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
@@ -108,7 +114,8 @@ export class Toolbar {
     public render(protyle: IProtyle, range: Range, event?: KeyboardEvent) {
         this.range = range;
         let nodeElement = hasClosestBlock(range.startContainer);
-        if (isMobile() || !nodeElement || protyle.disabled || nodeElement.classList.contains("av")) {
+        if (isMobile() || !nodeElement || protyle.disabled || nodeElement.classList.contains("av") ||
+            hasClosestByTag(range.startContainer, "CAPTION")) {
             this.element.classList.add("fn__none");
             return;
         }
@@ -771,7 +778,7 @@ export class Toolbar {
                             currentNode.textContent = currentNode.textContent.substring(1);
                         }
                         if (previousElement.textContent.endsWith(Constants.ZWSP)) {
-                            previousElement.textContent = previousElement.textContent.substring(0, previousElement.textContent.length - 2);
+                            previousElement.textContent = previousElement.textContent.substring(0, previousElement.textContent.length - 1);
                         }
                     } else {
                         const previousType = previousElement ? (previousElement.getAttribute("data-type") || "").split(" ") : [];
@@ -854,7 +861,7 @@ export class Toolbar {
         if (!nodeElement) {
             return;
         }
-        hideElements(["hint"], protyle);
+        hideElements(["hint", "select"], protyle);
         window.siyuan.menus.menu.remove();
         const id = nodeElement.getAttribute("data-node-id");
         const types = (renderElement.getAttribute("data-type") || "").split(" ");
@@ -1097,12 +1104,10 @@ export class Toolbar {
             }
         });
         this.subElementCloseCB = () => {
-            if (!renderElement.parentElement || protyle.disabled ||
-                (oldTextValue === textElement.value && textElement.value)) {
-                return;
-            }
+            const noChange = !renderElement.parentElement || protyle.disabled ||
+                (textElement.value && oldTextValue === textElement.value);
             let inlineLastNode: Element;
-            if (types.includes("NodeHTMLBlock")) {
+            if (types.includes("NodeHTMLBlock") && !noChange) {
                 let htmlText = textElement.value;
                 if (htmlText) {
                     // 需移除首尾的空白字符与连续的换行 (空行) https://github.com/siyuan-note/siyuan/issues/7921
@@ -1113,7 +1118,13 @@ export class Toolbar {
                     }
                 }
                 renderElement.querySelector("protyle-html").setAttribute("data-content", Lute.EscapeHTMLStr(htmlText));
-            } else if (isInlineMemo) {
+                // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
+                if (tempElement.content.childElementCount > 1) {
+                    showMessage(window.siyuan.languages.htmlBlockTip);
+                }
+            } else if (isInlineMemo && !noChange) {
                 let inlineMemoElements;
                 if (updateElements) {
                     inlineMemoElements = updateElements;
@@ -1144,7 +1155,7 @@ export class Toolbar {
                         item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(textElement.value));
                     }
                 });
-            } else if (types.includes("inline-math")) {
+            } else if (types.includes("inline-math") && !noChange) {
                 // 行内数学公式不允许换行 https://github.com/siyuan-note/siyuan/issues/2187
                 if (textElement.value) {
                     renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
@@ -1155,7 +1166,7 @@ export class Toolbar {
                     // esc 后需要 focus range，但点击空白处不能 focus range，否则光标无法留在点击位置
                     renderElement.outerHTML = "<wbr>";
                 }
-            } else {
+            } else if (!noChange) {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
                 renderElement.removeAttribute("data-render");
                 if (types.includes("NodeBlockQueryEmbed")) {
@@ -1165,7 +1176,6 @@ export class Toolbar {
                     processRender(renderElement);
                 }
             }
-
             // 光标定位
             if (getSelection().rangeCount === 0 ||
                 // $$ 中间输入后再 ESC 光标无法定位
@@ -1186,6 +1196,7 @@ export class Toolbar {
                         focusByRange(this.range);
                     }
                 } else {
+                    protyle.wysiwyg.element.focus({preventScroll: true});
                     focusBlock(renderElement);
                     renderElement.classList.add("protyle-wysiwyg--select");
                 }
@@ -1194,16 +1205,10 @@ export class Toolbar {
                 nodeElement.querySelector("wbr")?.remove();
             }
 
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            // HTML 块中包含多个 <pre> 时只能保存第一个 https://github.com/siyuan-note/siyuan/issues/5732
-            if (types.includes("NodeHTMLBlock")) {
-                const tempElement = document.createElement("template");
-                tempElement.innerHTML = protyle.lute.SpinBlockDOM(nodeElement.outerHTML);
-                if (tempElement.content.childElementCount > 1) {
-                    showMessage(window.siyuan.languages.htmlBlockTip);
-                }
+            if (!noChange && nodeElement.outerHTML !== html) {
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                updateTransaction(protyle, id, nodeElement.outerHTML, html);
             }
-            updateTransaction(protyle, id, nodeElement.outerHTML, html);
         };
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");

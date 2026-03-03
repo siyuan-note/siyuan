@@ -60,7 +60,7 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 	tree, withMath := HTML2Tree(htmlStr, luteEngine)
 
 	var formatted []byte
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
 		renderer.ExtRendererFuncs[nodeType] = rendererFunc
 	}
@@ -262,6 +262,14 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			if d == nil {
 				return nil
 			}
+
+			if ".json" == d.Name() { // https://github.com/siyuan-note/siyuan/issues/16637
+				if removeErr := os.RemoveAll(path); nil != removeErr {
+					logging.LogErrorf("remove empty av file [%s] failed: %s", path, removeErr)
+				}
+				return nil
+			}
+
 			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".json")) {
 				return nil
 			}
@@ -418,11 +426,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	for _, tree := range trees {
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 		syPath := filepath.Join(unzipRootPath, tree.Path)
-		if "" == tree.Root.Spec {
-			parse.NestedInlines2FlattedSpans(tree, false)
-			tree.Root.Spec = "1"
-		}
-		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions)
+		treenode.UpgradeSpec(tree)
+		renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		data := renderer.Render()
 
 		if !util.UseSingleLineSave {
@@ -576,10 +581,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-		if d == nil {
+		if d == nil || unzipRootPath == path {
 			return nil
 		}
-		if strings.Contains(path, "assets") && d.IsDir() {
+		if d.Name() == "assets" && d.IsDir() {
 			assetsDirs = append(assetsDirs, path)
 		}
 		return nil
@@ -620,10 +625,10 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-		if d == nil {
+		if d == nil || unzipRootPath == path {
 			return nil
 		}
-		if strings.Contains(path, "emojis") && d.IsDir() {
+		if d.Name() == "emojis" && d.IsDir() {
 			emojiDirs = append(emojiDirs, path)
 		}
 		return nil
@@ -831,7 +836,8 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return nil
 			}
 
-			if !d.IsDir() && !strings.HasSuffix(currentPath, ".md") && !strings.HasSuffix(currentPath, ".markdown") {
+			if !d.IsDir() && (!strings.HasSuffix(currentPath, ".md") && !strings.HasSuffix(currentPath, ".markdown") ||
+				strings.Contains(filepath.ToSlash(currentPath), "/assets/")) {
 				// 非 Markdown 文件作为资源文件处理 https://github.com/siyuan-note/siyuan/issues/13817
 				existName := assetsDone[currentPath]
 				var name string
@@ -943,7 +949,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			tree.Path = targetPath
 			targetPaths[curRelPath] = targetPath
 			tree.HPath = hPath
-			tree.Root.Spec = "1"
+			tree.Root.Spec = treenode.CurrentSpec
 
 			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -989,7 +995,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 
 				if strings.HasSuffix(absolutePath, ".md") || strings.HasSuffix(absolutePath, ".markdown") {
-					if !strings.Contains(absolutePath, "assets") {
+					if !strings.Contains(filepath.ToSlash(absolutePath), "/assets/") {
 						// 链接 .md 文件的情况下只有路径中包含 assets 才算作资源文件，其他情况算作文档链接，后续在 convertMdHyperlinks2WikiLinks 中处理
 						// Supports converting relative path hyperlinks into document block references after importing Markdown https://github.com/siyuan-note/siyuan/issues/13817
 						return ast.WalkContinue
@@ -1075,7 +1081,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		tree.Box = boxID
 		tree.Path = targetPath
 		tree.HPath = path.Join(baseHPath, title)
-		tree.Root.Spec = "1"
+		tree.Root.Spec = treenode.CurrentSpec
 
 		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
 		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
@@ -1276,6 +1282,11 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 	case "image/png":
 		img, decodeErr = png.Decode(dataReader)
 		ext = ".png"
+		if nil != decodeErr {
+			dataReader.Seek(0, 0)
+			img, decodeErr = jpeg.Decode(dataReader)
+			ext = ".jpg"
+		}
 	case "image/jpeg":
 		img, decodeErr = jpeg.Decode(dataReader)
 		ext = ".jpg"

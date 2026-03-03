@@ -1,21 +1,46 @@
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
-    if (isMobile()) {
+export const showTooltip = (
+    message: string,
+    target: Element,
+    tooltipClass?: string,
+    event?: MouseEvent,
+    space: number = 0.5
+) => {
+    if (isMobile() || !message) {
         return;
     }
-    const targetRect = target.getBoundingClientRect();
-    if (targetRect.height === 0 || !message) {
+    let targetRect = target.getBoundingClientRect();
+    // 跨行元素
+    const clientRects = Array.from(target.getClientRects());
+    if (clientRects.length > 1) {
+        if (event) {
+            // 选择鼠标附近的矩形
+            clientRects.forEach(item => {
+                if (event.clientY >= item.top - 3 && event.clientY <= item.bottom) {
+                    targetRect = item;
+                }
+            });
+        } else {
+            // 选择宽度最大的矩形
+            let lastWidth = 0;
+            clientRects.forEach(item => {
+                if (item.width > lastWidth) {
+                    targetRect = item;
+                }
+                lastWidth = item.width;
+            });
+        }
+    }
+    if (targetRect.height === 0) {
         hideTooltip();
         return;
     }
-
     const messageElement = document.getElementById("tooltip");
     messageElement.className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
     messageElement.innerHTML = message;
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
-
 
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
@@ -44,7 +69,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         }
     } else if (position?.endsWith("west")) {
         // west: gutter & 标题图标 & av relation
-        const positionDiff = parseInt(position) || 0.5;
+        const positionDiff = parseInt(position) || space;
         top = Math.max(0, targetRect.top - (messageElement.clientHeight - targetRect.height) / 2);
         if (top > window.innerHeight - messageElement.clientHeight) {
             top = window.innerHeight - messageElement.clientHeight;
@@ -55,7 +80,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         }
     } else if (position?.endsWith("north")) {
         // north: av 视图，列，多选描述, protyle-icon
-        const positionDiff = parseInt(position) || 0.5;
+        const positionDiff = parseInt(position) || space;
         left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
         top = targetRect.top - messageElement.clientHeight - positionDiff;
         if (top < 0) {
@@ -72,13 +97,13 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         }
     } else {
         // ${number}south & 默认值
-        const positionDiff = parseInt(position) || 0.5;
+        const positionDiff = parseInt(position) || space;
         left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
         top = targetRect.bottom + positionDiff;
 
         if (top + messageElement.clientHeight > window.innerHeight) {
             if (targetRect.top - positionDiff > window.innerHeight - top) {
-                top = targetRect.top - positionDiff - messageElement.clientHeight;
+                top = Math.max(0, targetRect.top - positionDiff - messageElement.clientHeight);
                 messageElement.style.maxHeight = (targetRect.top - positionDiff) + "px";
             } else {
                 messageElement.style.maxHeight = (window.innerHeight - top) + "px";

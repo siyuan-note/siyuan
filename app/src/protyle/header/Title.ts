@@ -20,7 +20,7 @@ import {openFileById} from "../../editor/util";
 import {setTitle} from "../../dialog/processSystem";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
-import {code160to32} from "../util/code160to32";
+import {nbsp2space} from "../util/normalizeText";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {hideTooltip} from "../../dialog/tooltip";
@@ -104,8 +104,12 @@ export class Title {
                     event.stopPropagation();
                     let textPlain = await readText() || "";
                     if (textPlain) {
+                        // 对 <<assets/...>> 进行内部转义 https://github.com/siyuan-note/siyuan/issues/11992
+                        textPlain = textPlain.replace(/<<assets\//g, "__@lt2assets/@__").replace(/>>/g, "__@gt2@__");
                         // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
                         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                        // 反转义 <<assets/...>>
+                        textPlain = textPlain.replace(/__@lt2assets\/@__/g, "<<assets/").replace(/__@gt2@__/g, ">>");
                         enableLuteMarkdownSyntax(protyle);
                         let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
                         restoreLuteMarkdownSyntax(protyle);
@@ -273,7 +277,9 @@ export class Title {
                     accelerator: "⇧⌘V",
                     click: async () => {
                         let textPlain = await readText() || "";
+                        textPlain = textPlain.replace(/<<assets\//g, "__@lt2assets/@__").replace(/>>/g, "__@gt2@__");
                         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                        textPlain = textPlain.replace(/__@lt2assets\/@__/g, "<<assets/").replace(/__@gt2@__/g, ">>");
                         enableLuteMarkdownSyntax(protyle);
                         let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
                         restoreLuteMarkdownSyntax(protyle);
@@ -336,17 +342,17 @@ export class Title {
     public setTitle(title: string) {
         /// #if MOBILE
         if (this.editElement) {
-            if (code160to32(title) !== code160to32(this.editElement.textContent)) {
+            if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
                 this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
             }
         } else {
             const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
-            if (code160to32(title) !== code160to32(inputElement.value)) {
+            if (nbsp2space(title) !== nbsp2space(inputElement.value)) {
                 inputElement.value = title === window.siyuan.languages.untitled ? "" : title;
             }
         }
         /// #else
-        if (code160to32(title) !== code160to32(this.editElement.textContent)) {
+        if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
             this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
         }
         /// #endif

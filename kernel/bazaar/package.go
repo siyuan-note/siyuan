@@ -18,6 +18,7 @@ package bazaar
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -36,60 +37,13 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
+	"golang.org/x/sync/singleflight"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
 
-type DisplayName struct {
-	Default string `json:"default"`
-	ArSA    string `json:"ar_SA"`
-	DeDE    string `json:"de_DE"`
-	EnUS    string `json:"en_US"`
-	EsES    string `json:"es_ES"`
-	FrFR    string `json:"fr_FR"`
-	HeIL    string `json:"he_IL"`
-	ItIT    string `json:"it_IT"`
-	JaJP    string `json:"ja_JP"`
-	PlPL    string `json:"pl_PL"`
-	PtBR    string `json:"pt_BR"`
-	RuRU    string `json:"ru_RU"`
-	ZhCHT   string `json:"zh_CHT"`
-	ZhCN    string `json:"zh_CN"`
-}
-
-type Description struct {
-	Default string `json:"default"`
-	ArSA    string `json:"ar_SA"`
-	DeDE    string `json:"de_DE"`
-	EnUS    string `json:"en_US"`
-	EsES    string `json:"es_ES"`
-	FrFR    string `json:"fr_FR"`
-	HeIL    string `json:"he_IL"`
-	ItIT    string `json:"it_IT"`
-	JaJP    string `json:"ja_JP"`
-	PlPL    string `json:"pl_PL"`
-	PtBR    string `json:"pt_BR"`
-	RuRU    string `json:"ru_RU"`
-	ZhCHT   string `json:"zh_CHT"`
-	ZhCN    string `json:"zh_CN"`
-}
-
-type Readme struct {
-	Default string `json:"default"`
-	ArSA    string `json:"ar_SA"`
-	DeDE    string `json:"de_DE"`
-	EnUS    string `json:"en_US"`
-	EsES    string `json:"es_ES"`
-	FrFR    string `json:"fr_FR"`
-	HeIL    string `json:"he_IL"`
-	ItIT    string `json:"it_IT"`
-	JaJP    string `json:"ja_JP"`
-	PlPL    string `json:"pl_PL"`
-	PtBR    string `json:"pt_BR"`
-	RuRU    string `json:"ru_RU"`
-	ZhCHT   string `json:"zh_CHT"`
-	ZhCN    string `json:"zh_CN"`
-}
+// LocaleStrings 表示按语种 key 的字符串表，key 为语种如 "default"、"en_US"、"zh_CN" 等
+type LocaleStrings map[string]string
 
 type Funding struct {
 	OpenCollective string   `json:"openCollective"`
@@ -99,18 +53,18 @@ type Funding struct {
 }
 
 type Package struct {
-	Author            string       `json:"author"`
-	URL               string       `json:"url"`
-	Version           string       `json:"version"`
-	MinAppVersion     string       `json:"minAppVersion"`
-	DisabledInPublish bool         `json:"disabledInPublish"`
-	Backends          []string     `json:"backends"`
-	Frontends         []string     `json:"frontends"`
-	DisplayName       *DisplayName `json:"displayName"`
-	Description       *Description `json:"description"`
-	Readme            *Readme      `json:"readme"`
-	Funding           *Funding     `json:"funding"`
-	Keywords          []string     `json:"keywords"`
+	Author            string        `json:"author"`
+	URL               string        `json:"url"`
+	Version           string        `json:"version"`
+	MinAppVersion     string        `json:"minAppVersion"`
+	DisabledInPublish bool          `json:"disabledInPublish"`
+	Backends          []string      `json:"backends"`
+	Frontends         []string      `json:"frontends"`
+	DisplayName       LocaleStrings `json:"displayName"`
+	Description       LocaleStrings `json:"description"`
+	Readme            LocaleStrings `json:"readme"`
+	Funding           *Funding      `json:"funding"`
+	Keywords          []string      `json:"keywords"`
 
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredName    string `json:"preferredName"`
@@ -124,31 +78,24 @@ type Package struct {
 	PreviewURLThumb string `json:"previewURLThumb"`
 	IconURL         string `json:"iconURL"`
 
-	Installed    bool   `json:"installed"`
-	Outdated     bool   `json:"outdated"`
-	Current      bool   `json:"current"`
-	Updated      string `json:"updated"`
-	Stars        int    `json:"stars"`
-	OpenIssues   int    `json:"openIssues"`
-	Size         int64  `json:"size"`
-	HSize        string `json:"hSize"`
-	InstallSize  int64  `json:"installSize"`
-	HInstallSize string `json:"hInstallSize"`
-	HInstallDate string `json:"hInstallDate"`
-	HUpdated     string `json:"hUpdated"`
-	Downloads    int    `json:"downloads"`
+	Installed               bool   `json:"installed"`
+	Outdated                bool   `json:"outdated"`
+	Current                 bool   `json:"current"`
+	Updated                 string `json:"updated"`
+	Stars                   int    `json:"stars"`
+	OpenIssues              int    `json:"openIssues"`
+	Size                    int64  `json:"size"`
+	HSize                   string `json:"hSize"`
+	InstallSize             int64  `json:"installSize"`
+	HInstallSize            string `json:"hInstallSize"`
+	HInstallDate            string `json:"hInstallDate"`
+	HUpdated                string `json:"hUpdated"`
+	Downloads               int    `json:"downloads"`
+	DisallowInstall         bool   `json:"disallowInstall"`
+	DisallowUpdate          bool   `json:"disallowUpdate"`
+	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer"`
 
 	Incompatible bool `json:"incompatible"`
-}
-
-type StagePackage struct {
-	Author      string       `json:"author"`
-	URL         string       `json:"url"`
-	Version     string       `json:"version"`
-	Description *Description `json:"description"`
-	Readme      *Readme      `json:"readme"`
-	I18N        []string     `json:"i18n"`
-	Funding     *Funding     `json:"funding"`
 }
 
 type StageRepo struct {
@@ -159,221 +106,41 @@ type StageRepo struct {
 	Size        int64  `json:"size"`
 	InstallSize int64  `json:"installSize"`
 
-	Package *StagePackage `json:"package"`
+	// Package 与 stage/*.json 内嵌的完整 package 一致，可直接用于构建列表
+	Package *Package `json:"package"`
 }
 
 type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
 }
 
-func getPreferredReadme(readme *Readme) string {
-	if nil == readme {
-		return "README.md"
+// getPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
+func getPreferredLocaleString(m LocaleStrings, fallback string) string {
+	if len(m) == 0 {
+		return fallback
 	}
-
-	ret := readme.Default
-	switch util.Lang {
-	case "ar_SA":
-		if "" != readme.ArSA {
-			ret = readme.ArSA
-		}
-	case "de_DE":
-		if "" != readme.DeDE {
-			ret = readme.DeDE
-		}
-	case "en_US":
-		if "" != readme.EnUS {
-			ret = readme.EnUS
-		}
-	case "es_ES":
-		if "" != readme.EsES {
-			ret = readme.EsES
-		}
-	case "fr_FR":
-		if "" != readme.FrFR {
-			ret = readme.FrFR
-		}
-	case "he_IL":
-		if "" != readme.HeIL {
-			ret = readme.HeIL
-		}
-	case "it_IT":
-		if "" != readme.ItIT {
-			ret = readme.ItIT
-		}
-	case "ja_JP":
-		if "" != readme.JaJP {
-			ret = readme.JaJP
-		}
-	case "pl_PL":
-		if "" != readme.PlPL {
-			ret = readme.PlPL
-		}
-	case "pt_BR":
-		if "" != readme.PtBR {
-			ret = readme.PtBR
-		}
-	case "ru_RU":
-		if "" != readme.RuRU {
-			ret = readme.RuRU
-		}
-	case "zh_CHT":
-		if "" != readme.ZhCHT {
-			ret = readme.ZhCHT
-		}
-	case "zh_CN":
-		if "" != readme.ZhCN {
-			ret = readme.ZhCN
-		}
-	default:
-		if "" != readme.EnUS {
-			ret = readme.EnUS
-		}
+	if v := strings.TrimSpace(m[util.Lang]); "" != v {
+		return v
 	}
-	if "" == ret {
-		ret = "README.md"
+	if v := strings.TrimSpace(m["default"]); "" != v {
+		return v
 	}
-	return ret
+	if v := strings.TrimSpace(m["en_US"]); "" != v {
+		return v
+	}
+	return fallback
 }
 
 func GetPreferredName(pkg *Package) string {
-	if nil == pkg.DisplayName {
-		return pkg.Name
-	}
-
-	ret := pkg.DisplayName.Default
-	switch util.Lang {
-	case "ar_SA":
-		if "" != pkg.DisplayName.ArSA {
-			ret = pkg.DisplayName.ArSA
-		}
-	case "de_DE":
-		if "" != pkg.DisplayName.DeDE {
-			ret = pkg.DisplayName.DeDE
-		}
-	case "en_US":
-		if "" != pkg.DisplayName.EnUS {
-			ret = pkg.DisplayName.EnUS
-		}
-	case "es_ES":
-		if "" != pkg.DisplayName.EsES {
-			ret = pkg.DisplayName.EsES
-		}
-	case "fr_FR":
-		if "" != pkg.DisplayName.FrFR {
-			ret = pkg.DisplayName.FrFR
-		}
-	case "he_IL":
-		if "" != pkg.DisplayName.HeIL {
-			ret = pkg.DisplayName.HeIL
-		}
-	case "it_IT":
-		if "" != pkg.DisplayName.ItIT {
-			ret = pkg.DisplayName.ItIT
-		}
-	case "ja_JP":
-		if "" != pkg.DisplayName.JaJP {
-			ret = pkg.DisplayName.JaJP
-		}
-	case "pl_PL":
-		if "" != pkg.DisplayName.PlPL {
-			ret = pkg.DisplayName.PlPL
-		}
-	case "pt_BR":
-		if "" != pkg.DisplayName.PtBR {
-			ret = pkg.DisplayName.PtBR
-		}
-	case "ru_RU":
-		if "" != pkg.DisplayName.RuRU {
-			ret = pkg.DisplayName.RuRU
-		}
-	case "zh_CHT":
-		if "" != pkg.DisplayName.ZhCHT {
-			ret = pkg.DisplayName.ZhCHT
-		}
-	case "zh_CN":
-		if "" != pkg.DisplayName.ZhCN {
-			ret = pkg.DisplayName.ZhCN
-		}
-	default:
-		if "" != pkg.DisplayName.EnUS {
-			ret = pkg.DisplayName.EnUS
-		}
-	}
-	if "" == ret {
-		ret = pkg.Name
-	}
-	return ret
+	return getPreferredLocaleString(pkg.DisplayName, pkg.Name)
 }
 
-func getPreferredDesc(desc *Description) string {
-	if nil == desc {
-		return ""
-	}
+func getPreferredDesc(desc LocaleStrings) string {
+	return getPreferredLocaleString(desc, "")
+}
 
-	ret := desc.Default
-	switch util.Lang {
-	case "ar_SA":
-		if "" != desc.ArSA {
-			ret = desc.ArSA
-		}
-	case "de_DE":
-		if "" != desc.DeDE {
-			ret = desc.DeDE
-		}
-	case "en_US":
-		if "" != desc.EnUS {
-			ret = desc.EnUS
-		}
-	case "es_ES":
-		if "" != desc.EsES {
-			ret = desc.EsES
-		}
-	case "fr_FR":
-		if "" != desc.FrFR {
-			ret = desc.FrFR
-		}
-	case "he_IL":
-		if "" != desc.HeIL {
-			ret = desc.HeIL
-		}
-	case "it_IT":
-		if "" != desc.ItIT {
-			ret = desc.ItIT
-		}
-	case "ja_JP":
-		if "" != desc.JaJP {
-			ret = desc.JaJP
-		}
-	case "pl_PL":
-		if "" != desc.PlPL {
-			ret = desc.PlPL
-		}
-	case "pt_BR":
-		if "" != desc.PtBR {
-			ret = desc.PtBR
-		}
-	case "ru_RU":
-		if "" != desc.RuRU {
-			ret = desc.RuRU
-		}
-	case "zh_CHT":
-		if "" != desc.ZhCHT {
-			ret = desc.ZhCHT
-		}
-	case "zh_CN":
-		if "" != desc.ZhCN {
-			ret = desc.ZhCN
-		}
-	default:
-		if "" != desc.EnUS {
-			ret = desc.EnUS
-		}
-	}
-	if "" == ret {
-		ret = desc.EnUS
-	}
-	return ret
+func getPreferredReadme(readme LocaleStrings) string {
+	return getPreferredLocaleString(readme, "README.md")
 }
 
 func getPreferredFunding(funding *Funding) string {
@@ -382,12 +149,21 @@ func getPreferredFunding(funding *Funding) string {
 	}
 
 	if "" != funding.OpenCollective {
+		if strings.HasPrefix(funding.OpenCollective, "http://") || strings.HasPrefix(funding.OpenCollective, "https://") {
+			return funding.OpenCollective
+		}
 		return "https://opencollective.com/" + funding.OpenCollective
 	}
 	if "" != funding.Patreon {
+		if strings.HasPrefix(funding.Patreon, "http://") || strings.HasPrefix(funding.Patreon, "https://") {
+			return funding.Patreon
+		}
 		return "https://www.patreon.com/" + funding.Patreon
 	}
 	if "" != funding.GitHub {
+		if strings.HasPrefix(funding.GitHub, "http://") || strings.HasPrefix(funding.GitHub, "https://") {
+			return funding.GitHub
+		}
 		return "https://github.com/sponsors/" + funding.GitHub
 	}
 	if 0 < len(funding.Custom) {
@@ -500,38 +276,134 @@ func ThemeJSON(themeDirName string) (ret *Theme, err error) {
 
 var cachedStageIndex = map[string]*StageIndex{}
 var stageIndexCacheTime int64
-var stageIndexLock = sync.Mutex{}
+var stageIndexLock = sync.RWMutex{}
 
-func getStageIndex(pkgType string) (ret *StageIndex, err error) {
-	rhyRet, err := util.GetRhyResult(false)
+type StageBazaarResult struct {
+	StageIndex  *StageIndex               // stage 索引
+	BazaarIndex map[string]*bazaarPackage // bazaar 索引
+	Online      bool                      // online 状态
+	StageErr    error                     // stage 错误
+}
+
+var stageBazaarFlight singleflight.Group
+var onlineCheckFlight singleflight.Group
+
+// getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
+func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
+	key := "stageBazaar:" + pkgType
+	v, err, _ := stageBazaarFlight.Do(key, func() (interface{}, error) {
+		return getStageAndBazaar0(pkgType), nil
+	})
 	if err != nil {
+		return
+	}
+	result = v.(StageBazaarResult)
+	return
+}
+
+// getStageAndBazaar0 执行一次 stage 和 bazaar 索引拉取
+func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
+	stageIndex, stageErr := getStageIndexFromCache(pkgType)
+	bazaarIndex := getBazaarIndexFromCache()
+	if nil != stageIndex && nil != bazaarIndex {
+		// 两者都从缓存返回，不需要 online 检查
+		return StageBazaarResult{
+			StageIndex:  stageIndex,
+			BazaarIndex: bazaarIndex,
+			Online:      true,
+			StageErr:    stageErr,
+		}
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var onlineResult bool
+	onlineDone := make(chan bool, 1)
+	wg := &sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		onlineResult = isBazzarOnline()
+		onlineDone <- true
+	}()
+	go func() {
+		defer wg.Done()
+		stageIndex, stageErr = getStageIndex(ctx, pkgType)
+	}()
+	go func() {
+		defer wg.Done()
+		bazaarIndex = getBazaarIndex(ctx)
+	}()
+
+	<-onlineDone
+	if !onlineResult {
+		// 不在线时立即取消其他请求并返回结果，避免等待 HTTP 请求超时
+		cancel()
+		return StageBazaarResult{
+			StageIndex:  stageIndex,
+			BazaarIndex: bazaarIndex,
+			Online:      false,
+			StageErr:    stageErr,
+		}
+	}
+
+	// 在线时等待所有请求完成
+	wg.Wait()
+
+	return StageBazaarResult{
+		StageIndex:  stageIndex,
+		BazaarIndex: bazaarIndex,
+		Online:      onlineResult,
+		StageErr:    stageErr,
+	}
+}
+
+// getStageIndexFromCache 仅从缓存获取 stage 索引，过期或无缓存时返回 nil
+func getStageIndexFromCache(pkgType string) (ret *StageIndex, err error) {
+	stageIndexLock.RLock()
+	cacheTime := stageIndexCacheTime
+	cached := cachedStageIndex[pkgType]
+	stageIndexLock.RUnlock()
+	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && nil != cached {
+		ret = cached
+	}
+	return
+}
+
+// getStageIndex 获取 stage 索引
+func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err error) {
+	if cached, cacheErr := getStageIndexFromCache(pkgType); nil != cached {
+		ret = cached
+		err = cacheErr
+		return
+	}
+
+	var rhyRet map[string]interface{}
+	rhyRet, err = util.GetRhyResult(ctx, false)
+	if nil != err {
 		return
 	}
 
 	stageIndexLock.Lock()
 	defer stageIndexLock.Unlock()
 
-	now := time.Now().Unix()
-	if 3600 >= now-stageIndexCacheTime && nil != cachedStageIndex[pkgType] {
-		ret = cachedStageIndex[pkgType]
-		return
-	}
-
 	bazaarHash := rhyRet["bazaar"].(string)
 	ret = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
-	resp, reqErr := request.SetSuccessResult(ret).Get(u)
+	resp, reqErr := request.SetContext(ctx).SetSuccessResult(ret).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
+		err = reqErr
 		return
 	}
 	if 200 != resp.StatusCode {
 		logging.LogErrorf("get community stage index [%s] failed: %d", u, resp.StatusCode)
+		err = errors.New("get stage index failed")
 		return
 	}
 
-	stageIndexCacheTime = now
+	stageIndexCacheTime = time.Now().Unix()
 	cachedStageIndex[pkgType] = ret
 	return
 }
@@ -548,7 +420,7 @@ func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
 	}
 
 	for _, pkg := range bazaarThemes {
-		if theme.URL == pkg.URL && theme.Name == pkg.Name && 0 > semver.Compare("v"+theme.Version, "v"+pkg.Version) {
+		if theme.Name == pkg.Name && 0 > semver.Compare("v"+theme.Version, "v"+pkg.Version) {
 			theme.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -568,7 +440,7 @@ func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
 	}
 
 	for _, pkg := range bazaarIcons {
-		if icon.URL == pkg.URL && icon.Name == pkg.Name && 0 > semver.Compare("v"+icon.Version, "v"+pkg.Version) {
+		if icon.Name == pkg.Name && 0 > semver.Compare("v"+icon.Version, "v"+pkg.Version) {
 			icon.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -588,7 +460,7 @@ func isOutdatedPlugin(plugin *Plugin, bazaarPlugins []*Plugin) bool {
 	}
 
 	for _, pkg := range bazaarPlugins {
-		if plugin.URL == pkg.URL && plugin.Name == pkg.Name && 0 > semver.Compare("v"+plugin.Version, "v"+pkg.Version) {
+		if plugin.Name == pkg.Name && 0 > semver.Compare("v"+plugin.Version, "v"+pkg.Version) {
 			plugin.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -608,7 +480,7 @@ func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
 	}
 
 	for _, pkg := range bazaarWidgets {
-		if widget.URL == pkg.URL && widget.Name == pkg.Name && 0 > semver.Compare("v"+widget.Version, "v"+pkg.Version) {
+		if widget.Name == pkg.Name && 0 > semver.Compare("v"+widget.Version, "v"+pkg.Version) {
 			widget.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -628,7 +500,7 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 	}
 
 	for _, pkg := range bazaarTemplates {
-		if template.URL == pkg.URL && template.Name == pkg.Name && 0 > semver.Compare("v"+template.Version, "v"+pkg.Version) {
+		if template.Name == pkg.Name && 0 > semver.Compare("v"+template.Version, "v"+pkg.Version) {
 			template.RepoHash = pkg.RepoHash
 			return true
 		}
@@ -636,9 +508,19 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 	return false
 }
 
-func isBazzarOnline() (ret bool) {
+func isBazzarOnline() bool {
+	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (interface{}, error) {
+		return isBazzarOnline0(), nil
+	})
+	if err != nil {
+		return false
+	}
+	return v.(bool)
+}
+
+func isBazzarOnline0() (ret bool) {
 	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
-	ret = util.IsOnline(util.BazaarOSSServer, true, 3000)
+	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
 	if !ret {
 		util.PushErrMsg(util.Langs[util.Lang][24], 5000)
 	}
@@ -648,7 +530,9 @@ func isBazzarOnline() (ret bool) {
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 
+	stageIndexLock.RLock()
 	stageIndex := cachedStageIndex[packageType]
+	stageIndexLock.RUnlock()
 	if nil == stageIndex {
 		return
 	}
@@ -661,7 +545,7 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 			break
 		}
 	}
-	if nil == repo {
+	if nil == repo || nil == repo.Package {
 		return
 	}
 
@@ -669,14 +553,29 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 
 	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
 	if err != nil {
-		ret = fmt.Sprintf("Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
-		if readme == repo.Package.Readme.Default || "" == strings.TrimSpace(repo.Package.Readme.Default) {
-			return
+		ret = fmt.Sprintf("Load bazaar package's preferred README(%s) failed: %s", readme, err.Error())
+		// 回退到 Default README
+		var defaultReadme string
+		if len(repo.Package.Readme) > 0 {
+			defaultReadme = repo.Package.Readme["default"]
 		}
-		readme = repo.Package.Readme.Default
-		data, err = downloadPackage(repoURLHash+"/"+readme, false, "")
-		if err != nil {
-			ret += fmt.Sprintf("<br>Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
+		if "" == strings.TrimSpace(defaultReadme) {
+			defaultReadme = "README.md"
+		}
+		if readme != defaultReadme {
+			data, err = downloadPackage(repoURLHash+"/"+defaultReadme, false, "")
+			if err != nil {
+				ret += fmt.Sprintf("<br>Load bazaar package's default README(%s) failed: %s", defaultReadme, err.Error())
+			}
+		}
+		// 回退到 README.md
+		if err != nil && readme != "README.md" && defaultReadme != "README.md" {
+			data, err = downloadPackage(repoURLHash+"/README.md", false, "")
+			if err != nil {
+				ret += fmt.Sprintf("<br>Load bazaar package's README.md failed: %s", err.Error())
+				return
+			}
+		} else if err != nil {
 			return
 		}
 	}
@@ -690,6 +589,46 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	}
 
 	ret, err = renderREADME(repoURL, data)
+	return
+}
+
+func loadInstalledReadme(installPath, basePath string, readme LocaleStrings) (ret string) {
+	readmeFilename := getPreferredReadme(readme)
+	readmeData, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
+	if nil == readErr {
+		ret, _ = renderLocalREADME(basePath, readmeData)
+		return
+	}
+
+	logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
+	ret = fmt.Sprintf("File %s not found", readmeFilename)
+	// 回退到 Default README
+	var defaultReadme string
+	if len(readme) > 0 {
+		defaultReadme = strings.TrimSpace(readme["default"])
+	}
+	if "" == defaultReadme {
+		defaultReadme = "README.md"
+	}
+	if readmeFilename != defaultReadme {
+		readmeData, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
+		if nil == readErr {
+			ret, _ = renderLocalREADME(basePath, readmeData)
+			return
+		}
+		logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
+		ret += fmt.Sprintf("<br>File %s not found", defaultReadme)
+	}
+	// 回退到 README.md
+	if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
+		readmeData, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
+		if nil == readErr {
+			ret, _ = renderLocalREADME(basePath, readmeData)
+			return
+		}
+		logging.LogWarnf("read installed README.md failed: %s", readErr)
+		ret += "<br>File README.md not found"
+	}
 	return
 }
 
@@ -845,20 +784,35 @@ type bazaarPackage struct {
 
 var cachedBazaarIndex = map[string]*bazaarPackage{}
 var bazaarIndexCacheTime int64
-var bazaarIndexLock = sync.Mutex{}
+var bazaarIndexLock = sync.RWMutex{}
 
-func getBazaarIndex() map[string]*bazaarPackage {
+// getBazaarIndexFromCache 仅从缓存获取 bazaar 索引，过期或无缓存时返回 nil
+func getBazaarIndexFromCache() (ret map[string]*bazaarPackage) {
+	bazaarIndexLock.RLock()
+	cacheTime := bazaarIndexCacheTime
+	cached := cachedBazaarIndex
+	hasData := 0 < len(cached)
+	bazaarIndexLock.RUnlock()
+	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && hasData {
+		ret = cached
+	} else {
+		ret = nil
+	}
+	return
+}
+
+// getBazaarIndex 获取 bazaar 索引
+func getBazaarIndex(ctx context.Context) map[string]*bazaarPackage {
+	if cached := getBazaarIndexFromCache(); nil != cached {
+		return cached
+	}
+
 	bazaarIndexLock.Lock()
 	defer bazaarIndexLock.Unlock()
 
-	now := time.Now().Unix()
-	if 3600 >= now-bazaarIndexCacheTime {
-		return cachedBazaarIndex
-	}
-
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
-	resp, reqErr := request.SetSuccessResult(&cachedBazaarIndex).Get(u)
+	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&cachedBazaarIndex).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
 		return cachedBazaarIndex
@@ -867,19 +821,18 @@ func getBazaarIndex() map[string]*bazaarPackage {
 		logging.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
 		return cachedBazaarIndex
 	}
-	bazaarIndexCacheTime = now
+	bazaarIndexCacheTime = time.Now().Unix()
 	return cachedBazaarIndex
 }
 
-// defaultMinAppVersion 如果集市包中缺失 minAppVersion 项，则使用该值作为最低支持的版本号，小于该版本号时不显示集市包
 // Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
-const defaultMinAppVersion = "2.9.0"
-
-func disallowDisplayBazaarPackage(pkg *Package) bool {
+func disallowInstallBazaarPackage(pkg *Package) bool {
+	// 如果包没有指定 minAppVersion，则允许安装
 	if "" == pkg.MinAppVersion {
-		pkg.MinAppVersion = defaultMinAppVersion
+		return false
 	}
 
+	// 如果包要求的 minAppVersion 大于当前版本，则不允许安装
 	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
 		return true
 	}

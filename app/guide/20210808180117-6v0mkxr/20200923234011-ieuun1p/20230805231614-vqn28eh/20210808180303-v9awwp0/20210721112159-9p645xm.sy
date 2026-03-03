@@ -1,10 +1,11 @@
 {
 	"ID": "20210721112159-9p645xm",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210721112159-9p645xm",
 		"title": "Storage",
+		"type": "doc",
 		"updated": "20230912091621"
 	},
 	"Children": [

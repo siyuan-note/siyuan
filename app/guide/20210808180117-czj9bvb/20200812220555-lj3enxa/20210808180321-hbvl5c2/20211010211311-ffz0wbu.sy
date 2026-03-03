@@ -1,10 +1,11 @@
 {
 	"ID": "20211010211311-ffz0wbu",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211010211311-ffz0wbu",
 		"title": "虚拟引用",
+		"type": "doc",
 		"updated": "20240228163846"
 	},
 	"Children": [

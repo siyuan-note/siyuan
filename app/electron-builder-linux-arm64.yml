@@ -10,6 +10,7 @@ directories:
   output: "build"
 files:
   - "electron"
+afterPack: "./scripts/afterPack.js"
 extraFiles:
   - from: "../LICENSE"
     to: "LICENSE"
@@ -68,3 +69,6 @@ extraResources:
     filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-linux-arm64.zip"
     to: "pandoc.zip"
+  - from: "pandoc/pandoc-resources"
+    to: "pandoc-resources"
+    filter: "!**/{.DS_Store}"

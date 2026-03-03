@@ -47,14 +47,17 @@ html {
     min-width: 32px;
     height: 100%;
     box-sizing: border-box;
-    border-radius: var(--b3-border-radius-b);
-
-    &:hover {
-      background-color: var(--b3-theme-surface-light);
-    }
   }
 }
 
+html[data-frontend="browser-desktop"] {
+  .fullscreen > .protyle-breadcrumb,
+  .fullscreen > .block__icons {
+    padding-left: calc(env(titlebar-area-x, 0px) + 8px);
+    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 8px);
+    height: calc(env(titlebar-area-height, 31px) + 1px);
+  }
+}
 
 .toolbar {
   background-color: var(--b3-toolbar-background);
@@ -66,8 +69,8 @@ html {
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
-    padding-left: env(titlebar-area-x, 0);
-    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0));
+    padding-left: calc(env(titlebar-area-x, 0px) + 5px);
+    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0px) + 5px);
     height: calc(env(titlebar-area-height, 31px) + 1px);
   }
 
@@ -222,26 +225,6 @@ html {
     display: flex;
     color: var(--b3-theme-on-surface);
     font-size: 12px;
-
-    & > div {
-      height: 4px;
-      border-radius: var(--b3-border-radius);
-      overflow: hidden;
-      background-color: #fff;
-      width: 64px;
-      align-self: center;
-      margin: 0 8px 0 4px;
-      cursor: pointer;
-      flex-shrink: 0;
-
-      & > div {
-        background-color: var(--b3-theme-primary-light);
-        height: 4px;
-        background-image: linear-gradient(-45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent);
-        animation: stripMove 450ms linear infinite;
-        background-size: 50px 50px;
-      }
-    }
   }
 
   .fn__space:last-child {
@@ -287,7 +270,7 @@ html {
 
   &.sy__file--disablehover {
     .b3-list--background .b3-list-item {
-      &:hover {
+      &:not(.b3-list-item--focus):hover {
         background-color: transparent !important;
       }
 

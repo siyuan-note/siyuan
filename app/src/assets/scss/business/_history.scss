@@ -42,4 +42,10 @@
     width: 5px;
     margin-left: -2px;
   }
+
+  &__panel {
+    .protyle-title__input {
+      margin-top: 8px;
+    }
+  }
 }

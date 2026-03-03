@@ -1,10 +1,11 @@
 {
 	"ID": "20210824201257-cy7icrc",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210824201257-cy7icrc",
 		"title": "挂件",
+		"type": "doc",
 		"updated": "20230820184200"
 	},
 	"Children": [

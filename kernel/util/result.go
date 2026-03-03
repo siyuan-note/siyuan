@@ -33,15 +33,16 @@ const (
 )
 
 type Result struct {
-	Cmd       string      `json:"cmd"`
-	ReqId     float64     `json:"reqId"`
-	AppId     string      `json:"app"`
-	SessionId string      `json:"sid"`
-	PushMode  PushMode    `json:"pushMode"`
-	Callback  interface{} `json:"callback"`
-	Code      int         `json:"code"`
-	Msg       string      `json:"msg"`
-	Data      interface{} `json:"data"`
+	Cmd       string         `json:"cmd"`
+	ReqId     float64        `json:"reqId"`
+	AppId     string         `json:"app"`
+	SessionId string         `json:"sid"`
+	PushMode  PushMode       `json:"pushMode"`
+	Callback  interface{}    `json:"callback"`
+	Code      int            `json:"code"`
+	Msg       string         `json:"msg"`
+	Data      interface{}    `json:"data"`
+	Context   map[string]any `json:"context,omitempty"`
 }
 
 func NewResult() *Result {

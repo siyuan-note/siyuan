@@ -79,16 +79,21 @@ func initDatabase(forceRebuild bool) (err error) {
 func initDBTables() {
 	_, err := db.Exec("DROP TABLE IF EXISTS blocktrees")
 	if err != nil {
-		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "drop table [blocks] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [blocks] failed: %s", err)
 	}
 	_, err = db.Exec("CREATE TABLE blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type)")
 	if err != nil {
-		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocktrees] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [blocktrees] failed: %s", err)
 	}
 
 	_, err = db.Exec("CREATE INDEX idx_blocktrees_id ON blocktrees(id)")
 	if err != nil {
-		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocktrees_id] failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocktrees_id] failed: %s", err)
+	}
+
+	_, err = db.Exec("CREATE INDEX idx_blocktrees_root_id ON blocktrees(root_id)")
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_blocktrees_root_id] failed: %s", err)
 	}
 }
 
@@ -111,7 +116,7 @@ func initDBConnection() {
 	var err error
 	db, err = sql.Open("sqlite3_extended", dsn)
 	if err != nil {
-		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create database failed: %s", err)
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create database failed: %s", err)
 	}
 	db.SetMaxIdleConns(7)
 	db.SetMaxOpenConns(7)
@@ -131,7 +136,8 @@ func closeDatabase() {
 		logging.LogErrorf("close database failed: %s", err)
 	}
 	debug.FreeOSMemory()
-	runtime.GC() // 没有这句的话文件句柄不会释放，后面就无法删除文件
+	db = nil
+	runtime.GC()
 	return
 }
 
@@ -514,6 +520,19 @@ func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
 	return
 }
 
+func RemoveBlockTreesByIDs(ids []string) {
+	if 1 > len(ids) {
+		return
+	}
+
+	sqlStmt := "DELETE FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
+	_, err := db.Exec(sqlStmt)
+	if err != nil {
+		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
+		return
+	}
+}
+
 func RemoveBlockTree(id string) {
 	sqlStmt := "DELETE FROM blocktrees WHERE id = ?"
 	_, err := db.Exec(sqlStmt, id)
@@ -536,6 +555,10 @@ func IndexBlockTree(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
+	if 1 > len(changedNodes) {
+		return
+	}
+
 	indexBlockTreeLock.Lock()
 	defer indexBlockTreeLock.Unlock()
 
@@ -545,21 +568,7 @@ func IndexBlockTree(tree *parse.Tree) {
 		return
 	}
 
-	sqlStmt := "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-	for _, n := range changedNodes {
-		var parentID string
-		if nil != n.Parent {
-			parentID = n.Parent.ID
-		}
-		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
-			tx.Rollback()
-			logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
-			return
-		}
-	}
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit transaction failed: %s", err)
-	}
+	execInsertBlocktrees(tx, tree, changedNodes)
 }
 
 func UpsertBlockTree(tree *parse.Tree) {
@@ -587,6 +596,10 @@ func UpsertBlockTree(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
+	if 1 > len(changedNodes) {
+		return
+	}
+
 	ids := bytes.Buffer{}
 	for i, n := range changedNodes {
 		ids.WriteString("'")
@@ -607,14 +620,26 @@ func UpsertBlockTree(tree *parse.Tree) {
 	}
 
 	sqlStmt := "DELETE FROM blocktrees WHERE id IN (" + ids.String() + ")"
-
 	_, err = tx.Exec(sqlStmt)
 	if err != nil {
 		tx.Rollback()
 		logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 		return
 	}
-	sqlStmt = "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+
+	execInsertBlocktrees(tx, tree, changedNodes)
+}
+
+func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node) {
+	sqlStmt := "INSERT INTO blocktrees (id, root_id, parent_id, box_id, path, hpath, updated, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+	stmt, err := tx.Prepare(sqlStmt)
+	if err != nil {
+		tx.Rollback()
+		logging.LogErrorf("prepare statement [%s] failed: %s", sqlStmt, err)
+		return
+	}
+	defer stmt.Close()
+
 	for _, n := range changedNodes {
 		var parentID string
 		if nil != n.Parent {
@@ -635,7 +660,7 @@ func InitBlockTree(force bool) {
 	err := initDatabase(force)
 	if err != nil {
 		logging.LogErrorf("init database failed: %s", err)
-		os.Exit(logging.ExitCodeReadOnlyDatabase)
+		os.Exit(logging.ExitCodeUnavailableDatabase)
 		return
 	}
 	return

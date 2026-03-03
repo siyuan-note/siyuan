@@ -164,6 +164,10 @@ func getDynamicIcon(c *gin.Context) {
 		svg = generateTypeOneSVG(color, lang, dateInfo)
 	}
 
+	if !model.Conf.Editor.AllowSVGScript {
+		svg = util.RemoveScriptsInSVG(svg)
+	}
+
 	c.Header("Content-Type", "image/svg+xml")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Pragma", "no-cache")

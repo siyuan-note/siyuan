@@ -1,10 +1,11 @@
 {
 	"ID": "20230808120347-pzvmkik",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230808120347-pzvmkik",
 		"title": "存储空间",
+		"type": "doc",
 		"updated": "20230912091534"
 	},
 	"Children": [

@@ -1,10 +1,11 @@
 {
 	"ID": "20230808120348-vaxi6eq",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230808120348-vaxi6eq",
 		"title": "微信提醒",
+		"type": "doc",
 		"updated": "20220420002356"
 	},
 	"Children": [

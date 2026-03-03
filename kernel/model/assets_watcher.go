@@ -33,7 +33,7 @@ import (
 var assetsWatcher *fsnotify.Watcher
 
 func WatchAssets() {
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+	if !isFileWatcherAvailable() {
 		return
 	}
 
@@ -73,12 +73,6 @@ func watchAssets() {
 
 				lastEvent = event
 				timer.Reset(time.Millisecond * 100)
-
-				if lastEvent.Op&fsnotify.Rename == fsnotify.Rename || lastEvent.Op&fsnotify.Write == fsnotify.Write {
-					HandleAssetsChangeEvent(lastEvent.Name)
-				} else if lastEvent.Op&fsnotify.Remove == fsnotify.Remove {
-					HandleAssetsRemoveEvent(lastEvent.Name)
-				}
 			case err, ok := <-assetsWatcher.Errors:
 				if !ok {
 					return

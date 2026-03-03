@@ -21,9 +21,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -65,20 +67,11 @@ func docTagSpans(n *ast.Node) (ret []*Span) {
 
 func docTitleImgAsset(root *ast.Node, boxLocalPath, docDirLocalPath string) *Asset {
 	if p := treenode.GetDocTitleImgPath(root); "" != p {
-		if !util.IsAssetLinkDest([]byte(p)) {
+		if !util.IsAssetLinkDest([]byte(p), false) {
 			return nil
 		}
 
-		var hash string
-		var err error
-		if lp := assetLocalPath(p, boxLocalPath, docDirLocalPath); "" != lp {
-			hash, err = util.GetEtag(lp)
-			if err != nil {
-				logging.LogErrorf("calc asset [%s] hash failed: %s", lp, err)
-				return nil
-			}
-		}
-
+		hash := assetHashByLocalPath(p, boxLocalPath, docDirLocalPath)
 		name, _ := util.LastID(p)
 		asset := &Asset{
 			ID:      ast.NewNodeID(),
@@ -123,6 +116,22 @@ func scanAssetRows(rows *sql.Rows) (ret *Asset) {
 		return
 	}
 	ret = &asset
+	return
+}
+
+func assetHashByLocalPath(linkDest, boxLocalPath, docDirLocalPath string) (ret string) {
+	if lp := assetLocalPath(linkDest, boxLocalPath, docDirLocalPath); "" != lp {
+		if !gulu.File.IsDir(lp) {
+			if assetHash := cache.GetAssetHashByPath(linkDest); nil != assetHash {
+				ret = assetHash.Hash
+			} else {
+				ret, _ = util.GetEtag(lp)
+				if "" != ret {
+					cache.SetAssetHash(ret, linkDest)
+				}
+			}
+		}
+	}
 	return
 }
 

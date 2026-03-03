@@ -145,8 +145,7 @@ export const renameAsset = (assetPath: string) => {
             /// #if !MOBILE
             getAllModels().asset.forEach(item => {
                 if (item.path === assetPath) {
-                    item.path = response.data.newPath;
-                    item.parent.updateTitle(getDisplayName(response.data.newPath));
+                    item.update(response.data.newPath);
                 }
             });
             /// #endif

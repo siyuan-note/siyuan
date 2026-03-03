@@ -1,10 +1,11 @@
 {
 	"ID": "20211226123101-qjw03ab",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226123101-qjw03ab",
 		"title": "小工具",
+		"type": "doc",
 		"updated": "20230820184228"
 	},
 	"Children": [

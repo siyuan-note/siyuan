@@ -229,17 +229,13 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
         if (port === 0) {
             publishAddresses.innerText = window.siyuan.languages.publishServiceNotStarted;
         } else {
-            publishAddresses.innerHTML = `<ul class="b3-list fn__flex-1" style="padding: 2px 0;">${
-                window.siyuan.config.localIPs
-                    .filter(ip => !(ip.startsWith("[") && ip.endsWith("]")))
-                    .map(ip => `<li><code class="fn__code">${ip}:${port}</code></li>`)
-                    .join("")
-            }${
-                window.siyuan.config.localIPs
-                    .filter(ip => (ip.startsWith("[") && ip.endsWith("]")))
-                    .map(ip => `<li><code class="fn__code">${ip}:${port}</code></li>`)
-                    .join("")
-            }</ul>`;
+            publishAddresses.innerHTML = `<div class="b3-label__text">${
+                window.siyuan.config.serverAddrs
+                    .map(serverAddr => {
+                        serverAddr = serverAddr.substring(0, serverAddr.lastIndexOf(":"));
+                        return `<code class="fn__code">${serverAddr}:${port}</code>`;
+                    }).join(" ")
+            }</div>`;
         }
     },
 };

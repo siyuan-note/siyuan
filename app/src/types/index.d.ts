@@ -110,7 +110,6 @@ type TAVCol =
     | "updated"
     | "checkbox"
     | "lineNumber"
-type THintSource = "search" | "av" | "hint";
 type TAVFilterOperator =
     "="
     | "!="
@@ -229,13 +228,13 @@ interface Window {
             setClipboard: { postMessage: (url: string) => void }
             purchase: { postMessage: (url: string) => void }
             print: { postMessage: (html: string) => void }
+            exit: { postMessage: (text: string) => void }
         }
     };
     htmlToImage: {
         toCanvas: (element: Element) => Promise<HTMLCanvasElement>
         toBlob: (element: Element) => Promise<Blob>
     };
-
     siyuan: ISiyuan;
     JSAndroid: {
         returnDesktop(): void
@@ -244,25 +243,34 @@ interface Window {
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
+        writeSiYuanHTMLClipboard(text: string, html: string, siyuanHTML: string): void
         writeImageClipboard(uri: string): void
         readClipboard(): string
         readHTMLClipboard(): string
+        readSiYuanHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
+        showKeyboard(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
+        exit(): void
     };
     JSHarmony: {
+        showKeyboard(): void
+        hideKeyboard(): void
         openExternal(url: string): void
         exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
+        writeSiYuanHTMLClipboard(text: string, html: string, siyuanHTML: string): void
         readClipboard(): string
         readHTMLClipboard(): string
+        readSiYuanHTMLClipboard(): string
         returnDesktop(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
+        exit(): void
     };
 
     Protyle: import("../protyle/method").default;
@@ -284,12 +292,17 @@ interface Window {
     destroyTheme(): Promise<void>;
 }
 
+interface ILocalFiles {
+    path: string,
+    size: number
+}
+
 interface IClipboardData {
     textHTML?: string,
     textPlain?: string,
     siyuanHTML?: string,
     files?: File[],
-    localFiles?: string[]
+    localFiles?: ILocalFiles[],
 }
 
 interface IRefDefs {
@@ -481,6 +494,17 @@ interface ISiyuan {
     emojis?: IEmoji[],
     backStack?: IBackStack[],
     mobile?: {
+        size: {
+            isLandscape?: boolean,
+            landscape?: {
+                height1: number,
+                height2: number,    // 键盘弹起时的高度
+            }, // 横屏
+            portrait?: {
+                height1: number,
+                height2: number,
+            }
+        }
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
         docks?: {
@@ -550,7 +574,7 @@ interface ISiyuan {
 interface IOperation {
     action: TOperation, // move， delete 不需要传 data
     id?: string,
-    context?: IObject,
+    context?: IObject,  // focusId, message, ignoreProcess, setRange
     blockID?: string,
     isTwoWay?: boolean, // 是否双向关联
     backRelationKeyID?: string, // 双向关联的目标关联列 ID
@@ -617,9 +641,9 @@ interface ILayoutJSON extends ILayoutOptions {
 interface ICommand {
     langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
-    hotkey: string,
+    hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
-    callback?: () => void   // 其余回调存在时将不会触
+    callback?: () => void   // 其余回调存在时将不会触发
     globalCallback?: () => void // 焦点不在应用内时执行的回调
     fileTreeCallback?: (file: import("../layout/dock/Files").Files) => void // 焦点在文档树上时执行的回调
     editorCallback?: (protyle: IProtyle) => void     // 焦点在编辑器上时执行的回调
@@ -703,6 +727,7 @@ interface IWebSocketData {
     msg: string;
     code: number;
     sid?: string;
+    context?: any;
 }
 
 interface IGraphCommon {
@@ -718,6 +743,7 @@ interface IGraphCommon {
     };
     type: {
         blockquote: boolean
+        callout: boolean
         code: boolean
         heading: boolean
         list: boolean
@@ -839,6 +865,7 @@ interface IBazaarItem {
     incompatible?: boolean;  // 仅 plugin
     enabled: boolean;
     preferredName: string;
+    minAppVersion: string;
     preferredDesc: string;
     preferredReadme: string;
     iconURL: string;
@@ -846,6 +873,7 @@ interface IBazaarItem {
     author: string;
     updated: string;
     downloads: string;
+    disallowInstall: boolean;
     current: false;
     installed: false;
     outdated: false;
@@ -863,6 +891,8 @@ interface IBazaarItem {
     hInstallDate: string;
     hUpdated: string;
     preferredFunding: string;
+    disallowUpdate: boolean;
+    updateRequiredMinAppVer: string;
 }
 
 interface IAV {
@@ -933,11 +963,11 @@ interface IAVFilter {
     operator: TAVFilterOperator,
     quantifier?: string,
     value: IAVCellValue,
-    relativeDate?: relativeDate
-    relativeDate2?: relativeDate
+    relativeDate?: IAVRelativeDate
+    relativeDate2?: IAVRelativeDate
 }
 
-interface relativeDate {
+interface IAVRelativeDate {
     count: number;   // 数量
     unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
     direction: number;   // 方向：-1: 前、0: 现在、1: 后

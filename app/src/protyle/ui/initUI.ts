@@ -128,63 +128,64 @@ export const initUI = (protyle: IProtyle) => {
             (!event.target.classList.contains("protyle-content") && !event.target.classList.contains("protyle-wysiwyg"))) {
             return;
         }
-        // 选中最后一个块末尾点击底部时，range 会有值，需等待
-        setTimeout(() => {
-            // 选中文本禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
-            if (window.getSelection().rangeCount > 0) {
-                const currentRange = window.getSelection().getRangeAt(0);
-                if (currentRange.toString() !== "" && protyle.wysiwyg.element.contains(currentRange.startContainer)) {
-                    return;
-                }
+        // https://github.com/siyuan-note/siyuan/issues/14190 选中最后一个块末尾点击底部时，range 会有值，需使用 setTimeout，最新测试无需 setTimeout 了，且会影响移动端键盘弹起故移除
+        // 选中文本禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
+        if (window.getSelection().rangeCount > 0) {
+            const currentRange = window.getSelection().getRangeAt(0);
+            if (currentRange.toString() !== "" && protyle.wysiwyg.element.contains(currentRange.startContainer)) {
+                return;
             }
-            const lastElement = protyle.wysiwyg.element.lastElementChild;
-            const lastRect = lastElement.getBoundingClientRect();
-            const range = document.createRange();
-            if (event.y > lastRect.bottom) {
-                const lastEditElement = getContenteditableElement(getLastBlock(lastElement));
-                if (!protyle.options.click.preventInsetEmptyBlock && (
-                    !lastEditElement ||
-                    (lastElement.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
-                    (lastElement.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== ""))
-                ) {
-                    let emptyElement: Element;
-                    if (lastElement.getAttribute("data-type") === "NodeHeading" && lastElement.getAttribute("fold") === "1") {
-                        emptyElement = genHeadingElement(lastElement) as Element;
-                    } else {
-                        emptyElement = genEmptyElement(false, false);
-                    }
-                    protyle.wysiwyg.element.insertAdjacentElement("beforeend", emptyElement);
-                    transaction(protyle, [{
-                        action: "insert",
-                        data: emptyElement.outerHTML,
-                        id: emptyElement.getAttribute("data-node-id"),
-                        previousID: emptyElement.previousElementSibling.getAttribute("data-node-id"),
-                        parentID: protyle.block.parentID
-                    }], [{
-                        action: "delete",
-                        id: emptyElement.getAttribute("data-node-id")
-                    }]);
-                    const emptyEditElement = getContenteditableElement(emptyElement) as HTMLInputElement;
-                    range.selectNodeContents(emptyEditElement);
-                    range.collapse(true);
-                    focusByRange(range);
-                    // 需等待 range 更新再次进行渲染
-                    if (protyle.options.render.breadcrumb) {
-                        setTimeout(() => {
-                            protyle.breadcrumb.render(protyle);
-                        }, Constants.TIMEOUT_TRANSITION);
-                    }
-                } else if (lastEditElement) {
-                    range.selectNodeContents(lastEditElement);
-                    range.collapse(false);
-                    focusByRange(range);
+        }
+        const lastElement = protyle.wysiwyg.element.lastElementChild;
+        const lastRect = lastElement.getBoundingClientRect();
+        const range = document.createRange();
+        if (event.y > lastRect.bottom) {
+            const lastEditElement = getContenteditableElement(getLastBlock(lastElement));
+            if (!protyle.options.click.preventInsetEmptyBlock && (
+                !lastEditElement ||
+                (lastElement.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
+                (lastElement.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== ""))
+            ) {
+                let emptyElement: Element;
+                if (lastElement.getAttribute("data-type") === "NodeHeading" && lastElement.getAttribute("fold") === "1") {
+                    emptyElement = genHeadingElement(lastElement) as Element;
+                } else {
+                    emptyElement = genEmptyElement(false, false);
                 }
-                protyle.toolbar.range = range;
+                protyle.wysiwyg.element.insertAdjacentElement("beforeend", emptyElement);
+                transaction(protyle, [{
+                    action: "insert",
+                    data: emptyElement.outerHTML,
+                    id: emptyElement.getAttribute("data-node-id"),
+                    previousID: emptyElement.previousElementSibling.getAttribute("data-node-id"),
+                    parentID: protyle.block.parentID
+                }], [{
+                    action: "delete",
+                    id: emptyElement.getAttribute("data-node-id")
+                }]);
+                const emptyEditElement = getContenteditableElement(emptyElement) as HTMLInputElement;
+                range.selectNodeContents(emptyEditElement);
+                range.collapse(true);
+                focusByRange(range);
+                // 需等待 range 更新再次进行渲染
+                if (protyle.options.render.breadcrumb) {
+                    setTimeout(() => {
+                        protyle.breadcrumb.render(protyle);
+                    }, Constants.TIMEOUT_TRANSITION);
+                }
+            } else if (lastEditElement) {
+                range.selectNodeContents(lastEditElement);
+                range.collapse(false);
+                focusByRange(range);
             }
-        });
+            protyle.toolbar.range = range;
+        }
     });
     let overAttr = false;
-    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & { target: HTMLElement }) => {
+    /// #if !MOBILE
+    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & {
+        target: HTMLElement
+    }) => {
         // attr
         const attrElement = hasClosestByClassName(event.target, "protyle-attr");
         if (attrElement && !attrElement.parentElement.classList.contains("protyle-title")) {
@@ -211,10 +212,10 @@ export const initUI = (protyle: IProtyle) => {
             }
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                protyle.gutter.render(protyle, embedElement, protyle.wysiwyg.element);
+                protyle.gutter.render(protyle, embedElement);
                 return;
             }
-            protyle.gutter.render(protyle, nodeElement, protyle.wysiwyg.element, event.target);
+            protyle.gutter.render(protyle, nodeElement, event.target);
             return;
         }
 
@@ -253,7 +254,6 @@ export const initUI = (protyle: IProtyle) => {
         }
 
         // 面包屑
-        /// #if !MOBILE
         if (protyle.selectElement.classList.contains("fn__none")) {
             const svgElement = hasClosestByAttribute(event.target, "data-node-id", null);
             if (svgElement && svgElement.parentElement.classList.contains("protyle-breadcrumb__bar")) {
@@ -266,8 +266,8 @@ export const initUI = (protyle: IProtyle) => {
                 }
             }
         }
-        /// #endif
     });
+    /// #endif
 };
 
 export const addLoading = (protyle: IProtyle, msg?: string) => {
@@ -330,11 +330,7 @@ export const getPadding = (protyle: IProtyle) => {
     let left = 24;
     let bottom = 16;
     if (protyle.options.typewriterMode) {
-        if (isMobile()) {
-            bottom = window.innerHeight / 5;
-        } else {
-            bottom = protyle.element.clientHeight / 2;
-        }
+        bottom = protyle.element.clientHeight / 2;
     }
     if (!isMobile()) {
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);

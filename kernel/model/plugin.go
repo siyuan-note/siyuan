@@ -36,6 +36,7 @@ type Petal struct {
 	Enabled           bool   `json:"enabled"`           // Whether enabled
 	Incompatible      bool   `json:"incompatible"`      // Whether incompatible
 	DisabledInPublish bool   `json:"disabledInPublish"` // Whether disabled in publish mode
+	DisallowInstall   bool   `json:"disallowInstall"`   // Whether disallow install
 
 	JS   string                 `json:"js"`   // JS code
 	CSS  string                 `json:"css"`  // CSS code
@@ -45,7 +46,7 @@ type Petal struct {
 func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
 	petals := getPetals()
 
-	found, displayName, incompatible, disabledInPublish := bazaar.ParseInstalledPlugin(name, frontend)
+	found, displayName, incompatible, disabledInPublish, disallowInstall := bazaar.ParseInstalledPlugin(name, frontend)
 	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
@@ -62,10 +63,18 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	ret.Enabled = enabled
 	ret.Incompatible = incompatible
 	ret.DisabledInPublish = disabledInPublish
+	ret.DisallowInstall = disallowInstall
 
-	if incompatible {
+	if enabled && incompatible {
 		err = fmt.Errorf(Conf.Language(205))
 		logging.LogInfof("plugin [%s] is incompatible [%s]", name, frontend)
+		return
+	}
+
+	if enabled && disallowInstall {
+		msg := "require upgrade SiYuan to use this plugin [" + name + "]"
+		err = fmt.Errorf(msg)
+		logging.LogInfof(msg)
 		return
 	}
 
@@ -100,8 +109,12 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 
 	petals := getPetals()
 	for _, petal := range petals {
-		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish = bazaar.ParseInstalledPlugin(petal.Name, frontend)
-		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) {
+		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall = bazaar.ParseInstalledPlugin(petal.Name, frontend)
+		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) || petal.DisallowInstall {
+			if petal.DisallowInstall {
+				SetPetalEnabled(petal.Name, false, frontend)
+				logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
+			}
 			continue
 		}
 

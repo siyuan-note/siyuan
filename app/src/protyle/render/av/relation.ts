@@ -460,7 +460,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     }
 };
 
-export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement, cellElements: HTMLElement[]) => {
+export const setRelationCell = async (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement, cellElements: HTMLElement[]) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
     if (!menuElement) {
         return;
@@ -515,6 +515,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 text: Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent),
                 className: target.className
             });
+            updateCellsValue(protyle, nodeElement, newValue, cellElements);
         } else if (rowId) {
             newValue.blockIDs.push(rowId);
             newValue.contents.push({
@@ -537,13 +538,24 @@ draggable="true">${genSelectItemHTML({
             if (!separatorElement.nextElementSibling) {
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML({type: "empty"}));
             }
+            updateCellsValue(protyle, nodeElement, newValue, cellElements);
         } else {
             const blockID = target.querySelector(".popover__block").getAttribute("data-id");
             const content = target.querySelector("b").textContent;
             const rowId = Lute.NewNodeID();
             const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
-            transaction(protyle, [{
+            newValue.blockIDs.push(rowId);
+            newValue.contents.push({
+                type: "block",
+                block: {
+                    content
+                },
+                isDetached: true
+            });
+            const updateOptions = await updateCellsValue(protyle, nodeElement, newValue, cellElements, null, null, true);
+            const doOperations: IOperation[] = [{
                 action: "insertAttrViewBlock",
+                ignoreDefaultFill: true,
                 avID: menuElement.firstElementChild.getAttribute("data-av-id"),
                 srcs: [{
                     itemID: rowId,
@@ -557,15 +569,7 @@ draggable="true">${genSelectItemHTML({
                 action: "doUpdateUpdated",
                 id: blockID,
                 data: dayjs().format("YYYYMMDDHHmmss"),
-            }]);
-            newValue.blockIDs.push(rowId);
-            newValue.contents.push({
-                type: "block",
-                block: {
-                    content
-                },
-                isDetached: true
-            });
+            }];
             separatorElement.insertAdjacentHTML("beforebegin", `<button data-row-id="${rowId}" data-position="west" data-type="setRelationCell" 
 class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
                 type: "selected",
@@ -573,8 +577,8 @@ class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML({
                 isDetached: true,
                 text: Lute.EscapeHTMLStr(content)
             })}</button>`);
+            transaction(protyle, doOperations.concat(updateOptions.doOperations));
         }
     }
-    updateCellsValue(protyle, nodeElement, newValue, cellElements);
     updateCopyRelatedItems(menuElement);
 };

@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-<a href="README_zh_CN.md">中文</a> | <a href="README_ja_JP.md">日本語</a>
+<a href="README_zh_CN.md">中文</a> | <a href="README_ja_JP.md">日本語</a> | <a href="README_tr_TR.md">Türkçe</a>
 </p>
 
 ---
@@ -43,6 +43,7 @@
   * [Package Manager](#package-manager)
   * [Docker Hosting](#docker-hosting)
   * [Unraid Hosting](#unraid-hosting)
+  * [TrueNAS Hosting](#TrueNAS-hosting)
   * [Insider Preview](#insider-preview)
 * [🏘️ Community](#️-community)
 * [🛠️ Development Guide](#️-development-guide)
@@ -309,6 +310,42 @@ Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
 Publish parameters: --accessAuthCode=******(Access authorization code)
+```
+
+</details>
+
+### TrueNAS Hosting
+
+<details>
+<summary>TrueNAS Deployment</summary>
+
+Note: First run below commands in the TrueNAS Shell. please update `Pool_1/Apps_Data/siyuan to match your dataset for Apps.
+
+```shell
+zfs create Pool_1/Apps_Data/siyuan
+chown -R 1001:1002 /mnt/Pool_1/Apps_Data/siyuan
+chmod 755 /mnt/Pool_1/Apps_Data/siyuan
+```
+
+Navigate to Apps - DiscoverApps - More Options(on top right, besies Custom App) - Install via YAML
+
+Template reference:
+
+```yaml
+services:
+  siyuan:
+    image: b3log/siyuan
+    container_name: siyuan
+    command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=2222']
+    ports:
+      - 6806:6806
+    volumes:
+      - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Adjust to your dataset path 
+    restart: unless-stopped
+    environment:
+      - TZ=America/Los_Angeles  # Replace with your timezone if needed
+      - PUID=1001
+      - PGID=1002
 ```
 
 </details>

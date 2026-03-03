@@ -143,7 +143,7 @@ const dockToJSON = (dock: Dock) => {
                 show: item.classList.contains("dock__item--active"),
                 icon: item.querySelector("use").getAttribute("xlink:href").substring(1),
                 hotkey: item.getAttribute("data-hotkey") || "",
-                hotkeyLangId: item.getAttribute("data-hotkeyLangId") || ""
+                hotkeyLangId: item.getAttribute("data-hotkeylangid") || ""
             });
         });
         return data;
@@ -274,7 +274,11 @@ export const getAllLayout = () => {
 };
 
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
-    dockItem.forEach((existSubItem) => {
+    dockItem.forEach((existSubItem, index) => {
+        if (window.siyuan.isPublish && existSubItem.type === "inbox") {
+            dockItem.splice(index, 1);
+            return;
+        }
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
             existSubItem.hotkey = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId].custom;
@@ -481,13 +485,14 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             }
         }
     });
+
     const idZoomIn = getIdZoomInByPath();
     if (idZoomIn.id) {
         openFileById({
             app,
             id: idZoomIn.id,
             action: idZoomIn.isZoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-            zoomIn: idZoomIn.isZoomIn
+            zoomIn: idZoomIn.isZoomIn,
         });
     } else {
         let latestTabHeaderElement: HTMLElement;
@@ -980,7 +985,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             item.element.style.minWidth = "";
         }
     });
-    if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2 ) {
+    if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2) {
         let index = Math.ceil(screen.width / 8);
         while (index > 0) {
             let width = 0;

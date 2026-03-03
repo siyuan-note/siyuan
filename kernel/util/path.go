@@ -19,7 +19,6 @@ package util
 import (
 	"bytes"
 	"io/fs"
-	"net"
 	"os"
 	"path"
 	"path/filepath"
@@ -65,85 +64,20 @@ func ShortPathForBootingDisplay(p string) string {
 
 var LocalIPs []string
 
-func GetLocalIPs() (ret []string) {
-	if ContainerAndroid == Container || ContainerHarmony == Container {
-		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
-		LocalIPs = append(LocalIPs, LocalHost)
-		LocalIPs = gulu.Str.RemoveDuplicatedElem(LocalIPs)
-		return LocalIPs
-	}
-
-	ret = []string{}
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		logging.LogWarnf("get interface addresses failed: %s", err)
-		return
-	}
-
-	IPv4Nets := []*net.IPNet{}
-	IPv6Nets := []*net.IPNet{}
-	for _, addr := range addrs {
-		if networkIp, ok := addr.(*net.IPNet); ok && networkIp.IP.String() != "<nil>" {
-			if networkIp.IP.To4() != nil {
-				IPv4Nets = append(IPv4Nets, networkIp)
-			} else if networkIp.IP.To16() != nil {
-				IPv6Nets = append(IPv6Nets, networkIp)
-			}
-		}
-	}
-
-	// loopback address
-	for _, net := range IPv4Nets {
-		if net.IP.IsLoopback() {
-			ret = append(ret, net.IP.String())
-		}
-	}
-	// private address
-	for _, net := range IPv4Nets {
-		if net.IP.IsPrivate() {
-			ret = append(ret, net.IP.String())
-		}
-	}
-	// IPv4 private address
-	for _, net := range IPv4Nets {
-		if net.IP.IsGlobalUnicast() {
-			ret = append(ret, net.IP.String())
-		}
-	}
-	// link-local unicast address
-	for _, net := range IPv4Nets {
-		if net.IP.IsLinkLocalUnicast() {
-			ret = append(ret, net.IP.String())
-		}
-	}
-
-	// loopback address
-	for _, net := range IPv6Nets {
-		if net.IP.IsLoopback() {
-			ret = append(ret, "["+net.IP.String()+"]")
-		}
-	}
-	// private address
-	for _, net := range IPv6Nets {
-		if net.IP.IsPrivate() {
-			ret = append(ret, "["+net.IP.String()+"]")
-		}
-	}
-	// IPv6 private address
-	for _, net := range IPv6Nets {
-		if net.IP.IsGlobalUnicast() {
-			ret = append(ret, "["+net.IP.String()+"]")
-		}
-	}
-	// link-local unicast address
-	for _, net := range IPv6Nets {
-		if net.IP.IsLinkLocalUnicast() {
-			ret = append(ret, "["+net.IP.String()+"]")
-		}
+func GetServerAddrs() (ret []string) {
+	if ContainerAndroid != Container && ContainerHarmony != Container {
+		ret = GetPrivateIPv4s()
+	} else {
+		// Android/鸿蒙上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
+		ret = LocalIPs
 	}
 
 	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
+
+	for i, _ := range ret {
+		ret[i] = "http://" + ret[i] + ":" + ServerPort
+	}
 	return
 }
 
@@ -163,6 +97,14 @@ func IsRelativePath(dest string) bool {
 	}
 
 	if '/' == dest[0] {
+		return false
+	}
+
+	// 检查特定协议前缀
+	lowerDest := strings.ToLower(dest)
+	if strings.HasPrefix(lowerDest, "mailto:") ||
+		strings.HasPrefix(lowerDest, "tel:") ||
+		strings.HasPrefix(lowerDest, "sms:") {
 		return false
 	}
 	return !strings.Contains(dest, ":/") && !strings.Contains(dest, ":\\")
@@ -308,8 +250,12 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 	return
 }
 
-func IsAssetLinkDest(dest []byte) bool {
-	return bytes.HasPrefix(dest, []byte("assets/"))
+func IsAssetLinkDest(dest []byte, includeServePath bool) bool {
+	return bytes.HasPrefix(dest, []byte("assets/")) ||
+		(includeServePath && (bytes.HasPrefix(dest, []byte("emojis/")) ||
+			bytes.HasPrefix(dest, []byte("plugins/")) ||
+			bytes.HasPrefix(dest, []byte("public/")) ||
+			bytes.HasPrefix(dest, []byte("widgets/"))))
 }
 
 var (
@@ -400,4 +346,51 @@ func IsPartitionRootPath(path string) bool {
 		// On Unix-like systems, the root path is "/"
 		return cleanPath == "/"
 	}
+}
+
+// IsSensitivePath 对传入路径做统一的敏感性检测。
+func IsSensitivePath(p string) bool {
+	if p == "" {
+		return false
+	}
+	pp := filepath.Clean(strings.ToLower(p))
+
+	// 敏感目录前缀（UNIX 风格）
+	prefixes := []string{
+		"/etc/ssh",
+		"/root",
+		"/etc",
+		"/var/lib/",
+		"/.",
+	}
+	for _, pre := range prefixes {
+		if strings.HasPrefix(pp, pre) {
+			return true
+		}
+	}
+
+	// Windows 常见敏感目录（小写比较）
+	winPrefixes := []string{
+		`c:\windows\system32`,
+		`c:\windows\system`,
+	}
+	for _, wp := range winPrefixes {
+		if strings.HasPrefix(pp, strings.ToLower(wp)) {
+			return true
+		}
+	}
+
+	homePrefixes := []string{
+		strings.ToLower(filepath.Join(HomeDir, ".ssh")),
+		strings.ToLower(filepath.Join(HomeDir, ".config")),
+		strings.ToLower(filepath.Join(HomeDir, ".bashrc")),
+		strings.ToLower(filepath.Join(HomeDir, ".zshrc")),
+		strings.ToLower(filepath.Join(HomeDir, ".profile")),
+	}
+	for _, hp := range homePrefixes {
+		if strings.HasPrefix(pp, hp) {
+			return true
+		}
+	}
+	return false
 }

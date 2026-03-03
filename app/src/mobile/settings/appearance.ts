@@ -1,11 +1,12 @@
 import {fetchPost} from "../../util/fetch";
 import {genLangOptions, genOptions} from "../../util/genOptions";
 import {openModel} from "../menu/model";
+import {setStatusBar} from "../../config/util/setStatusBar";
 
 export const initAppearance = () => {
     openModel({
         title: window.siyuan.languages.appearance,
-        icon:"iconTheme",
+        icon: "iconTheme",
         html: `<div class="b3-label">
     ${window.siyuan.languages.appearance4}
     <div class="fn__hr"></div>
@@ -42,9 +43,25 @@ export const initAppearance = () => {
     <div class="fn__hr"></div>
     <select id="lang" class="b3-select fn__block">${genLangOptions(window.siyuan.config.langs, window.siyuan.config.appearance.lang)}</select>
     <div class="b3-label__text">${window.siyuan.languages.language1}</div>
+</div>
+<div class="b3-label">
+    <label class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.appearance16}
+            <div class="b3-label__text">${window.siyuan.languages.appearance17}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="hideStatusBar" type="checkbox"${window.siyuan.config.appearance.hideStatusBar ? " checked" : ""}>
+    </label>
+    <div class="fn__hr"></div>
+    <button class="b3-button b3-button--outline fn__block" data-action="hideStatusBarSetting">
+       <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
+    </button>
+    <div class="b3-label__text">${window.siyuan.languages.appearance18}</div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
-            modelMainElement.querySelectorAll("select").forEach(item => {
+            setStatusBar(modelMainElement.querySelector('[data-action="hideStatusBarSetting"]'));
+            modelMainElement.querySelectorAll("select, .b3-switch").forEach(item => {
                 item.addEventListener("change", () => {
                     const modeElementValue = parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value);
                     fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
@@ -54,6 +71,7 @@ export const initAppearance = () => {
                         themeDark: (modelMainElement.querySelector("#themeDark") as HTMLSelectElement).value,
                         themeLight: (modelMainElement.querySelector("#themeLight") as HTMLSelectElement).value,
                         lang: (modelMainElement.querySelector("#lang") as HTMLSelectElement).value,
+                        hideStatusBar: (modelMainElement.querySelector("#hideStatusBar") as HTMLInputElement).checked,
                     }));
                 });
             });

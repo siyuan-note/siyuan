@@ -5,8 +5,8 @@ export const clearBlockElement = (element: Element) => {
     element.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
     element.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
     element.removeAttribute("refcount");
-    element.querySelector(".protyle-attr--av")?.remove();
     element.querySelector(".protyle-attr--refcount")?.remove();
+    element.querySelector(".protyle-attr--av")?.remove();
     element.removeAttribute("custom-avs");
     element.getAttributeNames().forEach(attr => {
         if (attr.startsWith("custom-sy-av-s-text-")) {

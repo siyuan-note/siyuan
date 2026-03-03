@@ -1,6 +1,6 @@
 {
 	"ID": "20230104151953-48hwkwf",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230104151953-48hwkwf",
@@ -268,11 +268,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
+									"TextMarkTextContent": "custom-liandi-articleid"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​（原為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "custom-liandi-articleId"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 用於關聯鏈滴帖子 ID"
+									"Data": "​ ）用於關聯鏈滴帖子 ID"
 								}
 							]
 						}

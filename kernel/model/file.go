@@ -139,7 +139,7 @@ func (box *Box) moveCorruptedData(filePath string) {
 	logging.LogWarnf("moved corrupted data file [%s] to [%s]", filePath, to)
 }
 
-func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]string) {
+func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[string]string) {
 	ret = []map[string]string{}
 
 	var deck *riff.Deck
@@ -159,11 +159,46 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		boxes[box.ID] = box
 	}
 
-	keywords := strings.Fields(keyword)
+	keyword = strings.TrimSpace(keyword)
+
 	var rootBlocks []*sql.Block
-	if 0 < len(keywords) {
-		for _, box := range boxes {
-			if gulu.Str.Contains(box.Name, keywords) {
+	if ast.IsNodeIDPattern(keyword) {
+		rootBlocks = sql.QueryRootBlockByCondition("id='"+keyword+"'", 1)
+	} else {
+		keywords := strings.Fields(keyword)
+		if 0 < len(keywords) {
+			for _, box := range boxes {
+				if gulu.Str.Contains(box.Name, keywords) {
+					if flashcard {
+						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
+						if 0 < flashcardCount {
+							ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
+						}
+					} else {
+						ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
+					}
+				}
+			}
+
+			var condition string
+			for i, k := range keywords {
+				condition += "(hpath LIKE '%" + k + "%'"
+				namCondition := Conf.Search.NAMFilter(k)
+				condition += " " + namCondition
+				condition += ")"
+
+				if i < len(keywords)-1 {
+					condition += " AND "
+				}
+			}
+
+			for _, excludeID := range excludeIDs {
+				condition += fmt.Sprintf(" AND path NOT LIKE '%%%s%%' ", excludeID)
+			}
+
+			rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
+		} else {
+			for _, box := range boxes {
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
@@ -172,31 +207,6 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 				} else {
 					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
 				}
-			}
-		}
-
-		var condition string
-		for i, k := range keywords {
-			condition += "(hpath LIKE '%" + k + "%'"
-			namCondition := Conf.Search.NAMFilter(k)
-			condition += " " + namCondition
-			condition += ")"
-
-			if i < len(keywords)-1 {
-				condition += " AND "
-			}
-		}
-
-		rootBlocks = sql.QueryRootBlockByCondition(condition, Conf.Search.Limit)
-	} else {
-		for _, box := range boxes {
-			if flashcard {
-				newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
-				if 0 < flashcardCount {
-					ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon, "newFlashcardCount": strconv.Itoa(newFlashcardCount), "dueFlashcardCount": strconv.Itoa(dueFlashcardCount), "flashcardCount": strconv.Itoa(flashcardCount)})
-				}
-			} else {
-				ret = append(ret, map[string]string{"path": "/", "hPath": box.Name + "/", "box": box.ID, "boxIcon": box.Icon})
 			}
 		}
 	}
@@ -733,7 +743,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	}
 
 	luteEngine.RenderOptions.NodeIndexStart = index
-	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
+	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 
 	if 1 > len(keywords) {
 		keywords = []string{}
@@ -745,7 +755,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	}
 	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 
-	go setRecentDocByTree(tree)
 	return
 }
 
@@ -974,23 +983,29 @@ func DuplicateDoc(tree *parse.Tree) {
 
 	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
+		// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
+		n.RemoveIALAttr(av.NodeAttrNameAvs)
+		n.RemoveIALAttr(av.NodeAttrViewNames)
+		n.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
+
+		// 复制为副本时移除闪卡相关属性 https://github.com/siyuan-note/siyuan/issues/13987
+		n.RemoveIALAttr(NodeAttrRiffDecks)
+
+		return ast.WalkContinue
+	})
+
 	createTreeTx(tree)
 	box := Conf.Box(tree.Box)
 	if nil != box {
 		box.addSort(previousPath, tree.ID)
 	}
 	FlushTxQueue()
-
-	// 复制为副本时移除数据库绑定状态 https://github.com/siyuan-note/siyuan/issues/12294
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || !n.IsBlock() {
-			return ast.WalkContinue
-		}
-
-		n.RemoveIALAttr(av.NodeAttrNameAvs)
-		n.RemoveIALAttrsByPrefix(av.NodeAttrViewStaticText)
-		return ast.WalkContinue
-	})
 	return
 }
 
@@ -1073,6 +1088,8 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	return
 }
 
+const DailyNoteAttrPrefix = "custom-dailynote-"
+
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -1109,8 +1126,8 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		}
 		p = tree.Path
 		date := time.Now().Format("20060102")
-		if tree.Root.IALAttr("custom-dailynote-"+date) == "" {
-			tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+		if tree.Root.IALAttr(DailyNoteAttrPrefix+date) == "" {
+			tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 			if err = indexWriteTreeUpsertQueue(tree); err != nil {
 				return
 			}
@@ -1178,7 +1195,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 	p = tree.Path
 	date := time.Now().Format("20060102")
-	tree.Root.SetIALAttr("custom-dailynote-"+date, date)
+	tree.Root.SetIALAttr(DailyNoteAttrPrefix+date, date)
 	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
 	}
@@ -1506,8 +1523,10 @@ func RemoveDoc(boxID, p string) {
 
 	FlushTxQueue()
 	luteEngine := util.NewLute()
-	removeDoc(box, p, luteEngine)
+	tree := removeDoc(box, p, luteEngine)
 	IncSync()
+
+	refreshParentDocInfo(tree)
 	return
 }
 
@@ -1519,15 +1538,29 @@ func RemoveDocs(paths []string) {
 	pathsBoxes := getBoxesByPaths(paths)
 	FlushTxQueue()
 	luteEngine := util.NewLute()
+
+	var trees []*parse.Tree
 	for p, box := range pathsBoxes {
-		removeDoc(box, p, luteEngine)
+		tree := removeDoc(box, p, luteEngine)
+		trees = append(trees, tree)
+	}
+
+	parentTrees := map[string]*parse.Tree{}
+	for _, tree := range trees {
+		parentTree := loadParentTree(tree)
+		if nil != parentTree {
+			parentTrees[parentTree.ID] = parentTree
+		}
+	}
+	for _, parentTree := range parentTrees {
+		refreshDocInfo(parentTree)
 	}
 	return
 }
 
-func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
-	tree, _ := filesys.LoadTree(box.ID, p, luteEngine)
-	if nil == tree {
+func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
+	ret, _ = filesys.LoadTree(box.ID, p, luteEngine)
+	if nil == ret {
 		return
 	}
 
@@ -1544,16 +1577,16 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 		return
 	}
 
-	generateAvHistory(tree, historyDir)
+	generateAvHistoryInTree(ret, historyDir)
 	copyDocAssetsToDataAssets(box.ID, p)
 
-	removeIDs := treenode.RootChildIDs(tree.ID)
+	removeIDs := treenode.RootChildIDs(ret.ID)
 	dir := path.Dir(p)
-	childrenDir := path.Join(dir, tree.ID)
+	childrenDir := path.Join(dir, ret.ID)
 	existChildren := box.Exist(childrenDir)
 	if existChildren {
-		absChildrenDir := filepath.Join(util.DataDir, tree.Box, childrenDir)
-		historyPath = filepath.Join(historyDir, tree.Box, childrenDir)
+		absChildrenDir := filepath.Join(util.DataDir, ret.Box, childrenDir)
+		historyPath = filepath.Join(historyDir, ret.Box, childrenDir)
 		if err = filelock.Copy(absChildrenDir, historyPath); err != nil {
 			logging.LogErrorf("backup [path=%s] to history [%s] failed: %s", absChildrenDir, historyPath, err)
 			return
@@ -1561,7 +1594,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	}
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
-	allRemoveRootIDs := []string{tree.ID}
+	allRemoveRootIDs := []string{ret.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
 	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
 	for _, rootID := range allRemoveRootIDs {
@@ -1587,7 +1620,6 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	logging.LogInfof("removed doc [%s%s]", box.ID, p)
 
 	box.removeSort(removeIDs)
-	RemoveRecentDoc(removeIDs)
 	if "/" != dir {
 		others, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, dir))
 		if err == nil && 1 > len(others) {
@@ -1600,9 +1632,8 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 		"ids": removeIDs,
 	}
 	util.PushEvent(evt)
-
-	refreshParentDocInfo(tree)
-	task.AppendTask(task.DatabaseIndex, removeDoc0, tree, childrenDir)
+	task.AppendTask(task.DatabaseIndex, removeDoc0, ret, childrenDir)
+	return
 }
 
 func removeDoc0(tree *parse.Tree, childrenDir string) {
@@ -1616,6 +1647,7 @@ func removeDoc0(tree *parse.Tree, childrenDir string) {
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
 	sql.RemoveTreePathQueue(tree.Box, childrenDir)
 	cache.RemoveDocIAL(tree.Path)
+	cache.RemoveTreeData(tree.ID)
 	return
 }
 
@@ -1741,7 +1773,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	tree.HPath = hPath
 	tree.ID = id
 	tree.Root.ID = id
-	tree.Root.Spec = "1"
+	tree.Root.Spec = treenode.CurrentSpec
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
 	if nil == tree.Root.FirstChild {
@@ -2181,6 +2213,10 @@ func (box *Box) setSort(sortIDVals map[string]int) {
 }
 
 func pushFiletreeSortChanged(sortIDs map[string]int) {
+	if 1 > len(sortIDs) {
+		return
+	}
+
 	var childIDs []string
 	for sortID := range sortIDs {
 		childIDs = append(childIDs, sortID)

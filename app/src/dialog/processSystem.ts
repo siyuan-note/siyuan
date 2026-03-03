@@ -280,25 +280,34 @@ export const kernelError = () => {
     }
 };
 
-export const exitSiYuan = async () => {
+export const exitSiYuan = async (setCurrentWorkspace = true) => {
     hideAllElements(["util"]);
     /// #if MOBILE
     if (window.siyuan.mobile.editor) {
         await saveScroll(window.siyuan.mobile.editor.protyle);
     }
     /// #endif
-    fetchPost("/api/system/exit", {force: false}, (response) => {
+    fetchPost("/api/system/exit", {force: false, setCurrentWorkspace}, (response) => {
         if (response.code === 1) { // 同步执行失败
             const msgId = showMessage(response.msg, response.data.closeTimeout, "error");
             const buttonElement = document.querySelector(`#message [data-id="${msgId}"] button`);
             if (buttonElement) {
                 buttonElement.addEventListener("click", () => {
-                    fetchPost("/api/system/exit", {force: true}, () => {
+                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, () => {
                         /// #if !BROWSER
                         ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
                         /// #else
-                        if (isInIOS() || isInAndroid() || isInHarmony()) {
-                            window.location.href = "siyuan://api/system/exit";
+                        if (isInAndroid()) {
+                            window.JSAndroid.exit();
+                            return;
+                        }
+                        if (isInIOS()) {
+                            window.webkit.messageHandlers.exit.postMessage("");
+                            return;
+                        }
+                        if (isInHarmony()) {
+                            window.JSHarmony.exit();
+                            return;
                         }
                         /// #endif
                     });
@@ -311,9 +320,10 @@ export const exitSiYuan = async () => {
                 ipcRenderer.send(Constants.SIYUAN_SHOW_WINDOW);
             }
 
-            confirmDialog(window.siyuan.languages.tip, response.msg, () => {
+            confirmDialog(window.siyuan.languages.updateVersion, response.msg, () => {
                 fetchPost("/api/system/exit", {
                     force: true,
+                    setCurrentWorkspace,
                     execInstallPkg: 2 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
                 }, () => {
                     /// #if !BROWSER
@@ -331,6 +341,7 @@ export const exitSiYuan = async () => {
             }, () => {
                 fetchPost("/api/system/exit", {
                     force: true,
+                    setCurrentWorkspace,
                     execInstallPkg: 1 //  0：默认检查新版本，1：不执行新版本安装，2：执行新版本安装
                 }, () => {
                     /// #if !BROWSER
@@ -342,8 +353,18 @@ export const exitSiYuan = async () => {
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
             /// #else
-            if (isInIOS() || isInAndroid() || isInHarmony()) {
-                window.location.href = "siyuan://api/system/exit";
+            if (isInAndroid()) {
+                window.JSAndroid.exit();
+                return;
+            }
+            if (isInIOS()) {
+                window.webkit.messageHandlers.exit.postMessage("");
+                return;
+            }
+
+            if (isInHarmony()) {
+                window.JSHarmony.exit();
+                return;
             }
             /// #endif
         }
@@ -395,30 +416,13 @@ export const refreshFileTree = (cb?: () => void) => {
 
 let statusTimeout: number;
 export const progressStatus = (data: IWebSocketData) => {
-    const statusElement = document.querySelector("#status") as HTMLElement;
-    if (!statusElement) {
-        return;
-    }
-
-    if (isMobile()) {
-        if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
-            return;
-        }
+    const msgElement = document.querySelector("#status .status__msg");
+    if (msgElement) {
         clearTimeout(statusTimeout);
-        statusElement.innerHTML = data.msg;
-        statusElement.style.bottom = "0";
+        msgElement.innerHTML = data.msg;
         statusTimeout = window.setTimeout(() => {
-            statusElement.style.bottom = "";
+            msgElement.innerHTML = "";
         }, 12000);
-    } else {
-        const msgElement = statusElement.querySelector(".status__msg");
-        if (msgElement) {
-            clearTimeout(statusTimeout);
-            msgElement.innerHTML = data.msg;
-            statusTimeout = window.setTimeout(() => {
-                msgElement.innerHTML = "";
-            }, 12000);
-        }
     }
 };
 
@@ -467,7 +471,7 @@ export const progressBackgroundTask = (tasks: { action: string }[]) => {
     } else {
         backgroundTaskElement.classList.remove("fn__none");
         backgroundTaskElement.setAttribute("data-tasks", JSON.stringify(tasks));
-        backgroundTaskElement.innerHTML = tasks[0].action + "<div><div></div></div>";
+        backgroundTaskElement.innerHTML = tasks[0].action + '<div class="fn__progress"><div></div></div>';
     }
 };
 

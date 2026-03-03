@@ -10,7 +10,7 @@ import {Constants} from "../constants";
 import {
     isInAndroid,
     isInHarmony,
-    isInIOS,
+    isInMobileApp,
     isIPad,
     setStorageVal,
     writeText
@@ -287,7 +287,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                                 fetchPost("/api/system/setWorkspaceDir", {
                                     path: openPath
                                 }, () => {
-                                    exitSiYuan();
+                                    exitSiYuan(false);
                                 });
                             });
                         });
@@ -317,7 +317,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                                 fetchPost("/api/system/setWorkspaceDir", {
                                     path: item.path
                                 }, () => {
-                                    exitSiYuan();
+                                    exitSiYuan(false);
                                 });
                             });
                         });
@@ -325,7 +325,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 });
             });
             /// #endif
-            if (!isBrowser() || isInIOS() || isInAndroid() || isInHarmony()) {
+            if (!isBrowser() || isInMobileApp()) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "workspaceList",
                     label: window.siyuan.languages.workspaceList,

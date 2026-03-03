@@ -14,6 +14,7 @@ export const getDefaultType = () => {
         mathBlock: window.siyuan.config.search.mathBlock,
         table: window.siyuan.config.search.table,
         blockquote: window.siyuan.config.search.blockquote,
+        callout: window.siyuan.config.search.callout,
         superBlock: window.siyuan.config.search.superBlock,
         paragraph: window.siyuan.config.search.paragraph,
         embedBlock: window.siyuan.config.search.embedBlock,

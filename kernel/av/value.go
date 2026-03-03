@@ -419,6 +419,14 @@ func (value *Value) SetValByType(typ KeyType, val interface{}) {
 }
 
 func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+	// 单独处理汇总
+	if KeyTypeRollup == value.Type {
+		if 1 > len(value.Rollup.Contents) {
+			return nil
+		}
+		return value.Rollup.Contents[0].GetValByType(typ)
+	}
+
 	switch typ {
 	case KeyTypeBlock:
 		return value.Block
@@ -490,6 +498,7 @@ const (
 	NumberFormatRUB NumberFormat = "RUB" // 卢布
 	NumberFormatINR NumberFormat = "INR" // 卢比
 	NumberFormatKRW NumberFormat = "KRW" // 韩元
+	NumberFormatTRY NumberFormat = "TRY" // 土耳其里拉
 	NumberFormatCAD NumberFormat = "CAD" // 加拿大元
 	NumberFormatCHF NumberFormat = "CHF" // 瑞士法郎
 	NumberFormatTHB NumberFormat = "THB" // 泰铢
@@ -499,6 +508,7 @@ const (
 	NumberFormatMOP NumberFormat = "MOP" // 澳门币
 	NumberFormatSGD NumberFormat = "SGD" // 新加坡元
 	NumberFormatNZD NumberFormat = "NZD" // 新西兰元
+	NumberFormatILS NumberFormat = "ILS" // 以色列新谢克尔
 )
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
@@ -562,6 +572,9 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatKRW, "won":
 		p := message.NewPrinter(language.Korean)
 		return p.Sprintf("₩%.0f", content)
+	case NumberFormatTRY, "turkishLira":
+		p := message.NewPrinter(language.Turkish)
+		return p.Sprintf("₺%.2f", content)
 	case NumberFormatCAD, "canadianDollar":
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("CA$%.2f", content)
@@ -589,6 +602,9 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatNZD:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("NZ$%.2f", content)
+	case NumberFormatILS:
+		p := message.NewPrinter(language.Hebrew)
+		return p.Sprintf("ILS₪%.2f", content)
 	default:
 		return strconv.FormatFloat(content, 'f', -1, 64)
 	}
@@ -680,6 +696,15 @@ func Round(val float64, precision int) float64 {
 type ValueSelect struct {
 	Content string `json:"content"`
 	Color   string `json:"color"` // 1-14
+}
+
+func MSelectRemoveOption(mSelect []*ValueSelect, opt string) (ret []*ValueSelect) {
+	for _, s := range mSelect {
+		if s.Content != opt {
+			ret = append(ret, s)
+		}
+	}
+	return
 }
 
 func MSelectExistOption(mSelect []*ValueSelect, opt string) bool {

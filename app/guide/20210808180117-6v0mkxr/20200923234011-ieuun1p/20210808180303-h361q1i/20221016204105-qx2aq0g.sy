@@ -1,10 +1,11 @@
 {
 	"ID": "20221016204105-qx2aq0g",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20221016204105-qx2aq0g",
 		"title": "Outline by Heading and List",
+		"type": "doc",
 		"updated": "20221016204723"
 	},
 	"Children": [

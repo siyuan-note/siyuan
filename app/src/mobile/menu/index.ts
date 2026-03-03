@@ -1,6 +1,6 @@
 import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
-import {initAssets} from "../settings/assets";
+import {initConfigAssets} from "../settings/assets";
 import {closePanel} from "../util/closePanel";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {repos} from "../../config/repos";
@@ -21,9 +21,7 @@ import {App} from "../../index";
 import {
     isDisabledFeature,
     isHuawei,
-    isInAndroid,
-    isInHarmony,
-    isInIOS,
+    isInMobileApp,
     isIPhone
 } from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
@@ -31,6 +29,7 @@ import {afterLoadPlugin} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../../plugin/openTopBarMenu";
 import {initFileTree} from "../settings/fileTree";
+import {initExport} from "../settings/export";
 
 export const popMenu = () => {
     activeBlur();
@@ -97,8 +96,8 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHistory">
         <svg class="b3-menu__icon"><use xlink:href="#iconHistory"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dataHistory}</span>
     </div>
-    <div class="b3-menu__separator${(isInAndroid() || isInIOS() || isInHarmony()) ? "" : " fn__none"}"></div>
-    <div class="b3-menu__item b3-menu__item--warning${(isInAndroid() || isInIOS() || isInHarmony()) ? "" : " fn__none"}" id="menuSafeQuit">
+    <div class="b3-menu__separator${isInMobileApp() ? "" : " fn__none"}"></div>
+    <div class="b3-menu__item b3-menu__item--warning${isInMobileApp() ? "" : " fn__none"}" id="menuSafeQuit">
         <svg class="b3-menu__icon"><use xlink:href="#iconQuit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.safeQuit}</span>
     </div>
     <div class="b3-menu__separator"></div>
@@ -114,6 +113,9 @@ export const initRightMenu = (app: App) => {
     ${aiHTML}
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAssets">
         <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg><span class="b3-menu__label">${window.siyuan.languages.assets}</span>
+    </div>
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuExport">
+        <svg class="b3-menu__icon"><use xlink:href="#iconUpload"></use></svg><span class="b3-menu__label">${window.siyuan.languages.export}</span>
     </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAppearance">
         <svg class="b3-menu__icon"><use xlink:href="#iconTheme"></use></svg><span class="b3-menu__label">${window.siyuan.languages.appearance}</span>
@@ -174,7 +176,12 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuAssets") {
-                initAssets();
+                initConfigAssets(app);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuExport") {
+                initExport();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

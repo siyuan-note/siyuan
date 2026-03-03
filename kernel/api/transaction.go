@@ -98,6 +98,16 @@ func pushTransactions(app, session string, transactions []*model.Transaction) {
 	evt.AppId = app
 	evt.SessionId = session
 	evt.Data = transactions
+
+	var rootIDs []string
+	for _, tx := range transactions {
+		rootIDs = append(rootIDs, tx.GetChangedRootIDs()...)
+	}
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+	evt.Context = map[string]any{
+		"rootIDs": rootIDs,
+	}
+
 	for _, tx := range transactions {
 		tx.WaitForCommit()
 	}

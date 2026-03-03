@@ -18,6 +18,7 @@ package model
 
 import (
 	"bufio"
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"io"
@@ -26,7 +27,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -35,6 +35,7 @@ import (
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/mod/semver"
 )
 
 func execNewVerInstallPkg(newVerInstallPkgPath string) {
@@ -45,6 +46,9 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	} else if gulu.OS.IsDarwin() {
 		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
 		cmd = exec.Command("open", newVerInstallPkgPath)
+	} else {
+		logging.LogErrorf("unsupported platform for auto-installing package")
+		return
 	}
 	gulu.CmdAttr(cmd)
 	cmdErr := cmd.Run()
@@ -54,28 +58,23 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	}
 }
 
-var newVerInstallPkgPath string
-
 func getNewVerInstallPkgPath() string {
 	if skipNewVerInstallPkg() {
-		newVerInstallPkgPath = ""
 		return ""
 	}
 
 	downloadPkgURLs, checksum, err := getUpdatePkg()
-	if err != nil || 1 > len(downloadPkgURLs) || "" == checksum {
-		newVerInstallPkgPath = ""
+	if err != nil {
 		return ""
 	}
 
 	pkg := path.Base(downloadPkgURLs[0])
-	newVerInstallPkgPath = filepath.Join(util.TempDir, "install", pkg)
-	localChecksum, _ := sha256Hash(newVerInstallPkgPath)
+	pkgPath := filepath.Join(util.TempDir, "install", pkg)
+	localChecksum, _ := sha256Hash(pkgPath)
 	if checksum != localChecksum {
-		newVerInstallPkgPath = ""
 		return ""
 	}
-	return newVerInstallPkgPath
+	return pkgPath
 }
 
 var checkDownloadInstallPkgLock = sync.Mutex{}
@@ -93,34 +92,43 @@ func checkDownloadInstallPkg() {
 	defer checkDownloadInstallPkgLock.Unlock()
 
 	downloadPkgURLs, checksum, err := getUpdatePkg()
-	if err != nil || 1 > len(downloadPkgURLs) || "" == checksum {
+	if err != nil {
 		return
 	}
 
-	msgId := util.PushMsg(Conf.Language(103), 1000*7)
-	succ := false
+	existingPkgPath := getNewVerInstallPkgPath()
+	if "" != existingPkgPath {
+		// 存在经过 sha256Hash 检查的安装包
+		util.PushUpdateMsg("update-pkg-ready", Conf.Language(62), 15*1000)
+		return
+	}
+
+	util.PushUpdateMsg("update-pkg-downloading", Conf.Language(103), 1000*7)
+	success := false
 	for _, downloadPkgURL := range downloadPkgURLs {
 		err = downloadInstallPkg(downloadPkgURL, checksum)
 		if err == nil {
-			succ = true
+			success = true
 			break
-
 		}
 	}
-	if !succ {
-		util.PushUpdateMsg(msgId, Conf.Language(104), 7000)
+	if success {
+		util.PushUpdateMsg("update-pkg-ready", Conf.Language(62), 15*1000)
+	} else {
+		util.PushUpdateMsg("update-pkg-downloading", Conf.Language(104), 7000)
 	}
 }
 
 func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	defer logging.Recover()
-	result, err := util.GetRhyResult(false)
+	result, err := util.GetRhyResult(context.TODO(), false)
 	if err != nil {
 		return
 	}
 
 	ver := result["ver"].(string)
 	if isVersionUpToDate(ver) {
+		err = fmt.Errorf("version is up to date")
 		return
 	}
 
@@ -158,6 +166,11 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 
 	checksums := result["checksums"].(map[string]interface{})
 	checksum = checksums[pkg].(string)
+
+	if "" == checksum {
+		err = fmt.Errorf("checksum is empty")
+		return
+	}
 	return
 }
 
@@ -234,7 +247,7 @@ type Announcement struct {
 }
 
 func getAnnouncements() (ret []*Announcement) {
-	result, err := util.GetRhyResult(false)
+	result, err := util.GetRhyResult(context.TODO(), false)
 	if err != nil {
 		logging.LogErrorf("get announcement failed: %s", err)
 		return
@@ -266,7 +279,7 @@ func CheckUpdate(showMsg bool) {
 		return
 	}
 
-	result, err := util.GetRhyResult(showMsg)
+	result, err := util.GetRhyResult(context.TODO(), showMsg)
 	if err != nil {
 		return
 	}
@@ -277,88 +290,42 @@ func CheckUpdate(showMsg bool) {
 		releaseLang = releaseLangArg.(string)
 	}
 
-	var msg string
-	var timeout int
 	if isVersionUpToDate(ver) {
-		msg = Conf.Language(10)
-		timeout = 3000
+		util.PushUpdateMsg("update-notify", Conf.Language(10), 3000)
 	} else {
-		msg = fmt.Sprintf(Conf.Language(9), "<a href=\""+releaseLang+"\">"+releaseLang+"</a>")
-		showMsg = true
-		timeout = 15000
+		util.PushUpdateMsg("update-notify", fmt.Sprintf(Conf.Language(9), "<a href=\""+releaseLang+"\">"+releaseLang+"</a>"), 15000)
 	}
-	if showMsg {
-		util.PushMsg(msg, timeout)
-		go func() {
-			defer logging.Recover()
-			checkDownloadInstallPkg()
-			if "" != getNewVerInstallPkgPath() {
-				util.PushMsg(Conf.Language(62), 15*1000)
-			}
-		}()
-	}
+	go func() {
+		defer logging.Recover()
+		checkDownloadInstallPkg()
+	}()
 }
 
 func isVersionUpToDate(releaseVer string) bool {
-	return ver2num(releaseVer) <= ver2num(util.Ver)
+	return semver.Compare("v"+releaseVer, "v"+util.Ver) <= 0
 }
+
+// skipInstallPkgPlatformCached 缓存平台相关判断，-1 未初始化，0 表示不跳过，1 表示跳过
+var skipInstallPkgPlatformCached = -1
 
 func skipNewVerInstallPkg() bool {
-	if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() {
-		return true
-	}
-	if util.ISMicrosoftStore || util.ContainerStd != util.Container {
-		return true
-	}
-	if !Conf.System.DownloadInstallPkg {
-		return true
-	}
-	if gulu.OS.IsWindows() {
-		plat := strings.ToLower(Conf.System.OSPlatform)
-		// Windows 7, 8 and Server 2012 are no longer supported https://github.com/siyuan-note/siyuan/issues/7347
-		if strings.Contains(plat, " 7 ") || strings.Contains(plat, " 8 ") || strings.Contains(plat, "2012") {
-			return true
+	if skipInstallPkgPlatformCached == -1 {
+		skipInstallPkgPlatformCached = 0
+		if !gulu.OS.IsWindows() && !gulu.OS.IsDarwin() {
+			skipInstallPkgPlatformCached = 1
+		} else if util.ISMicrosoftStore || util.ContainerStd != util.Container {
+			skipInstallPkgPlatformCached = 1
+		} else if gulu.OS.IsWindows() {
+			plat := strings.ToLower(Conf.System.OSPlatform)
+			// Windows 7, 8 and Server 2012 are no longer supported https://github.com/siyuan-note/siyuan/issues/7347
+			if strings.Contains(plat, " 7 ") || strings.Contains(plat, " 8 ") || strings.Contains(plat, "2012") {
+				skipInstallPkgPlatformCached = 1
+			}
 		}
+	}
+
+	if skipInstallPkgPlatformCached == 1 || !Conf.System.DownloadInstallPkg {
+		return true
 	}
 	return false
-}
-
-func ver2num(a string) int {
-	var version string
-	var suffixpos int
-	var suffixStr string
-	var suffix string
-	a = strings.Trim(a, " ")
-	if strings.Contains(a, "alpha") {
-		suffixpos = strings.Index(a, "-alpha")
-		version = a[0:suffixpos]
-		suffixStr = a[suffixpos+6 : len(a)]
-		suffix = "0" + fmt.Sprintf("%03s", suffixStr)
-	} else if strings.Contains(a, "beta") {
-		suffixpos = strings.Index(a, "-beta")
-		version = a[0:suffixpos]
-		suffixStr = a[suffixpos+5 : len(a)]
-		suffix = "1" + fmt.Sprintf("%03s", suffixStr)
-	} else {
-		version = a
-		suffix = "5000"
-	}
-	split := strings.Split(version, ".")
-	var verArr []string
-
-	verArr = append(verArr, "1")
-	var tmp string
-	for i := 0; i < 3; i++ {
-		if i < len(split) {
-			tmp = split[i]
-		} else {
-			tmp = "0"
-		}
-		verArr = append(verArr, fmt.Sprintf("%04s", tmp))
-	}
-	verArr = append(verArr, suffix)
-
-	ver := strings.Join(verArr, "")
-	verNum, _ := strconv.Atoi(ver)
-	return verNum
 }

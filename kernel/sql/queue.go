@@ -38,6 +38,7 @@ import (
 var (
 	operationQueue []*dbQueueOperation
 	dbQueueLock    = sync.Mutex{}
+	dbQueueCond    = sync.NewCond(&dbQueueLock)
 	txLock         = sync.Mutex{}
 )
 
@@ -61,10 +62,26 @@ func FlushTxJob() {
 }
 
 func WaitFlushTx() {
-	var printLog bool
-	var lastPrintLog bool
-	for i := 0; isWritingDatabase(util.SQLFlushInterval + 50*time.Millisecond); i++ {
-		time.Sleep(50 * time.Millisecond)
+	dbQueueLock.Lock()
+	defer dbQueueLock.Unlock()
+
+	var printLog, lastPrintLog bool
+	var i int
+
+	for len(operationQueue) > 0 || flushingTx.Load() {
+		if i == 0 {
+			// 第一次等待时使用较短的超时
+			dbQueueCond.Wait()
+		} else {
+			// 后续等待添加超时检测，用于打印警告日志
+			timer := time.AfterFunc(50*time.Millisecond, func() {
+				dbQueueCond.Broadcast()
+			})
+			dbQueueCond.Wait()
+			timer.Stop()
+		}
+
+		i++
 		if 200 < i && !printLog { // 10s 后打日志
 			logging.LogWarnf("database is writing: \n%s", logging.ShortStack())
 			printLog = true
@@ -76,16 +93,6 @@ func WaitFlushTx() {
 	}
 }
 
-func isWritingDatabase(d time.Duration) bool {
-	time.Sleep(d)
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-	if 0 < len(operationQueue) || flushingTx.Load() {
-		return true
-	}
-	return false
-}
-
 func ClearQueue() {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
@@ -95,6 +102,9 @@ func ClearQueue() {
 var flushingTx = atomic.Bool{}
 
 func FlushQueue() {
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+
 	ops := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
@@ -106,6 +116,8 @@ func FlushQueue() {
 	defer func() {
 		flushingTx.Store(false)
 		txLock.Unlock()
+		// 通知等待的协程队列已刷新完成
+		dbQueueCond.Broadcast()
 	}()
 
 	start := time.Now()
@@ -163,6 +175,7 @@ func FlushQueue() {
 		context["total"] = groupOpsTotal[op.action]
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
+			closeTxPreparedStmts(tx)
 			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
 			continue
 		}

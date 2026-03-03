@@ -53,7 +53,7 @@ export class Bookmark extends Model {
             }
         });
         this.element = tab.panelElement;
-        this.element.classList.add("fn__flex-column", "file-tree", "sy__bookmark");
+        this.element.classList.add("fn__flex-column", "file-tree", "sy__bookmark", "dockPanel");
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">
         <svg class="block__logoicon"><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.bookmark}

@@ -1,10 +1,11 @@
 {
 	"ID": "20211226122943-st7fpcj",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122943-st7fpcj",
 		"title": "PDF 標注",
+		"type": "doc",
 		"updated": "20220502141013"
 	},
 	"Children": [

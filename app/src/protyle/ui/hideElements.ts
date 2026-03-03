@@ -1,4 +1,5 @@
 import {getAllEditor} from "../../layout/getAll";
+import {isIPhone} from "../util/compatibility";
 
 // "gutter", "toolbar", "select", "hint", "util", "dialog", "gutterOnly"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
@@ -25,7 +26,9 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
     }
     //  不能 remove("protyle-wysiwyg--hl") 否则打开页签的时候 "cb-get-hl" 高亮会被移除
     if (protyle.gutter && panels.includes("gutterOnly")) {
-        protyle.gutter.element.classList.add("fn__none");
+        if (!isIPhone()) {
+            protyle.gutter.element.classList.add("fn__none");
+        }
         protyle.gutter.element.innerHTML = "";
     }
     if (protyle.toolbar && panels.includes("toolbar")) {

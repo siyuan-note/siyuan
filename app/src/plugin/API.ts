@@ -31,6 +31,7 @@ import {exportLayout} from "../layout/util";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Files} from "../layout/dock/Files";
+import {ProtyleMethod} from "./ProtyleMethod";
 
 let openTab;
 let openWindow;
@@ -112,7 +113,8 @@ openTab = (options: {
             afterOpen: options.afterOpen,
             id: options.doc.id,
             action: options.doc.action,
-            zoomIn: options.doc.zoomIn
+            zoomIn: options.doc.zoomIn,
+            scrollPosition: "start"
         });
     }
     if (options.asset) {
@@ -228,7 +230,8 @@ const getActiveEditor = (wndActive = true) => {
     }
     if (!editor) {
         editor = allEditor.find(item => {
-            if (hasClosestByClassName(item.protyle.element, "layout__wnd--active", true)) {
+            if (!item.protyle.element.classList.contains("fn__none") &&
+                hasClosestByClassName(item.protyle.element, "layout__wnd--active", true)) {
                 return true;
             }
         });
@@ -320,6 +323,7 @@ export const API = {
     lockScreen,
     exitSiYuan,
     Protyle,
+    ProtyleMethod,
     Plugin,
     Dialog,
     Menu,

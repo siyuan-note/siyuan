@@ -55,21 +55,18 @@ func autoOCRAssets() {
 }
 
 func getUnOCRAssetsAbsPaths() (ret []string) {
-	var assetsPaths []string
-	assets := cache.GetAssets()
-	for _, asset := range assets {
-		if !util.IsTesseractExtractable(asset.Path) {
-			continue
-		}
-		assetsPaths = append(assetsPaths, asset.Path)
-	}
+	// 只获取需要 OCR 的资源
+	ocrAssets := cache.FilterAssets(func(path string, asset *cache.Asset) bool {
+		return util.IsTesseractExtractable(asset.Path)
+	})
 
 	assetsPath := util.GetDataAssetsAbsPath()
-	for _, assetPath := range assetsPaths {
-		if util.ExistsAssetText(assetPath) {
+	for _, asset := range ocrAssets {
+		// 跳过已经存在 OCR 文本的资源
+		if util.ExistsAssetText(asset.Path) {
 			continue
 		}
-		absPath := filepath.Join(assetsPath, strings.TrimPrefix(assetPath, "assets"))
+		absPath := filepath.Join(assetsPath, strings.TrimPrefix(asset.Path, "assets"))
 		ret = append(ret, absPath)
 	}
 	return

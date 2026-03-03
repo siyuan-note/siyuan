@@ -1,13 +1,13 @@
 {
 	"ID": "20240530101000-875snki",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"ID": "20240530101000-vfng7sj",
 		"id": "20240530101000-875snki",
 		"title": "コンテンツブロックの属性",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20251201102644"
 	},
 	"Children": [
 		{
@@ -221,7 +221,7 @@
 			"Properties": {
 				"ID": "20240530101000-i0jnklc",
 				"id": "20240530101000-41pnskz",
-				"updated": "20240530101000"
+				"updated": "20251201102644"
 			},
 			"Children": [
 				{
@@ -234,9 +234,8 @@
 			"ID": "20240530101000-qc6ciit",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-j30er28",
 				"id": "20240530101000-qc6ciit",
-				"updated": "20240530101000"
+				"updated": "20251201102644"
 			},
 			"Children": [
 				{
@@ -250,7 +249,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ を選んで設定します。属性名に使用できるのは英数字のみです (例: "
+					"Data": "​ を選んで設定します。属性名には小文字の英語とアラビア数字のみを使用でき、文字で始まる必要があります（例："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -264,11 +263,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "7days"
+					"TextMarkTextContent": "day1"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​)。属性を設定すると、組み込み属性と区別するため属性名に "
+					"Data": "​）。属性を設定すると、組み込み属性と区別するため属性名に "
 				},
 				{
 					"Type": "NodeTextMark",

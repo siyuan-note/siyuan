@@ -19,7 +19,6 @@ package task
 import (
 	"context"
 	"reflect"
-	"slices"
 	"sync"
 	"time"
 
@@ -91,7 +90,7 @@ func containTask(task *Task, tasks []*Task) bool {
 			}
 
 			for i, arg := range t.Args {
-				if !reflect.DeepEqual(arg, task.Args[i]) {
+				if !areArgsEqual(arg, task.Args[i]) {
 					return false
 				}
 			}
@@ -99,6 +98,89 @@ func containTask(task *Task, tasks []*Task) bool {
 		}
 	}
 	return false
+}
+
+// areArgsEqual 比较两个参数是否相等
+func areArgsEqual(a, b interface{}) bool {
+
+	// 如果两个参数都为 nil
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+
+	// 快速处理常见的基本类型
+	switch av := a.(type) {
+	case string:
+		if bv, ok := b.(string); ok {
+			return av == bv
+		}
+	case int:
+		if bv, ok := b.(int); ok {
+			return av == bv
+		}
+	case int64:
+		if bv, ok := b.(int64); ok {
+			return av == bv
+		}
+	case int32:
+		if bv, ok := b.(int32); ok {
+			return av == bv
+		}
+	case bool:
+		if bv, ok := b.(bool); ok {
+			return av == bv
+		}
+	case float64:
+		if bv, ok := b.(float64); ok {
+			return av == bv
+		}
+	case float32:
+		if bv, ok := b.(float32); ok {
+			return av == bv
+		}
+	case uint:
+		if bv, ok := b.(uint); ok {
+			return av == bv
+		}
+	case uint64:
+		if bv, ok := b.(uint64); ok {
+			return av == bv
+		}
+	case uint32:
+		if bv, ok := b.(uint32); ok {
+			return av == bv
+		}
+	case []string:
+		if bv, ok := b.([]string); ok {
+			if len(av) != len(bv) {
+				return false
+			}
+			for i := range av {
+				if av[i] != bv[i] {
+					return false
+				}
+			}
+			return true
+		}
+	case []int:
+		if bv, ok := b.([]int); ok {
+			if len(av) != len(bv) {
+				return false
+			}
+			for i := range av {
+				if av[i] != bv[i] {
+					return false
+				}
+			}
+			return true
+		}
+	}
+
+	// 未处理的复杂类型，回退到 reflect.DeepEqual
+	return reflect.DeepEqual(a, b)
 }
 
 func getCurrentTasks() (ret []*Task) {
@@ -297,31 +379,30 @@ func popAsyncTasks() (ret []*Task) {
 		return
 	}
 
-	var popedIndexes []int
-	for i, task := range taskQueue {
-		if !task.Async {
-			continue
-		}
+	// writeIdx 指向下一个要写入的位置
+	writeIdx := 0
+	for readIdx := 0; readIdx < len(taskQueue); readIdx++ {
+		task := taskQueue[readIdx]
 
-		if time.Since(task.Created) <= task.Delay {
-			continue
-		}
-
-		if task.Async {
+		// 判断是否应该弹出此任务
+		shouldPop := task.Async && time.Since(task.Created) > task.Delay
+		if shouldPop {
 			ret = append(ret, task)
-			popedIndexes = append(popedIndexes, i)
+			// 不写入 taskQueue，相当于删除
+		} else {
+			// 保留此任务，移动到 writeIdx 位置
+			if writeIdx != readIdx {
+				taskQueue[writeIdx] = task
+			}
+			writeIdx++
 		}
 	}
 
-	if 0 < len(popedIndexes) {
-		var newQueue []*Task
-		for i, task := range taskQueue {
-			if !slices.Contains(popedIndexes, i) {
-				newQueue = append(newQueue, task)
-			}
-		}
-		taskQueue = newQueue
+	// 清理队列尾部的引用，防止内存泄漏
+	for i := writeIdx; i < len(taskQueue); i++ {
+		taskQueue[i] = nil
 	}
+	taskQueue = taskQueue[:writeIdx]
 	return
 }
 

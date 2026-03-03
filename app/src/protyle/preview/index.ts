@@ -193,7 +193,7 @@ export class Preview {
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement, protyle);
-                speechRender(protyle.preview.previewElement, protyle.options.lang);
+                speechRender(protyle.preview.previewElement, window.siyuan.config.appearance.lang);
                 protyle.preview.previewElement.scrollTop = oldScrollTop;
                 loadingElement.remove();
             });

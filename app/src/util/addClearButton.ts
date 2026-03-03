@@ -1,5 +1,12 @@
-const update = (inputElement: HTMLInputElement, clearElement: Element, right: number) => {
-    if (inputElement.value === "") {
+const update = (inputElement: HTMLElement, clearElement: Element, right: number) => {
+    let value = "";
+    if (inputElement.tagName === "DIV") {
+        value = inputElement.textContent;
+    } else {
+        value = (inputElement as HTMLInputElement).value;
+    }
+
+    if (value === "") {
         clearElement.classList.add("fn__none");
         if (typeof right === "number") {
             inputElement.style.paddingRight = inputElement.dataset.oldPaddingRight;
@@ -12,7 +19,7 @@ const update = (inputElement: HTMLInputElement, clearElement: Element, right: nu
     }
 };
 export const addClearButton = (options: {
-    inputElement: HTMLInputElement,
+    inputElement: HTMLElement,
     clearCB?: () => void,
     right?: number,
     width?: string,
@@ -25,7 +32,11 @@ export const addClearButton = (options: {
 <use xlink:href="#iconCloseRound"></use></svg>`);
     const clearElement = options.inputElement.nextElementSibling;
     clearElement.addEventListener("click", () => {
-        options.inputElement.value = "";
+        if (options.inputElement.tagName === "DIV") {
+            options.inputElement.textContent = "";
+        } else {
+            (options.inputElement as HTMLInputElement).value = "";
+        }
         options.inputElement.focus();
         update(options.inputElement, clearElement, options.right);
         if (options.clearCB) {

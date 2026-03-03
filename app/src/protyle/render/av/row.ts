@@ -114,7 +114,7 @@ export const insertAttrViewBlockAnimation = (options: {
     previousId: string,
     groupID?: string
 }) => {
-    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
+    options.blockElement.querySelector('[data-type="av-search"]').textContent = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(groupQuery + `.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行

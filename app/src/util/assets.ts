@@ -6,11 +6,24 @@ import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
-import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    isInIOS,
+    isInMobileApp,
+    isIPad,
+    isIPhone,
+    isMac,
+    isWin11
+} from "../protyle/util/compatibility";
+import {setCodeTheme} from "../protyle/render/util";
+import {getBackend, getFrontend} from "./functions";
 
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
+    htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
+    htmlElement.setAttribute("data-backend", getBackend());
     htmlElement.setAttribute("data-theme-mode", getThemeMode());
     htmlElement.setAttribute("data-light-theme", window.siyuan.config.appearance.themeLight);
     htmlElement.setAttribute("data-dark-theme", window.siyuan.config.appearance.themeDark);
@@ -279,10 +292,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     if (window.siyuan.config.editor.rtl) {
         style += `\n.protyle-title__input,
 .protyle-wysiwyg .p,
-.protyle-wysiwyg .code-block .hljs,
-.protyle-wysiwyg .table,
+.protyle-wysiwyg .table table,
 .protyle-wysiwyg .render-node protyle-html,
-.protyle-wysiwyg .render-node > div[spin="1"],
 .protyle-wysiwyg [data-type="NodeHeading"] {direction: rtl}
 .protyle-wysiwyg [data-node-id].li > .protyle-action {
     right: 0;
@@ -317,29 +328,6 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
         }
     }
     return style;
-};
-
-export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
-    const protyleHljsStyle = document.getElementById("protyleHljsStyle") as HTMLLinkElement;
-    let css;
-    if (window.siyuan.config.appearance.mode === 0) {
-        css = window.siyuan.config.appearance.codeBlockThemeLight;
-        if (!Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE.includes(css)) {
-            css = "default";
-        }
-    } else {
-        css = window.siyuan.config.appearance.codeBlockThemeDark;
-        if (!Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE.includes(css)) {
-            css = "github-dark";
-        }
-    }
-    const href = `${cdn}/js/highlight.js/styles/${css}.min.css?v=11.11.1`;
-    if (!protyleHljsStyle) {
-        addStyle(href, "protyleHljsStyle");
-    } else if (!protyleHljsStyle.href.includes(href)) {
-        protyleHljsStyle.remove();
-        addStyle(href, "protyleHljsStyle");
-    }
 };
 
 export const setMode = (modeElementValue: number) => {
@@ -382,7 +370,7 @@ const rgba2hex = (rgba: string) => {
 };
 
 const updateMobileTheme = (OSTheme: string) => {
-    if (isInIOS() || isInAndroid() || isInHarmony()) {
+    if (isInMobileApp()) {
         setTimeout(() => {
             const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim());
             let mode = window.siyuan.config.appearance.mode;

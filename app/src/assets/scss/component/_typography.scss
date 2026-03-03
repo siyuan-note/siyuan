@@ -71,6 +71,7 @@
   }
 
   span[data-type~="inline-math"] {
+    direction: ltr;
     user-select: text;
     display: inline;
     // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
@@ -81,7 +82,7 @@
   kbd,
   span[data-type~="kbd"] {
     padding: 2px 4px;
-    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    font: 75% var(--b3-font-family-kbd);
     line-height: 1;
     color: var(--b3-theme-on-surface);
     vertical-align: middle;
@@ -140,6 +141,108 @@
     background-color: var(--b3-bq-background);
     display: flex;
     flex-direction: column;
+  }
+
+  .callout {
+    position: relative;
+
+    &::before {
+      content: '';
+      width: .25em;
+      border-radius: var(--b3-border-radius);
+      position: absolute;
+      left: 2px;
+      top: 6px;
+      bottom: 6px;
+    }
+
+    padding-left: calc(0.25em + 6px);
+    color: var(--b3-theme-on-surface);
+    background-color: var(--b3-bq-background);
+    display: flex;
+    flex-direction: column;
+
+    // NOTE
+    &::before {
+      background-color: var(--b3-callout-note);
+    }
+
+    .callout-info {
+      color: var(--b3-callout-note);
+    }
+
+    .callout-icon:empty {
+      display: none;
+    }
+
+    &[data-subtype="WARNING"] {
+      &::before {
+        background-color: var(--b3-callout-warning);
+      }
+
+      .callout-info {
+        color: var(--b3-callout-warning);
+      }
+    }
+
+    &[data-subtype="TIP"] {
+      &::before {
+        background-color: var(--b3-callout-tip);
+      }
+
+      .callout-info {
+        color: var(--b3-callout-tip);
+      }
+    }
+
+    &[data-subtype="IMPORTANT"] {
+      &::before {
+        background-color: var(--b3-callout-important);
+      }
+
+      .callout-info {
+        color: var(--b3-callout-important);
+      }
+    }
+
+    &[data-subtype="CAUTION"] {
+      &::before {
+        background-color: var(--b3-callout-caution);
+      }
+
+      .callout-info {
+        color: var(--b3-callout-caution);
+      }
+    }
+
+    &-info {
+      display: flex;
+      align-items: center;
+      user-select: none;
+    }
+
+    &-icon {
+      width: 1.2em;
+      display: flex;
+      text-align: center;
+      height: 1.2em;
+      line-height: 1.2em;
+      padding: 4px;
+      border-radius: var(--b3-border-radius);
+    }
+
+    &-img {
+      height: 1.2em;
+      width: 100%;
+    }
+
+    &-title {
+      margin-left: 4px;
+      font-weight: 500;
+      font-size: 114%;
+      opacity: .86;
+      transition: var(--b3-color-transition);
+    }
   }
 
   h1,
@@ -339,7 +442,6 @@
   [data-subtype="mindmap"] {
     z-index: 1;
     height: 420px;
-    box-sizing: border-box;
 
     & > div:not(.protyle-icons):not(.protyle-attr) {
       overflow: hidden;
@@ -406,9 +508,12 @@
     text-align: center;
   }
 
+  [data-type="NodeIFrame"] {
+    height: 256px;
+  }
+
   [data-type="NodeIFrame"],
   [data-type="NodeWidget"] {
-    height: 256px;
     width: 100%;
     max-width: 100%;
 
@@ -493,6 +598,11 @@
 
   .iframe {
     text-align: center;
+
+    iframe {
+      width: 100%;
+      max-width: 100%;
+    }
   }
 }
 

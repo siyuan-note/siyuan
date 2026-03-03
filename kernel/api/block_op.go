@@ -25,6 +25,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -701,9 +702,15 @@ func updateBlock(c *gin.Context) {
 			tree.Root.FirstChild.Unlink()                          // 删除列表
 			tree.Root.FirstChild.Unlink()                          // 继续删除列表 IAL
 		}
-		tree.Root.FirstChild.SetIALAttr("id", id)
 
-		data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+		if nil != tree.Root.FirstChild {
+			tree.Root.FirstChild.SetIALAttr("id", id)
+		} else {
+			logging.LogWarnf("tree root has no child node, append empty paragraph node")
+			tree.Root.AppendChild(treenode.NewParagraph(id))
+		}
+
+		data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 		transactions = []*model.Transaction{
 			{
 				DoOperations: []*model.Operation{
@@ -888,7 +895,7 @@ func batchUpdateBlock(c *gin.Context) {
 			}
 			tree.Root.FirstChild.SetIALAttr("id", id)
 
-			data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+			data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 			ops = append(ops, &model.Operation{
 				Action: "update",
 				ID:     id,
@@ -903,7 +910,6 @@ func batchUpdateBlock(c *gin.Context) {
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
-
 }
 
 func deleteBlock(c *gin.Context) {

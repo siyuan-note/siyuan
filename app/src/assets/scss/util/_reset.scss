@@ -176,7 +176,7 @@ img {
   -ms-interpolation-mode: bicubic;
   overflow: hidden;
 
-  &:not(.emoji) {
+  &:not(.emoji):not(.callout-img) {
     font-size: 12px;
   }
 }

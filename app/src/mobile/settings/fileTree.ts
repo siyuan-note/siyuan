@@ -55,6 +55,12 @@ export const initFileTree = () => {
     <div class="b3-label__text">${window.siyuan.languages.fileTree17}</div>
 </div>
 <div class="b3-label">
+    ${window.siyuan.languages.recentDocsMaxListCount}
+    <span class="fn__hr"></span>
+    <input class="b3-text-field fn__block" id="recentDocsMaxListCount" type="number" min="32" max="256" value="${window.siyuan.config.fileTree.recentDocsMaxListCount}">
+    <div class="b3-label__text">${window.siyuan.languages.recentDocsMaxListCountTip}</div>
+</div>
+<div class="b3-label">
     ${window.siyuan.languages.fileTree12}
     <span class="fn__hr"></span>
     <select class="b3-select fn__block" id="docCreateSaveBox">${genNotebookOption(window.siyuan.config.fileTree.docCreateSaveBox)}</select>
@@ -90,6 +96,7 @@ export const initFileTree = () => {
                         createDocAtTop: (modelMainElement.querySelector("#createDocAtTop") as HTMLInputElement).checked,
                         largeFileWarningSize: parseInt((modelMainElement.querySelector("#largeFileWarningSize") as HTMLInputElement).value),
                         maxListCount: parseInt((modelMainElement.querySelector("#maxListCount") as HTMLInputElement).value),
+                        recentDocsMaxListCount: parseInt((modelMainElement.querySelector("#recentDocsMaxListCount") as HTMLInputElement).value),
                         maxOpenTabCount: window.siyuan.config.fileTree.maxOpenTabCount,
                     }, response => {
                         window.siyuan.config.fileTree = response.data;

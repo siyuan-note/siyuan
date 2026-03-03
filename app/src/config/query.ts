@@ -124,6 +124,15 @@ export const query = {
             <input class="b3-switch" id="blockquote" type="checkbox"${window.siyuan.config.search.blockquote ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
+            <svg class="svg"><use xlink:href="#iconCallout"></use></svg>
+            <span class="fn__space"></span>
+            <div class="fn__flex-1">
+                ${window.siyuan.languages.callout} <sup>[1]</sup>
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" id="callout" type="checkbox"${window.siyuan.config.search.callout ? " checked" : ""}/>
+        </label>
+        <label class="fn__flex">
             <svg class="svg"><use xlink:href="#iconSuper"></use></svg>
             <span class="fn__space"></span>
             <div class="fn__flex-1">
@@ -326,6 +335,7 @@ export const query = {
                     mathBlock: (query.element.querySelector("#mathBlock") as HTMLInputElement).checked,
                     table: (query.element.querySelector("#table") as HTMLInputElement).checked,
                     blockquote: (query.element.querySelector("#blockquote") as HTMLInputElement).checked,
+                    callout: (query.element.querySelector("#callout") as HTMLInputElement).checked,
                     superBlock: (query.element.querySelector("#superBlock") as HTMLInputElement).checked,
                     paragraph: (query.element.querySelector("#paragraph") as HTMLInputElement).checked,
                     name: (query.element.querySelector("#name") as HTMLInputElement).checked,

@@ -95,7 +95,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
             textElement.classList.add("fn__none");
             leftElement.lastElementChild.classList.remove("fn__none");
             textElement.previousElementSibling.classList.add("fn__none");
-            leftEditor.protyle.options.history.snapshot = dialogContainerElement.querySelector(".b3-dialog__header code").getAttribute("data-snapshot");
+            leftEditor.protyle.options.history.snapshot = dialogContainerElement.querySelectorAll(".b3-dialog__header code")[element.parentElement.getAttribute("data-type") === "update" ? 1 : 0].getAttribute("data-snapshot");
             onGet({
                 data: response,
                 protyle: leftEditor.protyle,
@@ -208,6 +208,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         }
     });
     genHTML(left, right, dialog, "left");
+    (document.activeElement as HTMLElement)?.blur();
 };
 
 const genHTML = (left: string, right: string, dialog: Dialog, direct: string) => {
@@ -249,7 +250,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
                 <span class="counter${response.data.addsLeft.length === 0 ? " fn__none" : ""}">${response.data.addsLeft.length}</span>
             </li>
-            <ul class="fn__none">${genItem(response.data.addsLeft)}</ul>
+            <ul class="fn__none" data-type="update">${genItem(response.data.addsLeft)}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">

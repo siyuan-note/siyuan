@@ -30,6 +30,7 @@ const dragoverScroll: {
     space?: number // -1 向上；1 向下
     lastTime?: number
 } = {};
+
 export const stopScrollAnimation = () => {
     if (dragoverScroll.animationId) {
         cancelAnimationFrame(dragoverScroll.animationId);
@@ -39,6 +40,7 @@ export const stopScrollAnimation = () => {
         dragoverScroll.lastTime = null;
     }
 };
+
 const scrollAnimation = (timestamp: number) => {
     if (!dragoverScroll.lastTime) {
         dragoverScroll.lastTime = timestamp - 8;

@@ -455,7 +455,7 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
 	</label>
 </div>`
-				ret = fmt.Sprintf(passwordHTML, passwordID, Conf.Language(275))
+				ret = fmt.Sprintf(passwordHTML, passwordID, Conf.Language(283))
 			}
 		}
 	}
@@ -477,7 +477,7 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 	<span style="font-size:100px; line-height:1.2;">🚫</span>
 	<span style="font-size:2em;">%s</span>
 </div>`
-			ret = fmt.Sprintf(forbiddenHTML, ID, Conf.Language(276))
+			ret = fmt.Sprintf(forbiddenHTML, ID, Conf.Language(284))
 		}
 	}
 	return

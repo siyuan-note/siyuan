@@ -1433,6 +1433,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.VideoBlock = types["videoBlock"]
 		s.IFrameBlock = types["iframeBlock"]
 		s.WidgetBlock = types["widgetBlock"]
+		s.Callout = types["callout"]
 	} else {
 		s.Document = Conf.Search.Document
 		s.Heading = Conf.Search.Heading
@@ -1451,6 +1452,7 @@ func buildTypeFilter(types map[string]bool) string {
 		s.VideoBlock = Conf.Search.VideoBlock
 		s.IFrameBlock = Conf.Search.IFrameBlock
 		s.WidgetBlock = Conf.Search.WidgetBlock
+		s.Callout = Conf.Search.Callout
 	}
 	return s.TypeFilter()
 }
@@ -1886,7 +1888,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	content = maxContent(content, 5120)
 	tag, _ := markSearch(sqlBlock.Tag, terms, beforeLen)
 	markdown := maxContent(sqlBlock.Markdown, 5120)
-	fContent := sqlBlock.FContent
+	fContent := util.EscapeHTML(sqlBlock.FContent) // fContent 会用于和 content 对比，在反链计算时用于判断是否是列表项下第一个子块，所以也需要转义 https://github.com/siyuan-note/siyuan/issues/11001
 	block = &Block{
 		Box:      sqlBlock.Box,
 		Path:     sqlBlock.Path,

@@ -88,7 +88,7 @@ export class Graph extends Model {
         this.rootId = options.rootId;
         this.type = options.type;
 
-        this.element.classList.add("graph", "file-tree", this.type === "global" ? "sy__globalGraph" : "sy__graph");
+        this.element.classList.add("graph", "file-tree", this.type === "global" ? "sy__globalGraph" : "sy__graph", "dockPanel");
         let panelHTML;
         if (this.type === "global") {
             panelHTML = `
@@ -107,6 +107,10 @@ export class Graph extends Model {
 <label>
     <span>${window.siyuan.languages.quote}</span> 
     <input data-type="blockquote" type="checkbox" class="b3-switch"${window.siyuan.config.graph.global.type.blockquote ? " checked" : ""}/>
+</label>
+<label>
+    <span>${window.siyuan.languages.callout}</span> 
+    <input data-type="callout" type="checkbox" class="b3-switch"${window.siyuan.config.graph.global.type.callout ? " checked" : ""}/>
 </label>
 <label>
     <span>${window.siyuan.languages.superBlock}</span> 
@@ -191,6 +195,10 @@ export class Graph extends Model {
 <label>
     <span>${window.siyuan.languages.quote}</span> 
     <input data-type="blockquote" type="checkbox" class="b3-switch"${window.siyuan.config.graph.local.type.blockquote ? " checked" : ""}/>
+</label>
+<label>
+    <span>${window.siyuan.languages.callout}</span> 
+    <input data-type="callout" type="checkbox" class="b3-switch"${window.siyuan.config.graph.local.type.callout ? " checked" : ""}/>
 </label>
 <label>
     <span>${window.siyuan.languages.superBlock}</span> 
@@ -324,8 +332,10 @@ export class Graph extends Model {
                         const minElement = this.element.querySelector('.block__icons .block__icon[data-type="min"]');
                         if (this.element.className.includes("fullscreen")) {
                             minElement.classList.add("fn__none");
+                            minElement.previousElementSibling.classList.add("fn__none");
                         } else {
                             minElement.classList.remove("fn__none");
+                            minElement.previousElementSibling.classList.remove("fn__none");
                         }
                     }
                     break;
@@ -401,6 +411,7 @@ export class Graph extends Model {
         (this.panelElement.querySelector("[data-type='heading']") as HTMLInputElement).checked = conf.type.heading;
         (this.panelElement.querySelector("[data-type='arrow']") as HTMLInputElement).checked = conf.d3.arrow;
         (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked = conf.type.blockquote;
+        (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked = conf.type.callout;
         (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked = conf.type.code;
         this.searchGraph(false);
     }
@@ -421,6 +432,7 @@ export class Graph extends Model {
             tag: (this.panelElement.querySelector("[data-type='tag']") as HTMLInputElement).checked,
             heading: (this.panelElement.querySelector("[data-type='heading']") as HTMLInputElement).checked,
             blockquote: (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked,
+            callout: (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked,
             code: (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked,
         };
         const d3 = {
@@ -542,6 +554,9 @@ export class Graph extends Model {
                     break;
                 case "NodeBlockquote":
                     item.color = {background: rootStyle.getPropertyValue("--b3-graph-bq-point").trim()};
+                    break;
+                case "NodeCallout":
+                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-callout-point").trim()};
                     break;
                 case "NodeSuperBlock":
                     item.color = {background: rootStyle.getPropertyValue("--b3-graph-super-point").trim()};

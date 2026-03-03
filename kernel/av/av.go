@@ -18,6 +18,7 @@
 package av
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -410,11 +411,12 @@ type Viewable interface {
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
-		Spec:      CurrentSpec,
-		ID:        id,
-		KeyValues: []*KeyValues{{Key: blockKey}, {Key: selectKey}},
-		ViewID:    view.ID,
-		Views:     []*View{view},
+		Spec:              CurrentSpec,
+		ID:                id,
+		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
+		ViewID:            view.ID,
+		Views:             []*View{view},
+		RenderedViewables: map[string]Viewable{},
 	}
 	return
 }
@@ -443,6 +445,52 @@ func GetAttributeViewNameByPath(avJSONPath string) (ret string, err error) {
 	return
 }
 
+func GetAttributeViewContent(avID string) (content string) {
+	if "" == avID {
+		return
+	}
+
+	attrView, err := ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	return getAttributeViewContent0(attrView)
+}
+
+func GetAttributeViewContentByPath(avJSONPath string) (content string) {
+	attrView, err := ParseAttributeViewByPath(avJSONPath)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avJSONPath, err)
+		return
+	}
+	return getAttributeViewContent0(attrView)
+}
+
+func getAttributeViewContent0(attrView *AttributeView) (content string) {
+	buf := bytes.Buffer{}
+	buf.WriteString(attrView.Name)
+	buf.WriteByte(' ')
+	for _, v := range attrView.Views {
+		buf.WriteString(v.Name)
+		buf.WriteByte(' ')
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		buf.WriteString(keyValues.Key.Name)
+		buf.WriteByte(' ')
+		for _, value := range keyValues.Values {
+			if nil != value {
+				buf.WriteString(value.String(true))
+				buf.WriteByte(' ')
+			}
+		}
+	}
+
+	content = strings.TrimSpace(buf.String())
+	return
+}
+
 func IsAttributeViewExist(avID string) bool {
 	avJSONPath := GetAttributeViewDataPath(avID)
 	return filelock.IsExist(avJSONPath)
@@ -450,11 +498,17 @@ func IsAttributeViewExist(avID string) bool {
 
 func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 	avJSONPath := GetAttributeViewDataPath(avID)
+	return ParseAttributeViewByPath(avJSONPath)
+}
+
+func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error) {
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
 	}
 
+	avID := filepath.Base(avJSONPath)
+	avID = strings.TrimSuffix(avID, filepath.Ext(avID))
 	data, readErr := filelock.ReadFile(avJSONPath)
 	if nil != readErr {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
@@ -823,9 +877,10 @@ func GetAttributeViewI18n(key string) string {
 }
 
 var (
-	ErrViewNotFound    = errors.New("view not found")
-	ErrKeyNotFound     = errors.New("key not found")
-	ErrWrongLayoutType = errors.New("wrong layout type")
+	ErrAttributeViewNotFound = errors.New("attribute view not found")
+	ErrViewNotFound          = errors.New("view not found")
+	ErrKeyNotFound           = errors.New("key not found")
+	ErrWrongLayoutType       = errors.New("wrong layout type")
 )
 
 const (

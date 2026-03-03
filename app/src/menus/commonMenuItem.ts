@@ -2,11 +2,11 @@
 import {shell} from "electron";
 /// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
-import {getSearch, isMobile, isValidAttrName} from "../util/functions";
+import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, isInIOS, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -21,11 +21,11 @@ import {exportImage} from "../protyle/export/util";
 import {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {openAssetNewWindow} from "../window/openNewWindow";
-import {escapeHtml} from "../util/escape";
 import {copyTextByType} from "../protyle/toolbar/util";
 import {hideElements} from "../protyle/ui/hideElements";
 import {Protyle} from "../protyle";
 import {getAllEditor} from "../layout/getAll";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -351,22 +351,34 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                     addDialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    if (!isValidAttrName(inputElement.value)) {
-                        showMessage(window.siyuan.languages.attrName + " <b>" + escapeHtml(inputElement.value) + "</b> " + window.siyuan.languages.invalid);
+                    const value = inputElement.value.toLowerCase();
+                    if (!isValidCustomAttrName(value)) {
+                        showMessage(window.siyuan.languages._kernel[25]);
                         return false;
                     }
-                    target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
+                    let existElement: HTMLElement | false;
+                    Array.from(dialog.element.querySelectorAll('.custom-attr[data-type="custom"] .b3-label .fn__flex-1')).find((labelItem: HTMLElement) => {
+                        if (labelItem.textContent === value) {
+                            existElement = hasClosestByClassName(labelItem, "b3-label");
+                            return true;
+                        }
+                    });
+                    if (existElement) {
+                        showMessage(window.siyuan.languages.hasAttrName.replace("${x}", value));
+                    } else {
+                        target.parentElement.insertAdjacentHTML("beforebegin", `<div class="b3-label b3-label--noborder">
     <div class="fn__flex">
-        <span class="fn__flex-1">${inputElement.value}</span>
+        <span class="fn__flex-1">${value}</span>
         <span data-action="remove" class="block__icon block__icon--show"><svg><use xlink:href="#iconMin"></use></svg></span>
     </div>
     <div class="fn__hr"></div>
-    <textarea style="resize: vertical" spellcheck="false" data-name="custom-${inputElement.value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
+    <textarea style="resize: vertical" spellcheck="false" data-name="custom-${value}" class="b3-text-field fn__block" rows="1" placeholder="${window.siyuan.languages.attrValue1}"></textarea>
 </div>`);
-                    const valueElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
-                    valueElement.focus();
-                    bindAttrInput(valueElement, attrs.id);
-                    addDialog.destroy();
+                        const newInputElement = target.parentElement.previousElementSibling.querySelector(".b3-text-field") as HTMLInputElement;
+                        newInputElement.focus();
+                        bindAttrInput(newInputElement, attrs.id);
+                        addDialog.destroy();
+                    }
                 });
                 event.stopPropagation();
                 event.preventDefault();
@@ -383,6 +395,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     });
     if (focusName === "av") {
         dialog.element.dispatchEvent(new CustomEvent("click", {detail: "NodeAttributeView"}));
+        (document.activeElement as HTMLElement)?.blur();
     } else if (focusName === "custom") {
         dialog.element.dispatchEvent(new CustomEvent("click", {detail: "custom"}));
     }
@@ -444,42 +457,42 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             }
         }
     },
-    /// #if BROWSER
-    {
-        id: "copyWebURL",
-        iconHTML: "",
-        label: window.siyuan.languages.copyWebURL,
-        click: () => {
-            copyTextByType(ids, "webURL");
-            if (focusElement) {
-                focusBlock(focusElement);
+        /// #if BROWSER
+        {
+            id: "copyWebURL",
+            iconHTML: "",
+            label: window.siyuan.languages.copyWebURL,
+            click: () => {
+                copyTextByType(ids, "webURL");
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
             }
-        }
-    },
-    /// #endif
-    {
-        id: "copyHPath",
-        iconHTML: "",
-        label: window.siyuan.languages.copyHPath,
-        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-        click: () => {
-            copyTextByType(ids, "hPath");
-            if (focusElement) {
-                focusBlock(focusElement);
+        },
+        /// #endif
+        {
+            id: "copyHPath",
+            iconHTML: "",
+            label: window.siyuan.languages.copyHPath,
+            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
+            click: () => {
+                copyTextByType(ids, "hPath");
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
             }
-        }
-    }, {
-        id: "copyID",
-        iconHTML: "",
-        label: window.siyuan.languages.copyID,
-        accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
-        click: () => {
-            copyTextByType(ids, "id");
-            if (focusElement) {
-                focusBlock(focusElement);
+        }, {
+            id: "copyID",
+            iconHTML: "",
+            label: window.siyuan.languages.copyID,
+            accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
+            click: () => {
+                copyTextByType(ids, "id");
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
             }
-        }
-    }];
+        }];
 
     if (stdMarkdownId) {
         menuItems.push({
@@ -772,7 +785,7 @@ export const exportMd = (id: string) => {
                 id: "exportPDF",
                 label: window.siyuan.languages.print,
                 icon: "iconPDF",
-                ignore: !isInAndroid() && !isInHarmony() && !isInIOS(),
+                ignore: !isInMobileApp(),
                 click: () => {
                     const msgId = showMessage(window.siyuan.languages.exporting);
                     const localData = window.siyuan.storage[Constants.LOCAL_EXPORTPDF];
@@ -973,9 +986,18 @@ export const movePathToMenu = (paths: string[]) => {
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,
         click() {
-            movePathTo((toPath, toNotebook) => {
-                moveToPath(paths, toNotebook[0], toPath[0]);
-            }, paths);
+            const rootIDs: string[] = [];
+            paths.forEach(item => {
+                rootIDs.push(pathPosix().basename(item).replace(".sy", ""));
+            });
+            movePathTo({
+                cb: (toPath, toNotebook) => {
+                    moveToPath(paths, toNotebook[0], toPath[0]);
+                },
+                paths,
+                flashcard: false,
+                rootIDs,
+            });
         }
     }).element;
 };

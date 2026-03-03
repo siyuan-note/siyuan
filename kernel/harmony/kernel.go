@@ -20,7 +20,6 @@ import (
 	"C"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -37,7 +36,7 @@ import (
 
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
-	go server.Serve(true)
+	go server.Serve(true, model.Conf.CookieKey)
 }
 
 //export StartKernel
@@ -49,7 +48,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
 
 	model.InitConf()
-	go server.Serve(false)
+	go server.Serve(false, model.Conf.CookieKey)
 	go func() {
 		model.InitAppearance()
 		sql.InitDatabase(false)
@@ -114,9 +113,6 @@ func GetMimeTypeByExt(ext string) string {
 
 //export SetTimezone
 func SetTimezone(container, appDir, timezoneID string) {
-	if "ios" == container {
-		os.Setenv("ZONEINFO", filepath.Join(appDir, "app", "zoneinfo.zip"))
-	}
 	z, err := time.LoadLocation(strings.TrimSpace(timezoneID))
 	if err != nil {
 		fmt.Printf("load location failed: %s\n", err)
@@ -135,7 +131,13 @@ func DisableFeature(feature *C.char) {
 func Unzip(zipFilePath, destination *C.char) {
 	if err := gulu.Zip.Unzip(C.GoString(zipFilePath), C.GoString(destination)); nil != err {
 		logging.LogErrorf("unzip [%s] failed: %s", zipFilePath, err)
+		panic(err)
 	}
+}
+
+//export Exit
+func Exit() {
+	os.Exit(logging.ExitCodeOk)
 }
 
 func main() {}

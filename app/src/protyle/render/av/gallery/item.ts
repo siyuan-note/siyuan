@@ -12,7 +12,7 @@ export const insertGalleryItemAnimation = (options: {
     groupID?: string
 }) => {
     const type = options.blockElement.getAttribute("data-av-type") as TAVView;
-    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
+    options.blockElement.querySelector('[data-type="av-search"]').textContent = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let sideItemElement = options.previousId ? options.blockElement.querySelector(groupQuery + `.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
     const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");

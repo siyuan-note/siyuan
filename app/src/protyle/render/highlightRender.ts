@@ -1,7 +1,7 @@
 import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {focusByOffset} from "../util/selection";
-import {setCodeTheme} from "../../util/assets";
+import {setCodeTheme} from "./util";
 
 export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, zoom = 1) => {
     let codeElements: NodeListOf<Element>;

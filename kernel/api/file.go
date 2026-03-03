@@ -24,7 +24,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -66,14 +68,26 @@ func globalCopyFiles(c *gin.Context) {
 		srcs = append(srcs, s.(string))
 	}
 
-	for _, src := range srcs {
-		if !filelock.IsExist(src) {
+	for i, src := range srcs {
+		absSrc, _ := filepath.Abs(src)
+
+		if !filelock.IsExist(absSrc) {
 			msg := fmt.Sprintf("file [%s] does not exist", src)
 			logging.LogErrorf(msg)
 			ret.Code = -1
 			ret.Msg = msg
 			return
 		}
+
+		if util.IsSensitivePath(absSrc) {
+			msg := fmt.Sprintf("refuse to copy sensitive file [%s]", src)
+			logging.LogErrorf(msg)
+			ret.Code = -2
+			ret.Msg = msg
+			return
+		}
+
+		srcs[i] = absSrc
 	}
 
 	destDir := arg["destDir"].(string) // 相对于工作空间的路径
@@ -127,6 +141,14 @@ func copyFile(c *gin.Context) {
 	}
 
 	dest := arg["dest"].(string)
+	if util.IsSensitivePath(dest) {
+		msg := fmt.Sprintf("refuse to copy sensitive file [%s]", dest)
+		logging.LogErrorf(msg)
+		ret.Code = -2
+		ret.Msg = msg
+		return
+	}
+
 	if err = filelock.Copy(src, dest); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1
@@ -155,6 +177,13 @@ func getFile(c *gin.Context) {
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
+	if !filelock.IsExist(fileAbsPath) {
+		ret.Code = http.StatusNotFound
+		ret.Msg = "file does not exist"
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+
 	info, err := os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
@@ -178,19 +207,8 @@ func getFile(c *gin.Context) {
 	}
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
-	if role := model.GetGinContextRole(c); !model.IsValidRole(role, []model.Role{
-		model.RoleAdministrator,
-	}) {
-		if relPath, err := filepath.Rel(util.ConfDir, fileAbsPath); err != nil {
-			logging.LogErrorf("Get a relative path from [%s] to [%s] failed: %s", util.ConfDir, fileAbsPath, err)
-			ret.Code = http.StatusInternalServerError
-			ret.Msg = err.Error()
-			c.JSON(http.StatusAccepted, ret)
-			return
-		} else if relPath == "conf.json" {
-			ret.Code = http.StatusForbidden
-			ret.Msg = http.StatusText(http.StatusForbidden)
-			c.JSON(http.StatusAccepted, ret)
+	if !model.IsAdminRoleContext(c) {
+		if refuseToAccess(c, fileAbsPath, ret) {
 			return
 		}
 	}
@@ -224,6 +242,55 @@ func getFile(c *gin.Context) {
 		contentType = "application/octet-stream"
 	}
 	c.Data(http.StatusOK, contentType, data)
+}
+
+func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
+	// 规范化并解析符号链接，防止通过大小写或符号链接绕过
+	fileNorm := normalizeAndResolve(fileAbsPath)
+
+	// 禁止访问配置文件 conf/conf.json
+	confPath := normalizeAndResolve(filepath.Join(util.ConfDir, "conf.json"))
+	if fileNorm == confPath {
+		ret.Code = http.StatusForbidden
+		ret.Msg = http.StatusText(http.StatusForbidden)
+		c.JSON(http.StatusAccepted, ret)
+		return true
+	}
+
+	// 禁止访问 data/snippets/conf.json
+	snippetPath := normalizeAndResolve(filepath.Join(util.DataDir, "snippets", "conf.json"))
+	if fileNorm == snippetPath {
+		ret.Code = http.StatusForbidden
+		ret.Msg = http.StatusText(http.StatusForbidden)
+		c.JSON(http.StatusAccepted, ret)
+		return true
+	}
+
+	// 禁止访问 data/templates 目录
+	templatesBase := normalizeAndResolve(filepath.Join(util.DataDir, "templates"))
+	if util.IsSubPath(templatesBase, fileNorm) {
+		ret.Code = http.StatusForbidden
+		ret.Msg = http.StatusText(http.StatusForbidden)
+		c.JSON(http.StatusAccepted, ret)
+		return true
+	}
+	return false
+}
+
+// normalizeAndResolve 将路径转为绝对、解析符号链接并清理；在需要时转为小写以实现不区分大小写比较
+func normalizeAndResolve(p string) string {
+	if abs, err := filepath.Abs(p); err == nil {
+		p = abs
+	}
+	if eval, err := filepath.EvalSymlinks(p); err == nil {
+		p = eval
+	}
+	p = filepath.Clean(p)
+	// 在 Windows 和 macOS 上文件系统通常为不区分大小写，使用小写统一比较
+	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+		p = strings.ToLower(p)
+	}
+	return p
 }
 
 func readDir(c *gin.Context) {
@@ -315,11 +382,11 @@ func renameFile(c *gin.Context) {
 	}
 
 	destPath := arg["newPath"].(string)
+	destPath = strings.TrimSpace(destPath)
 	destAbsPath, err := util.GetAbsPathInWorkspace(destPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
-		c.JSON(http.StatusAccepted, ret)
 		return
 	}
 	if filelock.IsExist(destAbsPath) {
@@ -381,8 +448,12 @@ func putFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	isDirStr := c.PostForm("isDir")
+	isDir, _ := strconv.ParseBool(isDirStr)
+
 	var err error
 	filePath := c.PostForm("path")
+	filePath = strings.TrimSpace(filePath)
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -390,14 +461,27 @@ func putFile(c *gin.Context) {
 		return
 	}
 
-	if !util.IsValidUploadFileName(filepath.Base(fileAbsPath)) { // Improve kernel API `/api/file/putFile` parameter validation https://github.com/siyuan-note/siyuan/issues/14658
-		ret.Code = http.StatusBadRequest
-		ret.Msg = "invalid file path, please check https://github.com/siyuan-note/siyuan/issues/14658 for more details"
-		return
+	fileExists := filelock.IsExist(fileAbsPath)
+	if !fileExists {
+		if !util.IsValidUploadFileName(filepath.Base(fileAbsPath)) { // Improve kernel API `/api/file/putFile` parameter validation https://github.com/siyuan-note/siyuan/issues/14658
+			ret.Code = http.StatusBadRequest
+			ret.Msg = "invalid file path, please check https://github.com/siyuan-note/siyuan/issues/14658 for more details"
+			return
+		}
+	} else {
+		info, statErr := os.Stat(fileAbsPath)
+		if statErr != nil {
+			logging.LogErrorf("stat file [%s] failed: %s", fileAbsPath, statErr)
+			ret.Code = http.StatusInternalServerError
+			ret.Msg = statErr.Error()
+			return
+		}
+		if info.IsDir() && !isDir {
+			ret.Code = http.StatusBadRequest
+			ret.Msg = "the path is a directory"
+			return
+		}
 	}
-
-	isDirStr := c.PostForm("isDir")
-	isDir, _ := strconv.ParseBool(isDirStr)
 
 	if isDir {
 		err = os.MkdirAll(fileAbsPath, 0755)

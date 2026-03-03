@@ -3,21 +3,20 @@ import * as path from "path";
 /// #endif
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {fetchPost} from "../../util/fetch";
-import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {newFileByName} from "../../util/newFile";
 import {App} from "../../index";
 import {Dialog} from "../../dialog";
 import {getAllModels} from "../../layout/getAll";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {getArticle, inputEvent, replace} from "../../search/util";
+import {getArticle, inputEvent, openSearchEditor, replace} from "../../search/util";
 import {useShell} from "../../util/pathName";
 import {assetInputEvent, renderPreview} from "../../search/assets";
 import {initSearchMenu} from "../../menus/search";
 import {writeText} from "../../protyle/util/compatibility";
-import {checkFold} from "../../util/noRelyPCFunction";
 import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
+import {Protyle} from "../../protyle";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
@@ -29,7 +28,7 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     }
     let element: HTMLElement;
     let dialog: Dialog;
-    let edit;
+    let edit: Protyle;
     let unRefEdit;
     let config: Config.IUILayoutTabSearchConfig;
     window.siyuan.dialogs.find((item) => {
@@ -98,20 +97,16 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (searchType !== "asset") {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.insertRight.custom, event)) {
-            const id = currentList.getAttribute("data-node-id");
-            checkFold(id, (zoomIn) => {
-                openFileById({
-                    app,
-                    id,
-                    position: "right",
-                    action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HL] :
-                        [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_HL],
-                    zoomIn,
-                    scrollPosition: "center"
-                });
-                if (dialog) {
-                    dialog.destroy({focus: "false"});
-                }
+            openSearchEditor({
+                protyle: edit.protyle,
+                rootId: currentList.getAttribute("data-root-id"),
+                id: currentList.getAttribute("data-node-id"),
+                cb: () => {
+                    if (dialog) {
+                        dialog.destroy({focus: "false"});
+                    }
+                },
+                openPosition: "right",
             });
             return true;
         }
@@ -222,19 +217,15 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
             if (targetId === "replaceInput") {
                 replace(element, config, edit, false);
             } else {
-                const id = currentList.getAttribute("data-node-id");
-                checkFold(id, (zoomIn) => {
-                    openFileById({
-                        app,
-                        id,
-                        action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL, Constants.CB_GET_HL] :
-                            [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_HL],
-                        zoomIn,
-                        scrollPosition: "center"
-                    });
-                    if (dialog) {
-                        dialog.destroy({focus: "false"});
-                    }
+                openSearchEditor({
+                    rootId: currentList.getAttribute("data-root-id"),
+                    protyle: edit.protyle,
+                    id: currentList.getAttribute("data-node-id"),
+                    cb: () => {
+                        if (dialog) {
+                            dialog.destroy({focus: "false"});
+                        }
+                    },
                 });
             }
         } else {

@@ -19,6 +19,7 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Editor struct {
+	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
 	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 块内脚本
 	FontSize                        int            `json:"fontSize"`                        // 字体大小
 	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
@@ -48,6 +49,7 @@ type Editor struct {
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
 	Spellcheck                      bool           `json:"spellcheck"`                      // 是否启用拼写检查
+	SpellcheckLanguages             []string       `json:"spellcheckLanguages"`             // 拼写检查语言
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
@@ -88,6 +90,8 @@ func NewEditor() *Editor {
 		DynamicLoadBlocks:               192,
 		Justify:                         false,
 		RTL:                             false,
+		Spellcheck:                      false,
+		SpellcheckLanguages:             []string{"en-US"},
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          -1,
 		BacklinkContainChildren:         true,

@@ -443,23 +443,42 @@ export const execByCommand = async (options: {
             if (!isFileFocus) {
                 const nodeElement = hasClosestBlock(range.startContainer);
                 if (protyle.title?.editElement.contains(range.startContainer) || !nodeElement || window.siyuan.menus.menu.element.getAttribute("data-name") === Constants.MENU_TITLE) {
-                    movePathTo((toPath, toNotebook) => {
-                        moveToPath([protyle.path], toNotebook[0], toPath[0]);
-                    }, [protyle.path], range);
+                    movePathTo({
+                        cb: (toPath, toNotebook) => {
+                            moveToPath([protyle.path], toNotebook[0], toPath[0]);
+                        },
+                        paths: [protyle.path],
+                        range,
+                        flashcard: false,
+                        rootIDs: [protyle.block.rootID]
+                    });
                 } else if (nodeElement && range && protyle.element.contains(range.startContainer)) {
                     let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                     if (selectElements.length === 0) {
                         selectElements = [nodeElement];
                     }
-                    movePathTo((toPath) => {
-                        hintMoveBlock(toPath[0], selectElements, protyle);
+                    movePathTo({
+                        cb: (toPath) => {
+                            hintMoveBlock(toPath[0], selectElements, protyle);
+                        },
+                        flashcard: false,
+                        rootIDs: [protyle.block.rootID]
                     });
                 }
             } else {
                 const paths = getTopPaths(fileLiElements);
-                movePathTo((toPath, toNotebook) => {
-                    moveToPath(paths, toNotebook[0], toPath[0]);
-                }, paths);
+                const rootIDs: string[] = [];
+                fileLiElements.forEach(item => {
+                    rootIDs.push(item.getAttribute("data-node-id"));
+                });
+                movePathTo({
+                    cb: (toPath, toNotebook) => {
+                        moveToPath(paths, toNotebook[0], toPath[0]);
+                    },
+                    paths,
+                    rootIDs,
+                    flashcard: false
+                });
             }
             break;
     }

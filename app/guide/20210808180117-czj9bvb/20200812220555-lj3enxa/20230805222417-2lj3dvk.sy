@@ -1,11 +1,12 @@
 {
 	"ID": "20230805222417-2lj3dvk",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f451",
 		"id": "20230805222417-2lj3dvk",
 		"title": "会员特权",
+		"type": "doc",
 		"updated": "20230817114518"
 	},
 	"Children": [

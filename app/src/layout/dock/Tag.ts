@@ -50,7 +50,7 @@ export class Tag extends Model {
         });
 
         this.element = tab.panelElement;
-        this.element.classList.add("fn__flex-column", "file-tree", "sy__tag");
+        this.element.classList.add("fn__flex-column", "file-tree", "sy__tag", "dockPanel");
 
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo">

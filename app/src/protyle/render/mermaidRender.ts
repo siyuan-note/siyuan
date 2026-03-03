@@ -49,23 +49,33 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 config.theme = "dark";
             }
             window.mermaid.initialize(config);
-            if (mermaidElements[0].firstElementChild.clientWidth === 0) {
+            const hideElements: Element[] = [];
+            const normalElements: Element[] = [];
+            mermaidElements.forEach(item => {
+                if (item.firstElementChild.clientWidth === 0) {
+                    hideElements.push(item);
+                } else {
+                    normalElements.push(item);
+                }
+            });
+            if (hideElements.length > 0) {
                 const observer = new MutationObserver(() => {
-                    initMermaid(mermaidElements);
+                    initMermaid(hideElements);
                     observer.disconnect();
                 });
-                const hideElement = hasClosestByAttribute(mermaidElements[0], "fold", "1");
-                if (hideElement) {
-                    observer.observe(hideElement, {attributeFilter: ["fold"]});
-                } else {
-                    const cardElement = hasClosestByClassName(mermaidElements[0], "card__block", true);
-                    if (cardElement) {
-                        observer.observe(cardElement, {attributeFilter: ["class"]});
+                hideElements.forEach(item => {
+                    const hideElement = hasClosestByAttribute(item, "fold", "1");
+                    if (hideElement) {
+                        observer.observe(hideElement, {attributeFilter: ["fold"]});
+                    } else {
+                        const cardElement = hasClosestByClassName(item, "card__block", true);
+                        if (cardElement) {
+                            observer.observe(cardElement, {attributeFilter: ["class"]});
+                        }
                     }
-                }
-            } else {
-                initMermaid(mermaidElements);
+                });
             }
+            initMermaid(normalElements);
         });
     });
 };

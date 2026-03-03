@@ -3,12 +3,14 @@ import {
     getNextBlock,
     getPreviousBlock,
     hasPreviousSibling,
+    isContainerBlock,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
+import {Constants} from "../../constants";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -248,7 +250,29 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
             } else if (range.startContainer.childNodes.length > 0) {
                 // in table or code block
                 const cloneRange = range.cloneRange();
-                range.selectNode(range.startContainer.childNodes[Math.max(0, range.startOffset - 1)]);
+                if (range.startOffset === 0) {
+                    let firstNode = range.startContainer.childNodes[range.startOffset] || range.startContainer.firstChild;
+                    while (firstNode) {
+                        if (firstNode.textContent === "" && firstNode.nodeType === 3) {
+                            firstNode = firstNode.previousSibling;
+                        } else {
+                            break;
+                        }
+                    }
+                    range.selectNodeContents(firstNode);
+                    range.collapse(true);
+                } else {
+                    let lastNode = range.startContainer.childNodes[range.startOffset] || range.startContainer.lastChild;
+                    while (lastNode) {
+                        if (lastNode.textContent === "" && lastNode.nodeType === 3) {
+                            lastNode = lastNode.previousSibling;
+                        } else {
+                            break;
+                        }
+                    }
+                    range.selectNodeContents(lastNode);
+                    range.collapse(false);
+                }
                 cursorRect = range.getClientRects()[0];
                 range.setEnd(cloneRange.endContainer, cloneRange.endOffset);
                 range.setStart(cloneRange.startContainer, cloneRange.startOffset);
@@ -544,8 +568,13 @@ export const focusByWbr = (element: Element, range: Range) => {
             range.setStart(wbrElement.previousSibling, wbrElement.previousSibling.textContent.length);
         } else if (wbrElement.nextSibling) {
             if (wbrElement.nextSibling.nodeType === 3) {
-                // <wbr>text
-                range.setStart(wbrElement.nextSibling, 0);
+                if (wbrElement.nextSibling.textContent === Constants.ZWSP) {
+                    // <wbr>零宽空格text
+                    range.setStart(wbrElement.nextSibling, 1);
+                } else {
+                    // <wbr>text
+                    range.setStart(wbrElement.nextSibling, 0);
+                }
             } else {
                 // <wbr><span>a</span>
                 range.setStartAfter(wbrElement);
@@ -575,6 +604,7 @@ export const focusByWbr = (element: Element, range: Range) => {
     range.collapse(true);
     wbrElement.remove();
     focusByRange(range);
+    return range;
 };
 
 export const focusByRange = (range: Range) => {
@@ -665,6 +695,9 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         });
     }
     if (cursorElement) {
+        if (cursorElement.getAttribute("contenteditable") === "false") {
+            return false;
+        }
         if (cursorElement.tagName === "TABLE") {
             if (toStart) {
                 cursorElement = cursorElement.querySelector("th, td");
@@ -716,7 +749,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
         parentElement.focus();
     } else {
         // li 下面为 hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等时递归处理
-        if (element.classList.contains("li")) {
+        if (isContainerBlock(element)) {
             return focusBlock(element.querySelector("[data-node-id]"), parentElement, toStart);
         }
     }

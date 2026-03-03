@@ -180,12 +180,6 @@ func setLocalStorage(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-
-	app := arg["app"].(string)
-	evt := util.NewCmdResult("setLocalStorage", 0, util.PushModeBroadcastMainExcludeSelfApp)
-	evt.AppId = app
-	evt.Data = val
-	util.PushEvent(evt)
 }
 
 func getLocalStorage(c *gin.Context) {
@@ -265,6 +259,10 @@ func updateRecentDocViewTime(c *gin.Context) {
 		return
 	}
 
+	if nil == arg["rootID"] {
+		return
+	}
+
 	rootID := arg["rootID"].(string)
 	err := model.UpdateRecentDocViewTime(rootID)
 	if err != nil {
@@ -280,6 +278,10 @@ func updateRecentDocOpenTime(c *gin.Context) {
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		return
+	}
+
+	if nil == arg["rootID"] {
 		return
 	}
 
@@ -301,12 +303,35 @@ func updateRecentDocCloseTime(c *gin.Context) {
 		return
 	}
 
-	if nil == arg["rootID"] {
+	rootID, ok := arg["rootID"].(string)
+	if !ok || rootID == "" {
 		return
 	}
 
-	rootID := arg["rootID"].(string)
 	err := model.UpdateRecentDocCloseTime(rootID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func batchUpdateRecentDocCloseTime(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootIDsArg := arg["rootIDs"].([]interface{})
+	var rootIDs []string
+	for _, id := range rootIDsArg {
+		rootIDs = append(rootIDs, id.(string))
+	}
+
+	err := model.BatchUpdateRecentDocCloseTime(rootIDs)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

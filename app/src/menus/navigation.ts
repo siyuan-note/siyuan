@@ -4,7 +4,7 @@ import {FileFilter, ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, getTopPaths, useShell, pathPosix} from "../util/pathName";
+import {getDisplayName, getNotebookName, getTopPaths, pathPosix, useShell} from "../util/pathName";
 import {hideMessage, showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -158,6 +158,19 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         type: "submenu",
         icon: "iconUpload",
         submenu: [{
+            id: "exportSiYuanZip",
+            label: "SiYuan .sy.zip",
+            icon: "iconSiYuan",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportSYs", {
+                    ids: blockIDs,
+                }, response => {
+                    hideMessage(msgId);
+                    openByMobile(response.data.zip);
+                });
+            }
+        }, {
             id: "exportMarkdown",
             label: "Markdown .zip",
             icon: "iconMarkdown",

@@ -1,10 +1,11 @@
 {
 	"ID": "20221016213308-uz5af79",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20221016213308-uz5af79",
 		"title": "通过标题列表概述",
+		"type": "doc",
 		"updated": "20221016213608"
 	},
 	"Children": [

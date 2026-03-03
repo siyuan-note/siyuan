@@ -1,11 +1,12 @@
 {
 	"ID": "20230805231816-h1z9mpc",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"icon": "1f387",
 		"id": "20230805231816-h1z9mpc",
 		"title": "Function Features",
+		"type": "doc",
 		"updated": "20230903112409"
 	},
 	"Children": [

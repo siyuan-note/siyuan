@@ -84,15 +84,27 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			err = openErr
 			return
 		}
+
 		hash, hashErr := util.GetEtagByHandle(f, fi.Size())
 		if nil != hashErr {
 			f.Close()
 			return
 		}
 
-		if existAssetPath := GetAssetPathByHash(hash); "" != existAssetPath {
-			// 已经存在同样数据的资源文件的话不重复保存
-			succMap[baseName] = existAssetPath
+		if 1 > fi.Size() {
+			hash = "random_1_" + gulu.Rand.String(12)
+		}
+
+		existAssetPath := GetAssetPathByHash(hash)
+		if "" != existAssetPath {
+			originalName := util.RemoveID(filepath.Base(existAssetPath))
+			if strings.ToLower(fName) != strings.ToLower(originalName) {
+				hash = "random_2_" + gulu.Rand.String(12)
+			}
+		}
+
+		if "" != existAssetPath && !strings.HasPrefix(hash, "random_") {
+			succMap[baseName] = strings.TrimPrefix(existAssetPath, "/")
 		} else {
 			fName = util.AssetName(fName, ast.NewNodeID())
 			writePath := filepath.Join(assetsDirPath, fName)
@@ -200,9 +212,20 @@ func Upload(c *gin.Context) {
 			break
 		}
 
-		if existAssetPath := GetAssetPathByHash(hash); "" != existAssetPath {
-			// 已经存在同样数据的资源文件的话不重复保存
-			succMap[baseName] = existAssetPath
+		if 1 > file.Size {
+			hash = "random_1_" + gulu.Rand.String(12)
+		}
+
+		existAssetPath := GetAssetPathByHash(hash)
+		if "" != existAssetPath {
+			originalName := util.RemoveID(filepath.Base(existAssetPath))
+			if strings.ToLower(fName) != strings.ToLower(originalName) {
+				hash = "random_2_" + gulu.Rand.String(12)
+			}
+		}
+
+		if "" != existAssetPath && !strings.HasPrefix(hash, "random_") {
+			succMap[baseName] = strings.TrimPrefix(existAssetPath, "/")
 		} else {
 			if skipIfDuplicated {
 				// 复制 PDF 矩形注解时不再重复插入图片 No longer upload image repeatedly when copying PDF rectangle annotation https://github.com/siyuan-note/siyuan/issues/10666

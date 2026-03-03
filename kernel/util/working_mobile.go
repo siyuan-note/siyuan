@@ -117,6 +117,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 
 	var workspacePaths []string
 	if !gulu.File.IsExist(workspaceConf) {
+		logging.LogInfof("workspace conf [%s] not exist, use the default workspace [%s]", workspaceConf, defaultWorkspaceDir)
 		WorkspaceDir = defaultWorkspaceDir
 		if !gulu.File.IsDir(WorkspaceDir) {
 			logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", WorkspaceDir, defaultWorkspaceDir)
@@ -125,6 +126,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		workspacePaths = append(workspacePaths, WorkspaceDir)
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
+
 		if 0 < len(workspacePaths) {
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
 			if !gulu.File.IsDir(WorkspaceDir) {

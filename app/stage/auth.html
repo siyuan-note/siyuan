@@ -2,7 +2,7 @@
 <html style="height: 100%">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <title>{{.l6}}</title>
     <style>
         body {
@@ -21,6 +21,7 @@
             --b3-theme-background: #fff;
             --b3-theme-on-background: #202124;
             --b3-theme-on-primary: #fff;
+            background-color: var(--b3-theme-background);
         }
 
         .dark {
@@ -33,7 +34,6 @@
             --b3-theme-background: #1e1e1e;
             --b3-theme-on-background: #c9d1d9;
             --b3-theme-on-primary: #fff;
-            background-color: var(--b3-theme-background);
         }
 
         .b3-button {
@@ -423,11 +423,22 @@
             const {ipcRenderer} = require('electron')
             ipcRenderer.send('siyuan-quit', window.location.port)
         } catch (e) {
-            if ((window.webkit && window.webkit.messageHandlers) || window.JSAndroid || window.JSHarmony) {
-                window.location.href = 'siyuan://api/system/exit'
-            } else {
-                window.location.reload()
+            if (window.JSAndroid) {
+                window.JSAndroid.exit();
+                return;
             }
+
+            if (window.webkit && window.webkit.messageHandlers) {
+                window.webkit.messageHandlers.exit.postMessage("");
+                return;
+            }
+
+            if (window.JSHarmony) {
+                window.JSHarmony.exit();
+                return;
+            }
+
+            window.location.reload()
         }
     }
 
@@ -467,7 +478,7 @@
         }
     }
 
-    const showMessage = (msg)=> {
+    const showMessage = (msg) => {
         document.querySelector('#message').classList.add('b3-snackbar--show')
         document.querySelector('#message').firstElementChild.innerHTML = msg
         setTimeout(() => {
@@ -480,7 +491,7 @@
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
         const rememberMeElement = document.getElementById('rememberMe')
-        let code =  inputElement.value.trim();
+        let code = inputElement.value.trim();
         if ("" === code) {
             showMessage({{.l9}})
             inputElement.value = ''
@@ -563,6 +574,17 @@
         new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/ws?app=siyuan&id=auth')
     }
     init();
+    window.addEventListener("click", (event) => {
+        if (event.target.tagName === "INPUT" &&
+            ["email", "number", "password", "search", "tel", "text", "url", "", null].includes(event.target.getAttribute("type")) &&
+            event.target.getAttribute("readonly") !== "readonly") {
+            if (window.JSAndroid && window.JSAndroid.showKeyboard) {
+                window.JSAndroid.showKeyboard();
+            } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
+                window.JSHarmony.showKeyboard();
+            }
+        }
+    })
 </script>
 </body>
 </html>

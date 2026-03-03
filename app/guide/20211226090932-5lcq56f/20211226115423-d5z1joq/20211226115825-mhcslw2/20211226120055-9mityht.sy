@@ -1,10 +1,11 @@
 {
 	"ID": "20211226120055-9mityht",
-	"Spec": "1",
+	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226120055-9mityht",
 		"title": "什麼是內容塊",
+		"type": "doc",
 		"updated": "20230630091613"
 	},
 	"Children": [

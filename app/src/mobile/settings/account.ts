@@ -130,7 +130,7 @@ ${renewHTML}<div class="fn__hr--b"></div>`;
     </div>
 </div></div>`,
         bindEvent(modelMainElement: HTMLElement) {
-            modelMainElement.addEventListener("click", (event) => {
+            modelMainElement.firstElementChild.addEventListener("click", (event: MouseEvent) => {
                 let target = event.target as HTMLElement;
                 if (typeof event.detail !== "number") {
                     target = event.detail;

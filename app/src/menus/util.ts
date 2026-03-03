@@ -11,6 +11,7 @@ import {MenuItem} from "./Menu";
 import {App} from "../index";
 import {exportByMobile, isInAndroid, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
+import {showMessage} from "../dialog/message";
 
 export const exportAsset = (src: string) => {
     return {
@@ -27,8 +28,34 @@ export const exportAsset = (src: string) => {
                 properties: ["showOverwriteConfirmation"],
             });
             if (!result.canceled) {
-                fetchPost("/api/file/copyFile", {src, dest: result.filePath});
+                fetchPost("/api/file/copyFile", {src, dest: result.filePath}, (response) => {
+                    if (response.code === 0) {
+                        showMessage(window.siyuan.languages.exported);
+                    }
+                });
             }
+            /// #endif
+        }
+    };
+};
+
+// 复制资源文件到系统剪贴板，在文件资源管理器中可粘贴为文件（仅 Windows、macOS 桌面端支持）
+export const copyAsset = (src: string) => {
+    return {
+        id: "copyFile",
+        label: window.siyuan.languages.copyFile,
+        icon: "iconCopy",
+        click: () => {
+            /// #if !BROWSER
+            fetchPost("/api/clipboard/writeFilePath", {path: src}, (response) => {
+                if (response.code === 0) {
+                    showMessage(window.siyuan.languages.copied);
+                } else {
+                    showMessage(response.msg || "", response.data?.closeTimeout ?? 5000, "error");
+                }
+            });
+            /// #else
+            showMessage("Copy as file is only supported in the Windows and macOS desktop app");
             /// #endif
         }
     };

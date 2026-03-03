@@ -22,11 +22,8 @@ import (
 	"runtime"
 	"sort"
 	"strings"
-	"sync"
 
 	"github.com/88250/go-humanize"
-	ants "github.com/panjf2000/ants/v2"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -36,105 +33,71 @@ type Plugin struct {
 	Enabled bool `json:"enabled"`
 }
 
+// Plugins 返回集市插件列表
 func Plugins(frontend string) (plugins []*Plugin) {
 	plugins = []*Plugin{}
+	result := getStageAndBazaar("plugins")
 
-	isOnline := isBazzarOnline()
-	if !isOnline {
+	if !result.Online {
+		return
+	}
+	if result.StageErr != nil {
+		return
+	}
+	if 1 > len(result.BazaarIndex) {
 		return
 	}
 
-	stageIndex, err := getStageIndex("plugins")
-	if err != nil {
-		return
+	for _, repo := range result.StageIndex.Repos {
+		if nil == repo.Package {
+			continue
+		}
+		plugin := buildPluginFromStageRepo(repo, frontend, result.BazaarIndex)
+		if nil != plugin {
+			plugins = append(plugins, plugin)
+		}
 	}
-	bazaarIndex := getBazaarIndex()
-	if 1 > len(bazaarIndex) {
-		return
-	}
-
-	requestFailed := false
-	waitGroup := &sync.WaitGroup{}
-	lock := &sync.Mutex{}
-	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
-		defer waitGroup.Done()
-
-		repo := arg.(*StageRepo)
-		repoURL := repo.URL
-
-		if pkg, found := packageCache.Get(repoURL); found {
-			lock.Lock()
-			plugins = append(plugins, pkg.(*Plugin))
-			lock.Unlock()
-			return
-		}
-
-		if requestFailed {
-			return
-		}
-
-		plugin := &Plugin{}
-		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/plugin.json"
-		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(plugin).Get(innerU)
-		if nil != innerErr {
-			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
-			requestFailed = true
-			return
-		}
-		if 200 != innerResp.StatusCode {
-			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
-			requestFailed = true
-			return
-		}
-
-		if disallowDisplayBazaarPackage(plugin.Package) {
-			return
-		}
-
-		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
-
-		plugin.URL = strings.TrimSuffix(plugin.URL, "/")
-		repoURLHash := strings.Split(repoURL, "@")
-		plugin.RepoURL = "https://github.com/" + repoURLHash[0]
-		plugin.RepoHash = repoURLHash[1]
-		plugin.PreviewURL = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageslim"
-		plugin.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repoURL + "/preview.png?imageView2/2/w/436/h/232"
-		plugin.IconURL = util.BazaarOSSServer + "/package/" + repoURL + "/icon.png"
-		plugin.Funding = repo.Package.Funding
-		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
-		plugin.PreferredName = GetPreferredName(plugin.Package)
-		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		plugin.Updated = repo.Updated
-		plugin.Stars = repo.Stars
-		plugin.OpenIssues = repo.OpenIssues
-		plugin.Size = repo.Size
-		plugin.HSize = humanize.BytesCustomCeil(uint64(plugin.Size), 2)
-		plugin.InstallSize = repo.InstallSize
-		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
-		packageInstallSizeCache.SetDefault(plugin.RepoURL, plugin.InstallSize)
-		plugin.HUpdated = formatUpdated(plugin.Updated)
-		pkg := bazaarIndex[strings.Split(repoURL, "@")[0]]
-		if nil != pkg {
-			plugin.Downloads = pkg.Downloads
-		}
-		lock.Lock()
-		plugins = append(plugins, plugin)
-		lock.Unlock()
-
-		packageCache.SetDefault(repoURL, plugin)
-	})
-	for _, repo := range stageIndex.Repos {
-		waitGroup.Add(1)
-		p.Invoke(repo)
-	}
-	waitGroup.Wait()
-	p.Release()
 
 	sort.Slice(plugins, func(i, j int) bool { return plugins[i].Updated > plugins[j].Updated })
 	return
 }
 
-func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish bool) {
+// buildPluginFromStageRepo 使用 stage 内嵌的 package 构建 *Plugin，不发起 HTTP 请求。
+func buildPluginFromStageRepo(repo *StageRepo, frontend string, bazaarIndex map[string]*bazaarPackage) *Plugin {
+	pkg := *repo.Package
+	pkg.URL = strings.TrimSuffix(pkg.URL, "/")
+	repoURLHash := strings.Split(repo.URL, "@")
+	if 2 != len(repoURLHash) {
+		return nil
+	}
+	pkg.RepoURL = "https://github.com/" + repoURLHash[0]
+	pkg.RepoHash = repoURLHash[1]
+	pkg.PreviewURL = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageslim"
+	pkg.PreviewURLThumb = util.BazaarOSSServer + "/package/" + repo.URL + "/preview.png?imageView2/2/w/436/h/232"
+	pkg.IconURL = util.BazaarOSSServer + "/package/" + repo.URL + "/icon.png"
+	pkg.Updated = repo.Updated
+	pkg.Stars = repo.Stars
+	pkg.OpenIssues = repo.OpenIssues
+	pkg.Size = repo.Size
+	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
+	pkg.InstallSize = repo.InstallSize
+	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
+	pkg.HUpdated = formatUpdated(pkg.Updated)
+	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+	pkg.PreferredName = GetPreferredName(&pkg)
+	pkg.PreferredDesc = getPreferredDesc(pkg.Description)
+	pkg.DisallowInstall = disallowInstallBazaarPackage(&pkg)
+	pkg.DisallowUpdate = disallowInstallBazaarPackage(&pkg)
+	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
+	pkg.Incompatible = isIncompatiblePlugin(&Plugin{Package: &pkg}, frontend)
+	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
+		pkg.Downloads = bp.Downloads
+	}
+	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
+	return &Plugin{Package: &pkg}
+}
+
+func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish, disallowInstall bool) {
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
 	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
 		return
@@ -164,11 +127,12 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		displayName = GetPreferredName(plugin.Package)
 		incompatible = isIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
+		disallowInstall = disallowInstallBazaarPackage(plugin.Package)
 	}
 	return
 }
 
-func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
+func InstalledPlugins(frontend string) (ret []*Plugin) {
 	ret = []*Plugin{}
 
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
@@ -182,10 +146,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 		return
 	}
 
-	var bazaarPlugins []*Plugin
-	if checkUpdate {
-		bazaarPlugins = Plugins(frontend)
-	}
+	bazaarPlugins := Plugins(frontend)
 
 	for _, pluginDir := range pluginDirs {
 		if !util.IsDirRegularOrSymlink(pluginDir) {
@@ -198,18 +159,25 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			continue
 		}
 
+		plugin.RepoURL = plugin.URL
+		plugin.DisallowInstall = disallowInstallBazaarPackage(plugin.Package)
+		if bazaarPkg := getBazaarPlugin(plugin.Name, bazaarPlugins); nil != bazaarPkg {
+			plugin.DisallowUpdate = disallowInstallBazaarPackage(bazaarPkg.Package)
+			plugin.UpdateRequiredMinAppVer = bazaarPkg.MinAppVersion
+			plugin.RepoURL = bazaarPkg.RepoURL
+		}
+
 		installPath := filepath.Join(util.DataDir, "plugins", dirName)
 		plugin.Installed = true
-		plugin.RepoURL = plugin.URL
 		plugin.PreviewURL = "/plugins/" + dirName + "/preview.png"
 		plugin.PreviewURLThumb = "/plugins/" + dirName + "/preview.png"
 		plugin.IconURL = "/plugins/" + dirName + "/icon.png"
 		plugin.PreferredFunding = getPreferredFunding(plugin.Funding)
 		plugin.PreferredName = GetPreferredName(plugin.Package)
 		plugin.PreferredDesc = getPreferredDesc(plugin.Description)
-		info, statErr := os.Stat(filepath.Join(installPath, "README.md"))
+		info, statErr := os.Stat(filepath.Join(installPath, "plugin.json"))
 		if nil != statErr {
-			logging.LogWarnf("stat install theme README.md failed: %s", statErr)
+			logging.LogWarnf("stat install plugin.json failed: %s", statErr)
 			continue
 		}
 		plugin.HInstallDate = info.ModTime().Format("2006-01-02")
@@ -221,19 +189,21 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			packageInstallSizeCache.SetDefault(plugin.RepoURL, is)
 		}
 		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
-		readmeFilename := getPreferredReadme(plugin.Readme)
-		readme, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-		if nil != readErr {
-			logging.LogWarnf("read installed README.md failed: %s", readErr)
-			continue
-		}
-
-		plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
+		plugin.PreferredReadme = loadInstalledReadme(installPath, "/plugins/"+dirName+"/", plugin.Readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)
 	}
 	return
+}
+
+func getBazaarPlugin(name string, plugins []*Plugin) *Plugin {
+	for _, p := range plugins {
+		if p.Name == name {
+			return p
+		}
+	}
+	return nil
 }
 
 func InstallPlugin(repoURL, repoHash, installPath string, systemID string) error {
@@ -254,9 +224,10 @@ func isIncompatiblePlugin(plugin *Plugin, currentFrontend string) bool {
 		return false
 	}
 
+	currentBackend := getCurrentBackend()
 	backendOk := false
 	for _, backend := range plugin.Backends {
-		if backend == getCurrentBackend() || "all" == backend {
+		if backend == currentBackend || "all" == backend {
 			backendOk = true
 			break
 		}

@@ -21,6 +21,10 @@
     font-size: 16px;
     line-height: 40px;
 
+    &:not(.b3-list-item--focus):hover {
+      background-color: transparent !important;
+    }
+
     &__icon {
       font-size: 18px;
       line-height: 32px;
@@ -251,8 +255,8 @@
       justify-content: center;
       overflow: auto;
       flex: 1;
-      margin-top: 8px;
-      padding: 0 8px;
+      padding: 8px;
+      background-color: var(--b3-theme-background);
     }
   }
 }

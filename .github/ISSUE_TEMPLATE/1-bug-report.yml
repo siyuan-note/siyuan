@@ -24,7 +24,7 @@ body:
     attributes:
       label: Could the issue be due to extensions?
       description: |
-        Be aware that themes, code snippets, widgets, or other extensions may cause problems.
+        Be aware that code snippets, plugins, themes, widgets, or other extensions may cause problems.
       options:
         - label: |
             I've ruled out the possibility that the extension is causing the problem.
@@ -56,7 +56,7 @@ body:
       value: |
         - Version: 
         - Operating System: 
-        - Browser (if used):
+        - Browser (if used): 
       render: markdown
     validations:
       required: true

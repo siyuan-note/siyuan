@@ -532,7 +532,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			name, _ = av.GetAttributeViewName(parent.AttributeViewID)
 		} else {
 			if "" == name {
-				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
+				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
 					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 				} else {
 					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes, true), maxNameLen)
@@ -544,7 +544,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 
 		add := true
-		if ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
+		if ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type || ast.NodeCallout == parent.Type {
 			add = false
 			if parent == node {
 				// https://github.com/siyuan-note/siyuan/issues/13141#issuecomment-2476789553
@@ -650,7 +650,7 @@ func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[stri
 			continue
 		}
 
-		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
+		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type || "NodeCallout" == parent.Type {
 			refBlock := parentRefParagraphs[parent.ID]
 			if nil == refBlock {
 				continue

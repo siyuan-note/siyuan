@@ -94,7 +94,7 @@ export class Outline extends Model {
         this.isPreview = options.isPreview;
         this.blockId = options.blockId;
         this.type = options.type;
-        options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__outline");
+        options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__outline", "dockPanel");
         options.tab.panelElement.innerHTML = `<div class="block__icons fn__hidescrollbar">
     <div class="block__logo">
         <svg class="block__logoicon"><use xlink:href="#iconAlignCenter"></use></svg>${window.siyuan.languages.outline}
@@ -332,7 +332,9 @@ export class Outline extends Model {
             preview: this.isPreview
         }, response => {
             this.update(response);
-            this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
+            if (this.blockId) {
+                this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
+            }
         });
     }
 
@@ -615,6 +617,9 @@ export class Outline extends Model {
             item.classList.remove("b3-list-item--focus");
         });
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
+        if (!currentElement) {
+            return;
+        }
         if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {

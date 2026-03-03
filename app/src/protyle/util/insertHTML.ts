@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
-import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getContenteditableElement, getParentBlock} from "../wysiwyg/getBlock";
 import {
     fixTableRange,
     focusBlock,
@@ -188,7 +188,8 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                             break;
                         }
                         const cellValue = textJSON[i][j];
-                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, html, true);
+                        const operations = await updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns,
+                            cellElement.getAttribute("data-dtype") === "mAsset" ? (tempElement.content.children[i * (j + 1) + j]?.outerHTML || "") : html, true);
                         if (operations.doOperations.length > 0) {
                             doOperations.push(...operations.doOperations);
                             undoOperations.push(...operations.undoOperations);
@@ -293,9 +294,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
 
     if (blockElement.classList.contains("av")) {
-        range.deleteContents();
-        processAV(range, html, protyle, blockElement as HTMLElement);
-        return;
+        const avTitleElement = hasClosestByClassName(range.startContainer, "av__title");
+        if (!avTitleElement || (avTitleElement && !isBlock)) {
+            range.deleteContents();
+            processAV(range, html, protyle, blockElement as HTMLElement);
+            return;
+        }
     }
     if (blockElement.classList.contains("table") && blockElement.querySelector(".table__select").clientWidth > 0 &&
         processTable(range, html, protyle, blockElement)) {
@@ -349,7 +353,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 选中 ref**bbb** 后 alt+[
             range.deleteContents();
             // https://github.com/siyuan-note/siyuan/issues/14035
-            if (range.startContainer.nodeType !== 3 && range.startContainer.textContent === "") {
+            if (range.startContainer.nodeType !== 3 && (range.startContainer as Element).tagName === "SPAN" &&
+                range.startContainer.textContent === "") {
                 // ref 选中处理 https://ld246.com/article/1629214377537
                 (range.startContainer as HTMLElement).remove();
             }
@@ -545,7 +550,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             data: oldHTML,
             id,
             previousID: blockElement.previousElementSibling ? blockElement.previousElementSibling.getAttribute("data-node-id") : "",
-            parentID: blockElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
         });
         blockElement.remove();
     }
@@ -553,24 +558,33 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         // https://github.com/siyuan-note/siyuan/issues/5591
         focusBlock(lastElement, undefined, false);
     }
-    const wbrElement = protyle.wysiwyg.element.querySelector("wbr");
-    if (wbrElement) {
-        wbrElement.remove();
-    }
-    let foldData;
-    if (blockElement.getAttribute("data-type") === "NodeHeading" &&
-        blockElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, blockElement, true, false, false, true);
-        doOperation.reverse();
-        foldData.doOperations[0].context = {
-            focusId: lastElement?.getAttribute("data-node-id"),
-        };
-        doOperation.push(...foldData.doOperations);
-        undoOperation.push(...foldData.undoOperations);
-    }
-    transaction(protyle, doOperation, undoOperation);
+    protyle.wysiwyg.element.querySelectorAll("wbr").forEach(item => {
+        item.remove();
+    });
     // 复制容器块中包含折叠标题块
     protyle.wysiwyg.element.querySelectorAll("[parent-heading]").forEach(item => {
         item.remove();
     });
+    let foldData;
+    if (blockElement.getAttribute("data-type") === "NodeHeading" &&
+        blockElement.getAttribute("fold") === "1" && !insertBefore) {
+        fetchPost("/api/block/getHeadingChildrenIDs", {id: blockElement.getAttribute("data-node-id")}, (response) => {
+            const childrenIDs: string[] = response.data;
+            const previousId = (childrenIDs && childrenIDs.length > 0) ? childrenIDs[childrenIDs.length - 1] : blockElement.getAttribute("data-node-id");
+            foldData = setFold(protyle, blockElement, true, false, false, true);
+            foldData.doOperations[0].context = {
+                focusId: lastElement?.getAttribute("data-node-id"),
+            };
+            doOperation.forEach(item => {
+                if (item.action === "insert") {
+                    item.previousID = previousId;
+                }
+            });
+            doOperation.splice(0, 0, ...foldData.doOperations);
+            undoOperation.push(...foldData.undoOperations);
+            transaction(protyle, doOperation, undoOperation);
+        });
+        return;
+    }
+    transaction(protyle, doOperation, undoOperation);
 };

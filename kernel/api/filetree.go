@@ -1034,8 +1034,16 @@ func searchDocs(c *gin.Context) {
 		flashcard = arg["flashcard"].(bool)
 	}
 
+	var excludeIDs []string
+	if arg["excludeIDs"] != nil {
+		excludeIDsArg := arg["excludeIDs"].([]interface{})
+		for _, excludeID := range excludeIDsArg {
+			excludeIDs = append(excludeIDs, excludeID.(string))
+		}
+	}
+
 	k := arg["k"].(string)
-	ret.Data = model.SearchDocsByKeyword(k, flashcard)
+	ret.Data = model.SearchDocs(k, flashcard, excludeIDs)
 }
 
 func listDocsByPath(c *gin.Context) {
@@ -1348,7 +1356,7 @@ func authFilePublishAccess(c *gin.Context) {
 			if item.Password == password {
 				model.SetPublishAuthCookie(c, ID, password)
 			} else {
-				ret.Msg = model.Conf.Language(277)
+				ret.Msg = model.Conf.Language(285)
 			}
 			break
 		}

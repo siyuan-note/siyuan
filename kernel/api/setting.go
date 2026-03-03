@@ -79,7 +79,7 @@ func setConfSnippet(c *gin.Context) {
 	model.Conf.Save()
 
 	ret.Data = snippet
-	util.BroadcastByType("main", "setSnippet", 0, "", snippet)
+	model.PushReloadSnippet(snippet)
 }
 
 func addVirtualBlockRefExclude(c *gin.Context) {
@@ -326,6 +326,7 @@ func setEditor(c *gin.Context) {
 	model.Conf.Save()
 
 	if oldGenerateHistoryInterval != model.Conf.Editor.GenerateHistoryInterval {
+		model.GenerateFileHistory()
 		model.ChangeHistoryTick(editor.GenerateHistoryInterval)
 	}
 
@@ -422,6 +423,14 @@ func setFiletree(c *gin.Context) {
 	if 32 < fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 32
 	}
+
+	if conf.MinFileTreeRecentDocsListCount > fileTree.RecentDocsMaxListCount {
+		fileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
+	}
+	if conf.MaxFileTreeRecentDocsListCount < fileTree.RecentDocsMaxListCount {
+		fileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
+	}
+
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
 

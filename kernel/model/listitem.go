@@ -128,7 +128,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (
 
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	newTree.Root.Spec = "1"
+	newTree.Root.Spec = treenode.CurrentSpec
 	if "" != previousPath {
 		box.addSort(previousPath, newTree.ID)
 	} else {

@@ -35,10 +35,20 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}, createIfNotExist bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
+		if !createIfNotExist {
+			err = av.ErrAttributeViewNotFound
+			return
+		}
+
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
 		attrView = av.NewAttributeView(avID)
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -116,7 +126,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		av.SaveAttributeView(attrView)
 	}
 
-	// 如果存在分组的话渲染分组视图
+	// 渲染分组视图
+	if nil == view.Groups {
+		genAttrViewGroups(view, attrView)
+		av.SaveAttributeView(attrView)
+	}
 
 	for _, groupView := range view.Groups {
 		groupView.Name = groupView.GetGroupValue()
@@ -490,6 +504,11 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	}
 
 	if nil == avFile {
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := repo.OpenFile(avFile)
@@ -498,7 +517,12 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 			return
 		}
 
-		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
+		attrView = av.NewAttributeView(avID)
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return
@@ -535,6 +559,11 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	}
 	if !gulu.File.IsExist(avJSONPath) {
 		logging.LogWarnf("attribute view [%s] not found in current data", avID)
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
 		attrView = av.NewAttributeView(avID)
 	} else {
 		data, readErr := os.ReadFile(avJSONPath)
@@ -543,7 +572,12 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 			return
 		}
 
-		attrView = &av.AttributeView{RenderedViewables: map[string]av.Viewable{}}
+		if !ast.IsNodeIDPattern(avID) {
+			err = ErrInvalidID
+			return
+		}
+
+		attrView = av.NewAttributeView(avID)
 		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return

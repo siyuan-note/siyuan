@@ -27,25 +27,28 @@ export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string)
 export const getIdZoomInByPath = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const PWAURL = searchParams.get("url");
-    let id = "";
-    let isZoomIn = false;
+    const data = {
+        id: "",
+        isZoomIn: false,
+    };
     if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
         // PWA 捕获 web+siyuan://blocks/20221031001313-rk7sd0e?focus=1
-        id = PWAURL.substring(20, 20 + 22);
-        isZoomIn = getSearch("focus", PWAURL) === "1";
+        data.id = PWAURL.substring(20, 20 + 22);
+        data.isZoomIn = getSearch("focus", PWAURL) === "1";
+        window.siyuan.editorIsFullscreen = getSearch("fullscreen", PWAURL) === "1";
     } else if (window.JSAndroid) {
         // PAD 通过思源协议打开
         const SYURL = window.JSAndroid.getBlockURL();
-        id = getIdFromSYProtocol(SYURL);
-        isZoomIn = getSearch("focus", SYURL) === "1";
+        data.id = getIdFromSYProtocol(SYURL);
+        data.isZoomIn = getSearch("focus", SYURL) === "1";
+        window.siyuan.editorIsFullscreen = getSearch("fullscreen", SYURL) === "1";
     } else {
         // 支持通过 URL 查询字符串参数 `id` 和 `focus` 跳转到 Web 端指定块 https://github.com/siyuan-note/siyuan/pull/7086
-        id = searchParams.get("id");
-        isZoomIn = searchParams.get("focus") === "1";
+        data.id = searchParams.get("id");
+        data.isZoomIn = searchParams.get("focus") === "1";
+        window.siyuan.editorIsFullscreen = searchParams.get("fullscreen") === "1";
     }
-    return {
-        id, isZoomIn
-    };
+    return data;
 };
 
 export const isSYProtocol = (url: string) => {
@@ -148,8 +151,14 @@ export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: stri
     });
 };
 
-export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
-                           paths?: string[], range?: Range, title?: string, flashcard = false) => {
+export const movePathTo = (options: {
+    cb: (toPath: string[], toNotebook: string[]) => void,
+    paths?: string[],
+    range?: Range,
+    title?: string,
+    flashcard: boolean
+    rootIDs?: string[],
+}) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
             item.destroy();
@@ -161,7 +170,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     }
     const dialog = new Dialog({
         title: `<div style="padding: 8px;">
-    ${title || window.siyuan.languages.move}
+    ${options.title || window.siyuan.languages.move}
     <div style="max-height: 16px;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>
 </div>`,
         content: `<div class="b3-form__icon" style="margin: 8px">
@@ -181,15 +190,15 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         width: isMobile() ? "92vw" : "50vw",
         height: isMobile() ? "80vh" : "70vh",
         destroyCallback() {
-            if (range) {
-                focusByRange(range);
+            if (options.range) {
+                focusByRange(options.range);
             }
         }
     });
     dialog.element.querySelector(".b3-dialog__header").setAttribute("style", "padding:0");
     dialog.element.setAttribute("data-key", Constants.DIALOG_MOVEPATHTO);
-    if (paths && paths.length > 0) {
-        fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
+    if (options.paths && options.paths.length > 0) {
+        fetchPost("/api/filetree/getHPathsByPaths", {paths: options.paths}, (response) => {
             dialog.element.querySelector(".b3-dialog__header .ft__smaller").innerHTML = escapeHtml(response.data.join(" "));
         });
     }
@@ -200,7 +209,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         notebooks.forEach((item) => {
             if (!item.closed) {
                 let countHTML = "";
-                if (flashcard) {
+                if (options.flashcard) {
                     countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${item.dueFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
@@ -217,7 +226,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }
         });
         searchTreeElement.innerHTML = html;
-    }, flashcard);
+    }, options.flashcard);
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
     inputElement.value = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k;
@@ -238,7 +247,8 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         searchListElement.scrollTo(0, 0);
         fetchPost("/api/filetree/searchDocs", {
             k: inputElement.value,
-            flashcard,
+            flashcard: options.flashcard,
+            excludeIDs: options.rootIDs,
         }, (data) => {
             let fileHTML = "";
             data.data.forEach((item: {
@@ -251,7 +261,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 flashcardCount: string
             }) => {
                 let countHTML = "";
-                if (flashcard) {
+                if (options.flashcard) {
                     countHTML = `<span class="fn__flex-1"></span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${item.dueFlashcardCount}</span>
@@ -383,7 +393,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         if (searchListElement.classList.contains("fn__none")) {
             if ((event.key === "ArrowRight" && !currentItemElement.querySelector(".b3-list-item__arrow--open") && !currentItemElement.querySelector(".b3-list-item__toggle").classList.contains("fn__hidden")) ||
                 (event.key === "ArrowLeft" && currentItemElement.querySelector(".b3-list-item__arrow--open"))) {
-                getLeaf(currentItemElement, flashcard);
+                getLeaf(currentItemElement, options.flashcard);
                 event.preventDefault();
                 return;
             }
@@ -516,7 +526,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 pathList.push(item.getAttribute("data-path"));
                 notebookIdList.push(item.getAttribute("data-box"));
             });
-            cb(pathList, notebookIdList);
+            options.cb(pathList, notebookIdList);
             dialog.destroy();
             event.preventDefault();
         }
@@ -525,7 +535,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
             if (target.classList.contains("b3-list-item__toggle")) {
-                getLeaf(target.parentElement, flashcard);
+                getLeaf(target.parentElement, options.flashcard);
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -546,7 +556,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                     pathList.push(item.getAttribute("data-path"));
                     notebookIdList.push(item.getAttribute("data-box"));
                 });
-                cb(pathList, notebookIdList);
+                options.cb(pathList, notebookIdList);
                 dialog.destroy();
                 event.preventDefault();
                 event.stopPropagation();
@@ -562,7 +572,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 if (currentItemElements.length === 0) {
                     return;
                 }
-                if (title === window.siyuan.languages.specifyPath && isOnlyMeta(event)) {
+                if (options.title === window.siyuan.languages.specifyPath && isOnlyMeta(event)) {
                     if (currentItemElements.length === 1 && currentItemElements[0] === target) {
                         // 至少需选中一个
                     } else {
@@ -573,7 +583,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                     target.classList.add("b3-list-item--focus");
                 }
                 if (target.getAttribute("data-path") === "/") {
-                    getLeaf(target, flashcard);
+                    getLeaf(target, options.flashcard);
                 }
                 event.preventDefault();
                 event.stopPropagation();
@@ -601,7 +611,10 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         liElement.nextElementSibling.classList.remove("fn__none");
         return;
     }
-
+    if (liElement.getAttribute("data-loading") === "true") {
+        return;
+    }
+    liElement.setAttribute("data-loading", "true");
     const notebookId = liElement.getAttribute("data-box");
     fetchPost("/api/filetree/listDocsByPath", {
         notebook: notebookId,
@@ -609,6 +622,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         flashcard,
         app: Constants.SIYUAN_APPID,
     }, response => {
+        liElement.removeAttribute("data-loading");
         if (response.data.files.length === 0) {
             showMessage(window.siyuan.languages.emptyContent);
             return;
@@ -700,4 +714,24 @@ export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = fa
             cb(response.data.notebooks);
         }
     });
+};
+
+/**
+ * 规范化并校验相对路径：允许子目录，但禁止通过 ".." 穿越到根外。
+ * 用于插件存储，确保路径不逃出指定根目录。
+ * @returns 规范化后的相对路径（使用 /），若路径非法则返回替换后的合法路径
+ */
+export const normalizeStoragePath = (storageName: string): string | null => {
+    const parts = storageName.replace(/\\/g, "/").split("/");
+    const resolved: string[] = [];
+    for (const part of parts) {
+        if (part === "..") {
+            if (resolved.length > 0) {
+                resolved.pop();
+            }
+        } else if (part && part !== ".") {
+            resolved.push(part);
+        }
+    }
+    return resolved.length > 0 ? resolved.join("/") : storageName.replace(/[\/\\]+/g, "");
 };

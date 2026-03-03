@@ -64,7 +64,7 @@ type AppConf struct {
 	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
 	Account        *conf.Account    `json:"account"`        // 帐号配置
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
-	LocalIPs       []string         `json:"localIPs"`       // 本地 IP 列表
+	ServerAddrs    []string         `json:"serverAddrs"`    // 本地服务器地址列表
 	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
 	System         *conf.System     `json:"system"`         // 系统配置
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
@@ -82,12 +82,18 @@ type AppConf struct {
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
 	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
+	CookieKey      string           `json:"cookieKey"`      // 用于加密 Cookie 的密钥
 
-	m *sync.Mutex
+	m        *sync.RWMutex // 配置数据锁
+	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
 }
 
 func NewAppConf() *AppConf {
-	return &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
+	return &AppConf{
+		LogLevel: "debug",
+		m:        &sync.RWMutex{},
+		userLock: &sync.RWMutex{},
+	}
 }
 
 func (conf *AppConf) GetUILayout() *conf.UILayout {
@@ -103,14 +109,14 @@ func (conf *AppConf) SetUILayout(uiLayout *conf.UILayout) {
 }
 
 func (conf *AppConf) GetUser() *conf.User {
-	conf.m.Lock()
-	defer conf.m.Unlock()
+	conf.userLock.RLock()
+	defer conf.userLock.RUnlock()
 	return conf.User
 }
 
 func (conf *AppConf) SetUser(user *conf.User) {
-	conf.m.Lock()
-	defer conf.m.Unlock()
+	conf.userLock.Lock()
+	defer conf.userLock.Unlock()
 	conf.User = user
 }
 
@@ -230,6 +236,13 @@ func InitConf() {
 		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
 	}
 
+	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
+	}
+	if conf.MaxFileTreeRecentDocsListCount < Conf.FileTree.RecentDocsMaxListCount {
+		Conf.FileTree.RecentDocsMaxListCount = conf.MaxFileTreeRecentDocsListCount
+	}
+
 	util.CurrentCloudRegion = Conf.CloudRegion
 
 	if nil == Conf.Tag {
@@ -240,8 +253,8 @@ func InitConf() {
 	if nil == Conf.Editor {
 		Conf.Editor = defaultEditor
 	}
-	// 新增字段的默认值
-	// 使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
+
+	// 新增字段的默认值，使用指针类型来区分字段不存在（nil）和用户设置为 0（非 nil）
 	if nil == Conf.Editor.BacklinkSort {
 		Conf.Editor.BacklinkSort = defaultEditor.BacklinkSort
 	}
@@ -281,6 +294,9 @@ func InitConf() {
 	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
+	}
+	if 1 > len(Conf.Editor.SpellcheckLanguages) {
+		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
 	}
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0
@@ -343,10 +359,6 @@ func InitConf() {
 		Conf.System.DisabledFeatures = []string{}
 	}
 
-	if nil == Conf.Snippet {
-		Conf.Snippet = conf.NewSnpt()
-	}
-
 	Conf.System.AppDir = util.WorkingDir
 	Conf.System.ConfDir = util.ConfDir
 	Conf.System.HomeDir = util.HomeDir
@@ -359,6 +371,24 @@ func InitConf() {
 	}
 	Conf.System.OS = runtime.GOOS
 	Conf.System.OSPlatform = util.GetOSPlatform()
+
+	docxTemplate := util.RemoveInvalid(Conf.Export.DocxTemplate)
+	if "" != docxTemplate {
+		params := util.RemoveInvalid(Conf.Export.PandocParams)
+		if gulu.File.IsExist(docxTemplate) && !strings.Contains(params, "--reference-doc") && !Conf.System.IsMicrosoftStore {
+			if !strings.HasPrefix(docxTemplate, "\"") {
+				docxTemplate = "\"" + docxTemplate + "\""
+			}
+			params += " --reference-doc " + docxTemplate
+			Conf.Export.PandocParams = strings.TrimSpace(params)
+		}
+		Conf.Export.DocxTemplate = ""
+		Conf.Save()
+	}
+
+	if nil == Conf.Snippet {
+		Conf.Snippet = conf.NewSnpt()
+	}
 
 	if "" != Conf.UserData {
 		Conf.SetUser(loadUserFromConf())
@@ -555,8 +585,6 @@ func InitConf() {
 	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
 	Conf.AccessAuthCode = util.RemoveInvalid(Conf.AccessAuthCode)
 
-	Conf.LocalIPs = util.GetLocalIPs()
-
 	if 1 == Conf.DataIndexState {
 		// 上次未正常完成数据索引
 		go func() {
@@ -571,6 +599,15 @@ func InitConf() {
 
 	Conf.DataIndexState = 0
 
+	if cookieKey := readCookieKey(); "" != cookieKey {
+		Conf.CookieKey = cookieKey
+	} else {
+		if "" == Conf.CookieKey {
+			Conf.CookieKey = gulu.Rand.String(16)
+		}
+		writeCookieKey(Conf.CookieKey)
+	}
+
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)
 
@@ -578,6 +615,33 @@ func InitConf() {
 
 	go util.InitPandoc()
 	go util.InitTesseract()
+}
+
+func readCookieKey() (cookieKey string) {
+	cookieKeyPath := filepath.Join(util.HomeDir, ".config", "siyuan", "cookie.key")
+	if !gulu.File.IsExist(cookieKeyPath) {
+		return
+	}
+
+	data, err := os.ReadFile(cookieKeyPath)
+	if err != nil {
+		logging.LogErrorf("read cookie key file [%s] failed: %s", cookieKeyPath, err)
+		return
+	}
+
+	cookieKey = string(bytes.TrimSpace(data))
+	return
+}
+
+func writeCookieKey(cookieKey string) {
+	cookieKeyPath := filepath.Join(util.HomeDir, ".config", "siyuan", "cookie.key")
+	if gulu.File.IsExist(cookieKeyPath) {
+		return
+	}
+
+	if err := os.WriteFile(cookieKeyPath, []byte(cookieKey), 0644); err != nil {
+		logging.LogErrorf("save cookie key file [%s] failed: %s", cookieKeyPath, err)
+	}
 }
 
 func initLang() {
@@ -691,6 +755,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false
+	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
 		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
 			waitSecondForExecInstallPkg = true
@@ -742,7 +807,15 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		if nil != util.WebSocketServer {
 			util.WebSocketServer.Close()
 		}
+		if nil != util.HttpServer {
+			util.HttpServer.Close()
+		}
 		util.HttpServing = false
+
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+			return
+		}
+
 		os.Exit(logging.ExitCodeOk)
 	}()
 	return
@@ -935,8 +1008,6 @@ func IsSubscriber() bool {
 }
 
 func IsPaidUser() bool {
-	// S3/WebDAV data sync and backup are available for a fee https://github.com/siyuan-note/siyuan/issues/8780
-
 	if IsSubscriber() {
 		return true
 	}
@@ -973,13 +1044,13 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	return
 }
 
-// REF: https://github.com/siyuan-note/siyuan/issues/11364
 // HideConfSecret 隐藏设置中的秘密信息
+// REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
 	c.Api = &conf.API{}
 	c.Flashcard = &conf.Flashcard{}
-	c.LocalIPs = []string{}
+	c.ServerAddrs = []string{}
 	c.Publish = &conf.Publish{}
 	c.Repo = &conf.Repo{}
 	c.Sync = &conf.Sync{}
@@ -1052,13 +1123,11 @@ func clearCorruptedNotebooks() {
 func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
-	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
+	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
@@ -1108,7 +1177,9 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.DataDir, ".siyuan", "history"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "backup"))
 	os.RemoveAll(filepath.Join(util.WorkspaceDir, "sync"))
-	os.RemoveAll(filepath.Join(util.DataDir, "%")) // v3.0.6 生成的错误历史文件夹
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
+	os.RemoveAll(filepath.Join(util.DataDir, "%"))                 // v3.0.6 生成的错误历史文件夹
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	logging.LogInfof("cleared workspace temp")
 }
@@ -1192,6 +1263,16 @@ func subscribeConfEvents() {
 	eventbus.Subscribe(util.EvtConfPandocInitialized, func() {
 		logging.LogInfof("pandoc initialized, set pandoc bin to [%s]", util.PandocBinPath)
 		Conf.Export.PandocBin = util.PandocBinPath
+
+		params := util.RemoveInvalid(Conf.Export.PandocParams)
+		if !strings.Contains(params, "--reference-doc") && "" != util.PandocTemplatePath && !Conf.System.IsMicrosoftStore {
+			params += " --reference-doc"
+			params += " \"" + util.PandocTemplatePath + "\""
+			Conf.Export.PandocParams = strings.TrimSpace(params)
+		}
+
+		logging.LogInfof("pandoc params set to [%s]", Conf.Export.PandocParams)
+		logging.LogInfof("pandoc resources [%s, %s]", util.PandocTemplatePath, util.PandocColorFilterPath)
 		Conf.Save()
 	})
 }

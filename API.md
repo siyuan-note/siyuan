@@ -1,4 +1,4 @@
-[中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
+[中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)| [日本語](https://github.com/siyuan-note/siyuan/blob/master/API_ja_JP.md)
 
 * [Specification](#Specification)
     * [Parameters and return values](#Parameters-and-return-values)
@@ -1097,6 +1097,8 @@ Move documents by `id`:
     ]
   }
   ```
+
+Note: In publish mode, access to this interface will be prohibited unless all document read and write permissions are made public. Please refer to the [discussion](https://github.com/siyuan-note/siyuan/pull/16041#issuecomment-3912139575).
 
 ### Flush transaction
 

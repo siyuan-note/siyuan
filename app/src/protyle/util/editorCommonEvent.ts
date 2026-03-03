@@ -11,7 +11,7 @@ import {Constants} from "../../constants";
 import {paste} from "./paste";
 import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
-import {getTopAloneElement} from "../wysiwyg/getBlock";
+import {getParentBlock, getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
@@ -60,7 +60,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     for (let index = sourceElements.length - 1; index >= 0; index--) {
         const item = sourceElements[index];
         const id = item.getAttribute("data-node-id");
-        const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID;
+        const parentID = getParentBlock(item).getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID;
         if (item.getAttribute("data-type") === "NodeListItem" && !newListId && !isSameLi) {
             newListId = Lute.NewNodeID();
             newListElement = document.createElement("div");
@@ -71,7 +71,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 data: newListElement.outerHTML,
                 id: newListId,
                 previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : tempTargetElement.previousElementSibling?.getAttribute("data-node-id")),
-                parentID: position === "afterbegin" ? targetId : (tempTargetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                parentID: position === "afterbegin" ? targetId : (getParentBlock(tempTargetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
             });
             undoOperations.push({
                 action: "delete",
@@ -132,7 +132,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     id: copyNewId,
                     data: copyElement.outerHTML,
                     previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : copyElement.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
-                    parentID: position === "afterbegin" ? targetId : (copyElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                    parentID: position === "afterbegin" ? targetId : (getParentBlock(copyElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(copyElement);
             }
@@ -155,7 +155,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "move",
                     id,
                     previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : item.previousElementSibling?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
-                    parentID: position === "afterbegin" ? targetId : (item.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                    parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
                 });
                 newSourceElements.push(item);
             }
@@ -171,7 +171,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     data: topSourceElement.outerHTML,
                     id: topSourceElement.getAttribute("data-node-id"),
                     previousID: topSourceElement.previousElementSibling?.getAttribute("data-node-id"),
-                    parentID: topSourceElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+                    parentID: getParentBlock(topSourceElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
                 });
                 const topSourceParentElement = topSourceElement.parentElement;
                 topSourceElement.remove();
@@ -346,9 +346,12 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     const undoOperations: IOperation[] = [];
     const targetMoveUndo: IOperation = {
         action: "move",
+        context: {
+            removeFold: "true"
+        },
         id: targetElement.getAttribute("data-node-id"),
         previousID: targetElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: targetElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+        parentID: getParentBlock(targetElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     };
     const sbElement = genSBElement(direct);
     targetElement.parentElement.replaceChild(sbElement, targetElement);
@@ -358,7 +361,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         id: sbElement.getAttribute("data-node-id"),
         nextID: sbElement.nextElementSibling?.getAttribute("data-node-id"),
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
-        parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
+        parentID: getParentBlock(sbElement)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
     // 临时插入，防止后面计算错误，最终再移动矫正
     sbElement.lastElementChild.before(targetElement);
@@ -400,34 +403,38 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         action: "delete",
         id: sbElement.getAttribute("data-node-id"),
     });
-    let hasFoldHeading = false;
+    const foldElements: Element[] = [];
     newSourceParentElement.forEach(item => {
-        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-            hasFoldHeading = true;
-            if (item.nextElementSibling && (
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1" &&
+            item.nextElementSibling && (
                 item.nextElementSibling.getAttribute("data-type") !== "NodeHeading" ||
-                item.nextElementSibling.getAttribute("data-subtype") > item.getAttribute("data-subtype")
+                (item.nextElementSibling.getAttribute("data-subtype") || "") > item.getAttribute("data-subtype")
             )) {
-                const foldOperations = setFold(protyle, item, true, false, false, true);
-                doOperations.push(...foldOperations.doOperations);
-                // 不折叠，否则无法撤销 undoOperations.push(...foldOperations.undoOperations);
-            }
-            return true;
+            foldElements.push(item);
         }
+    });
+    if ((newSourceParentElement.length > 1 || foldElements.length > 0) && direct === "col") {
+        const mergeOperations = await turnsIntoOneTransaction({
+            protyle,
+            selectsElement: newSourceParentElement.reverse(),
+            type: "BlocksMergeSuperBlock",
+            level: "row",
+            unfocus: true,
+            getOperations: true
+        });
+        doOperations.push(...mergeOperations.doOperations);
+        undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+    }
+    foldElements.forEach(item => {
+        const foldOperations = setFold(protyle, item, true, false, false, true);
+        doOperations.push(...foldOperations.doOperations);
+        undoOperations.splice(0, 0, ...foldOperations.undoOperations);
     });
     if (isSameDoc || isCopy) {
         transaction(protyle, doOperations, undoOperations);
     } else {
         // 跨文档或插入折叠标题下不支持撤销
         transaction(protyle, doOperations);
-    }
-    if ((newSourceParentElement.length > 1 || hasFoldHeading) && direct === "col") {
-        turnsIntoOneTransaction({
-            protyle,
-            selectsElement: newSourceParentElement.reverse(),
-            type: "BlocksMergeSuperBlock",
-            level: "row"
-        });
     }
     if (document.contains(sourceElements[0])) {
         focusBlock(sourceElements[0]);
@@ -515,7 +522,8 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             protyle,
             selectsElement: newSourceParentElement.reverse(),
             type: "BlocksMergeSuperBlock",
-            level: "row"
+            level: "row",
+            unfocus: true,
         });
     }
     if (document.contains(sourceElements[0])) {
@@ -1147,9 +1155,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!avElement) {
                 focusByRange(getRangeByPoint(event.clientX, event.clientY));
                 if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                    const files: string[] = [];
+                    const files: ILocalFiles[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                        files.push({
+                            path: webUtils.getPathForFile(event.dataTransfer.files[i]),
+                            size: event.dataTransfer.files[i].size
+                        });
                     }
                     uploadLocalFiles(files, protyle, !event.altKey);
                 } else {
@@ -1160,9 +1171,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
                     if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                        const files: string[] = [];
+                        const files: ILocalFiles[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                            files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                            files.push({
+                                path: webUtils.getPathForFile(event.dataTransfer.files[i]),
+                                size: event.dataTransfer.files[i].size
+                            });
                         }
                         dragUpload(files, protyle, cellElement);
                         clearSelect(["cell"], avElement);
@@ -1194,14 +1208,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             dragoverTab(event);
             event.preventDefault();
             return;
-        }
-        const contentRect = protyle.contentElement.getBoundingClientRect();
-        if (!hasClosestByClassName(event.target, "av__cell") &&
-            (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB || event.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB)) {
-            protyle.contentElement.scroll({
-                top: protyle.contentElement.scrollTop + (event.clientY < contentRect.top + Constants.SIZE_SCROLL_TB ? -Constants.SIZE_SCROLL_STEP : Constants.SIZE_SCROLL_STEP),
-                behavior: "smooth"
-            });
         }
         let targetElement: HTMLElement | false;
         // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
@@ -1272,7 +1278,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 prevElement = prevElement.parentElement;
             }
         }
-
         if (!targetElement) {
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
                 // 命中底部
@@ -1282,7 +1287,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 命中顶部
                 targetElement = editorElement.firstElementChild as HTMLElement;
                 point.className = "dragover__top";
-            } else if (contentRect) {
+            } else {
+                const contentRect = protyle.contentElement.getBoundingClientRect();
                 const editorPosition = {
                     left: contentRect.left + parseInt(editorElement.style.paddingLeft),
                     right: contentRect.left + protyle.contentElement.clientWidth - parseInt(editorElement.style.paddingRight)

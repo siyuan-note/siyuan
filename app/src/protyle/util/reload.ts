@@ -5,9 +5,15 @@ import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
 import {isSupportCSSHL, searchMarkRender} from "../render/searchMarkRender";
+/// #if MOBILE
+import {hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
+/// #endif
 import {restoreLuteMarkdownSyntax} from "./paste";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
+    /// #if MOBILE
+    hideKeyboardToolbar();
+    /// #endif
     if (!protyle.preview.element.classList.contains("fn__none")) {
         protyle.preview.render(protyle);
         removeLoading(protyle);

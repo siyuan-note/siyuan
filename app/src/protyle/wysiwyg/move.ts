@@ -57,6 +57,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
     if (previousElement) {
         previousElement = previousElement.lastElementChild.previousElementSibling;
         const sourceParentElement = sourceElements[0].classList.contains("list") ? sourceElements[0] : sourceElements[0].parentElement;
+        const orderIndex = parseInt(sourceParentElement.firstElementChild.getAttribute("data-marker"));
         sourceElements.reverse().forEach(item => {
             if (item.classList.contains("list")) {
                 previousElement.after(item.firstElementChild);
@@ -71,7 +72,7 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         if (sourceParentElement.childElementCount === 1) {
             sourceParentElement.remove();
         } else if (sourceParentElement.getAttribute("data-subtype") === "o" && sourceParentElement.classList.contains("list")) {
-            updateListOrder(sourceParentElement, 1);
+            updateListOrder(sourceParentElement, orderIndex);
         }
         if (previousElement.getAttribute("data-subtype") === "o") {
             updateListOrder(previousElement.parentElement);
@@ -88,8 +89,9 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
     previousElement = sourceElements[0].previousElementSibling;
     if (sourceElements[0].getAttribute("data-subtype") === "o" && type === "NodeListItem") {
         const html = sourceElements[0].parentElement.outerHTML;
+        const orderIndex = parseInt(sourceElements[0].parentElement.firstElementChild.getAttribute("data-marker"));
         sourceElements[sourceElements.length - 1].after(previousElement);
-        updateListOrder(sourceElements[0].parentElement, 1);
+        updateListOrder(sourceElements[0].parentElement, orderIndex);
         updateTransaction(protyle, sourceElements[0].parentElement.getAttribute("data-node-id"), sourceElements[0].parentElement.outerHTML, html);
     } else {
         const id = previousElement.getAttribute("data-node-id");
@@ -158,6 +160,7 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         }
     }
     if (nextElement) {
+        const orderIndex = parseInt(nextElement.getAttribute("data-marker"));
         const sourceParentElement = sourceElements[0].classList.contains("list") ? sourceElements[0] : sourceElements[0].parentElement;
         sourceElements.forEach(item => {
             if (item.classList.contains("list")) {
@@ -168,11 +171,9 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         });
         if (sourceParentElement.childElementCount === 1) {
             sourceParentElement.remove();
-        } else if (sourceParentElement.getAttribute("data-subtype") === "o" && sourceParentElement.classList.contains("list")) {
-            updateListOrder(sourceParentElement, 1);
         }
         if (nextElement.getAttribute("data-subtype") === "o") {
-            updateListOrder(nextElement.parentElement, 1);
+            updateListOrder(nextElement.parentElement, orderIndex);
         }
         updateTransaction(protyle, nextElement.parentElement.parentElement.parentElement.getAttribute("data-node-id"), nextElement.parentElement.parentElement.parentElement.outerHTML, oldListHTML);
         preventScroll(protyle);
@@ -186,8 +187,9 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
     nextElement = sourceElements[sourceElements.length - 1].nextElementSibling;
     if (nextElement.getAttribute("data-subtype") === "o" && nextElement.getAttribute("data-type") === "NodeListItem") {
         const html = nextElement.parentElement.outerHTML;
+        const orderIndex = parseInt(sourceElements[0].parentElement.firstElementChild.getAttribute("data-marker"));
         sourceElements[0].before(nextElement);
-        updateListOrder(nextElement.parentElement, 1);
+        updateListOrder(nextElement.parentElement, orderIndex);
         updateTransaction(protyle, nextElement.parentElement.getAttribute("data-node-id"), nextElement.parentElement.outerHTML, html);
     } else {
         const id = nextElement.getAttribute("data-node-id");

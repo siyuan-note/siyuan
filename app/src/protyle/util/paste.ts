@@ -13,45 +13,48 @@ import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
-import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
+import {removeZWJ} from "./normalizeText";
+import {base64ToURL} from "../../util/image";
 
-export const getTextStar = (blockElement: HTMLElement) => {
+export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
     let refText = "";
     if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
         refText = getContenteditableElement(blockElement).innerHTML;
-    } else {
-        if ("NodeHTMLBlock" === dataType) {
-            refText = "HTML";
-        } else if ("NodeAttributeView" === dataType) {
-            refText = blockElement.querySelector(".av__title").textContent || window.siyuan.languages.database;
-        } else if ("NodeThematicBreak" === dataType) {
-            refText = window.siyuan.languages.line;
-        } else if ("NodeIFrame" === dataType) {
-            refText = "IFrame";
-        } else if ("NodeWidget" === dataType) {
-            refText = window.siyuan.languages.widget;
-        } else if ("NodeVideo" === dataType) {
-            refText = window.siyuan.languages.video;
-        } else if ("NodeAudio" === dataType) {
-            refText = window.siyuan.languages.audio;
-        } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
-            refText = getPlainText(blockElement);
-        } else if (blockElement.classList.contains("render-node")) {
-            // 需在嵌入块后，代码块前
-            refText += blockElement.dataset.subtype || Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
-        } else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
-            Array.from(blockElement.querySelectorAll("[data-node-id]")).find((item: HTMLElement) => {
-                if (!["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(item.getAttribute("data-type"))) {
-                    refText = getTextStar(blockElement.querySelector("[data-node-id]"));
-                    return true;
-                }
-            });
-            if (refText) {
-                return refText;
+    } else if ("NodeHTMLBlock" === dataType) {
+        refText = "HTML";
+    } else if ("NodeAttributeView" === dataType) {
+        refText = blockElement.querySelector(".av__title").textContent || window.siyuan.languages.database;
+    } else if ("NodeThematicBreak" === dataType) {
+        refText = window.siyuan.languages.line;
+    } else if ("NodeIFrame" === dataType) {
+        refText = "IFrame";
+    } else if ("NodeWidget" === dataType) {
+        refText = window.siyuan.languages.widget;
+    } else if ("NodeVideo" === dataType) {
+        refText = window.siyuan.languages.video;
+    } else if ("NodeAudio" === dataType) {
+        refText = window.siyuan.languages.audio;
+    } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
+        refText = getPlainText(blockElement);
+    } else if (blockElement.classList.contains("render-node")) {
+        // 需在嵌入块后，代码块前
+        refText += blockElement.dataset.subtype || Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
+    } else if (["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+        Array.from(blockElement.querySelectorAll("[data-node-id]")).find((item: HTMLElement) => {
+            if (!["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(item.getAttribute("data-type"))) {
+                // 获取子块内容，使用容器块本身的 ID
+                refText = getTextStar(item, true);
+                return true;
             }
-        }
+        });
+    } else if ("NodeCallout" === dataType) {
+        refText = getCalloutInfo(blockElement);
+    }
+    if (contentOnly) {
+        return refText;
     }
     return refText + ` <span data-type="block-ref" data-subtype="s" data-id="${blockElement.getAttribute("data-node-id")}">*</span>`;
 };
@@ -80,8 +83,10 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
-    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock"].includes(dataType)) {
+    } else if (["NodeHeading", "NodeParagraph"].includes(dataType)) {
         text += blockElement.querySelector("[spellcheck]").textContent;
+    } else if ("NodeCodeBlock" === dataType) {
+        text += removeZWJ(blockElement.querySelector("[spellcheck]").textContent);
     } else if (dataType === "NodeTable") {
         blockElement.querySelectorAll("th, td").forEach((item) => {
             text += item.textContent.trim() + "\t";
@@ -90,7 +95,10 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
             }
         });
         text = text.slice(0, -1);
-    } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+    } else if (!isNested && ["NodeBlockquote", "NodeCallout", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
+        if (dataType === "NodeCallout") {
+            text += `${getCalloutInfo(blockElement)}\n`;
+        }
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
             const nestedText = getPlainText(item, true);
             text += nestedText ? nestedText + "\n" : "";
@@ -141,7 +149,7 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
 };
 
 export const pasteAsPlainText = async (protyle: IProtyle) => {
-    let localFiles: string[] = [];
+    let localFiles: ILocalFiles[] = [];
     /// #if !BROWSER
     localFiles = await getLocalFiles();
     if (localFiles.length > 0) {
@@ -155,7 +163,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
             if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
-                insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+                insertHTML(removeZWJ(textPlain).replace(/```/g, "\u200D```"), protyle);
                 return;
             }
         }
@@ -168,8 +176,14 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
         textPlain = textPlain.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
 
+        // 对 <<assets/...>> 进行内部转义 https://github.com/siyuan-note/siyuan/issues/11992
+        textPlain = textPlain.replace(/<<assets\//g, "__@lt2assets/@__").replace(/>>/g, "__@gt2@__");
+
         // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+
+        // 反转义 <<assets/...>>
+        textPlain = textPlain.replace(/__@lt2assets\/@__/g, "<<assets/").replace(/__@gt2@__/g, ">>");
 
         // 反转义内置需要解析的 HTML 标签
         textPlain = textPlain.replace(/__@sub@__/g, "<sub>").replace(/__@\/sub@__/g, "</sub>");
@@ -207,24 +221,24 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetMark(window.siyuan.config.editor.markdown.inlineMark);
 };
 
-const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
+const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {
     if (protyle && protyle.app && protyle.app.plugins) {
         for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response: { files: string[] } = await new Promise((resolve) => {
+            const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
                 const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
                     protyle,
                     resolve,
                     textHTML: "",
                     textPlain: "",
                     siyuanHTML: "",
-                    files: localFiles
+                    localFiles
                 });
                 if (emitResult) {
                     resolve(undefined);
                 }
             });
-            if (response?.files) {
-                localFiles = response.files;
+            if (response?.localFiles) {
+                localFiles = response.localFiles;
             }
         }
     }
@@ -270,14 +284,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     /// #if !BROWSER
     if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
-        const localFiles: string[] = await getLocalFiles();
+        const localFiles: ILocalFiles[] = await getLocalFiles();
         if (localFiles.length > 0) {
             readLocalFile(protyle, localFiles);
             return;
         }
     }
     /// #endif
-
+    const originalTextHTML = textHTML;
     // 浏览器地址栏拷贝处理
     if (textHTML.replace(/&amp;/g, "&").replace(/<(|\/)(html|body|meta)[^>]*?>/ig, "").trim() ===
         `<a href="${textPlain}">${textPlain}</a>` ||
@@ -347,17 +361,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         return;
     }
-    protyle.hint.enableExtend = Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);
+    protyle.hint.enableExtend = Constants.BLOCK_HINT_KEYS.concat("{{", "/", "#", "、", "「「", "「『", "『「", "『『",).includes(protyle.hint.splitChar);
     hideElements(protyle.hint.enableExtend ? ["select"] : ["select", "hint"], protyle);
     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
         item.classList.remove("protyle-wysiwyg--hl");
     });
-    const code = processPasteCode(textHTML, textPlain, protyle);
+    const code = processPasteCode(textHTML, textPlain, originalTextHTML, protyle);
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+        insertHTML(removeZWJ(textPlain).replace(/```/g, "\u200D```"), protyle);
         return;
     } else if (siyuanHTML) {
         // 编辑器内部粘贴
@@ -435,10 +449,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }
-
-            // https://github.com/siyuan-note/siyuan/issues/13552
-            tempInnerHTML = tempInnerHTML.replace(/\u200D```/g, "```");
-
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
@@ -584,11 +594,25 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
-
-            // https://github.com/siyuan-note/siyuan/issues/13552
-            textPlain = textPlain.replace(/\u200D```/g, "```");
-
-            const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
+            let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
+            if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = textPlainDom;
+                const imgSrcList: string[] = [];
+                const imageElements = tempElement.content.querySelectorAll("img");
+                imageElements.forEach((item) => {
+                    if (item.getAttribute("data-src").startsWith("data:image/")) {
+                        imgSrcList.push(item.getAttribute("data-src"));
+                    }
+                });
+                const base64SrcList = await base64ToURL(imgSrcList);
+                base64SrcList.forEach((item, index) => {
+                    imageElements[index].setAttribute("src", item);
+                    imageElements[index].setAttribute("data-src", item);
+                    imageElements[index].parentElement.querySelector(".img__net")?.remove();
+                });
+                textPlainDom = tempElement.innerHTML;
+            }
             insertHTML(textPlainDom, protyle, false, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);

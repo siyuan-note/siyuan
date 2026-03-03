@@ -174,7 +174,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/lute/html2BlockDOM", model.CheckAuth, html2BlockDOM)
 	ginServer.Handle("POST", "/api/lute/copyStdMarkdown", model.CheckAuth, copyStdMarkdown)
 
-	ginServer.Handle("POST", "/api/query/sql", model.CheckAuth, SQL)
+	ginServer.Handle("POST", "/api/query/sql", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, SQL)
 	ginServer.Handle("POST", "/api/sqlite/flushTransaction", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, flushTransaction)
 
 	ginServer.Handle("POST", "/api/search/searchTag", model.CheckAuth, searchTag)

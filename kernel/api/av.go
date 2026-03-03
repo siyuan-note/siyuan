@@ -213,6 +213,12 @@ func setAttrViewGroup(c *gin.Context) {
 	}
 
 	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false)
+	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		retDataMap := ret.Data.(map[string]interface{})
+		retDataMap["view"] = model.FilterViewByPublishAccess(c, publishAccess, retDataMap["view"].(av.Viewable))
+	}
+
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -236,6 +242,12 @@ func changeAttrViewLayout(c *gin.Context) {
 	}
 
 	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, false)
+	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		retDataMap := ret.Data.(map[string]interface{})
+		retDataMap["view"] = model.FilterViewByPublishAccess(c, publishAccess, retDataMap["view"].(av.Viewable))
+	}
+
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -871,6 +883,12 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging, createIfNotExist)
+	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		retDataMap := ret.Data.(map[string]interface{})
+		retDataMap["view"] = model.FilterViewByPublishAccess(c, publishAccess, retDataMap["view"].(av.Viewable))
+	}
+
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -896,11 +914,6 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		}
 
 		views = append(views, view)
-	}
-
-	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		view = model.FilterViewByPublishAccess(c, publishAccess, view)
 	}
 
 	ret.Data = map[string]interface{}{

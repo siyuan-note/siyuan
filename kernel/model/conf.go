@@ -296,7 +296,7 @@ func InitConf() {
 		v := 620
 		Conf.Editor.FloatWindowDelay = &v
 	} else {
-		*Conf.Editor.FloatWindowDelay = max(0, min(10000, *Conf.Editor.FloatWindowDelay))
+		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
 	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks

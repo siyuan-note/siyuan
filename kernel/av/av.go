@@ -238,7 +238,7 @@ type View struct {
 	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
 }
 
-// ViewData 用于序列化视图数据到前端
+// ViewData 用于序列化视图数据到前端。
 type ViewData struct {
 	ID               string     `json:"id"`
 	Icon             string     `json:"icon"`

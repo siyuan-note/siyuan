@@ -10,14 +10,12 @@ import {Constants} from "../constants";
 import {ipcRenderer} from "electron";
 /// #endif
 /// #if !MOBILE
-import {exportLayout} from "../layout/util";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {isOnlyMeta, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {saveScroll} from "../protyle/scroll/saveScroll";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
@@ -65,6 +63,10 @@ export const getIdFromSYProtocol = (url: string) => {
 
 /* redirect to auth page */
 export const redirectToCheckAuth = async (to: string = window.location.href) => {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+        return;
+    }
+
     const url = new URL(window.location.origin);
     url.pathname = "/check-auth";
     url.searchParams.set("to", to);

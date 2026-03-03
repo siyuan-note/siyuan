@@ -478,20 +478,19 @@ export const editor = {
                 (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "48";
             }
 
-            const floatWindowModeElement = editor.element.querySelector("#floatWindowMode") as HTMLSelectElement;
-            const floatWindowDelayWrapElement = editor.element.querySelector("#floatWindowDelayWrap") as HTMLElement;
-            if (floatWindowDelayWrapElement && floatWindowModeElement) {
-                floatWindowDelayWrapElement.classList.toggle("fn__none", parseInt(floatWindowModeElement.value) !== 0);
-            }
+            const floatWindowDelayElement = editor.element.querySelector("#floatWindowDelay") as HTMLInputElement;
+            const floatWindowMode = parseInt((editor.element.querySelector("#floatWindowMode") as HTMLSelectElement).value);
+            editor.element.querySelector("#floatWindowDelayWrap").classList.toggle("fn__none", floatWindowMode !== 0);
 
-            let floatWindowDelay = parseInt((editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value);
-            if (floatWindowDelay < 0 || isNaN(floatWindowDelay)) {
+            let floatWindowDelay = parseInt(floatWindowDelayElement.value);
+            if (isNaN(floatWindowDelay)) {
+                floatWindowDelay = 620;
+            } else if (floatWindowDelay < 0) {
                 floatWindowDelay = 0;
-                (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "0";
             } else if (floatWindowDelay > 2000) {
                 floatWindowDelay = 2000;
-                (editor.element.querySelector("#floatWindowDelay") as HTMLInputElement).value = "2000";
             }
+            floatWindowDelayElement.value = floatWindowDelay.toString();
 
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
@@ -525,8 +524,8 @@ export const editor = {
                 spellcheckLanguages: window.siyuan.config.editor.spellcheckLanguages,
                 /// #endif
                 onlySearchForDoc: (editor.element.querySelector("#onlySearchForDoc") as HTMLInputElement).checked,
-                floatWindowMode: parseInt((editor.element.querySelector("#floatWindowMode") as HTMLSelectElement).value),
-                floatWindowDelay: floatWindowDelay,
+                floatWindowMode,
+                floatWindowDelay,
                 plantUMLServePath: (editor.element.querySelector("#plantUMLServePath") as HTMLInputElement).value,
                 katexMacros: (editor.element.querySelector("#katexMacros") as HTMLTextAreaElement).value,
                 codeLineWrap: (editor.element.querySelector("#codeLineWrap") as HTMLInputElement).checked,

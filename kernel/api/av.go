@@ -721,17 +721,17 @@ func renderSnapshotAttributeView(c *gin.Context) {
 		return
 	}
 
-	var views []map[string]interface{}
+	var views []*av.ViewData
 	for _, v := range attrView.Views {
-		view := map[string]interface{}{
-			"id":               v.ID,
-			"icon":             v.Icon,
-			"name":             v.Name,
-			"hideAttrViewName": v.HideAttrViewName,
-			"type":             v.LayoutType,
-		}
-
-		views = append(views, view)
+		views = append(views, &av.ViewData{
+			ID:               v.ID,
+			Icon:             v.Icon,
+			Name:             v.Name,
+			Desc:             v.Desc,
+			HideAttrViewName: v.HideAttrViewName,
+			Type:             v.LayoutType,
+			PageSize:         v.PageSize,
+		})
 	}
 
 	ret.Data = map[string]interface{}{
@@ -797,17 +797,17 @@ func renderHistoryAttributeView(c *gin.Context) {
 		return
 	}
 
-	var views []map[string]interface{}
+	var views []*av.ViewData
 	for _, v := range attrView.Views {
-		view := map[string]interface{}{
-			"id":               v.ID,
-			"icon":             v.Icon,
-			"name":             v.Name,
-			"hideAttrViewName": v.HideAttrViewName,
-			"type":             v.LayoutType,
-		}
-
-		views = append(views, view)
+		views = append(views, &av.ViewData{
+			ID:               v.ID,
+			Icon:             v.Icon,
+			Name:             v.Name,
+			Desc:             v.Desc,
+			HideAttrViewName: v.HideAttrViewName,
+			Type:             v.LayoutType,
+			PageSize:         v.PageSize,
+		})
 	}
 
 	ret.Data = map[string]interface{}{
@@ -883,19 +883,17 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 		return
 	}
 
-	var views []map[string]interface{}
+	var views []*av.ViewData
 	for _, v := range attrView.Views {
-		view := map[string]interface{}{
-			"id":               v.ID,
-			"icon":             v.Icon,
-			"name":             v.Name,
-			"desc":             v.Desc,
-			"hideAttrViewName": v.HideAttrViewName,
-			"type":             v.LayoutType,
-			"pageSize":         v.PageSize,
-		}
-
-		views = append(views, view)
+		views = append(views, &av.ViewData{
+			ID:               v.ID,
+			Icon:             v.Icon,
+			Name:             v.Name,
+			Desc:             v.Desc,
+			HideAttrViewName: v.HideAttrViewName,
+			Type:             v.LayoutType,
+			PageSize:         v.PageSize,
+		})
 	}
 
 	ret.Data = map[string]interface{}{

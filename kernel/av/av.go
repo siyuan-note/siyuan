@@ -238,6 +238,17 @@ type View struct {
 	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
 }
 
+// ViewData 用于序列化视图数据到前端
+type ViewData struct {
+	ID               string     `json:"id"`
+	Icon             string     `json:"icon"`
+	Name             string     `json:"name"`
+	Desc             string     `json:"desc"`
+	HideAttrViewName bool       `json:"hideAttrViewName"`
+	Type             LayoutType `json:"type"`
+	PageSize         int        `json:"pageSize"`
+}
+
 func (view *View) IsGroupView() bool {
 	return nil != view.Group && "" != view.Group.Field
 }
@@ -587,22 +598,24 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 值去重
 	blockValues := av.GetBlockKeyValues()
-	blockIDs := map[string]bool{}
-	var duplicatedValueIDs []string
-	for _, blockValue := range blockValues.Values {
-		if !blockIDs[blockValue.BlockID] {
-			blockIDs[blockValue.BlockID] = true
-		} else {
-			duplicatedValueIDs = append(duplicatedValueIDs, blockValue.ID)
+	if nil != blockValues {
+		blockIDs := map[string]bool{}
+		var duplicatedValueIDs []string
+		for _, blockValue := range blockValues.Values {
+			if !blockIDs[blockValue.BlockID] {
+				blockIDs[blockValue.BlockID] = true
+			} else {
+				duplicatedValueIDs = append(duplicatedValueIDs, blockValue.ID)
+			}
 		}
-	}
-	var tmp []*Value
-	for _, blockValue := range blockValues.Values {
-		if !gulu.Str.Contains(blockValue.ID, duplicatedValueIDs) {
-			tmp = append(tmp, blockValue)
+		var tmp []*Value
+		for _, blockValue := range blockValues.Values {
+			if !gulu.Str.Contains(blockValue.ID, duplicatedValueIDs) {
+				tmp = append(tmp, blockValue)
+			}
 		}
+		blockValues.Values = tmp
 	}
-	blockValues.Values = tmp
 
 	// 视图值去重
 	for _, view := range av.Views {

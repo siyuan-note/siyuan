@@ -357,7 +357,44 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 				gallery.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
 			}
 		}
-	// TODO: 适配看板视图
+	case av.LayoutTypeKanban:
+		kanban := ret.(*av.Kanban)
+		filteredCards := []*av.KanbanCard{}
+		for _, card := range kanban.Cards {
+			// 默认第一个属性是文档块
+			var block *sql.Block
+			if len(card.Values) > 0 {
+				if card.Values[0].Value.Block != nil {
+					id := card.Values[0].Value.Block.ID
+					if id != "" {
+						block = sql.GetBlock(id)
+					}
+				}
+			}
+			if block != nil {
+				// 替换封面
+				newCoverContent := FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, card.CoverContent, true)
+				if card.CoverContent != newCoverContent {
+					card.CoverContent = newCoverContent
+					card.CoverURL = ""
+				}
+
+				// 不显示禁止文档
+				if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+					card = nil
+				}
+			}
+			if card != nil {
+				filteredCards = append(filteredCards, card)
+			}
+		}
+		kanban.Cards = filteredCards
+		kanban.CardCount = len(kanban.Cards)
+		if kanban.Groups != nil {
+			for i, viewable := range kanban.Groups {
+				kanban.Groups[i] = FilterViewByPublishAccess(c, publishAccess, viewable)
+			}
+		}
 	}
 	return
 }

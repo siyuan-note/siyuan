@@ -1011,12 +1011,12 @@ func (tx *Transaction) doDelete0(operation *Operation, tree *parse.Tree) {
 	}
 
 	if needSyncDel2AvBlock {
-		syncDelete2AvBlock(node, tree, tx)
+		syncDelete2AvBlock(node, tree, true, tx)
 	}
 }
 
-func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, tx *Transaction) {
-	changedAvIDs := syncDelete2AttributeView(node)
+func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, delChildrenWhenDelParent bool, tx *Transaction) {
+	changedAvIDs := syncDelete2AttributeView(node, delChildrenWhenDelParent)
 	avIDs := tx.syncDelete2Block(node, nodeTree)
 	changedAvIDs = append(changedAvIDs, avIDs...)
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
@@ -1078,53 +1078,63 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 	return
 }
 
-func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
+func syncDelete2AttributeView(node *ast.Node, delChildrenWhenDelParent bool) (changedAvIDs []string) {
+	if !delChildrenWhenDelParent {
+		changedAvIDs = deleteAttrView(node, changedAvIDs)
+		return
+	}
+
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
 		}
 
-		avs := n.IALAttr(av.NodeAttrNameAvs)
-		if "" == avs {
-			return ast.WalkContinue
-		}
-
-		avIDs := strings.Split(avs, ",")
-		for _, avID := range avIDs {
-			attrView, parseErr := av.ParseAttributeView(avID)
-			if nil != parseErr {
-				continue
-			}
-
-			changedAv := false
-			blockValues := attrView.GetBlockKeyValues()
-			if nil == blockValues {
-				continue
-			}
-
-			for i, blockValue := range blockValues.Values {
-				if nil == blockValue.Block {
-					continue
-				}
-
-				if blockValue.Block.ID == n.ID {
-					blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
-					changedAv = true
-					break
-				}
-			}
-
-			if changedAv {
-				regenAttrViewGroups(attrView)
-				av.SaveAttributeView(attrView)
-				changedAvIDs = append(changedAvIDs, avID)
-			}
-		}
+		changedAvIDs = append(changedAvIDs, deleteAttrView(n, changedAvIDs)...)
 		return ast.WalkContinue
 	})
 
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 	return
+}
+
+func deleteAttrView(n *ast.Node, changedAvIDs []string) []string {
+	avs := n.IALAttr(av.NodeAttrNameAvs)
+	if "" == avs {
+		return nil
+	}
+
+	avIDs := strings.Split(avs, ",")
+	for _, avID := range avIDs {
+		attrView, parseErr := av.ParseAttributeView(avID)
+		if nil != parseErr {
+			continue
+		}
+
+		changedAv := false
+		blockValues := attrView.GetBlockKeyValues()
+		if nil == blockValues {
+			continue
+		}
+
+		for i, blockValue := range blockValues.Values {
+			if nil == blockValue.Block {
+				continue
+			}
+
+			if blockValue.Block.ID == n.ID {
+				blockValues.Values = append(blockValues.Values[:i], blockValues.Values[i+1:]...)
+				changedAv = true
+				break
+			}
+		}
+
+		if changedAv {
+			regenAttrViewGroups(attrView)
+			av.SaveAttributeView(attrView)
+			changedAvIDs = append(changedAvIDs, avID)
+		}
+	}
+	return changedAvIDs
 }
 
 func (tx *Transaction) doLargeInsert(operations []*Operation) {
@@ -1482,7 +1492,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	removedNodes := getRemovedNodes(oldNode, updatedNode)
 	for _, n := range removedNodes {
-		syncDelete2AvBlock(n, tree, tx)
+		syncDelete2AvBlock(n, tree, false, tx)
 	}
 
 	// 将不属于折叠标题的块移动到折叠标题下方，需要展开折叠标题

@@ -165,7 +165,7 @@ func getDynamicIcon(c *gin.Context) {
 	}
 
 	if !model.Conf.Editor.AllowSVGScript {
-		svg = util.RemoveScriptsInSVG(svg)
+		svg = util.SanitizeSVG(svg)
 	}
 
 	c.Header("Content-Type", "image/svg+xml")

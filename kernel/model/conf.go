@@ -292,6 +292,12 @@ func InitConf() {
 	if 3650 < Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 3650
 	}
+	if nil == Conf.Editor.FloatWindowDelay {
+		v := 620
+		Conf.Editor.FloatWindowDelay = &v
+	} else {
+		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
+	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}
@@ -790,6 +796,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
+	util.BroadcastByType("main", "exit", 0, "", nil)
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)

@@ -7,7 +7,7 @@
 		"id": "20240530101000-xq26o73",
 		"title": "カーネルパラメータ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260302173724"
 	},
 	"Children": [
 		{
@@ -249,7 +249,7 @@
 			"Properties": {
 				"ID": "20240530101000-rje9q9t",
 				"id": "20240530101000-pzmi4gj",
-				"updated": "20240530101000"
+				"updated": "20260302173724"
 			},
 			"Children": [
 				{
@@ -263,9 +263,8 @@
 			"ID": "20240530101000-bqisa84",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-f48ihvt",
 				"id": "20240530101000-bqisa84",
-				"updated": "20240530101000"
+				"updated": "20260302173724"
 			},
 			"Children": [
 				{
@@ -375,6 +374,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "ru_RU"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sk_SK"
 				},
 				{
 					"Type": "NodeText",

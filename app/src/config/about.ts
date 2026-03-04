@@ -7,13 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {
-    isInMobileApp,
-    isIPad,
-    isMac,
-    openByMobile,
-    writeText
-} from "../protyle/util/compatibility";
+import {isInMobileApp, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -63,7 +57,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="downloadInstallPkg" type="checkbox"${window.siyuan.config.system.downloadInstallPkg ? " checked" : ""}>
 </label>
-<div class="b3-label">
+<div class="b3-label${isBrowser() ? " fn__none" : ""}">
     <label class="fn__flex config__item">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about11}

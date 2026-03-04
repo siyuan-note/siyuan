@@ -2,7 +2,9 @@ import {openMobileFileById} from "../editor";
 import {
     processSync,
     progressLoading,
-    reloadSync, setDefRefCount, setRefDynamicText,
+    reloadSync,
+    setDefRefCount,
+    setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
 import {App} from "../../index";
@@ -11,6 +13,7 @@ import {reloadEmoji} from "../../emoji";
 import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
 import {updateControlAlt} from "../../protyle/util/hotKey";
 import {renderSnippet} from "../../config/util/snippets";
+import {redirectToCheckAuth} from "../../util/pathName";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -18,6 +21,14 @@ const statusElement = document.querySelector("#status") as HTMLElement;
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "logoutAuth":
+                redirectToCheckAuth();
+                break;
+            case "sendDeviceNotification":
+                if (window.JSAndroid.sendNotification) {
+                    window.JSAndroid.sendNotification(data.data.title, data.data.body, data.data.delayInSeconds);
+                }
+                break;
             case "backgroundtask":
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
                     window.siyuan.config.appearance.hideStatusBar) {

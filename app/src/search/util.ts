@@ -241,6 +241,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
         render: {
+            background: true,
             gutter: true,
             breadcrumbDocName: true,
             title: true

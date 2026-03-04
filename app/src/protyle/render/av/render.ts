@@ -103,7 +103,7 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </button>
             <div style="position: relative" class="fn__flex">
-                <div contenteditable="true" style="${showSearch ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}"></div>
+                <div contenteditable="plaintext-only" style="${showSearch ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}"></div>
             </div>
             <div class="fn__space"></div>
             <span data-type="av-more" aria-label="${window.siyuan.languages.config}" data-position="8south" class="ariaLabel block__icon">
@@ -427,7 +427,7 @@ const afterRenderTable = (options: ITableOptions) => {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.paddingRight = "0";
+            searchInputElement.style.marginRight = "0";
         }
     });
     addClearButton({
@@ -439,7 +439,7 @@ const afterRenderTable = (options: ITableOptions) => {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.paddingRight = "0";
+            searchInputElement.style.marginRight = "0";
             focusBlock(options.blockElement);
             updateSearch(options.blockElement, options.protyle);
             /// #if MOBILE

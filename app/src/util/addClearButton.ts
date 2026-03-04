@@ -14,7 +14,8 @@ const update = (inputElement: HTMLElement, clearElement: Element, right: number)
     } else {
         clearElement.classList.remove("fn__none");
         if (typeof right === "number") {
-            inputElement.style.setProperty("padding-right", `${right * 2 + clearElement.clientWidth}px`, "important");
+            // 数据库搜索需设置 margin
+            inputElement.style.setProperty(inputElement.getAttribute("contenteditable") ? "margin-right" : "padding-right", `${right * 2 + clearElement.clientWidth}px`, "important");
         }
     }
 };

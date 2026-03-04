@@ -100,6 +100,8 @@
       outline: none;
       white-space: nowrap;
       overflow: auto;
+      padding-right: 0;
+      font-size: 1em;
 
       &::-webkit-scrollbar {
         display: none;

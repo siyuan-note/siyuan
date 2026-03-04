@@ -614,6 +614,8 @@
   "floatWindowMode0": "Schweben",
   "floatWindowMode1": "Drücken und halten Sie ${hotkey} + Schwellen",
   "floatWindowMode2": "Nicht auslösen",
+  "floatWindowDelay": "Verzögerung beim Auslösen des schwebenden Fensters beim Schweben",
+  "floatWindowDelayTip": "Wirkt nur, wenn die Auslösermethode des schwebenden Fensters Schweben ist",
   "codeSnippet": "Code-Schnipsel",
   "codeSnippetTip": "Feinabstimmung der Oberfläche oder Funktionalität durch Code-Schnipsel",
   "expandDown": "Nach unten erweitern",
@@ -1763,6 +1765,7 @@
     "279": "Insgesamt [%d] nicht referenzierte Datenbanken, hier werden nur [%d] aufgelistet",
     "280": "Bereinigung nicht referenzierter Datenbanken abgeschlossen, [%d] Dateien gelöscht, [%s] Festplattenspeicher freigegeben",
     "281": " (Standard)",
+    "282": "Fenster schließen",
     "283": "Passwort",
     "284": "Zugriff verweigert",
     "285": "Passwort ist falsch"

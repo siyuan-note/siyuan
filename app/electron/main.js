@@ -62,6 +62,23 @@ if (!app.requestSingleInstanceLock()) {
     return;
 }
 
+if (process.platform === "linux") {
+    const desktop = (process.env.XDG_CURRENT_DESKTOP || "").toUpperCase();
+    const isChineseOS = [
+        "DDE",      // 统信
+        "DEEPIN",   // 统信
+        "UKUI",     // 银河麒麟
+        "KYLIN",    // 麒麟备用标识
+        "NEWSTART"  // 中兴新支点
+    ].some(key => desktop.includes(key));
+    const isKylinFile = fs.existsSync("/etc/kylin-release");
+    const isUosFile = fs.existsSync("/etc/uos-version");
+    const isDeepinFile = fs.existsSync("/etc/deepin-release");
+    if (isChineseOS || isKylinFile || isUosFile || isDeepinFile) {
+        app.commandLine.appendSwitch("ozone-platform", "x11");
+    }
+}
+
 try {
     firstOpen = !fs.existsSync(path.join(confDir, "workspace.json"));
     if (!fs.existsSync(confDir)) {
@@ -174,6 +191,7 @@ const resolveAppLanguage = (languageTags) => {
         "pl": "pl_PL",
         "pt": "pt_BR",
         "ru": "ru_RU",
+        "sk": "sk_SK",
         "tr": "tr_TR"
     };
 

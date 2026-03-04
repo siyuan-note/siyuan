@@ -58,6 +58,8 @@ func LogoutAuth(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = "save session failed"
 	}
+
+	util.BroadcastByType("main", "logoutAuth", 0, "", nil)
 }
 
 func LoginAuth(c *gin.Context) {
@@ -150,6 +152,8 @@ func LoginAuth(c *gin.Context) {
 		c.Status(http.StatusInternalServerError)
 		return
 	}
+
+	util.BroadcastByType("auth", "loginAuth", 0, "", nil)
 }
 
 func GetCaptcha(c *gin.Context) {
@@ -250,7 +254,7 @@ func CheckAuth(c *gin.Context) {
 	// 未设置访问授权码
 	if "" == Conf.AccessAuthCode {
 		// Skip the empty access authorization code check https://github.com/siyuan-note/siyuan/issues/9709
-		if util.SiyuanAccessAuthCodeBypass {
+		if util.SiYuanAccessAuthCodeBypass {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return

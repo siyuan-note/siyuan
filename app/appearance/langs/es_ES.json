@@ -614,6 +614,8 @@
   "floatWindowMode0": "Flotar",
   "floatWindowMode1": "Presione y mantenga presionado ${hotkey} + Flotar",
   "floatWindowMode2": "No activar",
+  "floatWindowDelay": "Retardo de activación de la ventana flotante al pasar el mouse",
+  "floatWindowDelayTip": "Solo tiene efecto cuando el método de activación de la ventana flotante es Flotar",
   "codeSnippet": "Fragmento de código",
   "codeSnippetTip": "Ajusta la interfaz o la funcionalidad mediante fragmentos de código",
   "expandDown": "Expandir hacia abajo",
@@ -1763,6 +1765,7 @@
     "279": "Hay [%d] bases de datos sin referencias en total, aquí se muestran solo [%d]",
     "280": "Limpieza de bases de datos sin referencias completada, [%d] archivos eliminados, se liberaron [%s] de espacio en disco",
     "281": " (Por defecto)",
+    "282": "Cerrar ventana",
     "283": "Contraseña",
     "284": "Acceso denegado",
     "285": "La contraseña es incorrecta"

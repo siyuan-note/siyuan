@@ -289,6 +289,7 @@ declare namespace Config {
         | "pl_PL"
         | "pt_BR"
         | "ru_RU"
+        | "sk_SK"
         | "tr_TR"
         | "zh_CN"
         | "zh_CHT";
@@ -440,6 +441,11 @@ declare namespace Config {
          * - `2`: Do not trigger the floating window
          */
         floatWindowMode: number;
+        /**
+         * Hover delay of the floating window in milliseconds.
+         * Only takes effect when `floatWindowMode` is `0`.
+         */
+        floatWindowDelay: number;
         /**
          * The font used in the editor
          */

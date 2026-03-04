@@ -317,6 +317,13 @@ func setEditor(c *gin.Context) {
 		editor.HistoryRetentionDays = 3650
 	}
 
+	if nil == editor.FloatWindowDelay {
+		v := 620
+		editor.FloatWindowDelay = &v
+	} else {
+		*editor.FloatWindowDelay = max(0, min(2000, *editor.FloatWindowDelay))
+	}
+
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude

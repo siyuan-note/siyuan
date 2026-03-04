@@ -396,7 +396,7 @@ func GetBlockTree(id string) (ret *BlockTree) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return
 		}
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, logging.ShortStack())
+		logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())
 		return
 	}
 	return

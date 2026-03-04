@@ -65,6 +65,11 @@ func statAsset(c *gin.Context) {
 		return
 	}
 
+	if !util.IsAbsPathInWorkspace(p) {
+		ret.Code = 1
+		return
+	}
+
 	info, err := os.Stat(p)
 	if err != nil {
 		ret.Code = 1
@@ -355,7 +360,7 @@ func getUnusedAssets(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	unusedAssets := model.UnusedAssets()
+	unusedAssets := model.UnusedAssets(true)
 	total := len(unusedAssets)
 
 	// List only 512 unreferenced assets https://github.com/siyuan-note/siyuan/issues/13075

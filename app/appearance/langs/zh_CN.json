@@ -614,6 +614,8 @@
   "floatWindowMode0": "悬停",
   "floatWindowMode1": "按住 ${hotkey}+悬停",
   "floatWindowMode2": "不触发浮窗",
+  "floatWindowDelay": "浮窗悬停触发延迟",
+  "floatWindowDelayTip": "仅在“浮窗触发方式”为“悬停”时生效",
   "codeSnippet": "代码片段",
   "codeSnippetTip": "通过代码片段对界面或功能进行微调",
   "expandDown": "向下扩选",
@@ -1763,6 +1765,7 @@
     "279": "未引用数据库一共 [%d] 个，这里仅列出 [%d] 个",
     "280": "清理未引用的数据库完毕，已删除 [%d] 个文件，共释放 [%s] 磁盘空间",
     "281": "（默认主题）",
+    "282": "关闭窗口",
     "283": "密码",
     "284": "禁止访问",
     "285": "密码不正确"

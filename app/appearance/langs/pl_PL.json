@@ -614,6 +614,8 @@
   "floatWindowMode0": "Najedź",
   "floatWindowMode1": "Naciśnij i przytrzymaj ${hotkey} + Najedź",
   "floatWindowMode2": "Nie wywołuj",
+  "floatWindowDelay": "Opóźnienie wywołania okna pływającego przy najechaniu",
+  "floatWindowDelayTip": "Działa tylko wtedy, gdy metoda wywoływania okna pływającego to Najedź",
   "codeSnippet": "Fragment kodu",
   "codeSnippetTip": "Dostosuj interfejs lub funkcjonalność za pomocą fragmentów kodu",
   "expandDown": "Rozwiń w dół",
@@ -1763,6 +1765,7 @@
     "279": "Nieodwołane bazy danych łącznie: [%d], tutaj wyświetlono tylko [%d]",
     "280": "Czyszczenie nieodwołanych baz danych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
     "281": " (Domyślny)",
+    "282": "Zamknij okno",
     "283": "Hasło",
     "284": "Dostęp zabroniony",
     "285": "Hasło jest nieprawidłowe"

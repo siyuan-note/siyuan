@@ -281,6 +281,7 @@
             <option value="pl_PL">Polski</option>
             <option value="pt_BR">Português (Brasil)</option>
             <option value="ru_RU">Русский</option>
+            <option value="sk_SK">Slovenčina</option>
             <option value="tr_TR">Türkçe</option>
             <option value="zh_CHT">繁體中文</option>
             <option value="zh_CN">简体中文</option>
@@ -332,6 +333,7 @@
             <option value="pl_PL">Polski</option>
             <option value="pt_BR">Português (Brasil)</option>
             <option value="ru_RU">Русский</option>
+            <option value="sk_SK">Slovenčina</option>
             <option value="tr_TR">Türkçe</option>
             <option value="zh_CHT">繁體中文</option>
             <option value="zh_CN">简体中文</option>
@@ -437,7 +439,11 @@
             const path = require('path')
             const fs = require('fs')
 
-            const defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "SiYuan")
+            let defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "SiYuan")
+            if ("darwin" === process.platform) {
+                // Change the initial workspace path to ~/Library/Application Support/SiYuan on macOS https://github.com/siyuan-note/siyuan/issues/17095
+                defaultWorkspace = path.join(decodeURIComponent(getSearch('home')), "Library", "Application Support", "SiYuan")
+            }
             if (!fs.existsSync(defaultWorkspace)) {
                 fs.mkdirSync(defaultWorkspace, {mode: 0o755, recursive: true})
             }

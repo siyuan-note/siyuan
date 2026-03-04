@@ -191,7 +191,7 @@ export const initBlockPopover = (app: App) => {
             }
             clearTimeout(timeoutHide);
             showPopover(app);
-        }, 620);
+        }, window.siyuan.config.editor.floatWindowDelay);
     });
 };
 

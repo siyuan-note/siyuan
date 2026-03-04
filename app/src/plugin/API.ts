@@ -32,6 +32,7 @@ import {saveScroll} from "../protyle/scroll/saveScroll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
+import {openEmojiPanel} from "../emoji";
 
 let openTab;
 let openWindow;
@@ -305,6 +306,19 @@ export const expandDocTree = async (options: {
     file.getLeaf(liElement, notebookId);
 };
 
+const openEmoji = (options: {
+    position: IPosition,
+    selectedCB?: (emoji: string) => void,
+    dynamicIconURL?: string
+}) => {
+    let dynamicImgElement: HTMLImageElement;
+    if (options.dynamicIconURL) {
+        dynamicImgElement = document.createElement("img");
+        dynamicImgElement.src = options.dynamicIconURL;
+    }
+    openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement);
+};
+
 export const API = {
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
@@ -339,5 +353,6 @@ export const API = {
     openAttributePanel,
     saveLayout,
     globalCommand,
-    expandDocTree
+    expandDocTree,
+    openEmoji
 };

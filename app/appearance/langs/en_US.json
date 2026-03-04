@@ -614,6 +614,8 @@
   "floatWindowMode0": "Hover",
   "floatWindowMode1": "Press and hold ${hotkey} + Hover",
   "floatWindowMode2": "Do not trigger",
+  "floatWindowDelay": "Floating window hover delay",
+  "floatWindowDelayTip": "Only takes effect when the floating window trigger method is Hover",
   "codeSnippet": "Code Snippet",
   "codeSnippetTip": "Fine-tune the interface or functionality through code snippets",
   "expandDown": "Expand Down",
@@ -1763,6 +1765,7 @@
     "279": "There are [%d] unreferenced databases in total, only [%d] are listed here",
     "280": "Cleanup of unreferenced databases completed, [%d] files removed, [%s] of disk space freed",
     "281": " (Default)",
+    "282": "Close window",
     "283": "Password",
     "284": "Access denied",
     "285": "Password is incorrect"

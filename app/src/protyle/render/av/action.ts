@@ -281,6 +281,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
                 blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
                 blockElement.removeAttribute("data-render");
+                if (target.dataset.page) {
+                    blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                        bodyItem.dataset.pageSize = target.dataset.page;
+                    });
+                }
                 avRender(blockElement, protyle);
             } else {
                 transaction(protyle, [{
@@ -323,7 +328,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             const searchElement = blockElement.querySelector('div[data-type="av-search"]') as HTMLInputElement;
             searchElement.style.width = "128px";
             searchElement.style.paddingLeft = "";
-            searchElement.style.paddingRight = "";
+            searchElement.style.marginRight = "1em";
             const viewsElement = hasClosestByClassName(searchElement, "av__views");
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");

@@ -97,7 +97,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (event.target.getAttribute("data-type") === "av-search") {
+        if (hasClosestByAttribute(event.target, "data-type", "av-search")) {
             if (matchHotKey("⌘A", event)) {
                 event.preventDefault();
                 getSelection().getRangeAt(0).selectNodeContents(event.target);

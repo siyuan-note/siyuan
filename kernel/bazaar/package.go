@@ -633,6 +633,7 @@ func loadInstalledReadme(installPath, basePath string, readme LocaleStrings) (re
 }
 
 func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
+	mdData = bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)
@@ -644,6 +645,7 @@ func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
 }
 
 func renderLocalREADME(basePath string, mdData []byte) (ret string, err error) {
+	mdData = bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))
 	luteEngine := lute.New()
 	luteEngine.SetSoftBreak2HardBreak(false)
 	luteEngine.SetCodeSyntaxHighlight(false)

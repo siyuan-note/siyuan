@@ -17,6 +17,7 @@
 package util
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -211,6 +212,58 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]interface{}, o
 
 	ok = true
 	return
+}
+
+// ParseJsonArg 使用泛型从 JSON 参数中提取指定键的值。
+//   - 如果 required 为 true 但参数缺失，则会在 ret.Msg 中写入 “[key] is required”
+//   - 如果参数存在但类型不匹配，则会在 ret.Msg 中写入 “[key] should be [T]”
+//   - 返回值 ok 为 false 时，表示提取失败或类型不匹配
+func ParseJsonArg[T any](key string, required bool, arg map[string]interface{}, ret *gulu.Result) (value T, ok bool) {
+	raw, exists := arg[key]
+	if !exists || raw == nil {
+		if required {
+			ret.Code = -1
+			ret.Msg = key + " is required"
+		} else {
+			ok = true
+		}
+		return
+	}
+
+	value, ok = raw.(T)
+	if !ok {
+		var zero T
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("%s should be %T", key, zero)
+	}
+	return
+}
+
+// JsonArgParseFunc 为单次提取函数，用于 ParseJsonArgs 批量提取。
+type JsonArgParseFunc func(arg map[string]interface{}, ret *gulu.Result) bool
+
+// BindJsonArg 创建一个提取函数：从 arg 取 key 并写入 dest，供 ParseJsonArgs 使用。
+func BindJsonArg[T any](key string, required bool, dest *T) JsonArgParseFunc {
+	return func(arg map[string]interface{}, ret *gulu.Result) bool {
+		v, ok := ParseJsonArg[T](key, required, arg, ret)
+		if !ok {
+			return false
+		}
+		*dest = v
+		return true
+	}
+}
+
+// ParseJsonArgs 按顺序执行多个提取函数。
+//   - 任一失败返回 false 并在 ret 中写入错误信息
+//   - 全部成功返回 true
+func ParseJsonArgs(arg map[string]interface{}, ret *gulu.Result, extractors ...JsonArgParseFunc) bool {
+	for _, ext := range extractors {
+		if !ext(arg, ret) {
+			return false
+		}
+	}
+	return true
 }
 
 func InvalidIDPattern(idArg string, result *gulu.Result) bool {

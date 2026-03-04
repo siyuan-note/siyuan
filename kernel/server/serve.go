@@ -618,7 +618,7 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 		}
 
 		if !model.Conf.Editor.AllowSVGScript {
-			data = []byte(util.RemoveScriptsInSVG(string(data)))
+			data = []byte(util.SanitizeSVG(string(data)))
 		}
 
 		context.Data(200, "image/svg+xml", data)

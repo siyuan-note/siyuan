@@ -26,7 +26,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "sendDeviceNotification":
                 if (window.JSAndroid.sendNotification) {
-                    window.JSAndroid.sendNotification(data.data.title, data.data.body, data.data.delayInSeconds);
+                    window.JSAndroid.sendNotification(data.data.channel, data.data.title, data.data.body, data.data.delayInSeconds);
                 }
                 break;
             case "backgroundtask":

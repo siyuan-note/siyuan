@@ -80,18 +80,20 @@ func html2BlockDOM(c *gin.Context) {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
-	markdown, withMath, err := model.HTML2Markdown(dom, luteEngine)
-	if err != nil {
+	tree, _ := model.HTML2Tree(dom, luteEngine)
+	if nil == tree {
+		md, withMath, _ := model.HTML2Markdown(dom, luteEngine)
+		if withMath {
+			luteEngine.SetInlineMath(true)
+		}
+		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	}
+	if nil == tree {
 		ret.Data = "Failed to convert"
 		return
 	}
 
-	if withMath {
-		luteEngine.SetInlineMath(true)
-	}
-
 	var unlinks []*ast.Node
-	tree := parse.Parse("", []byte(markdown), luteEngine.ParseOptions)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -177,7 +179,7 @@ func html2BlockDOM(c *gin.Context) {
 			name = name[0 : len(name)-len(ext)]
 			name = name + "-" + ast.NewNodeID() + ext
 			targetPath := filepath.Join(util.DataDir, "assets", name)
-			if err = filelock.Copy(localPath, targetPath); err != nil {
+			if err := filelock.Copy(localPath, targetPath); err != nil {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
 				return ast.WalkStop
 			}

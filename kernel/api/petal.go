@@ -67,10 +67,10 @@ func setPetalEnabled(c *gin.Context) {
 		app = arg["app"].(string)
 	}
 	if enabled {
-		upsertPluginCodeSet := hashset.New(packageName)
-		model.PushReloadPlugin(upsertPluginCodeSet, nil, nil, nil, app)
+		reloadPluginSet := hashset.New(packageName)
+		model.PushReloadPlugin(nil, nil, reloadPluginSet, nil, app)
 	} else {
 		unloadPluginSet := hashset.New(packageName)
-		model.PushReloadPlugin(nil, nil, unloadPluginSet, nil, app)
+		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, app)
 	}
 }

@@ -19,6 +19,7 @@ package api
 import (
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,13 @@ func sendDeviceNotification(c *gin.Context) {
 		channel = strings.TrimSpace(arg["channel"].(string))
 	} else {
 		channel = "SiYuan Notifications"
+	}
+
+	var id int
+	if nil != arg["id"] {
+		id = int(arg["id"].(float64))
+	} else {
+		id = int(time.Now().Unix())
 	}
 
 	var title string
@@ -74,6 +82,7 @@ func sendDeviceNotification(c *gin.Context) {
 
 	util.BroadcastByType("main", "sendDeviceNotification", 0, "", map[string]interface{}{
 		"channel":        channel,
+		"id":             id,
 		"title":          title,
 		"body":           body,
 		"delayInSeconds": delayInSeconds,

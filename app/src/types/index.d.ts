@@ -255,7 +255,7 @@ interface Window {
         getScreenWidthPx(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
-        sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
+        sendNotification(channel: string, id: number, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
     };
     JSHarmony: {
@@ -275,7 +275,7 @@ interface Window {
         getScreenWidthPx(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
-        sendNotification(channel: string, title: string, body: string, delayInSeconds: number): void
+        sendNotification(channel: string, id: number, title: string, body: string, delayInSeconds: number): void
         cancelNotification(id: number): void
     };
 

@@ -18,26 +18,45 @@ package bazaar
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute"
+	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	textUnicode "golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
 
-func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
+// getReadmeFileCandidates 根据包的 README 配置返回去重的按优先级排序的 README 候选文件名列表：当前语言首选、default、README.md。
+func getReadmeFileCandidates(readme LocaleStrings) []string {
+	preferred := getPreferredReadme(readme)
+	defaultName := "README.md"
+	if v := strings.TrimSpace(readme["default"]); v != "" {
+		defaultName = v
+	}
+	return gulu.Str.RemoveDuplicatedElem([]string{preferred, defaultName, "README.md"})
+}
+
+// GetBazaarPackageREADME 获取集市包的在线 README。
+func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 
 	stageIndexLock.RLock()
 	stageIndex := cachedStageIndex[packageType]
 	stageIndexLock.RUnlock()
-	if nil == stageIndex {
-		return
+	if stageIndex == nil {
+		var err error
+		stageIndex, err = getStageIndex(ctx, packageType)
+		if err != nil {
+			return
+		}
 	}
 
 	url := strings.TrimPrefix(repoURLHash, "https://github.com/")
@@ -48,113 +67,106 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 			break
 		}
 	}
-	if nil == repo || nil == repo.Package {
+	if repo == nil || repo.Package == nil {
 		return
 	}
 
-	readme := getPreferredReadme(repo.Package.Readme)
-
-	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
-	if err != nil {
-		ret = fmt.Sprintf("Load bazaar package's preferred README(%s) failed: %s", readme, err.Error())
-		// 回退到 Default README
-		var defaultReadme string
-		if len(repo.Package.Readme) > 0 {
-			defaultReadme = repo.Package.Readme["default"]
+	candidates := getReadmeFileCandidates(repo.Package.Readme)
+	var data []byte
+	var loadErr error
+	var errMsgs []string
+	for _, name := range candidates {
+		data, loadErr = downloadPackage(repoURLHash+"/"+name, false, "")
+		if loadErr == nil {
+			break
 		}
-		if "" == strings.TrimSpace(defaultReadme) {
-			defaultReadme = "README.md"
-		}
-		if readme != defaultReadme {
-			data, err = downloadPackage(repoURLHash+"/"+defaultReadme, false, "")
-			if err != nil {
-				ret += fmt.Sprintf("<br>Load bazaar package's default README(%s) failed: %s", defaultReadme, err.Error())
-			}
-		}
-		// 回退到 README.md
-		if err != nil && readme != "README.md" && defaultReadme != "README.md" {
-			data, err = downloadPackage(repoURLHash+"/README.md", false, "")
-			if err != nil {
-				ret += fmt.Sprintf("<br>Load bazaar package's README.md failed: %s", err.Error())
-				return
-			}
-		} else if err != nil {
-			return
-		}
+		errMsgs = append(errMsgs, fmt.Sprintf("Load bazaar package's README(%s) failed: %s", name, loadErr.Error()))
 	}
-
-	if 2 < len(data) {
-		if 255 == data[0] && 254 == data[1] {
-			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.LittleEndian, textUnicode.ExpectBOM).NewDecoder(), data)
-		} else if 254 == data[0] && 255 == data[1] {
-			data, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.ExpectBOM).NewDecoder(), data)
-		}
-	}
-
-	ret, err = renderREADME(repoURL, data)
-	return
-}
-
-func loadInstalledReadme(installPath, basePath string, readme LocaleStrings) (ret string) {
-	readmeFilename := getPreferredReadme(readme)
-	readmeData, readErr := os.ReadFile(filepath.Join(installPath, readmeFilename))
-	if nil == readErr {
-		ret, _ = renderLocalREADME(basePath, readmeData)
+	if loadErr != nil {
+		ret = strings.Join(errMsgs, "<br>")
 		return
 	}
 
-	logging.LogWarnf("read installed %s failed: %s", readmeFilename, readErr)
-	ret = fmt.Sprintf("File %s not found", readmeFilename)
-	// 回退到 Default README
-	var defaultReadme string
-	if len(readme) > 0 {
-		defaultReadme = strings.TrimSpace(readme["default"])
-	}
-	if "" == defaultReadme {
-		defaultReadme = "README.md"
-	}
-	if readmeFilename != defaultReadme {
-		readmeData, readErr = os.ReadFile(filepath.Join(installPath, defaultReadme))
-		if nil == readErr {
-			ret, _ = renderLocalREADME(basePath, readmeData)
-			return
+	if len(data) > 2 {
+		var decoded []byte
+		var err error
+		if data[0] == 0xFF && data[1] == 0xFE {
+			decoded, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.LittleEndian, textUnicode.ExpectBOM).NewDecoder(), data)
+		} else if data[0] == 0xFE && data[1] == 0xFF {
+			decoded, _, err = transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.ExpectBOM).NewDecoder(), data)
 		}
-		logging.LogWarnf("read installed %s failed: %s", defaultReadme, readErr)
-		ret += fmt.Sprintf("<br>File %s not found", defaultReadme)
-	}
-	// 回退到 README.md
-	if nil != readErr && readmeFilename != "README.md" && defaultReadme != "README.md" {
-		readmeData, readErr = os.ReadFile(filepath.Join(installPath, "README.md"))
-		if nil == readErr {
-			ret, _ = renderLocalREADME(basePath, readmeData)
-			return
+		if decoded != nil && err == nil {
+			data = decoded
 		}
-		logging.LogWarnf("read installed README.md failed: %s", readErr)
-		ret += "<br>File README.md not found"
 	}
-	return
-}
 
-func renderREADME(repoURL string, mdData []byte) (ret string, err error) {
-	mdData = bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))
-	luteEngine := lute.New()
-	luteEngine.SetSoftBreak2HardBreak(false)
-	luteEngine.SetCodeSyntaxHighlight(false)
 	linkBase := "https://cdn.jsdelivr.net/gh/" + strings.TrimPrefix(repoURL, "https://github.com/")
+	ret = renderPackageREADME(linkBase, data)
+	return
+}
+
+// getInstalledPackageREADME 获取集市包的本地 README。
+func getInstalledPackageREADME(installPath, linkBase string, readme LocaleStrings) (ret string) {
+	candidates := getReadmeFileCandidates(readme)
+	var errMsgs []string
+	for _, name := range candidates {
+		readmeData, readErr := os.ReadFile(filepath.Join(installPath, name))
+		if readErr == nil {
+			ret = renderPackageREADME(linkBase, readmeData)
+			return
+		}
+		logging.LogWarnf("read installed %s failed: %s", name, readErr)
+		errMsgs = append(errMsgs, fmt.Sprintf("File [%s] not found", name))
+	}
+	ret = strings.Join(errMsgs, "<br>")
+	return
+}
+
+// renderPackageREADME 渲染 README Markdown 为 HTML。
+func renderPackageREADME(linkBase string, mdData []byte) (ret string) {
+	mdData = bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf")) // 移除文件开头的 BOM
+	luteEngine := lute.New()
+	luteEngine.SetSoftBreak2HardBreak(false)
+	luteEngine.SetCodeSyntaxHighlight(false)
 	luteEngine.SetLinkBase(linkBase)
-	ret = luteEngine.Md2HTML(string(mdData))
+
+	tree := parse.Parse("", mdData, luteEngine.ParseOptions)
+	normalizeNodesIAL(tree)
+	ret = luteEngine.Tree2HTML(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = util.LinkTarget(ret, linkBase)
 	return
 }
 
-func renderLocalREADME(basePath string, mdData []byte) (ret string, err error) {
-	mdData = bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))
-	luteEngine := lute.New()
-	luteEngine.SetSoftBreak2HardBreak(false)
-	luteEngine.SetCodeSyntaxHighlight(false)
-	linkBase := basePath
-	luteEngine.SetLinkBase(linkBase)
-	ret = luteEngine.Md2HTML(string(mdData))
-	ret = util.LinkTarget(ret, linkBase)
-	return
+func normalizeNodesIAL(tree *parse.Tree) {
+	if tree == nil || tree.Root == nil {
+		return
+	}
+
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if n.Type == ast.NodeCodeBlock {
+			// 代码块添加 code-block 类名以修正样式。
+			n.KramdownIAL = addClassToKramdownIAL(n.KramdownIAL, "code-block")
+		}
+		return ast.WalkContinue
+	})
+}
+
+func addClassToKramdownIAL(ial [][]string, class string) [][]string {
+	for i, attr := range ial {
+		if len(attr) < 2 || attr[0] != "class" {
+			continue
+		}
+		for _, item := range strings.Fields(attr[1]) {
+			if item == class {
+				return ial
+			}
+		}
+		attr[1] = strings.TrimSpace(attr[1] + " " + class)
+		ial[i] = attr
+		return ial
+	}
+	return append(ial, []string{"class", class})
 }

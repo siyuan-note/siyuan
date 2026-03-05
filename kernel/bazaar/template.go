@@ -154,7 +154,7 @@ func InstalledTemplates() (ret []*Template) {
 			packageInstallSizeCache.SetDefault(template.RepoURL, is)
 		}
 		template.HInstallSize = humanize.BytesCustomCeil(uint64(template.InstallSize), 2)
-		template.PreferredReadme = loadInstalledReadme(installPath, "/templates/"+dirName+"/", template.Readme)
+		template.PreferredReadme = getInstalledPackageREADME(installPath, "/templates/"+dirName+"/", template.Readme)
 		template.Outdated = isOutdatedTemplate(template, bazaarTemplates)
 		ret = append(ret, template)
 	}

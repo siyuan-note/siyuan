@@ -95,7 +95,7 @@ func getBazaarPackageREADME(c *gin.Context) {
 		return
 	}
 	ret.Data = map[string]interface{}{
-		"html": model.GetPackageREADME(repoURL, repoHash, pkgType),
+		"html": model.GetBazaarPackageREADME(c.Request.Context(), repoURL, repoHash, pkgType),
 	}
 }
 

@@ -17,6 +17,7 @@
 package model
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path"
@@ -192,8 +193,9 @@ func UpdatedPackages(frontend string) (plugins []*bazaar.Plugin, widgets []*baza
 	return
 }
 
-func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
-	ret = bazaar.GetPackageREADME(repoURL, repoHash, packageType)
+// GetBazaarPackageREADME 获取集市包的在线 README。
+func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType string) (ret string) {
+	ret = bazaar.GetBazaarPackageREADME(ctx, repoURL, repoHash, packageType)
 	return
 }
 

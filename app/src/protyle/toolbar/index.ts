@@ -1477,10 +1477,10 @@ export class Toolbar {
                     /// #else
                     setPosition(this.subElement, 0, 0);
                     /// #endif
-                } else if (response.data.blocks[0]?.path === previewPath) {
+                } else if (response.data.templates[0]?.path === previewPath) {
                     return;
                 } else {
-                    previewPath = response.data.blocks[0]?.path;
+                    previewPath = response.data.templates[0]?.path;
                 }
                 previewTemplate(previewPath, previewElement, protyle.block.parentID);
             });
@@ -1593,7 +1593,7 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string, name: string }, index: number) => {
+                response.data.widgets.forEach((item: { path: string, content: string, name: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${item.name}
     <span class="b3-list-item__meta">${item.content}</span>

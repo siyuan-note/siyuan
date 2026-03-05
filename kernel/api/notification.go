@@ -19,75 +19,11 @@ package api
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
-
-func sendDeviceNotification(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	if util.ContainerAndroid != util.Container && util.ContainerHarmony != util.Container {
-		ret.Code = -1
-		ret.Msg = "Just support Android and HarmonyOS"
-		return
-	}
-
-	var channel string
-	if nil != arg["channel"] {
-		channel = strings.TrimSpace(arg["channel"].(string))
-	} else {
-		channel = "SiYuan Notifications"
-	}
-
-	var id int
-	if nil != arg["id"] {
-		id = int(arg["id"].(float64))
-	} else {
-		id = int(time.Now().Unix())
-	}
-
-	var title string
-	if nil != arg["title"] {
-		title = strings.TrimSpace(arg["title"].(string))
-	} else {
-		ret.Code = -1
-		ret.Msg = "title can't be empty"
-		return
-	}
-
-	var body string
-	if nil != arg["body"] {
-		body = strings.TrimSpace(arg["body"].(string))
-	} else {
-		ret.Code = -1
-		ret.Msg = "body can't be empty"
-		return
-	}
-
-	var delayInSeconds int
-	if nil != arg["delayInSeconds"] {
-		delayInSeconds = int(arg["delayInSeconds"].(float64))
-	} else {
-		delayInSeconds = 1
-	}
-
-	util.BroadcastByType("main", "sendDeviceNotification", 0, "", map[string]interface{}{
-		"channel":        channel,
-		"id":             id,
-		"title":          title,
-		"body":           body,
-		"delayInSeconds": delayInSeconds,
-	})
-}
 
 func pushMsg(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

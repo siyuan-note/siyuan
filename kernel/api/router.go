@@ -458,7 +458,6 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/notification/pushMsg", model.CheckAuth, model.CheckAdminRole, pushMsg)
 	ginServer.Handle("POST", "/api/notification/pushErrMsg", model.CheckAuth, model.CheckAdminRole, pushErrMsg)
-	ginServer.Handle("POST", "/api/notification/sendDeviceNotification", model.CheckAuth, model.CheckAdminRole, sendDeviceNotification)
 
 	ginServer.Handle("POST", "/api/snippet/getSnippet", model.CheckAuth, getSnippet)
 	ginServer.Handle("POST", "/api/snippet/setSnippet", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSnippet)

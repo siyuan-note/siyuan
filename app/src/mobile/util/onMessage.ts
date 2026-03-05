@@ -28,6 +28,10 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 if (window.JSAndroid.sendNotification) {
                     window.JSAndroid.sendNotification(data.data.channel, data.data.title, data.data.body, data.data.delayInSeconds);
                 }
+                if (window.JSHarmony.sendNotification) {
+                    window.JSHarmony.sendNotification(data.data.channel, data.data.title, data.data.body, data.data.delayInSeconds);
+                }
+
                 break;
             case "backgroundtask":
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||

@@ -34,9 +34,9 @@ func sendDeviceNotification(c *gin.Context) {
 		return
 	}
 
-	if util.ContainerAndroid != util.Container {
+	if util.ContainerAndroid != util.Container && util.ContainerHarmony != util.Container {
 		ret.Code = -1
-		ret.Msg = "Just support Android"
+		ret.Msg = "Just support Android and HarmonyOS"
 		return
 	}
 

@@ -21,7 +21,7 @@ import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
 import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
-import {getAllModels} from "../layout/getAll";
+import {getAllModels, getAllTabs} from "../layout/getAll";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
@@ -348,6 +348,7 @@ export const API = {
     /// #if !MOBILE
     getActiveTab,
     getAllModels,
+    getAllTabs,
     /// #endif
     getActiveEditor,
     platformUtils,

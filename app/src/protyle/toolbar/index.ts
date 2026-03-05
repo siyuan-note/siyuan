@@ -1454,7 +1454,7 @@ export class Toolbar {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
+                response.data.templates.forEach((item: { path: string, content: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 <span class="b3-list-item__text">${item.content}</span>`;
                     /// #if !BROWSER
@@ -1469,7 +1469,7 @@ export class Toolbar {
                 listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
 
                 if (!previewPath) {
-                    previewPath = response.data.blocks[0]?.path;
+                    previewPath = response.data.templates[0]?.path;
                     /// #if !MOBILE
                     const rangePosition = getSelectionPosition(nodeElement, range);
                     setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);

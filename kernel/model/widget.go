@@ -26,8 +26,14 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SearchWidget(keyword string) (ret []*Block) {
-	ret = []*Block{}
+// WidgetSearchResult 描述了挂件搜索结果。
+type WidgetSearchResult struct {
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func SearchWidget(keyword string) (ret []*WidgetSearchResult) {
+	ret = []*WidgetSearchResult{}
 	widgetsDir := filepath.Join(util.DataDir, "widgets")
 	entries, err := os.ReadDir(widgetsDir)
 	if err != nil {
@@ -55,7 +61,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 
 	widgets = filterWidgets(widgets, k)
 	for _, widget := range widgets {
-		b := &Block{
+		b := &WidgetSearchResult{
 			Name:    bazaar.GetPreferredName(widget.Package),
 			Content: widget.Name,
 		}

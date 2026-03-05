@@ -71,11 +71,12 @@ if (process.platform === "linux") {
         "KYLIN",    // 麒麟备用标识
         "NEWSTART"  // 中兴新支点
     ].some(key => desktop.includes(key));
-    const isKylinFile = fs.existsSync("/etc/kylin-release");
+    const isKylinFile = fs.existsSync("/etc/kylin-version");
     const isUosFile = fs.existsSync("/etc/uos-version");
-    const isDeepinFile = fs.existsSync("/etc/deepin-release");
+    const isDeepinFile = fs.existsSync("/etc/deepin-version");
     if (isChineseOS || isKylinFile || isUosFile || isDeepinFile) {
-        app.commandLine.appendSwitch("ozone-platform", "x11");
+        app.commandLine.appendSwitch("enable-wayland-ime");
+        app.commandLine.appendSwitch("wayland-text-input-version", "3");
     }
 }
 

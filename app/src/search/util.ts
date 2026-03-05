@@ -941,7 +941,8 @@ export const openSearchEditor = (options: {
         const rangeBlockElement = hasClosestBlock(currentRange.startContainer);
         if (rangeBlockElement) {
             options.id = rangeBlockElement.getAttribute("data-node-id");
-            const offset = getSelectionOffset(getContenteditableElement(rangeBlockElement), null, options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex]);
+            const offset = getSelectionOffset(getContenteditableElement(rangeBlockElement) || rangeBlockElement,
+                null, options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex]);
             const scrollAttr: IScrollAttr = {
                 rootId: options.protyle.block.rootID,
                 focusId: options.id,

@@ -255,7 +255,8 @@ interface Window {
         getScreenWidthPx(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
-        sendNotification(channel: string, title: string, body: string, delayInSeconds: number): void
+        sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
+        cancelNotification(id: number): void
     };
     JSHarmony: {
         showKeyboard(): void
@@ -275,6 +276,7 @@ interface Window {
         exit(): void
         setWebViewFocusable(enable: boolean): void
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): void
+        cancelNotification(id: number): void
     };
 
     Protyle: import("../protyle/method").default;

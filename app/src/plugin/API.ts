@@ -310,13 +310,15 @@ const openEmoji = (options: {
     position: IPosition,
     selectedCB?: (emoji: string) => void,
     dynamicIconURL?: string
+    hideDynamicIcon?: boolean
+    hideCustomIcon?: boolean
 }) => {
     let dynamicImgElement: HTMLImageElement;
     if (options.dynamicIconURL) {
         dynamicImgElement = document.createElement("img");
         dynamicImgElement.src = options.dynamicIconURL;
     }
-    openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement);
+    openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement,  {dynamic: options.hideDynamicIcon, custom: options.hideCustomIcon});
 };
 
 export const API = {

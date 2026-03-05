@@ -34,10 +34,17 @@ func sendDeviceNotification(c *gin.Context) {
 		return
 	}
 
-	if util.ContainerAndroid != util.Container {
+	if util.ContainerAndroid != util.Container && util.ContainerHarmony != util.Container {
 		ret.Code = -1
-		ret.Msg = "Just support Android"
+		ret.Msg = "Just support Android and HarmonyOS"
 		return
+	}
+
+	var channel string
+	if nil != arg["channel"] {
+		channel = strings.TrimSpace(arg["channel"].(string))
+	} else {
+		channel = "SiYuan Notifications"
 	}
 
 	var title string
@@ -66,6 +73,7 @@ func sendDeviceNotification(c *gin.Context) {
 	}
 
 	util.BroadcastByType("main", "sendDeviceNotification", 0, "", map[string]interface{}{
+		"channel":        channel,
 		"title":          title,
 		"body":           body,
 		"delayInSeconds": delayInSeconds,

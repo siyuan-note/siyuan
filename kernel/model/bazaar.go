@@ -267,7 +267,7 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 	savePetals(petals)
 
 	uninstallPluginSet := hashset.New(pluginName)
-	PushReloadPlugin(nil, nil, nil, uninstallPluginSet, "")
+	PushReloadPlugin(uninstallPluginSet, nil, nil, nil, "")
 	return nil
 }
 
@@ -432,7 +432,7 @@ func InstalledThemes(keyword string) (ret []*bazaar.Theme) {
 }
 
 func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bool) error {
-	closeThemeWatchers()
+	CloseWatchThemes()
 
 	installPath := filepath.Join(util.ThemesPath, themeName)
 	err := bazaar.InstallTheme(repoURL, repoHash, installPath, Conf.System.ID)
@@ -458,7 +458,7 @@ func InstallBazaarTheme(repoURL, repoHash, themeName string, mode int, update bo
 }
 
 func UninstallBazaarTheme(themeName string) error {
-	closeThemeWatchers()
+	CloseWatchThemes()
 
 	installPath := filepath.Join(util.ThemesPath, themeName)
 	err := bazaar.UninstallTheme(installPath)
@@ -579,4 +579,9 @@ func getSearchKeywords(query string) (ret []string) {
 		}
 	}
 	return
+}
+
+// isBuiltInTheme 通过包名或目录名判断是否为内置主题
+func isBuiltInTheme(name string) bool {
+	return "daylight" == name || "midnight" == name
 }

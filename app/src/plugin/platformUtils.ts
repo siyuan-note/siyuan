@@ -17,8 +17,8 @@ export const updateHotkeyTip = compatibility.updateHotkeyTip;
 export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
-/// #if BROWSER
 export const sendMobileAppNotification = (channel: string, title: string, body: string, delayInSeconds: number): Promise<number> => {
+    /// #if BROWSER
     return new Promise((resolve) => {
         if (window.JSAndroid && window.JSAndroid.sendNotification) {
             const id = window.JSAndroid.sendNotification(channel, title, body, delayInSeconds);
@@ -42,11 +42,15 @@ export const sendMobileAppNotification = (channel: string, title: string, body: 
                 delay: delayInSeconds,
                 callback: `window.webkit.nativeCallbacks.${callbackId}`
             });
+        } else {
+            resolve(-1);
         }
     });
+    /// #endif
 };
 
 export const cancelMobileAppNotification = (id: number) => {
+    /// #if BROWSER
     if (window.JSAndroid && window.JSAndroid.cancelNotification) {
         window.JSAndroid.cancelNotification(id);
     } else if (window.JSHarmony && window.JSHarmony.cancelNotification) {
@@ -54,5 +58,5 @@ export const cancelMobileAppNotification = (id: number) => {
     } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.cancelNotification) {
         window.webkit.messageHandlers.cancelNotification.postMessage(id);
     }
+    /// #endif
 };
-/// #endif

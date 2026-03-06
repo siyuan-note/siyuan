@@ -34,24 +34,24 @@ type WidgetSearchResult struct {
 
 func SearchWidget(keyword string) (ret []*WidgetSearchResult) {
 	ret = []*WidgetSearchResult{}
-	widgetsDir := filepath.Join(util.DataDir, "widgets")
-	entries, err := os.ReadDir(widgetsDir)
+	widgetsDirPath := filepath.Join(util.DataDir, "widgets")
+	widgetsDir, err := os.ReadDir(widgetsDirPath)
 	if err != nil {
-		logging.LogErrorf("read dir [%s] failed: %s", widgetsDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", widgetsDirPath, err)
 		return
 	}
 
-	k := strings.ToLower(keyword)
-	var widgets []*bazaar.Widget
-	for _, entry := range entries {
-		if !util.IsDirRegularOrSymlink(entry) {
+	var widgets []*bazaar.Package
+	for _, dir := range widgetsDir {
+		if !util.IsDirRegularOrSymlink(dir) {
 			continue
 		}
-		if strings.HasPrefix(entry.Name(), ".") {
+		dirName := dir.Name()
+		if strings.HasPrefix(dirName, ".") {
 			continue
 		}
 
-		widget, _ := bazaar.WidgetJSON(entry.Name())
+		widget, _ := bazaar.ParsePackageJSON(filepath.Join(widgetsDirPath, dirName, "widget.json"))
 		if nil == widget {
 			continue
 		}
@@ -59,10 +59,10 @@ func SearchWidget(keyword string) (ret []*WidgetSearchResult) {
 		widgets = append(widgets, widget)
 	}
 
-	widgets = filterWidgets(widgets, k)
+	widgets = bazaar.FilterPackages(widgets, keyword)
 	for _, widget := range widgets {
 		b := &WidgetSearchResult{
-			Name:    bazaar.GetPreferredName(widget.Package),
+			Name:    bazaar.GetPreferredLocaleString(widget.DisplayName, widget.Name),
 			Content: widget.Name,
 		}
 		ret = append(ret, b)

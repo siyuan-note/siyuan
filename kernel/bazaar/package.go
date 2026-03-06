@@ -17,24 +17,16 @@
 package bazaar
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
+	"html"
 	"os"
-	"path/filepath"
+	"path"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/88250/gulu"
-	"github.com/araddon/dateparse"
-	"github.com/imroc/req/v3"
-	gcache "github.com/patrickmn/go-cache"
 	"github.com/siyuan-note/filelock"
-	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 )
 
 // LocaleStrings 表示按语种 key 的字符串表，key 为语种如 "default"、"en_US"、"zh_CN" 等
@@ -47,6 +39,8 @@ type Funding struct {
 	Custom         []string `json:"custom"`
 }
 
+// Package 描述了集市包元数据和传递给前端的其他信息。
+//  - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
 type Package struct {
 	Author            string        `json:"author"`
 	URL               string        `json:"url"`
@@ -66,12 +60,11 @@ type Package struct {
 	PreferredDesc    string `json:"preferredDesc"`
 	PreferredReadme  string `json:"preferredReadme"`
 
-	Name            string `json:"name"`
-	RepoURL         string `json:"repoURL"`
-	RepoHash        string `json:"repoHash"`
-	PreviewURL      string `json:"previewURL"`
-	PreviewURLThumb string `json:"previewURLThumb"`
-	IconURL         string `json:"iconURL"`
+	Name       string `json:"name"`    // 包名，不一定是仓库名
+	RepoURL    string `json:"repoURL"` // 形式为 https://github.com/owner/repo
+	RepoHash   string `json:"repoHash"`
+	PreviewURL string `json:"previewURL"`
+	IconURL    string `json:"iconURL"`
 
 	Installed               bool   `json:"installed"`
 	Outdated                bool   `json:"outdated"`
@@ -90,11 +83,14 @@ type Package struct {
 	DisallowUpdate          bool   `json:"disallowUpdate"`
 	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer"`
 
-	Incompatible bool `json:"incompatible"`
+	// 专用字段，nil 时不序列化
+	Incompatible *bool     `json:"incompatible,omitempty"` // Plugin：是否不兼容
+	Enabled      *bool     `json:"enabled,omitempty"`      // Plugin：是否启用
+	Modes        *[]string `json:"modes,omitempty"`        // Theme：支持的模式列表
 }
 
 type StageRepo struct {
-	URL         string `json:"url"`
+	URL         string `json:"url"` // owner/repo@hash 形式
 	Updated     string `json:"updated"`
 	Stars       int    `json:"stars"`
 	OpenIssues  int    `json:"openIssues"`
@@ -107,10 +103,48 @@ type StageRepo struct {
 
 type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
+
+	reposByURL map[string]*StageRepo // 不序列化，首次按 URL 查找时懒构建
+	reposOnce  sync.Once
 }
 
-// getPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
-func getPreferredLocaleString(m LocaleStrings, fallback string) string {
+// ParsePackageJSON 解析集市包 JSON 文件
+func ParsePackageJSON(filePath string) (ret *Package, err error) {
+	if !filelock.IsExist(filePath) {
+		err = os.ErrNotExist
+		return
+	}
+	data, err := filelock.ReadFile(filePath)
+	if err != nil {
+		logging.LogErrorf("read [%s] failed: %s", filePath, err)
+		return
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
+		logging.LogErrorf("parse [%s] failed: %s", filePath, err)
+		return
+	}
+
+	// 仅对本地集市包做 HTML 转义，在线 stage 由 bazaar 工作流处理
+	sanitizePackageDisplayStrings(ret)
+	ret.URL = strings.TrimSuffix(ret.URL, "/")
+	return
+}
+
+// sanitizePackageDisplayStrings 对集市包直接显示的信息做 HTML 转义，避免 XSS。
+func sanitizePackageDisplayStrings(pkg *Package) {
+	if pkg == nil {
+		return
+	}
+	for k, v := range pkg.DisplayName {
+		pkg.DisplayName[k] = html.EscapeString(v)
+	}
+	for k, v := range pkg.Description {
+		pkg.Description[k] = html.EscapeString(v)
+	}
+}
+
+// GetPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en_US，再回退 fallback。
+func GetPreferredLocaleString(m LocaleStrings, fallback string) string {
 	if len(m) == 0 {
 		return fallback
 	}
@@ -126,40 +160,19 @@ func getPreferredLocaleString(m LocaleStrings, fallback string) string {
 	return fallback
 }
 
-func GetPreferredName(pkg *Package) string {
-	return getPreferredLocaleString(pkg.DisplayName, pkg.Name)
-}
-
-func getPreferredDesc(desc LocaleStrings) string {
-	return getPreferredLocaleString(desc, "")
-}
-
-func getPreferredReadme(readme LocaleStrings) string {
-	return getPreferredLocaleString(readme, "README.md")
-}
-
+// getPreferredFunding 获取包的首选赞助链接
 func getPreferredFunding(funding *Funding) string {
 	if nil == funding {
 		return ""
 	}
-
-	if "" != funding.OpenCollective {
-		if strings.HasPrefix(funding.OpenCollective, "http://") || strings.HasPrefix(funding.OpenCollective, "https://") {
-			return funding.OpenCollective
-		}
-		return "https://opencollective.com/" + funding.OpenCollective
+	if v := normalizeFundingURL(funding.OpenCollective, "https://opencollective.com/"); "" != v {
+		return v
 	}
-	if "" != funding.Patreon {
-		if strings.HasPrefix(funding.Patreon, "http://") || strings.HasPrefix(funding.Patreon, "https://") {
-			return funding.Patreon
-		}
-		return "https://www.patreon.com/" + funding.Patreon
+	if v := normalizeFundingURL(funding.Patreon, "https://www.patreon.com/"); "" != v {
+		return v
 	}
-	if "" != funding.GitHub {
-		if strings.HasPrefix(funding.GitHub, "http://") || strings.HasPrefix(funding.GitHub, "https://") {
-			return funding.GitHub
-		}
-		return "https://github.com/sponsors/" + funding.GitHub
+	if v := normalizeFundingURL(funding.GitHub, "https://github.com/sponsors/"); "" != v {
+		return v
 	}
 	if 0 < len(funding.Custom) {
 		return funding.Custom[0]
@@ -167,249 +180,82 @@ func getPreferredFunding(funding *Funding) string {
 	return ""
 }
 
-func PluginJSON(pluginDirName string) (ret *Plugin, err error) {
-	p := filepath.Join(util.DataDir, "plugins", pluginDirName, "plugin.json")
-	if !filelock.IsExist(p) {
-		err = os.ErrNotExist
-		return
+func normalizeFundingURL(s, base string) string {
+	if "" == s {
+		return ""
 	}
-	data, err := filelock.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read plugin.json [%s] failed: %s", p, err)
-		return
+	if strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://") {
+		return s
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse plugin.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
+	return base + s
 }
 
-func WidgetJSON(widgetDirName string) (ret *Widget, err error) {
-	p := filepath.Join(util.DataDir, "widgets", widgetDirName, "widget.json")
-	if !filelock.IsExist(p) {
-		err = os.ErrNotExist
-		return
+// FilterPackages 按关键词过滤集市包列表
+func FilterPackages(packages []*Package, keyword string) []*Package {
+	keywords := getSearchKeywords(keyword)
+	if 0 == len(keywords) {
+		return packages
 	}
-	data, err := filelock.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func IconJSON(iconDirName string) (ret *Icon, err error) {
-	p := filepath.Join(util.IconsPath, iconDirName, "icon.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func TemplateJSON(templateDirName string) (ret *Template, err error) {
-	p := filepath.Join(util.DataDir, "templates", templateDirName, "template.json")
-	if !filelock.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := filelock.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
-		return
-	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-func ThemeJSON(themeDirName string) (ret *Theme, err error) {
-	p := filepath.Join(util.ThemesPath, themeDirName, "theme.json")
-	if !gulu.File.IsExist(p) {
-		err = os.ErrNotExist
-		return
-	}
-	data, err := os.ReadFile(p)
-	if err != nil {
-		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret = &Theme{}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
-		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
-		return
-	}
-
-	ret.URL = strings.TrimSuffix(ret.URL, "/")
-	return
-}
-
-var (
-	packageLocks     = map[string]*sync.Mutex{}
-	packageLocksLock = sync.Mutex{}
-)
-
-func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (data []byte, err error) {
-	packageLocksLock.Lock()
-	defer packageLocksLock.Unlock()
-
-	// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc
-	repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
-	lock, ok := packageLocks[repoURLHash]
-	if !ok {
-		lock = &sync.Mutex{}
-		packageLocks[repoURLHash] = lock
-	}
-	lock.Lock()
-	defer lock.Unlock()
-
-	repoURLHash = strings.TrimPrefix(repoURLHash, "https://github.com/")
-	u := util.BazaarOSSServer + "/package/" + repoURLHash
-	buf := &bytes.Buffer{}
-	resp, err := httpclient.NewCloudFileRequest2m().SetOutput(buf).SetDownloadCallback(func(info req.DownloadInfo) {
-		if pushProgress {
-			progress := float32(info.DownloadedSize) / float32(info.Response.ContentLength)
-			//logging.LogDebugf("downloading bazaar package [%f]", progress)
-			util.PushDownloadProgress(repoURL, progress)
+	ret := []*Package{}
+	for _, pkg := range packages {
+		if packageContainsKeywords(pkg, keywords) {
+			ret = append(ret, pkg)
 		}
-	}).Get(u)
-	if err != nil {
-		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
-		return nil, errors.New("get bazaar package failed, please check your network")
 	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get bazaar package [%s] failed: %d", u, resp.StatusCode)
-		return nil, errors.New("get bazaar package failed: " + resp.Status)
-	}
-	data = buf.Bytes()
-
-	go incPackageDownloads(repoURLHash, systemID)
-	return
+	return ret
 }
 
-func incPackageDownloads(repoURLHash, systemID string) {
-	if strings.Contains(repoURLHash, ".md") || "" == systemID {
+func getSearchKeywords(query string) (ret []string) {
+	query = strings.TrimSpace(query)
+	if "" == query {
 		return
 	}
-
-	repo := strings.Split(repoURLHash, "@")[0]
-	u := util.GetCloudServer() + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
-	httpclient.NewCloudRequest30s().SetBody(
-		map[string]interface{}{
-			"systemID": systemID,
-			"repo":     repo,
-		}).Post(u)
-}
-
-func uninstallPackage(installPath string) (err error) {
-	if err = os.RemoveAll(installPath); err != nil {
-		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
-		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
-	}
-	packageCache.Flush()
-	return
-}
-
-func installPackage(data []byte, installPath, repoURLHash string) (err error) {
-	err = installPackage0(data, installPath)
-	if err != nil {
-		return
-	}
-
-	packageCache.Delete(strings.TrimPrefix(repoURLHash, "https://github.com/"))
-	return
-}
-
-func installPackage0(data []byte, installPath string) (err error) {
-	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
-	if err = os.MkdirAll(tmpPackage, 0755); err != nil {
-		return
-	}
-	name := gulu.Rand.String(7)
-	tmp := filepath.Join(tmpPackage, name+".zip")
-	if err = os.WriteFile(tmp, data, 0644); err != nil {
-		return
-	}
-
-	unzipPath := filepath.Join(tmpPackage, name)
-	if err = gulu.Zip.Unzip(tmp, unzipPath); err != nil {
-		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
-		return
-	}
-
-	dirs, err := os.ReadDir(unzipPath)
-	if err != nil {
-		return
-	}
-
-	srcPath := unzipPath
-	if 1 == len(dirs) && dirs[0].IsDir() {
-		srcPath = filepath.Join(unzipPath, dirs[0].Name())
-	}
-
-	if err = filelock.Copy(srcPath, installPath); err != nil {
-		return
-	}
-	return
-}
-
-func formatUpdated(updated string) (ret string) {
-	t, e := dateparse.ParseIn(updated, time.Now().Location())
-	if nil == e {
-		ret = t.Format("2006-01-02")
-	} else {
-		if strings.Contains(updated, "T") {
-			ret = updated[:strings.Index(updated, "T")]
-		} else {
-			ret = strings.ReplaceAll(strings.ReplaceAll(updated, "T", ""), "Z", "")
+	keywords := strings.Split(query, " ")
+	for _, k := range keywords {
+		if "" != k {
+			ret = append(ret, strings.ToLower(k))
 		}
 	}
 	return
 }
 
-// Add marketplace package config item `minAppVersion` https://github.com/siyuan-note/siyuan/issues/8330
-func disallowInstallBazaarPackage(pkg *Package) bool {
-	// 如果包没有指定 minAppVersion，则允许安装
-	if "" == pkg.MinAppVersion {
+func packageContainsKeywords(pkg *Package, keywords []string) bool {
+	if 0 == len(keywords) {
+		return true
+	}
+	if nil == pkg {
 		return false
 	}
+	for _, kw := range keywords {
+		if !packageContainsKeyword(pkg, kw) {
+			return false
+		}
+	}
+	return true
+}
 
-	// 如果包要求的 minAppVersion 大于当前版本，则不允许安装
-	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
+func packageContainsKeyword(pkg *Package, kw string) bool {
+	if strings.Contains(strings.ToLower(pkg.Name), kw) || // https://github.com/siyuan-note/siyuan/issues/10515
+		strings.Contains(strings.ToLower(pkg.Author), kw) { // https://github.com/siyuan-note/siyuan/issues/11673
+		return true
+	}
+	for _, s := range pkg.DisplayName {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Description {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	for _, s := range pkg.Keywords {
+		if strings.Contains(strings.ToLower(s), kw) {
+			return true
+		}
+	}
+	if strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), kw) { // 仓库名，不一定是包名
 		return true
 	}
 	return false
 }
-
-var packageCache = gcache.New(6*time.Hour, 30*time.Minute) // [repoURL]*Package
-
-func CleanBazaarPackageCache() {
-	packageCache.Flush()
-}
-
-var packageInstallSizeCache = gcache.New(48*time.Hour, 6*time.Hour) // [repoURL]*int64

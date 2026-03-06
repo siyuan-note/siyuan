@@ -97,12 +97,16 @@ func loadThemes() {
 			continue
 		}
 		name := themeDir.Name()
-		themeConf, parseErr := bazaar.ThemeJSON(name)
+		themeConf, parseErr := bazaar.ParsePackageJSON(filepath.Join(util.ThemesPath, name, "theme.json"))
 		if nil != parseErr || nil == themeConf {
 			continue
 		}
 
-		for _, mode := range themeConf.Modes {
+		var modes []string
+		if nil != themeConf.Modes {
+			modes = *themeConf.Modes
+		}
+		for _, mode := range modes {
 			t := &conf.AppearanceTheme{Name: name}
 			if isBuiltInTheme(name) {
 				t.Label = name + Conf.Language(281)
@@ -174,7 +178,7 @@ func LoadIcons() {
 			continue
 		}
 		name := iconDir.Name()
-		iconConf, err := bazaar.IconJSON(name)
+		iconConf, err := bazaar.ParsePackageJSON(filepath.Join(util.IconsPath, name, "icon.json"))
 		if err != nil || nil == iconConf {
 			continue
 		}

@@ -318,6 +318,11 @@ func serveExport(ginServer *gin.Engine) {
 		}
 
 		fullPath := filepath.Join(exportBaseDir, decodedPath)
+		if util.IsSensitivePath(fullPath) {
+			logging.LogErrorf("refuse to export sensitive file [%s]", c.Request.URL.Path)
+			c.Status(http.StatusForbidden)
+			return
+		}
 
 		fileInfo, err := os.Stat(fullPath)
 		if os.IsNotExist(err) {

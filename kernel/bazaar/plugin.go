@@ -189,7 +189,7 @@ func InstalledPlugins(frontend string) (ret []*Plugin) {
 			packageInstallSizeCache.SetDefault(plugin.RepoURL, is)
 		}
 		plugin.HInstallSize = humanize.BytesCustomCeil(uint64(plugin.InstallSize), 2)
-		plugin.PreferredReadme = loadInstalledReadme(installPath, "/plugins/"+dirName+"/", plugin.Readme)
+		plugin.PreferredReadme = getInstalledPackageREADME(installPath, "/plugins/"+dirName+"/", plugin.Readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)

@@ -1237,6 +1237,9 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 			insertedNode = insertedNode.FirstChild
 		}
 		node.InsertBefore(insertedNode)
+		for _, remain := range remains {
+			node.InsertBefore(remain)
+		}
 	} else if "" != previousID {
 		node = treenode.GetNodeInTree(tree, previousID)
 		if nil == node {

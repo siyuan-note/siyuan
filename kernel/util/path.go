@@ -391,6 +391,12 @@ func IsSensitivePath(p string) bool {
 		}
 	}
 
+	// 工作空间/conf 目录（小写比较）
+	workspaceConfPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "conf"))
+	if strings.HasPrefix(pp, workspaceConfPrefix) {
+		return true
+	}
+
 	homePrefixes := []string{
 		strings.ToLower(filepath.Join(HomeDir, ".ssh")),
 		strings.ToLower(filepath.Join(HomeDir, ".config")),

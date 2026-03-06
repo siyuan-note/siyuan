@@ -807,7 +807,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 			time.Sleep(30 * time.Second)
 		}
 	}
+
 	closeSyncWebSocket()
+
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		logging.LogInfof("exited kernel")

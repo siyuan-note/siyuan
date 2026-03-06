@@ -221,6 +221,7 @@ interface Window {
     };
     pdfjsLib: any;
     webkit: {
+        nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
             openLink: { postMessage: (url: string) => void }
             startKernelFast: { postMessage: (url: string) => void }
@@ -229,6 +230,15 @@ interface Window {
             purchase: { postMessage: (url: string) => void }
             print: { postMessage: (html: string) => void }
             exit: { postMessage: (text: string) => void }
+            sendNotification: {
+                postMessage: (options: {
+                    title: string,
+                    body: string,
+                    delay: number,
+                    callback: string
+                }) => number
+            }
+            cancelNotification: { postMessage: (id: number) => void }
         }
     };
     htmlToImage: {

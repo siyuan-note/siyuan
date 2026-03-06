@@ -6,7 +6,7 @@
 		"id": "20200924100717-yzwzn64",
 		"title": "Kernel parameter",
 		"type": "doc",
-		"updated": "20221025095725"
+		"updated": "20260302173748"
 	},
 	"Children": [
 		{
@@ -212,7 +212,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220517144139-qeoe1f3",
-				"updated": "20220517144139"
+				"updated": "20260302173748"
 			},
 			"Children": [
 				{
@@ -227,7 +227,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220517144139-7q5hnts",
-				"updated": "20220517144139"
+				"updated": "20260302173748"
 			},
 			"Children": [
 				{
@@ -241,7 +241,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " will use Simplified Chinese to initialize the appearance language, the default is "
+					"Data": "​ will use Simplified Chinese to initialize the appearance language, the default is "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -250,7 +250,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ". Currently available values: "
+					"Data": "​. Currently available values: "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -259,7 +259,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -268,7 +268,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -277,7 +277,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -286,7 +286,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -295,7 +295,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -304,7 +304,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -313,7 +313,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -322,7 +322,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -331,7 +331,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -340,7 +340,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -349,7 +349,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -358,7 +358,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "sk_SK"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -367,7 +376,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -376,7 +385,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and "
+					"Data": "​ and "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -385,7 +394,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": "​."
 				}
 			]
 		},

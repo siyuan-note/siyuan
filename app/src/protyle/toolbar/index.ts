@@ -1440,13 +1440,12 @@ export class Toolbar {
                 focusByRange(this.range);
             }
         });
-        inputElement.addEventListener("input", (event) => {
-            event.stopPropagation();
+        const genList = () => {
             fetchPost("/api/search/searchTemplate", {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
+                response.data.templates.forEach((item: { path: string, content: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
 <span class="b3-list-item__text">${item.content}</span>`;
                     /// #if !BROWSER
@@ -1459,13 +1458,33 @@ export class Toolbar {
 </span></div>`;
                 });
                 listElement.innerHTML = searchHTML || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-                const currentPath = response.data.blocks[0]?.path;
-                if (previewPath === currentPath) {
+
+                if (!previewPath) {
+                    previewPath = response.data.templates[0]?.path;
+                    /// #if !MOBILE
+                    const rangePosition = getSelectionPosition(nodeElement, range);
+                    setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+                    (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
+                    /// #else
+                    setPosition(this.subElement, 0, 0);
+                    /// #endif
+                } else if (response.data.templates[0]?.path === previewPath) {
                     return;
+                } else {
+                    previewPath = response.data.templates[0]?.path;
                 }
-                previewPath = currentPath;
                 previewTemplate(previewPath, previewElement, protyle.block.parentID);
             });
+        };
+        inputElement.addEventListener("compositionend", () => {
+            genList();
+        });
+        inputElement.addEventListener("input", (event: KeyboardEvent) => {
+            event.stopPropagation();
+            if (event.isComposing) {
+                return;
+            }
+            genList();
         });
         this.subElement.lastElementChild.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
@@ -1530,33 +1549,7 @@ export class Toolbar {
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
         inputElement.select();
-        fetchPost("/api/search/searchTemplate", {
-            k: "",
-        }, (response) => {
-            let html = "";
-            response.data.blocks.forEach((item: { path: string, content: string }, index: number) => {
-                html += `<div data-value="${item.path}" class="b3-list-item--hide-action b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
-<span class="b3-list-item__text">${item.content}</span>`;
-                /// #if !BROWSER
-                html += `<span data-type="open" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.showInFolder}">
-    <svg><use xlink:href="#iconFolder"></use></svg>
-</span>`;
-                /// #endif
-                html += `<span data-type="remove" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">
-    <svg><use xlink:href="#iconTrashcan"></use></svg>
-</span></div>`;
-            });
-            this.subElement.querySelector(".b3-list--background").innerHTML = html || `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-            /// #if !MOBILE
-            const rangePosition = getSelectionPosition(nodeElement, range);
-            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-            (this.subElement.firstElementChild as HTMLElement).style.maxHeight = Math.min(window.innerHeight * 0.8, window.innerHeight - this.subElement.getBoundingClientRect().top) - 16 + "px";
-            /// #else
-            setPosition(this.subElement, 0, 0);
-            /// #endif
-            previewPath = listElement.firstElementChild.getAttribute("data-value");
-            previewTemplate(previewPath, previewElement, protyle.block.parentID);
-        });
+        genList();
     }
 
     public showWidget(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
@@ -1586,20 +1579,37 @@ export class Toolbar {
                 focusByRange(this.range);
             }
         });
-        inputElement.addEventListener("input", (event) => {
-            event.stopPropagation();
+        const genList = (init = false) => {
             fetchPost("/api/search/searchWidget", {
                 k: inputElement.value,
             }, (response) => {
                 let searchHTML = "";
-                response.data.blocks.forEach((item: { path: string, content: string, name: string }, index: number) => {
+                response.data.widgets.forEach((item: { path: string, content: string, name: string }, index: number) => {
                     searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
     ${item.name}
     <span class="b3-list-item__meta">${item.content}</span>
 </div>`;
                 });
                 listElement.innerHTML = searchHTML;
+                if (init) {
+                    /// #if !MOBILE
+                    const rangePosition = getSelectionPosition(nodeElement, range);
+                    setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
+                    /// #else
+                    setPosition(this.subElement, 0, 0);
+                    /// #endif
+                }
             });
+        };
+        inputElement.addEventListener("compositionend", () => {
+            genList();
+        });
+        inputElement.addEventListener("input", (event: KeyboardEvent) => {
+            event.stopPropagation();
+            if (event.isComposing) {
+                return;
+            }
+            genList();
         });
         this.subElement.lastElementChild.addEventListener("click", (event) => {
             const target = event.target as HTMLElement;
@@ -1614,24 +1624,7 @@ export class Toolbar {
         this.subElementCloseCB = undefined;
         this.element.classList.add("fn__none");
         inputElement.select();
-        fetchPost("/api/search/searchWidget", {
-            k: "",
-        }, (response) => {
-            let html = "";
-            response.data.blocks.forEach((item: { content: string, name: string }, index: number) => {
-                html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-content="${item.content}">
-${item.name}
-<span class="b3-list-item__meta">${item.content}</span>
-</div>`;
-            });
-            this.subElement.querySelector(".b3-list--background").innerHTML = html;
-            /// #if !MOBILE
-            const rangePosition = getSelectionPosition(nodeElement, range);
-            setPosition(this.subElement, rangePosition.left, rangePosition.top + 18, Constants.SIZE_TOOLBAR_HEIGHT);
-            /// #else
-            setPosition(this.subElement, 0, 0);
-            /// #endif
-        });
+        genList(true);
     }
 
     public showContent(protyle: IProtyle, range: Range, nodeElement: Element) {

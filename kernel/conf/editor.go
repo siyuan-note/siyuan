@@ -45,6 +45,7 @@ type Editor struct {
 	ListLogicalOutdent              bool           `json:"listLogicalOutdent"`              // 列表逻辑反向缩进
 	ListItemDotNumberClickFocus     bool           `json:"listItemDotNumberClickFocus"`     // 单击列表项标记聚焦
 	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
+	FloatWindowDelay                *int           `json:"floatWindowDelay"`                // 浮窗悬停触发延迟，单位：毫秒，默认 620，nil 表示未设置
 	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，可配置区间 [48, 1024]
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
@@ -87,6 +88,7 @@ func NewEditor() *Editor {
 		ListLogicalOutdent:              false,
 		ListItemDotNumberClickFocus:     true,
 		FloatWindowMode:                 0,
+		FloatWindowDelay:                func() *int { v := 620; return &v }(),
 		DynamicLoadBlocks:               192,
 		Justify:                         false,
 		RTL:                             false,

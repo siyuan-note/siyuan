@@ -27,7 +27,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "editorMarkdownInlineSup", "editorMarkdownInlineSupTip", "editorMarkdownInlineSub", "editorMarkdownInlineSubTip",
             "editorMarkdownInlineTag", "editorMarkdownInlineTagTip", "editorMarkdownInlineMath", "editorMarkdownInlineMathTip",
             "editorMarkdownInlineStrikethrough", "editorMarkdownInlineStrikethroughTip", "editorMarkdownInlineMark", "editorMarkdownInlineMarkTip",
-            "allowHTMLBLockScript", "allowHTMLBLockScriptTip", "backlinkExpandTip", "backmentionExpandTip",
+            "allowHTMLBLockScript", "allowHTMLBLockScriptTip", "floatWindowDelay", "floatWindowDelayTip",
             "backlinkContainChildren", "backlinkContainChildrenTip", "allowSVGScript", "allowSVGScriptTip"
         ]),
 

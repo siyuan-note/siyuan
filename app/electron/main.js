@@ -62,21 +62,39 @@ if (!app.requestSingleInstanceLock()) {
     return;
 }
 
-if (process.platform === 'linux') {
-    const desktop = (process.env.XDG_CURRENT_DESKTOP || '').toUpperCase();
-    const isChineseOS = [
-        'DDE',      // 统信
-        'DEEPIN',   // 统信
-        'UKUI',     // 银河麒麟
-        'KYLIN',    // 麒麟备用标识
-        'NEWSTART'  // 中兴新支点
-    ].some(key => desktop.includes(key));
-    const isKylinFile = fs.existsSync('/etc/kylin-release');
-    const isUosFile = fs.existsSync('/etc/uos-version');
-    const isDeepinFile = fs.existsSync('/etc/deepin-release');
-    if (isChineseOS || isKylinFile || isUosFile || isDeepinFile) {
-        app.commandLine.appendSwitch('ozone-platform', 'x11');
+if (process.platform === "linux") {
+    app.commandLine.appendSwitch("enable-wayland-ime");
+    app.commandLine.appendSwitch("wayland-text-input-version", "3");
+}
+
+app.setAsDefaultProtocolClient("siyuan");
+
+app.commandLine.appendSwitch("disable-web-security");
+app.commandLine.appendSwitch("auto-detect", "false");
+app.commandLine.appendSwitch("no-proxy-server");
+app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
+app.commandLine.appendSwitch("xdg-portal-required-version", "4");
+
+// Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
+writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
+let argStart = 1;
+if (!app.isPackaged) {
+    argStart = 2;
+}
+
+for (let i = argStart; i < process.argv.length; i++) {
+    let arg = process.argv[i];
+    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
+        // 跳过内置参数
+        if (arg.startsWith("--openAsHidden")) {
+            openAsHidden = true;
+            writeLog("open as hidden");
+        }
+        continue;
     }
+
+    app.commandLine.appendSwitch(arg);
+    writeLog("command line switch [" + arg + "]");
 }
 
 try {
@@ -191,6 +209,7 @@ const resolveAppLanguage = (languageTags) => {
         "pl": "pl_PL",
         "pt": "pt_BR",
         "ru": "ru_RU",
+        "sk": "sk_SK",
         "tr": "tr_TR"
     };
 
@@ -306,28 +325,6 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
     });
     errWindow.show();
     return errWindow.id;
-};
-
-const writeLog = (out) => {
-    console.log(out);
-    const logFile = path.join(confDir, "app.log");
-    let log = "";
-    const maxLogLines = 1024;
-    try {
-        if (fs.existsSync(logFile)) {
-            log = fs.readFileSync(logFile).toString();
-            let lines = log.split("\n");
-            if (maxLogLines < lines.length) {
-                log = lines.slice(maxLogLines / 2, maxLogLines).join("\n") + "\n";
-            }
-        }
-        out = out.toString();
-        out = new Date().toISOString().replace(/T/, " ").replace(/\..+/, "") + " " + out;
-        log += out + "\n";
-        fs.writeFileSync(logFile, log);
-    } catch (e) {
-        console.error(e);
-    }
 };
 
 let openAsHidden = false;
@@ -740,36 +737,6 @@ const initKernel = (workspace, port, lang) => {
         }
     });
 };
-
-app.setAsDefaultProtocolClient("siyuan");
-
-app.commandLine.appendSwitch("disable-web-security");
-app.commandLine.appendSwitch("auto-detect", "false");
-app.commandLine.appendSwitch("no-proxy-server");
-app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
-app.commandLine.appendSwitch("xdg-portal-required-version", "4");
-
-// Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
-writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
-let argStart = 1;
-if (!app.isPackaged) {
-    argStart = 2;
-}
-
-for (let i = argStart; i < process.argv.length; i++) {
-    let arg = process.argv[i];
-    if (arg.startsWith("--workspace=") || arg.startsWith("--openAsHidden") || arg.startsWith("--port=") || arg.startsWith("siyuan://")) {
-        // 跳过内置参数
-        if (arg.startsWith("--openAsHidden")) {
-            openAsHidden = true;
-            writeLog("open as hidden");
-        }
-        continue;
-    }
-
-    app.commandLine.appendSwitch(arg);
-    writeLog("command line switch [" + arg + "]");
-}
 
 app.whenReady().then(() => {
     const resetTrayMenu = (tray, lang, mainWindow) => {
@@ -1553,3 +1520,26 @@ app.on("before-quit", (event) => {
         }
     });
 });
+
+
+function writeLog(out) {
+    console.log(out);
+    const logFile = path.join(confDir, "app.log");
+    let log = "";
+    const maxLogLines = 1024;
+    try {
+        if (fs.existsSync(logFile)) {
+            log = fs.readFileSync(logFile).toString();
+            let lines = log.split("\n");
+            if (maxLogLines < lines.length) {
+                log = lines.slice(maxLogLines / 2, maxLogLines).join("\n") + "\n";
+            }
+        }
+        out = out.toString();
+        out = new Date().toISOString().replace(/T/, " ").replace(/\..+/, "") + " " + out;
+        log += out + "\n";
+        fs.writeFileSync(logFile, log);
+    } catch (e) {
+        console.error(e);
+    }
+}

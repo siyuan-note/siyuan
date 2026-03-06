@@ -380,6 +380,23 @@ func IsSensitivePath(p string) bool {
 		}
 	}
 
+	// Windows 开始启动菜单路径（小写比较）
+	startMenuPrefixes := []string{
+		strings.ToLower(filepath.Join(os.Getenv("APPDATA"), "Microsoft", "Windows", "Start Menu")),
+		strings.ToLower(filepath.Join(os.Getenv("ProgramData"), "Microsoft", "Windows", "Start Menu")),
+	}
+	for _, sp := range startMenuPrefixes {
+		if strings.HasPrefix(pp, sp) {
+			return true
+		}
+	}
+
+	// 工作空间/conf 目录（小写比较）
+	workspaceConfPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "conf"))
+	if strings.HasPrefix(pp, workspaceConfPrefix) {
+		return true
+	}
+
 	homePrefixes := []string{
 		strings.ToLower(filepath.Join(HomeDir, ".ssh")),
 		strings.ToLower(filepath.Join(HomeDir, ".config")),

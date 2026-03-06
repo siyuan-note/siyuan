@@ -603,6 +603,8 @@
   "floatWindowMode0": "Üzerine gelince",
   "floatWindowMode1": "${hotkey} tuşuna basılı tut + üzerine gel",
   "floatWindowMode2": "Tetikleme yok",
+  "floatWindowDelay": "İmleç üzerine gelindiğinde kayan pencere tetikleme gecikmesi",
+  "floatWindowDelayTip": "Yalnızca kayan pencere tetikleme yöntemi Üzerine gelince olduğunda etkili olur",
   "codeSnippet": "Kod Parçası",
   "codeSnippetTip": "Arayüzü veya işlevselliği kod parçacıklarıyla ince ayarla",
   "expandDown": "Aşağı genişlet",
@@ -1751,6 +1753,7 @@
     "278": "Çalışma alanı katı hal sürücüsünde (SSD) değil, bu belirgin bir performans düşüşüne yol açabilir, çalışma alanınızı SSD'de tutmanız önerilir",
     "279": "Kullanılmayan veritabanı toplam [%d] adet, burada yalnızca [%d] tanesi listeleniyor",
     "280": "Kullanılmayan veritabanları temizlendi, [%d] dosya kaldırıldı, toplam [%s] disk alanı boşaltıldı",
-    "281": " (Varsayılan)"
+    "281": " (Varsayılan)",
+    "282": "Pencereyi Kapat"
   }
 }

@@ -104,8 +104,14 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			preferredGroupKey := getKanbanPreferredGroupKey(attrView)
 			group := &av.ViewGroup{Field: preferredGroupKey.ID}
 			setAttributeViewGroup(attrView, view, group)
-			av.SaveAttributeView(attrView)
+			if err = av.SaveAttributeView(attrView); err != nil {
+				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+				return
+			}
 			groupKey = view.GetGroupKey(attrView)
+			if nil == groupKey {
+				return
+			}
 		} else {
 			return
 		}
@@ -116,20 +122,29 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
 			genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
-			av.SaveAttributeView(attrView)
+			if err = av.SaveAttributeView(attrView); err != nil {
+				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+				return
+			}
 		}
 	}
 
 	// 如果是按模板分组则需要重新生成分组
 	if isGroupByTemplate(attrView, view) {
 		genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
-		av.SaveAttributeView(attrView)
+		if err = av.SaveAttributeView(attrView); err != nil {
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+			return
+		}
 	}
 
 	// 渲染分组视图
 	if nil == view.Groups {
 		genAttrViewGroups(view, attrView)
-		av.SaveAttributeView(attrView)
+		if err = av.SaveAttributeView(attrView); err != nil {
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+			return
+		}
 	}
 
 	for _, groupView := range view.Groups {
@@ -510,10 +525,13 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		}
 
 		attrView = av.NewAttributeView(avID)
+		err = av.ErrAttributeViewNotFound
+		return
 	} else {
 		data, readErr := repo.OpenFile(avFile)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			err = readErr
 			return
 		}
 
@@ -537,6 +555,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
 	if nil != parseErr {
 		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
+		err = fmt.Errorf("parse created [%s] failed: %w", created, parseErr)
 		return
 	}
 
@@ -548,6 +567,7 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 	if 1 > len(matches) {
+		err = av.ErrAttributeViewNotFound
 		return
 	}
 
@@ -565,10 +585,13 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		}
 
 		attrView = av.NewAttributeView(avID)
+		err = av.ErrAttributeViewNotFound
+		return
 	} else {
 		data, readErr := os.ReadFile(avJSONPath)
 		if nil != readErr {
 			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			err = readErr
 			return
 		}
 

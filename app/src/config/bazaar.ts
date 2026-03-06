@@ -771,7 +771,7 @@ type="checkbox">
                                     app.plugins.find((item: Plugin) => {
                                         if (item.name === dataObj.name) {
                                             reloadPlugin(app, {
-                                                upsertCodePlugins: [dataObj.name],
+                                                reloadPlugins: [dataObj.name],
                                             });
                                             return true;
                                         }

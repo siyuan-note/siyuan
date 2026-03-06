@@ -9,6 +9,8 @@ import {Constants} from "../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
+/// #if !MOBILE
+/// #endif
 import {showMessage} from "../dialog/message";
 import {isOnlyMeta, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {matchHotKey} from "../protyle/util/hotKey";
@@ -60,7 +62,11 @@ export const getIdFromSYProtocol = (url: string) => {
 };
 
 /* redirect to auth page */
-export const redirectToCheckAuth = (to: string = window.location.href) => {
+export const redirectToCheckAuth = async (to: string = window.location.href) => {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+        return;
+    }
+
     const url = new URL(window.location.origin);
     url.pathname = "/check-auth";
     url.searchParams.set("to", to);

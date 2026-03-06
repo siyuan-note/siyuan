@@ -151,7 +151,7 @@ func InstalledWidgets() (ret []*Widget) {
 			packageInstallSizeCache.SetDefault(widget.RepoURL, is)
 		}
 		widget.HInstallSize = humanize.BytesCustomCeil(uint64(widget.InstallSize), 2)
-		widget.PreferredReadme = loadInstalledReadme(installPath, "/widgets/"+dirName+"/", widget.Readme)
+		widget.PreferredReadme = getInstalledPackageREADME(installPath, "/widgets/"+dirName+"/", widget.Readme)
 		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
 		ret = append(ret, widget)
 	}

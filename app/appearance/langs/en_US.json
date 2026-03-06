@@ -603,6 +603,8 @@
   "floatWindowMode0": "Hover",
   "floatWindowMode1": "Press and hold ${hotkey} + Hover",
   "floatWindowMode2": "Do not trigger",
+  "floatWindowDelay": "Floating window hover delay",
+  "floatWindowDelayTip": "Only takes effect when the floating window trigger method is Hover",
   "codeSnippet": "Code Snippet",
   "codeSnippetTip": "Fine-tune the interface or functionality through code snippets",
   "expandDown": "Expand Down",
@@ -1751,6 +1753,7 @@
     "278": "The workspace is not located on a solid-state drive (SSD), which can cause significant performance degradation, it is recommended to place the workspace on an SSD",
     "279": "There are [%d] unreferenced databases in total, only [%d] are listed here",
     "280": "Cleanup of unreferenced databases completed, [%d] files removed, [%s] of disk space freed",
-    "281": " (Default)"
+    "281": " (Default)",
+    "282": "Close window"
   }
 }

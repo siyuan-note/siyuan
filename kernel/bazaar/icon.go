@@ -153,7 +153,7 @@ func InstalledIcons() (ret []*Icon) {
 			packageInstallSizeCache.SetDefault(icon.RepoURL, is)
 		}
 		icon.HInstallSize = humanize.BytesCustomCeil(uint64(icon.InstallSize), 2)
-		icon.PreferredReadme = loadInstalledReadme(installPath, "/appearance/icons/"+dirName+"/", icon.Readme)
+		icon.PreferredReadme = getInstalledPackageREADME(installPath, "/appearance/icons/"+dirName+"/", icon.Readme)
 		icon.Outdated = isOutdatedIcon(icon, bazaarIcons)
 		ret = append(ret, icon)
 	}

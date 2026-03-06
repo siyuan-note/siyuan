@@ -46,28 +46,21 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.5.8"
+	Ver       = "3.5.9"
 	IsInsider = false
-
-	// env vars as fallback for commandline parameters
-	SIYUAN_ACCESS_AUTH_CODE = "SIYUAN_ACCESS_AUTH_CODE"
-	SIYUAN_WORKSPACE        = "SIYUAN_WORKSPACE_PATH"
-	SIYUAN_LANG             = "SIYUAN_LANG"
 )
 
 var (
-	RunInContainer                = false // 是否运行在容器中
-	SiyuanAccessAuthCodeBypass    = false // 是否跳过空访问授权码检查
-	SiyuanAccessAuthCodeViaEnvvar = ""    // Fallback auth code via env var (SIYUAN_ACCESS_AUTH_CODE)
+	RunInContainer             = false // 是否运行在容器中
+	SiYuanAccessAuthCodeBypass = false // 是否跳过空访问授权码检查
 )
 
 func initEnvVars() {
 	RunInContainer = isRunningInDockerContainer()
 	var err error
-	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); err != nil {
-		SiyuanAccessAuthCodeBypass = false
+	if SiYuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); err != nil {
+		SiYuanAccessAuthCodeBypass = false
 	}
-	SiyuanAccessAuthCodeViaEnvvar = os.Getenv("SIYUAN_ACCESS_AUTH_CODE")
 }
 
 var (
@@ -103,16 +96,16 @@ func Boot() {
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/it_IT/ja_JP/ko_KR/pl_PL/pt_BR/ru_RU/tr_TR/zh_CHT/zh_CN")
+	lang := flag.String("lang", "", "ar_SA/de_DE/en_US/es_ES/fr_FR/he_IL/it_IT/ja_JP/ko_KR/pl_PL/pt_BR/ru_RU/sk_SK/tr_TR/zh_CHT/zh_CN")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
 	// Fallback to env vars if commandline args are not set
 	// valid only for CLI args that default to "", as the
 	// others have explicit (sane) defaults
-	workspacePath = coalesceToEnvVar(workspacePath, SIYUAN_WORKSPACE)
-	accessAuthCode = coalesceToEnvVar(accessAuthCode, SIYUAN_ACCESS_AUTH_CODE)
-	lang = coalesceToEnvVar(lang, SIYUAN_LANG)
+	workspacePath = coalesceToEnvVar(workspacePath, "SIYUAN_WORKSPACE_PATH")
+	accessAuthCode = coalesceToEnvVar(accessAuthCode, "SIYUAN_ACCESS_AUTH_CODE")
+	lang = coalesceToEnvVar(lang, "SIYUAN_LANG")
 
 	if "" != *wdPath {
 		WorkingDir = *wdPath
@@ -133,7 +126,7 @@ func Boot() {
 			interruptBoot := true
 
 			// Set the env `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` to skip checking empty access auth code https://github.com/siyuan-note/siyuan/issues/9709
-			if SiyuanAccessAuthCodeBypass {
+			if SiYuanAccessAuthCodeBypass {
 				interruptBoot = false
 				fmt.Println("bypass access auth code check since the env [SIYUAN_ACCESS_AUTH_CODE_BYPASS] is set to [true]")
 			}

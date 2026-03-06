@@ -10,7 +10,6 @@ import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
-import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 import {Constants} from "../../constants";
 import {assetMenu} from "../../menus/protyle";

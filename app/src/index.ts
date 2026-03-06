@@ -192,7 +192,7 @@ export class App {
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
                                 break;
                             case "exit":
-                                if (isBrowser()) {
+                                if (isBrowser() && !isInMobileApp()) {
                                     window.location.href = "about:blank";
                                 }
                         }

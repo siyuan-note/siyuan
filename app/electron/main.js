@@ -63,9 +63,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 if (process.platform === "linux") {
-    // Linux 平台回退到 x11/XWayland 以解决某些系统上无法输入中文的问题
-    // 如果需要使用原生 Wayland 可以通过启动参数 --ozone-platform=wayland 进行覆盖
-    app.commandLine.appendSwitch('ozone-platform', 'x11');
+    app.commandLine.appendSwitch("enable-wayland-ime");
+    app.commandLine.appendSwitch("wayland-text-input-version", "3");
 }
 
 app.setAsDefaultProtocolClient("siyuan");

@@ -156,7 +156,7 @@ func InstalledThemes() (ret []*Theme) {
 			packageInstallSizeCache.SetDefault(theme.RepoURL, is)
 		}
 		theme.HInstallSize = humanize.BytesCustomCeil(uint64(theme.InstallSize), 2)
-		theme.PreferredReadme = loadInstalledReadme(installPath, "/appearance/themes/"+dirName+"/", theme.Readme)
+		theme.PreferredReadme = getInstalledPackageREADME(installPath, "/appearance/themes/"+dirName+"/", theme.Readme)
 		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
 		ret = append(ret, theme)
 	}

@@ -18,8 +18,8 @@ export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
 export const sendMobileAppNotification = (channel: string, title: string, body: string, delayInSeconds: number): Promise<number> => {
-    /// #if BROWSER
     return new Promise((resolve) => {
+        /// #if BROWSER
         if (window.JSAndroid && window.JSAndroid.sendNotification) {
             const id = window.JSAndroid.sendNotification(channel, title, body, delayInSeconds);
             resolve(id);
@@ -45,8 +45,10 @@ export const sendMobileAppNotification = (channel: string, title: string, body: 
         } else {
             resolve(-1);
         }
+        /// #else
+        resolve(-1);
+        /// #endif
     });
-    /// #endif
 };
 
 export const cancelMobileAppNotification = (id: number) => {

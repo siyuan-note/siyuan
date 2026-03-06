@@ -63,21 +63,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 if (process.platform === "linux") {
-    const desktop = (process.env.XDG_CURRENT_DESKTOP || "").toUpperCase();
-    const isChineseOS = [
-        "DDE",      // 统信
-        "DEEPIN",   // 统信
-        "UKUI",     // 银河麒麟
-        "KYLIN",    // 麒麟备用标识
-        "NEWSTART"  // 中兴新支点
-    ].some(key => desktop.includes(key));
-    const isKylinFile = fs.existsSync("/etc/kylin-version");
-    const isUosFile = fs.existsSync("/etc/uos-version");
-    const isDeepinFile = fs.existsSync("/etc/deepin-version");
-    if (isChineseOS || isKylinFile || isUosFile || isDeepinFile) {
-        app.commandLine.appendSwitch("enable-wayland-ime");
-        app.commandLine.appendSwitch("wayland-text-input-version", "3");
-    }
+    app.commandLine.appendSwitch("enable-wayland-ime");
+    app.commandLine.appendSwitch("wayland-text-input-version", "3");
 }
 
 try {

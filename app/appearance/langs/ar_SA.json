@@ -1321,6 +1321,7 @@
   "about14": "\u202B مصادفة الرمز المميز عند استدعاء واجهة برمجة التطبيقات (API)\u202C<br>\u202Bرأس طلب HTTP هو \u202A<code class='fn__code'>Authorization: token ${token}</code>\u202C\u202C",
   "about17": "‫عند الضبط على ‪<code class='fn__code'>اتصال مباشر</code>‬ لن يتم تفعيل الوكيل‬",
   "about18": "‫عند استخدام عنوان غير محلي (‪<code class='fn__code'>127.0.0.1</code>‬/‪<code class='fn__code'>[::1]</code>‬)، يرجى تعيين رمز الإذن بالوصول أولاً‬",
+  "about19": "برمجيات المصدر المفتوح",
   "checkUpdate": "تحقق من التحديثات",
   "currentVer": "النسخة الحالية",
   "downloadLatestVer": "‫<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\"> تنزيل أحدث إصدار</a>‬",

@@ -201,10 +201,14 @@ export const initAbout = () => {
         </div>
     </div>
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
-    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container ? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
+    ${window.siyuan.languages.about1} • <a target="_blank" id="aboutOpenSourceLicenses" href="#">${window.siyuan.languages.about19}</a> ${"harmony" === window.siyuan.config.system.container ? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
 </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
+            const openSourceLicensesEl = modelMainElement.querySelector("#aboutOpenSourceLicenses") as HTMLAnchorElement;
+            if (openSourceLicensesEl) {
+                openSourceLicensesEl.href = new URL("/stage/credits", window.location.origin).href;
+            }
             const workspaceDirElement = modelMainElement.querySelector("#workspaceDir");
             genWorkspace(workspaceDirElement);
             const importKeyElement = modelMainElement.querySelector("#importKey");

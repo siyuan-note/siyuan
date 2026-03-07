@@ -282,7 +282,7 @@ ${checkUpdateHTML}
         <span style="color:var(--b3-theme-background);font-family: cursive;">会泽百家&nbsp;至公天下</span>
     </div>
     <div class='fn__hr'></div>
-    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container ? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""} 
+    ${window.siyuan.languages.about1} • <a target="_blank" id="aboutOpenSourceLicenses" href="#">${window.siyuan.languages.about19}</a> ${"harmony" === window.siyuan.config.system.container ? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
 </div>`;
     },
     bindEvent: () => {
@@ -352,6 +352,10 @@ ${checkUpdateHTML}
                 /// #endif
             });
         });
+        const openSourceLicensesEl = about.element.querySelector("#aboutOpenSourceLicenses") as HTMLAnchorElement;
+        if (openSourceLicensesEl) {
+            openSourceLicensesEl.href = new URL("/stage/credits", window.location.origin).href;
+        }
 
         about.element.querySelector("#authCode").addEventListener("click", () => {
             setAccessAuthCode();

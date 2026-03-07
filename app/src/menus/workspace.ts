@@ -351,13 +351,13 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
 <div class="b3-list b3-list--background" style="max-width: 50vw"></div>`,
                 bind(menuElement) {
-                    const genListHTML = () => {
+                    const genListHTML = (isInit = false) => {
                         let html = "";
                         window.siyuan.storage[Constants.LOCAL_LAYOUTS].sort((a: ISaveLayout, b: ISaveLayout) => {
                             return a.name.localeCompare(b.name, undefined, {numeric: true});
                         }).forEach((item: ISaveLayout) => {
                             if (inputElement.value === "" || item.name.toLowerCase().indexOf(inputElement.value.toLowerCase()) > -1) {
-                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
+                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action ${!isInit && !html ? "b3-list-item--focus" : ""}">
     <div class="b3-list-item__text">${item.name}</div>
     <span class="b3-list-item__meta">${item.time ? dayjs(item.time).format("YYYY-MM-DD HH:mm") : ""}</span>
     <span class="b3-list-item__action">
@@ -371,8 +371,12 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     const inputElement = menuElement.querySelector(".b3-text-field") as HTMLInputElement;
                     const listElement = menuElement.querySelector(".b3-list");
                     inputElement.addEventListener("focus", () => {
-                        const listItemElement = inputElement.nextElementSibling?.querySelector(".b3-list-item");
-                        listItemElement?.classList.add("b3-list-item--focus");
+                        if (!menuElement.querySelector(".b3-list-item--focus")) {
+                            menuElement.querySelector(".b3-list-item")?.classList.add("b3-list-item--focus");
+                        }
+                    });
+                    inputElement.addEventListener("blur", () => {
+                        menuElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     });
                     inputElement.addEventListener("keydown", (event) => {
                         event.stopPropagation();
@@ -398,8 +402,6 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         }
                         event.stopPropagation();
                         listElement.innerHTML = genListHTML();
-                        const listItemElement = inputElement.nextElementSibling?.querySelector(".b3-list-item");
-                        listItemElement?.classList.add("b3-list-item--focus");
                     });
                     listElement.addEventListener("click", (event: MouseEvent) => {
                         if (window.siyuan.config.readonly) {
@@ -438,7 +440,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             event.stopPropagation();
                         }
                     });
-                    listElement.innerHTML = genListHTML();
+                    listElement.innerHTML = genListHTML(true);
                 }
             });
         }

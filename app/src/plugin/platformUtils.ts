@@ -1,5 +1,8 @@
 import * as compatibility from "../protyle/util/compatibility";
-
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+import {Constants} from "../constants";
+/// #endif
 export const openByMobile = compatibility.openByMobile;
 export const readText = compatibility.readText;
 export const writeText = compatibility.writeText;
@@ -17,7 +20,7 @@ export const updateHotkeyTip = compatibility.updateHotkeyTip;
 export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
-export const sendMobileAppNotification = (channel: string, title: string, body: string, delayInSeconds: number): Promise<number> => {
+export const sendNotification = (channel: string, title: string, body: string, delayInSeconds: number): Promise<number> => {
     return new Promise((resolve) => {
         /// #if BROWSER
         if (window.JSAndroid && window.JSAndroid.sendNotification) {
@@ -32,7 +35,7 @@ export const sendMobileAppNotification = (channel: string, title: string, body: 
             if (!window.webkit.nativeCallbacks) {
                 window.webkit.nativeCallbacks = {};
             }
-            window.webkit.nativeCallbacks[callbackId] = (id:number) => {
+            window.webkit.nativeCallbacks[callbackId] = (id: number) => {
                 delete window.webkit.nativeCallbacks[callbackId];
                 resolve(id);
             };
@@ -46,12 +49,19 @@ export const sendMobileAppNotification = (channel: string, title: string, body: 
             resolve(-1);
         }
         /// #else
-        resolve(-1);
+        const timeoutId = window.setTimeout(() => {
+            ipcRenderer.send(Constants.SIYUAN_CMD, {
+                cmd: "notification",
+                title,
+                body
+            });
+        }, delayInSeconds * 1000);
+        resolve(timeoutId);
         /// #endif
     });
 };
 
-export const cancelMobileAppNotification = (id: number) => {
+export const cancelNotification = (id: number) => {
     /// #if BROWSER
     if (window.JSAndroid && window.JSAndroid.cancelNotification) {
         window.JSAndroid.cancelNotification(id);
@@ -60,5 +70,7 @@ export const cancelMobileAppNotification = (id: number) => {
     } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.cancelNotification) {
         window.webkit.messageHandlers.cancelNotification.postMessage(id);
     }
+    /// else
+    clearTimeout(id);
     /// #endif
 };

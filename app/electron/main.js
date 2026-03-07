@@ -18,6 +18,7 @@ const {
     net,
     app,
     BrowserWindow,
+    Notification,
     shell,
     Menu,
     MenuItem,
@@ -952,6 +953,12 @@ app.whenReady().then(() => {
         switch (cmd) {
             case "showItemInFolder":
                 shell.showItemInFolder(data.filePath);
+                break;
+            case "notification":
+                new Notification({
+                    title: data.title,
+                    body: data.body,
+                }).show();
                 break;
             case "setSpellCheckerLanguages":
                 BrowserWindow.getAllWindows().forEach(item => {

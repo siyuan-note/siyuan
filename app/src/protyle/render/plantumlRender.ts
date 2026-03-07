@@ -4,12 +4,11 @@ import {genIconHTML} from "./util";
 import {hasClosestByClassName} from "../util/hasClosest";
 
 export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
-    let plantumlElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "plantuml") {
-        // 编辑器内代码块编辑渲染
+    let plantumlElements: Element[] | NodeListOf<Element> = [];
+    if (element.getAttribute("data-subtype") === "plantuml" && element.getAttribute("data-render") !== "true") {
         plantumlElements = [element];
     } else {
-        plantumlElements = Array.from(element.querySelectorAll('[data-subtype="plantuml"]'));
+        plantumlElements = element.querySelectorAll('[data-subtype="plantuml"]:not([data-render="true"])');
     }
     if (plantumlElements.length === 0) {
         return;
@@ -17,9 +16,7 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
     addScript(`${cdn}/js/plantuml/plantuml-encoder.min.js?v=0.0.0`, "protylePlantumlScript").then(() => {
         const wysiswgElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
         plantumlElements.forEach((e: HTMLDivElement) => {
-            if (e.getAttribute("data-render") === "true") {
-                return;
-            }
+            e.setAttribute("data-render", "true");
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
                 e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
@@ -39,7 +36,6 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                 renderElement.classList.add("ft__error");
                 renderElement.innerHTML = `plantuml render error: <br>${error}`;
             }
-            e.setAttribute("data-render", "true");
         });
     });
 };

@@ -3,13 +3,24 @@ import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 
+// 同一 target 共用一个监听器，重复调用时合并 items 而非替换，避免前次 hideElements 更多时被后次覆盖
+const mermaidObserverMap = new Map<Element, { observer: MutationObserver; group: { items: Element[]; attributeFilter: string[] } }>();
+
+export const disconnectMermaidObservers = (rootElement: Element) => {
+    mermaidObserverMap.forEach(({observer}, target) => {
+        if (rootElement.contains(target)) {
+            observer.disconnect();
+            mermaidObserverMap.delete(target);
+        }
+    });
+};
+
 export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
-    let mermaidElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "mermaid") {
-        // 编辑器内代码块编辑渲染
+    let mermaidElements: Element[] | NodeListOf<Element> = [];
+    if (element.getAttribute("data-subtype") === "mermaid" && element.getAttribute("data-render") !== "true") {
         mermaidElements = [element];
     } else {
-        mermaidElements = Array.from(element.querySelectorAll('[data-subtype="mermaid"]'));
+        mermaidElements = element.querySelectorAll('[data-subtype="mermaid"]:not([data-render="true"])');
     }
     if (mermaidElements.length === 0) {
         return;
@@ -59,20 +70,46 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 }
             });
             if (hideElements.length > 0) {
-                const observer = new MutationObserver(() => {
-                    initMermaid(hideElements);
-                    observer.disconnect();
-                });
+                const targetToItems = new Map<Element, { items: Element[]; attributeFilter: string[] }>();
                 hideElements.forEach(item => {
                     const hideElement = hasClosestByAttribute(item, "fold", "1");
+                    let target: Element;
+                    let attributeFilter: string[];
                     if (hideElement) {
-                        observer.observe(hideElement, {attributeFilter: ["fold"]});
+                        target = hideElement;
+                        attributeFilter = ["fold"];
                     } else {
                         const cardElement = hasClosestByClassName(item, "card__block", true);
-                        if (cardElement) {
-                            observer.observe(cardElement, {attributeFilter: ["class"]});
+                        if (!cardElement) {
+                            return;
                         }
+                        target = cardElement;
+                        attributeFilter = ["class"];
                     }
+                    const group = targetToItems.get(target);
+                    if (group) {
+                        group.items.push(item);
+                    } else {
+                        targetToItems.set(target, {items: [item], attributeFilter});
+                    }
+                });
+                targetToItems.forEach((group, target) => {
+                    const existing = mermaidObserverMap.get(target);
+                    if (existing) {
+                        group.items.forEach(item => {
+                            if (!existing.group.items.includes(item)) {
+                                existing.group.items.push(item);
+                            }
+                        });
+                        return;
+                    }
+                    const observer = new MutationObserver(() => {
+                        initMermaid(group.items);
+                        observer.disconnect();
+                        mermaidObserverMap.delete(target);
+                    });
+                    observer.observe(target, {attributeFilter: group.attributeFilter});
+                    mermaidObserverMap.set(target, {observer, group});
                 });
             }
             initMermaid(normalElements);
@@ -86,6 +123,7 @@ const initMermaid = (mermaidElements: Element[]) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
+        item.setAttribute("data-render", "true");
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
             item.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
         }
@@ -104,6 +142,5 @@ const initMermaid = (mermaidElements: Element[]) => {
             renderElement.lastElementChild.innerHTML = `${errorElement.outerHTML}<div class="fn__hr"></div><div class="ft__error">${e.message.replace(/\n/, "<br>")}</div>`;
             errorElement.parentElement.remove();
         }
-        item.setAttribute("data-render", "true");
     });
 };

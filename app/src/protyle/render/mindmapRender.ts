@@ -4,12 +4,11 @@ import {hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 
 export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
-    let mindmapElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "mindmap") {
-        // 编辑器内代码块编辑渲染
+    let mindmapElements: Element[] | NodeListOf<Element> = [];
+    if (element.getAttribute("data-subtype") === "mindmap" && element.getAttribute("data-render") !== "true") {
         mindmapElements = [element];
     } else {
-        mindmapElements = Array.from(element.querySelectorAll('[data-subtype="mindmap"]'));
+        mindmapElements = element.querySelectorAll('[data-subtype="mindmap"]:not([data-render="true"])');
     }
     if (mindmapElements.length === 0) {
         return;
@@ -21,9 +20,7 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
             width = wysiswgElement.firstElementChild.clientWidth;
         }
         mindmapElements.forEach((e: HTMLDivElement) => {
-            if (e.getAttribute("data-render") === "true") {
-                return;
-            }
+            e.setAttribute("data-render", "true");
             if (!e.firstElementChild.classList.contains("protyle-icons")) {
                 e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
@@ -85,7 +82,6 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 window.echarts.dispose(renderElement.lastElementChild);
                 renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" style="height:${e.style.height || "420px"}" contenteditable="false">Mindmap render error: <br>${error}</div>`;
             }
-            e.setAttribute("data-render", "true");
         });
     });
 };

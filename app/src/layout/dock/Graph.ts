@@ -22,6 +22,8 @@ export class Graph extends Model {
     private panelElement: HTMLElement;
     private element: HTMLElement;
     private network: any;
+    private intervalIds: ReturnType<typeof setInterval>[] = [];
+    private destroyed = false;
     public blockId: string; // "local" / "pin" 必填
     public rootId: string; // "local" 必填
     public graphData: {
@@ -511,10 +513,6 @@ export class Graph extends Model {
         this.network.selectNodes([id]);
     }
 
-    public destroy() {
-        this.network?.destroy();
-    }
-
     public onGraph(hl: boolean) {
         if (this.graphElement.clientHeight === 0) {
             // 界面没有渲染时不能进行渲染
@@ -714,7 +712,12 @@ export class Graph extends Model {
                 network.body.data.edges.add(edgesAdded);
                 j += batch;
             }, time);
+            this.intervalIds.push(intervalNode, intervalEdge);
             this.network = network;
+            if (this.destroyed) {
+                this.destroy();
+                return;
+            }
             network.on("stabilizationIterationsDone", () => {
                 network.physics.stopSimulation();
                 if (hl) {
@@ -778,5 +781,12 @@ export class Graph extends Model {
                 }
             });
         });
+    }
+
+    public destroy() {
+        this.destroyed = true;
+        this.intervalIds.forEach(id => clearInterval(id));
+        this.intervalIds = [];
+        this.network?.destroy();
     }
 }

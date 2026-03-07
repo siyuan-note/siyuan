@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
@@ -107,6 +108,7 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 		}
 	}
 
+	var petalNames []string
 	petals := getPetals()
 	for _, petal := range petals {
 		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall = bazaar.ParseInstalledPlugin(petal.Name, frontend)
@@ -120,7 +122,10 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 
 		loadCode(petal)
 		ret = append(ret, petal)
+		petalNames = append(petalNames, petal.Name)
 	}
+
+	logging.LogDebugf("loaded petals [frontend=%s, isPublish=%v, petals=[%s]]", frontend, isPublish, strings.Join(petalNames, ","))
 	return
 }
 

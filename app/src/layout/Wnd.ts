@@ -852,6 +852,7 @@ export class Wnd {
                             this.showHeading();
                         }
                     }
+                    item.headElement.classList.remove("item--focus");
                     if (animate) {
                         item.headElement.setAttribute("style", "max-width: 0px;");
                         setTimeout(() => {

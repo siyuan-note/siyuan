@@ -56,9 +56,7 @@ export const rename = (options: {
     if (window.siyuan.config.readonly) {
         return;
     }
-    if (options.empty) {
-        options.name = "";
-    }
+    const initialName = options.empty ? "" : options.name;
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
@@ -79,7 +77,7 @@ export const rename = (options: {
     dialog.bindInput(inputElement, () => {
         (btnsElement[1] as HTMLButtonElement).click();
     });
-    inputElement.value = Lute.UnEscapeHTMLStr(options.name);
+    inputElement.value = Lute.UnEscapeHTMLStr(initialName);
     inputElement.focus();
     inputElement.select();
     btnsElement[0].addEventListener("click", () => {
@@ -90,7 +88,7 @@ export const rename = (options: {
             return false;
         }
         let name = inputElement.value.trim();
-        if (name === options.name) {
+        if (name === initialName) {
             dialog.destroy();
             return false;
         }

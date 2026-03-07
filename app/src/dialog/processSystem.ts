@@ -32,7 +32,7 @@ const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     }, (response) => {
         tab.updateTitle(response.data.name);
         if (protyle && protyle.title) {
-            protyle.title.setTitle(response.data.name);
+            protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
         }
     });
 };
@@ -66,7 +66,7 @@ export const reloadSync = (
                 id: window.siyuan.mobile.editor.protyle.block.rootID
             }, (response) => {
                 setTitle(response.data.name);
-                window.siyuan.mobile.editor.protyle.title.setTitle(response.data.name);
+                window.siyuan.mobile.editor.protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
             });
         }
     }

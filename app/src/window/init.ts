@@ -68,6 +68,7 @@ export const init = (app: App) => {
         resizeTimeout = window.setTimeout(() => {
             adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
+            window.siyuan.menus.menu.resetPosition();
             if (getSelection().rangeCount > 0) {
                 const range = getSelection().getRangeAt(0);
                 getAllEditor().forEach(item => {

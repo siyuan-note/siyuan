@@ -339,21 +339,21 @@ export class Title {
         }, Constants.TIMEOUT_INPUT);
     }
 
-    public setTitle(title: string) {
+    public setTitle(title: string, empty?: boolean) {
         /// #if MOBILE
         if (this.editElement) {
             if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
-                this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
+                this.editElement.textContent = empty ? "" : title;
             }
         } else {
             const inputElement = document.getElementById("toolbarName") as HTMLInputElement;
             if (nbsp2space(title) !== nbsp2space(inputElement.value)) {
-                inputElement.value = title === window.siyuan.languages.untitled ? "" : title;
+                inputElement.value = empty ? "" : title;
             }
         }
         /// #else
         if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {
-            this.editElement.textContent = title === window.siyuan.languages.untitled ? "" : title;
+            this.editElement.textContent = empty ? "" : title;
         }
         /// #endif
     }
@@ -376,7 +376,7 @@ export class Title {
         protyle.background?.render(response.data.ial, protyle.block.rootID);
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.element.setAttribute("data-render", "true");
-        this.setTitle(response.data.ial.title);
+        this.setTitle(response.data.ial.title, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
         let nodeAttrHTML = "";
         if (response.data.ial.bookmark) {
             nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;

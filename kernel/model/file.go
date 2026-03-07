@@ -1088,7 +1088,10 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	return
 }
 
-const DailyNoteAttrPrefix = "custom-dailynote-"
+const (
+	DailyNoteAttrPrefix = "custom-dailynote-"
+	NodeAttrTitleEmpty  = "custom-sy-title-empty"
+)
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	createDocLock.Lock()
@@ -1672,35 +1675,60 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	oldTitle := tree.Root.IALAttr("title")
-	if oldTitle == title {
-		return
-	}
-	if "" == title {
-		title = Conf.language(16)
-	}
-	title = strings.ReplaceAll(title, "/", "")
 
-	tree.HPath = path.Join(path.Dir(tree.HPath), title)
-	tree.Root.SetIALAttr("title", title)
-	tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
-	if err = renameWriteJSONQueue(tree); err != nil {
-		return
+	// 先规范化输入得到实际会存储的标题，再与旧标题比较，避免 title=="" 被误判为标题变更
+	newTitle := strings.ReplaceAll(title, "/", "")
+	var isEmpty bool
+	if "" == newTitle {
+		newTitle = Conf.language(16)
+		isEmpty = true
+	}
+	titleChanged := oldTitle != newTitle
+
+	var emptyAttrUpdated bool
+	if titleChanged {
+		tree.HPath = path.Join(path.Dir(tree.HPath), newTitle)
+		tree.Root.SetIALAttr("title", newTitle)
 	}
 
-	refText := getNodeRefText(tree.Root)
-	evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
-		"box":     boxID,
-		"id":      tree.Root.ID,
-		"path":    p,
-		"title":   title,
-		"refText": refText,
+	// 按需同步“无标题”标记（仅更新 IAL，不触发子树重命名等）
+	isTitleEmpty := "" != tree.Root.IALAttr(NodeAttrTitleEmpty)
+	if isTitleEmpty != isEmpty {
+		if isEmpty {
+			tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")
+			isTitleEmpty = true
+		} else {
+			tree.Root.RemoveIALAttr(NodeAttrTitleEmpty)
+			isTitleEmpty = false
+		}
+		emptyAttrUpdated = true
 	}
-	util.PushEvent(evt)
 
-	box.renameSubTrees(tree)
-	updateRefTextRenameDoc(tree)
-	IncSync()
+	if titleChanged || emptyAttrUpdated {
+		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+		if err = renameWriteJSONQueue(tree); err != nil {
+			return
+		}
+
+		refText := getNodeRefText(tree.Root)
+		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
+		evt.Data = map[string]interface{}{
+			"box":     boxID,
+			"id":      tree.Root.ID,
+			"path":    p,
+			"title":   newTitle,
+			"empty":   isTitleEmpty,
+			"refText": refText,
+		}
+		util.PushEvent(evt)
+	}
+	if titleChanged {
+		box.renameSubTrees(tree)
+		updateRefTextRenameDoc(tree)
+	}
+	if titleChanged || emptyAttrUpdated {
+		IncSync()
+	}
 	return
 }
 
@@ -1713,8 +1741,10 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	}
 	title = strings.ReplaceAll(title, "/", "")
 	title = strings.TrimSpace(title)
+	var isEmpty bool
 	if "" == title {
 		title = Conf.Language(16)
+		isEmpty = true
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))
@@ -1776,6 +1806,9 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	tree.Root.Spec = treenode.CurrentSpec
 	updated := util.TimeFromID(id)
 	tree.Root.KramdownIAL = [][]string{{"id", id}, {"title", html.EscapeAttrVal(title)}, {"updated", updated}}
+	if isEmpty {
+		tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")
+	}
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph(""))
 	}

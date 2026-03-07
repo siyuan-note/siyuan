@@ -2,6 +2,7 @@ import {hideElements} from "../ui/hideElements";
 import {getAllModels} from "../../layout/getAll";
 import {updateOutline} from "../../editor/util";
 import {resize} from "./resize";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
     if (type === "preview") {
@@ -38,7 +39,5 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
         resize(protyle);
     }
     hideElements(["gutterOnly", "toolbar", "select", "hint", "util"], protyle);
-    protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("switch-protyle-mode", {protyle});
-    });
+    emitToEventBus("switch-protyle-mode", {protyle});
 };

@@ -70,12 +70,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             });
             /// #endif
             // rm listen
-            Array.from(document.childNodes).find(item => {
-                if (item.nodeType === 8 && item.textContent === name) {
-                    item.remove();
-                    return true;
-                }
-            });
+            plugin.eventBus.destroy();
             // rm plugin
             app.plugins.splice(index, 1);
             // rm icons

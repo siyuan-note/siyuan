@@ -41,6 +41,7 @@ import {Tag} from "./layout/dock/Tag";
 import {updateControlAlt} from "./protyle/util/hotKey";
 import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
+import {registerCustomEventBus, emitToEventBus} from "./plugin/EventBus";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -65,14 +66,13 @@ export class App {
             closedTabs: [],
             ctrlIsPressed: false,
             altIsPressed: false,
+            registerCustomEventBus,
             ws: new Model({
                 app: this,
                 id: genUUID(),
                 type: "main",
                 msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
+                    emitToEventBus("ws-main", data);
                     if (data) {
                         switch (data.cmd) {
                             case "logoutAuth":
@@ -176,7 +176,7 @@ export class App {
                                 transactionError();
                                 break;
                             case "syncing":
-                                processSync(data, this.plugins);
+                                processSync(data);
                                 break;
                             case "backgroundtask":
                                 progressBackgroundTask(data.data.tasks);

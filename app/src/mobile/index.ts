@@ -33,6 +33,7 @@ import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {updateControlAlt} from "../protyle/util/hotKey";
 import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
+import {emitToEventBus, registerCustomEventBus} from "../plugin/EventBus";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -64,14 +65,13 @@ class App {
                     inbox: null,
                 }
             },
+            registerCustomEventBus,
             ws: new Model({
                 app: this,
                 id: genUUID(),
                 type: "main",
                 msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
+                    emitToEventBus("ws-main", data);
                     onMessage(this, data);
                 }
             })

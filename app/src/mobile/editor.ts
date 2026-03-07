@@ -14,6 +14,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
 import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
+import {emitToEventBus} from "../plugin/EventBus";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -91,9 +92,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                     scrollAttr: window.siyuan.storage[Constants.LOCAL_FILEPOSITION][data.data.rootID],
                     mergedOptions: protyleOptions,
                     cb() {
-                        app.plugins.forEach(item => {
-                            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
-                        });
+                        emitToEventBus("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                     }
                 });
             } else {
@@ -108,9 +107,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
                         action,
                         scrollPosition,
                         afterCB() {
-                            app.plugins.forEach(item => {
-                                item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
-                            });
+                            emitToEventBus("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                         }
                     });
                 });

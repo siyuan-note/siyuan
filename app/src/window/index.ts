@@ -29,6 +29,7 @@ import {reloadEmoji} from "../emoji";
 import {updateControlAlt} from "../protyle/util/hotKey";
 import {updateAppearance} from "../config/util/updateAppearance";
 import {renderSnippet} from "../config/util/snippets";
+import {emitToEventBus, registerCustomEventBus} from "../plugin/EventBus";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -48,14 +49,13 @@ class App {
             closedTabs: [],
             ctrlIsPressed: false,
             altIsPressed: false,
+            registerCustomEventBus,
             ws: new Model({
                 app: this,
                 id: genUUID(),
                 type: "main",
                 msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
+                    emitToEventBus("ws-main", data);
                     if (data) {
                         switch (data.cmd) {
                             case "logoutAuth":
@@ -146,7 +146,7 @@ class App {
                                 transactionError();
                                 break;
                             case "syncing":
-                                processSync(data, this.plugins);
+                                processSync(data);
                                 break;
                             case "backgroundtask":
                                 progressBackgroundTask(data.data.tasks);

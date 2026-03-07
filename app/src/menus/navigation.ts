@@ -185,17 +185,14 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             }
         }]
     }).element);
-    if (app.plugins) {
-        emitOpenMenu({
-            plugins: app.plugins,
-            type: "open-menu-doctree",
-            detail: {
-                elements: selectItemElements,
-                type: "docs"
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-doctree",
+        detail: {
+            elements: selectItemElements,
+            type: "docs"
+        },
+        separatorPosition: "top",
+    });
     return window.siyuan.menus.menu;
 };
 
@@ -417,17 +414,14 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }]
     }).element);
-    if (app.plugins) {
-        emitOpenMenu({
-            plugins: app.plugins,
-            type: "open-menu-doctree",
-            detail: {
-                elements: selectItemElements,
-                type: "notebook"
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-doctree",
+        detail: {
+            elements: selectItemElements,
+            type: "notebook"
+        },
+        separatorPosition: "top",
+    });
     return window.siyuan.menus.menu;
 };
 
@@ -712,17 +706,14 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     }
     genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
-    if (app.plugins) {
-        emitOpenMenu({
-            plugins: app.plugins,
-            type: "open-menu-doctree",
-            detail: {
-                elements: selectItemElements,
-                type: "doc"
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-doctree",
+        detail: {
+            elements: selectItemElements,
+            type: "doc"
+        },
+        separatorPosition: "top",
+    });
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOC);
     return window.siyuan.menus.menu;
 };

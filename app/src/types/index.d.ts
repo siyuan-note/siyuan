@@ -585,6 +585,10 @@ interface ISiyuan {
      * 是否在发布服务下访问
      */
     isPublish?: boolean;
+    /**
+     * 供 JS 代码片段注册事件总线
+     */
+    registerCustomEventBus: (name?: string) => import("../plugin/EventBus").EventBus;
 }
 
 interface IOperation {

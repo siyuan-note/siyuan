@@ -75,22 +75,19 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "readonly":
                 window.siyuan.config.editor.readOnly = data.data;
                 break;
-            case"progress":
+            case "progress":
                 progressLoading(data);
                 break;
-            case"syncing":
-                processSync(data, app.plugins);
-                if (data.code === 1) {
-                    document.getElementById("toolbarSync").classList.add("fn__none");
-                }
+            case "syncing":
+                processSync(data);
                 break;
             case "openFileById":
                 openMobileFileById(app, data.data.id);
                 break;
-            case"txerr":
+            case "txerr":
                 transactionError();
                 break;
-            case"statusbar":
+            case "statusbar":
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||
                     window.siyuan.config.appearance.hideStatusBar) {
                     return;

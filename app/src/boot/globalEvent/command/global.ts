@@ -432,7 +432,7 @@ export const globalCommand = (command: string, app: App) => {
             setReadOnly(!window.siyuan.config.editor.readOnly);
             return true;
         case "lockScreen":
-            lockScreen(app);
+            lockScreen();
             return true;
         case "newFile":
             newFile({

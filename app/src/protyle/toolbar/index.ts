@@ -46,6 +46,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
 import {escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -1223,13 +1224,11 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
-        protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("open-noneditableblock", {
-                protyle,
-                toolbar: this,
-                blockElement: nodeElement,
-                renderElement,
-            });
+        emitToEventBus("open-noneditableblock", {
+            protyle,
+            toolbar: this,
+            blockElement: nodeElement,
+            renderElement,
         });
     }
 
@@ -1254,11 +1253,7 @@ export class Toolbar {
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
 
         const eventDetail = {languages: hljsLanguages, type: "init", listElement};
-        if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-update", eventDetail);
-            });
-        }
+        emitToEventBus("code-language-update", eventDetail);
 
         hljsLanguages = eventDetail.languages;
         hljsLanguages.forEach((item) => {
@@ -1328,11 +1323,7 @@ export class Toolbar {
             }
 
             const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
-            if (protyle.app && protyle.app.plugins) {
-                protyle.app.plugins.forEach((plugin: any) => {
-                    plugin.eventBus.emit("code-language-update", eventDetail);
-                });
-            }
+            emitToEventBus("code-language-update", eventDetail);
 
             matchLanguages = eventDetail.languages;
             if (value) {
@@ -1800,15 +1791,11 @@ export class Toolbar {
     private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
 
-        if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-change", {
-                    language: currentLang,
-                    languageElements,
-                    protyle: protyle
-                });
-            });
-        }
+        emitToEventBus("code-language-change", {
+            language: currentLang,
+            languageElements,
+            protyle: protyle
+        });
 
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;

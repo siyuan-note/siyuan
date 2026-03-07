@@ -2154,16 +2154,16 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                     let colSpan = orgColSpan;
                     while (colSpan > 0 && currentCellElement) {
                         currentCellElement.classList.remove("fn__none");
-                        currentCellElement.colSpan = 1;
-                        currentCellElement.rowSpan = 1;
+                        currentCellElement.removeAttribute("colspan");
+                        currentCellElement.removeAttribute("rowspan");
                         currentCellElement = currentCellElement.nextElementSibling as HTMLTableCellElement;
                         colSpan--;
                     }
                     currentRowElement = currentRowElement.nextElementSibling;
                     rowSpan--;
                 }
-                cellElement.rowSpan = 1;
-                cellElement.colSpan = 1;
+                cellElement.removeAttribute("colspan");
+                cellElement.removeAttribute("rowspan");
                 if (cellElement.tagName === "TH") {
                     let prueTrElement: HTMLElement;
                     Array.from(nodeElement.querySelectorAll("thead tr")).find((item: HTMLElement) => {

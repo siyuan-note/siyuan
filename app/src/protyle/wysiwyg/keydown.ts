@@ -92,7 +92,24 @@ export const getContentByInlineHTML = (range: Range, cb: (content: string) => vo
 };
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
+    const isMacOS = isMac();
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
+        // 如果修改了撤销/重做的自定义快捷键，默认行为会导致光标位置移动
+        if (isMacOS) {
+            // Mac: Cmd+Z 撤销, Cmd+Shift+Z 重做
+            if (event.metaKey && !event.ctrlKey && !event.altKey && event.key.toLowerCase() === "z") {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        } else {
+            // Windows/Linux: Ctrl+Z 撤销, Ctrl+Y 重做
+            if (event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+                (event.key.toLowerCase() === "z" || event.key.toLowerCase() === "y")) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        }
+        
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
             return;

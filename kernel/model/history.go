@@ -346,6 +346,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 			"id":      tree.Root.ID,
 			"path":    tree.Path,
 			"title":   tree.Root.IALAttr("title"),
+			"empty":   "" != tree.Root.IALAttr(NodeAttrTitleEmpty),
 			"refText": refText,
 		}
 		util.PushEvent(evt)

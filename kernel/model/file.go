@@ -1675,35 +1675,36 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	oldTitle := tree.Root.IALAttr("title")
-	var titleChanged, markCleared bool
 
-	// 标题改变
-	if oldTitle != title {
-		var isEmpty bool
-		if "" == title {
-			title = Conf.language(16)
-			isEmpty = true
-		}
-		title = strings.ReplaceAll(title, "/", "")
+	// 先规范化输入得到实际会存储的标题，再与旧标题比较，避免 title=="" 被误判为标题变更
+	newTitle := strings.ReplaceAll(title, "/", "")
+	var isEmpty bool
+	if "" == newTitle {
+		newTitle = Conf.language(16)
+		isEmpty = true
+	}
+	titleChanged := oldTitle != newTitle
 
-		tree.HPath = path.Join(path.Dir(tree.HPath), title)
-		tree.Root.SetIALAttr("title", title)
+	var emptyAttrUpdated bool
+	if titleChanged {
+		tree.HPath = path.Join(path.Dir(tree.HPath), newTitle)
+		tree.Root.SetIALAttr("title", newTitle)
+	}
+
+	// 按需同步“无标题”标记（仅更新 IAL，不触发子树重命名等）
+	isTitleEmpty := "" != tree.Root.IALAttr(NodeAttrTitleEmpty)
+	if isTitleEmpty != isEmpty {
 		if isEmpty {
 			tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")
+			isTitleEmpty = true
 		} else {
 			tree.Root.RemoveIALAttr(NodeAttrTitleEmpty)
-			markCleared = true
+			isTitleEmpty = false
 		}
-		titleChanged = true
+		emptyAttrUpdated = true
 	}
 
-	// 标题没变但需要清除标记
-	if !titleChanged && "" != title && "" != tree.Root.IALAttr(NodeAttrTitleEmpty) {
-		tree.Root.RemoveIALAttr(NodeAttrTitleEmpty)
-		markCleared = true
-	}
-
-	if titleChanged || markCleared {
+	if titleChanged || emptyAttrUpdated {
 		tree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 		if err = renameWriteJSONQueue(tree); err != nil {
 			return
@@ -1715,8 +1716,8 @@ func RenameDoc(boxID, p, title string) (err error) {
 			"box":     boxID,
 			"id":      tree.Root.ID,
 			"path":    p,
-			"title":   title,
-			"empty":   tree.Root.IALAttr(NodeAttrTitleEmpty),
+			"title":   newTitle,
+			"empty":   isTitleEmpty,
 			"refText": refText,
 		}
 		util.PushEvent(evt)
@@ -1725,7 +1726,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		box.renameSubTrees(tree)
 		updateRefTextRenameDoc(tree)
 	}
-	if titleChanged || markCleared {
+	if titleChanged || emptyAttrUpdated {
 		IncSync()
 	}
 	return

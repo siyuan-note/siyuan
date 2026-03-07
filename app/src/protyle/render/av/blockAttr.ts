@@ -16,7 +16,7 @@ import {webUtils} from "electron";
 /// #endif
 import {isBrowser} from "../../../util/functions";
 import {Constants} from "../../../constants";
-import {getCompressURL} from "../../../util/image";
+import {getCompressURL, removeCompressURL} from "../../../util/image";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -502,7 +502,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 });
             } else {
                 if (target.tagName === "IMG") {
-                    previewImages([target.getAttribute("src")]);
+                    previewImages([removeCompressURL(target.getAttribute("src"))]);
                 } else {
                     openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
                 }

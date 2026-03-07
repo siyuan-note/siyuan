@@ -21,12 +21,10 @@ import {updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
-import {isLocalPath, pathPosix} from "../../../util/pathName";
+import {pathPosix} from "../../../util/pathName";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getSearch, isMobile} from "../../../util/functions";
-/// #if !MOBILE
-import {openAsset} from "../../../editor/util";
-/// #endif
+import {isMobile} from "../../../util/functions";
+import {openLink} from "../../../editor/openLink";
 import {previewAttrViewImages} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
 import {
@@ -1358,29 +1356,13 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "openAssetItem") {
-                    const assetType = target.parentElement.dataset.type;
                     const assetLink = target.parentElement.dataset.content;
-                    /// #if !MOBILE
-                    const suffix = pathPosix().extname(assetLink);
-                    if (assetType === "image") {
-                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                            options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
-                    } else if (isLocalPath(assetLink) && assetType === "file" && (
-                        (suffix === ".pdf" && !assetLink.startsWith("file://")) ||
-                        Constants.SIYUAN_ASSETS_AUDIO.concat(Constants.SIYUAN_ASSETS_VIDEO, Constants.SIYUAN_ASSETS_IMAGE).includes(suffix)
-                    )) {
-                        openAsset(options.protyle.app, assetLink.trim(), parseInt(getSearch("page", assetLink)), "right");
-                    } else {
-                        window.open(assetLink);
-                    }
-                    /// #else
-                    if (assetType === "image") {
+                    if (target.parentElement.dataset.type === "image") {
                         previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                             options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
                     } else {
-                        window.open(assetLink);
+                        openLink(options.protyle, assetLink, event, event.ctrlKey || event.metaKey);
                     }
-                    /// #endif
                     event.preventDefault();
                     event.stopPropagation();
                     break;

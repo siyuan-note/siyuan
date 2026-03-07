@@ -18,6 +18,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -498,8 +499,129 @@ func serveAppearance(ginServer *gin.Engine) {
 		c.File(filePath)
 	})
 
-	siyuan.Static("/stage", filepath.Join(util.WorkingDir, "stage"))
+	// 使用单一路由避免 Gin 中 /stage/credits 与 /stage/*filepath 的 catch-all 冲突；先匹配 credits 再回退到静态文件
+	stageDir := filepath.Join(util.WorkingDir, "stage")
+	stageFS := http.FileServer(http.Dir(stageDir))
+	siyuan.GET("/stage/*filepath", func(c *gin.Context) {
+		rel := strings.TrimPrefix(c.Request.URL.Path, "/stage")
+		rel = strings.TrimPrefix(rel, "/")
+		if rel == "credits" || rel == "credits/" {
+			serveCredits(c)
+			return
+		}
+		c.Request.URL.Path = "/" + rel
+		stageFS.ServeHTTP(c.Writer, c.Request)
+	})
 }
+
+// creditsData 与 merge-oss-licenses.js 输出的 credits.json 结构一致
+type creditsData struct {
+	Frontend []creditsEntry `json:"frontend"`
+	Backend  []creditsEntry `json:"backend"`
+}
+
+type creditsEntry struct {
+	Name        string `json:"name"`
+	License     string `json:"license"`
+	LicenseURL  string `json:"licenseUrl"`
+	LicenseText string `json:"licenseText"`
+}
+
+func serveCredits(c *gin.Context) {
+	creditsPath := filepath.Join(util.WorkingDir, "stage", "credits.json")
+	data, err := os.ReadFile(creditsPath)
+	if err != nil {
+		logging.LogWarnf("read credits.json failed: %s", err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(creditsPageEmpty))
+		return
+	}
+	var credits creditsData
+	if err = json.Unmarshal(data, &credits); err != nil {
+		logging.LogWarnf("parse credits.json failed: %s", err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(creditsPageEmpty))
+		return
+	}
+	html, err := renderCreditsHTML(&credits)
+	if err != nil {
+		logging.LogWarnf("render credits HTML failed: %s", err)
+		c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(creditsPageEmpty))
+		return
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", html)
+}
+
+const creditsPageEmpty = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Credits</title></head><body><p>Credits data not found. Run <code>pnpm run gen:licenses</code> from the app directory.</p></body></html>`
+
+func renderCreditsHTML(credits *creditsData) ([]byte, error) {
+	tpl := template.Must(template.New("credits").Parse(creditsHTMLTpl))
+	buf := &bytes.Buffer{}
+	if err := tpl.Execute(buf, credits); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+const creditsHTMLTpl = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Credits</title>
+  <style>
+    html { --google-blue-50: rgb(232,240,254); --google-blue-300: rgb(138,180,248); --google-blue-700: rgb(25,103,210); --google-grey-200: rgb(232,234,237); --google-grey-800: rgb(60,64,67); --google-grey-900: rgb(32,33,36); --interactive-color: var(--google-blue-700); --primary-color: var(--google-grey-900); --product-background: var(--google-blue-50); background: white; }
+    @media (prefers-color-scheme: dark) { html { --interactive-color: var(--google-blue-300); --primary-color: var(--google-grey-200); --product-background: var(--google-grey-800); background: var(--google-grey-900); } }
+    body { color: var(--primary-color); font-family: system-ui,sans-serif; font-size: 84%; margin: 1rem 2rem; max-width: 1020px; }
+    a { color: var(--interactive-color); }
+    .page-title { float: left; font-size: 164%; font-weight: bold; }
+    .credits-header-right { float: right; display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+    .credits-header-right .show-all { margin: 0; }
+    #print-link { margin: 0; }
+    .show-all, .product .show { color: var(--interactive-color); text-decoration: underline; }
+    .product { background: var(--product-background); border-radius: 5px; margin-top: 16px; overflow: auto; padding: 2px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+    .product .license { flex-basis: 100%; }
+    .product .title { font-size: 110%; font-weight: bold; margin: 3px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .product .product__right { flex-shrink: 0; display: flex; align-items: center; margin-left: auto; white-space: nowrap; }
+    .product .product__right .show { margin: 0 3px; }
+    .license { border-radius: 3px; clear: both; display: none; padding: 16px; }
+    .license pre { white-space: pre-wrap; }
+    label.show::after { content: 'Show license'; cursor: pointer; }
+    label.show-all::after { content: 'Show all licenses'; cursor: pointer; }
+    .product:has(.show input:checked) .license { display: block; }
+    label.show:has(input:checked)::after { content: 'Hide license'; cursor: pointer; }
+    .credits-header-right:has(.show-all input:checked) ~ .credits-content .product .license { display: block; }
+    .credits-header-right:has(.show-all input:checked) .show-all::after { content: 'Hide all'; cursor: pointer; }
+    .ft__secondary { color: var(--primary-color); opacity: 0.8; }
+    h2 { clear: both; margin-top: 1.5rem; padding-bottom: 0.25rem; }
+    @media print { .license { display: block; font-size: smaller; padding: 0; } .product, a, body { color: black; } .product { background: white; } a { text-decoration: none; } .show, .credits-header-right .show-all, #print-link { display: none; } }
+  </style>
+</head>
+<body>
+<span class="page-title">Credits</span>
+<span class="credits-header-right">
+  <label class="show show-all" tabindex="0"><input type="checkbox" hidden></label>
+  <a id="print-link" href="#">Print</a>
+</span>
+<div class="credits-content" style="clear:both; overflow:auto;">
+  <p style="clear:both;">SiYuan software is made available as source code <a href="https://github.com/siyuan-note/siyuan" target="_blank" rel="noopener">here</a>.</p>
+  <h2>Frontend</h2>
+  {{range .Frontend}}{{template "creditsProduct" .}}{{end}}
+  <h2>Kernel</h2>
+  {{if .Backend}}{{range .Backend}}{{template "creditsProduct" .}}{{end}}{{else}}<p class="ft__secondary">No Go dependency list found.</p>{{end}}
+</div>
+<script>document.addEventListener('DOMContentLoaded',function(){var el=document.getElementById('print-link');if(el){el.hidden=false;el.onclick=function(){window.print();return false};}});</script>
+</body>
+</html>
+{{define "creditsProduct"}}
+<div class="product">
+  <span class="title">{{.Name}}{{if and .License (ne .License "Unknown")}} · {{.License}}{{end}}</span>
+  <span class="product__right">
+    {{if .LicenseText}}<label class="show"><input type="checkbox" hidden></label>{{end}}
+  </span>
+  {{if .LicenseText}}<div class="license"><pre>{{.LicenseText}}</pre></div>{{end}}
+</div>
+{{end}}
+`
 
 func serveCheckAuth(ginServer *gin.Engine) {
 	ginServer.GET("/check-auth", serveAuthPage)

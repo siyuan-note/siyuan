@@ -566,7 +566,9 @@ export class Outline extends Model {
         if (!nodeElement) {
             return;
         }
-        if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+        if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+            !nodeElement.parentElement.classList.contains("bq") &&
+            !nodeElement.parentElement.classList.contains("callout-content")) {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);

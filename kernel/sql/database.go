@@ -383,6 +383,14 @@ var (
 
 func SetCaseSensitive(b bool) {
 	caseSensitive = b
+
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+
+	if nil == db {
+		return
+	}
+
 	if b {
 		db.Exec("PRAGMA case_sensitive_like = ON;")
 	} else {
@@ -1307,6 +1315,10 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 		logging.LogErrorf("statement is empty")
 		return nil
 	}
+
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+
 	if nil == db {
 		return nil
 	}
@@ -1318,6 +1330,10 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 	if "" == query {
 		return nil, errors.New("statement is empty")
 	}
+
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+
 	if nil == db {
 		return nil, errors.New("database is nil")
 	}
@@ -1592,6 +1608,9 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 }
 
 func Vacuum() {
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
+
 	if nil != db {
 		if _, err := db.Exec("VACUUM"); nil != err {
 			logging.LogErrorf("vacuum database failed: %s", err)

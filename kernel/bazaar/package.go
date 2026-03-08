@@ -40,7 +40,7 @@ type Funding struct {
 }
 
 // Package 描述了集市包元数据和传递给前端的其他信息。
-//  - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
+//   - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
 type Package struct {
 	Author            string        `json:"author"`
 	URL               string        `json:"url"`
@@ -104,7 +104,7 @@ type StageRepo struct {
 type StageIndex struct {
 	Repos []*StageRepo `json:"repos"`
 
-	reposByURL map[string]*StageRepo // 不序列化，首次按 URL 查找时懒构建
+	reposByURL map[string]*StageRepo // 不序列化，首次按 URL 查找时懒构建，随整份索引一起过期
 	reposOnce  sync.Once
 }
 

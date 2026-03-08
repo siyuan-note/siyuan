@@ -45,28 +45,10 @@ func getReadmeFileCandidates(readme LocaleStrings) []string {
 }
 
 // GetBazaarPackageREADME 获取集市包的在线 README。
-func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType string) (ret string) {
+func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
-
-	stageIndexLock.RLock()
-	stageIndex := cachedStageIndex[packageType]
-	stageIndexLock.RUnlock()
-	if stageIndex == nil {
-		var err error
-		stageIndex, err = getStageIndex(ctx, packageType)
-		if err != nil {
-			return
-		}
-	}
-
 	url := strings.TrimPrefix(repoURLHash, "https://github.com/")
-	var repo *StageRepo
-	for _, r := range stageIndex.Repos {
-		if r.URL == url {
-			repo = r
-			break
-		}
-	}
+	repo := getStageRepoByURL(ctx, pkgType, url)
 	if repo == nil || repo.Package == nil {
 		return
 	}
@@ -87,6 +69,7 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType 
 		return
 	}
 
+	// 解码 UTF-16 BOM
 	if len(data) > 2 {
 		var decoded []byte
 		var err error

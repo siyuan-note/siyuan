@@ -22,25 +22,25 @@ import (
 	"sync"
 	"time"
 
+	gcache "github.com/patrickmn/go-cache"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/sync/singleflight"
 )
 
-var cachedStageIndex = map[string]*StageIndex{}
-var stageIndexCacheTime int64
-var stageIndexLock = sync.RWMutex{}
+// cachedStageIndex 缓存 stage 索引
+var cachedStageIndex = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6)
 
 type StageBazaarResult struct {
-	StageIndex  *StageIndex               // stage 索引
-	BazaarIndex map[string]*bazaarPackage // bazaar 索引
-	Online      bool                      // online 状态
-	StageErr    error                     // stage 错误
+	StageIndex  *StageIndex             // stage 索引
+	BazaarStats map[string]*bazaarStats // 统计信息
+	Online      bool                    // online 状态
+	StageErr    error                   // stage 错误
 }
 
 var stageBazaarFlight singleflight.Group
-var onlineCheckFlight singleflight.Group
+var bazaarStatsFlight singleflight.Group
 
 // getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
 func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
@@ -58,12 +58,12 @@ func getStageAndBazaar(pkgType string) (result StageBazaarResult) {
 // getStageAndBazaar0 执行一次 stage 和 bazaar 索引拉取
 func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	stageIndex, stageErr := getStageIndexFromCache(pkgType)
-	bazaarIndex := getBazaarIndexFromCache()
-	if nil != stageIndex && nil != bazaarIndex {
+	bazaarStats := getBazaarStatsFromCache()
+	if nil != stageIndex && nil != bazaarStats {
 		// 两者都从缓存返回，不需要 online 检查
 		return StageBazaarResult{
 			StageIndex:  stageIndex,
-			BazaarIndex: bazaarIndex,
+			BazaarStats: bazaarStats,
 			Online:      true,
 			StageErr:    stageErr,
 		}
@@ -77,7 +77,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		onlineResult = isBazzarOnline()
+		onlineResult = isBazaarOnline()
 		onlineDone <- true
 	}()
 	go func() {
@@ -86,7 +86,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	}()
 	go func() {
 		defer wg.Done()
-		bazaarIndex = getBazaarIndex(ctx)
+		bazaarStats = getBazaarStats(ctx)
 	}()
 
 	<-onlineDone
@@ -95,7 +95,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 		cancel()
 		return StageBazaarResult{
 			StageIndex:  stageIndex,
-			BazaarIndex: bazaarIndex,
+			BazaarStats: bazaarStats,
 			Online:      false,
 			StageErr:    stageErr,
 		}
@@ -106,7 +106,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 
 	return StageBazaarResult{
 		StageIndex:  stageIndex,
-		BazaarIndex: bazaarIndex,
+		BazaarStats: bazaarStats,
 		Online:      onlineResult,
 		StageErr:    stageErr,
 	}
@@ -114,12 +114,8 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 
 // getStageIndexFromCache 仅从缓存获取 stage 索引，过期或无缓存时返回 nil
 func getStageIndexFromCache(pkgType string) (ret *StageIndex, err error) {
-	stageIndexLock.RLock()
-	cacheTime := stageIndexCacheTime
-	cached := cachedStageIndex[pkgType]
-	stageIndexLock.RUnlock()
-	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && nil != cached {
-		ret = cached
+	if val, found := cachedStageIndex.Get(pkgType); found {
+		ret = val.(*StageIndex)
 	}
 	return
 }
@@ -138,13 +134,10 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 		return
 	}
 
-	stageIndexLock.Lock()
-	defer stageIndexLock.Unlock()
-
 	bazaarHash := rhyRet["bazaar"].(string)
 	ret = &StageIndex{}
 	request := httpclient.NewBrowserRequest()
-	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json"
+	u := util.BazaarOSSServer + "/bazaar@" + bazaarHash + "/stage/" + pkgType + ".json" // pkgType 单词为复数形式
 	resp, reqErr := request.SetContext(ctx).SetSuccessResult(ret).Get(u)
 	if nil != reqErr {
 		logging.LogErrorf("get community stage index [%s] failed: %s", u, reqErr)
@@ -157,22 +150,26 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 		return
 	}
 
-	stageIndexCacheTime = time.Now().Unix()
-	cachedStageIndex[pkgType] = ret
+	cachedStageIndex.SetDefault(pkgType, ret)
 	return
 }
 
-func isBazzarOnline() bool {
-	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (interface{}, error) {
-		return isBazzarOnline0(), nil
-	})
-	if err != nil {
-		return false
+// getStageRepoByURL 根据 pkgType 与 url（owner/repo@hash）获取 StageRepo
+func getStageRepoByURL(ctx context.Context, pkgType, url string) *StageRepo {
+	stageIndex, _ := getStageIndex(ctx, pkgType)
+	if nil == stageIndex {
+		return nil
 	}
-	return v.(bool)
+	stageIndex.reposOnce.Do(func() {
+		stageIndex.reposByURL = make(map[string]*StageRepo, len(stageIndex.Repos))
+		for _, r := range stageIndex.Repos {
+			stageIndex.reposByURL[r.URL] = r
+		}
+	})
+	return stageIndex.reposByURL[url]
 }
 
-func isBazzarOnline0() (ret bool) {
+func isBazaarOnline() (ret bool) {
 	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
 	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
 	if !ret {
@@ -181,50 +178,47 @@ func isBazzarOnline0() (ret bool) {
 	return
 }
 
-type bazaarPackage struct {
-	Name      string `json:"name"`
-	Downloads int    `json:"downloads"`
+// bazaarStats 集市包统计信息
+type bazaarStats struct {
+	Downloads int `json:"downloads"` // 下载次数
 }
 
-var cachedBazaarIndex = map[string]*bazaarPackage{}
-var bazaarIndexCacheTime int64
-var bazaarIndexLock = sync.RWMutex{}
+// cachedBazaarStats 缓存集市包统计信息
+var cachedBazaarStats = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6)
 
-// getBazaarIndexFromCache 仅从缓存获取 bazaar 索引，过期或无缓存时返回 nil
-func getBazaarIndexFromCache() (ret map[string]*bazaarPackage) {
-	bazaarIndexLock.RLock()
-	cacheTime := bazaarIndexCacheTime
-	cached := cachedBazaarIndex
-	hasData := 0 < len(cached)
-	bazaarIndexLock.RUnlock()
-	if util.RhyCacheDuration >= time.Now().Unix()-cacheTime && hasData {
-		ret = cached
-	} else {
-		ret = nil
+// getBazaarStatsFromCache 仅从缓存获取集市包统计信息，过期或无缓存时返回 nil
+func getBazaarStatsFromCache() (ret map[string]*bazaarStats) {
+	if val, found := cachedBazaarStats.Get("index"); found {
+		ret = val.(map[string]*bazaarStats)
 	}
 	return
 }
 
-// getBazaarIndex 获取 bazaar 索引
-func getBazaarIndex(ctx context.Context) map[string]*bazaarPackage {
-	if cached := getBazaarIndexFromCache(); nil != cached {
+// getBazaarStats 获取集市包统计信息
+func getBazaarStats(ctx context.Context) map[string]*bazaarStats {
+	if cached := getBazaarStatsFromCache(); nil != cached {
 		return cached
 	}
 
-	bazaarIndexLock.Lock()
-	defer bazaarIndexLock.Unlock()
+	v, _, _ := bazaarStatsFlight.Do("bazaarStats", func() (interface{}, error) {
+		return getBazaarStats0(ctx), nil
+	})
+	return v.(map[string]*bazaarStats)
+}
 
+func getBazaarStats0(ctx context.Context) map[string]*bazaarStats {
+	var result map[string]*bazaarStats
 	request := httpclient.NewBrowserRequest()
 	u := util.BazaarStatServer + "/bazaar/index.json"
-	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&cachedBazaarIndex).Get(u)
+	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&result).Get(u)
 	if nil != reqErr {
-		logging.LogErrorf("get bazaar index [%s] failed: %s", u, reqErr)
-		return cachedBazaarIndex
+		logging.LogErrorf("get bazaar stats [%s] failed: %s", u, reqErr)
+		return result
 	}
 	if 200 != resp.StatusCode {
-		logging.LogErrorf("get bazaar index [%s] failed: %d", u, resp.StatusCode)
-		return cachedBazaarIndex
+		logging.LogErrorf("get bazaar stats [%s] failed: %d", u, resp.StatusCode)
+		return result
 	}
-	bazaarIndexCacheTime = time.Now().Unix()
-	return cachedBazaarIndex
+	cachedBazaarStats.SetDefault("index", result)
+	return result
 }

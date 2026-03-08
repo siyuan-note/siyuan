@@ -89,6 +89,7 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 	if gulu.File.IsDir(assetAbsPath) {
 		return
 	}
+	// 跳过隐藏文件，如 WPS 的临时文件、Mac 的 .DS_Store
 	if filelock.IsHidden(assetAbsPath) {
 		return
 	}

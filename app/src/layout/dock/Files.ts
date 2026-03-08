@@ -128,7 +128,7 @@ export class Files extends Model {
     <span class="fn__space"></span>
     <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
-<div class="fn__flex-1" style="padding-top: 2px;"></div>
+<div class="fn__flex-1" style="padding-top: 2px;" data-tooltips-delay="200"></div>
 <ul class="b3-list fn__flex-column" style="min-height: auto;height:30px;transition: height  .2s cubic-bezier(0, 0, .2, 1) 0ms">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
@@ -864,7 +864,7 @@ export class Files extends Model {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item b3-list-item--hide-action" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""} 
 style="--file-toggle-width:22px" 
-data-type="navigation-root" data-path="/" data-tooltips-delay="200">
+data-type="navigation-root" data-path="/">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1314,7 +1314,7 @@ data-type="navigation-root" data-path="/" data-tooltips-delay="200">
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 
-class="b3-list-item b3-list-item--hide-action" data-path="${item.path}" data-tooltips-delay="200">
+class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>

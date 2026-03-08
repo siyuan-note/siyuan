@@ -22,6 +22,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "../util/hasClosest";
+import {hideElements} from "./hideElements";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -121,6 +122,7 @@ export const initUI = (protyle: IProtyle) => {
         }, Constants.TIMEOUT_LOAD);
     }, {passive: true});
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+        hideElements(["hint", "util"], protyle);
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||
             // 选中块时，禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905

@@ -2616,7 +2616,6 @@ export class WYSIWYG {
                     event
                 });
             });
-            hideElements(["hint", "util"], protyle);
             const ctrlIsPressed = isOnlyMeta(event);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {

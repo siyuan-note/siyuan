@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "Autoryzowane konta",
   "publishServiceAuthAccountsTip": "Lista kont autoryzacji podstawowej. Odwiedzający muszą wpisać nazwę użytkownika i hasło z tej listy, aby zobaczyć opublikowaną zawartość.",
   "publishServiceAuthAccountAdd": "Dodaj konto",
+  "publishAccess": "Kontrola dostępu do publikacji",
+  "publishAccessPublic": "Publiczny",
+  "publishAccessProtected": "Chroniony",
+  "publishAccessHidden": "Ukryty",
+  "publishAccessPrivate": "Prywatny",
+  "publishAccessForbidden": "Zabroniony",
+  "publishAccessPublicComment": "Pełny dostęp publiczny",
+  "publishAccessProtectedComment": "Widoczny publicznie, wymaga hasła do dostępu",
+  "publishAccessHiddenComment": "Nie jest widoczny publicznie, można uzyskać do niego bezpośredni dostęp",
+  "publishAccessPrivateComment": "Nie jest widoczny publicznie, wymaga hasła do dostępu",
+  "publishAccessForbiddenComment": "Dostęp zabroniony",
   "copyMirror": "Kopiuj lustro",
   "duplicateMirror": "Duplikuj lustro",
   "duplicateCompletely": "Duplikuj całkowicie",
@@ -1754,6 +1765,9 @@
     "279": "Nieodwołane bazy danych łącznie: [%d], tutaj wyświetlono tylko [%d]",
     "280": "Czyszczenie nieodwołanych baz danych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
     "281": " (Domyślny)",
-    "282": "Zamknij okno"
+    "282": "Zamknij okno",
+    "283": "Hasło",
+    "284": "Dostęp zabroniony",
+    "285": "Hasło jest nieprawidłowe"
   }
 }

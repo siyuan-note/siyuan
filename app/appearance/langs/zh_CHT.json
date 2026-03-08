@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "認證帳戶",
   "publishServiceAuthAccountsTip": "Basic 認證帳戶列表。啟用 Basic 認證後訪問者輸入列表中的用戶名與密碼後才能查看發布的內容",
   "publishServiceAuthAccountAdd": "添加帳戶",
+  "publishAccess": "發布存取控制",
+  "publishAccessPublic": "公開",
+  "publishAccessProtected": "保護",
+  "publishAccessHidden": "隱藏",
+  "publishAccessPrivate": "私密",
+  "publishAccessForbidden": "禁止",
+  "publishAccessPublicComment": "完全公開存取",
+  "publishAccessProtectedComment": "公眾可見，需密碼才能存取",
+  "publishAccessHiddenComment": "公眾不可見，可直接存取",
+  "publishAccessPrivateComment": "公眾不可見，需密碼才能存取",
+  "publishAccessForbiddenComment": "禁止存取",
   "copyMirror": "複製鏡像",
   "duplicateMirror": "複製為鏡像副本",
   "duplicateCompletely": "複製為完整副本",
@@ -1754,6 +1765,9 @@
     "279": "未引用資料庫一共 [%d] 個，這裡僅列出 [%d] 個",
     "280": "清理未引用的資料庫完畢，已刪除 [%d] 個檔案，共釋放 [%s] 磁碟空間",
     "281": "（預設主題）",
-    "282": "關閉視窗"
+    "282": "關閉視窗",
+    "283": "密碼",
+    "284": "禁止訪問",
+    "285": "密碼不正確"
   }
 }

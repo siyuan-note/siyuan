@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "חשבונות מאומתים",
   "publishServiceAuthAccountsTip": "רשימת חשבונות אימות בסיסי. צופים זקוקים להזין את שם המשתמש והסיסמה מהרשימה הזו כדי לראות את התוכן המפורסם.",
   "publishServiceAuthAccountAdd": "הוסף חשבון",
+  "publishAccess": "בקרת גישה להפצה",
+  "publishAccessPublic": "ציבורי",
+  "publishAccessProtected": "מוגן",
+  "publishAccessHidden": "מוסתר",
+  "publishAccessPrivate": "פרטי",
+  "publishAccessForbidden": "אסור",
+  "publishAccessPublicComment": "גישה ציבורית מלאה",
+  "publishAccessProtectedComment": "גלוי לציבור, דורש סיסמה לגישה",
+  "publishAccessHiddenComment": "לא גלוי לציבור, ניתן לגישה ישירה",
+  "publishAccessPrivateComment": "לא גלוי לציבור, דורש סיסמה לגישה",
+  "publishAccessForbiddenComment": "גישת אסורה",
   "copyMirror": "העתק מראה",
   "duplicateMirror": "שכפל מראה",
   "duplicateCompletely": "שכפל לחלוטין",
@@ -1754,6 +1765,9 @@
     "279": "בסך הכל קיימים [%d] מאגרי מידע שלא מקושרים, כאן מופיעים רק [%d]",
     "280": "ניקוי מאגרי המידע שלא מקושרים הושלם, נמחקו [%d] קבצים, שוחררו [%s] נפח דיסק",
     "281": " (ברירת מחדל)",
-    "282": "סגור חלון"
+    "282": "סגור חלון",
+    "283": "סיסמה",
+    "284": "הגישה אסורה",
+    "285": "הסיסמה שגויה"
   }
 }

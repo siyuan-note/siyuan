@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "인증된 계정",
   "publishServiceAuthAccountsTip": "기본 인증 계정 목록입니다. 방문자는 이 목록의 사용자 이름과 비밀번호를 입력해야 게시된 콘텐츠를 볼 수 있습니다.",
   "publishServiceAuthAccountAdd": "계정 추가",
+  "publishAccess": "게시 접근 제어",
+  "publishAccessPublic": "공개",
+  "publishAccessProtected": "보호됨",
+  "publishAccessHidden": "숨김",
+  "publishAccessPrivate": "비공개",
+  "publishAccessForbidden": "금지됨",
+  "publishAccessPublicComment": "완전히 공개된 접근",
+  "publishAccessProtectedComment": "공개되지만 비밀번호 필요",
+  "publishAccessHiddenComment": "공개되지 않으나 직접 접근 가능",
+  "publishAccessPrivateComment": "공개되지 않으며 비밀번호 필요",
+  "publishAccessForbiddenComment": "접근 금지됨",
   "copyMirror": "미러 복사",
   "duplicateMirror": "미러 사본 복제",
   "duplicateCompletely": "완전한 사본 복제",
@@ -1754,6 +1765,9 @@
     "279": "참조되지 않은 데이터베이스 전체 [%d]개, 여기에는 [%d]개만 나열됩니다",
     "280": "참조되지 않은 데이터베이스 정리 완료, [%d]개의 파일을 삭제하여 총 [%s]의 디스크 공간을 확보했습니다",
     "281": " (기본)",
-    "282": "창 닫기"
+    "282": "창 닫기",
+    "283": "비밀번호",
+    "284": "접근 금지됨",
+    "285": "비밀번호가 올바르지 않습니다"
   }
 }

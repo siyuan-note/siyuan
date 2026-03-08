@@ -101,6 +101,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
+import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 
@@ -2852,6 +2853,28 @@ export class WYSIWYG {
                 });
                 /// #endif
                 return;
+            }
+
+            if (window.siyuan.config.readonly) {
+                const publishAccessPasswordButtonElement = hasClosestByClassName(event.target, "publish-access-block--password-button");
+                if (publishAccessPasswordButtonElement) {
+                    const passwordID = publishAccessPasswordButtonElement.parentElement.parentElement.getAttribute("data-node-id");
+                    const password = publishAccessPasswordButtonElement.parentElement.querySelector("input").value;
+                    fetchPost("/api/filetree/authFilePublishAccess", {
+                        id: passwordID,
+                        password: password
+                    }, (response) => {
+                        if (response.msg) {
+                            showMessage(response.msg);
+                        } else {
+                            reloadProtyle(protyle, true);
+                            getAllModels().outline.forEach(item => { item.reload(); });
+                        }
+                    });
+                    
+                    event.stopPropagation();
+                    return;
+                }
             }
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");

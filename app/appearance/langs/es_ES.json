@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "Cuentas de autenticación",
   "publishServiceAuthAccountsTip": "Lista de cuentas de autenticación básica. Después de activar la autenticación básica, los visitantes deberán ingresar el nombre de usuario y la contraseña de la lista para ver el contenido publicado",
   "publishServiceAuthAccountAdd": "Agregar cuenta",
+  "publishAccess": "Control de acceso a la publicación",
+  "publishAccessPublic": "Público",
+  "publishAccessProtected": "Protegido",
+  "publishAccessHidden": "Oculto",
+  "publishAccessPrivate": "Privado",
+  "publishAccessForbidden": "Prohibido",
+  "publishAccessPublicComment": "Acceso completamente público",
+  "publishAccessProtectedComment": "Visible públicamente, requiere contraseña para acceder",
+  "publishAccessHiddenComment": "No visible públicamente, se puede acceder directamente",
+  "publishAccessPrivateComment": "No visible públicamente, requiere contraseña para acceder",
+  "publishAccessForbiddenComment": "Acceso prohibido",
   "copyMirror": "Copiar espejo",
   "duplicateMirror": "Espejo duplicado",
   "duplicateCompletely": "Duplicar completamente",
@@ -1754,6 +1765,9 @@
     "279": "Hay [%d] bases de datos sin referencias en total, aquí se muestran solo [%d]",
     "280": "Limpieza de bases de datos sin referencias completada, [%d] archivos eliminados, se liberaron [%s] de espacio en disco",
     "281": " (Por defecto)",
-    "282": "Cerrar ventana"
+    "282": "Cerrar ventana",
+    "283": "Contraseña",
+    "284": "Acceso denegado",
+    "285": "La contraseña es incorrecta"
   }
 }

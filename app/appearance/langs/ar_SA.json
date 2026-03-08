@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "الحسابات المصادقة",
   "publishServiceAuthAccountsTip": "قائمة حسابات المصادقة الأساسية. يحتاج الزوار إلى إدخال اسم المستخدم وكلمة المرور من هذه القائمة لعرض المحتوى المنشور.",
   "publishServiceAuthAccountAdd": "إضافة حساب",
+  "publishAccess": "التحكم في الوصول للنشر",
+  "publishAccessPublic": "عام",
+  "publishAccessProtected": "محمي",
+  "publishAccessHidden": "مخفي",
+  "publishAccessPrivate": "خاص",
+  "publishAccessForbidden": "محظور",
+  "publishAccessPublicComment": "الوصول العام الكامل",
+  "publishAccessProtectedComment": "مرئي للعامة، يتطلب كلمة مرور للوصول",
+  "publishAccessHiddenComment": "غير مرئي للعامة، يمكن الوصول مباشرة",
+  "publishAccessPrivateComment": "غير مرئي للعامة، يتطلب كلمة مرور للوصول",
+  "publishAccessForbiddenComment": "الوصول محظور",
   "copyMirror": "نسخ المرآة",
   "duplicateMirror": "تكرار المرآة",
   "duplicateCompletely": "تكرار بالكامل",
@@ -1754,6 +1765,9 @@
     "279": "يوجد إجمالاً [%d] قواعد بيانات غير مرجعية، هنا يتم سرد [%d] فقط",
     "280": "اكتمل تنظيف قواعد البيانات غير المرجعية، تم حذف [%d] ملفًا، وتم تحرير [%s] من مساحة القرص",
     "281": " (الافتراضي)",
-    "282": "إغلاق النافذة"
+    "282": "إغلاق النافذة",
+    "283": "كلمة المرور",
+    "284": "الوصول محظور",
+    "285": "كلمة المرور غير صحيحة"
   }
 }

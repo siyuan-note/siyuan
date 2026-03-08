@@ -35,7 +35,7 @@ func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 
 	packages = make([]*Package, 0, len(result.StageIndex.Repos))
 	for _, repo := range result.StageIndex.Repos {
-		pkg := buildBazaarPackageWithMetadata(repo, result.BazaarIndex, pkgType, frontend)
+		pkg := buildBazaarPackageWithMetadata(repo, result.BazaarStats, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}
@@ -45,7 +45,7 @@ func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 }
 
 // buildBazaarPackageWithMetadata 从 StageRepo 构建带有在线元数据的集市包。
-func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarIndex map[string]*bazaarPackage, pkgType string, frontend string) *Package {
+func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
 	if nil == repo || nil == repo.Package {
 		return nil
 	}
@@ -85,8 +85,8 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarIndex map[string]*baz
 	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
 	pkg.InstallSize = repo.InstallSize
 	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
-	if bp := bazaarIndex[repoURLHash[0]]; nil != bp {
-		pkg.Downloads = bp.Downloads
+	if stats := bazaarStats[repoURLHash[0]]; nil != stats { // 通过 bazaarStats[owner/repo] 获取单个包的统计数据
+		pkg.Downloads = stats.Downloads
 	}
 	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
 	return &pkg

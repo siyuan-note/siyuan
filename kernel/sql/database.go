@@ -391,7 +391,7 @@ func SetCaseSensitive(b bool) {
 	caseSensitive = b
 
 	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignore setting case sensitive to %v", b)
+		logging.LogWarnf("database is initializing, ignore setting case sensitive to [%v]", b)
 		return
 	}
 
@@ -1325,7 +1325,7 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 	}
 
 	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query: %s", query)
+		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
 		return nil
 	}
 
@@ -1342,7 +1342,7 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 	}
 
 	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query: %s", query)
+		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
 		return nil, errors.New("database is initializing")
 	}
 

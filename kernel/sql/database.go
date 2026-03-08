@@ -30,6 +30,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"text/template"
 	"time"
 	"unicode/utf8"
@@ -66,12 +67,17 @@ func init() {
 	})
 }
 
-var initDatabaseLock = sync.Mutex{}
+var (
+	initDatabaseLock       = sync.Mutex{}
+	isInitializingDatabase = atomic.Bool{}
+)
 
 func InitDatabase(forceRebuild bool) (err error) {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
+	isInitializingDatabase.Store(true)
+	defer isInitializingDatabase.Store(false)
 	ClearCache()
 	disableCache()
 	defer enableCache()
@@ -384,8 +390,10 @@ var (
 func SetCaseSensitive(b bool) {
 	caseSensitive = b
 
-	initDatabaseLock.Lock()
-	defer initDatabaseLock.Unlock()
+	if isInitializingDatabase.Load() {
+		logging.LogWarnf("database is initializing, ignore setting case sensitive to %v", b)
+		return
+	}
 
 	if nil == db {
 		return
@@ -1316,8 +1324,10 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 		return nil
 	}
 
-	initDatabaseLock.Lock()
-	defer initDatabaseLock.Unlock()
+	if isInitializingDatabase.Load() {
+		logging.LogWarnf("database is initializing, ignoring query: %s", query)
+		return nil
+	}
 
 	if nil == db {
 		return nil
@@ -1331,8 +1341,10 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	initDatabaseLock.Lock()
-	defer initDatabaseLock.Unlock()
+	if isInitializingDatabase.Load() {
+		logging.LogWarnf("database is initializing, ignoring query: %s", query)
+		return nil, errors.New("database is initializing")
+	}
 
 	if nil == db {
 		return nil, errors.New("database is nil")

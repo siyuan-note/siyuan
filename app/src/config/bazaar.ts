@@ -14,7 +14,7 @@ import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
-import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/loader";
+import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
 
 export const bazaar = {

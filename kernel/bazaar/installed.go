@@ -35,11 +35,6 @@ import (
 // packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
 var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
 
-// CleanBazaarPackageCache 清空集市包相关缓存（如切换语言后需刷新展示名等）
-func CleanBazaarPackageCache() {
-	packageInstallSizeCache.Flush()
-}
-
 // ReadInstalledPackageDirs 读取本地集市包的目录列表
 func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	if !util.IsPathRegularDirOrSymlinkDir(basePath) {

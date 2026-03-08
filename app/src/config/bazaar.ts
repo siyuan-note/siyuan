@@ -700,7 +700,7 @@ type="checkbox">
                         }, async response => {
                             bazaar._onBazaar(response, bazaarType);
                             bazaar._genMyHTML(bazaarType, app, false);
-                            if (bazaarType === "plugins") {
+                            if (response.code === 0 && bazaarType === "plugins") {
                                 if (window.siyuan.config.bazaar.petalDisabled) {
                                     confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                                 } else {
@@ -756,27 +756,17 @@ type="checkbox">
                                 packageName: dataObj.name,
                                 repoHash: dataObj.repoHash,
                                 mode: dataObj.themeMode === "dark" ? 1 : 0,
-                                update: true,
                                 frontend: getFrontend()
                             }, async response => {
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType);
+                                // TODO 集市包的相关逻辑应完全由内核处理并推送到所有前端实例，下面的代码需要确认
                                 // https://github.com/siyuan-note/siyuan/issues/15177
                                 if (bazaarType === "themes" && response.data.appearance?.themeVer) {
                                     window.siyuan.config.appearance.themeVer = response.data.appearance.themeVer;
                                 }
                                 // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                                 // https://github.com/siyuan-note/siyuan/issues/5411
-                                if (bazaarType === "plugins") {
-                                    app.plugins.find((item: Plugin) => {
-                                        if (item.name === dataObj.name) {
-                                            reloadPlugin(app, {
-                                                reloadPlugins: [dataObj.name],
-                                            });
-                                            return true;
-                                        }
-                                    });
-                                }
                             });
                         });
                     }
@@ -1099,12 +1089,6 @@ type="checkbox">
         });
     },
     _onBazaar(response: IWebSocketData, bazaarType: TBazaarType) {
-        if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
-            const dataObj = JSON.parse(bazaar.element.querySelector("#configBazaarReadme > .item__side").getAttribute("data-obj"));
-            bazaar._renderReadme((dataObj.bazaarType) as TBazaarType,
-                response.data.packages.find((item: IBazaarItem) => item.repoURL === dataObj.repoURL),
-                dataObj.downloaded);
-        }
         let id = "#configBazaarTemplate";
         if (bazaarType === "themes") {
             id = "#configBazaarTheme";
@@ -1117,10 +1101,18 @@ type="checkbox">
         }
         const element = bazaar.element.querySelector(id);
         if (response.code === 1) {
+            // 安装集市包 /api/bazaar/installBazaar* 失败
             showMessage(response.msg);
             element.querySelectorAll("img[data-type='img-loading']").forEach((item) => {
                 item.remove();
             });
+            return;
+        }
+        if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
+            const dataObj = JSON.parse(bazaar.element.querySelector("#configBazaarReadme > .item__side").getAttribute("data-obj"));
+            bazaar._renderReadme((dataObj.bazaarType) as TBazaarType,
+                response.data.packages.find((item: IBazaarItem) => item.repoURL === dataObj.repoURL),
+                dataObj.downloaded);
         }
         let html = "";
         response.data.packages.forEach((item: IBazaarItem) => {

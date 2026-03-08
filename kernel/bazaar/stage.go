@@ -19,14 +19,12 @@ package bazaar
 import (
 	"context"
 	"errors"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/mod/semver"
 	"golang.org/x/sync/singleflight"
 )
 
@@ -162,106 +160,6 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 	stageIndexCacheTime = time.Now().Unix()
 	cachedStageIndex[pkgType] = ret
 	return
-}
-
-func isOutdatedTheme(theme *Theme, bazaarThemes []*Theme) bool {
-	if !strings.HasPrefix(theme.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(theme.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarThemes {
-		if theme.Name == pkg.Name && 0 > semver.Compare("v"+theme.Version, "v"+pkg.Version) {
-			theme.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedIcon(icon *Icon, bazaarIcons []*Icon) bool {
-	if !strings.HasPrefix(icon.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(icon.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarIcons {
-		if icon.Name == pkg.Name && 0 > semver.Compare("v"+icon.Version, "v"+pkg.Version) {
-			icon.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedPlugin(plugin *Plugin, bazaarPlugins []*Plugin) bool {
-	if !strings.HasPrefix(plugin.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(plugin.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarPlugins {
-		if plugin.Name == pkg.Name && 0 > semver.Compare("v"+plugin.Version, "v"+pkg.Version) {
-			plugin.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedWidget(widget *Widget, bazaarWidgets []*Widget) bool {
-	if !strings.HasPrefix(widget.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(widget.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarWidgets {
-		if widget.Name == pkg.Name && 0 > semver.Compare("v"+widget.Version, "v"+pkg.Version) {
-			widget.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
-}
-
-func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
-	if !strings.HasPrefix(template.URL, "https://github.com/") {
-		return false
-	}
-
-	repo := strings.TrimPrefix(template.URL, "https://github.com/")
-	parts := strings.Split(repo, "/")
-	if 2 != len(parts) || "" == strings.TrimSpace(parts[1]) {
-		return false
-	}
-
-	for _, pkg := range bazaarTemplates {
-		if template.Name == pkg.Name && 0 > semver.Compare("v"+template.Version, "v"+pkg.Version) {
-			template.RepoHash = pkg.RepoHash
-			return true
-		}
-	}
-	return false
 }
 
 func isBazzarOnline() bool {

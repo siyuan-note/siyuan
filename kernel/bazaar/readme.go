@@ -36,7 +36,7 @@ import (
 
 // getReadmeFileCandidates 根据包的 README 配置返回去重的按优先级排序的 README 候选文件名列表：当前语言首选、default、README.md。
 func getReadmeFileCandidates(readme LocaleStrings) []string {
-	preferred := getPreferredReadme(readme)
+	preferred := GetPreferredLocaleString(readme, "README.md")
 	defaultName := "README.md"
 	if v := strings.TrimSpace(readme["default"]); v != "" {
 		defaultName = v
@@ -76,7 +76,7 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, packageType 
 	var loadErr error
 	var errMsgs []string
 	for _, name := range candidates {
-		data, loadErr = downloadPackage(repoURLHash+"/"+name, false, "")
+		data, loadErr = downloadBazaarFile(repoURLHash+"/"+name, false)
 		if loadErr == nil {
 			break
 		}

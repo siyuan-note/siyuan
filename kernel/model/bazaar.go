@@ -322,6 +322,7 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	return
 }
 
+// InstallBazaarPackage 安装集市包，themeMode 仅在 pkgType 为 "themes" 时生效
 func InstallBazaarPackage(pkgType, repoURL, repoHash, packageName string, themeMode int) error {
 	installPath, jsonFileName, err := getPackageInstallPath(pkgType, packageName)
 	if err != nil {

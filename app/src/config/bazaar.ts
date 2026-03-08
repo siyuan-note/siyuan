@@ -246,11 +246,11 @@ export const bazaar = {
         let themeMode = "";
         if (bazaarType === "themes") {
             const themeValue = (bazaar.element.querySelector("#bazaarSelect") as HTMLSelectElement).value;
-            if ((themeValue === "0" && item.modes.includes("dark")) ||
-                themeValue === "1" && item.modes.includes("light")) {
+            if ((themeValue === "0" && item.modes?.includes("dark")) ||
+                themeValue === "1" && item.modes?.includes("light")) {
                 hide = true;
             }
-            themeMode = item.modes.toString();
+            themeMode = item.modes?.toString() || "";
         }
         let showSwitch = false;
         if (["icons", "themes"].includes(bazaarType)) {

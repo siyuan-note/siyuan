@@ -749,6 +749,10 @@ func checkoutRepo(id string) {
 	CloseWatchEmojis()
 	defer WatchEmojis()
 
+	// 若主题支持同步，需关闭监听器
+	// CloseWatchThemes()
+	// defer WatchThemes()
+
 	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
 	syncEnabled := Conf.Sync.Enabled
 	Conf.Sync.Enabled = false

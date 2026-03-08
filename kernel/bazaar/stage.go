@@ -40,6 +40,7 @@ type StageBazaarResult struct {
 }
 
 var stageBazaarFlight singleflight.Group
+var onlineCheckFlight singleflight.Group
 var bazaarStatsFlight singleflight.Group
 
 // getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
@@ -112,6 +113,25 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	}
 }
 
+func isBazaarOnline() bool {
+	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (interface{}, error) {
+		return isBazaarOnline0(), nil
+	})
+	if err != nil {
+		return false
+	}
+	return v.(bool)
+}
+
+func isBazaarOnline0() (ret bool) {
+	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
+	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
+	if !ret {
+		util.PushErrMsg(util.Langs[util.Lang][24], 5000)
+	}
+	return
+}
+
 // getStageIndexFromCache 仅从缓存获取 stage 索引，过期或无缓存时返回 nil
 func getStageIndexFromCache(pkgType string) (ret *StageIndex, err error) {
 	if val, found := cachedStageIndex.Get(pkgType); found {
@@ -167,15 +187,6 @@ func getStageRepoByURL(ctx context.Context, pkgType, url string) *StageRepo {
 		}
 	})
 	return stageIndex.reposByURL[url]
-}
-
-func isBazaarOnline() (ret bool) {
-	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
-	ret = util.IsOnline(util.BazaarOSSServer+"/204", true, 3000)
-	if !ret {
-		util.PushErrMsg(util.Langs[util.Lang][24], 5000)
-	}
-	return
 }
 
 // bazaarStats 集市包统计信息

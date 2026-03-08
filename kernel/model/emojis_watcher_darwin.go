@@ -40,9 +40,9 @@ func WatchEmojis() {
 }
 
 func watchEmojis() {
+	CloseWatchEmojis()
 	emojisDir := filepath.Join(util.DataDir, "emojis")
 
-	CloseWatchEmojis()
 	emojisWatcher = watcher.New()
 
 	if !gulu.File.IsDir(emojisDir) {
@@ -74,6 +74,7 @@ func watchEmojis() {
 			}
 		}
 	}()
+
 	if err := emojisWatcher.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start emojis watcher for folder [%s] failed: %s", emojisDir, err)
 		return

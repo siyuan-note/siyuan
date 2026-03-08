@@ -697,10 +697,13 @@ type="checkbox">
                             repoHash: dataObj.repoHash,
                             mode: dataObj.themeMode === "dark" ? 1 : 0,
                             frontend: getFrontend()
-                        }, async response => {
+                        }, response => {
                             bazaar._onBazaar(response, bazaarType);
+                            if (response.code !== 0) {
+                                return;
+                            }
                             bazaar._genMyHTML(bazaarType, app, false);
-                            if (response.code === 0 && bazaarType === "plugins") {
+                            if (bazaarType === "plugins") {
                                 if (window.siyuan.config.bazaar.petalDisabled) {
                                     confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                                 } else {
@@ -716,8 +719,6 @@ type="checkbox">
                                         });
                                     });
                                 }
-                            } else if (response.code === 1) {
-                                showMessage(response.msg);
                             }
                         });
                     }
@@ -759,7 +760,7 @@ type="checkbox">
                                 repoHash: dataObj.repoHash,
                                 mode: dataObj.themeMode === "dark" ? 1 : 0,
                                 frontend: getFrontend()
-                            }, async response => {
+                            }, response => {
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType);
                             });
@@ -822,7 +823,7 @@ type="checkbox">
                             modeOS: false,
                             themeDark: mode === 1 ? packageName : window.siyuan.config.appearance.themeDark,
                             themeLight: mode === 0 ? packageName : window.siyuan.config.appearance.themeLight,
-                        }), async (appearanceResponse) => {
+                        }), (appearanceResponse) => {
                             this._genMyHTML("themes", app, false);
                             fetchPost("/api/bazaar/getBazaarTheme", {}, response => {
                                 response.data.appearance = appearanceResponse.data;

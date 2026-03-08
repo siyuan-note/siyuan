@@ -190,7 +190,7 @@ func loadBazaarInfo() (ret *BazaarInfo) {
 	return
 }
 
-// saveBazaarInfo 保存集市持久化信息（调用者需持有写锁）
+// saveBazaarInfo 保存集市持久化信息（调用者需持有 bazaarInfoCacheLock 写锁）
 func saveBazaarInfo() {
 	infoPath := filepath.Join(util.DataDir, "storage", "bazaar.json")
 

@@ -132,7 +132,7 @@ func installPackage(data []byte, installPath string) (err error) {
 		srcPath = filepath.Join(unzipPath, dirs[0].Name())
 	}
 
-	if err = filelock.CopyNewtimes(srcPath, installPath); err != nil {
+	if err = filelock.Copy(srcPath, installPath); err != nil {
 		return
 	}
 	return

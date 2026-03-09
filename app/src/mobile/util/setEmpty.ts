@@ -9,7 +9,7 @@ import {setTitle} from "../../dialog/processSystem";
 import {isIPhone} from "../../protyle/util/compatibility";
 
 export const setEmpty = (app: App) => {
-    setTitle(window.siyuan.languages.siyuanNote);
+    setTitle("", true);
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");
     const emptyElement = document.getElementById("empty");

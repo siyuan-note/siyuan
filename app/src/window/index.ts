@@ -180,7 +180,7 @@ class App {
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
                         init(this);
-                        setTitle(window.siyuan.languages.siyuanNote);
+                        setTitle("", true);
                         initMessage();
                     });
                 });

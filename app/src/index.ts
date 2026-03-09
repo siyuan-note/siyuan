@@ -217,7 +217,7 @@ export class App {
                         window.siyuan.user = userResponse.data;
                         onGetConfig(response.data.start, this);
                         account.onSetaccount();
-                        setTitle(window.siyuan.languages.siyuanNote);
+                        setTitle("", true);
                         initMessage();
                         /// #if BROWSER && !MOBILE
                         if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()) {

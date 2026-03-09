@@ -515,10 +515,10 @@ export const bootSync = () => {
     });
 };
 
-export const setTitle = (title: string) => {
+export const setTitle = (title: string, showVersionTitle = false) => {
     const dragElement = document.getElementById("drag");
     const workspaceName = getWorkspaceName();
-    if (title === window.siyuan.languages.siyuanNote) {
+    if (showVersionTitle) {
         const versionTitle = `${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         document.title = versionTitle;
         if (dragElement) {
@@ -526,7 +526,7 @@ export const setTitle = (title: string) => {
             dragElement.setAttribute("title", versionTitle);
         }
     } else {
-        title = title || window.siyuan.languages.untitled;
+        title = title.trim() || window.siyuan.languages["_kernel"][16];
         document.title = `${title} - ${workspaceName} - ${window.siyuan.languages.siyuanNote} v${Constants.SIYUAN_VERSION}`;
         if (!dragElement) {
             return;

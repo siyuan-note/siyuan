@@ -881,7 +881,7 @@ export class Wnd {
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app), false, false);
-                setTitle(window.siyuan.languages.siyuanNote);
+                setTitle("", true);
             }
         }
         if (isSaveLayout) {

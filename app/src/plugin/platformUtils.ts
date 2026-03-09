@@ -67,7 +67,7 @@ export const sendNotification = (options: ISendNotificationOptions): Promise<num
             resolve(-1);
         }
         /// #else
-        const timeoutType = options.timeoutType || "never";
+        const timeoutType = options.timeoutType || "default";
         const timeoutId = window.setTimeout(() => {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "notification",

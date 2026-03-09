@@ -168,7 +168,7 @@ export const image = {
                             code: 0
                         },
                         protyle: editor.protyle,
-                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML, Constants.CB_GET_AV_NO_CREATE],
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -198,27 +198,30 @@ export const image = {
                     const liElement = target.parentElement;
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.delete} <b>${liElement.querySelector(".b3-list-item__text").textContent}</b>`, () => {
                         if (liElement.getAttribute("data-tab-type") === "unRefAV") {
+                            const id = liElement.getAttribute("data-item");
                             fetchPost("/api/av/removeUnusedAttributeView", {
-                                id: liElement.getAttribute("data-item"),
+                                id,
                             }, () => {
                                 if (liElement.parentElement.querySelectorAll("li").length === 1) {
                                     liElement.parentElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                                 } else {
                                     liElement.remove();
                                 }
-                                onGet({
-                                    data: {
+                                if (editor.protyle.element.querySelector(`.av[data-av-id="${id}"]`)) {
+                                    onGet({
                                         data: {
-                                            content: "",
-                                            id: Lute.NewNodeID(),
-                                            rootID: Lute.NewNodeID(),
+                                            data: {
+                                                content: "",
+                                                id: Lute.NewNodeID(),
+                                                rootID: Lute.NewNodeID(),
+                                            },
+                                            msg: "",
+                                            code: 0
                                         },
-                                        msg: "",
-                                        code: 0
-                                    },
-                                    protyle: editor.protyle,
-                                    action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                                });
+                                        protyle: editor.protyle,
+                                        action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
+                                    });
+                                }
                             });
                         } else {
                             fetchPost("/api/asset/removeUnusedAsset", {
@@ -281,7 +284,7 @@ export const image = {
         data.forEach((item) => {
             html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}">
     <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
-    <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${window.siyuan.languages[type === "unRefAV" ? "copyMirror" : "copy"]}">
+    <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${type === "unRefAV" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>
     ${boxOpenHTML}

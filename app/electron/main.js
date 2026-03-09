@@ -959,6 +959,7 @@ app.whenReady().then(() => {
                     title: data.title,
                     body: data.body,
                     icon: path.join(appDir, "stage", "icon.png"),
+                    timeoutType: "never",
                 }).show();
                 break;
             case "setSpellCheckerLanguages":

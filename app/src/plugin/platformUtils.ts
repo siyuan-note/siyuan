@@ -70,7 +70,7 @@ export const sendNotification = (options: {
                 cmd: "notification",
                 title,
                 body,
-                timeoutType: options.timeoutType || "never"
+                timeoutType: options.timeoutType || "default"
             });
         }, delayInSeconds * 1000);
         resolve(timeoutId);

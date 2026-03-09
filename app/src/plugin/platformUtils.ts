@@ -20,15 +20,13 @@ export const updateHotkeyTip = compatibility.updateHotkeyTip;
 export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
-export interface ISendNotificationOptions {
+export const sendNotification = (options: {
     channel?: string,
     title?: string,
     body?: string,
     delayInSeconds?: number,
     timeoutType?: "default" | "never" // 该参数仅在桌面端有效
-}
-
-export const sendNotification = (options: ISendNotificationOptions): Promise<number> => {
+}): Promise<number> => {
     return new Promise((resolve) => {
         const title = options.title || "";
         const body = options.body || "";
@@ -67,13 +65,12 @@ export const sendNotification = (options: ISendNotificationOptions): Promise<num
             resolve(-1);
         }
         /// #else
-        const timeoutType = options.timeoutType || "never";
         const timeoutId = window.setTimeout(() => {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "notification",
                 title,
                 body,
-                timeoutType
+                timeoutType: options.timeoutType || "never"
             });
         }, delayInSeconds * 1000);
         resolve(timeoutId);
@@ -82,7 +79,7 @@ export const sendNotification = (options: ISendNotificationOptions): Promise<num
 };
 
 export const cancelNotification = (id: number) => {
-    if (id <= 0) {
+    if (id < 0) {
         return;
     }
     /// #if BROWSER

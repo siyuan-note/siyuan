@@ -20,9 +20,27 @@ export const updateHotkeyTip = compatibility.updateHotkeyTip;
 export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
-export const sendNotification = (channel: string, title: string, body: string, delayInSeconds: number): Promise<number> => {
+export interface ISendNotificationOptions {
+    channel?: string,
+    title?: string,
+    body?: string,
+    delayInSeconds?: number,
+    timeoutType?: "default" | "never"
+}
+
+export const sendNotification = (options: ISendNotificationOptions): Promise<number> => {
     return new Promise((resolve) => {
+        const title = options.title || "";
+        const body = options.body || "";
+        const delayInSeconds = options.delayInSeconds || 0;
+        if (!title.trim() && !body.trim()) {
+            // 不能同时为空
+            resolve(-1);
+            return;
+        }
+
         /// #if BROWSER
+        const channel = options.channel || "Plugin Notification";
         if (window.JSAndroid && window.JSAndroid.sendNotification) {
             const id = window.JSAndroid.sendNotification(channel, title, body, delayInSeconds);
             resolve(id);
@@ -49,11 +67,13 @@ export const sendNotification = (channel: string, title: string, body: string, d
             resolve(-1);
         }
         /// #else
+        const timeoutType = options.timeoutType || "default";
         const timeoutId = window.setTimeout(() => {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "notification",
                 title,
-                body
+                body,
+                timeoutType
             });
         }, delayInSeconds * 1000);
         resolve(timeoutId);
@@ -62,6 +82,9 @@ export const sendNotification = (channel: string, title: string, body: string, d
 };
 
 export const cancelNotification = (id: number) => {
+    if (id <= 0) {
+        return;
+    }
     /// #if BROWSER
     if (window.JSAndroid && window.JSAndroid.cancelNotification) {
         window.JSAndroid.cancelNotification(id);

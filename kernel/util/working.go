@@ -559,3 +559,30 @@ func LogDatabaseSize(dbPath string) {
 	dbSize := humanize.BytesCustomCeil(uint64(dbFile.Size()), 2)
 	logging.LogInfof("database [%s] size [%s]", dbPath, dbSize)
 }
+
+func RemoveDatabaseFile(dbPath string) {
+	if gulu.File.IsExist(dbPath) {
+		err := os.RemoveAll(dbPath)
+		if err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", dbPath, err)
+			return
+		}
+	}
+
+	if gulu.File.IsExist(dbPath + "-shm") {
+		err := os.RemoveAll(dbPath + "-shm")
+		if err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", dbPath+"-shm", err)
+			return
+		}
+	}
+
+	if gulu.File.IsExist(dbPath + "-wal") {
+		err := os.RemoveAll(dbPath + "-wal")
+		if err != nil {
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", dbPath+"-wal", err)
+			return
+		}
+	}
+	return
+}

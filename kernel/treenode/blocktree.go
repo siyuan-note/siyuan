@@ -62,12 +62,7 @@ func initDatabase(forceRebuild bool) (err error) {
 	}
 
 	closeDatabase()
-	if gulu.File.IsExist(util.BlockTreeDBPath) {
-		if err = removeDatabaseFile(); err != nil {
-			logging.LogErrorf("remove database file [%s] failed: %s", util.BlockTreeDBPath, err)
-			err = nil
-		}
-	}
+	util.RemoveDatabaseFile(util.BlockTreeDBPath)
 
 	initDBConnection()
 	initDBTables()
@@ -138,22 +133,6 @@ func closeDatabase() {
 	debug.FreeOSMemory()
 	db = nil
 	runtime.GC()
-	return
-}
-
-func removeDatabaseFile() (err error) {
-	err = os.RemoveAll(util.BlockTreeDBPath)
-	if err != nil {
-		return
-	}
-	err = os.RemoveAll(util.BlockTreeDBPath + "-shm")
-	if err != nil {
-		return
-	}
-	err = os.RemoveAll(util.BlockTreeDBPath + "-wal")
-	if err != nil {
-		return
-	}
 	return
 }
 
@@ -643,7 +622,13 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 	stmt, err := tx.Prepare(sqlStmt)
 	if err != nil {
 		tx.Rollback()
-		logging.LogErrorf("prepare statement [%s] failed: %s", sqlStmt, err)
+		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
+
+		if strings.Contains(err.Error(), "database disk image is malformed") {
+			closeDatabase()
+			util.RemoveDatabaseFile(util.BlockTreeDBPath)
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
+		}
 		return
 	}
 	defer stmt.Close()
@@ -655,7 +640,13 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		}
 		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
 			tx.Rollback()
-			logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
+			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
+
+			if strings.Contains(err.Error(), "database disk image is malformed") {
+				closeDatabase()
+				util.RemoveDatabaseFile(util.BlockTreeDBPath)
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
+			}
 			return
 		}
 	}

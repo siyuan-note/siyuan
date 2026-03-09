@@ -6,7 +6,6 @@ export const showTooltip = (
     tooltipClass?: string,
     event?: MouseEvent,
     space: number = 0.5,
-    delay?: number
 ) => {
     if (isMobile() || !message) {
         return;
@@ -42,14 +41,6 @@ export const showTooltip = (
     messageElement.innerHTML = message;
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
-
-    const delayAttr = target.closest("[data-tooltips-delay]")?.getAttribute("data-tooltips-delay");
-    const parsedDelay = parseInt(delayAttr, 10);
-    if (delay === undefined || delay === null) {
-        delay = Number.isFinite(parsedDelay) ? parsedDelay : 500;
-    }
-    messageElement.style.setProperty("--b3-tooltips-delay", delay + "ms");
-
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
 

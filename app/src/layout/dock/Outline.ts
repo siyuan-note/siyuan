@@ -573,7 +573,9 @@ export class Outline extends Model {
         } else {
             let previousElement = getPreviousBlock(nodeElement);
             while (previousElement) {
-                if (previousElement.getAttribute("data-type") === "NodeHeading") {
+                if (previousElement.getAttribute("data-type") === "NodeHeading" &&
+                    !previousElement.parentElement.classList.contains("bq") &&
+                    !previousElement.parentElement.classList.contains("callout-content")) {
                     break;
                 } else {
                     previousElement = getPreviousBlock(previousElement);

@@ -25,7 +25,7 @@ export interface ISendNotificationOptions {
     title?: string,
     body?: string,
     delayInSeconds?: number,
-    timeoutType?: "default" | "never"
+    timeoutType?: "default" | "never" // 该参数仅在桌面端有效
 }
 
 export const sendNotification = (options: ISendNotificationOptions): Promise<number> => {
@@ -40,7 +40,7 @@ export const sendNotification = (options: ISendNotificationOptions): Promise<num
         }
 
         /// #if BROWSER
-        const channel = options.channel || "Plugin Notification";
+        const channel = options.channel || "SiYuan Notifications";
         if (window.JSAndroid && window.JSAndroid.sendNotification) {
             const id = window.JSAndroid.sendNotification(channel, title, body, delayInSeconds);
             resolve(id);

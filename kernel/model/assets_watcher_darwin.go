@@ -65,7 +65,6 @@ func watchAssets() {
 					return
 				}
 
-				//logging.LogInfof("assets changed: %s", event)
 				if watcher.Write == event.Op {
 					IncSync()
 				}
@@ -88,6 +87,7 @@ func watchAssets() {
 			}
 		}
 	}()
+
 	if err := assetsWatcher.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return

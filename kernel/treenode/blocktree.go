@@ -569,6 +569,10 @@ func IndexBlockTree(tree *parse.Tree) {
 	}
 
 	execInsertBlocktrees(tx, tree, changedNodes)
+
+	if err = tx.Commit(); err != nil {
+		logging.LogErrorf("commit transaction failed: %s", err)
+	}
 }
 
 func UpsertBlockTree(tree *parse.Tree) {
@@ -628,6 +632,10 @@ func UpsertBlockTree(tree *parse.Tree) {
 	}
 
 	execInsertBlocktrees(tx, tree, changedNodes)
+
+	if err = tx.Commit(); err != nil {
+		logging.LogErrorf("commit transaction failed: %s", err)
+	}
 }
 
 func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node) {
@@ -650,9 +658,6 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 			logging.LogErrorf("sql exec [%s] failed: %s", sqlStmt, err)
 			return
 		}
-	}
-	if err = tx.Commit(); err != nil {
-		logging.LogErrorf("commit transaction failed: %s", err)
 	}
 }
 

@@ -62,6 +62,7 @@ func getUpdatedPackage(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", true, &frontend)) {
 		return
 	}
+
 	plugins, widgets, icons, themes, templates := model.GetUpdatedPackages(frontend)
 	ret.Data = map[string]interface{}{
 		"plugins":   plugins,

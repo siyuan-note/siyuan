@@ -142,7 +142,7 @@ func addClassToKramdownIAL(ial [][]string, class string) [][]string {
 		if len(attr) < 2 || attr[0] != "class" {
 			continue
 		}
-		for _, item := range strings.Fields(attr[1]) {
+		for item := range strings.FieldsSeq(attr[1]) {
 			if item == class {
 				return ial
 			}

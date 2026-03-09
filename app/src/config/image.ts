@@ -157,6 +157,8 @@ export const image = {
                     event.stopPropagation();
                     break;
                 } else if (target.getAttribute("data-tab-type") === "unRefAV") {
+                    avListElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                    target.classList.add("b3-list-item--focus");
                     onGet({
                         data: {
                             data: {

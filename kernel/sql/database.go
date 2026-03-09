@@ -102,12 +102,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 	// 不存在库或者版本不一致都会走到这里
 
 	closeDatabase()
-	if gulu.File.IsExist(util.DBPath) {
-		if err = removeDatabaseFile(); err != nil {
-			logging.LogErrorf("remove database file failed: %s", err)
-			err = nil
-		}
-	}
+	util.RemoveDatabaseFile(util.DBPath)
 
 	initDBConnection()
 	initDBTables()
@@ -1486,13 +1481,14 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err er
 	}
 
 	if _, err = stmt.Exec(args...); err != nil {
+		tx.Rollback()
+		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
+
 		if strings.Contains(err.Error(), "database disk image is malformed") {
-			tx.Rollback()
 			closeDatabase()
-			removeDatabaseFile()
+			util.RemoveDatabaseFile(util.DBPath)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
 		}
-		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
 		return
 	}
 	return
@@ -1500,13 +1496,14 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err er
 
 func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 	if _, err = tx.Exec(stmt, args...); err != nil {
+		tx.Rollback()
+		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
+
 		if strings.Contains(err.Error(), "database disk image is malformed") {
-			tx.Rollback()
 			closeDatabase()
-			removeDatabaseFile()
+			util.RemoveDatabaseFile(util.DBPath)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmt, args)
 		}
-		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
 		return
 	}
 	return
@@ -1556,22 +1553,6 @@ func ialAttr(ial, name string) (ret string) {
 	}
 	ret = ial[idx+len(name)+2:]
 	ret = ret[:strings.Index(ret, "\"")]
-	return
-}
-
-func removeDatabaseFile() (err error) {
-	err = os.RemoveAll(util.DBPath)
-	if err != nil {
-		return
-	}
-	err = os.RemoveAll(util.DBPath + "-shm")
-	if err != nil {
-		return
-	}
-	err = os.RemoveAll(util.DBPath + "-wal")
-	if err != nil {
-		return
-	}
 	return
 }
 

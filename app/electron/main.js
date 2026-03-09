@@ -958,6 +958,7 @@ app.whenReady().then(() => {
                 new Notification({
                     title: data.title,
                     body: data.body,
+                    icon: path.join(appDir, "stage", "icon.png"),
                 }).show();
                 break;
             case "setSpellCheckerLanguages":

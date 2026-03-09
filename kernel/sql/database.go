@@ -1490,7 +1490,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err er
 			tx.Rollback()
 			closeDatabase()
 			removeDatabaseFile()
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it", util.DBPath)
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
 		}
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
 		return

@@ -77,7 +77,7 @@ export const rename = (options: {
     dialog.bindInput(inputElement, () => {
         (btnsElement[1] as HTMLButtonElement).click();
     });
-    inputElement.value = Lute.UnEscapeHTMLStr(initialName);
+    inputElement.value = initialName;
     inputElement.focus();
     inputElement.select();
     btnsElement[0].addEventListener("click", () => {

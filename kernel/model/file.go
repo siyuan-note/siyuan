@@ -1668,27 +1668,24 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 
-	title = removeInvisibleCharsInTitle(title)
+	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		return errors.New(Conf.Language(106))
 	}
 
-	oldTitle := tree.Root.IALAttr("title")
-
-	// 先规范化输入得到实际会存储的标题，再与旧标题比较，避免 title=="" 被误判为标题变更
-	newTitle := strings.ReplaceAll(title, "/", "")
 	var isEmpty bool
-	if "" == newTitle {
-		newTitle = Conf.language(16)
+	if "" == title {
+		title = Conf.language(16)
 		isEmpty = true
 	}
-	titleChanged := oldTitle != newTitle
+	// 先规范化输入得到实际会存储的标题，再与旧标题比较
+	titleChanged := tree.Root.IALAttr("title") != title
 
 	var emptyAttrUpdated bool
 	if titleChanged {
-		tree.HPath = path.Join(path.Dir(tree.HPath), newTitle)
-		tree.Root.SetIALAttr("title", newTitle)
+		tree.HPath = path.Join(path.Dir(tree.HPath), title)
+		tree.Root.SetIALAttr("title", title)
 	}
 
 	// 按需同步“无标题”标记（仅更新 IAL，不触发子树重命名等）
@@ -1716,7 +1713,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 			"box":     boxID,
 			"id":      tree.Root.ID,
 			"path":    p,
-			"title":   newTitle,
+			"title":   title,
 			"empty":   isTitleEmpty,
 			"refText": refText,
 		}
@@ -1733,14 +1730,12 @@ func RenameDoc(boxID, p, title string) (err error) {
 }
 
 func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
-	title = removeInvisibleCharsInTitle(title)
+	title = normalizeDocTitle(title)
 	if 512 < utf8.RuneCountInString(title) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
 		return
 	}
-	title = strings.ReplaceAll(title, "/", "")
-	title = strings.TrimSpace(title)
 	var isEmpty bool
 	if "" == title {
 		title = Conf.Language(16)
@@ -1851,7 +1846,8 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	return
 }
 
-func removeInvisibleCharsInTitle(title string) string {
+func normalizeDocTitle(title string) string {
+	title = strings.ReplaceAll(title, "/", "")
 	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
 	title = util.RemoveInvalid(title)

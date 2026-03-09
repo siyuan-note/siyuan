@@ -261,6 +261,12 @@ func SanitizeSVG(svgInput string) string {
 					for _, a := range c.Attr {
 						key := strings.ToLower(a.Key)
 						val := strings.TrimSpace(strings.ToLower(a.Val))
+						val = strings.Map(func(r rune) rune {
+							if r == '\t' || r == '\n' || r == '\r' {
+								return -1 // Remove character
+							}
+							return r
+						}, val)
 
 						// 删除事件处理器属性（onload, onerror 等）
 						if strings.HasPrefix(key, "on") {

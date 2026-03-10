@@ -78,15 +78,13 @@ export class Menu {
             Math.min(itemRect.top - 9, window.innerHeight - subMenuRect.height - 1)) + "px";
 
         // 水平方向位置调整
-        if (subMenuRect.right <= window.innerWidth) {
+        if (window.innerWidth - itemRect.right - 8 >= subMenuRect.width) {
             // 8px 是 b3-menu__items 的默认 padding-right
             subMenuElement.style.left = (itemRect.right + 8) + "px";
+        } else if (itemRect.left - 8 >= subMenuRect.width) {
+            subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
         } else {
-            if (itemRect.left - 8 > subMenuRect.width) {
-                subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
-            } else {
-                subMenuElement.style.left = (window.innerWidth - subMenuRect.width) + "px";
-            }
+            subMenuElement.style.left = Math.max(0, window.innerWidth - subMenuRect.width) + "px";
         }
 
         this.updateMaxHeight(subMenuElement, itemsMenuElement);

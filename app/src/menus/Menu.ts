@@ -80,13 +80,9 @@ export class Menu {
         // 水平方向位置调整
         // 多级菜单继承上一级子菜单的方向
         let isParentDirectionLeft = false;
-        const parentSubMenuElement = hasClosestByClassName(subMenuElement.parentElement, "b3-menu__submenu") as HTMLElement;
-        if (parentSubMenuElement && parentSubMenuElement.parentElement) {
-            const parentItemRect = parentSubMenuElement.parentElement.getBoundingClientRect();
-            const parentSubMenuRect = parentSubMenuElement.getBoundingClientRect();
-            if (parentSubMenuRect.left < parentItemRect.left) {
-                isParentDirectionLeft = true;
-            }
+        const parentSubMenuElement = hasClosestByClassName(subMenuElement.parentElement.parentElement, "b3-menu__item") as HTMLElement;
+        if (parentSubMenuElement && itemRect.left < parentSubMenuElement.getBoundingClientRect().left) {
+            isParentDirectionLeft = true;
         }
 
         // 8px 是 b3-menu__items 的默认 padding-right

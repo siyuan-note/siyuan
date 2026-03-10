@@ -31,6 +31,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -71,8 +72,8 @@ func GetPublishAccess() (ret PublishAccess) {
 	if err != nil {
 		return
 	}
-	if !gulu.File.IsExist(publishAccessPath) {
-		if err = gulu.File.WriteFileSafer(publishAccessPath, []byte("[]"), 0644); err != nil {
+	if !filelock.IsExist(publishAccessPath) {
+		if err = filelock.WriteFile(publishAccessPath, []byte("[]")); err != nil {
 			logging.LogErrorf("create publishAccess.json [%s] failed: %s", publishAccessPath, err)
 			return
 		}
@@ -105,14 +106,14 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 		err = errors.New(msg)
 		return
 	}
-	
+
 	data, err := gulu.JSON.MarshalJSON(inputPublishAccess)
 	if err != nil {
 		logging.LogErrorf("marshal publishAccess.json [%s] failed: %s", publishAccessPath, err)
 		return
 	}
 
-	err = gulu.File.WriteFileSafer(publishAccessPath, data, 0644)
+	err = filelock.WriteFile(publishAccessPath, data)
 	if err != nil {
 		msg := fmt.Sprintf("write publishAccess.json [%s] failed: %s", publishAccessPath, err)
 		logging.LogErrorf(msg)
@@ -122,20 +123,20 @@ func SetPublishAccess(inputPublishAccess PublishAccess) (err error) {
 	return
 }
 
-func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
+func GetInvisiblePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) {
 	outputPublishAccess = PublishAccess{}
 	for _, item := range inputPublishAccess {
-		if !item.Visible  {
+		if !item.Visible {
 			outputPublishAccess = append(outputPublishAccess, item)
 		}
 	}
 	return
 }
 
-func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) { 
+func GetDisablePublishAccess(inputPublishAccess PublishAccess) (outputPublishAccess PublishAccess) {
 	outputPublishAccess = PublishAccess{}
 	for _, item := range inputPublishAccess {
-		if item.Disable  {
+		if item.Disable {
 			outputPublishAccess = append(outputPublishAccess, item)
 		}
 	}
@@ -149,7 +150,6 @@ func PurgePublishAccess() {
 		IDs = append(IDs, item.ID)
 	}
 
-	blocks := sql.GetBlocks(IDs)
 	boxes, err := ListNotebooks()
 	if err != nil {
 		return
@@ -161,13 +161,14 @@ func PurgePublishAccess() {
 		}
 	}
 
+	checkResult := treenode.ExistBlockTrees(IDs)
 	tempPublishAccess := PublishAccess{}
-	for i, block := range blocks {
-		if block != nil {
+	for i, ID := range IDs {
+		if exists, ok := checkResult[ID]; ok && exists {
 			tempPublishAccess = append(tempPublishAccess, publishAccess[i])
 		} else {
 			for _, box := range boxes {
-				if box.ID == publishAccess[i].ID {
+				if box.ID == ID {
 					tempPublishAccess = append(tempPublishAccess, publishAccess[i])
 					break
 				}
@@ -216,21 +217,23 @@ func GetPathPasswordByPublishAccess(box string, blockPath string, publishAccess 
 
 func CheckBlockIdAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockID string) bool {
 	publishIgnore := GetDisablePublishAccess(publishAccess)
-	block := sql.GetBlock(blockID)
-	if block != nil {
+	bt := treenode.GetBlockTree(blockID)
+	if bt == nil {
 		return false
 	}
-	passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-	return CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
+	passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+	return CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
 }
 
 func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 	authCookie := util.SHA256Hash([]byte(ID + password))
 	http.SetCookie(c.Writer, &http.Cookie{
-		Name: "publish-auth-" + ID,
-		Value: authCookie,
-		MaxAge: 24 * 60 * 60,
-		Path: "/",
+		Name:     "publish-auth-" + ID,
+		Value:    authCookie,
+		MaxAge:   24 * 60 * 60,
+		Path:     "/",
+		Secure:   util.SSL,
+		HttpOnly: true,
 	})
 }
 
@@ -264,14 +267,14 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			blockPath := "/" + strings.Join(pathParts[1:], "/")
 			passwordID, password := GetPathPasswordByPublishAccess(box, blockPath, publishAccess)
 			publishIgnore := GetDisablePublishAccess(publishAccess)
-			return CheckPathAccessableByPublishIgnore(box, blockPath, publishIgnore) && (password == "" ||CheckPublishAuthCookie(c, passwordID, password))
+			return CheckPathAccessableByPublishIgnore(box, blockPath, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
 		} else if pathParts[0] == "assets" {
 			publishIgnore := GetDisablePublishAccess(publishAccess)
-			blocks := sql.GetAllRootBlocks()
-			for _, block := range blocks {
-				passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-				if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
-					assets, _ := DocAssets(block.ID)
+			bts := treenode.GetBlockTreesByType("d")
+			for _, bt := range bts {
+				passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+				if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+					assets, _ := DocAssets(bt.ID)
 					for _, assetPath := range assets {
 						if assetPath == relPath {
 							return true
@@ -293,20 +296,20 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 	case av.LayoutTypeTable:
 		table := ret.(*av.Table)
 		filteredRows := []*av.TableRow{}
-		for _, row := range table.Rows { 
+		for _, row := range table.Rows {
 			// 默认第一个属性是文档块
-			var block *sql.Block
+			var bt *treenode.BlockTree
 			if len(row.Cells) > 0 {
 				if row.Cells[0].Value.Block != nil {
 					id := row.Cells[0].Value.Block.ID
 					if id != "" {
-						block = sql.GetBlock(id)
+						bt = treenode.GetBlockTree(id)
 					}
 				}
 			}
-			if block != nil {
+			if bt != nil {
 				// 不显示禁止文档
-				if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 					row = nil
 				}
 			}
@@ -325,25 +328,25 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 		filteredCards := []*av.GalleryCard{}
 		for _, card := range gallery.Cards {
 			// 默认第一个属性是文档块
-			var block *sql.Block
+			var bt *treenode.BlockTree
 			if len(card.Values) > 0 {
 				if card.Values[0].Value.Block != nil {
 					id := card.Values[0].Value.Block.ID
 					if id != "" {
-						block = sql.GetBlock(id)
+						bt = treenode.GetBlockTree(id)
 					}
 				}
 			}
-			if block != nil {
+			if bt != nil {
 				// 替换封面
-				newCoverContent := FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, card.CoverContent, true)
+				newCoverContent := FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, card.CoverContent, true)
 				if card.CoverContent != newCoverContent {
 					card.CoverContent = newCoverContent
 					card.CoverURL = ""
 				}
 
 				// 不显示禁止文档
-				if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 					card = nil
 				}
 			}
@@ -362,25 +365,25 @@ func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, view
 		filteredCards := []*av.KanbanCard{}
 		for _, card := range kanban.Cards {
 			// 默认第一个属性是文档块
-			var block *sql.Block
+			var bt *treenode.BlockTree
 			if len(card.Values) > 0 {
 				if card.Values[0].Value.Block != nil {
 					id := card.Values[0].Value.Block.ID
 					if id != "" {
-						block = sql.GetBlock(id)
+						bt = treenode.GetBlockTree(id)
 					}
 				}
 			}
-			if block != nil {
+			if bt != nil {
 				// 替换封面
-				newCoverContent := FilterContentByPublishAccess(c, publishAccess, block.Box, block.Path, card.CoverContent, true)
+				newCoverContent := FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, card.CoverContent, true)
 				if card.CoverContent != newCoverContent {
 					card.CoverContent = newCoverContent
 					card.CoverURL = ""
 				}
 
 				// 不显示禁止文档
-				if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 					card = nil
 				}
 			}
@@ -404,13 +407,10 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 	ret = []*BlockAttributeViewKeys{}
 	for _, blockAttributeViewKey := range blockAttributeViewKeys {
 		accessable := false
-		blocks := sql.GetBlocks(blockAttributeViewKey.BlockIDs)
-		for _, block := range blocks {
-			if block == nil {
-				continue
-			}
-			passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-			if (password == "" || CheckPublishAuthCookie(c, passwordID, password)) && CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+		bts := treenode.GetBlockTrees(blockAttributeViewKey.BlockIDs)
+		for _, bt := range bts {
+			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if (password == "" || CheckPublishAuthCookie(c, passwordID, password)) && CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 				accessable = true
 				break
 			}
@@ -435,13 +435,10 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 		avBlocksAccessable := false
 		if attrView.ID != "" {
 			avBlockIDs := treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
-			avBlocks := sql.GetBlocks(avBlockIDs)
+			avBlocks := treenode.GetBlockTrees(avBlockIDs)
 			for _, avBlock := range avBlocks {
-				if avBlock == nil {
-					continue
-				}
-				passwordID, password := GetPathPasswordByPublishAccess(avBlock.Box, avBlock.Path, publishAccess);
-				if (password == "" || CheckPublishAuthCookie(c, passwordID, password)) && CheckPathAccessableByPublishIgnore(avBlock.Box, avBlock.Path, publishIgnore) {
+				passwordID, password := GetPathPasswordByPublishAccess(avBlock.BoxID, avBlock.Path, publishAccess)
+				if (password == "" || CheckPublishAuthCookie(c, passwordID, password)) && CheckPathAccessableByPublishIgnore(avBlock.BoxID, avBlock.Path, publishIgnore) {
 					avBlocksAccessable = true
 					break
 				}
@@ -455,10 +452,10 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 	ret.AttrViews = filteredAttrViews
 	ret.IAL[av.NodeAttrNameAvs] = strings.Join(avIDs, ",")
 
-	block := sql.GetBlock(info.RootID)
-	if block != nil {
-		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess);
-		if (password != "" && !CheckPublishAuthCookie(c, passwordID, password)) || !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+	bt := treenode.GetBlockTree(info.RootID)
+	if bt != nil {
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		if (password != "" && !CheckPublishAuthCookie(c, passwordID, password)) || !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 			ret.IAL["name"] = ""
 			ret.IAL["alias"] = ""
 			ret.IAL["memo"] = ""
@@ -473,7 +470,7 @@ func FilterBlockInfoByPublishAccess(c *gin.Context, publishAccess PublishAccess,
 
 func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, box string, docPath string, content string, onlyIcon bool) (ret string) {
 	ret = content
-	
+
 	// 密码访问
 	passwordID, password := GetPathPasswordByPublishAccess(box, docPath, publishAccess)
 	if password != "" {
@@ -520,7 +517,7 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 	return
 }
 
-func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, embedBlocks []*EmbedBlock) (ret []*EmbedBlock) { 
+func FilterEmbedBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, embedBlocks []*EmbedBlock) (ret []*EmbedBlock) {
 	ret = []*EmbedBlock{}
 	for _, embedBlock := range embedBlocks {
 		embedBlock.Block.Content = FilterContentByPublishAccess(c, publishAccess, embedBlock.Block.Box, embedBlock.Block.Path, embedBlock.Block.Content, false)
@@ -540,12 +537,15 @@ func FilterPathsByPublishAccess(c *gin.Context, publishAccess PublishAccess, pat
 		IDs = append(IDs, path.ID)
 		IDtoPathIndexMap[path.ID] = i
 	}
-	blocks := sql.GetBlocks(IDs)
-	for _, block := range blocks {
-		pathIndex := IDtoPathIndexMap[block.ID]
+	bts := treenode.GetBlockTrees(IDs)
+	for _, bt := range bts {
+		if bt == nil {
+			continue
+		}
+		pathIndex := IDtoPathIndexMap[bt.ID]
 		path := paths[pathIndex]
-		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			ret = append(ret, path)
 		}
 	}
@@ -566,11 +566,11 @@ func FilterBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, bl
 	return
 }
 
-func FilterSQLBlocksByPublishIgnore(publishIgnore PublishAccess, blocks []*sql.Block) (ret []*sql.Block) {
-	ret = []*sql.Block{}
-	for _, block := range blocks {
-		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
-			ret = append(ret, block)
+func FilterBlockTreesByPublishIgnore(publishIgnore PublishAccess, bts map[string]*treenode.BlockTree) (ret map[string]*treenode.BlockTree) {
+	ret = map[string]*treenode.BlockTree{}
+	for id, bt := range bts {
+		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+			ret[id] = bt
 		}
 	}
 	return
@@ -584,14 +584,14 @@ func FilterRefDefsByPublishIgnore(publishIgnore PublishAccess, refDefs []*RefDef
 		IDs = append(IDs, refDef.DefIDs...)
 	}
 	IDs = gulu.Str.RemoveDuplicatedElem(IDs)
-	blocks := sql.GetBlocks(IDs)
-	blocks = FilterSQLBlocksByPublishIgnore(publishIgnore, blocks)
+	bts := treenode.GetBlockTrees(IDs)
+	bts = FilterBlockTreesByPublishIgnore(publishIgnore, bts)
 	visibles := make(map[string]bool)
 	for _, ID := range IDs {
 		visibles[ID] = false
 	}
-	for _, block := range blocks {
-		visibles[block.ID] = true
+	for _, bt := range bts {
+		visibles[bt.ID] = true
 	}
 	for _, refDef := range refDefs {
 		if !visibles[refDef.RefID] {
@@ -639,7 +639,7 @@ func FilterUILayoutByPublishIgnore(publishIgnore PublishAccess, uiLayout *conf.U
 
 func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[string]interface{}) (ret map[string]interface{}) {
 	ret = item
-	if (item == nil) {
+	if item == nil {
 		return
 	}
 
@@ -662,11 +662,11 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 			return
 		}
 		rootId := children["rootId"].(string)
-		block := sql.GetBlock(rootId)
-		if block == nil {
+		bt := treenode.GetBlockTree(rootId)
+		if bt == nil {
 			return
 		}
-		if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+		if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 			ret = nil
 		}
 	} else {
@@ -817,9 +817,9 @@ func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage
 			idItem := docInfo["id"]
 			if idItem != nil {
 				id := idItem.(string)
-				block := sql.GetBlock(id)
-				if block != nil {
-					if !CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) {
+				bt := treenode.GetBlockTree(id)
+				if bt != nil {
+					if !CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 						docInfo["id"] = ""
 					}
 				}
@@ -832,11 +832,11 @@ func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage
 func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, assetContent []*AssetContent) (ret []*AssetContent) {
 	publishIgnore := GetInvisiblePublishAccess(publishAccess)
 	validAssets := []string{}
-	blocks := sql.GetAllRootBlocks()
-	for _, block := range blocks {
-		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-		if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
-			assets, err := DocAssets(block.ID)
+	bts := treenode.GetBlockTreesByType("d")
+	for _, bt := range bts {
+		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+			assets, err := DocAssets(bt.ID)
 			if err == nil {
 				validAssets = append(validAssets, assets...)
 			}
@@ -845,6 +845,9 @@ func FilterAssetContentByPublishAccess(c *gin.Context, publishAccess PublishAcce
 
 	ret = []*AssetContent{}
 	for _, asset := range assetContent {
+		if asset == nil {
+			continue
+		}
 		for _, validAsset := range validAssets {
 			if validAsset == asset.Path {
 				ret = append(ret, asset)
@@ -858,10 +861,10 @@ func FilterRecentDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess
 	ret = []*RecentDoc{}
 	publishIgnore := GetInvisiblePublishAccess(publishAccess)
 	for _, recentDoc := range recentDocs {
-		block := sql.GetBlock(recentDoc.RootID)
-		if block != nil {
-			passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
-			if CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishIgnore) && (passwordID == "" || CheckPublishAuthCookie(c, passwordID, password)) {
+		bt := treenode.GetBlockTree(recentDoc.RootID)
+		if bt != nil {
+			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) && (passwordID == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 				ret = append(ret, recentDoc)
 			}
 		}

@@ -77,7 +77,7 @@ func getAssetContent(c *gin.Context) {
 	query := arg["query"].(string)
 	queryMethod := int(arg["queryMethod"].(float64))
 	assetContent := model.GetAssetContent(id, query, queryMethod)
-	if model.IsReadOnlyRoleContext(c) {
+	if model.IsReadOnlyRoleContext(c) && assetContent != nil {
 		publishAccess := model.GetPublishAccess()
 		filteredAssetContents := model.FilterAssetContentByPublishAccess(c, publishAccess, []*model.AssetContent{assetContent})
 		if len(filteredAssetContents) > 0 {
@@ -106,8 +106,6 @@ func fullTextSearchAssetContent(c *gin.Context) {
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		assetContents = model.FilterAssetContentByPublishAccess(c, publishAccess, assetContents)
-		matchedAssetCount = len(assetContents)
-		pageCount = (matchedAssetCount + pageSize - 1) / pageSize
 	}
 	ret.Data = map[string]interface{}{
 		"assetContents":     assetContents,

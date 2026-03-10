@@ -2,8 +2,6 @@ import {isMobile} from "../util/functions";
 import {Dialog} from "../dialog";
 import {fetchPost} from "../util/fetch";
 import {setPosition} from "../util/setPosition";
-import { get } from "http";
-import { access } from "fs";
 
 type PublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
 export const getPublishAccessOptionByLevel = (level: PublishAccessLevel) => {
@@ -73,7 +71,7 @@ export const getPublishAccessOption = (visible: boolean, password: string, disab
     return getPublishAccessOptionByLevel(getPublishAccessLevel(visible, password, disable));
 }
 
-export const openPublishAccessDialog = (id: string, position: IPosition, callback?: (access: { id: string, visible: boolean, password: string, disable: boolean, iconHTML: string }) => void) => {
+export const openPublishAccessDialog = (id: string, position: IPosition, callback: (access: { id: string, visible: boolean, password: string, disable: boolean, iconHTML: string }) => void) => {
     const dialog = new Dialog({
         disableAnimation: true,
         transparent: true,
@@ -83,7 +81,7 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
         content: `<div class="publish-access-dialog">
     <div class="publish-access-dialog__selector" style="display: flex;">
         <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="public" aria-label="${window.siyuan.languages.publishAccessPublic}">${getPublishAccessOptionByLevel("public").iconHTML}</button>
-        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="protected" aria-label="${window.siyuan.languages.publishAccessProtected}"">${getPublishAccessOptionByLevel("protected").iconHTML}</button>
+        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="protected" aria-label="${window.siyuan.languages.publishAccessProtected}">${getPublishAccessOptionByLevel("protected").iconHTML}</button>
         <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="hidden" aria-label="${window.siyuan.languages.publishAccessHidden}">${getPublishAccessOptionByLevel("hidden").iconHTML}</button>
         <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="private" aria-label="${window.siyuan.languages.publishAccessPrivate}">${getPublishAccessOptionByLevel("private").iconHTML}</button>
         <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="forbidden" aria-label="${window.siyuan.languages.publishAccessForbidden}">${getPublishAccessOptionByLevel("forbidden").iconHTML}</button>
@@ -92,7 +90,7 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
     </div>
     <div class="fn__hr"></div>
     <div>
-        <div class="publish-access-dialog__comment" style="text-align:center; margin-left:8px; margin-right:8px; word-wrap:break-word;">公开可见</div>
+        <div class="publish-access-dialog__comment" style="text-align:center; margin-left:8px; margin-right:8px; word-wrap:break-word;">${window.siyuan.languages.publishAccessPublicComment}</div>
         <div class="fn__hr"></div>
     </div>
     <div class="publish-access-dialog__password">

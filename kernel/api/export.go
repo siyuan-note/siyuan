@@ -313,7 +313,7 @@ func exportResources(c *gin.Context) {
 	if nil == arg["paths"] {
 		ret.Code = 1
 		ret.Data = ""
-		ret.Msg = "paths is required"
+		ret.Msg = "[paths] is required"
 		return
 	}
 

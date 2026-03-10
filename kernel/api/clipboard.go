@@ -68,7 +68,7 @@ func writeFilePath(c *gin.Context) {
 	pathArg, ok := arg["path"].(string)
 	if !ok || pathArg == "" {
 		ret.Code = -1
-		ret.Msg = "path is required"
+		ret.Msg = "[path] is required"
 		return
 	}
 

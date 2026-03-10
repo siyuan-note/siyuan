@@ -223,7 +223,7 @@ func ParseJsonArg[T any](key string, required bool, arg map[string]interface{}, 
 	if !exists || raw == nil {
 		if required {
 			ret.Code = -1
-			ret.Msg = key + " is required"
+			ret.Msg = "[" + key + "] is required"
 		} else {
 			ok = true
 		}

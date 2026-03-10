@@ -832,7 +832,7 @@ func importTLSCABundle(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = "file is required: " + err.Error()
+		ret.Msg = "[file] is required: " + err.Error()
 		return
 	}
 

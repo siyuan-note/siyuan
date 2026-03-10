@@ -423,7 +423,7 @@ func uploadCloudByAssetsPaths(c *gin.Context) {
 
 	if nil == arg["paths"] {
 		ret.Code = -1
-		ret.Msg = "paths is required"
+		ret.Msg = "[paths] is required"
 		return
 	}
 

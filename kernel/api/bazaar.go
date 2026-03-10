@@ -187,7 +187,7 @@ func uninstallBazaarPlugin(c *gin.Context) {
 
 	var frontend, keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("frontend", true, &frontend),
+		util.BindJsonArg("frontend", false, &frontend),
 		util.BindJsonArg("keyword", false, &keyword),
 		util.BindJsonArg("packageName", true, &packageName),
 	) {
@@ -200,8 +200,16 @@ func uninstallBazaarPlugin(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
-		"packages": model.GetBazaarPackages("plugins", frontend, keyword),
+	// 兼容旧行为：如果不指定 frontend，则卸载插件但不返回插件列表
+	var packages any
+	if "" == frontend {
+		packages = []any{}
+	} else {
+		packages = model.GetBazaarPackages("plugins", frontend, keyword)
+	}
+
+	ret.Data = map[string]any{
+		"packages": packages,
 	}
 }
 

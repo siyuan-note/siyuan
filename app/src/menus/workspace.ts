@@ -349,7 +349,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 iconHTML: "",
                 type: "empty",
                 label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
-<div class="b3-list b3-list--background" style="max-width: 50vw"></div>`,
+<div class="b3-list b3-list--background" style="width: 260px"></div>`,
                 bind(menuElement) {
                     const genListHTML = (isInit = false) => {
                         let html = "";

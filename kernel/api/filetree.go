@@ -1265,6 +1265,7 @@ func setPublishAccess(c *gin.Context) {
 	disable := arg["disable"].(bool)
 
 	foundIndex := -1
+	updated := false
 	for i, item := range publishAccess {
 		if ID == item.ID {
 			foundIndex = i
@@ -1279,7 +1280,7 @@ func setPublishAccess(c *gin.Context) {
 			publishAccess[foundIndex].Password = password
 			publishAccess[foundIndex].Disable = disable
 		}
-		model.SetPublishAccess(publishAccess)
+		updated = true
 	} else {
 		if !visible || len(password) != 0 || disable {
 			publishAccess = append(publishAccess, &model.PublishAccessItem{
@@ -1288,9 +1289,19 @@ func setPublishAccess(c *gin.Context) {
 				Password:    password,
 				Disable:     disable,
 			})
-			model.SetPublishAccess(publishAccess)
+			updated = true
 		}
 	}
+
+	if updated {
+		err := model.SetPublishAccess(publishAccess)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
 	model.PurgePublishAccess()
 }
 

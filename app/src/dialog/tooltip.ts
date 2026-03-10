@@ -77,6 +77,17 @@ export const showTooltip = (
         if (left < 0) {
             left = targetRect.right;
         }
+    } else if (position?.endsWith("east")) {
+        // east: 布局菜单
+        const positionDiff = parseInt(position) || space;
+        top = Math.max(0, targetRect.top - (messageElement.clientHeight - targetRect.height) / 2);
+        if (top > window.innerHeight - messageElement.clientHeight) {
+            top = window.innerHeight - messageElement.clientHeight;
+        }
+        left = targetRect.right + positionDiff;
+        if (left + messageElement.clientWidth > window.innerWidth) {
+            left = targetRect.left - messageElement.clientWidth - positionDiff;
+        }
     } else if (position?.endsWith("north")) {
         // north: av 视图，列，多选描述, protyle-icon
         const positionDiff = parseInt(position) || space;

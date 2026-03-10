@@ -24,7 +24,7 @@ import {exitSiYuan, lockScreen} from "../dialog/processSystem";
 import {showMessage} from "../dialog/message";
 import {unicode2Emoji} from "../emoji";
 import {Dock} from "../layout/dock";
-import {escapeHtml} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {viewCards} from "../card/viewCards";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -349,7 +349,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 iconHTML: "",
                 type: "empty",
                 label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
-<div class="b3-list b3-list--background" style="width: 260px"></div>`,
+<div class="b3-list b3-list--background" style="width: 220px"></div>`,
                 bind(menuElement) {
                     const genListHTML = (isInit = false) => {
                         let html = "";
@@ -357,7 +357,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             return a.name.localeCompare(b.name, undefined, {numeric: true});
                         }).forEach((item: ISaveLayout) => {
                             if (inputElement.value === "" || item.name.toLowerCase().indexOf(inputElement.value.toLowerCase()) > -1) {
-                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action ${!isInit && !html ? "b3-list-item--focus" : ""}">
+                                html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action${!isInit && !html ? " b3-list-item--focus" : ""} ariaLabel" data-position="8east" aria-label="${escapeAttr(item.name)}" >
     <div class="b3-list-item__text">${item.name}</div>
     <span class="b3-list-item__meta">${item.time ? dayjs(item.time).format("YYYY-MM-DD HH:mm") : ""}</span>
     <span class="b3-list-item__action">

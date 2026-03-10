@@ -78,13 +78,36 @@ export class Menu {
             Math.min(itemRect.top - 9, window.innerHeight - subMenuRect.height - 1)) + "px";
 
         // 水平方向位置调整
-        if (window.innerWidth - itemRect.right - 8 >= subMenuRect.width) {
-            // 8px 是 b3-menu__items 的默认 padding-right
-            subMenuElement.style.left = (itemRect.right + 8) + "px";
-        } else if (itemRect.left - 8 >= subMenuRect.width) {
-            subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
+        // 多级菜单继承上一级子菜单的方向
+        let isParentDirectionLeft = false;
+        const parentSubMenuElement = hasClosestByClassName(subMenuElement.parentElement, "b3-menu__submenu") as HTMLElement;
+        if (parentSubMenuElement && parentSubMenuElement.parentElement) {
+            const parentItemRect = parentSubMenuElement.parentElement.getBoundingClientRect();
+            const parentSubMenuRect = parentSubMenuElement.getBoundingClientRect();
+            if (parentSubMenuRect.left < parentItemRect.left) {
+                isParentDirectionLeft = true;
+            }
+        }
+
+        // 8px 是 b3-menu__items 的默认 padding-right
+        const spaceRight = window.innerWidth - itemRect.right - 8;
+        const spaceLeft = itemRect.left - 8;
+        if (isParentDirectionLeft) {
+            if (spaceLeft >= subMenuRect.width) {
+                subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
+            } else if (spaceRight >= subMenuRect.width) {
+                subMenuElement.style.left = (itemRect.right + 8) + "px";
+            } else {
+                subMenuElement.style.left = Math.max(0, window.innerWidth - subMenuRect.width) + "px";
+            }
         } else {
-            subMenuElement.style.left = Math.max(0, window.innerWidth - subMenuRect.width) + "px";
+            if (spaceRight >= subMenuRect.width) {
+                subMenuElement.style.left = (itemRect.right + 8) + "px";
+            } else if (spaceLeft >= subMenuRect.width) {
+                subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
+            } else {
+                subMenuElement.style.left = Math.max(0, window.innerWidth - subMenuRect.width) + "px";
+            }
         }
 
         this.updateMaxHeight(subMenuElement, itemsMenuElement);

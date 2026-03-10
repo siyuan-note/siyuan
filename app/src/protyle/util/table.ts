@@ -447,7 +447,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         if (event.key === "ArrowRight" && range.toString() === "" &&
             !nodeElement.nextElementSibling &&
             cellElement === nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild &&
-            getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
+            getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.innerText.length) {
             event.preventDefault();
             insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
             return true;

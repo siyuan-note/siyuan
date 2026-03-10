@@ -1,6 +1,6 @@
 import {setEditMode} from "../util/setEditMode";
 import {scrollEvent} from "../scroll/event";
-import {isMobile, isTouchDevice} from "../../util/functions";
+import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
@@ -22,6 +22,7 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "../util/hasClosest";
+import {hideElements} from "./hideElements";
 
 const removeFnsByProtyle = new WeakMap<IProtyle, Array<() => void>>();
 
@@ -142,6 +143,7 @@ export const initUI = (protyle: IProtyle) => {
         protyle.contentElement.removeEventListener("mousewheel", onContentMousewheel, {passive: true} as EventListenerOptions);
     });
     const onContentClick = (event: MouseEvent & { target: HTMLElement }) => {
+        hideElements(["hint", "util"], protyle);
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||
             // 选中块时，禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905

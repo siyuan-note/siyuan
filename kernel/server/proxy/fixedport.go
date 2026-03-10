@@ -18,6 +18,7 @@ package proxy
 
 import (
 	"crypto/tls"
+	"errors"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -51,39 +52,10 @@ func InitFixedPortService(host string, useTLS bool, certPath, keyPath string) {
 				return
 			}
 
-			m := cmux.New(ln)
-
-			// Match TLS connections (first byte 0x16 indicates TLS handshake)
-			tlsL := m.Match(cmux.TLS())
-			// Match HTTP (anything else)
-			httpL := m.Match(cmux.Any())
-
-			cert, err := tls.LoadX509KeyPair(certPath, keyPath)
-			if err != nil {
-				logging.LogWarnf("failed to load TLS cert for fixed port service: %s", err)
-				ln.Close()
-				return
-			}
-			tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
-
-			tlsListener := tls.NewListener(tlsL, tlsConfig)
-
-			go func() {
-				httpServer := &http.Server{Handler: proxy}
-				if err := httpServer.Serve(httpL); err != nil && err != cmux.ErrListenerClosed {
-					logging.LogWarnf("fixed port HTTP server error: %s", err)
+			if serveErr := util.ServeMultiplexed(ln, proxy, certPath, keyPath, nil); serveErr != nil {
+				if serveErr != cmux.ErrListenerClosed && !errors.Is(serveErr, http.ErrServerClosed) {
+					logging.LogWarnf("fixed port cmux serve error: %s", serveErr)
 				}
-			}()
-
-			go func() {
-				httpsServer := &http.Server{Handler: proxy}
-				if err := httpsServer.Serve(tlsListener); err != nil && err != cmux.ErrListenerClosed {
-					logging.LogWarnf("fixed port HTTPS server error: %s", err)
-				}
-			}()
-
-			if err := m.Serve(); err != nil && err != cmux.ErrListenerClosed {
-				logging.LogWarnf("fixed port cmux serve error: %s", err)
 			}
 		} else {
 			logging.LogInfof("fixed port service [%s] is running", addr)

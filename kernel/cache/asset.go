@@ -54,6 +54,11 @@ func SetAssetHash(hash, path string) {
 	assetHashLock.Lock()
 	defer assetHashLock.Unlock()
 
+	if !strings.HasPrefix(path, "assets/") {
+		logging.LogErrorf("invalid asset path [%s]", path)
+		return
+	}
+
 	assetHashCache[hash] = &AssetHash{Hash: hash, Path: path}
 	assetPathHashCache[path] = &AssetHash{Hash: hash, Path: path}
 }

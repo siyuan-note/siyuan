@@ -88,7 +88,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
 
-	unusedAttributeViews := UnusedAttributeViews()
+	unusedAttributeViews := UnusedAttributeViews(false)
 
 	historyDir, err := GetHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -132,7 +132,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 	return
 }
 
-func UnusedAttributeViews() (ret []*UnusedItem) {
+func UnusedAttributeViews(sorted bool) (ret []*UnusedItem) {
 	defer logging.Recover()
 	ret = []*UnusedItem{}
 
@@ -172,26 +172,27 @@ func UnusedAttributeViews() (ret []*UnusedItem) {
 	for _, id := range allAvIDs {
 		if !docReferencedAvIDs[id] && !isRelatedSrcAvDocReferenced(id, docReferencedAvIDs, checkedAvIDs) {
 			name, _ := av.GetAttributeViewName(id)
-			ret = append(ret, &UnusedItem{Item: id, Name: name})
+
+			var modTime time.Time
+			if sorted {
+				p := filepath.Join(util.DataDir, "storage", "av", id+".json")
+				if info, statErr := os.Stat(p); nil == statErr {
+					modTime = info.ModTime()
+				}
+			}
+
+			ret = append(ret, &UnusedItem{Item: id, Name: name, ModTime: modTime})
 		}
 	}
 
-	// 按文件更新时间排序
-	modTimes := make([]time.Time, len(ret))
-	for i := range ret {
-		p := filepath.Join(util.DataDir, "storage", "av", ret[i].Item+".json")
-		if info, statErr := os.Stat(p); nil != statErr {
-			modTimes[i] = info.ModTime()
-		} else {
-			modTimes[i] = time.Time{}
-		}
+	if sorted {
+		sort.Slice(ret, func(i, j int) bool {
+			if !ret[i].ModTime.Equal(ret[j].ModTime) {
+				return ret[i].ModTime.After(ret[j].ModTime)
+			}
+			return ret[i].Item > ret[j].Item
+		})
 	}
-	sort.Slice(ret, func(i, j int) bool {
-		if !modTimes[i].Equal(modTimes[j]) {
-			return modTimes[i].After(modTimes[j])
-		}
-		return ret[i].Item > ret[j].Item
-	})
 	return
 }
 
@@ -3457,18 +3458,14 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	if nil == operation.Context {
-		operation.Context = map[string]interface{}{}
-	}
-
-	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.Context)
+	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.ViewID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool, context map[string]interface{}) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -3503,14 +3500,14 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, isDetached, ignoreDefaultFill, tree, tx, context); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, context map[string]interface{}) (err error) {
+func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)

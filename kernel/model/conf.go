@@ -292,6 +292,12 @@ func InitConf() {
 	if 3650 < Conf.Editor.HistoryRetentionDays {
 		Conf.Editor.HistoryRetentionDays = 3650
 	}
+	if nil == Conf.Editor.FloatWindowDelay {
+		v := 620
+		Conf.Editor.FloatWindowDelay = &v
+	} else {
+		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
+	}
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}
@@ -331,10 +337,11 @@ func InitConf() {
 			Conf.OpenHelp = true
 		}
 	} else {
-		if 0 < semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion) {
+		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
+		if 0 < cmp {
 			logging.LogInfof("upgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
 			Conf.ShowChangelog = true
-		} else if 0 > semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion) {
+		} else if 0 > cmp {
 			logging.LogInfof("downgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
 		}
 
@@ -790,6 +797,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		}
 	}
 
+	util.BroadcastByType("main", "exit", 0, "", nil)
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)
@@ -800,7 +808,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 			time.Sleep(30 * time.Second)
 		}
 	}
+
 	closeSyncWebSocket()
+
 	go func() {
 		time.Sleep(500 * time.Millisecond)
 		logging.LogInfof("exited kernel")
@@ -1008,8 +1018,6 @@ func IsSubscriber() bool {
 }
 
 func IsPaidUser() bool {
-	// S3/WebDAV data sync and backup are available for a fee https://github.com/siyuan-note/siyuan/issues/8780
-
 	if IsSubscriber() {
 		return true
 	}
@@ -1026,9 +1034,12 @@ const (
 	MaskedAccessAuthCode = "*******"
 )
 
+// GetMaskedConf 获取脱敏后的 Conf
 func GetMaskedConf() (ret *AppConf, err error) {
-	// 脱敏处理
-	data, err := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	// 序列化时持锁，避免与 loadThemes/LoadIcons 等写操作并发导致 slice 在编码过程中被改写而 panic https://github.com/siyuan-note/siyuan/issues/16978
+	Conf.m.Lock()
+	data, err := gulu.JSON.MarshalJSON(Conf)
+	Conf.m.Unlock()
 	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)
 		return

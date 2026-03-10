@@ -14,7 +14,7 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInEdge, isInHarmony} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
-import {callMobileAppShowKeyboard, canInput} from "./mobileAppUtil";
+import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -471,6 +471,12 @@ export const hideKeyboardToolbar = () => {
 };
 
 export const activeBlur = () => {
+    const now = Date.now();
+    if (now < keyboardLockUntil) {
+        console.warn(`activeBlur blocked by lock (remaining: ${keyboardLockUntil - now}ms)`);
+        return;
+    }
+
     if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
         window.JSAndroid.hideKeyboard();
     } else if (window.JSHarmony && window.JSHarmony.hideKeyboard) {

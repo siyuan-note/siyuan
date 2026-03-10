@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20251230162824"
+		"updated": "20260222162357"
 	},
 	"Children": [
 		{
@@ -1722,7 +1722,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-erf17it",
-				"updated": "20251230162813"
+				"updated": "20260222162357"
 			},
 			"Children": [
 				{
@@ -1948,6 +1948,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20260222161831-2ijwkjg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260222161831-2ijwkjg",
+				"updated": "20260222162357"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果表格包含合并的单元格或标题，则会以 HTML 形式复制或导出为 Markdown。"
 				}
 			]
 		},

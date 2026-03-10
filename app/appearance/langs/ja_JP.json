@@ -1,4 +1,7 @@
 {
+  "position": "位置",
+  "insertColumnLeft1": "左側に ${x} 列を挿入",
+  "insertColumnRight1": "右側に ${x} 列を挿入",
   "noSplitScreenWhenOpenTab": "タブを開くときに分割表示しない",
   "noSplitScreenWhenOpenTabTip": "検索や PDF などのタブを開いたときに自動で分割表示しない",
   "useChrome": "Chromium ベースのブラウザ（例えば Chrome/Edge）でのみ使用可能で、他のブラウザでは解決できない互換性の問題が発生することがあります",
@@ -600,6 +603,8 @@
   "floatWindowMode0": "ホバー",
   "floatWindowMode1": "${hotkey} を押しながらホバー",
   "floatWindowMode2": "表示しない",
+  "floatWindowDelay": "ホバー時のフローティングウィンドウ表示遅延",
+  "floatWindowDelayTip": "フローティングウィンドウのトリガー方法がホバーのときのみ有効です",
   "codeSnippet": "コードスニペット",
   "codeSnippetTip": "コードスニペットを使用してインターフェースや機能を微調整します",
   "expandDown": "選択範囲を下に拡張",
@@ -1176,8 +1181,8 @@
   "md40": "デフォルト (<code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>) を復元するには空白にします",
   "md41": "<code class='fn__code'>/</code> で囲んだ正規表現をサポートします。<code class='fn__code'>foo,/[0-9]+/</code> の場合は foo と数字を除外することを意味します",
   "fileTree2": "エディタのタブを切り替えるとドキュメントツリーで自動的に現在のドキュメントを選択します",
-  "fileTree3": "ドキュメントを削除するときに確認しない",
-  "fileTree4": "ドキュメントを削除するときに確認ボックスを表示しません",
+  "fileTree3": "単一のドキュメントを削除するときに確認しない",
+  "fileTree4": "有効にすると単一のドキュメントを削除するときに確認ダイアログが表示されません",
   "fileTree5": "参照の保存場所",
   "fileTree6": "<code class='fn__code'>((</code> または <code class='fn__code'>[[</code> を使用した時の参照の保存パス (例: <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "現在のタブで開く",
@@ -1748,6 +1753,7 @@
     "278": "ワークスペースがSSD上に配置されていません、これにより著しいパフォーマンス低下が発生する可能性があるため、ワークスペースをSSD上で使用することを推奨します",
     "279": "参照されていないデータベースは合計 [%d] 件で、ここには [%d] 件のみ表示しています",
     "280": "参照されていないデータベースのクリーンアップが完了しました。[%d] 個のファイルを削除し、合計 [%s] のディスク領域を解放しました",
-    "281": " (デフォルト)"
+    "281": " (デフォルト)",
+    "282": "ウィンドウを閉じる"
   }
 }

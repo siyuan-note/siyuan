@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20251230163004"
+		"updated": "20260222162325"
 	},
 	"Children": [
 		{
@@ -1720,7 +1720,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091538-38bsz5r",
-				"updated": "20251230163004"
+				"updated": "20260222162325"
 			},
 			"Children": [
 				{
@@ -1946,6 +1946,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20260222162028-4qi1oj4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260222162028-4qi1oj4",
+				"updated": "20260222162325"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If the table contains merged cells or headers, it will be copied as HTML or exported as Markdown."
 				}
 			]
 		},

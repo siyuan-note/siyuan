@@ -88,6 +88,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             adjustLayout();
             resizeTabs();
             resizeTopBar();
+            window.siyuan.menus.menu.resetPosition();
             firstResize = true;
             if (getSelection().rangeCount > 0) {
                 const range = getSelection().getRangeAt(0);
@@ -202,7 +203,7 @@ export const initWindow = async (app: App) => {
         }
     });
     ipcRenderer.on(Constants.SIYUAN_SEND_WINDOWS, (e, ipcData: IWebSocketData) => {
-        onWindowsMsg(ipcData);
+        onWindowsMsg(ipcData, app);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
         let matchCommand = false;

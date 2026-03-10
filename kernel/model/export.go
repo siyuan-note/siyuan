@@ -1777,7 +1777,7 @@ func yfm(docIAL map[string]string) string {
 	var title, created, updated, tags string
 	for k, v := range docIAL {
 		if "id" == k {
-			createdTime, parseErr := time.Parse("20060102150405", util.TimeFromID(v))
+			createdTime, parseErr := time.ParseInLocation("20060102150405", util.TimeFromID(v), time.Local)
 			if nil == parseErr {
 				created = createdTime.Format(time.RFC3339)
 			}
@@ -1788,7 +1788,7 @@ func yfm(docIAL map[string]string) string {
 			continue
 		}
 		if "updated" == k {
-			updatedTime, parseErr := time.Parse("20060102150405", v)
+			updatedTime, parseErr := time.ParseInLocation("20060102150405", v, time.Local)
 			if nil == parseErr {
 				updated = updatedTime.Format(time.RFC3339)
 			}

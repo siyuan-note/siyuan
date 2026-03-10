@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20251230162901"
+		"updated": "20260222162331"
 	},
 	"Children": [
 		{
@@ -1645,7 +1645,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-fe8klj7",
-				"updated": "20251230162852"
+				"updated": "20260222162331"
 			},
 			"Children": [
 				{
@@ -1869,6 +1869,20 @@
 				{
 					"Type": "NodeText",
 					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20260222162012-6uewwvk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260222162012-6uewwvk",
+				"updated": "20260222162331"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果表格包含合併的儲存格或標題，則會以 HTML 形式複製或導出為 Markdown。"
 				}
 			]
 		},

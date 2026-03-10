@@ -1,4 +1,7 @@
 {
+  "position": "Pozycja",
+  "insertColumnLeft1": "Wstaw ${x} kolumn po lewej",
+  "insertColumnRight1": "Wstaw ${x} kolumn po prawej",
   "noSplitScreenWhenOpenTab": "Nie dziel ekranu przy otwieraniu kart",
   "noSplitScreenWhenOpenTabTip": "Nie dziel automatycznie ekranu przy otwieraniu kart wyszukiwania, PDF itp.",
   "useChrome": "Obsługiwane tylko w przeglądarkach opartych na silniku Chromium (np. Chrome/Edge), korzystanie z innych przeglądarek może spowodować problemy z kompatybilnością, których nie da się rozwiązać",
@@ -600,6 +603,8 @@
   "floatWindowMode0": "Najedź",
   "floatWindowMode1": "Naciśnij i przytrzymaj ${hotkey} + Najedź",
   "floatWindowMode2": "Nie wywołuj",
+  "floatWindowDelay": "Opóźnienie wywołania okna pływającego przy najechaniu",
+  "floatWindowDelayTip": "Działa tylko wtedy, gdy metoda wywoływania okna pływającego to Najedź",
   "codeSnippet": "Fragment kodu",
   "codeSnippetTip": "Dostosuj interfejs lub funkcjonalność za pomocą fragmentów kodu",
   "expandDown": "Rozwiń w dół",
@@ -1176,8 +1181,8 @@
   "md40": "Pozostaw puste, aby przywrócić domyślne <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
   "md41": "Wspiera używanie <code class='fn__code'>/</code> do zawijania wyrażeń regularnych, na przykład <code class='fn__code'>foo,/[0-9]+/</code> oznacza wykluczenie foo i cyfr",
   "fileTree2": "Drzewo dokumentu automatycznie wybierze bieżący dokument przy przełączaniu zakładek edytora",
-  "fileTree3": "Nie wymaga potwierdzenia przy usuwaniu dokumentów",
-  "fileTree4": "Jeśli nie jest włączone, okno potwierdzenia pojawi się za każdym razem, gdy usuniesz dokument",
+  "fileTree3": "Nie wymaga potwierdzenia przy usuwaniu pojedynczego dokumentu",
+  "fileTree4": "Po włączeniu przy usuwaniu pojedynczego dokumentu nie pojawia się okno potwierdzenia",
   "fileTree5": "Ref stworzone miejsce zapisu dokumentu",
   "fileTree6": "Kiedy używasz <code class='fn__code'>((</code> lub <code class='fn__code'>[[</code>, ścieżka zapisu nowego dokumentu (na przykład <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Otwórz w bieżącej zakładce",
@@ -1748,6 +1753,7 @@
     "278": "Obszar roboczy nie znajduje się na dysku SSD, co może spowodować znaczny spadek wydajności, zaleca się umieszczenie obszaru roboczego na dysku SSD",
     "279": "Nieodwołane bazy danych łącznie: [%d], tutaj wyświetlono tylko [%d]",
     "280": "Czyszczenie nieodwołanych baz danych zakończone, usunięto [%d] plików, zwolniono [%s] miejsca na dysku",
-    "281": " (Domyślny)"
+    "281": " (Domyślny)",
+    "282": "Zamknij okno"
   }
 }

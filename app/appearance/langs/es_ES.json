@@ -1,4 +1,7 @@
 {
+  "position": "Posición",
+  "insertColumnLeft1": "Insertar ${x} columnas a la izquierda",
+  "insertColumnRight1": "Insertar ${x} columnas a la derecha",
   "noSplitScreenWhenOpenTab": "No dividir pantalla al abrir pestañas",
   "noSplitScreenWhenOpenTabTip": "No dividir automáticamente la pantalla al abrir pestañas de búsqueda, PDF u otras",
   "useChrome": "Solo es compatible con navegadores basados en el motor Chromium (por ejemplo Chrome/Edge), usar otros navegadores puede provocar problemas de compatibilidad que no se pueden resolver",
@@ -600,6 +603,8 @@
   "floatWindowMode0": "Flotar",
   "floatWindowMode1": "Presione y mantenga presionado ${hotkey} + Flotar",
   "floatWindowMode2": "No activar",
+  "floatWindowDelay": "Retardo de activación de la ventana flotante al pasar el mouse",
+  "floatWindowDelayTip": "Solo tiene efecto cuando el método de activación de la ventana flotante es Flotar",
   "codeSnippet": "Fragmento de código",
   "codeSnippetTip": "Ajusta la interfaz o la funcionalidad mediante fragmentos de código",
   "expandDown": "Expandir hacia abajo",
@@ -1176,8 +1181,8 @@
   "md40": "Dejar en blanco para restablecer el valor por defecto <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
   "md41": "Se admite el uso de <code class='fn__code'>/</code> para ajustar expresiones regulares, por ejemplo <code class='fn__code'>foo,/[0-9]+/</code> significa excluir foo y números",
   "fileTree2": "Documentos seleccionará automáticamente el documento actual cuando se cambie la pestaña del editor",
-  "fileTree3": "No se requiere confirmación al borrar documentos",
-  "fileTree4": "Si no se activa, aparecerá un cuadro de confirmación cada vez que se elimine un documento",
+  "fileTree3": "No se requiere confirmación al borrar un solo documento",
+  "fileTree4": "Cuando está activado, no aparece un cuadro de confirmación al borrar un solo documento",
   "fileTree5": "Ref crear ubicación de guardado de documentos",
   "fileTree6": "Al utilizar <code class='fn__code'>((</code> o <code class='fn__code'>[[</code>, la ruta de guardado del nuevo documento (por ejemplo, <code class='fn__code'>/carpeta1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Abrir en la pestaña actual",
@@ -1748,6 +1753,7 @@
     "278": "El espacio de trabajo no está ubicado en un disco de estado sólido (SSD), esto puede provocar una disminución notable del rendimiento, se recomienda colocar el espacio de trabajo en un SSD",
     "279": "Hay [%d] bases de datos sin referencias en total, aquí se muestran solo [%d]",
     "280": "Limpieza de bases de datos sin referencias completada, [%d] archivos eliminados, se liberaron [%s] de espacio en disco",
-    "281": " (Por defecto)"
+    "281": " (Por defecto)",
+    "282": "Cerrar ventana"
   }
 }

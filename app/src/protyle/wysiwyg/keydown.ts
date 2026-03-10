@@ -97,7 +97,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (event.target.getAttribute("data-type") === "av-search") {
+        if (hasClosestByAttribute(event.target, "data-type", "av-search")) {
             if (matchHotKey("⌘A", event)) {
                 event.preventDefault();
                 getSelection().getRangeAt(0).selectNodeContents(event.target);
@@ -183,7 +183,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
         // 有可能输入 shift+. ，因此需要使用 event.key 来进行判断
-        if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
+        if (typeof event.key === "string" && event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
             event.key !== "Escape" && event.key !== "Shift" && event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
             !isNotEditBlock(nodeElement) && !/^F\d{1,2}$/.test(event.key) &&
             // 微软双拼使用 compositionstart，否则 focusByRange 导致无法输入文字
@@ -1884,7 +1884,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (!event.shiftKey) {
-                document.execCommand("insertText", false, window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " "));
+                document.execCommand("insertHTML", false, window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " "));
                 return true;
             }
         }

@@ -224,13 +224,6 @@ func extensionCopy(c *gin.Context) {
 		})
 
 		tree, withMath = model.HTML2Tree(dom, luteEngine)
-		if nil == tree {
-			md, withMath, _ = model.HTML2Markdown(dom, luteEngine)
-			if withMath {
-				luteEngine.SetInlineMath(true)
-			}
-			tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
-		}
 	} else {
 		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	}

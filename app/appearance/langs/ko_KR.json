@@ -1,4 +1,7 @@
 {
+  "position": "위치",
+  "insertColumnLeft1": "왼쪽에 ${x} 열 삽입",
+  "insertColumnRight1": "오른쪽에 ${x} 열 삽입",
   "noSplitScreenWhenOpenTab": "탭 열기 시 분할 화면 사용 안 함",
   "noSplitScreenWhenOpenTabTip": "검색, PDF 등 탭을 열 때 자동으로 분할 화면으로 열지 않음",
   "useChrome": "Chromium 엔진 기반 브라우저(예: Chrome/Edge)에서만 지원되며, 다른 브라우저를 사용할 경우 해결할 수 없는 호환성 문제가 발생할 수 있습니다",
@@ -600,6 +603,8 @@
   "floatWindowMode0": "호버(Hover)",
   "floatWindowMode1": "${hotkey} 누른 채 호버",
   "floatWindowMode2": "트리거하지 않음",
+  "floatWindowDelay": "호버 시 플로팅 창 트리거 지연",
+  "floatWindowDelayTip": "플로팅 창 트리거 방식이 호버(Hover)일 때만 적용됩니다",
   "codeSnippet": "코드 스니펫",
   "codeSnippetTip": "코드 스니펫을 통해 인터페이스나 기능을 미세 조정합니다",
   "expandDown": "아래로 확장",
@@ -1176,8 +1181,8 @@
   "md40": "비워두면 기본값 <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>로 복원됩니다",
   "md41": "정규식을 감싸기 위해 <code class='fn__code'>/</code> 사용 지원, 예: <code class='fn__code'>foo,/[0-9]+/</code>는 foo와 숫자를 제외함을 의미합니다",
   "fileTree2": "에디터 탭이 전환되면 문서 트리가 자동으로 현재 문서를 선택합니다",
-  "fileTree3": "문서를 삭제할 때 확인이 필요하지 않음",
-  "fileTree4": "활성화하지 않으면 문서를 삭제할 때마다 확인 상자가 팝업됩니다",
+  "fileTree3": "단일 문서를 삭제할 때 확인이 필요하지 않음",
+  "fileTree4": "활성화하면 단일 문서를 삭제할 때 확인 창이 뜨지 않습니다",
   "fileTree5": "참조 생성 문서 저장 위치",
   "fileTree6": "<code class='fn__code'>((</code> 또는 <code class='fn__code'>[[</code> 사용 시 새 문서의 저장 경로 (예: <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "현재 탭에서 열기",
@@ -1748,6 +1753,7 @@
     "278": "작업 공간이 SSD에 있지 않습니다, 이로 인해 성능이 크게 저하될 수 있으므로 작업 공간을 SSD에 두어 사용하시기 바랍니다",
     "279": "참조되지 않은 데이터베이스 전체 [%d]개, 여기에는 [%d]개만 나열됩니다",
     "280": "참조되지 않은 데이터베이스 정리 완료, [%d]개의 파일을 삭제하여 총 [%s]의 디스크 공간을 확보했습니다",
-    "281": " (기본)"
+    "281": " (기본)",
+    "282": "창 닫기"
   }
 }

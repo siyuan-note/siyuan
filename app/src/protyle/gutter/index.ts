@@ -1627,7 +1627,8 @@ export class Gutter {
             if (!tableElement.contains(range.startContainer)) {
                 range = getEditorRange(tableElement.querySelector("th"));
             }
-            const cellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+            const cellElement = hasClosestByTag(range.startContainer, "TD") ||
+                hasClosestByTag(range.startContainer, "TH") || nodeElement.querySelector("th, td");
             if (cellElement) {
                 window.siyuan.menus.menu.append(new MenuItem({id: "separator_table", type: "separator"}).element);
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -2175,6 +2176,7 @@ export class Gutter {
     }
 
     private genAlign(nodeElements: Element[], protyle: IProtyle) {
+        const disabledRTL = nodeElements.some(e => ["NodeAttributeView", "NodeCodeBlock", "NodeMathBlock"].includes(e.getAttribute("data-type")));
         window.siyuan.menus.menu.append(new MenuItem({
             id: "layout",
             label: window.siyuan.languages.layout,
@@ -2242,27 +2244,40 @@ export class Gutter {
             }, {
                 id: "ltr",
                 icon: "iconLtr",
+                ignore: disabledRTL,
                 label: window.siyuan.languages.ltr,
                 accelerator: window.siyuan.config.keymap.editor.general.ltr.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.direction = "ltr";
+                        if (e.classList.contains("table")) {
+                            e.querySelector("table").style.direction = "ltr";
+                        } else if (e.getAttribute("data-type") === "NodeHTMLBlock") {
+                            (e.querySelector("protyle-html") as HTMLElement).style.direction = "ltr";
+                        } else {
+                            e.style.direction = "ltr";
+                        }
                     });
                 }
             }, {
                 id: "rtl",
                 icon: "iconRtl",
+                ignore: disabledRTL,
                 label: window.siyuan.languages.rtl,
                 accelerator: window.siyuan.config.keymap.editor.general.rtl.custom,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        if (!e.classList.contains("av")) {
+                        if (e.classList.contains("table")) {
+                            e.querySelector("table").style.direction = "rtl";
+                        } else if (e.getAttribute("data-type") === "NodeHTMLBlock") {
+                            (e.querySelector("protyle-html") as HTMLElement).style.direction = "rtl";
+                        } else {
                             e.style.direction = "rtl";
                         }
                     });
                 }
             }, {
                 id: "separator_2",
+                ignore: disabledRTL,
                 type: "separator"
             }, {
                 id: "clearFontStyle",
@@ -2302,7 +2317,7 @@ export class Gutter {
                     data: e.outerHTML
                 });
                 if (e.getAttribute("data-subtype") === "echarts") {
-                    const chartInstance = window.echarts.getInstanceById(e.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
+                    const chartInstance = window.echarts.getInstanceById(e.querySelector("[_echarts_instance_]").getAttribute("_echarts_instance_"));
                     if (chartInstance) {
                         chartInstance.resize();
                     }
@@ -2346,7 +2361,7 @@ export class Gutter {
                         e.style.width = item;
                         e.style.flex = "none";
                         if (e.getAttribute("data-subtype") === "echarts") {
-                            const chartInstance = window.echarts.getInstanceById(e.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
+                            const chartInstance = window.echarts.getInstanceById(e.querySelector("[_echarts_instance_]").getAttribute("_echarts_instance_"));
                             if (chartInstance) {
                                 chartInstance.resize();
                             }
@@ -2392,7 +2407,7 @@ export class Gutter {
                             e.style.width = "";
                             e.style.flex = "";
                             if (e.getAttribute("data-subtype") === "echarts") {
-                                const chartInstance = window.echarts.getInstanceById(e.querySelector('[_echarts_instance_]').getAttribute("_echarts_instance_"));
+                                const chartInstance = window.echarts.getInstanceById(e.querySelector("[_echarts_instance_]").getAttribute("_echarts_instance_"));
                                 if (chartInstance) {
                                     chartInstance.resize();
                                 }

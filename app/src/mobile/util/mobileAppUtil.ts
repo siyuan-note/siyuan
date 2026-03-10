@@ -1,6 +1,12 @@
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 
+export let keyboardLockUntil = 0;
+
 export const callMobileAppShowKeyboard = () => {
+    // 某些机型（比如鸿蒙 Pura X）在弹起键盘后会立即触发 activeBlur 导致键盘被关闭，所以在主动唤起键盘时锁定一段时间，禁止 activeBlur 关闭键盘
+    // 每次主动唤起键盘时，锁定接下来的 500ms 不允许通过 activeBlur 关闭
+    keyboardLockUntil = Date.now() + 500;
+
     if (window.JSAndroid && window.JSAndroid.showKeyboard) {
         window.JSAndroid.showKeyboard();
     } else if (window.JSHarmony && window.JSHarmony.showKeyboard) {
@@ -24,4 +30,14 @@ export const canInput = (element: Element) => {
         return hasClosestByAttribute(element, "contenteditable", "true");
     }
     return false;
+};
+
+export const setWebViewFocusable = () => {
+    if ((window.JSAndroid || window.JSHarmony) && document.activeElement.tagName === "IFRAME") {
+        if (window.JSAndroid?.setWebViewFocusable) {
+            window.JSAndroid.setWebViewFocusable(true);
+        } else if (window.JSHarmony?.setWebViewFocusable) {
+            window.JSHarmony.setWebViewFocusable(true);
+        }
+    }
 };

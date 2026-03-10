@@ -139,6 +139,7 @@ export abstract class Constants {
     public static readonly CB_GET_HTML = "cb-get-html"; // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
     public static readonly CB_GET_HISTORY = "cb-get-history"; // 历史渲染
     public static readonly CB_GET_OPENNEW = "cb-get-opennew"; // 编辑器只读后新建文件需为临时解锁状态 & https://github.com/siyuan-note/siyuan/issues/12197
+    public static readonly CB_GET_AV_NO_CREATE = "cb-get-av-no-create"; // 属性视图不自动创建
 
     // localstorage
     public static readonly LOCAL_ZOOM = "local-zoom";
@@ -317,6 +318,7 @@ export abstract class Constants {
         pl_PL: "20210808180117-6v0mkxr",
         pt_BR: "20210808180117-6v0mkxr",
         ru_RU: "20210808180117-6v0mkxr",
+        sk_SK: "20210808180117-6v0mkxr",
         tr_TR: "20210808180117-6v0mkxr",
         zh_CHT: "20211226090932-5lcq56f",
         zh_CN: "20210808180117-czj9bvb",

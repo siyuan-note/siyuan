@@ -1,4 +1,7 @@
 {
+  "position": "Posizione",
+  "insertColumnLeft1": "Inserisci ${x} colonne a sinistra",
+  "insertColumnRight1": "Inserisci ${x} colonne a destra",
   "noSplitScreenWhenOpenTab": "Non dividere lo schermo all'apertura della scheda",
   "noSplitScreenWhenOpenTabTip": "Non dividere automaticamente lo schermo all'apertura di schede come ricerca, PDF, ecc.",
   "useChrome": "Supportato solo su browser basati sul motore Chromium (ad es. Chrome/Edge), l'uso di altri browser può causare problemi di compatibilità irrisolvibili",
@@ -600,6 +603,8 @@
   "floatWindowMode0": "Passa il mouse",
   "floatWindowMode1": "Tieni premuto ${hotkey} + Passa il mouse",
   "floatWindowMode2": "Non attivare",
+  "floatWindowDelay": "Ritardo di attivazione della finestra flottante al passaggio del mouse",
+  "floatWindowDelayTip": "Ha effetto solo quando il metodo di attivazione della finestra flottante è Passa il mouse",
   "codeSnippet": "Snippet di codice",
   "codeSnippetTip": "Affina l'interfaccia o la funzionalità tramite frammenti di codice",
   "expandDown": "Espandi verso il basso",
@@ -1176,8 +1181,8 @@
   "md40": "Lascia vuoto per ripristinare il valore predefinito <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
   "md41": "Supporta l'uso di <code class='fn__code'>/</code> per avvolgere le espressioni regolari, ad esempio <code class='fn__code'>foo,/[0-9]+/</code> significa escludere foo e numeri",
   "fileTree2": "L'albero dei documenti selezionerà automaticamente il documento corrente quando la scheda dell'editor viene cambiata",
-  "fileTree3": "Nessuna conferma richiesta durante l'eliminazione dei documenti",
-  "fileTree4": "Se non abilitato, ogni volta che elimini un documento verrà visualizzata una finestra di conferma",
+  "fileTree3": "Nessuna conferma richiesta durante l'eliminazione di un singolo documento",
+  "fileTree4": "Se abilitato, non verrà visualizzata alcuna finestra di conferma quando elimini un singolo documento",
   "fileTree5": "Percorso di salvataggio dei nuovi documenti creati con riferimento",
   "fileTree6": "Quando usi <code class='fn__code'>((</code> o <code class='fn__code'>[[</code>, il percorso di salvataggio del nuovo documento (ad esempio, <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>)",
   "fileTree7": "Apri nella scheda corrente",
@@ -1748,6 +1753,7 @@
     "278": "Lo spazio di lavoro non è su un disco a stato solido (SSD), ciò può causare una diminuzione significativa delle prestazioni, si consiglia di posizionare lo spazio di lavoro su un SSD",
     "279": "Database non referenziati in totale: [%d], qui ne vengono elencati solo [%d]",
     "280": "Pulizia dei database non referenziati completata, eliminati [%d] file, liberato [%s] di spazio su disco",
-    "281": " (Predefinito)"
+    "281": " (Predefinito)",
+    "282": "Chiudi finestra"
   }
 }

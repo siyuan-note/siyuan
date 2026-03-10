@@ -1,4 +1,7 @@
 {
+  "position": "位置",
+  "insertColumnLeft1": "在左侧插入 ${x} 列",
+  "insertColumnRight1": "在右侧插入 ${x} 列",
   "noSplitScreenWhenOpenTab": "打开页签时不分屏",
   "noSplitScreenWhenOpenTabTip": "打开搜索、PDF 等页签时不自动分屏",
   "useChrome": "仅支持在基于 Chromium 内核的浏览器（比如 Chrome/Edge）中使用，使用其他浏览器会遇到无法解决的兼容性问题",
@@ -600,6 +603,8 @@
   "floatWindowMode0": "悬停",
   "floatWindowMode1": "按住 ${hotkey}+悬停",
   "floatWindowMode2": "不触发浮窗",
+  "floatWindowDelay": "浮窗悬停触发延迟",
+  "floatWindowDelayTip": "仅在“浮窗触发方式”为“悬停”时生效",
   "codeSnippet": "代码片段",
   "codeSnippetTip": "通过代码片段对界面或功能进行微调",
   "expandDown": "向下扩选",
@@ -1176,8 +1181,8 @@
   "md40": "留空将恢复默认值 <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
   "md41": "支持使用 <code class='fn__code'>/</code> 包裹正则表达式，例如 <code class='fn__code'>foo,/[0-9]+/</code> 表示排除 foo 和数字",
   "fileTree2": "在编辑器页签切换时文档树会自动选中当前的文档",
-  "fileTree3": "删除文档时不需要确认",
-  "fileTree4": "不启用时每次删除文档都会弹出确认框",
+  "fileTree3": "删除单个文档时不需要确认",
+  "fileTree4": "启用时删除单个文档不再弹出确认框",
   "fileTree5": "块引新建文档存放位置",
   "fileTree6": "使用 <code class='fn__code'>((</code> 或 <code class='fn__code'>[[</code> 时新建文档的存放路径（例如 <code class='fn__code'>/folder1/{{now | date \"20060102150405\"}}/</code>）",
   "fileTree7": "在当前页签中打开",
@@ -1355,8 +1360,8 @@
   "inline-code": "行级代码",
   "insertAfter": "下方插入块",
   "insertBefore": "上方插入块",
-  "insertColumnLeft": "在左边插入一列",
-  "insertColumnRight": "在右边插入一列",
+  "insertColumnLeft": "在左侧插入一列",
+  "insertColumnRight": "在右侧插入一列",
   "insertRowAbove": "在上方插入一行",
   "insertRowBelow": "在下方插入一行",
   "italic": "斜体",
@@ -1748,6 +1753,7 @@
     "278": "工作空间未放置在固态硬盘上，这会导致显著的性能下降，建议将工作空间放置在固态硬盘上使用",
     "279": "未引用数据库一共 [%d] 个，这里仅列出 [%d] 个",
     "280": "清理未引用的数据库完毕，已删除 [%d] 个文件，共释放 [%s] 磁盘空间",
-    "281": "（默认主题）"
+    "281": "（默认主题）",
+    "282": "关闭窗口"
   }
 }

@@ -281,6 +281,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
                 blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, target.dataset.id);
                 blockElement.removeAttribute("data-render");
+                if (target.dataset.page) {
+                    blockElement.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                        bodyItem.dataset.pageSize = target.dataset.page;
+                    });
+                }
                 avRender(blockElement, protyle);
             } else {
                 transaction(protyle, [{
@@ -323,7 +328,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             const searchElement = blockElement.querySelector('div[data-type="av-search"]') as HTMLInputElement;
             searchElement.style.width = "128px";
             searchElement.style.paddingLeft = "";
-            searchElement.style.paddingRight = "";
+            searchElement.style.marginRight = "1em";
             const viewsElement = hasClosestByClassName(searchElement, "av__views");
             if (viewsElement) {
                 viewsElement.classList.add("av__views--show");
@@ -625,7 +630,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 id: avType === "table" ? "insertRowBefore" : "insertItemBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field"><span class="fn__space"></span>`)}
+${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -660,7 +665,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 id: avType === "table" ? "insertRowAfter" : "insertItemAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field" value="1"><span class="fn__space"></span>`)}
+${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field b3-text-field--size" value="1"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");

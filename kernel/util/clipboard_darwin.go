@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//go:build darwin
+//go:build darwin && !ios
 
 // 本文件实现 macOS NSPasteboard 写入文件路径列表：通过 writeObjects: 写入 NSURL 数组
 //（NSPasteboardTypeFileURL / public.file-url），使 Finder 等应用可识别并粘贴为文件。

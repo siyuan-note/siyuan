@@ -231,8 +231,7 @@ func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
 	return
 }
 
-// RemoveScriptsInSVG 移除 SVG 中的 <script> 标签及其内部所有内容
-func RemoveScriptsInSVG(svgInput string) string {
+func SanitizeSVG(svgInput string) string {
 	// 1. 将字符串解析为节点树
 	doc, err := html.Parse(strings.NewReader(svgInput))
 	if err != nil {
@@ -246,13 +245,75 @@ func RemoveScriptsInSVG(svgInput string) string {
 		// 倒序遍历子节点，确保删除操作不影响后续迭代
 		for c := n.FirstChild; c != nil; {
 			next := c.NextSibling
-			// 检查标签名是否为 script
-			if c.Type == html.ElementNode && strings.EqualFold(c.Data, "script") {
-				n.RemoveChild(c)
-			} else {
-				// 递归处理子节点
+			if c.Type == html.ElementNode {
+				tag := strings.ToLower(c.Data)
+				if tag == "script" || tag == "iframe" || tag == "object" || tag == "embed" || tag == "foreignobject" || "animate" == tag ||
+					"animatetransform" == tag || "animatecolor" == tag || "animatemotion" == tag || "set" == tag {
+					n.RemoveChild(c)
+					c = next
+					continue
+				}
+
+				// 清理不安全属性
+				if len(c.Attr) > 0 {
+					// 过滤属性：删除以 on 开头的属性（事件处理），href/xlink:href 指向 javascript: 或不安全 data:，以及危险的 style 表达式
+					filtered := c.Attr[:0]
+					for _, a := range c.Attr {
+						key := strings.ToLower(a.Key)
+						val := strings.TrimSpace(strings.ToLower(a.Val))
+						val = strings.Map(func(r rune) rune {
+							if r == '\t' || r == '\n' || r == '\r' {
+								return -1 // Remove character
+							}
+							return r
+						}, val)
+
+						// 删除事件处理器属性（onload, onerror 等）
+						if strings.HasPrefix(key, "on") {
+							continue
+						}
+
+						if key == "values" || key == "from" || key == "to" {
+							// 删除 animate* 元素的 values、from、to 属性以防止恶意动画
+							if strings.Contains(val, "javascript:") {
+								continue
+							}
+						}
+
+						// 删除 href 或 xlink:href 指向 javascript: 或某些不安全的 data: URI
+						if key == "href" || key == "xlink:href" || key == "xlinkhref" {
+							if strings.HasPrefix(val, "javascript:") {
+								continue
+							}
+							// 对 data: 做保守处理，删除包含可执行内容的 data:text/html 或 data:image/svg+xml
+							if strings.HasPrefix(val, "data:") {
+								if strings.Contains(val, "text/html") || strings.Contains(val, "image/svg+xml") || strings.Contains(val, "application/xhtml+xml") {
+									continue
+								}
+							}
+						}
+
+						// 清理 style 中的危险表达式，如 expression() 或 url(javascript:...)
+						if key == "style" {
+							low := val
+							if strings.Contains(low, "expression(") || strings.Contains(low, "url(javascript:") || strings.Contains(low, "javascript:") {
+								// 丢弃整个 style 属性以保证安全
+								continue
+							}
+						}
+
+						// 其它属性保留
+						filtered = append(filtered, a)
+					}
+					c.Attr = filtered
+				}
+			}
+
+			// 递归处理子节点（如果节点尚未被删除）
+			if c.Parent != nil {
 				walk(c)
 			}
+
 			c = next
 		}
 	}

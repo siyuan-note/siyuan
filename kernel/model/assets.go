@@ -89,6 +89,7 @@ func HandleAssetsRemoveEvent(assetAbsPath string) {
 	if gulu.File.IsDir(assetAbsPath) {
 		return
 	}
+	// 跳过隐藏文件，如 WPS 的临时文件、Mac 的 .DS_Store
 	if filelock.IsHidden(assetAbsPath) {
 		return
 	}
@@ -129,7 +130,7 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 		logging.LogErrorf("calc asset [%s] hash failed: %s", assetAbsPath, err)
 	} else {
 		p := strings.TrimPrefix(assetAbsPath, util.DataDir)
-		p = filepath.ToSlash(p)
+		p = strings.TrimPrefix(filepath.ToSlash(p), "/")
 		cache.SetAssetHash(hash, p)
 	}
 }
@@ -765,7 +766,7 @@ func RemoveUnusedAssets() (ret []string) {
 		util.PushUpdateMsg(msgId, msg, 7000)
 	}()
 
-	unusedAssets := UnusedAssets()
+	unusedAssets := UnusedAssets(false)
 
 	historyDir, err := GetHistoryDir(HistoryOpClean)
 	if err != nil {
@@ -1006,11 +1007,12 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 }
 
 type UnusedItem struct {
-	Item string `json:"item"`
-	Name string `json:"name"`
+	Item    string    `json:"item"`
+	Name    string    `json:"name"`
+	ModTime time.Time `json:"-"`
 }
 
-func UnusedAssets() (ret []*UnusedItem) {
+func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 	defer logging.Recover()
 	ret = []*UnusedItem{}
 
@@ -1167,7 +1169,24 @@ func UnusedAssets() (ret []*UnusedItem) {
 			p = p[1:]
 		}
 		name := util.RemoveID(path.Base(p))
-		ret = append(ret, &UnusedItem{Item: p, Name: name})
+
+		var modTime time.Time
+		if sorted {
+			if info, statErr := os.Stat(assetAbsPath); nil == statErr {
+				modTime = info.ModTime()
+			}
+		}
+
+		ret = append(ret, &UnusedItem{Item: p, Name: name, ModTime: modTime})
+	}
+
+	if sorted {
+		sort.Slice(ret, func(i, j int) bool {
+			if !ret[i].ModTime.Equal(ret[j].ModTime) {
+				return ret[i].ModTime.After(ret[j].ModTime)
+			}
+			return ret[i].Item > ret[j].Item
+		})
 	}
 	return
 }

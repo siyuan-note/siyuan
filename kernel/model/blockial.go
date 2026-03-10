@@ -223,7 +223,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 			var tags []string
 			tmp := strings.Split(value, ",")
 			for _, t := range tmp {
-				t = util.RemoveInvalid(t)
 				t = strings.TrimSpace(t)
 				if "" != t {
 					tags = append(tags, t)

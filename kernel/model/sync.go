@@ -250,10 +250,14 @@ func checkSync(boot, exit, byHand bool) bool {
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 		if !IsSubscriber() {
+			Conf.Sync.Enabled = false
+			Conf.Save()
 			return false
 		}
 	case conf.ProviderWebDAV, conf.ProviderS3, conf.ProviderLocal:
 		if !IsPaidUser() {
+			Conf.Sync.Enabled = false
+			Conf.Save()
 			return false
 		}
 	}

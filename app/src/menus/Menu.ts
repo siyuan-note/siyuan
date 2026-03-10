@@ -9,6 +9,7 @@ export class Menu {
     public data: any;   // 用于记录当前菜单的数据
     public removeCB: () => void;
     private wheelEvent: string;
+    private position: IPosition;
 
     constructor() {
         this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
@@ -61,22 +62,39 @@ export class Menu {
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
+        const itemsMenuElement = subMenuElement.lastElementChild as HTMLElement;
+        if (itemsMenuElement) {
+            itemsMenuElement.style.maxHeight = "";
+        } else {
+            return;
+        }
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
-        subMenuElement.style.top = (itemRect.top - 8) + "px";
-        subMenuElement.style.left = (itemRect.right + 8) + "px";
-        subMenuElement.style.bottom = "auto";
-        const rect = subMenuElement.getBoundingClientRect();
-        if (rect.right > window.innerWidth) {
-            if (itemRect.left - 8 > rect.width) {
-                subMenuElement.style.left = (itemRect.left - 8 - rect.width) + "px";
+        const subMenuRect = subMenuElement.getBoundingClientRect();
+
+        // 垂直方向位置调整
+        // 减 9px 是为了尽量对齐菜单选项（b3-menu__submenu 的默认 padding-top 加上子菜单首个 b3-menu__item 的默认 margin-top）
+        // 减 1px 是为了避免在特定情况下渲染出不应存在的滚动条而做的兼容处理
+        subMenuElement.style.top = Math.max(Constants.SIZE_TOOLBAR_HEIGHT,
+            Math.min(itemRect.top - 9, window.innerHeight - subMenuRect.height - 1)) + "px";
+
+        // 水平方向位置调整
+        if (subMenuRect.right <= window.innerWidth) {
+            // 8px 是 b3-menu__items 的默认 padding-right
+            subMenuElement.style.left = (itemRect.right + 8) + "px";
+        } else {
+            if (itemRect.left - 8 > subMenuRect.width) {
+                subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
             } else {
-                subMenuElement.style.left = (window.innerWidth - rect.width) + "px";
+                subMenuElement.style.left = (window.innerWidth - subMenuRect.width) + "px";
             }
         }
-        if (rect.bottom > window.innerHeight) {
-            subMenuElement.style.top = "auto";
-            subMenuElement.style.bottom = "8px";
-        }
+
+        this.updateMaxHeight(subMenuElement, itemsMenuElement);
+    }
+
+    private updateMaxHeight(menuElement: HTMLElement, itemsMenuElement: HTMLElement) {
+        // 加 1px 是为了避免在特定情况下渲染出不应存在的滚动条而做的兼容处理; 18 为父子块高差
+        itemsMenuElement.style.maxHeight = Math.max(window.innerHeight - menuElement.getBoundingClientRect().top - 18 + 1, 30) + "px";
     }
 
     private preventDefault(event: KeyboardEvent) {
@@ -149,6 +167,20 @@ export class Menu {
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
+        this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
+        this.position = options;
+    }
+
+    public resetPosition() {
+        if (this.element.classList.contains("fn__none")) {
+            return;
+        }
+        setPosition(this.element, this.position.x - (this.position.isLeft ? this.element.clientWidth : 0), this.position.y, this.position.h, this.position.w);
+        this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
+        this.element.querySelectorAll(".b3-menu__item--show .b3-menu__submenu").forEach((item: HTMLElement) => {
+            // 可能有多层子菜单，都要重新定位
+            this.showSubMenu(item);
+        });
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {

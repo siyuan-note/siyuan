@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/88250/gulu"
@@ -107,6 +108,7 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 		}
 	}
 
+	var petalNames []string
 	petals := getPetals()
 	for _, petal := range petals {
 		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall = bazaar.ParseInstalledPlugin(petal.Name, frontend)
@@ -120,7 +122,10 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 
 		loadCode(petal)
 		ret = append(ret, petal)
+		petalNames = append(petalNames, petal.Name)
 	}
+
+	logging.LogDebugf("loaded petals [frontend=%s, isPublish=%v, petals=[%s]]", frontend, isPublish, strings.Join(petalNames, ","))
 	return
 }
 
@@ -262,9 +267,12 @@ func getPetals() (ret []*Petal) {
 	var tmp []*Petal
 	pluginsDir := filepath.Join(util.DataDir, "plugins")
 	for _, petal := range ret {
-		pluginPath := filepath.Join(pluginsDir, petal.Name)
-		if hasPluginFiles(pluginPath) {
+		pluginJSONPath := filepath.Join(pluginsDir, petal.Name, "plugin.json")
+		if filelock.IsExist(pluginJSONPath) {
 			tmp = append(tmp, petal)
+		} else {
+			// 插件不存在时，删除对应的持久化信息
+			bazaar.RemovePackageInfo("plugins", petal.Name)
 		}
 	}
 	if len(tmp) != len(ret) {
@@ -275,21 +283,4 @@ func getPetals() (ret []*Petal) {
 		ret = []*Petal{}
 	}
 	return
-}
-
-// hasPluginFiles 检查插件安装目录是否存在且包含文件
-func hasPluginFiles(pluginPath string) bool {
-	if !filelock.IsExist(pluginPath) {
-		return false
-	}
-	entries, err := os.ReadDir(pluginPath)
-	if err != nil {
-		return false
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			return true
-		}
-	}
-	return false
 }

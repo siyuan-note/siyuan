@@ -222,7 +222,9 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
         const cellElement = (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD")) as HTMLTableCellElement;
         const tableElement = blockElement.querySelector("table");
         if (cellElement && tableElement && tableElement.getAttribute("contenteditable") === "true") {
-            const tableHeight = blockElement.querySelector("table").clientHeight;
+            const tableHeight = blockElement.querySelector("colgroup").clientHeight;
+            const captionElement = blockElement.querySelector("caption");
+            const captionHeight = (captionElement && captionElement.style.captionSide !== "bottom") ? captionElement.clientHeight : 0;
             const resizeElement = blockElement.querySelector(".table__resize");
             if (blockElement.style.textAlign === "center" || blockElement.style.textAlign === "right") {
                 resizeElement.parentElement.style.left = tableElement.offsetLeft + "px";
@@ -232,10 +234,10 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
             const rect = cellElement.getBoundingClientRect();
             if (rect.right - event.clientX < 3 && rect.right - event.clientX > 0) {
                 resizeElement.setAttribute("data-col-index", (getColIndex(cellElement) + cellElement.colSpan - 1).toString());
-                resizeElement.setAttribute("style", `height:${tableHeight}px;left: ${Math.round(cellElement.offsetWidth + cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
+                resizeElement.setAttribute("style", `top:${captionHeight}px;height:${tableHeight}px;left: ${Math.round(cellElement.offsetWidth + cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
             } else if (event.clientX - rect.left < 3 && event.clientX - rect.left > 0 && cellElement.previousElementSibling) {
                 resizeElement.setAttribute("data-col-index", (getColIndex(cellElement) - 1).toString());
-                resizeElement.setAttribute("style", `height:${tableHeight}px;left: ${Math.round(cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
+                resizeElement.setAttribute("style", `top:${captionHeight}px;height:${tableHeight}px;left: ${Math.round(cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
             }
         }
     }

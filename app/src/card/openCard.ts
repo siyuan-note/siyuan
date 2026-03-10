@@ -100,19 +100,19 @@ export const genCardHTML = (options: {
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex card__action fn__none">
-        <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
+        <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;">
             <svg><use xlink:href="#iconLeft"></use></svg>
             ${!isMobile() ? "(p / q)" : ""}
-        </button>
-        <span class="fn__space"></span>
-        <button data-type="-3" aria-label="0 / x" class="b3-button b3-button--white b3-tooltips__n b3-tooltips">
-            <div class="card__icon">💤</div>
-            ${window.siyuan.languages.skip}${!isMobile() ? " (0)" : ""}
         </button>
         <span class="fn__space"></span>
         <button data-type="-1" aria-label="${window.siyuan.languages.space}/${window.siyuan.languages.enterKey}" class="b3-button b3-tooltips__n b3-tooltips">
             <div class="card__icon">👀</div>
             ${window.siyuan.languages.cardShowAnswer}
+        </button>
+        <span class="fn__space"></span>
+        <button data-type="-3" aria-label="0 / x" style="width: 25%" class="b3-button b3-button--cancel b3-tooltips__n b3-tooltips">
+            <div class="card__icon">💤</div>
+            ${window.siyuan.languages.skip}${!isMobile() ? " (0)" : ""}
         </button>
     </div>
     <div class="fn__flex card__action fn__none">

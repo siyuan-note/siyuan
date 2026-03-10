@@ -21,6 +21,7 @@ import {openFileById} from "../../editor/util";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
+import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -125,6 +126,9 @@ export const initWindowEvent = (app: App) => {
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
+        /// #if BROWSER
+        setWebViewFocusable();
+        /// #endif
     });
 
     window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {

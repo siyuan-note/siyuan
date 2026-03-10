@@ -14,6 +14,8 @@ import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
 import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
     if (nodeElement.getAttribute("custom-pinthead") === "true") {
@@ -90,7 +92,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
     focusByWbr(tableElement, range);
 };
 
-export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
+export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element, count = 1) => {
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
@@ -100,28 +102,28 @@ export const insertRow = (protyle: IProtyle, range: Range, cellElement: HTMLElem
     for (let m = 0; m < cellElement.parentElement.childElementCount; m++) {
         rowHTML += `<td align="${cellElement.parentElement.children[m].getAttribute("align") || ""}"></td>`;
     }
-    let newRowElememt: HTMLTableRowElement;
+    let newRowElement: HTMLTableRowElement;
     if (cellElement.tagName === "TH") {
         const tbodyElement = nodeElement.querySelector("tbody");
         if (tbodyElement) {
-            tbodyElement.insertAdjacentHTML("afterbegin", `<tr>${rowHTML}</tr>`);
-            newRowElememt = tbodyElement.firstElementChild as HTMLTableRowElement;
+            tbodyElement.insertAdjacentHTML("afterbegin", `<tr>${rowHTML}</tr>`.repeat(count));
+            newRowElement = tbodyElement.firstElementChild as HTMLTableRowElement;
         } else {
-            cellElement.parentElement.parentElement.insertAdjacentHTML("afterend", `<tbody><tr>${rowHTML}</tr></tbody>`);
-            newRowElememt = cellElement.parentElement.parentElement.nextElementSibling.firstElementChild as HTMLTableRowElement;
+            cellElement.parentElement.parentElement.insertAdjacentHTML("afterend", `<tbody>${`<tr>${rowHTML}</tr>`.repeat(count)}</tbody>`);
+            newRowElement = cellElement.parentElement.parentElement.nextElementSibling.firstElementChild as HTMLTableRowElement;
         }
     } else {
-        cellElement.parentElement.insertAdjacentHTML("afterend", `<tr>${rowHTML}</tr>`);
-        newRowElememt = cellElement.parentElement.nextElementSibling as HTMLTableRowElement;
+        cellElement.parentElement.insertAdjacentHTML("afterend", `<tr>${rowHTML}</tr>`.repeat(count));
+        newRowElement = cellElement.parentElement.nextElementSibling as HTMLTableRowElement;
     }
-    range.selectNodeContents(newRowElememt.cells[getColIndex(cellElement)]);
+    range.selectNodeContents(newRowElement.cells[getColIndex(cellElement)]);
     range.collapse(true);
     focusByRange(range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    scrollToView(nodeElement, newRowElememt, protyle);
+    scrollToView(nodeElement, newRowElement, protyle);
 };
 
-export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
+export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element, count = 1) => {
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
@@ -156,24 +158,27 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
             previousTrElement = previousTrElement.previousElementSibling;
         }
     }
-    let newRowElememt: HTMLTableRowElement;
+    let newRowElement: HTMLTableRowElement;
     if (cellElement.parentElement.parentElement.tagName === "THEAD" && !cellElement.parentElement.previousElementSibling) {
         cellElement.parentElement.parentElement.insertAdjacentHTML("beforebegin", `<thead><tr>${rowHTML}</tr></thead>`);
-        newRowElememt = nodeElement.querySelector("thead tr");
+        newRowElement = nodeElement.querySelector("thead tr");
         cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML.replace(/<th/g, "<td").replace(/<\/th>/g, "</td>"));
+        if (count > 1) {
+            cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", `<tr>${rowHTML.replace(/<th/g, "<td").replace(/<\/th>/g, "</td>")}</tr>`.repeat(count - 1));
+        }
         cellElement.parentElement.parentElement.remove();
     } else {
-        cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`);
-        newRowElememt = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
+        cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`.repeat(count));
+        newRowElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
     }
-    range.selectNodeContents(newRowElememt.cells[getColIndex(cellElement)]);
+    range.selectNodeContents(newRowElement.cells[getColIndex(cellElement)]);
     range.collapse(true);
     focusByRange(range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
-    scrollToView(nodeElement, newRowElememt, protyle);
+    scrollToView(nodeElement, newRowElement, protyle);
 };
 
-export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLElement, type: InsertPosition, range: Range) => {
+export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElement: HTMLElement, type: InsertPosition, range: Range, count = 1) => {
     const wbrElement = document.createElement("wbr");
     range.insertNode(wbrElement);
     const html = nodeElement.outerHTML;
@@ -182,19 +187,23 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
     const tableElement = nodeElement.querySelector("table");
     for (let i = 0; i < tableElement.rows.length; i++) {
         const colCellElement = tableElement.rows[i].cells[index];
-        const newCellElement = document.createElement(colCellElement.tagName);
-        colCellElement.insertAdjacentElement(type, newCellElement);
+        const tag = colCellElement.tagName.toLowerCase();
+        let html = "";
         if (colCellElement === cellElement) {
-            newCellElement.innerHTML = "<wbr> ";
-            // 滚动条横向定位
-            if (newCellElement.offsetLeft + newCellElement.clientWidth > nodeElement.firstElementChild.scrollLeft + nodeElement.firstElementChild.clientWidth) {
-                nodeElement.firstElementChild.scrollLeft = newCellElement.offsetLeft + newCellElement.clientWidth - nodeElement.firstElementChild.clientWidth;
-            }
+            html = `<${tag}><wbr></${tag}>` + `<${tag}></${tag}>`.repeat(count - 1);
         } else {
-            newCellElement.textContent = " ";
+            html = `<${tag}></${tag}>`.repeat(count);
         }
+        colCellElement.insertAdjacentHTML(type, html);
     }
-    tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col style='min-width: 60px;'>");
+    // 滚动条横向定位
+    if (type === "afterend" && cellElement.offsetLeft + cellElement.clientWidth + 60 >
+        nodeElement.firstElementChild.scrollLeft + nodeElement.firstElementChild.clientWidth) {
+        nodeElement.firstElementChild.scrollLeft = cellElement.offsetLeft + cellElement.clientWidth + 60 - nodeElement.firstElementChild.clientWidth;
+    } else if (type === "beforebegin" && cellElement.offsetLeft - 60 * count < nodeElement.firstElementChild.scrollLeft) {
+        nodeElement.firstElementChild.scrollLeft = cellElement.offsetLeft - 60 * count;
+    }
+    tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col style='min-width: 60px;'>".repeat(count));
     focusByWbr(nodeElement, range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
 };
@@ -787,4 +796,66 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
         item.innerHTML = "";
     });
     updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+};
+
+export const updateTableTitle = (protyle: IProtyle, nodeElement: Element) => {
+    const captionElement = nodeElement.querySelector("caption");
+    window.siyuan.menus.menu.remove();
+    const dialog = new Dialog({
+        title: window.siyuan.languages.table,
+        width: isMobile() ? "92vw" : "520px",
+        content: `<div class="b3-dialog__content">
+    <label>
+        <div>${window.siyuan.languages.title}</div>
+        <div class="fn__hr"></div>
+        <input class="b3-text-field fn__block">
+    </label>
+    <div class="fn__hr--b"></div>
+    <label>
+        <div>${window.siyuan.languages.position}</div>
+        <div class="fn__hr"></div>
+        <select class="b3-select fn__block">
+            <option value="top">${window.siyuan.languages.up}</option>
+            <option value="bottom" ${captionElement?.style.captionSide === "bottom" ? "selected" : ""}>${window.siyuan.languages.down}</option>
+        </select>
+    </label>
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>
+<div>`,
+    });
+    const html = nodeElement.outerHTML;
+    const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    const btnsElement = dialog.element.querySelectorAll(".b3-button");
+    dialog.bindInput(inputElement, () => {
+        (btnsElement[1] as HTMLButtonElement).click();
+    });
+    btnsElement[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    btnsElement[1].addEventListener("click", () => {
+        const title = inputElement.value.trim();
+        const location = (dialog.element.querySelector("select") as HTMLSelectElement).value;
+        if (title) {
+            const html = `<caption contenteditable="false" ${location === "bottom" ? 'style="caption-side: bottom;"' : ""}>${Lute.EscapeHTMLStr(title)}</caption>`;
+            if (captionElement) {
+                captionElement.outerHTML = html;
+            } else {
+                nodeElement.querySelector("table").insertAdjacentHTML("afterbegin", html);
+            }
+            nodeElement.setAttribute("caption", Lute.EscapeHTMLStr(html));
+        } else {
+            if (captionElement) {
+                captionElement.remove();
+            }
+            nodeElement.removeAttribute("caption");
+        }
+        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+        dialog.destroy();
+    });
+    inputElement.value = captionElement?.textContent || "";
+    inputElement.focus();
+    inputElement.select();
 };

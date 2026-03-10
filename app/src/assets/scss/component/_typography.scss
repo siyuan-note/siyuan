@@ -71,6 +71,7 @@
   }
 
   span[data-type~="inline-math"] {
+    direction: ltr;
     user-select: text;
     display: inline;
     // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test

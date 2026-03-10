@@ -566,12 +566,16 @@ export class Outline extends Model {
         if (!nodeElement) {
             return;
         }
-        if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+        if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+            !hasClosestByClassName(nodeElement, "bq") &&
+            !hasClosestByClassName(nodeElement, "callout-content")) {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);
             while (previousElement) {
-                if (previousElement.getAttribute("data-type") === "NodeHeading") {
+                if (previousElement.getAttribute("data-type") === "NodeHeading" &&
+                    !hasClosestByClassName(previousElement, "bq") &&
+                    !hasClosestByClassName(previousElement, "callout-content")) {
                     break;
                 } else {
                     previousElement = getPreviousBlock(previousElement);

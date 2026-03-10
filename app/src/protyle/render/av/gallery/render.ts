@@ -250,7 +250,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.paddingRight = "0";
+            searchInputElement.style.marginRight = "0";
         }
     });
     addClearButton({
@@ -262,7 +262,7 @@ export const afterRenderGallery = (options: ITableOptions) => {
             viewsElement.classList.remove("av__views--show");
             searchInputElement.style.width = "0";
             searchInputElement.style.paddingLeft = "0";
-            searchInputElement.style.paddingRight = "0";
+            searchInputElement.style.marginRight = "0";
             focusBlock(options.blockElement);
             updateSearch(options.blockElement, options.protyle);
             /// #if MOBILE

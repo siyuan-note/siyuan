@@ -223,7 +223,7 @@ func ParseJsonArg[T any](key string, required bool, arg map[string]interface{}, 
 	if !exists || raw == nil {
 		if required {
 			ret.Code = -1
-			ret.Msg = "[" + key + "] is required"
+			ret.Msg = fmt.Sprintf("[%s] is required", key)
 		} else {
 			ok = true
 		}
@@ -234,7 +234,7 @@ func ParseJsonArg[T any](key string, required bool, arg map[string]interface{}, 
 	if !ok {
 		var zero T
 		ret.Code = -1
-		ret.Msg = fmt.Sprintf("%s should be %T", key, zero)
+		ret.Msg = fmt.Sprintf("[%s] should be [%T]", key, zero)
 	}
 	return
 }

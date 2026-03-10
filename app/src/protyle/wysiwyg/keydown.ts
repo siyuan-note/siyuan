@@ -735,7 +735,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const nextElement = getNextBlock(nodeElement);
                 // 末尾块/单元格统一移动到末尾 https://github.com/siyuan-note/siyuan/issues/17116
                 if (tdElement && tdStatus === "last" && nodeType === "NodeTable" && !nextElement &&
-                    // 需使用 innerText 否则表格内 br 无法传唤为 /n
+                    // 需使用 innerText 否则表格内 br 无法转换为 /n
                     nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1) {
                     setLastNodeRange(nodeEditableElement, range, false);
                     range.collapse(false);
@@ -890,7 +890,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             return;
                         }
                     }
-                    // 需使用 innerText，否则 br 无法传唤为 /n https://github.com/siyuan-note/siyuan/issues/12066
+                    // 需使用 innerText，否则 br 无法转换为 /n https://github.com/siyuan-note/siyuan/issues/12066
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
                     if (isEndOfBlock(range) || editElement.textContent.substring(position.start) === "\n") {
                         const cloneRange = range.cloneRange();

@@ -50,10 +50,13 @@ export const scrollCenter = (
         if (blockElement) {
             // https://github.com/siyuan-note/siyuan/issues/10769
             if (blockElement.classList.contains("code-block")) {
+                const hljsElement = blockElement.querySelector(".hljs");
+                const scrollLeft = hljsElement.scrollLeft;
                 const brElement = document.createElement("br");
                 range.insertNode(brElement);
                 brElement.scrollIntoView({block: position, behavior});
                 brElement.remove();
+                hljsElement.scrollLeft = scrollLeft;
                 return;
             }
 

@@ -186,6 +186,28 @@ html[data-frontend="browser-desktop"] {
     white-space: nowrap;
     user-select: none;
   }
+
+  &,
+  &__window {
+    #maxWindow {
+      display: flex;
+    }
+
+    #restoreWindow {
+      display: none;
+    }
+
+    body.body--maximize &,
+    body.body--fullscreen & {
+      #maxWindow {
+        display: none;
+      }
+
+      #restoreWindow {
+        display: flex;
+      }
+    }
+  }
 }
 
 .status {

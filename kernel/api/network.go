@@ -344,7 +344,7 @@ func getSafeClient(timeout time.Duration) *req.Client {
 			}
 			ip := net.ParseIP(host)
 			if ip != nil && isPrivateIP(ip) {
-				return fmt.Errorf("ip address %s is prohibited", host)
+				return fmt.Errorf("ip address [%s] is prohibited", host)
 			}
 			return nil
 		},

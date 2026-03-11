@@ -1185,29 +1185,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                         dragUpload(files, protyle, cellElement);
                         /// #else
-                        const blockElement = hasClosestBlock(cellElement);
-                        if (blockElement) {
-                            const files = event.dataTransfer.files;
-                            uploadFiles(protyle, files, undefined, (res) => {
-                                const resData = JSON.parse(res);
-                                const value: IAVCellAssetValue[] = [];
-                                Object.keys(resData.data.succMap).forEach((key) => {
-                                    value.push({
-                                        name: key,
-                                        content: resData.data.succMap[key],
-                                        type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
-                                    });
-                                });
-                                updateAssetCell({
-                                    protyle,
-                                    cellElements: [cellElement],
-                                    addValue: value,
-                                    blockElement
-                                });
-                            });
-                        }
+                        focusBlock(hasClosestBlock(cellElement));
+                        uploadFiles(protyle, event.dataTransfer.files, undefined);
                         /// #endif
-                        clearSelect(["cell"], avElement);
                     }
                 }
             }

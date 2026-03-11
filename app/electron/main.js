@@ -47,6 +47,10 @@ let firstOpen = false;
 let workspaces = []; // workspaceDir, id, browserWindow, tray, hideShortcut
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
+let openAsHidden = false;
+const isOpenAsHidden = function () {
+    return 1 === workspaces.length && openAsHidden;
+};
 
 remote.initialize();
 
@@ -326,11 +330,6 @@ const showErrorWindow = (titleZh, titleEn, content, emoji = "⚠️") => {
     });
     errWindow.show();
     return errWindow.id;
-};
-
-let openAsHidden = false;
-const isOpenAsHidden = function () {
-    return 1 === workspaces.length && openAsHidden;
 };
 
 const initMainWindow = () => {

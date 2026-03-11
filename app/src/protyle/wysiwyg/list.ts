@@ -80,7 +80,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
     while (blockElement.parentElement !== liElement) {
         blockElement = blockElement.parentElement;
     }
-    // 考虑到列表项块内可能存在多个字列表块，在 nodeElement 的后面查找最近的同级列表块，如果不存在则在列表项块的最后一个子块后面插入新的列表块
+    // 考虑到列表项块内可能存在多个子列表块，在 nodeElement 的后面查找最近的同级列表块，如果不存在则在列表项块的最后一个子块后面插入新的列表块
     let nextSibling = blockElement?.nextElementSibling;
     while (nextSibling) {
         if (nextSibling.classList.contains("list")) {

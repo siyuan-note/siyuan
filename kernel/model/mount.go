@@ -271,3 +271,48 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 func IsUserGuide(boxID string) bool {
 	return "20210808180117-czj9bvb" == boxID || "20210808180117-6v0mkxr" == boxID || "20211226090932-5lcq56f" == boxID || "20240530133126-axarxgx" == boxID
 }
+
+func getUserGuideAVJSONFiles(boxID string) (ret []string, err error) {
+	guideAVDirPath := filepath.Join(util.WorkingDir, "guide", boxID, "storage", "av")
+	if !filelock.IsExist(guideAVDirPath) {
+		logging.LogErrorf("guide av dir [%s] not exist", guideAVDirPath)
+		return
+	}
+
+	avEntries, err := os.ReadDir(guideAVDirPath)
+	if nil != err {
+		logging.LogErrorf("read guide av dir [%s] failed: %s", guideAVDirPath, err)
+		return
+	}
+
+	for _, avEntry := range avEntries {
+		avName := avEntry.Name()
+		if avEntry.IsDir() || !strings.HasSuffix(avName, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(avName, ".json")) {
+			continue
+		}
+		ret = append(ret, avName)
+	}
+	return
+}
+
+func getAllUserGuideAVJSONFiles() (ret []string) {
+	guideDirPath := filepath.Join(util.WorkingDir, "guide")
+	guideEntries, err := os.ReadDir(guideDirPath)
+	if nil != err {
+		return
+	}
+
+	for _, guideEntry := range guideEntries {
+		boxID := guideEntry.Name()
+		if !guideEntry.IsDir() || !IsUserGuide(boxID) {
+			continue
+		}
+
+		avFiles, err := getUserGuideAVJSONFiles(boxID)
+		if nil != err {
+			continue
+		}
+		ret = append(ret, avFiles...)
+	}
+	return
+}

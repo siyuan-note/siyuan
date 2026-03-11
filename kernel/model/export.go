@@ -2430,8 +2430,14 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
 
 	// 将块超链接转换为引用
-	depth = 0
-	blockLink2Ref(ret, ret.ID, &depth)
+	if 4 == blockRefMode {
+		// 脚注+锚点哈希模式下保持原有的全图递归逻辑
+		depth = 0
+		blockLink2Ref(ret, ret.ID, &depth)
+	} else {
+		// 锚文本块链（2）和仅锚文本（3）模式下，只在当前导出树中将块链接浅转换为块引用，不再做跨文档递归
+		blockLink2RefShallow(ret)
+	}
 
 	// 收集引用转脚注+锚点哈希
 	var refFootnotes []*refAsFootnotes
@@ -3257,6 +3263,23 @@ func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, depth *int) {
 		} else if treenode.IsBlockRef(n) {
 			defID, _, _ := treenode.GetBlockRef(n)
 			blockLink2Ref(currentTree, defID, depth)
+		}
+		return ast.WalkContinue
+	})
+}
+
+// blockLink2RefShallow 只在当前导出树中将块链接转换为块引用，不进行跨文档递归。
+// 用于 blockRefMode 为 2/3 的场景，以避免在锚文本模式下遍历整个引用图。
+func blockLink2RefShallow(currentTree *parse.Tree) {
+	ast.Walk(currentTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if treenode.IsBlockLink(n) {
+			n.TextMarkType = strings.TrimSpace(strings.TrimPrefix(n.TextMarkType, "a") + " block-ref")
+			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			n.TextMarkBlockRefSubtype = "s"
 		}
 		return ast.WalkContinue
 	})

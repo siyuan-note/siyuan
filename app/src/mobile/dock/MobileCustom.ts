@@ -20,6 +20,7 @@ export class MobileCustom {
         this.init = options.init;
         this.destroy = options.destroy;
         this.update = options.update;
+        this.element.innerHTML = "";
         this.init(this);
     }
 }

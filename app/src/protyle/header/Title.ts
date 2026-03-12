@@ -339,7 +339,7 @@ export class Title {
         }, Constants.TIMEOUT_INPUT);
     }
 
-    public setTitle(title: string, empty: boolean = false) {
+    public setTitle(title: string, empty = false) {
         /// #if MOBILE
         if (this.editElement) {
             if (nbsp2space(title) !== nbsp2space(this.editElement.textContent)) {

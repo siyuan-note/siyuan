@@ -56,7 +56,7 @@ export const rename = (options: {
     if (window.siyuan.config.readonly) {
         return;
     }
-    const initialName = options.empty ? "" : options.name;
+    const initialName = options.empty ? "" : Lute.UnEscapeHTMLStr(options.name);
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>

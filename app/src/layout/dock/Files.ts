@@ -123,10 +123,6 @@ export class Files extends Model {
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
-    <div data-type="publish-access" class="b3-tooltips b3-tooltips__sw block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.publishAccess}">
-        <svg><use xlink:href="#iconEye"></use></svg>
-    </div>
-    <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
     <div data-type="more" class="b3-tooltips b3-tooltips__sw block__icon${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </div> 
@@ -202,17 +198,6 @@ export class Files extends Model {
             });
             window.siyuan.storage[Constants.LOCAL_FILESPATHS] = [];
             setStorageVal(Constants.LOCAL_FILESPATHS, []);
-        });
-        this.actionsElement.querySelector('[data-type="publish-access"]').addEventListener("click", () => {
-            const publishAccessElement = this.actionsElement.querySelector('[data-type="publish-access"]');
-            publishAccessElement.classList.toggle("block__icon--active");
-            const editingPublishAccess = publishAccessElement.classList.contains("block__icon--active");
-            this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-                item.classList.toggle("fn__none", editingPublishAccess);
-            });
-            this.element.querySelectorAll('.b3-list-item__switch[data-type="publish-access"]').forEach(item => {
-                item.classList.toggle("fn__none", !editingPublishAccess);
-            });
         });
         this.actionsElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
@@ -884,7 +869,7 @@ export class Files extends Model {
     }
 
     private genNotebook(item: INotebook) {
-        const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
+        const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? ' fn__none' : ''}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`
         if (item.closed) {
@@ -1355,7 +1340,7 @@ data-type="navigation-root" data-path="/">
         }
         const ariaLabel = this.genDocAriaLabel(item, escapeAriaLabel);
         const paddingLeft = (item.path.split("/").length - 1) * 18;
-        const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
+        const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 
@@ -1422,6 +1407,23 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
                 label: window.siyuan.languages.sort,
                 type: "submenu",
                 submenu: subMenu,
+            }).element);
+        }
+        if (!window.siyuan.config.readonly) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconEye",
+                label: window.siyuan.languages.publishAccess,
+                checked: this.element.classList.contains("file-tree__publish-access--active"),
+                click: () => {
+                    this.element.classList.toggle("file-tree__publish-access--active");
+                    const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
+                    this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+                        item.classList.toggle("fn__none", editingPublishAccess);
+                    });
+                    this.element.querySelectorAll('.b3-list-item__switch[data-type="publish-access"]').forEach(item => {
+                        item.classList.toggle("fn__none", !editingPublishAccess);
+                    });
+                }
             }).element);
         }
         return window.siyuan.menus.menu;

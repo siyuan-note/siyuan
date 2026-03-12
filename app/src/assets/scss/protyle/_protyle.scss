@@ -421,6 +421,30 @@
   }
 }
 
+.protyle-password {
+  text-align: center;
+
+  &__button {
+    align-self: center;
+    left: unset;
+    right: 5px;
+  }
+
+  &__content {
+    display: flex;
+    width: 260px;
+    margin: 0 auto;
+  }
+
+  &__logo {
+    font-size: 80px;
+  }
+
+  &__tip {
+    font-size: 2rem;
+  }
+}
+
 table[contenteditable="false"] + .protyle-action__table > .table__resize {
   display: none !important;
 }

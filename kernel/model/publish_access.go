@@ -476,17 +476,17 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 	if password != "" {
 		if !CheckPublishAuthCookie(c, passwordID, password) {
 			if onlyIcon {
-				passwordHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🔒</span>
+				passwordHTML := `<div class="protyle-password protyle-password--alert" data-node-id="%s">
+	<span class="protyle-password__logo">🔒</span>
 </div>`
 				ret = fmt.Sprintf(passwordHTML, passwordID)
 			} else {
-				passwordHTML := `<div class="publish-access-block--password fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🔒</span>
-	<label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center; margin: 0 auto 0 auto; max-width:230px;">
-		<svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
-		<input class="b3-form__icon-input b3-text-field fn__block" placeholder="%s" style="padding-right:25px !important;">
-		<svg class="publish-access-block--password-button b3-form__icon-icon" style="align-self:center; left:unset; right:5px;"><use xlink:href="#iconForward"></use></svg>
+				passwordHTML := `<div class="protyle-password" data-node-id="%s">
+	<span class="protyle-password__logo">🔒</span>
+	<label class="b3-form__icon protyle-password__content">
+		<svg class="b3-form__icon-icon"><use xlink:href="#iconKey"></use></svg>
+		<input type="text" class="b3-form__icon-input b3-text-field b3-form__icona-input" placeholder="%s"/>
+		<svg class="protyle-password__button b3-form__icona-icon"><use xlink:href="#iconForward"></use></svg>
 	</label>
 </div>`
 				ret = fmt.Sprintf(passwordHTML, passwordID, Conf.Language(283))
@@ -502,14 +502,14 @@ func FilterContentByPublishAccess(c *gin.Context, publishAccess PublishAccess, b
 	publishIgnore := GetDisablePublishAccess(publishAccess)
 	if !CheckPathAccessableByPublishIgnore(box, docPath, publishIgnore) {
 		if onlyIcon {
-			forbiddenHTML := `<div class="publish-access-block--alert fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px;">🚫</span>
+			forbiddenHTML := `<div class="protyle-password protyle-password--alert" data-node-id="%s">
+	<span class="protyle-password__logo">🚫</span>
 </div>`
 			ret = fmt.Sprintf(forbiddenHTML, ID)
 		} else {
-			forbiddenHTML := `<div class="publish-access-block--forbidden fn__flex-column fn__flex-center" data-node-id="%s" style="text-align:center;">
-	<span style="font-size:100px; line-height:1.2;">🚫</span>
-	<span style="font-size:2em;">%s</span>
+			forbiddenHTML := `<div class="protyle-password protyle-password--forbidden" data-node-id="%s">
+	<span class="protyle-password__logo">🚫</span>
+	<div class="protyle-password__tip">%s</div>
 </div>`
 			ret = fmt.Sprintf(forbiddenHTML, ID, Conf.Language(284))
 		}

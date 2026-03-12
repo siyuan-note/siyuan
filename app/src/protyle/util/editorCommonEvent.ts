@@ -32,8 +32,6 @@ import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
 /// #else
 import {uploadFiles} from "../upload";
-import {updateAssetCell} from "../render/av/asset";
-import {pathPosix} from "../../util/pathName";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
@@ -1185,7 +1183,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                         dragUpload(files, protyle, cellElement);
                         /// #else
-                        focusBlock(hasClosestBlock(cellElement));
+                        focusBlock(hasClosestBlock(cellElement) as HTMLElement);
                         uploadFiles(protyle, event.dataTransfer.files, undefined);
                         /// #endif
                     }

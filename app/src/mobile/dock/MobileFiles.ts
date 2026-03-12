@@ -4,7 +4,7 @@ import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
-import {getPublishAccessOption, getPublishAccessOptionByLevel, openPublishAccessDialog} from "../../dialog/publishAccessDialog";
+import {getPublishAccessOption, getPublishAccessOptionByLevel, openPublishAccessDialog} from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
@@ -153,7 +153,7 @@ export class MobileFiles extends Model {
                 } else if (type === "publish-access") {
                     if (target.classList.contains("b3-list-item__switch")) {
                         // 文档/笔记本前的按钮
-                        let targetId = target.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.getAttribute("data-url");
+                        const targetId = target.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.getAttribute("data-url");
                         const rect = target.getBoundingClientRect();
                         openPublishAccessDialog(targetId, {
                             x: rect.left,
@@ -171,7 +171,7 @@ export class MobileFiles extends Model {
                         });
                     } else {
                         // 顶部栏中的按钮
-                        target.classList.toggle("block__icon--active")
+                        target.classList.toggle("block__icon--active");
                         const editingPublishAccess = target.classList.contains("block__icon--active");
                         this.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
                             item.classList.toggle("fn__none", editingPublishAccess);
@@ -334,8 +334,8 @@ export class MobileFiles extends Model {
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? ' fn__none' : ''}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
-        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item">
     <span class="b3-list-item__toggle fn__hidden">
@@ -797,8 +797,8 @@ class="b3-list-item" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 1) * 20}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon"${editingPublishAccess ? ' fn__none' : ''}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
-    <span class="b3-list-item__switch${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access">${getPublishAccessOptionByLevel("public").iconHTML}</span>
+    <span class="b3-list-item__icon"${editingPublishAccess ? " fn__none" : ""}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__switch${editingPublishAccess ? "" : " fn__none"}" data-type="publish-access">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
@@ -815,19 +815,19 @@ class="b3-list-item" data-path="${item.path}">
             return;
         }
 
-        let ids: string[] = [];
-        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")))
-        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")))
+        const ids: string[] = [];
+        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")));
+        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
         fetchPost("/api/filetree/getPublishAccess", {
             ids: ids
         }, response => {
             response.data.publishAccess.forEach((item : { id: string, visible: boolean, password: string, disable: boolean }) => {
-                const element = this.element.querySelector(`[data-url="${item.id}"]`) || this.element.querySelector(`[data-node-id="${item.id}"]`)
+                const element = this.element.querySelector(`[data-url="${item.id}"]`) || this.element.querySelector(`[data-node-id="${item.id}"]`);
                 if (element) {
-                    const publishAccessElement = element.querySelector(`[data-type="publish-access"]`) as HTMLElement;
+                    const publishAccessElement = element.querySelector("[data-type=\"publish-access\"]") as HTMLElement;
                     publishAccessElement.innerHTML = getPublishAccessOption(item.visible, item.password, item.disable).iconHTML;
                 }
             });
-        })
+        });
     }
 }

@@ -382,6 +382,9 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
 
 // 用于推送和撤销
 export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
+   if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
+       return;
+   }
     const updateElements: Element[] = [];
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
         if (!isInEmbedBlock(item)) {
@@ -785,7 +788,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         return;
     }
-    if (operation.action === "insert" && !window.siyuan.config.readonly) {
+    if (operation.action === "insert") {
         if (operation.context?.ignoreProcess === "true") {
             return;
         }

@@ -2854,23 +2854,31 @@ export class WYSIWYG {
                 return;
             }
 
-            if (window.siyuan.config.readonly) {
-                const publishAccessPasswordButtonElement = hasClosestByClassName(event.target, "publish-access-block--password-button");
-                if (publishAccessPasswordButtonElement) {
-                    const passwordID = publishAccessPasswordButtonElement.parentElement.parentElement.getAttribute("data-node-id");
-                    const password = publishAccessPasswordButtonElement.parentElement.querySelector("input").value;
+            if (window.siyuan.isPublish) {
+                const passwordButtonElement = hasClosestByClassName(event.target, "protyle-password__button");
+                if (passwordButtonElement) {
                     fetchPost("/api/filetree/authFilePublishAccess", {
-                        id: passwordID,
-                        password: password
+                        id: passwordButtonElement.parentElement.parentElement.getAttribute("data-node-id"),
+                        password: passwordButtonElement.parentElement.querySelector("input").value
                     }, (response) => {
                         if (response.msg) {
                             showMessage(response.msg);
                         } else {
                             reloadProtyle(protyle, true);
-                            getAllModels().outline.forEach(item => { item.reload(); });
+                            /// #if !MOBILE
+                            getAllModels().outline.forEach(item => {
+                                if (item.blockId === protyle.block.rootID) {
+                                    fetchPost("/api/outline/getDocOutline", {
+                                        id: item.blockId,
+                                        preview: item.isPreview
+                                    }, response => {
+                                        item.update(response);
+                                    });
+                                }
+                            });
+                            /// #endif
                         }
                     });
-                    
                     event.stopPropagation();
                     return;
                 }

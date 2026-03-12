@@ -1,52 +1,52 @@
-import {isMobile} from "../util/functions";
-import {Dialog} from "../dialog";
-import {fetchPost} from "../util/fetch";
-import {setPosition} from "../util/setPosition";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
+import {setPosition} from "../../util/setPosition";
+import {fetchPost} from "../../util/fetch";
 
 type PublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
 export const getPublishAccessOptionByLevel = (level: PublishAccessLevel) => {
     if (level == "protected") {
         return {
-            iconHTML: `🔒`,
-            comment: window.siyuan.languages.publishAccessProtectedComment, 
+            iconHTML: "🔒",
+            comment: window.siyuan.languages.publishAccessProtectedComment,
             visible: true,
             hasPassword: true,
             disable: false,
-        }
+        };
     } else if (level == "hidden") {
         return {
-            iconHTML: `👻`,
+            iconHTML: "👻",
             comment: window.siyuan.languages.publishAccessHiddenComment,
             visible: false,
             hasPassword: false,
             disable: false,
-        }
+        };
     } else if (level == "private") {
         return {
-            iconHTML: `🤫`,
+            iconHTML: "🤫",
             comment: window.siyuan.languages.publishAccessPrivateComment,
             visible: false,
             hasPassword: true,
             disable: false,
-        }
+        };
     } else if (level == "forbidden") {
         return {
-            iconHTML: `🚫`,
+            iconHTML: "🚫",
             comment: window.siyuan.languages.publishAccessForbiddenComment,
             visible: false,
             hasPassword: false,
             disable: true,
-        }
+        };
     } else {
         return {
-            iconHTML: `🌐`,
+            iconHTML: "🌐",
             comment: window.siyuan.languages.publishAccessPublicComment,
             visible: true,
             hasPassword: false,
             disable: false,
-        }
+        };
     }
-}
+};
 
 export const getPublishAccessLevel = (visible: boolean, password: string, disable: boolean): PublishAccessLevel => {
     if (disable) {
@@ -65,11 +65,11 @@ export const getPublishAccessLevel = (visible: boolean, password: string, disabl
             return "hidden";
         }
     }
-}
+};
 
 export const getPublishAccessOption = (visible: boolean, password: string, disable: boolean) => {
     return getPublishAccessOptionByLevel(getPublishAccessLevel(visible, password, disable));
-}
+};
 
 export const openPublishAccessDialog = (id: string, position: IPosition, callback: (access: { id: string, visible: boolean, password: string, disable: boolean, iconHTML: string }) => void) => {
     const dialog = new Dialog({
@@ -107,17 +107,17 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
     dialogElement.style.justifyContent = "inherit";
     dialogElement.style.alignItems = "flex-start";
     setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
-    
+
     fetchPost("/api/filetree/getPublishAccess", {
         ids: [id],
     }, (response) => {
-        response.data.publishAccess.forEach((item: { id: string, visible: boolean, password: string, disable: boolean }) => { 
+        response.data.publishAccess.forEach((item: { id: string, visible: boolean, password: string, disable: boolean }) => {
             if (id == item.id) {
                 setPublishAccessInDialog(dialog.element, {
                     visible: item.visible,
                     password: item.password,
                     disable: item.disable,
-                })
+                });
             }
         });
     });
@@ -126,15 +126,15 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
         element.addEventListener("click", () => {
             setPublishAccessLevelInDialog(dialog.element, (element.getAttribute("data-level") as PublishAccessLevel));
         });
-    })
-    dialog.element.querySelector(".publish-access-dialog__confirm").addEventListener("click", () => { 
+    });
+    dialog.element.querySelector(".publish-access-dialog__confirm").addEventListener("click", () => {
         const element = dialog.element.querySelector(".publish-access-dialog__selector-item.emojis__item--current");
         if (!element) {
             return;
         }
         const password = (dialog.element.querySelector(".publish-access-dialog__password input") as HTMLInputElement).value.trim();
         let accessOption = getPublishAccessOptionByLevel(element.getAttribute("data-level") as PublishAccessLevel);
-        accessOption = getPublishAccessOption(accessOption.visible, accessOption.hasPassword ? password : "", accessOption.disable)
+        accessOption = getPublishAccessOption(accessOption.visible, accessOption.hasPassword ? password : "", accessOption.disable);
         callback({
             id,
             visible: accessOption.visible,

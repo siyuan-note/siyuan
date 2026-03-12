@@ -9,7 +9,7 @@ import {newFile} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
-import {getPublishAccessOption, getPublishAccessOptionByLevel, openPublishAccessDialog} from "../../dialog/publishAccessDialog";
+import {getPublishAccessOption, getPublishAccessOptionByLevel, openPublishAccessDialog} from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
@@ -281,10 +281,10 @@ export class Files extends Model {
                         event.stopPropagation();
                         window.siyuan.menus.menu.remove();
                         break;
-                    } else if (isNotCtrl(event) && target.classList.contains('b3-list-item__switch') && target.getAttribute("data-type") == "publish-access") {
+                    } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__switch") && target.getAttribute("data-type") == "publish-access") {
                         event.preventDefault();
                         event.stopPropagation();
-                        let targetId = target.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.getAttribute("data-url");
+                        const targetId = target.parentElement.getAttribute("data-node-id") || target.parentElement.parentElement.getAttribute("data-url");
                         const rect = target.getBoundingClientRect();
                         openPublishAccessDialog(targetId, {
                             x: rect.left,
@@ -870,8 +870,8 @@ export class Files extends Model {
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? ' fn__none' : ''}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
-        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e${editingPublishAccess ? " fn__none" : ""}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
+        const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess ? "" : " fn__none"}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
             return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__toggle fn__hidden">
@@ -1348,8 +1348,8 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? ' fn__none' : ''}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
-    <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? '' : ' fn__none'}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
+    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" data-type="publish-access" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-position="parentE"
 aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
@@ -1434,19 +1434,19 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
             return;
         }
 
-        let ids: string[] = [];
-        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")))
-        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")))
+        const ids: string[] = [];
+        this.element.querySelectorAll("[data-url]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-url")));
+        this.element.querySelectorAll("[data-node-id]").forEach((element: HTMLElement) => ids.push(element.getAttribute("data-node-id")));
         fetchPost("/api/filetree/getPublishAccess", {
             ids: ids
         }, response => {
             response.data.publishAccess.forEach((item : { id: string, visible: boolean, password: string, disable: boolean }) => {
-                const element = this.element.querySelector(`[data-url="${item.id}"]`) || this.element.querySelector(`[data-node-id="${item.id}"]`)
+                const element = this.element.querySelector(`[data-url="${item.id}"]`) || this.element.querySelector(`[data-node-id="${item.id}"]`);
                 if (element) {
-                    const publishAccessElement = element.querySelector(`[data-type="publish-access"]`) as HTMLElement;
+                    const publishAccessElement = element.querySelector("[data-type=\"publish-access\"]") as HTMLElement;
                     publishAccessElement.innerHTML = getPublishAccessOption(item.visible, item.password, item.disable).iconHTML;
                 }
             });
-        })
+        });
     }
 }

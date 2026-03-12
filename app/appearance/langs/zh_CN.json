@@ -641,6 +641,8 @@
   "clear": "清空",
   "autoDownloadUpdatePkg": "自动下载更新安装包",
   "autoDownloadUpdatePkgTip": "启用后会每隔两小时自动检查版本更新，如果有更新版本则自动下载安装包并提示安装",
+  "autoUpdateCheck": "启用自动更新检查",
+  "autoUpdateCheckTip": "在后台定期检查新版本、集市变更和公告。",
   "downloaded": "已下载",
   "allOp": "所有操作",
   "allNotebooks": "所有笔记本",

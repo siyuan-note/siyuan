@@ -18,13 +18,13 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 export const about = {
     element: undefined as Element,
     genHTML: () => {
-        const checkUpdateHTML = window.siyuan.config.system.isMicrosoftStore ? `<div class="fn__flex b3-label config__item">
+        const checkUpdateHTML = window.siyuan.config.system.isMicrosoftStore ? `<div class="fn__flex config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
         <span id="isInsider"></span>
         <div class="b3-label__text">${window.siyuan.languages.isMsStoreVerTip}</div>
     </div>
-</div>` : `<div class="fn__flex b3-label config__item">
+</div>` : `<div class="fn__flex config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.currentVer} v${Constants.SIYUAN_VERSION}
         <span id="isInsider"></span>
@@ -243,7 +243,17 @@ export const about = {
         <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.export}
     </button>
 </div>
-${checkUpdateHTML}
+<div class="b3-label">
+    <label class="fn__flex config__item">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.autoUpdateCheck}
+            <div class="b3-label__text">${window.siyuan.languages.autoUpdateCheckTip}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="autoUpdateCheck" type="checkbox"${window.siyuan.config.system.autoUpdateCheck ? " checked" : ""}>
+    </label>
+    ${checkUpdateHTML}
+</div>
 <div class="fn__flex config__item  b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.about13}
@@ -509,6 +519,12 @@ ${checkUpdateHTML}
         downloadInstallPkgElement.addEventListener("change", () => {
             fetchPost("/api/system/setDownloadInstallPkg", {downloadInstallPkg: downloadInstallPkgElement.checked}, () => {
                 window.siyuan.config.system.downloadInstallPkg = downloadInstallPkgElement.checked;
+            });
+        });
+        const autoUpdateCheckElement = about.element.querySelector("#autoUpdateCheck") as HTMLInputElement;
+        autoUpdateCheckElement.addEventListener("change", () => {
+            fetchPost("/api/system/setAutoUpdateCheck", {autoUpdateCheck: autoUpdateCheckElement.checked}, () => {
+                window.siyuan.config.system.autoUpdateCheck = autoUpdateCheckElement.checked;
             });
         });
         /// #if !BROWSER

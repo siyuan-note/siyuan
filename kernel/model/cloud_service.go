@@ -217,11 +217,16 @@ var (
 func RefreshCheckJob2H() {
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
-	go refreshAnnouncement()
+	if Conf.System.AutoUpdateCheck {
+		go refreshAnnouncement()
+	}
 }
 
 func RefreshCheckJob6H() {
-	go refreshCheckDownloadInstallPkg()
+	if Conf.System.AutoUpdateCheck {
+		go refreshCheckDownloadInstallPkg()
+		go util.RefreshRhyResultJob()
+	}
 }
 
 func refreshSubscriptionExpirationRemind() {

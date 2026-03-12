@@ -1599,6 +1599,10 @@ declare namespace Config {
          */
         downloadInstallPkg: boolean;
         /**
+         * Whether to automatically check for updates in the background
+         */
+        autoUpdateCheck: boolean;
+        /**
          * The absolute path of the user's home directory for the current operating system user
          */
         homeDir: string;

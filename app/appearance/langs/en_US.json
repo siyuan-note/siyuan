@@ -641,6 +641,8 @@
   "clear": "Clear",
   "autoDownloadUpdatePkg": "Automatically download update installation package",
   "autoDownloadUpdatePkgTip": "When enabled, it will automatically check the version update every two hours. If there is an updated version, it will automatically download the installation package and prompt for installation",
+  "autoUpdateCheck": "Enable automatic update checks",
+  "autoUpdateCheckTip": "Periodically check for new versions, bazaar changes, and announcements in the background.",
   "downloaded": "Downloaded",
   "allOp": "All operations",
   "allNotebooks": "All Notebooks",

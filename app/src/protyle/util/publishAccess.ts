@@ -3,8 +3,7 @@ import {isMobile} from "../../util/functions";
 import {setPosition} from "../../util/setPosition";
 import {fetchPost} from "../../util/fetch";
 
-type PublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
-export const getPublishAccessOptionByLevel = (level: PublishAccessLevel) => {
+export const getPublishAccessOptionByLevel = (level: TPublishAccessLevel) => {
     if (level == "protected") {
         return {
             iconHTML: "🔒",
@@ -48,7 +47,7 @@ export const getPublishAccessOptionByLevel = (level: PublishAccessLevel) => {
     }
 };
 
-export const getPublishAccessLevel = (visible: boolean, password: string, disable: boolean): PublishAccessLevel => {
+export const getPublishAccessLevel = (visible: boolean, password: string, disable: boolean): TPublishAccessLevel => {
     if (disable) {
         return "forbidden";
     }
@@ -67,74 +66,60 @@ export const getPublishAccessLevel = (visible: boolean, password: string, disabl
     }
 };
 
-export const getPublishAccessOption = (visible: boolean, password: string, disable: boolean) => {
-    return getPublishAccessOptionByLevel(getPublishAccessLevel(visible, password, disable));
-};
-
-export const openPublishAccessDialog = (id: string, position: IPosition, callback: (access: { id: string, visible: boolean, password: string, disable: boolean, iconHTML: string }) => void) => {
+export const openPublishAccessDialog = (id: string, position: IPosition, callback: (access: IPublishAccessItem) => void) => {
     const dialog = new Dialog({
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "230px",
         height: "auto",
-        content: `<div class="publish-access-dialog">
-    <div class="publish-access-dialog__selector" style="display: flex;">
-        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="public" aria-label="${window.siyuan.languages.publishAccessPublic}">${getPublishAccessOptionByLevel("public").iconHTML}</button>
-        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="protected" aria-label="${window.siyuan.languages.publishAccessProtected}">${getPublishAccessOptionByLevel("protected").iconHTML}</button>
-        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="hidden" aria-label="${window.siyuan.languages.publishAccessHidden}">${getPublishAccessOptionByLevel("hidden").iconHTML}</button>
-        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="private" aria-label="${window.siyuan.languages.publishAccessPrivate}">${getPublishAccessOptionByLevel("private").iconHTML}</button>
-        <button class="publish-access-dialog__selector-item emojis__item ariaLabel" data-position="north" data-level="forbidden" aria-label="${window.siyuan.languages.publishAccessForbidden}">${getPublishAccessOptionByLevel("forbidden").iconHTML}</button>
-        <span class="fn__flex-1"></span>
-        <button class="publish-access-dialog__confirm b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-    </div>
+        content: `<div class="block__icons">
+    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="public" aria-label="${window.siyuan.languages.publishAccessPublic}">${getPublishAccessOptionByLevel("public").iconHTML}</button>
+    <span class="fn__space"></span>
+    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="protected" aria-label="${window.siyuan.languages.publishAccessProtected}">${getPublishAccessOptionByLevel("protected").iconHTML}</button>
+    <span class="fn__space"></span>
+    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="hidden" aria-label="${window.siyuan.languages.publishAccessHidden}">${getPublishAccessOptionByLevel("hidden").iconHTML}</button>
+    <span class="fn__space"></span>
+    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="private" aria-label="${window.siyuan.languages.publishAccessPrivate}">${getPublishAccessOptionByLevel("private").iconHTML}</button>
+    <span class="fn__space"></span>
+    <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="forbidden" aria-label="${window.siyuan.languages.publishAccessForbidden}">${getPublishAccessOptionByLevel("forbidden").iconHTML}</button>
+    <span class="fn__flex-1"></span>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>
+<div style="padding: 0 8px 8px 8px;text-align: center;">
+    <div class="publish-access-dialog__comment">${window.siyuan.languages.publishAccessPublicComment}</div>
     <div class="fn__hr"></div>
-    <div>
-        <div class="publish-access-dialog__comment" style="text-align:center; margin-left:8px; margin-right:8px; word-wrap:break-word;">${window.siyuan.languages.publishAccessPublicComment}</div>
-        <div class="fn__hr"></div>
-    </div>
-    <div class="publish-access-dialog__password">
-        <label class="b3-form__icon fn__flex-1" style="overflow:initial; display:block; justify-content:center; margin-left: 8px; margin-right: 8px;">
-            <svg class="b3-form__icon-icon" style="align-self:center"><use xlink:href="#iconKey"></use></svg>
-            <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.password}">
-        </label>
-        <div class="fn__hr"></div>
+    <div class="b3-form__icon">
+        <svg class="b3-form__icon-icon"><use xlink:href="#iconKey"></use></svg>
+        <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.password}">
     </div>
 </div>`
     });
-    dialog.element.querySelector(".b3-dialog__container").setAttribute("data-menu", "true");
-    const dialogElement = dialog.element.querySelector(".b3-dialog") as HTMLElement;
-    dialogElement.style.justifyContent = "inherit";
-    dialogElement.style.alignItems = "flex-start";
-    setPosition(dialog.element.querySelector(".b3-dialog__container"), position.x, position.y, position.h, position.w);
-
+    const containerElement = dialog.element.querySelector(".b3-dialog__container") as HTMLElement;
+    containerElement.style.position = "fixed";
+    setPosition(containerElement, position.x, position.y, position.h, position.w);
     fetchPost("/api/filetree/getPublishAccess", {
         ids: [id],
     }, (response) => {
-        response.data.publishAccess.forEach((item: { id: string, visible: boolean, password: string, disable: boolean }) => {
+        response.data.publishAccess.find((item: IPublishAccessItem) => {
             if (id == item.id) {
-                setPublishAccessInDialog(dialog.element, {
-                    visible: item.visible,
-                    password: item.password,
-                    disable: item.disable,
-                });
+                setPublishAccessLevelInDialog(dialog.element, getPublishAccessLevel(item.visible, item.password, item.disable));
+                (dialog.element.querySelector(".b3-text-field") as HTMLInputElement).value = item.password;
+                return true;
             }
         });
     });
 
-    dialog.element.querySelectorAll(".publish-access-dialog__selector-item").forEach((element: HTMLElement) => {
+    dialog.element.querySelectorAll(".block__icon").forEach((element: HTMLElement) => {
         element.addEventListener("click", () => {
-            setPublishAccessLevelInDialog(dialog.element, (element.getAttribute("data-level") as PublishAccessLevel));
+            setPublishAccessLevelInDialog(dialog.element, (element.getAttribute("data-level") as TPublishAccessLevel));
         });
     });
-    dialog.element.querySelector(".publish-access-dialog__confirm").addEventListener("click", () => {
-        const element = dialog.element.querySelector(".publish-access-dialog__selector-item.emojis__item--current");
-        if (!element) {
-            return;
-        }
-        const password = (dialog.element.querySelector(".publish-access-dialog__password input") as HTMLInputElement).value.trim();
-        let accessOption = getPublishAccessOptionByLevel(element.getAttribute("data-level") as PublishAccessLevel);
-        accessOption = getPublishAccessOption(accessOption.visible, accessOption.hasPassword ? password : "", accessOption.disable);
+    dialog.element.querySelector(".b3-button").addEventListener("click", () => {
+        const element = dialog.element.querySelector(".block__icon.block__icon--active");
+        const password = (dialog.element.querySelector("input.b3-text-field") as HTMLInputElement).value.trim();
+        let accessOption = getPublishAccessOptionByLevel(element.getAttribute("data-level") as TPublishAccessLevel);
+        accessOption = getPublishAccessOptionByLevel(getPublishAccessLevel(accessOption.visible, accessOption.hasPassword ? password : "", accessOption.disable));
         callback({
             id,
             visible: accessOption.visible,
@@ -146,17 +131,11 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
     });
 };
 
-const setPublishAccessLevelInDialog = (dialogElement: HTMLElement, accessLevel: PublishAccessLevel) => {
+const setPublishAccessLevelInDialog = (dialogElement: HTMLElement, accessLevel: TPublishAccessLevel) => {
     const accessOption = getPublishAccessOptionByLevel(accessLevel);
-    dialogElement.querySelectorAll(".publish-access-dialog__selector-item").forEach((element: HTMLElement) => {
-        element.classList.toggle("emojis__item--current", element.getAttribute("data-level") == accessLevel);
+    dialogElement.querySelectorAll(".block__icon").forEach((element: HTMLElement) => {
+        element.classList.toggle("block__icon--active", element.getAttribute("data-level") == accessLevel);
     });
     dialogElement.querySelector(".publish-access-dialog__comment").innerHTML = accessOption.comment;
-    dialogElement.querySelector(".publish-access-dialog__password").classList.toggle("fn__none", !accessOption.hasPassword);
-};
-
-const setPublishAccessInDialog = (dialogElement: HTMLElement, access: { visible: boolean, password: string, disable: boolean }) => {
-    const accessLevel = getPublishAccessLevel(access.visible, access.password, access.disable);
-    setPublishAccessLevelInDialog(dialogElement, accessLevel);
-    (dialogElement.querySelector(".publish-access-dialog__password input") as HTMLInputElement).value = access.password;
+    dialogElement.querySelector(".b3-form__icon").classList.toggle("fn__none", !accessOption.hasPassword);
 };

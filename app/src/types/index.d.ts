@@ -129,6 +129,7 @@ type TAVFilterOperator =
     | "Is false"
 
 type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "updated"
+type TPublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
 
 declare module "blueimp-md5"
 
@@ -1146,4 +1147,12 @@ interface IAVCellRollupValue {
 interface IAVCalc {
     operator?: string,
     result?: IAVCellValue
+}
+
+interface IPublishAccessItem {
+    id: string,
+    visible: boolean,
+    password: string,
+    disable: boolean
+    iconHTML?: string
 }

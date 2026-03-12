@@ -561,6 +561,61 @@ func setAppearance(c *gin.Context) {
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 
+func setTheme(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	themeName, ok := arg["theme"].(string)
+	if !ok || themeName == "" {
+		ret.Code = -1
+		ret.Msg = "theme is required"
+		return
+	}
+
+	modesRaw, ok := arg["modes"].([]interface{})
+	if !ok || len(modesRaw) == 0 {
+		ret.Code = -1
+		ret.Msg = "modes is required ([0] for light, [1] for dark, [0,1] for both)"
+		return
+	}
+
+	var modes []int
+	seen := map[int]bool{}
+	for _, m := range modesRaw {
+		mf, isMf := m.(float64)
+		if !isMf {
+			ret.Code = -1
+			ret.Msg = "modes values must be integers"
+			return
+		}
+		mi := int(mf)
+		if mi != 0 && mi != 1 {
+			ret.Code = -1
+			ret.Msg = "modes values must be 0 (light) or 1 (dark)"
+			return
+		}
+		if !seen[mi] {
+			modes = append(modes, mi)
+			seen[mi] = true
+		}
+	}
+
+	if errMsg := model.SetTheme(themeName, modes); errMsg != "" {
+		ret.Code = -1
+		ret.Msg = errMsg
+		return
+	}
+
+	model.InitAppearance()
+	ret.Data = model.Conf.Appearance
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+}
+
 func setPublish(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

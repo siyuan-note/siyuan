@@ -50,11 +50,13 @@ export const rename = (options: {
     notebookId: string
     name: string,
     type: "notebook" | "file"
+    empty?: boolean
     range?: Range,
 }) => {
     if (window.siyuan.config.readonly) {
         return;
     }
+    const initialName = options.empty ? "" : options.name;
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value=""></div>
@@ -75,7 +77,7 @@ export const rename = (options: {
     dialog.bindInput(inputElement, () => {
         (btnsElement[1] as HTMLButtonElement).click();
     });
-    inputElement.value = Lute.UnEscapeHTMLStr(options.name);
+    inputElement.value = initialName;
     inputElement.focus();
     inputElement.select();
     btnsElement[0].addEventListener("click", () => {
@@ -85,27 +87,27 @@ export const rename = (options: {
         if (!validateName(inputElement.value)) {
             return false;
         }
-        if (inputElement.value === options.name) {
+        let name = inputElement.value.trim();
+        if (name === initialName) {
             dialog.destroy();
             return false;
         }
-        if (inputElement.value.trim() === "") {
-            inputElement.value = window.siyuan.languages.untitled;
-        } else {
-            inputElement.value = replaceFileName(inputElement.value);
-        }
+        name = replaceFileName(name);
         if (options.type === "notebook") {
+            if (!name) {
+                name = window.siyuan.languages.untitled;
+            }
             fetchPost("/api/notebook/renameNotebook", {
                 notebook: options.notebookId,
-                name: inputElement.value
+                name,
             }, () => {
-                setNotebookName(options.notebookId, inputElement.value);
+                setNotebookName(options.notebookId, name);
             });
         } else {
             fetchPost("/api/filetree/renameDoc", {
                 notebook: options.notebookId,
                 path: options.path,
-                title: inputElement.value,
+                title: name,
             });
         }
         dialog.destroy();

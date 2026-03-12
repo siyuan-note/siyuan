@@ -47,7 +47,7 @@ const focusStack = (backStack: IBackStack) => {
             id: backStack.id,
         }, (response) => {
             setTitle(response.data.name);
-            protyle.title.setTitle(response.data.name);
+            protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
             protyle.background.render(response.data.ial, protyle.block.rootID);
             protyle.wysiwyg.renderCustom(response.data.ial);
         });

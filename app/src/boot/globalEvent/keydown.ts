@@ -658,12 +658,26 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.rename.custom, event)) {
         window.siyuan.menus.menu.remove();
-        rename({
-            notebookId,
-            path: pathString,
-            name: isFile ? getDisplayName(liElements[0].getAttribute("data-name"), false, true) : getNotebookName(notebookId),
-            type: isFile ? "file" : "notebook",
-        });
+        if (isFile) {
+            fetchPost("/api/block/getDocInfo", {
+                id: liElements[0].getAttribute("data-node-id")
+            }, (response) => {
+                rename({
+                    notebookId,
+                    path: pathString,
+                    name: response.data.ial.title,
+                    empty: response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true",
+                    type: "file",
+                });
+            });
+        } else {
+            rename({
+                notebookId,
+                path: pathString,
+                name: getNotebookName(notebookId),
+                type: "notebook",
+            });
+        }
         event.preventDefault();
         return true;
     }

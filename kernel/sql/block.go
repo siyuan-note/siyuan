@@ -144,28 +144,17 @@ func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 		return ""
 	}
 
+	if ast.NodeDocument == node.Type {
+		return html.EscapeHTMLStr(node.IALAttr("title"))
+	}
+
 	if ast.NodeAttributeView == node.Type {
 		if fullAttrView {
 			return av.GetAttributeViewContent(node.AttributeViewID)
 		}
 
 		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
-		return ret
-	}
-	return nodeStaticContent(node, excludeTypes, includeTextMarkATitleURL, includeAssetPath)
-}
-
-func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath bool) string {
-	if nil == node {
-		return ""
-	}
-
-	if ast.NodeDocument == node.Type {
-		return node.IALAttr("title")
-	}
-
-	if ast.NodeAttributeView == node.Type {
-		return ""
+		return html.EscapeHTMLStr(ret)
 	}
 
 	buf := bytes.Buffer{}

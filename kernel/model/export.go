@@ -2433,9 +2433,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	if 4 == blockRefMode {
 		// 脚注+锚点哈希模式下保持原有的全图递归逻辑
 		depth = 0
-		blockLink2Ref(ret, ret.ID, &depth)
-	} else {
-		// 锚文本块链（2）和仅锚文本（3）模式下，只在当前导出树中将块链接浅转换为块引用，不再做跨文档递归
+		visited := map[string]bool{}
+		blockLink2Ref(ret, ret.ID, &depth, visited)
+	} else if 2 != blockRefMode {
+		// 仅锚文本（3）等模式下，只在当前导出树中将块链接浅转换为块引用，不再做跨文档递归
+		// 锚文本块链（2）模式下块超链接本身已是目标格式，无需转换
 		blockLink2RefShallow(ret)
 	}
 
@@ -3217,7 +3219,12 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	return
 }
 
-func blockLink2Ref(currentTree *parse.Tree, id string, depth *int) {
+func blockLink2Ref(currentTree *parse.Tree, id string, depth *int, visited map[string]bool) {
+	if visited[id] {
+		return
+	}
+	visited[id] = true
+
 	*depth++
 	if 4096 < *depth {
 		return
@@ -3237,17 +3244,17 @@ func blockLink2Ref(currentTree *parse.Tree, id string, depth *int) {
 		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
 		return
 	}
-	blockLink2Ref0(currentTree, node, depth)
+	blockLink2Ref0(currentTree, node, depth, visited)
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			blockLink2Ref0(currentTree, c, depth)
+			blockLink2Ref0(currentTree, c, depth, visited)
 		}
 	}
 	return
 }
 
-func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, depth *int) {
+func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, depth *int, visited map[string]bool) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3258,11 +3265,11 @@ func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, depth *int) {
 			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
 			n.TextMarkBlockRefSubtype = "s"
 
-			blockLink2Ref(currentTree, n.TextMarkBlockRefID, depth)
+			blockLink2Ref(currentTree, n.TextMarkBlockRefID, depth, visited)
 			return ast.WalkSkipChildren
 		} else if treenode.IsBlockRef(n) {
 			defID, _, _ := treenode.GetBlockRef(n)
-			blockLink2Ref(currentTree, defID, depth)
+			blockLink2Ref(currentTree, defID, depth, visited)
 		}
 		return ast.WalkContinue
 	})

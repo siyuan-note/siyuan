@@ -1330,6 +1330,23 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 	return db.QueryRow(query, args...)
 }
 
+func queryTx(tx *sql.Tx, query string, args ...interface{}) (*sql.Rows, error) {
+	query = strings.TrimSpace(query)
+	if "" == query {
+		return nil, errors.New("statement is empty")
+	}
+
+	if isInitializingDatabase.Load() {
+		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
+		return nil, errors.New("database is initializing")
+	}
+
+	if nil == db {
+		return nil, errors.New("database is nil")
+	}
+	return tx.Query(query, args...)
+}
+
 func query(query string, args ...interface{}) (*sql.Rows, error) {
 	query = strings.TrimSpace(query)
 	if "" == query {

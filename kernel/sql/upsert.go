@@ -397,7 +397,7 @@ func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (er
 }
 
 func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
-	oldBlockHashes := queryBlockHashes(tree.ID)
+	oldBlockHashes := queryBlockHashes(tx, tree.ID)
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	newBlockHashes := map[string]string{}
 	for _, block := range blocks {

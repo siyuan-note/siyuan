@@ -49,9 +49,9 @@ func QueryEmptyContentEmbedBlocks() (ret []*Block) {
 	return
 }
 
-func queryBlockHashes(rootID string) (ret map[string]string) {
+func queryBlockHashes(tx *sql.Tx, rootID string) (ret map[string]string) {
 	stmt := "SELECT id, hash FROM blocks WHERE root_id = ?"
-	rows, err := query(stmt, rootID)
+	rows, err := queryTx(tx, stmt, rootID)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", stmt, err)
 		return

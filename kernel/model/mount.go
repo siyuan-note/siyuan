@@ -170,22 +170,20 @@ func RemoveBox(boxID string) (err error) {
 func Unmount(boxID string) {
 	FlushTxQueue()
 
-	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
-		"box": boxID,
-	}
+	unmount0(boxID)
 
+	cmdName := "closeBox"
 	if IsUserGuide(boxID) {
-		if err := RemoveBox(boxID); nil == err {
-			evt.Callback = "cb-mount-remove"
+		if err := RemoveBox(boxID); err == nil {
+			cmdName = "removeBox"
 		} else {
 			logging.LogErrorf("close user guide box [%s] failed, fallback to unmount: %s", boxID, err)
-			unmount0(boxID)
 		}
-	} else {
-		unmount0(boxID)
 	}
-
+	evt := util.NewCmdResult(cmdName, 0, util.PushModeBroadcast)
+	evt.Data = map[string]any{
+		"box": boxID,
+	}
 	util.PushEvent(evt)
 }
 

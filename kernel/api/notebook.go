@@ -145,11 +145,10 @@ func removeNotebook(c *gin.Context) {
 		return
 	}
 
-	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
+	evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box": notebook,
 	}
-	evt.Callback = "cb-mount-remove"
 	util.PushEvent(evt)
 }
 

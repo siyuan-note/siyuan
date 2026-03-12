@@ -84,7 +84,8 @@ export class Files extends Model {
                                 });
                             });
                             break;
-                        case "unmount":
+                        case "closeBox":
+                        case "removeBox":
                             this.onRemove(data);
                             options.app.plugins.forEach((item) => {
                                 item.eventBus.emit("closed-notebook", data);
@@ -953,12 +954,12 @@ data-type="navigation-root" data-path="/">
 
     private onRemove(data: IWebSocketData) {
         // "doc2heading" 后删除文件或挂载帮助文档前的 unmount
-        if (data.cmd === "unmount") {
+        if (data.cmd === "closeBox" || data.cmd === "removeBox") {
             setNoteBook((notebooks) => {
                 const targetElement = this.element.querySelector(`ul[data-url="${data.data.box}"] li[data-path="${"/"}"]`);
                 if (targetElement) {
                     targetElement.parentElement.remove();
-                    if (Constants.CB_MOUNT_REMOVE !== data.callback) {
+                    if (data.cmd === "closeBox") {
                         let closeHTML = "";
                         notebooks.find(item => {
                             if (item.closed) {
@@ -972,7 +973,7 @@ data-type="navigation-root" data-path="/">
                     }
                 }
             });
-            if (Constants.CB_MOUNT_REMOVE === data.callback) {
+            if (data.cmd === "removeBox") {
                 const removeElement = this.closeElement.querySelector(`li[data-url="${data.data.box}"]`);
                 if (removeElement) {
                     removeElement.remove();

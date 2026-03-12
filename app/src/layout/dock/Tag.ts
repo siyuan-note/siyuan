@@ -37,7 +37,8 @@ export class Tag extends Model {
                                 }
                             });
                             break;
-                        case "unmount":
+                        case "closeBox":
+                        case "removeBox":
                         case "removeDoc":
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {

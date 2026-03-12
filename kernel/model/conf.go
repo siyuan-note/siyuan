@@ -1250,11 +1250,10 @@ func closeUserGuide() {
 		}
 
 		msgId := util.PushMsg(Conf.language(233), 30000)
-		evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
+		evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
 		evt.Data = map[string]interface{}{
 			"box": boxID,
 		}
-		evt.Callback = "cb-mount-remove"
 		util.PushEvent(evt)
 
 		unindex(boxID)

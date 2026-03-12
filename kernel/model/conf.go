@@ -1250,17 +1250,18 @@ func closeUserGuide() {
 		}
 
 		msgId := util.PushMsg(Conf.language(233), 30000)
-		evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
-		evt.Data = map[string]interface{}{
-			"box": boxID,
-		}
-		util.PushEvent(evt)
 
 		unindex(boxID)
 
 		sql.FlushQueue()
 
-		if removeErr := RemoveBox(boxID); nil != removeErr {
+		if removeErr := RemoveBox(boxID); nil == removeErr {
+			evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
+			evt.Data = map[string]interface{}{
+				"box": boxID,
+			}
+			util.PushEvent(evt)
+		} else {
 			logging.LogErrorf("close user guide box [%s] failed: %s", boxID, removeErr)
 			util.PushClearMsg(msgId)
 			continue

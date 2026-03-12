@@ -214,6 +214,11 @@ export class Protyle {
                                 } else {
                                     this.protyle.title.setTitle(data.data.title, data.data.empty);
                                 }
+                                if (data.data.empty) {
+                                    this.protyle.wysiwyg.element.setAttribute(Constants.CUSTOM_SY_TITLE_EMPTY, "true");
+                                } else {
+                                    this.protyle.wysiwyg.element.removeAttribute(Constants.CUSTOM_SY_TITLE_EMPTY);
+                                }
                             }
                             // update ref
                             this.protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${data.data.id}"]`).forEach(item => {

@@ -133,6 +133,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 
 		cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 		pushBroadcastAttrTransactions(oldAttrs, node)
+		util.PushSetBlockAttrs(node.ID, tree.Root.ID)
 		nodes = append(nodes, node)
 	}
 
@@ -182,6 +183,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
 	pushBroadcastAttrTransactions(oldAttrs, node)
+	util.PushSetBlockAttrs(node.ID, tree.Root.ID)
 
 	go func() {
 		sql.FlushQueue()

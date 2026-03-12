@@ -285,6 +285,10 @@ func PushReloadDoc(rootID string) {
 	BroadcastByType("main", "reloaddoc", 0, "", rootID)
 }
 
+func PushSetBlockAttrs(id, rootID string) {
+	BroadcastByType("main", "setBlockAttrs", 0, "", map[string]interface{}{"id": id, "rootID": rootID})
+}
+
 func PushSaveDoc(rootID, typ string, sources interface{}) {
 	evt := NewCmdResult("savedoc", 0, PushModeBroadcast)
 	evt.Data = map[string]interface{}{

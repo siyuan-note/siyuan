@@ -248,7 +248,6 @@ func openNotebook(c *gin.Context) {
 		"box":     box,
 		"existed": existed,
 	}
-	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
 
 	if isUserGuide {

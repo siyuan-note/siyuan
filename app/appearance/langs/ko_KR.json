@@ -1321,6 +1321,7 @@
   "about14": "API를 호출할 때 토큰을 인증해야 합니다<br>HTTP 요청 헤더 <code class=\"fn__code\">Authorization: token ${token}</code>",
   "about17": "<code class='fn__code'>직접 연결</code>로 설정하면 프록시를 활성화하지 않습니다",
   "about18": "비 루프백 주소(<code class=\"fn__code\">127.0.0.1</code>/<code class=\"fn__code\">[::1]</code>)를 사용할 때는 먼저 액세스 인증 코드를 설정하세요",
+  "about19": "오픈 소스 소프트웨어",
   "checkUpdate": "업데이트 확인",
   "currentVer": "현재 버전",
   "downloadLatestVer": "<a href=\"https://b3log.org/siyuan/en/download.html\", target=\"_blank\">최신 버전 다운로드</a>",

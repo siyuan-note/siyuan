@@ -2,7 +2,7 @@ import {focusByRange} from "./selection";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
-import {clipboard, ipcRenderer} from "electron";
+import {ipcRenderer} from "electron";
 /// #endif
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
@@ -133,12 +133,17 @@ export const getLocalFiles = async () => {
     // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
     let localFiles: ILocalFiles[] = [];
     if ("darwin" === window.siyuan.config.system.os) {
-        const xmlString = clipboard.read("NSFilenamesPboardType");
-        const domParser = new DOMParser();
-        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
-        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-            localFiles.push({path: item.childNodes[0].nodeValue, size: null});
+        const xmlString = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "clipboardRead",
+            format: "NSFilenamesPboardType",
         });
+        if (xmlString) {
+            const domParser = new DOMParser();
+            const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+            Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+                localFiles.push({path: item.childNodes[0].nodeValue, size: null});
+            });
+        }
     } else {
         const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
         if (xmlString.data.length > 0) {

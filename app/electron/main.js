@@ -24,6 +24,7 @@ const {
     MenuItem,
     screen,
     ipcMain,
+    clipboard,
     globalShortcut,
     Tray,
     dialog,
@@ -843,6 +844,9 @@ app.whenReady().then(() => {
         app.exit();
     });
     ipcMain.handle("siyuan-get", (event, data) => {
+        if (data.cmd === "clipboardRead") {
+            return clipboard.read(data.format);
+        }
         if (data.cmd === "showOpenDialog") {
             return dialog.showOpenDialog(data);
         }

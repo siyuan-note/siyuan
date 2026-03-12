@@ -1254,27 +1254,17 @@ func closeUserGuide() {
 		evt.Data = map[string]interface{}{
 			"box": boxID,
 		}
+		evt.Callback = "cb-mount-remove"
 		util.PushEvent(evt)
 
 		unindex(boxID)
 
 		sql.FlushQueue()
 
-		if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
-			logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
+		if removeErr := RemoveBox(boxID); nil != removeErr {
+			logging.LogErrorf("close user guide box [%s] failed: %s", boxID, removeErr)
 			util.PushClearMsg(msgId)
 			continue
-		}
-
-		if avFiles, readAvErr := getUserGuideAVJSONFiles(boxID); nil == readAvErr {
-			for _, avName := range avFiles {
-				avFilePath := filepath.Join(util.DataDir, "storage", "av", avName)
-				if removeErr := filelock.Remove(avFilePath); nil != removeErr {
-					logging.LogErrorf("remove av file [%s] failed: %s", avFilePath, removeErr)
-				} else {
-					logging.LogInfof("removed av file [%s]", avFilePath)
-				}
-			}
 		}
 
 		util.PushClearMsg(msgId)

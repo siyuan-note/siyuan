@@ -2,7 +2,6 @@ import {fetchPost} from "../util/fetch";
 import {getDisplayName, getNotebookName} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "../util/escape";
 
@@ -49,7 +48,6 @@ export const deleteFiles = (liElements: Element[]) => {
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`, () => {
                         fetchPost("/api/notebook/removeNotebook", {
                             notebook: itemNotebookId,
-                            callback: Constants.CB_MOUNT_REMOVE
                         });
                     }, undefined, true);
             }

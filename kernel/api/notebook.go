@@ -149,7 +149,7 @@ func removeNotebook(c *gin.Context) {
 	evt.Data = map[string]interface{}{
 		"box": notebook,
 	}
-	evt.Callback = arg["callback"]
+	evt.Callback = "cb-mount-remove"
 	util.PushEvent(evt)
 }
 

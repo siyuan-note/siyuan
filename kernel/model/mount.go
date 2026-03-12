@@ -147,6 +147,20 @@ func RemoveBox(boxID string) (err error) {
 	if err = filelock.Remove(localPath); err != nil {
 		return
 	}
+
+	if isUserGuide {
+		if avFiles, readAvErr := getUserGuideAVJSONFiles(boxID); nil == readAvErr {
+			for _, avName := range avFiles {
+				avFilePath := filepath.Join(util.DataDir, "storage", "av", avName)
+				if removeErr := filelock.Remove(avFilePath); nil != removeErr {
+					logging.LogErrorf("remove av file [%s] failed: %s", avFilePath, removeErr)
+				} else {
+					logging.LogInfof("removed av file [%s]", avFilePath)
+				}
+			}
+		}
+	}
+
 	IncSync()
 
 	logging.LogInfof("removed box [%s]", boxID)
@@ -156,11 +170,22 @@ func RemoveBox(boxID string) (err error) {
 func Unmount(boxID string) {
 	FlushTxQueue()
 
-	unmount0(boxID)
 	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box": boxID,
 	}
+
+	if IsUserGuide(boxID) {
+		if err := RemoveBox(boxID); nil == err {
+			evt.Callback = "cb-mount-remove"
+		} else {
+			logging.LogErrorf("close user guide box [%s] failed, fallback to unmount: %s", boxID, err)
+			unmount0(boxID)
+		}
+	} else {
+		unmount0(boxID)
+	}
+
 	util.PushEvent(evt)
 }
 

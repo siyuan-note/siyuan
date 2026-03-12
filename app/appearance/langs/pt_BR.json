@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "Contas autenticadas",
   "publishServiceAuthAccountsTip": "Lista de contas de autenticação básica. Os visitantes precisam inserir o nome de usuário e senha desta lista para visualizar o conteúdo publicado.",
   "publishServiceAuthAccountAdd": "Adicionar conta",
+  "publishAccess": "Controle de acesso à publicação",
+  "publishAccessPublic": "Público",
+  "publishAccessProtected": "Protegido",
+  "publishAccessHidden": "Oculto",
+  "publishAccessPrivate": "Privado",
+  "publishAccessForbidden": "Proibido",
+  "publishAccessPublicComment": "Acesso totalmente público",
+  "publishAccessProtectedComment": "Visível publicamente, requer senha para acessar",
+  "publishAccessHiddenComment": "Não visível publicamente, pode ser acessado diretamente",
+  "publishAccessPrivateComment": "Não visível publicamente, requer senha para acessar",
+  "publishAccessForbiddenComment": "Acesso proibido",
   "copyMirror": "Copiar espelho",
   "duplicateMirror": "Duplicar espelho",
   "duplicateCompletely": "Duplicar completamente",
@@ -1754,6 +1765,9 @@
     "279": "Há [%d] bancos de dados não referenciados no total, aqui são listados apenas [%d]",
     "280": "Limpeza de bancos de dados não referenciados concluída, [%d] arquivos removidos, [%s] de espaço em disco liberados",
     "281": " (Padrão)",
-    "282": "Fechar janela"
+    "282": "Fechar janela",
+    "283": "Senha",
+    "284": "Acesso negado",
+    "285": "A senha está incorreta"
   }
 }

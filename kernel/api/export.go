@@ -34,6 +34,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -786,6 +787,13 @@ func exportPreview(c *gin.Context) {
 	}
 
 	stdHTML := model.ExportPreview(id, fillCSSVar)
+	if model.IsReadOnlyRoleContext(c) {
+		bt := treenode.GetBlockTree(id)
+		if bt != nil {
+			publishAccess := model.GetPublishAccess()
+			stdHTML = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, stdHTML, true)
+		}
+	}
 	ret.Data = map[string]interface{}{
 		"html":       stdHTML,
 		"fillCSSVar": fillCSSVar,

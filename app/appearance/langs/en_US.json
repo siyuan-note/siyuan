@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "Authenticated accounts",
   "publishServiceAuthAccountsTip": "List of Basic authentication accounts. Visitors need to enter the username and password from this list to view the published content.",
   "publishServiceAuthAccountAdd": "Add account",
+  "publishAccess": "Publish Access Control",
+  "publishAccessPublic": "Public",
+  "publishAccessProtected": "Protected",
+  "publishAccessHidden": "Hidden",
+  "publishAccessPrivate": "Private",
+  "publishAccessForbidden": "Forbidden",
+  "publishAccessPublicComment": "Fully public access",
+  "publishAccessProtectedComment": "Publicly visible, requires password to access",
+  "publishAccessHiddenComment": "Not publicly visible, can be accessed directly",
+  "publishAccessPrivateComment": "Not publicly visible, requires password to access",
+  "publishAccessForbiddenComment": "Access forbidden",
   "copyMirror": "Copy mirror",
   "duplicateMirror": "Duplicate mirror",
   "duplicateCompletely": "Duplicate completely",
@@ -1754,6 +1765,9 @@
     "279": "There are [%d] unreferenced databases in total, only [%d] are listed here",
     "280": "Cleanup of unreferenced databases completed, [%d] files removed, [%s] of disk space freed",
     "281": " (Default)",
-    "282": "Close window"
+    "282": "Close window",
+    "283": "Password",
+    "284": "Access denied",
+    "285": "Password is incorrect"
   }
 }

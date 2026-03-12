@@ -65,7 +65,15 @@ func copyStdMarkdown(c *gin.Context) {
 		imgTag = arg["imgTag"].(bool)
 	}
 
-	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
+	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
+	if model.IsReadOnlyRoleContext(c) {
+		bt := treenode.GetBlockTree(id)
+		if bt != nil {
+			publishAccess := model.GetPublishAccess()
+			markdownContent = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, markdownContent, true)
+		}
+	}
+	ret.Data = markdownContent
 }
 
 func html2BlockDOM(c *gin.Context) {

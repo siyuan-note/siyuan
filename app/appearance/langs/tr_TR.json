@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "Yetkili hesaplar",
   "publishServiceAuthAccountsTip": "Temel kimlik doğrulaması hesap listesi. Ziyaretçilerin içerikleri görebilmesi için buradaki kullanıcı adı ve parolayı girmesi gerekir.",
   "publishServiceAuthAccountAdd": "Hesap ekle",
+  "publishAccess": "Yayın Erişim Kontrolü",
+  "publishAccessPublic": "Herkese Açık",
+  "publishAccessProtected": "Korumalı",
+  "publishAccessHidden": "Gizli",
+  "publishAccessPrivate": "Özel",
+  "publishAccessForbidden": "Yasaklı",
+  "publishAccessPublicComment": "Tamamen herkese açık erişim",
+  "publishAccessProtectedComment": "Herkese görünür, şifre ile erişilebilir",
+  "publishAccessHiddenComment": "Herkese görünmez, doğrudan erişilebilir",
+  "publishAccessPrivateComment": "Herkese görünmez, şifre ile erişilebilir",
+  "publishAccessForbiddenComment": "Erişim yasaklandı",
   "copyMirror": "Yansıyı kopyala",
   "duplicateMirror": "Yansıyı çoğalt",
   "duplicateCompletely": "Tam kopyala",
@@ -1754,6 +1765,9 @@
     "279": "Kullanılmayan veritabanı toplam [%d] adet, burada yalnızca [%d] tanesi listeleniyor",
     "280": "Kullanılmayan veritabanları temizlendi, [%d] dosya kaldırıldı, toplam [%s] disk alanı boşaltıldı",
     "281": " (Varsayılan)",
-    "282": "Pencereyi Kapat"
+    "282": "Pencereyi Kapat",
+    "283": "Şifre",
+    "284": "Erişim yasaklandı",
+    "285": "Şifre yanlış"
   }
 }

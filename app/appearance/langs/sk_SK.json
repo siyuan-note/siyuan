@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "Overené účty",
   "publishServiceAuthAccountsTip": "Zoznam účtov pre základné overenie. Návštevníci musia zadať meno a heslo z tohto zoznamu.",
   "publishServiceAuthAccountAdd": "Pridať účet",
+  "publishAccess": "Kontrola prístupu k publikovaniu",
+  "publishAccessPublic": "Verejné",
+  "publishAccessProtected": "Chránené",
+  "publishAccessHidden": "Skryté",
+  "publishAccessPrivate": "Súkromné",
+  "publishAccessForbidden": "Zakázané",
+  "publishAccessPublicComment": "Úplne verejný prístup",
+  "publishAccessProtectedComment": "Viditeľné pre verejnosť, prístup chránený heslom",
+  "publishAccessHiddenComment": "Neviditeľné pre verejnosť, priamy prístup možný",
+  "publishAccessPrivateComment": "Neviditeľné pre verejnosť, prístup chránený heslom",
+  "publishAccessForbiddenComment": "Prístup zakázaný",
   "copyMirror": "Kopírovať zrkadlo",
   "duplicateMirror": "Duplikovať zrkadlo",
   "duplicateCompletely": "Duplikovať úplne",
@@ -1754,6 +1765,9 @@
     "279": "Celkom %d databáz bez odkazov",
     "280": "Vymazanie nepotrebných databáz dokončené, uvoľnených %s",
     "281": " (Predvolené)",
-    "282": "Zavrieť okno"
+    "282": "Zavrieť okno",
+    "283": "Heslo",
+    "284": "Prístup zakázaný",
+    "285": "Nesprávne heslo"
   }
 }

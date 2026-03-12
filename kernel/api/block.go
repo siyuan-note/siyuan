@@ -377,6 +377,10 @@ func getDocInfo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		info = model.FilterBlockInfoByPublishAccess(c, publishAccess, info)
+	}
 	ret.Data = info
 }
 
@@ -401,6 +405,12 @@ func getDocsInfo(c *gin.Context) {
 		ret.Msg = fmt.Sprintf(model.Conf.Language(15), ids)
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		for i, docinfo := range info {
+			info[i] = model.FilterBlockInfoByPublishAccess(c, publishAccess, docinfo)
+		}
+	}
 	ret.Data = info
 }
 
@@ -409,6 +419,10 @@ func getRecentUpdatedBlocks(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	blocks := model.RecentUpdatedBlocks()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
 	ret.Data = blocks
 }
 
@@ -524,6 +538,11 @@ func getRefIDs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	refDefs, originalRefBlockIDs := model.GetBlockRefs(id)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		refDefs, originalRefBlockIDs = model.FilterRefDefsByPublishIgnore(publishIgnore, refDefs)
+	}
 	ret.Data = map[string]any{
 		"refDefs":             refDefs,
 		"originalRefBlockIDs": originalRefBlockIDs,

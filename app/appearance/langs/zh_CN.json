@@ -127,6 +127,17 @@
   "publishServiceAuthAccounts": "认证账户",
   "publishServiceAuthAccountsTip": "Basic 认证账户列表。访问者输入列表中的用户名与密码后才能查看发布的内容",
   "publishServiceAuthAccountAdd": "添加账户",
+  "publishAccess": "发布访问控制",
+  "publishAccessPublic": "公开",
+  "publishAccessProtected": "保护",
+  "publishAccessHidden": "隐藏",
+  "publishAccessPrivate": "私密",
+  "publishAccessForbidden": "禁止",
+  "publishAccessPublicComment": "完全公开访问",
+  "publishAccessProtectedComment": "公众可见，需密码访问",
+  "publishAccessHiddenComment": "公众不可见，可直接访问",
+  "publishAccessPrivateComment": "公众不可见，需密码访问",
+  "publishAccessForbiddenComment": "禁止访问",
   "copyMirror": "复制镜像",
   "duplicateMirror": "复制为镜像副本",
   "duplicateCompletely": "复制为完整副本",
@@ -1754,6 +1765,9 @@
     "279": "未引用数据库一共 [%d] 个，这里仅列出 [%d] 个",
     "280": "清理未引用的数据库完毕，已删除 [%d] 个文件，共释放 [%s] 磁盘空间",
     "281": "（默认主题）",
-    "282": "关闭窗口"
+    "282": "关闭窗口",
+    "283": "密码",
+    "284": "禁止访问",
+    "285": "密码不正确"
   }
 }

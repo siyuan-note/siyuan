@@ -68,38 +68,42 @@ func InitAppearance() {
 	util.InitEmojiChars()
 }
 
-// SetTheme applies themeName to the slot(s) identified by modes (0 = light, 1 = dark).
-// It validates that the theme is available for each requested mode using the already-loaded
-// theme lists, then updates Conf. Call InitAppearance() after to persist and broadcast.
-// Returns a non-empty error message on failure.
-func SetTheme(themeName string, modes []int) string {
+func SetTheme(theme string, modes []int, appearanceMode string) error {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
 
-	for _, mode := range modes {
-		if mode == 0 {
-			if !containTheme(themeName, Conf.Appearance.LightThemes) {
-				return "theme not available for light mode: " + themeName
-			}
-		} else {
-			if !containTheme(themeName, Conf.Appearance.DarkThemes) {
-				return "theme not available for dark mode: " + themeName
+	if theme != "" {
+		for _, mode := range modes {
+			switch mode {
+			case 0:
+				if !containTheme(theme, Conf.Appearance.LightThemes) {
+					return fmt.Errorf("theme not exists or not available for light mode: %s", theme)
+				}
+				Conf.Appearance.ThemeLight = theme
+			case 1:
+				if !containTheme(theme, Conf.Appearance.DarkThemes) {
+					return fmt.Errorf("theme not exists or not available for dark mode: %s", theme)
+				}
+				Conf.Appearance.ThemeDark = theme
 			}
 		}
 	}
 
-	for _, mode := range modes {
-		if mode == 0 {
-			Conf.Appearance.ThemeLight = themeName
-		} else {
-			Conf.Appearance.ThemeDark = themeName
+	if appearanceMode != "" {
+		switch appearanceMode {
+		case "light":
+			Conf.Appearance.ModeOS = false
+			Conf.Appearance.Mode = 0
+		case "dark":
+			Conf.Appearance.ModeOS = false
+			Conf.Appearance.Mode = 1
+		case "system":
+			Conf.Appearance.ModeOS = true
+		default:
+			return fmt.Errorf("invalid appearance mode: %s", appearanceMode)
 		}
 	}
-	// Only switch the active mode when targeting a single slot
-	if len(modes) == 1 {
-		Conf.Appearance.Mode = modes[0]
-	}
-	return ""
+	return nil
 }
 
 func containTheme(name string, themes []*conf.AppearanceTheme) bool {

@@ -1822,6 +1822,7 @@ type Operation struct {
 	Action     string      `json:"action"`
 	Data       interface{} `json:"data"`
 	ID         string      `json:"id"`
+	RootID     string      `json:"rootID"`
 	ParentID   string      `json:"parentID"`
 	PreviousID string      `json:"previousID"`
 	NextID     string      `json:"nextID"`

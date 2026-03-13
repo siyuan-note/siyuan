@@ -355,18 +355,11 @@ func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType
 	}
-	doOp := &Operation{Action: "updateAttrs", Data: data, ID: node.ID}
+	doOp := &Operation{Action: "updateAttrs", Data: data, ID: node.ID, RootID: treenode.TreeRoot(node).ID}
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
 	evt.Data = []*Transaction{{
 		DoOperations:   []*Operation{doOp},
 		UndoOperations: []*Operation{},
 	}}
 	util.PushEvent(evt)
-
-	util.BroadcastByType("main", "setBlockAttrs", 0, "", map[string]interface{}{
-		"id":     node.ID,
-		"rootID": treenode.TreeRoot(node).ID,
-		"old":    oldAttrs,
-		"new":    newAttrs,
-	})
 }

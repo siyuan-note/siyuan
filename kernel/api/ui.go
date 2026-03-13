@@ -77,4 +77,13 @@ func reloadIcon(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	model.LoadIcons()
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+}
+
+func reloadTheme(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	model.LoadThemes()
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }

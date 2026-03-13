@@ -363,7 +363,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/template/render", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renderTemplate)
 	ginServer.Handle("POST", "/api/template/docSaveAsTemplate", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, docSaveAsTemplate)
-	ginServer.Handle("POST", "/api/template/renderSprig", model.CheckAuth, renderSprig)
+	ginServer.Handle("POST", "/api/template/renderSprig", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renderSprig)
 
 	ginServer.Handle("POST", "/api/transactions", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, performTransactions)
 

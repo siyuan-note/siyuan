@@ -46,7 +46,7 @@ func InitAppearance() {
 		return
 	}
 
-	loadThemes()
+	LoadThemes()
 	LoadIcons()
 
 	Conf.m.Lock()
@@ -111,7 +111,7 @@ func containTheme(name string, themes []*conf.AppearanceTheme) bool {
 	return false
 }
 
-func loadThemes() {
+func LoadThemes() {
 	themeDirs, err := os.ReadDir(util.ThemesPath)
 	if err != nil {
 		logging.LogErrorf("read appearance themes folder failed: %s", err)

@@ -685,9 +685,6 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 		return nil
 	}
 
-	initDatabaseLock.RLock()
-	defer initDatabaseLock.RUnlock()
-
 	if nil == db {
 		return nil
 	}
@@ -700,9 +697,6 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	initDatabaseLock.RLock()
-	defer initDatabaseLock.RUnlock()
-
 	if nil == db {
 		return nil, errors.New("database is nil")
 	}
@@ -714,9 +708,6 @@ func exec(stmt string, args ...interface{}) (sql.Result, error) {
 	if "" == stmt {
 		return nil, errors.New("statement is empty")
 	}
-
-	initDatabaseLock.RLock()
-	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil, errors.New("database is nil")

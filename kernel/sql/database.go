@@ -377,9 +377,6 @@ var (
 func SetCaseSensitive(b bool) {
 	caseSensitive = b
 
-	initDatabaseLock.Lock()
-	defer initDatabaseLock.Unlock()
-
 	if nil == db {
 		return
 	}
@@ -1309,9 +1306,6 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 		return nil
 	}
 
-	initDatabaseLock.RLock()
-	defer initDatabaseLock.RUnlock()
-
 	if nil == db {
 		return nil
 	}
@@ -1324,9 +1318,6 @@ func queryTx(tx *sql.Tx, query string, args ...interface{}) (*sql.Rows, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	initDatabaseLock.RLock()
-	defer initDatabaseLock.RUnlock()
-
 	if nil == db {
 		return nil, errors.New("database is nil")
 	}
@@ -1338,9 +1329,6 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 	if "" == query {
 		return nil, errors.New("statement is empty")
 	}
-
-	initDatabaseLock.RLock()
-	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil, errors.New("database is nil")

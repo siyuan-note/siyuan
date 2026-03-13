@@ -2429,17 +2429,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	depth := 0
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
 
-	// 将块超链接转换为引用
-	if 4 == blockRefMode {
-		// 脚注+锚点哈希模式下保持原有的全图递归逻辑
-		depth = 0
-		blockLink2Ref(ret, ret.ID, &depth)
-	} else {
-		// 锚文本块链（2）和仅锚文本（3）模式下，只在当前导出树中将块链接浅转换为块引用，不再做跨文档递归
-		blockLink2RefShallow(ret)
-	}
+	// 将当前文档的块超链接转换为引用
+	blockLink2Ref(ret)
 
-	// 收集引用转脚注+锚点哈希
+	// 收集引用转脚注+锚点哈希（可能跨文档递归）
 	var refFootnotes []*refAsFootnotes
 	if 4 == blockRefMode && singleFile {
 		depth = 0
@@ -3217,60 +3210,9 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	return
 }
 
-func blockLink2Ref(currentTree *parse.Tree, id string, depth *int) {
-	*depth++
-	if 4096 < *depth {
-		return
-	}
-
-	b := treenode.GetBlockTree(id)
-	if nil == b {
-		return
-	}
-	t, err := LoadTreeByBlockID(b.RootID)
-	if nil != err {
-		return
-	}
-
-	node := treenode.GetNodeInTree(t, b.ID)
-	if nil == node {
-		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
-		return
-	}
-	blockLink2Ref0(currentTree, node, depth)
-	if ast.NodeHeading == node.Type {
-		children := treenode.HeadingChildren(node)
-		for _, c := range children {
-			blockLink2Ref0(currentTree, c, depth)
-		}
-	}
-	return
-}
-
-func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, depth *int) {
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if treenode.IsBlockLink(n) {
-			n.TextMarkType = strings.TrimSpace(strings.TrimPrefix(n.TextMarkType, "a") + " block-ref")
-			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
-			n.TextMarkBlockRefSubtype = "s"
-
-			blockLink2Ref(currentTree, n.TextMarkBlockRefID, depth)
-			return ast.WalkSkipChildren
-		} else if treenode.IsBlockRef(n) {
-			defID, _, _ := treenode.GetBlockRef(n)
-			blockLink2Ref(currentTree, defID, depth)
-		}
-		return ast.WalkContinue
-	})
-}
-
-// blockLink2RefShallow 只在当前导出树中将块链接转换为块引用，不进行跨文档递归。
-// 用于 blockRefMode 为 2/3 的场景，以避免在锚文本模式下遍历整个引用图。
-func blockLink2RefShallow(currentTree *parse.Tree) {
+// blockLink2Ref 只在当前导出树中将块链接转换为块引用，不进行跨文档递归。
+// 转换阶段仅修改当前树；脚注收集阶段由 collectFootnotesDefs 递归遍历块引用与块链接指向的块。
+func blockLink2Ref(currentTree *parse.Tree) {
 	ast.Walk(currentTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3311,7 +3253,6 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*r
 			collectFootnotesDefs0(currentTree, c, refFootnotes, depth)
 		}
 	}
-	return
 }
 
 func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes *[]*refAsFootnotes, depth *int) {
@@ -3338,6 +3279,11 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes
 				})
 				collectFootnotesDefs(currentTree, defID, refFootnotes, depth)
 			}
+			return ast.WalkSkipChildren
+		} else if treenode.IsBlockLink(n) {
+			// 块超链接视同块引用，递归遍历目标块以收集其中的引用/脚注
+			blockRefID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			collectFootnotesDefs(currentTree, blockRefID, refFootnotes, depth)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue

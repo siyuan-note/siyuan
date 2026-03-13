@@ -132,8 +132,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 		}
 
 		cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-		pushBroadcastAttrTransactions(oldAttrs, node)
-		util.PushSetBlockAttrs(node.ID, tree.Root.ID)
+		pushBlockAttrs(oldAttrs, node)
 		nodes = append(nodes, node)
 	}
 
@@ -182,8 +181,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
-	pushBroadcastAttrTransactions(oldAttrs, node)
-	util.PushSetBlockAttrs(node.ID, tree.Root.ID)
+	pushBlockAttrs(oldAttrs, node)
 
 	go func() {
 		sql.FlushQueue()
@@ -202,7 +200,7 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-	pushBroadcastAttrTransactions(oldAttrs, node)
+	pushBlockAttrs(oldAttrs, node)
 	return
 }
 
@@ -265,21 +263,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	return
 }
 
-func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
-	newAttrs := parse.IAL2Map(node.KramdownIAL)
-	data := map[string]interface{}{"old": oldAttrs, "new": newAttrs}
-	if "" != node.AttributeViewType {
-		data["data-av-type"] = node.AttributeViewType
-	}
-	doOp := &Operation{Action: "updateAttrs", Data: data, ID: node.ID}
-	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
-	evt.Data = []*Transaction{{
-		DoOperations:   []*Operation{doOp},
-		UndoOperations: []*Operation{},
-	}}
-	util.PushEvent(evt)
-}
-
 func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	if util.ReadOnly {
 		return
@@ -312,7 +295,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
-	pushBroadcastAttrTransactions(oldAttrs, node)
+	pushBlockAttrs(oldAttrs, node)
 
 	go func() {
 		sql.FlushQueue()
@@ -364,4 +347,26 @@ func validateChars(name string, startIdx, n int) bool {
 		}
 	}
 	return true
+}
+
+func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	data := map[string]interface{}{"old": oldAttrs, "new": newAttrs}
+	if "" != node.AttributeViewType {
+		data["data-av-type"] = node.AttributeViewType
+	}
+	doOp := &Operation{Action: "updateAttrs", Data: data, ID: node.ID}
+	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
+	evt.Data = []*Transaction{{
+		DoOperations:   []*Operation{doOp},
+		UndoOperations: []*Operation{},
+	}}
+	util.PushEvent(evt)
+
+	util.BroadcastByType("main", "setBlockAttrs", 0, "", map[string]interface{}{
+		"id":     node.ID,
+		"rootID": treenode.TreeRoot(node).ID,
+		"old":    oldAttrs,
+		"new":    newAttrs,
+	})
 }

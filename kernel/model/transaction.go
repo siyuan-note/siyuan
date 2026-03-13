@@ -1063,7 +1063,7 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 			avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
 			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
 			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
+			pushBlockAttrs(oldAttrs, toChangNode)
 		}
 
 		for _, tree := range trees {
@@ -1548,7 +1548,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 			time.Sleep(200 * time.Millisecond)
 			oldAttrs := parse.IAL2Map(updatedNode.KramdownIAL)
 			updatedNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-			pushBroadcastAttrTransactions(oldAttrs, updatedNode)
+			pushBlockAttrs(oldAttrs, updatedNode)
 		}()
 	}
 

@@ -28,6 +28,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -2429,21 +2430,15 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	depth := 0
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
 
-	// 将块超链接转换为引用
-	if 4 == blockRefMode {
-		// 脚注+锚点哈希模式下保持原有的全图递归逻辑
-		depth = 0
-		blockLink2Ref(ret, ret.ID, &depth)
-	} else {
-		// 锚文本块链（2）和仅锚文本（3）模式下，只在当前导出树中将块链接浅转换为块引用，不再做跨文档递归
-		blockLink2RefShallow(ret)
-	}
+	// 将当前文档的块超链接转换为引用
+	blockLink2Ref(ret)
 
-	// 收集引用转脚注+锚点哈希
-	var refFootnotes []*refAsFootnotes
+	// 收集引用转脚注+锚点哈希（可能跨文档递归）
+	var refFootnoteOrder []string // 按顺序存储 defID
+	refFootnotesByID := make(map[string]*refAsFootnotes)
 	if 4 == blockRefMode && singleFile {
 		depth = 0
-		collectFootnotesDefs(ret, ret.ID, &refFootnotes, &depth)
+		collectFootnotesDefs(ret, ret.ID, &refFootnoteOrder, refFootnotesByID, &depth)
 	}
 
 	currentTreeNodeIDs := map[string]bool{}
@@ -2533,7 +2528,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				return ast.WalkContinue
 			}
 
-			refFoot := getRefAsFootnotes(defID, &refFootnotes)
+			refFoot := refFootnotesByID[defID]
 			if nil == refFoot {
 				return ast.WalkContinue
 			}
@@ -2557,7 +2552,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 	if 4 == blockRefMode { // 脚注+锚点哈希
 		unlinks = nil
-		footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight)
+		footnotesDefBlock := resolveFootnotesDefs(&refFootnoteOrder, refFootnotesByID, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight)
 		if nil != footnotesDefBlock {
 			// 如果是聚焦导出，可能存在没有使用的脚注定义块，在这里进行清理
 			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
@@ -2605,14 +2600,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 	} else {
 		if 4 == blockRefMode { // 脚注+锚点哈希
-			refRoot := false
-
-			for _, refFoot := range refFootnotes {
-				if id == refFoot.defID {
-					refRoot = true
-					break
-				}
-			}
+			refRoot := slices.Contains(refFootnoteOrder, id)
 
 			footnotesDefs := tree.Root.ChildrenByType(ast.NodeFootnotesDef)
 			for _, footnotesDef := range footnotesDefs {
@@ -3064,36 +3052,35 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	return ret
 }
 
-func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string) (footnotesDefBlock *ast.Node) {
-	if 1 > len(*refFootnotes) {
+func resolveFootnotesDefs(refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string) (footnotesDefBlock *ast.Node) {
+	if 1 > len(*refFootnoteOrder) {
 		return nil
 	}
 
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
 	var rendered []string
 
-	var defIDs []string
-	for _, foot := range *refFootnotes {
-		defIDs = append(defIDs, foot.defID)
-	}
-	defIDs = gulu.Str.RemoveDuplicatedElem(defIDs)
-	bts := treenode.GetBlockTrees(defIDs)
-	for _, foot := range *refFootnotes {
-		bt := bts[foot.defID]
+	bts := treenode.GetBlockTrees(*refFootnoteOrder)
+	for _, defID := range *refFootnoteOrder {
+		foot := refFootnotesByID[defID]
+		if nil == foot {
+			continue
+		}
+		bt := bts[defID]
 		if nil == bt {
-			logging.LogWarnf("not found block tree for footnote def [%s] refNum [%s]", foot.defID, foot.refNum)
+			logging.LogWarnf("not found block tree for footnote def [%s] refNum [%s]", defID, foot.refNum)
 			continue
 		}
 
 		t, err := LoadTreeByBlockID(bt.RootID)
 		if nil != err {
-			logging.LogWarnf("load tree for footnote def [%s] refNum [%s] failed: %s", foot.defID, foot.refNum, err)
+			logging.LogWarnf("load tree for footnote def [%s] refNum [%s] failed: %s", defID, foot.refNum, err)
 			continue
 		}
 
-		defNode := treenode.GetNodeInTree(t, foot.defID)
+		defNode := treenode.GetNodeInTree(t, defID)
 		if nil == defNode {
-			logging.LogErrorf("not found node [%s] in tree for footnote refNum [%s]", foot.defID, foot.refNum)
+			logging.LogErrorf("not found node [%s] in tree for footnote refNum [%s]", defID, foot.refNum)
 			continue
 		}
 
@@ -3128,7 +3115,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 
 				if treenode.IsBlockRef(n) {
 					defID, _, _ := treenode.GetBlockRef(n)
-					if f := getRefAsFootnotes(defID, refFootnotes); nil != f {
+					if f := refFootnotesByID[defID]; nil != f {
 						n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(blockRefTextLeft + f.refAnchorText + blockRefTextRight)})
 						n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + f.refNum), FootnotesRefId: f.refNum, FootnotesRefLabel: []byte("^" + f.refNum)})
 						unlinks = append(unlinks, n)
@@ -3217,60 +3204,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	return
 }
 
-func blockLink2Ref(currentTree *parse.Tree, id string, depth *int) {
-	*depth++
-	if 4096 < *depth {
-		return
-	}
-
-	b := treenode.GetBlockTree(id)
-	if nil == b {
-		return
-	}
-	t, err := LoadTreeByBlockID(b.RootID)
-	if nil != err {
-		return
-	}
-
-	node := treenode.GetNodeInTree(t, b.ID)
-	if nil == node {
-		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
-		return
-	}
-	blockLink2Ref0(currentTree, node, depth)
-	if ast.NodeHeading == node.Type {
-		children := treenode.HeadingChildren(node)
-		for _, c := range children {
-			blockLink2Ref0(currentTree, c, depth)
-		}
-	}
-	return
-}
-
-func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, depth *int) {
-	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if treenode.IsBlockLink(n) {
-			n.TextMarkType = strings.TrimSpace(strings.TrimPrefix(n.TextMarkType, "a") + " block-ref")
-			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
-			n.TextMarkBlockRefSubtype = "s"
-
-			blockLink2Ref(currentTree, n.TextMarkBlockRefID, depth)
-			return ast.WalkSkipChildren
-		} else if treenode.IsBlockRef(n) {
-			defID, _, _ := treenode.GetBlockRef(n)
-			blockLink2Ref(currentTree, defID, depth)
-		}
-		return ast.WalkContinue
-	})
-}
-
-// blockLink2RefShallow 只在当前导出树中将块链接转换为块引用，不进行跨文档递归。
-// 用于 blockRefMode 为 2/3 的场景，以避免在锚文本模式下遍历整个引用图。
-func blockLink2RefShallow(currentTree *parse.Tree) {
+func blockLink2Ref(currentTree *parse.Tree) {
 	ast.Walk(currentTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3285,7 +3219,7 @@ func blockLink2RefShallow(currentTree *parse.Tree) {
 	})
 }
 
-func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*refAsFootnotes, depth *int) {
+func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int) {
 	*depth++
 	if 4096 < *depth {
 		return
@@ -3304,17 +3238,35 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*r
 		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
 		return
 	}
-	collectFootnotesDefs0(currentTree, node, refFootnotes, depth)
+	collectFootnotesDefs0(currentTree, node, refFootnoteOrder, refFootnotesByID, depth)
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			collectFootnotesDefs0(currentTree, c, refFootnotes, depth)
+			collectFootnotesDefs0(currentTree, c, refFootnoteOrder, refFootnotesByID, depth)
 		}
 	}
-	return
 }
 
-func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes *[]*refAsFootnotes, depth *int) {
+func addRefFootnoteAndRecurse(currentTree *parse.Tree, defID, anchorText string, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int) {
+	if nil != refFootnotesByID[defID] {
+		return
+	}
+	if isNodeInTree(defID, currentTree) {
+		// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
+		return
+	}
+	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
+		anchorText = gulu.Str.SubStr(anchorText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
+	}
+	*refFootnoteOrder = append(*refFootnoteOrder, defID)
+	refFootnotesByID[defID] = &refAsFootnotes{
+		refNum:        strconv.Itoa(len(*refFootnoteOrder)),
+		refAnchorText: anchorText,
+	}
+	collectFootnotesDefs(currentTree, defID, refFootnoteOrder, refFootnotesByID, depth)
+}
+
+func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnoteOrder *[]string, refFootnotesByID map[string]*refAsFootnotes, depth *int) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -3322,22 +3274,15 @@ func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes
 
 		if treenode.IsBlockRef(n) {
 			defID, refText, _ := treenode.GetBlockRef(n)
-			if nil == getRefAsFootnotes(defID, refFootnotes) {
-				if isNodeInTree(defID, currentTree) {
-					// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
-					return ast.WalkSkipChildren
-				}
-				anchorText := refText
-				if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
-					anchorText = gulu.Str.SubStr(anchorText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
-				}
-				*refFootnotes = append(*refFootnotes, &refAsFootnotes{
-					defID:         defID,
-					refNum:        strconv.Itoa(len(*refFootnotes) + 1),
-					refAnchorText: anchorText,
-				})
-				collectFootnotesDefs(currentTree, defID, refFootnotes, depth)
+			addRefFootnoteAndRecurse(currentTree, defID, refText, refFootnoteOrder, refFootnotesByID, depth)
+			return ast.WalkSkipChildren
+		} else if treenode.IsBlockLink(n) {
+			defID := strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			anchorText := n.TextMarkTextContent
+			if "" == anchorText {
+				anchorText = sql.GetRefText(defID)
 			}
+			addRefFootnoteAndRecurse(currentTree, defID, anchorText, refFootnoteOrder, refFootnotesByID, depth)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
@@ -3359,17 +3304,7 @@ func isNodeInTree(id string, tree *parse.Tree) (ret bool) {
 	return
 }
 
-func getRefAsFootnotes(defID string, slice *[]*refAsFootnotes) *refAsFootnotes {
-	for _, e := range *slice {
-		if e.defID == defID {
-			return e
-		}
-	}
-	return nil
-}
-
 type refAsFootnotes struct {
-	defID         string
 	refNum        string
 	refAnchorText string
 }

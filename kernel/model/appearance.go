@@ -68,6 +68,40 @@ func InitAppearance() {
 	util.InitEmojiChars()
 }
 
+// SetTheme applies themeName to the slot(s) identified by modes (0 = light, 1 = dark).
+// It validates that the theme is available for each requested mode using the already-loaded
+// theme lists, then updates Conf. Call InitAppearance() after to persist and broadcast.
+// Returns a non-empty error message on failure.
+func SetTheme(themeName string, modes []int) string {
+	Conf.m.Lock()
+	defer Conf.m.Unlock()
+
+	for _, mode := range modes {
+		if mode == 0 {
+			if !containTheme(themeName, Conf.Appearance.LightThemes) {
+				return "theme not available for light mode: " + themeName
+			}
+		} else {
+			if !containTheme(themeName, Conf.Appearance.DarkThemes) {
+				return "theme not available for dark mode: " + themeName
+			}
+		}
+	}
+
+	for _, mode := range modes {
+		if mode == 0 {
+			Conf.Appearance.ThemeLight = themeName
+		} else {
+			Conf.Appearance.ThemeDark = themeName
+		}
+	}
+	// Only switch the active mode when targeting a single slot
+	if len(modes) == 1 {
+		Conf.Appearance.Mode = modes[0]
+	}
+	return ""
+}
+
 func containTheme(name string, themes []*conf.AppearanceTheme) bool {
 	for _, t := range themes {
 		if t.Name == name {

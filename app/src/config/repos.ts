@@ -185,11 +185,9 @@ const renderProvider = (provider: number) => {
     </button>
 </div>`;
     } else if (provider === 4) {
+        const isUnsupportedMobile = ["ios", "harmony"].includes(window.siyuan.config.system.container);
         return `<div class="b3-label b3-label--inner">
-    <div class="ft__error">
-        ${window.siyuan.languages.mobileNotSupport}
-    </div>
-    <div class="fn__hr"></div>
+    ${isUnsupportedMobile ? `<div class="ft__error">${window.siyuan.languages.mobileNotSupport}</div><div class="fn__hr"></div>` : ""}
     ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
     <div class="fn__hr"></div>
     <em>${window.siyuan.languages.proFeature}</em>
@@ -198,6 +196,10 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
     <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.local.endpoint}">
+</div>
+<div class="b3-label b3-label--inner fn__flex${window.siyuan.config.system.container === "android" ? "" : " fn__none"}">
+    <div class="fn__flex-1"></div>
+    <button id="browseLocalFolder" class="b3-button b3-button--outline fn__size200">Browse...</button>
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Timeout (s)</div>
@@ -405,6 +407,21 @@ const bindProviderEvent = () => {
             }
         });
     });
+
+    const browseBtn = providerPanelElement?.querySelector("#browseLocalFolder") as HTMLButtonElement;
+    if (browseBtn) {
+        browseBtn.addEventListener("click", () => {
+            (window as any).siyuanAndroidFolderPickerResult = (path: string) => {
+                delete (window as any).siyuanAndroidFolderPickerResult;
+                const endpointInput = providerPanelElement.querySelector<HTMLInputElement>("#endpoint");
+                if (endpointInput) {
+                    endpointInput.value = path;
+                    endpointInput.dispatchEvent(new Event("blur"));
+                }
+            };
+            (window as any).JSAndroid.pickLocalSyncFolder();
+        });
+    }
 };
 
 export const repos = {
@@ -424,7 +441,7 @@ export const repos = {
         <option value="0" ${window.siyuan.config.sync.provider === 0 ? "selected" : ""}>SiYuan</option>
         <option value="2" ${window.siyuan.config.sync.provider === 2 ? "selected" : ""}>S3</option>
         <option value="3" ${window.siyuan.config.sync.provider === 3 ? "selected" : ""}>WebDAV</option>
-        <option class="${!["std", "docker"].includes(window.siyuan.config.system.container) ? "fn__none" : ""}" value="4" ${window.siyuan.config.sync.provider === 4 ? "selected" : ""}>${window.siyuan.languages.localFileSystem}</option>
+        <option class="${["ios", "harmony"].includes(window.siyuan.config.system.container) ? "fn__none" : ""}" value="4" ${window.siyuan.config.sync.provider === 4 ? "selected" : ""}>${window.siyuan.languages.localFileSystem}</option>
     </select>
 </div>
 <div id="syncProviderPanel" class="b3-label">

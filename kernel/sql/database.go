@@ -30,7 +30,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"text/template"
 	"time"
 	"unicode/utf8"
@@ -52,6 +51,8 @@ var (
 	db             *sql.DB
 	historyDB      *sql.DB
 	assetContentDB *sql.DB
+
+	initDatabaseLock = sync.RWMutex{}
 )
 
 func init() {
@@ -67,17 +68,14 @@ func init() {
 	})
 }
 
-var (
-	initDatabaseLock       = sync.Mutex{}
-	isInitializingDatabase = atomic.Bool{}
-)
-
-func InitDatabase(forceRebuild bool) (err error) {
+func InitDatabase(forceRebuild bool) {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
-	isInitializingDatabase.Store(true)
-	defer isInitializingDatabase.Store(false)
+	initDatabase(forceRebuild)
+}
+
+func initDatabase(forceRebuild bool) {
 	ClearCache()
 	disableCache()
 	defer enableCache()
@@ -101,14 +99,10 @@ func InitDatabase(forceRebuild bool) (err error) {
 
 	// 不存在库或者版本不一致都会走到这里
 
-	closeDatabase()
-	util.RemoveDatabaseFile(util.DBPath)
-
-	initDBConnection()
 	initDBTables()
+	vacuum()
 
 	logging.LogInfof("reinitialized database [%s]", util.DBPath)
-	return
 }
 
 func initDBTables() {
@@ -232,9 +226,7 @@ func initDBTables() {
 }
 
 func initDBConnection() {
-	if nil != db {
-		closeDatabase()
-	}
+	closeDatabase()
 
 	util.LogDatabaseSize(util.DBPath)
 	dsn := util.DBPath + "?_journal_mode=WAL" +
@@ -385,10 +377,8 @@ var (
 func SetCaseSensitive(b bool) {
 	caseSensitive = b
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignore setting case sensitive to [%v]", b)
-		return
-	}
+	initDatabaseLock.Lock()
+	defer initDatabaseLock.Unlock()
 
 	if nil == db {
 		return
@@ -1319,10 +1309,8 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 		return nil
 	}
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
-		return nil
-	}
+	initDatabaseLock.RLock()
+	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil
@@ -1336,10 +1324,8 @@ func queryTx(tx *sql.Tx, query string, args ...interface{}) (*sql.Rows, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
-		return nil, errors.New("database is initializing")
-	}
+	initDatabaseLock.RLock()
+	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil, errors.New("database is nil")
@@ -1353,10 +1339,8 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
-		return nil, errors.New("database is initializing")
-	}
+	initDatabaseLock.RLock()
+	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil, errors.New("database is nil")
@@ -1502,8 +1486,8 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []interface{}) (err er
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
-			closeDatabase()
 			util.RemoveDatabaseFile(util.DBPath)
+			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
 		}
 		return
@@ -1517,8 +1501,7 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
-			closeDatabase()
-			util.RemoveDatabaseFile(util.DBPath)
+			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmt, args)
 		}
 		return
@@ -1621,6 +1604,10 @@ func Vacuum() {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
+	vacuum()
+}
+
+func vacuum() {
 	if nil != db {
 		if _, err := db.Exec("VACUUM"); nil != err {
 			logging.LogErrorf("vacuum database failed: %s", err)
@@ -1636,5 +1623,4 @@ func Vacuum() {
 			logging.LogErrorf("vacuum asset content database failed: %s", err)
 		}
 	}
-	return
 }

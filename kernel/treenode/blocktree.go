@@ -20,12 +20,10 @@ import (
 	"bytes"
 	"database/sql"
 	"errors"
-	"os"
 	"runtime"
 	"runtime/debug"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/88250/gulu"
@@ -48,19 +46,13 @@ type BlockTree struct {
 
 var (
 	db *sql.DB
+
+	initDatabaseLock = sync.RWMutex{}
 )
 
-var (
-	initDatabaseLock       = sync.Mutex{}
-	isInitializingDatabase = atomic.Bool{}
-)
-
-func initDatabase(forceRebuild bool) (err error) {
+func initDatabase(forceRebuild bool) {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
-
-	isInitializingDatabase.Store(true)
-	defer isInitializingDatabase.Store(false)
 
 	initDBConnection()
 
@@ -73,14 +65,10 @@ func initDatabase(forceRebuild bool) (err error) {
 		return
 	}
 
-	closeDatabase()
-	util.RemoveDatabaseFile(util.BlockTreeDBPath)
-
-	initDBConnection()
 	initDBTables()
+	vacuum()
 
 	logging.LogInfof("reinitialized database [%s]", util.BlockTreeDBPath)
-	return
 }
 
 func initDBTables() {
@@ -105,9 +93,7 @@ func initDBTables() {
 }
 
 func initDBConnection() {
-	if nil != db {
-		closeDatabase()
-	}
+	closeDatabase()
 
 	util.LogDatabaseSize(util.BlockTreeDBPath)
 	dsn := util.BlockTreeDBPath + "?_journal_mode=WAL" +
@@ -637,8 +623,7 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
-			closeDatabase()
-			util.RemoveDatabaseFile(util.BlockTreeDBPath)
+			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 		}
 		return
@@ -655,8 +640,7 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
 
 			if strings.Contains(err.Error(), "database disk image is malformed") {
-				closeDatabase()
-				util.RemoveDatabaseFile(util.BlockTreeDBPath)
+				initDatabase(true)
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 			}
 			return
@@ -665,13 +649,7 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 }
 
 func InitBlockTree(force bool) {
-	err := initDatabase(force)
-	if err != nil {
-		logging.LogErrorf("init database failed: %s", err)
-		os.Exit(logging.ExitCodeUnavailableDatabase)
-		return
-	}
-	return
+	initDatabase(force)
 }
 
 func CeilTreeCount(count int) int {
@@ -707,10 +685,8 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 		return nil
 	}
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
-		return nil
-	}
+	initDatabaseLock.RLock()
+	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil
@@ -724,10 +700,8 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring query [%s]", query)
-		return nil, errors.New("database is initializing")
-	}
+	initDatabaseLock.RLock()
+	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil, errors.New("database is nil")
@@ -741,13 +715,19 @@ func exec(stmt string, args ...interface{}) (sql.Result, error) {
 		return nil, errors.New("statement is empty")
 	}
 
-	if isInitializingDatabase.Load() {
-		logging.LogWarnf("database is initializing, ignoring exec [%s]", stmt)
-		return nil, errors.New("database is initializing")
-	}
+	initDatabaseLock.RLock()
+	defer initDatabaseLock.RUnlock()
 
 	if nil == db {
 		return nil, errors.New("database is nil")
 	}
 	return db.Exec(stmt, args...)
+}
+
+func vacuum() {
+	if nil != db {
+		if _, err := db.Exec("VACUUM"); nil != err {
+			logging.LogErrorf("vacuum database failed: %s", err)
+		}
+	}
 }

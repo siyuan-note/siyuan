@@ -564,7 +564,7 @@ func RemoveDatabaseFile(dbPath string) {
 	if gulu.File.IsExist(dbPath) {
 		err := os.RemoveAll(dbPath)
 		if err != nil {
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", dbPath, err)
+			logging.LogErrorf("remove database file [%s] failed: %s", dbPath, err)
 			return
 		}
 	}
@@ -572,7 +572,7 @@ func RemoveDatabaseFile(dbPath string) {
 	if gulu.File.IsExist(dbPath + "-shm") {
 		err := os.RemoveAll(dbPath + "-shm")
 		if err != nil {
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", dbPath+"-shm", err)
+			logging.LogErrorf("remove database file [%s] failed: %s", dbPath+"-shm", err)
 			return
 		}
 	}
@@ -580,7 +580,7 @@ func RemoveDatabaseFile(dbPath string) {
 	if gulu.File.IsExist(dbPath + "-wal") {
 		err := os.RemoveAll(dbPath + "-wal")
 		if err != nil {
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "remove database file [%s] failed: %s", dbPath+"-wal", err)
+			logging.LogErrorf("remove database file [%s] failed: %s", dbPath+"-wal", err)
 			return
 		}
 	}

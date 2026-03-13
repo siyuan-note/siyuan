@@ -822,10 +822,7 @@ func fullReindex() {
 
 	FlushTxQueue()
 
-	if err := sql.InitDatabase(true); err != nil {
-		os.Exit(logging.ExitCodeUnavailableDatabase)
-		return
-	}
+	sql.InitDatabase(true)
 
 	sql.IndexIgnoreCached = false
 	openedBoxes := Conf.GetOpenedBoxes()

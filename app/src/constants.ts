@@ -240,6 +240,7 @@ export abstract class Constants {
     public static readonly MENU_BAR_MORE = "barmore"; // 顶栏更多菜单
     public static readonly MENU_STATUS_HELP = "statusHelp"; // 状态栏帮助菜单
     public static readonly MENU_STATUS_BACKGROUND_TASK = "statusBackgroundTask"; // 状态栏后台任务菜单
+    public static readonly MENU_DOCK = "dockMenu"; // 桌面端 dock 图标菜单
     public static readonly MENU_DOCK_MOBILE = "dockMobileMenu"; // 移动端侧栏插件选项菜单
 
     public static readonly MENU_BLOCK_SINGLE = "block-single"; // 单选块菜单

@@ -1,7 +1,9 @@
 import {MenuItem} from "./Menu";
+import {Constants} from "../constants";
 
 const moveMenuItem = (label: string, target: Element) => {
     return new MenuItem({
+        id: label,
         label: window.siyuan.languages[label],
         icon: label.replace("moveTo", "icon"),
         click: () => {
@@ -18,6 +20,7 @@ const moveMenuItem = (label: string, target: Element) => {
 
 export const initDockMenu = (target: Element) => {
     window.siyuan.menus.menu.remove();
+    window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_DOCK);
     window.siyuan.menus.menu.append(moveMenuItem("moveToLeftTop", target).element);
     window.siyuan.menus.menu.append(moveMenuItem("moveToLeftBottom", target).element);
     window.siyuan.menus.menu.append(moveMenuItem("moveToRightTop", target).element);

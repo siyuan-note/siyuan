@@ -185,11 +185,9 @@ const renderProvider = (provider: number) => {
     </button>
 </div>`;
     } else if (provider === 4) {
+        const isUnsupportedMobile = ["ios", "harmony"].includes(window.siyuan.config.system.container);
         return `<div class="b3-label b3-label--inner">
-    <div class="ft__error">
-        ${window.siyuan.languages.mobileNotSupport}
-    </div>
-    <div class="fn__hr"></div>
+    ${isUnsupportedMobile ? `<div class="ft__error">${window.siyuan.languages.mobileNotSupport}</div><div class="fn__hr"></div>` : ""}
     ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
     <div class="fn__hr"></div>
     <em>${window.siyuan.languages.proFeature}</em>
@@ -424,7 +422,7 @@ export const repos = {
         <option value="0" ${window.siyuan.config.sync.provider === 0 ? "selected" : ""}>SiYuan</option>
         <option value="2" ${window.siyuan.config.sync.provider === 2 ? "selected" : ""}>S3</option>
         <option value="3" ${window.siyuan.config.sync.provider === 3 ? "selected" : ""}>WebDAV</option>
-        <option class="${!["std", "docker"].includes(window.siyuan.config.system.container) ? "fn__none" : ""}" value="4" ${window.siyuan.config.sync.provider === 4 ? "selected" : ""}>${window.siyuan.languages.localFileSystem}</option>
+        <option class="${["ios", "harmony"].includes(window.siyuan.config.system.container) ? "fn__none" : ""}" value="4" ${window.siyuan.config.sync.provider === 4 ? "selected" : ""}>${window.siyuan.languages.localFileSystem}</option>
     </select>
 </div>
 <div id="syncProviderPanel" class="b3-label">

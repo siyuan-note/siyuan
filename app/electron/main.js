@@ -482,26 +482,13 @@ const initMainWindow = () => {
         cb({responseHeaders: details.responseHeaders});
     });
 
-    currentWindow.webContents.on("did-finish-load", () => {
-        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
-        if (siyuanOpenURL) {
-            if (currentWindow.isMinimized()) {
-                currentWindow.restore();
-            }
-            currentWindow.show();
-            setTimeout(() => { // 等待界面js执行完毕
-                writeLog(siyuanOpenURL);
-                currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
-            }, 2000);
+    let mainShown = false;
+    const showMainWindowOnce = (reason) => {
+        if (mainShown || !currentWindow || currentWindow.isDestroyed()) {
+            return;
         }
-    });
-
-    if (windowState.isDevToolsOpened) {
-        currentWindow.webContents.openDevTools({mode: "bottom"});
-    }
-
-    // 主界面事件监听
-    currentWindow.once("ready-to-show", () => {
+        mainShown = true;
+        writeLog("show main window [" + reason + "]");
         if (isOpenAsHidden()) {
             currentWindow.minimize();
         } else {
@@ -514,7 +501,44 @@ const initMainWindow = () => {
         }
         if (bootWindow && !bootWindow.isDestroyed()) {
             bootWindow.destroy();
+            writeLog("destroy boot window");
         }
+    };
+
+    currentWindow.webContents.on("did-finish-load", () => {
+        let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
+        if (siyuanOpenURL) {
+            if (currentWindow.isMinimized()) {
+                currentWindow.restore();
+            }
+            currentWindow.show();
+            setTimeout(() => { // 等待界面js执行完毕
+                writeLog(siyuanOpenURL);
+                currentWindow.webContents.send("siyuan-open-url", siyuanOpenURL);
+            }, 2000);
+        }
+
+        if (!mainShown) {
+            // 页面已经加载完成，但 ready-to-show 事件无法触发、未显示主窗口 https://github.com/siyuan-note/siyuan/issues/17212
+            setTimeout(() => {
+                if (currentWindow && !currentWindow.isDestroyed() && !currentWindow.isVisible()) {
+                    showMainWindowOnce("did-finish-load");
+                }
+            }, 1000);
+        }
+    });
+
+    currentWindow.webContents.on("did-fail-load", (_event, errorCode, errorDesc, url) => {
+        writeLog("main window did-fail-load, code=" + errorCode + ", desc=" + errorDesc + ", url=" + url);
+    });
+
+    if (windowState.isDevToolsOpened) {
+        currentWindow.webContents.openDevTools({mode: "bottom"});
+    }
+
+    // 主界面事件监听
+    currentWindow.once("ready-to-show", () => {
+        showMainWindowOnce("ready-to-show");
     });
 
     // 菜单

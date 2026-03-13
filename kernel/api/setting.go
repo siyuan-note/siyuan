@@ -570,49 +570,45 @@ func setTheme(c *gin.Context) {
 		return
 	}
 
-	themeName, ok := arg["theme"].(string)
-	if !ok || themeName == "" {
-		ret.Code = -1
-		ret.Msg = "theme is required"
+	var theme string
+	var modesRaw []any
+	var appearanceMode string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("theme", false, &theme),
+		util.BindJsonArg("modes", false, &modesRaw),
+		util.BindJsonArg("appearanceMode", false, &appearanceMode),
+	) {
 		return
 	}
 
-	modesRaw, ok := arg["modes"].([]interface{})
-	if !ok || len(modesRaw) == 0 {
-		ret.Code = -1
-		ret.Msg = "modes is required ([0] for light, [1] for dark, [0,1] for both)"
-		return
-	}
-
-	var modes []int
-	seen := map[int]bool{}
-	for _, m := range modesRaw {
-		mf, isMf := m.(float64)
-		if !isMf {
-			ret.Code = -1
-			ret.Msg = "modes values must be integers"
-			return
-		}
-		mi := int(mf)
-		if mi != 0 && mi != 1 {
-			ret.Code = -1
-			ret.Msg = "modes values must be 0 (light) or 1 (dark)"
-			return
-		}
-		if !seen[mi] {
+	modes := make([]int, 0, 2)
+	if theme != "" {
+		for _, m := range modesRaw {
+			mf, ok := m.(float64)
+			if !ok {
+				break
+			}
+			mi := int(mf)
+			if mi != 0 && mi != 1 {
+				break
+			}
 			modes = append(modes, mi)
-			seen[mi] = true
+		}
+		if len(modes) == 0 {
+			ret.Code = -1
+			ret.Msg = "[modes] is required ([0] for light, [1] for dark, [0,1] for both)"
+			return
 		}
 	}
+	// 没有 theme 时静默忽略 modes
 
-	if errMsg := model.SetTheme(themeName, modes); errMsg != "" {
+	if err := model.SetTheme(theme, modes, appearanceMode); err != nil {
 		ret.Code = -1
-		ret.Msg = errMsg
+		ret.Msg = err.Error()
 		return
 	}
 
 	model.InitAppearance()
-	ret.Data = model.Conf.Appearance
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 

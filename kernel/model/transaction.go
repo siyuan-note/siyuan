@@ -1822,7 +1822,7 @@ type Operation struct {
 	Action     string      `json:"action"`
 	Data       interface{} `json:"data"`
 	ID         string      `json:"id"`
-	RootID     string      `json:"rootID"`
+	RootID     string      `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
 	ParentID   string      `json:"parentID"`
 	PreviousID string      `json:"previousID"`
 	NextID     string      `json:"nextID"`

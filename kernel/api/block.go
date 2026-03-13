@@ -741,6 +741,22 @@ func getBlockDOM(c *gin.Context) {
 
 	id := arg["id"].(string)
 	dom := model.GetBlockDOM(id)
+
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetDisablePublishAccess(publishAccess)
+		bt := treenode.GetBlockTree(id)
+		if bt != nil {
+			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
+				dom = ""
+			}
+			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				dom = ""
+			}
+		}
+	}
+
 	ret.Data = map[string]string{
 		"id":  id,
 		"dom": dom,
@@ -763,6 +779,22 @@ func getBlockDOMs(c *gin.Context) {
 	}
 
 	doms := model.GetBlockDOMs(ids)
+
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetDisablePublishAccess(publishAccess)
+		bts := treenode.GetBlockTrees(ids)
+		for id, bt := range bts {
+			_, ok := doms[id]
+			if ok {
+				passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+				if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+					doms[id] = ""
+				}
+			}
+		}
+	}
+
 	ret.Data = doms
 }
 
@@ -777,6 +809,22 @@ func getBlockDOMWithEmbed(c *gin.Context) {
 
 	id := arg["id"].(string)
 	dom := model.GetBlockDOMWithEmbed(id)
+
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetDisablePublishAccess(publishAccess)
+		bt := treenode.GetBlockTree(id)
+		if bt != nil {
+			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
+				dom = ""
+			}
+			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				dom = ""
+			}
+		}
+	}
+
 	ret.Data = map[string]string{
 		"id":  id,
 		"dom": dom,
@@ -799,6 +847,22 @@ func getBlockDOMsWithEmbed(c *gin.Context) {
 	}
 
 	doms := model.GetBlockDOMsWithEmbed(ids)
+
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetDisablePublishAccess(publishAccess)
+		bts := treenode.GetBlockTrees(ids)
+		for id, bt := range bts {
+			_, ok := doms[id]
+			if ok {
+				passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+				if (password != "" && !model.CheckPublishAuthCookie(c, passwordID, password)) || !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+					doms[id] = ""
+				}
+			}
+		}
+	}
+
 	ret.Data = doms
 }
 
@@ -833,13 +897,13 @@ func getBlockKramdown(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
+		publishIgnore := model.GetDisablePublishAccess(publishAccess)
 		bt := treenode.GetBlockTree(id)
 		if bt != nil {
 			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 			if password != "" && !model.CheckPublishAuthCookie(c, passwordID, password) {
 				kramdown = ""
 			}
-			publishIgnore := model.GetDisablePublishAccess(publishAccess)
 			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
 				kramdown = ""
 			}

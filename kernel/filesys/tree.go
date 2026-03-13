@@ -129,6 +129,8 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		return
 	}
 
+	data = removeUnescapedUnicodeNull(data)
+
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
 	if nil == err {
 		cache.SetTreeData(rootID, data)

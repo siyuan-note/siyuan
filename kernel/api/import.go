@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -188,6 +189,23 @@ func importStdMd(c *gin.Context) {
 	notebook := arg["notebook"].(string)
 	localPath := arg["localPath"].(string)
 	toPath := arg["toPath"].(string)
+
+	if util.IsSubPath(util.WorkingDir, localPath) {
+		msg := fmt.Sprintf("import from local path [%s] failed: local path is sub path of working dir", localPath)
+		logging.LogErrorf(msg)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+
+	if util.IsSensitivePath(localPath) {
+		msg := fmt.Sprintf("import from local path [%s] failed: local path is sensitive path", localPath)
+		logging.LogErrorf(msg)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+
 	err := model.ImportFromLocalPath(notebook, localPath, toPath)
 	if err != nil {
 		ret.Code = -1

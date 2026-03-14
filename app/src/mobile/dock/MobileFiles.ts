@@ -79,7 +79,7 @@ export class MobileFiles extends Model {
                             this.selectItem(data.data.box.id, data.data.path);
                             break;
                         case "renamenotebook":
-                            this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = data.data.name;
+                            this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
                             break;
                         case "rename":
                             this.onRename(data.data);

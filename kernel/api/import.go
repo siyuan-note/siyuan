@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -68,8 +69,17 @@ func importSY(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	writePath := filepath.Join(util.TempDir, "import", file.Filename)
+
+	writePath := filepath.Join(importDir, file.Filename)
+	if !util.IsSubPath(importDir, writePath) {
+		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
+		ret.Code = -1
+		ret.Msg = "import path is not sub path of import dir"
+		return
+	}
+
 	defer os.RemoveAll(writePath)
+
 	writer, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logging.LogErrorf("open import .sy.zip [%s] failed: %s", writePath, err)
@@ -119,14 +129,14 @@ func importData(c *gin.Context) {
 		return
 	}
 
-	tmpImport := filepath.Join(util.TempDir, "import")
-	err = os.MkdirAll(tmpImport, 0755)
+	importDir := filepath.Join(util.TempDir, "import")
+	err = os.MkdirAll(importDir, 0755)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = "create temp import dir failed"
 		return
 	}
-	dataZipPath := filepath.Join(tmpImport, util.CurrentTimeSecondsStr()+".zip")
+	dataZipPath := filepath.Join(importDir, util.CurrentTimeSecondsStr()+".zip")
 	defer os.RemoveAll(dataZipPath)
 	dataZipFile, err := os.Create(dataZipPath)
 	if err != nil {
@@ -179,6 +189,23 @@ func importStdMd(c *gin.Context) {
 	notebook := arg["notebook"].(string)
 	localPath := arg["localPath"].(string)
 	toPath := arg["toPath"].(string)
+
+	if util.IsSubPath(util.WorkingDir, localPath) {
+		msg := fmt.Sprintf("import from local path [%s] failed: local path is sub path of working dir", localPath)
+		logging.LogErrorf(msg)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+
+	if util.IsSensitivePath(localPath) {
+		msg := fmt.Sprintf("import from local path [%s] failed: local path is sensitive path", localPath)
+		logging.LogErrorf(msg)
+		ret.Code = -1
+		ret.Msg = msg
+		return
+	}
+
 	err := model.ImportFromLocalPath(notebook, localPath, toPath)
 	if err != nil {
 		ret.Code = -1
@@ -225,8 +252,17 @@ func importZipMd(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
 	writePath := filepath.Join(util.TempDir, "import", file.Filename)
+	if !util.IsSubPath(importDir, writePath) {
+		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
+		ret.Code = -1
+		ret.Msg = "import path is not sub path of import dir"
+		return
+	}
+
 	defer os.RemoveAll(writePath)
+
 	writer, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logging.LogErrorf("open import .zip [%s] failed: %s", writePath, err)

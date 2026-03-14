@@ -636,10 +636,6 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
                 action: "addFlashcards",
                 deckID: Constants.QUICK_DECK_ID,
                 blockIDs: ids,
-            }], [{
-                action: "removeFlashcards",
-                deckID: Constants.QUICK_DECK_ID,
-                blockIDs: ids,
             }]);
         }
         event.preventDefault();

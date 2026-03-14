@@ -1181,7 +1181,7 @@
   "md29": "Numero di spazi del Tab",
   "md30": "Sostituisce solo con spazi quando si preme Tab, non sostituisce le tabulazioni (Tab) negli appunti con spazi",
   "md31": "Riga a capo automatico nel blocco di codice",
-  "md32": "Dopo l'abilitazione, il contenuto nel blocco di codice verrà avvolto automaticamente",
+  "md32": "Dopo l'abilitazione, il contenuto che supera la larghezza del blocco di codice verrà avvolto automaticamente",
   "md33": "Riferimento virtuale",
   "md34": "Dopo l'abilitazione, identificherà automaticamente la possibile relazione di riferimento in base al nome, alias e testo di ancoraggio del riferimento al blocco esistente",
   "md35": "Lista di esclusione delle parole chiave di riferimento virtuale",

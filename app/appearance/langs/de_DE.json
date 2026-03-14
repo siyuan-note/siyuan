@@ -1181,7 +1181,7 @@
   "md29": "Anzahl der Tabulatoren",
   "md30": "Ersetzt nur durch Leerzeichen, wenn Tab gedrückt wird, ersetzt keine Tabs (Tab) in der Zwischenablage durch Leerzeichen",
   "md31": "Codeblock-Wraps",
-  "md32": "Nach der Aktivierung wird der Inhalt im Codeblock automatisch umgebrochen",
+  "md32": "Nach der Aktivierung wird Inhalt, der die Breite des Codeblocks überschreitet, automatisch umgebrochen",
   "md33": "Virtuelle Referenz",
   "md34": "Nach der Aktivierung wird sie automatisch mögliche Referenzbeziehungen nach Name, Alias und Ankertext des bestehenden Blockrefs erkennen.",
   "md35": "Virtuelle Referenz-Stichwort-Ausschlussliste",

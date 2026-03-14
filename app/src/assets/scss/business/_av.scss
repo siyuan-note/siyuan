@@ -710,6 +710,13 @@
       &:last-child {
         margin-right: 0;
       }
+
+      svg {
+        height: 1.625em;
+        width: 1em;
+        vertical-align: bottom;
+        color: var(--b3-theme-on-surface-light);
+      }
     }
 
     .block__icon {

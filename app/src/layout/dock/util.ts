@@ -146,6 +146,7 @@ export const openOutline = async (options: {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
     const newWnd = wnd.split("lr");
+
     if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.rootId});
         options.title = response.data.name || window.siyuan.languages.untitled;

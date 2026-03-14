@@ -353,18 +353,28 @@ func IsSensitivePath(p string) bool {
 	if p == "" {
 		return false
 	}
-	pp := filepath.Clean(strings.ToLower(p))
+	toCheckPathLower := filepath.Clean(strings.ToLower(p))
+	toCheckNameLower := filepath.Base(toCheckPathLower)
 
 	// 敏感目录前缀（UNIX 风格）
 	prefixes := []string{
-		"/etc/ssh",
+		"/.",
+		"/etc",
 		"/root",
 		"/etc",
-		"/var/lib/",
-		"/.",
+		"/var",
+		"/proc",
+		"/sys",
+		"/run",
+		"/bin",
+		"/boot",
+		"/dev",
+		"/lib",
+		"/srv",
+		"/tmp",
 	}
 	for _, pre := range prefixes {
-		if strings.HasPrefix(pp, pre) {
+		if strings.HasPrefix(toCheckPathLower, pre) {
 			return true
 		}
 	}
@@ -375,7 +385,7 @@ func IsSensitivePath(p string) bool {
 		`c:\windows\system`,
 	}
 	for _, wp := range winPrefixes {
-		if strings.HasPrefix(pp, strings.ToLower(wp)) {
+		if strings.HasPrefix(toCheckPathLower, strings.ToLower(wp)) {
 			return true
 		}
 	}
@@ -386,17 +396,18 @@ func IsSensitivePath(p string) bool {
 		strings.ToLower(filepath.Join(os.Getenv("ProgramData"), "Microsoft", "Windows", "Start Menu")),
 	}
 	for _, sp := range startMenuPrefixes {
-		if strings.HasPrefix(pp, sp) {
+		if strings.HasPrefix(toCheckPathLower, sp) {
 			return true
 		}
 	}
 
 	// 工作空间/conf 目录（小写比较）
 	workspaceConfPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "conf"))
-	if strings.HasPrefix(pp, workspaceConfPrefix) {
+	if strings.HasPrefix(toCheckPathLower, workspaceConfPrefix) {
 		return true
 	}
 
+	// 用户家目录下的敏感目录（小写比较）
 	homePrefixes := []string{
 		strings.ToLower(filepath.Join(HomeDir, ".ssh")),
 		strings.ToLower(filepath.Join(HomeDir, ".config")),
@@ -405,7 +416,18 @@ func IsSensitivePath(p string) bool {
 		strings.ToLower(filepath.Join(HomeDir, ".profile")),
 	}
 	for _, hp := range homePrefixes {
-		if strings.HasPrefix(pp, hp) {
+		if strings.HasPrefix(toCheckPathLower, hp) {
+			return true
+		}
+	}
+
+	// 特定的文件名（小写比较）
+	namePrefixes := []string{
+		strings.ToLower("credentials"),
+		strings.ToLower("id_"),
+	}
+	for _, np := range namePrefixes {
+		if strings.HasPrefix(toCheckNameLower, np) {
 			return true
 		}
 	}

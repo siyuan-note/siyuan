@@ -29,7 +29,8 @@ var (
 	WebSocketServer *melody.Melody
 
 	// map[string]map[string]*melody.Session{}
-	sessions = sync.Map{} // {appId, {sessionId, session}}
+	sessions     = sync.Map{} // {appId, {sessionId, session}}
+	authSessions = sync.Map{}
 )
 
 func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg string, data interface{}) {
@@ -113,12 +114,22 @@ func AddPushChan(session *melody.Session) {
 	typ := session.Request.URL.Query().Get("type")
 	session.Set("type", typ)
 
-	if appSessions, ok := sessions.Load(appID); !ok {
-		appSess := &sync.Map{}
-		appSess.Store(id, session)
-		sessions.Store(appID, appSess)
+	if "auth" == id {
+		if appSessions, ok := authSessions.Load(appID); !ok {
+			appSess := &sync.Map{}
+			appSess.Store(id, session)
+			authSessions.Store(appID, appSess)
+		} else {
+			(appSessions.(*sync.Map)).Store(id, session)
+		}
 	} else {
-		(appSessions.(*sync.Map)).Store(id, session)
+		if appSessions, ok := sessions.Load(appID); !ok {
+			appSess := &sync.Map{}
+			appSess.Store(id, session)
+			sessions.Store(appID, appSess)
+		} else {
+			(appSessions.(*sync.Map)).Store(id, session)
+		}
 	}
 }
 
@@ -130,12 +141,23 @@ func RemovePushChan(session *melody.Session) {
 		return
 	}
 
-	appSess, _ := sessions.Load(app)
-	if nil != appSess {
-		appSessions := appSess.(*sync.Map)
-		appSessions.Delete(id)
-		if 1 > lenOfSyncMap(appSessions) {
-			sessions.Delete(app)
+	if "auth" == id {
+		appSess, _ := authSessions.Load(app)
+		if nil != appSess {
+			appSessions := appSess.(*sync.Map)
+			appSessions.Delete(id)
+			if 1 > lenOfSyncMap(appSessions) {
+				authSessions.Delete(app)
+			}
+		}
+	} else {
+		appSess, _ := sessions.Load(app)
+		if nil != appSess {
+			appSessions := appSess.(*sync.Map)
+			appSessions.Delete(id)
+			if 1 > lenOfSyncMap(appSessions) {
+				sessions.Delete(app)
+			}
 		}
 	}
 }
@@ -448,6 +470,10 @@ func broadcastOthers(msg []byte, excludeSID string) {
 
 func CountSessions() (ret int) {
 	sessions.Range(func(key, value interface{}) bool {
+		ret++
+		return true
+	})
+	authSessions.Range(func(key, value interface{}) bool {
 		ret++
 		return true
 	})

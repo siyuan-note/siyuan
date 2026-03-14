@@ -1181,7 +1181,7 @@
   "md29": "Número de espaços Tab",
   "md30": "Substitui por espaços apenas quando Tab é pressionado, não substitui tabs (Tab) na área de transferência por espaços",
   "md31": "Quebra de linha do bloco de código",
-  "md32": "Quando ativado, o conteúdo no bloco de código quebrará linha automaticamente",
+  "md32": "Quando ativado, o conteúdo que exceder a largura do bloco de código quebrará linha automaticamente",
   "md33": "Referência Virtual",
   "md34": "Quando ativado, identificará automaticamente a possível relação de referência de acordo com o nome, apelido e texto âncora da referência de bloco existente",
   "md35": "Lista de exclusão de palavras-chave de Referência Virtual",

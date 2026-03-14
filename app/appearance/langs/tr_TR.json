@@ -1181,7 +1181,7 @@
   "md29": "Sekme boşluğu sayısı",
   "md30": "Sadece Tab tuşuna basıldığında boşluklarla değiştir, panodaki sekmeleri boşlukla değiştirme",
   "md31": "Kod bloğu satır kaydırması",
-  "md32": "Etkinleştirildiğinde kod bloğu içeriği otomatik olarak satır kaydırır",
+  "md32": "Etkinleştirildiğinde kod bloğu genişliğini aşan içerik otomatik olarak satır kaydırır",
   "md33": "Sanal referans",
   "md34": "Etkinleştirildiğinde mevcut blok referanslarının ad, takma ad ve bağlantı metnine göre olası referans ilişkilerini otomatik belirler",
   "md35": "Sanal referans hariç tutulacak kelimeler listesi",

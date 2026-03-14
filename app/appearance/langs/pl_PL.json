@@ -1181,7 +1181,7 @@
   "md29": "Ilość spacji Tab",
   "md30": "Zastępuje spacjami tylko podczas naciśnięcia Tab, nie zastępuje tabulatorów (Tab) w schowku spacjami",
   "md31": "Zawijanie bloku kodu",
-  "md32": "Po włączeniu, zawartość w bloku kodu automatycznie się zawija",
+  "md32": "Po włączeniu, zawartość przekraczająca szerokość bloku kodu automatycznie się zawija",
   "md33": "Wirtualna referencja",
   "md34": "Po włączeniu, automatycznie zidentyfikuje możliwą relację referencyjną według nazwy, aliasu i tekstu zakotwienia istniejącego odniesienia bloku",
   "md35": "Lista słów kluczowych wykluczenia referencji wirtualnych",

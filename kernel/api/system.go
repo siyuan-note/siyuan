@@ -441,8 +441,15 @@ func importConf(c *gin.Context) {
 		return
 	}
 
-	tmp := filepath.Join(importDir, f.Filename)
-	if err = os.WriteFile(tmp, data, 0644); err != nil {
+	writePath := filepath.Join(importDir, f.Filename)
+	if !util.IsSubPath(importDir, writePath) {
+		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
+		ret.Code = -1
+		ret.Msg = "import path is not sub path of import dir"
+		return
+	}
+
+	if err = os.WriteFile(writePath, data, 0644); err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -451,15 +458,15 @@ func importConf(c *gin.Context) {
 
 	tmpDir := filepath.Join(importDir, "conf")
 	os.RemoveAll(tmpDir)
-	if strings.HasSuffix(strings.ToLower(tmp), ".zip") {
-		if err = gulu.Zip.Unzip(tmp, tmpDir); err != nil {
+	if strings.HasSuffix(strings.ToLower(writePath), ".zip") {
+		if err = gulu.Zip.Unzip(writePath, tmpDir); err != nil {
 			logging.LogErrorf("import conf failed: %s", err)
 			ret.Code = -1
 			ret.Msg = err.Error()
 			return
 		}
-	} else if strings.HasSuffix(strings.ToLower(tmp), ".json") {
-		if err = gulu.File.CopyFile(tmp, filepath.Join(tmpDir, f.Filename)); err != nil {
+	} else if strings.HasSuffix(strings.ToLower(writePath), ".json") {
+		if err = gulu.File.CopyFile(writePath, filepath.Join(tmpDir, f.Filename)); err != nil {
 			logging.LogErrorf("import conf failed: %s", err)
 			ret.Code = -1
 			ret.Msg = err.Error()
@@ -486,8 +493,8 @@ func importConf(c *gin.Context) {
 		return
 	}
 
-	tmp = filepath.Join(tmpDir, entries[0].Name())
-	data, err = os.ReadFile(tmp)
+	writePath = filepath.Join(tmpDir, entries[0].Name())
+	data, err = os.ReadFile(writePath)
 	if err != nil {
 		logging.LogErrorf("import conf failed: %s", err)
 		ret.Code = -1

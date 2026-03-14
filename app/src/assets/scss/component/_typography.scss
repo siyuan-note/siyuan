@@ -74,6 +74,10 @@
     direction: ltr;
     user-select: text;
     display: inline;
+    // https://github.com/siyuan-note/siyuan/issues/17211
+    &:after {
+      content: '‎';
+    }
     // https://github.com/siyuan-note/siyuan/issues/3081 test $\begin{bmatrix}   a & b \\c & d \\   e & f\end{bmatrix}$ test
     // https://ld246.com/article/1626937851892 <u>test $\mu_p$ test</u>
     // https://ld246.com/article/1636204769623  test $\rightarrow$ test

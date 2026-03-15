@@ -441,9 +441,22 @@ const initMainWindow = () => {
     net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
         return response.json();
     }).then((response) => {
-        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
+        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(async () => {
             // 加载主界面
-            currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
+            await currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
+            if (isOpenAsHidden()) {
+                currentWindow.minimize();
+            } else {
+                currentWindow.show();
+                if (windowState.isMaximized) {
+                    currentWindow.maximize();
+                } else {
+                    currentWindow.unmaximize();
+                }
+            }
+            if (bootWindow && !bootWindow.isDestroyed()) {
+                bootWindow.destroy();
+            }
         });
     });
 
@@ -499,23 +512,6 @@ const initMainWindow = () => {
     if (windowState.isDevToolsOpened) {
         currentWindow.webContents.openDevTools({mode: "bottom"});
     }
-
-    // 主界面事件监听
-    currentWindow.once("ready-to-show", () => {
-        if (isOpenAsHidden()) {
-            currentWindow.minimize();
-        } else {
-            currentWindow.show();
-            if (windowState.isMaximized) {
-                currentWindow.maximize();
-            } else {
-                currentWindow.unmaximize();
-            }
-        }
-        if (bootWindow && !bootWindow.isDestroyed()) {
-            bootWindow.destroy();
-        }
-    });
 
     // 菜单
     const productName = "SiYuan";

@@ -89,7 +89,7 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
 <div style="padding: 0 8px 8px 8px;text-align: center;">
     <div class="publish-access-dialog__comment">${window.siyuan.languages.publishAccessPublicComment}</div>
     <div class="fn__hr"></div>
-    <div class="b3-form__icon">
+    <div class="b3-form__icon fn__none">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconKey"></use></svg>
         <input class="b3-form__icon-input b3-text-field fn__block" placeholder="${window.siyuan.languages.password}">
     </div>

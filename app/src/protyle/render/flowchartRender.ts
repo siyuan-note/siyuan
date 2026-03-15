@@ -7,35 +7,82 @@ declare const flowchart: {
     parse(text: string): { drawSVG: (type: Element) => void };
 };
 
+// 同一 target 共用一个监听器，重复调用时合并 items 而非替换，避免前次 hideElements 更多时被后次覆盖
+const flowchartObserverMap = new Map<Element, { observer: MutationObserver; group: { items: Element[]; attributeFilter: string[] } }>();
+
+export const disconnectFlowchartObservers = (rootElement: Element) => {
+    flowchartObserverMap.forEach(({observer}, target) => {
+        if (rootElement.contains(target)) {
+            observer.disconnect();
+            flowchartObserverMap.delete(target);
+        }
+    });
+};
+
 export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
-    let flowchartElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "flowchart") {
-        // 编辑器内代码块编辑渲染
+    let flowchartElements: Element[] | NodeListOf<Element> = [];
+    if (element.getAttribute("data-subtype") === "flowchart" && element.getAttribute("data-render") !== "true") {
         flowchartElements = [element];
     } else {
-        flowchartElements = Array.from(element.querySelectorAll('[data-subtype="flowchart"]'));
+        flowchartElements = element.querySelectorAll('[data-subtype="flowchart"]:not([data-render="true"])');
     }
     if (flowchartElements.length === 0) {
         return;
     }
     addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=1.18.0`, "protyleFlowchartScript").then(() => {
-        if (flowchartElements[0].firstElementChild.clientWidth === 0) {
-            const observer = new MutationObserver(() => {
-                initFlowchart(flowchartElements);
-                observer.disconnect();
-            });
-            const hideElement = hasClosestByAttribute(flowchartElements[0], "fold", "1");
-            if (hideElement) {
-                observer.observe(hideElement, {attributeFilter: ["fold"]});
+        const hideElements: Element[] = [];
+        const normalElements: Element[] = [];
+        flowchartElements.forEach(item => {
+            if (item.firstElementChild.clientWidth === 0) {
+                hideElements.push(item);
             } else {
-                const cardElement = hasClosestByClassName(flowchartElements[0], "card__block", true);
-                if (cardElement) {
-                    observer.observe(cardElement, {attributeFilter: ["class"]});
-                }
+                normalElements.push(item);
             }
-        } else {
-            initFlowchart(flowchartElements);
+        });
+        if (hideElements.length > 0) {
+            const targetToItems = new Map<Element, { items: Element[]; attributeFilter: string[] }>();
+            hideElements.forEach(item => {
+                const hideElement = hasClosestByAttribute(item, "fold", "1");
+                let target: Element;
+                let attributeFilter: string[];
+                if (hideElement) {
+                    target = hideElement;
+                    attributeFilter = ["fold"];
+                } else {
+                    const cardElement = hasClosestByClassName(item, "card__block", true);
+                    if (!cardElement) {
+                        return;
+                    }
+                    target = cardElement;
+                    attributeFilter = ["class"];
+                }
+                const group = targetToItems.get(target);
+                if (group) {
+                    group.items.push(item);
+                } else {
+                    targetToItems.set(target, {items: [item], attributeFilter});
+                }
+            });
+            targetToItems.forEach((group, target) => {
+                const existing = flowchartObserverMap.get(target);
+                if (existing) {
+                    group.items.forEach(item => {
+                        if (!existing.group.items.includes(item)) {
+                            existing.group.items.push(item);
+                        }
+                    });
+                    return;
+                }
+                const observer = new MutationObserver(() => {
+                    initFlowchart(group.items);
+                    observer.disconnect();
+                    flowchartObserverMap.delete(target);
+                });
+                observer.observe(target, {attributeFilter: group.attributeFilter});
+                flowchartObserverMap.set(target, {observer, group});
+            });
         }
+        initFlowchart(normalElements);
     });
 };
 
@@ -45,6 +92,7 @@ const initFlowchart = (flowchartElements: Element[]) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
+        item.setAttribute("data-render", "true");
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
             item.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
         }
@@ -59,6 +107,5 @@ const initFlowchart = (flowchartElements: Element[]) => {
         } catch (error) {
             renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">Flow Chart render error: <br>${error}</div>`;
         }
-        item.setAttribute("data-render", "true");
     });
 };

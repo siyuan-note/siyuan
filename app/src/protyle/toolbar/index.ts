@@ -907,12 +907,14 @@ export class Toolbar {
         } else if (isInlineMemo) {
             title = window.siyuan.languages.memo;
         }
+        const showLineNumbers = !isInlineMemo && !types.includes("inline-math");
         const isPin = this.subElement.querySelector('[data-type="pin"]')?.getAttribute("aria-label") === window.siyuan.languages.unpin;
         const pinData: IObject = {};
         if (isPin) {
             const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
             pinData.styleH = textElement.style.height;
-            pinData.styleW = textElement.style.width;
+            const wrapEl = this.subElement.querySelector(".render-editor__wrap") as HTMLElement;
+            pinData.styleW = wrapEl?.style.width || textElement.style.width;
         } else {
             this.subElement.style.width = "";
             this.subElement.style.padding = "0";
@@ -1041,6 +1043,50 @@ export class Toolbar {
             }, Constants.TIMEOUT_LOAD);
         };
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
+        let gutterElement: HTMLElement | null = null;
+        if (showLineNumbers) {
+            const wrapEl = document.createElement("div");
+            wrapEl.className = "fn__flex render-editor__wrap";
+            wrapEl.style.cssText = (textElement.style.width ? "width:" + textElement.style.width + ";" : "") +
+                "min-width:" + (textElement.style.minWidth || "268px") + ";" +
+                "border-radius:0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);overflow:hidden;";
+            gutterElement = document.createElement("div");
+            gutterElement.className = "render-editor__gutter";
+            gutterElement.style.cssText = "overflow:hidden;flex-shrink:0;padding:4px 4px 4px 8px;text-align:right;" +
+                "opacity:0.38;font-family:var(--b3-font-family-code);font-size:14px;line-height:20px;" +
+                "white-space:pre;background-color:var(--b3-theme-background);" +
+                "border-right:.6px solid var(--b3-theme-on-surface);user-select:none;";
+            textElement.classList.remove("fn__block");
+            textElement.style.width = "";
+            textElement.style.minWidth = "0";
+            textElement.style.borderRadius = "0";
+            textElement.style.flex = "1";
+            textElement.style.overflowY = "auto";
+            textElement.parentElement.insertBefore(wrapEl, textElement);
+            wrapEl.appendChild(gutterElement);
+            wrapEl.appendChild(textElement);
+            textElement.addEventListener("scroll", () => {
+                gutterElement.scrollTop = textElement.scrollTop;
+            });
+        }
+        let lastLineCount = 0;
+        const updateLineNumbers = () => {
+            if (!gutterElement) {
+                return;
+            }
+            const lineCount = textElement.value.split("\n").length;
+            if (lineCount !== lastLineCount) {
+                lastLineCount = lineCount;
+                const frag = document.createDocumentFragment();
+                for (let i = 1; i <= lineCount; i++) {
+                    const div = document.createElement("div");
+                    div.textContent = String(i);
+                    frag.appendChild(div);
+                }
+                gutterElement.replaceChildren(frag);
+            }
+            gutterElement.scrollTop = textElement.scrollTop;
+        };
         if (types.includes("NodeHTMLBlock")) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
         } else if (isInlineMemo) {
@@ -1049,6 +1095,7 @@ export class Toolbar {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
         const oldTextValue = textElement.value;
+        updateLineNumbers();
         textElement.addEventListener("input", (event) => {
             if (!renderElement.parentElement) {
                 return;
@@ -1056,6 +1103,7 @@ export class Toolbar {
             if (textElement.clientHeight !== textElement.scrollHeight) {
                 autoHeight();
             }
+            updateLineNumbers();
             if (!this.subElement.querySelector('[data-type="refresh"]').classList.contains("block__icon--active")) {
                 return;
             }
@@ -1215,7 +1263,14 @@ export class Toolbar {
         const nodeRect = renderElement.getBoundingClientRect();
         this.element.classList.add("fn__none");
         if (isPin) {
-            textElement.style.width = pinData.styleW;
+            if (showLineNumbers) {
+                const wrapEl = this.subElement.querySelector(".render-editor__wrap") as HTMLElement;
+                if (wrapEl && pinData.styleW) {
+                    wrapEl.style.width = pinData.styleW;
+                }
+            } else {
+                textElement.style.width = pinData.styleW;
+            }
             textElement.style.height = pinData.styleH;
         } else {
             autoHeight();

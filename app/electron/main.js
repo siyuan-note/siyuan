@@ -953,13 +953,23 @@ app.whenReady().then(() => {
             case "showItemInFolder":
                 shell.showItemInFolder(data.filePath);
                 break;
-            case "notification":
-                new Notification({
+            case "notification": {
+                const notificationOptions = {
                     title: data.title,
                     body: data.body,
                     timeoutType: data.timeoutType,
-                }).show();
+                };
+                if (data.icon && currentWindow) {
+                    const workspaceItem = workspaces.find(item => item.browserWindow && item.browserWindow.id === currentWindow.id && item.workspaceDir);
+                    if (workspaceItem && workspaceItem.workspaceDir) {
+                        notificationOptions.icon = path.join(workspaceItem.workspaceDir, data.icon);
+                    } else {
+                        writeLog("notification icon [" + data.icon + "] ignored: workspaceDir not found");
+                    }
+                }
+                new Notification(notificationOptions).show();
                 break;
+            }
             case "setSpellCheckerLanguages":
                 BrowserWindow.getAllWindows().forEach(item => {
                     item.webContents.session.setSpellCheckerLanguages(data.languages);

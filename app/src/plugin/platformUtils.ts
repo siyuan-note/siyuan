@@ -2,6 +2,7 @@ import * as compatibility from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {Constants} from "../constants";
+import {originalPath} from "../util/pathName";
 /// #endif
 export const openByMobile = compatibility.openByMobile;
 export const readText = compatibility.readText;
@@ -25,7 +26,8 @@ export const sendNotification = (options: {
     title?: string,
     body?: string,
     delayInSeconds?: number,
-    timeoutType?: "default" | "never" // 该参数仅在桌面端有效
+    timeoutType?: "default" | "never", // 该参数仅在 Windows 和 Linux 有效
+    icon?: string, // 该参数仅在桌面端有效
 }): Promise<number> => {
     return new Promise((resolve) => {
         const title = options.title || "";
@@ -65,12 +67,19 @@ export const sendNotification = (options: {
             resolve(-1);
         }
         /// #else
+        let icon = options.icon;
+        if (icon && (icon.includes("..") || originalPath().isAbsolute(icon))) {
+            // 仅允许工作空间内的相对路径，如 "data/plugins/plugin-sample/icon.png"
+            console.warn("notification icon [" + icon + "] is contains '..' or is not a relative path");
+            icon = undefined;
+        }
         const timeoutId = window.setTimeout(() => {
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "notification",
                 title,
                 body,
-                timeoutType: options.timeoutType || "default"
+                timeoutType: options.timeoutType || "default",
+                icon,
             });
         }, delayInSeconds * 1000);
         resolve(timeoutId);

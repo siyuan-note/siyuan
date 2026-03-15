@@ -14,9 +14,7 @@ import {afterLoadPlugin} from "../plugin/loader";
 import {Tab} from "../layout/Tab";
 import {initWindowEvent} from "../boot/globalEvent/event";
 import {getAllEditor} from "../layout/getAll";
-/// #if !BROWSER
-import {initNativeDialogOverride} from "../protyle/util/compatibility";
-/// #endif
+import {initNativeDialogOverride, initWindowOpenOverride} from "../protyle/util/compatibility";
 
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
@@ -55,9 +53,8 @@ export const init = (app: App) => {
     });
     initStatus(true);
     initWindow(app);
-    /// #if !BROWSER
+    initWindowOpenOverride(app);
     initNativeDialogOverride();
-    /// #endif
     appearance.onSetAppearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();

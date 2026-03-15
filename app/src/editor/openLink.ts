@@ -109,6 +109,10 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
             linkAddress = linkAddress.split("?page")[0];
         }
     }
+    if (linkAddress.startsWith("siyuan://") && processSYLink(protyle.app, linkAddress)) {
+        // 内部处理 siyuan://
+        return;
+    }
     /// #if MOBILE
     openByMobile(linkAddress);
     /// #else

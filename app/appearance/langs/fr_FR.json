@@ -1181,7 +1181,7 @@
   "md29": "Nombre d'espaces Tab ",
   "md30": "Remplace par des espaces uniquement lorsque la Tab est enfoncée, ne remplace pas les tabulations (Tab) dans le presse-papiers par des espaces",
   "md31": "Saut de ligne du bloc de code",
-  "md32": "Après l'activation, le contenu du bloc de code sera automatiquement  Saut de ligne",
+  "md32": "Après l'activation, le contenu qui dépasse la largeur du bloc de code sera automatiquement renvoyé à la ligne",
   "md33": "Référence virtuelle",
   "md34": "Après ouverture, il identifiera automatiquement les relations de référence possibles en fonction du nom, de l'alias et du texte d'ancrage des guillemets de bloc existants",
   "md35": "Liste d'exclusion des mots-clés de la référence virtuelle",

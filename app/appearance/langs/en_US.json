@@ -1181,7 +1181,7 @@
   "md29": "Number of Tab Spaces",
   "md30": "Replaces with spaces only when Tab is pressed, does not replace tabs (Tab) in clipboard with spaces",
   "md31": "Code block wraps",
-  "md32": "When enabled, the content in the code block will wrap automatically",
+  "md32": "When enabled, content that exceeds the code block width will wrap automatically",
   "md33": "Virtual Reference",
   "md34": "When enabled, it will automatically identify the possible reference relationship according to the name, alias and anchor text of the existing block ref",
   "md35": "Virtual Reference keyword exclusion list",

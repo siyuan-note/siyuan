@@ -396,6 +396,14 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 
 	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+
+	// SQL mode requires admin privileges, consistent with /api/query/sql
+	if method == 2 && !model.IsAdminRoleContext(c) {
+		ret.Code = -1
+		ret.Msg = "SQL search requires administrator privileges"
+		return
+	}
+
 	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()

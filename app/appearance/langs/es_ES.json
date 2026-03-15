@@ -1181,7 +1181,7 @@
   "md29": "Número de espacios de Tab",
   "md30": "Sustituye por espacios sólo cuando se pulsa el Tab, no sustituye los tabuladores (Tab) del portapapeles por espacios",
   "md31": "Envuelve el bloque de código",
-  "md32": "Después de habilitarlo, el contenido del bloque de código se envolverá automáticamente",
+  "md32": "Después de habilitarlo, el contenido que exceda el ancho del bloque de código se envolverá automáticamente",
   "md33": "Referencia virtual",
   "md34": "Una vez habilitado, identificará automáticamente la posible relación de referencia según el nombre, el alias y el texto de anclaje del bloque existente ref",
   "md35": "Lista de exclusión de palabras clave de referencia virtual",

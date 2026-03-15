@@ -1181,7 +1181,7 @@
   "md29": "Veľkosť tabulátora (medzery)",
   "md30": "Nahradiť tabulátor medzerami pri stlačení klávesu Tab",
   "md31": "Zalamovanie kódu",
-  "md32": "Kód v blokoch sa bude automaticky zalamovať",
+  "md32": "Po zapnutí sa obsah presahujúci šírku bloku kódu bude automaticky zalamovať",
   "md33": "Virtuálna referencia",
   "md34": "Automaticky identifikovať vzťahy podľa názvov a aliasov",
   "md35": "Zoznam vylúčení pre virtuálne referencie",

@@ -1413,7 +1413,7 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
                 submenu: subMenu,
             }).element);
         }
-        if (!window.siyuan.config.readonly) {
+        if (!window.siyuan.config.readonly && window.siyuan.config.publish.enable) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconEye",
                 label: window.siyuan.languages.publishAccess,

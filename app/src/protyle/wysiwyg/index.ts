@@ -104,6 +104,7 @@ import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2611,11 +2612,9 @@ export class WYSIWYG {
                 this.preventClick = false;
                 return;
             }
-            protyle.app.plugins.forEach(item => {
-                item.eventBus.emit("click-editorcontent", {
-                    protyle,
-                    event
-                });
+            emitToEventBus("click-editorcontent", {
+                protyle,
+                event
             });
             const ctrlIsPressed = isOnlyMeta(event);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");

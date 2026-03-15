@@ -13,6 +13,7 @@ import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
 import {setTitle} from "../../dialog/processSystem";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 const forwardStack: IBackStack[] = [];
 
@@ -104,10 +105,8 @@ const focusStack = (backStack: IBackStack) => {
             protyle.contentElement.scrollTop = backStack.scrollTop;
         }, Constants.TIMEOUT_LOAD);
 
-        protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle});
-            item.eventBus.emit("loaded-protyle-static", {protyle});
-        });
+        emitToEventBus("switch-protyle", {protyle});
+        emitToEventBus("loaded-protyle-static", {protyle});
         exitFocusElement.classList.add("fn__none");
     });
 };

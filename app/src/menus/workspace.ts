@@ -528,7 +528,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 icon: "iconLock",
                 accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
                 click: () => {
-                    lockScreen(app);
+                    lockScreen();
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

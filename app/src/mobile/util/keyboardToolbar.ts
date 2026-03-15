@@ -15,6 +15,7 @@ import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInEdge, isInHarmony} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -426,9 +427,7 @@ export const showKeyboardToolbar = () => {
         if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
             editor.protyle.element.parentElement.style.paddingBottom = "48px";
         }
-        editor.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("mobile-keyboard-show");
-        });
+        emitToEventBus("mobile-keyboard-show");
     }
     setTimeout(() => {
         const contentElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
@@ -460,9 +459,7 @@ export const hideKeyboardToolbar = () => {
     const editor = getCurrentEditor();
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "";
-        editor.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("mobile-keyboard-hide");
-        });
+        emitToEventBus("mobile-keyboard-hide");
     }
     const modelElement = document.getElementById("model");
     if (modelElement.style.transform === "translateY(0px)") {

@@ -33,6 +33,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
 import {selectOpenTab} from "./util";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -62,9 +63,7 @@ export class Files extends Model {
                             break;
                         case "mount":
                             this.onMount(data);
-                            options.app.plugins.forEach((item) => {
-                                item.eventBus.emit("opened-notebook", data);
-                            });
+                            emitToEventBus("opened-notebook", data);
                             break;
                         case "createnotebook":
                             setNoteBook((notebooks) => {
@@ -87,9 +86,7 @@ export class Files extends Model {
                         case "closeBox":
                         case "removeBox":
                             this.onRemove(data);
-                            options.app.plugins.forEach((item) => {
-                                item.eventBus.emit("closed-notebook", data);
-                            });
+                            emitToEventBus("closed-notebook", data);
                             break;
                         case "removeDoc":
                             this.onRemove(data);

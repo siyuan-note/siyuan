@@ -17,6 +17,7 @@ import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
+import {customEventBuses} from "../../plugin/EventBus";
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
@@ -222,24 +223,26 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
 };
 
 const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {
-    if (protyle && protyle.app && protyle.app.plugins) {
-        for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
-                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
-                    protyle,
-                    resolve,
-                    textHTML: "",
-                    textPlain: "",
-                    siyuanHTML: "",
-                    localFiles
-                });
-                if (emitResult) {
-                    resolve(undefined);
-                }
+    const eventBuses = [
+        ...protyle.app.plugins.map((p) => p.eventBus),
+        ...customEventBuses
+    ];
+    for (let i = 0; i < eventBuses.length; i++) {
+        const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
+            const emitResult = eventBuses[i].emit("paste", {
+                protyle,
+                resolve,
+                textHTML: "",
+                textPlain: "",
+                siyuanHTML: "",
+                localFiles
             });
-            if (response?.localFiles) {
-                localFiles = response.localFiles;
+            if (emitResult) {
+                resolve(undefined);
             }
+        });
+        if (response?.localFiles) {
+            localFiles = response.localFiles;
         }
     }
     uploadLocalFiles(localFiles, protyle, true);
@@ -323,34 +326,36 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = Lute.Sanitize(textHTML);
     }
 
-    if (protyle && protyle.app && protyle.app.plugins) {
-        for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response: IObject & { files: FileList } = await new Promise((resolve) => {
-                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
-                    protyle,
-                    resolve,
-                    textHTML,
-                    textPlain,
-                    siyuanHTML,
-                    files
-                });
-                if (emitResult) {
-                    resolve(undefined);
-                }
+    const eventBuses = [
+        ...protyle.app.plugins.map((p) => p.eventBus),
+        ...customEventBuses
+    ];
+    for (let i = 0; i < eventBuses.length; i++) {
+        const response: IObject & { files: FileList } = await new Promise((resolve) => {
+            const emitResult = eventBuses[i].emit("paste", {
+                protyle,
+                resolve,
+                textHTML,
+                textPlain,
+                siyuanHTML,
+                files
             });
+            if (emitResult) {
+                resolve(undefined);
+            }
+        });
 
-            if (response?.textHTML) {
-                textHTML = response.textHTML;
-            }
-            if (response?.textPlain) {
-                textPlain = response.textPlain;
-            }
-            if (response?.siyuanHTML) {
-                siyuanHTML = response.siyuanHTML;
-            }
-            if (response?.files) {
-                files = response.files as FileList;
-            }
+        if (response?.textHTML) {
+            textHTML = response.textHTML;
+        }
+        if (response?.textPlain) {
+            textPlain = response.textPlain;
+        }
+        if (response?.siyuanHTML) {
+            siyuanHTML = response.siyuanHTML;
+        }
+        if (response?.files) {
+            files = response.files as FileList;
         }
     }
 

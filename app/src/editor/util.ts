@@ -36,6 +36,7 @@ import {preventScroll} from "../protyle/scroll/preventScroll";
 import {clearOBG} from "../layout/dock/util";
 import {Model} from "../layout/Model";
 import {hideElements} from "../protyle/ui/hideElements";
+import {emitToEventBus} from "../plugin/EventBus";
 
 export const openFileById = async (options: {
     app: App,
@@ -597,9 +598,7 @@ export const updatePanelByEditor = (options: {
                 }
             }
         }
-        options.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle: options.protyle});
-        });
+        emitToEventBus("switch-protyle", {protyle: options.protyle});
     }
     // 切换页签或关闭所有页签时，需更新对应的面板
     const models = getAllModels();

@@ -13,6 +13,7 @@ import {App} from "../index";
 import {fetchPost} from "../util/fetch";
 import {checkFold} from "../util/noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
+import {emitToEventBus} from "../plugin/EventBus";
 
 export const processSYLink = (app: App, url: string) => {
     let urlObj: URL;
@@ -82,13 +83,11 @@ export const processSYLink = (app: App, url: string) => {
                 ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                 /// #endif
             }
-            app.plugins.forEach(plugin => {
-                plugin.eventBus.emit("open-siyuan-url-block", {
-                    url,
-                    id,
-                    focus,
-                    exist: existResponse.data,
-                });
+            emitToEventBus("open-siyuan-url-block", {
+                url,
+                id,
+                focus,
+                exist: existResponse.data,
             });
         });
         return true;

@@ -24,7 +24,7 @@ import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
-import {Plugin} from "../plugin";
+import {emitToEventBus} from "../plugin/EventBus";
 
 const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {
@@ -233,13 +233,11 @@ export const setDefRefCount = (data: {
     }
 };
 
-export const lockScreen = async (app: App) => {
+export const lockScreen = async () => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
-    app.plugins.forEach(item => {
-        item.eventBus.emit("lock-screen");
-    });
+    emitToEventBus("lock-screen");
     /// #if !MOBILE
     exportLayout({
         errorExit: false,
@@ -558,7 +556,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
+export const processSync = (data?: IWebSocketData) => {
     /// #if MOBILE
     const menuSyncUseElement = document.querySelector("#menuSyncNow use");
     const barSyncUseElement = document.querySelector("#toolbarSync use");
@@ -585,6 +583,7 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
     } else if (data.code === 1) {   // success
         menuSyncUseElement?.setAttribute("xlink:href", "#iconCloudSucc");
         barSyncUseElement.setAttribute("xlink:href", "#iconCloudSucc");
+        document.getElementById("toolbarSync").classList.add("fn__none");
     }
     /// #else
     const iconElement = document.querySelector("#barSync");
@@ -614,13 +613,11 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
         useElement.setAttribute("xlink:href", "#iconCloudSucc");
     }
     /// #endif
-    plugins.forEach((item) => {
-        if (data.code === 0) {
-            item.eventBus.emit("sync-start", data);
-        } else if (data.code === 1) {
-            item.eventBus.emit("sync-end", data);
-        } else if (data.code === 2) {
-            item.eventBus.emit("sync-fail", data);
-        }
-    });
+    if (data.code === 0) {
+        emitToEventBus("sync-start", data);
+    } else if (data.code === 1) {
+        emitToEventBus("sync-end", data);
+    } else if (data.code === 2) {
+        emitToEventBus("sync-fail", data);
+    }
 };

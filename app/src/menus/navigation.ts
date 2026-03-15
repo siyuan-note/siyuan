@@ -343,16 +343,18 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            id: "close",
-            label: window.siyuan.languages.close,
-            icon: "iconClose",
-            click: () => {
-                fetchPost("/api/notebook/closeNotebook", {
-                    notebook: notebookId
-                });
-            }
-        }).element);
+        if (!Object.values(Constants.HELP_PATH).includes(notebookId)) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "close",
+                label: window.siyuan.languages.close,
+                icon: "iconClose",
+                click: () => {
+                    fetchPost("/api/notebook/closeNotebook", {
+                        notebook: notebookId
+                    });
+                }
+            }).element);
+        }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "delete",
             icon: "iconTrashcan",

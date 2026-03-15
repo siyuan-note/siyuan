@@ -43,20 +43,15 @@ export const deleteFiles = (liElements: Element[]) => {
             if (liElements[0].getAttribute("data-type") === "navigation-file") {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {
-                if (Object.values(Constants.HELP_PATH).includes(itemNotebookId)) {
-                    fetchPost("/api/notebook/removeNotebook", {
-                        notebook: itemNotebookId,
-                    });
-                } else {
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                        `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
+                const isHelpNotebook = Object.values(Constants.HELP_PATH).includes(itemNotebookId);
+                confirmDialog(isHelpNotebook ? "" : window.siyuan.languages.deleteOpConfirm,
+                    isHelpNotebook ? "" : `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
 <div class="fn__hr"></div>
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`, () => {
-                            fetchPost("/api/notebook/removeNotebook", {
-                                notebook: itemNotebookId,
-                            });
-                        }, undefined, true);
-                }
+                        fetchPost("/api/notebook/removeNotebook", {
+                            notebook: itemNotebookId,
+                        });
+                    }, undefined, true);
             }
         }
     } else {

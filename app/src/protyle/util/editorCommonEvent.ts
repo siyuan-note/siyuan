@@ -703,12 +703,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
-        const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top");
-        if (targetElement) {
-            targetElement.classList.remove("dragover");
-            targetElement.removeAttribute("select-start");
-            targetElement.removeAttribute("select-end");
-        }
+        const dragoverElements = editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top");
+        const targetElement = dragoverElements[0] as HTMLElement | undefined;
+        const targetClass = targetElement ? targetElement.className.split(" ") : [];
+        // 先清理指示器，否则可能在拖拽完成后或撤回后残留在编辑器内
+        dragoverElements.forEach((el: HTMLElement) => {
+            clearDragoverElement(el);
+            el.removeAttribute("select-start");
+            el.removeAttribute("select-end");
+        });
         if (gutterType) {
             // gutter 或反链面板拖拽
             const sourceElements: Element[] = [];
@@ -740,7 +743,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 insertHTML(protyle.lute.SpinBlockDOM(html), protyle, true);
                 blockRender(protyle, protyle.wysiwyg.element);
-            } else if (targetElement && targetElement.className.indexOf("dragover__") > -1) {
+            } else if (targetElement) {
                 let queryClass = "";
                 selectedIds.forEach(item => {
                     queryClass += `[data-node-id="${item}"],`;
@@ -783,9 +786,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
 
                 hideElements(["gutter"], protyle);
-
-                const targetClass = targetElement.className.split(" ");
-                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
 
                 if (targetElement.classList.contains("av__cell")) {
                     const blockElement = hasClosestBlock(targetElement);
@@ -1047,7 +1047,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
                 insertHTML(protyle.lute.Md2BlockDOM(html), protyle);
-            } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
+            } else if (targetElement && !protyle.options.backlinkData) {
                 const scrollTop = protyle.contentElement.scrollTop;
                 if (targetElement.classList.contains("av__row") ||
                     targetElement.classList.contains("av__gallery-item") ||
@@ -1056,9 +1056,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         let previousID = "";
-                        if (targetElement.classList.contains("dragover__bottom") || targetElement.classList.contains("dragover__right")) {
+                        if (targetClass.includes("dragover__bottom") || targetClass.includes("dragover__right")) {
                             previousID = targetElement.getAttribute("data-id") || "";
-                        } else if (targetElement.classList.contains("dragover__top") || targetElement.classList.contains("dragover__left")) {
+                        } else if (targetClass.includes("dragover__top") || targetClass.includes("dragover__left")) {
                             previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
                         }
                         const avID = blockElement.getAttribute("data-av-id");
@@ -1103,7 +1103,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         blockElement.setAttribute("updated", newUpdated);
                     }
                 } else {
-                    if (targetElement.classList.contains("dragover__bottom")) {
+                    if (targetClass.includes("dragover__bottom")) {
                         for (let i = ids.length - 1; i > -1; i--) {
                             if (ids[i]) {
                                 await fetchSyncPost("/api/filetree/doc2Heading", {
@@ -1147,7 +1147,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }, Constants.TIMEOUT_LOAD);
                     });
                 }
-                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
             }
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             event.preventDefault();
@@ -1197,6 +1196,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     });
     let dragoverElement: Element;
     let disabledPosition: string;
+    let cursorUpdateRafId = 0;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
@@ -1246,7 +1246,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const gutterTypes = gutterType ? gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP) : [];
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
-        if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
+        // 按住 Alt 拖拽块标时需继续执行后续逻辑以显示光标；按住 Shift 拖拽块标时需继续执行以显示指示器
+        if ((event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) && !(gutterType && (event.altKey || event.shiftKey))) {
             const targetAssetElement = hasClosestBlock(event.target);
             if (targetAssetElement) {
                 targetAssetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
@@ -1393,7 +1394,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (!targetElement) {
             editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right");
+                clearDragoverElement(item);
             });
             return;
         }
@@ -1401,11 +1402,33 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
+        if (targetElement && isNotAvItem) {
+            if (((fileTreeIds && !event.altKey) || (gutterType && event.altKey))) {
+                // 文档树拖拽文档，或按住 Alt 拖拽块标时，是插入块引用，需在拖拽过程中显示光标
+                if (!cursorUpdateRafId) {
+                    cursorUpdateRafId = requestAnimationFrame(() => {
+                        cursorUpdateRafId = 0;
+                        const range = getRangeByPoint(event.clientX, event.clientY);
+                        if (range && protyle.wysiwyg.element.contains(range.startContainer)) {
+                            focusByRange(range);
+                        }
+                    });
+                }
+                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
+                    clearDragoverElement(item);
+                });
+                dragoverElement = undefined;
+                return;
+            } else if (((fileTreeIds && event.altKey) || (gutterType && !event.altKey))) {
+                // 文档树按住 Alt 拖拽文档，或拖拽块标时，是移动块，需清除此前显示的光标
+                getSelection().removeAllRanges();
+            }
+        }
         if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                clearDragoverElement(item);
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
             });
@@ -1508,7 +1531,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (fileTreeIds.split(",").includes(protyle.block.rootID) && isNotAvItem && event.altKey) {
                 dragoverElement = undefined;
                 editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                    clearDragoverElement(item);
                     item.removeAttribute("select-start");
                     item.removeAttribute("select-end");
                 });
@@ -1594,9 +1617,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         counter--;
         if (counter === 0) {
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                clearDragoverElement(item);
             });
             dragoverElement = undefined;
+            if (cursorUpdateRafId) {
+                cancelAnimationFrame(cursorUpdateRafId);
+                cursorUpdateRafId = 0;
+            }
         }
     });
     editorElement.addEventListener("dragenter", (event) => {
@@ -1604,6 +1631,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         counter++;
     });
     editorElement.addEventListener("dragend", () => {
+        if (cursorUpdateRafId) {
+            cancelAnimationFrame(cursorUpdateRafId);
+            cursorUpdateRafId = 0;
+        }
         if (window.siyuan.dragElement) {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;

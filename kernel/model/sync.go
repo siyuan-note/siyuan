@@ -730,27 +730,23 @@ func planSyncAfter(d time.Duration) {
 func isProviderOnline(byHand bool) (ret bool) {
 	var checkURL string
 	skipTlsVerify := false
-	timeout := 3000
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 		checkURL = util.GetCloudSyncServer()
 	case conf.ProviderS3:
 		checkURL = Conf.Sync.S3.Endpoint
 		skipTlsVerify = Conf.Sync.S3.SkipTlsVerify
-		timeout = Conf.Sync.S3.Timeout * 1000
 	case conf.ProviderWebDAV:
 		checkURL = Conf.Sync.WebDAV.Endpoint
 		skipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
-		timeout = Conf.Sync.WebDAV.Timeout * 1000
 	case conf.ProviderLocal:
 		checkURL = "file://" + Conf.Sync.Local.Endpoint
-		timeout = Conf.Sync.Local.Timeout * 1000
 	default:
 		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
 		return false
 	}
 
-	if ret = util.IsOnline(checkURL, skipTlsVerify, timeout); !ret {
+	if ret = util.IsOnline(checkURL, skipTlsVerify, 7000); !ret {
 		if 1 > autoSyncErrCount || byHand {
 			util.PushErrMsg(Conf.Language(76)+" (Provider: "+conf.ProviderToStr(Conf.Sync.Provider)+")", 5000)
 		}

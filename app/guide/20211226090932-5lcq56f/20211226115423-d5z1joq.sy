@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20251209211226"
+		"updated": "20260315155758"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"Type": "NodeCallout",
 			"Properties": {
 				"id": "20251209211216-jdw0b6a",
-				"updated": "20251209211226"
+				"updated": "20260315155758"
 			},
 			"CalloutType": "TIP",
 			"CalloutTitle": "Tip",
@@ -26,12 +26,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20251209211218-hayh5v3",
-						"updated": "20251209211226"
+						"updated": "20260315155758"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "關閉思源筆記時會自動關閉用戶指南，可以點擊 "
+							"Data": "關閉思源筆記時會自動刪除用戶指南，可以點擊 "
 						},
 						{
 							"Type": "NodeTextMark",

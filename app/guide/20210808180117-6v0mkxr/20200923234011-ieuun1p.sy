@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20240508004348"
+		"updated": "20260315155722"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"Type": "NodeCallout",
 			"Properties": {
 				"id": "20251209212043-iea22ml",
-				"updated": "20251209212055"
+				"updated": "20260315155722"
 			},
 			"CalloutType": "TIP",
 			"CalloutTitle": "Tip",
@@ -26,12 +26,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20251209212048-wngov6k",
-						"updated": "20251209212055"
+						"updated": "20260315155722"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "When you close SiYuan Notes, the User Guide will be automatically closed. You can click "
+							"Data": "When you close SiYuan Notes, the User Guide will be automatically deleted. You can click "
 						},
 						{
 							"Type": "NodeTextMark",

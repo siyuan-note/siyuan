@@ -234,7 +234,8 @@ export class Protyle {
                                 this.protyle.notebookId = data.data.toNotebook;
                             }
                             break;
-                        case "unmount":
+                        case "closeBox":
+                        case "removeBox":
                             if (this.protyle.notebookId === data.data.box) {
                                 /// #if MOBILE
                                 setEmpty(app);

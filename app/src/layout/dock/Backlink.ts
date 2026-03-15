@@ -61,7 +61,8 @@ export class Backlink extends Model {
                                 this.parent.updateTitle(data.data.title);
                             }
                             break;
-                        case "unmount":
+                        case "closeBox":
+                        case "removeBox":
                             if (this.notebookId === data.data.box && this.type === "local") {
                                 this.parent.parent.removeTab(this.parent.id);
                             }

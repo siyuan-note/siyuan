@@ -69,7 +69,8 @@ export class Graph extends Model {
                                 this.searchGraph(false);
                             }
                             break;
-                        case "unmount":
+                        case "closeBox":
+                        case "removeBox":
                             if (this.type === "local" && this.graphData && this.graphData.box === data.data.box) {
                                 this.parent.parent.removeTab(this.parent.id);
                             }

@@ -2,9 +2,9 @@ import {fetchPost} from "../util/fetch";
 import {getDisplayName, getNotebookName} from "../util/pathName";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {hasTopClosestByTag} from "../protyle/util/hasClosest";
-import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "../util/escape";
+import {Constants} from "../constants";
 
 export const deleteFile = (notebookId: string, pathString: string) => {
     if (window.siyuan.config.fileTree.removeDocWithoutConfirm) {
@@ -43,15 +43,20 @@ export const deleteFiles = (liElements: Element[]) => {
             if (liElements[0].getAttribute("data-type") === "navigation-file") {
                 deleteFile(itemNotebookId, liElements[0].getAttribute("data-path"));
             } else {
-                confirmDialog(window.siyuan.languages.deleteOpConfirm,
-                    `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
+                if (Object.values(Constants.HELP_PATH).includes(itemNotebookId)) {
+                    fetchPost("/api/notebook/removeNotebook", {
+                        notebook: itemNotebookId,
+                    });
+                } else {
+                    confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                        `${window.siyuan.languages.confirmDeleteTip.replace("${x}", Lute.EscapeHTMLStr(getNotebookName(itemNotebookId)))}
 <div class="fn__hr"></div>
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`, () => {
-                        fetchPost("/api/notebook/removeNotebook", {
-                            notebook: itemNotebookId,
-                            callback: Constants.CB_MOUNT_REMOVE
-                        });
-                    }, undefined, true);
+                            fetchPost("/api/notebook/removeNotebook", {
+                                notebook: itemNotebookId,
+                            });
+                        }, undefined, true);
+                }
             }
         }
     } else {

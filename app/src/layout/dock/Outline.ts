@@ -73,7 +73,8 @@ export class Outline extends Model {
                                 }, -1);
                             }
                             break;
-                        case "unmount":
+                        case "closeBox":
+                        case "removeBox":
                             if (this.type === "local") {
                                 fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
                                     if (!existResponse.data) {

@@ -23,6 +23,7 @@ export class Asset extends Model {
     private pdfId: number | string;
     private pdfPage: number;
     public pdfObject: any;
+    private pdfMutationObserver: MutationObserver | null = null;
 
     constructor(options: { app: App, tab: Tab, path: string, page?: number | string }) {
         super({app: options.app, id: options.tab.id});
@@ -517,13 +518,14 @@ export class Asset extends Model {
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
             setTimeout(() => {
                 if (this.element.clientWidth === 0) {
-                    const observer = new MutationObserver(() => {
+                    this.pdfMutationObserver = new MutationObserver(() => {
                         this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
                             this.element, this.pdfPage, this.pdfId);
                         this.element.setAttribute("data-loading", "true");
-                        observer.disconnect();
+                        this.pdfMutationObserver?.disconnect();
+                        this.pdfMutationObserver = null;
                     });
-                    observer.observe(this.element, {attributeFilter: ["class"]});
+                    this.pdfMutationObserver.observe(this.element, {attributeFilter: ["class"]});
                 } else {
                     this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
                         this.element, this.pdfPage, this.pdfId);
@@ -535,5 +537,11 @@ export class Asset extends Model {
             }, Constants.TIMEOUT_LOAD);
             /// #endif
         }
+    }
+
+    public destroy() {
+        this.pdfObject?.pdfLoadingTask?.destroy();
+        this.pdfMutationObserver?.disconnect();
+        this.pdfMutationObserver = null;
     }
 }

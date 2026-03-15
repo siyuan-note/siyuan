@@ -69,10 +69,6 @@ export class Wnd {
         this.resize = resize;
         this.element = document.createElement("div");
         this.element.classList.add("fn__flex-1", "fn__flex");
-        let dragHTML = '<div class="layout-tab-container__drag fn__none"></div>';
-        if (parentType === "left" || parentType === "right" || parentType === "bottom") {
-            dragHTML = "";
-        }
         this.element.innerHTML = `<div data-type="wnd" data-id="${this.id}" class="fn__flex-column fn__flex fn__flex-1">
     <div class="fn__flex fn__none">
         <ul class="fn__flex layout-tab-bar"></ul>
@@ -84,14 +80,15 @@ export class Wnd {
             </li>
         </ul>
     </div>
-    <div class="layout-tab-container fn__flex-1">${dragHTML}</div>
+    <div class="layout-tab-container fn__flex-1">${["left", "right", "bottom"].includes(parentType) ? "" : '<div class="layout-tab-container__drag fn__none"></div>'}</div>
 </div>`;
         this.headersElement = this.element.querySelector(".layout-tab-bar");
         const dragElement = this.element.querySelector(".layout-tab-container__drag") as HTMLElement;
         if (!dragElement) {
+            // 侧栏面板不添加后续的监听器
             return;
         }
-        this.headersElement.addEventListener("mousedown", (event) => {
+        this.#onHeadersMousedown = (event) => {
             // 点击鼠标滚轮关闭
             if (event.button !== 1) {
                 return;
@@ -126,12 +123,14 @@ export class Wnd {
                 }
                 target = target.parentElement;
             }
-        });
-        this.headersElement.addEventListener("mousewheel", (event: WheelEvent) => {
+        };
+        this.headersElement.addEventListener("mousedown", this.#onHeadersMousedown);
+        this.#onHeadersMousewheel = (event: WheelEvent) => {
             this.headersElement.scrollLeft = this.headersElement.scrollLeft + event.deltaY;
-        }, {passive: true});
+        };
+        this.headersElement.addEventListener("mousewheel", this.#onHeadersMousewheel, {passive: true});
 
-        this.headersElement.parentElement.addEventListener("click", (event) => {
+        this.#onParentClick = (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (target.classList.contains("block__icon") && target.getAttribute("data-type") === "new") {
@@ -154,8 +153,9 @@ export class Wnd {
                 }
                 target = target.parentElement;
             }
-        });
-        this.headersElement.parentElement.addEventListener("dblclick", (event) => {
+        };
+        this.headersElement.parentElement.addEventListener("click", this.#onParentClick);
+        this.#onParentDblclick = (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.headersElement)) {
                 if (window.siyuan.config.fileTree.openFilesUseCurrentTab && target.getAttribute("data-type") === "tab-header") {
@@ -164,8 +164,9 @@ export class Wnd {
                 }
                 target = target.parentElement;
             }
-        });
-        this.headersElement.parentElement.addEventListener("dragover", function (event: DragEvent & {
+        };
+        this.headersElement.parentElement.addEventListener("dblclick", this.#onParentDblclick);
+        this.#onParentDragover = function (event: DragEvent & {
             target: HTMLElement
         }) {
             const it = this as HTMLElement;
@@ -232,8 +233,9 @@ export class Wnd {
                     newTabHeaderElement.before(oldTabHeaderElement);
                 }
             }
-        });
-        this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
+        };
+        this.headersElement.parentElement.addEventListener("dragover", this.#onParentDragover);
+        this.#onParentDrop = function (event: DragEvent & {
             target: HTMLElement
         }) {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
@@ -314,9 +316,10 @@ export class Wnd {
                 oldTab.parent.children.push(tempTab);
             }
             saveLayout();
-        });
+        };
+        this.headersElement.parentElement.addEventListener("drop", this.#onParentDrop);
         let elementDragCounter = 0;
-        this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
+        this.#onElementDragenter = (event: DragEvent & { target: HTMLElement }) => {
             elementDragCounter++;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 const tabHeadersElement = hasClosestByClassName(event.target, "layout-tab-bar");
@@ -329,16 +332,18 @@ export class Wnd {
                     this.updateDragElement(event, dragElement.parentElement.getBoundingClientRect(), dragElement);
                 }
             }
-        });
+        };
+        this.element.addEventListener("dragenter", this.#onElementDragenter);
         //  dragElement dragleave 后还会触发 dragenter https://github.com/siyuan-note/siyuan/issues/13753
-        this.element.addEventListener("dragleave", () => {
+        this.#onElementDragleave = () => {
             elementDragCounter--;
             if (elementDragCounter === 0) {
                 dragElement.classList.add("fn__none");
                 dragElement.removeAttribute("style");
             }
-        });
-        dragElement.addEventListener("dragover", (event: DragEvent & { layerX: number, layerY: number }) => {
+        };
+        this.element.addEventListener("dragleave", this.#onElementDragleave);
+        this.#onDragElementDragover = (event: DragEvent & { layerX: number, layerY: number }) => {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                 item.classList.remove("layout-tab-bars--drag");
             });
@@ -347,14 +352,14 @@ export class Wnd {
                 return;
             }
             this.updateDragElement(event, dragElement.parentElement.getBoundingClientRect(), dragElement);
-        });
-
-        dragElement.addEventListener("dragleave", () => {
+        };
+        dragElement.addEventListener("dragover", this.#onDragElementDragover);
+        this.#onDragElementDragleave = () => {
             dragElement.classList.add("fn__none");
             dragElement.removeAttribute("style");
-        });
-
-        dragElement.addEventListener("drop", (event: DragEvent & { target: HTMLElement }) => {
+        };
+        dragElement.addEventListener("dragleave", this.#onDragElementDragleave);
+        this.#onDragElementDrop = (event: DragEvent & { target: HTMLElement }) => {
             dragElement.classList.add("fn__none");
             const targetWndElement = event.target.parentElement.parentElement;
             const targetWnd = getInstanceById(targetWndElement.getAttribute("data-id")) as Wnd;
@@ -421,7 +426,8 @@ export class Wnd {
                 targetWnd.moveTab(oldTab);
                 resizeTabs();
             }
-        });
+        };
+        dragElement.addEventListener("drop", this.#onDragElementDrop);
     }
 
     private isPointWithinLines(x: number, y: number, line1: { k: number, b: number }, line2: {
@@ -753,30 +759,7 @@ export class Wnd {
         if (!model) {
             return;
         }
-        if (model instanceof Editor && model.editor) {
-            window.siyuan.blockPanels.forEach((item) => {
-                if (item.element && model.editor.protyle.wysiwyg.element.contains(item.element)) {
-                    item.destroy();
-                }
-            });
-            model.editor.destroy();
-            return;
-        }
-        if (model instanceof Search) {
-            model.editors.edit.destroy();
-            model.editors.unRefEdit.destroy();
-            return;
-        }
-        if (model instanceof Asset) {
-            if (model.pdfObject && model.pdfObject.pdfLoadingTask) {
-                model.pdfObject.pdfLoadingTask.destroy();
-            }
-        }
-        if (model instanceof Custom) {
-            if (model.destroy) {
-                model.destroy();
-            }
-        }
+        model.destroy();
         model.send("closews", {});
     }
 
@@ -806,7 +789,8 @@ export class Wnd {
                 if (this.children.length === 1) {
                     this.destroyModel(this.children[0].model);
                     this.children = [];
-                    if (["bottom", "left", "right"].includes(this.parent.type)) {
+                    if (["left", "right", "bottom"].includes(this.parent.type)) {
+                        // 侧栏需要保留 Wnd 槽位，并且没有监听器需要移除，所以不执行 this.remove()
                         item.panelElement.remove();
                     } else {
                         recordBeforeResizeTop();
@@ -1044,7 +1028,35 @@ export class Wnd {
         return wnd;
     }
 
+    #onHeadersMousedown: ((event: MouseEvent) => void) | null = null;
+    #onHeadersMousewheel: ((event: WheelEvent) => void) | null = null;
+    #onParentClick: ((event: MouseEvent) => void) | null = null;
+    #onParentDblclick: ((event: MouseEvent) => void) | null = null;
+    #onParentDragover: ((event: DragEvent) => void) | null = null;
+    #onParentDrop: ((event: DragEvent) => void) | null = null;
+    #onElementDragenter: ((event: DragEvent) => void) | null = null;
+    #onElementDragleave: (() => void) | null = null;
+    #onDragElementDragover: ((event: DragEvent) => void) | null = null;
+    #onDragElementDragleave: (() => void) | null = null;
+    #onDragElementDrop: ((event: DragEvent) => void) | null = null;
+
     private remove() {
+        this.headersElement.removeEventListener("mousedown", this.#onHeadersMousedown);
+        this.headersElement.removeEventListener("mousewheel", this.#onHeadersMousewheel, {passive: true} as any);
+        const parent = this.headersElement.parentElement;
+        parent.removeEventListener("click", this.#onParentClick);
+        parent.removeEventListener("dblclick", this.#onParentDblclick);
+        parent.removeEventListener("dragover", this.#onParentDragover);
+        parent.removeEventListener("drop", this.#onParentDrop);
+        this.element.removeEventListener("dragenter", this.#onElementDragenter);
+        this.element.removeEventListener("dragleave", this.#onElementDragleave);
+        const dragEl = this.element.querySelector(".layout-tab-container__drag") as HTMLElement;
+        if (dragEl) {
+            dragEl.removeEventListener("dragover", this.#onDragElementDragover);
+            dragEl.removeEventListener("dragleave", this.#onDragElementDragleave);
+            dragEl.removeEventListener("drop", this.#onDragElementDrop);
+        }
+
         let layout = this.parent;
         let element = this.element;
         let id = this.id;

@@ -8,9 +8,6 @@ on:
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
-  # repo_name_android: "siyuan-android"
-  # repo_name: "siyuan"
-  # repo_owner: "siyuan-note"
   package_json: "app/package.json"
 
 jobs:

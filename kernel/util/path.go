@@ -361,7 +361,6 @@ func IsSensitivePath(p string) bool {
 		"/.",
 		"/etc",
 		"/root",
-		"/etc",
 		"/var",
 		"/proc",
 		"/sys",

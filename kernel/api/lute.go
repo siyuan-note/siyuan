@@ -176,6 +176,11 @@ func html2BlockDOM(c *gin.Context) {
 				return ast.WalkContinue
 			}
 
+			if util.IsSensitivePath(localPath) {
+				logging.LogWarnf("skip copying asset [%s] due to sensitive path", localPath)
+				return ast.WalkContinue
+			}
+
 			name := filepath.Base(localPath)
 			ext := filepath.Ext(name)
 			name = name[0 : len(name)-len(ext)]

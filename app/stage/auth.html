@@ -551,6 +551,7 @@
 
         try {
             const {ipcRenderer} = require('electron')
+            ipcRenderer.send("siyuan-ready-to-show");
             ipcRenderer.on('siyuan-save-close', (event, close) => {
                 exitSiYuan()
             })

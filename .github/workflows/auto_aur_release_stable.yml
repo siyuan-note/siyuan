@@ -4,6 +4,8 @@ on:
   release:
     types: [published]
 
+# https://github.blog/changelog/2022-10-11-github-actions-deprecating-save-state-and-set-output-commands/
+
 jobs:
   build:
     if: ${{ github.repository_owner == 'siyuan-note' }}
@@ -14,20 +16,20 @@ jobs:
         run: |
           if [[ "${{ github.ref }}" == *"dev"* ]]; then
             echo "Skip the workflow as the tag contains 'dev'"
-            echo "::set-output name=skip::true"
+            echo "skip=true" >> $GITHUB_OUTPUT
           else
             echo "Continue the workflow"
-            echo "::set-output name=skip::false"
+            echo "skip=false" >> $GITHUB_OUTPUT
           fi
         shell: bash
 
       - name: Extract tag name
         id: get_version
-        run: echo ::set-output name=TAG_VERSION::${{ github.event.release.tag_name }}
+        run: echo "TAG_VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
 
       - name: Extra tag name without v
         id: get_version_without_v
-        run: echo ::set-output name=TAG_VERSION_WITHOUT_V::$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
+        run: echo "TAG_VERSION_WITHOUT_V=$(echo '${{ github.event.release.tag_name }}' | sed 's/^v//')" >> $GITHUB_OUTPUT
 
       - name: Create PKGBUILD
         run: |
@@ -95,7 +97,7 @@ jobs:
           EOF
 
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
           pkgname: siyuan-bin
           pkgbuild: ./PKGBUILD

@@ -11,7 +11,8 @@ def generate_msg_from_repo(repo_name, args):
         return None
 
     action_file = "cd.yml"
-    print(U.generate_header_from_repo(repo_name, args.tag, args.lastestRelease, args.electronVersion, action_file, C.HEADER[repo_name]))
+    header = C.HEADER.get(repo_name,"")
+    print(U.generate_header_from_repo(repo_name, args.tag, args.lastestRelease, args.electronVersion, action_file, header))
 
 
 if __name__ == "__main__":

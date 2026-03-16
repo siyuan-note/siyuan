@@ -4,7 +4,7 @@
   "insertColumnRight1": "在右側插入 ${x} 欄",
   "noSplitScreenWhenOpenTab": "打開分頁時不分屏",
   "noSplitScreenWhenOpenTabTip": "打開搜尋、PDF 等分頁時不自動分屏",
-  "useChrome": "僅支援在基於 Chromium 核心的瀏覽器（例如 Chrome/Edge）中使用，使用其他瀏覽器會遇到無法解決的相容性問題",
+  "useChrome": "僅支援在 Chrome 瀏覽器中使用，使用其他瀏覽器會遇到無法解決的相容性問題",
   "clearAllAV": "確認清理所有未引用的資料庫？",
   "unreferencedAV": "未引用的資料庫",
   "includeSubDocs": "包含子文檔",

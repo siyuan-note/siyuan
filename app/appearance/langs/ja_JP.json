@@ -4,7 +4,7 @@
   "insertColumnRight1": "右側に ${x} 列を挿入",
   "noSplitScreenWhenOpenTab": "タブを開くときに分割表示しない",
   "noSplitScreenWhenOpenTabTip": "検索や PDF などのタブを開いたときに自動で分割表示しない",
-  "useChrome": "Chromium ベースのブラウザ（例えば Chrome/Edge）でのみ使用可能で、他のブラウザでは解決できない互換性の問題が発生することがあります",
+  "useChrome": "Chrome ブラウザでのみサポートされます、他のブラウザを使用すると、解決できない互換性の問題が発生することがあります",
   "clearAllAV": "すべての参照されていないデータベースを削除してもよろしいですか？",
   "unreferencedAV": "参照されていないデータベース",
   "includeSubDocs": "子ドキュメントを含める",

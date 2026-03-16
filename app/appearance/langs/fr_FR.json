@@ -4,7 +4,7 @@
   "insertColumnRight1": "Insérer ${x} colonnes à droite",
   "noSplitScreenWhenOpenTab": "Ne pas scinder l'écran à l'ouverture d'un onglet",
   "noSplitScreenWhenOpenTabTip": "Ne pas scinder automatiquement l'écran lors de l'ouverture d'onglets de recherche, PDF, etc.",
-  "useChrome": "Pris en charge uniquement dans les navigateurs basés sur le moteur Chromium (par exemple Chrome/Edge), l'utilisation d'autres navigateurs peut engendrer des problèmes de compatibilité insolubles",
+  "useChrome": "Pris en charge uniquement dans le navigateur Chrome, l'utilisation d'autres navigateurs peut entraîner des problèmes de compatibilité irréparables",
   "clearAllAV": "Confirmer le nettoyage de toutes les bases de données non référencées ?",
   "unreferencedAV": "Base de données non référencée",
   "includeSubDocs": "Inclure les sous-documents",

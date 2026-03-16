@@ -4,7 +4,7 @@
   "insertColumnRight1": "Inserisci ${x} colonne a destra",
   "noSplitScreenWhenOpenTab": "Non dividere lo schermo all'apertura della scheda",
   "noSplitScreenWhenOpenTabTip": "Non dividere automaticamente lo schermo all'apertura di schede come ricerca, PDF, ecc.",
-  "useChrome": "Supportato solo su browser basati sul motore Chromium (ad es. Chrome/Edge), l'uso di altri browser può causare problemi di compatibilità irrisolvibili",
+  "useChrome": "Supportato solo nel browser Chrome, l'uso di altri browser può causare problemi di compatibilità irrisolvibili",
   "clearAllAV": "Confermare la pulizia di tutti i database non referenziati?",
   "unreferencedAV": "Database non referenziato",
   "includeSubDocs": "Includi sottodocumenti",

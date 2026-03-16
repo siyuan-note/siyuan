@@ -4,7 +4,7 @@
   "insertColumnRight1": "오른쪽에 ${x} 열 삽입",
   "noSplitScreenWhenOpenTab": "탭 열기 시 분할 화면 사용 안 함",
   "noSplitScreenWhenOpenTabTip": "검색, PDF 등 탭을 열 때 자동으로 분할 화면으로 열지 않음",
-  "useChrome": "Chromium 엔진 기반 브라우저(예: Chrome/Edge)에서만 지원되며, 다른 브라우저를 사용할 경우 해결할 수 없는 호환성 문제가 발생할 수 있습니다",
+  "useChrome": "Chrome 브라우저에서만 지원되며, 다른 브라우저를 사용하면 해결할 수 없는 호환성 문제가 발생할 수 있습니다",
   "clearAllAV": "모든 참조되지 않은 데이터베이스를 정리하시겠습니까?",
   "unreferencedAV": "참조되지 않은 데이터베이스",
   "includeSubDocs": "하위 문서 포함",

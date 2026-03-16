@@ -4,7 +4,7 @@
   "insertColumnRight1": "Sağ tarafa ${x} sütun ekle",
   "noSplitScreenWhenOpenTab": "Sekme açarken ekranı bölme",
   "noSplitScreenWhenOpenTabTip": "Arama, PDF gibi sekmeler açıldığında ekranı otomatik olarak bölme",
-  "useChrome": "Sadece Chromium tabanlı tarayıcılarda (ör. Chrome/Edge) kullanılabilir; diğer tarayıcılarda çözülemeyen uyumluluk sorunlarıyla karşılaşılabilir",
+  "useChrome": "Sadece Chrome tarayıcısında desteklenir, diğer tarayıcıları kullanmak çözülemeyen uyumluluk sorunlarıyla karşılaşmanıza neden olabilir",
   "clearAllAV": "Tüm atıfta bulunulmayan veritabanlarını temizlemek istediğinize emin misiniz?",
   "unreferencedAV": "Başvurulmayan veritabanı",
   "includeSubDocs": "Alt belgeleri dahil et",

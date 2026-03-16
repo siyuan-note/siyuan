@@ -4,7 +4,7 @@
   "insertColumnRight1": "Vložiť ${x} stĺpec/stĺpce doprava",
   "noSplitScreenWhenOpenTab": "Nerozdeľovať obrazovku pri otváraní kariet",
   "noSplitScreenWhenOpenTabTip": "Automaticky nerozdeľovať obrazovku pri otváraní vyhľadávania, PDF a iných kariet",
-  "useChrome": "Podporované iba v prehliadačoch založených na jadre Chromium (napr. Chrome/Edge), pri iných prehliadačoch sa môžu vyskytnúť neriešiteľné problémy s kompatibilitou",
+  "useChrome": "Podporované iba v prehliadači Chrome, použitie iných prehliadačov môže spôsobiť neodstrániteľné problémy s kompatibilitou",
   "clearAllAV": "Potvrdiť vymazanie všetkých databáz bez odkazov?",
   "unreferencedAV": "Databáza bez odkazov",
   "includeSubDocs": "Zahrnúť poddokumenty",

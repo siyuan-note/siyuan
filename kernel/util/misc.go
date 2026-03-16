@@ -285,9 +285,13 @@ func SanitizeSVG(svgInput string) string {
 							if strings.HasPrefix(val, "javascript:") {
 								continue
 							}
-							// 对 data: 做保守处理，删除包含可执行内容的 data:text/html 或 data:image/svg+xml
+							// 对 data: 做保守处理，只允许常见安全的图片格式（png/jpeg/gif/webp）
 							if strings.HasPrefix(val, "data:") {
-								if strings.Contains(val, "text/html") || strings.Contains(val, "image/svg+xml") || strings.Contains(val, "application/xhtml+xml") {
+								safe := strings.HasPrefix(val, "data:image/png") ||
+									strings.HasPrefix(val, "data:image/jpeg") ||
+									strings.HasPrefix(val, "data:image/gif") ||
+									strings.HasPrefix(val, "data:image/webp")
+								if !safe {
 									continue
 								}
 							}

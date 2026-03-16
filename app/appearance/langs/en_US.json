@@ -4,7 +4,7 @@
   "insertColumnRight1": "Insert ${x} column(s) to the right",
   "noSplitScreenWhenOpenTab": "Don't split the screen when opening tabs",
   "noSplitScreenWhenOpenTabTip": "Don't automatically split the screen when opening search, PDF and other tabs",
-  "useChrome": "Only supported in browsers based on the Chromium engine (e.g., Chrome/Edge), using other browsers may encounter compatibility issues that cannot be resolved",
+  "useChrome": "Only supported in the Chrome browser, using other browsers may encounter compatibility issues that cannot be resolved",
   "clearAllAV": "Confirm clearing all unreferenced databases?",
   "unreferencedAV": "Unreferenced database",
   "includeSubDocs": "Include sub-documents",

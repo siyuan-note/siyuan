@@ -4,7 +4,7 @@
   "insertColumnRight1": "Inserir ${x} colunas à direita",
   "noSplitScreenWhenOpenTab": "Não dividir a tela ao abrir abas",
   "noSplitScreenWhenOpenTabTip": "Não dividir automaticamente a tela ao abrir abas de pesquisa, PDF e outras",
-  "useChrome": "Suporta apenas navegadores baseados no mecanismo Chromium (por exemplo, Chrome/Edge), usar outros navegadores pode causar problemas de compatibilidade sem solução",
+  "useChrome": "Compatível apenas com o navegador Chrome, o uso de outros navegadores pode ocasionar problemas de compatibilidade sem solução",
   "clearAllAV": "Confirmar a limpeza de todos os bancos de dados não referenciados?",
   "unreferencedAV": "Banco de dados não referenciado",
   "includeSubDocs": "Incluir subdocumentos",

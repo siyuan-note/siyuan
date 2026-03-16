@@ -4,7 +4,7 @@
   "insertColumnRight1": "Füge ${x} Spalten rechts ein",
   "noSplitScreenWhenOpenTab": "Beim Öffnen von Tabs nicht in den Splitscreen wechseln",
   "noSplitScreenWhenOpenTabTip": "Beim Öffnen von Such-, PDF- und ähnlichen Tabs nicht automatisch in den Splitscreen wechseln",
-  "useChrome": "Nur in Browsern mit Chromium-Engine (z. B. Chrome/Edge) unterstützt, die Verwendung anderer Browser kann zu nicht löschbaren Kompatibilitätsproblemen führen",
+  "useChrome": "Nur im Chrome-Browser unterstützt, die Verwendung anderer Browser kann zu nicht behebbaren Kompatibilitätsproblemen führen",
   "clearAllAV": "Bestätigen Sie das Löschen aller nicht referenzierten Datenbanken?",
   "unreferencedAV": "Nicht referenzierte Datenbank",
   "includeSubDocs": "Unterdokumente einbeziehen",

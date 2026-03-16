@@ -19,6 +19,7 @@ package util
 import (
 	"bytes"
 	"io/fs"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -28,7 +29,6 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
@@ -235,7 +235,7 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 	for _, fromPath := range paths {
 		dir := strings.TrimSuffix(fromPath, ".sy")
 		existParent := false
-		for d, _ := range dirs {
+		for d := range dirs {
 			if strings.HasPrefix(fromPath, d) {
 				existParent = true
 				break
@@ -248,6 +248,27 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 		ret = append(ret, fromPath)
 	}
 	return
+}
+
+// FileURLToLocalPath 将 file:// URL 转为本地文件路径。
+func FileURLToLocalPath(fileURL string) string {
+	if len(fileURL) < 7 || strings.ToLower(fileURL[:7]) != "file://" {
+		return ""
+	}
+	p := fileURL[7:]
+	if gulu.OS.IsWindows() {
+		// Windows 支持 file:// 后跟多个斜杠 https://github.com/siyuan-note/siyuan/issues/11885
+		p = strings.TrimLeft(p, "/")
+	}
+	if strings.Contains(p, "?") {
+		// 去除查询参数 https://github.com/siyuan-note/siyuan/issues/13600
+		p = p[:strings.Index(p, "?")]
+	}
+	if unescaped, err := url.PathUnescape(p); err == nil && unescaped != p {
+		// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
+		p = unescaped
+	}
+	return p
 }
 
 func IsAssetLinkDest(dest []byte, includeServePath bool) bool {
@@ -264,25 +285,35 @@ var (
 	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
 )
 
-func IsAssetsImage(assetPath string) bool {
+// IsPossiblyImage 模糊判断指定文件链接是否可能是图片。
+func IsPossiblyImage(assetPath string) bool {
 	ext := strings.ToLower(filepath.Ext(assetPath))
-	if "" == ext {
-		absPath := filepath.Join(DataDir, assetPath)
-		f, err := filelock.OpenFile(absPath, os.O_RDONLY, 0644)
-		if err != nil {
-			logging.LogErrorf("open file [%s] failed: %s", absPath, err)
-			return false
-		}
-		defer filelock.CloseFile(f)
-		m, err := mimetype.DetectReader(f)
-		if nil != err {
-			logging.LogWarnf("detect file [%s] mimetype failed: %v", absPath, err)
-			return false
-		}
-
-		ext = m.Extension()
+	if "" != ext {
+		return gulu.Str.Contains(ext, SiYuanAssetsImage)
 	}
-	return gulu.Str.Contains(ext, SiYuanAssetsImage)
+
+	if strings.HasPrefix(assetPath, "https://") || strings.HasPrefix(assetPath, "http://") {
+		// 网络图片链接不一定有拓展名
+		return true
+	}
+
+	if filePath := FileURLToLocalPath(assetPath); filePath != "" {
+		m, ok := GetMimeTypeByPath(filePath)
+		if !ok {
+			return false
+		}
+		return gulu.Str.Contains(m.Extension(), SiYuanAssetsImage)
+	}
+
+	if IsAssetLinkDest([]byte(assetPath), true) {
+		filePath := filepath.Join(DataDir, assetPath)
+		m, ok := GetMimeTypeByPath(filePath)
+		if !ok {
+			return false
+		}
+		return gulu.Str.Contains(m.Extension(), SiYuanAssetsImage)
+	}
+	return false
 }
 
 func IsDisplayableAsset(p string) bool {

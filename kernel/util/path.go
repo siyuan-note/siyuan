@@ -256,7 +256,7 @@ func FileURLToLocalPath(fileURL string) string {
 		return ""
 	}
 	p := fileURL[7:]
-	if gulu.OS.IsWindows() {
+	if gulu.OS.IsWindows() && strings.Contains(p, ":") {
 		// Windows 支持 file:// 后跟多个斜杠 https://github.com/siyuan-note/siyuan/issues/11885
 		p = strings.TrimLeft(p, "/")
 	}

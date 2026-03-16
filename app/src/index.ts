@@ -35,6 +35,8 @@ import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
 /// #if BROWSER
 import {setLocalShorthandCount} from "./util/noRelyPCFunction";
+/// #else
+import {ipcRenderer} from "electron";
 /// #endif
 import {getDockByType} from "./layout/tabUtil";
 import {Tag} from "./layout/dock/Tag";
@@ -255,4 +257,6 @@ window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
 };
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
+/// #else
+ipcRenderer.send(Constants.SIYUAN_READY_TO_SHOW);
 /// #endif

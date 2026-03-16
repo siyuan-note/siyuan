@@ -441,22 +441,9 @@ const initMainWindow = () => {
     net.fetch(getServer() + "/api/system/getNetwork", {method: "POST"}).then((response) => {
         return response.json();
     }).then((response) => {
-        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(async () => {
+        setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents).then(() => {
             // 加载主界面
-            await currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
-            if (isOpenAsHidden()) {
-                currentWindow.minimize();
-            } else {
-                currentWindow.show();
-                if (windowState.isMaximized) {
-                    currentWindow.maximize();
-                } else {
-                    currentWindow.unmaximize();
-                }
-            }
-            if (bootWindow && !bootWindow.isDestroyed()) {
-                bootWindow.destroy();
-            }
+            currentWindow.loadURL(getServer() + "/stage/build/app/?v=" + new Date().getTime());
         });
     });
 
@@ -543,6 +530,21 @@ const initMainWindow = () => {
     });
     workspaces.push({
         browserWindow: currentWindow,
+    });
+    ipcMain.once("siyuan-ready-to-show", () => {
+        if (isOpenAsHidden()) {
+            currentWindow.minimize();
+        } else {
+            currentWindow.show();
+            if (windowState.isMaximized) {
+                currentWindow.maximize();
+            } else {
+                currentWindow.unmaximize();
+            }
+        }
+        if (bootWindow && !bootWindow.isDestroyed()) {
+            bootWindow.destroy();
+        }
     });
 };
 
@@ -1311,7 +1313,6 @@ app.whenReady().then(() => {
             args: data.openAsHidden ? ["--openAsHidden"] : ""
         });
     });
-
     if (firstOpen) {
         const firstOpenWindow = new BrowserWindow({
             width: Math.floor(screen.getPrimaryDisplay().size.width * 0.6),
@@ -1527,7 +1528,6 @@ app.on("before-quit", (event) => {
         }
     });
 });
-
 
 function writeLog(out) {
     console.log(out);

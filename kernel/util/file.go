@@ -99,6 +99,7 @@ func GetMimeTypeByPath(filePath string) (m *mimetype.MIME, ok bool) {
 		logging.LogWarnf("detect file [%s] mimetype failed: %v", filePath, err)
 		return
 	}
+	ok = true
 	return
 }
 

@@ -8,8 +8,10 @@ on:
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
-  repo_name_android: 'siyuan-android'
-  package_json: 'app/package.json'
+  # repo_name_android: "siyuan-android"
+  # repo_name: "siyuan"
+  # repo_owner: "siyuan-note"
+  package_json: "app/package.json"
 
 jobs:
   create_release:
@@ -27,7 +29,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: "3.11"
       - run: pip install PyGithub
 
       - id: thisLatestRelease
@@ -43,19 +45,19 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: version
         with:
-          cmd: 'jq .version ${{ env.package_json }} -r'
+          cmd: "jq .version ${{ env.package_json }} -r"
 
       - name: Extract electronVersion from package.json
         uses: sergeysova/jq-action@v2
         id: electronVersion
         with:
-          cmd: 'jq .devDependencies.electron ${{ env.package_json }} -r'
+          cmd: "jq .devDependencies.electron ${{ env.package_json }} -r"
 
       - name: Extract packageManager from package.json
         uses: sergeysova/jq-action@v2
         id: packageManager
         with:
-          cmd: 'jq .packageManager ${{ env.package_json }} -r'
+          cmd: "jq .packageManager ${{ env.package_json }} -r"
 
       - name: Gather Release Information
         id: release_info
@@ -92,51 +94,51 @@ jobs:
         config:
           - os: ubuntu-24.04
             name: ubuntu build linux.AppImage
-            kernel_path: '../app/kernel-linux/SiYuan-Kernel'
-            build_args_prefix: '-s -w -X'
-            build_args_suffix: 'Mode=prod'
-            electron_args: 'dist-linux'
-            goos: 'linux'
-            goarch: 'amd64'
-            suffix: 'linux.AppImage'
+            kernel_path: "../app/kernel-linux/SiYuan-Kernel"
+            build_args_prefix: "-s -w -X"
+            build_args_suffix: "Mode=prod"
+            electron_args: "dist-linux"
+            goos: "linux"
+            goarch: "amd64"
+            suffix: "linux.AppImage"
           - os: ubuntu-24.04
             name: ubuntu build linux.tar.gz
-            kernel_path: '../app/kernel-linux/SiYuan-Kernel'
-            build_args_prefix: '-s -w -X'
-            build_args_suffix: 'Mode=prod'
-            electron_args: 'dist-linux'
-            goos: 'linux'
-            goarch: 'amd64'
-            suffix: 'linux.tar.gz'
+            kernel_path: "../app/kernel-linux/SiYuan-Kernel"
+            build_args_prefix: "-s -w -X"
+            build_args_suffix: "Mode=prod"
+            electron_args: "dist-linux"
+            goos: "linux"
+            goarch: "amd64"
+            suffix: "linux.tar.gz"
           - os: macos-latest
             name: macos build mac.dmg
-            kernel_path: '../app/kernel-darwin/SiYuan-Kernel'
-            build_args_prefix: '-s -w -X'
-            build_args_suffix: 'Mode=prod'
-            electron_args: 'dist-darwin'
-            goos: 'darwin'
-            goarch: 'amd64'
-            suffix: 'mac.dmg'
+            kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
+            build_args_prefix: "-s -w -X"
+            build_args_suffix: "Mode=prod"
+            electron_args: "dist-darwin"
+            goos: "darwin"
+            goarch: "amd64"
+            suffix: "mac.dmg"
           - os: macos-latest
             name: macos build mac-arm64.dmg
-            kernel_path: '../app/kernel-darwin-arm64/SiYuan-Kernel'
-            build_args_prefix: '-s -w -X'
-            build_args_suffix: 'Mode=prod'
-            electron_args: 'dist-darwin-arm64'
-            goos: 'darwin'
-            goarch: 'arm64'
-            suffix: 'mac-arm64.dmg'
+            kernel_path: "../app/kernel-darwin-arm64/SiYuan-Kernel"
+            build_args_prefix: "-s -w -X"
+            build_args_suffix: "Mode=prod"
+            electron_args: "dist-darwin-arm64"
+            goos: "darwin"
+            goarch: "arm64"
+            suffix: "mac-arm64.dmg"
           - os: windows-latest
             name: windows build win.exe
-            kernel_path: '../app/kernel/SiYuan-Kernel.exe'
-            build_args_prefix: '-s -w -H=windowsgui -X'
-            build_args_suffix: 'Mode=prod'
-            electron_args: 'dist'
-            goos: 'windows'
-            gobin: 'bin'
-            mingwsys: 'MINGW64'
-            goarch: 'amd64'
-            suffix: 'win.exe'
+            kernel_path: "../app/kernel/SiYuan-Kernel.exe"
+            build_args_prefix: "-s -w -H=windowsgui -X"
+            build_args_suffix: "Mode=prod"
+            electron_args: "dist"
+            goos: "windows"
+            gobin: "bin"
+            mingwsys: "MINGW64"
+            goarch: "amd64"
+            suffix: "win.exe"
 
     steps:
       - uses: actions/checkout@v6

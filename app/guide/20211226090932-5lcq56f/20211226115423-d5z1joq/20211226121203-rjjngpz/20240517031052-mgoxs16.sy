@@ -6,7 +6,7 @@
 		"id": "20240517031052-mgoxs16",
 		"title": "發布服務",
 		"type": "doc",
-		"updated": "20260315160433"
+		"updated": "20260317200702"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160433-v2hgbex",
-				"updated": "20260315160433"
+				"updated": "20260317200702"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160433-ubgzvn4",
-				"updated": "20260315160433"
+				"updated": "20260317200702"
 			},
 			"Children": [
 				{
@@ -265,7 +265,7 @@
 					},
 					"Properties": {
 						"id": "20260315160433-twduxmc",
-						"updated": "20260315160433"
+						"updated": "20260317200702"
 					},
 					"Children": [
 						{
@@ -288,7 +288,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260315160438-p4ogqy6",
-								"updated": "20260315160438"
+								"updated": "20260317200702"
 							},
 							"Children": [
 								{
@@ -300,7 +300,7 @@
 									},
 									"Properties": {
 										"id": "20260315160433-0mttibg",
-										"updated": "20260315160433"
+										"updated": "20260317200702"
 									},
 									"Children": [
 										{
@@ -308,7 +308,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260315160433-oezruev",
-												"updated": "20260315160433"
+												"updated": "20260317200702"
 											},
 											"Children": [
 												{
@@ -336,12 +336,12 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
-													"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Authentication#basic_驗證方案",
+													"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#basic_authentication_scheme",
 													"TextMarkTextContent": "Basic 驗證方案"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 對訪客進行認證。訪客在瀏覽發佈內容前必須正確輸入 "
+													"Data": "對訪客進行認證。訪客在瀏覽發佈內容前必須正確輸入 "
 												},
 												{
 													"Type": "NodeTextMark",

@@ -33,7 +33,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gofrs/flock"
@@ -46,7 +45,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.6.0"
+	Ver       = "3.6.1"
 	IsInsider = false
 )
 

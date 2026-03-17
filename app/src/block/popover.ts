@@ -107,7 +107,11 @@ export const initBlockPopover = (app: App) => {
                         } else {
                             assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
-                        showTooltip(assetTip, aElement, tooltipClass, event, tooltipSpace);
+                        try {
+                            showTooltip(decodeURIComponent(assetTip), aElement, tooltipClass, event, tooltipSpace);
+                        } catch (e) {
+                            showTooltip(assetTip, aElement, tooltipClass, event, tooltipSpace);
+                        }
                     });
                     tip = "";
                 } else if (title) {

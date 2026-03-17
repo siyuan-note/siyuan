@@ -539,28 +539,54 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	return
 }
 
-func GetAssetAbsPath(relativePath string) (ret string, err error) {
+func GetAssetAbsPath(relativePath string) (string, error) {
 	relativePath = strings.TrimSpace(relativePath)
-	if strings.Contains(relativePath, "?") {
-		relativePath = relativePath[:strings.Index(relativePath, "?")]
+	if idx := strings.Index(relativePath, "?"); idx >= 0 {
+		relativePath = relativePath[:idx]
 	}
 
-	// 在全局 assets 路径下搜索
+	absPath, err := getAssetAbsPath(relativePath)
+	if err == nil && absPath != "" {
+		return absPath, nil
+	}
+
+	// supports URL-encoded local file names
+	unescaped, secondErr := url.PathUnescape(relativePath)
+	if secondErr == nil && unescaped != relativePath {
+		absPathUnescaped, secondErr := getAssetAbsPath(unescaped)
+		if secondErr == nil && absPathUnescaped != "" {
+			return absPathUnescaped, nil
+		}
+	}
+
+	// 优先返回原始路径错误，其次返回反转义路径错误
+	if err != nil {
+		return "", err
+	}
+	if secondErr != nil {
+		return "", secondErr
+	}
+	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
+}
+
+func getAssetAbsPath(relativePath string) (absPath string, err error) {
+	relativePath = filepath.ToSlash(relativePath)
+	// 在 data 文件夹下搜索，主要是 data/assets 文件夹
 	p := filepath.Join(util.DataDir, relativePath)
 	if gulu.File.IsExist(p) {
-		ret = p
-		if !util.IsSubPath(util.WorkspaceDir, ret) {
-			err = fmt.Errorf("[%s] is not sub path of workspace", ret)
-			return
+		if !util.IsSubPath(util.WorkspaceDir, p) {
+			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
-		return
+		return p, nil
 	}
 
-	// 在笔记本下搜索
+	// 在文档同级 assets 文件夹下搜索
+	if !strings.HasPrefix(relativePath, "assets/") {
+		return "", nil
+	}
 	notebooks, err := ListNotebooks()
 	if err != nil {
-		err = errors.New(Conf.Language(0))
-		return
+		return "", errors.New(Conf.Language(0))
 	}
 	for _, notebook := range notebooks {
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
@@ -573,22 +599,21 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 			}
 			if p := filepath.ToSlash(path); strings.HasSuffix(p, relativePath) {
 				if gulu.File.IsExist(path) {
-					ret = path
+					absPath = path
 					return fs.SkipAll
 				}
 			}
 			return nil
 		})
 
-		if "" != ret {
-			if !util.IsSubPath(util.WorkspaceDir, ret) {
-				err = fmt.Errorf("[%s] is not sub path of workspace", ret)
-				return
+		if "" != absPath {
+			if !util.IsSubPath(util.WorkspaceDir, absPath) {
+				return "", fmt.Errorf("[%s] is not sub path of workspace", absPath)
 			}
-			return
+			return absPath, nil
 		}
 	}
-	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
+	return "", nil
 }
 
 func UploadAssets2Cloud(id string, ignorePushMsg bool) (count int, err error) {

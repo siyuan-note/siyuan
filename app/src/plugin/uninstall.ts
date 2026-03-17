@@ -61,6 +61,13 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                     window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
                     dockIconElement = document.querySelector(`.dock__item[data-type="${key}"]`);
                     if (dockIconElement) {
+                        let index = 0;
+                        let previousElement = dockIconElement;
+                        while (previousElement.previousElementSibling) {
+                            index++;
+                            previousElement = previousElement.previousElementSibling;
+                        }
+                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].index = index;
                         window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].show = dockIconElement.classList.contains("dock__item--active");
                         window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].size = {
                             height: parseInt(dockIconElement.getAttribute("data-height")) || null,

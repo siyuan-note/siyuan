@@ -598,6 +598,14 @@ func serveAssets(ginServer *gin.Engine) {
 			}
 		}
 
+		if !model.IsAdminRoleContext(context) {
+			publishAccess := model.GetPublishAccess()
+			if !model.CheckAbsPathAccessableByPublishAccess(context, p, publishAccess) {
+				context.Status(http.StatusForbidden)
+				return
+			}
+		}
+
 		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
 			return
 		}

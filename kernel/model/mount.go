@@ -155,7 +155,7 @@ func RemoveBox(boxID string) (err error) {
 				if removeErr := filelock.Remove(avFilePath); nil != removeErr {
 					logging.LogErrorf("remove av file [%s] failed: %s", avFilePath, removeErr)
 				} else {
-					logging.LogInfof("removed av file [%s]", avFilePath)
+					logging.LogDebugf("removed av file [%s]", avFilePath)
 				}
 			}
 		}

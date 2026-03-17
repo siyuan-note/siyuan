@@ -76,7 +76,7 @@ func queryRefTexts(refSearchIgnoreLines []string) (ret []string) {
 	sqlStmt += " LIMIT 10240"
 	rows, err := query(sqlStmt)
 	if err != nil {
-		logging.LogErrorf("sql query failed: %s", sqlStmt, err)
+		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
 		return
 	}
 	defer rows.Close()

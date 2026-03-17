@@ -293,7 +293,7 @@ func IsPossiblyImage(assetPath string) bool {
 	}
 
 	if strings.HasPrefix(assetPath, "https://") || strings.HasPrefix(assetPath, "http://") {
-		// 网络图片链接不一定有拓展名
+		// 网络图片链接不一定有扩展名
 		return true
 	}
 

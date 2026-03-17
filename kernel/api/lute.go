@@ -18,7 +18,6 @@ package api
 
 import (
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -156,18 +155,7 @@ func html2BlockDOM(c *gin.Context) {
 			if strings.HasPrefix(localPath, "http") {
 				return ast.WalkContinue
 			}
-
-			localPath = strings.TrimPrefix(localPath, "file://")
-			if gulu.OS.IsWindows() {
-				localPath = strings.TrimPrefix(localPath, "/")
-			}
-
-			unescaped, _ := url.PathUnescape(localPath)
-			if unescaped != localPath {
-				// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
-				localPath = unescaped
-			}
-
+			localPath = util.FileURLToLocalPath(localPath)
 			if !filepath.IsAbs(localPath) {
 				// Kernel crash when copy-pasting from some browsers https://github.com/siyuan-note/siyuan/issues/9203
 				return ast.WalkContinue

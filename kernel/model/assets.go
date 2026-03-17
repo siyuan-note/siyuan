@@ -261,20 +261,7 @@ func netAssets2LocalAssets0(tree *parse.Tree, onlyImg bool, originalURL string, 
 		}
 
 		for _, dest := range dests {
-			if strings.HasPrefix(strings.ToLower(dest), "file://") { // 处理本地文件链接
-				u := dest[7:]
-				unescaped, _ := url.PathUnescape(u)
-				if unescaped != u {
-					// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
-					u = unescaped
-				}
-				if strings.Contains(u, ":") {
-					u = strings.TrimPrefix(u, "/")
-				}
-				if strings.Contains(u, "?") {
-					u = u[:strings.Index(u, "?")]
-				}
-
+			if u := util.FileURLToLocalPath(dest); u != "" { // 处理本地文件链接
 				if !gulu.File.IsExist(u) {
 					logging.LogErrorf("local file asset [%s] not exist", u)
 					continue

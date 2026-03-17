@@ -6,7 +6,7 @@
 		"id": "20240517031028-xqinazo",
 		"title": "发布服务",
 		"type": "doc",
-		"updated": "20260315160139"
+		"updated": "20260317200616"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160139-adeko8a",
-				"updated": "20260315160022"
+				"updated": "20260317200616"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160139-at1ed35",
-				"updated": "20260315160022"
+				"updated": "20260317200616"
 			},
 			"Children": [
 				{
@@ -276,7 +276,7 @@
 					},
 					"Properties": {
 						"id": "20260315160139-f15jf3z",
-						"updated": "20260315160022"
+						"updated": "20260317200616"
 					},
 					"Children": [
 						{
@@ -299,7 +299,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260315160139-218sjzk",
-								"updated": "20260315160022"
+								"updated": "20260317200616"
 							},
 							"Children": [
 								{
@@ -311,7 +311,7 @@
 									},
 									"Properties": {
 										"id": "20260315160139-vopqsrs",
-										"updated": "20260315160022"
+										"updated": "20260317200616"
 									},
 									"Children": [
 										{
@@ -319,7 +319,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260315160139-1fy74tq",
-												"updated": "20260315160022"
+												"updated": "20260317200616"
 											},
 											"Children": [
 												{
@@ -347,12 +347,12 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
-													"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Authentication#basic_验证方案",
+													"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/Authentication#basic_%E9%AA%8C%E8%AF%81%E6%96%B9%E6%A1%88",
 													"TextMarkTextContent": "Basic 验证方案"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 对访问者进行认证。访问者在浏览发布内容前必须正确输入 "
+													"Data": "对访问者进行认证。访问者在浏览发布内容前必须正确输入 "
 												},
 												{
 													"Type": "NodeTextMark",

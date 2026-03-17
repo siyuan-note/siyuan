@@ -6,7 +6,7 @@
 		"id": "20240517031132-jmr5ihm",
 		"title": "Publish service",
 		"type": "doc",
-		"updated": "20260315160506"
+		"updated": "20260317200403"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160303-vbqukj8",
-				"updated": "20260315160506"
+				"updated": "20260317200403"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160303-5spvi7o",
-				"updated": "20260315160506"
+				"updated": "20260317200403"
 			},
 			"Children": [
 				{
@@ -265,7 +265,7 @@
 					},
 					"Properties": {
 						"id": "20260315160303-u4zmpim",
-						"updated": "20260315160506"
+						"updated": "20260317200403"
 					},
 					"Children": [
 						{
@@ -288,7 +288,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260315160357-dm9iiml",
-								"updated": "20260315160506"
+								"updated": "20260317200403"
 							},
 							"Children": [
 								{
@@ -300,7 +300,7 @@
 									},
 									"Properties": {
 										"id": "20260315160303-aa4kh8e",
-										"updated": "20260315160505"
+										"updated": "20260317200403"
 									},
 									"Children": [
 										{
@@ -308,7 +308,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260315160303-8kzcy9p",
-												"updated": "20260315160505"
+												"updated": "20260317200403"
 											},
 											"Children": [
 												{
@@ -336,7 +336,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "a",
-													"TextMarkAHref": "https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Authentication#basic_验证方案",
+													"TextMarkAHref": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Authentication#basic_authentication_scheme",
 													"TextMarkTextContent": "Basic authentication scheme"
 												},
 												{

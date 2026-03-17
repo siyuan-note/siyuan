@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20250117171906"
+		"updated": "20260317195629"
 	},
 	"Children": [
 		{
@@ -555,61 +555,47 @@
 			]
 		},
 		{
-			"ID": "20250114215505-lg1uhjx",
+			"ID": "20260317195622-4bssmue",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20250114215505-lg1uhjx",
-				"updated": "20250117171906"
+				"id": "20260317195622-4bssmue",
+				"updated": "20260317195629"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Android 端自訂通知"
+					"Data": "Android 端自訂保活通知"
 				}
 			]
 		},
 		{
-			"ID": "20250114215505-fhrh4h0",
+			"ID": "20260317195622-yeasvwz",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20250114215505-fhrh4h0",
-				"updated": "20250114215505"
+				"id": "20260317195622-yeasvwz",
+				"updated": "20260317195622"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "為了盡量保活後台運行，思源會定時發送通知，預設的通知內容是一些開發團隊喜歡的歌詞。"
+					"Data": "如果你需要思源盡量保活後台運行，請依照下列步驟操作："
 				}
 			]
 		},
 		{
-			"ID": "20250114215505-v559536",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20250114215505-v559536",
-				"updated": "20250114215505"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要自訂它，請按以下步驟操作："
-				}
-			]
-		},
-		{
-			"ID": "20250114215505-0k51ynd",
+			"ID": "20260317195622-hikbqlp",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20250114215505-0k51ynd",
-				"updated": "20250117171906"
+				"id": "20260317195622-hikbqlp",
+				"updated": "20260317195629"
 			},
 			"Children": [
 				{
-					"ID": "20250114215505-kgwvae6",
+					"ID": "20260317195622-b0cll04",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -618,16 +604,85 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20250114215505-kgwvae6",
-						"updated": "20250117171906"
+						"id": "20260317195622-b0cll04",
+						"updated": "20260317195622"
 					},
 					"Children": [
 						{
-							"ID": "20250114215505-cayyq7g",
+							"ID": "20260317195622-juupipi",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20250114215505-cayyq7g",
-								"updated": "20250117171906"
+								"id": "20260317195622-juupipi",
+								"updated": "20260317195622"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "省點策略調整為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "無限制"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195622-oek6y57",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260317195622-oek6y57",
+						"updated": "20260317195622"
+					},
+					"Children": [
+						{
+							"ID": "20260317195622-6y7o5mp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195622-6y7o5mp",
+								"updated": "20260317195622"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "允許通知"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195622-boz0953",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260317195622-boz0953",
+						"updated": "20260317195622"
+					},
+					"Children": [
+						{
+							"ID": "20260317195622-dh9h1de",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195622-dh9h1de",
+								"updated": "20260317195622"
 							},
 							"Children": [
 								{
@@ -657,25 +712,25 @@
 					]
 				},
 				{
-					"ID": "20250114215505-y572ade",
+					"ID": "20260317195622-acopv3b",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
 						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
+						"Marker": "NC4=",
+						"Num": 4
 					},
 					"Properties": {
-						"id": "20250114215505-y572ade",
-						"updated": "20250114215523"
+						"id": "20260317195622-acopv3b",
+						"updated": "20260317195629"
 					},
 					"Children": [
 						{
-							"ID": "20250114215505-kbmum62",
+							"ID": "20260317195622-damrx1c",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20250114215505-kbmum62",
-								"updated": "20250114215523"
+								"id": "20260317195622-damrx1c",
+								"updated": "20260317195629"
 							},
 							"Children": [
 								{
@@ -686,7 +741,7 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226121438-xaafdo8",
-									"TextMarkBlockRefSubtype": "d",
+									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "資料同步"
 								},
 								{
@@ -700,16 +755,16 @@
 			]
 		},
 		{
-			"ID": "20250114215505-8w2wnfo",
+			"ID": "20260317195622-pqamghs",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20250114215505-8w2wnfo",
-				"updated": "20250114215505"
+				"id": "20260317195622-pqamghs",
+				"updated": "20260317195622"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "完成這兩個步驟以後通知就會使用自訂的文字。"
+					"Data": "完成以上步驟後思源每隔 45 秒會發送通知來盡量保活後台運作。"
 				}
 			]
 		}

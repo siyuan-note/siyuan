@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20250117171835"
+		"updated": "20260317195311"
 	},
 	"Children": [
 		{
@@ -559,12 +559,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250114214413-n2v7z20",
-				"updated": "20250117171835"
+				"updated": "20260317195311"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Android 端自定义通知"
+					"Data": "Android 端自定义保活通知"
 				}
 			]
 		},
@@ -573,26 +573,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20250114214422-sv4vhfx",
-				"updated": "20250114214515"
+				"updated": "20260317183614"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "为了尽量保活后台运行，思源会定时发送通知，默认的通知内容是一些开发团队喜欢的歌词。"
-				}
-			]
-		},
-		{
-			"ID": "20250114214516-9f65cgn",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20250114214516-9f65cgn",
-				"updated": "20250114215336"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要自定义它，请按如下步骤操作："
+					"Data": "如果你需要思源尽量保活后台运行，请按如下步骤操作："
 				}
 			]
 		},
@@ -604,17 +590,86 @@
 			},
 			"Properties": {
 				"id": "20250114215159-d40seb3",
-				"updated": "20250117171835"
+				"updated": "20260317195311"
 			},
 			"Children": [
 				{
-					"ID": "20250114215201-degei8s",
+					"ID": "20260317183810-qwz9j00",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
 						"Delimiter": 46,
 						"Marker": "MS4=",
 						"Num": 1
+					},
+					"Properties": {
+						"id": "20260317183810-qwz9j00",
+						"updated": "20260317195311"
+					},
+					"Children": [
+						{
+							"ID": "20260317183810-ghgiv5m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317183810-ghgiv5m",
+								"updated": "20260317195311"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "省点策略调整为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "无限制"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317183714-af6het7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260317183714-af6het7",
+						"updated": "20260317183714"
+					},
+					"Children": [
+						{
+							"ID": "20260317183714-uxiyad6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317183714-uxiyad6",
+								"updated": "20260317183724"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "允许通知"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114215201-degei8s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
 					},
 					"Properties": {
 						"id": "20250114215201-degei8s",
@@ -626,7 +681,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250114215201-ffgvnm6",
-								"updated": "20250117171835"
+								"updated": "20260317183745"
 							},
 							"Children": [
 								{
@@ -661,8 +716,8 @@
 					"ListData": {
 						"Typ": 1,
 						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
+						"Marker": "NC4=",
+						"Num": 4
 					},
 					"Properties": {
 						"id": "20250114215213-x87hdl5",
@@ -699,18 +754,26 @@
 			]
 		},
 		{
-			"ID": "20250114215221-sl97cs4",
+			"ID": "20260317183852-dxt8l8a",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20250114215221-sl97cs4",
-				"updated": "20250114215242"
+				"id": "20260317183852-dxt8l8a",
+				"updated": "20260317183945"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "完成这两个步骤以后通知就会使用自定义的文本。"
+					"Data": "完成以上步骤后思源每隔 45 秒会发送一条通知来尽量保活后台运行。"
 				}
 			]
+		},
+		{
+			"ID": "20250114215221-sl97cs4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215221-sl97cs4",
+				"updated": "20260317183704"
+			}
 		}
 	]
 }

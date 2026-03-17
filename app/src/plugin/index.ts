@@ -438,7 +438,6 @@ export class Plugin {
             window.siyuan.config.keymap.plugin[this.name] = {};
         }
         const hotkey = typeof options.config.hotkey === "string" ? options.config.hotkey : "";
-        console.log(this.name, "hotkey", hotkey);
         if (!window.siyuan.config.keymap.plugin[this.name][type2]) {
             window.siyuan.config.keymap.plugin[this.name][type2] = {
                 default: hotkey,
@@ -450,7 +449,6 @@ export class Plugin {
             }
             window.siyuan.config.keymap.plugin[this.name][type2]["default"] = hotkey;
         }
-        console.log("type2:", window.siyuan.config.keymap.plugin[this.name][type2]);
         return this.docks[type2];
     }
 

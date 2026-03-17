@@ -34,7 +34,10 @@ func chatGPT(c *gin.Context) {
 		return
 	}
 
-	msg := arg["msg"].(string)
+	var msg string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", true, &msg)) {
+		return
+	}
 	ret.Data = model.ChatGPT(msg)
 }
 

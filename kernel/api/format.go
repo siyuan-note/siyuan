@@ -34,7 +34,10 @@ func netAssets2LocalAssets(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	err := model.NetAssets2LocalAssets(id, false, "")
 	if err != nil {
 		ret.Code = -1
@@ -76,7 +79,10 @@ func autoSpace(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	err := model.AutoSpace(id)
 	if err != nil {
 		ret.Code = -1

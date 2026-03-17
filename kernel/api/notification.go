@@ -34,10 +34,14 @@ func pushMsg(c *gin.Context) {
 		return
 	}
 
-	msg := strings.TrimSpace(arg["msg"].(string))
+	var msg string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", true, &msg)) {
+		return
+	}
+	msg = strings.TrimSpace(msg)
 	if "" == msg {
 		ret.Code = -1
-		ret.Msg = "msg can't be empty"
+		ret.Msg = "Field [msg] must not be empty"
 		return
 	}
 
@@ -47,7 +51,7 @@ func pushMsg(c *gin.Context) {
 	}
 	msgId := util.PushMsg(msg, timeout)
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"id": msgId,
 	}
 }
@@ -61,14 +65,24 @@ func pushErrMsg(c *gin.Context) {
 		return
 	}
 
-	msg := arg["msg"].(string)
+	var msg string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", true, &msg)) {
+		return
+	}
+	msg = strings.TrimSpace(msg)
+	if "" == msg {
+		ret.Code = -1
+		ret.Msg = "Field [msg] must not be empty"
+		return
+	}
+
 	timeout := 7000
 	if nil != arg["timeout"] {
 		timeout = int(arg["timeout"].(float64))
 	}
 	msgId := util.PushErrMsg(msg, timeout)
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"id": msgId,
 	}
 }

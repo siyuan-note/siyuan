@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260317195629"
+		"updated": "20260317202510"
 	},
 	"Children": [
 		{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260317195622-4bssmue",
-				"updated": "20260317195629"
+				"updated": "20260317202510"
 			},
 			"Children": [
 				{
@@ -591,7 +591,7 @@
 			},
 			"Properties": {
 				"id": "20260317195622-hikbqlp",
-				"updated": "20260317195629"
+				"updated": "20260317202510"
 			},
 			"Children": [
 				{
@@ -605,7 +605,7 @@
 					},
 					"Properties": {
 						"id": "20260317195622-b0cll04",
-						"updated": "20260317195622"
+						"updated": "20260317202510"
 					},
 					"Children": [
 						{
@@ -613,12 +613,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260317195622-juupipi",
-								"updated": "20260317195622"
+								"updated": "20260317202510"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "省點策略調整為 "
+									"Data": "省電策略調整為 "
 								},
 								{
 									"Type": "NodeTextMark",

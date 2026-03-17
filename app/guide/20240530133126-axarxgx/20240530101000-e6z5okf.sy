@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20260317195538"
+		"updated": "20260317202604"
 	},
 	"Children": [
 		{
@@ -286,7 +286,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260317195514-yho54qh",
-				"updated": "20260317195538"
+				"updated": "20260317202604"
 			},
 			"Children": [
 				{
@@ -317,7 +317,7 @@
 			},
 			"Properties": {
 				"id": "20260317195514-87rztvj",
-				"updated": "20260317195538"
+				"updated": "20260317202604"
 			},
 			"Children": [
 				{
@@ -331,7 +331,7 @@
 					},
 					"Properties": {
 						"id": "20260317195514-31osjhv",
-						"updated": "20260317195514"
+						"updated": "20260317202604"
 					},
 					"Children": [
 						{
@@ -339,12 +339,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260317195514-r1jpi3g",
-								"updated": "20260317195514"
+								"updated": "20260317202604"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "バッテリーセーバーの設定を「無制限（Unrestricted）」に設定します。"
+									"Data": "省電力設定を「無制限」に調整しました。"
 								}
 							]
 						}

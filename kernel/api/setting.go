@@ -638,15 +638,19 @@ func setPublish(c *gin.Context) {
 	model.Conf.Publish = publish
 	model.Conf.Save()
 
-	if port, err := proxy.InitPublishService(); err != nil {
+	port, err := proxy.InitPublishService()
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-	} else {
-		ret.Data = map[string]any{
-			"port":    port,
-			"publish": model.Conf.Publish,
-		}
+		return
 	}
+
+	ret.Data = map[string]any{
+		"port":    port,
+		"publish": model.Conf.Publish,
+	}
+
+	util.BroadcastByType("main", "setPublish", 0, "", model.Conf.Publish)
 }
 
 func getPublish(c *gin.Context) {

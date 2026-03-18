@@ -289,7 +289,6 @@ func heading2Doc(c *gin.Context) {
 		"path":           targetPath,
 		"srcRootBlockID": srcRootBlockID,
 	}
-	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
 }
 
@@ -329,7 +328,6 @@ func li2Doc(c *gin.Context) {
 		"path":           targetPath,
 		"srcRootBlockID": srcRootBlockID,
 	}
-	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
 }
 
@@ -813,7 +811,6 @@ func createDailyNote(c *gin.Context) {
 			"box":  box,
 			"path": p,
 		}
-		evt.Callback = arg["callback"]
 		util.PushEvent(evt)
 	}
 
@@ -1208,7 +1205,7 @@ func getDoc(c *gin.Context) {
 		newContent := model.FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
 		if newContent != content {
 			content = newContent
-			scroll = false  // 避免长页面可通过滚动无限刷出多个锁
+			scroll = false // 避免长页面可通过滚动无限刷出多个锁
 		}
 	}
 
@@ -1245,7 +1242,6 @@ func pushCreate(box *model.Box, p string, arg map[string]interface{}) {
 		"path":        p,
 		"listDocTree": listDocTree,
 	}
-	evt.Callback = arg["callback"]
 	util.PushEvent(evt)
 }
 
@@ -1284,10 +1280,10 @@ func setPublishAccess(c *gin.Context) {
 	} else {
 		if !visible || len(password) != 0 || disable {
 			publishAccess = append(publishAccess, &model.PublishAccessItem{
-				ID:          ID,
-				Visible:     visible,
-				Password:    password,
-				Disable:     disable,
+				ID:       ID,
+				Visible:  visible,
+				Password: password,
+				Disable:  disable,
 			})
 			updated = true
 		}
@@ -1318,7 +1314,7 @@ func getPublishAccess(c *gin.Context) {
 	for _, ID := range arg["ids"].([]interface{}) {
 		IDs = append(IDs, ID.(string))
 	}
-	
+
 	publishAccess := model.GetPublishAccess()
 	maskedPublishAccess := model.PublishAccess{}
 	for _, ID := range IDs {
@@ -1332,10 +1328,10 @@ func getPublishAccess(c *gin.Context) {
 		}
 		if !found {
 			maskedPublishAccess = append(maskedPublishAccess, &model.PublishAccessItem{
-				ID:          ID,
-				Visible:     true,
-				Password:    "",
-				Disable:     false,
+				ID:       ID,
+				Visible:  true,
+				Password: "",
+				Disable:  false,
 			})
 		}
 	}
@@ -1360,7 +1356,6 @@ func authFilePublishAccess(c *gin.Context) {
 	}
 	password := arg["password"].(string)
 
-	
 	publishAccess := model.GetPublishAccess()
 	for _, item := range publishAccess {
 		if item.ID == ID {

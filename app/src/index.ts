@@ -127,9 +127,10 @@ export class App {
                                 window.siyuan.config.publish = data.data;
                                 if (!window.siyuan.config.publish.enable) {
                                     getAllModels().files.forEach(item => {
-                                        item.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-                                            item.classList.remove("fn__none");
-                                            item.nextElementSibling.classList.add("fn__none");
+                                        item.element.classList.remove("file-tree__publish-access--active");
+                                        item.element.querySelectorAll(".b3-list-item__icon").forEach(iconItem => {
+                                            iconItem.classList.remove("fn__none");
+                                            iconItem.nextElementSibling.classList.add("fn__none");
                                         });
                                     });
                                 }

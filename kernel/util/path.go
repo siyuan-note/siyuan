@@ -402,6 +402,9 @@ func IsSensitivePath(p string) bool {
 		"/lib",
 		"/srv",
 		"/tmp",
+		"/usr",
+		"/opt",
+		"/sbin",
 	}
 	for _, pre := range prefixes {
 		if strings.HasPrefix(toCheckPathLower, pre) {

@@ -1,6 +1,7 @@
 import {fetchPost} from "../util/fetch";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
+import {getAllModels} from "../layout/getAll";
 
 export const publish = {
     element: undefined as Element,
@@ -16,15 +17,15 @@ export const publish = {
     <input class="b3-switch fn__flex-center" id="publishEnable" type="checkbox"${window.siyuan.config.publish.enable ? " checked" : ""}/>
 </label>
 <div class="b3-label">
-    ${(()=>{
-        if (mobile) {
-            return `
+    ${(() => {
+            if (mobile) {
+                return `
 ${window.siyuan.languages.publishServicePort}
 <span class="fn__hr"></span>
 <input class="b3-text-field fn__block" id="publishPort" type="number" min="0" max="65535" value="${window.siyuan.config.publish.port}">
 <div class="b3-label__text">${window.siyuan.languages.publishServicePortTip}</div>`;
-        } else {
-            return `
+            } else {
+                return `
 <div class="fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.publishServicePort}
@@ -33,8 +34,8 @@ ${window.siyuan.languages.publishServicePort}
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="publishPort" type="number" min="0" max="65535" value="${window.siyuan.config.publish.port}">
 </div>`;
-        }
-    })()}
+            }
+        })()}
 </div>
 <div class="b3-label">
     <div class="fn__flex">
@@ -59,9 +60,9 @@ ${window.siyuan.languages.publishServicePort}
     </label>
 </div>
 <div class="b3-label">
-    ${(()=>{
-        if (mobile) {
-            return `
+    ${(() => {
+            if (mobile) {
+                return `
 ${window.siyuan.languages.publishServiceAuthAccounts}
 <div class="b3-label__text">${window.siyuan.languages.publishServiceAuthAccountsTip}</div>
 <div class="b3-label b3-label--inner fn__flex">
@@ -70,8 +71,8 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
         <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.publishServiceAuthAccountAdd}
     </button>
 </div>`;
-        } else {
-            return `
+            } else {
+                return `
 <div class="fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.publishServiceAuthAccounts}
@@ -82,8 +83,8 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
         <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.publishServiceAuthAccountAdd}
     </button>
 </div>`;
-        }
-    })()}
+            }
+        })()}
     <div class="fn__flex-1" id="publishAuthAccounts">
     </div>
 </div>
@@ -125,8 +126,8 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
             auth: {
                 enable: publishAuthEnable.checked,
                 accounts: window.siyuan.config.publish.auth.accounts,
-            } as Config.IPublishAuth,
-        } as Config.IPublish, publish._updatePublishConfig.bind(null, reloadAccounts));
+            },
+        }, publish._updatePublishConfig.bind(null, reloadAccounts));
     },
     _updatePublishConfig: (
         reloadAccounts: boolean,
@@ -138,6 +139,29 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
                 publish._renderPublishAuthAccounts(publish.element);
             }
             publish._renderPublishAddressList(publish.element, response.data.port);
+
+            /// #if !MOBILE
+            if (!window.siyuan.config.publish.enable) {
+                getAllModels().files.forEach(item => {
+                    item.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+                        item.classList.remove("fn__none");
+                        item.nextElementSibling.classList.add("fn__none");
+                    });
+                });
+            }
+            /// #else
+            const accessElement = window.siyuan.mobile.docks.file.element.previousElementSibling.querySelector('[data-type="publish-access"]');
+            if (!window.siyuan.config.publish.enable) {
+                accessElement.classList.remove("block__icon--active");
+                accessElement.classList.add("fn__none");
+                window.siyuan.mobile.docks.file.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+                    item.classList.remove("fn__none");
+                    item.nextElementSibling.classList.add("fn__none");
+                });
+            } else {
+                accessElement.classList.remove("fn__none");
+            }
+            /// #endif
         } else {
             publish._renderPublishAddressList(publish.element, 0);
         }
@@ -161,19 +185,19 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
     <span class="fn__space"></span>
     <input class="b3-text-field fn__block" data-name="memo" value="${account.memo}" placeholder="${window.siyuan.languages.memo}">
     <span class="fn__space"></span>
-    ${(()=>{
-        if (mobile) {
-            return `
+    ${(() => {
+                    if (mobile) {
+                        return `
 <button class="b3-button b3-button--outline fn__block" data-action="remove">
     <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.delete}
 </button>`;
-        } else {
-            return `
+                    } else {
+                        return `
 <span data-action="remove" class="block__icon block__icon--show">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>`;
-        }
-    })()}
+                    }
+                })()}
 </li>
 `)
                 .join("")

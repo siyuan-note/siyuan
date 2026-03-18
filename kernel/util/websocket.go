@@ -114,7 +114,7 @@ func AddPushChan(session *melody.Session) {
 	typ := session.Request.URL.Query().Get("type")
 	session.Set("type", typ)
 
-	if "auth" == id {
+	if IsAuthSession(session) {
 		if appSessions, ok := authSessions.Load(appID); !ok {
 			appSess := &sync.Map{}
 			appSess.Store(id, session)
@@ -133,6 +133,16 @@ func AddPushChan(session *melody.Session) {
 	}
 }
 
+func IsAuthSession(session *melody.Session) bool {
+	id, _ := session.Get("id")
+	if "auth" == id {
+		return true
+	}
+
+	id = session.Request.URL.Query().Get("id")
+	return "auth" == id
+}
+
 func RemovePushChan(session *melody.Session) {
 	app, _ := session.Get("app")
 	id, _ := session.Get("id")
@@ -141,7 +151,7 @@ func RemovePushChan(session *melody.Session) {
 		return
 	}
 
-	if "auth" == id {
+	if IsAuthSession(session) {
 		appSess, _ := authSessions.Load(app)
 		if nil != appSess {
 			appSessions := appSess.(*sync.Map)

@@ -781,6 +781,11 @@ func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.HandleMessage(func(s *melody.Session, msg []byte) {
 		start := time.Now()
 		logging.LogTracef("request [%s]", shortReqMsg(msg))
+
+		if util.IsAuthSession(s) {
+			return
+		}
+
 		request := map[string]interface{}{}
 		if err := gulu.JSON.UnmarshalJSON(msg, &request); err != nil {
 			result := util.NewResult()

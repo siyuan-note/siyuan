@@ -7,18 +7,6 @@ declare const flowchart: {
     parse(text: string): { drawSVG: (type: Element) => void };
 };
 
-// 同一 target 共用一个监听器，重复调用时合并 items 而非替换，避免前次 hideElements 更多时被后次覆盖
-const flowchartObserverMap = new Map<Element, { observer: MutationObserver; group: { items: Element[]; attributeFilter: string[] } }>();
-
-export const disconnectFlowchartObservers = (rootElement: Element) => {
-    flowchartObserverMap.forEach(({observer}, target) => {
-        if (rootElement.contains(target)) {
-            observer.disconnect();
-            flowchartObserverMap.delete(target);
-        }
-    });
-};
-
 export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let flowchartElements: Element[] | NodeListOf<Element> = [];
     if (element.getAttribute("data-subtype") === "flowchart" && element.getAttribute("data-render") !== "true") {
@@ -40,46 +28,20 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
             }
         });
         if (hideElements.length > 0) {
-            const targetToItems = new Map<Element, { items: Element[]; attributeFilter: string[] }>();
+            const observer = new MutationObserver(() => {
+                initFlowchart(hideElements);
+                observer.disconnect();
+            });
             hideElements.forEach(item => {
                 const hideElement = hasClosestByAttribute(item, "fold", "1");
-                let target: Element;
-                let attributeFilter: string[];
                 if (hideElement) {
-                    target = hideElement;
-                    attributeFilter = ["fold"];
+                    observer.observe(hideElement, {attributeFilter: ["fold"]});
                 } else {
                     const cardElement = hasClosestByClassName(item, "card__block", true);
-                    if (!cardElement) {
-                        return;
+                    if (cardElement) {
+                        observer.observe(cardElement, {attributeFilter: ["class"]});
                     }
-                    target = cardElement;
-                    attributeFilter = ["class"];
                 }
-                const group = targetToItems.get(target);
-                if (group) {
-                    group.items.push(item);
-                } else {
-                    targetToItems.set(target, {items: [item], attributeFilter});
-                }
-            });
-            targetToItems.forEach((group, target) => {
-                const existing = flowchartObserverMap.get(target);
-                if (existing) {
-                    group.items.forEach(item => {
-                        if (!existing.group.items.includes(item)) {
-                            existing.group.items.push(item);
-                        }
-                    });
-                    return;
-                }
-                const observer = new MutationObserver(() => {
-                    initFlowchart(group.items);
-                    observer.disconnect();
-                    flowchartObserverMap.delete(target);
-                });
-                observer.observe(target, {attributeFilter: group.attributeFilter});
-                flowchartObserverMap.set(target, {observer, group});
             });
         }
         initFlowchart(normalElements);

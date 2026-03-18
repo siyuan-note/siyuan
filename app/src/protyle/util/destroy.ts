@@ -16,8 +16,6 @@ export const destroy = (protyle: IProtyle) => {
     }
     protyle.observer?.disconnect();
     protyle.observerLoad?.disconnect();
-    disconnectFlowchartObservers(protyle.element);
-    disconnectMermaidObservers(protyle.element);
     protyle.element.classList.remove("protyle");
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {

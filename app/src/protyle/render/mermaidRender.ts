@@ -3,18 +3,6 @@ import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 
-// 同一 target 共用一个监听器，重复调用时合并 items 而非替换，避免前次 hideElements 更多时被后次覆盖
-const mermaidObserverMap = new Map<Element, { observer: MutationObserver; group: { items: Element[]; attributeFilter: string[] } }>();
-
-export const disconnectMermaidObservers = (rootElement: Element) => {
-    mermaidObserverMap.forEach(({observer}, target) => {
-        if (rootElement.contains(target)) {
-            observer.disconnect();
-            mermaidObserverMap.delete(target);
-        }
-    });
-};
-
 export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
     let mermaidElements: Element[] | NodeListOf<Element> = [];
     if (element.getAttribute("data-subtype") === "mermaid" && element.getAttribute("data-render") !== "true") {
@@ -70,46 +58,20 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 }
             });
             if (hideElements.length > 0) {
-                const targetToItems = new Map<Element, { items: Element[]; attributeFilter: string[] }>();
+                const observer = new MutationObserver(() => {
+                    initMermaid(hideElements);
+                    observer.disconnect();
+                });
                 hideElements.forEach(item => {
                     const hideElement = hasClosestByAttribute(item, "fold", "1");
-                    let target: Element;
-                    let attributeFilter: string[];
                     if (hideElement) {
-                        target = hideElement;
-                        attributeFilter = ["fold"];
+                        observer.observe(hideElement, {attributeFilter: ["fold"]});
                     } else {
                         const cardElement = hasClosestByClassName(item, "card__block", true);
-                        if (!cardElement) {
-                            return;
+                        if (cardElement) {
+                            observer.observe(cardElement, {attributeFilter: ["class"]});
                         }
-                        target = cardElement;
-                        attributeFilter = ["class"];
                     }
-                    const group = targetToItems.get(target);
-                    if (group) {
-                        group.items.push(item);
-                    } else {
-                        targetToItems.set(target, {items: [item], attributeFilter});
-                    }
-                });
-                targetToItems.forEach((group, target) => {
-                    const existing = mermaidObserverMap.get(target);
-                    if (existing) {
-                        group.items.forEach(item => {
-                            if (!existing.group.items.includes(item)) {
-                                existing.group.items.push(item);
-                            }
-                        });
-                        return;
-                    }
-                    const observer = new MutationObserver(() => {
-                        initMermaid(group.items);
-                        observer.disconnect();
-                        mermaidObserverMap.delete(target);
-                    });
-                    observer.observe(target, {attributeFilter: group.attributeFilter});
-                    mermaidObserverMap.set(target, {observer, group});
                 });
             }
             initMermaid(normalElements);

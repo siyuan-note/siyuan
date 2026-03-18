@@ -24,7 +24,7 @@ import {
     transactionError
 } from "./dialog/processSystem";
 import {initMessage, showMessage} from "./dialog/message";
-import {getAllTabs} from "./layout/getAll";
+import {getAllModels, getAllTabs} from "./layout/getAll";
 import {getLocalStorage, isChromeBrowser, isInMobileApp} from "./protyle/util/compatibility";
 import {getSearch, isBrowser} from "./util/functions";
 import {checkPublishServiceClosed} from "./util/processMessage";
@@ -122,6 +122,17 @@ export class App {
                             case "setConf":
                                 window.siyuan.config = data.data;
                                 updateControlAlt();
+                                break;
+                            case "setPublish":
+                                window.siyuan.config.publish = data.data;
+                                if (!window.siyuan.config.publish.enable) {
+                                    getAllModels().files.forEach(item => {
+                                        item.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
+                                            item.classList.remove("fn__none");
+                                            item.nextElementSibling.classList.add("fn__none");
+                                        });
+                                    });
+                                }
                                 break;
                             case "progress":
                                 progressLoading(data);

@@ -113,7 +113,7 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
         publish._refreshPublish();
     },
     _refreshPublish: () => {
-        fetchPost("/api/setting/getPublish", {}, publish._updatePublishConfig.bind(null, true));
+        fetchPost("/api/setting/getPublish", {}, publish.updatePublishConfig.bind(null, true));
     },
     _savePublish: (reloadAccounts = true) => {
         const publishEnable = publish.element.querySelector<HTMLInputElement>("#publishEnable");
@@ -127,9 +127,9 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
                 enable: publishAuthEnable.checked,
                 accounts: window.siyuan.config.publish.auth.accounts,
             },
-        }, publish._updatePublishConfig.bind(null, reloadAccounts));
+        }, publish.updatePublishConfig.bind(null, reloadAccounts));
     },
-    _updatePublishConfig: (
+    updatePublishConfig: (
         reloadAccounts: boolean,
         response: IWebSocketData,
     ) => {
@@ -139,29 +139,6 @@ ${window.siyuan.languages.publishServiceAuthAccounts}
                 publish._renderPublishAuthAccounts(publish.element);
             }
             publish._renderPublishAddressList(publish.element, response.data.port);
-
-            /// #if !MOBILE
-            if (!window.siyuan.config.publish.enable) {
-                getAllModels().files.forEach(item => {
-                    item.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-                        item.classList.remove("fn__none");
-                        item.nextElementSibling.classList.add("fn__none");
-                    });
-                });
-            }
-            /// #else
-            const accessElement = window.siyuan.mobile.docks.file.element.previousElementSibling.querySelector('[data-type="publish-access"]');
-            if (!window.siyuan.config.publish.enable) {
-                accessElement.classList.remove("block__icon--active");
-                accessElement.classList.add("fn__none");
-                window.siyuan.mobile.docks.file.element.querySelectorAll(".b3-list-item__icon").forEach(item => {
-                    item.classList.remove("fn__none");
-                    item.nextElementSibling.classList.add("fn__none");
-                });
-            } else {
-                accessElement.classList.remove("fn__none");
-            }
-            /// #endif
         } else {
             publish._renderPublishAddressList(publish.element, 0);
         }

@@ -7,8 +7,8 @@ import {avRender} from "./av/render";
 import {genRenderFrame} from "./util";
 
 /**
-* 渲染嵌入块
-*/
+ * 渲染嵌入块
+ */
 export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
     let blockElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeBlockQueryEmbed" && element.getAttribute("data-render") !== "true") {

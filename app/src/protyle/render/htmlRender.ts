@@ -8,7 +8,7 @@ export const htmlRender = (element: Element) => {
     if (htmlElements.length === 0) {
         return;
     }
-    htmlElements.forEach((e: any) => {
+    htmlElements.forEach((e) => {
         e.setAttribute("data-render", "true");
         e.firstElementChild.firstElementChild.setAttribute("aria-label", window.siyuan.languages.edit);
         e.firstElementChild.lastElementChild.setAttribute("aria-label", window.siyuan.languages.more);

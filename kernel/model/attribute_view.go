@@ -5003,6 +5003,8 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 		} else if _, ok := v["rowID"]; ok {
 			// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
 			itemID = v["rowID"].(string)
+			logging.LogWarnf("[%s] parameter [%s] is deprecated, it will be removed at [%s], visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
+				"/api/av/batchSetAttributeViewBlockAttrs", "rowID", "2026-06-30")
 		}
 		valueData := v["value"]
 		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)

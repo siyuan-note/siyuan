@@ -22,6 +22,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -992,6 +993,8 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	} else if _, ok := arg["rowID"]; ok {
 		// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
 		itemID = arg["rowID"].(string)
+		logging.LogWarnf("[%s] parameter [%s] is deprecated, it will be removed at [%s], visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
+			c.Request.RequestURI, "rowID", "2026-06-30")
 	}
 	value := arg["value"].(interface{})
 	updatedVal, err := model.UpdateAttributeViewCell(nil, avID, keyID, itemID, value)

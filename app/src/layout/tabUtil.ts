@@ -200,7 +200,7 @@ export const newCenterEmptyTab = (app: App) => {
         </div>
     </div>
 </div>`,
-        callback(tab: Tab) {
+        callback: (tab: Tab) => {
             tab.panelElement.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 while (target && !target.isEqualNode(tab.panelElement)) {
@@ -253,7 +253,7 @@ export const copyTab = (app: App, tab: Tab) => {
         icon: tab.icon,
         docIcon: tab.docIcon,
         title: tab.title,
-        callback(newTab: Tab) {
+        callback: (newTab: Tab) => {
             let model: Model;
             if (tab.model instanceof Editor) {
                 const newAction: TProtyleAction[] = [];

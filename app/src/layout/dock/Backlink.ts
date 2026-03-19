@@ -44,7 +44,7 @@ export class Backlink extends Model {
         super({
             app: options.app,
             id: options.tab.id,
-            callback() {
+            callback: () => {
                 if (this.type === "local") {
                     fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
                         if (!existResponse.data) {
@@ -53,7 +53,7 @@ export class Backlink extends Model {
                     });
                 }
             },
-            msgCallback(data) {
+            msgCallback: (data) => {
                 if (data && this.type === "local") {
                     switch (data.cmd) {
                         case "rename":

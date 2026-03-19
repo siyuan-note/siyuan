@@ -463,7 +463,7 @@ const newTab = (options: IOpenFileOptions) => {
             tab = new Tab({
                 icon,
                 title: getDisplayName(options.assetPath),
-                callback(tab) {
+                callback: (tab) => {
                     tab.addModel(new Asset({
                         app: options.app,
                         tab,
@@ -478,7 +478,7 @@ const newTab = (options: IOpenFileOptions) => {
         tab = new Tab({
             icon: options.custom.icon,
             title: options.custom.title,
-            callback(tab) {
+            callback: (tab) => {
                 if (options.custom.id) {
                     if (options.custom.id === "siyuan-card") {
                         tab.addModel(newCardModel({
@@ -512,7 +512,7 @@ const newTab = (options: IOpenFileOptions) => {
         tab = new Tab({
             icon: "iconSearch",
             title: window.siyuan.languages.search,
-            callback(tab) {
+            callback: (tab) => {
                 tab.addModel(new Search({
                     app: options.app,
                     tab,
@@ -525,7 +525,7 @@ const newTab = (options: IOpenFileOptions) => {
         tab = new Tab({
             title: getDisplayName(options.fileName, true, true),
             docIcon: options.rootIcon,
-            callback(tab) {
+            callback: (tab) => {
                 let editor;
                 if (options.zoomIn) {
                     editor = new Editor({

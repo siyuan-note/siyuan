@@ -35,7 +35,7 @@ export class MobileOutline extends Model {
         super({
             app: options.app,
             id: genUUID(),
-            msgCallback(data) {
+            msgCallback: (data) => {
                 if (data) {
                     switch (data.cmd) {
                         case "savedoc":

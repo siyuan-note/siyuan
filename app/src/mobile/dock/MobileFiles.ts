@@ -30,7 +30,7 @@ export class MobileFiles extends Model {
             app,
             id: genUUID(),
             type: "filetree",
-            msgCallback(data) {
+            msgCallback: (data) => {
                 if (data) {
                     switch (data.cmd) {
                         case "moveDoc":
@@ -42,7 +42,7 @@ export class MobileFiles extends Model {
                             });
                             break;
                         case "mount":
-                            this.onMount(data);
+                            this.onMount(data as any);
                             break;
                         case "createnotebook":
                             setNoteBook((notebooks) => {

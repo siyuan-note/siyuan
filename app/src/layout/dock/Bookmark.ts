@@ -21,7 +21,7 @@ export class Bookmark extends Model {
         super({
             app,
             id: tab.id,
-            msgCallback(data) {
+            msgCallback: (data) => {
                 if (data) {
                     switch (data.cmd) {
                         case "transactions":
@@ -34,7 +34,7 @@ export class Bookmark extends Model {
                                 }
                                 if (needReload) {
                                     fetchPost("/api/bookmark/getBookmark", {}, response => {
-                                        this.update(response.data);
+                                        this.update();
                                     });
                                 }
                             });
@@ -45,7 +45,7 @@ export class Bookmark extends Model {
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {
                                 fetchPost("/api/bookmark/getBookmark", {}, response => {
-                                    this.update(response.data);
+                                    this.update();
                                 });
                             }
                             break;

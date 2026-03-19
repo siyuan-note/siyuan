@@ -480,7 +480,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 id: protyle.block.rootID,
                 isPushBack: false,
                 focusId: operation.id,
-                callback() {
+                callback: () => {
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
                         if (!isInEmbedBlock(item)) {
                             updateElements.push(item);
@@ -521,7 +521,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 id: protyle.block.rootID,
                 isPushBack: false,
                 focusId: operation.id,
-                callback() {
+                callback: () => {
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
                         if (!isInEmbedBlock(item)) {
                             updateElements.push(item);

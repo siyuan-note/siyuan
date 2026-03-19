@@ -41,7 +41,7 @@ export class Graph extends Model {
         super({
             app: options.app,
             id: options.tab.id,
-            callback() {
+            callback: () => {
                 if (this.type === "local") {
                     fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
                         if (!existResponse.data) {
@@ -50,7 +50,7 @@ export class Graph extends Model {
                     });
                 }
             },
-            msgCallback(data) {
+            msgCallback: (data) => {
                 if (data) {
                     switch (data.cmd) {
                         case "mount":

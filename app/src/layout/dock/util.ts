@@ -54,7 +54,7 @@ export const openBacklink = async (options: {
     newWnd.addTab(new Tab({
         icon: "iconLink",
         title: options.title,
-        callback(tab: Tab) {
+        callback: (tab: Tab) => {
             tab.addModel(new Backlink({
                 app: options.app,
                 type: "local",
@@ -110,7 +110,7 @@ export const openGraph = async (options: {
     newWnd.addTab(new Tab({
         icon: "iconGraph",
         title: options.title,
-        callback(tab: Tab) {
+        callback: (tab: Tab) => {
             tab.addModel(new Graph({
                 app: options.app,
                 type: "local",
@@ -154,7 +154,7 @@ export const openOutline = async (options: {
     newWnd.addTab(new Tab({
         icon: "iconAlignCenter",
         title: options.title,
-        callback(tab: Tab) {
+        callback: (tab: Tab) => {
             tab.addModel(new Outline({
                 app: options.app,
                 type: "local",

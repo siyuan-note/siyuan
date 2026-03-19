@@ -46,7 +46,7 @@ export class Files extends Model {
             app: options.app,
             type: "filetree",
             id: options.tab.id,
-            msgCallback(data) {
+            msgCallback: (data) => {
                 if (data) {
                     switch (data.cmd) {
                         case "reloadDocInfo":
@@ -61,7 +61,7 @@ export class Files extends Model {
                             });
                             break;
                         case "mount":
-                            this.onMount(data);
+                            this.onMount(data as any);
                             options.app.plugins.forEach((item) => {
                                 item.eventBus.emit("opened-notebook", data);
                             });

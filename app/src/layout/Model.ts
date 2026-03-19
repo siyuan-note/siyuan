@@ -40,7 +40,7 @@ export class Model {
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);
         ws.onopen = () => {
             if (options.callback) {
-                options.callback.call(this);
+                options.callback();
             }
             const logElement = document.getElementById("errorLog");
             if (logElement) {
@@ -57,7 +57,9 @@ export class Model {
         ws.onmessage = (event) => {
             if (options.msgCallback) {
                 const data = processMessage(JSON.parse(event.data));
-                options.msgCallback.call(this, data);
+                if (data) {
+                    options.msgCallback(data);
+                }
             }
         };
         ws.onclose = (ev) => {

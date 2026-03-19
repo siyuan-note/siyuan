@@ -107,7 +107,7 @@ func getRepoFile(c *gin.Context) {
 	c.Data(http.StatusOK, contentType, data)
 }
 
-func openRepoSnapshotDoc(c *gin.Context) {
+func openRepoSnapshotFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -120,7 +120,7 @@ func openRepoSnapshotDoc(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
 		return
 	}
-	title, content, displayInText, updated, err := model.OpenRepoSnapshotDoc(id)
+	title, content, displayInText, updated, err := model.OpenRepoSnapshotFile(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

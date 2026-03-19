@@ -76,7 +76,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
         disabledProtyle(rightEditor.protyle);
     }
 
-    fetchPost("/api/repo/openRepoSnapshotDoc", {id: element.getAttribute("data-id")}, (response) => {
+    fetchPost("/api/repo/openRepoSnapshotFile", {id: element.getAttribute("data-id")}, (response) => {
         leftElement.classList.remove("fn__none");
         const textElement = leftElement.querySelector("textarea");
         const type = pathPosix().extname(response.data.content).toLowerCase();
@@ -108,7 +108,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
     const id2 = element.getAttribute("data-id2");
     if (id2) {
         rightElement.classList.remove("fn__none");
-        fetchPost("/api/repo/openRepoSnapshotDoc", {id: id2}, (response) => {
+        fetchPost("/api/repo/openRepoSnapshotFile", {id: id2}, (response) => {
             const textElement = rightElement.querySelector("textarea");
             const type = pathPosix().extname(response.data.content).toLowerCase();
             const titleElement = rightElement.querySelector(".protyle-title__input");

@@ -186,7 +186,7 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	return
 }
 
-func OpenRepoSnapshotDoc(fileID string) (title, content string, displayInText bool, updated int64, err error) {
+func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return

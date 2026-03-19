@@ -6,6 +6,7 @@ import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
 import {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
+import {setPadding} from "../protyle/ui/initUI";
 
 export const newCardModel = (options: {
     app: App,
@@ -119,6 +120,7 @@ export const newCardModel = (options: {
                     cardsData,
                 });
                 customObj.editors.push(editor);
+                setPadding(editor.protyle);
             });
         }
     });

@@ -1768,6 +1768,7 @@
     "282": "Chiudi finestra",
     "283": "Password",
     "284": "Accesso negato",
-    "285": "La password è errata"
+    "285": "La password è errata",
+    "286": "[%s] è già stato ripristinato"
   }
 }

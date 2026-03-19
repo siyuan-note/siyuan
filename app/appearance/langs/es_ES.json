@@ -1768,6 +1768,7 @@
     "282": "Cerrar ventana",
     "283": "Contraseña",
     "284": "Acceso denegado",
-    "285": "La contraseña es incorrecta"
+    "285": "La contraseña es incorrecta",
+    "286": "[%s] ya ha sido revertido"
   }
 }

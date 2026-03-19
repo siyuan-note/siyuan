@@ -240,9 +240,11 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	rootID := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(rootID)
 	if nil != workingDoc && "d" == workingDoc.Type {
-		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
+		workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
+		if err = filelock.Remove(workingDocPath); err != nil {
 			return
 		}
+		logging.LogInfof("removed working doc file [%s]", workingDocPath)
 	}
 
 	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath, workingDoc)
@@ -319,8 +321,12 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 	ReloadFiletree()
 	ReloadProtyle(rootID)
-	util.PushMsg(Conf.Language(102), 3000)
 
+	msg := fmt.Sprintf(Conf.Language(286), destPath)
+	if box := Conf.GetBox(boxID); nil != box {
+		msg = fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+	}
+	util.PushMsg(msg, 3000)
 	IncSync()
 
 	// 刷新属性视图

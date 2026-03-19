@@ -1768,6 +1768,7 @@
     "282": "Fermer la fenêtre",
     "283": "Mot de passe",
     "284": "Accès refusé",
-    "285": "Le mot de passe est incorrect"
+    "285": "Le mot de passe est incorrect",
+    "286": "[%s] a déjà été restauré"
   }
 }

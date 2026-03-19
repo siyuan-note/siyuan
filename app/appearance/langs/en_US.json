@@ -1768,6 +1768,7 @@
     "282": "Close window",
     "283": "Password",
     "284": "Access denied",
-    "285": "Password is incorrect"
+    "285": "Password is incorrect",
+    "286": "[%s] has already been rolled back"
   }
 }

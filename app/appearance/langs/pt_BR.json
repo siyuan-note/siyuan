@@ -1768,6 +1768,7 @@
     "282": "Fechar janela",
     "283": "Senha",
     "284": "Acesso negado",
-    "285": "A senha está incorreta"
+    "285": "A senha está incorreta",
+    "286": "[%s] já foi revertido"
   }
 }

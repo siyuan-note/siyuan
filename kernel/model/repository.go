@@ -222,12 +222,6 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		return
 	}
 
-	to := filepath.Join(util.DataDir, file.Path)
-	if err = filelock.CopyNewtimes(from, to); nil != err {
-		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
-		return
-	}
-
 	if strings.HasSuffix(file.Path, ".sy") {
 		var destPath, parentHPath string
 		rootID := util.GetTreeID(file.Path)
@@ -239,9 +233,9 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 			return
 		}
 
-		tree, _ := loadTree(to, util.NewLute())
+		tree, _ := loadTree(from, util.NewLute())
 		if nil == tree {
-			msg := fmt.Sprintf("no such file or directory: %s", to)
+			msg := fmt.Sprintf("no such file or directory: %s", from)
 			logging.LogErrorf(msg)
 			err = errors.New(msg)
 			return
@@ -250,7 +244,13 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		tree.Box = boxID
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 		tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
-
+		if nil != workingDoc && "d" == workingDoc.Type {
+			workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
+			if err = filelock.Remove(workingDocPath); err != nil {
+				return
+			}
+			logging.LogInfof("removed working doc file [%s]", workingDocPath)
+		}
 		if nil != workingDoc {
 			treenode.RemoveBlockTreesByRootID(rootID)
 		}
@@ -261,10 +261,23 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		}
 		ReloadFiletree()
 		ReloadProtyle(rootID)
+
+		if box := Conf.GetBox(boxID); nil != box {
+			msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+			util.PushMsg(msg, 7000)
+		}
+	} else {
+		to := filepath.Join(util.DataDir, file.Path)
+		if err = filelock.CopyNewtimes(from, to); nil != err {
+			logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+			return
+		}
+
+		msg := fmt.Sprintf(Conf.Language(286), to)
+		util.PushMsg(msg, 3000)
 	}
 
 	IncSync()
-	util.PushMsg(Conf.Language(102), 3000)
 	return
 }
 

@@ -1768,6 +1768,7 @@
     "282": "Fenster schließen",
     "283": "Passwort",
     "284": "Zugriff verweigert",
-    "285": "Passwort ist falsch"
+    "285": "Passwort ist falsch",
+    "286": "[%s] wurde bereits zurückgesetzt"
   }
 }

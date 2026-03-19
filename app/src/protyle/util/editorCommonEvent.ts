@@ -1480,7 +1480,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
 
-            if (event.clientX < nodeRect.left + 32 && event.clientX >= nodeRect.left - 1 &&
+            // 减小两个列表之间左侧间距，以便拖拽到其中 https://github.com/siyuan-note/siyuan/issues/15672
+            if (event.clientX < nodeRect.left + (targetElement.classList.contains("list") ? 8 : 32) &&
+                event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__left");
                 addDragover(targetElement);

@@ -107,6 +107,28 @@ func getRepoFile(c *gin.Context) {
 	c.Data(http.StatusOK, contentType, data)
 }
 
+func rollbackRepoSnapshotFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
+
+	err := model.RollbackRepoSnapshotFile(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func openRepoSnapshotFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -120,6 +142,7 @@ func openRepoSnapshotFile(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
 		return
 	}
+
 	title, content, displayInText, updated, err := model.OpenRepoSnapshotFile(id)
 	if err != nil {
 		ret.Code = -1

@@ -160,7 +160,6 @@ func (c *Calendars) load() error {
 
 	// load iCalendar files (*.ics)
 	wg := &sync.WaitGroup{}
-	wg.Add(len(c.calendarsMetaData))
 	for _, calendarMetaData := range c.calendarsMetaData {
 		calendar := &Calendar{
 			Changed:       false,
@@ -169,10 +168,9 @@ func (c *Calendars) load() error {
 			Objects:       sync.Map{},
 		}
 		c.calendars.Store(calendarMetaData.Path, calendar)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			calendar.load()
-		}()
+		})
 	}
 	wg.Wait()
 
@@ -523,10 +521,7 @@ func (c *Calendar) load() error {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == ICalendarFileExt {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
+				wg.Go(func() {
 					// create & load calendar object
 					calendarObjectFilePath := path.Join(c.DirectoryPath, filename)
 					calendarObject := &CalendarObject{
@@ -541,7 +536,7 @@ func (c *Calendar) load() error {
 
 					id := path.Base(filename)
 					c.Objects.Store(id, calendarObject)
-				}()
+				})
 			}
 		}
 	}

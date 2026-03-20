@@ -114,28 +114,22 @@ func BatchUpdatePackages(frontend string) {
 // GetUpdatedPackages 获取所有类型集市包的更新列表
 func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*bazaar.Package) {
 	wg := &sync.WaitGroup{}
-	wg.Add(5)
 
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		plugins = getUpdatedPackages("plugins", frontend, "")
-	}()
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		themes = getUpdatedPackages("themes", "", "")
-	}()
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		icons = getUpdatedPackages("icons", "", "")
-	}()
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		templates = getUpdatedPackages("templates", "", "")
-	}()
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		widgets = getUpdatedPackages("widgets", "", "")
-	}()
+	})
 
 	wg.Wait()
 	return

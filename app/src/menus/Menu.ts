@@ -119,7 +119,7 @@ export class Menu {
         const menuRect = menuElement.getBoundingClientRect();
         const itemsRect = itemsMenuElement.getBoundingClientRect();
         const style = getComputedStyle(itemsMenuElement);
-        const cap = Math.max(30, Math.floor(window.innerHeight - itemsRect.top - Math.max(0, menuRect.bottom - itemsRect.bottom) - (parseFloat(style.marginBottom) || 0)));
+        const cap = Math.max(30, window.innerHeight - itemsRect.top - Math.max(0, menuRect.bottom - itemsRect.bottom) - parseFloat(style.marginBottom) || 0);
         // content-box 下 max-height 只限制 content，不包括 padding/border
         let contentBoxExtra = 0;
         if (style.boxSizing === "content-box") {

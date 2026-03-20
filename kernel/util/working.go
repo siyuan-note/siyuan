@@ -584,5 +584,4 @@ func RemoveDatabaseFile(dbPath string) {
 			return
 		}
 	}
-	return
 }

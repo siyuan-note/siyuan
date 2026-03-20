@@ -107,8 +107,8 @@ func pidByPort(port string) (ret string) {
 			return
 		}
 		output := string(data)
-		lines := strings.Split(output, "\n")
-		for _, l := range lines {
+		lines := strings.SplitSeq(output, "\n")
+		for l := range lines {
 			if strings.Contains(l, "LISTENING") {
 				l = l[strings.Index(l, "LISTENING")+len("LISTENING"):]
 				l = strings.TrimSpace(l)
@@ -127,8 +127,8 @@ func pidByPort(port string) (ret string) {
 		return
 	}
 	output := string(data)
-	lines := strings.Split(output, "\n")
-	for _, l := range lines {
+	lines := strings.SplitSeq(output, "\n")
+	for l := range lines {
 		if strings.HasPrefix(l, "p") {
 			l = l[1:]
 			ret = l

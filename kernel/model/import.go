@@ -1351,13 +1351,8 @@ func htmlBlock2Inline(tree *parse.Tree) {
 
 		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<img "))) {
 			tokens := bytes.TrimSpace(n.Tokens)
-			if bytes.HasPrefix(tokens, []byte("<div>")) {
-				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
-			}
-			if bytes.HasSuffix(tokens, []byte("</div>")) {
-				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
-			}
-			tokens = bytes.TrimSpace(tokens)
+			tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
+			tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
 
 			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(tokens), &html.Node{Type: html.ElementNode})
 			if nil != pErr {
@@ -1377,13 +1372,8 @@ func htmlBlock2Inline(tree *parse.Tree) {
 		}
 		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<a "))) {
 			tokens := bytes.TrimSpace(n.Tokens)
-			if bytes.HasPrefix(tokens, []byte("<div>")) {
-				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
-			}
-			if bytes.HasSuffix(tokens, []byte("</div>")) {
-				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
-			}
-			tokens = bytes.TrimSpace(tokens)
+			tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
+			tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
 
 			if ast.NodeHTMLBlock != n.Type && nil != n.Next && nil != n.Next.Next {
 				if ast.NodeText == n.Next.Next.Type && bytes.Equal(n.Next.Next.Tokens, []byte("</a>")) {
@@ -1496,7 +1486,6 @@ func htmlBlock2Inline(tree *parse.Tree) {
 	for _, n := range unlinks {
 		n.Unlink()
 	}
-	return
 }
 
 func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {

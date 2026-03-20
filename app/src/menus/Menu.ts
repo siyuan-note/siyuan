@@ -9,7 +9,6 @@ export class Menu {
     public data: any;   // 用于记录当前菜单的数据
     public removeCB: () => void;
     private wheelEvent: string;
-    private position: IPosition;
 
     constructor() {
         this.wheelEvent = "onwheel" in document.createElement("div") ? "wheel" : "mousewheel";
@@ -62,7 +61,7 @@ export class Menu {
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
-        const itemsMenuElement = subMenuElement.lastElementChild as HTMLElement;
+        const itemsMenuElement = subMenuElement.querySelector(".b3-menu__items") as HTMLElement;
         if (itemsMenuElement) {
             itemsMenuElement.style.maxHeight = "";
         } else {
@@ -70,12 +69,20 @@ export class Menu {
         }
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
         const subMenuRect = subMenuElement.getBoundingClientRect();
+        const itemsContainerEl = hasClosestByClassName(subMenuElement, "b3-menu__items");
+        let itemsPadLeft = 0;
+        let itemsPadRight = 0;
+        if (itemsContainerEl) {
+            const cs = getComputedStyle(itemsContainerEl);
+            itemsPadLeft = parseFloat(cs.paddingLeft) || 0;
+            itemsPadRight = parseFloat(cs.paddingRight) || 0;
+        }
+        const firstRow = itemsMenuElement.querySelector(".b3-menu__item, .b3-menu__separator");
+        const firstRowTopOffset = (firstRow ?? itemsMenuElement).getBoundingClientRect().top - subMenuRect.top; // 回退 itemsMenuElement 以兼容插件或 JS 片段插入的特殊子菜单
 
-        // 垂直方向位置调整
-        // 减 9px 是为了尽量对齐菜单选项（b3-menu__submenu 的默认 padding-top 加上子菜单首个 b3-menu__item 的默认 margin-top）
-        // 减 1px 是为了避免在特定情况下渲染出不应存在的滚动条而做的兼容处理
+        // 垂直方向与父级菜单项对齐
         subMenuElement.style.top = Math.max(Constants.SIZE_TOOLBAR_HEIGHT,
-            Math.min(itemRect.top - 9, window.innerHeight - subMenuRect.height - 1)) + "px";
+            Math.min(itemRect.top - firstRowTopOffset, window.innerHeight - subMenuRect.height)) + "px";
 
         // 水平方向位置调整
         // 多级菜单继承上一级子菜单的方向
@@ -85,22 +92,21 @@ export class Menu {
             isParentDirectionLeft = true;
         }
 
-        // 8px 是 b3-menu__items 的默认 padding-right
-        const spaceRight = window.innerWidth - itemRect.right - 8;
-        const spaceLeft = itemRect.left - 8;
+        const spaceRight = window.innerWidth - itemRect.right - itemsPadRight;
+        const spaceLeft = itemRect.left - itemsPadLeft;
         if (isParentDirectionLeft) {
             if (spaceLeft >= subMenuRect.width) {
-                subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
+                subMenuElement.style.left = (itemRect.left - itemsPadLeft - subMenuRect.width) + "px";
             } else if (spaceRight >= subMenuRect.width) {
-                subMenuElement.style.left = (itemRect.right + 8) + "px";
+                subMenuElement.style.left = (itemRect.right + itemsPadRight) + "px";
             } else {
                 subMenuElement.style.left = Math.max(0, window.innerWidth - subMenuRect.width) + "px";
             }
         } else {
             if (spaceRight >= subMenuRect.width) {
-                subMenuElement.style.left = (itemRect.right + 8) + "px";
+                subMenuElement.style.left = (itemRect.right + itemsPadRight) + "px";
             } else if (spaceLeft >= subMenuRect.width) {
-                subMenuElement.style.left = (itemRect.left - 8 - subMenuRect.width) + "px";
+                subMenuElement.style.left = (itemRect.left - itemsPadLeft - subMenuRect.width) + "px";
             } else {
                 subMenuElement.style.left = Math.max(0, window.innerWidth - subMenuRect.width) + "px";
             }
@@ -110,8 +116,17 @@ export class Menu {
     }
 
     private updateMaxHeight(menuElement: HTMLElement, itemsMenuElement: HTMLElement) {
-        // 加 1px 是为了避免在特定情况下渲染出不应存在的滚动条而做的兼容处理; 18 为父子块高差
-        itemsMenuElement.style.maxHeight = Math.max(window.innerHeight - menuElement.getBoundingClientRect().top - 18 + 1, 30) + "px";
+        const menuRect = menuElement.getBoundingClientRect();
+        const itemsRect = itemsMenuElement.getBoundingClientRect();
+        const style = getComputedStyle(itemsMenuElement);
+        const cap = Math.max(30, Math.floor(window.innerHeight - itemsRect.top - Math.max(0, menuRect.bottom - itemsRect.bottom) - (parseFloat(style.marginBottom) || 0)));
+        // content-box 下 max-height 只限制 content，不包括 padding/border
+        let contentBoxExtra = 0;
+        if (style.boxSizing === "content-box") {
+            contentBoxExtra = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0)
+                + (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.borderBottomWidth) || 0);
+        }
+        itemsMenuElement.style.maxHeight = Math.max(0, cap - contentBoxExtra) + "px";
     }
 
     private preventDefault(event: KeyboardEvent) {
@@ -185,14 +200,23 @@ export class Menu {
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
         this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
-        this.position = options;
     }
 
     public resetPosition() {
-        if (this.element.classList.contains("fn__none")) {
+        if (this.element.classList.contains("fn__none") || this.element.classList.contains("b3-menu--fullscreen")) {
             return;
         }
-        setPosition(this.element, this.position.x - (this.position.isLeft ? this.element.clientWidth : 0), this.position.y, this.position.h, this.position.w);
+        const style = getComputedStyle(this.element);
+        const rect = this.element.getBoundingClientRect();
+        let left = parseFloat(style.left);
+        let top = parseFloat(style.top);
+        if (Number.isNaN(left)) {
+            left = rect.left;
+        }
+        if (Number.isNaN(top)) {
+            top = rect.top;
+        }
+        setPosition(this.element, left, top, 0, 0);
         this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
         this.element.querySelectorAll(".b3-menu__item--show .b3-menu__submenu").forEach((item: HTMLElement) => {
             // 可能有多层子菜单，都要重新定位

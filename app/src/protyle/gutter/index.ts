@@ -196,7 +196,7 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
             hideTooltip();
-            clearSelect(["av", "img"], protyle.wysiwyg.element);
+            clearSelect(["cell", "img"], protyle.wysiwyg.element);
             const id = buttonElement.getAttribute("data-node-id");
             if (!id) {
                 if (buttonElement.getAttribute("disabled")) {
@@ -439,7 +439,7 @@ export class Gutter {
             }
             if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
                 hideTooltip();
-                clearSelect(["av", "img"], protyle.wysiwyg.element);
+                clearSelect(["cell", "img"], protyle.wysiwyg.element);
                 const gutterRect = buttonElement.getBoundingClientRect();
                 if (buttonElement.dataset.type === "NodeAttributeViewRowMenu") {
                     const rowElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"] .av__row[data-id="${buttonElement.dataset.rowId}"]`)).find((item: HTMLElement) => {

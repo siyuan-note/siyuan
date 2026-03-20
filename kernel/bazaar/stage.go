@@ -75,20 +75,16 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	var onlineResult bool
 	onlineDone := make(chan bool, 1)
 	wg := &sync.WaitGroup{}
-	wg.Add(3)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		onlineResult = isBazaarOnline()
 		onlineDone <- true
-	}()
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		stageIndex, stageErr = getStageIndex(ctx, pkgType)
-	}()
-	go func() {
-		defer wg.Done()
+	})
+	wg.Go(func() {
 		bazaarStats = getBazaarStats(ctx)
-	}()
+	})
 
 	<-onlineDone
 	if !onlineResult {

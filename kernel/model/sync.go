@@ -330,16 +330,14 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 		}
 
 		upsertFile = filepath.ToSlash(upsertFile)
-		if strings.HasPrefix(upsertFile, "/") {
-			upsertFile = upsertFile[1:]
-		}
-		idx := strings.Index(upsertFile, "/")
-		if 0 > idx {
+		upsertFile := strings.TrimPrefix(upsertFile, "/")
+
+		box, _, found := strings.Cut(upsertFile, "/")
+		if !found {
 			// .sy 直接出现在 data 文件夹下，没有出现在笔记本文件夹下的情况
 			continue
 		}
 
-		box := upsertFile[:idx]
 		p := strings.TrimPrefix(upsertFile, box)
 		msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
 		util.IncBootProgress(bootProgressPart, msg)
@@ -386,13 +384,11 @@ func SetCloudSyncDir(name string) {
 func SetSyncGenerateConflictDoc(b bool) {
 	Conf.Sync.GenerateConflictDoc = b
 	Conf.Save()
-	return
 }
 
 func SetSyncEnable(b bool) {
 	Conf.Sync.Enabled = b
 	Conf.Save()
-	return
 }
 
 func SetSyncInterval(interval int) {
@@ -406,29 +402,27 @@ func SetSyncInterval(interval int) {
 	Conf.Sync.Interval = interval
 	Conf.Save()
 	planSyncAfter(time.Duration(interval) * time.Second)
-	return
 }
 
-func SetSyncPerception(b bool) {
+func SetSyncPerception(enabled bool) {
 	if util.ContainerDocker == util.Container {
-		b = false
+		enabled = false
 	}
 
-	Conf.Sync.Perception = b
+	Conf.Sync.Perception = enabled
 	Conf.Save()
 
-	if b {
+	if enabled {
 		connectSyncWebSocket()
-	} else {
-		closeSyncWebSocket()
+		return
 	}
-	return
+
+	closeSyncWebSocket()
 }
 
 func SetSyncMode(mode int) {
 	Conf.Sync.Mode = mode
 	Conf.Save()
-	return
 }
 
 func SetSyncProvider(provider int) (err error) {
@@ -485,26 +479,26 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 	if nil != err {
 		msg := fmt.Sprintf("get endpoint [%s] abs path failed: %s", local.Endpoint, err)
 		logging.LogErrorf(msg)
-		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 	if !gulu.File.IsExist(absPath) {
 		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint)
 		logging.LogErrorf(msg)
-		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 	if util.IsAbsPathInWorkspace(absPath) || filepath.Clean(absPath) == filepath.Clean(util.WorkspaceDir) {
 		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint)
 		logging.LogErrorf(msg)
-		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 
 	if util.IsSubPath(absPath, util.WorkspaceDir) {
 		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
 		logging.LogErrorf(msg)
-		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		err = fmt.Errorf(Conf.Language(77), msg)
 		return
 	}
 

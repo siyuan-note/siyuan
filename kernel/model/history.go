@@ -301,7 +301,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return ast.WalkContinue
 	})
 	var ids []string
-	for nodeID, _ := range nodes {
+	for nodeID := range nodes {
 		ids = append(ids, nodeID)
 	}
 	idMap := treenode.ExistBlockTrees(ids)

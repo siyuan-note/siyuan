@@ -227,7 +227,6 @@ func (c *Contacts) load() error {
 
 	// load vCard files (*.vcf)
 	wg := &sync.WaitGroup{}
-	wg.Add(len(c.booksMetaData))
 	for _, addressBookMetaData := range c.booksMetaData {
 		addressBook := &AddressBook{
 			Changed:       false,
@@ -236,10 +235,9 @@ func (c *Contacts) load() error {
 			Addresses:     sync.Map{},
 		}
 		c.books.Store(addressBookMetaData.Path, addressBook)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			addressBook.load()
-		}()
+		})
 	}
 	wg.Wait()
 
@@ -607,10 +605,7 @@ func (b *AddressBook) load() error {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == VCardFileExt {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
+				wg.Go(func() {
 					// load cards
 					addressFilePath := path.Join(b.DirectoryPath, filename)
 					vCards, err := LoadCards(addressFilePath)
@@ -638,9 +633,7 @@ func (b *AddressBook) load() error {
 						// Create a file for each card
 						addressesWaitGroup := &sync.WaitGroup{}
 						for _, vCard := range vCards {
-							addressesWaitGroup.Add(1)
-							go func() {
-								defer addressesWaitGroup.Done()
+							addressesWaitGroup.Go(func() {
 								filename_ := util.AssetName(filename, ast.NewNodeID())
 								address := &AddressObject{
 									FilePath: path.Join(b.DirectoryPath, filename_),
@@ -658,7 +651,7 @@ func (b *AddressBook) load() error {
 
 								id := path.Base(filename)
 								b.Addresses.Store(id, address)
-							}()
+							})
 						}
 
 						addressesWaitGroup.Wait()
@@ -668,7 +661,7 @@ func (b *AddressBook) load() error {
 							return
 						}
 					}
-				}()
+				})
 			}
 		}
 	}

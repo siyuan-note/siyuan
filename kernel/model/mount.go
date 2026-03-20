@@ -34,6 +34,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetBoxByName(name string) (ret *Box) {
+	for _, box := range Conf.GetOpenedBoxes() {
+		if box.Name == name {
+			ret = box
+			return
+		}
+	}
+	return
+}
+
 func CreateBox(name string) (id string, err error) {
 	name = util.RemoveInvalid(name)
 	if 512 < utf8.RuneCountInString(name) {

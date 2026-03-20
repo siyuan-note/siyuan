@@ -228,6 +228,15 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		workingDoc := treenode.GetBlockTree(rootID)
 		boxID := strings.TrimPrefix(file.Path, "/")
 		boxID = strings.Split(boxID, "/")[0]
+
+		var box *Box
+		box, err = getRollbackBox(boxID)
+		if err != nil {
+			logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)
+			return
+		}
+		boxID = box.ID
+
 		destPath, parentHPath, err = getRollbackDockPath(boxID, file.Path, workingDoc)
 		if err != nil {
 			return

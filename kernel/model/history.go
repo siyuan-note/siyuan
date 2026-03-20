@@ -235,6 +235,13 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	FlushTxQueue()
 
+	box, err := getRollbackBox(boxID)
+	if err != nil {
+		logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)
+		return
+	}
+	boxID = box.ID
+
 	srcPath := historyPath
 	var destPath, parentHPath string
 	rootID := util.GetTreeID(historyPath)
@@ -322,10 +329,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	ReloadFiletree()
 	ReloadProtyle(rootID)
 
-	msg := fmt.Sprintf(Conf.Language(286), destPath)
-	if box := Conf.GetBox(boxID); nil != box {
-		msg = fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
-	}
+	msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
 	util.PushMsg(msg, 3000)
 	IncSync()
 
@@ -1055,4 +1059,29 @@ func subscribeSQLHistoryEvents() {
 	eventbus.Subscribe(util.EvtSQLHistoryRebuild, func() {
 		ReindexHistory()
 	})
+}
+
+func getRollbackBox(boxID string) (ret *Box, err error) {
+	box := Conf.Box(boxID)
+	if nil == box {
+		boxName := "Rollback"
+		box = GetBoxByName(boxName)
+		if nil == box {
+			var id string
+			id, err = CreateBox(boxName)
+			if nil != err {
+				return
+			}
+			_, err = Mount(id)
+			if nil != err {
+				return
+			}
+			box = Conf.Box(id)
+		}
+	}
+	if nil == box {
+		err = errors.New("can not get or create rollback box")
+		return
+	}
+	return
 }

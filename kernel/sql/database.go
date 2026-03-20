@@ -1534,14 +1534,14 @@ func nSort(n *ast.Node) int {
 	return 100
 }
 
-func ialAttr(ial, name string) (ret string) {
+func ialAttr(ial, name string) string {
 	idx := strings.Index(ial, name)
 	if 0 > idx {
 		return ""
 	}
-	ret = ial[idx+len(name)+2:]
+	ret := ial[idx+len(name)+2:]
 	ret = ret[:strings.Index(ret, "\"")]
-	return
+	return ret
 }
 
 func closeDatabase() {
@@ -1553,7 +1553,6 @@ func closeDatabase() {
 	debug.FreeOSMemory()
 	db = nil
 	runtime.GC()
-	return
 }
 
 func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {

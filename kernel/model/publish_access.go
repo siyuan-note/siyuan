@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -26,7 +27,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -41,10 +41,10 @@ import (
 )
 
 type PublishAccessItem struct {
-	ID          string     `json:"id"`
-	Visible     bool       `json:"visible"`   // 是否发布可见
-	Password    string     `json:"password"`  // 密码，为空字符串时表示无密码
-	Disable     bool       `json:"disable"`   // 是否禁止发布
+	ID       string `json:"id"`
+	Visible  bool   `json:"visible"`  // 是否发布可见
+	Password string `json:"password"` // 密码，为空字符串时表示无密码
+	Disable  bool   `json:"disable"`  // 是否禁止发布
 }
 
 type PublishAccess []*PublishAccessItem
@@ -58,7 +58,7 @@ var (
 func GetPublishAccess() (ret PublishAccess) {
 	ret = PublishAccess{}
 	now := time.Now().UnixMilli()
-	if now - publishAccessLastModified < 30*1000 {
+	if now-publishAccessLastModified < 30*1000 {
 		return publishAccess
 	}
 
@@ -239,7 +239,7 @@ func SetPublishAuthCookie(c *gin.Context, ID string, password string) {
 
 func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
 	authCookie, err := c.Request.Cookie("publish-auth-" + ID)
-	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID + password))
+	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID+password))
 }
 
 func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publishAccess PublishAccess) bool {

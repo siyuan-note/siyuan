@@ -1353,7 +1353,7 @@ func htmlBlock2Inline(tree *parse.Tree) {
 			tokens := bytes.TrimSpace(n.Tokens)
 			tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
 			tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
-			tokens := bytes.TrimSpace(n.Tokens)
+			tokens = bytes.TrimSpace(n.Tokens)
 
 			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(tokens), &html.Node{Type: html.ElementNode})
 			if nil != pErr {
@@ -1375,7 +1375,7 @@ func htmlBlock2Inline(tree *parse.Tree) {
 			tokens := bytes.TrimSpace(n.Tokens)
 			tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
 			tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
-			tokens := bytes.TrimSpace(n.Tokens)
+			tokens = bytes.TrimSpace(n.Tokens)
 
 			if ast.NodeHTMLBlock != n.Type && nil != n.Next && nil != n.Next.Next {
 				if ast.NodeText == n.Next.Next.Type && bytes.Equal(n.Next.Next.Tokens, []byte("</a>")) {

@@ -17,6 +17,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -169,13 +170,11 @@ func isOnline(checkURL string, skipTlsVerify bool, timeout int) (ret bool) {
 			return true
 		}
 
-		switch err.(type) {
-		case *url.Error:
-			if err.(*url.Error).URL != checkURL {
-				// DNS 重定向
-				logging.LogWarnf("network is online [DNS redirect, checkURL=%s, retURL=%s]", checkURL, err.(*url.Error).URL)
-				return true
-			}
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) && urlErr.URL != checkURL {
+			// DNS 重定向
+			logging.LogWarnf("network is online [DNS redirect, checkURL=%s, retURL=%s]", checkURL, urlErr.URL)
+			return true
 		}
 
 		ret = err == nil

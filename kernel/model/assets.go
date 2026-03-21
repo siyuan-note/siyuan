@@ -138,11 +138,11 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 func removeAssetThumbnail(assetAbsPath string) {
 	if util.IsCompressibleAssetImage(assetAbsPath) {
 		p := filepath.ToSlash(assetAbsPath)
-		idx := strings.Index(p, "assets/")
-		if -1 == idx {
+		_, after, found := strings.Cut(p, "assets/")
+		if !found {
 			return
 		}
-		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", p[idx+7:])
+		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", after)
 		os.RemoveAll(thumbnailPath)
 	}
 }

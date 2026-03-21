@@ -1297,7 +1297,6 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 		}
 		if ast.NodeEmojiImg == n.Type {
 			tokens := n.Tokens
-			// idx := bytes.Index(tokens, []byte("src=\""))
 			_, src, found := bytes.Cut(tokens, []byte("src=\""))
 			if !found {
 				return ast.WalkContinue

@@ -23,16 +23,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/88250/lute/html"
 	"github.com/siyuan-note/logging"
 )
-
-func init() {
-	rand.Seed(time.Now().UTC().UnixNano())
-}
 
 func GetDuplicateName(master string) (ret string) {
 	if "" == master {

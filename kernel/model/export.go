@@ -22,6 +22,7 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -1352,11 +1353,8 @@ func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 					builtInFontNames = append(builtInFontNames, f)
 				}
 
-				for _, font := range builtInFontNames {
-					if font == m["fontname"] {
-						useDefaultFont = false
-						break
-					}
+				if slices.Contains(builtInFontNames, m["fontname"]) {
+					useDefaultFont = false
 				}
 			}
 		}
@@ -1947,9 +1945,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 
 	// 将引用树合并到选择树中，以便后面一次性导出资源文件
-	for treeID, tree := range refTrees {
-		trees[treeID] = tree
-	}
+	maps.Copy(trees, refTrees)
 
 	// 导出引用的资源文件
 	assetPathMap, err := allAssetAbsPaths()

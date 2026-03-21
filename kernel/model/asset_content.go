@@ -362,10 +362,6 @@ func subscribeSQLAssetContentEvents() {
 	})
 }
 
-var (
-	AssetsSearchEnabled = true
-)
-
 type AssetsSearcher struct {
 	parsers map[string]AssetParser
 	lock    *sync.Mutex

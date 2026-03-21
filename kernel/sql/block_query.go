@@ -317,7 +317,7 @@ func QueryBlockNamesByRootID(rootID string) (ret []string) {
 	return
 }
 
-func QueryBookmarkBlocksByKeyword(bookmark string) (ret []*Block) {
+func QueryBookmarkBlocksByKeyword() (ret []*Block) {
 	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
 	rows, err := query(sqlStmt, "%bookmark=%")
 	if err != nil {

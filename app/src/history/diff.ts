@@ -11,18 +11,19 @@ import {App} from "../index";
 import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
+import {confirmDialog} from "../dialog/confirmDialog";
 
 const genItem = (data: [], data2?: { title: string, fileID: string }[], hasUndo = true) => {
     if (!data || data.length === 0) {
         return `<li style="padding-left: 40px;" class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
     }
     let html = "";
-    data.forEach((item: { title: string, fileID: string, path: string, hSize: string }, index) => {
+    data.forEach((item: { title: string, fileID: string, path: string, hSize: string, updated: number }, index) => {
         let id2 = "";
         if (data2) {
             id2 = `data-id2="${data2[index].fileID}"`;
         }
-        html += `<li style="padding-left: 40px;" class="b3-list-item b3-list-item--hide-action" ${id2} data-id="${item.fileID}">
+        html += `<li style="padding-left: 40px;" class="b3-list-item b3-list-item--hide-action" ${id2} data-created="${item.updated}" data-id="${item.fileID}">
     <span class="b3-list-item__text" title="${escapeAttr(item.path)} ${item.hSize}">${escapeHtml(item.title)}</span>
     <span class="fn__space"></span>
     <span class="b3-list-item__action ariaLabel${hasUndo ? "" : " fn__none"}" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
@@ -208,7 +209,11 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.stopPropagation();
                 break;
             } else if (target.getAttribute("data-type") == "rollback") {
-                fetchPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
+                confirmDialog("⚠️ " + window.siyuan.languages.rollback,
+                    window.siyuan.languages.rollbackConfirm.replace("${name}", target.parentElement.textContent).replace("${time}", dayjs(parseInt(target.parentElement.dataset.created)).format("YYYY-MM-DD HH:mm:ss")),
+                    () => {
+                        fetchPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
+                    });
                 event.preventDefault();
                 event.stopPropagation();
                 break;

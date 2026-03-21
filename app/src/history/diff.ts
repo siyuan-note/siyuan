@@ -12,7 +12,7 @@ import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {resizeSide} from "./resizeSide";
 
-const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
+const genItem = (data: [], data2?: { title: string, fileID: string }[], hasUndo = true) => {
     if (!data || data.length === 0) {
         return `<li style="padding-left: 40px;" class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
     }
@@ -22,8 +22,12 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
         if (data2) {
             id2 = `data-id2="${data2[index].fileID}"`;
         }
-        html += `<li style="padding-left: 40px;" class="b3-list-item" ${id2} data-id="${item.fileID}">
+        html += `<li style="padding-left: 40px;" class="b3-list-item b3-list-item--hide-action" ${id2} data-id="${item.fileID}">
     <span class="b3-list-item__text" title="${escapeAttr(item.path)} ${item.hSize}">${escapeHtml(item.title)}</span>
+    <span class="fn__space"></span>
+    <span class="b3-list-item__action ariaLabel${hasUndo ? "" : " fn__none"}" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
+        <svg><use xlink:href="#iconUndo"></use></svg>
+    </span>
 </li>`;
     });
     return html;
@@ -203,6 +207,11 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 event.preventDefault();
                 event.stopPropagation();
                 break;
+            } else if (target.getAttribute("data-type") == "rollback") {
+                fetchPost("/api/repo/rollbackRepoSnapshotFile", {id: target.parentElement.dataset.id});
+                event.preventDefault();
+                event.stopPropagation();
+                break;
             }
             target = target.parentElement;
         }
@@ -250,7 +259,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
                 <span style="padding-left: 4px" class="b3-list-item__text">${window.siyuan.languages.addAttr}</span>
                 <span class="counter${response.data.addsLeft.length === 0 ? " fn__none" : ""}">${response.data.addsLeft.length}</span>
             </li>
-            <ul class="fn__none" data-type="update">${genItem(response.data.addsLeft)}</ul>
+            <ul class="fn__none" data-type="update">${genItem(response.data.addsLeft, undefined, false)}</ul>
         </ul>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">

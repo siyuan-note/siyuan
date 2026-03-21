@@ -527,24 +527,24 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
-	} else {
-		data, readErr := repo.OpenFile(avFile)
-		if nil != readErr {
-			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-			err = readErr
-			return
-		}
+	}
 
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
-		}
+	data, readErr := repo.OpenFile(avFile)
+	if nil != readErr {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+		err = readErr
+		return
+	}
 
-		attrView = av.NewAttributeView(avID)
-		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
-			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-			return
-		}
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
+	attrView = av.NewAttributeView(avID)
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+		return
 	}
 
 	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
@@ -587,24 +587,24 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
-	} else {
-		data, readErr := os.ReadFile(avJSONPath)
-		if nil != readErr {
-			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-			err = readErr
-			return
-		}
+	}
 
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
-		}
+	data, readErr := os.ReadFile(avJSONPath)
+	if nil != readErr {
+		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+		err = readErr
+		return
+	}
 
-		attrView = av.NewAttributeView(avID)
-		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
-			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-			return
-		}
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
+	attrView = av.NewAttributeView(avID)
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
+		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+		return
 	}
 
 	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging)

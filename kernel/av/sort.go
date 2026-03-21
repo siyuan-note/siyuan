@@ -201,12 +201,12 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 					return -1
 				}
 				return 0
-			} else {
-				if !other.Number.IsNotEmpty {
-					return 1
-				}
-				return 0
 			}
+
+			if !other.Number.IsNotEmpty {
+				return 1
+			}
+			return 0
 		}
 	case KeyTypeDate:
 		if nil != value.Date && nil != other.Date {
@@ -234,12 +234,12 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 					return -1
 				}
 				return 0
-			} else {
-				if !other.Date.IsNotEmpty {
-					return 1
-				}
-				return 0
 			}
+
+			if !other.Date.IsNotEmpty {
+				return 1
+			}
+			return 0
 		}
 	case KeyTypeCreated:
 		if nil != value.Created && nil != other.Created {
@@ -288,7 +288,6 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 						return s
 					}
 				}
-				return 0
 			} else {
 				for i := 0; i < oLen; i++ {
 					v := value.MSelect[i].Content
@@ -303,8 +302,8 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 						return s
 					}
 				}
-				return 0
 			}
+			return 0
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other.URL {

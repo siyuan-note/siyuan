@@ -565,12 +565,12 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
 				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
 				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, relativeDate2.Direction)
-			} else { // 使用具体时间比较
-				if nil == other.Date {
-					return true
-				}
-				return filterTime(value.Date.Content, value.Date.IsNotEmpty, other.Date.Content, other.Date.Content2, operator)
 			}
+			// 使用具体时间比较
+			if nil == other.Date {
+				return true
+			}
+			return filterTime(value.Date.Content, value.Date.IsNotEmpty, other.Date.Content, other.Date.Content2, operator)
 		}
 	case KeyTypeCreated:
 		if nil != value.Created {
@@ -578,12 +578,12 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
 				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
 				return filterRelativeTime(value.Created.Content, true, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, relativeDate2.Direction)
-			} else { // 使用具体时间比较
-				if nil == other.Created {
-					return true
-				}
-				return filterTime(value.Created.Content, value.Created.IsNotEmpty, other.Created.Content, other.Created.Content2, operator)
 			}
+			// 使用具体时间比较
+			if nil == other.Created {
+				return true
+			}
+			return filterTime(value.Created.Content, value.Created.IsNotEmpty, other.Created.Content, other.Created.Content2, operator)
 		}
 	case KeyTypeUpdated:
 		if nil != value.Updated {
@@ -591,13 +591,13 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
 				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
 				return filterRelativeTime(value.Updated.Content, true, operator, relativeTimeStart, relativeTimeEnd, relativeDate.Direction, relativeTimeStart2, relativeTimeEnd2, relativeDate2.Direction)
-			} else { // 使用具体时间比较
-				if nil == other.Updated {
-					return true
-				}
-
-				return filterTime(value.Updated.Content, value.Updated.IsNotEmpty, other.Updated.Content, other.Updated.Content2, operator)
 			}
+			// 使用具体时间比较
+			if nil == other.Updated {
+				return true
+			}
+
+			return filterTime(value.Updated.Content, value.Updated.IsNotEmpty, other.Updated.Content, other.Updated.Content2, operator)
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {

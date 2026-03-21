@@ -297,7 +297,7 @@ func daysBetween(date1, date2 time.Time) int {
 	}
 
 	// 加上最后一年的天数
-	days += int(date2.YearDay() - date1.YearDay())
+	days += date2.YearDay() - date1.YearDay()
 
 	// 如果原始的date1晚于date2，返回负值
 	if swap {

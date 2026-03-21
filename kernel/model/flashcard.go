@@ -1105,7 +1105,7 @@ func getDeckDueCards(deck *riff.Deck, reviewedCardIDs, blockIDs []string, newCar
 	}
 	var toCheckBlockIDs []string
 	var tmp []riff.Card
-	for bID, _ := range toChecks {
+	for bID := range toChecks {
 		toCheckBlockIDs = append(toCheckBlockIDs, bID)
 	}
 	checkResult := treenode.ExistBlockTrees(toCheckBlockIDs)

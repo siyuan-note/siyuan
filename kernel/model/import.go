@@ -512,7 +512,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 		return nil
 	})
-	for p, _ := range renamePaths {
+	for p := range renamePaths {
 		originalPath := p
 		p = strings.TrimPrefix(p, unzipRootPath)
 		p = filepath.ToSlash(p)
@@ -538,7 +538,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	var oldPaths []string
-	for oldPath, _ := range renamePaths {
+	for oldPath := range renamePaths {
 		oldPaths = append(oldPaths, oldPath)
 	}
 	sort.Slice(oldPaths, func(i, j int) bool {

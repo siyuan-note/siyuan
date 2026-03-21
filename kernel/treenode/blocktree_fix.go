@@ -51,7 +51,7 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 		btPathsMap[path] = true
 	}
 
-	for p, _ := range btPathsMap {
+	for p := range btPathsMap {
 		if !pathsMap[p] {
 			ret = append(ret, p)
 		}
@@ -91,7 +91,7 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 		btPathsMap[path] = true
 	}
 
-	for p, _ := range pathsMap {
+	for p := range pathsMap {
 		if !btPathsMap[p] {
 			ret = append(ret, p)
 		}

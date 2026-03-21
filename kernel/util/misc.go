@@ -40,7 +40,7 @@ func GetDuplicateName(master string) (ret string) {
 	}
 
 	ret = master + " (1)"
-	r := regexp.MustCompile("^(.*) \\((\\d+)\\)$")
+	r := regexp.MustCompile(`^(.*) \((\d+)\)$`)
 	m := r.FindStringSubmatch(master)
 	if nil == m || 3 > len(m) {
 		return

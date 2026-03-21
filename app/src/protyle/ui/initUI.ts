@@ -83,24 +83,58 @@ export const initUI = (protyle: IProtyle) => {
     let wheelTimeout: number;
     const wheelId = genUUID();
     const isMacOS = isMac();
+    let resetTimer: number;
+    let wheelActive = false; // 记录是否处于同一轮滚动中
+    let modifierOnset = false; // 记录同一轮滚动的首次滚动是否按下 Cmd
+    let accumDeltaY = 0;
+    const ZOOM_THRESHOLD = 20; // 按下 Cmd 滚动时累加 deltaY，达到阈值时改动一级字号
+    const WHEEL_IDLE_MS = 200; // 单轮滚动的间隔时间，超过该时间后重置累加值
     protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
-        if (!window.siyuan.config.editor.fontSizeScrollZoom || (isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
+        if (!window.siyuan.config.editor.fontSizeScrollZoom || event.shiftKey || event.deltaY === 0) {
+            // 用 event.shiftKey || event.deltaY === 0 检测横向滚动，因为 Mac 触控板快速划动时 deltaX 可能很大，即使容器并不能发生横向滚动
             return;
         }
-        event.stopPropagation();
-        if (event.deltaY < 0) {
-            if (window.siyuan.config.editor.fontSize < 72) {
-                window.siyuan.config.editor.fontSize++;
-            } else {
-                return;
-            }
-        } else if (event.deltaY > 0) {
-            if (window.siyuan.config.editor.fontSize > 9) {
-                window.siyuan.config.editor.fontSize--;
-            } else {
-                return;
-            }
+        const modifierDown = (isMacOS && event.metaKey) || (!isMacOS && event.ctrlKey);
+        if (!modifierDown) {
+            accumDeltaY = 0;
         }
+        clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(() => {
+            wheelActive = false;
+            accumDeltaY = 0;
+        }, WHEEL_IDLE_MS);
+        if (!wheelActive) {
+            wheelActive = true;
+            modifierOnset = modifierDown;
+        }
+        if (!modifierDown || !modifierOnset) {
+            // 触控板惯性会在松手后仍产生滚轮事件，避免划动触控板之后再按下 Cmd 会调整字号 https://ld246.com/article/1764296257377
+            // 要在单轮滚动的最后一个滚动事件触发之后等待 WHEEL_IDLE_MS 再按下 Cmd 滚动才能调整字号
+            return;
+        }
+        if (isMacOS) {
+            // Windows 按下 Ctrl 之后无法滚动容器，Mac 按下 Cmd 之后仍能滚动容器，需要 preventDefault 阻止编辑器滚动
+            event.preventDefault();
+        }
+        event.stopPropagation();
+        if (accumDeltaY !== 0 && Math.sign(event.deltaY) !== Math.sign(accumDeltaY)) {
+            accumDeltaY = 0;
+        }
+        accumDeltaY += event.deltaY;
+        if (accumDeltaY <= -ZOOM_THRESHOLD) {
+            if (window.siyuan.config.editor.fontSize >= 72) {
+                return;
+            }
+            window.siyuan.config.editor.fontSize++;
+        } else if (accumDeltaY >= ZOOM_THRESHOLD) {
+            if (window.siyuan.config.editor.fontSize <= 9) {
+                return;
+            }
+            window.siyuan.config.editor.fontSize--;
+        } else {
+            return;
+        }
+        accumDeltaY = 0;
         setInlineStyle();
         clearTimeout(wheelTimeout);
         showMessage(`${window.siyuan.languages.fontSize} ${window.siyuan.config.editor.fontSize}px<span class="fn__space"></span>
@@ -120,7 +154,7 @@ export const initUI = (protyle: IProtyle) => {
                 });
             });
         }, Constants.TIMEOUT_LOAD);
-    }, {passive: true});
+    }, {passive: !isMacOS});
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         hideElements(["hint", "util"], protyle);
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009

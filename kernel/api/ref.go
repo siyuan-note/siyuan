@@ -180,5 +180,4 @@ func getBacklink(c *gin.Context) {
 		"mk":            mentionKeyword,
 		"box":           boxID,
 	}
-	util.RandomSleep(200, 500)
 }

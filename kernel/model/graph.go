@@ -230,9 +230,10 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 	}
 
 	// 构造标签节点
+	tagNodeMap := map[string]*GraphNode{}
 	var tagNodes []*GraphNode
 	for _, tagSpan := range tagSpans {
-		if nil == tagNodeIn(tagNodes, tagSpan.Content) {
+		if nil == tagNodeMap[tagSpan.Content] {
 			node := &GraphNode{
 				ID:    tagSpan.Content,
 				Label: tagSpan.Content,
@@ -241,26 +242,39 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 			}
 			*nodes = append(*nodes, node)
 			tagNodes = append(tagNodes, node)
+			tagNodeMap[tagSpan.Content] = node
+		}
+	}
+
+	// Index tagSpans by rootID (global) or blockID (local) for O(1) lookup
+	tagSpanIndex := map[string][]*sql.Span{}
+	for _, tagSpan := range tagSpans {
+		if isGlobal {
+			tagSpanIndex[tagSpan.RootID] = append(tagSpanIndex[tagSpan.RootID], tagSpan)
+		} else {
+			tagSpanIndex[tagSpan.BlockID] = append(tagSpanIndex[tagSpan.BlockID], tagSpan)
 		}
 	}
 
 	// 连接标签和块
 	for _, block := range *blocks {
-		for _, tagSpan := range tagSpans {
-			if isGlobal { // 全局关系图将标签链接到文档块上
-				if block.RootID == tagSpan.RootID { // 局部关系图将标签链接到子块上
-					*links = append(*links, &GraphLink{
-						From: tagSpan.Content,
-						To:   block.RootID,
-					})
-				}
+		var matchedSpans []*sql.Span
+		if isGlobal {
+			matchedSpans = tagSpanIndex[block.RootID]
+		} else {
+			matchedSpans = tagSpanIndex[block.ID]
+		}
+		for _, tagSpan := range matchedSpans {
+			if isGlobal {
+				*links = append(*links, &GraphLink{
+					From: tagSpan.Content,
+					To:   block.RootID,
+				})
 			} else {
-				if block.ID == tagSpan.BlockID { // 局部关系图将标签链接到子块上
-					*links = append(*links, &GraphLink{
-						From: tagSpan.Content,
-						To:   block.ID,
-					})
-				}
+				*links = append(*links, &GraphLink{
+					From: tagSpan.Content,
+					To:   block.ID,
+				})
 			}
 		}
 	}
@@ -273,8 +287,7 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 		}
 
 		for _, targetID := range ids[:len(ids)-1] {
-			if targetTag := tagNodeIn(tagNodes, targetID); nil != targetTag {
-
+			if nil != tagNodeMap[targetID] {
 				*links = append(*links, &GraphLink{
 					From: tagNode.ID,
 					To:   targetID,
@@ -282,15 +295,6 @@ func linkTagBlocks(blocks *[]*Block, nodes *[]*GraphNode, links *[]*GraphLink, p
 			}
 		}
 	}
-}
-
-func tagNodeIn(tagNodes []*GraphNode, content string) *GraphNode {
-	for _, tagNode := range tagNodes {
-		if tagNode.Label == content {
-			return tagNode
-		}
-	}
-	return nil
 }
 
 func growTreeGraph(forwardlinks, backlinks *[]*Block, nodes *[]*GraphNode) {
@@ -303,6 +307,15 @@ func growLinkedNodes(forwardlinks, backlinks *[]*Block, nodes, all *[]*GraphNode
 		return
 	}
 
+	// Build set of all known node IDs for O(1) existence checks
+	nodeSet := map[string]bool{}
+	for _, n := range *all {
+		nodeSet[n.ID] = true
+	}
+	for _, n := range *nodes {
+		nodeSet[n.ID] = true
+	}
+
 	forwardGeneration := &[]*GraphNode{}
 	if 16 > *forwardDepth {
 		for _, ref := range *forwardlinks {
@@ -310,7 +323,7 @@ func growLinkedNodes(forwardlinks, backlinks *[]*Block, nodes, all *[]*GraphNode
 				if node.ID == ref.ID {
 					var defs []*Block
 					for _, refDef := range ref.Defs {
-						if existNodes(all, refDef.ID) || existNodes(forwardGeneration, refDef.ID) || existNodes(nodes, refDef.ID) {
+						if nodeSet[refDef.ID] {
 							continue
 						}
 						defs = append(defs, refDef)
@@ -326,6 +339,7 @@ func growLinkedNodes(forwardlinks, backlinks *[]*Block, nodes, all *[]*GraphNode
 						}
 						nodeTitleLabel(defNode, nodeContentByBlock(refDef))
 						*forwardGeneration = append(*forwardGeneration, defNode)
+						nodeSet[refDef.ID] = true
 					}
 				}
 			}
@@ -338,7 +352,7 @@ func growLinkedNodes(forwardlinks, backlinks *[]*Block, nodes, all *[]*GraphNode
 			for _, node := range *nodes {
 				if node.ID == def.ID {
 					for _, ref := range def.Refs {
-						if existNodes(all, ref.ID) || existNodes(backGeneration, ref.ID) || existNodes(nodes, ref.ID) {
+						if nodeSet[ref.ID] {
 							continue
 						}
 
@@ -351,6 +365,7 @@ func growLinkedNodes(forwardlinks, backlinks *[]*Block, nodes, all *[]*GraphNode
 						}
 						nodeTitleLabel(refNode, nodeContentByBlock(ref))
 						*backGeneration = append(*backGeneration, refNode)
+						nodeSet[ref.ID] = true
 					}
 				}
 			}
@@ -364,15 +379,6 @@ func growLinkedNodes(forwardlinks, backlinks *[]*Block, nodes, all *[]*GraphNode
 	*backDepth++
 	growLinkedNodes(forwardlinks, backlinks, generation, nodes, forwardDepth, backDepth)
 	*nodes = append(*nodes, *generation...)
-}
-
-func existNodes(nodes *[]*GraphNode, id string) bool {
-	for _, node := range *nodes {
-		if node.ID == id {
-			return true
-		}
-	}
-	return false
 }
 
 func buildLinks(defs *[]*Block, links *[]*GraphLink, local bool) {
@@ -428,27 +434,26 @@ func markLinkedNodes(nodes *[]*GraphNode, links *[]*GraphLink, local bool) {
 		nodeSize = Conf.Graph.Global.NodeSize
 	}
 
+	// Build node index for O(1) lookup
+	nodeIndex := map[string]*GraphNode{}
+	for _, node := range *nodes {
+		nodeIndex[node.ID] = node
+	}
+
 	tmpLinks := (*links)[:0]
 	for _, link := range *links {
-		var sourceFound, targetFound bool
-		for _, node := range *nodes {
-			if link.To == node.ID {
-				if link.Ref {
-					size := nodeSize
-					node.Defs++
-					size = math.Log2(float64(node.Defs))*nodeSize + nodeSize
-					node.Size = size
-				}
-				targetFound = true
-			} else if link.From == node.ID {
-				node.Refs++
-				sourceFound = true
-			}
-			if targetFound && sourceFound {
-				break
+		targetNode := nodeIndex[link.To]
+		sourceNode := nodeIndex[link.From]
+		if nil != targetNode {
+			if link.Ref {
+				targetNode.Defs++
+				targetNode.Size = math.Log2(float64(targetNode.Defs))*nodeSize + nodeSize
 			}
 		}
-		if sourceFound && targetFound {
+		if nil != sourceNode {
+			sourceNode.Refs++
+		}
+		if nil != sourceNode && nil != targetNode {
 			tmpLinks = append(tmpLinks, link)
 		}
 	}
@@ -493,17 +498,15 @@ func pruneUnref(nodes *[]*GraphNode, links *[]*GraphLink) {
 	}
 	*nodes = tmpNodes
 
+	// Build node index for O(1) link validation
+	nodeIndex := map[string]bool{}
+	for _, node := range *nodes {
+		nodeIndex[node.ID] = true
+	}
+
 	tmpLinks := (*links)[:0]
 	for _, link := range *links {
-		var sourceFound, targetFound bool
-		for _, node := range *nodes {
-			if link.To == node.ID {
-				targetFound = true
-			} else if link.From == node.ID {
-				sourceFound = true
-			}
-		}
-		if sourceFound && targetFound {
+		if nodeIndex[link.To] && nodeIndex[link.From] {
 			tmpLinks = append(tmpLinks, link)
 		}
 	}

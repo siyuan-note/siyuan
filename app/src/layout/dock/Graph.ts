@@ -22,6 +22,7 @@ export class Graph extends Model {
     private panelElement: HTMLElement;
     private element: HTMLElement;
     private network: any;
+    private searchDebounceTimer: number;
     public blockId: string; // "local" / "pin" 必填
     public rootId: string; // "local" 必填
     public graphData: {
@@ -351,7 +352,7 @@ export class Graph extends Model {
             }
         });
         this.inputElement.addEventListener("compositionend", () => {
-            this.searchGraph(false);
+            this.debouncedSearchGraph(false);
         });
         this.inputElement.addEventListener("blur", (event: InputEvent) => {
             const inputElement = event.target as HTMLInputElement;
@@ -361,17 +362,17 @@ export class Graph extends Model {
             if (event.isComposing) {
                 return;
             }
-            this.searchGraph(false);
+            this.debouncedSearchGraph(false);
         });
         this.element.querySelectorAll(".b3-slider").forEach((item: HTMLInputElement) => {
             item.addEventListener("input", () => {
                 item.setAttribute("aria-label", item.value);
-                this.searchGraph(false);
+                this.debouncedSearchGraph(false);
             });
         });
         this.element.querySelectorAll(".b3-switch").forEach((item) => {
             item.addEventListener("change", () => {
-                this.searchGraph(false);
+                this.debouncedSearchGraph(false);
             });
         });
         this.searchGraph(options.type !== "global");
@@ -415,6 +416,13 @@ export class Graph extends Model {
         (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked = conf.type.callout;
         (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked = conf.type.code;
         this.searchGraph(false);
+    }
+
+    private debouncedSearchGraph(focus: boolean, id?: string) {
+        clearTimeout(this.searchDebounceTimer);
+        this.searchDebounceTimer = window.setTimeout(() => {
+            this.searchGraph(focus, id);
+        }, 300);
     }
 
     public searchGraph(focus: boolean, id?: string, refresh = false) {

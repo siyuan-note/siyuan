@@ -1301,7 +1301,11 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 			if !found {
 				return ast.WalkContinue
 			}
-			src = src[:bytes.Index(src, []byte("\""))]
+			idx := bytes.Index(src, []byte("\""))
+			if idx == -1 {
+				return ast.WalkContinue
+			}
+			src = src[:idx]
 			ret = append(ret, string(src))
 		}
 		return ast.WalkContinue

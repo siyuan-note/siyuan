@@ -216,21 +216,6 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 	return
 }
 
-func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
-	if old == new {
-		return strs, false
-	}
-
-	for i, v := range strs {
-		if v == old {
-			strs[i] = new
-			changed = true
-		}
-	}
-	ret = strs
-	return
-}
-
 func SanitizeSVG(svgInput string) string {
 	// 1. 将字符串解析为节点树
 	doc, err := html.Parse(strings.NewReader(svgInput))

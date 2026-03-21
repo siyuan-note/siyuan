@@ -34,32 +34,16 @@ export const processMessage = (response: IWebSocketData) => {
         return false;
     }
     if ("reloadui" === response.cmd) {
-        if (response.data?.resetScroll) {
-            window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
-            setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {
-                /// #if MOBILE
+        /// #if MOBILE
+        window.location.reload();
+        /// #else
+        exportLayout({
+            cb() {
                 window.location.reload();
-                /// #else
-                exportLayout({
-                    cb() {
-                        window.location.reload();
-                    },
-                    errorExit: false,
-                });
-                /// #endif
-            });
-        } else {
-            /// #if MOBILE
-            window.location.reload();
-            /// #else
-            exportLayout({
-                cb() {
-                    window.location.reload();
-                },
-                errorExit: false,
-            });
-            /// #endif
-        }
+            },
+            errorExit: false,
+        });
+        /// #endif
         return false;
     }
     if ("closepublishpage" === response.cmd) {

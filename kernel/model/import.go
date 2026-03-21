@@ -56,19 +56,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, withMath bool, err error) {
-	tree, withMath := HTML2Tree(htmlStr, luteEngine)
-
-	var formatted []byte
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
-		renderer.ExtRendererFuncs[nodeType] = rendererFunc
-	}
-	formatted = renderer.Render()
-	markdown = gulu.Str.FromBytes(formatted)
-	return
-}
-
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
 	assetDirPath := filepath.Join(util.DataDir, "assets")

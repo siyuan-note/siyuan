@@ -1454,7 +1454,6 @@
     "task.database.index": "データベースのインデックスを作成中",
     "task.database.index.commit": "データベースのインデックスをコミット中",
     "task.database.index.ref": "データベースのインデックスを参照中",
-    "task.database.index.fix": "データベースのインデックスを修正中",
     "task.ocr.image": "画像 OCR を実行してテキストを抽出中",
     "task.history.generateFile": "履歴データベースのドキュメントを生成中",
     "task.history.database.index.full": "履歴データベースのインデックスを再構築中",

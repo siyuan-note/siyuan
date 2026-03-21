@@ -1454,7 +1454,6 @@
     "task.database.index": "בצע אינדוקס מסד נתונים",
     "task.database.index.commit": "בצע התחייבות אינדוקס מסד נתונים",
     "task.database.index.ref": "בצע הפניית אינדוקס מסד נתונים",
-    "task.database.index.fix": "בצע תיקון אינדוקס מסד נתונים",
     "task.ocr.image": "בצע OCR לתמונה כדי לחלץ טקסט",
     "task.history.generateFile": "בצע ייצור מסמך היסטוריה במאגר",
     "task.history.database.index.full": "בצע בניית אינדקס מחדש למאגר ההיסטוריה",

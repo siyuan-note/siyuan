@@ -200,13 +200,13 @@ func getCurrentTasks() (ret []*Task) {
 }
 
 const (
-	RepoCheckout                    = "task.repo.checkout"                 // 从快照中检出
-	RepoAutoPurge                   = "task.repo.autoPurge"                // 自动清理数据仓库
-	DatabaseIndexFull               = "task.database.index.full"           // 重建索引
-	DatabaseIndex                   = "task.database.index"                // 数据库索引
-	DatabaseIndexCommit             = "task.database.index.commit"         // 数据库索引提交
-	DatabaseIndexRef                = "task.database.index.ref"            // 数据库索引引用
-	DatabaseIndexFix                = "task.database.index.fix"            // 数据库索引订正
+	RepoCheckout        = "task.repo.checkout"         // 从快照中检出
+	RepoAutoPurge       = "task.repo.autoPurge"        // 自动清理数据仓库
+	DatabaseIndexFull   = "task.database.index.full"   // 重建索引
+	DatabaseIndex       = "task.database.index"        // 数据库索引
+	DatabaseIndexCommit = "task.database.index.commit" // 数据库索引提交
+	DatabaseIndexRef    = "task.database.index.ref"    // 数据库索引引用
+
 	OCRImage                        = "task.ocr.image"                     // 图片 OCR 提取文本
 	HistoryGenerateFile             = "task.history.generateFile"          // 生成文件历史
 	HistoryDatabaseIndexFull        = "task.history.database.index.full"   // 历史数据库重建索引

@@ -1454,7 +1454,6 @@
     "task.database.index": "데이터베이스 인덱스 실행",
     "task.database.index.commit": "데이터베이스 인덱스 커밋 실행",
     "task.database.index.ref": "데이터베이스 인덱스 참조 실행",
-    "task.database.index.fix": "데이터베이스 인덱스 수정 실행",
     "task.ocr.image": "이미지 OCR 텍스트 추출 실행",
     "task.history.generateFile": "히스토리 데이터베이스 문서 생성 실행",
     "task.history.database.index.full": "히스토리 데이터베이스 인덱스 재생성 실행",

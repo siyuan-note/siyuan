@@ -1454,7 +1454,6 @@
     "task.database.index": "Executar índice do banco de dados",
     "task.database.index.commit": "Executar commit do índice do banco de dados",
     "task.database.index.ref": "Executar índice de referência do banco de dados",
-    "task.database.index.fix": "Executar correção do índice do banco de dados",
     "task.ocr.image": "Executar OCR de imagem para extrair texto",
     "task.history.generateFile": "Executar geração de documento do histórico do banco de dados",
     "task.history.database.index.full": "Executar reconstrução do índice do histórico do banco de dados",

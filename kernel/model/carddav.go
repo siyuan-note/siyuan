@@ -97,7 +97,7 @@ var (
 	ErrorCardDavAddressFileExtensionNameInvalid = errors.New("CardDAV: address file extension name is invalid")
 )
 
-// ImportVCardFile imports a address book from a vCard file (*.vcf)
+// ImportAddressBook imports an address book from a vCard file (*.vcf)
 func ImportAddressBook(addressBookPath, cardContent string) (addresses []*AddressObject, err error) {
 	// TODO: Check whether the path is valid (PathDepth: Address)
 	// TODO: Check whether the address book exists
@@ -106,7 +106,7 @@ func ImportAddressBook(addressBookPath, cardContent string) (addresses []*Addres
 	return
 }
 
-// ExportAddressBook exports a address book to a vCard file (*.vcf)
+// ExportAddressBook exports an address book to a vCard file (*.vcf)
 func ExportAddressBook(addressBookPath string) (cardContent string, err error) {
 	// TODO: Check whether the path is valid (PathDepth: AddressBook)
 	// TODO: Check whether the address book exists
@@ -114,7 +114,7 @@ func ExportAddressBook(addressBookPath string) (cardContent string, err error) {
 	return
 }
 
-// AddressBooksMetaDataFilePath returns the absolute path of the address books meta data file
+// AddressBooksMetaDataFilePath returns the absolute path of the address books metadata file
 func AddressBooksMetaDataFilePath() string {
 	return DavPath2DirectoryPath(CardDavAddressBooksMetaDataFilePath)
 }

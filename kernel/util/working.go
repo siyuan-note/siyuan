@@ -526,7 +526,7 @@ func IsWorkspaceLocked(workspacePath string) bool {
 	}
 
 	f := flock.New(lockFilePath)
-	defer f.Unlock()
+	defer f.Close()
 	ok, _ := f.TryLock()
 	if ok {
 		return false

@@ -75,7 +75,7 @@ func GetServerAddrs() (ret []string) {
 	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 
-	for i, _ := range ret {
+	for i := range ret {
 		ret[i] = "http://" + ret[i] + ":" + ServerPort
 	}
 	return

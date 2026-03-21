@@ -617,13 +617,11 @@ func serveAssets(ginServer *gin.Engine) {
 
 		// 返回原始文件
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 
 	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 }
 
@@ -668,7 +666,6 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		requestPath := context.Param("path")
 		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 }
 
@@ -1026,7 +1023,6 @@ func jwtMiddleware(c *gin.Context) {
 	}
 	c.Set(model.RoleContextKey, model.RoleVisitor)
 	c.Next()
-	return
 }
 
 func serveFixedStaticFiles(ginServer *gin.Engine) {

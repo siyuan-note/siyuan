@@ -223,7 +223,6 @@ func indexBox(boxID string) {
 	elapsed := end.Sub(start).Seconds()
 	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.BytesCustomCeil(uint64(treeSize), 2))
 	debug.FreeOSMemory()
-	return
 }
 
 func IndexRefs() {

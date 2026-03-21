@@ -152,10 +152,7 @@ func indexBox(boxID string) {
 	lock := sync.Mutex{}
 	util.PushStatusBar(fmt.Sprintf("["+html.EscapeString(box.Name)+"] "+Conf.Language(64), len(files)))
 
-	poolSize := runtime.NumCPU()
-	if 4 < poolSize {
-		poolSize = 4
-	}
+	poolSize := min(runtime.NumCPU(), 4)
 	waitGroup := &sync.WaitGroup{}
 	var avNodes []*ast.Node
 	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
@@ -223,7 +220,6 @@ func indexBox(boxID string) {
 	elapsed := end.Sub(start).Seconds()
 	logging.LogInfof("rebuilt database for notebook [%s] in [%.2fs], tree [count=%d, size=%s]", box.ID, elapsed, treeCount, humanize.BytesCustomCeil(uint64(treeSize), 2))
 	debug.FreeOSMemory()
-	return
 }
 
 func IndexRefs() {

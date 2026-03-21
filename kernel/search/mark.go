@@ -85,7 +85,9 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 	if caseSensitive {
 		ic = "(?)"
 	}
-	re := ic + "("
+
+	var re strings.Builder
+	re.WriteString(ic + "(")
 	for i, k := range keywords {
 		if "" == k {
 			continue
@@ -96,27 +98,28 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 			wordBoundary = lex.IsASCIILetterNums(gulu.Str.ToBytes(k)) // Improve virtual reference split words https://github.com/siyuan-note/siyuan/issues/7833
 		}
 		k = regexp.QuoteMeta(util.EscapeHTML(k))
-		re += "("
+		re.WriteString("(")
 		if wordBoundary {
-			re += "\\b"
+			re.WriteString("\\b")
 		}
-		re += k
+		re.WriteString(k)
 		if wordBoundary {
-			re += "\\b"
+			re.WriteString("\\b")
 		}
-		re += ")"
+		re.WriteString(")")
 		if i < len(keywords)-1 {
-			re += "|"
+			re.WriteString("|")
 		}
 	}
-	re += ")"
+	re.WriteString(")")
+
 	ret = util.EscapeHTML(text)
 
 	ret = strings.ReplaceAll(ret, "&#34;", "\ue000")
 	ret = strings.ReplaceAll(ret, "&lt;", "\ue001")
 	ret = strings.ReplaceAll(ret, "&gt;", "\ue002")
 	ret = strings.ReplaceAll(ret, "&#39;", "\ue003")
-	if reg, err := regexp.Compile(re); err == nil {
+	if reg, err := regexp.Compile(re.String()); err == nil {
 		ret = reg.ReplaceAllStringFunc(ret, func(s string) string { return openMark + s + closeMark })
 	}
 	ret = strings.ReplaceAll(ret, "\ue000", "&#34;")

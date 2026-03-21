@@ -793,12 +793,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		return
 	}
 
-	// initialize go-pdfium with number of available cores
-	// we fire up the complete worker pool for maximum performance
-	cores := runtime.NumCPU()
-	if 4 < cores {
-		cores = 4 // Limit memory usage
-	}
+	cores := min(runtime.NumCPU(), 4) // Limit memory usage
 
 	pool, err := webassembly.Init(webassembly.Config{
 		MinIdle:  cores,

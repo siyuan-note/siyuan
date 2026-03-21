@@ -1396,9 +1396,7 @@ func bootSyncRepo() (err error) {
 
 	waitGroup := sync.WaitGroup{}
 	var errs []error
-	waitGroup.Add(1)
-	go func() {
-		defer waitGroup.Done()
+	waitGroup.Go(func() {
 		defer logging.Recover()
 
 		start := time.Now()
@@ -1419,12 +1417,9 @@ func bootSyncRepo() (err error) {
 		}
 
 		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
-	}()
-
+	})
 	var fetchedFiles []*entity.File
-	waitGroup.Add(1)
-	go func() {
-		defer waitGroup.Done()
+	waitGroup.Go(func() {
 		defer logging.Recover()
 
 		start := time.Now()
@@ -1454,7 +1449,7 @@ func bootSyncRepo() (err error) {
 		}
 
 		logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", time.Since(start).Seconds())
-	}()
+	})
 	waitGroup.Wait()
 	if 0 < len(errs) {
 		err = errs[0]

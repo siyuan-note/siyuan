@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"math"
 	"path"
-	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -160,38 +159,78 @@ func FlushQueue() {
 	}
 
 	groupOpsCurrent := map[string]int{}
-	for i, op := range ops {
+
+	// Batch multiple operations into a single SQLite transaction for throughput.
+	// This is the primary I/O-amplification fix: the original code opened and
+	// committed a separate transaction per operation, which causes a WAL sync per
+	// op and dominates latency on spinning disks and network-attached storage.
+	//
+	// We cap at batchSize (64) so a single failure doesn't roll back too much
+	// work, and because large transactions hold the WAL lock longer.
+	const batchSize = 64
+
+	for batchStart := 0; batchStart < len(ops); {
 		if util.IsExiting.Load() {
 			return
 		}
+
+		batchEnd := batchStart + batchSize
+		if batchEnd > len(ops) {
+			batchEnd = len(ops)
+		}
+		batch := ops[batchStart:batchEnd]
+		batchStart = batchEnd
 
 		tx, err := beginTx()
 		if err != nil {
 			return
 		}
 
-		groupOpsCurrent[op.action]++
-		context["current"] = groupOpsCurrent[op.action]
-		context["total"] = groupOpsTotal[op.action]
-		if err = execOp(op, tx, context); err != nil {
-			tx.Rollback()
-			closeTxPreparedStmts(tx)
-			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
-			continue
+		batchOK := true
+		for _, op := range batch {
+			groupOpsCurrent[op.action]++
+			context["current"] = groupOpsCurrent[op.action]
+			context["total"] = groupOpsTotal[op.action]
+			if err = execOp(op, tx, context); err != nil {
+				tx.Rollback()
+				closeTxPreparedStmts(tx)
+				logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
+				batchOK = false
+				break
+			}
 		}
 
-		if err = commitTx(tx); err != nil {
-			logging.LogErrorf("commit tx failed: %s", err)
-			continue
+		if batchOK {
+			if err = commitTx(tx); err != nil {
+				logging.LogErrorf("commit tx failed: %s", err)
+				batchOK = false
+			}
 		}
 
-		if 16 < i && 0 == i%128 {
-			debug.FreeOSMemory()
+		if !batchOK && len(batch) > 1 {
+			// The batch failed. Fall back to individual per-op transactions so
+			// that the one bad op doesn't silently discard all the good ones.
+			// This preserves the original behaviour: each op is independently
+			// atomic and a single failure only affects that op.
+			for _, op := range batch {
+				singleTx, txErr := beginTx()
+				if txErr != nil {
+					continue
+				}
+				groupOpsCurrent[op.action]++
+				context["current"] = groupOpsCurrent[op.action]
+				context["total"] = groupOpsTotal[op.action]
+				if txErr = execOp(op, singleTx, context); txErr != nil {
+					singleTx.Rollback()
+					closeTxPreparedStmts(singleTx)
+					logging.LogErrorf("queue operation [%s] failed (single retry): %s", op.action, txErr)
+					continue
+				}
+				if txErr = commitTx(singleTx); txErr != nil {
+					logging.LogErrorf("commit tx failed (single retry): %s", txErr)
+				}
+			}
 		}
-	}
-
-	if 128 < total {
-		debug.FreeOSMemory()
 	}
 
 	elapsed := time.Now().Sub(start).Milliseconds()
@@ -241,7 +280,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = indexNode(tx, op.id)
 	default:
 		msg := fmt.Sprintf("unknown operation [%s]", op.action)
-		logging.LogErrorf(msg)
+		logging.LogErrorf("%s", msg)
 		err = errors.New(msg)
 	}
 	return

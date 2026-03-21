@@ -26,7 +26,12 @@ type treeCacheEntry struct {
 
 var (
 	treeCache, _ = ristretto.NewCache(&ristretto.Config{
-		NumCounters: 8,
+		// NumCounters should be ~10x the expected number of cached items.
+		// With a 200 MB budget and average tree size ~20 KB, we can hold ~10 000
+		// trees; 1 000 000 counters gives the TinyLFU admittance filter enough
+		// resolution to work correctly.  The original value of 8 was too small
+		// and caused the cache to admit/evict almost randomly.
+		NumCounters: 1_000_000,
 		MaxCost:     1024 * 1024 * 200,
 		BufferItems: 64,
 	})

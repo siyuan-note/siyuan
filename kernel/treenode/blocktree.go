@@ -44,6 +44,143 @@ type BlockTree struct {
 	Type     string // 类型
 }
 
+// btCache is an in-process, read-optimised dual-index for BlockTree rows.
+// It eliminates the SQLite round-trips that occurred on every keypress through
+// GetBlockTree (called ~80 times per kernel transaction).
+//
+// Design:
+//   - byID   – primary lookup used by GetBlockTree(id)
+//   - byRoot – secondary index used by GetBlockTreesByRootID(rootID)
+//
+// Writes (insert / delete) are protected by a single RWMutex.  Reads acquire
+// only the read-lock, so many concurrent goroutines can look up simultaneously.
+// The cache is populated from SQLite on demand (lazy load-through) and
+// invalidated in RemoveBlockTree / RemoveBlockTreesByRootID / etc.
+type btCacheStore struct {
+	mu     sync.RWMutex
+	byID   map[string]*BlockTree
+	byRoot map[string][]*BlockTree // rootID → all BlockTrees with that root
+}
+
+var btCache = &btCacheStore{
+	byID:   make(map[string]*BlockTree, 65536),
+	byRoot: make(map[string][]*BlockTree, 4096),
+}
+
+func (c *btCacheStore) get(id string) *BlockTree {
+	c.mu.RLock()
+	bt := c.byID[id]
+	c.mu.RUnlock()
+	return bt
+}
+
+func (c *btCacheStore) getByRoot(rootID string) []*BlockTree {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	bts := c.byRoot[rootID]
+	if len(bts) == 0 {
+		return nil
+	}
+	// Copy while still holding the read lock so a concurrent writer cannot
+	// mutate the underlying array between the unlock and the copy.
+	out := make([]*BlockTree, len(bts))
+	copy(out, bts)
+	return out
+}
+
+func (c *btCacheStore) put(bt *BlockTree) {
+	if bt == nil || bt.ID == "" {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	old := c.byID[bt.ID]
+	if old != nil && old.RootID != bt.RootID {
+		// Root changed (e.g. block moved) – remove from old root bucket.
+		c.removeFromRootBucket(old.RootID, old.ID)
+	}
+
+	c.byID[bt.ID] = bt
+
+	// Maintain byRoot index.
+	bucket := c.byRoot[bt.RootID]
+	for i, existing := range bucket {
+		if existing.ID == bt.ID {
+			bucket[i] = bt
+			c.byRoot[bt.RootID] = bucket
+			return
+		}
+	}
+	c.byRoot[bt.RootID] = append(bucket, bt)
+}
+
+func (c *btCacheStore) remove(id string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	bt := c.byID[id]
+	if bt == nil {
+		return
+	}
+	c.removeFromRootBucket(bt.RootID, id)
+	delete(c.byID, id)
+}
+
+func (c *btCacheStore) removeByRoot(rootID string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for _, bt := range c.byRoot[rootID] {
+		delete(c.byID, bt.ID)
+	}
+	delete(c.byRoot, rootID)
+}
+
+func (c *btCacheStore) removeByBox(boxID string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	for id, bt := range c.byID {
+		if bt.BoxID == boxID {
+			c.removeFromRootBucket(bt.RootID, id)
+			delete(c.byID, id)
+		}
+	}
+}
+
+// removeFromRootBucket removes id from c.byRoot[rootID].  Must be called under write lock.
+func (c *btCacheStore) removeFromRootBucket(rootID, id string) {
+	bucket := c.byRoot[rootID]
+	for i, bt := range bucket {
+		if bt.ID == id {
+			last := len(bucket) - 1
+			bucket[i] = bucket[last]
+			bucket[last] = nil
+			c.byRoot[rootID] = bucket[:last]
+			return
+		}
+	}
+}
+
+func (c *btCacheStore) removeByPathPrefix(prefix string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	for id, bt := range c.byID {
+		if strings.HasPrefix(bt.Path, prefix) {
+			c.removeFromRootBucket(bt.RootID, id)
+			delete(c.byID, id)
+		}
+	}
+}
+
+func (c *btCacheStore) clear() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.byID = make(map[string]*BlockTree, 65536)
+	c.byRoot = make(map[string][]*BlockTree, 4096)
+}
+
 var (
 	db *sql.DB
 
@@ -72,6 +209,8 @@ func initDatabase(forceRebuild bool) {
 }
 
 func initDBTables() {
+	btCache.clear() // Invalidate in-memory cache when tables are dropped.
+
 	_, err := db.Exec("DROP TABLE IF EXISTS blocktrees")
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [blocks] failed: %s", err)
@@ -365,6 +504,11 @@ func GetBlockTree(id string) (ret *BlockTree) {
 		return
 	}
 
+	// Cache-first: avoid SQLite round-trip on the hot path.
+	if cached := btCache.get(id); cached != nil {
+		return cached
+	}
+
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
 	err := queryRow(sqlStmt, id).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
@@ -376,15 +520,18 @@ func GetBlockTree(id string) (ret *BlockTree) {
 		logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())
 		return
 	}
+	btCache.put(ret)
 	return
 }
 
 func SetBlockTreePath(tree *parse.Tree) {
-	RemoveBlockTreesByRootID(tree.ID)
+	RemoveBlockTreesByRootID(tree.ID) // also evicts from btCache
 	IndexBlockTree(tree)
 }
 
 func RemoveBlockTreesByRootID(rootID string) {
+	btCache.removeByRoot(rootID)
+
 	sqlStmt := "DELETE FROM blocktrees WHERE root_id = ?"
 	_, err := exec(sqlStmt, rootID)
 	if err != nil {
@@ -425,6 +572,11 @@ func GetBlockTreesByPathPrefix(pathPrefix string) (ret []*BlockTree) {
 }
 
 func GetBlockTreesByRootID(rootID string) (ret []*BlockTree) {
+	// Cache-first.
+	if cached := btCache.getByRoot(rootID); len(cached) > 0 {
+		return cached
+	}
+
 	sqlStmt := "SELECT * FROM blocktrees WHERE root_id = ?"
 	rows, err := query(sqlStmt, rootID)
 	if err != nil {
@@ -440,10 +592,18 @@ func GetBlockTreesByRootID(rootID string) (ret []*BlockTree) {
 		}
 		ret = append(ret, &block)
 	}
+	// Populate cache from DB results.
+	for _, bt := range ret {
+		btCache.put(bt)
+	}
 	return
 }
 
 func RemoveBlockTreesByPathPrefix(pathPrefix string) {
+	// Evict all cache entries whose path starts with pathPrefix before the SQL
+	// DELETE so that concurrent GetBlockTree calls can't return stale paths.
+	btCache.removeByPathPrefix(pathPrefix)
+
 	sqlStmt := "DELETE FROM blocktrees WHERE path LIKE ?"
 	_, err := exec(sqlStmt, pathPrefix+"%")
 	if err != nil {
@@ -472,6 +632,8 @@ func GetBlockTreesByBoxID(boxID string) (ret []*BlockTree) {
 }
 
 func RemoveBlockTreesByBoxID(boxID string) (ids []string) {
+	btCache.removeByBox(boxID)
+
 	sqlStmt := "SELECT id FROM blocktrees WHERE box_id = ?"
 	rows, err := query(sqlStmt, boxID)
 	if err != nil {
@@ -502,6 +664,10 @@ func RemoveBlockTreesByIDs(ids []string) {
 		return
 	}
 
+	for _, id := range ids {
+		btCache.remove(id)
+	}
+
 	sqlStmt := "DELETE FROM blocktrees WHERE id IN ('" + strings.Join(ids, "','") + "')"
 	_, err := exec(sqlStmt)
 	if err != nil {
@@ -511,6 +677,8 @@ func RemoveBlockTreesByIDs(ids []string) {
 }
 
 func RemoveBlockTree(id string) {
+	btCache.remove(id)
+
 	sqlStmt := "DELETE FROM blocktrees WHERE id = ?"
 	_, err := exec(sqlStmt, id)
 	if err != nil {
@@ -635,9 +803,11 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		if nil != n.Parent {
 			parentID = n.Parent.ID
 		}
-		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
+		typ := TypeAbbr(n.Type.String())
+		updated := n.IALAttr("updated")
+		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, updated, typ); err != nil {
 			tx.Rollback()
-			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
+			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 			if strings.Contains(err.Error(), "database disk image is malformed") {
 				initDatabase(true)
@@ -645,6 +815,17 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 			}
 			return
 		}
+		// Keep in-memory cache consistent with what we just wrote to DB.
+		btCache.put(&BlockTree{
+			ID:       n.ID,
+			RootID:   tree.ID,
+			ParentID: parentID,
+			BoxID:    tree.Box,
+			Path:     tree.Path,
+			HPath:    tree.HPath,
+			Updated:  updated,
+			Type:     typ,
+		})
 	}
 }
 

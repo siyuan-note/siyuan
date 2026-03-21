@@ -115,7 +115,7 @@ func execAssetContentOp(op *assetContentDBQueueOperation, tx *sql.Tx, context ma
 		err = deleteAssetContentsByPath(tx, op.path, context)
 	default:
 		msg := fmt.Sprintf("unknown asset content operation [%s]", op.action)
-		logging.LogErrorf(msg)
+		logging.LogErrorf("%s", msg)
 		err = errors.New(msg)
 	}
 	return

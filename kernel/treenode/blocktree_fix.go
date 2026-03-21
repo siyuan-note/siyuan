@@ -61,6 +61,17 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 }
 
 func removeBlockTreesByPath(boxID, path string) {
+	// Evict all blocks for this specific path from the in-memory cache before
+	// the SQL DELETE, so concurrent GetBlockTree calls can't return stale entries.
+	btCache.mu.Lock()
+	for id, bt := range btCache.byID {
+		if bt.BoxID == boxID && bt.Path == path {
+			btCache.removeFromRootBucket(bt.RootID, id)
+			delete(btCache.byID, id)
+		}
+	}
+	btCache.mu.Unlock()
+
 	sqlStmt := "DELETE FROM blocktrees WHERE box_id = ? AND path = ?"
 	_, err := db.Exec(sqlStmt, boxID, path)
 	if err != nil {

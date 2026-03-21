@@ -330,7 +330,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 		}
 
 		upsertFile = filepath.ToSlash(upsertFile)
-		upsertFile := strings.TrimPrefix(upsertFile, "/")
+		upsertFile = strings.TrimPrefix(upsertFile, "/")
 
 		box, _, found := strings.Cut(upsertFile, "/")
 		if !found {

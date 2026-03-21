@@ -18,6 +18,7 @@ package sql
 
 import (
 	"database/sql"
+	"errors"
 	"path/filepath"
 	"strings"
 
@@ -100,7 +101,7 @@ func QueryAssetByHash(hash string) (ret *Asset) {
 	row := queryRow(sqlStmt, hash)
 	var asset Asset
 	if err := row.Scan(&asset.ID, &asset.BlockID, &asset.RootID, &asset.Box, &asset.DocPath, &asset.Path, &asset.Name, &asset.Title, &asset.Hash); err != nil {
-		if sql.ErrNoRows != err {
+		if !errors.Is(err, sql.ErrNoRows) {
 			logging.LogErrorf("query scan field failed: %s", err)
 		}
 		return

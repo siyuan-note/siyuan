@@ -247,7 +247,7 @@ func Serve(fastMode bool, cookieKey string) {
 
 	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {
 		if err = util.ServeMultiplexed(ln, ginServer, certPath, keyPath, util.HttpServer); err != nil {
-			if errors.Is(err, http.ErrServerClosed) || err == cmux.ErrListenerClosed {
+			if errors.Is(err, http.ErrServerClosed) || errors.Is(err, cmux.ErrListenerClosed) {
 				return
 			}
 

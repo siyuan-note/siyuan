@@ -223,20 +223,24 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 	}
 
 	if strings.HasSuffix(file.Path, ".sy") {
-		var destPath, parentHPath string
-		rootID := util.GetTreeID(file.Path)
-		workingDoc := treenode.GetBlockTree(rootID)
 		boxID := strings.TrimPrefix(file.Path, "/")
 		boxID = strings.Split(boxID, "/")[0]
 
 		var box *Box
-		box, err = getRollbackBox(boxID)
+		var needResetTree bool
+		box, needResetTree, err = getRollbackBox(boxID)
 		if err != nil {
 			logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)
 			return
 		}
 		boxID = box.ID
 
+		var destPath, parentHPath string
+		rootID := util.GetTreeID(file.Path)
+		workingDoc := treenode.GetBlockTree(rootID)
+		if needResetTree {
+			workingDoc = nil
+		}
 		destPath, parentHPath, err = getRollbackDockPath(boxID, file.Path, workingDoc)
 		if err != nil {
 			return
@@ -253,6 +257,10 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		tree.Box = boxID
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 		tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+		if needResetTree {
+			resetTree(tree, "", true)
+		}
+
 		if nil != workingDoc && "d" == workingDoc.Type {
 			workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
 			if err = filelock.Remove(workingDocPath); err != nil {
@@ -271,10 +279,8 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		ReloadFiletree()
 		ReloadProtyle(rootID)
 
-		if box := Conf.GetBox(boxID); nil != box {
-			msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
-			util.PushMsg(msg, 7000)
-		}
+		msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+		util.PushMsg(msg, 7000)
 	} else {
 		to := filepath.Join(util.DataDir, file.Path)
 		if err = filelock.CopyNewtimes(from, to); nil != err {

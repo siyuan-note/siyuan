@@ -318,22 +318,6 @@ func QueryBlockNamesByRootID(rootID string) (ret []string) {
 	return
 }
 
-func QueryBookmarkBlocksByKeyword() (ret []*Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
-	rows, err := query(sqlStmt, "%bookmark=%")
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			ret = append(ret, block)
-		}
-	}
-	return
-}
-
 func QueryBookmarkBlocks() (ret []*Block) {
 	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
 	rows, err := query(sqlStmt, "%bookmark=%")

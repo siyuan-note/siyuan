@@ -573,7 +573,7 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 
 	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 32)
 	if err != nil {
-		if dejavu.ErrNotFoundIndex == err {
+		if errors.Is(err, dejavu.ErrNotFoundIndex) {
 			logs = []*dejavu.Log{}
 			err = nil
 			return

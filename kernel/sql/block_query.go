@@ -19,6 +19,7 @@ package sql
 import (
 	"bytes"
 	"database/sql"
+	"errors"
 	"math"
 	"regexp"
 	"sort"
@@ -752,7 +753,7 @@ func scanBlockRows(rows *sql.Rows) (ret *Block) {
 func scanBlockRow(row *sql.Row) (ret *Block) {
 	var block Block
 	if err := row.Scan(&block.ID, &block.ParentID, &block.RootID, &block.Hash, &block.Box, &block.Path, &block.HPath, &block.Name, &block.Alias, &block.Memo, &block.Tag, &block.Content, &block.FContent, &block.Markdown, &block.Length, &block.Type, &block.SubType, &block.IAL, &block.Sort, &block.Created, &block.Updated); err != nil {
-		if sql.ErrNoRows != err {
+		if !errors.Is(err, sql.ErrNoRows) {
 			logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
 		}
 		return

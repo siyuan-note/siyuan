@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -778,7 +779,7 @@ func createDailyNote(c *gin.Context) {
 	notebook := arg["notebook"].(string)
 	p, existed, err := model.CreateDailyNote(notebook)
 	if err != nil {
-		if model.ErrBoxNotFound == err {
+		if errors.Is(err, model.ErrBoxNotFound) {
 			ret.Code = 1
 		} else {
 			ret.Code = -1
@@ -1186,7 +1187,7 @@ func getDoc(c *gin.Context) {
 
 	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
 		model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
-	if model.ErrBlockNotFound == err {
+	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
 		return
 	}

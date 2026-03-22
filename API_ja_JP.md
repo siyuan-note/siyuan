@@ -1,4 +1,6 @@
-[English](https://github.com/siyuan-note/siyuan/blob/master/API.md) | [中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
+[English](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+| [中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
+| **日本語**
 
 * [仕様](#仕様)
     * [パラメータと戻り値](#パラメータと戻り値)

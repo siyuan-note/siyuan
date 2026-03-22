@@ -224,9 +224,9 @@ func getSelectorPriority(selector, currentMode string) int {
 		if strings.Contains(selector, modeSelector) {
 			if strings.Contains(selector, ":root") || strings.Contains(selector, "html") {
 				return 2
-			} else {
-				return 1
 			}
+
+			return 1
 		}
 	}
 

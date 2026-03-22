@@ -373,10 +373,10 @@ func IsPartitionRootPath(path string) bool {
 	if runtime.GOOS == "windows" {
 		// On Windows, root paths are like "C:\", "D:\", etc.
 		return len(cleanPath) == 3 && cleanPath[1] == ':' && cleanPath[2] == '\\'
-	} else {
-		// On Unix-like systems, the root path is "/"
-		return cleanPath == "/"
 	}
+
+	// On Unix-like systems, the root path is "/"
+	return cleanPath == "/"
 }
 
 // IsSensitivePath 对传入路径做统一的敏感性检测。

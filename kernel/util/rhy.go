@@ -18,7 +18,6 @@ package util
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -31,49 +30,14 @@ import (
 var (
 	RhyCacheDuration = int64(3600 * 6)
 
-	cachedRhyResult    = map[string]interface{}{}
+	cachedRhyResult    = map[string]any{}
 	rhyResultCacheTime int64
 	rhyResultLock      = sync.Mutex{}
 	rhyResultFlight    singleflight.Group
+
+	rhyBazaarHash     string
+	rhyBazaarHashLock sync.RWMutex
 )
-
-func GetRhyResult(ctx context.Context, force bool) (map[string]interface{}, error) {
-	if ContainerDocker == Container {
-		RhyCacheDuration = int64(3600 * 24)
-	}
-
-	if RhyCacheDuration >= time.Now().Unix()-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
-		return cachedRhyResult, nil
-	}
-
-	// 并发调用只执行一次实际请求
-	v, err, _ := rhyResultFlight.Do("rhyResult", func() (interface{}, error) {
-		return getRhyResult0(ctx)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return v.(map[string]interface{}), nil
-}
-
-func getRhyResult0(ctx context.Context) (map[string]interface{}, error) {
-	rhyResultLock.Lock()
-	defer rhyResultLock.Unlock()
-
-	request := httpclient.NewCloudRequest30s()
-	resp, err := request.SetContext(ctx).SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
-	if err != nil {
-		logging.LogErrorf("get version info failed: %s", err)
-		return nil, err
-	}
-	if 200 != resp.StatusCode {
-		msg := fmt.Sprintf("get rhy result failed: %d", resp.StatusCode)
-		logging.LogErrorf(msg)
-		return nil, errors.New(msg)
-	}
-	rhyResultCacheTime = time.Now().Unix()
-	return cachedRhyResult, nil
-}
 
 func RefreshRhyResultJob() {
 	_, err := GetRhyResult(context.TODO(), true)
@@ -84,4 +48,76 @@ func RefreshRhyResultJob() {
 			GetRhyResult(context.TODO(), true)
 		}()
 	}
+}
+
+func GetRhyResult(ctx context.Context, force bool) (map[string]any, error) {
+	if ContainerDocker == Container {
+		RhyCacheDuration = int64(3600 * 24)
+	}
+
+	if RhyCacheDuration >= time.Now().Unix()-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
+		return cachedRhyResult, nil
+	}
+
+	// 并发调用只执行一次实际请求
+	v, err, _ := rhyResultFlight.Do("rhyResult", func() (any, error) {
+		return getRhyResult0(ctx)
+	})
+	if err != nil {
+		return nil, err
+	}
+	ret := v.(map[string]any)
+	syncRhyBazaarHashFromResult(ret)
+	return ret, nil
+}
+
+func getRhyResult0(ctx context.Context) (map[string]any, error) {
+	rhyResultLock.Lock()
+	defer rhyResultLock.Unlock()
+
+	request := httpclient.NewCloudRequest30s()
+	resp, err := request.SetContext(ctx).SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
+	if err != nil {
+		logging.LogErrorf("get version info failed: %s", err)
+		return nil, err
+	}
+	if 200 != resp.StatusCode {
+		logging.LogErrorf("get rhy result failed: %d", resp.StatusCode)
+		return nil, fmt.Errorf("get rhy result failed: %d", resp.StatusCode)
+	}
+	rhyResultCacheTime = time.Now().Unix()
+	return cachedRhyResult, nil
+}
+
+func syncRhyBazaarHashFromResult(m map[string]any) {
+	rhyBazaarHashLock.Lock()
+	defer rhyBazaarHashLock.Unlock()
+	if nil == m {
+		rhyBazaarHash = ""
+		return
+	}
+	v, ok := m["bazaar"]
+	if !ok || nil == v {
+		rhyBazaarHash = ""
+		return
+	}
+	s, ok := v.(string)
+	if !ok || "" == s {
+		rhyBazaarHash = ""
+		return
+	}
+	rhyBazaarHash = s
+}
+
+func GetRhyBazaarHash(ctx context.Context) string {
+	rhyBazaarHashLock.RLock()
+	h := rhyBazaarHash
+	rhyBazaarHashLock.RUnlock()
+	if "" != h {
+		return h
+	}
+	_, _ = GetRhyResult(ctx, false)
+	rhyBazaarHashLock.RLock()
+	defer rhyBazaarHashLock.RUnlock()
+	return rhyBazaarHash
 }

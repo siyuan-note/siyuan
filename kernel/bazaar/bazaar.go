@@ -88,7 +88,10 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	if stats := bazaarStats[repoURLHash[0]]; nil != stats { // 通过 bazaarStats[owner/repo] 获取单个包的统计数据
 		pkg.Downloads = stats.Downloads
 	}
-	packageInstallSizeCache.SetDefault(pkg.RepoURL, pkg.InstallSize)
+	// TODO 分离本地安装大小和在线 stage 数据的安装大小，不保存到 installSizeCache
+	bazaarMemMu.Lock()
+	installSizeCache[pkg.RepoURL] = pkg.InstallSize
+	bazaarMemMu.Unlock()
 	return &pkg
 }
 

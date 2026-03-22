@@ -283,7 +283,7 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		}
 
 		msg := fmt.Sprintf(Conf.Language(286), to)
-		util.PushMsg(msg, 3000)
+		util.PushMsg(msg, 7000)
 	}
 
 	IncSync()

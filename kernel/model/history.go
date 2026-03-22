@@ -330,7 +330,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	ReloadProtyle(rootID)
 
 	msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
-	util.PushMsg(msg, 3000)
+	util.PushMsg(msg, 7000)
 	IncSync()
 
 	// 刷新属性视图
@@ -1062,11 +1062,11 @@ func subscribeSQLHistoryEvents() {
 }
 
 func getRollbackBox(boxID string) (ret *Box, err error) {
-	box := Conf.Box(boxID)
-	if nil == box {
+	ret = Conf.Box(boxID)
+	if nil == ret {
 		boxName := "Rollback"
-		box = GetBoxByName(boxName)
-		if nil == box {
+		ret = GetBoxByName(boxName)
+		if nil == ret {
 			var id string
 			id, err = CreateBox(boxName)
 			if nil != err {
@@ -1076,10 +1076,10 @@ func getRollbackBox(boxID string) (ret *Box, err error) {
 			if nil != err {
 				return
 			}
-			box = Conf.Box(id)
+			ret = Conf.Box(id)
 		}
 	}
-	if nil == box {
+	if nil == ret {
 		err = errors.New("can not get or create rollback box")
 		return
 	}

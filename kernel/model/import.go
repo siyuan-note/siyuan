@@ -764,7 +764,7 @@ func ImportData(zipPath string) (err error) {
 
 	logging.LogInfof("import data from [%s] done", zipPath)
 	IncSync()
-	FullReindex()
+	FullReindex(false)
 	return
 }
 

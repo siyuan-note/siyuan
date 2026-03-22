@@ -881,7 +881,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	FullReindex()
+	FullReindex(true)
 
 	if syncEnabled {
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
@@ -1834,7 +1834,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	syncingStorages.Store(false)
 
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
-		FullReindex()
+		FullReindex(false)
 		return
 	}
 

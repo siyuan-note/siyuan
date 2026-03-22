@@ -796,7 +796,7 @@ func VacuumDataIndex() {
 	util.PushMsg(msg, 7000)
 }
 
-func FullReindex() {
+func FullReindex(needResetScroll bool) {
 	util.PushEndlessProgress(Conf.language(35))
 
 	cache.ClearTreeCache()
@@ -810,7 +810,11 @@ func FullReindex() {
 		ResetVirtualBlockRefCache()
 	}()
 	task.AppendTaskWithTimeout(task.DatabaseIndexEmbedBlock, 30*time.Second, autoIndexEmbedBlock)
-	task.AppendTask(task.ReloadUI, util.ReloadUI)
+	if needResetScroll {
+		task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
+	} else {
+		task.AppendTask(task.ReloadUI, util.ReloadUI)
+	}
 }
 
 func fullReindex() {

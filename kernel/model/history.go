@@ -432,7 +432,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 		return
 	}
 
-	FullReindex()
+	FullReindex(true)
 	IncSync()
 	return nil
 }

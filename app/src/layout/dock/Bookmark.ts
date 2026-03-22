@@ -33,7 +33,7 @@ export class Bookmark extends Model {
                                     needReload = true;
                                 }
                                 if (needReload) {
-                                    this.update();
+                                    (this as Bookmark).update();
                                 }
                             });
                             break;
@@ -42,7 +42,7 @@ export class Bookmark extends Model {
                         case "removeDoc":
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {
-                                this.update();
+                                (this as Bookmark).update();
                             }
                             break;
                     }

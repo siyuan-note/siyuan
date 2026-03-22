@@ -78,8 +78,6 @@ var (
 		calendarsMetaData: []*caldav.Calendar{},
 	}
 
-	ErrorCalDavPathInvalid = errors.New("CalDAV: path is invalid")
-
 	ErrorCalDavCalendarNotFound    = errors.New("CalDAV: calendar not found")
 	ErrorCalDavCalendarPathInvalid = errors.New("CalDAV: calendar path is invalid")
 

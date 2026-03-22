@@ -4453,7 +4453,7 @@ func refreshAttrViewKeyIDs(attrView *av.AttributeView, needSave bool) {
 		existKeyIDs[keyValues.Key.ID] = true
 	}
 
-	for k, _ := range existKeyIDs {
+	for k := range existKeyIDs {
 		if !gulu.Str.Contains(k, attrView.KeyIDs) {
 			attrView.KeyIDs = append(attrView.KeyIDs, k)
 		}

@@ -318,22 +318,6 @@ func QueryBlockNamesByRootID(rootID string) (ret []string) {
 	return
 }
 
-func QueryBookmarkBlocksByKeyword(bookmark string) (ret []*Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
-	rows, err := query(sqlStmt, "%bookmark=%")
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			ret = append(ret, block)
-		}
-	}
-	return
-}
-
 func QueryBookmarkBlocks() (ret []*Block) {
 	sqlStmt := "SELECT * FROM blocks WHERE ial LIKE ?"
 	rows, err := query(sqlStmt, "%bookmark=%")
@@ -533,7 +517,7 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 	}
 
 	noLimit := !containsLimitClause(stmt)
-	var count, errCount int
+	var count int
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
 		columnPointers := make([]interface{}, len(cols))
@@ -553,7 +537,7 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 
 		ret = append(ret, m)
 		count++
-		if (noLimit && limit < count) || 0 < errCount {
+		if noLimit && limit < count {
 			break
 		}
 	}

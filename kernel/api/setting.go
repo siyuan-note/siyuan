@@ -488,7 +488,7 @@ func setSearch(c *gin.Context) {
 	sql.SetIndexAssetPath(s.IndexAssetPath)
 
 	if needFullReindex := s.CaseSensitive != oldCaseSensitive || s.IndexAssetPath != oldIndexAssetPath; needFullReindex {
-		model.FullReindex()
+		model.FullReindex(false)
 	}
 
 	if oldVirtualRefName != s.VirtualRefName ||

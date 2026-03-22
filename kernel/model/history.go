@@ -432,7 +432,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 		return
 	}
 
-	FullReindex()
+	FullReindex(true)
 	IncSync()
 	return nil
 }
@@ -798,34 +798,6 @@ func recentModifiedAssets() (ret []string) {
 		ret = append(ret, absPath)
 	}
 	assetsLatestHistoryTime = time.Now().Unix()
-	return
-}
-
-var attributeViewLatestHistoryTime = time.Now().Unix()
-
-func recentModifiedAttributeViews() (ret []string) {
-	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
-	if nil != err {
-		logging.LogErrorf("read attribute view dir failed: %s", err)
-		return
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
-			continue
-		}
-
-		info, err := entry.Info()
-		if nil != err {
-			logging.LogErrorf("read attribute view file info failed: %s", err)
-			continue
-		}
-
-		if info.ModTime().Unix() > attributeViewLatestHistoryTime {
-			ret = append(ret, filepath.Join(util.DataDir, "storage", "av", entry.Name()))
-		}
-	}
-	attributeViewLatestHistoryTime = time.Now().Unix()
 	return
 }
 

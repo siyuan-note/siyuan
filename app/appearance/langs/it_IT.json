@@ -1454,7 +1454,6 @@
     "task.database.index": "Esegui indice database",
     "task.database.index.commit": "Esegui commit indice database",
     "task.database.index.ref": "Esegui indice riferimento database",
-    "task.database.index.fix": "Esegui correzione indice database",
     "task.ocr.image": "Esegui OCR immagine per estrarre testo",
     "task.history.generateFile": "Esegui generazione documento dal database cronologia",
     "task.history.database.index.full": "Esegui ricostruzione indice database cronologia",

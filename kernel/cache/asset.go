@@ -111,18 +111,6 @@ var (
 	assetsLock  = sync.Mutex{}
 )
 
-// IterateAssets 遍历所有资源，适合只读场景
-func IterateAssets(fn func(path string, asset *Asset) bool) {
-	assetsLock.Lock()
-	defer assetsLock.Unlock()
-
-	for path, asset := range assetsCache {
-		if !fn(path, asset) {
-			break
-		}
-	}
-}
-
 // FilterAssets 根据过滤函数返回符合条件的资源
 func FilterAssets(filter func(path string, asset *Asset) bool) (ret map[string]*Asset) {
 	assetsLock.Lock()
@@ -135,14 +123,6 @@ func FilterAssets(filter func(path string, asset *Asset) bool) (ret map[string]*
 		}
 	}
 	return
-}
-
-// GetAssetByPath 根据路径获取资源
-func GetAssetByPath(path string) *Asset {
-	assetsLock.Lock()
-	defer assetsLock.Unlock()
-
-	return assetsCache[path]
 }
 
 func RemoveAsset(path string) {

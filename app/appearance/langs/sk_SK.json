@@ -1454,7 +1454,6 @@
     "task.database.index": "Vykonať indexáciu databázy",
     "task.database.index.commit": "Vykonať zápis indexu",
     "task.database.index.ref": "Vykonať indexáciu referencií",
-    "task.database.index.fix": "Vykonať opravu indexu",
     "task.ocr.image": "Vykonať OCR obrázka",
     "task.history.generateFile": "Vykonať generovanie dokumentu z histórie",
     "task.history.database.index.full": "Vykonať prestavbu indexu histórie",

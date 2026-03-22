@@ -623,7 +623,7 @@ func filterDailyNote(blocks []*Block, local bool) (ret []*Block) {
 
 	for _, block := range blocks {
 		isDailyNote := false
-		for k, _ := range block.IAL {
+		for k := range block.IAL {
 			isDailyNote = strings.HasPrefix(k, DailyNoteAttrPrefix)
 			if isDailyNote {
 				break

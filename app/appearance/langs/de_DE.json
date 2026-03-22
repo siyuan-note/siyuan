@@ -1454,7 +1454,6 @@
     "task.database.index": "Datenbankindex ausführen",
     "task.database.index.commit": "Datenbankindex-Bestätigung ausführen",
     "task.database.index.ref": "Datenbankindex-Referenz ausführen",
-    "task.database.index.fix": "Datenbankindex-Reparatur ausführen",
     "task.ocr.image": "Bild-OCR ausführen, um Text zu extrahieren",
     "task.history.generateFile": "Historie-Datenbank-Dokument erstellen ausführen",
     "task.history.database.index.full": "Historie-Datenbank-Index neu erstellen ausführen",

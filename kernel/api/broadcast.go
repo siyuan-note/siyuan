@@ -373,7 +373,7 @@ type PublishResult struct {
 //	"ws://localhost:6806/ws/broadcast?channel=test"
 func broadcast(c *gin.Context) {
 	var (
-		channel          string = c.Query("channel")
+		channel          = c.Query("channel")
 		broadcastChannel *BroadcastChannel
 	)
 

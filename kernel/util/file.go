@@ -206,13 +206,6 @@ func LastID(p string) (name, id string) {
 	return
 }
 
-func IsCorruptedSYData(data []byte) bool {
-	if 64 > len(data) || '{' != data[0] {
-		return true
-	}
-	return false
-}
-
 func IsValidUploadFileName(name string) bool {
 	return name == FilterUploadFileName(name)
 }

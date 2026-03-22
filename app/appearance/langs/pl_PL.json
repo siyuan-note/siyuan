@@ -1454,7 +1454,6 @@
     "task.database.index": "Wykonaj indeks bazy danych",
     "task.database.index.commit": "Wykonaj zatwierdzenie indeksu bazy danych",
     "task.database.index.ref": "Wykonaj odniesienie indeksu bazy danych",
-    "task.database.index.fix": "Wykonaj naprawę indeksu bazy danych",
     "task.ocr.image": "Wykonaj OCR obrazu, aby wyodrębnić tekst",
     "task.history.generateFile": "Wykonaj generację dokumentu historii bazy danych",
     "task.history.database.index.full": "Wykonaj przebudowę indeksu bazy danych historii",

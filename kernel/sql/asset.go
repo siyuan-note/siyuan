@@ -110,16 +110,6 @@ func QueryAssetByHash(hash string) (ret *Asset) {
 	return
 }
 
-func scanAssetRows(rows *sql.Rows) (ret *Asset) {
-	var asset Asset
-	if err := rows.Scan(&asset.ID, &asset.BlockID, &asset.RootID, &asset.Box, &asset.DocPath, &asset.Path, &asset.Name, &asset.Title, &asset.Hash); err != nil {
-		logging.LogErrorf("query scan field failed: %s", err)
-		return
-	}
-	ret = &asset
-	return
-}
-
 func assetHashByLocalPath(linkDest, boxLocalPath, docDirLocalPath string) (ret string) {
 	if lp := assetLocalPath(linkDest, boxLocalPath, docDirLocalPath); "" != lp {
 		if !gulu.File.IsDir(lp) {

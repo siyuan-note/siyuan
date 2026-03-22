@@ -23,16 +23,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/88250/lute/html"
 	"github.com/siyuan-note/logging"
 )
-
-func init() {
-	rand.Seed(time.Now().UTC().UnixNano())
-}
 
 func GetDuplicateName(master string) (ret string) {
 	if "" == master {
@@ -213,21 +208,6 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 			ret = append(ret, v)
 		}
 	}
-	return
-}
-
-func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
-	if old == new {
-		return strs, false
-	}
-
-	for i, v := range strs {
-		if v == old {
-			strs[i] = new
-			changed = true
-		}
-	}
-	ret = strs
 	return
 }
 

@@ -377,8 +377,15 @@ const renderKeyboardToolbar = () => {
             } else {
                 goinlineElement.classList.remove("fn__none");
             }
-            if (nodeElement.parentElement.classList.contains("li") ||
-                nodeElement.classList.contains("code-block")) {
+            if (nodeElement.parentElement.classList.contains("li")) {
+                outdentElement.classList.remove("fn__none");
+                outdentElement.nextElementSibling.classList.remove("fn__none");
+                if (nodeElement.parentElement.previousElementSibling) {
+                    outdentElement.nextElementSibling.removeAttribute("disabled");
+                } else {
+                    outdentElement.nextElementSibling.setAttribute("disabled", "true");
+                }
+            } else if (nodeElement.classList.contains("code-block") && range.toString()) {
                 outdentElement.classList.remove("fn__none");
                 outdentElement.nextElementSibling.classList.remove("fn__none");
             } else {

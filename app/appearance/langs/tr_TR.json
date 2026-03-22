@@ -1454,7 +1454,6 @@
     "task.database.index": "Veritabanı indekslemesini çalıştır",
     "task.database.index.commit": "Veritabanı indeksleme kaydını çalıştır",
     "task.database.index.ref": "Veritabanı indeks referansını çalıştır",
-    "task.database.index.fix": "Veritabanı indeks onarımını çalıştır",
     "task.ocr.image": "Görsel OCR işlemini çalıştır (metin çıkar)",
     "task.history.generateFile": "Geçmiş veritabanından belge oluşturmayı çalıştır",
     "task.history.database.index.full": "Geçmiş veritabanı dizinini yeniden oluşturmayı çalıştır",

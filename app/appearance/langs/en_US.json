@@ -1454,7 +1454,6 @@
     "task.database.index": "Execute database index",
     "task.database.index.commit": "Execute database index commit",
     "task.database.index.ref": "Execute database index reference",
-    "task.database.index.fix": "Execute database index fix",
     "task.ocr.image": "Execute image OCR to extract text",
     "task.history.generateFile": "Execute history database generate doc",
     "task.history.database.index.full": "Execute history database rebuild index",

@@ -1454,7 +1454,6 @@
     "task.database.index": "تنفيذ فهرس قاعدة البيانات",
     "task.database.index.commit": "تنفيذ الالتزام بفهرس قاعدة البيانات",
     "task.database.index.ref": "تنفيذ رجوع فهرس قاعدة البيانات",
-    "task.database.index.fix": "تنفيذ إصلاح فهرس قاعدة البيانات",
     "task.ocr.image": "‫تنفيذ OCR لصور لاستخراج النص‬",
     "task.history.generateFile": "تنفيذ توليد تواريخ المستندات",
     "task.history.database.index.full": "تنفيذ إعادة إنشاء فهرس قاعدة بيانات التاريخ",

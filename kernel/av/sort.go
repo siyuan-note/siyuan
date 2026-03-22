@@ -127,10 +127,14 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 			}
 			sorted = true
 
-			if fieldIndexSort.Order == SortOrderAsc {
+			switch fieldIndexSort.Order {
+			case SortOrderAsc:
 				return 0 > result
+			case SortOrderDesc:
+				return 0 < result
+			default:
+				return 0 < result
 			}
-			return 0 < result
 		}
 
 		if !sorted {

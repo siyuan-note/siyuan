@@ -195,6 +195,10 @@ func ClosePushChan(id string) {
 	})
 }
 
+func ReloadUIResetScroll() {
+	BroadcastByType("main", "reloadui", 0, "", map[string]interface{}{"resetScroll": true})
+}
+
 func ReloadUI() {
 	BroadcastByType("main", "reloadui", 0, "", nil)
 }

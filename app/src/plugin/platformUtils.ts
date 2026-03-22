@@ -25,7 +25,7 @@ export const sendNotification = (options: {
     title?: string,
     body?: string,
     delayInSeconds?: number,
-    timeoutType?: "default" | "never" // 该参数仅在桌面端有效
+    timeoutType?: "default" | "never" // 该参数仅在 Windows 和 Linux 有效
 }): Promise<number> => {
     return new Promise((resolve) => {
         const title = options.title || "";

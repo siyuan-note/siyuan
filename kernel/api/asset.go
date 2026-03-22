@@ -118,9 +118,9 @@ func getImageOCRText(c *gin.Context) {
 			"text": "",
 		}
 		return
-	} else {
-		path = arg["path"].(string)
 	}
+
+	path = arg["path"].(string)
 
 	ret.Data = map[string]interface{}{
 		"text": util.GetAssetText(path),

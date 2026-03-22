@@ -517,7 +517,7 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 	}
 
 	noLimit := !containsLimitClause(stmt)
-	var count, errCount int
+	var count int
 	for rows.Next() {
 		columns := make([]interface{}, len(cols))
 		columnPointers := make([]interface{}, len(cols))
@@ -537,7 +537,7 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 
 		ret = append(ret, m)
 		count++
-		if (noLimit && limit < count) || 0 < errCount {
+		if noLimit && limit < count {
 			break
 		}
 	}

@@ -21,7 +21,7 @@ export class Bookmark extends Model {
         super({
             app,
             id: tab.id,
-            msgCallback(data) {
+            msgCallback(this: Bookmark, data) {
                 if (data) {
                     switch (data.cmd) {
                         case "transactions":
@@ -33,7 +33,7 @@ export class Bookmark extends Model {
                                     needReload = true;
                                 }
                                 if (needReload) {
-                                    (this as Bookmark).update();
+                                    this.update();
                                 }
                             });
                             break;
@@ -42,7 +42,7 @@ export class Bookmark extends Model {
                         case "removeDoc":
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {
-                                (this as Bookmark).update();
+                                this.update();
                             }
                             break;
                     }

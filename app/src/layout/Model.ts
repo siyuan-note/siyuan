@@ -22,7 +22,7 @@ export class Model {
         id: string,
         type?: TWS,
         callback?: () => void,
-        msgCallback?: (data: IWebSocketData) => void
+        msgCallback?: (this: Model, data: IWebSocketData) => void
     }) {
         this.app = options.app;
         if (options.msgCallback) {
@@ -34,7 +34,7 @@ export class Model {
         id: string,
         type?: TWS,
         callback?: () => void,
-        msgCallback?: (data: IWebSocketData) => void
+        msgCallback?: (this: Model, data: IWebSocketData) => void
     }) {
         const websocketURL = `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.host}/ws`;
         const ws = new WebSocket(`${websocketURL}?app=${Constants.SIYUAN_APPID}&id=${options.id}${options.type ? "&type=" + options.type : ""}`);

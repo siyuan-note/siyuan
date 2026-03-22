@@ -66,12 +66,12 @@ func StatBlock(id string) (ret *util.BlockStatResult) {
 
 	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := node.Stat()
 	ret = &util.BlockStatResult{
-		runeCnt,
-		wordCnt,
-		linkCnt,
-		imgCnt,
-		refCnt,
-		1,
+		RuneCount:  runeCnt,
+		WordCount:  wordCnt,
+		LinkCount:  linkCnt,
+		ImageCount: imgCnt,
+		RefCount:   refCnt,
+		BlockCount: 1,
 	}
 	return
 }

@@ -110,7 +110,7 @@ func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
 	return historyDB.Query(query, args...)
 }
 
-func deleteOutdatedHistories(tx *sql.Tx, before int64, context map[string]interface{}) (err error) {
+func deleteOutdatedHistories(tx *sql.Tx, before int64) (err error) {
 	stmt := "DELETE FROM histories_fts_case_insensitive WHERE CAST(created AS INTEGER) < ?"
 	if err = execStmtTx(tx, stmt, before); err != nil {
 		return

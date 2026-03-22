@@ -738,7 +738,7 @@ func exportPreviewHTML(c *gin.Context) {
 	) {
 		return
 	}
-	name, content, node := model.ExportHTML(id, "", true, image, keepFold, merge)
+	name, content, node := model.ExportHTML(id, "", true, keepFold, merge)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -784,7 +784,7 @@ func exportHTML(c *gin.Context) {
 	if savePath == "" {
 		folderName := "html-" + id + "-" + util.CurrentTimeSecondsStr()
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
-		name, content, _ := model.ExportHTML(id, tmpDir, pdf, false, keepFold, merge)
+		name, content, _ := model.ExportHTML(id, tmpDir, pdf, keepFold, merge)
 		ret.Data = map[string]interface{}{
 			"id":      id,
 			"name":    name,
@@ -794,7 +794,7 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
-	name, content, _ := model.ExportHTML(id, savePath, pdf, false, keepFold, merge)
+	name, content, _ := model.ExportHTML(id, savePath, pdf, keepFold, merge)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,

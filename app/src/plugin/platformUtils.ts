@@ -20,12 +20,16 @@ export const updateHotkeyTip = compatibility.updateHotkeyTip;
 export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
+/**
+ * @param {string} [options.timeoutType="defalut"] 仅在 Windows 和 Linux 有效，"default" 表示使用默认的超时机制，"never" 表示通知将一直显示，直到用户手动关闭它。
+ * @returns 通知 id
+ */
 export const sendNotification = (options: {
     channel?: string,
     title?: string,
     body?: string,
     delayInSeconds?: number,
-    timeoutType?: "default" | "never" // 该参数仅在桌面端有效
+    timeoutType?: "default" | "never"
 }): Promise<number> => {
     return new Promise((resolve) => {
         const title = options.title || "";

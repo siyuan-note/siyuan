@@ -58,10 +58,24 @@ export const setMenuItemsMaxHeight = (menuElement: HTMLElement, itemsMenuElement
 };
 
 export const setVisibleMenusItemsMaxHeight = (menuRoot?: HTMLElement) => {
-    const roots = menuRoot ? [menuRoot] : document.querySelectorAll<HTMLElement>(".b3-menu:not(.fn__none)");
-    roots.forEach((menuElement) => {
-        menuElement.querySelectorAll(":scope > .b3-menu__items:not(.fn__none)").forEach((el) => {
-            setMenuItemsMaxHeight(menuElement, el as HTMLElement);
+    if (menuRoot) {
+        menuRoot.querySelectorAll(":scope > .b3-menu__items:not(.fn__none)").forEach((el) => {
+            setMenuItemsMaxHeight(menuRoot, el as HTMLElement);
         });
+        return;
+    }
+    document.querySelectorAll<HTMLElement>(".b3-menu:not(.b3-menu--fullscreen):not(.fn__none)").forEach((menuElement) => {
+        // 优先移动菜单位置
+        const style = getComputedStyle(menuElement);
+        const rect = menuElement.getBoundingClientRect();
+        let left = parseFloat(style.left);
+        let top = parseFloat(style.top);
+        if (Number.isNaN(left)) {
+            left = rect.left;
+        }
+        if (Number.isNaN(top)) {
+            top = rect.top;
+        }
+        setPosition(menuElement, left, top, 0, 0);
     });
 };

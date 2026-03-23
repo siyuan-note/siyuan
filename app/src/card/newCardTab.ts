@@ -6,7 +6,6 @@ import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
 import {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
-import {setPadding} from "../protyle/ui/initUI";
 
 export const newCardModel = (options: {
     app: App,
@@ -48,6 +47,7 @@ export const newCardModel = (options: {
                     index: options.data.index,
                 });
                 customObj.editors.push(editor);
+                editor.resize();
                 // https://github.com/siyuan-note/siyuan/issues/9561#issuecomment-1794473512
                 delete options.data.cardsData;
                 delete options.data.index;
@@ -77,6 +77,7 @@ export const newCardModel = (options: {
                         cardType: this.data.cardType,
                         cardsData,
                     });
+                    editor.resize();
                     customObj.editors.push(editor);
                 });
             }
@@ -120,7 +121,7 @@ export const newCardModel = (options: {
                     cardsData,
                 });
                 customObj.editors.push(editor);
-                setPadding(editor.protyle);
+                editor.resize();
             });
         }
     });

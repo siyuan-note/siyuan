@@ -1,7 +1,6 @@
 import {fetchPost} from "../util/fetch";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
-import {getAllModels} from "../layout/getAll";
 
 export const publish = {
     element: undefined as Element,

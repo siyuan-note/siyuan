@@ -37,4 +37,31 @@ export const setPosition = (element: HTMLElement, left: number, top: number, tar
             element.style.left = "0";
         }
     }
+
+    if (element.classList.contains("b3-menu")) {
+        setVisibleMenusItemsMaxHeight(element);
+    }
+};
+
+export const setMenuItemsMaxHeight = (menuElement: HTMLElement, itemsMenuElement: HTMLElement) => {
+    const menuRect = menuElement.getBoundingClientRect();
+    const itemsRect = itemsMenuElement.getBoundingClientRect();
+    const style = getComputedStyle(itemsMenuElement);
+    const cap = Math.max(30, window.innerHeight - itemsRect.top - Math.max(0, menuRect.bottom - itemsRect.bottom) - parseFloat(style.marginBottom) || 0);
+    // content-box 下 max-height 只限制 content，不包括 padding/border
+    let contentBoxExtra = 0;
+    if (style.boxSizing === "content-box") {
+        contentBoxExtra = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0)
+            + (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.borderBottomWidth) || 0);
+    }
+    itemsMenuElement.style.maxHeight = Math.max(0, cap - contentBoxExtra) + "px";
+};
+
+export const setVisibleMenusItemsMaxHeight = (menuRoot?: HTMLElement) => {
+    const roots = menuRoot ? [menuRoot] : document.querySelectorAll<HTMLElement>(".b3-menu:not(.fn__none)");
+    roots.forEach((menuElement) => {
+        menuElement.querySelectorAll(":scope > .b3-menu__items:not(.fn__none)").forEach((el) => {
+            setMenuItemsMaxHeight(menuElement, el as HTMLElement);
+        });
+    });
 };

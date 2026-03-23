@@ -1,5 +1,5 @@
 import {getEventName, updateHotkeyTip} from "../protyle/util/compatibility";
-import {setPosition} from "../util/setPosition";
+import {setMenuItemsMaxHeight, setPosition} from "../util/setPosition";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
@@ -112,21 +112,7 @@ export class Menu {
             }
         }
 
-        this.updateMaxHeight(subMenuElement, itemsMenuElement);
-    }
-
-    private updateMaxHeight(menuElement: HTMLElement, itemsMenuElement: HTMLElement) {
-        const menuRect = menuElement.getBoundingClientRect();
-        const itemsRect = itemsMenuElement.getBoundingClientRect();
-        const style = getComputedStyle(itemsMenuElement);
-        const cap = Math.max(30, window.innerHeight - itemsRect.top - Math.max(0, menuRect.bottom - itemsRect.bottom) - parseFloat(style.marginBottom) || 0);
-        // content-box 下 max-height 只限制 content，不包括 padding/border
-        let contentBoxExtra = 0;
-        if (style.boxSizing === "content-box") {
-            contentBoxExtra = (parseFloat(style.paddingTop) || 0) + (parseFloat(style.paddingBottom) || 0)
-                + (parseFloat(style.borderTopWidth) || 0) + (parseFloat(style.borderBottomWidth) || 0);
-        }
-        itemsMenuElement.style.maxHeight = Math.max(0, cap - contentBoxExtra) + "px";
+        setMenuItemsMaxHeight(subMenuElement, itemsMenuElement);
     }
 
     private preventDefault(event: KeyboardEvent) {
@@ -199,7 +185,6 @@ export class Menu {
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
-        this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
     }
 
     public resetPosition() {
@@ -217,7 +202,6 @@ export class Menu {
             top = rect.top;
         }
         setPosition(this.element, left, top, 0, 0);
-        this.updateMaxHeight(this.element, this.element.lastElementChild as HTMLElement);
         this.element.querySelectorAll(".b3-menu__item--show .b3-menu__submenu").forEach((item: HTMLElement) => {
             // 可能有多层子菜单，都要重新定位
             this.showSubMenu(item);

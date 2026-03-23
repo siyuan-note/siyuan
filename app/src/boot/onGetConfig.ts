@@ -31,6 +31,7 @@ import {correctHotkey} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {processSYLink} from "../editor/openLink";
 import {getAllEditor} from "../layout/getAll";
+import {setVisibleMenusItemsMaxHeight} from "../util/setPosition";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
@@ -89,6 +90,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             resizeTabs();
             resizeTopBar();
             window.siyuan.menus.menu.resetPosition();
+            setVisibleMenusItemsMaxHeight();
             firstResize = true;
             if (getSelection().rangeCount > 0) {
                 const range = getSelection().getRangeAt(0);

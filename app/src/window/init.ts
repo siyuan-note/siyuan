@@ -1,4 +1,5 @@
 import {Constants} from "../constants";
+import {setVisibleMenusItemsMaxHeight} from "../util/setPosition";
 import {ipcRenderer, webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
 import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
@@ -69,6 +70,7 @@ export const init = (app: App) => {
             adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
             window.siyuan.menus.menu.resetPosition();
+            setVisibleMenusItemsMaxHeight();
             if (getSelection().rangeCount > 0) {
                 const range = getSelection().getRangeAt(0);
                 getAllEditor().forEach(item => {

@@ -235,7 +235,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	FlushTxQueue()
 
-	box, err := getRollbackBox(boxID)
+	box, needResetTree, err := getRollbackBox(boxID)
 	if err != nil {
 		logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)
 		return
@@ -246,12 +246,8 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	var destPath, parentHPath string
 	rootID := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(rootID)
-	if nil != workingDoc && "d" == workingDoc.Type {
-		workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
-		if err = filelock.Remove(workingDocPath); err != nil {
-			return
-		}
-		logging.LogInfof("removed working doc file [%s]", workingDocPath)
+	if needResetTree {
+		workingDoc = nil
 	}
 
 	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath, workingDoc)
@@ -287,7 +283,18 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 	tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
 
+	if needResetTree {
+		resetTree(tree, "", true)
+	}
+
 	// 重置重复的块 ID https://github.com/siyuan-note/siyuan/issues/14358
+	if nil != workingDoc && "d" == workingDoc.Type {
+		workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
+		if err = filelock.Remove(workingDocPath); err != nil {
+			return
+		}
+		logging.LogInfof("removed working doc file [%s]", workingDocPath)
+	}
 	if nil != workingDoc {
 		treenode.RemoveBlockTreesByRootID(rootID)
 	}
@@ -1033,7 +1040,7 @@ func subscribeSQLHistoryEvents() {
 	})
 }
 
-func getRollbackBox(boxID string) (ret *Box, err error) {
+func getRollbackBox(boxID string) (ret *Box, created bool, err error) {
 	ret = Conf.Box(boxID)
 	if nil == ret {
 		boxName := "Rollback"
@@ -1049,6 +1056,7 @@ func getRollbackBox(boxID string) (ret *Box, err error) {
 				return
 			}
 			ret = Conf.Box(id)
+			created = true
 		}
 	}
 	if nil == ret {

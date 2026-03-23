@@ -199,6 +199,7 @@ export class Plugin {
         position?: "south" | "left",
         callback: (evt: MouseEvent) => void
     }) {
+        options.icon = options.icon.trim();
         if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
             console.error(`plugin ${this.name} addTopBar error: icon must be svg id or svg tag`);
             return;

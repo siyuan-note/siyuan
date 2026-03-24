@@ -68,6 +68,17 @@ func InitAppearance() {
 	util.InitEmojiChars()
 }
 
+func SetIcon(icon string) error {
+	Conf.m.Lock()
+	defer Conf.m.Unlock()
+
+	if !gulu.Str.Contains(icon, Conf.Appearance.Icons) {
+		return fmt.Errorf("icon [%s] not exists or not available", icon)
+	}
+	Conf.Appearance.Icon = icon
+	return nil
+}
+
 func SetTheme(theme string, modes []int, appearanceMode string) error {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
@@ -77,12 +88,12 @@ func SetTheme(theme string, modes []int, appearanceMode string) error {
 			switch mode {
 			case 0:
 				if !containTheme(theme, Conf.Appearance.LightThemes) {
-					return fmt.Errorf("theme not exists or not available for light mode: %s", theme)
+					return fmt.Errorf("theme [%s] not exists or not available for light mode", theme)
 				}
 				Conf.Appearance.ThemeLight = theme
 			case 1:
 				if !containTheme(theme, Conf.Appearance.DarkThemes) {
-					return fmt.Errorf("theme not exists or not available for dark mode: %s", theme)
+					return fmt.Errorf("theme [%s] not exists or not available for dark mode", theme)
 				}
 				Conf.Appearance.ThemeDark = theme
 			}

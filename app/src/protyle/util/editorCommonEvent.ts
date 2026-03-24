@@ -1575,7 +1575,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 列表项不能拖入列表项中第一个元素之上
                 disabledPosition = "top";
             }
-            if (gutterTypes[0] === "nodelistitem" && targetElement.nextElementSibling?.classList.contains("list")) {
+            if (gutterTypes[0] === "nodelistitem" &&
+                targetElement.nextElementSibling?.classList.contains("list") &&
+                // https://github.com/siyuan-note/siyuan/issues/15672
+                targetElement.parentElement?.classList.contains("li")) {
                 // 列表项不能拖入列表上方块的下面
                 disabledPosition = "bottom";
             }

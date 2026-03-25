@@ -65,10 +65,10 @@
 
 ## 💡 Introduction
 
-SiYuan is a privacy-first personal knowledge management system, support fine-grained block-level reference and Markdown
+SiYuan is a privacy-first personal knowledge management system, that supports fine-grained block-level reference and Markdown
 WYSIWYG.
 
-Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
+Learn more in [the SiYuan English Community](https://liuyun.io).
 
 ![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
 

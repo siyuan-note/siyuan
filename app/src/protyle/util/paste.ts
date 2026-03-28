@@ -599,7 +599,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (!trimmedText.includes("\n")) {
                 const linkDest = trimmedText.startsWith("assets/") ? trimmedText : protyle.lute.GetLinkDest(trimmedText);
                 if (linkDest) {
-                    textPlain = "[" + trimmedText + "](" + linkDest + ")";
+                    textPlain = "[" + trimmedText + "](<" + linkDest + ">)";
                 }
             }
             let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);

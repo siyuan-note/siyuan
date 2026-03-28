@@ -213,10 +213,6 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 }
 
 func SanitizeImgSrc(src string) string {
-	if strings.HasPrefix(src, "assets/") {
-		src = "http://127.0.0.1:6806/" + src
-	}
-
 	src = strings.TrimSpace(src)
 	h := "<img src=\"" + src + "\">"
 	p := bluemonday.UGCPolicy()

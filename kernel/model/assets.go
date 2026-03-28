@@ -528,31 +528,29 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 
 func GetAssetAbsPath(relativePath string) (string, error) {
 	relativePath = strings.TrimSpace(relativePath)
-	if idx := strings.Index(relativePath, "?"); idx >= 0 {
-		relativePath = relativePath[:idx]
+	paths := []string{relativePath}
+	// Unix-like 系统的文件名可能包含问号字符 https://ld246.com/article/1774430186145/comment/1774680334872#comments
+	if prefix, _, ok := strings.Cut(relativePath, "?"); ok && prefix != "" {
+		paths = append(paths, prefix)
 	}
 
-	absPath, err := getAssetAbsPath(relativePath)
-	if err == nil && absPath != "" {
-		return absPath, nil
-	}
+	for _, p := range paths {
+		absPath, err := getAssetAbsPath(p)
+		if err == nil && absPath != "" {
+			return absPath, nil
+		}
 
-	// supports URL-encoded local file names
-	unescaped, secondErr := url.PathUnescape(relativePath)
-	if secondErr == nil && unescaped != relativePath {
-		absPathUnescaped, secondErr := getAssetAbsPath(unescaped)
-		if secondErr == nil && absPathUnescaped != "" {
-			return absPathUnescaped, nil
+		// supports URL-encoded local file names
+		unescaped, uerr := url.PathUnescape(p)
+		if uerr != nil || unescaped == p {
+			continue
+		}
+		absPath, err = getAssetAbsPath(unescaped)
+		if err == nil && absPath != "" {
+			return absPath, nil
 		}
 	}
 
-	// 优先返回原始路径错误，其次返回反转义路径错误
-	if err != nil {
-		return "", err
-	}
-	if secondErr != nil {
-		return "", secondErr
-	}
 	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
 

@@ -612,6 +612,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                             protyle.toolbar.range.setStartAfter(lastNode);
                             protyle.toolbar.range.collapse(true);
                         }
+                        return;
                     }
                 }
             }

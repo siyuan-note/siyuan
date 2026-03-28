@@ -463,6 +463,8 @@
   "switchDirect": "تغيير اتجاه المقارنة",
   "onlySearchForDoc": "‫‪<code class='fn__code'>[[</code>‬ للبحث عن المستندات فقط‬",
   "onlySearchForDocTip": "بعد التمكين، ]] للبحث عن مراجع الكتلة فقط في أسماء المستندات",
+  "pasteURLAutoConvert": "تحويل عنوان URL الملصق تلقائيًا إلى رابط",
+  "pasteURLAutoConvertTip": "عند التمكين، سيؤدي لصق عنوان URL يبدأ بـ http:// أو https:// إلى تحويله تلقائيًا إلى رابط قابل للنقر",
   "ocrResult": "‫نص نتيجة OCR‬",
   "reOCR": "‫إعادة OCR‬",
   "continueReview1": "متابعة المراجعة",

@@ -463,6 +463,8 @@
   "switchDirect": "비교 방향 전환",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 문서만 검색",
   "onlySearchForDocTip": "활성화하면 [[ 또는 【【 를 사용하여 블록 참조를 검색할 때 문서 이름만 검색합니다",
+  "pasteURLAutoConvert": "붙여넣은 URL을 자동으로 링크로 변환",
+  "pasteURLAutoConvertTip": "활성화하면 http:// 또는 https:// 로 시작하는 URL을 붙여넣을 때 자동으로 클릭 가능한 링크로 변환합니다",
   "ocrResult": "OCR 결과 텍스트",
   "reOCR": "다시 OCR",
   "continueReview1": "복습 계속",

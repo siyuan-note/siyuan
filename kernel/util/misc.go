@@ -26,6 +26,7 @@ import (
 	"unicode"
 
 	"github.com/88250/lute/html"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/siyuan-note/logging"
 )
 
@@ -209,6 +210,20 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 		}
 	}
 	return
+}
+
+func SanitizeImgSrc(src string) string {
+	if strings.HasPrefix(src, "assets/") {
+		src = "http://127.0.0.1:6806/" + src
+	}
+
+	src = strings.TrimSpace(src)
+	h := "<img src=\"" + src + "\">"
+	p := bluemonday.UGCPolicy()
+	ret := p.Sanitize(h)
+	ret = strings.TrimPrefix(ret, "<img src=\"")
+	ret = strings.TrimSuffix(ret, "\">")
+	return ret
 }
 
 func SanitizeSVG(svgInput string) string {

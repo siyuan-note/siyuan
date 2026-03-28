@@ -204,6 +204,8 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 		}
 
 		for _, asset := range assetValue.MAsset {
+			asset.Content = util.SanitizeImgSrc(asset.Content)
+
 			if asset.Type == av.AssetTypeImage && util.IsPossiblyImage(asset.Content) {
 				galleryCard.CoverURL = asset.Content
 				break

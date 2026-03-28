@@ -603,11 +603,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     const linkDest = resolveLinkDest(trimmedText, protyle.lute);
                     if (linkDest) {
                         const linkText = genLinkText(linkDest, false);
-                        protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                        const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",
                             color: linkDest + Constants.ZWSP + linkText
                         });
-                        return;
+                        if (linkNodes && linkNodes.length > 0) {
+                            const lastNode = linkNodes[linkNodes.length - 1];
+                            protyle.toolbar.range.setStartAfter(lastNode);
+                            protyle.toolbar.range.collapse(true);
+                        }
                     }
                 }
             }

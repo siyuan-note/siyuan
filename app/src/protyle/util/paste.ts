@@ -17,6 +17,7 @@ import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
+import {resolveLinkDest, genLinkText} from "../toolbar/util";
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
@@ -584,7 +585,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     return;
                 } else {
                     // https://github.com/siyuan-note/siyuan/issues/8475
-                    const linkDest = textPlain.startsWith("assets/") ? textPlain : protyle.lute.GetLinkDest(textPlain);
+                    const linkDest = resolveLinkDest(textPlain, protyle.lute);
                     if (linkDest) {
                         protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",
@@ -599,12 +600,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (window.siyuan.config.editor.pasteURLAutoConvert) {
                 const trimmedText = textPlain.trim();
                 if (!trimmedText.includes("\n")) {
-                    const linkDest = trimmedText.startsWith("assets/") ? trimmedText : protyle.lute.GetLinkDest(trimmedText);
+                    const linkDest = resolveLinkDest(trimmedText, protyle.lute);
                     if (linkDest) {
-                        let linkText = decodeURIComponent(linkDest.replace("https://", "").replace("http://", ""));
-                        if (linkDest.length > Constants.SIZE_LINK_TEXT_MAX) {
-                            linkText = linkDest.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
-                        }
+                        const linkText = genLinkText(linkDest);
                         protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",
                             color: linkDest + Constants.ZWSP + linkText

@@ -3,6 +3,7 @@ import {linkMenu} from "../../menus/protyle";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {readClipboard} from "../util/compatibility";
 import {Constants} from "../../constants";
+import {genLinkText, resolveLinkDest} from "./util";
 
 export class Link extends ToolbarItem {
     public element: HTMLElement;
@@ -44,7 +45,7 @@ export class Link extends ToolbarItem {
                         }
                     }
                     if (!dataHref) {
-                        dataHref = protyle.lute.GetLinkDest(clipObject.textPlain);
+                        dataHref = resolveLinkDest(clipObject.textPlain, protyle.lute);
                     }
                     if (!dataHref) {
                         // 360
@@ -56,16 +57,9 @@ export class Link extends ToolbarItem {
                             }
                         }
                     }
-                    // https://github.com/siyuan-note/siyuan/issues/12867
-                    if (!dataHref && clipObject.textPlain.startsWith("assets/")) {
-                        dataHref = clipObject.textPlain;
-                    }
                     // https://github.com/siyuan-note/siyuan/issues/14704#issuecomment-2867555769 第一点 & https://github.com/siyuan-note/siyuan/issues/6798
                     if (dataHref && !dataText) {
-                        dataText = decodeURIComponent(dataHref.replace("https://", "").replace("http://", ""));
-                        if (dataHref.length > Constants.SIZE_LINK_TEXT_MAX) {
-                            dataText = dataHref.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
-                        }
+                        dataText = genLinkText(dataHref);
                         showMenu = true;
                     }
                 }

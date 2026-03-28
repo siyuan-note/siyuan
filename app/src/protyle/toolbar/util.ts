@@ -215,6 +215,29 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
     return toolbarResult;
 };
 
+/**
+ * Detect a URL from text, handling the `assets/` prefix and `GetLinkDest`.
+ * Returns the resolved href, or an empty string if no URL was detected.
+ */
+export const resolveLinkDest = (text: string, lute: Lute): string => {
+    if (text.startsWith("assets/")) {
+        return text;
+    }
+    return lute.GetLinkDest(text);
+};
+
+/**
+ * Generate a display label for a link URL: decode, strip protocol, and truncate.
+ * Shared between Ctrl+K link handler and paste URL auto-convert.
+ */
+export const genLinkText = (href: string): string => {
+    let text = decodeURIComponent(href.replace("https://", "").replace("http://", ""));
+    if (href.length > Constants.SIZE_LINK_TEXT_MAX) {
+        text = href.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
+    }
+    return text;
+};
+
 export const copyTextByType = async (ids: string[],
                                      type: "ref" | "blockEmbed" | "protocol" | "protocolMd" | "hPath" | "id" | "webURL") => {
     let text = "";

@@ -594,6 +594,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
+            // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
+            const trimmedText = textPlain.trim();
+            if (!trimmedText.includes("\n")) {
+                const linkDest = trimmedText.startsWith("assets/") ? trimmedText : protyle.lute.GetLinkDest(trimmedText);
+                if (linkDest) {
+                    textPlain = "[" + trimmedText + "](" + linkDest + ")";
+                }
+            }
             let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
                 const tempElement = document.createElement("template");

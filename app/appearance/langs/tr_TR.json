@@ -463,6 +463,8 @@
   "switchDirect": "Karşılaştırma yönünü değiştir",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> sadece belgelerde ara",
   "onlySearchForDocTip": "Etkinleştirildiğinde [[ veya 【【 yalnızca belge adlarında blok referanslarını arar",
+  "pasteURLAutoConvert": "Yapıştırılan URL'yi otomatik olarak bağlantıya dönüştür",
+  "pasteURLAutoConvertTip": "Etkinleştirildiğinde, http:// veya https:// ile başlayan bir URL yapıştırıldığında otomatik olarak tıklanabilir bir bağlantıya dönüştürülür",
   "ocrResult": "OCR sonuç metni",
   "reOCR": "OCR’yi yeniden çalıştır",
   "continueReview1": "Gözden geçirmeye devam et",

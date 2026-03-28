@@ -463,6 +463,8 @@
   "switchDirect": "Cambia direzione di confronto",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> cerca solo nei documenti",
   "onlySearchForDocTip": "Dopo l'abilitazione, [[ o 【【 per cercare riferimenti di blocchi solo nei nomi dei documenti",
+  "pasteURLAutoConvert": "Converti automaticamente URL incollato in link",
+  "pasteURLAutoConvertTip": "Quando abilitato, incollando un URL che inizia con http:// o https:// verrà automaticamente convertito in un link cliccabile",
   "ocrResult": "Risultato OCR",
   "reOCR": "Ripeti OCR",
   "continueReview1": "Continua la revisione",

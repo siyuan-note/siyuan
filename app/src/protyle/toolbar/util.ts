@@ -231,14 +231,21 @@ export const resolveLinkDest = (text: string, lute: Lute): string => {
  * Shared between Ctrl+K link handler and paste URL auto-convert.
  * @param stripScheme When true, removes https:// and http:// prefixes (used by Ctrl+K).
  */
-export const genLinkText = (href: string, stripScheme: boolean = true): string => {
-    let text = stripScheme
-        ? decodeURIComponent(href.replace("https://", "").replace("http://", ""))
-        : decodeURIComponent(href);
-    if (href.length > Constants.SIZE_LINK_TEXT_MAX) {
-        text = href.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
+export const genLinkText = (href: string, stripScheme: boolean = true, decodeURI: boolean = false): string => {
+    try {
+        let text = stripScheme
+            ? href.replace("https://", "").replace("http://", "")
+            : href;
+        if (decodeURI) {
+            text = decodeURIComponent(text);
+        }
+        if (text.length > Constants.SIZE_LINK_TEXT_MAX) {
+            text = text.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
+        }
+        return text;
+    } catch {
+        return href;
     }
-    return text;
 };
 
 export const copyTextByType = async (ids: string[],

@@ -59,7 +59,7 @@ export class Link extends ToolbarItem {
                     }
                     // https://github.com/siyuan-note/siyuan/issues/14704#issuecomment-2867555769 第一点 & https://github.com/siyuan-note/siyuan/issues/6798
                     if (dataHref && !dataText) {
-                        dataText = genLinkText(dataHref);
+                        dataText = genLinkText(dataHref, true, true);
                         showMenu = true;
                     }
                 }

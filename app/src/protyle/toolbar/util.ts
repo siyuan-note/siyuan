@@ -227,11 +227,14 @@ export const resolveLinkDest = (text: string, lute: Lute): string => {
 };
 
 /**
- * Generate a display label for a link URL: decode, strip protocol, and truncate.
+ * Generate a display label for a link URL: decode, optionally strip protocol, and truncate.
  * Shared between Ctrl+K link handler and paste URL auto-convert.
+ * @param stripScheme When true, removes https:// and http:// prefixes (used by Ctrl+K).
  */
-export const genLinkText = (href: string): string => {
-    let text = decodeURIComponent(href.replace("https://", "").replace("http://", ""));
+export const genLinkText = (href: string, stripScheme: boolean = true): string => {
+    let text = stripScheme
+        ? decodeURIComponent(href.replace("https://", "").replace("http://", ""))
+        : decodeURIComponent(href);
     if (href.length > Constants.SIZE_LINK_TEXT_MAX) {
         text = href.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
     }

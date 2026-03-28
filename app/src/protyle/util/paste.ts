@@ -602,7 +602,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 if (!trimmedText.includes("\n")) {
                     const linkDest = resolveLinkDest(trimmedText, protyle.lute);
                     if (linkDest) {
-                        const linkText = genLinkText(linkDest);
+                        const linkText = genLinkText(linkDest, false);
                         protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",
                             color: linkDest + Constants.ZWSP + linkText

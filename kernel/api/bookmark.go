@@ -34,7 +34,7 @@ func getBookmark(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		tempBookmarks := &model.Bookmarks{}
 		for _, bookmark := range *bookmarks {
-			bookmark.Blocks = model.FilterBlocksByPublishAccess(nil, publishAccess, bookmark.Blocks)
+			bookmark.Blocks = model.FilterBlocksByPublishAccess(c, publishAccess, bookmark.Blocks)
 			bookmark.Count = len(bookmark.Blocks)
 			if bookmark.Count > 0 {
 				*tempBookmarks = append(*tempBookmarks, bookmark)

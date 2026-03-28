@@ -58,7 +58,7 @@ type Editor struct {
 	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
 	BackmentionSort                 *int           `json:"backmentionSort"`                 // 反链提及排序方式
 	HeadingEmbedMode                int            `json:"headingEmbedMode"`                // 标题嵌入块模式，0：显示标题与下方的块，1：仅显示标题，2：仅显示标题下方的块
-	PasteURLAutoConvert             bool           `json:"pasteURLAutoConvert"`              // 粘贴网址时自动转为链接
+	PasteURLAutoConvert             bool           `json:"pasteURLAutoConvert"`             // 粘贴网址时自动转为链接
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
 }
 

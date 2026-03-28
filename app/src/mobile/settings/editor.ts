@@ -158,7 +158,7 @@ export const initEditor = () => {
         <div class="b3-label__text">${window.siyuan.languages.onlySearchForDocTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="onlySearchForDoc" type="checkbox"${window.siyuan.config.editor.spellcheck ? " checked" : ""}/>
+    <input class="b3-switch fn__flex-center" id="onlySearchForDoc" type="checkbox"${window.siyuan.config.editor.onlySearchForDoc ? " checked" : ""}/>
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">

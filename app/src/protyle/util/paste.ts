@@ -595,12 +595,21 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             }
             // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
+            // Reuses the same setInlineMark approach as the Ctrl+K link handler (Link.ts)
             if (window.siyuan.config.editor.pasteURLAutoConvert) {
                 const trimmedText = textPlain.trim();
                 if (!trimmedText.includes("\n")) {
                     const linkDest = trimmedText.startsWith("assets/") ? trimmedText : protyle.lute.GetLinkDest(trimmedText);
                     if (linkDest) {
-                        textPlain = "[" + trimmedText + "](<" + linkDest + ">)";
+                        let linkText = decodeURIComponent(linkDest.replace("https://", "").replace("http://", ""));
+                        if (linkDest.length > Constants.SIZE_LINK_TEXT_MAX) {
+                            linkText = linkDest.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
+                        }
+                        protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                            type: "a",
+                            color: linkDest + Constants.ZWSP + linkText
+                        });
+                        return;
                     }
                 }
             }

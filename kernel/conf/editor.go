@@ -101,7 +101,7 @@ func NewEditor() *Editor {
 		BacklinkSort:                    func() *int { v := util.SortModeUpdatedDESC; return &v }(),
 		BackmentionSort:                 func() *int { v := util.SortModeUpdatedDESC; return &v }(),
 		HeadingEmbedMode:                0,
-		PasteURLAutoConvert:             true,
+		PasteURLAutoConvert:             false,
 		Markdown:                        util.MarkdownSettings,
 	}
 }

@@ -1435,7 +1435,8 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
     }
 
     private refreshPublishAccessSwitch() {
-        if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+        if (window.siyuan.config.readonly || window.siyuan.isPublish ||
+            !this.element.classList.contains("file-tree__publish-access--active")) {
             return;
         }
         const ids: string[] = [];

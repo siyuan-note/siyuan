@@ -814,7 +814,8 @@ class="b3-list-item" data-path="${item.path}">
     };
 
     private refreshPublishAccessSwitch() {
-        if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+        if (window.siyuan.config.readonly || window.siyuan.isPublish ||
+            !this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active")) {
             return;
         }
         const ids: string[] = [];

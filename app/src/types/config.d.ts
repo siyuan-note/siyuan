@@ -496,6 +496,10 @@ declare namespace Config {
          */
         plantUMLServePath: string;
         /**
+         * Whether to auto-convert pasted URLs to links
+         */
+        pasteURLAutoConvert: boolean;
+        /**
          * Whether to enable read-only mode
          */
         readOnly: boolean;

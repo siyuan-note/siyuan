@@ -209,6 +209,39 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
     return toolbarResult;
 };
 
+/**
+ * Detect a URL from text, handling the `assets/` prefix and `GetLinkDest`.
+ * Returns the resolved href, or an empty string if no URL was detected.
+ */
+export const resolveLinkDest = (text: string, lute: Lute): string => {
+    if (text.startsWith("assets/")) {
+        return text;
+    }
+    return lute.GetLinkDest(text);
+};
+
+/**
+ * Generate a display label for a link URL: decode, optionally strip protocol, and truncate.
+ * Shared between Ctrl+K link handler and paste URL auto-convert.
+ * @param stripScheme When true, removes https:// and http:// prefixes (used by Ctrl+K).
+ */
+export const genLinkText = (href: string, stripScheme: boolean = true, decodeURI: boolean = false): string => {
+    try {
+        let text = stripScheme
+            ? href.replace("https://", "").replace("http://", "")
+            : href;
+        if (decodeURI) {
+            text = decodeURIComponent(text);
+        }
+        if (text.length > Constants.SIZE_LINK_TEXT_MAX) {
+            text = text.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
+        }
+        return text;
+    } catch {
+        return href;
+    }
+};
+
 export const copyTextByType = async (ids: string[],
                                      type: "ref" | "blockEmbed" | "protocol" | "protocolMd" | "hPath" | "id" | "webURL") => {
     let text = "";

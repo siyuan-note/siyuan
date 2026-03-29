@@ -17,6 +17,33 @@ import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
+import {resolveLinkDest, genLinkText} from "../toolbar/util";
+
+const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
+    if (!window.siyuan.config.editor.pasteURLAutoConvert) {
+        return false;
+    }
+    const trimmed = text.trim();
+    if (!trimmed || trimmed.includes("\n")) {
+        // TODO 暂不支持多行文本
+        return false;
+    }
+    const linkDest = resolveLinkDest(trimmed, protyle.lute);
+    if (!linkDest) {
+        return false;
+    }
+    const linkText = genLinkText(linkDest, false);
+    const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
+        type: "a",
+        color: linkDest + Constants.ZWSP + linkText
+    });
+    if (linkNodes && linkNodes.length > 0) {
+        const lastNode = linkNodes[linkNodes.length - 1];
+        protyle.toolbar.range.setStartAfter(lastNode);
+        protyle.toolbar.range.collapse(true);
+    }
+    return true;
+};
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
@@ -418,6 +445,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
         }
+        if (pasteAsLink(tempElement.textContent, protyle)) {
+            return;
+        }
         let isBlock = false;
         tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
             const newId = Lute.NewNodeID();
@@ -584,7 +614,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     return;
                 } else {
                     // https://github.com/siyuan-note/siyuan/issues/8475
-                    const linkDest = textPlain.startsWith("assets/") ? textPlain : protyle.lute.GetLinkDest(textPlain);
+                    const linkDest = resolveLinkDest(textPlain, protyle.lute);
                     if (linkDest) {
                         protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",
@@ -593,6 +623,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         return;
                     }
                 }
+            }
+            // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
+            if (pasteAsLink(textPlain, protyle)) {
+                return;
             }
             let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {

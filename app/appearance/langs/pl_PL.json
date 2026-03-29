@@ -463,6 +463,8 @@
   "switchDirect": "Zmień kierunek porównania",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> tylko szukaj dokumentów",
   "onlySearchForDocTip": "Po włączeniu, [[ lub 【【 wyszuka odniesienia bloków tylko w nazwach dokumentów",
+  "pasteURLAutoConvert": "Automatycznie konwertuj wklejany URL na link",
+  "pasteURLAutoConvertTip": "Po włączeniu, wklejenie URL zaczynającego się od http:// lub https:// automatycznie przekształci go w klikalny link",
   "ocrResult": "Tekst wyniku OCR",
   "reOCR": "Re OCR",
   "continueReview1": "Kontynuuj przegląd",

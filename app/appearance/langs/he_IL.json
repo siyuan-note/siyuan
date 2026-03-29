@@ -463,6 +463,8 @@
   "switchDirect": "שנה כיוון השוואה",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> חפש רק מסמכים",
   "onlySearchForDocTip": "לאחר הפעלה, חפש באמצעות [[ או 【【 רק התייחסויות בלוקים בשמות המסמכים",
+  "pasteURLAutoConvert": "המרה אוטומטית של כתובת URL מודבקת לקישור",
+  "pasteURLAutoConvertTip": "כאשר מופעל, הדבקת כתובת URL שמתחילה ב-http:// או https:// תמיר אותה אוטומטית לקישור לחיץ",
   "ocrResult": "טקסט תוצאת OCR",
   "reOCR": "OCR מחדש",
   "continueReview1": "המשך סקירה",

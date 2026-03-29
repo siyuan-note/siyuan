@@ -463,6 +463,8 @@
   "switchDirect": "交換對比方向",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 僅搜索文檔",
   "onlySearchForDocTip": "啟用後使用 [[ 或 【【 搜索塊引用時將只在文檔名中搜索",
+  "pasteURLAutoConvert": "貼上網址時自動轉為連結",
+  "pasteURLAutoConvertTip": "啟用後貼上 http:// 或 https:// 開頭的網址時將自動轉為可點擊的連結",
   "ocrResult": "OCR 結果文字",
   "reOCR": "重新 OCR",
   "continueReview1": "繼續複習",

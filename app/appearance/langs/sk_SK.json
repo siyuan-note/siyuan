@@ -463,6 +463,8 @@
   "switchDirect": "Prepnúť smer porovnávania",
   "onlySearchForDoc": "[[ hľadá iba v dokumentoch",
   "onlySearchForDocTip": "Ak je povolené, hľadanie cez [[ sa obmedzí len na názvy dokumentov",
+  "pasteURLAutoConvert": "Automaticky previesť vloženú URL na odkaz",
+  "pasteURLAutoConvertTip": "Ak je povolené, vloženie URL začínajúcej na http:// alebo https:// ju automaticky prevedie na klikateľný odkaz",
   "ocrResult": "Text výsledku OCR",
   "reOCR": "Spustiť OCR znova",
   "continueReview1": "Pokračovať v opakovaní",

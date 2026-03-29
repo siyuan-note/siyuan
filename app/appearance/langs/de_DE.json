@@ -463,6 +463,8 @@
   "switchDirect": "Vergleichsrichtung wechseln",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> nur Dokumente suchen",
   "onlySearchForDocTip": "Nach der Aktivierung wird [[ oder 【【 verwendet, um nach Blockreferenzen nur in Dokumentnamen zu suchen",
+  "pasteURLAutoConvert": "Eingefügte URLs automatisch in Links umwandeln",
+  "pasteURLAutoConvertTip": "Wenn aktiviert, werden URLs, die mit http:// oder https:// beginnen, beim Einfügen automatisch in klickbare Links umgewandelt",
   "ocrResult": "OCR-Ergebnistext",
   "reOCR": "Re OCR",
   "continueReview1": "Überprüfung fortsetzen",

@@ -49,14 +49,14 @@ openWindow = (options: {
     height?: number,
     width?: number,
     tab?: Tab,
-    setAlwaysOnTop?: boolean,
+    alwaysOnTop?: boolean,
     doc?: {
         id: string,     // 块 id
     },
 }) => {
     if (options.doc && options.doc.id) {
         openNewWindowById(options.doc.id, {
-            setAlwaysOnTop: options.setAlwaysOnTop,
+            alwaysOnTop: options.alwaysOnTop,
             position: options.position,
             width: options.width,
             height: options.height
@@ -65,7 +65,7 @@ openWindow = (options: {
     }
     if (options.tab) {
         openNewWindow(options.tab, {
-            setAlwaysOnTop: options.setAlwaysOnTop,
+            alwaysOnTop: options.alwaysOnTop,
             position: options.position,
             width: options.width,
             height: options.height

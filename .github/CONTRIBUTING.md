@@ -41,8 +41,8 @@ Note: In the development environment, the kernel process will not be automatical
 ### Desktop
 
 * `cd kernel`
-* Windows: `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
-* Linux/macOS: `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
+* Windows: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Linux/macOS: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
 * Windows: `./SiYuan-Kernel.exe --wd=.. --mode=dev`
 * Linux/macOS: `./SiYuan-Kernel --wd=.. --mode=dev`
@@ -50,14 +50,14 @@ Note: In the development environment, the kernel process will not be automatical
 ### iOS
 
 * `cd kernel`
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
+* `gomobile bind -tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
 * `cd kernel`
 * `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8`
-* `gomobile bind --tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target=android/arm64 -androidapi 26 ./mobile/`
+* `gomobile bind -tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target=android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ### Harmony

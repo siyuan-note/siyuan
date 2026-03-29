@@ -1314,6 +1314,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = document.elementFromPoint(point.x, point.y - 6) as HTMLElement;
                 }
                 targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
+                if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
+                    const childElement = targetElement.querySelectorAll("[data-node-id]");
+                    if (point.className === "dragover__left") {
+                        targetElement = childElement[0] as HTMLElement;
+                    } else {
+                        targetElement = childElement[childElement.length - 1] as HTMLElement;
+                    }
+                }
             }
         } else if (targetElement && targetElement.classList.contains("list")) {
             if (gutterTypes[0] !== "nodelistitem") {

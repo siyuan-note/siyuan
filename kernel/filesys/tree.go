@@ -333,24 +333,33 @@ func removeUnescapedUnicodeNull(data []byte) []byte {
 	if n < patLen {
 		return data
 	}
+	if !bytes.Contains(data, []byte(`\u0000`)) {
+		return data
+	}
 
 	dst := make([]byte, 0, n)
 	i := 0
 	for i < n {
+		from := i
+		j := bytes.IndexByte(data[i:], '\\')
+		if j < 0 {
+			dst = append(dst, data[from:]...)
+			break
+		}
+		i += j
+		dst = append(dst, data[from:i]...)
+
 		// 快速检查是否可能匹配 `\u0000`
 		if i+patLen <= n &&
-			data[i] == '\\' &&
 			data[i+1] == 'u' &&
 			data[i+2] == '0' &&
 			data[i+3] == '0' &&
 			data[i+4] == '0' &&
 			data[i+5] == '0' {
 			// 统计当前 `\` 之前连续的反斜杠数量
-			j := i - 1
 			backslashes := 0
-			for j >= 0 && data[j] == '\\' {
+			for k := i - 1; k >= 0 && data[k] == '\\'; k-- {
 				backslashes++
-				j--
 			}
 			// 若为偶数，则当前 `\` 未被转义，跳过整个 `\u0000`
 			if backslashes%2 == 0 {

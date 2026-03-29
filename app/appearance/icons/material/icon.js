@@ -318,8 +318,8 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsMaterial" style="p
     <path d="M28.8 8v16h-25.6v-16h25.6zM28.8 4.8h-25.6c-1.76 0-3.184 1.44-3.184 3.2l-0.016 16c0 1.76 1.44 3.2 3.2 3.2h25.6c1.76 0 3.2-1.44 3.2-3.2v-16c0-1.76-1.44-3.2-3.2-3.2zM14.4 9.6h3.2v3.2h-3.2zM14.4 14.4h3.2v3.2h-3.2zM9.6 9.6h3.2v3.2h-3.2zM9.6 14.4h3.2v3.2h-3.2zM4.8 14.4h3.2v3.2h-3.2zM4.8 9.6h3.2v3.2h-3.2zM9.6 19.2h12.8v3.2h-12.8zM19.2 14.4h3.2v3.2h-3.2zM19.2 9.6h3.2v3.2h-3.2zM24 14.4h3.2v3.2h-3.2zM24 9.6h3.2v3.2h-3.2z"></path>
   </symbol>
   <symbol id="iconFont" viewBox="0 0 32 32">
-    <path opacity="0.36" d="M0 24.667h32v5.333h-32v-5.333z"></path>
-    <path d="M14.667 2l-7.333 18.667h3l1.493-4h8.333l1.493 4h3l-7.32-18.667h-2.667zM12.827 14l3.173-8.44 3.173 8.44h-6.347z"></path>
+    <path d="M14.5 0.941l-8.249 21h3.375l1.68-4.5h9.374l1.68 4.5h3.375l-8.235-21h-3zM12.43 14.441l3.57-9.495 3.57 9.495h-7.14z"></path>
+    <path fill="var(--b3-theme-error)" d="M0 25.667h32v5.333h-32v-5.333z"></path>
   </symbol>
   <symbol id="iconUnpin" viewBox="0 0 32 32">
     <path d="M3.272 1.151l27.577 27.577-2.121 2.121-27.577-27.577z"></path>

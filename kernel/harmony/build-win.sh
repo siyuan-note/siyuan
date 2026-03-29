@@ -24,4 +24,4 @@ export GOARCH=amd64
 export CGO_CFLAGS="-I${LOG_ADAPTOR_HOME}/include -g -O2 `$LLVMCONFIG --cflags` --target=x86_64-linux-ohos --sysroot=$OHOS_NDK_HOME/native/sysroot"
 export CGO_LDFLAGS="--target=x86_64-linux-ohos -fuse-ld=lld -L${LOG_ADAPTOR_HOME}/dist/x86_64"
 
-go build --tags fts5 -ldflags "-s -w" -buildmode=c-shared -v -o libkernel.so .
+go build -tags fts5 -ldflags "-s -w" -buildmode=c-shared -v -o libkernel.so .

@@ -71,14 +71,14 @@ if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo 'Building Kernel amd64'
     export GOARCH=amd64
     export CC=~/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc
-    go build -buildmode=pie --tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
+    go build -buildmode=pie -tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
 fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel arm64'
     export GOARCH=arm64
     export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
-    go build -buildmode=pie --tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
+    go build -buildmode=pie -tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
 fi
 
 echo

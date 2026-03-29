@@ -213,7 +213,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
 
       - name: Building Kernel
-        run: go build --tags fts5 -o "${{ matrix.config.kernel_path }}" -v -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
+        run: go build -tags fts5 -o "${{ matrix.config.kernel_path }}" -v -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
           GO111MODULE: on

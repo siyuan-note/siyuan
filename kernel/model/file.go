@@ -740,9 +740,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		}
 
 		subTree.Root.AppendChild(n)
-		for _, ial := range n.KramdownIAL {
-			ial[1] = util.SanitizeAttr(ial[1])
-		}
 	}
 
 	luteEngine.RenderOptions.NodeIndexStart = index

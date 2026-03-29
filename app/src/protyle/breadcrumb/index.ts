@@ -543,17 +543,14 @@ ${padHTML}
                 }).element);
             }
             /// #endif
-            if (protyle?.app?.plugins) {
-                emitOpenMenu({
-                    plugins: protyle.app.plugins,
-                    type: "open-menu-breadcrumbmore",
-                    detail: {
-                        protyle,
-                        data: response.data.stat,
-                    },
-                    separatorPosition: "top",
-                });
-            }
+            emitOpenMenu({
+                type: "open-menu-breadcrumbmore",
+                detail: {
+                    protyle,
+                    data: response.data.stat,
+                },
+                separatorPosition: "top",
+            });
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "docInfo",

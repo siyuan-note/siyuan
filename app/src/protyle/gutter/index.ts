@@ -923,17 +923,14 @@ export class Gutter {
             }).element);
         }
 
-        if (protyle?.app?.plugins) {
-            emitOpenMenu({
-                plugins: protyle.app.plugins,
-                type: "click-blockicon",
-                detail: {
-                    protyle,
-                    blockElements: selectsElement,
-                },
-                separatorPosition: "top",
-            });
-        }
+        emitOpenMenu({
+            type: "click-blockicon",
+            detail: {
+                protyle,
+                blockElements: selectsElement,
+            },
+            separatorPosition: "top",
+        });
 
         return window.siyuan.menus.menu;
     }
@@ -2116,17 +2113,14 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_5", type: "separator"}).element);
         }
 
-        if (protyle?.app?.plugins) {
-            emitOpenMenu({
-                plugins: protyle.app.plugins,
-                type: "click-blockicon",
-                detail: {
-                    protyle,
-                    blockElements: [nodeElement]
-                },
-                separatorPosition: "bottom",
-            });
-        }
+        emitOpenMenu({
+            type: "click-blockicon",
+            detail: {
+                protyle,
+                blockElements: [nodeElement]
+            },
+            separatorPosition: "bottom",
+        });
 
         let updateHTML = nodeElement.getAttribute("updated") || "";
         if (updateHTML) {

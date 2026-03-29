@@ -302,17 +302,14 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         }
     }).element);
 
-    if (protyle?.app?.plugins) {
-        emitOpenMenu({
-            plugins: protyle.app.plugins,
-            type: "open-menu-fileannotationref",
-            detail: {
-                protyle,
-                element: refElement,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-fileannotationref",
+        detail: {
+            protyle,
+            element: refElement,
+        },
+        separatorPosition: "top",
+    });
     /// #if MOBILE
     window.siyuan.menus.menu.fullscreen();
     /// #else
@@ -665,17 +662,14 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         }).element);
     }
-    if (protyle?.app?.plugins) {
-        emitOpenMenu({
-            plugins: protyle.app.plugins,
-            type: "open-menu-blockref",
-            detail: {
-                protyle,
-                element: element,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-blockref",
+        detail: {
+            protyle,
+            element: element,
+        },
+        separatorPosition: "top",
+    });
 
     /// #if MOBILE
     window.siyuan.menus.menu.fullscreen();
@@ -906,18 +900,15 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         }
     }
     /// #endif
-    if (protyle?.app?.plugins) {
-        emitOpenMenu({
-            plugins: protyle.app.plugins,
-            type: "open-menu-content",
-            detail: {
-                protyle,
-                range,
-                element: nodeElement,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-content",
+        detail: {
+            protyle,
+            range,
+            element: nodeElement,
+        },
+        separatorPosition: "top",
+    });
 };
 
 export const enterBack = (protyle: IProtyle, id: string) => {
@@ -1426,17 +1417,14 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     if (dataSrc && dataSrc.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(dataSrc)).element);
     }
-    if (protyle?.app?.plugins) {
-        emitOpenMenu({
-            plugins: protyle.app.plugins,
-            type: "open-menu-image",
-            detail: {
-                protyle,
-                element: assetElement,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-image",
+        detail: {
+            protyle,
+            element: assetElement,
+        },
+        separatorPosition: "top",
+    });
     /// #if MOBILE
     window.siyuan.menus.menu.fullscreen();
     /// #else
@@ -1702,9 +1690,8 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         }
     }
 
-    if (!protyle.disabled && protyle?.app?.plugins) {
+    if (!protyle.disabled) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-link",
             detail: {
                 protyle,
@@ -1896,17 +1883,14 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         }
     }).element);
 
-    if (protyle?.app?.plugins) {
-        emitOpenMenu({
-            plugins: protyle.app.plugins,
-            type: "open-menu-tag",
-            detail: {
-                protyle,
-                element: tagElement,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-tag",
+        detail: {
+            protyle,
+            element: tagElement,
+        },
+        separatorPosition: "top",
+    });
 
     /// #if MOBILE
     window.siyuan.menus.menu.fullscreen();

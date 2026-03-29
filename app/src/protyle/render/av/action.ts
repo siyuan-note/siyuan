@@ -761,18 +761,15 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
             submenu: editAttrSubmenu
         });
     }
-    if (protyle?.app?.plugins) {
-        emitOpenMenu({
-            plugins: protyle.app.plugins,
-            type: "open-menu-av",
-            detail: {
-                protyle,
-                element: blockElement,
-                selectRowElements: rowElements,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-av",
+        detail: {
+            protyle,
+            element: blockElement,
+            selectRowElements: rowElements,
+        },
+        separatorPosition: "top",
+    });
     menu.open(position);
     return true;
 };

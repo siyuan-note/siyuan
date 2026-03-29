@@ -1,5 +1,6 @@
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
+import {emitToEventBus} from "../../plugin/EventBus";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
@@ -29,9 +30,7 @@ export const destroy = (protyle: IProtyle) => {
             protyle.ws.send("closews", {});
         }, 10240);
     }
-    protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("destroy-protyle", {
-            protyle,
-        });
+    emitToEventBus("destroy-protyle", {
+        protyle,
     });
 };

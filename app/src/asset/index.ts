@@ -16,6 +16,7 @@ import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 import {getDisplayName} from "../util/pathName";
+import {emitToEventBus} from "../plugin/EventBus";
 
 export class Asset extends Model {
     public path: string;
@@ -35,9 +36,7 @@ export class Asset extends Model {
         this.element.addEventListener("click", (event) => {
             clearOBG();
             setPanelFocus(this.element.parentElement.parentElement);
-            this.app.plugins.forEach(item => {
-                item.eventBus.emit("click-pdf", {event});
-            });
+            emitToEventBus("click-pdf", {event});
         });
         if (typeof this.pdfId === "string") {
             this.getPdfId(() => {

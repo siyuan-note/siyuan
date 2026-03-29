@@ -1413,6 +1413,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     const dataSrc = imgElement.getAttribute("data-src");
     if (dataSrc && dataSrc.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(dataSrc)).element);
+        window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(dataSrc)).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
         id: "copyAsPNG",
@@ -1423,9 +1424,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             copyPNGByLink(imgElement.getAttribute("src"));
         }
     }).element);
-    if (dataSrc && dataSrc.startsWith("assets/")) {
-        window.siyuan.menus.menu.append(new MenuItem(writeAssetToClipboard(dataSrc)).element);
-    }
     if (protyle?.app?.plugins) {
         emitOpenMenu({
             plugins: protyle.app.plugins,

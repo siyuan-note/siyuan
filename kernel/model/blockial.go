@@ -280,7 +280,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
-	oldAttrs := parse.IAL2MapUnEsc(node.KramdownIAL)
+	oldAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
 	node.ClearIALAttrs()
 
 	_, err = setNodeAttrs0(node, nameValues)
@@ -295,7 +295,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
-	pushBlockAttrs(oldAttrs, node)
+	pushBlockAttrs(oldAttrsUnEsc, node)
 
 	go func() {
 		sql.FlushQueue()

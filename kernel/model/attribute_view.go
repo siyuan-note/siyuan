@@ -3254,9 +3254,9 @@ func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 	_, nodes := tx.getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
 		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
-		oldAttrs := parse.IAL2Map(node.KramdownIAL)
+		oldAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
 		node.SetIALAttr(av.NodeAttrViewNames, avNames)
-		pushBlockAttrs(oldAttrs, node)
+		pushBlockAttrs(oldAttrsUnEsc, node)
 	}
 	return
 }

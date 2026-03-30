@@ -37,12 +37,17 @@ func setRepoIndexRetentionDays(c *gin.Context) {
 	if !ok {
 		return
 	}
-	days := int(arg["days"].(float64))
-	if 1 > days {
-		days = 180
+
+	var days float64
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("days", true, &days)) {
+		return
+	}
+	daysInt := int(days)
+	if 1 > daysInt {
+		daysInt = 180
 	}
 
-	model.Conf.Repo.IndexRetentionDays = days
+	model.Conf.Repo.IndexRetentionDays = daysInt
 	model.Conf.Save()
 }
 
@@ -54,12 +59,17 @@ func setRetentionIndexesDaily(c *gin.Context) {
 	if !ok {
 		return
 	}
-	indexes := int(arg["indexes"].(float64))
-	if 1 > indexes {
-		indexes = 180
+
+	var indexes float64
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("indexes", true, &indexes)) {
+		return
+	}
+	indexesInt := int(indexes)
+	if 1 > indexesInt {
+		indexesInt = 180
 	}
 
-	model.Conf.Repo.RetentionIndexesDaily = indexes
+	model.Conf.Repo.RetentionIndexesDaily = indexesInt
 	model.Conf.Save()
 }
 
@@ -74,7 +84,10 @@ func getRepoFile(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	data, p, err := model.GetRepoFile(id)
 	if err != nil {
 		ret.Code = -1
@@ -94,7 +107,7 @@ func getRepoFile(c *gin.Context) {
 	c.Data(http.StatusOK, contentType, data)
 }
 
-func openRepoSnapshotDoc(c *gin.Context) {
+func rollbackRepoSnapshotFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -103,8 +116,34 @@ func openRepoSnapshotDoc(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	title, content, displayInText, updated, err := model.OpenRepoSnapshotDoc(id)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
+
+	err := model.RollbackRepoSnapshotFile(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func openRepoSnapshotFile(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
+
+	title, content, displayInText, updated, err := model.OpenRepoSnapshotFile(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -128,8 +167,13 @@ func diffRepoSnapshots(c *gin.Context) {
 		return
 	}
 
-	left := arg["left"].(string)
-	right := arg["right"].(string)
+	var left, right string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("left", true, &left),
+		util.BindJsonArg("right", true, &right),
+	) {
+		return
+	}
 	diff, err := model.DiffRepoSnapshots(left, right)
 	if err != nil {
 		ret.Code = -1
@@ -182,7 +226,10 @@ func checkoutRepo(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	model.CheckoutRepo(id)
 }
 
@@ -195,8 +242,13 @@ func downloadCloudSnapshot(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	tag := arg["tag"].(string)
+	var id, tag string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("tag", true, &tag),
+	) {
+		return
+	}
 	if err := model.DownloadCloudSnapshot(tag, id); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -213,8 +265,13 @@ func uploadCloudSnapshot(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	tag := arg["tag"].(string)
+	var id, tag string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("tag", true, &tag),
+	) {
+		return
+	}
 	if err := model.UploadCloudSnapshot(tag, id); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -231,7 +288,10 @@ func getRepoSnapshots(c *gin.Context) {
 		return
 	}
 
-	page := arg["page"].(float64)
+	var page float64
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("page", true, &page)) {
+		return
+	}
 	snapshots, pageCount, totalCount, err := model.GetRepoSnapshots(int(page))
 	if err != nil {
 		ret.Code = -1
@@ -254,9 +314,12 @@ func getCloudRepoSnapshots(c *gin.Context) {
 		return
 	}
 
-	page := int(arg["page"].(float64))
+	var page float64
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("page", true, &page)) {
+		return
+	}
 
-	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshots(page)
+	snapshots, pageCount, totalCount, err := model.GetCloudRepoSnapshots(int(page))
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -295,7 +358,10 @@ func removeCloudRepoTagSnapshot(c *gin.Context) {
 		return
 	}
 
-	tag := arg["tag"].(string)
+	var tag string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("tag", true, &tag)) {
+		return
+	}
 	err := model.RemoveCloudRepoTag(tag)
 	if err != nil {
 		ret.Code = -1
@@ -329,7 +395,10 @@ func removeRepoTagSnapshot(c *gin.Context) {
 		return
 	}
 
-	tag := arg["tag"].(string)
+	var tag string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("tag", true, &tag)) {
+		return
+	}
 	err := model.RemoveTagSnapshot(tag)
 	if err != nil {
 		ret.Code = -1
@@ -347,7 +416,10 @@ func createSnapshot(c *gin.Context) {
 		return
 	}
 
-	memo := arg["memo"].(string)
+	var memo string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("memo", true, &memo)) {
+		return
+	}
 	if err := model.IndexRepo(memo); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
@@ -365,8 +437,13 @@ func tagSnapshot(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	name := arg["name"].(string)
+	var id, name string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("name", true, &name),
+	) {
+		return
+	}
 	if err := model.TagSnapshot(id, name); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
@@ -384,7 +461,10 @@ func importRepoKey(c *gin.Context) {
 		return
 	}
 
-	base64Key := arg["key"].(string)
+	var base64Key string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", true, &base64Key)) {
+		return
+	}
 	retKey, err := model.ImportRepoKey(base64Key)
 	if err != nil {
 		ret.Code = -1
@@ -407,7 +487,10 @@ func initRepoKeyFromPassphrase(c *gin.Context) {
 		return
 	}
 
-	pass := arg["pass"].(string)
+	var pass string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("pass", true, &pass)) {
+		return
+	}
 	if err := model.InitRepoKeyFromPassphrase(pass); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)

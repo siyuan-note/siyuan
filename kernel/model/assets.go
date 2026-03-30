@@ -138,11 +138,11 @@ func HandleAssetsChangeEvent(assetAbsPath string) {
 func removeAssetThumbnail(assetAbsPath string) {
 	if util.IsCompressibleAssetImage(assetAbsPath) {
 		p := filepath.ToSlash(assetAbsPath)
-		idx := strings.Index(p, "assets/")
-		if -1 == idx {
+		_, after, found := strings.Cut(p, "assets/")
+		if !found {
 			return
 		}
-		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", p[idx+7:])
+		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", after)
 		os.RemoveAll(thumbnailPath)
 	}
 }
@@ -553,7 +553,7 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 	if secondErr != nil {
 		return "", secondErr
 	}
-	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
+	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }
 
 func getAssetAbsPath(relativePath string) (absPath string, err error) {
@@ -747,7 +747,7 @@ func uploadAssets2Cloud(assetPaths []string, bizType string, ignorePushMsg bool)
 
 		if 0 != requestResult.Code {
 			logging.LogErrorf("upload assets failed: %s", requestResult.Msg)
-			err = errors.New(fmt.Sprintf(Conf.Language(94), requestResult.Msg))
+			err = fmt.Errorf(Conf.Language(94), requestResult.Msg)
 			return
 		}
 
@@ -1176,10 +1176,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		} else {
 			p = strings.TrimPrefix(assetAbsPath, filepath.Dir(dataAssetsAbsPath))
 		}
-		p = filepath.ToSlash(p)
-		if strings.HasPrefix(p, "/") {
-			p = p[1:]
-		}
+		p = strings.TrimPrefix(filepath.ToSlash(p), "/")
 		name := path.Base(p)
 
 		var modTime time.Time
@@ -1300,12 +1297,15 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 		}
 		if ast.NodeEmojiImg == n.Type {
 			tokens := n.Tokens
-			idx := bytes.Index(tokens, []byte("src=\""))
-			if -1 == idx {
+			_, src, found := bytes.Cut(tokens, []byte("src=\""))
+			if !found {
 				return ast.WalkContinue
 			}
-			src := tokens[idx+len("src=\""):]
-			src = src[:bytes.Index(src, []byte("\""))]
+			idx := bytes.Index(src, []byte("\""))
+			if idx == -1 {
+				return ast.WalkContinue
+			}
+			src = src[:idx]
 			ret = append(ret, string(src))
 		}
 		return ast.WalkContinue

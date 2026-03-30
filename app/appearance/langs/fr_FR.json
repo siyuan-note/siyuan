@@ -287,7 +287,7 @@
   "imported": "Importation terminée",
   "mirrorTip": "Base de données miroir, toutes les mises à jour des données seront synchronisées avec tous les autres miroirs",
   "includeTime": "Inclure l'heure",
-  "accountSupport1": "Depuis sa première version publique le 31 août 2020, SiYuan a été publié plus de 830 fois au total, a répondu aux exigences et aux commentaires des utilisateurs plus de 15000 fois et a soumis du code plus de 19800 fois. Nous ne pouvons pas nous passer de votre soutien et de vos commentaires.",
+  "accountSupport1": "Depuis sa première version publique le 31 août 2020, SiYuan a été publié plus de 880 fois au total, a répondu aux exigences et aux commentaires des utilisateurs plus de 16000 fois et a soumis du code plus de 22000 fois. Nous ne pouvons pas nous passer de votre soutien et de vos commentaires.",
   "accountSupport2": "Votre soutien et vos retours permettront à SiYuan de se développer et de mieux se développer. Nous serons toujours amis avec les utilisateurs, travaillerons dur pour améliorer les produits et vous offrirons une meilleure expérience de gestion des connaissances. Merci beaucoup pour votre soutient!",
   "goToTab1": "Aller à l'onglet #1",
   "goToTab2": "Aller à l'onglet #2",
@@ -463,6 +463,8 @@
   "switchDirect": "Changer le sens de comparaison",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> rechercher uniquement les documents",
   "onlySearchForDocTip": "Après l'activation, [[ ou 【【 pour rechercher des références de bloc uniquement dans les noms de documents",
+  "pasteURLAutoConvert": "Convertir automatiquement les URL collées en liens",
+  "pasteURLAutoConvertTip": "Lorsque cette option est activée, coller une URL commençant par http:// ou https:// la convertit automatiquement en lien cliquable",
   "ocrResult": "Texte du résultat OCR",
   "reOCR": "ReOCR",
   "continueReview1": "Continuer la révision",
@@ -1454,7 +1456,6 @@
     "task.database.index": "Effectuer l'indexation de la base de données",
     "task.database.index.commit": "Effectuer la validation de l'index de la base de données",
     "task.database.index.ref": "Exécuter la référence d'index de la base de données",
-    "task.database.index.fix": "Effectuer la correction de l'index de la base de données",
     "task.ocr.image": "Exécute l'OCR d'image pour extraire le texte",
     "task.history.generateFile": "Exécuter la base de données historique générer doc",
     "task.history.database.index.full": "Exécuter l'index de reconstruction de la base de données de l'historique",
@@ -1768,6 +1769,7 @@
     "282": "Fermer la fenêtre",
     "283": "Mot de passe",
     "284": "Accès refusé",
-    "285": "Le mot de passe est incorrect"
+    "285": "Le mot de passe est incorrect",
+    "286": "[%s] a déjà été restauré"
   }
 }

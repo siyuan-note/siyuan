@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20250117171922"
+		"updated": "20260317202604"
 	},
 	"Children": [
 		{
@@ -281,61 +281,47 @@
 			]
 		},
 		{
-			"ID": "20250114215535-x0zo9js",
+			"ID": "20260317195514-yho54qh",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20250114215535-x0zo9js",
-				"updated": "20250117171922"
+				"id": "20260317195514-yho54qh",
+				"updated": "20260317202604"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Android でのカスタム通知"
+					"Data": "Androidでのカスタム「Keep-Alive」通知"
 				}
 			]
 		},
 		{
-			"ID": "20250114215535-1m8nzmu",
+			"ID": "20260317195514-pwmwtf0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20250114215535-1m8nzmu",
-				"updated": "20250114215620"
+				"id": "20260317195514-pwmwtf0",
+				"updated": "20260317195514"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "バックグラウンドでの動作を可能な限り維持するために、SiYuan は定期的に通知を送信します。デフォルトの通知内容は、開発チームが気に入っている歌詞です。"
+					"Data": "SiYuanがバックグラウンドで動作し続ける機能を最大限に活用したい場合は、以下の手順に従ってください。"
 				}
 			]
 		},
 		{
-			"ID": "20250114215535-942fbf3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20250114215535-942fbf3",
-				"updated": "20250114215535"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "カスタマイズする必要がある場合は、以下の手順に従ってください。"
-				}
-			]
-		},
-		{
-			"ID": "20250114215535-5igrtp8",
+			"ID": "20260317195514-87rztvj",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20250114215535-5igrtp8",
-				"updated": "20250117171922"
+				"id": "20260317195514-87rztvj",
+				"updated": "20260317202604"
 			},
 			"Children": [
 				{
-					"ID": "20250114215535-a0e9b4c",
+					"ID": "20260317195514-31osjhv",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -344,46 +330,28 @@
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20250114215535-a0e9b4c",
-						"updated": "20250117171922"
+						"id": "20260317195514-31osjhv",
+						"updated": "20260317202604"
 					},
 					"Children": [
 						{
-							"ID": "20250114215535-2lxc7ib",
+							"ID": "20260317195514-r1jpi3g",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20250114215535-2lxc7ib",
-								"updated": "20250117171922"
+								"id": "20260317195514-r1jpi3g",
+								"updated": "20260317202604"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デスクトップの "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "workspace/data/assets/"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ フォルダに "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "android-notification-texts.txt"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ という名前のテキストファイルを作成します。各行は通知のテキストになります。"
+									"Data": "省電力設定を「無制限」に調整しました。"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20250114215535-gcwij08",
+					"ID": "20260317195514-y0ftv3q",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
@@ -392,28 +360,106 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20250114215535-gcwij08",
-						"updated": "20250114215604"
+						"id": "20260317195514-y0ftv3q",
+						"updated": "20260317195514"
 					},
 					"Children": [
 						{
-							"ID": "20250114215535-hfrsfi9",
+							"ID": "20260317195514-3yz94lq",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20250114215535-hfrsfi9",
-								"updated": "20250114215604"
+								"id": "20260317195514-3yz94lq",
+								"updated": "20260317195514"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通知機能を有効にします。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195514-wy353hn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260317195514-wy353hn",
+						"updated": "20260317195514"
+					},
+					"Children": [
+						{
+							"ID": "20260317195514-vc2wyly",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195514-vc2wyly",
+								"updated": "20260317195514"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップクライアント上で、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/assets/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ フォルダ内に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "android-notification-texts.txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ という名前のテキストファイルを作成します。このファイル内の各行が、通知メッセージのテキストとして使用されます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260317195514-7q5zeh1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"id": "20260317195514-7q5zeh1",
+						"updated": "20260317195538"
+					},
+					"Children": [
+						{
+							"ID": "20260317195514-4xu3rev",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260317195514-4xu3rev",
+								"updated": "20260317195538"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20240530101000-wo49zvq",
-									"TextMarkBlockRefSubtype": "d",
+									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "データ同期"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "を介してAndroid側に同期します。"
+									"Data": "機能を使用して、このファイルをAndroidデバイスに同期します。"
 								}
 							]
 						}
@@ -422,16 +468,16 @@
 			]
 		},
 		{
-			"ID": "20250114215535-0a2tswh",
+			"ID": "20260317195514-6utuus1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20250114215535-0a2tswh",
-				"updated": "20250114215535"
+				"id": "20260317195514-6utuus1",
+				"updated": "20260317195514"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "これら 2 つの手順を完了すると、通知にはカスタマイズしたテキストが使用されるようになります。"
+					"Data": "上記の手順が完了すると、SiYuanは45秒ごとに通知を送信し、バックグラウンドでの動作を維持できるようになります。"
 				}
 			]
 		}

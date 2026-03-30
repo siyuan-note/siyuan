@@ -25,8 +25,8 @@ export const canInput = (element: Element) => {
     ) && element.getAttribute("readonly") !== "readonly") {
         return element;
     }
-    const wysisygElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
-    if (wysisygElement && wysisygElement.getAttribute("data-readonly") === "false") {
+    const wysiwygElement = hasClosestByClassName(element, "protyle-wysiwyg", true);
+    if (wysiwygElement && wysiwygElement.getAttribute("data-readonly") === "false") {
         return hasClosestByAttribute(element, "contenteditable", "true");
     }
     return false;

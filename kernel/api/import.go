@@ -54,14 +54,6 @@ func importSY(c *gin.Context) {
 		return
 	}
 	file := files[0]
-	reader, err := file.Open()
-	if err != nil {
-		logging.LogErrorf("read import .sy.zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
 	importDir := filepath.Join(util.TempDir, "import")
 	if err = os.MkdirAll(importDir, 0755); err != nil {
 		logging.LogErrorf("make import dir [%s] failed: %s", importDir, err)
@@ -80,7 +72,26 @@ func importSY(c *gin.Context) {
 
 	defer os.RemoveAll(writePath)
 
-	writer, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
+	var reader io.ReadCloser
+	var writer *os.File
+	defer func() {
+		if writer != nil {
+			_ = writer.Close()
+		}
+		if reader != nil {
+			_ = reader.Close()
+		}
+	}()
+
+	reader, err = file.Open()
+	if err != nil {
+		logging.LogErrorf("read import .sy.zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	writer, err = os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logging.LogErrorf("open import .sy.zip [%s] failed: %s", writePath, err)
 		ret.Code = -1
@@ -93,8 +104,20 @@ func importSY(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	writer.Close()
-	reader.Close()
+	if err = writer.Close(); err != nil {
+		logging.LogErrorf("close import .sy.zip [%s] failed: %s", writePath, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	writer = nil
+	if err = reader.Close(); err != nil {
+		logging.LogErrorf("close import upload reader failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	reader = nil
 
 	notebook := form.Value["notebook"][0]
 	toPath := form.Value["toPath"][0]
@@ -138,7 +161,19 @@ func importData(c *gin.Context) {
 	}
 	dataZipPath := filepath.Join(importDir, util.CurrentTimeSecondsStr()+".zip")
 	defer os.RemoveAll(dataZipPath)
-	dataZipFile, err := os.Create(dataZipPath)
+
+	var dataZipFile *os.File
+	var fileReader io.ReadCloser
+	defer func() {
+		if dataZipFile != nil {
+			_ = dataZipFile.Close()
+		}
+		if fileReader != nil {
+			_ = fileReader.Close()
+		}
+	}()
+
+	dataZipFile, err = os.Create(dataZipPath)
 	if err != nil {
 		logging.LogErrorf("create temp file failed: %s", err)
 		ret.Code = -1
@@ -147,7 +182,7 @@ func importData(c *gin.Context) {
 	}
 	file := form.File["file"][0]
 	logging.LogInfof("import data [name=%s, size=%d]", file.Filename, file.Size)
-	fileReader, err := file.Open()
+	fileReader, err = file.Open()
 	if err != nil {
 		logging.LogErrorf("open upload file failed: %s", err)
 		ret.Code = -1
@@ -167,7 +202,14 @@ func importData(c *gin.Context) {
 		ret.Msg = "close file failed"
 		return
 	}
-	fileReader.Close()
+	dataZipFile = nil
+	if err = fileReader.Close(); err != nil {
+		logging.LogErrorf("close upload reader failed: %s", err)
+		ret.Code = -1
+		ret.Msg = "close file failed"
+		return
+	}
+	fileReader = nil
 
 	err = model.ImportData(dataZipPath)
 	if err != nil {
@@ -237,14 +279,6 @@ func importZipMd(c *gin.Context) {
 		return
 	}
 	file := files[0]
-	reader, err := file.Open()
-	if err != nil {
-		logging.LogErrorf("read import .zip failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
 	importDir := filepath.Join(util.TempDir, "import")
 	if err = os.MkdirAll(importDir, 0755); err != nil {
 		logging.LogErrorf("make import dir [%s] failed: %s", importDir, err)
@@ -253,7 +287,7 @@ func importZipMd(c *gin.Context) {
 		return
 	}
 
-	writePath := filepath.Join(util.TempDir, "import", file.Filename)
+	writePath := filepath.Join(importDir, file.Filename)
 	if !util.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
 		ret.Code = -1
@@ -263,7 +297,26 @@ func importZipMd(c *gin.Context) {
 
 	defer os.RemoveAll(writePath)
 
-	writer, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
+	var reader io.ReadCloser
+	var writer *os.File
+	defer func() {
+		if writer != nil {
+			_ = writer.Close()
+		}
+		if reader != nil {
+			_ = reader.Close()
+		}
+	}()
+
+	reader, err = file.Open()
+	if err != nil {
+		logging.LogErrorf("read import .zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	writer, err = os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		logging.LogErrorf("open import .zip [%s] failed: %s", writePath, err)
 		ret.Code = -1
@@ -276,8 +329,20 @@ func importZipMd(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	writer.Close()
-	reader.Close()
+	if err = writer.Close(); err != nil {
+		logging.LogErrorf("close import .zip [%s] failed: %s", writePath, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	writer = nil
+	if err = reader.Close(); err != nil {
+		logging.LogErrorf("close import upload reader failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	reader = nil
 
 	notebook := form.Value["notebook"][0]
 	toPath := form.Value["toPath"][0]

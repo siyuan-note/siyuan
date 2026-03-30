@@ -488,7 +488,7 @@ func setSearch(c *gin.Context) {
 	sql.SetIndexAssetPath(s.IndexAssetPath)
 
 	if needFullReindex := s.CaseSensitive != oldCaseSensitive || s.IndexAssetPath != oldIndexAssetPath; needFullReindex {
-		model.FullReindex()
+		model.FullReindex(false)
 	}
 
 	if oldVirtualRefName != s.VirtualRefName ||
@@ -561,6 +561,39 @@ func setAppearance(c *gin.Context) {
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 
+func setIcon(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var icon string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("icon", true, &icon),
+	) {
+		return
+	}
+
+	icon = strings.TrimSpace(icon)
+	if icon == "" {
+		ret.Code = -1
+		ret.Msg = "[icon] must not be empty"
+		return
+	}
+
+	if err := model.SetIcon(icon); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.InitAppearance()
+	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+}
+
 func setTheme(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -570,9 +603,8 @@ func setTheme(c *gin.Context) {
 		return
 	}
 
-	var theme string
+	var theme, appearanceMode string
 	var modesRaw []any
-	var appearanceMode string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("theme", false, &theme),
 		util.BindJsonArg("modes", false, &modesRaw),
@@ -581,6 +613,7 @@ func setTheme(c *gin.Context) {
 		return
 	}
 
+	theme, appearanceMode = strings.TrimSpace(theme), strings.TrimSpace(appearanceMode)
 	modes := make([]int, 0, 2)
 	if theme != "" {
 		for _, m := range modesRaw {
@@ -638,15 +671,19 @@ func setPublish(c *gin.Context) {
 	model.Conf.Publish = publish
 	model.Conf.Save()
 
-	if port, err := proxy.InitPublishService(); err != nil {
+	port, err := proxy.InitPublishService()
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-	} else {
-		ret.Data = map[string]any{
-			"port":    port,
-			"publish": model.Conf.Publish,
-		}
+		return
 	}
+
+	ret.Data = map[string]any{
+		"port":    port,
+		"publish": model.Conf.Publish,
+	}
+
+	util.BroadcastByType("main", "setPublish", 0, "", model.Conf.Publish)
 }
 
 func getPublish(c *gin.Context) {

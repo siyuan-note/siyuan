@@ -1314,6 +1314,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     targetElement = document.elementFromPoint(point.x, point.y - 6) as HTMLElement;
                 }
                 targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
+                if (targetElement && targetElement.classList.contains("sb") && targetElement.getAttribute("data-sb-layout") === "col") {
+                    const childElement = targetElement.querySelectorAll("[data-node-id]");
+                    if (point.className === "dragover__left") {
+                        targetElement = childElement[0] as HTMLElement;
+                    } else {
+                        targetElement = childElement[childElement.length - 1] as HTMLElement;
+                    }
+                }
             }
         } else if (targetElement && targetElement.classList.contains("list")) {
             if (gutterTypes[0] !== "nodelistitem") {
@@ -1480,7 +1488,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
 
-            if (event.clientX < nodeRect.left + 32 && event.clientX >= nodeRect.left - 1 &&
+            // 减小两个列表之间左侧间距，以便拖拽到其中 https://github.com/siyuan-note/siyuan/issues/15672
+            if (event.clientX < nodeRect.left + (targetElement.classList.contains("list") ? 8 : 32) &&
+                event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__left");
                 addDragover(targetElement);
@@ -1573,7 +1583,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 列表项不能拖入列表项中第一个元素之上
                 disabledPosition = "top";
             }
-            if (gutterTypes[0] === "nodelistitem" && targetElement.nextElementSibling?.classList.contains("list")) {
+            if (gutterTypes[0] === "nodelistitem" &&
+                targetElement.nextElementSibling?.classList.contains("list") &&
+                // https://github.com/siyuan-note/siyuan/issues/15672
+                targetElement.parentElement?.classList.contains("li")) {
                 // 列表项不能拖入列表上方块的下面
                 disabledPosition = "bottom";
             }

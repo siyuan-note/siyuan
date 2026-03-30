@@ -199,6 +199,7 @@ export class Plugin {
         position?: "south" | "left",
         callback: (evt: MouseEvent) => void
     }) {
+        options.icon = options.icon.trim();
         if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
             console.error(`plugin ${this.name} addTopBar error: icon must be svg id or svg tag`);
             return;
@@ -434,25 +435,20 @@ export class Plugin {
         if (!window.siyuan.config.keymap.plugin) {
             window.siyuan.config.keymap.plugin = {};
         }
-        if (options.config.hotkey) {
-            if (!window.siyuan.config.keymap.plugin[this.name]) {
-                window.siyuan.config.keymap.plugin[this.name] = {
-                    [type2]: {
-                        default: options.config.hotkey,
-                        custom: options.config.hotkey,
-                    }
-                };
-            } else if (!window.siyuan.config.keymap.plugin[this.name][type2]) {
-                window.siyuan.config.keymap.plugin[this.name][type2] = {
-                    default: options.config.hotkey,
-                    custom: options.config.hotkey,
-                };
-            } else if (window.siyuan.config.keymap.plugin[this.name][type2]) {
-                if (typeof window.siyuan.config.keymap.plugin[this.name][type2].custom !== "string") {
-                    window.siyuan.config.keymap.plugin[this.name][type2].custom = options.config.hotkey;
-                }
-                window.siyuan.config.keymap.plugin[this.name][type2]["default"] = options.config.hotkey;
+        if (!window.siyuan.config.keymap.plugin[this.name]) {
+            window.siyuan.config.keymap.plugin[this.name] = {};
+        }
+        const hotkey = typeof options.config.hotkey === "string" ? options.config.hotkey : "";
+        if (!window.siyuan.config.keymap.plugin[this.name][type2]) {
+            window.siyuan.config.keymap.plugin[this.name][type2] = {
+                default: hotkey,
+                custom: hotkey,
+            };
+        } else {
+            if (typeof window.siyuan.config.keymap.plugin[this.name][type2].custom !== "string") {
+                window.siyuan.config.keymap.plugin[this.name][type2].custom = hotkey;
             }
+            window.siyuan.config.keymap.plugin[this.name][type2]["default"] = hotkey;
         }
         return this.docks[type2];
     }

@@ -42,7 +42,7 @@ const (
 	TLSKeyFilename    = "key.pem"
 )
 
-// Returns paths to existing TLS certificates or generates new ones signed by a local CA.
+// GetOrCreateTLSCert returns paths to existing TLS certificates or generates new ones signed by a local CA.
 // Certificates are stored in the conf directory of the workspace.
 func GetOrCreateTLSCert() (certPath, keyPath string, err error) {
 	certPath = filepath.Join(ConfDir, TLSCertFilename)
@@ -278,7 +278,7 @@ func writeCertAndKey(certPath, keyPath string, certDER []byte, privateKey *ecdsa
 	return nil
 }
 
-// Imports a CA certificate and private key from PEM-encoded strings.
+// ImportCABundle imports a CA certificate and private key from PEM-encoded strings.
 func ImportCABundle(caCertPEM, caKeyPEM string) error {
 	certBlock, _ := pem.Decode([]byte(caCertPEM))
 	if certBlock == nil {

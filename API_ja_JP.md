@@ -1,4 +1,6 @@
-[English](https://github.com/siyuan-note/siyuan/blob/master/API.md) | [中文](https://github.com/siyuan-note/siyuan/blob/master/API_zh_CN.md)
+[English](API.md)
+| [中文](API_zh_CN.md)
+| **日本語**
 
 * [仕様](#仕様)
     * [パラメータと戻り値](#パラメータと戻り値)
@@ -1091,7 +1093,7 @@
   }
   ```
 
-注意：公開モードでは、すべてのドキュメントの読み書き権限を公開していない限り、このAPIへのアクセスは禁止されます。詳しくは[議論](https://github.com/siyuan-note/siyuan/pull/16041#issuecomment-3912139575)を参照してください。
+注：データセキュリティを確保するため、パブリッシュモードでの本インターフェースへのアクセスは禁止されています。
 
 ### トランザクションをフラッシュ
 

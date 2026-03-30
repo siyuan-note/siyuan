@@ -287,7 +287,7 @@
   "imported": "가져오기 완료",
   "mirrorTip": "미러 데이터베이스, 모든 데이터 업데이트가 다른 모든 미러에 동기화됩니다",
   "includeTime": "시간 포함",
-  "accountSupport1": "2020년 8월 31일 첫 공개 릴리스 이후, SiYuan은 830회 이상 릴리스되었으며, 15,000회 이상의 사용자 요구 사항 및 피드백을 해결하고, 19,800회 이상의 코드를 커밋했습니다. 여러분의 지원과 피드백 없이는 이룰 수 없었습니다.",
+  "accountSupport1": "2020년 8월 31일 첫 공개 릴리스 이후, SiYuan은 880회 이상 릴리스되었으며, 16000회 이상의 사용자 요구 사항 및 피드백을 해결하고, 22000회 이상의 코드를 커밋했습니다. 여러분의 지원과 피드백 없이는 이룰 수 없었습니다.",
   "accountSupport2": "여러분의 지원과 피드백은 SiYuan을 더 좋게 만듭니다. 우리는 항상 사용자와 친구가 되어 더 나은 제품을 만들기 위해 노력하고, 더 나은 지식 관리 경험을 제공할 것입니다. 지원해 주셔서 대단히 감사합니다!",
   "goToTab1": "탭 #1로 이동",
   "goToTab2": "탭 #2로 이동",
@@ -463,6 +463,8 @@
   "switchDirect": "비교 방향 전환",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> 문서만 검색",
   "onlySearchForDocTip": "활성화하면 [[ 또는 【【 를 사용하여 블록 참조를 검색할 때 문서 이름만 검색합니다",
+  "pasteURLAutoConvert": "붙여넣은 URL을 자동으로 링크로 변환",
+  "pasteURLAutoConvertTip": "활성화하면 http:// 또는 https:// 로 시작하는 URL을 붙여넣을 때 자동으로 클릭 가능한 링크로 변환합니다",
   "ocrResult": "OCR 결과 텍스트",
   "reOCR": "다시 OCR",
   "continueReview1": "복습 계속",
@@ -1454,7 +1456,6 @@
     "task.database.index": "데이터베이스 인덱스 실행",
     "task.database.index.commit": "데이터베이스 인덱스 커밋 실행",
     "task.database.index.ref": "데이터베이스 인덱스 참조 실행",
-    "task.database.index.fix": "데이터베이스 인덱스 수정 실행",
     "task.ocr.image": "이미지 OCR 텍스트 추출 실행",
     "task.history.generateFile": "히스토리 데이터베이스 문서 생성 실행",
     "task.history.database.index.full": "히스토리 데이터베이스 인덱스 재생성 실행",
@@ -1768,6 +1769,7 @@
     "282": "창 닫기",
     "283": "비밀번호",
     "284": "접근 금지됨",
-    "285": "비밀번호가 올바르지 않습니다"
+    "285": "비밀번호가 올바르지 않습니다",
+    "286": "[%s] 이미 롤백되었습니다"
   }
 }

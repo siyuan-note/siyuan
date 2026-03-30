@@ -75,7 +75,7 @@ func GetServerAddrs() (ret []string) {
 	ret = append(ret, LocalHost)
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 
-	for i, _ := range ret {
+	for i := range ret {
 		ret[i] = "http://" + ret[i] + ":" + ServerPort
 	}
 	return
@@ -373,10 +373,10 @@ func IsPartitionRootPath(path string) bool {
 	if runtime.GOOS == "windows" {
 		// On Windows, root paths are like "C:\", "D:\", etc.
 		return len(cleanPath) == 3 && cleanPath[1] == ':' && cleanPath[2] == '\\'
-	} else {
-		// On Unix-like systems, the root path is "/"
-		return cleanPath == "/"
 	}
+
+	// On Unix-like systems, the root path is "/"
+	return cleanPath == "/"
 }
 
 // IsSensitivePath 对传入路径做统一的敏感性检测。
@@ -402,6 +402,9 @@ func IsSensitivePath(p string) bool {
 		"/lib",
 		"/srv",
 		"/tmp",
+		"/usr",
+		"/opt",
+		"/sbin",
 	}
 	for _, pre := range prefixes {
 		if strings.HasPrefix(toCheckPathLower, pre) {

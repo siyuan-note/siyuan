@@ -572,32 +572,32 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     name = window.siyuan.languages.workspaceData;
                     time = (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim();
                 }
-                const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", name)
-                    .replace("${time}", time);
-                confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
-                    if (dataType === "assets") {
-                        fetchPost("/api/history/rollbackAssetsHistory", {
-                            historyPath: target.parentElement.getAttribute("data-path")
-                        });
-                    } else if (dataType === "doc") {
-                        fetchPost("/api/history/rollbackDocHistory", {
-                            notebook: target.parentElement.getAttribute("data-notebook-id"),
-                            historyPath: target.parentElement.getAttribute("data-path")
-                        });
-                    } else if (dataType === "av") {
-                        fetchPost("/api/history/rollbackAttributeViewHistory", {
-                            historyPath: target.parentElement.getAttribute("data-path")
-                        });
-                    } else if (dataType === "notebook") {
-                        fetchPost("/api/history/rollbackNotebookHistory", {
-                            historyPath: target.parentElement.getAttribute("data-path")
-                        });
-                    } else {
-                        fetchPost("/api/repo/checkoutRepo", {
-                            id: target.parentElement.getAttribute("data-id")
-                        });
-                    }
-                });
+                confirmDialog("⚠️ " + window.siyuan.languages.rollback,
+                    window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),
+                    () => {
+                        if (dataType === "assets") {
+                            fetchPost("/api/history/rollbackAssetsHistory", {
+                                historyPath: target.parentElement.getAttribute("data-path")
+                            });
+                        } else if (dataType === "doc") {
+                            fetchPost("/api/history/rollbackDocHistory", {
+                                notebook: target.parentElement.getAttribute("data-notebook-id"),
+                                historyPath: target.parentElement.getAttribute("data-path")
+                            });
+                        } else if (dataType === "av") {
+                            fetchPost("/api/history/rollbackAttributeViewHistory", {
+                                historyPath: target.parentElement.getAttribute("data-path")
+                            });
+                        } else if (dataType === "notebook") {
+                            fetchPost("/api/history/rollbackNotebookHistory", {
+                                historyPath: target.parentElement.getAttribute("data-path")
+                            });
+                        } else {
+                            fetchPost("/api/repo/checkoutRepo", {
+                                id: target.parentElement.getAttribute("data-id")
+                            });
+                        }
+                    });
                 event.stopPropagation();
                 event.preventDefault();
                 break;

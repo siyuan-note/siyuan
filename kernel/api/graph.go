@@ -62,8 +62,15 @@ func getGraph(c *gin.Context) {
 	reqId := arg["reqId"]
 	ret.Data = map[string]interface{}{"reqId": reqId}
 
-	query := arg["k"].(string)
-	graphConf, err := gulu.JSON.MarshalJSON(arg["conf"])
+	var query string
+	var confArg map[string]any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("k", true, &query),
+		util.BindJsonArg("conf", true, &confArg),
+	) {
+		return
+	}
+	graphConf, err := gulu.JSON.MarshalJSON(confArg)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -111,10 +118,17 @@ func getLocalGraph(c *gin.Context) {
 		return
 	}
 
-	keyword := arg["k"].(string)
-	id := arg["id"].(string)
+	var keyword, id string
+	var confArg map[string]any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("k", true, &keyword),
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("conf", true, &confArg),
+	) {
+		return
+	}
 
-	graphConf, err := gulu.JSON.MarshalJSON(arg["conf"])
+	graphConf, err := gulu.JSON.MarshalJSON(confArg)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

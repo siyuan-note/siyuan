@@ -56,7 +56,7 @@ func CleanNotExistAssetsTexts() {
 
 	assetsPath := GetDataAssetsAbsPath()
 	var toRemoves []string
-	for asset, _ := range assetsTexts {
+	for asset := range assetsTexts {
 		assetAbsPath := strings.TrimPrefix(asset, "assets")
 		assetAbsPath = filepath.Join(assetsPath, assetAbsPath)
 		if !filelock.IsExist(assetAbsPath) {

@@ -113,7 +113,7 @@ func FlushHistoryQueue() {
 		debug.FreeOSMemory()
 	}
 
-	elapsed := time.Now().Sub(start).Milliseconds()
+	elapsed := time.Since(start).Milliseconds()
 	if 7000 < elapsed {
 		logging.LogInfof("database history op tx [%dms]", elapsed)
 	}
@@ -124,7 +124,7 @@ func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]i
 	case "index":
 		err = insertHistories(tx, op.histories, context)
 	case "deleteOutdated":
-		err = deleteOutdatedHistories(tx, op.before, context)
+		err = deleteOutdatedHistories(tx, op.before)
 	default:
 		msg := fmt.Sprintf("unknown history operation [%s]", op.action)
 		logging.LogErrorf(msg)

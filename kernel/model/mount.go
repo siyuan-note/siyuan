@@ -34,6 +34,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func GetBoxByName(name string) (ret *Box) {
+	for _, box := range Conf.GetOpenedBoxes() {
+		if box.Name == name {
+			ret = box
+			return
+		}
+	}
+	return
+}
+
 func CreateBox(name string) (id string, err error) {
 	name = util.RemoveInvalid(name)
 	if 512 < utf8.RuneCountInString(name) {
@@ -155,7 +165,7 @@ func RemoveBox(boxID string) (err error) {
 				if removeErr := filelock.Remove(avFilePath); nil != removeErr {
 					logging.LogErrorf("remove av file [%s] failed: %s", avFilePath, removeErr)
 				} else {
-					logging.LogInfof("removed av file [%s]", avFilePath)
+					logging.LogDebugf("removed av file [%s]", avFilePath)
 				}
 			}
 		}

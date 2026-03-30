@@ -112,7 +112,7 @@ func execAssetContentOp(op *assetContentDBQueueOperation, tx *sql.Tx, context ma
 	case "index":
 		err = insertAssetContents(tx, op.assetContents, context)
 	case "deletePath":
-		err = deleteAssetContentsByPath(tx, op.path, context)
+		err = deleteAssetContentsByPath(tx, op.path)
 	default:
 		msg := fmt.Sprintf("unknown asset content operation [%s]", op.action)
 		logging.LogErrorf(msg)

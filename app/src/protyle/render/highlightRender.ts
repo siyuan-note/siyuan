@@ -33,13 +33,14 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
     addScript(`${cdn}/js/highlight.js/highlight.min.js?v=11.11.1`, "protyleHljsScript").then(() => {
         addScript(`${cdn}/js/highlight.js/third-languages.js?v=2.0.1`, "protyleHljsThirdScript").then(() => {
             codeElements.forEach((block: HTMLElement) => {
+                if (block.getAttribute("data-render") === "true") {
+                    return;
+                }
+                block.setAttribute("data-render", "true");
                 const iconElements = block.parentElement.querySelectorAll(".protyle-icon");
                 if (iconElements.length === 2) {
                     iconElements[0].setAttribute("aria-label", window.siyuan.languages.copy);
                     iconElements[1].setAttribute("aria-label", window.siyuan.languages.more);
-                }
-                if (block.getAttribute("data-render") === "true") {
-                    return;
                 }
                 const wbrElement = block.querySelector("wbr");
                 let startIndex = 0;
@@ -69,7 +70,6 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
                     language = "plaintext";
                 }
                 block.classList.add("hljs");
-                block.setAttribute("data-render", "true");
                 const autoEnter = block.parentElement.getAttribute("linewrap");
                 const ligatures = block.parentElement.getAttribute("ligatures");
                 const lineNumber = block.parentElement.getAttribute("linenumber");

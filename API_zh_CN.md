@@ -1,4 +1,6 @@
-[English](https://github.com/siyuan-note/siyuan/blob/master/API.md)| [日本語](https://github.com/siyuan-note/siyuan/blob/master/API_ja_JP.md)
+[English](API.md)
+| **中文**
+| [日本語](API_ja_JP.md)
 
 * [规范](#规范)
     * [参数和返回值](#参数和返回值)
@@ -1091,7 +1093,7 @@
   }
   ```
   
-注意：发布模式下除非公开所有文档读写权限，否则会禁止访问该接口，请参考[讨论](https://github.com/siyuan-note/siyuan/pull/16041#issuecomment-3912139575)。
+注意：为保证数据安全，发布模式下禁止访问该接口。
 
 ### 提交事务
 

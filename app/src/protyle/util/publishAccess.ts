@@ -84,7 +84,7 @@ export const openPublishAccessDialog = (id: string, position: IPosition, callbac
     <span class="fn__space"></span>
     <button class="block__icon block__icon--show ariaLabel" data-position="north" data-level="forbidden" aria-label="${window.siyuan.languages.publishAccessForbidden}">${getPublishAccessOptionByLevel("forbidden").iconHTML}</button>
     <span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+    <button class="b3-button b3-button--text ariaLabel" data-position="north" aria-label="${window.siyuan.languages.confirm}"><svg><use xlink:href="#iconSelect"></use></svg></button>
 </div>
 <div style="padding: 0 8px 8px 8px;text-align: center;">
     <div class="publish-access-dialog__comment">${window.siyuan.languages.publishAccessPublicComment}</div>

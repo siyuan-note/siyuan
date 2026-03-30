@@ -51,9 +51,11 @@ import (
 	"github.com/siyuan-note/dejavu/entity"
 	"github.com/siyuan-note/encryption"
 	"github.com/siyuan-note/eventbus"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -186,7 +188,115 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	return
 }
 
-func OpenRepoSnapshotDoc(fileID string) (title, content string, displayInText bool, updated int64, err error) {
+func RollbackRepoSnapshotFile(fileID string) (err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+
+	file, err := repo.GetFile(fileID)
+	if err != nil {
+		return
+	}
+
+	data, err := repo.OpenFile(file)
+	if err != nil {
+		return
+	}
+
+	dir, f := filepath.Split(file.Path)
+	tempRepoDiffDir := filepath.Join(util.TempDir, "repo", "rollback", dir)
+	if err = os.MkdirAll(tempRepoDiffDir, 0755); nil != err {
+		logging.LogErrorf("mkdir [%s] failed: %v", tempRepoDiffDir, err)
+		return
+	}
+
+	from := filepath.Join(tempRepoDiffDir, f)
+	if err = os.WriteFile(from, data, 0644); nil != err {
+		logging.LogErrorf("write file [%s] failed: %v", filepath.Join(tempRepoDiffDir, file.Path), err)
+		return
+	}
+
+	if strings.HasSuffix(file.Path, ".sy") {
+		boxID := strings.TrimPrefix(file.Path, "/")
+		boxID = strings.Split(boxID, "/")[0]
+
+		var box *Box
+		var needResetTree bool
+		box, needResetTree, err = getRollbackBox(boxID)
+		if err != nil {
+			logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)
+			return
+		}
+		boxID = box.ID
+
+		var destPath, parentHPath string
+		rootID := util.GetTreeID(file.Path)
+		workingDoc := treenode.GetBlockTree(rootID)
+		if needResetTree {
+			workingDoc = nil
+		}
+		destPath, parentHPath, err = getRollbackDockPath(boxID, file.Path, workingDoc)
+		if err != nil {
+			return
+		}
+
+		tree, _ := loadTree(from, util.NewLute())
+		if nil == tree {
+			msg := fmt.Sprintf("no such file or directory: %s", from)
+			logging.LogErrorf(msg)
+			err = errors.New(msg)
+			return
+		}
+
+		tree.Box = boxID
+		tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
+		tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+		if needResetTree {
+			resetTree(tree, "", true)
+		}
+
+		if nil != workingDoc && "d" == workingDoc.Type {
+			workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
+			if err = filelock.Remove(workingDocPath); err != nil {
+				return
+			}
+			logging.LogInfof("removed working doc file [%s]", workingDocPath)
+		}
+		if nil != workingDoc {
+			treenode.RemoveBlockTreesByRootID(rootID)
+		}
+
+		sql.RemoveTreeQueue(rootID)
+		if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
+			return
+		}
+		ReloadFiletree()
+		ReloadProtyle(rootID)
+
+		msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+		util.PushMsg(msg, 7000)
+	} else {
+		to := filepath.Join(util.DataDir, file.Path)
+		if err = filelock.CopyNewtimes(from, to); nil != err {
+			logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
+			return
+		}
+
+		msg := fmt.Sprintf(Conf.Language(286), to)
+		util.PushMsg(msg, 7000)
+	}
+
+	IncSync()
+	return
+}
+
+func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -469,7 +579,7 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 
 	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 32)
 	if err != nil {
-		if dejavu.ErrNotFoundIndex == err {
+		if errors.Is(err, dejavu.ErrNotFoundIndex) {
 			logs = []*dejavu.Log{}
 			err = nil
 			return
@@ -777,7 +887,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	FullReindex()
+	FullReindex(true)
 
 	if syncEnabled {
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
@@ -1292,9 +1402,7 @@ func bootSyncRepo() (err error) {
 
 	waitGroup := sync.WaitGroup{}
 	var errs []error
-	waitGroup.Add(1)
-	go func() {
-		defer waitGroup.Done()
+	waitGroup.Go(func() {
 		defer logging.Recover()
 
 		start := time.Now()
@@ -1315,12 +1423,9 @@ func bootSyncRepo() (err error) {
 		}
 
 		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
-	}()
-
+	})
 	var fetchedFiles []*entity.File
-	waitGroup.Add(1)
-	go func() {
-		defer waitGroup.Done()
+	waitGroup.Go(func() {
 		defer logging.Recover()
 
 		start := time.Now()
@@ -1350,7 +1455,7 @@ func bootSyncRepo() (err error) {
 		}
 
 		logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", time.Since(start).Seconds())
-	}()
+	})
 	waitGroup.Wait()
 	if 0 < len(errs) {
 		err = errs[0]
@@ -1735,7 +1840,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	syncingStorages.Store(false)
 
 	if needFullReindex(upsertTrees) { // 改进同步后全量重建索引判断 https://github.com/siyuan-note/siyuan/issues/5764
-		FullReindex()
+		FullReindex(false)
 		return
 	}
 

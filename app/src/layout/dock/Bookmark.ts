@@ -33,9 +33,7 @@ export class Bookmark extends Model {
                                     needReload = true;
                                 }
                                 if (needReload) {
-                                    fetchPost("/api/bookmark/getBookmark", {}, response => {
-                                        this.update(response.data);
-                                    });
+                                    (this as Bookmark).update();
                                 }
                             });
                             break;
@@ -44,9 +42,7 @@ export class Bookmark extends Model {
                         case "removeDoc":
                         case "mount":
                             if (data.cmd !== "mount" || data.code !== 1) {
-                                fetchPost("/api/bookmark/getBookmark", {}, response => {
-                                    this.update(response.data);
-                                });
+                                (this as Bookmark).update();
                             }
                             break;
                     }

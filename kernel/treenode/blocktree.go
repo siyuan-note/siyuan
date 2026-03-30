@@ -637,7 +637,7 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		}
 		if _, err = tx.Exec(sqlStmt, n.ID, tree.ID, parentID, tree.Box, tree.Path, tree.HPath, n.IALAttr("updated"), TypeAbbr(n.Type.String())); err != nil {
 			tx.Rollback()
-			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
+			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 			if strings.Contains(err.Error(), "database disk image is malformed") {
 				initDatabase(true)

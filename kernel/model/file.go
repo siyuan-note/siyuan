@@ -468,7 +468,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	inputIndex := index
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
-		if ErrBlockNotFound == err {
+		if errors.Is(err, ErrBlockNotFound) {
 			if 0 == mode {
 				err = ErrTreeNotFound // 初始化打开文档时如果找不到则关闭编辑器
 			}
@@ -740,6 +740,9 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		}
 
 		subTree.Root.AppendChild(n)
+		for _, ial := range n.KramdownIAL {
+			ial[1] = util.SanitizeAttr(ial[1])
+		}
 	}
 
 	luteEngine.RenderOptions.NodeIndexStart = index

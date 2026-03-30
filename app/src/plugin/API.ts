@@ -49,16 +49,27 @@ openWindow = (options: {
     height?: number,
     width?: number,
     tab?: Tab,
+    alwaysOnTop?: boolean,
     doc?: {
         id: string,     // 块 id
     },
 }) => {
     if (options.doc && options.doc.id) {
-        openNewWindowById(options.doc.id, {position: options.position, width: options.width, height: options.height});
+        openNewWindowById(options.doc.id, {
+            alwaysOnTop: options.alwaysOnTop,
+            position: options.position,
+            width: options.width,
+            height: options.height
+        });
         return;
     }
     if (options.tab) {
-        openNewWindow(options.tab, {position: options.position, width: options.width, height: options.height});
+        openNewWindow(options.tab, {
+            alwaysOnTop: options.alwaysOnTop,
+            position: options.position,
+            width: options.width,
+            height: options.height
+        });
         return;
     }
 };
@@ -318,7 +329,10 @@ const openEmoji = (options: {
         dynamicImgElement = document.createElement("img");
         dynamicImgElement.src = options.dynamicIconURL;
     }
-    openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement,  {dynamic: options.hideDynamicIcon, custom: options.hideCustomIcon});
+    openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement, {
+        dynamic: options.hideDynamicIcon,
+        custom: options.hideCustomIcon
+    });
 };
 
 export const API = {

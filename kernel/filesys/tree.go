@@ -83,10 +83,8 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
 	waitGroup := sync.WaitGroup{}
 	lock := sync.Mutex{}
-	poolSize := runtime.NumCPU()
-	if 8 < poolSize {
-		poolSize = 8
-	}
+	poolSize := min(runtime.NumCPU(), 8)
+
 	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
 		defer waitGroup.Done()
 

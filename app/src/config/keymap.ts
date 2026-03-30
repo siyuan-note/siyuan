@@ -78,9 +78,6 @@ export const keymap = {
             });
             Object.keys(item.docks).forEach(key => {
                 const dockConfig = item.docks[key].config;
-                if (!dockConfig.hotkey) {
-                    return;
-                }
                 const dockKeymap = window.siyuan.config.keymap.plugin[item.name][key];
                 const keyValue = updateHotkeyTip(dockKeymap.custom);
                 commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">

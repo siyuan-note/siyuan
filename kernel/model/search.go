@@ -1938,7 +1938,7 @@ func maxContent(content string, maxLen int) string {
 	idx := strings.Index(content, "<mark>")
 	if 128 < maxLen && maxLen <= idx {
 		head := bytes.Buffer{}
-		for i := 0; i < 512; i++ {
+		for range 512 {
 			r, size := utf8.DecodeLastRuneInString(content[:idx])
 			head.WriteRune(r)
 			idx -= size
@@ -2151,7 +2151,7 @@ func markReplaceSpanWithSplit(text string, keywords []string, replacementStart, 
 	tmp := search.EncloseHighlighting(text, keywords, replacementStart, replacementEnd, Conf.Search.CaseSensitive, true)
 	parts := strings.Split(tmp, replacementEnd)
 	buf := bytes.Buffer{}
-	for i := 0; i < len(parts); i++ {
+	for i := range len(parts) {
 		if i >= len(parts)-1 {
 			buf.WriteString(parts[i])
 			break

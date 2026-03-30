@@ -452,7 +452,6 @@ const afterRenderTable = (options: ITableOptions) => {
 export const avRender = async (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true, avData?: IAV) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
-        // 编辑器内代码块编辑渲染
         avElements = [element];
     } else {
         avElements = Array.from(element.querySelectorAll('[data-type="NodeAttributeView"]'));

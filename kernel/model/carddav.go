@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -98,7 +97,7 @@ var (
 	ErrorCardDavAddressFileExtensionNameInvalid = errors.New("CardDAV: address file extension name is invalid")
 )
 
-// ImportVCardFile imports a address book from a vCard file (*.vcf)
+// ImportAddressBook imports an address book from a vCard file (*.vcf)
 func ImportAddressBook(addressBookPath, cardContent string) (addresses []*AddressObject, err error) {
 	// TODO: Check whether the path is valid (PathDepth: Address)
 	// TODO: Check whether the address book exists
@@ -107,7 +106,7 @@ func ImportAddressBook(addressBookPath, cardContent string) (addresses []*Addres
 	return
 }
 
-// ExportAddressBook exports a address book to a vCard file (*.vcf)
+// ExportAddressBook exports an address book to a vCard file (*.vcf)
 func ExportAddressBook(addressBookPath string) (cardContent string, err error) {
 	// TODO: Check whether the path is valid (PathDepth: AddressBook)
 	// TODO: Check whether the address book exists
@@ -115,7 +114,7 @@ func ExportAddressBook(addressBookPath string) (cardContent string, err error) {
 	return
 }
 
-// AddressBooksMetaDataFilePath returns the absolute path of the address books meta data file
+// AddressBooksMetaDataFilePath returns the absolute path of the address books metadata file
 func AddressBooksMetaDataFilePath() string {
 	return DavPath2DirectoryPath(CardDavAddressBooksMetaDataFilePath)
 }
@@ -227,7 +226,6 @@ func (c *Contacts) load() error {
 
 	// load vCard files (*.vcf)
 	wg := &sync.WaitGroup{}
-	wg.Add(len(c.booksMetaData))
 	for _, addressBookMetaData := range c.booksMetaData {
 		addressBook := &AddressBook{
 			Changed:       false,
@@ -236,41 +234,14 @@ func (c *Contacts) load() error {
 			Addresses:     sync.Map{},
 		}
 		c.books.Store(addressBookMetaData.Path, addressBook)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			addressBook.load()
-		}()
+		})
 	}
 	wg.Wait()
 
 	c.loaded = true
 	c.changed = false
-	return nil
-}
-
-// save all contacts
-func (c *Contacts) save(force bool) error {
-	if force || c.changed {
-		// save address books meta data
-		if err := c.saveAddressBooksMetaData(); err != nil {
-			return err
-		}
-
-		// save all address to *.vbf files
-		wg := &sync.WaitGroup{}
-		c.books.Range(func(path any, book any) bool {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				// path_ := path.(string)
-				book_ := book.(*AddressBook)
-				book_.save(force)
-			}()
-			return true
-		})
-		wg.Wait()
-		c.changed = false
-	}
 	return nil
 }
 
@@ -607,10 +578,7 @@ func (b *AddressBook) load() error {
 			filename := entry.Name()
 			ext := util.Ext(filename)
 			if ext == VCardFileExt {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
+				wg.Go(func() {
 					// load cards
 					addressFilePath := path.Join(b.DirectoryPath, filename)
 					vCards, err := LoadCards(addressFilePath)
@@ -638,9 +606,7 @@ func (b *AddressBook) load() error {
 						// Create a file for each card
 						addressesWaitGroup := &sync.WaitGroup{}
 						for _, vCard := range vCards {
-							addressesWaitGroup.Add(1)
-							go func() {
-								defer addressesWaitGroup.Done()
+							addressesWaitGroup.Go(func() {
 								filename_ := util.AssetName(filename, ast.NewNodeID())
 								address := &AddressObject{
 									FilePath: path.Join(b.DirectoryPath, filename_),
@@ -658,7 +624,7 @@ func (b *AddressBook) load() error {
 
 								id := path.Base(filename)
 								b.Addresses.Store(id, address)
-							}()
+							})
 						}
 
 						addressesWaitGroup.Wait()
@@ -668,39 +634,11 @@ func (b *AddressBook) load() error {
 							return
 						}
 					}
-				}()
+				})
 			}
 		}
 	}
 	wg.Wait()
-	return nil
-}
-
-// save an address book to multiple *.vcf files
-func (b *AddressBook) save(force bool) error {
-	if force || b.Changed {
-		// create directory
-		if err := os.MkdirAll(b.DirectoryPath, 0755); err != nil {
-			logging.LogErrorf("create directory [%s] failed: %s", b.DirectoryPath, err)
-			return err
-		}
-
-		wg := &sync.WaitGroup{}
-		b.Addresses.Range(func(id any, address any) bool {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				// id_ := id.(string)
-				address_ := address.(*AddressObject)
-				address_.save(force)
-				address_.update()
-			}()
-			return true
-		})
-		wg.Wait()
-		b.Changed = false
-	}
-
 	return nil
 }
 
@@ -709,32 +647,6 @@ type AddressObject struct {
 	FilePath string
 	BookPath string
 	Data     *carddav.AddressObject
-}
-
-// load an address from *.vcf file
-func (o *AddressObject) load() error {
-	// load vCard file
-	cards, err := LoadCards(o.FilePath)
-	if err != nil {
-		return err
-	}
-	if len(cards) != 1 {
-		return fmt.Errorf("file [%s] contains multiple cards", o.FilePath)
-	}
-
-	// create address object
-	o.Data = &carddav.AddressObject{
-		Card: *cards[0],
-	}
-
-	// update file info
-	err = o.update()
-	if err != nil {
-		return err
-	}
-
-	o.Changed = false
-	return nil
 }
 
 // save an address to *.vcf file

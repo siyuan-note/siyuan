@@ -173,8 +173,13 @@ func rollbackDocHistory(c *gin.Context) {
 		return
 	}
 
-	notebook := arg["notebook"].(string)
-	historyPath := arg["historyPath"].(string)
+	var notebook, historyPath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("notebook", true, &notebook),
+		util.BindJsonArg("historyPath", true, &historyPath),
+	) {
+		return
+	}
 	err := model.RollbackDocHistory(notebook, historyPath)
 	if err != nil {
 		ret.Code = -1
@@ -196,7 +201,10 @@ func rollbackAssetsHistory(c *gin.Context) {
 		return
 	}
 
-	historyPath := arg["historyPath"].(string)
+	var historyPath string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", true, &historyPath)) {
+		return
+	}
 	err := model.RollbackAssetsHistory(historyPath)
 	if err != nil {
 		ret.Code = -1
@@ -214,7 +222,10 @@ func rollbackNotebookHistory(c *gin.Context) {
 		return
 	}
 
-	historyPath := arg["historyPath"].(string)
+	var historyPath string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", true, &historyPath)) {
+		return
+	}
 	err := model.RollbackNotebookHistory(historyPath)
 	if err != nil {
 		ret.Code = -1
@@ -232,7 +243,10 @@ func rollbackAttributeViewHistory(c *gin.Context) {
 		return
 	}
 
-	historyPath := arg["historyPath"].(string)
+	var historyPath string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", true, &historyPath)) {
+		return
+	}
 	err := model.RollbackAttributeViewHistory(historyPath)
 	if err != nil {
 		ret.Code = -1

@@ -247,7 +247,7 @@ func Serve(fastMode bool, cookieKey string) {
 
 	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {
 		if err = util.ServeMultiplexed(ln, ginServer, certPath, keyPath, util.HttpServer); err != nil {
-			if errors.Is(err, http.ErrServerClosed) || err == cmux.ErrListenerClosed {
+			if errors.Is(err, http.ErrServerClosed) || errors.Is(err, cmux.ErrListenerClosed) {
 				return
 			}
 
@@ -444,6 +444,11 @@ func serveAppearance(ginServer *gin.Engine) {
 	}
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
 		filePath := filepath.Join(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
+		if !util.IsSubPath(appearancePath, filePath) {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
 		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") {
 			if !gulu.File.IsExist(filePath) {
 				// 主题 js 不存在时生成空内容返回
@@ -598,19 +603,25 @@ func serveAssets(ginServer *gin.Engine) {
 			}
 		}
 
+		if !model.IsAdminRoleContext(context) {
+			publishAccess := model.GetPublishAccess()
+			if !model.CheckAbsPathAccessableByPublishAccess(context, p, publishAccess) {
+				context.Status(http.StatusForbidden)
+				return
+			}
+		}
+
 		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {
 			return
 		}
 
 		// 返回原始文件
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 
 	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 }
 
@@ -655,7 +666,6 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		requestPath := context.Param("path")
 		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
 		http.ServeFile(context.Writer, context.Request, p)
-		return
 	})
 }
 
@@ -773,6 +783,11 @@ func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.HandleMessage(func(s *melody.Session, msg []byte) {
 		start := time.Now()
 		logging.LogTracef("request [%s]", shortReqMsg(msg))
+
+		if util.IsAuthSession(s) {
+			return
+		}
+
 		request := map[string]interface{}{}
 		if err := gulu.JSON.UnmarshalJSON(msg, &request); err != nil {
 			result := util.NewResult()
@@ -960,7 +975,7 @@ func corsMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Private-Network", "true")
+		c.Header("Access-Control-Allow-Private-Network", "false")
 
 		if strings.HasPrefix(c.Request.RequestURI, "/webdav") {
 			c.Header("Access-Control-Allow-Methods", allowWebDavMethods)
@@ -1008,7 +1023,6 @@ func jwtMiddleware(c *gin.Context) {
 	}
 	c.Set(model.RoleContextKey, model.RoleVisitor)
 	c.Next()
-	return
 }
 
 func serveFixedStaticFiles(ginServer *gin.Engine) {

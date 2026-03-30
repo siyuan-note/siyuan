@@ -23,16 +23,12 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 	"unicode"
 
 	"github.com/88250/lute/html"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/siyuan-note/logging"
 )
-
-func init() {
-	rand.Seed(time.Now().UTC().UnixNano())
-}
 
 func GetDuplicateName(master string) (ret string) {
 	if "" == master {
@@ -40,7 +36,7 @@ func GetDuplicateName(master string) (ret string) {
 	}
 
 	ret = master + " (1)"
-	r := regexp.MustCompile("^(.*) \\((\\d+)\\)$")
+	r := regexp.MustCompile(`^(.*) \((\d+)\)$`)
 	m := r.FindStringSubmatch(master)
 	if nil == m || 3 > len(m) {
 		return
@@ -216,19 +212,25 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 	return
 }
 
-func ReplaceStr(strs []string, old, new string) (ret []string, changed bool) {
-	if old == new {
-		return strs, false
-	}
+func SanitizeAttr(attr string) string {
+	attr = strings.TrimSpace(attr)
+	h := "<div data-attr=\"" + attr + "\">"
+	p := bluemonday.UGCPolicy()
+	p.AllowDataAttributes()
+	ret := p.Sanitize(h)
+	ret = strings.TrimPrefix(ret, "<div data-attr=\"")
+	ret = strings.TrimSuffix(ret, "\">")
+	return ret
+}
 
-	for i, v := range strs {
-		if v == old {
-			strs[i] = new
-			changed = true
-		}
-	}
-	ret = strs
-	return
+func SanitizeImgSrc(src string) string {
+	src = strings.TrimSpace(src)
+	h := "<img src=\"" + src + "\">"
+	p := bluemonday.UGCPolicy()
+	ret := p.Sanitize(h)
+	ret = strings.TrimPrefix(ret, "<img src=\"")
+	ret = strings.TrimSuffix(ret, "\">")
+	return ret
 }
 
 func SanitizeSVG(svgInput string) string {

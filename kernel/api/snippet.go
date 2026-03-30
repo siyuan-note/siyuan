@@ -37,15 +37,20 @@ func getSnippet(c *gin.Context) {
 		return
 	}
 
-	typ := arg["type"].(string)                 // js/css/all
-	enabledArg := int(arg["enabled"].(float64)) // 0：禁用，1：启用，2：全部
-	enabled := true
-	if 0 == enabledArg {
-		enabled = false
-	}
+	var typ string         // js/css/all
+	var enabledArg float64 // 0：禁用，1：启用，2：全部
 	var keyword string
-	if nil != arg["keyword"] {
-		keyword = arg["keyword"].(string)
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("type", true, &typ),
+		util.BindJsonArg("enabled", true, &enabledArg),
+		util.BindJsonArg("keyword", false, &keyword),
+	) {
+		return
+	}
+
+	enabled := true
+	if 0 == int(enabledArg) {
+		enabled = false
 	}
 
 	confSnippets, err := model.LoadSnippets()
@@ -71,10 +76,12 @@ func getSnippet(c *gin.Context) {
 		snippets = append(snippets, s)
 	}
 
+	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
+		keyword = strings.ToLower(keyword)
 		var snippetsFiltered []*conf.Snippet
 		for _, s := range snippets {
-			if strings.Contains(strings.ToLower(s.Name), strings.ToLower(keyword)) || strings.Contains(strings.ToLower(s.Content), strings.ToLower(keyword)) {
+			if strings.Contains(strings.ToLower(s.Name), keyword) || strings.Contains(strings.ToLower(s.Content), keyword) {
 				snippetsFiltered = append(snippetsFiltered, s)
 			}
 		}
@@ -136,7 +143,10 @@ func removeSnippet(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	snippet, err := model.RemoveSnippet(id)
 	if err != nil {
 		ret.Code = -1

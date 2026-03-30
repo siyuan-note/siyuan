@@ -87,7 +87,7 @@ func insertAssetContents0(tx *sql.Tx, bulk []*AssetContent, context map[string]i
 	return
 }
 
-func deleteAssetContentsByPath(tx *sql.Tx, path string, context map[string]interface{}) (err error) {
+func deleteAssetContentsByPath(tx *sql.Tx, path string) (err error) {
 	stmt := "DELETE FROM asset_contents_fts_case_insensitive WHERE path = ?"
 	if err = execStmtTx(tx, stmt, path); err != nil {
 		return

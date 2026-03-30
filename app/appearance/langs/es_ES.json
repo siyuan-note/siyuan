@@ -287,7 +287,7 @@
   "imported": "Importación completada",
   "mirrorTip": "Base de datos espejo, todas las actualizaciones de datos se sincronizarán con todos los demás espejos",
   "includeTime": "Incluir tiempo",
-  "accountSupport1": "Desde su primer lanzamiento público el 31 de agosto de 2020, SiYuan se ha publicado más de 830 veces, ha resuelto los requisitos y comentarios de los usuarios más de 15000 veces y ha enviado código más de 19800 veces. No podemos prescindir de su apoyo y comentarios.",
+  "accountSupport1": "Desde su primer lanzamiento público el 31 de agosto de 2020, SiYuan se ha publicado más de 880 veces, ha resuelto los requisitos y comentarios de los usuarios más de 16000 veces y ha enviado código más de 22000 veces. No podemos prescindir de su apoyo y comentarios.",
   "accountSupport2": "Su apoyo y comentarios permitirán a SiYuan desarrollarse y desarrollarse mejor. Siempre seremos amigos de los usuarios, trabajaremos duro para mejorar los productos y brindarle una mejor experiencia de gestión del conocimiento. ¡Muchas gracias por tu apoyo!",
   "goToTab1": "Ir a la pestaña #1",
   "goToTab2": "Ir a la pestaña #2",
@@ -463,6 +463,8 @@
   "switchDirect": "Cambiar dirección de comparación",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> solo buscar documentos",
   "onlySearchForDocTip": "Después de habilitar, [[ o 【【 para buscar referencias de bloque solo en nombres de documentos",
+  "pasteURLAutoConvert": "Convertir automáticamente la URL pegada en enlace",
+  "pasteURLAutoConvertTip": "Cuando está habilitado, pegar una URL que comience con http:// o https:// la convertirá automáticamente en un enlace clicable",
   "ocrResult": "Texto de resultado de OCR",
   "reOCR": "Re-OCR",
   "continueReview1": "Continuar revisión",
@@ -1454,7 +1456,6 @@
     "task.database.index": "Ejecutar el índice de la base de datos",
     "task.database.index.commit": "Ejecutar la confirmación del índice de la base de datos",
     "task.database.index.ref": "Ejecutar referencia de índice de base de datos",
-    "task.database.index.fix": "Ejecutar corrección del índice de la base de datos",
     "task.ocr.image": "Ejecutar OCR de imagen para extraer texto",
     "task.history.generateFile": "Ejecutar base de datos de historial generar doc",
     "task.history.database.index.full": "Ejecutar el índice de reconstrucción de la base de datos del historial",
@@ -1768,6 +1769,7 @@
     "282": "Cerrar ventana",
     "283": "Contraseña",
     "284": "Acceso denegado",
-    "285": "La contraseña es incorrecta"
+    "285": "La contraseña es incorrecta",
+    "286": "[%s] ya ha sido revertido"
   }
 }

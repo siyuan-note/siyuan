@@ -287,7 +287,7 @@
   "imported": "Import zakończony",
   "mirrorTip": "Lustro bazy danych, wszystkie aktualizacje danych będą synchronizowane z wszystkimi innymi lustrami",
   "includeTime": "Uwzględnij czas",
-  "accountSupport1": "Od pierwszego publicznego wydania 31 sierpnia 2020 r. SiYuan został wydany ponad 830 razy, rozwiązano wymagania użytkowników i opinie ponad 15000 razy oraz przesłano kod ponad 19800 razy. Nie możemy się obejść bez twojego wsparcia i opinii.",
+  "accountSupport1": "Od pierwszego publicznego wydania 31 sierpnia 2020 r. SiYuan został wydany ponad 880 razy, rozwiązano wymagania użytkowników i opinie ponad 16000 razy oraz przesłano kod ponad 22000 razy. Nie możemy się obejść bez twojego wsparcia i opinii.",
   "accountSupport2": "Twoje wsparcie i opinie umożliwią SiYuanowi dalszy rozwój. Zawsze będziemy przyjaciółmi użytkowników, ciężko pracując, aby poprawić produkty i zapewnić lepsze wrażenia w zarządzaniu wiedzą. Bardzo dziękujemy za twoje wsparcie!",
   "goToTab1": "Przejdź do zakładki #1",
   "goToTab2": "Przejdź do zakładki #2",
@@ -463,6 +463,8 @@
   "switchDirect": "Zmień kierunek porównania",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> tylko szukaj dokumentów",
   "onlySearchForDocTip": "Po włączeniu, [[ lub 【【 wyszuka odniesienia bloków tylko w nazwach dokumentów",
+  "pasteURLAutoConvert": "Automatycznie konwertuj wklejany URL na link",
+  "pasteURLAutoConvertTip": "Po włączeniu, wklejenie URL zaczynającego się od http:// lub https:// automatycznie przekształci go w klikalny link",
   "ocrResult": "Tekst wyniku OCR",
   "reOCR": "Re OCR",
   "continueReview1": "Kontynuuj przegląd",
@@ -1454,7 +1456,6 @@
     "task.database.index": "Wykonaj indeks bazy danych",
     "task.database.index.commit": "Wykonaj zatwierdzenie indeksu bazy danych",
     "task.database.index.ref": "Wykonaj odniesienie indeksu bazy danych",
-    "task.database.index.fix": "Wykonaj naprawę indeksu bazy danych",
     "task.ocr.image": "Wykonaj OCR obrazu, aby wyodrębnić tekst",
     "task.history.generateFile": "Wykonaj generację dokumentu historii bazy danych",
     "task.history.database.index.full": "Wykonaj przebudowę indeksu bazy danych historii",
@@ -1768,6 +1769,7 @@
     "282": "Zamknij okno",
     "283": "Hasło",
     "284": "Dostęp zabroniony",
-    "285": "Hasło jest nieprawidłowe"
+    "285": "Hasło jest nieprawidłowe",
+    "286": "[%s] został cofnięty"
   }
 }

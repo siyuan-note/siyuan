@@ -4,17 +4,16 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 
 export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
-    let mermaidElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "mermaid") {
-        // 编辑器内代码块编辑渲染
+    let mermaidElements: Element[] | NodeListOf<Element> = [];
+    if (element.getAttribute("data-subtype") === "mermaid" && element.getAttribute("data-render") !== "true") {
         mermaidElements = [element];
     } else {
-        mermaidElements = Array.from(element.querySelectorAll('[data-subtype="mermaid"]'));
+        mermaidElements = element.querySelectorAll('[data-subtype="mermaid"]:not([data-render="true"])');
     }
     if (mermaidElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=11.12.0`, "protyleMermaidScript").then(() => {
+    addScript(`${cdn}/js/mermaid/mermaid.min.js?v=11.13.0`, "protyleMermaidScript").then(() => {
         addScript(`${cdn}/js/mermaid/mermaid-zenuml.min.js?v=0.2.2`, "protyleMermaidZenumlScript").then(async () => {
             await window.mermaid.registerExternalDiagrams([window.zenuml]);
             window.mermaid.registerIconPacks([
@@ -86,6 +85,7 @@ const initMermaid = (mermaidElements: Element[]) => {
         if (item.getAttribute("data-render") === "true") {
             return;
         }
+        item.setAttribute("data-render", "true");
         if (!item.firstElementChild.classList.contains("protyle-icons")) {
             item.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
         }
@@ -104,6 +104,5 @@ const initMermaid = (mermaidElements: Element[]) => {
             renderElement.lastElementChild.innerHTML = `${errorElement.outerHTML}<div class="fn__hr"></div><div class="ft__error">${e.message.replace(/\n/, "<br>")}</div>`;
             errorElement.parentElement.remove();
         }
-        item.setAttribute("data-render", "true");
     });
 };

@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.3
-        version: 2.1.3(electron@40.8.1)
+        version: 2.1.3(electron@40.8.3)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.1
@@ -40,8 +40,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.19
       electron:
-        specifier: 40.8.1
-        version: 40.8.1
+        specifier: 40.8.3
+        version: 40.8.3
       electron-builder:
         specifier: 26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -1185,8 +1185,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@40.8.1:
-    resolution: {integrity: sha512-oLBb+hs/zUpjqdec+fWdxQErwiOEWNjpJeTFmF8RAnXB0wXghtK8HHAbQxZhdkdlBSuD4X711CmimvY/jrlOnw==}
+  electron@40.8.3:
+    resolution: {integrity: sha512-MH6LK4xM6VVmmtz0nRE0Fe8l2jTKSYTvH1t0ZfbNLw3o6dlBCVTRqQha6uL8ZQVoMy74JyLguGwK7dU7rCKIhw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -1911,9 +1911,9 @@ packages:
     resolution: {integrity: sha512-LT49Zi2/WMROHYoqGgdlQIZh8mLPZmOrN2NdJjMXxYe4nkN6FUyuPuOAOedNJDrx0IRGg9+4guZewtp8hE6TxA==}
     engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
 
-  minipass-flush@1.0.6:
-    resolution: {integrity: sha512-7Uf5gMJZ2kTkFisE3toGxT991s+cg+vMh42nbZGM2bNxfYVpkpqRudf1QrcOy72a3PwcL4JYqL+4NY7t0Hdd0A==}
-    engines: {node: '>=16 || 14 >=14.17'}
+  minipass-flush@1.0.7:
+    resolution: {integrity: sha512-TbqTz9cUwWyHS2Dy89P3ocAGUGxKjjLuR9z8w4WUTGAVgEj17/4nhgo2Du56i0Fm3Pm30g4iA8Lcqctc76jCzA==}
+    engines: {node: '>= 8'}
 
   minipass-pipeline@1.2.4:
     resolution: {integrity: sha512-xuIq7cIOt09RPRJ19gdi4b+RiNvDFYe5JH+ggNvBqGqpQXcru3PcRmOZuHBKWK1Txf9+cQ+HMVN4d6z46LZP7A==}
@@ -2831,9 +2831,9 @@ snapshots:
       - bluebird
       - supports-color
 
-  '@electron/remote@2.1.3(electron@40.8.1)':
+  '@electron/remote@2.1.3(electron@40.8.3)':
     dependencies:
-      electron: 40.8.1
+      electron: 40.8.3
 
   '@electron/universal@2.0.1':
     dependencies:
@@ -3600,7 +3600,7 @@ snapshots:
       lru-cache: 7.18.3
       minipass: 3.3.6
       minipass-collect: 1.0.2
-      minipass-flush: 1.0.6
+      minipass-flush: 1.0.7
       minipass-pipeline: 1.2.4
       mkdirp: 1.0.4
       p-map: 4.0.0
@@ -3960,7 +3960,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@40.8.1:
+  electron@40.8.3:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 24.12.0
@@ -4686,7 +4686,7 @@ snapshots:
       minipass: 3.3.6
       minipass-collect: 1.0.2
       minipass-fetch: 2.1.2
-      minipass-flush: 1.0.6
+      minipass-flush: 1.0.7
       minipass-pipeline: 1.2.4
       negotiator: 0.6.4
       promise-retry: 2.0.1
@@ -4755,7 +4755,7 @@ snapshots:
     optionalDependencies:
       encoding: 0.1.13
 
-  minipass-flush@1.0.6:
+  minipass-flush@1.0.7:
     dependencies:
       minipass: 7.1.3
 

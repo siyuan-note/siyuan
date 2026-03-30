@@ -50,9 +50,12 @@ func getTag(c *gin.Context) {
 		ignoreMaxListHint = ignoreMaxListHintArg.(bool)
 	}
 
-	app := arg["app"].(string)
+	var app string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("app", true, &app)) {
+		return
+	}
 	tags := model.BuildTags(ignoreMaxListHint, app)
-	
+
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
@@ -70,8 +73,13 @@ func renameTag(c *gin.Context) {
 		return
 	}
 
-	oldLabel := arg["oldLabel"].(string)
-	newLabel := arg["newLabel"].(string)
+	var oldLabel, newLabel string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("oldLabel", true, &oldLabel),
+		util.BindJsonArg("newLabel", true, &newLabel),
+	) {
+		return
+	}
 	if err := model.RenameTag(oldLabel, newLabel); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -89,7 +97,10 @@ func removeTag(c *gin.Context) {
 		return
 	}
 
-	label := arg["label"].(string)
+	var label string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("label", true, &label)) {
+		return
+	}
 	if err := model.RemoveTag(label); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

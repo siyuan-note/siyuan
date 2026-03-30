@@ -914,6 +914,7 @@ data-type="navigation-root" data-path="/">
         let html = "";
         let closeHtml = "";
         let closeCounter = 0;
+        const scrollTop = this.element.scrollTop;
         window.siyuan.notebooks.forEach((item) => {
             if (item.closed) {
                 closeCounter++;
@@ -931,10 +932,11 @@ data-type="navigation-root" data-path="/">
         } else {
             this.closeElement.classList.add("fn__none");
         }
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: IFilesPath) => {
-            item.openPaths.forEach((openPath) => {
-                this.selectItem(item.notebookId, openPath, undefined, false, false);
-            });
+        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach(async (item: IFilesPath) => {
+            for (const openPath of item.openPaths) {
+                await this.selectItem(item.notebookId, openPath, undefined, false, false);
+            }
+            this.element.scrollTop = scrollTop;
         });
         this.refreshPublishAccessSwitch();
         if (!init) {
@@ -1433,7 +1435,8 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
     }
 
     private refreshPublishAccessSwitch() {
-        if (window.siyuan.config.readonly || window.siyuan.isPublish) {
+        if (window.siyuan.config.readonly || window.siyuan.isPublish ||
+            !this.element.classList.contains("file-tree__publish-access--active")) {
             return;
         }
         const ids: string[] = [];

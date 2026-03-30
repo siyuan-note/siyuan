@@ -188,11 +188,8 @@ func (s *EventSourceServer) SendEvent(event *MessageEvent) bool {
 // Subscribe subscribes to specified broadcast channels
 func (s *EventSourceServer) Subscribe(c *gin.Context, retry uint, channels ...string) {
 	wg := sync.WaitGroup{}
-	wg.Add(len(channels))
 	for _, channel := range channels {
-		go func() {
-			defer wg.Done()
-
+		wg.Go(func() {
 			var broadcastChannel *BroadcastChannel
 			_broadcastChannel, exist := BroadcastChannels.Load(channel)
 			if exist { // channel exists, use it
@@ -201,7 +198,7 @@ func (s *EventSourceServer) Subscribe(c *gin.Context, retry uint, channels ...st
 				broadcastChannel = ConstructBroadcastChannel(channel)
 			}
 			broadcastChannel.Subscriber.Count++
-		}()
+		})
 	}
 	wg.Wait()
 
@@ -376,7 +373,7 @@ type PublishResult struct {
 //	"ws://localhost:6806/ws/broadcast?channel=test"
 func broadcast(c *gin.Context) {
 	var (
-		channel          string = c.Query("channel")
+		channel          = c.Query("channel")
 		broadcastChannel *BroadcastChannel
 	)
 

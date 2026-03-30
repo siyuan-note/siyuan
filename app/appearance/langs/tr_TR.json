@@ -287,8 +287,8 @@
   "imported": "İçe aktarma tamamlandı",
   "mirrorTip": "Yansıtılmış veritabanı; tüm veri güncellemeleri diğer yansılara senkronize edilir",
   "includeTime": "Zamanı dahil et",
-  "accountSupport1": "31 Ağustos 2020’deki ilk halka açık sürümünden bu yana SiYuan 830’dan fazla kez yayınlandı, 15.000’den fazla kullanıcı isteği ve geri bildirimi çözüldü ve 19.800’den fazla kod katkısı yapıldı. Bunu senin desteğin ve geri bildirimin olmadan başaramazdık.",
-  "accountSupport2": "Desteğin ve geri bildirimin SiYuan’ı daha iyi hale getirecek. Her zaman kullanıcılarımızla dost kalacağız, ürünleri geliştirmek için çok çalışacağız ve sana daha iyi bir bilgi yönetimi deneyimi sunacağız. Desteğin için çok teşekkür ederiz!",
+  "accountSupport1": "31 Ağustos 2020’deki ilk halka açık sürümünden bu yana SiYuan 880’den fazla kez yayınlandı, 16000’den fazla kullanıcı isteği ve geri bildirimi çözüldü ve 22000’den fazla kod katkısı yapıldı. Bunu senin desteğin ve geri bildirimin olmadan başaramazdık.",
+  "accountSupport2": "Desteğin ve geri bildirimin SiYuan’ı daha iyi hale getirecek. Her zaman kullanıcılarımızla dost kalacağız, ürünleri daha iyi hale getirmek için çok çalışacağız ve sana daha iyi bir bilgi yönetimi deneyimi sunacağız. Desteğin için çok teşekkür ederiz!",
   "goToTab1": "Sekme #1’e git",
   "goToTab2": "Sekme #2’ye git",
   "goToTab3": "Sekme #3’e git",
@@ -463,6 +463,8 @@
   "switchDirect": "Karşılaştırma yönünü değiştir",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> sadece belgelerde ara",
   "onlySearchForDocTip": "Etkinleştirildiğinde [[ veya 【【 yalnızca belge adlarında blok referanslarını arar",
+  "pasteURLAutoConvert": "Yapıştırılan URL'yi otomatik olarak bağlantıya dönüştür",
+  "pasteURLAutoConvertTip": "Etkinleştirildiğinde, http:// veya https:// ile başlayan bir URL yapıştırıldığında otomatik olarak tıklanabilir bir bağlantıya dönüştürülür",
   "ocrResult": "OCR sonuç metni",
   "reOCR": "OCR’yi yeniden çalıştır",
   "continueReview1": "Gözden geçirmeye devam et",
@@ -1454,7 +1456,6 @@
     "task.database.index": "Veritabanı indekslemesini çalıştır",
     "task.database.index.commit": "Veritabanı indeksleme kaydını çalıştır",
     "task.database.index.ref": "Veritabanı indeks referansını çalıştır",
-    "task.database.index.fix": "Veritabanı indeks onarımını çalıştır",
     "task.ocr.image": "Görsel OCR işlemini çalıştır (metin çıkar)",
     "task.history.generateFile": "Geçmiş veritabanından belge oluşturmayı çalıştır",
     "task.history.database.index.full": "Geçmiş veritabanı dizinini yeniden oluşturmayı çalıştır",
@@ -1768,6 +1769,7 @@
     "282": "Pencereyi Kapat",
     "283": "Şifre",
     "284": "Erişim yasaklandı",
-    "285": "Şifre yanlış"
+    "285": "Şifre yanlış",
+    "286": "[%s] geri alındı"
   }
 }

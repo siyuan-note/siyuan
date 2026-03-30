@@ -7,12 +7,11 @@ import {looseJsonParse} from "../../util/functions";
 import {genRenderFrame} from "./util";
 
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
-    let mathElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "math") {
-        // 编辑器内代码块编辑渲染
+    let mathElements: Element[] | NodeListOf<Element> = [];
+    if (element.getAttribute("data-subtype") === "math" && element.getAttribute("data-render") !== "true") {
         mathElements = [element];
     } else {
-        mathElements = Array.from(element.querySelectorAll('[data-subtype="math"]'));
+        mathElements = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
     }
     if (mathElements.length === 0) {
         return;
@@ -21,9 +20,6 @@ export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWid
     addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
         addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
             mathElements.forEach((mathElement: HTMLElement) => {
-                if (mathElement.getAttribute("data-render") === "true") {
-                    return;
-                }
                 mathElement.setAttribute("data-render", "true");
                 let macros = {};
                 try {

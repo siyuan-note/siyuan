@@ -287,8 +287,8 @@
   "imported": "Import dokončený",
   "mirrorTip": "Zrkadlová databáza, všetky zmeny sa synchronizujú do všetkých zrkadiel",
   "includeTime": "Zahrnúť čas",
-  "accountSupport1": "Od prvého vydania v r. 2020 bol SiYuan vydaný viac ako 830-krát a vyriešil tisíce požiadaviek. Ďakujeme za vašu podporu.",
-  "accountSupport2": "Vaša spätná väzba robí SiYuan lepším. Budeme tvrdo pracovať na vašom zážitku so správou znalostí!",
+  "accountSupport1": "Od prvého verejného vydania 31. augusta 2020 bol SiYuan vydaný viac ako 880-krát, vyriešil požiadavky a spätnú väzbu používateľov viac ako 16000-krát a commitol kód viac ako 22000-krát. Bez vašej podpory a spätnej väzby by sme to nedosiahli.",
+  "accountSupport2": "Vaša podpora a spätná väzba urobia SiYuan lepším. Vždy budeme priateľmi používateľov, budeme tvrdo pracovať na zlepšovaní produktov a poskytneme vám lepší zážitok so správou znalostí. Ďakujeme za vašu podporu!",
   "goToTab1": "Prejsť na kartu #1",
   "goToTab2": "Prejsť na kartu #2",
   "goToTab3": "Prejsť na kartu #3",
@@ -463,6 +463,8 @@
   "switchDirect": "Prepnúť smer porovnávania",
   "onlySearchForDoc": "[[ hľadá iba v dokumentoch",
   "onlySearchForDocTip": "Ak je povolené, hľadanie cez [[ sa obmedzí len na názvy dokumentov",
+  "pasteURLAutoConvert": "Automaticky previesť vloženú URL na odkaz",
+  "pasteURLAutoConvertTip": "Ak je povolené, vloženie URL začínajúcej na http:// alebo https:// ju automaticky prevedie na klikateľný odkaz",
   "ocrResult": "Text výsledku OCR",
   "reOCR": "Spustiť OCR znova",
   "continueReview1": "Pokračovať v opakovaní",
@@ -1454,7 +1456,6 @@
     "task.database.index": "Vykonať indexáciu databázy",
     "task.database.index.commit": "Vykonať zápis indexu",
     "task.database.index.ref": "Vykonať indexáciu referencií",
-    "task.database.index.fix": "Vykonať opravu indexu",
     "task.ocr.image": "Vykonať OCR obrázka",
     "task.history.generateFile": "Vykonať generovanie dokumentu z histórie",
     "task.history.database.index.full": "Vykonať prestavbu indexu histórie",
@@ -1768,6 +1769,7 @@
     "282": "Zavrieť okno",
     "283": "Heslo",
     "284": "Prístup zakázaný",
-    "285": "Nesprávne heslo"
+    "285": "Nesprávne heslo",
+    "286": "[%s] bol vrátený"
   }
 }

@@ -287,7 +287,7 @@
   "imported": "Import completed",
   "mirrorTip": "Mirror database, all data updates will be synchronized to all other mirrors",
   "includeTime": "Include time",
-  "accountSupport1": "Since its first public release on August 31, 2020, SiYuan has been released more than 830 times, solved user requirements and feedback more than 15000 times, and committed code more than 19800 times. We couldn't have achieved this without your support and feedback.",
+  "accountSupport1": "Since its first public release on August 31, 2020, SiYuan has been released more than 880 times, solved user requirements and feedback more than 16000 times, and committed code more than 22000 times. We couldn't have achieved this without your support and feedback.",
   "accountSupport2": "Your support and feedback will make SiYuan better. We will always be friends with users, work hard to make products better, and provide you with a better knowledge management experience. Thank you very much for your support!",
   "goToTab1": "Go to tab #1",
   "goToTab2": "Go to tab #2",
@@ -463,6 +463,8 @@
   "switchDirect": "Switch comparison direction",
   "onlySearchForDoc": "<code class='fn__code'>[[</code> only search documents",
   "onlySearchForDocTip": "When enabled, [[ or 【【 to search for block references only in doc names",
+  "pasteURLAutoConvert": "Auto-convert pasted URL to link",
+  "pasteURLAutoConvertTip": "When enabled, pasting a URL starting with http:// or https:// will automatically convert it to a clickable link",
   "ocrResult": "OCR result text",
   "reOCR": "Re OCR",
   "continueReview1": "Continue Review",
@@ -1454,7 +1456,6 @@
     "task.database.index": "Execute database index",
     "task.database.index.commit": "Execute database index commit",
     "task.database.index.ref": "Execute database index reference",
-    "task.database.index.fix": "Execute database index fix",
     "task.ocr.image": "Execute image OCR to extract text",
     "task.history.generateFile": "Execute history database generate doc",
     "task.history.database.index.full": "Execute history database rebuild index",
@@ -1768,6 +1769,7 @@
     "282": "Close window",
     "283": "Password",
     "284": "Access denied",
-    "285": "Password is incorrect"
+    "285": "Password is incorrect",
+    "286": "[%s] has already been rolled back"
   }
 }

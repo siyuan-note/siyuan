@@ -56,19 +56,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, withMath bool, err error) {
-	tree, withMath := HTML2Tree(htmlStr, luteEngine)
-
-	var formatted []byte
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
-		renderer.ExtRendererFuncs[nodeType] = rendererFunc
-	}
-	formatted = renderer.Render()
-	markdown = gulu.Str.FromBytes(formatted)
-	return
-}
-
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
 	assetDirPath := filepath.Join(util.DataDir, "assets")
@@ -512,7 +499,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		}
 		return nil
 	})
-	for p, _ := range renamePaths {
+	for p := range renamePaths {
 		originalPath := p
 		p = strings.TrimPrefix(p, unzipRootPath)
 		p = filepath.ToSlash(p)
@@ -538,7 +525,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	var oldPaths []string
-	for oldPath, _ := range renamePaths {
+	for oldPath := range renamePaths {
 		oldPaths = append(oldPaths, oldPath)
 	}
 	sort.Slice(oldPaths, func(i, j int) bool {
@@ -777,7 +764,7 @@ func ImportData(zipPath string) (err error) {
 
 	logging.LogInfof("import data from [%s] done", zipPath)
 	IncSync()
-	FullReindex()
+	FullReindex(false)
 	return
 }
 
@@ -1351,12 +1338,8 @@ func htmlBlock2Inline(tree *parse.Tree) {
 
 		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<img "))) {
 			tokens := bytes.TrimSpace(n.Tokens)
-			if bytes.HasPrefix(tokens, []byte("<div>")) {
-				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
-			}
-			if bytes.HasSuffix(tokens, []byte("</div>")) {
-				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
-			}
+			tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
+			tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
 			tokens = bytes.TrimSpace(tokens)
 
 			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(tokens), &html.Node{Type: html.ElementNode})
@@ -1377,12 +1360,8 @@ func htmlBlock2Inline(tree *parse.Tree) {
 		}
 		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<a "))) {
 			tokens := bytes.TrimSpace(n.Tokens)
-			if bytes.HasPrefix(tokens, []byte("<div>")) {
-				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
-			}
-			if bytes.HasSuffix(tokens, []byte("</div>")) {
-				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
-			}
+			tokens, _ = bytes.CutPrefix(tokens, []byte("<div>"))
+			tokens, _ = bytes.CutSuffix(tokens, []byte("</div>"))
 			tokens = bytes.TrimSpace(tokens)
 
 			if ast.NodeHTMLBlock != n.Type && nil != n.Next && nil != n.Next.Next {
@@ -1496,7 +1475,6 @@ func htmlBlock2Inline(tree *parse.Tree) {
 	for _, n := range unlinks {
 		n.Unlink()
 	}
-	return
 }
 
 func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {

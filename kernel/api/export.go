@@ -47,7 +47,10 @@ func exportCodeBlock(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	filePath, err := model.ExportCodeBlock(id)
 	if err != nil {
 		ret.Code = 1
@@ -70,8 +73,13 @@ func exportAttributeView(c *gin.Context) {
 		return
 	}
 
-	avID := arg["id"].(string)
-	blockID := arg["blockID"].(string)
+	var avID, blockID string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &avID),
+		util.BindJsonArg("blockID", true, &blockID),
+	) {
+		return
+	}
 	zipPath, err := model.ExportAv2CSV(avID, blockID)
 	if err != nil {
 		ret.Code = 1
@@ -94,7 +102,10 @@ func exportEPUB(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "epub", ".epub")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -111,7 +122,10 @@ func exportRTF(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rtf", ".rtf")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -128,7 +142,10 @@ func exportODT(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "odt", ".odt")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -145,7 +162,10 @@ func exportMediaWiki(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "mediawiki", ".wiki")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -162,7 +182,10 @@ func exportOrgMode(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "org", ".org")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -179,7 +202,10 @@ func exportOPML(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "opml", ".opml")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -196,7 +222,10 @@ func exportTextile(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "textile", ".textile")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -213,7 +242,10 @@ func exportAsciiDoc(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "asciidoc", ".adoc")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -230,7 +262,10 @@ func exportReStructuredText(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rst", ".rst")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -247,7 +282,10 @@ func export2Liandi(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	err := model.Export2Liandi(id)
 	if err != nil {
 		ret.Code = -1
@@ -265,7 +303,10 @@ func exportDataInFolder(c *gin.Context) {
 		return
 	}
 
-	exportFolder := arg["folder"].(string)
+	var exportFolder string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("folder", true, &exportFolder)) {
+		return
+	}
 	name, err := model.ExportDataInFolder(exportFolder)
 	if err != nil {
 		ret.Code = -1
@@ -344,7 +385,10 @@ func exportNotebookMd(c *gin.Context) {
 		return
 	}
 
-	notebook := arg["notebook"].(string)
+	var notebook string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", true, &notebook)) {
+		return
+	}
 	zipPath := model.ExportNotebookMarkdown(notebook)
 	ret.Data = map[string]interface{}{
 		"name": path.Base(zipPath),
@@ -383,7 +427,10 @@ func exportMd(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	name, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
 	ret.Data = map[string]interface{}{
 		"name": name,
@@ -400,7 +447,10 @@ func exportNotebookSY(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	zipPath := model.ExportNotebookSY(id)
 	ret.Data = map[string]interface{}{
 		"zip": zipPath,
@@ -437,7 +487,10 @@ func exportSY(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	zipPath := model.ExportSYs([]string{id})
 	ret.Data = map[string]interface{}{
 		"zip": zipPath,
@@ -453,7 +506,10 @@ func exportMdContent(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
@@ -473,19 +529,13 @@ func exportMdContent(c *gin.Context) {
 		yfm = arg["yfm"].(bool)
 	}
 
-	fillCSSVar := false
-	if nil != arg["fillCSSVar"] {
-		fillCSSVar = arg["fillCSSVar"].(bool)
-	}
-
-	adjustHeadingLevel := false
-	if nil != arg["adjustHeadingLevel"] {
-		adjustHeadingLevel = arg["adjustHeadingLevel"].(bool)
-	}
-
-	imgTag := false
-	if nil != arg["imgTag"] {
-		imgTag = arg["imgTag"].(bool)
+	var fillCSSVar, adjustHeadingLevel, imgTag bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("fillCSSVar", false, &fillCSSVar),
+		util.BindJsonArg("adjustHeadingLevel", false, &adjustHeadingLevel),
+		util.BindJsonArg("imgTag", false, &imgTag),
+	) {
+		return
 	}
 
 	addTitle := model.Conf.Export.AddTitle
@@ -513,12 +563,15 @@ func exportDocx(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	savePath := arg["savePath"].(string)
-	removeAssets := arg["removeAssets"].(bool)
-	merge := false
-	if nil != arg["merge"] {
-		merge = arg["merge"].(bool)
+	var id, savePath string
+	var removeAssets, merge bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("savePath", true, &savePath),
+		util.BindJsonArg("removeAssets", true, &removeAssets),
+		util.BindJsonArg("merge", false, &merge),
+	) {
+		return
 	}
 
 	fullPath, err := model.ExportDocx(id, savePath, removeAssets, merge)
@@ -542,8 +595,13 @@ func exportMdHTML(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	savePath := arg["savePath"].(string)
+	var id, savePath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("savePath", true, &savePath),
+	) {
+		return
+	}
 
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
@@ -576,7 +634,10 @@ func exportTempContent(c *gin.Context) {
 		return
 	}
 
-	content := arg["content"].(string)
+	var content string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("content", true, &content)) {
+		return
+	}
 	tmpExport := filepath.Join(util.TempDir, "export", "temp")
 	if err := os.MkdirAll(tmpExport, 0755); err != nil {
 		ret.Code = 1
@@ -591,9 +652,9 @@ func exportTempContent(c *gin.Context) {
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
 		return
 	}
-	url := path.Join("/export/temp/", filepath.Base(p))
+	urlPath := path.Join("/export/temp/", filepath.Base(p))
 	ret.Data = map[string]interface{}{
-		"url": "http://" + util.LocalHost + ":" + util.ServerPort + url,
+		"url": "http://" + util.LocalHost + ":" + util.ServerPort + urlPath,
 	}
 }
 
@@ -606,9 +667,14 @@ func exportBrowserHTML(c *gin.Context) {
 		return
 	}
 
-	folder := arg["folder"].(string)
-	htmlContent := arg["html"].(string)
-	name := arg["name"].(string)
+	var folder, htmlContent, name string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("folder", true, &folder),
+		util.BindJsonArg("html", true, &htmlContent),
+		util.BindJsonArg("name", true, &name),
+	) {
+		return
+	}
 
 	tmpDir := filepath.Join(util.TempDir, "export", folder)
 
@@ -662,20 +728,17 @@ func exportPreviewHTML(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	keepFold := false
-	if nil != arg["keepFold"] {
-		keepFold = arg["keepFold"].(bool)
+	var id string
+	var keepFold, merge, image bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("keepFold", false, &keepFold),
+		util.BindJsonArg("merge", false, &merge),
+		util.BindJsonArg("image", false, &image),
+	) {
+		return
 	}
-	merge := false
-	if nil != arg["merge"] {
-		merge = arg["merge"].(bool)
-	}
-	image := false
-	if nil != arg["image"] {
-		image = arg["image"].(bool)
-	}
-	name, content, node := model.ExportHTML(id, "", true, image, keepFold, merge)
+	name, content, node := model.ExportHTML(id, "", true, keepFold, merge)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -705,23 +768,23 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	pdf := arg["pdf"].(bool)
-	savePath := arg["savePath"].(string)
-	keepFold := false
-	if nil != arg["keepFold"] {
-		keepFold = arg["keepFold"].(bool)
-	}
-	merge := false
-	if nil != arg["merge"] {
-		merge = arg["merge"].(bool)
+	var id, savePath string
+	var pdf, keepFold, merge bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("pdf", true, &pdf),
+		util.BindJsonArg("savePath", true, &savePath),
+		util.BindJsonArg("keepFold", false, &keepFold),
+		util.BindJsonArg("merge", false, &merge),
+	) {
+		return
 	}
 
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
 		folderName := "html-" + id + "-" + util.CurrentTimeSecondsStr()
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
-		name, content, _ := model.ExportHTML(id, tmpDir, pdf, false, keepFold, merge)
+		name, content, _ := model.ExportHTML(id, tmpDir, pdf, keepFold, merge)
 		ret.Data = map[string]interface{}{
 			"id":      id,
 			"name":    name,
@@ -731,7 +794,7 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
-	name, content, _ := model.ExportHTML(id, savePath, pdf, false, keepFold, merge)
+	name, content, _ := model.ExportHTML(id, savePath, pdf, keepFold, merge)
 	ret.Data = map[string]interface{}{
 		"id":      id,
 		"name":    name,
@@ -748,15 +811,18 @@ func processPDF(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
-	path := arg["path"].(string)
-	merge := false
-	if nil != arg["merge"] {
-		merge = arg["merge"].(bool)
+	var id, pdfPath string
+	var merge bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", true, &id),
+		util.BindJsonArg("path", true, &pdfPath),
+		util.BindJsonArg("merge", false, &merge),
+	) {
+		return
 	}
 	removeAssets := arg["removeAssets"].(bool)
 	watermark := arg["watermark"].(bool)
-	err := model.ProcessPDF(id, path, merge, removeAssets, watermark)
+	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -773,7 +839,10 @@ func exportPreview(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+		return
+	}
 
 	userAgentStr := c.GetHeader("User-Agent")
 	fillCSSVar := true

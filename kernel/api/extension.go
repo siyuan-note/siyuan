@@ -121,6 +121,9 @@ func extensionCopy(c *gin.Context) {
 		}
 
 		u, _ := url.Parse(oName)
+		if nil == u {
+			continue
+		}
 		if "" == u.Path {
 			continue
 		}

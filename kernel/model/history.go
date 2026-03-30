@@ -235,14 +235,19 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	FlushTxQueue()
 
+	box, needResetTree, err := getRollbackBox(boxID)
+	if err != nil {
+		logging.LogErrorf("get rollback box [%s] failed: %s", boxID, err)
+		return
+	}
+	boxID = box.ID
+
 	srcPath := historyPath
 	var destPath, parentHPath string
 	rootID := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(rootID)
-	if nil != workingDoc && "d" == workingDoc.Type {
-		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
-			return
-		}
+	if needResetTree {
+		workingDoc = nil
 	}
 
 	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath, workingDoc)
@@ -278,7 +283,18 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 	tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
 
+	if needResetTree {
+		resetTree(tree, "", true)
+	}
+
 	// 重置重复的块 ID https://github.com/siyuan-note/siyuan/issues/14358
+	if nil != workingDoc && "d" == workingDoc.Type {
+		workingDocPath := filepath.Join(util.DataDir, boxID, workingDoc.Path)
+		if err = filelock.Remove(workingDocPath); err != nil {
+			return
+		}
+		logging.LogInfof("removed working doc file [%s]", workingDocPath)
+	}
 	if nil != workingDoc {
 		treenode.RemoveBlockTreesByRootID(rootID)
 	}
@@ -292,7 +308,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return ast.WalkContinue
 	})
 	var ids []string
-	for nodeID, _ := range nodes {
+	for nodeID := range nodes {
 		ids = append(ids, nodeID)
 	}
 	idMap := treenode.ExistBlockTrees(ids)
@@ -319,8 +335,9 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 	ReloadFiletree()
 	ReloadProtyle(rootID)
-	util.PushMsg(Conf.Language(102), 3000)
 
+	msg := fmt.Sprintf(Conf.Language(286), path.Join(box.Name, tree.HPath))
+	util.PushMsg(msg, 7000)
 	IncSync()
 
 	// 刷新属性视图
@@ -422,7 +439,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 		return
 	}
 
-	FullReindex()
+	FullReindex(true)
 	IncSync()
 	return nil
 }
@@ -791,34 +808,6 @@ func recentModifiedAssets() (ret []string) {
 	return
 }
 
-var attributeViewLatestHistoryTime = time.Now().Unix()
-
-func recentModifiedAttributeViews() (ret []string) {
-	entries, err := os.ReadDir(filepath.Join(util.DataDir, "storage", "av"))
-	if nil != err {
-		logging.LogErrorf("read attribute view dir failed: %s", err)
-		return
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".json") {
-			continue
-		}
-
-		info, err := entry.Info()
-		if nil != err {
-			logging.LogErrorf("read attribute view file info failed: %s", err)
-			continue
-		}
-
-		if info.ModTime().Unix() > attributeViewLatestHistoryTime {
-			ret = append(ret, filepath.Join(util.DataDir, "storage", "av", entry.Name()))
-		}
-	}
-	attributeViewLatestHistoryTime = time.Now().Unix()
-	return
-}
-
 const (
 	HistoryOpClean   = "clean"
 	HistoryOpUpdate  = "update"
@@ -1049,4 +1038,30 @@ func subscribeSQLHistoryEvents() {
 	eventbus.Subscribe(util.EvtSQLHistoryRebuild, func() {
 		ReindexHistory()
 	})
+}
+
+func getRollbackBox(boxID string) (ret *Box, created bool, err error) {
+	ret = Conf.Box(boxID)
+	if nil == ret {
+		boxName := "Rollback"
+		ret = GetBoxByName(boxName)
+		if nil == ret {
+			var id string
+			id, err = CreateBox(boxName)
+			if nil != err {
+				return
+			}
+			_, err = Mount(id)
+			if nil != err {
+				return
+			}
+			ret = Conf.Box(id)
+			created = true
+		}
+	}
+	if nil == ret {
+		err = errors.New("can not get or create rollback box")
+		return
+	}
+	return
 }

@@ -350,7 +350,7 @@ export class Toolbar {
         }
         let isEndSpan = false;
         // https://github.com/siyuan-note/siyuan/issues/7200
-        if (this.range.endOffset === this.range.startContainer.textContent.length &&
+        if (this.range.endOffset === this.range.endContainer.textContent.length &&
             !["DIV", "TD", "TH", "TR"].includes(this.range.endContainer.parentElement.tagName) &&
             !hasNextSibling(this.range.endContainer)) {
             this.range.setEndAfter(this.range.endContainer.parentElement);

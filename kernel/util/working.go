@@ -20,7 +20,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"math/rand"
 	"mime"
 	"net/http"
 	"net/url"
@@ -31,7 +30,6 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
@@ -86,7 +84,6 @@ func coalesceToEnvVar(fromCLI *string, envVarName string) *string {
 func Boot() {
 	initEnvVars()
 	IncBootProgress(3, "Booting kernel...")
-	rand.Seed(time.Now().UTC().UnixNano())
 	initMime()
 	initHttpClient()
 
@@ -584,5 +581,4 @@ func RemoveDatabaseFile(dbPath string) {
 			return
 		}
 	}
-	return
 }

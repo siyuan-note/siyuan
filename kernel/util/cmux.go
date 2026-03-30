@@ -37,13 +37,13 @@ func ServeMultiplexed(ln net.Listener, handler http.Handler, certPath, keyPath s
 	httpsServer := &http.Server{Handler: handler}
 
 	go func() {
-		if serveErr := httpServer.Serve(httpL); serveErr != nil && serveErr != cmux.ErrListenerClosed && !errors.Is(serveErr, http.ErrServerClosed) {
+		if serveErr := httpServer.Serve(httpL); serveErr != nil && !errors.Is(serveErr, cmux.ErrListenerClosed) && !errors.Is(serveErr, http.ErrServerClosed) {
 			logging.LogErrorf("multiplexed HTTP server error: %s", serveErr)
 		}
 	}()
 
 	go func() {
-		if serveErr := httpsServer.Serve(tlsListener); serveErr != nil && serveErr != cmux.ErrListenerClosed && !errors.Is(serveErr, http.ErrServerClosed) {
+		if serveErr := httpsServer.Serve(tlsListener); serveErr != nil && !errors.Is(serveErr, cmux.ErrListenerClosed) && !errors.Is(serveErr, http.ErrServerClosed) {
 			logging.LogErrorf("multiplexed HTTPS server error: %s", serveErr)
 		}
 	}()

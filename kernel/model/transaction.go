@@ -1061,9 +1061,9 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 				}
 			}
 			avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
-			oldAttrsUnEsc := parse.IAL2MapUnEsc(toChangNode.KramdownIAL)
+			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
 			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-			pushBlockAttrs(oldAttrsUnEsc, toChangNode)
+			pushBlockAttrs(oldAttrs, toChangNode)
 		}
 
 		for _, tree := range trees {
@@ -1546,9 +1546,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		// updateBlock 会清空数据库角标 https://github.com/siyuan-note/siyuan/issues/16549
 		go func() {
 			time.Sleep(200 * time.Millisecond)
-			oldAttrsUnEsc := parse.IAL2MapUnEsc(updatedNode.KramdownIAL)
+			oldAttrs := parse.IAL2Map(updatedNode.KramdownIAL)
 			updatedNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-			pushBlockAttrs(oldAttrsUnEsc, updatedNode)
+			pushBlockAttrs(oldAttrs, updatedNode)
 		}()
 	}
 

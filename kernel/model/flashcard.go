@@ -802,7 +802,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 			continue
 		}
 
-		oldAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
+		oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
 		deckAttrs := node.IALAttr(NodeAttrRiffDecks)
 		var deckIDs []string
@@ -828,7 +828,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 		tx.writeTree(tree)
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
-		pushBlockAttrs(oldAttrsUnEsc, node)
+		pushBlockAttrs(oldAttrs, node)
 	}
 
 	return
@@ -908,7 +908,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		oldAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
+		oldAttrs := parse.IAL2Map(node.KramdownIAL)
 
 		deckAttrs := node.IALAttr(NodeAttrRiffDecks)
 		deckIDs := strings.Split(deckAttrs, ",")
@@ -922,7 +922,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		tx.writeTree(tree)
 
 		cache.PutBlockIAL(blockID, parse.IAL2Map(node.KramdownIAL))
-		pushBlockAttrs(oldAttrsUnEsc, node)
+		pushBlockAttrs(oldAttrs, node)
 	}
 
 	deck := Decks[deckID]

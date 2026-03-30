@@ -350,8 +350,8 @@ func validateChars(name string, startIdx, n int) bool {
 }
 
 func pushBlockAttrs(oldAttrsUnEsc map[string]string, node *ast.Node) {
-	newAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
-	data := map[string]interface{}{"old": oldAttrsUnEsc, "new": newAttrsUnEsc}
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	data := map[string]interface{}{"old": oldAttrsUnEsc, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType
 	}

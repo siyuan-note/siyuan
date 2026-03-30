@@ -127,7 +127,10 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		return
 	}
 
-	data = removeUnescapedUnicodeNull(data)
+	data, err = correctTreeJSONData(boxID, p, data, luteEngine)
+	if nil != err {
+		return
+	}
 
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
 	if nil == err {
@@ -330,24 +333,33 @@ func removeUnescapedUnicodeNull(data []byte) []byte {
 	if n < patLen {
 		return data
 	}
+	if !bytes.Contains(data, []byte(`\u0000`)) {
+		return data
+	}
 
 	dst := make([]byte, 0, n)
 	i := 0
 	for i < n {
+		from := i
+		j := bytes.IndexByte(data[i:], '\\')
+		if j < 0 {
+			dst = append(dst, data[from:]...)
+			break
+		}
+		i += j
+		dst = append(dst, data[from:i]...)
+
 		// 快速检查是否可能匹配 `\u0000`
 		if i+patLen <= n &&
-			data[i] == '\\' &&
 			data[i+1] == 'u' &&
 			data[i+2] == '0' &&
 			data[i+3] == '0' &&
 			data[i+4] == '0' &&
 			data[i+5] == '0' {
 			// 统计当前 `\` 之前连续的反斜杠数量
-			j := i - 1
 			backslashes := 0
-			for j >= 0 && data[j] == '\\' {
+			for k := i - 1; k >= 0 && data[k] == '\\'; k-- {
 				backslashes++
-				j--
 			}
 			// 若为偶数，则当前 `\` 未被转义，跳过整个 `\u0000`
 			if backslashes%2 == 0 {
@@ -367,28 +379,31 @@ func afterWriteTree(tree *parse.Tree) {
 	cache.PutDocIAL(tree.Path, docIAL)
 }
 
-func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+// correctTreeJSONData 订正树 JSON 数据。
+func correctTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) ([]byte, error) {
+	jsonData = removeUnescapedUnicodeNull(jsonData)
 	var needFix bool
-	ret, needFix, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	ret, needFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
-		return
+		return nil, err
 	}
 
 	ret.Box = boxID
 	ret.Path = p
 
 	if err = treenode.CheckSpec(ret); errors.Is(err, treenode.ErrSpecTooNew) {
-		return
+		return nil, err
 	}
 
 	if treenode.UpgradeSpec(ret) {
 		needFix = true
 	}
 
-	if escapeAttributeValues(ret) { // TODO 计划于 2026 年 6 月 30 日后删除
-		// v3.5.1 https://github.com/siyuan-note/siyuan/pull/16657 引入的问题，属性值未转义
-		// v3.5.2 https://github.com/siyuan-note/siyuan/issues/16686 进行了修复，并加了订正逻辑 https://github.com/siyuan-note/siyuan/pull/16712
+	// v3.5.1 https://github.com/siyuan-note/siyuan/pull/16657 引入的问题，属性值未转义
+	// v3.5.2 https://github.com/siyuan-note/siyuan/issues/16686 进行了修复，并加了订正逻辑 https://github.com/siyuan-note/siyuan/pull/16712
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-ff66-236v-p4fg XSS 漏洞："title": "&amp;\" onmouseenter=\"require('child_process').exec('calc')"
+	if escapeAttributeValues(ret) {
 		needFix = true
 	}
 
@@ -400,34 +415,51 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		ret.Root.SetIALAttr("id", ret.ID)
 	}
 
-	if needFix {
-		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)
-		data := renderer.Render()
+	if !needFix {
+		return jsonData, nil
+	}
 
-		if !util.UseSingleLineSave {
-			buf := bytes.Buffer{}
-			buf.Grow(1024 * 1024 * 2)
-			if err = json.Indent(&buf, data, "", "\t"); err != nil {
-				return
-			}
-			data = buf.Bytes()
-		}
+	renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	data := renderer.Render()
 
-		filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
-		if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
-			return
+	if !util.UseSingleLineSave {
+		buf := bytes.Buffer{}
+		buf.Grow(1024 * 1024 * 2)
+		if err = json.Indent(&buf, data, "", "\t"); err != nil {
+			return nil, err
 		}
-		if err = filelock.WriteFile(filePath, data); err != nil {
-			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
-			logging.LogErrorf(msg)
-		}
+		data = buf.Bytes()
+	}
+
+	filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
+	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+		return nil, err
+	}
+	if err = filelock.WriteFile(filePath, data); err != nil {
+		logging.LogErrorf("write data [%s] failed: %s", filePath, err)
+	}
+	return data, nil
+}
+
+func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	if err != nil {
+		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
+		return
+	}
+
+	ret.Box = boxID
+	ret.Path = p
+
+	if err = treenode.CheckSpec(ret); errors.Is(err, treenode.ErrSpecTooNew) {
+		return
 	}
 	return
 }
 
 // escapeAttributeValues 转义属性值
 func escapeAttributeValues(tree *parse.Tree) (hasEscaped bool) {
-	if util.ReadOnly || nil == tree || nil == tree.Root {
+	if nil == tree || nil == tree.Root {
 		return false
 	}
 
@@ -451,35 +483,12 @@ func escapeNodeAttributeValues(node *ast.Node) (escaped bool) {
 	}
 
 	for _, kv := range node.KramdownIAL {
-		if value := kv[1]; needsEscapeForValue(value) {
-			kv[1] = html.EscapeAttrVal(value)
+		// 解码再编码后发生变化则说明未正确转义或存在恶意拼接，需要订正
+		canonical := html.EscapeAttrVal(html.UnescapeAttrVal(kv[1]))
+		if canonical != kv[1] {
+			kv[1] = canonical
 			escaped = true
 		}
 	}
 	return
-}
-
-// needsEscapeForValue 检查值是否需要转义（包含需要转义的特殊字符但尚未被转义）
-func needsEscapeForValue(value string) bool {
-	hasSpecialChars := false
-	for _, char := range value {
-		switch char {
-		case '<', '>', '&', '"', '{', '}':
-			hasSpecialChars = true
-		}
-		if hasSpecialChars {
-			break
-		}
-	}
-	if !hasSpecialChars {
-		return false
-	}
-
-	entities := []string{"&quot;", "&#123;", "&#125;", "&amp;", "&lt;", "&gt;"}
-	for _, entity := range entities {
-		if strings.Contains(value, entity) {
-			return false
-		}
-	}
-	return true
 }

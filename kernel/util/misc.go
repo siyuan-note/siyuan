@@ -212,17 +212,6 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 	return
 }
 
-func SanitizeAttr(attr string) string {
-	attr = strings.TrimSpace(attr)
-	h := "<div data-attr=\"" + attr + "\">"
-	p := bluemonday.UGCPolicy()
-	p.AllowDataAttributes()
-	ret := p.Sanitize(h)
-	ret = strings.TrimPrefix(ret, "<div data-attr=\"")
-	ret = strings.TrimSuffix(ret, "\">")
-	return ret
-}
-
 func SanitizeImgSrc(src string) string {
 	src = strings.TrimSpace(src)
 	h := "<img src=\"" + src + "\">"
@@ -249,6 +238,9 @@ func SanitizeSVG(svgInput string) string {
 			next := c.NextSibling
 			if c.Type == html.ElementNode {
 				tag := strings.ToLower(c.Data)
+				if i := strings.LastIndex(tag, ":"); i >= 0 {
+					tag = tag[i+1:]
+				}
 				if tag == "script" || tag == "iframe" || tag == "object" || tag == "embed" || tag == "foreignobject" || "animate" == tag ||
 					"animatetransform" == tag || "animatecolor" == tag || "animatemotion" == tag || "set" == tag {
 					n.RemoveChild(c)

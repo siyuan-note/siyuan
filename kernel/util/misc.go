@@ -212,17 +212,6 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 	return
 }
 
-func SanitizeAttr(attr string) string {
-	attr = strings.TrimSpace(attr)
-	h := "<div data-attr=\"" + attr + "\">"
-	p := bluemonday.UGCPolicy()
-	p.AllowDataAttributes()
-	ret := p.Sanitize(h)
-	ret = strings.TrimPrefix(ret, "<div data-attr=\"")
-	ret = strings.TrimSuffix(ret, "\">")
-	return ret
-}
-
 func SanitizeImgSrc(src string) string {
 	src = strings.TrimSpace(src)
 	h := "<img src=\"" + src + "\">"

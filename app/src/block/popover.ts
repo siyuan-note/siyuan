@@ -30,7 +30,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tooltipClass = "";
-            let tip = aElement.getAttribute("aria-label") || "";
+            let tip = escapeHtml(aElement.getAttribute("aria-label")) || "";
             if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");

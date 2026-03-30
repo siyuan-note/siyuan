@@ -1546,7 +1546,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		// updateBlock 会清空数据库角标 https://github.com/siyuan-note/siyuan/issues/16549
 		go func() {
 			time.Sleep(200 * time.Millisecond)
-			oldAttrs := parse.IAL2Map(updatedNode.KramdownIAL)
+			oldAttrs := parse.IAL2MapUnEsc(updatedNode.KramdownIAL)
 			updatedNode.SetIALAttr(av.NodeAttrViewNames, avNames)
 			pushBlockAttrs(oldAttrs, updatedNode)
 		}()

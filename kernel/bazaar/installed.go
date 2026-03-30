@@ -24,16 +24,12 @@ import (
 
 	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
-	gcache "github.com/patrickmn/go-cache"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
 	"golang.org/x/sync/singleflight"
 )
-
-// packageInstallSizeCache 缓存集市包的安装大小，与 cachedStageIndex 使用相同的缓存时间
-var packageInstallSizeCache = gcache.New(time.Duration(util.RhyCacheDuration)*time.Second, time.Duration(util.RhyCacheDuration)*time.Second/6) // [repoURL]*int64
 
 // ReadInstalledPackageDirs 读取本地集市包的目录列表
 func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
@@ -85,12 +81,18 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 	pkg.HInstallDate = getPackageHInstallDate(pkgType, pkg.Name, installPath)
 	// TODO 本地安装大小的缓存改成 1 分钟有效，打开集市包 README 的时候才遍历集市包文件夹进行统计，异步返回结果到前端显示 https://github.com/siyuan-note/siyuan/issues/16983
 	// 目前优先使用在线 stage 数据：不耗时，但可能不准确，比如本地旧版本与云端最新版本的安装大小可能不一致；其次使用本地目录大小：耗时，但准确
-	if installSize, ok := packageInstallSizeCache.Get(pkg.RepoURL); ok {
-		pkg.InstallSize = installSize.(int64)
+	// 需要分离本地安装大小和在线 stage 数据的安装大小
+	bazaarMemMu.RLock()
+	cachedSize, hit := installSizeCache[pkg.RepoURL]
+	bazaarMemMu.RUnlock()
+	if hit {
+		pkg.InstallSize = cachedSize
 	} else {
 		size, _ := util.SizeOfDirectory(installPath)
 		pkg.InstallSize = size
-		packageInstallSizeCache.SetDefault(pkg.RepoURL, size)
+		bazaarMemMu.Lock()
+		installSizeCache[pkg.RepoURL] = size
+		bazaarMemMu.Unlock()
 	}
 	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
 

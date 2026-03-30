@@ -61,6 +61,7 @@ var blockIALCache, _ = ristretto.NewCache(&ristretto.Config{
 })
 
 func PutBlockIAL(id string, ial map[string]string) {
+	// 这里存入的属性值都是反转义过的，用的是 parse.IAL2Map()，而不是 parse.IAL2MapUnEsc()
 	blockIALCache.Set(id, ial, 128)
 }
 

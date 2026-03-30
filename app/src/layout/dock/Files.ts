@@ -1428,6 +1428,7 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
                         item.classList.toggle("fn__none", editingPublishAccess);
                         item.nextElementSibling.classList.toggle("fn__none", !editingPublishAccess);
                     });
+                    this.refreshPublishAccessSwitch();
                 }
             }).element);
         }

@@ -19,20 +19,49 @@ import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest, genLinkText} from "../toolbar/util";
 
-const resolveAllLinks = (text: string, lute: Lute): { dest: string; text: string }[] | null => {
-    const parts = text.split(/\s+/).filter(p => p.length > 0);
-    if (parts.length === 0) {
-        return null;
+const convertUrlsToLinks = (container: HTMLElement, lute: Lute) => {
+    if (!window.siyuan.config.editor.pasteURLAutoConvert) {
+        return;
     }
-    const links: { dest: string; text: string }[] = [];
-    for (const part of parts) {
-        const linkDest = resolveLinkDest(part, lute);
-        if (!linkDest) {
-            return null;
+    container.querySelectorAll('[data-type="NodeParagraph"]').forEach((paragraph) => {
+        const editable = paragraph.querySelector('[contenteditable]');
+        if (!editable) {
+            return;
         }
-        links.push({dest: linkDest, text: genLinkText(linkDest, false)});
-    }
-    return links;
+        let allText = true;
+        editable.childNodes.forEach((node) => {
+            if (node.nodeType !== 3) {
+                allText = false;
+            }
+        });
+        if (!allText) {
+            return;
+        }
+        const text = editable.textContent.trim();
+        if (!text) {
+            return;
+        }
+        const parts = text.split(/\s+/).filter(p => p.length > 0);
+        const links: { dest: string; text: string }[] = [];
+        for (const part of parts) {
+            const linkDest = resolveLinkDest(part, lute);
+            if (!linkDest) {
+                return;
+            }
+            links.push({dest: linkDest, text: genLinkText(linkDest, false)});
+        }
+        editable.innerHTML = "";
+        links.forEach((link, i) => {
+            if (i > 0) {
+                editable.appendChild(document.createTextNode(" "));
+            }
+            const span = document.createElement("span");
+            span.setAttribute("data-type", "a");
+            span.setAttribute("data-href", link.dest);
+            span.textContent = link.text;
+            editable.appendChild(span);
+        });
+    });
 };
 
 const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
@@ -40,29 +69,17 @@ const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
         return false;
     }
     const trimmed = text.trim();
-    if (!trimmed) {
+    if (!trimmed || trimmed.includes("\n")) {
         return false;
     }
-    const lines = trimmed.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length > 1) {
-        const mdLines: string[] = [];
-        for (const line of lines) {
-            const links = resolveAllLinks(line, protyle.lute);
-            if (!links) {
-                return false;
-            }
-            mdLines.push(links.map(l => `[${l.text}](${l.dest})`).join(" "));
+    const parts = trimmed.split(/\s+/).filter(p => p.length > 0);
+    const links: { dest: string; text: string }[] = [];
+    for (const part of parts) {
+        const linkDest = resolveLinkDest(part, protyle.lute);
+        if (!linkDest) {
+            return false;
         }
-        const dom = protyle.lute.Md2BlockDOM(mdLines.join("\n\n"));
-        if (dom) {
-            insertHTML(dom, protyle, true, false, true);
-            return true;
-        }
-        return false;
-    }
-    const links = resolveAllLinks(trimmed, protyle.lute);
-    if (!links) {
-        return false;
+        links.push({dest: linkDest, text: genLinkText(linkDest, false)});
     }
     for (let i = 0; i < links.length; i++) {
         if (i > 0) {
@@ -491,10 +508,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             clearBlockElement(e);
             isBlock = true;
         });
-        if (!isBlock && !tempElement.querySelector('[data-type]') &&
-            pasteAsLink(tempElement.textContent, protyle)) {
-            return;
-        }
         if (nodeElement.classList.contains("table")) {
             isBlock = false;
         }
@@ -502,6 +515,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
             e.setAttribute("contenteditable", "true");
         });
+        convertUrlsToLinks(tempElement, protyle.lute);
+        if (!isBlock && pasteAsLink(tempElement.textContent, protyle)) {
+            return;
+        }
         let tempInnerHTML = tempElement.innerHTML;
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {

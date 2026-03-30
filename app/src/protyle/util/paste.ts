@@ -19,28 +19,67 @@ import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest, genLinkText} from "../toolbar/util";
 
+const resolveAllLinks = (text: string, lute: Lute): { dest: string; text: string }[] | null => {
+    const parts = text.split(/\s+/).filter(p => p.length > 0);
+    if (parts.length === 0) {
+        return null;
+    }
+    const links: { dest: string; text: string }[] = [];
+    for (const part of parts) {
+        const linkDest = resolveLinkDest(part, lute);
+        if (!linkDest) {
+            return null;
+        }
+        links.push({dest: linkDest, text: genLinkText(linkDest, false)});
+    }
+    return links;
+};
+
 const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
     if (!window.siyuan.config.editor.pasteURLAutoConvert) {
         return false;
     }
     const trimmed = text.trim();
-    if (!trimmed || trimmed.includes("\n")) {
-        // TODO 暂不支持多行文本
+    if (!trimmed) {
         return false;
     }
-    const linkDest = resolveLinkDest(trimmed, protyle.lute);
-    if (!linkDest) {
+    const lines = trimmed.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length > 1) {
+        const mdLines: string[] = [];
+        for (const line of lines) {
+            const links = resolveAllLinks(line, protyle.lute);
+            if (!links) {
+                return false;
+            }
+            mdLines.push(links.map(l => `[${l.text}](${l.dest})`).join(" "));
+        }
+        const dom = protyle.lute.Md2BlockDOM(mdLines.join("\n\n"));
+        if (dom) {
+            insertHTML(dom, protyle, true, false, true);
+            return true;
+        }
         return false;
     }
-    const linkText = genLinkText(linkDest, true);
-    const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
-        type: "a",
-        color: linkDest + Constants.ZWSP + linkText
-    });
-    if (linkNodes && linkNodes.length > 0) {
-        const lastNode = linkNodes[linkNodes.length - 1];
-        protyle.toolbar.range.setStartAfter(lastNode);
-        protyle.toolbar.range.collapse(true);
+    const links = resolveAllLinks(trimmed, protyle.lute);
+    if (!links) {
+        return false;
+    }
+    for (let i = 0; i < links.length; i++) {
+        if (i > 0) {
+            const spaceNode = document.createTextNode(" ");
+            protyle.toolbar.range.insertNode(spaceNode);
+            protyle.toolbar.range.setStartAfter(spaceNode);
+            protyle.toolbar.range.collapse(true);
+        }
+        const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
+            type: "a",
+            color: links[i].dest + Constants.ZWSP + links[i].text
+        });
+        if (linkNodes && linkNodes.length > 0) {
+            const lastNode = linkNodes[linkNodes.length - 1];
+            protyle.toolbar.range.setStartAfter(lastNode);
+            protyle.toolbar.range.collapse(true);
+        }
     }
     return true;
 };
@@ -445,9 +484,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
         }
-        if (pasteAsLink(tempElement.textContent, protyle)) {
-            return;
-        }
         let isBlock = false;
         tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
             const newId = Lute.NewNodeID();
@@ -455,6 +491,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             clearBlockElement(e);
             isBlock = true;
         });
+        if (!isBlock && !tempElement.querySelector('[data-type]') &&
+            pasteAsLink(tempElement.textContent, protyle)) {
+            return;
+        }
         if (nodeElement.classList.contains("table")) {
             isBlock = false;
         }

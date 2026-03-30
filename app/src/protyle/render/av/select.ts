@@ -666,12 +666,12 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
         selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
-    return `<div class="b3-menu__items">
+    return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">
 <div class="b3-chips" style="max-width: 50vw">
     ${selectedHTML}
     <input>
 </div>
-<div>${filterSelectHTML("", colData.options, selected)}</div>
+<div style="flex: 1;overflow: auto;">${filterSelectHTML("", colData.options, selected)}</div>
 </div>`;
 };
 

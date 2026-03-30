@@ -2816,14 +2816,14 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		if blockViewID == viewID {
 			attrs[av.NodeAttrView] = attrView.ViewID
 			node.AttributeViewType = string(view.LayoutType)
-			oldAttrsUnEsc, e := setNodeAttrs0(node, attrs)
+			oldAttrs, e := setNodeAttrs0(node, attrs)
 			if nil != e {
 				logging.LogErrorf("set node attrs failed: %s", e)
 				continue
 			}
 
 			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-			pushBlockAttrs(oldAttrsUnEsc, node)
+			pushBlockAttrs(oldAttrs, node)
 		}
 	}
 
@@ -3254,9 +3254,9 @@ func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 	_, nodes := tx.getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
 		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
-		oldAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
+		oldAttrs := parse.IAL2Map(node.KramdownIAL)
 		node.SetIALAttr(av.NodeAttrViewNames, avNames)
-		pushBlockAttrs(oldAttrsUnEsc, node)
+		pushBlockAttrs(oldAttrs, node)
 	}
 	return
 }
@@ -5826,12 +5826,12 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 				attrs[av.NodeAttrViewNames] = avNames
 			}
 
-			oldAttrsUnEsc, setErr := setNodeAttrs0(node, attrs)
+			oldAttrs, setErr := setNodeAttrs0(node, attrs)
 			if nil != setErr {
 				continue
 			}
 			cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-			pushBlockAttrs(oldAttrsUnEsc, node)
+			pushBlockAttrs(oldAttrs, node)
 			if "" != avNames {
 				node.RemoveIALAttr(av.NodeAttrViewNames)
 			}

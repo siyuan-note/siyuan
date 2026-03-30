@@ -19,7 +19,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"maps"
 	"strings"
 	"time"
 
@@ -126,13 +125,13 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 		}
 
 		attrs := blockAttr["attrs"].(map[string]string)
-		oldAttrsUnEsc, e := setNodeAttrs0(node, attrs)
+		oldAttrs, e := setNodeAttrs0(node, attrs)
 		if nil != e {
 			return e
 		}
 
 		cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-		pushBlockAttrs(oldAttrsUnEsc, node)
+		pushBlockAttrs(oldAttrs, node)
 		nodes = append(nodes, node)
 	}
 
@@ -169,7 +168,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 }
 
 func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
-	oldAttrsUnEsc, err := setNodeAttrs0(node, nameValues)
+	oldAttrs, err := setNodeAttrs0(node, nameValues)
 	if err != nil {
 		return
 	}
@@ -181,7 +180,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
-	pushBlockAttrs(oldAttrsUnEsc, node)
+	pushBlockAttrs(oldAttrs, node)
 
 	go func() {
 		sql.FlushQueue()
@@ -191,7 +190,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 }
 
 func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
-	oldAttrsUnEsc, err := setNodeAttrs0(node, nameValues)
+	oldAttrs, err := setNodeAttrs0(node, nameValues)
 	if err != nil {
 		return
 	}
@@ -200,13 +199,13 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-	pushBlockAttrs(oldAttrsUnEsc, node)
+	pushBlockAttrs(oldAttrs, node)
 	return
 }
 
-func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrsUnEsc map[string]string, err error) {
-	oldAttrsUnEsc = parse.IAL2MapUnEsc(node.KramdownIAL)
-	newAttrsUnEsc := maps.Clone(oldAttrsUnEsc)
+func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[string]string, err error) {
+	oldAttrs = parse.IAL2Map(node.KramdownIAL)
+	newAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
 
 	for name, value := range nameValues {
 		value = util.RemoveInvalidRetainCtrl(value)
@@ -257,7 +256,7 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrsUnEsc 
 
 	node.KramdownIAL = parse.Map2IAL(newAttrsUnEsc)
 
-	if oldAttrsUnEsc["tags"] != newAttrsUnEsc["tags"] {
+	if html.EscapeAttrVal(oldAttrs["tags"]) != newAttrsUnEsc["tags"] {
 		ReloadTag()
 	}
 	return
@@ -280,7 +279,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return errors.New(fmt.Sprintf(Conf.Language(15), id))
 	}
 
-	oldAttrsUnEsc := parse.IAL2MapUnEsc(node.KramdownIAL)
+	oldAttrs := parse.IAL2Map(node.KramdownIAL)
 	node.ClearIALAttrs()
 
 	_, err = setNodeAttrs0(node, nameValues)
@@ -295,7 +294,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	IncSync()
 	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
 
-	pushBlockAttrs(oldAttrsUnEsc, node)
+	pushBlockAttrs(oldAttrs, node)
 
 	go func() {
 		sql.FlushQueue()
@@ -349,9 +348,9 @@ func validateChars(name string, startIdx, n int) bool {
 	return true
 }
 
-func pushBlockAttrs(oldAttrsUnEsc map[string]string, node *ast.Node) {
+func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {
 	newAttrs := parse.IAL2Map(node.KramdownIAL)
-	data := map[string]interface{}{"old": oldAttrsUnEsc, "new": newAttrs}
+	data := map[string]interface{}{"old": oldAttrs, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType
 	}

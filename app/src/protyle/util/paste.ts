@@ -32,7 +32,7 @@ const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
     if (!linkDest) {
         return false;
     }
-    const linkText = genLinkText(linkDest, false);
+    const linkText = genLinkText(linkDest, true);
     const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
         type: "a",
         color: linkDest + Constants.ZWSP + linkText

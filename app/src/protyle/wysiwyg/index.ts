@@ -104,6 +104,7 @@ import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
+import {initTableDrag} from "../util/tableDrag";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -111,7 +112,6 @@ export class WYSIWYG {
     public preventKeyup: boolean;
 
     private preventClick: boolean;
-
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
@@ -133,6 +133,9 @@ export class WYSIWYG {
         }
         keydown(protyle, this.element);
         dropEvent(protyle, this.element);
+        if (!isMobile()) {
+            initTableDrag(protyle);
+        }
     }
 
     public renderCustom(ial: IObject) {
@@ -636,7 +639,7 @@ export class WYSIWYG {
                             showMessage(window.siyuan.languages.crossKeepLazyLoad);
                         }
                         selectElements.forEach(item => {
-                            if (!hasClosestByClassName(item, "protyle-wysiwyg--select")) {
+                            if (!hasClosestByClassName(currentElement, "protyle-wysiwyg--select")) {
                                 item.classList.add("protyle-wysiwyg--select");
                                 ids.push(item.getAttribute("data-node-id"));
                                 // 清除选中的子块 https://ld246.com/article/1667826582251

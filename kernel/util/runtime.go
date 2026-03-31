@@ -155,7 +155,7 @@ func getWorkspaceDriveType() string {
 
 		for _, disk := range block.Disks {
 			for _, partition := range disk.Partitions {
-				if strings.HasPrefix(WorkspaceDir, partition.MountPoint) {
+				if IsSubPath(partition.MountPoint, WorkspaceDir) {
 					return partition.Disk.DriveType.String()
 				}
 			}

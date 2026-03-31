@@ -8,8 +8,8 @@ Please provide a summary of the change and the issue being fixed. Include releva
 ## Type of change / 变更类型
 
 <!--
-A PR should only have one purpose, such as never putting multiple changes like refactoring, feature improvement, or bug fixes in one PR, otherwise the PR will be rejected.
-一个 PR 应该只包含一个目的，比如切勿将重构、功能改进或者修复缺陷等多个变更放在一个 PR 中，否则提交将被拒。
+A PR should have a single purpose. Please do not include multiple changes such as bug fixes, refactoring, or new features in one PR; otherwise, the PR will be rejected.
+一个 PR 应该只包含一个目的，请勿将缺陷修复、代码重构或新功能等多个变更包含在同一个 PR 中，否则 PR 将被拒绝。
 -->
 
 - [ ] Bug fix

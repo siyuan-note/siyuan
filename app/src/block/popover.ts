@@ -30,7 +30,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tooltipClass = "";
-            let tip = escapeHtml(aElement.getAttribute("aria-label")) || "";
+            let tip = aElement.getAttribute("aria-label") || "";
             if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
@@ -79,6 +79,8 @@ export const initBlockPopover = (app: App) => {
                 if (childElement && childElement.clientWidth < childElement.scrollWidth) {
                     tip = childElement.textContent;
                 }
+            } else if (aElement.classList.contains("protyle-attr--memo")) {
+                tip = escapeHtml(tip);
             }
             let tooltipSpace: number | undefined;
             if (!tip && aElement.getAttribute("data-type")?.includes("inline-memo")) {

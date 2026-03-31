@@ -113,7 +113,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--outline fn__size200" data-action="purgeData">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.cloudStoragePurge}
     </button>
     <div class="fn__space"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">
@@ -172,7 +172,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--outline fn__size200" data-action="purgeData">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.cloudStoragePurge}
     </button>
     <div class="fn__space"></div>
     <button class="b3-button b3-button--outline fn__size200" style="position: relative">

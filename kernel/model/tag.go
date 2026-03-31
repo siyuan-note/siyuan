@@ -368,6 +368,8 @@ func labelTags() (ret map[string]Tags) {
 	for _, tagSpan := range tagSpans {
 		label := util.UnescapeHTML(tagSpan.Content)
 		if "" == label {
+			// 历史数据中可能存在标签内容为空的情况，跳过这些数据
+			// Empty tags no longer appear in the tag panel https://github.com/siyuan-note/siyuan/issues/17367
 			continue
 		}
 

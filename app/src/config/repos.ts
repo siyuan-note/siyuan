@@ -6,6 +6,7 @@ import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
 import {openByMobile} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {escapeAttr} from "../util/escape";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {
@@ -59,7 +60,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
-    <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.endpoint}">
+    <input id="endpoint" class="b3-text-field fn__block" value="${escapeAttr(window.siyuan.config.sync.s3.endpoint)}">
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Access Key</div>
@@ -136,7 +137,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
-    <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.webdav.endpoint}">
+    <input id="endpoint" class="b3-text-field fn__block" value="${escapeAttr(window.siyuan.config.sync.webdav.endpoint)}">
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Username</div>
@@ -197,7 +198,7 @@ const renderProvider = (provider: number) => {
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Endpoint</div>
     <div class="fn__space"></div>
-    <input id="endpoint" class="b3-text-field fn__block" value="${window.siyuan.config.sync.local.endpoint}">
+    <input id="endpoint" class="b3-text-field fn__block" value="${escapeAttr(window.siyuan.config.sync.local.endpoint)}">
 </div>
 <div class="b3-label b3-label--inner fn__flex">
     <div class="fn__flex-center fn__size200">Timeout (s)</div>

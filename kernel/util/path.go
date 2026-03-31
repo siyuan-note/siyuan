@@ -36,6 +36,13 @@ import (
 var (
 	SSL       = false
 	UserAgent = "SiYuan/" + Ver
+
+	// invisibleCharsReplacer 用于 NormalizeEndpoint：去除复制粘贴易带入的零宽字符。
+	invisibleCharsReplacer = strings.NewReplacer(
+		"\u200b", "", // 零宽空格 ZWSP
+		"\u200c", "", // 零宽不连字 ZWNJ
+		"\u200d", "", // 零宽连字 ZWJ
+	)
 )
 
 func TrimSpaceInPath(p string) string {
@@ -191,6 +198,7 @@ func NormalizeTimeout(timeout int) int {
 }
 
 func NormalizeEndpoint(endpoint string) string {
+	endpoint = invisibleCharsReplacer.Replace(endpoint)
 	endpoint = strings.TrimSpace(endpoint)
 	if "" == endpoint {
 		return ""

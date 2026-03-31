@@ -85,9 +85,6 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
-	// 消毒
-	sanitizeAttrView(attrView)
-
 	// 渲染视图
 	viewable = sql.RenderView(attrView, view, query)
 	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
@@ -98,18 +95,6 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 	// 渲染分组视图
 	err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging)
 	return
-}
-
-func sanitizeAttrView(attrView *av.AttributeView) {
-	for _, kv := range attrView.KeyValues {
-		for _, v := range kv.Values {
-			if av.KeyTypeMAsset == v.Type {
-				for _, a := range v.MAsset {
-					a.Content = util.SanitizeHtmlTagAttr(a.Content)
-				}
-			}
-		}
-	}
 }
 
 func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]interface{}) (err error) {

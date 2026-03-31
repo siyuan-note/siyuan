@@ -302,7 +302,7 @@ export const editAssetItem = (options: {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             click() {
-                writeText(`![](${linkAddress.replace(/%20/g, " ")})`);
+                writeText(`![](${textElements[0].value})`);
             }
         });
         menu.addItem({
@@ -310,7 +310,7 @@ export const editAssetItem = (options: {
             label: window.siyuan.languages.copyAsPNG,
             icon: "iconImage",
             click() {
-                copyPNGByLink(linkAddress);
+                copyPNGByLink(textElements[0].value);
             }
         });
     }
@@ -333,7 +333,7 @@ export const editAssetItem = (options: {
             label: window.siyuan.languages.rename,
             icon: "iconEdit",
             click() {
-                renameAsset(linkAddress);
+                renameAsset(decodeURI(linkAddress));
                 document.querySelector(".av__panel")?.remove();
             }
         });
@@ -381,7 +381,7 @@ export const editAssetItem = (options: {
     });
     /// #endif
     const textElements = menu.element.querySelectorAll("textarea");
-    textElements[0].value = linkAddress;
+    textElements[0].value = decodeURI(linkAddress);
     textElements[0].focus();
     textElements[0].select();
     if (textElements.length > 1) {

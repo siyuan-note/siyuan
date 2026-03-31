@@ -9,7 +9,7 @@ export const previewImages = (srcList: string[], currentSrc?: string) => {
         let initialViewIndex = -1;
         srcList.forEach((item: string, index: number) => {
             if (item) {
-                html += `<li><img src="${item}"></li>`;
+                html += `<li><img src="${encodeURI(item)}"></li>`;
                 if (currentSrc && initialViewIndex === -1 && (currentSrc.endsWith(encodeURI(item)) || currentSrc.endsWith(item))) {
                     initialViewIndex = index;
                 }

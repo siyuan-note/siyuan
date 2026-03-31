@@ -128,7 +128,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 	newLabel = strings.TrimSuffix(newLabel, "/")
 	newLabel = strings.TrimSpace(newLabel)
 
-	if "" == newLabel {
+	if "" == oldLabel || "" == newLabel {
 		return errors.New(Conf.Language(114))
 	}
 
@@ -367,10 +367,6 @@ func labelTags() (ret map[string]Tags) {
 	tagSpans := sql.QueryTagSpans("")
 	for _, tagSpan := range tagSpans {
 		label := util.UnescapeHTML(tagSpan.Content)
-		if "" == label {
-			continue
-		}
-
 		if _, ok := ret[label]; ok {
 			ret[label] = append(ret[label], &Tag{})
 		} else {

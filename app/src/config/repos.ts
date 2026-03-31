@@ -326,14 +326,8 @@ const bindProviderEvent = () => {
                     concurrentReqs = 16;
                 }
                 s3TimeoutInput.value = timeout.toString();
-                let endpoint = s3EndpointInput.value;
-                endpoint = endpoint.trim().replace("http://http(s)://", "https://");
-                endpoint = endpoint.replace("http(s)://", "https://");
-                if (!endpoint.startsWith("http")) {
-                    endpoint = "http://" + endpoint;
-                }
                 const s3 = {
-                    endpoint: endpoint,
+                    endpoint: s3EndpointInput.value,
                     accessKey: s3AccessKeyInput.value.trim(),
                     secretKey: s3SecretKeyInput.value.trim(),
                     bucket: s3BucketInput.value.trim(),

@@ -203,9 +203,20 @@ func NormalizeEndpoint(endpoint string) string {
 	if "" == endpoint {
 		return ""
 	}
+	endpoint = strings.Replace(endpoint, "http://http(s)://", "https://", 1)
+	endpoint = strings.Replace(endpoint, "http(s)://", "https://", 1)
 	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
 		endpoint = "http://" + endpoint
 	}
+	if idx := strings.Index(endpoint, "://"); 0 <= idx {
+		head := endpoint[:idx+len("://")]
+		tail := endpoint[idx+len("://"):]
+		for strings.Contains(tail, "//") {
+			tail = strings.ReplaceAll(tail, "//", "/")
+		}
+		endpoint = head + tail
+	}
+	endpoint = strings.TrimSpace(endpoint)
 	if !strings.HasSuffix(endpoint, "/") {
 		endpoint = endpoint + "/"
 	}

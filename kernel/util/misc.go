@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
@@ -212,12 +213,18 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 	return
 }
 
-func SanitizeImgSrc(src string) string {
-	src = strings.TrimSpace(src)
-	h := "<img src=\"" + src + "\">"
+func SanitizeHtmlTagAttr(val string) string {
+	val = strings.TrimSpace(val)
+	u, err := url.Parse(val)
+	if err == nil {
+		val = u.String()
+	}
+	h := "<div data-attr=\"" + val + "\">"
 	p := bluemonday.UGCPolicy()
+	p.AllowRelativeURLs(true)
+	p.AllowDataAttributes()
 	ret := p.Sanitize(h)
-	ret = strings.TrimPrefix(ret, "<img src=\"")
+	ret = strings.TrimPrefix(ret, "<div data-attr=\"")
 	ret = strings.TrimSuffix(ret, "\">")
 	return ret
 }

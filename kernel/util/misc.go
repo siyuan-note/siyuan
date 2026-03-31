@@ -20,14 +20,12 @@ import (
 	"bytes"
 	"fmt"
 	"math/rand"
-	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
 
 	"github.com/88250/lute/html"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/siyuan-note/logging"
 )
 
@@ -211,22 +209,6 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 		}
 	}
 	return
-}
-
-func SanitizeHtmlTagAttr(val string) string {
-	val = strings.TrimSpace(val)
-	u, err := url.Parse(val)
-	if err == nil {
-		val = u.String()
-	}
-	h := "<div data-attr=\"" + val + "\">"
-	p := bluemonday.UGCPolicy()
-	p.AllowRelativeURLs(true)
-	p.AllowDataAttributes()
-	ret := p.Sanitize(h)
-	ret = strings.TrimPrefix(ret, "<div data-attr=\"")
-	ret = strings.TrimSuffix(ret, "\">")
-	return ret
 }
 
 func SanitizeSVG(svgInput string) string {

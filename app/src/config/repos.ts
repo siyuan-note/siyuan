@@ -397,37 +397,38 @@ const bindProviderEvent = () => {
                     webdavConcurrentReqsInput.value = String(webdav.concurrentReqs);
                 });
             } else if (window.siyuan.config.sync.provider === 4) {
-                let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);
+                const localEndpointInput = providerPanelElement.querySelector("#endpoint") as HTMLInputElement;
+                const localTimeoutInput = providerPanelElement.querySelector("#timeout") as HTMLInputElement;
+                const localConcurrentReqsInput = providerPanelElement.querySelector("#localConcurrentReqs") as HTMLInputElement;
+                let timeout = parseInt(localTimeoutInput.value, 10);
                 if (7 > timeout) {
                     timeout = 7;
                 }
                 if (300 < timeout) {
                     timeout = 300;
                 }
-                let concurrentReqs = parseInt((providerPanelElement.querySelector("#localConcurrentReqs") as HTMLInputElement).value, 10);
+                let concurrentReqs = parseInt(localConcurrentReqsInput.value, 10);
                 if (1 > concurrentReqs) {
                     concurrentReqs = 1;
                 }
                 if (1024 < concurrentReqs) {
                     concurrentReqs = 1024;
                 }
-                (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
+                localTimeoutInput.value = timeout.toString();
                 const local = {
-                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
+                    endpoint: localEndpointInput.value,
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
                 };
                 fetchPost("/api/sync/setSyncProviderLocal", {local}, (response) => {
-                    if (response.code === 0) {
+                    if (response.code === 0 && response.data?.local) {
                         window.siyuan.config.sync.local = response.data.local;
-
-                        const endpoint = providerPanelElement.querySelector<HTMLInputElement>("#endpoint");
-                        if (endpoint) {
-                            endpoint.value = response.data.local.endpoint;
-                        }
-                    } else {
-                        window.siyuan.config.sync.local = local;
                     }
+                    // 配置没有成功时也要还原之前配置的值，保持配置界面的值与实际配置一致
+                    const local = window.siyuan.config.sync.local;
+                    localEndpointInput.value = local.endpoint;
+                    localTimeoutInput.value = String(local.timeout);
+                    localConcurrentReqsInput.value = String(local.concurrentReqs);
                 });
             }
         });

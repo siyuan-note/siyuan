@@ -783,7 +783,7 @@ func setSyncProviderLocal(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"local": local,
+		"local": model.Conf.Sync.Local,
 	}
 }
 

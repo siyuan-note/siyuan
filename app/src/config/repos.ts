@@ -1,5 +1,5 @@
 import {isPaidUser, needSubscribe} from "../util/needSubscribe";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {processSync} from "../dialog/processSystem";
@@ -337,22 +337,26 @@ const bindProviderEvent = () => {
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
                 };
-                fetchPost("/api/sync/setSyncProviderS3", {s3}, (response) => {
-                    if (response.code === 0 && response.data?.s3) {
-                        window.siyuan.config.sync.s3 = response.data.s3;
-                    }
-                    // 配置没有成功时也要还原之前配置的值，保持配置界面的值与实际配置一致
-                    const s3 = window.siyuan.config.sync.s3;
-                    s3EndpointInput.value = s3.endpoint;
-                    s3AccessKeyInput.value = s3.accessKey;
-                    s3SecretKeyInput.value = s3.secretKey;
-                    s3BucketInput.value = s3.bucket;
-                    s3RegionInput.value = s3.region;
-                    s3TimeoutInput.value = String(s3.timeout);
-                    s3PathStyleSelect.value = s3.pathStyle ? "true" : "false";
-                    s3SkipTlsSelect.value = s3.skipTlsVerify ? "true" : "false";
-                    s3ConcurrentReqsInput.value = String(s3.concurrentReqs);
-                });
+                // 使用 fetchSyncPost：内核返回 code < 0 时 fetchPost 不会调用回调，此处需始终回写界面与已保存配置一致
+                fetchSyncPost("/api/sync/setSyncProviderS3", {s3})
+                    .then((response) => {
+                        if (response.code === 0 && response.data?.s3) {
+                            window.siyuan.config.sync.s3 = response.data.s3;
+                        }
+                    })
+                    .finally(() => {
+                        const s3 = window.siyuan.config.sync.s3;
+                        s3EndpointInput.value = s3.endpoint;
+                        s3AccessKeyInput.value = s3.accessKey;
+                        s3SecretKeyInput.value = s3.secretKey;
+                        s3BucketInput.value = s3.bucket;
+                        s3RegionInput.value = s3.region;
+                        s3TimeoutInput.value = String(s3.timeout);
+                        s3PathStyleSelect.value = s3.pathStyle ? "true" : "false";
+                        s3SkipTlsSelect.value = s3.skipTlsVerify ? "true" : "false";
+                        s3ConcurrentReqsInput.value = String(s3.concurrentReqs);
+                    })
+                    .catch(() => {});
             } else if (window.siyuan.config.sync.provider === 3) {
                 const webdavEndpointInput = providerPanelElement.querySelector("#endpoint") as HTMLInputElement;
                 const webdavUsernameInput = providerPanelElement.querySelector("#username") as HTMLInputElement;
@@ -383,19 +387,22 @@ const bindProviderEvent = () => {
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
                 };
-                fetchPost("/api/sync/setSyncProviderWebDAV", {webdav}, (response) => {
-                    if (response.code === 0 && response.data?.webdav) {
-                        window.siyuan.config.sync.webdav = response.data.webdav;
-                    }
-                    // 配置没有成功时也要还原之前配置的值，保持配置界面的值与实际配置一致
-                    const webdav = window.siyuan.config.sync.webdav;
-                    webdavEndpointInput.value = webdav.endpoint;
-                    webdavUsernameInput.value = webdav.username;
-                    webdavPasswordInput.value = webdav.password;
-                    webdavTimeoutInput.value = String(webdav.timeout);
-                    webdavSkipTlsSelect.value = webdav.skipTlsVerify ? "true" : "false";
-                    webdavConcurrentReqsInput.value = String(webdav.concurrentReqs);
-                });
+                fetchSyncPost("/api/sync/setSyncProviderWebDAV", {webdav})
+                    .then((response) => {
+                        if (response.code === 0 && response.data?.webdav) {
+                            window.siyuan.config.sync.webdav = response.data.webdav;
+                        }
+                    })
+                    .finally(() => {
+                        const webdav = window.siyuan.config.sync.webdav;
+                        webdavEndpointInput.value = webdav.endpoint;
+                        webdavUsernameInput.value = webdav.username;
+                        webdavPasswordInput.value = webdav.password;
+                        webdavTimeoutInput.value = String(webdav.timeout);
+                        webdavSkipTlsSelect.value = webdav.skipTlsVerify ? "true" : "false";
+                        webdavConcurrentReqsInput.value = String(webdav.concurrentReqs);
+                    })
+                    .catch(() => {});
             } else if (window.siyuan.config.sync.provider === 4) {
                 const localEndpointInput = providerPanelElement.querySelector("#endpoint") as HTMLInputElement;
                 const localTimeoutInput = providerPanelElement.querySelector("#timeout") as HTMLInputElement;
@@ -420,16 +427,19 @@ const bindProviderEvent = () => {
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
                 };
-                fetchPost("/api/sync/setSyncProviderLocal", {local}, (response) => {
-                    if (response.code === 0 && response.data?.local) {
-                        window.siyuan.config.sync.local = response.data.local;
-                    }
-                    // 配置没有成功时也要还原之前配置的值，保持配置界面的值与实际配置一致
-                    const local = window.siyuan.config.sync.local;
-                    localEndpointInput.value = local.endpoint;
-                    localTimeoutInput.value = String(local.timeout);
-                    localConcurrentReqsInput.value = String(local.concurrentReqs);
-                });
+                fetchSyncPost("/api/sync/setSyncProviderLocal", {local})
+                    .then((response) => {
+                        if (response.code === 0 && response.data?.local) {
+                            window.siyuan.config.sync.local = response.data.local;
+                        }
+                    })
+                    .finally(() => {
+                        const local = window.siyuan.config.sync.local;
+                        localEndpointInput.value = local.endpoint;
+                        localTimeoutInput.value = String(local.timeout);
+                        localConcurrentReqsInput.value = String(local.concurrentReqs);
+                    })
+                    .catch(() => {});
             }
         });
     });

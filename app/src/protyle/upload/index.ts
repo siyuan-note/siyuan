@@ -389,7 +389,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                         genUploadedLabel(responseText, protyle);
                     }
                 } else if (xhr.status === 0) {
-                    showMessage(window.siyuan.languages.fileTypeError);
+                    showMessage(window.siyuan.languages["_kernel"][28]);
                 } else {
                     if (protyle.options.upload.error) {
                         protyle.options.upload.error(xhr.responseText);

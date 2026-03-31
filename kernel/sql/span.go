@@ -97,15 +97,20 @@ func QueryTagSpansByLabel(label string) (ret []*Span) {
 
 func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 	// 标签搜索支持空格分隔关键字 Tag search supports space-separated keywords https://github.com/siyuan-note/siyuan/issues/14580
-	keywords := strings.Split(keyword, " ")
-	contentLikes := ""
-	for _, k := range keywords {
-		if contentLikes != "" {
-			contentLikes += " AND "
+	keywords := strings.Fields(keyword)
+	var stmt string
+	if len(keywords) == 0 {
+		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND content != '' GROUP BY markdown LIMIT " + strconv.Itoa(limit)
+	} else {
+		contentLikes := ""
+		for _, k := range keywords {
+			if contentLikes != "" {
+				contentLikes += " AND "
+			}
+			contentLikes += "content LIKE '%" + k + "%'"
 		}
-		contentLikes += "content LIKE '%" + k + "%'"
+		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND (" + contentLikes + ") GROUP BY markdown LIMIT " + strconv.Itoa(limit)
 	}
-	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND (" + contentLikes + ") GROUP BY markdown LIMIT " + strconv.Itoa(limit)
 	rows, err := query(stmt)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
@@ -120,7 +125,7 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 }
 
 func QueryTagSpans(p string) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%'"
+	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND content != ''"
 	if "" != p {
 		stmt += " AND path = '" + p + "'"
 	}

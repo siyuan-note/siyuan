@@ -153,13 +153,37 @@ func getWorkspaceDriveType() string {
 			return ""
 		}
 
+		workspacePath := filepath.Clean(WorkspaceDir)
+		if !filepath.IsAbs(workspacePath) {
+			abs, err := filepath.Abs(workspacePath)
+			if err != nil {
+				return ""
+			}
+			workspacePath = abs
+		}
+		var maxMountPathLen int
+		var matchedDriveType string
+		parentRelPrefix := ".." + string(filepath.Separator)
 		for _, disk := range block.Disks {
 			for _, partition := range disk.Partitions {
-				if strings.HasPrefix(WorkspaceDir, partition.MountPoint) {
-					return partition.Disk.DriveType.String()
+				if partition.MountPoint == "" {
+					continue
+				}
+				mountPath := filepath.Clean(partition.MountPoint)
+				rel, err := filepath.Rel(mountPath, workspacePath)
+				if err != nil {
+					continue
+				}
+				if rel == ".." || strings.HasPrefix(rel, parentRelPrefix) {
+					continue
+				}
+				if len(mountPath) > maxMountPathLen {
+					maxMountPathLen = len(mountPath)
+					matchedDriveType = partition.Disk.DriveType.String()
 				}
 			}
 		}
+		return matchedDriveType
 	}
 	return ""
 }

@@ -203,8 +203,8 @@ export const editAssetItem = (options: {
     const type = options.type as "image" | "file";
     const menu = new Menu(Constants.MENU_AV_ASSET_EDIT, async () => {
         let currentLink = textElements[0].value;
-        if ((!textElements[1] && currentLink === linkAddress) ||
-            (textElements[1] && currentLink === linkAddress && textElements[1].value === options.name)) {
+        if ((!textElements[1] && currentLink === decodeURI(linkAddress)) ||
+            (textElements[1] && currentLink === decodeURI(linkAddress) && textElements[1].value === options.name)) {
             return;
         }
         if (type === "image" && currentLink.startsWith("data:image/")) {

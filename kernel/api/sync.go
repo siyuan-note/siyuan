@@ -697,6 +697,10 @@ func setSyncProviderS3(c *gin.Context) {
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
+
+	ret.Data = map[string]any{
+		"s3": model.Conf.Sync.S3,
+	}
 }
 
 func setSyncProviderWebDAV(c *gin.Context) {

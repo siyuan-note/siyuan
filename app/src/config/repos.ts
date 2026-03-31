@@ -297,7 +297,16 @@ const bindProviderEvent = () => {
     providerPanelElement.querySelectorAll(".b3-text-field, .b3-select").forEach(item => {
         item.addEventListener("blur", () => {
             if (window.siyuan.config.sync.provider === 2) {
-                let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);
+                const s3EndpointInput = providerPanelElement.querySelector("#endpoint") as HTMLInputElement;
+                const s3AccessKeyInput = providerPanelElement.querySelector("#accessKey") as HTMLInputElement;
+                const s3SecretKeyInput = providerPanelElement.querySelector("#secretKey") as HTMLInputElement;
+                const s3BucketInput = providerPanelElement.querySelector("#bucket") as HTMLInputElement;
+                const s3RegionInput = providerPanelElement.querySelector("#region") as HTMLInputElement;
+                const s3TimeoutInput = providerPanelElement.querySelector("#timeout") as HTMLInputElement;
+                const s3PathStyleSelect = providerPanelElement.querySelector("#pathStyle") as HTMLSelectElement;
+                const s3SkipTlsSelect = providerPanelElement.querySelector("#s3SkipTlsVerify") as HTMLSelectElement;
+                const s3ConcurrentReqsInput = providerPanelElement.querySelector("#s3ConcurrentReqs") as HTMLInputElement;
+                let timeout = parseInt(s3TimeoutInput.value, 10);
                 if (7 > timeout) {
                     if (1 > timeout) {
                         timeout = 30;
@@ -308,15 +317,15 @@ const bindProviderEvent = () => {
                 if (300 < timeout) {
                     timeout = 300;
                 }
-                let concurrentReqs = parseInt((providerPanelElement.querySelector("#s3ConcurrentReqs") as HTMLInputElement).value, 10);
+                let concurrentReqs = parseInt(s3ConcurrentReqsInput.value, 10);
                 if (1 > concurrentReqs) {
                     concurrentReqs = 1;
                 }
                 if (16 < concurrentReqs) {
                     concurrentReqs = 16;
                 }
-                (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
-                let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
+                s3TimeoutInput.value = timeout.toString();
+                let endpoint = s3EndpointInput.value;
                 endpoint = endpoint.trim().replace("http://http(s)://", "https://");
                 endpoint = endpoint.replace("http(s)://", "https://");
                 if (!endpoint.startsWith("http")) {
@@ -324,17 +333,30 @@ const bindProviderEvent = () => {
                 }
                 const s3 = {
                     endpoint: endpoint,
-                    accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value.trim(),
-                    secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value.trim(),
-                    bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value.trim(),
-                    pathStyle: (providerPanelElement.querySelector("#pathStyle") as HTMLInputElement).value === "true",
-                    region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value.trim(),
-                    skipTlsVerify: (providerPanelElement.querySelector("#s3SkipTlsVerify") as HTMLInputElement).value === "true",
+                    accessKey: s3AccessKeyInput.value.trim(),
+                    secretKey: s3SecretKeyInput.value.trim(),
+                    bucket: s3BucketInput.value.trim(),
+                    pathStyle: s3PathStyleSelect.value === "true",
+                    region: s3RegionInput.value.trim(),
+                    skipTlsVerify: s3SkipTlsSelect.value === "true",
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
                 };
-                fetchPost("/api/sync/setSyncProviderS3", {s3}, () => {
-                    window.siyuan.config.sync.s3 = s3;
+                fetchPost("/api/sync/setSyncProviderS3", {s3}, (response) => {
+                    if (response.code === 0 && response.data?.s3) {
+                        window.siyuan.config.sync.s3 = response.data.s3;
+                    }
+                    // 配置没有成功时也要还原之前配置的值，保持配置界面的值与实际配置一致
+                    const s3 = window.siyuan.config.sync.s3;
+                    s3EndpointInput.value = s3.endpoint;
+                    s3AccessKeyInput.value = s3.accessKey;
+                    s3SecretKeyInput.value = s3.secretKey;
+                    s3BucketInput.value = s3.bucket;
+                    s3RegionInput.value = s3.region;
+                    s3TimeoutInput.value = String(s3.timeout);
+                    s3PathStyleSelect.value = s3.pathStyle ? "true" : "false";
+                    s3SkipTlsSelect.value = s3.skipTlsVerify ? "true" : "false";
+                    s3ConcurrentReqsInput.value = String(s3.concurrentReqs);
                 });
             } else if (window.siyuan.config.sync.provider === 3) {
                 let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);

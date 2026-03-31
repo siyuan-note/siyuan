@@ -739,6 +739,10 @@ func setSyncProviderWebDAV(c *gin.Context) {
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
+
+	ret.Data = map[string]any{
+		"webdav": model.Conf.Sync.WebDAV,
+	}
 }
 
 func setSyncProviderLocal(c *gin.Context) {

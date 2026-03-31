@@ -354,37 +354,47 @@ const bindProviderEvent = () => {
                     s3ConcurrentReqsInput.value = String(s3.concurrentReqs);
                 });
             } else if (window.siyuan.config.sync.provider === 3) {
-                let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);
+                const webdavEndpointInput = providerPanelElement.querySelector("#endpoint") as HTMLInputElement;
+                const webdavUsernameInput = providerPanelElement.querySelector("#username") as HTMLInputElement;
+                const webdavPasswordInput = providerPanelElement.querySelector("#password") as HTMLInputElement;
+                const webdavTimeoutInput = providerPanelElement.querySelector("#timeout") as HTMLInputElement;
+                const webdavSkipTlsSelect = providerPanelElement.querySelector("#webdavSkipTlsVerify") as HTMLSelectElement;
+                const webdavConcurrentReqsInput = providerPanelElement.querySelector("#webdavConcurrentReqs") as HTMLInputElement;
+                let timeout = parseInt(webdavTimeoutInput.value, 10);
                 if (7 > timeout) {
                     timeout = 7;
                 }
                 if (300 < timeout) {
                     timeout = 300;
                 }
-                let concurrentReqs = parseInt((providerPanelElement.querySelector("#webdavConcurrentReqs") as HTMLInputElement).value, 10);
+                let concurrentReqs = parseInt(webdavConcurrentReqsInput.value, 10);
                 if (1 > concurrentReqs) {
                     concurrentReqs = 1;
                 }
                 if (16 < concurrentReqs) {
                     concurrentReqs = 16;
                 }
-                (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
-                let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
-                endpoint = endpoint.trim().replace("http://http(s)://", "https://");
-                endpoint = endpoint.replace("http(s)://", "https://");
-                if (!endpoint.startsWith("http")) {
-                    endpoint = "http://" + endpoint;
-                }
+                webdavTimeoutInput.value = timeout.toString();
                 const webdav = {
-                    endpoint: endpoint,
-                    username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value.trim(),
-                    password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value.trim(),
-                    skipTlsVerify: (providerPanelElement.querySelector("#webdavSkipTlsVerify") as HTMLInputElement).value === "true",
+                    endpoint: webdavEndpointInput.value,
+                    username: webdavUsernameInput.value.trim(),
+                    password: webdavPasswordInput.value.trim(),
+                    skipTlsVerify: webdavSkipTlsSelect.value === "true",
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
                 };
-                fetchPost("/api/sync/setSyncProviderWebDAV", {webdav}, () => {
-                    window.siyuan.config.sync.webdav = webdav;
+                fetchPost("/api/sync/setSyncProviderWebDAV", {webdav}, (response) => {
+                    if (response.code === 0 && response.data?.webdav) {
+                        window.siyuan.config.sync.webdav = response.data.webdav;
+                    }
+                    // 配置没有成功时也要还原之前配置的值，保持配置界面的值与实际配置一致
+                    const webdav = window.siyuan.config.sync.webdav;
+                    webdavEndpointInput.value = webdav.endpoint;
+                    webdavUsernameInput.value = webdav.username;
+                    webdavPasswordInput.value = webdav.password;
+                    webdavTimeoutInput.value = String(webdav.timeout);
+                    webdavSkipTlsSelect.value = webdav.skipTlsVerify ? "true" : "false";
+                    webdavConcurrentReqsInput.value = String(webdav.concurrentReqs);
                 });
             } else if (window.siyuan.config.sync.provider === 4) {
                 let timeout = parseInt((providerPanelElement.querySelector("#timeout") as HTMLInputElement).value, 10);

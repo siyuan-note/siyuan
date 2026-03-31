@@ -796,21 +796,28 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                 if (html) {
                     const tempElement = document.createElement("template");
                     tempElement.innerHTML = html;
-                    tempElement.content.querySelectorAll('[data-type~="a"], .img img').forEach(item => {
-                        if (item.tagName === "IMG") {
+                    tempElement.content.querySelectorAll('[data-type~="a"], .img img').forEach(linkItem => {
+                        if (linkItem.tagName === "IMG") {
                             htmlValue.push({
                                 type: "image",
-                                content: item.getAttribute("data-src"),
+                                content: linkItem.getAttribute("data-src"),
                                 name: ""
                             });
                         } else {
                             htmlValue.push({
                                 type: "file",
-                                content: item.getAttribute("data-href"),
-                                name: item.textContent
+                                content: linkItem.getAttribute("data-href"),
+                                name: linkItem.textContent
                             });
                         }
                     });
+                    if (htmlValue.length === 0 && value) {
+                        htmlValue.push({
+                            type: "file",
+                            content: "",
+                            name: value
+                        });
+                    }
                 }
                 newValue = oldValue.mAsset.concat(htmlValue);
             }

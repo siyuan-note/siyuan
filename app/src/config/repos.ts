@@ -214,6 +214,9 @@ const renderProvider = (provider: number) => {
 };
 
 const fillSyncProviderPanelValues = (panel: Element) => {
+    if (!isPaidUser()) {
+        return;
+    }
     const provider = window.siyuan.config.sync.provider;
     if (provider === 2) {
         const s3 = window.siyuan.config.sync.s3;

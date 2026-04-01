@@ -68,11 +68,6 @@ if (!app.requestSingleInstanceLock()) {
     return;
 }
 
-if (process.platform === "linux") {
-    app.commandLine.appendSwitch("enable-wayland-ime");
-    app.commandLine.appendSwitch("wayland-text-input-version", "3");
-}
-
 app.setAsDefaultProtocolClient("siyuan");
 
 app.commandLine.appendSwitch("disable-web-security");

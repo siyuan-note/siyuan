@@ -102,27 +102,27 @@ export class Outline extends Model {
     </div>
     <span class="fn__flex-1 fn__space"></span>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
-    <span data-type="search" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.filter}">
+    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}">
         <svg><use xlink:href='#iconFilter'></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="keepCurrentExpand" class="block__icon ariaLabel${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " block__icon--active" : ""}" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand}">
+    <span data-type="keepCurrentExpand" class="block__icon ariaLabel${window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand ? " block__icon--active" : ""}" data-position="north" aria-label="${window.siyuan.languages.outlineKeepCurrentExpand}">
         <svg><use xlink:href="#iconFocus"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="expandLevel" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.expandLevel}">
+    <span data-type="expandLevel" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandLevel}">
         <svg><use xlink:href="#iconList"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="expand" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
+    <span data-type="expand" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
         <svg><use xlink:href="#iconExpand"></use></svg>
     </span>
     <span class="fn__space"></span>
-    <span data-type="collapse" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.foldAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
+    <span data-type="collapse" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.foldAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
-    <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}">
+    <span data-type="min" class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}">
         <svg><use xlink:href='#iconMin'></use></svg>
     </span>
 </div>

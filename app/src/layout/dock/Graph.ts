@@ -271,19 +271,19 @@ export class Graph extends Model {
     <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
     <input class="b3-text-field search__label fn__size200 fn__none" placeholder="${window.siyuan.languages.search}" />
-    <span data-type="search" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="refresh" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
+    <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <div class="fn__space"></div>
-    <div data-type="fullscreen" class="b3-tooltips b3-tooltips__sw block__icon" aria-label="${window.siyuan.languages.fullscreen}">
+    <div data-type="fullscreen" class="ariaLabel block__icon" data-position="north" aria-label="${window.siyuan.languages.fullscreen}">
         <svg><use xlink:href="#iconFullscreen"></use></svg>
     </div>
     <div class="fn__space"></div>
-    <div data-type="menu" class="b3-tooltips b3-tooltips__sw block__icon" aria-label="${window.siyuan.languages.more}">
+    <div data-type="menu" class="ariaLabel block__icon" data-position="north" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </div> 
     <span class="${this.type === "local" ? "fn__none " : ""}fn__space"></span>
-    <span data-type="min"  class="${this.type === "local" ? "fn__none " : ""}block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
+    <span data-type="min"  class="${this.type === "local" ? "fn__none " : ""}block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="graph__panel">
     ${panelHTML}

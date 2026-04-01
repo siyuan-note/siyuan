@@ -62,13 +62,13 @@ export class Inbox extends Model {
     <span class="fn__space"></span>
     <span data-type="selectall" class="block__icon"><svg><use xlink:href="#iconUncheck"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="previous" class="block__icon b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href="#iconLeft"></use></svg></span>
+    <span data-type="previous" class="block__icon ariaLabel" disabled="disabled" data-position="north" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href="#iconLeft"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="next" class="block__icon b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href="#iconRight"></use></svg></span>
+    <span data-type="next" class="block__icon ariaLabel" disabled="disabled" data-position="north" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href="#iconRight"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="more" data-menu="true" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
+    <span data-type="more" data-menu="true" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="min" class="block__icon b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href="#iconMin"></use></svg></span>
+    <span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href="#iconMin"></use></svg></span>
 </div>
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
@@ -203,7 +203,7 @@ ${data.shorthandContent}
 </div>`;
         /// #else
         if (data.shorthandURL) {
-            linkHTML = `<span class="fn__space"></span><a href="${data.shorthandURL}" target="_blank" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.link}">
+            linkHTML = `<span class="fn__space"></span><a href="${data.shorthandURL}" target="_blank" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.link}">
         <svg><use xlink:href="#iconLink"></use></svg>
     </a>`;
         }

@@ -19,83 +19,51 @@ import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest, genLinkText} from "../toolbar/util";
 
-const convertUrlsToLinks = (container: HTMLElement, lute: Lute) => {
-    if (!window.siyuan.config.editor.pasteURLAutoConvert) {
-        return;
-    }
-    container.querySelectorAll('[data-type="NodeParagraph"]').forEach((paragraph) => {
-        const editable = paragraph.querySelector('[contenteditable]');
-        if (!editable) {
-            return;
-        }
-        let allText = true;
-        editable.childNodes.forEach((node) => {
-            if (node.nodeType !== 3) {
-                allText = false;
-            }
-        });
-        if (!allText) {
-            return;
-        }
-        const text = editable.textContent.trim();
-        if (!text) {
-            return;
-        }
-        const parts = text.split(/\s+/).filter(p => p.length > 0);
-        const links: { dest: string; text: string }[] = [];
-        for (const part of parts) {
-            const linkDest = resolveLinkDest(part, lute);
-            if (!linkDest) {
-                return;
-            }
-            links.push({dest: linkDest, text: genLinkText(linkDest, false)});
-        }
-        editable.innerHTML = "";
-        links.forEach((link, i) => {
-            if (i > 0) {
-                editable.appendChild(document.createTextNode(" "));
-            }
-            const span = document.createElement("span");
-            span.setAttribute("data-type", "a");
-            span.setAttribute("data-href", link.dest);
-            span.textContent = link.text;
-            editable.appendChild(span);
-        });
-    });
-};
-
 const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
     if (!window.siyuan.config.editor.pasteURLAutoConvert) {
         return false;
     }
     const trimmed = text.trim();
-    if (!trimmed || trimmed.includes("\n")) {
+    if (!trimmed) {
         return false;
     }
-    const parts = trimmed.split(/\s+/).filter(p => p.length > 0);
-    const links: { dest: string; text: string }[] = [];
-    for (const part of parts) {
-        const linkDest = resolveLinkDest(part, protyle.lute);
-        if (!linkDest) {
-            return false;
+    const segments: { type: "link" | "text"; value: string; dest?: string; label?: string }[] = [];
+    let hasLink = false;
+    const tokenRegex = /(\s+)|(\S+)/g;
+    let match: RegExpExecArray | null;
+    while ((match = tokenRegex.exec(trimmed)) !== null) {
+        if (match[1]) {
+            segments.push({type: "text", value: match[1]});
+        } else {
+            const word = match[2];
+            const dest = resolveLinkDest(word, protyle.lute);
+            if (dest) {
+                segments.push({type: "link", value: word, dest, label: genLinkText(dest, false)});
+                hasLink = true;
+            } else {
+                segments.push({type: "text", value: word});
+            }
         }
-        links.push({dest: linkDest, text: genLinkText(linkDest, false)});
     }
-    for (let i = 0; i < links.length; i++) {
-        if (i > 0) {
-            const spaceNode = document.createTextNode(" ");
-            protyle.toolbar.range.insertNode(spaceNode);
-            protyle.toolbar.range.setStartAfter(spaceNode);
+    if (!hasLink) {
+        return false;
+    }
+    for (const seg of segments) {
+        if (seg.type === "text") {
+            const textNode = document.createTextNode(seg.value);
+            protyle.toolbar.range.insertNode(textNode);
+            protyle.toolbar.range.setStartAfter(textNode);
             protyle.toolbar.range.collapse(true);
-        }
-        const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
-            type: "a",
-            color: links[i].dest + Constants.ZWSP + links[i].text
-        });
-        if (linkNodes && linkNodes.length > 0) {
-            const lastNode = linkNodes[linkNodes.length - 1];
-            protyle.toolbar.range.setStartAfter(lastNode);
-            protyle.toolbar.range.collapse(true);
+        } else {
+            const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                type: "a",
+                color: seg.dest + Constants.ZWSP + seg.label
+            });
+            if (linkNodes && linkNodes.length > 0) {
+                const lastNode = linkNodes[linkNodes.length - 1];
+                protyle.toolbar.range.setStartAfter(lastNode);
+                protyle.toolbar.range.collapse(true);
+            }
         }
     }
     return true;
@@ -515,7 +483,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
             e.setAttribute("contenteditable", "true");
         });
-        convertUrlsToLinks(tempElement, protyle.lute);
+
         if (!isBlock && pasteAsLink(tempElement.textContent, protyle)) {
             return;
         }

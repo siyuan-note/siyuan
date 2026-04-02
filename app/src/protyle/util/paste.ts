@@ -24,7 +24,7 @@ const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
         return false;
     }
     const trimmed = text.trim();
-    if (!trimmed || trimmed.includes("\n")) {
+    if (!trimmed || trimmed.includes("\n") || trimmed.includes(" ")) {
         // TODO 暂不支持多行文本
         return false;
     }
@@ -444,9 +444,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 });
                 return;
             }
-        }
-        if (pasteAsLink(tempElement.textContent, protyle)) {
-            return;
         }
         let isBlock = false;
         tempElement.querySelectorAll("[data-node-id]").forEach((e) => {

@@ -436,11 +436,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
         let tempInnerHTML = tempElement.innerHTML;
 
-        // block 类型不处理链接转换
-        if (!isBlock && window.siyuan.config.editor.pasteURLAutoConvert) {
-            tempInnerHTML = protyle.lute.Md2BlockDOMWithAutoLink(tempInnerHTML);
-        }
-
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
                 const json = JSON.parse(tempInnerHTML);
@@ -457,6 +452,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }
+
+            // block 类型不处理链接转换
+            if (!isBlock && window.siyuan.config.editor.pasteURLAutoConvert) {
+                tempInnerHTML = protyle.lute.Md2BlockDOMWithAutoLink(tempInnerHTML);
+            }
+
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);

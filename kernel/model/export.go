@@ -1820,6 +1820,7 @@ func yfm(docIAL map[string]string) string {
 		tagLines := strings.Split(tags, ",")
 		for _, tag := range tagLines {
 			buf.WriteString("  - '")
+			tag = strings.ReplaceAll(tag, "'", "''")
 			buf.WriteString(tag)
 			buf.WriteString("'\n")
 		}

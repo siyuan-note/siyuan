@@ -19,57 +19,6 @@ import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest, genLinkText} from "../toolbar/util";
 
-const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
-    if (!window.siyuan.config.editor.pasteURLAutoConvert) {
-        return false;
-    }
-    const trimmed = text.trim();
-    if (!trimmed || trimmed.includes("\n") || trimmed.includes(" ")) {
-        // TODO 暂不支持多行文本
-        return false;
-    }
-    const segments: { type: "link" | "text"; value: string; dest?: string; label?: string }[] = [];
-    let hasLink = false;
-    const tokenRegex = /(\s+)|(\S+)/g;
-    let match: RegExpExecArray | null;
-    while ((match = tokenRegex.exec(trimmed)) !== null) {
-        if (match[1]) {
-            segments.push({type: "text", value: match[1]});
-        } else {
-            const word = match[2];
-            const dest = resolveLinkDest(word, protyle.lute);
-            if (dest) {
-                segments.push({type: "link", value: word, dest, label: genLinkText(dest, false)});
-                hasLink = true;
-            } else {
-                segments.push({type: "text", value: word});
-            }
-        }
-    }
-    if (!hasLink) {
-        return false;
-    }
-    for (const seg of segments) {
-        if (seg.type === "text") {
-            const textNode = document.createTextNode(seg.value);
-            protyle.toolbar.range.insertNode(textNode);
-            protyle.toolbar.range.setStartAfter(textNode);
-            protyle.toolbar.range.collapse(true);
-        } else {
-            const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
-                type: "a",
-                color: seg.dest + Constants.ZWSP + seg.label
-            });
-            if (linkNodes && linkNodes.length > 0) {
-                const lastNode = linkNodes[linkNodes.length - 1];
-                protyle.toolbar.range.setStartAfter(lastNode);
-                protyle.toolbar.range.collapse(true);
-            }
-        }
-    }
-    return true;
-};
-
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
     let refText = "";
@@ -485,10 +434,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.setAttribute("contenteditable", "true");
         });
 
-        if (!isBlock && pasteAsLink(tempElement.textContent, protyle)) {
-            return;
-        }
         let tempInnerHTML = tempElement.innerHTML;
+
+        // block 类型不处理链接转换
+        if (!isBlock && window.siyuan.config.editor.pasteURLAutoConvert) {
+            tempInnerHTML = protyle.lute.Md2BlockDOMWithAutoLink(tempInnerHTML);
+        }
+
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
                 const json = JSON.parse(tempInnerHTML);

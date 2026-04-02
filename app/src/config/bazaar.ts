@@ -266,13 +266,13 @@ export const bazaar = {
             downloads: item.downloads,
             downloaded: false,
         };
-        return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card b3-card--wrap${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
+        return `<div data-obj='${JSON.stringify(dataObj)}' class="b3-card${hide ? " fn__none" : ""}${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">
         <img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/>
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
-            ${item.preferredName}${item.preferredName !== item.name ? ` <span class="ft__on-surface ft__smaller">${item.name}</span>` : ""}
+            ${item.preferredName}
             <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">
                 ${item.preferredDesc || ""}
             </div>
@@ -287,9 +287,6 @@ export const bazaar = {
             ${bazaar._genFundingHTML(item.preferredFunding)}
             <span class="fn__space"></span>
             <div class="fn__flex-1"></div>
-            <span data-position="north" class="ariaLabel block__icon block__icon--show${item.installed ? "" : " fn__none"}" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
-                <svg><use xlink:href="#iconTrashcan"></use></svg>
-            </span>
             <div class="fn__space${!item.current && item.installed && showSwitch ? "" : " fn__none"}"></div>
             <span data-position="north" class="ariaLabel block__icon block__icon--show${!item.current && item.installed && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
                 <svg><use xlink:href="#iconSelect"></use></svg>
@@ -316,7 +313,7 @@ export const bazaar = {
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            ${item.preferredName}${item.preferredName !== item.name ? ` <span class="ft__on-surface ft__smaller">${item.name}</span>` : ""}
+            ${item.preferredName}
             <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
         </div>
     </div>
@@ -425,7 +422,7 @@ export const bazaar = {
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            ${item.preferredName}${item.preferredName !== item.name ? ` <span class="ft__on-surface ft__smaller">${item.name}</span>` : ""}
+            ${item.preferredName}
             <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
         </div>
     </div>
@@ -1076,9 +1073,6 @@ type="checkbox">
                     }
                     localSort[selectElement.parentElement.parentElement.getAttribute("data-type")] = selectElement.value;
                     setStorageVal(Constants.LOCAL_BAZAAR, window.siyuan.storage[Constants.LOCAL_BAZAAR]);
-                    if (cardElements.length > 1) {
-                        html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div><div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
-                    }
                     panelElement.querySelector(".b3-cards").innerHTML = html;
                 }
             });
@@ -1139,9 +1133,6 @@ type="checkbox">
             }).forEach((item) => {
                 html += item.outerHTML;
             });
-        }
-        if (response.data.packages.length > 1) {
-            html += '<div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div><div class="fn__flex-1" style="margin-left: 15px;min-width: 342px;"></div>';
         }
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
     }

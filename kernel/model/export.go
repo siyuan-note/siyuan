@@ -1819,9 +1819,9 @@ func yfm(docIAL map[string]string) string {
 		buf.WriteString("tags:\n")
 		tagLines := strings.Split(tags, ",")
 		for _, tag := range tagLines {
-			buf.WriteString("  - ")
+			buf.WriteString("  - '")
 			buf.WriteString(tag)
-			buf.WriteString("\n")
+			buf.WriteString("'\n")
 		}
 	}
 	buf.WriteString("---\n\n")

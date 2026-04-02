@@ -24,7 +24,8 @@ const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
         return false;
     }
     const trimmed = text.trim();
-    if (!trimmed) {
+    if (!trimmed || trimmed.includes("\n") || trimmed.includes(" ")) {
+        // TODO 暂不支持多行文本
         return false;
     }
     const segments: { type: "link" | "text"; value: string; dest?: string; label?: string }[] = [];

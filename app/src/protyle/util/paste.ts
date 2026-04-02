@@ -650,11 +650,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
+            let textPlainDom: string;
+
             // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
-            if (pasteAsLink(textPlain, protyle)) {
-                return;
+            if (window.siyuan.config.editor.pasteURLAutoConvert) {
+                textPlainDom = protyle.lute.Md2BlockDOMWithAutoLink(textPlain);
+            } else {
+                textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             }
-            let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = textPlainDom;

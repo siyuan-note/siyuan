@@ -273,6 +273,7 @@ declare class Lute {
     public SpinBlockDOM(html: string): string;
 
     public Md2BlockDOM(html: string): string;
+    public Md2BlockDOMWithAutoLink(html: string): string;
 
     public SetProtyleWYSIWYG(wysiwyg: boolean): void;
 

@@ -37,7 +37,7 @@ export const processPasteCode = (html: string, text: string, originalTextHTML: s
             return protyle.lute.Md2BlockDOM(code);
         } else {
             // Paste code from IDE no longer escape `<` and `>` https://github.com/siyuan-note/siyuan/issues/8340
-            code = code.replace("<", "&lt;").replace(">", "&gt;");
+            code = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
             return "`" + code + "`";
         }
     }

@@ -115,17 +115,11 @@ const windowNavigate = (currentWindow, windowType) => {
         if (url.startsWith(localServer)) {
             try {
                 const pathname = new URL(url).pathname;
-                // 所有窗口都允许认证页面
-                if (pathname === "/check-auth" || pathname === "/") {
-                    return;
-                }
-                if (pathname === "/stage/build/app/" && windowType === "app") {
-                    return;
-                }
-                if (pathname === "/stage/build/app/window.html" && windowType === "window") {
-                    return;
-                }
-                if (pathname.startsWith("/export/temp/") && windowType === "export") {
+                if (
+                    (windowType === "app" && ["/", "/stage/build/app/", "/check-auth"].includes(pathname) ||
+                    (windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(pathname))) ||
+                    (windowType === "export" && pathname.startsWith("/export/temp/"))
+                ) {
                     return;
                 }
             } catch (e) {

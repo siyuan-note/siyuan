@@ -38,6 +38,10 @@ export const processPasteCode = (html: string, text: string, originalTextHTML: s
         } else {
             // Paste code from IDE no longer escape `<` and `>` https://github.com/siyuan-note/siyuan/issues/8340
             code = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            // Improve pasting of inline code containing backticks https://github.com/siyuan-note/siyuan/issues/17388
+            if (-1 < code.indexOf("`")) {
+                return "``" + code + "``"; // ``foo `bar` baz``
+            }
             return "`" + code + "`";
         }
     }

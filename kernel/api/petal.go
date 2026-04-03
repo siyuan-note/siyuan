@@ -36,7 +36,7 @@ func loadPetals(c *gin.Context) {
 	}
 
 	var frontend string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", true, &frontend)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, false)) {
 		return
 	}
 	isPublish := model.IsReadOnlyRole(model.GetGinContextRole(c))
@@ -56,10 +56,10 @@ func setPetalEnabled(c *gin.Context) {
 	var packageName, frontend, app string
 	var enabled bool
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("packageName", true, &packageName),
-		util.BindJsonArg("enabled", true, &enabled),
-		util.BindJsonArg("frontend", true, &frontend),
-		util.BindJsonArg("app", false, &app),
+		util.BindJsonArg("packageName", &packageName, true, false),
+		util.BindJsonArg("enabled", &enabled, true, false),
+		util.BindJsonArg("frontend", &frontend, true, false),
+		util.BindJsonArg("app", &app, false, false),
 	) {
 		return
 	}

@@ -35,7 +35,7 @@ func pushMsg(c *gin.Context) {
 	}
 
 	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", true, &msg)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, false)) {
 		return
 	}
 	msg = strings.TrimSpace(msg)
@@ -66,7 +66,7 @@ func pushErrMsg(c *gin.Context) {
 	}
 
 	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", true, &msg)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, false)) {
 		return
 	}
 	msg = strings.TrimSpace(msg)

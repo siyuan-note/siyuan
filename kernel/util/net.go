@@ -215,9 +215,10 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]any, ok bool) 
 
 // ParseJsonArg 使用泛型从 JSON 参数中提取指定键的值。
 //   - 如果 required 为 true 但参数缺失，则会在 ret.Msg 中说明需要传入的键
+//   - 如果 rejectEmpty 为 true 但参数值为空，则会在 ret.Msg 中说明该键必须不为空
 //   - 如果参数存在但类型不匹配，则会在 ret.Msg 中说明该键期望的类型
-//   - 返回值 ok 为 false 时，表示提取失败或类型不匹配
-func ParseJsonArg[T any](key string, required bool, arg map[string]any, ret *gulu.Result) (value T, ok bool) {
+//   - 返回值 ok 为 false 时，表示提取失败、类型不匹配或不满足非空约束
+func ParseJsonArg[T any](key string, arg map[string]any, ret *gulu.Result, required, rejectEmpty bool) (value T, ok bool) {
 	raw, exists := arg[key]
 	if !exists || raw == nil {
 		if required {
@@ -252,6 +253,26 @@ func ParseJsonArg[T any](key string, required bool, arg map[string]any, ret *gul
 		}
 
 		ret.Msg = fmt.Sprintf("Field [%s] should be of type [%s]", key, jsonType)
+		return
+	}
+
+	if rejectEmpty {
+		var bad bool
+		switch x := any(value).(type) {
+		case string:
+			if t := strings.TrimSpace(x); t == "" {
+				bad = true
+			} else {
+				value = any(t).(T)
+			}
+		case []any:
+			bad = len(x) == 0
+		}
+		if bad {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s] must not be empty", key)
+			ok = false
+		}
 	}
 	return
 }
@@ -260,9 +281,9 @@ func ParseJsonArg[T any](key string, required bool, arg map[string]any, ret *gul
 type JsonArgParseFunc func(arg map[string]any, ret *gulu.Result) bool
 
 // BindJsonArg 创建一个提取函数：从 arg 取 key 并写入 dest，供 ParseJsonArgs 使用。
-func BindJsonArg[T any](key string, required bool, dest *T) JsonArgParseFunc {
+func BindJsonArg[T any](key string, dest *T, required, rejectEmpty bool) JsonArgParseFunc {
 	return func(arg map[string]any, ret *gulu.Result) bool {
-		v, ok := ParseJsonArg[T](key, required, arg, ret)
+		v, ok := ParseJsonArg[T](key, arg, ret, required, rejectEmpty)
 		if !ok {
 			return false
 		}

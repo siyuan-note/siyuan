@@ -38,7 +38,7 @@ func getNotebookInfo(c *gin.Context) {
 	}
 
 	var boxID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", true, &boxID)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &boxID, true, false)) {
 		return
 	}
 	if util.InvalidIDPattern(boxID, ret) {
@@ -69,8 +69,8 @@ func setNotebookIcon(c *gin.Context) {
 
 	var boxID, icon string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", true, &boxID),
-		util.BindJsonArg("icon", true, &icon),
+		util.BindJsonArg("notebook", &boxID, true, false),
+		util.BindJsonArg("icon", &icon, true, false),
 	) {
 		return
 	}
@@ -104,7 +104,7 @@ func renameNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", true, &notebook)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
@@ -112,7 +112,7 @@ func renameNotebook(c *gin.Context) {
 	}
 
 	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", true, &name)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
 		return
 	}
 	err := model.RenameBox(notebook, name)
@@ -141,7 +141,7 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", true, &notebook)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
@@ -179,7 +179,7 @@ func createNotebook(c *gin.Context) {
 	}
 
 	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", true, &name)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
 		return
 	}
 	id, err := model.CreateBox(name)
@@ -225,7 +225,7 @@ func openNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", true, &notebook)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {

@@ -65,10 +65,8 @@ func writeFilePath(c *gin.Context) {
 		return
 	}
 
-	pathArg, ok := arg["path"].(string)
-	if !ok || pathArg == "" {
-		ret.Code = -1
-		ret.Msg = "[path] is required"
+	var pathArg string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("path", &pathArg, true, true)) {
 		return
 	}
 

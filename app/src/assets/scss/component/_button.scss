@@ -9,7 +9,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: box-shadow 280ms cubic-bezier(.4, 0, .2, 1);
+  transition: box-shadow 280ms ease;
   border: 0;
   box-sizing: border-box;
   text-align: center;

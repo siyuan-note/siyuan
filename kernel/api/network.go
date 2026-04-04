@@ -162,7 +162,7 @@ func forwardProxy(c *gin.Context) {
 	}
 
 	var destURL string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("url", &destURL, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("url", &destURL, true, true)) {
 		return
 	}
 	u, e := url.ParseRequestURI(destURL)

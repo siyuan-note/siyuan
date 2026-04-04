@@ -84,15 +84,29 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 	}
 
 	needRewrite := false
+	var cssTotal, cssEnabled, jsTotal, jsEnabled int
 	for _, snippet := range ret {
 		if "" == snippet.ID {
 			snippet.ID = ast.NewNodeID()
 			needRewrite = true
 		}
+		switch snippet.Type {
+		case "css":
+			cssTotal++
+			if snippet.Enabled {
+				cssEnabled++
+			}
+		case "js":
+			jsTotal++
+			if snippet.Enabled {
+				jsEnabled++
+			}
+		}
 	}
 	if needRewrite {
 		writeSnippetsConf(ret)
 	}
+	logging.LogDebugf("loaded snippets [css %d/%d, js %d/%d]", cssEnabled, cssTotal, jsEnabled, jsTotal)
 	return
 }
 

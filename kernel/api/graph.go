@@ -65,8 +65,8 @@ func getGraph(c *gin.Context) {
 	var query string
 	var confArg map[string]any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", true, &query),
-		util.BindJsonArg("conf", true, &confArg),
+		util.BindJsonArg("k", &query, true, false),
+		util.BindJsonArg("conf", &confArg, true, false),
 	) {
 		return
 	}
@@ -121,9 +121,9 @@ func getLocalGraph(c *gin.Context) {
 	var keyword, id string
 	var confArg map[string]any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", true, &keyword),
-		util.BindJsonArg("id", true, &id),
-		util.BindJsonArg("conf", true, &confArg),
+		util.BindJsonArg("k", &keyword, true, false),
+		util.BindJsonArg("id", &id, true, false),
+		util.BindJsonArg("conf", &confArg, true, false),
 	) {
 		return
 	}

@@ -43,7 +43,7 @@ func batchUpdatePackage(c *gin.Context) {
 	}
 
 	var frontend string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", true, &frontend)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, false)) {
 		return
 	}
 	model.BatchUpdatePackages(frontend)
@@ -59,7 +59,7 @@ func getUpdatedPackage(c *gin.Context) {
 	}
 
 	var frontend string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", true, &frontend)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, false)) {
 		return
 	}
 
@@ -84,9 +84,9 @@ func getBazaarPackageREADME(c *gin.Context) {
 
 	var repoURL, repoHash, pkgType string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("repoURL", true, &repoURL),
-		util.BindJsonArg("repoHash", true, &repoHash),
-		util.BindJsonArg("packageType", true, &pkgType),
+		util.BindJsonArg("repoURL", &repoURL, true, false),
+		util.BindJsonArg("repoHash", &repoHash, true, false),
+		util.BindJsonArg("packageType", &pkgType, true, false),
 	) {
 		return
 	}
@@ -111,8 +111,8 @@ func getBazaarPlugin(c *gin.Context) {
 
 	var frontend, keyword string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("frontend", true, &frontend),
-		util.BindJsonArg("keyword", false, &keyword),
+		util.BindJsonArg("frontend", &frontend, true, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
 	) {
 		return
 	}
@@ -133,8 +133,8 @@ func getInstalledPlugin(c *gin.Context) {
 
 	var frontend, keyword string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("frontend", true, &frontend),
-		util.BindJsonArg("keyword", false, &keyword),
+		util.BindJsonArg("frontend", &frontend, true, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
 	) {
 		return
 	}
@@ -155,11 +155,11 @@ func installBazaarPlugin(c *gin.Context) {
 
 	var frontend, keyword, repoURL, repoHash, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("frontend", true, &frontend),
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("repoURL", true, &repoURL),
-		util.BindJsonArg("repoHash", true, &repoHash),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("frontend", &frontend, true, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("repoURL", &repoURL, true, false),
+		util.BindJsonArg("repoHash", &repoHash, true, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -187,9 +187,9 @@ func uninstallBazaarPlugin(c *gin.Context) {
 
 	var frontend, keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("frontend", false, &frontend),
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("frontend", &frontend, false, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -223,7 +223,7 @@ func getBazaarWidget(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -242,7 +242,7 @@ func getInstalledWidget(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -262,10 +262,10 @@ func installBazaarWidget(c *gin.Context) {
 
 	var keyword, repoURL, repoHash, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("repoURL", true, &repoURL),
-		util.BindJsonArg("repoHash", true, &repoHash),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("repoURL", &repoURL, true, false),
+		util.BindJsonArg("repoHash", &repoHash, true, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -293,8 +293,8 @@ func uninstallBazaarWidget(c *gin.Context) {
 
 	var keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -320,7 +320,7 @@ func getBazaarIcon(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -339,7 +339,7 @@ func getInstalledIcon(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -359,10 +359,10 @@ func installBazaarIcon(c *gin.Context) {
 
 	var keyword, repoURL, repoHash, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("repoURL", true, &repoURL),
-		util.BindJsonArg("repoHash", true, &repoHash),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("repoURL", &repoURL, true, false),
+		util.BindJsonArg("repoHash", &repoHash, true, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -391,8 +391,8 @@ func uninstallBazaarIcon(c *gin.Context) {
 
 	var keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -419,7 +419,7 @@ func getBazaarTemplate(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -438,7 +438,7 @@ func getInstalledTemplate(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -458,10 +458,10 @@ func installBazaarTemplate(c *gin.Context) {
 
 	var keyword, repoURL, repoHash, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("repoURL", true, &repoURL),
-		util.BindJsonArg("repoHash", true, &repoHash),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("repoURL", &repoURL, true, false),
+		util.BindJsonArg("repoHash", &repoHash, true, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -490,8 +490,8 @@ func uninstallBazaarTemplate(c *gin.Context) {
 
 	var keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}
@@ -517,7 +517,7 @@ func getBazaarTheme(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -536,7 +536,7 @@ func getInstalledTheme(c *gin.Context) {
 	}
 
 	var keyword string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", false, &keyword)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keyword", &keyword, false, false)) {
 		return
 	}
 
@@ -557,11 +557,11 @@ func installBazaarTheme(c *gin.Context) {
 	var keyword, repoURL, repoHash, packageName string
 	var mode float64
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("repoURL", true, &repoURL),
-		util.BindJsonArg("repoHash", true, &repoHash),
-		util.BindJsonArg("packageName", true, &packageName),
-		util.BindJsonArg("mode", true, &mode),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("repoURL", &repoURL, true, false),
+		util.BindJsonArg("repoHash", &repoHash, true, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
+		util.BindJsonArg("mode", &mode, true, false),
 	) {
 		return
 	}
@@ -595,8 +595,8 @@ func uninstallBazaarTheme(c *gin.Context) {
 
 	var keyword, packageName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("keyword", false, &keyword),
-		util.BindJsonArg("packageName", true, &packageName),
+		util.BindJsonArg("keyword", &keyword, false, false),
+		util.BindJsonArg("packageName", &packageName, true, false),
 	) {
 		return
 	}

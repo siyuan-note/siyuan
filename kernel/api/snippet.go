@@ -41,9 +41,9 @@ func getSnippet(c *gin.Context) {
 	var enabledArg float64 // 0：禁用，1：启用，2：全部
 	var keyword string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("type", true, &typ),
-		util.BindJsonArg("enabled", true, &enabledArg),
-		util.BindJsonArg("keyword", false, &keyword),
+		util.BindJsonArg("type", &typ, true, false),
+		util.BindJsonArg("enabled", &enabledArg, true, false),
+		util.BindJsonArg("keyword", &keyword, false, false),
 	) {
 		return
 	}
@@ -144,7 +144,7 @@ func removeSnippet(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
 		return
 	}
 	snippet, err := model.RemoveSnippet(id)

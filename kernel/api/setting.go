@@ -572,15 +572,8 @@ func setIcon(c *gin.Context) {
 
 	var icon string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("icon", true, &icon),
+		util.BindJsonArg("icon", &icon, true, true),
 	) {
-		return
-	}
-
-	icon = strings.TrimSpace(icon)
-	if icon == "" {
-		ret.Code = -1
-		ret.Msg = "[icon] must not be empty"
 		return
 	}
 
@@ -606,9 +599,9 @@ func setTheme(c *gin.Context) {
 	var theme, appearanceMode string
 	var modesRaw []any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("theme", false, &theme),
-		util.BindJsonArg("modes", false, &modesRaw),
-		util.BindJsonArg("appearanceMode", false, &appearanceMode),
+		util.BindJsonArg("theme", &theme, false, false),
+		util.BindJsonArg("modes", &modesRaw, false, false),
+		util.BindJsonArg("appearanceMode", &appearanceMode, false, false),
 	) {
 		return
 	}

@@ -101,7 +101,7 @@ func FlushAssetContentQueue() {
 		debug.FreeOSMemory()
 	}
 
-	elapsed := time.Now().Sub(start).Milliseconds()
+	elapsed := time.Since(start).Milliseconds()
 	if 7000 < elapsed {
 		logging.LogInfof("database asset content op tx [%dms]", elapsed)
 	}

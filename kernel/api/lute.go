@@ -85,7 +85,7 @@ func html2BlockDOM(c *gin.Context) {
 	}
 
 	var dom string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", true, &dom)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
 		return
 	}
 	luteEngine := util.NewLute()
@@ -211,7 +211,7 @@ func spinBlockDOM(c *gin.Context) {
 	}
 
 	var dom string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", true, &dom)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
 		return
 	}
 	luteEngine := model.NewLute()

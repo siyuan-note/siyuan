@@ -984,11 +984,6 @@ func RemoveCloudRepoTag(tag string) (err error) {
 		return
 	}
 
-	if "" == tag {
-		err = errors.New("tag is empty")
-		return
-	}
-
 	repo, err := newRepository()
 	if err != nil {
 		return

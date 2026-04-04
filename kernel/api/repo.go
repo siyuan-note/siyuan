@@ -85,7 +85,7 @@ func getRepoFile(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
 	data, p, err := model.GetRepoFile(id)
@@ -117,7 +117,7 @@ func rollbackRepoSnapshotFile(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
 
@@ -139,7 +139,7 @@ func openRepoSnapshotFile(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
 
@@ -169,8 +169,8 @@ func diffRepoSnapshots(c *gin.Context) {
 
 	var left, right string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("left", &left, true, false),
-		util.BindJsonArg("right", &right, true, false),
+		util.BindJsonArg("left", &left, true, true),
+		util.BindJsonArg("right", &right, true, true),
 	) {
 		return
 	}
@@ -227,7 +227,7 @@ func checkoutRepo(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
 	model.CheckoutRepo(id)
@@ -244,7 +244,7 @@ func downloadCloudSnapshot(c *gin.Context) {
 
 	var id, tag string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, false),
+		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("tag", &tag, true, false),
 	) {
 		return
@@ -267,7 +267,7 @@ func uploadCloudSnapshot(c *gin.Context) {
 
 	var id, tag string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, false),
+		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("tag", &tag, true, false),
 	) {
 		return
@@ -359,7 +359,7 @@ func removeCloudRepoTagSnapshot(c *gin.Context) {
 	}
 
 	var tag string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("tag", &tag, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("tag", &tag, true, true)) {
 		return
 	}
 	err := model.RemoveCloudRepoTag(tag)
@@ -396,7 +396,7 @@ func removeRepoTagSnapshot(c *gin.Context) {
 	}
 
 	var tag string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("tag", &tag, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("tag", &tag, true, true)) {
 		return
 	}
 	err := model.RemoveTagSnapshot(tag)
@@ -439,7 +439,7 @@ func tagSnapshot(c *gin.Context) {
 
 	var id, name string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("id", &id, true, false),
+		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("name", &name, true, false),
 	) {
 		return

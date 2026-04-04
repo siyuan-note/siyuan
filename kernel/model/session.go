@@ -106,8 +106,8 @@ func LoginAuth(c *gin.Context) {
 	}
 
 	authCode := arg["authCode"].(string)
-	authCode = strings.TrimSpace(authCode)
 	authCode = util.RemoveInvalid(authCode)
+	authCode = strings.TrimSpace(authCode)
 
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1

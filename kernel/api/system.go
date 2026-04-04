@@ -632,8 +632,8 @@ func setAccessAuthCode(c *gin.Context) {
 		aac = model.Conf.AccessAuthCode
 	}
 
-	aac = strings.TrimSpace(aac)
 	aac = util.RemoveInvalid(aac)
+	aac = strings.TrimSpace(aac)
 
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()

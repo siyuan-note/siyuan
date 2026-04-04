@@ -4,31 +4,25 @@
   box-shadow: var(--b3-point-shadow);
   background-color: var(--b3-theme-surface);
   border-radius: var(--b3-border-radius);
-  margin: 16px;
   overflow: hidden;
   position: relative;
   transition: var(--b3-transition);
   cursor: pointer;
   display: flex;
 
-  &--wrap {
-    flex: 1;
-    margin: 16px 0 0 16px;
-    min-width: 342px;
-  }
-
   &:hover {
     background-color: var(--b3-list-hover);
   }
 
   &s {
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 16px 16px 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 342px), 1fr));
+    margin: 16px;
   }
 
   &--current {
-    background-color: var(--b3-theme-primary-lightest)
+    background-color: var(--b3-theme-primary-lightest);
   }
 
   &--disabled {
@@ -48,7 +42,7 @@
   }
 
   &__info {
-    padding: 16px 16px 4px;
+    padding: 16px 16px 0;
     line-height: 18px;
 
     &--left {
@@ -60,17 +54,22 @@
   &__desc {
     color: var(--b3-theme-on-surface);
     font-size: 12px;
-    margin-top: 4px;
+    text-autospace: normal;
+    margin-top: 8px;
     max-height: 54px;
     @include mixin.text-clamp(3);
   }
 
   &__actions {
-    padding: 0 16px 14px 16px;
     display: flex;
     box-sizing: border-box;
     font-size: 12px;
     line-height: 14px;
+    padding: 3px 11px 11px;
+
+    &:not(.b3-card__actions--right) .block__icon {
+      color: var(--b3-theme-on-surface-light);
+    }
 
     &--right {
       padding-left: 0;

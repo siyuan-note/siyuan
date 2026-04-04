@@ -524,7 +524,6 @@ func CreateCloudSyncDir(name string) (err error) {
 		return
 	}
 
-	name = strings.TrimSpace(name)
 	name = util.RemoveInvalid(name)
 	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
@@ -553,10 +552,6 @@ func RemoveCloudSyncDir(name string) (err error) {
 	}
 
 	msgId := util.PushMsg(Conf.Language(116), 15000)
-
-	if "" == name {
-		return
-	}
 
 	repo, err := newRepository()
 	if err != nil {

@@ -35,10 +35,11 @@ func searchHistory(c *gin.Context) {
 		return
 	}
 
-	var notebook, query string
+	var notebook, query, op string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("notebook", &notebook, false, false),
 		util.BindJsonArg("query", &query, false, false),
+		util.BindJsonArg("op", &op, false, false),
 	) {
 		return
 	}
@@ -58,14 +59,6 @@ func searchHistory(c *gin.Context) {
 		}
 		page = int(pageVal)
 	}
-	op := "all"
-	if nil != arg["op"] {
-		opVal, ok := util.ParseJsonArg[string]("op", arg, ret, true, true)
-		if !ok {
-			return
-		}
-		op = opVal
-	}
 	histories, pageCount, totalCount := model.FullTextSearchHistory(query, notebook, op, typ, page)
 	ret.Data = map[string]interface{}{
 		"histories":  histories,
@@ -83,11 +76,12 @@ func getHistoryItems(c *gin.Context) {
 		return
 	}
 
-	var created, notebook, query string
+	var created, notebook, query, op string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("created", &created, true, true),
 		util.BindJsonArg("notebook", &notebook, false, false),
 		util.BindJsonArg("query", &query, false, false),
+		util.BindJsonArg("op", &op, false, false),
 	) {
 		return
 	}
@@ -98,14 +92,6 @@ func getHistoryItems(c *gin.Context) {
 			return
 		}
 		typ = int(typeVal)
-	}
-	op := "all"
-	if nil != arg["op"] {
-		opVal, ok := util.ParseJsonArg[string]("op", arg, ret, true, true)
-		if !ok {
-			return
-		}
-		op = opVal
 	}
 	histories := model.FullTextSearchHistoryItems(created, query, notebook, op, typ)
 	ret.Data = map[string]interface{}{

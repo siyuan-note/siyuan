@@ -550,7 +550,8 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	} else {
 		stmt += "1=1"
 	}
-	if "all" != op {
+
+	if op = strings.TrimSpace(op); op != "" && op != "all" {
 		stmt += " AND op = '" + op + "'"
 	}
 

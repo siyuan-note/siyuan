@@ -130,7 +130,7 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 }
 
 func isBazaarOnline() bool {
-	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (interface{}, error) {
+	v, err, _ := onlineCheckFlight.Do("bazaarOnline", func() (any, error) {
 		return isBazaarOnline0(), nil
 	})
 	if err != nil {
@@ -227,7 +227,7 @@ func getBazaarStats(ctx context.Context) map[string]*bazaarStats {
 		return cached
 	}
 
-	v, _, _ := bazaarStatsFlight.Do("bazaarStats", func() (interface{}, error) {
+	v, _, _ := bazaarStatsFlight.Do("bazaarStats", func() (any, error) {
 		return getBazaarStats0(ctx), nil
 	})
 	return v.(map[string]*bazaarStats)

@@ -519,7 +519,7 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
-			mapAv := map[string]interface{}{}
+			mapAv := map[string]any{}
 			if err = gulu.JSON.UnmarshalJSON(data, &mapAv); err != nil {
 				logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 				return
@@ -527,30 +527,30 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 
 			// v3.0.3 兼容之前旧版本，将 relation.contents[""] 转换为 null
 			keyValues := mapAv["keyValues"]
-			keyValuesMap := keyValues.([]interface{})
+			keyValuesMap := keyValues.([]any)
 			for _, kv := range keyValuesMap {
-				kvMap := kv.(map[string]interface{})
+				kvMap := kv.(map[string]any)
 				if values := kvMap["values"]; nil != values {
-					valuesMap := values.([]interface{})
+					valuesMap := values.([]any)
 					for _, v := range valuesMap {
-						if vMap := v.(map[string]interface{}); nil != vMap["relation"] {
-							vMap["relation"].(map[string]interface{})["contents"] = nil
+						if vMap := v.(map[string]any); nil != vMap["relation"] {
+							vMap["relation"].(map[string]any)["contents"] = nil
 						}
 					}
 				}
 			}
 
 			views := mapAv["views"]
-			viewsMap := views.([]interface{})
+			viewsMap := views.([]any)
 			for _, view := range viewsMap {
-				if table := view.(map[string]interface{})["table"]; nil != table {
-					tableMap := table.(map[string]interface{})
+				if table := view.(map[string]any)["table"]; nil != table {
+					tableMap := table.(map[string]any)
 					if filters := tableMap["filters"]; nil != filters {
-						filtersMap := filters.([]interface{})
+						filtersMap := filters.([]any)
 						for _, f := range filtersMap {
-							if fMap := f.(map[string]interface{}); nil != fMap["value"] {
-								if valueMap := fMap["value"].(map[string]interface{}); nil != valueMap["relation"] {
-									valueMap["relation"].(map[string]interface{})["contents"] = nil
+							if fMap := f.(map[string]any); nil != fMap["value"] {
+								if valueMap := fMap["value"].(map[string]any); nil != valueMap["relation"] {
+									valueMap["relation"].(map[string]any)["contents"] = nil
 								}
 							}
 						}

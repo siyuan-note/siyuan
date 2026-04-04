@@ -16,5 +16,5 @@
 
 package conf
 
-type UILayout map[string]interface{} // 界面布局
-type Keymap map[string]interface{}   // 快捷键
+type UILayout map[string]any // 界面布局
+type Keymap map[string]any   // 快捷键

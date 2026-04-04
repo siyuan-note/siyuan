@@ -56,7 +56,7 @@ func listInvalidBlockRefs(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,
 		"matchedRootCount":  matchedRootCount,
@@ -86,7 +86,7 @@ func getAssetContent(c *gin.Context) {
 			assetContent = nil
 		}
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"assetContent": assetContent,
 	}
 	return
@@ -107,7 +107,7 @@ func fullTextSearchAssetContent(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		assetContents = model.FilterAssetContentByPublishAccess(c, publishAccess, assetContents)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"assetContents":     assetContents,
 		"matchedAssetCount": matchedAssetCount,
 		"pageCount":         pageCount,
@@ -127,7 +127,7 @@ func findReplace(c *gin.Context) {
 
 	k := arg["k"].(string)
 	r := arg["r"].(string)
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -137,7 +137,7 @@ func findReplace(c *gin.Context) {
 	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, blockRef, fileAnnotationRef kbd, mark, s, sub, sup, tag, u
 	// docTitle, codeBlock, mathBlock, htmlBlock
 	if nil != arg["replaceTypes"] {
-		replaceTypesArg := arg["replaceTypes"].(map[string]interface{})
+		replaceTypesArg := arg["replaceTypes"].(map[string]any)
 		for t, b := range replaceTypesArg {
 			replaceTypes[t] = b.(bool)
 		}
@@ -147,7 +147,7 @@ func findReplace(c *gin.Context) {
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 	return
@@ -166,7 +166,7 @@ func searchAsset(c *gin.Context) {
 
 	var exts []string
 	if extsArg := arg["exts"]; nil != extsArg {
-		for _, ext := range extsArg.([]interface{}) {
+		for _, ext := range extsArg.([]any) {
 			exts = append(exts, ext.(string))
 		}
 	}
@@ -189,7 +189,7 @@ func searchTag(c *gin.Context) {
 	if 1 > len(tags) {
 		tags = []string{}
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"tags": tags,
 		"k":    k,
 	}
@@ -206,7 +206,7 @@ func searchWidget(c *gin.Context) {
 
 	keyword := arg["k"].(string)
 	widgets := model.SearchWidget(keyword)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"widgets": widgets,
 		"k":       keyword,
 	}
@@ -241,7 +241,7 @@ func searchTemplate(c *gin.Context) {
 
 	keyword := arg["k"].(string)
 	templates := model.SearchTemplate(keyword)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"templates": templates,
 		"k":         keyword,
 	}
@@ -258,7 +258,7 @@ func getEmbedBlock(c *gin.Context) {
 	}
 
 	embedBlockID := arg["embedBlockID"].(string)
-	includeIDsArg := arg["includeIDs"].([]interface{})
+	includeIDsArg := arg["includeIDs"].([]any)
 	var includeIDs []string
 	for _, includeID := range includeIDsArg {
 		includeIDs = append(includeIDs, includeID.(string))
@@ -279,7 +279,7 @@ func getEmbedBlock(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks": blocks,
 	}
 }
@@ -315,7 +315,7 @@ func searchEmbedBlock(c *gin.Context) {
 
 	embedBlockID := arg["embedBlockID"].(string)
 	stmt := arg["stmt"].(string)
-	excludeIDsArg := arg["excludeIDs"].([]interface{})
+	excludeIDsArg := arg["excludeIDs"].([]any)
 	var excludeIDs []string
 	for _, excludeID := range excludeIDsArg {
 		if nil == excludeID {
@@ -339,7 +339,7 @@ func searchEmbedBlock(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterEmbedBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks": blocks,
 	}
 }
@@ -354,7 +354,7 @@ func searchRefBlock(c *gin.Context) {
 	}
 
 	reqId := arg["reqId"]
-	ret.Data = map[string]interface{}{"reqId": reqId}
+	ret.Data = map[string]any{"reqId": reqId}
 	if nil == arg["id"] {
 		return
 	}
@@ -378,7 +378,7 @@ func searchRefBlock(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks": blocks,
 		"newDoc": newDoc,
 		"k":      util.EscapeHTML(keyword),
@@ -409,7 +409,7 @@ func fullTextSearchBlock(c *gin.Context) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,
 		"matchedRootCount":  matchedRootCount,
@@ -418,7 +418,7 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 }
 
-func parseSearchBlockArgs(arg map[string]interface{}) (page, pageSize int, query string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) {
+func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) {
 	page = 1
 	if nil != arg["page"] {
 		page = int(arg["page"].(float64))
@@ -442,7 +442,7 @@ func parseSearchBlockArgs(arg map[string]interface{}) (page, pageSize int, query
 
 	pathsArg := arg["paths"]
 	if nil != pathsArg {
-		for _, p := range pathsArg.([]interface{}) {
+		for _, p := range pathsArg.([]any) {
 			path := p.(string)
 			box := strings.TrimSpace(strings.Split(path, "/")[0])
 			if "" != box {
@@ -458,7 +458,7 @@ func parseSearchBlockArgs(arg map[string]interface{}) (page, pageSize int, query
 	}
 
 	if nil != arg["types"] {
-		typesArg := arg["types"].(map[string]interface{})
+		typesArg := arg["types"].(map[string]any)
 		types = map[string]bool{}
 		for t, b := range typesArg {
 			types[t] = b.(bool)
@@ -485,7 +485,7 @@ func parseSearchBlockArgs(arg map[string]interface{}) (page, pageSize int, query
 	return
 }
 
-func parseSearchAssetContentArgs(arg map[string]interface{}) (page, pageSize int, query string, types map[string]bool, method, orderBy int) {
+func parseSearchAssetContentArgs(arg map[string]any) (page, pageSize int, query string, types map[string]bool, method, orderBy int) {
 	page = 1
 	if nil != arg["page"] {
 		page = int(arg["page"].(float64))
@@ -508,7 +508,7 @@ func parseSearchAssetContentArgs(arg map[string]interface{}) (page, pageSize int
 	}
 
 	if nil != arg["types"] {
-		typesArg := arg["types"].(map[string]interface{})
+		typesArg := arg["types"].(map[string]any)
 		types = map[string]bool{}
 		for t, b := range typesArg {
 			types[t] = b.(bool)

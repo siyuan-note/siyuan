@@ -98,7 +98,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	return
 }
 
-func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
+func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 	if util.ReadOnly {
 		return
 	}
@@ -350,7 +350,7 @@ func validateChars(name string, startIdx, n int) bool {
 
 func pushBlockAttrs(oldAttrs map[string]string, node *ast.Node) {
 	newAttrs := parse.IAL2Map(node.KramdownIAL)
-	data := map[string]interface{}{"old": oldAttrs, "new": newAttrs}
+	data := map[string]any{"old": oldAttrs, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType
 	}

@@ -155,7 +155,7 @@ func indexBox(boxID string) {
 	poolSize := min(runtime.NumCPU(), 4)
 	waitGroup := &sync.WaitGroup{}
 	var avNodes []*ast.Node
-	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
+	p, _ := ants.NewPoolWithFunc(poolSize, func(arg any) {
 		defer waitGroup.Done()
 
 		file := arg.(*FileInfo)
@@ -366,13 +366,13 @@ var (
 
 func subscribeSQLEvents() {
 	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
-	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
+	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]any, current, total, blockCount int, hash string) {
 	//
 	//	msg := fmt.Sprintf(Conf.Language(89), current, total, blockCount, hash)
 	//	util.SetBootDetails(msg)
 	//	util.ContextPushMsg(context, msg)
 	//})
-	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
+	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]any, blockCount int, hash string) {
 		if !pushSQLInsertBlocksFTSMsg {
 			return
 		}
@@ -383,7 +383,7 @@ func subscribeSQLEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]interface{}, rootID string) {
+	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]any, rootID string) {
 		if !pushSQLDeleteBlocksMsg {
 			return
 		}
@@ -394,7 +394,7 @@ func subscribeSQLEvents() {
 		util.SetBootDetails(msg)
 		util.ContextPushMsg(context, msg)
 	})
-	eventbus.Subscribe(eventbus.EvtSQLUpdateBlocksHPaths, func(context map[string]interface{}, blockCount int, hash string) {
+	eventbus.Subscribe(eventbus.EvtSQLUpdateBlocksHPaths, func(context map[string]any, blockCount int, hash string) {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 			return
 		}
@@ -406,7 +406,7 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(eventbus.EvtSQLInsertHistory, func(context map[string]interface{}) {
+	eventbus.Subscribe(eventbus.EvtSQLInsertHistory, func(context map[string]any) {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 			return
 		}
@@ -418,7 +418,7 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 
-	eventbus.Subscribe(eventbus.EvtSQLInsertAssetContent, func(context map[string]interface{}) {
+	eventbus.Subscribe(eventbus.EvtSQLInsertAssetContent, func(context map[string]any) {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 			return
 		}

@@ -100,8 +100,8 @@ func echo(c *gin.Context) {
 	c.Request.ParseForm()
 	c.Request.ParseMultipartForm(math.MaxInt64)
 
-	ret.Data = map[string]interface{}{
-		"Context": map[string]interface{}{
+	ret.Data = map[string]any{
+		"Context": map[string]any{
 			"Params":       c.Params,
 			"HandlerNames": c.HandlerNames(),
 			"FullPath":     c.FullPath(),
@@ -111,7 +111,7 @@ func echo(c *gin.Context) {
 			"IsWebsocket":  c.IsWebsocket(),
 			"RawData":      rawData,
 		},
-		"Request": map[string]interface{}{
+		"Request": map[string]any{
 			"Method":           c.Request.Method,
 			"URL":              c.Request.URL,
 			"Proto":            c.Request.Proto,
@@ -132,7 +132,7 @@ func echo(c *gin.Context) {
 			"Cookies":          c.Request.Cookies(),
 			"Referer":          c.Request.Referer(),
 		},
-		"URL": map[string]interface{}{
+		"URL": map[string]any{
 			"EscapedPath":     c.Request.URL.EscapedPath(),
 			"EscapedFragment": c.Request.URL.EscapedFragment(),
 			"String":          c.Request.URL.String(),
@@ -143,7 +143,7 @@ func echo(c *gin.Context) {
 			"Hostname":        c.Request.URL.Hostname(),
 			"Port":            c.Request.URL.Port(),
 		},
-		"User": map[string]interface{}{
+		"User": map[string]any{
 			"Username":    c.Request.URL.User.Username(),
 			"Password":    password,
 			"PasswordSet": passwordSet,
@@ -192,9 +192,9 @@ func forwardProxy(c *gin.Context) {
 
 	client := getSafeClient(time.Duration(timeout) * time.Millisecond)
 	request := client.R()
-	if headers, ok := arg["headers"].([]interface{}); ok {
+	if headers, ok := arg["headers"].([]any); ok {
 		for _, pair := range headers {
-			if m, ok := pair.(map[string]interface{}); ok {
+			if m, ok := pair.(map[string]any); ok {
 				for k, v := range m {
 					request.SetHeader(k, fmt.Sprintf("%v", v))
 				}
@@ -308,7 +308,7 @@ func forwardProxy(c *gin.Context) {
 		body = string(bodyData)
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"url":          destURL,
 		"status":       resp.StatusCode,
 		"contentType":  resp.GetHeader("content-type"),

@@ -48,7 +48,7 @@ func getUniqueFilename(c *gin.Context) {
 	}
 
 	filePath := arg["path"].(string)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"path": util.GetUniqueFilename(filePath),
 	}
 }
@@ -63,7 +63,7 @@ func globalCopyFiles(c *gin.Context) {
 	}
 
 	var srcs []string
-	srcsArg := arg["srcs"].([]interface{})
+	srcsArg := arg["srcs"].([]any)
 	for _, s := range srcsArg {
 		srcs = append(srcs, s.(string))
 	}
@@ -120,7 +120,7 @@ func copyFile(c *gin.Context) {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", src, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -129,14 +129,14 @@ func copyFile(c *gin.Context) {
 		logging.LogErrorf("stat [%s] failed: %s", src, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
 	if info.IsDir() {
 		ret.Code = -1
 		ret.Msg = "file is a directory"
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -153,7 +153,7 @@ func copyFile(c *gin.Context) {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -356,7 +356,7 @@ func readDir(c *gin.Context) {
 		return
 	}
 
-	files := []map[string]interface{}{}
+	files := []map[string]any{}
 	for _, entry := range entries {
 		path := filepath.Join(dirAbsPath, entry.Name())
 		info, err = os.Stat(path)
@@ -366,7 +366,7 @@ func readDir(c *gin.Context) {
 			ret.Msg = err.Error()
 			return
 		}
-		files = append(files, map[string]interface{}{
+		files = append(files, map[string]any{
 			"name":      entry.Name(),
 			"isDir":     info.IsDir(),
 			"isSymlink": util.IsSymlink(entry),

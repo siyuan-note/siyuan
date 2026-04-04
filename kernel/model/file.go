@@ -1293,7 +1293,7 @@ func GetIDsByHPath(hpath, boxID string) (ret []string, err error) {
 	return
 }
 
-func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) (err error) {
+func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
 		err = errors.New(Conf.Language(0))
@@ -1372,7 +1372,7 @@ func countSubDocs(box, p string) (ret int) {
 	return
 }
 
-func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback interface{}) (newPath string, err error) {
+func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngine *lute.Lute, callback any) (newPath string, err error) {
 	isSameBox := fromBox.ID == toBox.ID
 
 	if isSameBox {
@@ -1491,7 +1491,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 			subToPath := path.Join(toFolder, relPath)
 
 			evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
-			evt.Data = map[string]interface{}{
+			evt.Data = map[string]any{
 				"fromNotebook": fromBox.ID,
 				"fromPath":     subFromPath,
 				"toNotebook":   toBox.ID,
@@ -1504,7 +1504,7 @@ func moveDoc(fromBox *Box, fromPath string, toBox *Box, toPath string, luteEngin
 	}
 
 	evt := util.NewCmdResult("moveDoc", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
+	evt.Data = map[string]any{
 		"fromNotebook": fromBox.ID,
 		"fromPath":     fromPath,
 		"toNotebook":   toBox.ID,
@@ -1635,7 +1635,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 	cache.RemoveTreeData(ret.ID)
 
 	evt := util.NewCmdResult("removeDoc", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
+	evt.Data = map[string]any{
 		"ids": removeIDs,
 	}
 	util.PushEvent(evt)
@@ -1710,7 +1710,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
-		evt.Data = map[string]interface{}{
+		evt.Data = map[string]any{
 			"box":     boxID,
 			"id":      tree.Root.ID,
 			"path":    p,

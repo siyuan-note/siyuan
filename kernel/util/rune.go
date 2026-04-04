@@ -95,16 +95,16 @@ func InitEmojiChars() {
 		return
 	}
 
-	var conf []map[string]interface{}
+	var conf []map[string]any
 	if err = gulu.JSON.UnmarshalJSON(data, &conf); err != nil {
 		logging.LogErrorf("unmarshal emojis conf.json failed: %s", err)
 		return
 	}
 
 	for _, emoji := range conf {
-		items := emoji["items"].([]interface{})
+		items := emoji["items"].([]any)
 		for _, item := range items {
-			e := item.(map[string]interface{})
+			e := item.(map[string]any)
 			NativeEmojiChars[e["unicode"].(string)] = true
 		}
 	}

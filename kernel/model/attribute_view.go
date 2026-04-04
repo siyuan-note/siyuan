@@ -2521,7 +2521,7 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		return
 	}
 
-	data := operation.Data.(map[string]interface{})
+	data := operation.Data.(map[string]any)
 	if nil != data["calc"] {
 		calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])
 		if nil != jsonErr {
@@ -3339,7 +3339,7 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	operationData := operation.Data.([]interface{})
+	operationData := operation.Data.([]any)
 	data, err := gulu.JSON.MarshalJSON(operationData)
 	if err != nil {
 		return
@@ -3372,7 +3372,7 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	operationData := operation.Data.([]interface{})
+	operationData := operation.Data.([]any)
 	data, err := gulu.JSON.MarshalJSON(operationData)
 	if err != nil {
 		return
@@ -3430,7 +3430,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	operationData := operation.Data.(interface{})
+	operationData := operation.Data.(any)
 	data, err := gulu.JSON.MarshalJSON(operationData)
 	if err != nil {
 		return
@@ -3465,7 +3465,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -4988,14 +4988,14 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interface{}) (err error) {
+func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
 	for _, value := range values {
-		v := value.(map[string]interface{})
+		v := value.(map[string]any)
 		keyID := v["keyID"].(string)
 		var itemID string
 		if _, ok := v["itemID"]; ok {
@@ -5015,7 +5015,7 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 	return
 }
 
-func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueData interface{}) (val *av.Value, err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueData any) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -5028,7 +5028,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueD
 	return
 }
 
-func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData interface{}) (val *av.Value, err error) {
+func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData any) (val *av.Value, err error) {
 	avID := attrView.ID
 	var blockVal *av.Value
 	for _, kv := range attrView.KeyValues {
@@ -5621,7 +5621,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		return
 	}
 
-	data := operation.Data.(map[string]interface{})
+	data := operation.Data.(map[string]any)
 
 	rename := false
 	oldName := strings.TrimSpace(data["oldName"].(string))
@@ -5740,7 +5740,7 @@ func setAttributeViewColumnOptionDesc(operation *Operation) (err error) {
 		return
 	}
 
-	data := operation.Data.(map[string]interface{})
+	data := operation.Data.(map[string]any)
 	name := data["name"].(string)
 	desc := data["desc"].(string)
 

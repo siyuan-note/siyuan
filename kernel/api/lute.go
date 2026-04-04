@@ -217,7 +217,7 @@ func spinBlockDOM(c *gin.Context) {
 	luteEngine := model.NewLute()
 
 	dom = luteEngine.SpinBlockDOM(dom)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"dom": dom,
 	}
 }

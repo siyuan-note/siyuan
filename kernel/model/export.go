@@ -397,7 +397,7 @@ func Export2Liandi(id string) (err error) {
 	request = request.
 		SetSuccessResult(result).
 		SetCookies(&http.Cookie{Name: "symphony", Value: Conf.GetUser().UserToken}).
-		SetBody(map[string]interface{}{
+		SetBody(map[string]any{
 			"articleTitle":   title,
 			"articleTags":    tags,
 			"articleContent": content})
@@ -3323,7 +3323,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 		logging.LogErrorf("read file [%s] failed: %s", sya, err)
 		return ast.WalkSkipChildren
 	}
-	syaJSON := map[string]interface{}{}
+	syaJSON := map[string]any{}
 	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); err != nil {
 		logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
 		return ast.WalkSkipChildren
@@ -3334,8 +3334,8 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 		logging.LogErrorf("not found annotation [%s] in .sya", annotationID)
 		return ast.WalkSkipChildren
 	}
-	pages := annotationData.(map[string]interface{})["pages"].([]interface{})
-	page := int(pages[0].(map[string]interface{})["index"].(float64)) + 1
+	pages := annotationData.(map[string]any)["pages"].([]any)
+	page := int(pages[0].(map[string]any)["index"].(float64)) + 1
 	pageStr := strconv.Itoa(page)
 
 	refText := n.TextMarkTextContent

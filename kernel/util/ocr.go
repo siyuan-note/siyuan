@@ -157,7 +157,7 @@ func ExistsAssetText(asset string) (ret bool) {
 	return
 }
 
-func OcrAsset(asset string) (ret []map[string]interface{}, err error) {
+func OcrAsset(asset string) (ret []map[string]any, err error) {
 	if !TesseractEnabled {
 		err = fmt.Errorf(Langs[Lang][266])
 		return
@@ -219,7 +219,7 @@ func IsTesseractExtractable(p string) bool {
 // tesseractOCRLock 用于 Tesseract OCR 加锁串行执行提升稳定性 https://github.com/siyuan-note/siyuan/issues/7265
 var tesseractOCRLock = sync.Mutex{}
 
-func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
+func Tesseract(imgAbsPath string) (ret []map[string]any) {
 	if ContainerStd != Container || !TesseractEnabled {
 		return
 	}
@@ -283,7 +283,7 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 		// 分割每列数据
 		fields := strings.Split(line, "\t")
 		// 将字段名和字段值映射到一个 map 中
-		dataMap := make(map[string]interface{})
+		dataMap := make(map[string]any)
 		headers := strings.Split(lines[0], "\t")
 		for i, header := range headers {
 			if i < len(fields) {
@@ -303,7 +303,7 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 }
 
 // GetOcrJsonText 提取并连接所有 text 字段的函数
-func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
+func GetOcrJsonText(jsonData []map[string]any) (ret string) {
 	for _, dataMap := range jsonData {
 		// 检查 text 字段是否存在
 		if text, ok := dataMap["text"]; ok {

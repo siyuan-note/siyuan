@@ -44,7 +44,7 @@ func batchGetBlockAttrs(c *gin.Context) {
 		return
 	}
 
-	ids := arg["ids"].([]interface{})
+	ids := arg["ids"].([]any)
 	var idList []string
 	for _, id := range ids {
 		idList = append(idList, id.(string))
@@ -84,7 +84,7 @@ func setBlockAttrs(c *gin.Context) {
 		return
 	}
 
-	attrs := arg["attrs"].(map[string]interface{})
+	attrs := arg["attrs"].(map[string]any)
 	if 1 == len(attrs) && "" != attrs["scroll"] {
 		// 不记录用户指南滚动位置
 		if b := treenode.GetBlockTree(id); nil != b && (model.IsUserGuide(b.BoxID)) {
@@ -123,16 +123,16 @@ func batchSetBlockAttrs(c *gin.Context) {
 		return
 	}
 
-	blockAttrsArg := arg["blockAttrs"].([]interface{})
-	var blockAttrs []map[string]interface{}
+	blockAttrsArg := arg["blockAttrs"].([]any)
+	var blockAttrs []map[string]any
 	for _, blockAttrArg := range blockAttrsArg {
-		blockAttr := blockAttrArg.(map[string]interface{})
+		blockAttr := blockAttrArg.(map[string]any)
 		id := blockAttr["id"].(string)
 		if util.InvalidIDPattern(id, ret) {
 			return
 		}
 
-		attrs := blockAttr["attrs"].(map[string]interface{})
+		attrs := blockAttr["attrs"].(map[string]any)
 		nameValues := map[string]string{}
 		for name, value := range attrs {
 			if nil == value {
@@ -148,7 +148,7 @@ func batchSetBlockAttrs(c *gin.Context) {
 			}
 		}
 
-		blockAttrs = append(blockAttrs, map[string]interface{}{
+		blockAttrs = append(blockAttrs, map[string]any{
 			"id":    id,
 			"attrs": nameValues,
 		})
@@ -172,7 +172,7 @@ func resetBlockAttrs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	attrs := arg["attrs"].(map[string]interface{})
+	attrs := arg["attrs"].(map[string]any)
 	nameValues := map[string]string{}
 	for name, value := range attrs {
 		if nil == value {

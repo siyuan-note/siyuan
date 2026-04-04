@@ -75,7 +75,7 @@ func PushReloadPlugin(uninstallPluginNameSet, unloadPluginNameSet, reloadPluginS
 	}
 
 	logging.LogInfof("reload plugins, uninstalls=%v, unloads=%v, reloads=%v, dataChanges=%v", slices[0], slices[1], slices[2], slices[3])
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"uninstallPlugins":  slices[0], // 插件卸载
 		"unloadPlugins":     slices[1], // 插件禁用
 		"reloadPlugins":     slices[2], // 插件启用，或插件代码变更
@@ -148,7 +148,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 		}
 	}
 
-	docInfo := map[string]interface{}{
+	docInfo := map[string]any{
 		"rootID":       tree.ID,
 		"name":         tree.Root.IALAttr("title"),
 		"alias":        tree.Root.IALAttr("alias"),
@@ -412,5 +412,5 @@ func ReloadAttrView(avID string) {
 }
 
 func pushReloadAttrView(avID string) {
-	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
+	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]any{"id": avID})
 }

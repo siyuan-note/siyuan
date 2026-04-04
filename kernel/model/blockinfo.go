@@ -67,7 +67,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 	scrollData := ret.IAL["scroll"]
 	if 0 < len(scrollData) {
-		scroll := map[string]interface{}{}
+		scroll := map[string]any{}
 		if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
 			logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
 			delete(ret.IAL, "scroll")
@@ -150,7 +150,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 		scrollData := ret.IAL["scroll"]
 		if 0 < len(scrollData) {
-			scroll := map[string]interface{}{}
+			scroll := map[string]any{}
 			if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
 				logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
 				delete(ret.IAL, "scroll")

@@ -55,7 +55,7 @@ func removeBookmark(c *gin.Context) {
 	}
 
 	var bookmark string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("bookmark", true, &bookmark)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("bookmark", &bookmark, true, false)) {
 		return
 	}
 	if err := model.RemoveBookmark(bookmark); err != nil {
@@ -77,8 +77,8 @@ func renameBookmark(c *gin.Context) {
 
 	var oldBookmark, newBookmark string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("oldBookmark", true, &oldBookmark),
-		util.BindJsonArg("newBookmark", true, &newBookmark),
+		util.BindJsonArg("oldBookmark", &oldBookmark, true, false),
+		util.BindJsonArg("newBookmark", &newBookmark, true, false),
 	) {
 		return
 	}

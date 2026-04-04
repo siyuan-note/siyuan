@@ -51,7 +51,7 @@ func getTag(c *gin.Context) {
 	}
 
 	var app string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("app", true, &app)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("app", &app, true, false)) {
 		return
 	}
 	tags := model.BuildTags(ignoreMaxListHint, app)
@@ -75,8 +75,8 @@ func renameTag(c *gin.Context) {
 
 	var oldLabel, newLabel string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("oldLabel", true, &oldLabel),
-		util.BindJsonArg("newLabel", true, &newLabel),
+		util.BindJsonArg("oldLabel", &oldLabel, true, false),
+		util.BindJsonArg("newLabel", &newLabel, true, false),
 	) {
 		return
 	}
@@ -98,7 +98,7 @@ func removeTag(c *gin.Context) {
 	}
 
 	var label string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("label", true, &label)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("label", &label, true, false)) {
 		return
 	}
 	if err := model.RemoveTag(label); err != nil {

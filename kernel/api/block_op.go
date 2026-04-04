@@ -806,8 +806,8 @@ func batchUpdateBlock(c *gin.Context) {
 		return
 	}
 
-	var blocksArg []interface{}
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("blocks", true, &blocksArg)) {
+	var blocksArg []any
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("blocks", &blocksArg, true, false)) {
 		return
 	}
 

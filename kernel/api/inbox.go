@@ -58,7 +58,7 @@ func getShorthand(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", true, &id)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
 		return
 	}
 	data, err := model.GetCloudShorthand(id)
@@ -80,7 +80,7 @@ func getShorthands(c *gin.Context) {
 	}
 
 	var page float64
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("page", true, &page)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("page", &page, true, false)) {
 		return
 	}
 	data, err := model.GetCloudShorthands(int(page))

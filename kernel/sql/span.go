@@ -81,7 +81,12 @@ func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 }
 
 func QueryTagSpansByLabel(label string) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND content LIKE '%" + label + "%' GROUP BY block_id"
+	var stmt string
+	if "" != label {
+		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND content LIKE '%" + label + "%' GROUP BY block_id"
+	} else {
+		stmt = "SELECT * FROM spans WHERE type LIKE '%tag%' AND content = '' GROUP BY block_id"
+	}
 	rows, err := query(stmt)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
@@ -125,7 +130,7 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 }
 
 func QueryTagSpans(p string) (ret []*Span) {
-	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%' AND content != ''"
+	stmt := "SELECT * FROM spans WHERE type LIKE '%tag%'"
 	if "" != p {
 		stmt += " AND path = '" + p + "'"
 	}

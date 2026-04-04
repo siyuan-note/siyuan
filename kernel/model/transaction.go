@@ -105,7 +105,7 @@ func flushTx(tx *Transaction) {
 			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
 		}
 	}
-	elapsed := time.Now().Sub(start).Milliseconds()
+	elapsed := time.Since(start).Milliseconds()
 	if 0 < len(tx.DoOperations) {
 		if 2000 < elapsed {
 			logging.LogWarnf("op tx [%dms]", elapsed)

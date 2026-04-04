@@ -390,10 +390,9 @@ Net:
 	Conf.UserData = util.AESEncrypt(string(data))
 	Conf.Save()
 
-	if elapsed := time.Now().Sub(start).Milliseconds(); 3000 < elapsed {
+	if elapsed := time.Since(start).Milliseconds(); 3000 < elapsed {
 		logging.LogInfof("get cloud user elapsed [%dms]", elapsed)
 	}
-	return
 }
 
 func loadUserFromConf() *conf.User {

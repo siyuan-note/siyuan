@@ -279,7 +279,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	if err != nil {
 		return
 	}
-	elapsed := time.Now().Sub(start).Milliseconds()
+	elapsed := time.Since(start).Milliseconds()
 	if 100 < elapsed {
 		logging.LogWarnf("ls elapsed [%dms]", elapsed)
 	}
@@ -366,7 +366,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			}
 		}
 	}
-	elapsed = time.Now().Sub(start).Milliseconds()
+	elapsed = time.Since(start).Milliseconds()
 	if 500 < elapsed {
 		logging.LogWarnf("list doc tree [%s] build docs [%d] elapsed [%dms]", listPath, len(docs), elapsed)
 	}
@@ -378,7 +378,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			doc.Count = count
 		}
 	}
-	elapsed = time.Now().Sub(start).Milliseconds()
+	elapsed = time.Since(start).Milliseconds()
 	if 500 < elapsed {
 		logging.LogWarnf("query root block ref count elapsed [%dms]", elapsed)
 	}
@@ -449,7 +449,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	}
 	ret = ret[:]
 
-	elapsed = time.Now().Sub(start).Milliseconds()
+	elapsed = time.Since(start).Milliseconds()
 	if 200 < elapsed {
 		logging.LogInfof("sort docs elapsed [%dms]", elapsed)
 	}

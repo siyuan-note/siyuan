@@ -330,7 +330,7 @@ export const bazaar = {
 </div>`;
     },
     _getUpdate() {
-        fetchPost("/api/bazaar/getUpdatedPackage", undefined, (response) => {
+        fetchPost("/api/bazaar/getUpdatedPackage", {frontend: getFrontend()}, (response) => {
             let html = "";
             response.data.plugins.forEach((item: IBazaarItem) => {
                 html += this._genUpdateItemHTML(item, "plugins");

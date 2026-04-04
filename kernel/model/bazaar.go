@@ -80,7 +80,7 @@ func updatePackages(packages []*bazaar.Package, pkgType string, count *int, tota
 
 // BatchUpdatePackages 更新所有集市包
 func BatchUpdatePackages() {
-	plugins, widgets, icons, themes, templates := GetUpdatedPackages()
+	plugins, widgets, icons, themes, templates := GetUpdatedPackages("")
 
 	total := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
 	if 1 > total {
@@ -112,23 +112,25 @@ func BatchUpdatePackages() {
 }
 
 // GetUpdatedPackages 获取所有类型集市包的更新列表
-func GetUpdatedPackages() (plugins, widgets, icons, themes, templates []*bazaar.Package) {
+//
+//   - frontend 仅用于插件兼容性展示
+func GetUpdatedPackages(frontend string) (plugins, widgets, icons, themes, templates []*bazaar.Package) {
 	wg := &sync.WaitGroup{}
 
 	wg.Go(func() {
-		plugins = getUpdatedPackages("plugins")
+		plugins = getUpdatedPackages("plugins", frontend)
 	})
 	wg.Go(func() {
-		themes = getUpdatedPackages("themes")
+		themes = getUpdatedPackages("themes", "")
 	})
 	wg.Go(func() {
-		icons = getUpdatedPackages("icons")
+		icons = getUpdatedPackages("icons", "")
 	})
 	wg.Go(func() {
-		templates = getUpdatedPackages("templates")
+		templates = getUpdatedPackages("templates", "")
 	})
 	wg.Go(func() {
-		widgets = getUpdatedPackages("widgets")
+		widgets = getUpdatedPackages("widgets", "")
 	})
 
 	wg.Wait()
@@ -136,8 +138,8 @@ func GetUpdatedPackages() (plugins, widgets, icons, themes, templates []*bazaar.
 }
 
 // getUpdatedPackages 获取单个类型集市包的更新列表
-func getUpdatedPackages(pkgType string) (updatedPackages []*bazaar.Package) {
-	installedPackages := GetInstalledPackages(pkgType, "", "")
+func getUpdatedPackages(pkgType, frontend string) (updatedPackages []*bazaar.Package) {
+	installedPackages := GetInstalledPackages(pkgType, frontend, "")
 	updatedPackages = []*bazaar.Package{} // 确保返回空切片而非 nil
 	for _, pkg := range installedPackages {
 		if !pkg.Outdated {

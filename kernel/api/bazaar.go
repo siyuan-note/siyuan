@@ -44,7 +44,17 @@ func getUpdatedPackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	plugins, widgets, icons, themes, templates := model.GetUpdatedPackages()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var frontend string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, true)) {
+		return
+	}
+
+	plugins, widgets, icons, themes, templates := model.GetUpdatedPackages(frontend)
 	ret.Data = map[string]interface{}{
 		"plugins":   plugins,
 		"widgets":   widgets,

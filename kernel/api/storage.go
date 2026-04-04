@@ -29,14 +29,11 @@ func getRecentDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	// 获取排序参数
-	sortBy := "viewedAt" // 默认按浏览时间排序，openAt：按打开时间排序，closedAt：按关闭时间排序
-
-	// 兼容旧版接口，不能直接使用 util.JsonArg()
-	arg := map[string]interface{}{}
+	var sortBy string
+	arg := map[string]any{}
 	if err := c.ShouldBindJSON(&arg); err == nil {
-		if arg["sortBy"] != nil {
-			sortBy = arg["sortBy"].(string)
+		if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("sortBy", &sortBy, false, false)) {
+			return
 		}
 	}
 

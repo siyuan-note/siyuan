@@ -36,10 +36,10 @@ func loadPetals(c *gin.Context) {
 	}
 
 	var frontend string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, true)) {
 		return
 	}
-	isPublish := model.IsReadOnlyRole(model.GetGinContextRole(c))
+	isPublish := model.IsReadOnlyRoleContext(c)
 
 	ret.Data = model.LoadPetals(frontend, isPublish)
 }
@@ -53,17 +53,17 @@ func setPetalEnabled(c *gin.Context) {
 		return
 	}
 
-	var packageName, frontend, app string
+	var packageName, app string
 	var enabled bool
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("packageName", &packageName, true, false),
+		util.BindJsonArg("packageName", &packageName, true, true),
 		util.BindJsonArg("enabled", &enabled, true, false),
-		util.BindJsonArg("frontend", &frontend, true, false),
 		util.BindJsonArg("app", &app, false, false),
 	) {
 		return
 	}
-	data, err := model.SetPetalEnabled(packageName, enabled, frontend)
+
+	data, err := model.SetPetalEnabled(packageName, enabled)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

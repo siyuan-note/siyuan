@@ -374,7 +374,7 @@ func Export2Liandi(id string) (err error) {
 		case 404:
 			foundArticle = false
 		default:
-			err = errors.New(fmt.Sprintf("get liandi article info failed [sc=%d]", resp.StatusCode))
+			err = fmt.Errorf("get liandi article info failed [sc=%d]", resp.StatusCode)
 			return
 		}
 	}
@@ -545,13 +545,13 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 
 		_, _, tempExportFree := util.GetDiskUsage(util.TempDir)
 		if int64(tempExportFree) < dataSize*2 { // 压缩 zip 文件时需要 data 的两倍空间
-			err = errors.New(fmt.Sprintf(Conf.Language(242), humanize.BytesCustomCeil(tempExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize)*2, 2)))
+			err = fmt.Errorf(Conf.Language(242), humanize.BytesCustomCeil(tempExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize)*2, 2))
 			return
 		}
 
 		_, _, targetExportFree := util.GetDiskUsage(exportFolder)
 		if int64(targetExportFree) < dataSize { // 复制 zip 最多需要 data 一样的空间
-			err = errors.New(fmt.Sprintf(Conf.Language(242), humanize.BytesCustomCeil(targetExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize), 2)))
+			err = fmt.Errorf(Conf.Language(242), humanize.BytesCustomCeil(targetExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize), 2))
 			return
 		}
 	}
@@ -611,7 +611,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	data := filepath.Join(util.WorkspaceDir, "data")
 	if err = filelock.Copy(data, exportFolder); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
-		err = errors.New(fmt.Sprintf(Conf.Language(14), err.Error()))
+		err = fmt.Errorf(Conf.Language(14), err.Error())
 		return
 	}
 
@@ -817,7 +817,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 		argStr := strings.Join(args, " ")
 		msg := gulu.DecodeCmdOutput(output)
 		logging.LogErrorf("export docx [%s] failed: %s", argStr, msg)
-		err = errors.New(fmt.Sprintf(Conf.Language(14), msg))
+		err = fmt.Errorf(Conf.Language(14), msg)
 		return
 	}
 
@@ -825,14 +825,14 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	fullPath = util.GetUniqueFilename(fullPath)
 	if err = filelock.Copy(tmpDocxPath, fullPath); err != nil {
 		logging.LogErrorf("export docx failed: %s", err)
-		err = errors.New(fmt.Sprintf(Conf.Language(14), err))
+		err = fmt.Errorf(Conf.Language(14), err)
 		return
 	}
 
 	if tmpAssets := filepath.Join(tmpDir, "assets"); !removeAssets && gulu.File.IsDir(tmpAssets) {
 		if err = filelock.Copy(tmpAssets, filepath.Join(savePath, "assets")); err != nil {
 			logging.LogErrorf("export docx failed: %s", err)
-			err = errors.New(fmt.Sprintf(Conf.Language(14), err))
+			err = fmt.Errorf(Conf.Language(14), err)
 			return
 		}
 	}

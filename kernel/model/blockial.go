@@ -62,7 +62,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return errors.New(fmt.Sprintf(Conf.Language(15), id))
+		return fmt.Errorf(Conf.Language(15), id)
 	}
 
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
@@ -116,12 +116,12 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 		id := blockAttr["id"].(string)
 		tree := trees[id]
 		if nil == tree {
-			return errors.New(fmt.Sprintf(Conf.Language(15), id))
+			return fmt.Errorf(Conf.Language(15), id)
 		}
 
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
-			return errors.New(fmt.Sprintf(Conf.Language(15), id))
+			return fmt.Errorf(Conf.Language(15), id)
 		}
 
 		attrs := blockAttr["attrs"].(map[string]string)
@@ -160,7 +160,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return errors.New(fmt.Sprintf(Conf.Language(15), id))
+		return fmt.Errorf(Conf.Language(15), id)
 	}
 
 	err = setNodeAttrs(node, tree, nameValues)
@@ -276,7 +276,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		return errors.New(fmt.Sprintf(Conf.Language(15), id))
+		return fmt.Errorf(Conf.Language(15), id)
 	}
 
 	oldAttrs := parse.IAL2Map(node.KramdownIAL)

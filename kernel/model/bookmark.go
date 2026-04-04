@@ -79,7 +79,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	if invalidChar := treenode.ContainsMarker(newBookmark); "" != invalidChar {
-		return errors.New(fmt.Sprintf(Conf.Language(112), invalidChar))
+		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
 
 	newBookmark = strings.TrimSpace(newBookmark)

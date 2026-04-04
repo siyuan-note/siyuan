@@ -47,7 +47,7 @@ func useActivationcode(c *gin.Context) {
 	}
 
 	var code string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("data", &code, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("data", &code, true, true)) {
 		return
 	}
 	err := model.UseActivationcode(code)
@@ -68,7 +68,7 @@ func checkActivationcode(c *gin.Context) {
 	}
 
 	var code string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("data", &code, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("data", &code, true, true)) {
 		return
 	}
 	ret.Code, ret.Msg = model.CheckActivationcode(code)

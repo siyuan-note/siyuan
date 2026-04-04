@@ -44,14 +44,12 @@ func getTag(c *gin.Context) {
 		return
 	}
 
-	if sortParam := arg["sort"]; sortParam != nil {
-		f, ok := sortParam.(float64)
+	if nil != arg["sort"] {
+		sortVal, ok := util.ParseJsonArg[float64]("sort", arg, ret, true, false)
 		if !ok {
-			ret.Code = -1
-			ret.Msg = "Field [sort] should be of type [Number]"
 			return
 		}
-		model.Conf.Tag.Sort = int(f)
+		model.Conf.Tag.Sort = int(sortVal)
 		model.Conf.Save()
 	}
 

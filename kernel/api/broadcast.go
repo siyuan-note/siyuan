@@ -721,8 +721,8 @@ func postMessage(c *gin.Context) {
 
 	var message, channelName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("message", &message, true, false),
-		util.BindJsonArg("channel", &channelName, true, false),
+		util.BindJsonArg("message", &message, true, true),
+		util.BindJsonArg("channel", &channelName, true, true),
 	) {
 		return
 	}
@@ -780,7 +780,7 @@ func getChannelInfo(c *gin.Context) {
 	}
 
 	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
 		return
 	}
 

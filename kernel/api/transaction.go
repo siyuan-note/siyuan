@@ -38,7 +38,25 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 
-	trans := arg["transactions"]
+	var trans []any
+	var reqID float64
+	var app, session string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("transactions", &trans, true, false),
+		util.BindJsonArg("reqId", &reqID, true, false),
+		util.BindJsonArg("app", &app, true, false),
+		util.BindJsonArg("session", &session, true, false),
+	) {
+		return
+	}
+
+	if !util.IsBooted() {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(74), int(util.GetBootProgress()))
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
 	data, err := gulu.JSON.MarshalJSON(trans)
 	if err != nil {
 		ret.Code = -1
@@ -46,14 +64,7 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 
-	if !util.IsBooted() {
-		ret.Code = -1
-		ret.Msg = fmt.Sprintf(model.Conf.Language(74), int(util.GetBootProgress()))
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
-		return
-	}
-
-	timestamp := int64(arg["reqId"].(float64))
+	timestamp := int64(reqID)
 	var transactions []*model.Transaction
 	if err = gulu.JSON.UnmarshalJSON(data, &transactions); err != nil {
 		ret.Code = -1
@@ -68,8 +79,6 @@ func performTransactions(c *gin.Context) {
 
 	ret.Data = transactions
 
-	app := arg["app"].(string)
-	session := arg["session"].(string)
 	pushTransactions(app, session, transactions)
 
 	if model.IsMoveOutlineHeading(&transactions) {

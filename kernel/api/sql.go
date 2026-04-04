@@ -45,7 +45,7 @@ func SQL(c *gin.Context) {
 	}
 
 	var stmt string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("stmt", &stmt, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("stmt", &stmt, true, true)) {
 		return
 	}
 	result, err := sql.Query(stmt, model.Conf.Search.Limit)

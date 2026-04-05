@@ -266,7 +266,7 @@ export class Background {
                     });
                     const dialog = new Dialog({
                         title: window.siyuan.languages.builtIn,
-                        content: `<div class="b3-cards">${html}</div>`,
+                        content: `<div class="b3-cards" style="padding: 16px">${html}</div>`,
                         width: isMobile() ? "92vw" : "912px",
                         height: isMobile() ? "80vh" : "70vh",
                     });

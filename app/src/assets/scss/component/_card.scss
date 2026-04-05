@@ -18,7 +18,10 @@
     display: grid;
     gap: 16px;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 342px), 1fr));
-    margin: 16px;
+
+    &--nowrap {
+      grid-template-columns:1fr;
+    }
   }
 
   &--current {
@@ -66,10 +69,6 @@
     font-size: 12px;
     line-height: 14px;
     padding: 3px 11px 11px;
-
-    &:not(.b3-card__actions--right) .block__icon {
-      color: var(--b3-theme-on-surface-light);
-    }
 
     &--right {
       padding-left: 0;

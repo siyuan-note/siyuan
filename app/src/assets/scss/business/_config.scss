@@ -249,10 +249,6 @@
     &__panel {
       height: 100%;
       overflow: auto;
-
-      &[data-type="downloaded"] .config-bazaar__content {
-        margin: 16px;
-      }
     }
 
     &__title {
@@ -264,8 +260,7 @@
     }
 
     &__content {
-      display: grid;
-      gap: 16px;
+      margin: 1px 16px;
     }
 
     &__readme {

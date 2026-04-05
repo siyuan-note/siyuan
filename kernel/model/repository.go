@@ -969,7 +969,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
 			return
 		}
-		err = errors.New(fmt.Sprintf(Conf.Language(84), formatRepoErrorMsg(err)))
+		err = fmt.Errorf(Conf.Language(84), formatRepoErrorMsg(err))
 		return
 	}
 	msg := fmt.Sprintf(Conf.Language(152), uploadFileCount, uploadChunkCount, humanize.BytesCustomCeil(uint64(uploadBytes), 2))

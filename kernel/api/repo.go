@@ -150,7 +150,7 @@ func openRepoSnapshotFile(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"title":         title,
 		"content":       content,
 		"displayInText": displayInText,
@@ -181,7 +181,7 @@ func diffRepoSnapshots(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"addsLeft":     diff.AddsLeft,
 		"updatesLeft":  diff.UpdatesLeft,
 		"updatesRight": diff.UpdatesRight,
@@ -203,7 +203,7 @@ func getCloudSpace(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"sync":                 sync,
 		"backup":               backup,
 		"hAssetSize":           hAssetSize,
@@ -298,7 +298,7 @@ func getRepoSnapshots(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"snapshots":  snapshots,
 		"pageCount":  pageCount,
 		"totalCount": totalCount,
@@ -326,7 +326,7 @@ func getCloudRepoSnapshots(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"snapshots":  snapshots,
 		"pageCount":  pageCount,
 		"totalCount": totalCount,
@@ -344,7 +344,7 @@ func getCloudRepoTagSnapshots(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"snapshots": snapshots,
 	}
 }
@@ -381,7 +381,7 @@ func getRepoTagSnapshots(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"snapshots": snapshots,
 	}
 }
@@ -423,7 +423,7 @@ func createSnapshot(c *gin.Context) {
 	if err := model.IndexRepo(memo); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }
@@ -447,7 +447,7 @@ func tagSnapshot(c *gin.Context) {
 	if err := model.TagSnapshot(id, name); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(140), err)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }
@@ -469,11 +469,11 @@ func importRepoKey(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"key": retKey,
 	}
 }
@@ -494,11 +494,11 @@ func initRepoKeyFromPassphrase(c *gin.Context) {
 	if err := model.InitRepoKeyFromPassphrase(pass); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"key": model.Conf.Repo.Key,
 	}
 }
@@ -510,11 +510,11 @@ func initRepoKey(c *gin.Context) {
 	if err := model.InitRepoKey(); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"key": model.Conf.Repo.Key,
 	}
 }
@@ -526,7 +526,7 @@ func resetRepo(c *gin.Context) {
 	if err := model.ResetRepo(); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(146), err.Error())
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }
@@ -538,7 +538,7 @@ func purgeRepo(c *gin.Context) {
 	if err := model.PurgeRepo(); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(201), err.Error())
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }
@@ -550,7 +550,7 @@ func purgeCloudRepo(c *gin.Context) {
 	if err := model.PurgeCloud(); err != nil {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(201), err.Error())
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }

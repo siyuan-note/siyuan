@@ -36,8 +36,8 @@ type History struct {
 	Path    string
 }
 
-func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
-	ret = []map[string]interface{}{}
+func QueryHistory(stmt string) (ret []map[string]any, err error) {
+	ret = []map[string]any{}
 	rows, err := queryHistory(stmt)
 	if err != nil {
 		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
@@ -51,8 +51,8 @@ func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 	}
 
 	for rows.Next() {
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
@@ -61,9 +61,9 @@ func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 			return
 		}
 
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
+			val := columnPointers[i].(*any)
 			m[colName] = *val
 		}
 		ret = append(ret, m)
@@ -99,7 +99,7 @@ func scanHistoryRows(rows *sql.Rows) (ret *History) {
 	return
 }
 
-func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
+func queryHistory(query string, args ...any) (*sql.Rows, error) {
 	query = strings.TrimSpace(query)
 	if "" == query {
 		return nil, errors.New("statement is empty")
@@ -123,7 +123,7 @@ const (
 	HistoriesPlaceholder              = "(?, ?, ?, ?, ?, ?, ?)"
 )
 
-func insertHistories(tx *sql.Tx, histories []*History, context map[string]interface{}) (err error) {
+func insertHistories(tx *sql.Tx, histories []*History, context map[string]any) (err error) {
 	if 1 > len(histories) {
 		return
 	}
@@ -148,9 +148,9 @@ func insertHistories(tx *sql.Tx, histories []*History, context map[string]interf
 	return
 }
 
-func insertHistories0(tx *sql.Tx, bulk []*History, context map[string]interface{}) (err error) {
+func insertHistories0(tx *sql.Tx, bulk []*History, context map[string]any) (err error) {
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(HistoriesPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(HistoriesPlaceholder, "?"))
 	for _, b := range bulk {
 		valueStrings = append(valueStrings, HistoriesPlaceholder)
 		valueArgs = append(valueArgs, b.ID)

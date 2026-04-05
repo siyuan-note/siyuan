@@ -218,7 +218,7 @@ var getInstalledPackagesFlight singleflight.Group
 // GetInstalledPackages 获取本地集市包列表
 func GetInstalledPackages(pkgType, frontend, keyword string) (installedPackages []*bazaar.Package) {
 	key := "getInstalledPackages:" + pkgType + ":" + frontend + ":" + keyword
-	v, err, _ := getInstalledPackagesFlight.Do(key, func() (interface{}, error) {
+	v, err, _ := getInstalledPackagesFlight.Do(key, func() (any, error) {
 		return getInstalledPackages0(pkgType, frontend, keyword), nil
 	})
 	if err != nil {

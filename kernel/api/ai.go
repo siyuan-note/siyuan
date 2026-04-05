@@ -50,7 +50,7 @@ func chatGPTWithAction(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))

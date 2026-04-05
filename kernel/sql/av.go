@@ -141,7 +141,7 @@ func renderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	}
 
 	buf := &bytes.Buffer{}
-	dataModel := map[string]interface{}{} // 复制一份 IAL 以避免修改原始数据
+	dataModel := map[string]any{} // 复制一份 IAL 以避免修改原始数据
 	for k, v := range ial {
 		dataModel[k] = v
 

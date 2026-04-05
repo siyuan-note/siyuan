@@ -45,8 +45,8 @@ type RecentDoc struct {
 }
 
 type OutlineDoc struct {
-	DocID string                 `json:"docID"`
-	Data  map[string]interface{} `json:"data"`
+	DocID string         `json:"docID"`
+	Data  map[string]any `json:"data"`
 }
 
 var recentDocLock = sync.Mutex{}
@@ -646,7 +646,7 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 	return setLocalStorage(localStorage)
 }
 
-func SetLocalStorageVal(key string, val interface{}) (err error) {
+func SetLocalStorageVal(key string, val any) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
@@ -655,19 +655,19 @@ func SetLocalStorageVal(key string, val interface{}) (err error) {
 	return setLocalStorage(localStorage)
 }
 
-func SetLocalStorage(val interface{}) (err error) {
+func SetLocalStorage(val any) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 	return setLocalStorage(val)
 }
 
-func GetLocalStorage() (ret map[string]interface{}) {
+func GetLocalStorage() (ret map[string]any) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 	return getLocalStorage()
 }
 
-func setLocalStorage(val interface{}) (err error) {
+func setLocalStorage(val any) (err error) {
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [local] dir failed: %s", err)
@@ -689,9 +689,9 @@ func setLocalStorage(val interface{}) (err error) {
 	return
 }
 
-func getLocalStorage() (ret map[string]interface{}) {
+func getLocalStorage() (ret map[string]any) {
 	// When local.json is corrupted, clear the file to avoid being unable to enter the main interface https://github.com/siyuan-note/siyuan/issues/7911
-	ret = map[string]interface{}{}
+	ret = map[string]any{}
 	lsPath := filepath.Join(util.DataDir, "storage/local.json")
 	if !filelock.IsExist(lsPath) {
 		return
@@ -712,11 +712,11 @@ func getLocalStorage() (ret map[string]interface{}) {
 
 var outlineStorageLock = sync.Mutex{}
 
-func GetOutlineStorage(docID string) (ret map[string]interface{}, err error) {
+func GetOutlineStorage(docID string) (ret map[string]any, err error) {
 	outlineStorageLock.Lock()
 	defer outlineStorageLock.Unlock()
 
-	ret = map[string]interface{}{}
+	ret = map[string]any{}
 	outlineDocs, err := getOutlineDocs()
 	if err != nil {
 		return
@@ -731,16 +731,16 @@ func GetOutlineStorage(docID string) (ret map[string]interface{}, err error) {
 	return
 }
 
-func SetOutlineStorage(docID string, val interface{}) (err error) {
+func SetOutlineStorage(docID string, val any) (err error) {
 	outlineStorageLock.Lock()
 	defer outlineStorageLock.Unlock()
 
 	outlineDoc := &OutlineDoc{
 		DocID: docID,
-		Data:  make(map[string]interface{}),
+		Data:  make(map[string]any),
 	}
 
-	if valMap, ok := val.(map[string]interface{}); ok {
+	if valMap, ok := val.(map[string]any); ok {
 		outlineDoc.Data = valMap
 	}
 

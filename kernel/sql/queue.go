@@ -148,7 +148,7 @@ func FlushQueue() {
 		}
 	}
 
-	context := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	if 512 < len(ops) {
 		disableCache()
 		defer enableCache()
@@ -205,7 +205,7 @@ func FlushQueue() {
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
 }
 
-func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (err error) {
+func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {
 	switch op.action {
 	case "index":
 		err = indexTree(tx, op.indexTree, context)

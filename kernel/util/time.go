@@ -221,7 +221,7 @@ func HumanizeTime(then time.Time, lang string) string {
 	return strings.TrimSpace(humanize.CustomRelTime(then, time.Now(), labels["albl"].(string), labels["blbl"].(string), magnitudes))
 }
 
-func humanizeTimeMagnitudes(lang string) (labels map[string]interface{}, magnitudes []humanize.RelTimeMagnitude) {
+func humanizeTimeMagnitudes(lang string) (labels map[string]any, magnitudes []humanize.RelTimeMagnitude) {
 	labels = TimeLangs[lang]
 	magnitudes = []humanize.RelTimeMagnitude{
 		{time.Second, labels["now"].(string), time.Second},

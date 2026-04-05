@@ -628,7 +628,7 @@ func FilterUILayoutByPublishIgnore(publishIgnore PublishAccess, uiLayout *conf.U
 		return
 	}
 
-	layout, ok := (*uiLayout)["layout"].(map[string]interface{})
+	layout, ok := (*uiLayout)["layout"].(map[string]any)
 	if !ok {
 		return
 	}
@@ -637,7 +637,7 @@ func FilterUILayoutByPublishIgnore(publishIgnore PublishAccess, uiLayout *conf.U
 	return
 }
 
-func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[string]interface{}) (ret map[string]interface{}) {
+func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[string]any) (ret map[string]any) {
 	ret = item
 	if item == nil {
 		return
@@ -653,7 +653,7 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 		if !exists {
 			return
 		}
-		children := childrenItem.(map[string]interface{})
+		children := childrenItem.(map[string]any)
 		if children == nil {
 			return
 		}
@@ -674,14 +674,14 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 		if !exists {
 			return
 		}
-		children := childrenItem.([]interface{})
+		children := childrenItem.([]any)
 		if children == nil {
 			return
 		}
-		newChildren := []interface{}{}
+		newChildren := []any{}
 		updateTabs := false
 		for _, childItem := range children {
-			child := childItem.(map[string]interface{})
+			child := childItem.(map[string]any)
 			if child == nil {
 				return
 			}
@@ -696,7 +696,7 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 			hasActive := false
 			activeTimes := []int64{}
 			for _, childItem := range newChildren {
-				child := childItem.(map[string]interface{})
+				child := childItem.(map[string]any)
 				activeTimeStr := child["activeTime"].(string)
 				var activeTime int64
 				if len(activeTimeStr) > 0 {
@@ -715,12 +715,12 @@ func filterLayoutItemByPublishIgnore(publishIgnore PublishAccess, item map[strin
 						maxIndex = i
 					}
 				}
-				newChildren[maxIndex].(map[string]interface{})["active"] = true
+				newChildren[maxIndex].(map[string]any)["active"] = true
 			}
 			if len(newChildren) == 0 {
-				child := make(map[string]interface{})
+				child := make(map[string]any)
 				child["instance"] = "Tab"
-				child["children"] = make(map[string]interface{})
+				child["children"] = make(map[string]any)
 				newChildren = append(newChildren, child)
 			}
 		}
@@ -791,20 +791,20 @@ func reassignTagCounts(tag *Tag, counts map[string]int) (ret *Tag) {
 	return tag
 }
 
-func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage map[string]interface{}) (ret map[string]interface{}) {
+func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage map[string]any) (ret map[string]any) {
 	ret = localStorage
 	publishIgnore := GetInvisiblePublishAccess(publishAccess)
 	// 清空搜索历史记录
 	searchKeysItem := ret["local-searchkeys"]
 	if searchKeysItem != nil {
-		searchKeys := searchKeysItem.(map[string]interface{})
+		searchKeys := searchKeysItem.(map[string]any)
 		if searchKeys != nil {
 			searchKeys["keys"] = []string{}
 		}
 	}
 	searchAssetItem := ret["local-searchasset"]
 	if searchAssetItem != nil {
-		searchAsset := searchAssetItem.(map[string]interface{})
+		searchAsset := searchAssetItem.(map[string]any)
 		if searchAsset != nil {
 			searchAsset["k"] = ""
 			searchAsset["keys"] = []string{}
@@ -812,7 +812,7 @@ func FilterLocalStorageByPublishAccess(publishAccess PublishAccess, localStorage
 	}
 	docInfoItem := ret["local-docinfo"]
 	if docInfoItem != nil {
-		docInfo := docInfoItem.(map[string]interface{})
+		docInfo := docInfoItem.(map[string]any)
 		if docInfo != nil {
 			idItem := docInfo["id"]
 			if idItem != nil {

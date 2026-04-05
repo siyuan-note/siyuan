@@ -94,7 +94,7 @@ func addVirtualBlockRefExclude(c *gin.Context) {
 
 	keywordsArg := arg["keywords"]
 	var keywords []string
-	for _, k := range keywordsArg.([]interface{}) {
+	for _, k := range keywordsArg.([]any) {
 		keywords = append(keywords, k.(string))
 	}
 
@@ -115,7 +115,7 @@ func addVirtualBlockRefInclude(c *gin.Context) {
 
 	keywordsArg := arg["keywords"]
 	var keywords []string
-	for _, k := range keywordsArg.([]interface{}) {
+	for _, k := range keywordsArg.([]any) {
 		keywords = append(keywords, k.(string))
 	}
 
@@ -372,7 +372,7 @@ func setExport(c *gin.Context) {
 	if err = gulu.JSON.UnmarshalJSON(param, export); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -752,7 +752,7 @@ func setEmoji(c *gin.Context) {
 		return
 	}
 
-	argEmoji := arg["emoji"].([]interface{})
+	argEmoji := arg["emoji"].([]any)
 	var emoji []string
 	for _, ae := range argEmoji {
 		e := ae.(string)

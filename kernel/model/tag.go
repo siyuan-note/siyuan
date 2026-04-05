@@ -120,14 +120,14 @@ func RemoveTag(label string) (err error) {
 
 func RenameTag(oldLabel, newLabel string) (err error) {
 	if invalidChar := treenode.ContainsMarker(newLabel); "" != invalidChar {
-		return errors.New(fmt.Sprintf(Conf.Language(112), invalidChar))
+		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
 
 	newLabel = strings.TrimPrefix(newLabel, "/")
 	newLabel = strings.TrimSuffix(newLabel, "/")
 	newLabel = strings.TrimSpace(newLabel)
 
-	if "" == oldLabel || "" == newLabel {
+	if "" == newLabel {
 		return errors.New(Conf.Language(114))
 	}
 

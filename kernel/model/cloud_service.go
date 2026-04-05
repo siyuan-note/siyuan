@@ -44,15 +44,15 @@ func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err 
 		return
 	}
 
-	payload := map[string]interface{}{}
-	var messages []map[string]interface{}
+	payload := map[string]any{}
+	var messages []map[string]any
 	for _, contextMsg := range contextMsgs {
-		messages = append(messages, map[string]interface{}{
+		messages = append(messages, map[string]any{
 			"role":    "user",
 			"content": contextMsg,
 		})
 	}
-	messages = append(messages, map[string]interface{}{
+	messages = append(messages, map[string]any{
 		"role":    "user",
 		"content": msg,
 	})
@@ -76,14 +76,14 @@ func CloudChatGPT(msg string, contextMsgs []string) (ret string, stop bool, err 
 		return
 	}
 
-	data := requestResult.Data.(map[string]interface{})
-	choices := data["choices"].([]interface{})
+	data := requestResult.Data.(map[string]any)
+	choices := data["choices"].([]any)
 	if 1 > len(choices) {
 		stop = true
 		return
 	}
-	choice := choices[0].(map[string]interface{})
-	message := choice["message"].(map[string]interface{})
+	choice := choices[0].(map[string]any)
+	message := choice["message"].(map[string]any)
 	ret = message["content"].(string)
 
 	if nil != choice["finish_reason"] {
@@ -150,7 +150,7 @@ func DeactivateUser() (err error) {
 
 func SetCloudBlockReminder(id, data string, timed int64) (err error) {
 	requestResult := gulu.Ret.NewResult()
-	payload := map[string]interface{}{"dataId": id, "data": data, "timed": timed}
+	payload := map[string]any{"dataId": id, "data": data, "timed": timed}
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(requestResult).
@@ -204,7 +204,7 @@ func LoadUploadToken() (err error) {
 		return
 	}
 
-	resultData := requestResult.Data.(map[string]interface{})
+	resultData := requestResult.Data.(map[string]any)
 	uploadToken = resultData["uploadToken"].(string)
 	uploadTokenTime = now
 	return
@@ -410,9 +410,9 @@ func loadUserFromConf() *conf.User {
 }
 
 func RemoveCloudShorthands(ids []string) (err error) {
-	result := map[string]interface{}{}
+	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
-	body := map[string]interface{}{
+	body := map[string]any{
 		"ids": ids,
 	}
 	resp, err := request.
@@ -440,8 +440,8 @@ func RemoveCloudShorthands(ids []string) (err error) {
 	return
 }
 
-func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
-	result := map[string]interface{}{}
+func GetCloudShorthand(id string) (ret map[string]any, err error) {
+	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(&result).
@@ -464,7 +464,7 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 		err = errors.New(result["msg"].(string))
 		return
 	}
-	ret = result["data"].(map[string]interface{})
+	ret = result["data"].(map[string]any)
 	t, _ := strconv.ParseInt(id, 10, 64)
 	hCreated := util.Millisecond2Time(t)
 	ret["hCreated"] = hCreated.Format("2006-01-02 15:04")
@@ -481,8 +481,8 @@ func GetCloudShorthand(id string) (ret map[string]interface{}, err error) {
 	return
 }
 
-func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
-	result = map[string]interface{}{}
+func GetCloudShorthands(page int) (result map[string]any, err error) {
+	result = map[string]any{}
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(&result).
@@ -510,9 +510,9 @@ func GetCloudShorthands(page int) (result map[string]interface{}, err error) {
 	audioRegexp := regexp.MustCompile("<audio.*>.*</audio>")
 	videoRegexp := regexp.MustCompile("<video.*>.*</video>")
 	fileRegexp := regexp.MustCompile("\\[文件]\\(.*\\)")
-	shorthands := result["data"].(map[string]interface{})["shorthands"].([]interface{})
+	shorthands := result["data"].(map[string]any)["shorthands"].([]any)
 	for _, item := range shorthands {
-		shorthand := item.(map[string]interface{})
+		shorthand := item.(map[string]any)
 		id := shorthand["oId"].(string)
 		t, _ := strconv.ParseInt(id, 10, 64)
 		hCreated := util.Millisecond2Time(t)
@@ -542,7 +542,7 @@ var (
 )
 
 func getUser(token string) (*conf.User, error) {
-	result := map[string]interface{}{}
+	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(&result).
@@ -631,7 +631,7 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	Conf.Save()
 	util.CurrentCloudRegion = cloudRegion
 
-	result := map[string]interface{}{}
+	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
 		SetSuccessResult(&result).
@@ -655,7 +655,7 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	ret = &gulu.Result{
 		Code: int(result["code"].(float64)),
 		Msg:  result["msg"].(string),
-		Data: map[string]interface{}{
+		Data: map[string]any{
 			"userName":    result["userName"],
 			"token":       result["token"],
 			"needCaptcha": result["needCaptcha"],
@@ -667,8 +667,8 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	return
 }
 
-func Login2fa(token, code string) (map[string]interface{}, error) {
-	result := map[string]interface{}{}
+func Login2fa(token, code string) (map[string]any, error) {
+	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
 	_, err := request.
 		SetSuccessResult(&result).

@@ -60,7 +60,7 @@ func searchHistory(c *gin.Context) {
 		page = int(pageVal)
 	}
 	histories, pageCount, totalCount := model.FullTextSearchHistory(query, notebook, op, typ, page)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"histories":  histories,
 		"pageCount":  pageCount,
 		"totalCount": totalCount,
@@ -94,7 +94,7 @@ func getHistoryItems(c *gin.Context) {
 		typ = int(typeVal)
 	}
 	histories := model.FullTextSearchHistoryItems(created, query, notebook, op, typ)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"items": histories,
 	}
 }
@@ -117,7 +117,7 @@ func getNotebookHistory(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"histories": histories,
 	}
 }
@@ -168,7 +168,7 @@ func getDocHistoryContent(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"id":         id,
 		"rootID":     rootID,
 		"content":    content,
@@ -199,7 +199,7 @@ func rollbackDocHistory(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"box": notebook,
 	}
 }

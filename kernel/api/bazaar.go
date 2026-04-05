@@ -55,7 +55,7 @@ func getUpdatedPackage(c *gin.Context) {
 	}
 
 	plugins, widgets, icons, themes, templates := model.GetUpdatedPackages(frontend)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"plugins":   plugins,
 		"widgets":   widgets,
 		"icons":     icons,
@@ -86,7 +86,7 @@ func getBazaarPackageREADME(c *gin.Context) {
 		ret.Msg = "Invalid package type"
 		return
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"html": model.GetBazaarPackageREADME(c.Request.Context(), repoURL, repoHash, pkgType),
 	}
 }
@@ -108,7 +108,7 @@ func getBazaarPlugin(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("plugins", frontend, keyword),
 	}
 }
@@ -130,7 +130,7 @@ func getInstalledPlugin(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetInstalledPackages("plugins", frontend, keyword),
 	}
 }
@@ -162,7 +162,7 @@ func installBazaarPlugin(c *gin.Context) {
 	}
 
 	util.PushMsg(model.Conf.Language(69), 3000)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("plugins", frontend, keyword),
 	}
 }
@@ -218,7 +218,7 @@ func getBazaarWidget(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("widgets", "", keyword),
 	}
 }
@@ -237,7 +237,7 @@ func getInstalledWidget(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetInstalledPackages("widgets", "", keyword),
 	}
 }
@@ -268,7 +268,7 @@ func installBazaarWidget(c *gin.Context) {
 	}
 
 	util.PushMsg(model.Conf.Language(69), 3000)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("widgets", "", keyword),
 	}
 }
@@ -296,7 +296,7 @@ func uninstallBazaarWidget(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("widgets", "", keyword),
 	}
 }
@@ -315,7 +315,7 @@ func getBazaarIcon(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("icons", "", keyword),
 	}
 }
@@ -334,7 +334,7 @@ func getInstalledIcon(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetInstalledPackages("icons", "", keyword),
 	}
 }
@@ -365,7 +365,7 @@ func installBazaarIcon(c *gin.Context) {
 	}
 	util.PushMsg(model.Conf.Language(69), 3000)
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages":   model.GetBazaarPackages("icons", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
@@ -394,7 +394,7 @@ func uninstallBazaarIcon(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages":   model.GetBazaarPackages("icons", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
@@ -414,7 +414,7 @@ func getBazaarTemplate(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("templates", "", keyword),
 	}
 }
@@ -433,7 +433,7 @@ func getInstalledTemplate(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetInstalledPackages("templates", "", keyword),
 	}
 }
@@ -463,7 +463,7 @@ func installBazaarTemplate(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("templates", "", keyword),
 	}
 
@@ -493,7 +493,7 @@ func uninstallBazaarTemplate(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("templates", "", keyword),
 	}
 }
@@ -512,7 +512,7 @@ func getBazaarTheme(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetBazaarPackages("themes", "", keyword),
 	}
 }
@@ -531,7 +531,7 @@ func getInstalledTheme(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages": model.GetInstalledPackages("themes", "", keyword),
 	}
 }
@@ -569,7 +569,7 @@ func installBazaarTheme(c *gin.Context) {
 	model.Conf.Save()
 
 	util.PushMsg(model.Conf.Language(69), 3000)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages":   model.GetBazaarPackages("themes", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}
@@ -598,7 +598,7 @@ func uninstallBazaarTheme(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"packages":   model.GetBazaarPackages("themes", "", keyword),
 		"appearance": model.Conf.Appearance,
 	}

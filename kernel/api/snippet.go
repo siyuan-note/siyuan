@@ -92,7 +92,7 @@ func getSnippet(c *gin.Context) {
 		snippets = []*conf.Snippet{}
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"snippets": snippets,
 	}
 }
@@ -106,10 +106,10 @@ func setSnippet(c *gin.Context) {
 		return
 	}
 
-	snippetsArg := arg["snippets"].([]interface{})
+	snippetsArg := arg["snippets"].([]any)
 	var snippets []*conf.Snippet
 	for _, s := range snippetsArg {
-		m := s.(map[string]interface{})
+		m := s.(map[string]any)
 		snippet := &conf.Snippet{
 			ID:      m["id"].(string),
 			Name:    m["name"].(string),

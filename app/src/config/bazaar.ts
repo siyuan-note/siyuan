@@ -101,7 +101,7 @@ export const bazaar = {
             <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">
             <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div id="configBazaarDownloaded" class="config-bazaar__content">
+        <div id="configBazaarDownloaded" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
         </div>
     </div>
@@ -359,7 +359,7 @@ export const bazaar = {
     <span class="fn__space"></span>
     <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}">${allCount}</div>
 </div>
-<div class="config-bazaar__content">${html}</div>`;
+<div class="config-bazaar__content b3-cards b3-cards--nowrap">${html}</div>`;
         });
     },
     _genMyHTML(bazaarType: TBazaarType, app: App, updateUpdate = true) {

@@ -35,14 +35,14 @@ func getRiffCardsByBlockIDs(c *gin.Context) {
 	if !ok {
 		return
 	}
-	blockIDsArg := arg["blockIDs"].([]interface{})
+	blockIDsArg := arg["blockIDs"].([]any)
 	var blockIDs []string
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
 
 	blocks := model.GetFlashcardsByBlockIDs(blockIDs)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks": blocks,
 	}
 }
@@ -57,8 +57,8 @@ func batchSetRiffCardsDueTime(c *gin.Context) {
 	}
 
 	var cardDues []*model.SetFlashcardDueTime
-	for _, cardDueArg := range arg["cardDues"].([]interface{}) {
-		cardDue := cardDueArg.(map[string]interface{})
+	for _, cardDueArg := range arg["cardDues"].([]any) {
+		cardDue := cardDueArg.(map[string]any)
 		cardDues = append(cardDues, &model.SetFlashcardDueTime{
 			ID:  cardDue["id"].(string),
 			Due: cardDue["due"].(string),
@@ -87,7 +87,7 @@ func resetRiffCards(c *gin.Context) {
 	blockIDsArg := arg["blockIDs"]   // 如果不传入 blockIDs （或者传入实参为空数组），则重置所有卡片
 	var blockIDs []string
 	if nil != blockIDsArg {
-		for _, blockID := range blockIDsArg.([]interface{}) {
+		for _, blockID := range blockIDsArg.([]any) {
 			blockIDs = append(blockIDs, blockID.(string))
 		}
 	}
@@ -111,7 +111,7 @@ func getNotebookRiffCards(c *gin.Context) {
 		pageSize = int(arg["pageSize"].(float64))
 	}
 	blockIDs, total, pageCount := model.GetNotebookFlashcards(notebookID, page, pageSize)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks":    blockIDs,
 		"total":     total,
 		"pageCount": pageCount,
@@ -134,7 +134,7 @@ func getTreeRiffCards(c *gin.Context) {
 		pageSize = int(arg["pageSize"].(float64))
 	}
 	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page, pageSize)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks":    blockIDs,
 		"total":     total,
 		"pageCount": pageCount,
@@ -157,7 +157,7 @@ func getRiffCards(c *gin.Context) {
 		pageSize = int(arg["pageSize"].(float64))
 	}
 	blocks, total, pageCount := model.GetDeckFlashcards(deckID, page, pageSize)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"blocks":    blocks,
 		"total":     total,
 		"pageCount": pageCount,
@@ -222,7 +222,7 @@ func getNotebookRiffDueCards(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"cards":                  cards,
 		"unreviewedCount":        unreviewedCount,
 		"unreviewedNewCardCount": unreviewedNewCardCount,
@@ -248,7 +248,7 @@ func getTreeRiffDueCards(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"cards":                  cards,
 		"unreviewedCount":        unreviewedCount,
 		"unreviewedNewCardCount": unreviewedNewCardCount,
@@ -274,7 +274,7 @@ func getRiffDueCards(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"cards":                  cards,
 		"unreviewedCount":        unreviewedCount,
 		"unreviewedNewCardCount": unreviewedNewCardCount,
@@ -282,14 +282,14 @@ func getRiffDueCards(c *gin.Context) {
 	}
 }
 
-func getReviewedCards(arg map[string]interface{}) (ret []string) {
+func getReviewedCards(arg map[string]any) (ret []string) {
 	if nil == arg["reviewedCards"] {
 		return
 	}
 
-	reviewedCardsArg := arg["reviewedCards"].([]interface{})
+	reviewedCardsArg := arg["reviewedCards"].([]any)
 	for _, card := range reviewedCardsArg {
-		c := card.(map[string]interface{})
+		c := card.(map[string]any)
 		cardID := c["cardID"].(string)
 		ret = append(ret, cardID)
 	}
@@ -306,7 +306,7 @@ func removeRiffCards(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
-	blockIDsArg := arg["blockIDs"].([]interface{})
+	blockIDsArg := arg["blockIDs"].([]any)
 	var blockIDs []string
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
@@ -344,7 +344,7 @@ func addRiffCards(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
-	blockIDsArg := arg["blockIDs"].([]interface{})
+	blockIDsArg := arg["blockIDs"].([]any)
 	var blockIDs []string
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
@@ -430,18 +430,18 @@ func getRiffDecks(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	decks := model.GetDecks()
-	var data []interface{}
+	var data []any
 	for _, deck := range decks {
 		data = append(data, deckData(deck))
 	}
 	if 1 > len(data) {
-		data = []interface{}{}
+		data = []any{}
 	}
 	ret.Data = data
 }
 
-func deckData(deck *riff.Deck) map[string]interface{} {
-	return map[string]interface{}{
+func deckData(deck *riff.Deck) map[string]any {
+	return map[string]any{
 		"id":      deck.ID,
 		"name":    deck.Name,
 		"size":    deck.CountCards(),

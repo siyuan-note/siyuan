@@ -453,11 +453,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }
 
-            // block 类型不处理链接转换
-            if (!isBlock && window.siyuan.config.editor.pasteURLAutoConvert) {
-                tempInnerHTML = protyle.lute.Md2BlockDOMWithAutoLink(tempInnerHTML);
-            }
-
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);

@@ -283,7 +283,11 @@ export const bazaar = {
                 <span class="fn__space"></span>
                 ${item.downloads}
             </span>
-            <span class="fn__space"></span>
+            <span class="block__icon block__icon--show ft__primary">
+                <svg><use xlink:href="#iconAccount"></use></svg>
+                <span class="fn__space"></span>
+                ${item.author}
+            </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
             <span class="fn__space"></span>
             <div class="fn__flex-1"></div>

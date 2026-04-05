@@ -39,9 +39,9 @@ type Petal struct {
 	DisabledInPublish bool   `json:"disabledInPublish"` // Whether disabled in publish mode
 	DisallowInstall   bool   `json:"disallowInstall"`   // Whether disallow install
 
-	JS   string                 `json:"js"`   // JS code
-	CSS  string                 `json:"css"`  // CSS code
-	I18n map[string]interface{} `json:"i18n"` // i18n text
+	JS   string         `json:"js"`   // JS code
+	CSS  string         `json:"css"`  // CSS code
+	I18n map[string]any `json:"i18n"` // i18n text
 }
 
 func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
@@ -192,7 +192,7 @@ func loadCode(petal *Petal) {
 				if err != nil {
 					logging.LogErrorf("read plugin [%s] i18n failed: %s", petal.Name, err)
 				} else {
-					petal.I18n = map[string]interface{}{}
+					petal.I18n = map[string]any{}
 					if err = gulu.JSON.UnmarshalJSON(data, &petal.I18n); err != nil {
 						logging.LogErrorf("unmarshal plugin [%s] i18n failed: %s", petal.Name, err)
 					}

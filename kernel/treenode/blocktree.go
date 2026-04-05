@@ -678,7 +678,7 @@ func CeilBlockCount(count int) int {
 	return 10000*100 + 1
 }
 
-func queryRow(query string, args ...interface{}) *sql.Row {
+func queryRow(query string, args ...any) *sql.Row {
 	query = strings.TrimSpace(query)
 	if "" == query {
 		logging.LogErrorf("statement is empty")
@@ -691,7 +691,7 @@ func queryRow(query string, args ...interface{}) *sql.Row {
 	return db.QueryRow(query, args...)
 }
 
-func query(query string, args ...interface{}) (*sql.Rows, error) {
+func query(query string, args ...any) (*sql.Rows, error) {
 	query = strings.TrimSpace(query)
 	if "" == query {
 		return nil, errors.New("statement is empty")
@@ -703,7 +703,7 @@ func query(query string, args ...interface{}) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
-func exec(stmt string, args ...interface{}) (sql.Result, error) {
+func exec(stmt string, args ...any) (sql.Result, error) {
 	stmt = strings.TrimSpace(stmt)
 	if "" == stmt {
 		return nil, errors.New("statement is empty")

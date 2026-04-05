@@ -39,7 +39,7 @@ const (
 	AssetContentsPlaceholder              = "(?, ?, ?, ?, ?, ?, ?)"
 )
 
-func insertAssetContents(tx *sql.Tx, assetContents []*AssetContent, context map[string]interface{}) (err error) {
+func insertAssetContents(tx *sql.Tx, assetContents []*AssetContent, context map[string]any) (err error) {
 	if 1 > len(assetContents) {
 		return
 	}
@@ -64,9 +64,9 @@ func insertAssetContents(tx *sql.Tx, assetContents []*AssetContent, context map[
 	return
 }
 
-func insertAssetContents0(tx *sql.Tx, bulk []*AssetContent, context map[string]interface{}) (err error) {
+func insertAssetContents0(tx *sql.Tx, bulk []*AssetContent, context map[string]any) (err error) {
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(AssetContentsPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(AssetContentsPlaceholder, "?"))
 	for _, b := range bulk {
 		valueStrings = append(valueStrings, AssetContentsPlaceholder)
 		valueArgs = append(valueArgs, b.ID)

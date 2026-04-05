@@ -41,7 +41,7 @@ func checkBlockRef(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -61,7 +61,7 @@ func getBlockTreeInfos(c *gin.Context) {
 	}
 
 	var ids []string
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
@@ -101,7 +101,7 @@ func getBlockRelevantIDs(c *gin.Context) {
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -137,7 +137,7 @@ func transferBlockRef(c *gin.Context) {
 
 	var refIDs []string
 	if nil != arg["refIDs"] {
-		for _, refID := range arg["refIDs"].([]interface{}) {
+		for _, refID := range arg["refIDs"].([]any) {
 			refIDs = append(refIDs, refID.(string))
 		}
 	}
@@ -146,7 +146,7 @@ func transferBlockRef(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -171,7 +171,7 @@ func swapBlockRef(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 }
@@ -237,7 +237,7 @@ func getHeadingDeleteTransaction(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -259,7 +259,7 @@ func getHeadingInsertTransaction(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -282,7 +282,7 @@ func getHeadingLevelTransaction(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -304,7 +304,7 @@ func setBlockReminder(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 }
@@ -320,7 +320,7 @@ func getUnfoldedParentID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	parentID := model.GetUnfoldedParentID(id)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"parentID": parentID,
 	}
 }
@@ -336,7 +336,7 @@ func checkBlockFold(c *gin.Context) {
 
 	id := arg["id"].(string)
 	isFolded, isRoot := model.IsBlockFolded(id)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"isFolded": isFolded,
 		"isRoot":   isRoot,
 	}
@@ -392,7 +392,7 @@ func getDocsInfo(c *gin.Context) {
 	if !ok {
 		return
 	}
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -451,7 +451,7 @@ func getBlocksWordCount(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -583,7 +583,7 @@ func getBlockDefIDsByRefText(c *gin.Context) {
 	}
 
 	anchor := arg["anchor"].(string)
-	excludeIDsArg := arg["excludeIDs"].([]interface{})
+	excludeIDsArg := arg["excludeIDs"].([]any)
 	var excludeIDs []string
 	for _, excludeID := range excludeIDsArg {
 		excludeIDs = append(excludeIDs, excludeID.(string))
@@ -616,7 +616,7 @@ func getBlockBreadcrumb(c *gin.Context) {
 	excludeTypesArg := arg["excludeTypes"]
 	var excludeTypes []string
 	if nil != excludeTypesArg {
-		for _, excludeType := range excludeTypesArg.([]interface{}) {
+		for _, excludeType := range excludeTypesArg.([]any) {
 			excludeTypes = append(excludeTypes, excludeType.(string))
 		}
 	}
@@ -654,7 +654,7 @@ func getBlocksIndexes(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -772,7 +772,7 @@ func getBlockDOMs(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -840,7 +840,7 @@ func getBlockDOMsWithEmbed(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
@@ -925,7 +925,7 @@ func getBlockKramdowns(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		idStr := id.(string)

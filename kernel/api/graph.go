@@ -33,7 +33,7 @@ func resetGraph(c *gin.Context) {
 	graph := conf.NewGlobalGraph()
 	model.Conf.Graph.Global = graph
 	model.Conf.Save()
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"conf": graph,
 	}
 }
@@ -45,7 +45,7 @@ func resetLocalGraph(c *gin.Context) {
 	graph := conf.NewLocalGraph()
 	model.Conf.Graph.Local = graph
 	model.Conf.Save()
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"conf": graph,
 	}
 }
@@ -60,7 +60,7 @@ func getGraph(c *gin.Context) {
 	}
 
 	reqId := arg["reqId"]
-	ret.Data = map[string]interface{}{"reqId": reqId}
+	ret.Data = map[string]any{"reqId": reqId}
 
 	var query string
 	var confArg map[string]any
@@ -93,7 +93,7 @@ func getGraph(c *gin.Context) {
 		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		nodes, links = model.FilterGraphByPublishIgnore(publishIgnore, nodes, links)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"nodes": nodes,
 		"links": links,
 		"conf":  global,
@@ -113,7 +113,7 @@ func getLocalGraph(c *gin.Context) {
 	}
 
 	reqId := arg["reqId"]
-	ret.Data = map[string]interface{}{"reqId": reqId}
+	ret.Data = map[string]any{"reqId": reqId}
 	if nil == arg["id"] {
 		return
 	}
@@ -151,7 +151,7 @@ func getLocalGraph(c *gin.Context) {
 		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		nodes, links = model.FilterGraphByPublishIgnore(publishIgnore, nodes, links)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"id":    id,
 		"box":   boxID,
 		"nodes": nodes,

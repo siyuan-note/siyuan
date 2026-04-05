@@ -39,7 +39,7 @@ var downloadPackageFlight singleflight.Group
 // downloadBazaarFile 下载集市文件
 func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err error) {
 	repoURLHashTrimmed := strings.TrimPrefix(repoURLHash, "https://github.com/")
-	v, err, _ := downloadPackageFlight.Do(repoURLHash, func() (interface{}, error) {
+	v, err, _ := downloadPackageFlight.Do(repoURLHash, func() (any, error) {
 		// repoURLHash: https://github.com/88250/Comfortably-Numb@6286912c381ef3f83e455d06ba4d369c498238dc 或带路径 /README.md
 		repoURL := repoURLHash[:strings.LastIndex(repoURLHash, "@")]
 		u := util.BazaarOSSServer + "/package/" + repoURLHashTrimmed
@@ -75,7 +75,7 @@ func incPackageDownloads(repoURL, systemID string) {
 	repo := strings.TrimPrefix(repoURL, "https://github.com/")
 	u := util.GetCloudServer() + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
 	httpclient.NewCloudRequest30s().SetBody(
-		map[string]interface{}{
+		map[string]any{
 			"systemID": systemID,
 			"repo":     repo,
 		}).Post(u)

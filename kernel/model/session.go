@@ -47,7 +47,7 @@ func LogoutAuth(c *gin.Context) {
 	if "" == Conf.AccessAuthCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(86)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -191,7 +191,7 @@ func CheckReadonly(c *gin.Context) {
 		result := util.NewResult()
 		result.Code = -1
 		result.Msg = Conf.Language(34)
-		result.Data = map[string]interface{}{"closeTimeout": 5000}
+		result.Data = map[string]any{"closeTimeout": 5000}
 		c.JSON(http.StatusOK, result)
 		c.Abort()
 		return
@@ -229,7 +229,7 @@ func CheckAuth(c *gin.Context) {
 				return
 			}
 
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed [header: Authorization]"})
 			c.Abort()
 			return
 		}
@@ -243,7 +243,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
+		c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed [query: token]"})
 		c.Abort()
 		return
 	}
@@ -270,7 +270,7 @@ func CheckAuth(c *gin.Context) {
 			("" != host && !util.IsLocalHost(host)) ||
 			("" != origin && !util.IsLocalOrigin(origin) && !strings.HasPrefix(origin, "chrome-extension://")) ||
 			("" != forwardedHost && !util.IsLocalHost(forwardedHost)) {
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed: for security reasons, please set [Access authorization code] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [访问授权码]"})
+			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: for security reasons, please set [Access authorization code] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [访问授权码]"})
 			c.Abort()
 			return
 		}
@@ -352,7 +352,7 @@ func CheckAuth(c *gin.Context) {
 		userAgentHeader := c.GetHeader("User-Agent")
 		if strings.HasPrefix(userAgentHeader, "SiYuan/") || strings.HasPrefix(userAgentHeader, "Mozilla/") {
 			if "GET" != c.Request.Method || c.IsWebsocket() {
-				c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": Conf.Language(156)})
+				c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": Conf.Language(156)})
 				c.Abort()
 				return
 			}
@@ -368,7 +368,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [session]"})
+		c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed [session]"})
 		c.Abort()
 		return
 	}

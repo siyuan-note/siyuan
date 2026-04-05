@@ -34,8 +34,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]interface{}, err error) {
-	succMap = map[string]interface{}{}
+func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any, err error) {
+	succMap = map[string]any{}
 
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
@@ -171,7 +171,7 @@ func Upload(c *gin.Context) {
 	}
 
 	var errFiles []string
-	succMap := map[string]interface{}{}
+	succMap := map[string]any{}
 	files := form.File["file[]"]
 	skipIfDuplicated := false // 默认不跳过重复文件，但是有的场景需要跳过，比如上传 PDF 标注图片 https://github.com/siyuan-note/siyuan/issues/10666
 	if nil != form.Value["skipIfDuplicated"] {
@@ -344,7 +344,7 @@ func Upload(c *gin.Context) {
 		}
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"errFiles": errFiles,
 		"succMap":  succMap,
 	}

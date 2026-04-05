@@ -270,7 +270,7 @@ func broadcastRefreshThemeIfCurrent(themeCssPath string) {
 	if themeName == "" {
 		return
 	}
-	util.BroadcastByType("main", "refreshtheme", 0, "", map[string]interface{}{
+	util.BroadcastByType("main", "refreshtheme", 0, "", map[string]any{
 		"theme": "/appearance/themes/" + themeName + "/theme.css?" + fmt.Sprintf("%d", time.Now().Unix()),
 	})
 }

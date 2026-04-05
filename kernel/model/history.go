@@ -358,7 +358,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		// 刷新页签名
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
-		evt.Data = map[string]interface{}{
+		evt.Data = map[string]any{
 			"box":     boxID,
 			"id":      tree.Root.ID,
 			"path":    tree.Path,

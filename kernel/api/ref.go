@@ -61,7 +61,7 @@ func getBackmentionDoc(c *gin.Context) {
 		highlight = val.(bool)
 	}
 	backlinks, keywords := model.GetBackmentionDoc(defID, refTreeID, keyword, containChildren, highlight)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"backmentions": backlinks,
 		"keywords":     keywords,
 	}
@@ -88,7 +88,7 @@ func getBacklinkDoc(c *gin.Context) {
 		highlight = val.(bool)
 	}
 	backlinks, keywords := model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren, highlight)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"backlinks": backlinks,
 		"keywords":  keywords,
 	}
@@ -130,7 +130,7 @@ func getBacklink2(c *gin.Context) {
 		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)
 		backmentions = model.FilterPathsByPublishAccess(c, publishAccess, backmentions)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"backlinks":     backlinks,
 		"linkRefsCount": linkRefsCount,
 		"backmentions":  backmentions,
@@ -171,7 +171,7 @@ func getBacklink(c *gin.Context) {
 		backlinks = model.FilterPathsByPublishAccess(c, publishAccess, backlinks)
 		backmentions = model.FilterPathsByPublishAccess(c, publishAccess, backmentions)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"backlinks":     backlinks,
 		"linkRefsCount": linkRefsCount,
 		"backmentions":  backmentions,

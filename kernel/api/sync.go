@@ -525,7 +525,7 @@ func removeCloudSyncDir(c *gin.Context) {
 	}
 
 	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
 		return
 	}
 	err := model.RemoveCloudSyncDir(name)
@@ -549,7 +549,7 @@ func createCloudSyncDir(c *gin.Context) {
 	}
 
 	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
 		return
 	}
 	err := model.CreateCloudSyncDir(name)
@@ -797,7 +797,7 @@ func setCloudSyncDir(c *gin.Context) {
 	}
 
 	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
 		return
 	}
 	model.SetCloudSyncDir(name)

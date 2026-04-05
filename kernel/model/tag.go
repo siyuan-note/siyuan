@@ -123,7 +123,6 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 		return fmt.Errorf(Conf.Language(112), invalidChar)
 	}
 
-	newLabel = strings.TrimSpace(newLabel)
 	newLabel = strings.TrimPrefix(newLabel, "/")
 	newLabel = strings.TrimSuffix(newLabel, "/")
 	newLabel = strings.TrimSpace(newLabel)

@@ -65,7 +65,7 @@ func getGraph(c *gin.Context) {
 	var query string
 	var confArg map[string]any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", &query, true, false),
+		util.BindJsonArg("k", &query, false, false),
 		util.BindJsonArg("conf", &confArg, true, false),
 	) {
 		return
@@ -98,7 +98,7 @@ func getGraph(c *gin.Context) {
 		"links": links,
 		"conf":  global,
 		"box":   boxID,
-		"reqId": arg["reqId"],
+		"reqId": reqId,
 	}
 	util.RandomSleep(200, 500)
 }
@@ -121,8 +121,8 @@ func getLocalGraph(c *gin.Context) {
 	var keyword, id string
 	var confArg map[string]any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", &keyword, true, false),
-		util.BindJsonArg("id", &id, true, false),
+		util.BindJsonArg("k", &keyword, false, false),
+		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("conf", &confArg, true, false),
 	) {
 		return
@@ -157,7 +157,7 @@ func getLocalGraph(c *gin.Context) {
 		"nodes": nodes,
 		"links": links,
 		"conf":  local,
-		"reqId": arg["reqId"],
+		"reqId": reqId,
 	}
 	util.RandomSleep(200, 500)
 }

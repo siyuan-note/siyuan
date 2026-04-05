@@ -38,7 +38,7 @@ func getNotebookInfo(c *gin.Context) {
 	}
 
 	var boxID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &boxID, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &boxID, true, true)) {
 		return
 	}
 	if util.InvalidIDPattern(boxID, ret) {
@@ -69,7 +69,7 @@ func setNotebookIcon(c *gin.Context) {
 
 	var boxID, icon string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &boxID, true, false),
+		util.BindJsonArg("notebook", &boxID, true, true),
 		util.BindJsonArg("icon", &icon, true, false),
 	) {
 		return
@@ -103,16 +103,14 @@ func renameNotebook(c *gin.Context) {
 		return
 	}
 
-	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
+	var notebook, name string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("notebook", &notebook, true, true),
+		util.BindJsonArg("name", &name, true, false),
+	) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
-		return
-	}
-
-	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
 		return
 	}
 	err := model.RenameBox(notebook, name)
@@ -141,7 +139,7 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
@@ -225,7 +223,7 @@ func openNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {

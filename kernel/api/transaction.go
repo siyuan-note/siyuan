@@ -42,10 +42,10 @@ func performTransactions(c *gin.Context) {
 	var reqID float64
 	var app, session string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("transactions", &trans, true, false),
+		util.BindJsonArg("transactions", &trans, true, true),
 		util.BindJsonArg("reqId", &reqID, true, false),
-		util.BindJsonArg("app", &app, true, false),
-		util.BindJsonArg("session", &session, true, false),
+		util.BindJsonArg("app", &app, false, false),
+		util.BindJsonArg("session", &session, false, false),
 	) {
 		return
 	}

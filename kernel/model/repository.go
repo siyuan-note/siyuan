@@ -647,8 +647,8 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 func ImportRepoKey(base64Key string) (retKey string, err error) {
 	util.PushMsg(Conf.Language(136), 3000)
 
-	retKey = strings.TrimSpace(base64Key)
-	retKey = gulu.Str.RemoveInvisible(retKey)
+	retKey = gulu.Str.RemoveInvisible(base64Key)
+	retKey = strings.TrimSpace(retKey)
 	if 1 > len(retKey) {
 		err = errors.New(Conf.Language(142))
 		return
@@ -984,11 +984,6 @@ func RemoveCloudRepoTag(tag string) (err error) {
 		return
 	}
 
-	if "" == tag {
-		err = errors.New("tag is empty")
-		return
-	}
-
 	repo, err := newRepository()
 	if err != nil {
 		return
@@ -1134,8 +1129,8 @@ func TagSnapshot(id, name string) (err error) {
 		return
 	}
 
-	name = strings.TrimSpace(name)
 	name = util.RemoveInvalid(name)
+	name = strings.TrimSpace(name)
 	if "" == name {
 		err = errors.New(Conf.Language(142))
 		return
@@ -1170,8 +1165,8 @@ func IndexRepo(memo string) (err error) {
 		return
 	}
 
-	memo = strings.TrimSpace(memo)
 	memo = gulu.Str.RemoveInvisible(memo)
+	memo = strings.TrimSpace(memo)
 	if "" == memo {
 		err = errors.New(Conf.Language(142))
 		return

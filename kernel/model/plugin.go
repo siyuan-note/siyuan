@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -28,6 +29,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sync/singleflight"
 )
 
 // Petal represents a plugin's management status.
@@ -44,10 +46,10 @@ type Petal struct {
 	I18n map[string]any `json:"i18n"` // i18n text
 }
 
-func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
+func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	petals := getPetals()
 
-	found, displayName, incompatible, disabledInPublish, disallowInstall := bazaar.ParseInstalledPlugin(name, frontend)
+	found, displayName, incompatible, disabledInPublish, disallowInstall := bazaar.ParseInstalledPlugin(name, "")
 	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
@@ -66,16 +68,9 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	ret.DisabledInPublish = disabledInPublish
 	ret.DisallowInstall = disallowInstall
 
-	if enabled && incompatible {
-		err = fmt.Errorf(Conf.Language(205))
-		logging.LogInfof("plugin [%s] is incompatible [%s]", name, frontend)
-		return
-	}
-
 	if enabled && disallowInstall {
-		msg := "require upgrade SiYuan to use this plugin [" + name + "]"
-		err = fmt.Errorf(msg)
-		logging.LogInfof(msg)
+		err = fmt.Errorf("require upgrade SiYuan to use this plugin [%s]", name)
+		logging.LogInfof("require upgrade SiYuan to use this plugin [%s]", name)
 		return
 	}
 
@@ -94,7 +89,21 @@ func getPetalByName(name string, petals []*Petal) (ret *Petal) {
 	return
 }
 
+var loadPetalsFlight singleflight.Group
+
 func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
+	// 调用 setPetalEnabled 接口之后推送消息到所有前端实例，接着会同时调用 loadPetals 接口，合并相同类型的请求为一次执行
+	key := "loadPetals:" + frontend + ":" + strconv.FormatBool(isPublish)
+	v, err, _ := loadPetalsFlight.Do(key, func() (any, error) {
+		return loadPetals(frontend, isPublish), nil
+	})
+	if err != nil {
+		return []*Petal{}
+	}
+	return v.([]*Petal)
+}
+
+func loadPetals(frontend string, isPublish bool) (ret []*Petal) {
 	ret = []*Petal{}
 
 	if Conf.Bazaar.PetalDisabled {
@@ -114,7 +123,7 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall = bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) || petal.DisallowInstall {
 			if petal.DisallowInstall {
-				SetPetalEnabled(petal.Name, false, frontend)
+				SetPetalEnabled(petal.Name, false)
 				logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
 			}
 			continue

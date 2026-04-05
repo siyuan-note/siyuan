@@ -106,8 +106,8 @@ func LoginAuth(c *gin.Context) {
 	}
 
 	authCode := arg["authCode"].(string)
-	authCode = strings.TrimSpace(authCode)
 	authCode = util.RemoveInvalid(authCode)
+	authCode = strings.TrimSpace(authCode)
 
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
@@ -187,7 +187,7 @@ func GetCaptcha(c *gin.Context) {
 }
 
 func CheckReadonly(c *gin.Context) {
-	if util.ReadOnly || IsReadOnlyRole(GetGinContextRole(c)) {
+	if util.ReadOnly || IsReadOnlyRoleContext(c) {
 		result := util.NewResult()
 		result.Code = -1
 		result.Msg = Conf.Language(34)

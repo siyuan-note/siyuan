@@ -19,6 +19,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -203,9 +204,15 @@ func GetRemoteAddr(req *http.Request) string {
 
 func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]any, ok bool) {
 	arg = map[string]any{}
-	if err := c.BindJSON(&arg); err != nil {
+	if err := c.ShouldBindJSON(&arg); err != nil {
 		result.Code = -1
-		result.Msg = "parses request failed"
+		var detail string
+		if errors.Is(err, io.EOF) {
+			detail = "the request body is empty or truncated (EOF)"
+		} else {
+			detail = err.Error()
+		}
+		result.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, detail)
 		return
 	}
 

@@ -128,42 +128,47 @@ export const getAllTabs = (type?: TTab | string) => {
     const getTabs = (layout: Layout) => {
         for (let i = 0; i < layout.children.length; i++) {
             const item = layout.children[i];
-            if (item instanceof Tab) {
-                if (type) {
-                    if (item.model) {
-                        if (item.model instanceof Search && type === "Search") {
-                            tabs.push(item);
-                        } else if (item.model instanceof Asset && type === "Asset") {
-                            tabs.push(item);
-                        } else if (item.model instanceof Editor && type === "Editor") {
-                            tabs.push(item);
-                        } else if (item.model instanceof Graph && type === "Graph") {
-                            tabs.push(item);
-                        } else if (item.model instanceof Backlink && type === "Backlink") {
-                            tabs.push(item);
-                        } else if (item.model instanceof Outline && type === "Outline") {
-                            tabs.push(item);
-                        }
-                    } else {
-                        const initData = item?.headElement?.getAttribute("data-initdata");
-                        if (initData) {
-                            try {
-                                const initObj = JSON.parse(initData);
-                                if (initObj.instance === "Custom" && initObj.customModelType === type) {
-                                    tabs.push(item);
-                                } else if (initObj.instance === type) {
-                                    tabs.push(item);
-                                }
-                            } catch (e) {
-                                console.log(`getAllTabs(${type}) error:`, e);
-                            }
-                        }
-                    }
-                } else {
+            if (!(item instanceof Tab)) {
+                getTabs(item as Layout);
+                continue;
+            }
+            if (!type) {
+                tabs.push(item);
+                continue;
+            }
+            const model = item.model;
+            if (model) {
+                if (model instanceof Search && type === "Search") {
+                    tabs.push(item);
+                } else if (model instanceof Asset && type === "Asset") {
+                    tabs.push(item);
+                } else if (model instanceof Editor && type === "Editor") {
+                    tabs.push(item);
+                } else if (model instanceof Graph && type === "Graph") {
+                    tabs.push(item);
+                } else if (model instanceof Backlink && type === "Backlink") {
+                    tabs.push(item);
+                } else if (model instanceof Outline && type === "Outline") {
+                    tabs.push(item);
+                } else if (model instanceof Custom && model.type === type) {
                     tabs.push(item);
                 }
-            } else {
-                getTabs(item as Layout);
+                continue;
+            }
+            const initData = item.headElement?.getAttribute("data-initdata");
+            if (!initData) {
+                continue;
+            }
+            try {
+                const initObj = JSON.parse(initData) as { instance?: string; customModelType?: string };
+                if (
+                    (initObj.instance === "Custom" && initObj.customModelType === type) ||
+                    initObj.instance === type
+                ) {
+                    tabs.push(item);
+                }
+            } catch (e) {
+                console.log(`getAllTabs(${type}) error:`, e);
             }
         }
     };

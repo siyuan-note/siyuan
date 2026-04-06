@@ -278,7 +278,7 @@ export const bazaar = {
             </div>
         </div>
         <div class="b3-card__actions">
-            <span class="block__icon block__icon--show ft__primary">
+            <span class="block__icon block__icon--show">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>
                 ${item.downloads}

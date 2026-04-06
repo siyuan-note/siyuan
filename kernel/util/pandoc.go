@@ -135,9 +135,9 @@ func InitPandoc() {
 	if confPath := filepath.Join(ConfDir, "conf.json"); gulu.File.IsExist(confPath) {
 		// Workspace built-in Pandoc is no longer initialized after customizing Pandoc path https://github.com/siyuan-note/siyuan/issues/8377
 		if data, err := os.ReadFile(confPath); err == nil {
-			conf := map[string]interface{}{}
+			conf := map[string]any{}
 			if err = gulu.JSON.UnmarshalJSON(data, &conf); err == nil && nil != conf["export"] {
-				export := conf["export"].(map[string]interface{})
+				export := conf["export"].(map[string]any)
 				if customPandocBinPath := export["pandocBin"].(string); !strings.HasPrefix(customPandocBinPath, tempPandocDir) {
 					if pandocVer := getPandocVer(customPandocBinPath); "" != pandocVer {
 						PandocBinPath = customPandocBinPath

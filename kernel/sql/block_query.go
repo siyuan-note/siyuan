@@ -359,11 +359,11 @@ func QueryBookmarkLabels() (ret []string) {
 	return
 }
 
-func QueryNoLimit(stmt string) (ret []map[string]interface{}, err error) {
+func QueryNoLimit(stmt string) (ret []map[string]any, err error) {
 	return queryRawStmt(stmt, math.MaxInt)
 }
 
-func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
+func Query(stmt string, limit int) (ret []map[string]any, err error) {
 	originalStmt := stmt
 	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
 	// 这里为了支持 || 操作符，使用了另一个 sql 解析器，但是这个解析器无法处理 UNION https://github.com/siyuan-note/siyuan/issues/8226
@@ -409,7 +409,7 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 		}
 	}
 
-	ret = []map[string]interface{}{}
+	ret = []map[string]any{}
 	rows, err := query(stmt)
 	if err != nil {
 		rows, err = query(originalStmt + " LIMIT " + strconv.Itoa(limit))
@@ -426,8 +426,8 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 	}
 
 	for rows.Next() {
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
@@ -436,9 +436,9 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 			return
 		}
 
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
+			val := columnPointers[i].(*any)
 			m[colName] = *val
 		}
 		ret = append(ret, m)
@@ -446,7 +446,7 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 	return
 }
 
-func ToBlocks(result []map[string]interface{}) (ret []*Block) {
+func ToBlocks(result []map[string]any) (ret []*Block) {
 	for _, row := range result {
 		b := &Block{
 			ID:       row["id"].(string),
@@ -501,7 +501,7 @@ func getLimitClause(parsedStmt sqlparser.Statement, limit int) (ret *sqlparser.L
 	return
 }
 
-func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err error) {
+func queryRawStmt(stmt string, limit int) (ret []map[string]any, err error) {
 	rows, err := query(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -519,8 +519,8 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 	noLimit := !containsLimitClause(stmt)
 	var count int
 	for rows.Next() {
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
@@ -529,9 +529,9 @@ func queryRawStmt(stmt string, limit int) (ret []map[string]interface{}, err err
 			return
 		}
 
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
+			val := columnPointers[i].(*any)
 			m[colName] = *val
 		}
 
@@ -881,7 +881,7 @@ func GetBlocks(ids []string) (ret []*Block) {
 	length := len(notHitIDs)
 	stmtBuilder := bytes.Buffer{}
 	stmtBuilder.WriteString("SELECT * FROM blocks WHERE id IN (")
-	var args []interface{}
+	var args []any
 	for i, id := range notHitIDs {
 		args = append(args, id)
 		stmtBuilder.WriteByte('?')

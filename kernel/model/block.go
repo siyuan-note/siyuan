@@ -18,7 +18,6 @@ package model
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"html"
 	"regexp"
@@ -592,7 +591,7 @@ func GetHeadingDeleteTransaction(id string) (transaction *Transaction, err error
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		err = errors.New(fmt.Sprintf(Conf.Language(15), id))
+		err = fmt.Errorf(Conf.Language(15), id)
 		return
 	}
 
@@ -635,7 +634,7 @@ func GetHeadingInsertTransaction(id string) (transaction *Transaction, err error
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		err = errors.New(fmt.Sprintf(Conf.Language(15), id))
+		err = fmt.Errorf(Conf.Language(15), id)
 		return
 	}
 
@@ -765,7 +764,7 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
-		err = errors.New(fmt.Sprintf(Conf.Language(15), id))
+		err = fmt.Errorf(Conf.Language(15), id)
 		return
 	}
 

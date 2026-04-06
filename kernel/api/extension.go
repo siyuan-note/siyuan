@@ -283,7 +283,7 @@ func extensionCopy(c *gin.Context) {
 	parse.NestedInlines2FlattedSpansHybrid(tree, false)
 
 	md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"md":       md,
 		"withMath": withMath,
 	}

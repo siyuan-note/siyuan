@@ -226,7 +226,7 @@ func unfoldBlock(c *gin.Context) {
 			},
 		}
 	} else {
-		data, _ := gulu.JSON.MarshalJSON(map[string]interface{}{"fold": ""})
+		data, _ := gulu.JSON.MarshalJSON(map[string]any{"fold": ""})
 		transactions = []*model.Transaction{
 			{
 				DoOperations: []*model.Operation{
@@ -286,7 +286,7 @@ func foldBlock(c *gin.Context) {
 			},
 		}
 	} else {
-		data, _ := gulu.JSON.MarshalJSON(map[string]interface{}{"fold": "1"})
+		data, _ := gulu.JSON.MarshalJSON(map[string]any{"fold": "1"})
 		transactions = []*model.Transaction{
 			{
 				DoOperations: []*model.Operation{
@@ -437,11 +437,11 @@ func batchAppendBlock(c *gin.Context) {
 		return
 	}
 
-	blocksArg := arg["blocks"].([]interface{})
+	blocksArg := arg["blocks"].([]any)
 	var transactions []*model.Transaction
 	luteEngine := util.NewLute()
 	for _, blockArg := range blocksArg {
-		blockMap := blockArg.(map[string]interface{})
+		blockMap := blockArg.(map[string]any)
 		data := blockMap["data"].(string)
 		dataType := blockMap["dataType"].(string)
 		parentID := blockMap["parentID"].(string)
@@ -530,11 +530,11 @@ func batchPrependBlock(c *gin.Context) {
 		return
 	}
 
-	blocksArg := arg["blocks"].([]interface{})
+	blocksArg := arg["blocks"].([]any)
 	var transactions []*model.Transaction
 	luteEngine := util.NewLute()
 	for _, blockArg := range blocksArg {
-		blockMap := blockArg.(map[string]interface{})
+		blockMap := blockArg.(map[string]any)
 		data := blockMap["data"].(string)
 		dataType := blockMap["dataType"].(string)
 		parentID := blockMap["parentID"].(string)
@@ -684,7 +684,7 @@ func updateBlock(c *gin.Context) {
 		var ops []*model.Operation
 		for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
 			toRemoves = append(toRemoves, n)
-			ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]interface{}{
+			ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]any{
 				"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
 			}})
 		}
@@ -740,11 +740,11 @@ func batchInsertBlock(c *gin.Context) {
 		return
 	}
 
-	blocksArg := arg["blocks"].([]interface{})
+	blocksArg := arg["blocks"].([]any)
 	var transactions []*model.Transaction
 	luteEngine := util.NewLute()
 	for _, blockArg := range blocksArg {
-		blockMap := blockArg.(map[string]interface{})
+		blockMap := blockArg.(map[string]any)
 		data := blockMap["data"].(string)
 		dataType := blockMap["dataType"].(string)
 		var parentID, previousID, nextID string
@@ -807,7 +807,7 @@ func batchUpdateBlock(c *gin.Context) {
 	}
 
 	var blocksArg []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("blocks", &blocksArg, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("blocks", &blocksArg, true, true)) {
 		return
 	}
 
@@ -822,7 +822,7 @@ func batchUpdateBlock(c *gin.Context) {
 	var blocks []*updateBlockArg
 	luteEngine := util.NewLute()
 	for _, blockArg := range blocksArg {
-		blockMap := blockArg.(map[string]interface{})
+		blockMap := blockArg.(map[string]any)
 		id := blockMap["id"].(string)
 		if util.InvalidIDPattern(id, ret) {
 			return
@@ -881,7 +881,7 @@ func batchUpdateBlock(c *gin.Context) {
 
 			for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
 				toRemoves = append(toRemoves, n)
-				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]interface{}{
+				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]any{
 					"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
 				}})
 			}

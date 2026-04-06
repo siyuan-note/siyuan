@@ -708,7 +708,6 @@ type="checkbox">
                                         fetchPost("/api/petal/setPetalEnabled", {
                                             packageName: dataObj.name,
                                             enabled: true,
-                                            frontend: getFrontend(),
                                             app: Constants.SIYUAN_APPID,
                                         }, (response) => {
                                             loadPlugin(app, response.data);
@@ -724,7 +723,7 @@ type="checkbox">
                     break;
                 } else if (type === "install-all") {
                     confirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
-                        fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()});
+                        fetchPost("/api/bazaar/batchUpdatePackage");
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -875,7 +874,6 @@ type="checkbox">
                         fetchPost("/api/petal/setPetalEnabled", {
                             packageName: dataObj.name,
                             enabled,
-                            frontend: getFrontend(),
                             app: Constants.SIYUAN_APPID,
                         }, (response) => {
                             target.removeAttribute("disabled");

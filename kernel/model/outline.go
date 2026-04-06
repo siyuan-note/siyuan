@@ -262,7 +262,7 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 			}
 		}
 
-		expandIDsArg := storage["expandIds"].([]interface{})
+		expandIDsArg := storage["expandIds"].([]any)
 		var expandIDs []string
 		for _, id := range expandIDsArg {
 			expandIDs = append(expandIDs, id.(string))

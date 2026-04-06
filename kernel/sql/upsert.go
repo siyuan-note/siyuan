@@ -57,7 +57,7 @@ const (
 	FileAnnotationRefsPlaceholder = "(?, ?, ?, ?, ?, ?, ?, ?, ?)"
 )
 
-func insertBlocks(tx *sql.Tx, blocks []*Block, context map[string]interface{}) (err error) {
+func insertBlocks(tx *sql.Tx, blocks []*Block, context map[string]any) (err error) {
 	if 1 > len(blocks) {
 		return
 	}
@@ -82,9 +82,9 @@ func insertBlocks(tx *sql.Tx, blocks []*Block, context map[string]interface{}) (
 	return
 }
 
-func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]interface{}) (err error) {
+func insertBlocks0(tx *sql.Tx, bulk []*Block, context map[string]any) (err error) {
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(BlocksPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(BlocksPlaceholder, "?"))
 	hashBuf := bytes.Buffer{}
 	for _, b := range bulk {
 		valueStrings = append(valueStrings, BlocksPlaceholder)
@@ -171,7 +171,7 @@ func insertAttribute0(tx *sql.Tx, bulk []*Attribute) (err error) {
 	}
 
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(AttributesPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(AttributesPlaceholder, "?"))
 	for _, attr := range bulk {
 		valueStrings = append(valueStrings, AttributesPlaceholder)
 		valueArgs = append(valueArgs, attr.ID)
@@ -219,7 +219,7 @@ func insertAsset0(tx *sql.Tx, bulk []*Asset) (err error) {
 	}
 
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(AssetsPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(AssetsPlaceholder, "?"))
 	for _, asset := range bulk {
 		valueStrings = append(valueStrings, AssetsPlaceholder)
 		valueArgs = append(valueArgs, asset.ID)
@@ -268,7 +268,7 @@ func insertSpans0(tx *sql.Tx, bulk []*Span) (err error) {
 	}
 
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(SpansPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(SpansPlaceholder, "?"))
 	for _, span := range bulk {
 		valueStrings = append(valueStrings, SpansPlaceholder)
 		valueArgs = append(valueArgs, span.ID)
@@ -317,7 +317,7 @@ func insertRefs0(tx *sql.Tx, bulk []*Ref) (err error) {
 	}
 
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(RefsPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(RefsPlaceholder, "?"))
 	for _, ref := range bulk {
 		valueStrings = append(valueStrings, RefsPlaceholder)
 		valueArgs = append(valueArgs, ref.ID)
@@ -371,7 +371,7 @@ func insertFileAnnotationRefs0(tx *sql.Tx, bulk []*FileAnnotationRef) (err error
 	}
 
 	valueStrings := make([]string, 0, len(bulk))
-	valueArgs := make([]interface{}, 0, len(bulk)*strings.Count(FileAnnotationRefsPlaceholder, "?"))
+	valueArgs := make([]any, 0, len(bulk)*strings.Count(FileAnnotationRefsPlaceholder, "?"))
 	for _, ref := range bulk {
 		valueStrings = append(valueStrings, FileAnnotationRefsPlaceholder)
 		valueArgs = append(valueArgs, ref.ID)
@@ -389,14 +389,14 @@ func insertFileAnnotationRefs0(tx *sql.Tx, bulk []*FileAnnotationRef) (err error
 	return
 }
 
-func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
+func indexTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	refs, fileAnnotationRefs := refsFromTree(tree)
 	err = insertTree0(tx, tree, context, blocks, spans, assets, attributes, refs, fileAnnotationRefs)
 	return
 }
 
-func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
+func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
 	oldBlockHashes := queryBlockHashes(tx, tree.ID)
 	blocks, spans, assets, attributes := fromTree(tree.Root, tree)
 	newBlockHashes := map[string]string{}
@@ -452,7 +452,7 @@ func upsertTree(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (e
 	return err
 }
 
-func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]interface{},
+func insertTree0(tx *sql.Tx, tree *parse.Tree, context map[string]any,
 	blocks []*Block, spans []*Span, assets []*Asset, attributes []*Attribute,
 	refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) (err error) {
 	if ignoreLines := getIndexIgnoreLines(); 0 < len(ignoreLines) {

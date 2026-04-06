@@ -34,26 +34,25 @@ func getTag(c *gin.Context) {
 		return
 	}
 
-	sortParam := arg["sort"]
-	sortMode := model.Conf.Tag.Sort
-	if nil != sortParam {
-		sortMode = int(sortParam.(float64))
-	}
-
-	model.Conf.Tag.Sort = sortMode
-	model.Conf.Save()
-
-	// API `getTag` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/16000
-	ignoreMaxListHint := false
-	ignoreMaxListHintArg := arg["ignoreMaxListHint"]
-	if nil != ignoreMaxListHintArg {
-		ignoreMaxListHint = ignoreMaxListHintArg.(bool)
-	}
-
+	var ignoreMaxListHint bool
 	var app string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("app", &app, true, false)) {
+	if !util.ParseJsonArgs(arg, ret,
+		// API `getTag` add an optional parameter `ignoreMaxListHint` https://github.com/siyuan-note/siyuan/issues/16000
+		util.BindJsonArg("ignoreMaxListHint", &ignoreMaxListHint, false, false),
+		util.BindJsonArg("app", &app, false, false),
+	) {
 		return
 	}
+
+	if nil != arg["sort"] {
+		sortVal, ok := util.ParseJsonArg[float64]("sort", arg, ret, true, false)
+		if !ok {
+			return
+		}
+		model.Conf.Tag.Sort = int(sortVal)
+		model.Conf.Save()
+	}
+
 	tags := model.BuildTags(ignoreMaxListHint, app)
 
 	if model.IsReadOnlyRoleContext(c) {
@@ -76,14 +75,14 @@ func renameTag(c *gin.Context) {
 	var oldLabel, newLabel string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("oldLabel", &oldLabel, true, false),
-		util.BindJsonArg("newLabel", &newLabel, true, false),
+		util.BindJsonArg("newLabel", &newLabel, true, true),
 	) {
 		return
 	}
 	if err := model.RenameTag(oldLabel, newLabel); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }
@@ -104,7 +103,7 @@ func removeTag(c *gin.Context) {
 	if err := model.RemoveTag(label); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 }

@@ -47,7 +47,7 @@ func checkWorkspaceDir(c *gin.Context) {
 	if util.IsPartitionRootPath(path) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(273)
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -62,7 +62,7 @@ func checkWorkspaceDir(c *gin.Context) {
 		if 0 < len(entries) {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(274)
-			ret.Data = map[string]interface{}{"closeTimeout": 7000}
+			ret.Data = map[string]any{"closeTimeout": 7000}
 			return
 		}
 	}
@@ -79,7 +79,7 @@ func checkWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"isWorkspace": util.IsWorkspaceDir(path),
 	}
 }
@@ -141,7 +141,7 @@ func removeWorkspaceDir(c *gin.Context) {
 		msg := "Cannot remove current workspace"
 		ret.Code = -1
 		ret.Msg = msg
-		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}
 
@@ -274,14 +274,14 @@ func setWorkspaceDir(c *gin.Context) {
 	if util.WorkspaceDir == path {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(78)
-		ret.Data = map[string]interface{}{"closeTimeout": 3000}
+		ret.Data = map[string]any{"closeTimeout": 3000}
 		return
 	}
 
 	if util.IsCloudDrivePath(path) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(196)
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -292,7 +292,7 @@ func setWorkspaceDir(c *gin.Context) {
 		if strings.HasPrefix(pathLower, installDirLower) && (util.IsSubPath(installDirLower, pathLower) || filepath.Clean(installDirLower) == filepath.Clean(pathLower)) {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(98)
-			ret.Data = map[string]interface{}{"closeTimeout": 5000}
+			ret.Data = map[string]any{"closeTimeout": 5000}
 			return
 		}
 	}
@@ -304,7 +304,7 @@ func setWorkspaceDir(c *gin.Context) {
 			if util.IsWorkspaceDir(p) {
 				ret.Code = -1
 				ret.Msg = fmt.Sprintf(model.Conf.Language(256), path, p)
-				ret.Data = map[string]interface{}{"closeTimeout": 7000}
+				ret.Data = map[string]any{"closeTimeout": 7000}
 				return
 			}
 		}

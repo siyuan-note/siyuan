@@ -38,10 +38,10 @@ type Result struct {
 	AppId     string         `json:"app"`
 	SessionId string         `json:"sid"`
 	PushMode  PushMode       `json:"pushMode"`
-	Callback  interface{}    `json:"callback"`
+	Callback  any            `json:"callback"`
 	Code      int            `json:"code"`
 	Msg       string         `json:"msg"`
-	Data      interface{}    `json:"data"`
+	Data      any            `json:"data"`
 	Context   map[string]any `json:"context,omitempty"`
 }
 

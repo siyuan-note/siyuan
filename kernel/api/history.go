@@ -35,26 +35,32 @@ func searchHistory(c *gin.Context) {
 		return
 	}
 
-	notebook := ""
-	if nil != arg["notebook"] {
-		notebook = arg["notebook"].(string)
+	var notebook, query, op string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("notebook", &notebook, false, false),
+		util.BindJsonArg("query", &query, false, false),
+		util.BindJsonArg("op", &op, false, false),
+	) {
+		return
 	}
 	typ := model.HistoryTypeDoc
 	if nil != arg["type"] {
-		typ = int(arg["type"].(float64))
+		typeVal, ok := util.ParseJsonArg[float64]("type", arg, ret, true, false)
+		if !ok {
+			return
+		}
+		typ = int(typeVal)
 	}
-
-	query := arg["query"].(string)
 	page := 1
 	if nil != arg["page"] {
-		page = int(arg["page"].(float64))
-	}
-	op := "all"
-	if nil != arg["op"] {
-		op = arg["op"].(string)
+		pageVal, ok := util.ParseJsonArg[float64]("page", arg, ret, true, false)
+		if !ok {
+			return
+		}
+		page = int(pageVal)
 	}
 	histories, pageCount, totalCount := model.FullTextSearchHistory(query, notebook, op, typ, page)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"histories":  histories,
 		"pageCount":  pageCount,
 		"totalCount": totalCount,
@@ -70,24 +76,25 @@ func getHistoryItems(c *gin.Context) {
 		return
 	}
 
-	created := arg["created"].(string)
-
-	notebook := ""
-	if nil != arg["notebook"] {
-		notebook = arg["notebook"].(string)
+	var created, notebook, query, op string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("created", &created, true, true),
+		util.BindJsonArg("notebook", &notebook, false, false),
+		util.BindJsonArg("query", &query, false, false),
+		util.BindJsonArg("op", &op, false, false),
+	) {
+		return
 	}
 	typ := model.HistoryTypeDoc
 	if nil != arg["type"] {
-		typ = int(arg["type"].(float64))
-	}
-
-	query := arg["query"].(string)
-	op := "all"
-	if nil != arg["op"] {
-		op = arg["op"].(string)
+		typeVal, ok := util.ParseJsonArg[float64]("type", arg, ret, true, false)
+		if !ok {
+			return
+		}
+		typ = int(typeVal)
 	}
 	histories := model.FullTextSearchHistoryItems(created, query, notebook, op, typ)
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"items": histories,
 	}
 }
@@ -110,7 +117,7 @@ func getNotebookHistory(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"histories": histories,
 	}
 }
@@ -139,15 +146,20 @@ func getDocHistoryContent(c *gin.Context) {
 		return
 	}
 
-	historyPath := arg["historyPath"].(string)
-	k := arg["k"]
-	var keyword string
-	if nil != k {
-		keyword = k.(string)
+	var historyPath, keyword string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("historyPath", &historyPath, true, true),
+		util.BindJsonArg("k", &keyword, false, false),
+	) {
+		return
 	}
 	highlight := true
-	if val, ok := arg["highlight"]; ok {
-		highlight = val.(bool)
+	if nil != arg["highlight"] {
+		highlightVal, ok := util.ParseJsonArg[bool]("highlight", arg, ret, true, false)
+		if !ok {
+			return
+		}
+		highlight = highlightVal
 	}
 	id, rootID, content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword, highlight)
 	if err != nil {
@@ -156,7 +168,7 @@ func getDocHistoryContent(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"id":         id,
 		"rootID":     rootID,
 		"content":    content,
@@ -175,8 +187,8 @@ func rollbackDocHistory(c *gin.Context) {
 
 	var notebook, historyPath string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, true, false),
-		util.BindJsonArg("historyPath", &historyPath, true, false),
+		util.BindJsonArg("notebook", &notebook, true, true),
+		util.BindJsonArg("historyPath", &historyPath, true, true),
 	) {
 		return
 	}
@@ -187,7 +199,7 @@ func rollbackDocHistory(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"box": notebook,
 	}
 }
@@ -202,7 +214,7 @@ func rollbackAssetsHistory(c *gin.Context) {
 	}
 
 	var historyPath string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
 		return
 	}
 	err := model.RollbackAssetsHistory(historyPath)
@@ -223,7 +235,7 @@ func rollbackNotebookHistory(c *gin.Context) {
 	}
 
 	var historyPath string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
 		return
 	}
 	err := model.RollbackNotebookHistory(historyPath)
@@ -244,7 +256,7 @@ func rollbackAttributeViewHistory(c *gin.Context) {
 	}
 
 	var historyPath string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
 		return
 	}
 	err := model.RollbackAttributeViewHistory(historyPath)

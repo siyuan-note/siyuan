@@ -381,7 +381,7 @@ func (value *Value) IsEmpty() bool {
 	return false
 }
 
-func (value *Value) SetValByType(typ KeyType, val interface{}) {
+func (value *Value) SetValByType(typ KeyType, val any) {
 	switch typ {
 	case KeyTypeBlock:
 		value.Block = val.(*ValueBlock)
@@ -418,7 +418,7 @@ func (value *Value) SetValByType(typ KeyType, val interface{}) {
 	}
 }
 
-func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
+func (value *Value) GetValByType(typ KeyType) (ret any) {
 	// 单独处理汇总
 	if KeyTypeRollup == value.Type {
 		if 1 > len(value.Rollup.Contents) {

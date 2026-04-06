@@ -35,7 +35,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}, createIfNotExist bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -74,7 +74,7 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any) (viewable av.Viewable, err error) {
 	// 获取待渲染的视图
 	view, err := getRenderAttributeViewView(attrView, viewID, nodeID)
 	if nil != err {
@@ -97,7 +97,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 	return
 }
 
-func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]interface{}) (err error) {
+func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {
@@ -180,7 +180,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		groupPage, groupPageSize := page, pageSize
 		if nil != groupPaging {
 			if paging := groupPaging[groupView.ID]; nil != paging {
-				pagingMap := paging.(map[string]interface{})
+				pagingMap := paging.(map[string]any)
 				if nil != pagingMap["page"] {
 					groupPage = int(pagingMap["page"].(float64))
 				}
@@ -551,7 +551,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	return
 }
 
-func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
 	if nil != parseErr {
 		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)

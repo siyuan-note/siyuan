@@ -35,7 +35,7 @@ func chatGPT(c *gin.Context) {
 	}
 
 	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, true)) {
 		return
 	}
 	ret.Data = model.ChatGPT(msg)
@@ -50,7 +50,7 @@ func chatGPTWithAction(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["ids"].([]interface{})
+	idsArg := arg["ids"].([]any)
 	var ids []string
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))

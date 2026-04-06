@@ -27,11 +27,11 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-func QueryAssetContentNoLimit(stmt string) (ret []map[string]interface{}, err error) {
+func QueryAssetContentNoLimit(stmt string) (ret []map[string]any, err error) {
 	return queryAssetContentRawStmt(stmt, math.MaxInt)
 }
 
-func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interface{}, err error) {
+func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]any, err error) {
 	rows, err := queryAssetContent(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
@@ -49,8 +49,8 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interfac
 	noLimit := !containsLimitClause(stmt)
 	var count int
 	for rows.Next() {
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
+		columns := make([]any, len(cols))
+		columnPointers := make([]any, len(cols))
 		for i := range columns {
 			columnPointers[i] = &columns[i]
 		}
@@ -59,9 +59,9 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interfac
 			return
 		}
 
-		m := make(map[string]interface{})
+		m := make(map[string]any)
 		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
+			val := columnPointers[i].(*any)
 			m[colName] = *val
 		}
 
@@ -180,7 +180,7 @@ func scanAssetContentRows(rows *sql.Rows) (ret *AssetContent) {
 	return
 }
 
-func queryAssetContent(query string, args ...interface{}) (*sql.Rows, error) {
+func queryAssetContent(query string, args ...any) (*sql.Rows, error) {
 	query = strings.TrimSpace(query)
 	if "" == query {
 		return nil, errors.New("statement is empty")

@@ -174,7 +174,7 @@ func getDynamicIcon(c *gin.Context) {
 	c.String(http.StatusOK, svg)
 }
 
-func getDateInfo(dateStr string, lang string, weekdayType string) map[string]interface{} {
+func getDateInfo(dateStr string, lang string, weekdayType string) map[string]any {
 	// 设置默认值
 	var date time.Time
 	var err error
@@ -261,7 +261,7 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 	// countDown := int(math.Floor(date.Sub(today).Hours() / 24)) // 注意最大返回106751天，go的时间戳最大值
 	countDown := daysBetween(today, date)
 
-	return map[string]interface{}{
+	return map[string]any{
 		"year":      year,
 		"isoYear":   isoYear,
 		"month":     month,
@@ -312,7 +312,7 @@ func isLeapYear(year int) bool {
 }
 
 // Type 1: 显示年月日星期
-func generateTypeOneSVG(color string, dateInfo map[string]interface{}) string {
+func generateTypeOneSVG(color string, dateInfo map[string]any) string {
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
@@ -328,7 +328,7 @@ func generateTypeOneSVG(color string, dateInfo map[string]interface{}) string {
 }
 
 // Type 2: 显示年月日
-func generateTypeTwoSVG(color string, dateInfo map[string]interface{}) string {
+func generateTypeTwoSVG(color string, dateInfo map[string]any) string {
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
@@ -343,7 +343,7 @@ func generateTypeTwoSVG(color string, dateInfo map[string]interface{}) string {
 }
 
 // Type 3: 显示年月
-func generateTypeThreeSVG(color string, dateInfo map[string]interface{}) string {
+func generateTypeThreeSVG(color string, dateInfo map[string]any) string {
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
@@ -365,7 +365,7 @@ func generateTypeThreeSVG(color string, dateInfo map[string]interface{}) string 
 }
 
 // Type 4: 仅显示年
-func generateTypeFourSVG(color string, dateInfo map[string]interface{}) string {
+func generateTypeFourSVG(color string, dateInfo map[string]any) string {
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
@@ -386,7 +386,7 @@ func generateTypeFourSVG(color string, dateInfo map[string]interface{}) string {
 }
 
 // Type 5:: 显示周数
-func generateTypeFiveSVG(color string, dateInfo map[string]interface{}) string {
+func generateTypeFiveSVG(color string, dateInfo map[string]any) string {
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
@@ -408,7 +408,7 @@ func generateTypeFiveSVG(color string, dateInfo map[string]interface{}) string {
 }
 
 // Type 6: 仅显示星期
-func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo map[string]interface{}) string {
+func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo map[string]any) string {
 
 	weekday := dateInfo["weekday"].(string)
 	isWeekend := dateInfo["isWeekend"].(bool)
@@ -461,7 +461,7 @@ func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo 
 }
 
 // Type7: 倒数日
-func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interface{}) string {
+func generateTypeSevenSVG(color string, lang string, dateInfo map[string]any) string {
 	colorScheme := getColorScheme(color)
 
 	diffDays := dateInfo["countDown"].(int)

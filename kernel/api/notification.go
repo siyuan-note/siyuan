@@ -18,7 +18,6 @@ package api
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -35,13 +34,7 @@ func pushMsg(c *gin.Context) {
 	}
 
 	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, false)) {
-		return
-	}
-	msg = strings.TrimSpace(msg)
-	if "" == msg {
-		ret.Code = -1
-		ret.Msg = "Field [msg] must not be empty"
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, true)) {
 		return
 	}
 
@@ -66,13 +59,7 @@ func pushErrMsg(c *gin.Context) {
 	}
 
 	var msg string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, false)) {
-		return
-	}
-	msg = strings.TrimSpace(msg)
-	if "" == msg {
-		ret.Code = -1
-		ret.Msg = "Field [msg] must not be empty"
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("msg", &msg, true, true)) {
 		return
 	}
 

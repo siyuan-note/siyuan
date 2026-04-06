@@ -38,7 +38,7 @@ func getNotebookInfo(c *gin.Context) {
 	}
 
 	var boxID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &boxID, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &boxID, true, true)) {
 		return
 	}
 	if util.InvalidIDPattern(boxID, ret) {
@@ -53,7 +53,7 @@ func getNotebookInfo(c *gin.Context) {
 	}
 
 	boxInfo := box.GetInfo()
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"boxInfo": boxInfo,
 	}
 }
@@ -69,7 +69,7 @@ func setNotebookIcon(c *gin.Context) {
 
 	var boxID, icon string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &boxID, true, false),
+		util.BindJsonArg("notebook", &boxID, true, true),
 		util.BindJsonArg("icon", &icon, true, false),
 	) {
 		return
@@ -86,7 +86,7 @@ func changeSortNotebook(c *gin.Context) {
 		return
 	}
 
-	idsArg := arg["notebooks"].([]interface{})
+	idsArg := arg["notebooks"].([]any)
 	var ids []string
 	for _, p := range idsArg {
 		ids = append(ids, p.(string))
@@ -103,28 +103,26 @@ func renameNotebook(c *gin.Context) {
 		return
 	}
 
-	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
+	var notebook, name string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("notebook", &notebook, true, true),
+		util.BindJsonArg("name", &name, true, false),
+	) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
-		return
-	}
-
-	var name string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, false)) {
 		return
 	}
 	err := model.RenameBox(notebook, name)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
 	evt := util.NewCmdResult("renamenotebook", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
+	evt.Data = map[string]any{
 		"box":  notebook,
 		"name": name,
 	}
@@ -141,7 +139,7 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
@@ -151,7 +149,7 @@ func removeNotebook(c *gin.Context) {
 	if util.ReadOnly && !model.IsUserGuide(notebook) {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(34)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -163,7 +161,7 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	evt := util.NewCmdResult("removeBox", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
+	evt.Data = map[string]any{
 		"box": notebook,
 	}
 	util.PushEvent(evt)
@@ -203,12 +201,12 @@ func createNotebook(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"notebook": box,
 	}
 
 	evt := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
+	evt.Data = map[string]any{
 		"box":     box,
 		"existed": existed,
 	}
@@ -225,7 +223,7 @@ func openNotebook(c *gin.Context) {
 	}
 
 	var notebook string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("notebook", &notebook, true, true)) {
 		return
 	}
 	if util.InvalidIDPattern(notebook, ret) {
@@ -236,7 +234,7 @@ func openNotebook(c *gin.Context) {
 	if util.ReadOnly && !isUserGuide {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(34)
-		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
@@ -246,7 +244,7 @@ func openNotebook(c *gin.Context) {
 		// Opening the user guide is no longer supported on iOS https://github.com/siyuan-note/siyuan/issues/11492
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(215)
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		ret.Data = map[string]any{"closeTimeout": 7000}
 		return
 	}
 
@@ -267,7 +265,7 @@ func openNotebook(c *gin.Context) {
 	}
 
 	evt := util.NewCmdResult("mount", 0, util.PushModeBroadcast)
-	evt.Data = map[string]interface{}{
+	evt.Data = map[string]any{
 		"box":     box,
 		"existed": existed,
 	}
@@ -293,7 +291,7 @@ func openNotebook(c *gin.Context) {
 				}
 				startID = guideStartID[notebook]
 				if treenode.ExistBlockTree(startID) {
-					util.BroadcastByTypeAndApp("main", app, "openFileById", 0, "", map[string]interface{}{
+					util.BroadcastByTypeAndApp("main", app, "openFileById", 0, "", map[string]any{
 						"id": startID,
 					})
 					break
@@ -340,7 +338,7 @@ func getNotebookConf(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"box":  box.ID,
 		"name": box.Name,
 		"conf": box.GetConf(),
@@ -424,7 +422,7 @@ func lsNotebooks(c *gin.Context) {
 	flashcard := false
 
 	// 兼容旧版接口，不能直接使用 util.JsonArg()
-	arg := map[string]interface{}{}
+	arg := map[string]any{}
 	if err := c.ShouldBindJSON(&arg); err == nil {
 		if arg["flashcard"] != nil {
 			flashcard = arg["flashcard"].(bool)
@@ -467,7 +465,7 @@ func lsNotebooks(c *gin.Context) {
 		}
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"notebooks": notebooks,
 	}
 }

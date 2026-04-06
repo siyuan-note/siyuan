@@ -85,7 +85,7 @@ var uiProcNames = []string{"siyuan", "electron"}
 
 // getAttachedUIProcCount 获取已经附加的 UI 进程数。
 func getAttachedUIProcCount() (ret int) {
-	util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
+	util.UIProcessIDs.Range(func(uiProcIDArg, _ any) bool {
 		uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
 		if err != nil {
 			logging.LogErrorf("invalid UI proc ID [%s]: %s", uiProcIDArg, err)

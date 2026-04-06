@@ -128,7 +128,7 @@ func ParseJWT(tokenString string) (*jwt.Token, error) {
 	// REF: https://golang-jwt.github.io/jwt/usage/parse/
 	return jwt.Parse(
 		tokenString,
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			return jwtKey, nil
 		},
 		jwt.WithIssuer(iss),

@@ -98,7 +98,7 @@ func renderTemplate(c *gin.Context) {
 		return
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"path":    p,
 		"content": content,
 	}

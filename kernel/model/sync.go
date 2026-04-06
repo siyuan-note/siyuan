@@ -213,7 +213,7 @@ func syncData(exit, byHand bool) {
 
 	if 1 == Conf.Sync.Mode && nil != webSocketConn && Conf.Sync.Perception && dataChanged {
 		// 如果处于自动同步模式且不是由 WS 触发的同步，则通知其他设备上的内核进行同步
-		request := map[string]interface{}{
+		request := map[string]any{
 			"cmd":    "synced",
 			"synced": Conf.Sync.Synced,
 		}
@@ -524,7 +524,6 @@ func CreateCloudSyncDir(name string) (err error) {
 		return
 	}
 
-	name = strings.TrimSpace(name)
 	name = util.RemoveInvalid(name)
 	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
@@ -553,10 +552,6 @@ func RemoveCloudSyncDir(name string) (err error) {
 	}
 
 	msgId := util.PushMsg(Conf.Language(116), 15000)
-
-	if "" == name {
-		return
-	}
 
 	repo, err := newRepository()
 	if err != nil {
@@ -872,7 +867,7 @@ func connectSyncWebSocket() {
 			}
 
 			logging.LogInfof("sync websocket message: %v", result)
-			data := result.Data.(map[string]interface{})
+			data := result.Data.(map[string]any)
 			switch data["cmd"].(string) {
 			case "synced":
 				// Improve data synchronization perception https://github.com/siyuan-note/siyuan/issues/13000
@@ -881,8 +876,8 @@ func connectSyncWebSocket() {
 				onlineKernelsLock.Lock()
 
 				onlineKernels = []*OnlineKernel{}
-				for _, kernel := range data["kernels"].([]interface{}) {
-					kernelMap := kernel.(map[string]interface{})
+				for _, kernel := range data["kernels"].([]any) {
+					kernelMap := kernel.(map[string]any)
 					onlineKernels = append(onlineKernels, &OnlineKernel{
 						ID:       kernelMap["id"].(string),
 						Hostname: kernelMap["hostname"].(string),

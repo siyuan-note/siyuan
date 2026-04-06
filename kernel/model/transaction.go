@@ -1600,7 +1600,7 @@ func unfoldHeading(heading, currentNode *ast.Node) {
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
 
-	util.BroadcastByType("protyle", "unfoldHeading", 0, "", map[string]interface{}{"id": heading.ID, "currentNodeID": currentNode.ID})
+	util.BroadcastByType("protyle", "unfoldHeading", 0, "", map[string]any{"id": heading.ID, "currentNodeID": currentNode.ID})
 }
 
 func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
@@ -1819,38 +1819,38 @@ func createdUpdated(node *ast.Node) {
 }
 
 type Operation struct {
-	Action     string      `json:"action"`
-	Data       interface{} `json:"data"`
-	ID         string      `json:"id"`
-	RootID     string      `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
-	ParentID   string      `json:"parentID"`
-	PreviousID string      `json:"previousID"`
-	NextID     string      `json:"nextID"`
-	RetData    interface{} `json:"retData"`
-	BlockIDs   []string    `json:"blockIDs"`
-	BlockID    string      `json:"blockID"`
+	Action     string   `json:"action"`
+	Data       any      `json:"data"`
+	ID         string   `json:"id"`
+	RootID     string   `json:"rootID"` // 思源内部暂时没有用到 https://github.com/siyuan-note/siyuan/issues/17179#issuecomment-4051604916
+	ParentID   string   `json:"parentID"`
+	PreviousID string   `json:"previousID"`
+	NextID     string   `json:"nextID"`
+	RetData    any      `json:"retData"`
+	BlockIDs   []string `json:"blockIDs"`
+	BlockID    string   `json:"blockID"`
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
-	AvID              string                   `json:"avID"`              // 属性视图 ID
-	SrcIDs            []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
-	Srcs              []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
-	IsDetached        bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
-	Name              string                   `json:"name"`              // 属性视图列名
-	Typ               string                   `json:"type"`              // 属性视图列类型
-	Format            string                   `json:"format"`            // 属性视图列格式化
-	KeyID             string                   `json:"keyID"`             // 属性视图字段 ID
-	RowID             string                   `json:"rowID"`             // 属性视图行 ID
-	IsTwoWay          bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
-	BackRelationKeyID string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
-	RemoveDest        bool                     `json:"removeDest"`        // 属性视图删除关联目标
-	Layout            av.LayoutType            `json:"layout"`            // 属性视图布局类型
-	GroupID           string                   `json:"groupID"`           // 属性视图分组视图 ID
-	TargetGroupID     string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
-	ViewID            string                   `json:"viewID"`            // 属性视图视图 ID
-	IgnoreDefaultFill bool                     `json:"ignoreDefaultFill"` // 是否忽略默认填充
+	AvID              string           `json:"avID"`              // 属性视图 ID
+	SrcIDs            []string         `json:"srcIDs"`            // 用于从属性视图中删除行
+	Srcs              []map[string]any `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
+	IsDetached        bool             `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
+	Name              string           `json:"name"`              // 属性视图列名
+	Typ               string           `json:"type"`              // 属性视图列类型
+	Format            string           `json:"format"`            // 属性视图列格式化
+	KeyID             string           `json:"keyID"`             // 属性视图字段 ID
+	RowID             string           `json:"rowID"`             // 属性视图行 ID
+	IsTwoWay          bool             `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
+	BackRelationKeyID string           `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
+	RemoveDest        bool             `json:"removeDest"`        // 属性视图删除关联目标
+	Layout            av.LayoutType    `json:"layout"`            // 属性视图布局类型
+	GroupID           string           `json:"groupID"`           // 属性视图分组视图 ID
+	TargetGroupID     string           `json:"targetGroupID"`     // 属性视图目标分组视图 ID
+	ViewID            string           `json:"viewID"`            // 属性视图视图 ID
+	IgnoreDefaultFill bool             `json:"ignoreDefaultFill"` // 是否忽略默认填充
 
-	Context map[string]interface{} `json:"context"` // 上下文信息
+	Context map[string]any `json:"context"` // 上下文信息
 }
 
 type Transaction struct {
@@ -1909,7 +1909,7 @@ func (tx *Transaction) commit() (err error) {
 			return
 		}
 
-		var sources []interface{}
+		var sources []any
 		sources = append(sources, tx)
 		util.PushSaveDoc(tree.ID, "tx", sources)
 

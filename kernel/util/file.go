@@ -314,9 +314,9 @@ func FilterFileName(name string) string {
 	name = strings.ReplaceAll(name, "<", "_")
 	name = strings.ReplaceAll(name, ">", "_")
 	name = strings.ReplaceAll(name, "|", "_")
+	name = RemoveInvalid(name) // Remove invisible characters from file names when uploading assets https://github.com/siyuan-note/siyuan/issues/11683
 	name = strings.TrimSpace(name)
 	name = strings.TrimSuffix(name, ".")
-	name = RemoveInvalid(name) // Remove invisible characters from file names when uploading assets https://github.com/siyuan-note/siyuan/issues/11683
 	return name
 }
 

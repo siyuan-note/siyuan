@@ -33,7 +33,7 @@ func resetGraph(c *gin.Context) {
 	graph := conf.NewGlobalGraph()
 	model.Conf.Graph.Global = graph
 	model.Conf.Save()
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"conf": graph,
 	}
 }
@@ -45,7 +45,7 @@ func resetLocalGraph(c *gin.Context) {
 	graph := conf.NewLocalGraph()
 	model.Conf.Graph.Local = graph
 	model.Conf.Save()
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"conf": graph,
 	}
 }
@@ -60,12 +60,12 @@ func getGraph(c *gin.Context) {
 	}
 
 	reqId := arg["reqId"]
-	ret.Data = map[string]interface{}{"reqId": reqId}
+	ret.Data = map[string]any{"reqId": reqId}
 
 	var query string
 	var confArg map[string]any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", &query, true, false),
+		util.BindJsonArg("k", &query, false, false),
 		util.BindJsonArg("conf", &confArg, true, false),
 	) {
 		return
@@ -93,12 +93,12 @@ func getGraph(c *gin.Context) {
 		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		nodes, links = model.FilterGraphByPublishIgnore(publishIgnore, nodes, links)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"nodes": nodes,
 		"links": links,
 		"conf":  global,
 		"box":   boxID,
-		"reqId": arg["reqId"],
+		"reqId": reqId,
 	}
 	util.RandomSleep(200, 500)
 }
@@ -113,7 +113,7 @@ func getLocalGraph(c *gin.Context) {
 	}
 
 	reqId := arg["reqId"]
-	ret.Data = map[string]interface{}{"reqId": reqId}
+	ret.Data = map[string]any{"reqId": reqId}
 	if nil == arg["id"] {
 		return
 	}
@@ -121,8 +121,8 @@ func getLocalGraph(c *gin.Context) {
 	var keyword, id string
 	var confArg map[string]any
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("k", &keyword, true, false),
-		util.BindJsonArg("id", &id, true, false),
+		util.BindJsonArg("k", &keyword, false, false),
+		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("conf", &confArg, true, false),
 	) {
 		return
@@ -151,13 +151,13 @@ func getLocalGraph(c *gin.Context) {
 		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
 		nodes, links = model.FilterGraphByPublishIgnore(publishIgnore, nodes, links)
 	}
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"id":    id,
 		"box":   boxID,
 		"nodes": nodes,
 		"links": links,
 		"conf":  local,
-		"reqId": arg["reqId"],
+		"reqId": reqId,
 	}
 	util.RandomSleep(200, 500)
 }

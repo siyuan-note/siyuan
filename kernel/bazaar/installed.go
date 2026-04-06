@@ -144,7 +144,7 @@ func getBazaarInfo() {
 		return
 	}
 
-	_, _, _ = bazaarInfoSingleFlight.Do("loadBazaarInfo", func() (interface{}, error) {
+	_, _, _ = bazaarInfoSingleFlight.Do("loadBazaarInfo", func() (any, error) {
 		// 缓存失效时从磁盘加载
 		newRet := loadBazaarInfo()
 		// 更新缓存和修改时间

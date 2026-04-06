@@ -41,7 +41,7 @@ func getSnippet(c *gin.Context) {
 	var enabledArg float64 // 0：禁用，1：启用，2：全部
 	var keyword string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("type", &typ, true, false),
+		util.BindJsonArg("type", &typ, true, true),
 		util.BindJsonArg("enabled", &enabledArg, true, false),
 		util.BindJsonArg("keyword", &keyword, false, false),
 	) {
@@ -60,7 +60,7 @@ func getSnippet(c *gin.Context) {
 		return
 	}
 
-	isPublish := model.IsReadOnlyRole(model.GetGinContextRole(c))
+	isPublish := model.IsReadOnlyRoleContext(c)
 	var snippets []*conf.Snippet
 	for _, s := range confSnippets {
 		if isPublish && s.DisabledInPublish {
@@ -92,7 +92,7 @@ func getSnippet(c *gin.Context) {
 		snippets = []*conf.Snippet{}
 	}
 
-	ret.Data = map[string]interface{}{
+	ret.Data = map[string]any{
 		"snippets": snippets,
 	}
 }
@@ -106,10 +106,10 @@ func setSnippet(c *gin.Context) {
 		return
 	}
 
-	snippetsArg := arg["snippets"].([]interface{})
+	snippetsArg := arg["snippets"].([]any)
 	var snippets []*conf.Snippet
 	for _, s := range snippetsArg {
-		m := s.(map[string]interface{})
+		m := s.(map[string]any)
 		snippet := &conf.Snippet{
 			ID:      m["id"].(string),
 			Name:    m["name"].(string),
@@ -144,7 +144,7 @@ func removeSnippet(c *gin.Context) {
 	}
 
 	var id string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, false)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
 		return
 	}
 	snippet, err := model.RemoveSnippet(id)

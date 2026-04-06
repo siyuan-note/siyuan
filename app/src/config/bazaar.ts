@@ -464,7 +464,7 @@ type="checkbox">
             } else {
                 checkElement.classList.add("fn__none");
             }
-            contentElement.innerHTML = html ? html : `<div class="fn__hr"></div><ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
     },
     _data: {
@@ -1132,6 +1132,6 @@ type="checkbox">
                 html += item.outerHTML;
             });
         }
-        element.innerHTML = `<div class="b3-cards">${html}</div>`;
+        element.innerHTML = `<div class="b3-cards">${html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`}</div>`;
     }
 };

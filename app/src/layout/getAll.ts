@@ -160,7 +160,7 @@ export const getAllTabs = (type?: TTab | string) => {
                 continue;
             }
             try {
-                const initObj = JSON.parse(initData) as { instance?: string; customModelType?: string };
+                const initObj = JSON.parse(initData) as ILayoutJSON;
                 if (
                     (initObj.instance === "Custom" && initObj.customModelType === type) ||
                     initObj.instance === type

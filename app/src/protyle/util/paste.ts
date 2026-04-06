@@ -19,32 +19,6 @@ import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
 import {resolveLinkDest, genLinkText} from "../toolbar/util";
 
-const pasteAsLink = (text: string, protyle: IProtyle): boolean => {
-    if (!window.siyuan.config.editor.pasteURLAutoConvert) {
-        return false;
-    }
-    const trimmed = text.trim();
-    if (!trimmed || trimmed.includes("\n") || trimmed.includes(" ")) {
-        // TODO 暂不支持多行文本
-        return false;
-    }
-    const linkDest = resolveLinkDest(trimmed, protyle.lute);
-    if (!linkDest) {
-        return false;
-    }
-    const linkText = genLinkText(linkDest, false);
-    const linkNodes = protyle.toolbar.setInlineMark(protyle, "a", "range", {
-        type: "a",
-        color: linkDest + Constants.ZWSP + linkText
-    });
-    if (linkNodes && linkNodes.length > 0) {
-        const lastNode = linkNodes[linkNodes.length - 1];
-        protyle.toolbar.range.setStartAfter(lastNode);
-        protyle.toolbar.range.collapse(true);
-    }
-    return true;
-};
-
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
     let refText = "";
@@ -459,7 +433,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
             e.setAttribute("contenteditable", "true");
         });
+
         let tempInnerHTML = tempElement.innerHTML;
+
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
                 const json = JSON.parse(tempInnerHTML);
@@ -476,6 +452,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }
+
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
@@ -621,11 +598,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
+            let textPlainDom: string;
+
             // Auto-convert pasted URL to link format https://github.com/siyuan-note/siyuan/issues/17337
-            if (pasteAsLink(textPlain, protyle)) {
-                return;
+            if (window.siyuan.config.editor.pasteURLAutoConvert) {
+                textPlainDom = protyle.lute.Md2BlockDOMWithAutoLink(textPlain);
+            } else {
+                textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             }
-            let textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             if (textPlainDom && textPlainDom.indexOf("data:image/") > -1) {
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = textPlainDom;

@@ -283,7 +283,7 @@ export const bazaar = {
                 <span class="fn__space"></span>
                 ${item.downloads}
             </span>
-            <span class="block__icon block__icon--show ft__primary">
+            <span class="block__icon block__icon--show">
                 <svg><use xlink:href="#iconAccount"></use></svg>
                 <span class="fn__space"></span>
                 ${item.author}

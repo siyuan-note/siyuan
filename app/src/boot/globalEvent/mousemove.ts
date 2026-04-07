@@ -2,17 +2,32 @@ import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
+import {getFirstBlock} from "../../protyle/wysiwyg/getBlock";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
-    let index = 1;
+    let left = x + 34;
     let nodeElement = element;
     if (nodeElement && nodeElement.classList.contains("protyle-action")) {
         return nodeElement;
     }
     while (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
-        nodeElement = document.elementFromPoint(x + 73 * index, y) as HTMLElement;
+        nodeElement = document.elementFromPoint(left, y) as HTMLElement;
         nodeElement = hasClosestBlock(nodeElement) as HTMLElement;
-        index++;
+        if (nodeElement) {
+            if (nodeElement.classList.contains("bq")) {
+                nodeElement = nodeElement.firstElementChild as HTMLElement;
+            } else if (nodeElement.classList.contains("callout")) {
+                if (y > nodeElement.firstElementChild.getBoundingClientRect().bottom) {
+                    nodeElement = getFirstBlock(nodeElement) as HTMLElement;
+                } else {
+                    nodeElement = nodeElement.firstElementChild as HTMLElement;
+                }
+            } else {
+                left += 34;
+            }
+        } else {
+            left += 34;
+        }
     }
     return nodeElement;
 };

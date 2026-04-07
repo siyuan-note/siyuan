@@ -115,11 +115,9 @@ const windowNavigate = (currentWindow, windowType) => {
         if (url.startsWith(localServer)) {
             try {
                 const pathname = new URL(url).pathname;
-                if (
-                    (windowType === "app" && ["/", "/stage/build/app/", "/check-auth"].includes(pathname) ||
-                    (windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(pathname))) ||
-                    (windowType === "export" && pathname.startsWith("/export/temp/"))
-                ) {
+                if (windowType === "app" && ["/", "/stage/build/app/", "/check-auth"].includes(pathname) ||
+                    (windowType === "window" && ["/stage/build/app/window.html", "/check-auth"].includes(pathname)) ||
+                    (windowType === "export" && pathname.startsWith("/export/temp/"))) {
                     return;
                 }
             } catch (e) {

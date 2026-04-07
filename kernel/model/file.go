@@ -754,7 +754,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		keywords[i] = keyword
 	}
 	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
-
 	return
 }
 

@@ -105,6 +105,104 @@ func globalCopyFiles(c *gin.Context) {
 	model.IncSync()
 }
 
+func workspaceCopyFiles(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var srcsArg []any
+	var destDirArg string // 相对于工作空间的路径
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("srcs", &srcsArg, true, true),
+		util.BindJsonArg("destDir", &destDirArg, true, false),
+	) {
+		return
+	}
+
+	var relSrcs []string
+	for _, s := range srcsArg {
+		str, ok := s.(string) // 相对于工作空间的路径
+		if !ok {
+			ret.Code = -1
+			ret.Msg = "Field [srcs]: each element should be of type [String]"
+			return
+		}
+		str = strings.TrimSpace(str)
+		if str == "" {
+			ret.Code = -1
+			ret.Msg = "src path must not be empty"
+			return
+		}
+		relSrcs = append(relSrcs, str)
+	}
+
+	destDir, err := util.GetAbsPathInWorkspace(destDirArg)
+	if err != nil {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+	if filelock.IsExist(destDir) {
+		destInfo, err := os.Stat(destDir)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if !destInfo.IsDir() {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("destDir [%s] is not a directory", destDirArg)
+			return
+		}
+	} else {
+		if err = os.MkdirAll(destDir, 0755); err != nil {
+			logging.LogErrorf("make dir [%s] failed: %s", destDir, err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
+	var absSrcs []string
+	for _, src := range relSrcs {
+		absSrc, err := util.GetAbsPathInWorkspace(src)
+		if err != nil {
+			ret.Code = http.StatusForbidden
+			ret.Msg = err.Error()
+			return
+		}
+		if !filelock.IsExist(absSrc) {
+			logging.LogErrorf("file [%s] does not exist", src)
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("file [%s] does not exist", src)
+			return
+		}
+		if util.IsSensitivePath(absSrc) {
+			logging.LogErrorf("refuse to copy sensitive file [%s]", src)
+			ret.Code = -2
+			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
+			return
+		}
+		absSrcs = append(absSrcs, absSrc)
+	}
+
+	for _, absSrc := range absSrcs {
+		dest := filepath.Join(destDir, filepath.Base(absSrc))
+		if err := filelock.Copy(absSrc, dest); err != nil {
+			logging.LogErrorf("copy file [%s] to [%s] failed: %s", absSrc, dest, err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
+	model.IncSync()
+}
+
 func copyFile(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

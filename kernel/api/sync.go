@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/logging"
 
 	"github.com/88250/gulu"
@@ -686,6 +687,15 @@ func setSyncProviderS3(c *gin.Context) {
 	if err = gulu.JSON.UnmarshalJSON(data, s3); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
+	newBucket := strings.TrimSpace(s3.Bucket)
+	prevBucket := strings.TrimSpace(model.Conf.Sync.S3.Bucket)
+	if newBucket != prevBucket && !cloud.IsValidCloudDirName(newBucket) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(37)
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}

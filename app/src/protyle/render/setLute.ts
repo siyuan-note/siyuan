@@ -47,6 +47,10 @@ export const setLute = (options: ILuteOptions) => {
         });
         lute.PutEmojis(emojis);
     }
-    lute.SetUnorderedListMarker("-");;
+    lute.SetUnorderedListMarker("-");
+    lute.SetDataTask(true);
+    lute.SetExportNormalizeTaskListMarker(true);
+    lute.SetArbitraryTaskListItemMarker(true);
+
     return lute;
 };

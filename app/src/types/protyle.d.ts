@@ -297,6 +297,12 @@ declare class Lute {
     public HTML2BlockDOM(html: string): string;
 
     public SetUnorderedListMarker(marker: string): void;
+
+    public SetDataTask(marker: boolean): void;
+
+    public SetExportNormalizeTaskListMarker(marker: boolean): void;
+
+    public SetArbitraryTaskListItemMarker(marker: boolean): void;
 }
 
 declare const webkitAudioContext: {

@@ -55,7 +55,7 @@ const isOpenAsHidden = function () {
 
 remote.initialize();
 
-// `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
+// Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 // getPath("userData") 会创建空的 SiYuan 目录，改为 app.getPath("appData")
 app.setPath("userData", path.join(app.getPath("appData"), app.getName() + "-Electron"));
 

@@ -236,9 +236,9 @@ export const bazaar = {
         }
         try {
             new URL(funding);
-            return `<a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
+            return `<span class="fn__space"></span><a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
         } catch (e) {
-            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
+            return `<span class="fn__space"></span><span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
         }
     },
     _genCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
@@ -278,12 +278,13 @@ export const bazaar = {
             </div>
         </div>
         <div class="b3-card__actions">
-            <span class="block__icon block__icon--show">
+            <span class="block__icon block__icon--show block__icon--show">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>
                 ${item.downloads}
             </span>
-            <span class="block__icon block__icon--show">
+            <span class="fn__space"></span>
+            <span class="block__icon block__icon--show block__icon--show">
                 <svg><use xlink:href="#iconAccount"></use></svg>
                 <span class="fn__space"></span>
                 ${item.author}

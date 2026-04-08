@@ -85,7 +85,7 @@
     transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
     line-height: 14px;
 
-    &:hover:not([disabled]):not(.ft__primary):not(.block__icon--warning),
+    &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning),
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);

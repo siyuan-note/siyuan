@@ -81,6 +81,9 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetSanitize(true)
 	ret.SetUnorderedListMarker("-")
 	ret.SetCallout(true)
+	ret.SetDataTask(true)
+	ret.SetArbitraryTaskListItemMarker(true)
+	ret.SetExportNormalizeTaskListMarker(true)
 	return
 }
 

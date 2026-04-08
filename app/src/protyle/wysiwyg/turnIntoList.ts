@@ -7,7 +7,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
         // 任务列表首块不需要再更新为任务列表
         !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&
         (
-            ["[ ]", "[x]", "[X]", "【 】", "【x】", "【X】"].includes(editElement.innerHTML.substring(0, 3)) ||
+            /(\[[^\[\]]\]|【[^【】]】)/.test(editElement.innerHTML.substring(0, 3)) ||
             ["[]", "【】"].includes(editElement.innerHTML.substring(0, 2))
         )
     ) {

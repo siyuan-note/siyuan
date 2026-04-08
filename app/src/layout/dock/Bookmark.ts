@@ -52,11 +52,9 @@ export class Bookmark extends Model {
         this.element = tab.panelElement;
         this.element.classList.add("fn__flex-column", "file-tree", "sy__bookmark", "dockPanel");
         this.element.innerHTML = `<div class="block__icons">
-    <div class="block__logo">
+    <div class="block__logo fn__flex-1">
         <svg class="block__logoicon"><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.bookmark}
     </div>
-    <span class="fn__flex-1"></span>
-    <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="expand" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expand}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">

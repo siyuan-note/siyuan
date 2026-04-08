@@ -248,9 +248,28 @@ html[data-frontend="browser-desktop"] {
 }
 
 .file-tree {
+  .block__icons .block__icon,
+  &:not(.fullscreen) .block__icons .fn__space {
+    display: none;
+    transition: opacity .3s cubic-bezier(0, 0, .2, 1) 0ms, display .3s cubic-bezier(0, 0, .2, 1) 0ms allow-discrete;
+  }
+
+  .block__logo::-webkit-scrollbar {
+    display: none;
+  }
+
+  &:hover .block__icons .fn__space {
+    display: block;
+  }
+
   &:hover .block__icons .block__icon:not([disabled]),
+  &:not(.fullscreen):hover .block__icons .fn__space,
   &.fullscreen .block__icons .block__icon:not([disabled]) {
     opacity: 1;
+    display: block;
+    @starting-style {
+      opacity: 0;
+    }
   }
 
   &:hover .block__icons .block__icon[disabled] {

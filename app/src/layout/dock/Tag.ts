@@ -54,11 +54,9 @@ export class Tag extends Model {
         this.element.classList.add("fn__flex-column", "file-tree", "sy__tag", "dockPanel");
 
         this.element.innerHTML = `<div class="block__icons">
-    <div class="block__logo">
+    <div class="block__logo fn__flex-1">
         <svg class="block__logoicon"><use xlink:href="#iconTags"></use></svg>${window.siyuan.languages.tag}
     </div>
-    <span class="fn__flex-1"></span>
-    <span class="fn__space"></span>
     <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="sort" class="block__icon ariaLabel${window.siyuan.config.readonly ? " fn__none" : ""}" data-position="north" aria-label="${window.siyuan.languages.sort}">

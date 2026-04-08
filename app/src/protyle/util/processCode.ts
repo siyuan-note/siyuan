@@ -7,6 +7,8 @@ import {mindmapRender} from "../render/mindmapRender";
 import {flowchartRender} from "../render/flowchartRender";
 import {plantumlRender} from "../render/plantumlRender";
 import {htmlRender} from "../render/htmlRender";
+import {Constants} from "../../constants";
+import {escapeHtml} from "../../util/escape";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -32,17 +34,12 @@ export const processPasteCode = (html: string, text: string, originalTextHTML: s
     }
 
     if (isCode) {
-        let code = text || html;
+        const code = text || html;
         if (/\n/.test(code)) {
             return protyle.lute.Md2BlockDOM(code);
         } else {
-            // Paste code from IDE no longer escape `<` and `>` https://github.com/siyuan-note/siyuan/issues/8340
-            code = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            // Improve pasting of inline code containing backticks https://github.com/siyuan-note/siyuan/issues/17388
-            if (-1 < code.indexOf("`")) {
-                return "``" + code + "``"; // ``foo `bar` baz``
-            }
-            return "`" + code + "`";
+            // Paste code <&lt;div class="b3-dialog__action"&gt;> WithAll<XXX>() <div class="b3-dialog__action">
+            return `<span data-type="code" spellcheck="false">${Constants.ZWSP}${escapeHtml(code)}</span>`;
         }
     }
     return false;

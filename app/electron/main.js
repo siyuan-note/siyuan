@@ -56,7 +56,11 @@ const isOpenAsHidden = function () {
 remote.initialize();
 
 app.setPath("userData", app.getPath("userData") + "-Electron"); // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
-fs.rmSync(app.getPath("appData") + "/" + app.name, {recursive: true}); // 删除自动创建的应用目录 https://github.com/siyuan-note/siyuan/issues/13150
+
+if ("darwin" !== process.platform) {
+    // macOS 上不能删除该路径，因为该路径是默认的工作空间路径 Default workspace data will be lost on macOS https://github.com/siyuan-note/siyuan/issues/17430
+    fs.rmSync(app.getPath("appData") + "/" + app.name, {recursive: true}); // 删除自动创建的应用目录 https://github.com/siyuan-note/siyuan/issues/13150
+}
 
 if (process.platform === "win32") {
     // Windows 需要设置 AppUserModelId 才能正确显示应用名称和应用图标 https://github.com/siyuan-note/siyuan/issues/17022

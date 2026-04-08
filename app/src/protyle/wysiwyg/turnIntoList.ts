@@ -3,11 +3,12 @@ import {focusByWbr} from "../util/selection";
 import * as dayjs from "dayjs";
 
 export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
+    const dataTask = editElement.innerHTML.substring(0, 3).match(/^[\[【]([^\[\]【】])[\]】]$/);
     if (type !== "NodeCodeBlock" &&
         // 任务列表首块不需要再更新为任务列表
         !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&
         (
-            /(\[[^\[\]]\]|【[^【】]】)/.test(editElement.innerHTML.substring(0, 3)) ||
+            dataTask ||
             ["[]", "【】"].includes(editElement.innerHTML.substring(0, 2))
         )
     ) {
@@ -29,6 +30,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 const liElement = blockElement.parentElement.parentElement;
                 const oldHTML = liElement.outerHTML;
                 liElement.setAttribute("data-subtype", "t");
+                liElement.setAttribute("data-task", dataTask ? dataTask[1] : " ");
                 liElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 blockElement.parentElement.setAttribute("data-subtype", "t");
                 if (isDone) {
@@ -55,7 +57,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
             }, {
                 action: "insert",
                 id: newId,
-                data: `<div data-subtype="t" data-node-id="${newId}" updated="${newId.split("-")[0]}" data-type="NodeList" class="list"><div data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${emptyId}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`,
+                data: `<div data-subtype="t" data-node-id="${newId}" updated="${newId.split("-")[0]}" data-type="NodeList" class="list"><div data-task="${dataTask ? dataTask[1] : " "}" data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div><div data-node-id="${emptyId}" data-type="NodeParagraph" class="p"><div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`,
                 previousID: id,
             }, {
                 action: "move",
@@ -76,7 +78,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 id,
                 data: oldHTML,
             }]);
-            blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
+            blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-task="${dataTask ? dataTask[1] : " "}" data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
             focusByWbr(protyle.wysiwyg.element, range);
             return true;
         }

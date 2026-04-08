@@ -263,7 +263,7 @@ func initWorkspaceDir(workspaceArg string) {
 		}
 	} else if gulu.OS.IsDarwin() {
 		// Change the initial workspace path to ~/Library/Application Support/SiYuan on macOS https://github.com/siyuan-note/siyuan/issues/17095
-		defaultWorkspaceDir = filepath.Join(userHomeConfDir, "Library", "Application Support", "SiYuan")
+		defaultWorkspaceDir = filepath.Join(HomeDir, "Library", "Application Support", "SiYuan")
 	}
 
 	var workspacePaths []string

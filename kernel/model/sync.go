@@ -441,11 +441,6 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
 	s3.ConcurrentReqs = util.NormalizeConcurrentReqs(s3.ConcurrentReqs, conf.ProviderS3)
 
-	if !cloud.IsValidCloudDirName(s3.Bucket) {
-		util.PushErrMsg(Conf.Language(37), 5000)
-		return
-	}
-
 	Conf.Sync.S3 = s3
 	Conf.Save()
 	return

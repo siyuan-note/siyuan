@@ -90,8 +90,8 @@ ${item.id ? 'data-node-id="' + item.id + '"' : ""}
 ${item.box ? 'data-notebook-id="' + item.box + '"' : ""} 
 style="--file-toggle-width:${item.depth === 0 ? 22 : ((item.depth + 1) * 18)}px" 
 data-treetype="${item.type}" 
-data-type="${item.nodeType}" 
-data-subtype="${item.subType}" 
+data-type="${item.nodeType || ""}" 
+data-subtype="${item.subType || ""}" 
 ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'` : ""}>
     <span style="${style}" class="b3-list-item__toggle${showArrow ? " b3-list-item__toggle--hl" : ""}${showArrow ? "" : " fn__hidden"}">
         <svg data-id="${item.id || encodeURIComponent(item.name + item.depth)}" class="b3-list-item__arrow${(item.type === "outline" ? !item.folded : hasChild) ? " b3-list-item__arrow--open" : ""}"><use xlink:href="#iconRight"></use></svg>
@@ -148,8 +148,8 @@ style="--file-toggle-width:${item.depth === 0 ? 22 : ((item.depth + 1) * 18)}px"
 data-node-id="${item.id}" 
 data-ref-text="${encodeURIComponent(item.refText)}" 
 data-def-id="${item.defID}" 
-data-type="${item.type}" 
-data-subtype="${item.subType}" 
+data-type="${item.type || ""}" 
+data-subtype="${item.subType || ""}" 
 data-treetype="${type}" 
 data-def-path="${item.defPath}">
     <span style="${style}" class="b3-list-item__toggle${item.children ? " b3-list-item__toggle--hl" : ""}${item.children ? "" : " fn__hidden"}">

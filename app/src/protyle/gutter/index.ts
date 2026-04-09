@@ -2565,8 +2565,14 @@ export class Gutter {
                 if (index === 0) {
                     // 不单独显示，要不然在块的间隔中，gutter 会跳来跳去的
                     if (["NodeBlockquote", "NodeList", "NodeCallout", "NodeSuperBlock"].includes(type)) {
-                        if (target && type === "NodeCallout" && hasTopClosestByClassName(target, "callout-info")) {
+                        if (target && type === "NodeCallout") {
                             // Callout 标题需显示
+                            const calloutInfoElement = hasTopClosestByClassName(target, "callout-info");
+                            if (calloutInfoElement) {
+                                element = calloutInfoElement;
+                            } else {
+                                return;
+                            }
                         } else {
                             return;
                         }
@@ -2606,11 +2612,11 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
-                const buttonHTML = `<button class="ariaLabel" data-position="parentW" aria-label="${gutterTip}" 
+                const buttonHTML = type ? `<button class="ariaLabel" data-position="parentW" aria-label="${gutterTip}" 
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
-</button>`;
+</button>` : "";
                 if (!hideParent) {
                     html = buttonHTML + html;
                 }
@@ -2630,7 +2636,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                     html = html + foldHTML;
                 }
                 if (["NodeBlockquote", "NodeCallout"].includes(type)) {
-                    space += 8;
+                    space += 10;
                 }
                 if ((nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) ||
                     nodeElement.parentElement.classList.contains("callout-content")) {
@@ -2642,7 +2648,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                     }
                     // 列表项中的引述块中的第二个段落块块标和引述块左侧样式重叠
                     if (parentElement && ["NodeBlockquote", "NodeCallout"].includes(parentElement.getAttribute("data-type"))) {
-                        space += 8;
+                        space += 10;
                     }
                 }
             }

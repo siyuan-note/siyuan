@@ -3053,9 +3053,11 @@ export class WYSIWYG {
                                 if (actionElement.parentElement.classList.contains("protyle-task--done")) {
                                     actionElement.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
                                     actionElement.parentElement.classList.remove("protyle-task--done");
+                                    actionElement.parentElement.setAttribute("data-task", " ");
                                 } else {
                                     actionElement.querySelector("use").setAttribute("xlink:href", "#iconCheck");
                                     actionElement.parentElement.classList.add("protyle-task--done");
+                                    actionElement.parentElement.setAttribute("data-task", "X");
                                 }
                                 actionElement.parentElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                                 updateTransaction(protyle, actionId, actionElement.parentElement.outerHTML, html);

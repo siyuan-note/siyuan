@@ -47,11 +47,10 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             label: window.siyuan.languages.copyDoc,
             accelerator: undefined,
             click: async () => {
-                const responseHTML = await fetchSyncPost("/api/filetree/getDoc", {
+                const responseHTML = await fetchSyncPost("/api/block/getBlockDOM", {
                     id: protyle.block.rootID,
-                    mode: 0,
                 });
-                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.content)}'-->${responseHTML.data.content}`;
+                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.dom)}'-->${responseHTML.data.dom}`;
                 const responseText = await fetchSyncPost("/api/export/exportMdContent", {
                     id: protyle.block.rootID,
                     refMode: 3,

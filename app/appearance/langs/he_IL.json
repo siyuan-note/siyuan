@@ -1,4 +1,5 @@
 {
+  "copyDoc": "העתק את כל הטקסט",
   "position": "מיקום",
   "insertColumnLeft1": "הוסף ${x} עמודות משמאל",
   "insertColumnRight1": "הוסף ${x} עמודות מימין",

@@ -1,4 +1,5 @@
 {
+  "copyDoc": "نسخ النص كاملًا",
   "position": "الموقع",
   "insertColumnLeft1": "إدراج ${x} عمودًا إلى اليسار",
   "insertColumnRight1": "إدراج ${x} عمودًا إلى اليمين",

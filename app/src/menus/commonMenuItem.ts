@@ -415,7 +415,7 @@ export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle: 
     });
 };
 
-export const copySubMenu = (ids: string[], accelerator = true, focusElement?: Element, stdMarkdownId?: string) => {
+export const copySubMenu = (ids: string[], accelerator = true, focusElement?: Element, stdMarkdownId?: string): IMenu[] => {
     const menuItems = [{
         id: "copyBlockRef",
         iconHTML: "",

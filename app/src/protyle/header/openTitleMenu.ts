@@ -2,7 +2,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, openFileWechatNotify,} from "../../menus/commonMenuItem";
 import {deleteFile} from "../../editor/deleteFile";
-import {updateHotkeyTip} from "../util/compatibility";
+import {encodeBase64, updateHotkeyTip} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import * as path from "path";
@@ -25,6 +25,7 @@ import {transferBlockRef} from "../../menus/block";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
+import {showMessage} from "../../dialog/message";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -40,12 +41,42 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TITLE);
         const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
         window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover-" + from : "app-" + from);
+        const submenu = copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID);
+        submenu.push({
+            iconHTML: "",
+            label: window.siyuan.languages.copyDoc,
+            accelerator: undefined,
+            click: async () => {
+                const responseHTML = await fetchSyncPost("/api/filetree/getDoc", {
+                    id: protyle.block.rootID,
+                    mode: 0,
+                });
+                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.content)}'-->${responseHTML.data.content}`;
+                const responseText = await fetchSyncPost("/api/export/exportMdContent", {
+                    id: protyle.block.rootID,
+                    refMode: 3,
+                    embedMode: 1,
+                    yfm: false,
+                    fillCSSVar: false,
+                    adjustHeadingLevel: false
+                });
+                try {
+                    await navigator.clipboard.write([new ClipboardItem({
+                        ["text/plain"]: responseText.data.content,
+                        ["text/html"]: textHTML,
+                    })]);
+                } catch (e) {
+                    console.log(window.siyuan.languages.copyDoc + " error:", e);
+                }
+                showMessage(window.siyuan.languages.copied);
+            }
+        });
         window.siyuan.menus.menu.append(new MenuItem({
             id: "copy",
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID)
+            submenu,
         }).element);
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));

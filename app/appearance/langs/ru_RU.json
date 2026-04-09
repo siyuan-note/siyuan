@@ -1,4 +1,5 @@
 {
+  "copyDoc": "Копировать весь текст",
   "position": "Позиция",
   "insertColumnLeft1": "Вставить слева ${x} столбцов",
   "insertColumnRight1": "Вставить справа ${x} столбцов",

@@ -1,4 +1,5 @@
 {
+  "copyDoc": "Copiar todo o texto",
   "position": "Posição",
   "insertColumnLeft1": "Inserir ${x} colunas à esquerda",
   "insertColumnRight1": "Inserir ${x} colunas à direita",

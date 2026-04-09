@@ -485,7 +485,13 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	srcPath := arg["path"].(string)
+	var srcPath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &srcPath, true, true),
+	) {
+		return
+	}
+
 	srcAbsPath, err := util.GetAbsPathInWorkspace(srcPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -532,7 +538,13 @@ func removeFile(c *gin.Context) {
 		return
 	}
 
-	filePath := arg["path"].(string)
+	var filePath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &filePath, true, true),
+	) {
+		return
+	}
+
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden

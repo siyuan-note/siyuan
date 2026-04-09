@@ -2591,7 +2591,13 @@ export class Gutter {
                     }
                     // 标题（除列表下的）、提示下的块必须显示
                     if (topElement !== nodeElement && type !== "NodeHeading" && !hasClosestByClassName(nodeElement, "callout")) {
-                        nodeElement = topElement;
+                        while (nodeElement !== topElement) {
+                            nodeElement = nodeElement.parentElement;
+                            // > > > > 1 left 位置
+                            if (nodeElement.parentElement.classList.contains("bq")) {
+                                space += 10;
+                            }
+                        }
                         parentElement = hasClosestBlock(nodeElement.parentElement);
                         type = nodeElement.getAttribute("data-type");
                         dataNodeId = nodeElement.getAttribute("data-node-id");

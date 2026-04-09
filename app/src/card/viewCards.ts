@@ -23,9 +23,9 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
         const dialog = new Dialog({
             positionId: Constants.DIALOG_VIEWCARDS,
             content: `<div class="fn__flex-column" style="height: 100%">
-    <div class="block__icons">
-        <span class="fn__flex-1 fn__flex-center resize__move">${escapeHtml(title)}</span>
-        <span class="fn__space"></span>
+    <div class="block__icons" style="border-bottom: 1px solid var(--b3-border-color)">
+        <span class="fn__flex-center resize__move">${escapeHtml(title)}</span>
+        <span class="fn__space${(deckType === "" && deckID === "") ? " fn__none" : ""}"></span>
         <span data-type="resetAll" class="block__icon block__icon--show b3-tooltips b3-tooltips__w${(deckType === "" && deckID === "") ? " fn__none" : ""}" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href='#iconUndo'></use></svg></span>
         <span class="fn__space"></span>
         <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
@@ -41,7 +41,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
 </div>` : ""}
     </div>
     <div class="${isMobile() ? "fn__flex-column" : "fn__flex"} fn__flex-1" style="min-height: auto">
-        <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none">
+        <ul class="fn__flex-1 b3-list b3-list--background" style="user-select: none;padding: 8px 0">
             ${renderViewItem(response.data.blocks, title, deckType)}
         </ul>
         <div id="cardPreview" style="border-bottom-right-radius:var(--b3-border-radius-b);" class="fn__flex-1 fn__none"></div>

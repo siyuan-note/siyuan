@@ -98,7 +98,7 @@ const initMermaid = (mermaidElements: Element[]) => {
         try {
             renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
             const mermaidData = await window.mermaid.render(id, Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
-            renderElement.lastElementChild.innerHTML = mermaidData.svg;
+            renderElement.lastElementChild.innerHTML = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);;
         } catch (e) {
             const errorElement = document.querySelector("#" + id);
             renderElement.lastElementChild.innerHTML = `${errorElement.outerHTML}<div class="fn__hr"></div><div class="ft__error">${e.message.replace(/\n/, "<br>")}</div>`;

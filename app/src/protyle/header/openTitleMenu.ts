@@ -47,26 +47,26 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             label: window.siyuan.languages.copyDoc,
             accelerator: undefined,
             click: async () => {
-                const responseHTML = await fetchSyncPost("/api/block/getBlockDOM", {
-                    id: protyle.block.rootID,
-                });
+                const [responseHTML, responseText] = await Promise.all([
+                    fetchSyncPost("/api/block/getBlockDOM", {id: protyle.block.rootID}),
+                    fetchSyncPost("/api/export/exportMdContent", {
+                        id: protyle.block.rootID,
+                        refMode: 3,
+                        embedMode: 1,
+                        yfm: false,
+                        fillCSSVar: false,
+                        adjustHeadingLevel: false
+                    })
+                ]);
+
                 const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.dom)}'-->${responseHTML.data.dom}`;
-                const responseText = await fetchSyncPost("/api/export/exportMdContent", {
-                    id: protyle.block.rootID,
-                    refMode: 3,
-                    embedMode: 1,
-                    yfm: false,
-                    fillCSSVar: false,
-                    adjustHeadingLevel: false
-                });
-                try {
-                    await navigator.clipboard.write([new ClipboardItem({
-                        ["text/plain"]: responseText.data.content,
-                        ["text/html"]: textHTML,
-                    })]);
-                } catch (e) {
-                    console.log(window.siyuan.languages.copyDoc + " error:", e);
-                }
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        "text/plain": new Blob([responseText.data.content], {type: "text/plain"}),
+                        "text/html": new Blob([textHTML], {type: "text/html"}),
+                    })
+                ]);
+
                 showMessage(window.siyuan.languages.copied);
             }
         });

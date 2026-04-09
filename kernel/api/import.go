@@ -63,7 +63,7 @@ func importSY(c *gin.Context) {
 	}
 
 	writePath := filepath.Join(importDir, file.Filename)
-	if !util.IsSubPath(importDir, writePath) {
+	if !gulu.File.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
 		ret.Code = -1
 		ret.Msg = "import path is not sub path of import dir"
@@ -232,7 +232,7 @@ func importStdMd(c *gin.Context) {
 	localPath := arg["localPath"].(string)
 	toPath := arg["toPath"].(string)
 
-	if util.IsSubPath(util.WorkingDir, localPath) {
+	if gulu.File.IsSubPath(util.WorkingDir, localPath) {
 		msg := fmt.Sprintf("import from local path [%s] failed: local path is sub path of working dir", localPath)
 		logging.LogErrorf(msg)
 		ret.Code = -1
@@ -288,7 +288,7 @@ func importZipMd(c *gin.Context) {
 	}
 
 	writePath := filepath.Join(importDir, file.Filename)
-	if !util.IsSubPath(importDir, writePath) {
+	if !gulu.File.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
 		ret.Code = -1
 		ret.Msg = "import path is not sub path of import dir"

@@ -366,7 +366,7 @@ func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
 
 	// 禁止访问 data/templates 目录
 	templatesBase := normalizeAndResolve(filepath.Join(util.DataDir, "templates"))
-	if util.IsSubPath(templatesBase, fileNorm) {
+	if gulu.File.IsSubPath(templatesBase, fileNorm) {
 		ret.Code = http.StatusForbidden
 		ret.Msg = http.StatusText(http.StatusForbidden)
 		c.JSON(http.StatusAccepted, ret)

@@ -490,7 +490,7 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 		return
 	}
 
-	if util.IsSubPath(absPath, util.WorkspaceDir) {
+	if gulu.File.IsSubPath(absPath, util.WorkspaceDir) {
 		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
 		logging.LogErrorf(msg)
 		err = fmt.Errorf(Conf.Language(77), msg)

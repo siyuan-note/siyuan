@@ -10,18 +10,25 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     if (nodeElement && nodeElement.classList.contains("protyle-action")) {
         return nodeElement;
     }
-    while (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
+    let lastNodeElement;
+    while (nodeElement && (
+        nodeElement.classList.contains("list") || nodeElement.classList.contains("li") ||
+        nodeElement.classList.contains("bq") || nodeElement.classList.contains("callout")
+    )) {
         nodeElement = document.elementFromPoint(left, y) as HTMLElement;
+        const calloutInfoElement = hasClosestByClassName(nodeElement, "callout-info");
+        if (calloutInfoElement) {
+            nodeElement = calloutInfoElement;
+            break;
+        }
         nodeElement = hasClosestBlock(nodeElement) as HTMLElement;
+        if (lastNodeElement && lastNodeElement === nodeElement) {
+            break;
+        }
+        lastNodeElement = nodeElement;
         if (nodeElement) {
-            if (nodeElement.classList.contains("bq")) {
-                nodeElement = nodeElement.firstElementChild as HTMLElement;
-            } else if (nodeElement.classList.contains("callout")) {
-                if (y > nodeElement.firstElementChild.getBoundingClientRect().bottom) {
-                    nodeElement = getFirstBlock(nodeElement) as HTMLElement;
-                } else {
-                    nodeElement = nodeElement.firstElementChild as HTMLElement;
-                }
+            if (nodeElement.classList.contains("bq") || nodeElement.classList.contains("callout")) {
+                left += 10;
             } else {
                 left += 34;
             }

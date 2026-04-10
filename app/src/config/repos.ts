@@ -245,6 +245,19 @@ const fillSyncProviderPanelValues = (panel: Element) => {
     }
 };
 
+const getReposDataLoadingHTML = () =>
+    `<div class="fn__flex">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.cloudStorage}
+    </div>
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.trafficStat}
+    </div>
+</div>
+<div style="min-height: 180px; display: flex; justify-content: center;" id="reposLoading">
+    <img src="/stage/loading-pure.svg">
+</div>`;
+
 const bindProviderEvent = () => {
     const importElement = repos.element.querySelector("#importData") as HTMLInputElement;
     if (importElement) {
@@ -267,10 +280,8 @@ const bindProviderEvent = () => {
     }
 
     const reposDataElement = repos.element.querySelector("#reposData");
-    const loadingElement = repos.element.querySelector("#reposLoading");
     if (window.siyuan.config.sync.provider === 0) {
         if (needSubscribe("")) {
-            loadingElement.classList.add("fn__none");
             let nextElement = reposDataElement;
             while (nextElement) {
                 nextElement.classList.add("fn__none");
@@ -278,13 +289,13 @@ const bindProviderEvent = () => {
             }
             return;
         }
+        reposDataElement.innerHTML = getReposDataLoadingHTML();
         fetchPost("/api/cloud/getCloudSpace", {}, (response) => {
-            loadingElement.classList.add("fn__none");
             if (response.code === 1) {
                 reposDataElement.innerHTML = response.msg;
                 return;
-            } else {
-                reposDataElement.innerHTML = `<div class="fn__flex">
+            }
+            reposDataElement.innerHTML = `<div class="fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.cloudStorage}
         <div class="fn__hr"></div>
@@ -308,13 +319,11 @@ const bindProviderEvent = () => {
         </ul>
     </div>
 </div>`;
-            }
         });
         reposDataElement.classList.remove("fn__none");
         return;
     }
 
-    loadingElement.classList.add("fn__none");
     let nextElement = reposDataElement.nextElementSibling;
     while (nextElement) {
         if (isPaidUser()) {
@@ -447,11 +456,7 @@ const bindProviderEvent = () => {
 export const repos = {
     element: undefined as Element,
     genHTML: () => {
-        return `<div>
-<div style="position: fixed;width: 800px;height: 434px;box-sizing: border-box;text-align: center;display: flex;align-items: center;justify-content: center;z-index: 1;" id="reposLoading">
-    <img src="/stage/loading-pure.svg">
-</div>
-<div class="fn__flex b3-label config__item">
+        return `<div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.syncProvider}
         <div class="b3-label__text">${window.siyuan.languages.syncProviderTip}</div>
@@ -468,14 +473,7 @@ export const repos = {
     ${renderProvider(window.siyuan.config.sync.provider)}
 </div>
 <div id="reposData" class="b3-label">
-    <div class="fn__flex">
-        <div class="fn__flex-1">
-            ${window.siyuan.languages.cloudStorage}
-        </div>
-        <div class="fn__flex-1">
-            ${window.siyuan.languages.trafficStat}
-        </div>
-    </div>
+${getReposDataLoadingHTML()}
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -541,7 +539,6 @@ export const repos = {
 <div class="b3-label fn__flex">
     <div class="fn__flex-center">${window.siyuan.languages.cloudBackup}</div>
     <div class="b3-list-item__meta fn__flex-center">${window.siyuan.languages.cloudBackupTip}</div>
-</div>
 </div>`;
     },
     bindEvent: () => {
@@ -629,9 +626,6 @@ export const repos = {
                 }
             });
         });
-        const loadingElement = repos.element.querySelector("#reposLoading") as HTMLElement;
-        loadingElement.style.width = repos.element.clientWidth + "px";
-        loadingElement.style.height = repos.element.clientHeight + "px";
         bindSyncCloudListEvent(syncConfigElement);
         repos.element.firstElementChild.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;

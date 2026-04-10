@@ -39,6 +39,9 @@ func removeUnusedAttributeView(c *gin.Context) {
 	}
 
 	avID := arg["id"].(string)
+	if util.InvalidIDPattern(avID, ret) {
+		return
+	}
 	model.RemoveUnusedAttributeView(avID)
 	ret.Data = map[string]any{
 		"id": avID,

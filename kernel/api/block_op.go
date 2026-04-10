@@ -32,6 +32,101 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func updateTaskListItemMarker(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id, marker string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, true, true),
+		util.BindJsonArg("marker", &marker, true, false),
+	) {
+		return
+	}
+
+	block, err := model.GetBlock(id, nil)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = "get block failed: " + err.Error()
+		return
+	}
+
+	var transactions []*model.Transaction
+	if "NodeListItem" != block.Type {
+		ret.Code = -1
+		ret.Msg = "block is not a list item"
+		return
+	}
+
+	luteEngine := util.NewLute()
+	tree, err := filesys.LoadTree(block.Box, block.Path, luteEngine)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = "load tree failed: " + err.Error()
+		return
+	}
+
+	li := treenode.GetNodeInTree(tree, id)
+	if li == nil {
+		ret.Code = -1
+		ret.Msg = "block not found"
+		return
+	}
+
+	if 3 != li.ListData.Typ {
+		ret.Code = -1
+		ret.Msg = "block is not a task list item"
+		return
+	}
+
+	if 1 != len(marker) {
+		ret.Code = -1
+		ret.Msg = "task list item marker length should be 1"
+		return
+	}
+
+	liMarker := marker[0]
+	if '[' == liMarker || ']' == liMarker {
+		ret.Code = -1
+		ret.Msg = "task list item marker can not be [ or ]"
+		return
+	}
+
+	markerNode := li.ChildByType(ast.NodeTaskListItemMarker)
+	if nil == markerNode {
+		ret.Code = -1
+		ret.Msg = "task list item marker not found"
+		return
+	}
+
+	markerNode.TaskListItemMarker = liMarker
+	markerNode.TaskListItemChecked = ' ' != markerNode.TaskListItemMarker
+
+	data := luteEngine.RenderNodeBlockDOM(li)
+	transactions = []*model.Transaction{
+		{
+			DoOperations: []*model.Operation{
+				{
+					Action: "update",
+					ID:     id,
+					Data:   data,
+				},
+			},
+		},
+	}
+
+	model.PerformTransactions(&transactions)
+	model.FlushTxQueue()
+
+	ret.Data = transactions
+	broadcastTransactions(transactions)
+}
+
 func moveOutlineHeading(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

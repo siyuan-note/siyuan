@@ -3,7 +3,7 @@ import {focusByWbr} from "../util/selection";
 import * as dayjs from "dayjs";
 
 export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
-    const dataTask = editElement.innerHTML.substring(0, 3).match(/^[\[【]([^\[\]【】])[\]】]$/);
+    const dataTask = editElement.innerHTML.substring(0, 3).match(/^[\[【]([^\x80-\uffff\[\]【】\"])[\]】]$/);
     if (type !== "NodeCodeBlock" &&
         // 任务列表首块不需要再更新为任务列表
         !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&

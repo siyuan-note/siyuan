@@ -1137,6 +1137,6 @@ type="checkbox">
                 html += item.outerHTML;
             });
         }
-        element.innerHTML = `<div class="b3-cards">${html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`}</div>`;
+        element.innerHTML = `<div class="b3-cards${html ? "" : " b3-cards--nowrap"}">${html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`}</div>`;
     }
 };

@@ -240,9 +240,10 @@
         'win32': 'Windows',
         'linux': 'Linux'
     }[process.platform] || process.platform;
-
+    const release = typeof process.getSystemVersion === 'function'
+        ? process.getSystemVersion() // Electron 提供，系统版本
+        : os.release(); // Node.js 提供，内核版本
     // Windows 系统版本判断
-    const release = os.release();
     if (process.platform === 'win32') {
         const versionParts = release.split('.'); // 10.0.22000
         if (versionParts.length >= 3) {

@@ -320,34 +320,6 @@ func FilterFileName(name string) string {
 	return name
 }
 
-func IsSubPath(absPath, toCheckPath string) bool {
-	if 1 > len(absPath) || 1 > len(toCheckPath) {
-		return false
-	}
-	if absPath == toCheckPath { // 相同路径时不认为是子路径
-		return false
-	}
-
-	if gulu.OS.IsWindows() {
-		if filepath.IsAbs(absPath) && filepath.IsAbs(toCheckPath) {
-			if strings.ToLower(absPath)[0] != strings.ToLower(toCheckPath)[0] {
-				// 不在一个盘
-				return false
-			}
-		}
-	}
-
-	up := ".." + string(os.PathSeparator)
-	rel, err := filepath.Rel(absPath, toCheckPath)
-	if err != nil {
-		return false
-	}
-	if !strings.HasPrefix(rel, up) && rel != ".." {
-		return true
-	}
-	return false
-}
-
 func IsCompressibleAssetImage(p string) bool {
 	lowerName := strings.ToLower(p)
 	return strings.HasPrefix(lowerName, "assets/") &&

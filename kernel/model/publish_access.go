@@ -245,11 +245,11 @@ func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
 func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publishAccess PublishAccess) bool {
 	absPath = filepath.Clean(absPath)
 
-	if util.IsSubPath(util.HistoryDir, absPath) {
+	if gulu.File.IsSubPath(util.HistoryDir, absPath) {
 		return false
 	}
 
-	if util.IsSubPath(util.DataDir, absPath) {
+	if gulu.File.IsSubPath(util.DataDir, absPath) {
 		relPath, err := filepath.Rel(util.DataDir, absPath)
 		if err != nil {
 			return true

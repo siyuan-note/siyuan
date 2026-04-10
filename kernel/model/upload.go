@@ -67,7 +67,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			continue
 		}
 
-		if util.IsSubPath(assetsDirPath, assetAbsPath) {
+		if gulu.File.IsSubPath(assetsDirPath, assetAbsPath) {
 			// 已经位于 assets 目录下的资源文件不处理
 			// Dragging a file from the assets folder into the editor causes the kernel to exit https://github.com/siyuan-note/siyuan/issues/15355
 			succMap[baseName] = "assets/" + fName

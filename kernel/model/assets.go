@@ -561,7 +561,7 @@ func getAssetAbsPath(relativePath string) (absPath string, err error) {
 	// 在 data 文件夹下搜索，主要是 data/assets 文件夹
 	p := filepath.Join(util.DataDir, relativePath)
 	if gulu.File.IsExist(p) {
-		if !util.IsSubPath(util.WorkspaceDir, p) {
+		if !gulu.File.IsSubPath(util.WorkspaceDir, p) {
 			return "", fmt.Errorf("[%s] is not sub path of workspace", p)
 		}
 		return p, nil
@@ -594,7 +594,7 @@ func getAssetAbsPath(relativePath string) (absPath string, err error) {
 		})
 
 		if "" != absPath {
-			if !util.IsSubPath(util.WorkspaceDir, absPath) {
+			if !gulu.File.IsSubPath(util.WorkspaceDir, absPath) {
 				return "", fmt.Errorf("[%s] is not sub path of workspace", absPath)
 			}
 			return absPath, nil

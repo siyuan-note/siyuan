@@ -444,7 +444,7 @@ func serveAppearance(ginServer *gin.Engine) {
 	}
 	siyuan.GET("/appearance/*filepath", func(c *gin.Context) {
 		filePath := filepath.Join(appearancePath, strings.TrimPrefix(c.Request.URL.Path, "/appearance/"))
-		if !util.IsSubPath(appearancePath, filePath) {
+		if !gulu.File.IsSubPath(appearancePath, filePath) {
 			c.Status(http.StatusUnauthorized)
 			return
 		}

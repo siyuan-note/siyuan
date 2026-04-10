@@ -359,14 +359,14 @@ func GetAbsPathInWorkspace(relPath string) (string, error) {
 		return absPath, nil
 	}
 
-	if IsSubPath(WorkspaceDir, absPath) {
+	if gulu.File.IsSubPath(WorkspaceDir, absPath) {
 		return absPath, nil
 	}
 	return "", os.ErrPermission
 }
 
 func IsAbsPathInWorkspace(absPath string) bool {
-	return IsSubPath(WorkspaceDir, absPath)
+	return gulu.File.IsSubPath(WorkspaceDir, absPath)
 }
 
 // IsWorkspaceDir 判断指定目录是否是工作空间目录。

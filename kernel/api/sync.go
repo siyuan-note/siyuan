@@ -81,7 +81,7 @@ func importSyncProviderWebDAV(c *gin.Context) {
 	}
 
 	writePath := filepath.Join(importDir, f.Filename)
-	if !util.IsSubPath(importDir, writePath) {
+	if !gulu.File.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
 		ret.Code = -1
 		ret.Msg = "import path is not sub path of import dir"
@@ -274,7 +274,7 @@ func importSyncProviderS3(c *gin.Context) {
 	}
 
 	writePath := filepath.Join(importDir, f.Filename)
-	if !util.IsSubPath(importDir, writePath) {
+	if !gulu.File.IsSubPath(importDir, writePath) {
 		logging.LogErrorf("import path [%s] is not sub path of import dir [%s]", writePath, importDir)
 		ret.Code = -1
 		ret.Msg = "import path is not sub path of import dir"

@@ -245,8 +245,7 @@ const fillSyncProviderPanelValues = (panel: Element) => {
     }
 };
 
-const getReposDataLoadingHTML = () =>
-    `<div class="fn__flex">
+const getReposDataLoadingHTML = () => `<div class="fn__flex">
     <div class="fn__flex-1">
         ${window.siyuan.languages.cloudStorage}
     </div>
@@ -473,7 +472,7 @@ export const repos = {
     ${renderProvider(window.siyuan.config.sync.provider)}
 </div>
 <div id="reposData" class="b3-label">
-${getReposDataLoadingHTML()}
+    ${getReposDataLoadingHTML()}
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">

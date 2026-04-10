@@ -253,7 +253,7 @@ const getReposDataLoadingHTML = () => `<div class="fn__flex">
         ${window.siyuan.languages.trafficStat}
     </div>
 </div>
-<div style="min-height: 180px; display: flex; justify-content: center;" id="reposLoading">
+<div style="min-height: 183px; display: flex; justify-content: center;" id="reposLoading">
     <img src="/stage/loading-pure.svg">
 </div>`;
 

@@ -20,7 +20,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
             contextStartIndex = Math.min(contextStartIndex, contextStar2tIndex);
         }
         editElement.removeAttribute("placeholder");
-        const isDone = editElement.innerHTML.substring(1, 2).toLowerCase() === "x";
+        const isDone = dataTask && dataTask[1] !== " ";
         if (blockElement.parentElement.classList.contains("li") &&
             blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506
         ) {
@@ -30,8 +30,8 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 const liElement = blockElement.parentElement.parentElement;
                 const oldHTML = liElement.outerHTML;
                 liElement.setAttribute("data-subtype", "t");
-                liElement.setAttribute("data-task", dataTask ? dataTask[1] : " ");
                 liElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                blockElement.parentElement.setAttribute("data-task", dataTask ? dataTask[1] : " ");
                 blockElement.parentElement.setAttribute("data-subtype", "t");
                 if (isDone) {
                     blockElement.parentElement.classList.add("protyle-task--done");

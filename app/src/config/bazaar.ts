@@ -130,7 +130,7 @@ export const bazaar = {
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div id="configBazaarTheme" class="config-bazaar__content">
+        <div id="configBazaarTheme" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
         </div>
     </div>
@@ -153,7 +153,7 @@ export const bazaar = {
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div id="configBazaarTemplate" class="config-bazaar__content">
+        <div id="configBazaarTemplate" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
         </div>
     </div>
@@ -176,7 +176,7 @@ export const bazaar = {
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div id="configBazaarPlugin" class="config-bazaar__content">
+        <div id="configBazaarPlugin" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
         </div>
     </div>
@@ -199,7 +199,7 @@ export const bazaar = {
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div id="configBazaarIcon" class="config-bazaar__content">
+        <div id="configBazaarIcon" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
         </div>
     </div>
@@ -222,7 +222,7 @@ export const bazaar = {
             <div class="fn__flex-1"></div>
             <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
         </div>
-        <div id="configBazaarWidget" class="config-bazaar__content">
+        <div id="configBazaarWidget" class="config-bazaar__content b3-cards b3-cards--nowrap">
             ${loadingHTML}
         </div>
     </div>
@@ -469,7 +469,7 @@ type="checkbox">
             } else {
                 checkElement.classList.add("fn__none");
             }
-            contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            contentElement.innerHTML = html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
         });
     },
     _data: {
@@ -1112,7 +1112,7 @@ type="checkbox">
             html += this._genCardHTML(item, bazaarType);
         });
         bazaar._data[bazaarType] = response.data.packages;
-        element.innerHTML = `<div class="b3-cards">${html}</div>`;
+        element.innerHTML = html;
         element.parentElement.querySelector(".counter").textContent = element.querySelectorAll(".b3-card:not(.fn__none)").length.toString();
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
         if (localSort[bazaarType.replace("s", "")] === "1") {
@@ -1137,6 +1137,7 @@ type="checkbox">
                 html += item.outerHTML;
             });
         }
-        element.innerHTML = `<div class="b3-cards${html ? "" : " b3-cards--nowrap"}">${html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`}</div>`;
+        element.classList.toggle("b3-cards--nowrap", !html);
+        element.innerHTML = html || `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
     }
 };

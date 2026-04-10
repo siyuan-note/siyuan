@@ -278,13 +278,13 @@ export const bazaar = {
             </div>
         </div>
         <div class="b3-card__actions">
-            <span class="block__icon block__icon--show block__icon--show">
+            <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>
                 ${item.downloads}
             </span>
             <span class="fn__space"></span>
-            <span class="block__icon block__icon--show block__icon--show">
+            <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconAccount"></use></svg>
                 <span class="fn__space"></span>
                 ${item.author}

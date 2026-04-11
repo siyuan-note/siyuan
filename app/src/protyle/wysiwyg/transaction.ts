@@ -692,7 +692,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             fetchPost("/api/block/getBlockDOM", {
                 id: operation.id,
             }, (response) => {
-                document.querySelector(`[data-node-id="${operation.id}"]`).outerHTML = response.data.dom;
+                document.querySelector(`.protyle-wysiwyg [data-node-id="${operation.id}"]`).outerHTML = response.data.dom;
             });
         }
         let range;

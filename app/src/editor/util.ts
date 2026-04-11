@@ -5,7 +5,7 @@ import {getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../l
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getDocDisplayName, pathPosix, useShell} from "../util/pathName";
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -61,6 +61,7 @@ export const openFileById = async (options: {
     return openFile({
         app: options.app,
         fileName: response.data.rootTitle,
+        rootTitleEmpty: response.data.rootTitleEmpty,
         rootIcon: response.data.rootIcon,
         rootID: response.data.rootID,
         id: options.id,
@@ -518,7 +519,7 @@ const newTab = (options: IOpenFileOptions) => {
         });
     } else {
         tab = new Tab({
-            title: getDisplayName(options.fileName, true, true),
+            title: getDocDisplayName(options.fileName, options.rootTitleEmpty),
             docIcon: options.rootIcon,
             callback(tab) {
                 let editor;

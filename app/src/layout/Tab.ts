@@ -99,7 +99,9 @@ export class Tab {
                     tabElement.style.opacity = "0.38";
                     window.siyuan.dragElement = this.headElement;
                 }
+                /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "removeRegionStyle"});
+                /// #endif
             });
             this.headElement.addEventListener("dragend", (event: DragEvent & { target: HTMLElement }) => {
                 const tabElement = hasClosestByTag(event.target, "LI");

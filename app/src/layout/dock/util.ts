@@ -2,7 +2,7 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {fixWndFlex1, getInstanceById, getWndByLayout, saveLayout, switchWnd} from "../util";
+import {fixWndFlex1, getInstanceById, getWndByLayout, saveLayout} from "../util";
 import {getDockByType, resizeTabs} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";
@@ -145,7 +145,7 @@ export const openOutline = async (options: {
     if (!wnd) {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
-    const newWnd = wnd.split("lr");
+    const newWnd = wnd.split("lr", false);
 
     if (!options.title) {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.rootId});
@@ -166,7 +166,6 @@ export const openOutline = async (options: {
     }), false, false);
     newWnd.element.style.width = "200px";
     newWnd.element.classList.remove("fn__flex-1");
-    switchWnd(newWnd, wnd);
     fixWndFlex1(newWnd.parent);
     saveLayout();
 };

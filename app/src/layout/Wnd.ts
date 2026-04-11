@@ -9,7 +9,6 @@ import {
     pdfIsLoading,
     saveLayout,
     setPanelFocus,
-    switchWnd
 } from "./util";
 import {Tab} from "./Tab";
 import {Model} from "./Model";
@@ -382,26 +381,16 @@ export class Wnd {
                 // split
                 if (dragElement.style.height === "50%") {
                     // split to bottom
-                    const newWnd = targetWnd.split("tb");
+                    const newWnd = targetWnd.split("tb", dragElement.style.bottom !== "50%");
                     newWnd.headersElement.append(oldTab.headElement);
                     newWnd.headersElement.parentElement.classList.remove("fn__none");
                     newWnd.moveTab(oldTab);
-
-                    if (dragElement.style.bottom === "50%" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
-                        // 交换位置
-                        switchWnd(newWnd, targetWnd);
-                    }
                 } else if (dragElement.style.width === "50%") {
                     // split to right
-                    const newWnd = targetWnd.split("lr");
+                    const newWnd = targetWnd.split("lr", dragElement.style.right !== "50%");
                     newWnd.headersElement.append(oldTab.headElement);
                     newWnd.headersElement.parentElement.classList.remove("fn__none");
                     newWnd.moveTab(oldTab);
-
-                    if (dragElement.style.right === "50%" && newWnd.element.previousElementSibling && targetWnd.element.parentElement) {
-                        // 交换位置
-                        switchWnd(newWnd, targetWnd);
-                    }
                 }
                 resizeTabs();
                 /// #if !BROWSER
@@ -990,7 +979,7 @@ export class Wnd {
         /// #endif
     }
 
-    public split(direction: Config.TUILayoutDirection) {
+    public split(direction: Config.TUILayoutDirection, after = true) {
         if (this.children.length === 1 && !this.children[0].headElement) {
             // 场景：没有打开的文档，点击标签面板打开
             return this;
@@ -998,7 +987,7 @@ export class Wnd {
         recordBeforeResizeTop();
         const wnd = new Wnd(this.app, direction);
         if (direction === this.parent.direction) {
-            this.parent.addWnd(wnd, this.id);
+            this.parent.addWnd(wnd, this.id, after);
         } else if (this.parent.children.length === 1) {
             // layout 仅含一个时，只需更新 direction
             this.parent.direction = direction;
@@ -1009,7 +998,7 @@ export class Wnd {
                 this.parent.element.classList.remove("fn__flex-column");
                 this.parent.element.classList.add("fn__flex");
             }
-            this.parent.addWnd(wnd, this.id);
+            this.parent.addWnd(wnd, this.id, after);
         } else {
             this.parent.children.find((item, index) => {
                 if (item.id === this.id) {
@@ -1023,8 +1012,13 @@ export class Wnd {
                         movedWnd.element.previousElementSibling.remove();
                         movedWnd.resize = undefined;
                     }
-                    layout.addWnd.call(layout, movedWnd);
-                    layout.addWnd.call(layout, wnd);
+                    if (after) {
+                        layout.addWnd.call(layout, movedWnd);
+                        layout.addWnd.call(layout, wnd);
+                    } else {
+                        layout.addWnd.call(layout, wnd);
+                        layout.addWnd.call(layout, movedWnd);
+                    }
 
                     if (direction === "tb" && movedWnd.element.style.width) {
                         layout.element.style.width = movedWnd.element.style.width;

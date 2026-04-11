@@ -68,57 +68,6 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     }
 };
 
-export const switchWnd = (newWnd: Wnd, targetWnd: Wnd) => {
-    // DOM 移动后 range 会变化
-    const rangeDatas: {
-        id: string,
-        start: number,
-        end: number
-    }[] = [];
-    targetWnd.children.forEach((item) => {
-        if (item.model instanceof Editor && item.model.editor.protyle.toolbar.range) {
-            const blockElement = hasClosestBlock(item.model.editor.protyle.toolbar.range.startContainer);
-            if (blockElement) {
-                const startEnd = getSelectionOffset(blockElement, undefined, item.model.editor.protyle.toolbar.range);
-                rangeDatas.push({
-                    id: blockElement.getAttribute("data-node-id"),
-                    start: startEnd.start,
-                    end: startEnd.end
-                });
-            }
-        }
-    });
-    newWnd.element.after(targetWnd.element);
-    targetWnd.children.forEach((item) => {
-        if (item.model instanceof Editor) {
-            const rangeData = rangeDatas.splice(0, 1)[0];
-            if (!rangeData) {
-                return;
-            }
-            const range = focusByOffset(item.model.editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${rangeData.id}"]`), rangeData.start, rangeData.end);
-            if (range) {
-                item.model.editor.protyle.toolbar.range = range;
-            }
-        }
-    });
-    // 分隔线
-    newWnd.element.after(newWnd.element.previousElementSibling);
-    newWnd.parent.children.find((item, index) => {
-        if (item.id === newWnd.id) {
-            const tempResize = newWnd.parent.children[index].resize;
-            newWnd.parent.children[index].resize = newWnd.parent.children[index - 1].resize;
-            newWnd.parent.children[index - 1].resize = tempResize;
-            const temp = item;
-            newWnd.parent.children[index] = newWnd.parent.children[index - 1];
-            newWnd.parent.children[index - 1] = temp;
-            return true;
-        }
-    });
-    /// #if !BROWSER
-    setTabPosition();
-    /// #endif
-};
-
 export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {
     const wndsTemp: Wnd[] = [];
     getAllWnds(layout, wndsTemp);
@@ -790,7 +739,7 @@ export const getInstanceById = (id: string, layout = window.siyuan.layout.center
     return _getInstanceById(layout, id);
 };
 
-export const addResize = (obj: Layout | Wnd) => {
+export const addResize = (obj: Layout | Wnd, after = true) => {
     if (!obj.resize) {
         return;
     }
@@ -917,7 +866,11 @@ export const addResize = (obj: Layout | Wnd) => {
         resizeElement.classList.add("layout__resize--lr");
     }
     resizeElement.classList.add("layout__resize");
-    obj.element.insertAdjacentElement("beforebegin", resizeElement);
+    if (after) {
+        obj.element.insertAdjacentElement("beforebegin", resizeElement);
+    } else {
+        obj.element.insertAdjacentElement("afterend", resizeElement);
+    }
     resizeWnd(resizeElement, obj.resize);
 
     resizeElement.addEventListener("dblclick", () => {

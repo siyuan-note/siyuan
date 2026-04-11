@@ -38,6 +38,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
+const errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
+
 func getUniqueFilename(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -47,7 +50,13 @@ func getUniqueFilename(c *gin.Context) {
 		return
 	}
 
-	filePath := arg["path"].(string)
+	var filePath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &filePath, true, true),
+	) {
+		return
+	}
+
 	ret.Data = map[string]any{
 		"path": util.GetUniqueFilename(filePath),
 	}
@@ -62,36 +71,80 @@ func globalCopyFiles(c *gin.Context) {
 		return
 	}
 
+	var srcsArg []any
+	var destDirArg string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("srcs", &srcsArg, true, true),        // 绝对路径
+		util.BindJsonArg("destDir", &destDirArg, true, false), // 相对于工作空间的路径
+	) {
+		return
+	}
+
 	var srcs []string
-	srcsArg := arg["srcs"].([]any)
 	for _, s := range srcsArg {
-		srcs = append(srcs, s.(string))
+		str, elemOk := s.(string)
+		if !elemOk {
+			ret.Code = -1
+			ret.Msg = "Field [srcs]: each element should be of type [String]"
+			return
+		}
+		srcs = append(srcs, str)
 	}
 
 	for i, src := range srcs {
+		if !filepath.IsAbs(src) {
+			logging.LogErrorf("global copy files src [%s] is not an absolute path", src)
+			ret.Code = -1
+			ret.Msg = "Field [srcs]: each path must be absolute"
+			return
+		}
+
 		absSrc, _ := filepath.Abs(src)
 
 		if !filelock.IsExist(absSrc) {
-			msg := fmt.Sprintf("file [%s] does not exist", src)
-			logging.LogErrorf(msg)
+			logging.LogErrorf("file [%s] does not exist", src)
 			ret.Code = -1
-			ret.Msg = msg
+			ret.Msg = fmt.Sprintf("file [%s] does not exist", src)
 			return
 		}
 
 		if util.IsSensitivePath(absSrc) {
-			msg := fmt.Sprintf("refuse to copy sensitive file [%s]", src)
-			logging.LogErrorf(msg)
+			logging.LogErrorf("refuse to copy sensitive file [%s]", src)
 			ret.Code = -2
-			ret.Msg = msg
+			ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", src)
 			return
 		}
 
 		srcs[i] = absSrc
 	}
 
-	destDir := arg["destDir"].(string) // 相对于工作空间的路径
-	destDir = filepath.Join(util.WorkspaceDir, destDir)
+	destDir, err := util.GetAbsPathInWorkspace(destDirArg)
+	if err != nil {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+	if filelock.IsExist(destDir) {
+		destInfo, statErr := os.Stat(destDir)
+		if statErr != nil {
+			ret.Code = -1
+			ret.Msg = statErr.Error()
+			return
+		}
+		if !destInfo.IsDir() {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [destDir]: path [%s] is not a directory", destDirArg)
+			return
+		}
+	} else {
+		if err = os.MkdirAll(destDir, 0755); err != nil {
+			logging.LogErrorf("make dir [%s] failed: %s", destDir, err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
 	for _, src := range srcs {
 		dest := filepath.Join(destDir, filepath.Base(src))
 		if err := filelock.Copy(src, dest); err != nil {
@@ -115,18 +168,18 @@ func workspaceCopyFiles(c *gin.Context) {
 	}
 
 	var srcsArg []any
-	var destDirArg string // 相对于工作空间的路径
+	var destDirArg string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("srcs", &srcsArg, true, true),
-		util.BindJsonArg("destDir", &destDirArg, true, false),
+		util.BindJsonArg("srcs", &srcsArg, true, true),        // 相对于工作空间的路径
+		util.BindJsonArg("destDir", &destDirArg, true, false), // 相对于工作空间的路径
 	) {
 		return
 	}
 
 	var relSrcs []string
 	for _, s := range srcsArg {
-		str, ok := s.(string) // 相对于工作空间的路径
-		if !ok {
+		str, elemOk := s.(string)
+		if !elemOk {
 			ret.Code = -1
 			ret.Msg = "Field [srcs]: each element should be of type [String]"
 			return
@@ -134,37 +187,10 @@ func workspaceCopyFiles(c *gin.Context) {
 		str = strings.TrimSpace(str)
 		if str == "" {
 			ret.Code = -1
-			ret.Msg = "src path must not be empty"
+			ret.Msg = "Field [srcs]: path must not be empty"
 			return
 		}
 		relSrcs = append(relSrcs, str)
-	}
-
-	destDir, err := util.GetAbsPathInWorkspace(destDirArg)
-	if err != nil {
-		ret.Code = http.StatusForbidden
-		ret.Msg = err.Error()
-		return
-	}
-	if filelock.IsExist(destDir) {
-		destInfo, err := os.Stat(destDir)
-		if err != nil {
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
-		}
-		if !destInfo.IsDir() {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("destDir [%s] is not a directory", destDirArg)
-			return
-		}
-	} else {
-		if err = os.MkdirAll(destDir, 0755); err != nil {
-			logging.LogErrorf("make dir [%s] failed: %s", destDir, err)
-			ret.Code = -1
-			ret.Msg = err.Error()
-			return
-		}
 	}
 
 	var absSrcs []string
@@ -190,6 +216,33 @@ func workspaceCopyFiles(c *gin.Context) {
 		absSrcs = append(absSrcs, absSrc)
 	}
 
+	destDir, err := util.GetAbsPathInWorkspace(destDirArg)
+	if err != nil {
+		ret.Code = http.StatusForbidden
+		ret.Msg = err.Error()
+		return
+	}
+	if filelock.IsExist(destDir) {
+		destInfo, err := os.Stat(destDir)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if !destInfo.IsDir() {
+			ret.Code = -1
+			ret.Msg = "Field [destDir]: path is not a directory"
+			return
+		}
+	} else {
+		if err = os.MkdirAll(destDir, 0755); err != nil {
+			logging.LogErrorf("make dir [%s] failed: %s", destDir, err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	}
+
 	for _, absSrc := range absSrcs {
 		dest := filepath.Join(destDir, filepath.Base(absSrc))
 		if err := filelock.Copy(absSrc, dest); err != nil {
@@ -212,7 +265,22 @@ func copyFile(c *gin.Context) {
 		return
 	}
 
-	src := arg["src"].(string)
+	var src, dest string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("src", &src, true, true),   // 资源路径，由 GetAssetAbsPath 解析
+		util.BindJsonArg("dest", &dest, true, true), // 绝对路径
+	) {
+		return
+	}
+
+	if !filepath.IsAbs(dest) {
+		logging.LogErrorf("copy file dest [%s] is not an absolute path", dest)
+		ret.Code = -1
+		ret.Msg = "Field [dest]: path must be absolute"
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
 	src, err := model.GetAssetAbsPath(src)
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", src, err)
@@ -233,17 +301,15 @@ func copyFile(c *gin.Context) {
 
 	if info.IsDir() {
 		ret.Code = -1
-		ret.Msg = "file is a directory"
+		ret.Msg = "Field [src]: path is a directory"
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
 
-	dest := arg["dest"].(string)
 	if util.IsSensitivePath(dest) {
-		msg := fmt.Sprintf("refuse to copy sensitive file [%s]", dest)
-		logging.LogErrorf(msg)
+		logging.LogErrorf("refuse to copy sensitive file [%s]", dest)
 		ret.Code = -2
-		ret.Msg = msg
+		ret.Msg = fmt.Sprintf("refuse to copy sensitive file [%s]", dest)
 		return
 	}
 
@@ -267,7 +333,14 @@ func getFile(c *gin.Context) {
 		return
 	}
 
-	filePath := arg["path"].(string)
+	var filePath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &filePath, true, true),
+	) {
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -298,8 +371,8 @@ func getFile(c *gin.Context) {
 	}
 	if info.IsDir() {
 		logging.LogErrorf("path [%s] is a directory path", fileAbsPath)
-		ret.Code = http.StatusMethodNotAllowed
-		ret.Msg = "This is a directory path"
+		ret.Code = http.StatusConflict
+		ret.Msg = "path is a directory"
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
@@ -420,7 +493,13 @@ func readDir(c *gin.Context) {
 		return
 	}
 
-	dirPath := arg["path"].(string)
+	var dirPath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &dirPath, true, false),
+	) {
+		return
+	}
+
 	dirAbsPath, err := util.GetAbsPathInWorkspace(dirPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -430,19 +509,19 @@ func readDir(c *gin.Context) {
 	info, err := os.Stat(dirAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
-		ret.Msg = err.Error()
+		ret.Msg = "path does not exist"
 		return
 	}
 	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", dirAbsPath, err)
 		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 	if !info.IsDir() {
 		logging.LogErrorf("file [%s] is not a directory", dirAbsPath)
-		ret.Code = http.StatusMethodNotAllowed
-		ret.Msg = "file is not a directory"
+		ret.Code = http.StatusConflict
+		ret.Msg = "path is not a directory"
 		return
 	}
 
@@ -450,7 +529,7 @@ func readDir(c *gin.Context) {
 	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", dirAbsPath, err)
 		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 
@@ -461,7 +540,7 @@ func readDir(c *gin.Context) {
 		if err != nil {
 			logging.LogErrorf("stat [%s] failed: %s", path, err)
 			ret.Code = http.StatusInternalServerError
-			ret.Msg = err.Error()
+			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 			return
 		}
 		files = append(files, map[string]any{
@@ -485,9 +564,10 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	var srcPath string
+	var srcPath, destPath string
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("path", &srcPath, true, true),
+		util.BindJsonArg("newPath", &destPath, true, true),
 	) {
 		return
 	}
@@ -498,14 +578,19 @@ func renameFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if !filelock.IsExist(srcAbsPath) {
+	srcInfo, srcStatErr := os.Stat(srcAbsPath)
+	if os.IsNotExist(srcStatErr) {
 		ret.Code = http.StatusNotFound
-		ret.Msg = "the [path] file or directory does not exist"
+		ret.Msg = "Field [path]: path does not exist"
+		return
+	}
+	if srcStatErr != nil {
+		logging.LogErrorf("stat [%s] failed: %s", srcAbsPath, srcStatErr)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 
-	destPath := arg["newPath"].(string)
-	destPath = strings.TrimSpace(destPath)
 	destAbsPath, err := util.GetAbsPathInWorkspace(destPath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -514,14 +599,43 @@ func renameFile(c *gin.Context) {
 	}
 	if filelock.IsExist(destAbsPath) {
 		ret.Code = http.StatusConflict
-		ret.Msg = "the [newPath] file or directory already exists"
+		ret.Msg = "Field [newPath]: path already exists"
 		return
 	}
 
-	if err := filelock.Rename(srcAbsPath, destAbsPath); err != nil {
-		logging.LogErrorf("rename file [%s] to [%s] failed: %s", srcAbsPath, destAbsPath, err)
+	if srcInfo.IsDir() && gulu.File.IsSubPath(srcAbsPath, destAbsPath) {
+		ret.Code = http.StatusConflict
+		ret.Msg = "Field [newPath]: cannot rename a directory into its own subdirectory"
+		return
+	}
+
+	destParent := filepath.Dir(destAbsPath)
+	if filelock.IsExist(destParent) {
+		parentInfo, statErr := os.Stat(destParent)
+		if statErr != nil {
+			logging.LogErrorf("stat [%s] failed: %s", destParent, statErr)
+			ret.Code = http.StatusInternalServerError
+			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+			return
+		}
+		if !parentInfo.IsDir() {
+			ret.Code = http.StatusConflict
+			ret.Msg = fmt.Sprintf("Field [newPath]: parent path [%s] is not a directory", filepath.Dir(destPath))
+			return
+		}
+	} else {
+		if err = os.MkdirAll(destParent, 0755); err != nil {
+			logging.LogErrorf("make dir [%s] failed: %s", destParent, err)
+			ret.Code = http.StatusInternalServerError
+			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+			return
+		}
+	}
+
+	if err := filelock.RenameWithoutFatal(srcAbsPath, destAbsPath); err != nil {
+		logging.LogErrorf("rename file failed: %s", err)
 		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 
@@ -554,19 +668,20 @@ func removeFile(c *gin.Context) {
 	_, err = os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
+		ret.Msg = "path does not exist"
 		return
 	}
 	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 
-	if err = filelock.Remove(fileAbsPath); err != nil {
+	if err = filelock.RemoveWithoutFatal(fileAbsPath); err != nil {
 		logging.LogErrorf("remove [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
-		ret.Msg = err.Error()
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 
@@ -583,6 +698,11 @@ func putFile(c *gin.Context) {
 	var err error
 	filePath := c.PostForm("path")
 	filePath = strings.TrimSpace(filePath)
+	if filePath == "" {
+		ret.Code = http.StatusBadRequest
+		ret.Msg = "path must not be empty"
+		return
+	}
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
 	if err != nil {
 		ret.Code = http.StatusForbidden
@@ -594,7 +714,7 @@ func putFile(c *gin.Context) {
 	if !fileExists {
 		if !util.IsValidUploadFileName(filepath.Base(fileAbsPath)) { // Improve kernel API `/api/file/putFile` parameter validation https://github.com/siyuan-note/siyuan/issues/14658
 			ret.Code = http.StatusBadRequest
-			ret.Msg = "invalid file path, please check https://github.com/siyuan-note/siyuan/issues/14658 for more details"
+			ret.Msg = "invalid file path. For details, please check https://github.com/siyuan-note/siyuan/issues/14658"
 			return
 		}
 	} else {
@@ -607,7 +727,7 @@ func putFile(c *gin.Context) {
 		}
 		if info.IsDir() && !isDir {
 			ret.Code = http.StatusBadRequest
-			ret.Msg = "the path is a directory"
+			ret.Msg = "path is a directory"
 			return
 		}
 	}
@@ -622,11 +742,11 @@ func putFile(c *gin.Context) {
 		if nil == fileHeader {
 			logging.LogErrorf("form file is nil [path=%s]", fileAbsPath)
 			ret.Code = http.StatusBadRequest
-			ret.Msg = "form file is nil"
+			ret.Msg = "Field [file] must not be empty"
 			return
 		}
 
-		for {
+		for range 1 {
 			dir := filepath.Dir(fileAbsPath)
 			if err = os.MkdirAll(dir, 0755); err != nil {
 				logging.LogErrorf("put file [%s] make dir [%s] failed: %s", fileAbsPath, dir, err)
@@ -652,7 +772,6 @@ func putFile(c *gin.Context) {
 				logging.LogErrorf("write file [%s] failed: %s", fileAbsPath, err)
 				break
 			}
-			break
 		}
 	}
 	if err != nil {

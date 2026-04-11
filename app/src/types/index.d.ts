@@ -788,6 +788,7 @@ interface IFile {
     bookmark: string;
     path: string;
     name: string;
+    titleEmpty?: boolean;
     hMtime: string;
     hCtime: string;
     hSize: string;

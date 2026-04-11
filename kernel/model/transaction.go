@@ -1754,23 +1754,9 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
-	var invalidNames []string
-	for name := range attrs {
-		if !isValidAttrName(name) {
-			logging.LogWarnf("invalid attr name [%s]", name)
-			invalidNames = append(invalidNames, name)
-		}
-	}
-	for _, name := range invalidNames {
-		delete(attrs, name)
-	}
-
-	for name, value := range attrs {
-		if "" == value {
-			node.RemoveIALAttr(name)
-		} else {
-			node.SetIALAttr(name, value)
-		}
+	if _, setErr := setNodeAttrs0(node, attrs); nil != setErr {
+		logging.LogErrorf("set attrs failed: %s", setErr)
+		return &TxErr{code: TxErrCodePushMsg, msg: setErr.Error(), id: id}
 	}
 
 	tx.writeTree(tree)

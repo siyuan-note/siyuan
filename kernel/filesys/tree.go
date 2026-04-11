@@ -149,6 +149,12 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 	ret.Root.Path = p
 
 	parts := strings.Split(p, "/")
+	if 2 < len(parts) {
+		logging.LogErrorf("parse tree [%s] failed: invalid path", p)
+		err = errors.New("invalid path")
+		return
+	}
+
 	parts = parts[1 : len(parts)-1] // 去掉开头的斜杆和结尾的自己
 	if 1 > len(parts) {
 		ret.HPath = "/" + ret.Root.IALAttr("title")

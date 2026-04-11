@@ -33,7 +33,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 const oldHTML = liElement.outerHTML;
                 liElement.setAttribute("data-subtype", "t");
                 liElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                blockElement.parentElement.setAttribute("data-task", dataTask ? escapeAttr(dataTask[1]) : " ");
+                blockElement.parentElement.setAttribute("data-task", dataTask ? dataTask[1] : " ");
                 blockElement.parentElement.setAttribute("data-subtype", "t");
                 if (isDone) {
                     blockElement.parentElement.classList.add("protyle-task--done");

@@ -92,10 +92,14 @@ func flushTx(tx *Transaction) {
 	start := time.Now()
 	if txErr := performTx(tx); nil != txErr {
 		switch txErr.code {
-		case TxErrCodeBlockNotFound:
+		case TxErrCodeBlockNotFound, TxErrCodePushMsg:
 			pushMsg := txErr.msg
 			if pushMsg == "" {
-				pushMsg = "Transaction failed: block not found"
+				if TxErrCodeBlockNotFound == txErr.code {
+					pushMsg = "Transaction failed: block not found"
+				} else {
+					pushMsg = "Transaction failed"
+				}
 			}
 			if txErr.id != "" && !strings.Contains(pushMsg, txErr.id) {
 				pushMsg += fmt.Sprintf(" [%s]", txErr.id)
@@ -125,7 +129,6 @@ func PerformTransactions(transactions *[]*Transaction) {
 		tx.m = &sync.Mutex{}
 		txQueue <- tx
 	}
-	return
 }
 
 const (
@@ -133,6 +136,7 @@ const (
 	TxErrCodeDataIsSyncing   = 1
 	TxErrCodeWriteTree       = 2
 	TxErrHandleAttributeView = 3
+	TxErrCodePushMsg         = 4
 )
 
 type TxErr struct {
@@ -157,7 +161,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			return
 		}
 		logging.LogErrorf("begin tx failed: %s", err)
-		ret = &TxErr{msg: err.Error()}
+		ret = &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
 		return
 	}
 
@@ -339,7 +343,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
-		return &TxErr{msg: cr.Error()}
+		return &TxErr{code: TxErrCodePushMsg, msg: cr.Error()}
 	}
 	return
 }
@@ -1422,7 +1426,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode := treenode.GetNodeInTree(tree, id)
 	if nil == oldNode {
 		logging.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
-		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
+		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
 	}
 
 	// 收集引用的定义块 ID
@@ -1476,7 +1480,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	updatedNode := subTree.Root.FirstChild
 	if nil == updatedNode {
 		logging.LogErrorf("get fist node in sub tree [%s] failed", subTree.Root.ID)
-		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
+		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
 	}
 	if ast.NodeList == updatedNode.Type && ast.NodeList == oldNode.Parent.Type {
 		updatedNode = updatedNode.FirstChild
@@ -1727,7 +1731,7 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
 		logging.LogErrorf("get node [%s] in tree [%s] failed", id, tree.Root.ID)
-		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
+		return &TxErr{code: TxErrCodeBlockNotFound, msg: ErrBlockNotFound.Error(), id: id}
 	}
 
 	node.SetIALAttr("updated", operation.Data.(string))

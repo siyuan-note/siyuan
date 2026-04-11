@@ -595,9 +595,9 @@ type="checkbox">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
-        if (downloaded && data.preferredReadme) {
+        if (downloaded) {
             const mdElement = readmeElement.querySelector(".item__readme");
-            mdElement.innerHTML = data.preferredReadme;
+            mdElement.innerHTML = data.preferredReadme || "";
             highlightRender(mdElement);
         } else {
             fetchPost("/api/bazaar/getBazaarPackageREADME", {

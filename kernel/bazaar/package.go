@@ -135,6 +135,7 @@ func sanitizePackageDisplayStrings(pkg *Package) {
 	if pkg == nil {
 		return
 	}
+	pkg.Author = html.EscapeString(pkg.Author)
 	for k, v := range pkg.DisplayName {
 		pkg.DisplayName[k] = html.EscapeString(v)
 	}

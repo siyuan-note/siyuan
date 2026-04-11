@@ -154,7 +154,7 @@ interface CSSStyleDeclarationElectron extends CSSStyleDeclaration {
 
 interface Window {
     DOMPurify: {
-        sanitize(dirty: string): string;
+        sanitize(dirty: string, options?: any): string;
     };
     echarts: {
         init(element: Element, theme?: string, options?: {

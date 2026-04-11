@@ -47,8 +47,12 @@ import (
 )
 
 func RemoveUnusedAttributeView(id string) {
-	absPath := filepath.Join(util.DataDir, "storage", "av", id+".json")
+	base := filepath.Join(util.DataDir, "storage", "av")
+	absPath := filepath.Join(base, id+".json")
 	if !filelock.IsExist(absPath) {
+		return
+	}
+	if !gulu.File.IsSubPath(base, absPath) {
 		return
 	}
 

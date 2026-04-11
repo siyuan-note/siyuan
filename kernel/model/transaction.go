@@ -93,7 +93,14 @@ func flushTx(tx *Transaction) {
 	if txErr := performTx(tx); nil != txErr {
 		switch txErr.code {
 		case TxErrCodeBlockNotFound:
-			util.PushTxErr("Transaction failed", txErr.code, nil)
+			pushMsg := txErr.msg
+			if pushMsg == "" {
+				pushMsg = "Transaction failed: block not found"
+			}
+			if txErr.id != "" && !strings.Contains(pushMsg, txErr.id) {
+				pushMsg += fmt.Sprintf(" [%s]", txErr.id)
+			}
+			util.PushTxErr(pushMsg, txErr.code, nil)
 			return
 		case TxErrCodeDataIsSyncing:
 			util.PushMsg(Conf.Language(222), 5000)
@@ -1201,6 +1208,8 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
+		logging.LogErrorf("invalid data tree: insert op id[%s] parent[%s] previous[%s] next[%s] root[%s]",
+			operation.ID, operation.ParentID, operation.PreviousID, operation.NextID, tree.Root.ID)
 		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree"}
 	}
 	var remains []*ast.Node

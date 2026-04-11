@@ -92,7 +92,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 openMobileFileById(app, data.data.id);
                 break;
             case"txerr":
-                transactionError();
+                transactionError(data.msg);
                 break;
             case"statusbar":
                 if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none") ||

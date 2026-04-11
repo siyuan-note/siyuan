@@ -144,7 +144,7 @@ class App {
                                 progressStatus(data);
                                 break;
                             case "txerr":
-                                transactionError();
+                                transactionError(data.msg);
                                 break;
                             case "syncing":
                                 processSync(data, this.plugins);

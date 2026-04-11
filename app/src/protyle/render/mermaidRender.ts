@@ -98,7 +98,15 @@ const initMermaid = (mermaidElements: Element[]) => {
         try {
             renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
             const mermaidData = await window.mermaid.render(id, Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
-            renderElement.lastElementChild.innerHTML = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);;
+            let svg = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);
+            svg = window.DOMPurify.sanitize(svg, {
+                USE_PROFILES: { svg: true, svgFilters: true },
+                ADD_TAGS: ['foreignObject', 'use', 'style'],
+                    ADD_ATTR: ['dominant-baseline', 'xlink:href', 'href'], // 保留对齐和链接属性
+                    // 必须添加此项，否则 foreignObject 里的 HTML 内容会被清空
+                    HTML_INTEGRATION_POINTS: { foreignobject: true }
+            });
+            renderElement.lastElementChild.innerHTML = svg;
         } catch (e) {
             const errorElement = document.querySelector("#" + id);
             renderElement.lastElementChild.innerHTML = `${errorElement.outerHTML}<div class="fn__hr"></div><div class="ft__error">${e.message.replace(/\n/, "<br>")}</div>`;

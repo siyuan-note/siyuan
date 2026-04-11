@@ -70,6 +70,11 @@
     line-height: 14px;
     padding: 3px 11px 11px;
 
+    &:not(.b3-card__actions--right).block__icon svg {
+      height: 12px;
+      width: 12px;
+    }
+
     &--right {
       padding-left: 0;
       padding-bottom: 0;

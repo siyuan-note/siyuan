@@ -236,9 +236,9 @@ export const bazaar = {
         }
         try {
             new URL(funding);
-            return `<span class="fn__space"></span><a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
+            return `<span class="fn__space--small"></span><a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
         } catch (e) {
-            return `<span class="fn__space"></span><span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
+            return `<span class="fn__space--small"></span><span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
         }
     },
     _genCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
@@ -280,23 +280,23 @@ export const bazaar = {
         <div class="b3-card__actions">
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconDownload"></use></svg>
-                <span class="fn__space"></span>
+                <span class="fn__space--small"></span>
                 ${item.downloads}
             </span>
-            <span class="fn__space"></span>
+            <span class="fn__space--small"></span>
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconAccount"></use></svg>
-                <span class="fn__space"></span>
+                <span class="fn__space--small"></span>
                 ${item.author}
             </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
-            <span class="fn__space"></span>
+            <span class="fn__space--small"></span>
             <div class="fn__flex-1"></div>
-            <div class="fn__space${!item.current && item.installed && showSwitch ? "" : " fn__none"}"></div>
+            <div class="fn__space--small${!item.current && item.installed && showSwitch ? "" : " fn__none"}"></div>
             <span data-position="north" class="ariaLabel block__icon block__icon--show${!item.current && item.installed && showSwitch ? "" : " fn__none"}" data-type="switch" aria-label="${window.siyuan.languages.use}">
                 <svg><use xlink:href="#iconSelect"></use></svg>
             </span>
-            <div class="fn__space${item.outdated ? "" : " fn__none"}"></div>
+            <div class="fn__space--small${item.outdated ? "" : " fn__none"}"></div>
             <span data-type="install-t" ${item.disallowUpdate ? "disabled" : ""} aria-label="${item.disallowUpdate ? window.siyuan.languages.bazaarNeedVersion.replace("${x}", item.updateRequiredMinAppVer) : window.siyuan.languages.update}" data-position="north" class="ariaLabel block__icon block__icon--show${item.outdated ? "" : " fn__none"}">
                 <svg class="ft__primary"><use xlink:href="#iconRefresh"></use></svg>
             </span>

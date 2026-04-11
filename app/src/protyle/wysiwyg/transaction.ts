@@ -382,9 +382,9 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
 
 // 用于推送和撤销
 export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: boolean) => {
-   if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
-       return;
-   }
+    if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
+        return;
+    }
     const updateElements: Element[] = [];
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
         if (!isInEmbedBlock(item)) {
@@ -688,11 +688,17 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         if (updateElements.length === 0) {
             const tempEl = document.createElement("div");
             tempEl.setAttribute("data-node-id", operation.id);
+            tempEl.setAttribute("data-protyle-id", protyle.element.getAttribute("data-id"));
             updateElements.push(tempEl);
             fetchPost("/api/block/getBlockDOM", {
                 id: operation.id,
             }, (response) => {
-                document.querySelector(`.protyle-wysiwyg [data-node-id="${operation.id}"]`).outerHTML = response.data.dom;
+                document.querySelectorAll(`.protyle-wysiwyg [data-node-id="${response.data.id}"]`).forEach(item => {
+                    if (item.getAttribute("data-protyle-id")) {
+                        item.outerHTML = response.data.dom;
+                        item.removeAttribute("data-protyle-id");
+                    }
+                });
             });
         }
         let range;

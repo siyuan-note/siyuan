@@ -65,7 +65,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20260411080619-1de6197a80f4
 	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
-	github.com/siyuan-note/filelock v0.0.0-20260411080437-db25ef668c70
+	github.com/siyuan-note/filelock v0.0.0-20260411140353-00a3dcfafe12
 	github.com/siyuan-note/httpclient v0.0.0-20260408083825-43e4476ad2b3
 	github.com/siyuan-note/logging v0.0.0-20260117134552-88b424dfe7f1
 	github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754
@@ -79,11 +79,11 @@ require (
 	github.com/xuri/excelize/v2 v2.10.1
 	golang.org/x/image v0.38.0
 	golang.org/x/mobile v0.0.0-20251209145715-2553ed8ce294
-	golang.org/x/mod v0.33.0
-	golang.org/x/net v0.52.0
+	golang.org/x/mod v0.34.0
+	golang.org/x/net v0.53.0
 	golang.org/x/sync v0.20.0
-	golang.org/x/sys v0.42.0
-	golang.org/x/text v0.35.0
+	golang.org/x/sys v0.43.0
+	golang.org/x/text v0.36.0
 	golang.org/x/time v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -171,7 +171,7 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/qiniu/go-sdk/v7 v7.26.8 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
-	github.com/quic-go/quic-go v0.58.0 // indirect
+	github.com/quic-go/quic-go v0.59.0 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.6 // indirect
@@ -191,8 +191,8 @@ require (
 	github.com/xuri/nfp v0.0.2-0.20250530014748-2ddeb826f9a9 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/arch v0.23.0 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
-	golang.org/x/tools v0.42.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/tools v0.43.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	howett.net/plist v1.0.2-0.20250314012144-ee69052608d9 // indirect

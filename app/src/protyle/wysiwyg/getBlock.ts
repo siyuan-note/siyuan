@@ -168,17 +168,10 @@ export const getTopAloneElement = (topSourceElement: Element) => {
                 break;
             }
         }
-    } else if (topSourceElement.parentElement.classList.contains("callout-content") &&
-        topSourceElement.parentElement.childElementCount === 1) {
-        while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
-            if (topSourceElement.parentElement.classList.contains("callout-content") &&
-                topSourceElement.parentElement.childElementCount === 1) {
-                topSourceElement = topSourceElement.parentElement.parentElement;
-            } else {
-                topSourceElement = getTopAloneElement(topSourceElement);
-                break;
-            }
-        }
+    } else if (topSourceElement.parentElement.classList.contains("callout-content")) {
+        // When inside callout-content, always return the callout block itself
+        // This prevents the callout from being deleted when dragging internal blocks
+        return topSourceElement.parentElement.parentElement;
     } else if ("NodeSuperBlock" === topSourceElement.parentElement.getAttribute("data-type") && topSourceElement.parentElement.childElementCount === 2) {
         while (topSourceElement.parentElement && !topSourceElement.parentElement.classList.contains("protyle-wysiwyg")) {
             if (topSourceElement.parentElement.getAttribute("data-type") === "NodeSuperBlock" && topSourceElement.parentElement.childElementCount === 2) {

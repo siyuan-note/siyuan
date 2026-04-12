@@ -36,7 +36,7 @@ var (
 func BroadcastByTypeAndExcludeApp(excludeApp, typ, cmd string, code int, msg string, data any) {
 	sessions.Range(func(key, value any) bool {
 		appSessions := value.(*sync.Map)
-		if key == excludeApp {
+		if excludeApp != "" && key == excludeApp {
 			return true
 		}
 
@@ -418,8 +418,10 @@ func broadcastOtherApps(msg []byte, excludeApp string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
-			if app, _ := session.Get("app"); app == excludeApp {
-				return true
+			if excludeApp != "" {
+				if app, _ := session.Get("app"); app == excludeApp {
+					return true
+				}
 			}
 			session.Write(msg)
 			return true
@@ -433,8 +435,10 @@ func broadcastOtherAppMains(msg []byte, excludeApp string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
-			if app, _ := session.Get("app"); app == excludeApp {
-				return true
+			if excludeApp != "" {
+				if app, _ := session.Get("app"); app == excludeApp {
+					return true
+				}
 			}
 
 			if t, ok := session.Get("type"); ok && "main" != t {
@@ -468,8 +472,10 @@ func broadcastOthers(msg []byte, excludeSID string) {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
-			if id, _ := session.Get("id"); id == excludeSID {
-				return true
+			if excludeSID != "" {
+				if id, _ := session.Get("id"); id == excludeSID {
+					return true
+				}
 			}
 			session.Write(msg)
 			return true

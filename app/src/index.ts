@@ -139,6 +139,19 @@ export class App {
                             case "setLocalStorageVal":
                                 window.siyuan.storage[data.data.key] = data.data.val;
                                 break;
+                            case "setLocalStorageVals":
+                                Object.keys(data.data.keyVals).forEach((k) => {
+                                    window.siyuan.storage[k] = data.data.keyVals[k];
+                                });
+                                break;
+                            case "removeLocalStorageVal":
+                                delete window.siyuan.storage[data.data.key];
+                                break;
+                            case "removeLocalStorageVals":
+                                data.data.keys.forEach((k: string) => {
+                                    delete window.siyuan.storage[k];
+                                });
+                                break;
                             case "rename":
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {

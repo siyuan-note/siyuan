@@ -646,13 +646,24 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 	return setLocalStorage(localStorage)
 }
 
-func SetLocalStorageVal(key string, val any) (err error) {
+func SetLocalStorageVals(keyVals map[string]any) (removedKeys []string, setKeyVals map[string]any, err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
+	removedKeys = make([]string, 0, len(keyVals))
+	setKeyVals = make(map[string]any, len(keyVals))
 	localStorage := getLocalStorage()
-	localStorage[key] = val
-	return setLocalStorage(localStorage)
+	for k, v := range keyVals {
+		if v == nil {
+			delete(localStorage, k)
+			removedKeys = append(removedKeys, k)
+		} else {
+			localStorage[k] = v
+			setKeyVals[k] = v
+		}
+	}
+	err = setLocalStorage(localStorage)
+	return
 }
 
 func SetLocalStorage(val any) (err error) {

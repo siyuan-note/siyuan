@@ -360,21 +360,25 @@ export const copyTab = (app: App, tab: Tab) => {
     });
 };
 
-const getRootID = (item: Tab) => {
+const pushRootID = (rootIDs: string[], item: Tab) => {
+    let id;
     if (item.model instanceof Editor) {
-        return item.model.editor.protyle.block.rootID;
+        id = item.model.editor.protyle.block.rootID;
     } else if (!item.model) {
         const initTab = item.headElement.getAttribute("data-initdata");
         if (initTab) {
             try {
                 const initTabData = JSON.parse(initTab);
                 if (initTabData && initTabData.instance === "Editor" && initTabData.rootId) {
-                    return initTabData.rootId;
+                    id = initTabData.rootId;
                 }
             } catch (e) {
                 console.warn("Failed to parse tab init data:", e);
             }
         }
+    }
+    if (id) {
+        rootIDs.push(id);
     }
 };
 
@@ -384,7 +388,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
             if (item.id !== tab.id && !item.headElement.classList.contains("item--pin")) {
-                rootIDs.push(getRootID(item));
+                pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true, false);
                 index--;
             }
@@ -393,7 +397,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
             if (!item.headElement.classList.contains("item--pin")) {
-                rootIDs.push(getRootID(item));
+                pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true);
                 index--;
             }

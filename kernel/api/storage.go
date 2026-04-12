@@ -60,7 +60,11 @@ func removeCriterion(c *gin.Context) {
 		return
 	}
 
-	name := arg["name"].(string)
+	var name string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("name", &name, true, true)) {
+		return
+	}
+
 	err := model.RemoveCriterion(name)
 	if err != nil {
 		ret.Code = -1
@@ -78,7 +82,12 @@ func setCriterion(c *gin.Context) {
 		return
 	}
 
-	param, err := gulu.JSON.MarshalJSON(arg["criterion"])
+	var criterionRaw any
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("criterion", &criterionRaw, true, false)) {
+		return
+	}
+
+	param, err := gulu.JSON.MarshalJSON(criterionRaw)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -117,10 +126,29 @@ func removeLocalStorageVals(c *gin.Context) {
 		return
 	}
 
+	var keysArg []any
+	var app string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("keys", &keysArg, true, true),
+		util.BindJsonArg("app", &app, false, false),
+	) {
+		return
+	}
+
 	var keys []string
-	keysArg := arg["keys"].([]any)
 	for _, key := range keysArg {
-		keys = append(keys, key.(string))
+		ks, elemOk := key.(string)
+		if !elemOk {
+			ret.Code = -1
+			ret.Msg = "Field [keys]: each element should be of type [String]"
+			return
+		}
+		if ks == "" {
+			ret.Code = -1
+			ret.Msg = "Field [keys]: each element must not be empty"
+			return
+		}
+		keys = append(keys, ks)
 	}
 
 	err := model.RemoveLocalStorageVals(keys)
@@ -130,10 +158,40 @@ func removeLocalStorageVals(c *gin.Context) {
 		return
 	}
 
-	app := arg["app"].(string)
 	evt := util.NewCmdResult("removeLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evt.AppId = app
 	evt.Data = map[string]any{"keys": keys}
+	util.PushEvent(evt)
+}
+
+func removeLocalStorageVal(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var key string
+	var app string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("key", &key, true, true),
+		util.BindJsonArg("app", &app, false, false),
+	) {
+		return
+	}
+
+	err := model.RemoveLocalStorageVals([]string{key})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	evt := util.NewCmdResult("removeLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
+	evt.AppId = app
+	evt.Data = map[string]any{"key": key}
 	util.PushEvent(evt)
 }
 
@@ -146,20 +204,74 @@ func setLocalStorageVal(c *gin.Context) {
 		return
 	}
 
-	key := arg["key"].(string)
-	val := arg["val"].(any)
-	err := model.SetLocalStorageVal(key, val)
+	var key string
+	var app string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("key", &key, true, true),
+		util.BindJsonArg("app", &app, false, false),
+	) {
+		return
+	}
+	val := arg["val"]
+
+	removedKeys, setKeyVals, err := model.SetLocalStorageVals(map[string]any{key: val})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	app := arg["app"].(string)
+	if len(removedKeys) > 0 {
+		evt := util.NewCmdResult("removeLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
+		evt.AppId = app
+		evt.Data = map[string]any{"key": removedKeys[0]}
+		util.PushEvent(evt)
+		return
+	}
+
 	evt := util.NewCmdResult("setLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
 	evt.AppId = app
-	evt.Data = map[string]any{"key": key, "val": val}
+	evt.Data = map[string]any{"key": key, "val": setKeyVals[key]}
 	util.PushEvent(evt)
+}
+
+func setLocalStorageVals(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var keyVals map[string]any
+	var app string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("keyVals", &keyVals, true, true),
+		util.BindJsonArg("app", &app, false, false),
+	) {
+		return
+	}
+
+	removedKeys, setKeyVals, err := model.SetLocalStorageVals(keyVals)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if len(removedKeys) > 0 {
+		evtRm := util.NewCmdResult("removeLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
+		evtRm.AppId = app
+		evtRm.Data = map[string]any{"keys": removedKeys}
+		util.PushEvent(evtRm)
+	}
+	if len(setKeyVals) > 0 {
+		evtSet := util.NewCmdResult("setLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
+		evtSet.AppId = app
+		evtSet.Data = map[string]any{"keyVals": setKeyVals}
+		util.PushEvent(evtSet)
+	}
 }
 
 func setLocalStorage(c *gin.Context) {
@@ -171,7 +283,13 @@ func setLocalStorage(c *gin.Context) {
 		return
 	}
 
-	val := arg["val"].(any)
+	val, hasVal := arg["val"]
+	if !hasVal {
+		ret.Code = -1
+		ret.Msg = "Field [val] is required"
+		return
+	}
+
 	err := model.SetLocalStorage(val)
 	if err != nil {
 		ret.Code = -1
@@ -192,6 +310,70 @@ func getLocalStorage(c *gin.Context) {
 	ret.Data = data
 }
 
+func getLocalStorageVal(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var key string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
+		return
+	}
+
+	data := model.GetLocalStorage()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+	}
+	ret.Data = data[key]
+}
+
+func getLocalStorageVals(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var keysArg []any
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("keys", &keysArg, true, true)) {
+		return
+	}
+
+	var keys []string
+	for _, key := range keysArg {
+		ks, elemOk := key.(string)
+		if !elemOk {
+			ret.Code = -1
+			ret.Msg = "Field [keys]: each element should be of type [String]"
+			return
+		}
+		if ks == "" {
+			ret.Code = -1
+			ret.Msg = "Field [keys]: each element must not be empty"
+			return
+		}
+		keys = append(keys, ks)
+	}
+
+	data := model.GetLocalStorage()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+	}
+	out := map[string]any{}
+	for _, k := range keys {
+		out[k] = data[k]
+	}
+	ret.Data = out
+}
+
 func getOutlineStorage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -201,7 +383,11 @@ func getOutlineStorage(c *gin.Context) {
 		return
 	}
 
-	docID := arg["docID"].(string)
+	var docID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("docID", &docID, true, true)) {
+		return
+	}
+
 	data, err := model.GetOutlineStorage(docID)
 	if err != nil {
 		ret.Code = -1
@@ -220,8 +406,17 @@ func setOutlineStorage(c *gin.Context) {
 		return
 	}
 
-	docID := arg["docID"].(string)
-	val := arg["val"].(any)
+	var docID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("docID", &docID, true, true)) {
+		return
+	}
+	val, hasVal := arg["val"]
+	if !hasVal {
+		ret.Code = -1
+		ret.Msg = "Field [val] is required"
+		return
+	}
+
 	err := model.SetOutlineStorage(docID, val)
 	if err != nil {
 		ret.Code = -1
@@ -239,7 +434,11 @@ func removeOutlineStorage(c *gin.Context) {
 		return
 	}
 
-	docID := arg["docID"].(string)
+	var docID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("docID", &docID, true, true)) {
+		return
+	}
+
 	err := model.RemoveOutlineStorage(docID)
 	if err != nil {
 		ret.Code = -1
@@ -257,11 +456,11 @@ func updateRecentDocViewTime(c *gin.Context) {
 		return
 	}
 
-	if nil == arg["rootID"] {
+	var rootID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
 		return
 	}
 
-	rootID := arg["rootID"].(string)
 	err := model.UpdateRecentDocViewTime(rootID)
 	if err != nil {
 		ret.Code = -1
@@ -279,11 +478,11 @@ func updateRecentDocOpenTime(c *gin.Context) {
 		return
 	}
 
-	if nil == arg["rootID"] {
+	var rootID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
 		return
 	}
 
-	rootID := arg["rootID"].(string)
 	err := model.UpdateRecentDocOpenTime(rootID)
 	if err != nil {
 		ret.Code = -1
@@ -301,8 +500,8 @@ func updateRecentDocCloseTime(c *gin.Context) {
 		return
 	}
 
-	rootID, ok := arg["rootID"].(string)
-	if !ok || rootID == "" {
+	var rootID string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
 		return
 	}
 
@@ -323,10 +522,25 @@ func batchUpdateRecentDocCloseTime(c *gin.Context) {
 		return
 	}
 
-	rootIDsArg := arg["rootIDs"].([]any)
+	var rootIDsArg []any
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootIDs", &rootIDsArg, true, true)) {
+		return
+	}
+
 	var rootIDs []string
 	for _, id := range rootIDsArg {
-		rootIDs = append(rootIDs, id.(string))
+		str, elemOk := id.(string)
+		if !elemOk {
+			ret.Code = -1
+			ret.Msg = "Field [rootIDs]: each element should be of type [String]"
+			return
+		}
+		if str == "" {
+			ret.Code = -1
+			ret.Msg = "Field [rootIDs]: each element must not be empty"
+			return
+		}
+		rootIDs = append(rootIDs, str)
 	}
 
 	err := model.BatchUpdateRecentDocCloseTime(rootIDs)

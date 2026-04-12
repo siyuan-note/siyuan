@@ -395,13 +395,17 @@ ${data.shorthandContent}
             const nextElement = this.element.querySelector('[data-type="next"]');
             if (response.data.data.pagination.paginationPageCount > this.currentPage) {
                 nextElement.removeAttribute("disabled");
+                nextElement.classList.remove("fn__none");
             } else {
                 nextElement.setAttribute("disabled", "disabled");
+                nextElement.classList.add("fn__none");
             }
             if (this.currentPage === 1) {
                 previousElement.setAttribute("disabled", "disabled");
+                previousElement.classList.add("fn__none");
             } else {
                 previousElement.removeAttribute("disabled");
+                previousElement.classList.remove("fn__none");
             }
             const selectCount = this.element.lastElementChild.querySelectorAll(".b3-list-item").length;
             this.element.firstElementChild.querySelector('[data-type="selectall"] use').setAttribute("xlink:href", (this.element.lastElementChild.querySelectorAll('[*|href="#iconCheck"]').length === selectCount && selectCount !== 0) ? "#iconCheck" : "#iconUncheck");

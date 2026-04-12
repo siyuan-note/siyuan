@@ -26,6 +26,7 @@ import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
+import {removeZWJ} from "../util/normalizeText";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -59,7 +60,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     })
                 ]);
 
-                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.dom)}'-->${responseHTML.data.dom}`;
+                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.dom)}'-->${removeZWJ(responseHTML.data.dom)}`;
                 await navigator.clipboard.write([
                     new ClipboardItem({
                         "text/plain": new Blob([responseText.data.content], {type: "text/plain"}),

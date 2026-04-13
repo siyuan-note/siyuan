@@ -139,8 +139,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 newSourceElements.push(copyElement);
             }
         } else {
-            const topSourceElement = getTopAloneElement(item);
-            const oldSourceParentElement = item.parentElement;
+            let topSourceElement = getTopAloneElement(item);
+            const oldSourceParentElement = getParentBlock(item);
             if (item.classList.contains("li") && item.getAttribute("data-subtype") === "o") {
                 orderListElements[item.parentElement.getAttribute("data-node-id")] = item.parentElement;
             }
@@ -163,7 +163,10 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             }
 
             if (topSourceElement !== item) {
-                // 删除空元素
+                if (topSourceElement.contains(item)) {
+                    topSourceElement = getTopAloneElement(oldSourceParentElement);
+                }
+                // 拖拽后剩下空元素
                 doOperations.push({
                     action: "delete",
                     id: topSourceElement.getAttribute("data-node-id"),

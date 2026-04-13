@@ -67,7 +67,7 @@ func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
 		return false
 	}
 
-	backend := getCurrentBackend()
+	backend := GetCurrentBackend()
 	if !isTargetSupported(plugin.Backends, backend) {
 		return true
 	}
@@ -81,7 +81,7 @@ func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
 
 var cachedBackend string
 
-func getCurrentBackend() string {
+func GetCurrentBackend() string {
 	if cachedBackend == "" {
 		if util.Container == util.ContainerStd {
 			cachedBackend = runtime.GOOS

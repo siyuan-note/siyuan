@@ -1163,6 +1163,7 @@
   "appearance3": "Selecione o tema de destaque de sintaxe usado no modo escuro",
   "appearance2": "Selecione o tema de destaque de sintaxe usado no modo claro",
   "appearance1": "Tema do Bloco de Código",
+  "codeBlockEngine": "Motor de renderização do bloco de código",
   "appearance10": "Configurações do botão fechar",
   "appearance11": "minimizar para a bandeja após clicar no botão fechar",
   "appearance16": "Ocultar a barra de status inferior",

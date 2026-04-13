@@ -1163,6 +1163,7 @@
   "appearance3": "Seleccionar el tema de resaltado de sintaxis utilizado en el modo oscuro",
   "appearance2": "Selecciona el tema de resaltado de sintaxis utilizado en el modo claro",
   "appearance1": "Tema del bloque de código",
+  "codeBlockEngine": "Motor de renderizado de bloques de código",
   "appearance10": "Configuración del botón de cierre",
   "appearance11": "Minimizar a la bandeja del sistema después de hacer clic en el botón de cierre",
   "appearance16": "Barra de estado inferior",

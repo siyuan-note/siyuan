@@ -1163,6 +1163,7 @@
   "appearance3": "Wählen Sie das Syntaxhervorhebungsthema für den Dunkelmodus",
   "appearance2": "Wählen Sie das Syntaxhervorhebungsthema für den Hellmodus",
   "appearance1": "Codeblock-Thema",
+  "codeBlockEngine": "Codeblock-Rendering-Engine",
   "appearance10": "Einstellungen für die Schaltfläche schließen",
   "appearance11": "Nach dem Klicken auf die Schaltfläche schließen in das Tray minimieren",
   "appearance16": "Statusleiste unten ausblenden",

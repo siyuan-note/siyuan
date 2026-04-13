@@ -385,9 +385,9 @@ export const transactionError = (msg?: string) => {
     const dialog = new Dialog({
         disableClose: true,
         title: `${window.siyuan.languages.stateExcepted} v${Constants.SIYUAN_VERSION}`,
-        content: `<div class="b3-dialog__content" id="transactionError">
+        content: `<div class="b3-dialog__content" style="max-height: calc(100vh - 182px)" id="transactionError">
     ${window.siyuan.languages.rebuildIndexTip}
-    ${msg ? `<br><div style="margin-top: 8px; max-height: 50vh; white-space: pre-wrap;">${escapeHtml(msg.trim())}</div>` : ""}
+    ${msg ? `<div class="fn__hr"></div>${escapeHtml(msg.trim())}` : ""}
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--text">${window.siyuan.languages._kernel[97]}</button>

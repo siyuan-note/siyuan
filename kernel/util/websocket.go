@@ -17,12 +17,14 @@
 package util
 
 import (
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/eventbus"
+	"github.com/siyuan-note/logging"
 )
 
 var (
@@ -107,11 +109,25 @@ func SessionsByType(typ string) (ret []*melody.Session) {
 }
 
 func AddPushChan(session *melody.Session) {
-	appID := session.Request.URL.Query().Get("app")
+	appID := strings.TrimSpace(session.Request.URL.Query().Get("app"))
+	if "" == appID {
+		logging.LogErrorf("app id is required")
+		return
+	}
 	session.Set("app", appID)
-	id := session.Request.URL.Query().Get("id")
+
+	id := strings.TrimSpace(session.Request.URL.Query().Get("id"))
+	if "" == id {
+		logging.LogErrorf("id is required")
+		return
+	}
 	session.Set("id", id)
-	typ := session.Request.URL.Query().Get("type")
+
+	typ := strings.TrimSpace(session.Request.URL.Query().Get("type"))
+	if "" == typ {
+		logging.LogErrorf("type is required")
+		return
+	}
 	session.Set("type", typ)
 
 	if IsAuthSession(session) {

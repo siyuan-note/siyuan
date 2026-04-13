@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -1005,7 +1006,6 @@ func DuplicateDoc(tree *parse.Tree) {
 		box.addSort(previousPath, tree.ID)
 	}
 	FlushTxQueue()
-	return
 }
 
 func createTreeTx(tree *parse.Tree) {
@@ -1529,7 +1529,6 @@ func RemoveDoc(boxID, p string) {
 	IncSync()
 
 	refreshParentDocInfo(tree)
-	return
 }
 
 func RemoveDocs(paths []string) {
@@ -1557,7 +1556,6 @@ func RemoveDocs(paths []string) {
 	for _, parentTree := range parentTrees {
 		refreshDocInfo(parentTree)
 	}
-	return
 }
 
 func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
@@ -1651,7 +1649,6 @@ func removeDoc0(tree *parse.Tree, childrenDir string) {
 	}
 
 	sql.RemoveTreePathQueue(tree.Box, childrenDir)
-	return
 }
 
 func RenameDoc(boxID, p, title string) (err error) {
@@ -1856,6 +1853,36 @@ func normalizeDocTitle(title string) string {
 	return title
 }
 
+func readSortConfMap(confPath string) (map[string]int, error) {
+	if !filelock.IsExist(confPath) {
+		return map[string]int{}, nil
+	}
+	data, err := filelock.ReadFile(confPath)
+	if err != nil {
+		logging.LogErrorf("read sort conf [%s] failed: %s", confPath, err)
+		return nil, err
+	}
+	ret := map[string]int{}
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
+		logging.LogWarnf("unmarshal sort conf [%s] failed: %s", confPath, err)
+		return map[string]int{}, nil
+	}
+	return ret, nil
+}
+
+func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
+	data, err := gulu.JSON.MarshalJSON(fullSortIDs)
+	if err != nil {
+		logging.LogErrorf("marshal sort conf [%s] failed: %s", confPath, err)
+		return err
+	}
+	if err = filelock.WriteFile(confPath, data); err != nil {
+		logging.LogErrorf("write sort conf [%s] failed: %s", confPath, err)
+		return err
+	}
+	return nil
+}
+
 func moveSorts(rootID, fromBox, toBox string) {
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
@@ -1865,48 +1892,23 @@ func moveSorts(rootID, fromBox, toBox string) {
 	fromRootSorts := map[string]int{}
 	ids := treenode.RootChildIDs(rootID)
 	fromConfPath := filepath.Join(util.DataDir, fromBox, ".siyuan", "sort.json")
-	fromFullSortIDs := map[string]int{}
-	if filelock.IsExist(fromConfPath) {
-		data, err := filelock.ReadFile(fromConfPath)
-		if err != nil {
-			logging.LogErrorf("read sort conf failed: %s", err)
-			return
-		}
-
-		if err = gulu.JSON.UnmarshalJSON(data, &fromFullSortIDs); err != nil {
-			logging.LogErrorf("unmarshal sort conf failed: %s", err)
-		}
+	fromFullSortIDs, err := readSortConfMap(fromConfPath)
+	if err != nil {
+		return
 	}
 	for _, id := range ids {
 		fromRootSorts[id] = fromFullSortIDs[id]
 	}
 
 	toConfPath := filepath.Join(util.DataDir, toBox, ".siyuan", "sort.json")
-	toFullSortIDs := map[string]int{}
-	if filelock.IsExist(toConfPath) {
-		data, err := filelock.ReadFile(toConfPath)
-		if err != nil {
-			logging.LogErrorf("read sort conf failed: %s", err)
-			return
-		}
-
-		if err = gulu.JSON.UnmarshalJSON(data, &toFullSortIDs); err != nil {
-			logging.LogErrorf("unmarshal sort conf failed: %s", err)
-			return
-		}
-	}
-
-	for id, sortVal := range fromRootSorts {
-		toFullSortIDs[id] = sortVal
-	}
-
-	data, err := gulu.JSON.MarshalJSON(toFullSortIDs)
+	toFullSortIDs, err := readSortConfMap(toConfPath)
 	if err != nil {
-		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(toConfPath, data); err != nil {
-		logging.LogErrorf("write sort conf failed: %s", err)
+
+	maps.Copy(toFullSortIDs, fromRootSorts)
+
+	if err = writeSortConfMap(toConfPath, toFullSortIDs); err != nil {
 		return
 	}
 
@@ -1916,7 +1918,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 		parentPath := path.Dir(bt.Path)
 		docs, _, listErr := ListDocTree(toBox, parentPath, util.SortModeUnassigned, false, false, 102400)
 		if listErr != nil {
-			logging.LogErrorf("list doc tree failed: %s", err)
+			logging.LogErrorf("list doc tree failed: %s", listErr)
 			return
 		}
 
@@ -1975,31 +1977,14 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 		return
 	}
 	confPath := filepath.Join(confDir, "sort.json")
-	fullSortIDs := map[string]int{}
-	var data []byte
-	if filelock.IsExist(confPath) {
-		data, err = filelock.ReadFile(confPath)
-		if err != nil {
-			logging.LogErrorf("read sort conf failed: %s", err)
-			return
-		}
-
-		if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
-			logging.LogErrorf("unmarshal sort conf failed: %s", err)
-		}
-	}
-
-	for sortID, sortVal := range sortFolderIDs {
-		fullSortIDs[sortID] = sortVal
-	}
-
-	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
+	fullSortIDs, err := readSortConfMap(confPath)
 	if err != nil {
-		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(confPath, data); err != nil {
-		logging.LogErrorf("write sort conf failed: %s", err)
+
+	maps.Copy(fullSortIDs, sortFolderIDs)
+
+	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
 
@@ -2010,19 +1995,8 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 
 func (box *Box) fillSort(files *[]*File) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
-	if !filelock.IsExist(confPath) {
-		return
-	}
-
-	data, err := filelock.ReadFile(confPath)
+	fullSortIDs, err := readSortConfMap(confPath)
 	if err != nil {
-		logging.LogErrorf("read sort conf failed: %s", err)
-		return
-	}
-
-	fullSortIDs := map[string]int{}
-	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
-		logging.LogErrorf("unmarshal sort conf failed: %s", err)
 		return
 	}
 
@@ -2038,15 +2012,8 @@ func (box *Box) removeSort(ids []string) {
 		return
 	}
 
-	data, err := filelock.ReadFile(confPath)
+	fullSortIDs, err := readSortConfMap(confPath)
 	if err != nil {
-		logging.LogErrorf("read sort conf failed: %s", err)
-		return
-	}
-
-	fullSortIDs := map[string]int{}
-	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
-		logging.LogErrorf("unmarshal sort conf failed: %s", err)
 		return
 	}
 
@@ -2054,13 +2021,7 @@ func (box *Box) removeSort(ids []string) {
 		delete(fullSortIDs, toRemove)
 	}
 
-	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
-	if err != nil {
-		logging.LogErrorf("marshal sort conf failed: %s", err)
-		return
-	}
-	if err = filelock.WriteFile(confPath, data); err != nil {
-		logging.LogErrorf("write sort conf failed: %s", err)
+	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
 }
@@ -2125,31 +2086,15 @@ func (box *Box) setSortVal(id string, sortVal int) {
 		return
 	}
 	confPath := filepath.Join(confDir, "sort.json")
-	fullSortIDs := map[string]int{}
-	var data []byte
-	if filelock.IsExist(confPath) {
-		data, err = filelock.ReadFile(confPath)
-		if err != nil {
-			logging.LogErrorf("read sort conf failed: %s", err)
-			return
-		}
-
-		if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
-			logging.LogErrorf("unmarshal sort conf failed: %s", err)
-		}
+	fullSortIDs, err := readSortConfMap(confPath)
+	if err != nil {
+		return
 	}
 
 	fullSortIDs[id] = sortVal
-	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
-	if err != nil {
-		logging.LogErrorf("marshal sort conf failed: %s", err)
+	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
-	if err = filelock.WriteFile(confPath, data); err != nil {
-		logging.LogErrorf("write sort conf failed: %s", err)
-		return
-	}
-	return
 }
 
 func (box *Box) addSort(previousPath, id string) {
@@ -2159,18 +2104,9 @@ func (box *Box) addSort(previousPath, id string) {
 		return
 	}
 	confPath := filepath.Join(confDir, "sort.json")
-	fullSortIDs := map[string]int{}
-	var data []byte
-	if filelock.IsExist(confPath) {
-		data, err := filelock.ReadFile(confPath)
-		if err != nil {
-			logging.LogErrorf("read sort conf failed: %s", err)
-			return
-		}
-
-		if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
-			logging.LogErrorf("unmarshal sort conf failed: %s", err)
-		}
+	fullSortIDs, err := readSortConfMap(confPath)
+	if err != nil {
+		return
 	}
 
 	parentPath := path.Dir(previousPath)
@@ -2193,13 +2129,7 @@ func (box *Box) addSort(previousPath, id string) {
 		sortIDs[doc.ID] = sortVal
 	}
 
-	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
-	if err != nil {
-		logging.LogErrorf("marshal sort conf failed: %s", err)
-		return
-	}
-	if err = filelock.WriteFile(confPath, data); err != nil {
-		logging.LogErrorf("write sort conf failed: %s", err)
+	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
 
@@ -2212,29 +2142,14 @@ func (box *Box) setSort(sortIDVals map[string]int) {
 		return
 	}
 
-	data, err := filelock.ReadFile(confPath)
+	fullSortIDs, err := readSortConfMap(confPath)
 	if err != nil {
-		logging.LogErrorf("read sort conf failed: %s", err)
 		return
 	}
 
-	fullSortIDs := map[string]int{}
-	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
-		logging.LogErrorf("unmarshal sort conf failed: %s", err)
-		return
-	}
+	maps.Copy(fullSortIDs, sortIDVals)
 
-	for sortID := range sortIDVals {
-		fullSortIDs[sortID] = sortIDVals[sortID]
-	}
-
-	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
-	if err != nil {
-		logging.LogErrorf("marshal sort conf failed: %s", err)
-		return
-	}
-	if err = filelock.WriteFile(confPath, data); err != nil {
-		logging.LogErrorf("write sort conf failed: %s", err)
+	if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
 		return
 	}
 

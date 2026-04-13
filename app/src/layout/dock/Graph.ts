@@ -314,11 +314,11 @@ export class Graph extends Model {
                     if (dataType === "min") {
                         getDockByType(this.type === "global" ? "globalGraph" : "graph").toggleModel(this.type === "global" ? "globalGraph" : "graph", false, true);
                     } else if (dataType === "menu") {
-                        if (target.classList.contains("ft__primary")) {
-                            target.classList.remove("ft__primary");
+                        if (target.classList.contains("block__icon--active")) {
+                            target.classList.remove("block__icon--active");
                             this.panelElement.style.right = "";
                         } else {
-                            target.classList.add("ft__primary");
+                            target.classList.add("block__icon--active");
                             this.panelElement.style.right = "0";
                         }
                     } else if (dataType === "search") {
@@ -339,8 +339,8 @@ export class Graph extends Model {
                     }
                     break;
                 } else if (target.classList.contains("graph__svg")) {
-                    this.element.querySelectorAll(".block__icon.ft__primary").forEach(item => {
-                        item.classList.remove("ft__primary");
+                    this.element.querySelectorAll(".block__icon.block__icon--active").forEach(item => {
+                        item.classList.remove("block__icon--active");
                     });
                     this.panelElement.style.right = "";
                     break;

@@ -274,6 +274,8 @@ html[data-frontend="browser-desktop"] {
 
   &:hover .block__icons .block__icon[disabled] {
     opacity: .38;
+    display: block;
+    cursor: not-allowed;
   }
 
   &__close {

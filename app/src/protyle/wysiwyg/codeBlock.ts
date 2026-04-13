@@ -1,6 +1,7 @@
 import {hasNextSibling} from "./getBlock";
 import {setLastNodeRange} from "../util/selection";
 import {updateTransaction} from "./transaction";
+import {ensureShikiLang, shikiHighlight, isShikiLanguage} from "../render/shikiInit";
 
 export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
                              range: Range, outdent = false) => {
@@ -40,17 +41,33 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
             }
         }
     }
-    if (!window.hljs.getLanguage(language)) {
-        language = "plaintext";
+
+    const useShiki = window.siyuan.config.appearance.codeBlockEngine === "shiki";
+
+    if (useShiki) {
+        ensureShikiLang(language).then((resolvedLang) => {
+            const highlighted = shikiHighlight(text.substr(0, text.length - 1), resolvedLang);
+            wbrElement.insertAdjacentHTML("afterend", highlighted + "<br>");
+            range.setStart(wbrElement.nextSibling, 0);
+            const brElement = wbrElement.parentElement.querySelector("br");
+            setLastNodeRange(brElement.previousSibling as Element, range, false);
+            brElement.remove();
+            updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+            wbrElement.remove();
+        });
+    } else {
+        if (!window.hljs.getLanguage(language)) {
+            language = "plaintext";
+        }
+        wbrElement.insertAdjacentHTML("afterend", window.hljs.highlight(text.substr(0, text.length - 1), {
+            language,
+            ignoreIllegals: true
+        }).value + "<br>");
+        range.setStart(wbrElement.nextSibling, 0);
+        const brElement = wbrElement.parentElement.querySelector("br");
+        setLastNodeRange(brElement.previousSibling as Element, range, false);
+        brElement.remove();
+        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+        wbrElement.remove();
     }
-    wbrElement.insertAdjacentHTML("afterend", window.hljs.highlight(text.substr(0, text.length - 1), {
-        language,
-        ignoreIllegals: true
-    }).value + "<br>");
-    range.setStart(wbrElement.nextSibling, 0);
-    const brElement = wbrElement.parentElement.querySelector("br");
-    setLastNodeRange(brElement.previousSibling as Element, range, false);
-    brElement.remove();
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-    wbrElement.remove();
 };

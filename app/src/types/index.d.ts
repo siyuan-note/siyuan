@@ -199,6 +199,11 @@ interface Window {
             name: string
         };
     };
+    siyuanShiki: {
+        highlighter: import("shiki").HighlighterGeneric<any, any> | null;
+        loadedLanguages: Set<string>;
+        loadedThemes: Set<string>;
+    };
     katex: {
         renderToString(math: string, option: {
             displayMode: boolean;

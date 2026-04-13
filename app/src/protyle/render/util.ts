@@ -50,6 +50,14 @@ export const processClonePHElement = (item: Element) => {
 };
 
 export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
+    if (window.siyuan.config.appearance.codeBlockEngine === "shiki") {
+        // Shiki uses inline styles, remove hljs theme CSS if present
+        const protyleHljsStyle = document.getElementById("protyleHljsStyle");
+        if (protyleHljsStyle) {
+            protyleHljsStyle.remove();
+        }
+        return;
+    }
     const protyleHljsStyle = document.getElementById("protyleHljsStyle") as HTMLLinkElement;
     let css;
     if (window.siyuan.config.appearance.mode === 0) {

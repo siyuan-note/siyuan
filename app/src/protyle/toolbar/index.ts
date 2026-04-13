@@ -17,6 +17,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
+import {getShikiLanguageList, isShikiLanguage} from "../render/shikiInit";
 import {copyPlainText, openByMobile, readClipboard, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
@@ -1251,7 +1252,12 @@ export class Toolbar {
         const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
 
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
-        let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        let hljsLanguages: string[];
+        if (window.siyuan.config.appearance.codeBlockEngine === "shiki") {
+            hljsLanguages = getShikiLanguageList();
+        } else {
+            hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        }
 
         const eventDetail = {languages: hljsLanguages, type: "init", listElement};
         if (protyle.app && protyle.app.plugins) {
@@ -1321,7 +1327,10 @@ export class Toolbar {
                     return 0;
                 });
 
-                if (window.hljs?.getLanguage(value)) {
+                const isValidLang = window.siyuan.config.appearance.codeBlockEngine === "shiki"
+                    ? isShikiLanguage(value)
+                    : window.hljs?.getLanguage(value);
+                if (isValidLang) {
                     // Default languages and their aliases
                     matchLanguages = [value].concat(matchLanguages.filter(item => item !== value));
                 }

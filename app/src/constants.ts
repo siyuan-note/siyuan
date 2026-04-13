@@ -831,6 +831,21 @@ export abstract class Constants {
         "grayscale", "idea", "intellij-light", "isbl-editor-light", "kimbie-light", "lightfair", "magula", "mono-blue",
         "nnfx-light", "panda-syntax-light", "paraiso-light", "purebasic", "qtcreator-light", "rose-pine-dawn", "routeros",
         "school-book", "stackoverflow-light", "tokyo-night-light", "vs", "xcode", "default"];
+    public static readonly SIYUAN_CONFIG_APPEARANCE_DARK_CODE_SHIKI: string[] = [
+        "andromeeda", "aurora-x", "ayu-dark", "ayu-mirage", "catppuccin-frappe", "catppuccin-macchiato", "catppuccin-mocha",
+        "dark-plus", "dracula", "dracula-soft", "everforest-dark", "github-dark", "github-dark-default", "github-dark-dimmed",
+        "github-dark-high-contrast", "gruvbox-dark-hard", "gruvbox-dark-medium", "gruvbox-dark-soft", "horizon", "houston",
+        "kanagawa-dragon", "kanagawa-wave", "laserwave", "material-theme", "material-theme-darker", "material-theme-ocean",
+        "material-theme-palenight", "min-dark", "monokai", "night-owl", "nord", "one-dark-pro", "plastic", "poimandres",
+        "red", "rose-pine", "rose-pine-moon", "slack-dark", "solarized-dark", "synthwave-84", "tokyo-night", "vesper",
+        "vitesse-black", "vitesse-dark"
+    ];
+    public static readonly SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE_SHIKI: string[] = [
+        "ayu-light", "catppuccin-latte", "everforest-light", "github-light", "github-light-default", "github-light-high-contrast",
+        "gruvbox-light-hard", "gruvbox-light-medium", "gruvbox-light-soft", "horizon-bright", "kanagawa-lotus", "light-plus",
+        "material-theme-lighter", "min-light", "night-owl-light", "one-light", "rose-pine-dawn", "slack-ochin", "snazzy-light",
+        "solarized-light", "vitesse-light"
+    ];
     public static readonly ZWSP: string = "\u200b";
     public static readonly INLINE_TYPE: string[] = ["block-ref", "kbd", "text", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark", "sup", "sub", "tag", "code", "inline-math", "inline-memo", "clear"];
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];

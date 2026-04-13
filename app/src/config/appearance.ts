@@ -12,6 +12,7 @@ import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {useShell} from "../util/pathName";
 import {setStatusBar} from "./util/setStatusBar";
+import {highlightRender} from "../protyle/render/highlightRender";
 
 export const appearance = {
     element: undefined as Element,
@@ -312,6 +313,9 @@ export const appearance = {
         // Force re-render all code blocks when engine or theme changes
         document.querySelectorAll('.code-block .hljs[data-render="true"]').forEach((item) => {
             item.removeAttribute("data-render");
+        });
+        document.querySelectorAll(".protyle-wysiwyg").forEach((wysiwyg) => {
+            highlightRender(wysiwyg);
         });
     }
 };

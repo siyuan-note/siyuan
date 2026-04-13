@@ -2,7 +2,7 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {focusByOffset} from "../util/selection";
 import {setCodeTheme} from "./util";
-import {initShiki, ensureShikiLang, shikiHighlight, isShikiLanguage} from "./shikiInit";
+import {initShiki, ensureShikiLang, shikiHighlight} from "./shikiInit";
 
 const isShikiEngine = () => {
     return window.siyuan.config.appearance.codeBlockEngine === "shiki";
@@ -113,10 +113,18 @@ const renderBlockShiki = async (block: HTMLElement, isPreview: boolean, zoom: nu
     applyBlockStyles(block, hljsElement);
     const codeText = hljsElement.textContent;
     applyLineNumbers(block, isPreview, zoom);
-    hljsElement.innerHTML = shikiHighlight(
+    const result = shikiHighlight(
         codeText + (codeText.endsWith("\n") ? "" : "\n"),
         language
     );
+    hljsElement.innerHTML = result.html;
+    // Apply Shiki theme background and foreground colors
+    if (result.bg) {
+        block.style.backgroundColor = result.bg;
+    }
+    if (result.fg) {
+        block.style.color = result.fg;
+    }
     if (wbrElement && getSelection().rangeCount > 0) {
         focusByOffset(block, startIndex, startIndex);
     }

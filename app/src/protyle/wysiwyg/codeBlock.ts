@@ -1,7 +1,7 @@
 import {hasNextSibling} from "./getBlock";
 import {setLastNodeRange} from "../util/selection";
 import {updateTransaction} from "./transaction";
-import {ensureShikiLang, shikiHighlight, isShikiLanguage} from "../render/shikiInit";
+import {ensureShikiLang, shikiHighlight} from "../render/shikiInit";
 
 export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
                              range: Range, outdent = false) => {
@@ -46,8 +46,8 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
 
     if (useShiki) {
         ensureShikiLang(language).then((resolvedLang) => {
-            const highlighted = shikiHighlight(text.substr(0, text.length - 1), resolvedLang);
-            wbrElement.insertAdjacentHTML("afterend", highlighted + "<br>");
+            const result = shikiHighlight(text.substr(0, text.length - 1), resolvedLang);
+            wbrElement.insertAdjacentHTML("afterend", result.html + "<br>");
             range.setStart(wbrElement.nextSibling, 0);
             const brElement = wbrElement.parentElement.querySelector("br");
             setLastNodeRange(brElement.previousSibling as Element, range, false);

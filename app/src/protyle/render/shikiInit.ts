@@ -72,9 +72,15 @@ export const ensureShikiLang = async (lang: string): Promise<string> => {
     return "plaintext";
 };
 
-export const shikiHighlight = (code: string, language: string): string => {
+export interface ShikiHighlightResult {
+    html: string;
+    bg: string;
+    fg: string;
+}
+
+export const shikiHighlight = (code: string, language: string): ShikiHighlightResult => {
     if (!window.siyuanShiki?.highlighter) {
-        return code;
+        return {html: escapeHtml(code), bg: "", fg: ""};
     }
     const theme = getShikiTheme();
     const tokens = window.siyuanShiki.highlighter.codeToTokens(code, {
@@ -83,7 +89,8 @@ export const shikiHighlight = (code: string, language: string): string => {
     });
     // Build inline-styled spans from tokens, matching hljs output structure
     let html = "";
-    for (const line of tokens.tokens) {
+    for (let i = 0; i < tokens.tokens.length; i++) {
+        const line = tokens.tokens[i];
         for (const token of line) {
             if (token.color) {
                 html += `<span style="color:${token.color}">${escapeHtml(token.content)}</span>`;
@@ -91,9 +98,16 @@ export const shikiHighlight = (code: string, language: string): string => {
                 html += escapeHtml(token.content);
             }
         }
-        html += "\n";
+        // Only add newline between lines, not after the last line
+        if (i < tokens.tokens.length - 1) {
+            html += "\n";
+        }
     }
-    return html;
+    return {
+        html,
+        bg: tokens.bg || "",
+        fg: tokens.fg || "",
+    };
 };
 
 export const getShikiLanguageList = (): string[] => {

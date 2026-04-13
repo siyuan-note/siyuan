@@ -529,7 +529,7 @@ type="checkbox">
         <span class="fn__flex-1"></span>
         ${data.preferredFunding ?
             bazaar._genFundingHTML(data.preferredFunding) :
-            '<span class="block__icon block__icon--show block__icon--text"><svg><use xlink:href="#iconAccount"></use></svg></span>'
+            '<span class="block__icon block__icon--show block__icon--text"} style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>'
         }
         <span class="fn__space"></span>
         <a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a>

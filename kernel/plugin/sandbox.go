@@ -19,9 +19,12 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/fastschema/qjs"
 	"github.com/siyuan-note/filelock"
@@ -237,10 +240,129 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) erro
 	return err
 }
 
-// injectFetch adds siyuan.fetch method. TODO in Task 7.
+// injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
 func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
-	// TODO: implement in Task 7
-	return nil
+	ctx.SetAsyncFunc("__siyuan_fetch", func(this *qjs.This) {
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: path required")))
+			return
+		}
+
+		path := args[0].String()
+
+		// Path validation: must start with /, no scheme allowed
+		if !strings.HasPrefix(path, "/") || strings.Contains(path, "://") {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: path must start with / and must not contain a scheme")))
+			return
+		}
+
+		method := "GET"
+		var body string
+		headers := map[string]string{}
+
+		// Parse init options if provided
+		if len(args) > 1 && !args[1].IsNull() && !args[1].IsUndefined() {
+			init := args[1]
+			if m := init.GetPropertyStr("method"); m != nil && !m.IsUndefined() {
+				method = m.String()
+			}
+			if b := init.GetPropertyStr("body"); b != nil && !b.IsUndefined() {
+				body = b.String()
+			}
+			if h := init.GetPropertyStr("headers"); h != nil && !h.IsUndefined() && h.IsObject() {
+				// Extract headers via JSON round-trip to avoid complex JS property enumeration
+				headersJSON, jsonErr := h.JSONStringify()
+				if jsonErr == nil {
+					var parsed map[string]string
+					if unmarshalErr := json.Unmarshal([]byte(headersJSON), &parsed); unmarshalErr == nil {
+						headers = parsed
+					}
+				}
+			}
+		}
+
+		go func() {
+			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
+
+			var bodyReader io.Reader
+			if body != "" {
+				bodyReader = strings.NewReader(body)
+			}
+
+			req, err := http.NewRequest(method, targetURL, bodyReader)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: create request: %w", err)))
+				return
+			}
+
+			// Inject auth token (via callback, avoids importing model)
+			if p.TokenFunc != nil {
+				if token := p.TokenFunc(); token != "" {
+					req.Header.Set("Authorization", "Token "+token)
+				}
+			}
+
+			// Apply user headers (Authorization will be overwritten above)
+			for k, v := range headers {
+				if !strings.EqualFold(k, "Authorization") {
+					req.Header.Set(k, v)
+				}
+			}
+			if req.Header.Get("Content-Type") == "" && body != "" {
+				req.Header.Set("Content-Type", "application/json")
+			}
+
+			client := &http.Client{Timeout: 30 * time.Second}
+			resp, err := client.Do(req)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: %w", err)))
+				return
+			}
+			defer resp.Body.Close()
+
+			respBody, err := io.ReadAll(resp.Body)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: read body: %w", err)))
+				return
+			}
+
+			// Build Response-like object
+			respHeaders := map[string]string{}
+			for k, vs := range resp.Header {
+				respHeaders[k] = strings.Join(vs, ", ")
+			}
+
+			result := map[string]interface{}{
+				"ok":         resp.StatusCode >= 200 && resp.StatusCode < 300,
+				"status":     resp.StatusCode,
+				"statusText": resp.Status,
+				"_body":      string(respBody),
+				"headers":    respHeaders,
+			}
+
+			// Convert result to JS object via JSON
+			jsonBytes, _ := json.Marshal(result)
+			jsResult := ctx.ParseJSON(string(jsonBytes))
+			this.Promise().Resolve(jsResult)
+		}()
+	})
+
+	// Wire up siyuan.fetch in JS with Response-like object
+	_, err := ctx.Eval(`
+		siyuan.fetch = async function(path, init) {
+			const raw = await __siyuan_fetch(path, init || {});
+			return {
+				ok: raw.ok,
+				status: raw.status,
+				statusText: raw.statusText,
+				headers: raw.headers || {},
+				json: async function() { return JSON.parse(raw._body); },
+				text: async function() { return raw._body; }
+			};
+		};
+	`)
+	return err
 }
 
 // injectSocket adds siyuan.socket method. TODO in Task 8.

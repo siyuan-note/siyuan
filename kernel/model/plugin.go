@@ -293,3 +293,10 @@ func getPetals() (ret []*Petal) {
 	}
 	return
 }
+
+// Kernel plugin lifecycle hooks - wired by main.go
+var (
+	OnKernelPluginStart    func(name string)
+	OnKernelPluginStop     func(name string)
+	OnKernelPluginShutdown func()
+)

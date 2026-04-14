@@ -22,6 +22,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -41,6 +42,17 @@ func main() {
 
 	model.BootSyncData()
 	model.InitBoxes()
+
+	// Wire kernel plugin system
+	mgr := plugin.GetManager()
+	mgr.TokenFunc = func() string { return model.Conf.Api.Token }
+	mgr.PetalDisabledFunc = func() bool { return model.Conf.Bazaar.PetalDisabled }
+	mgr.TrustFunc = func() bool { return model.Conf.Bazaar.Trust }
+	model.OnKernelPluginStart = mgr.StartPlugin
+	model.OnKernelPluginStop = mgr.StopPlugin
+	model.OnKernelPluginShutdown = mgr.Stop
+	mgr.Start()
+
 	model.LoadFlashcards()
 	util.LoadAssetsTexts()
 

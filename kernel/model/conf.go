@@ -740,6 +740,11 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
+
+	// Stop kernel plugins early in shutdown
+	if OnKernelPluginShutdown != nil {
+		OnKernelPluginShutdown()
+	}
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 

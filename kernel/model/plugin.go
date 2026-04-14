@@ -75,6 +75,18 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	}
 
 	savePetals(petals)
+
+	// Hook kernel plugin lifecycle (callbacks avoid circular import with plugin package)
+	if enabled {
+		if OnKernelPluginStart != nil {
+			OnKernelPluginStart(name)
+		}
+	} else {
+		if OnKernelPluginStop != nil {
+			OnKernelPluginStop(name)
+		}
+	}
+
 	loadCode(ret)
 	return
 }

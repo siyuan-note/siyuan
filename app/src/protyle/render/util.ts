@@ -51,11 +51,9 @@ export const processClonePHElement = (item: Element) => {
 
 export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
     if (window.siyuan.config.appearance.codeBlockEngine === "shiki") {
-        // Shiki uses inline styles, remove hljs theme CSS if present
-        const protyleHljsStyle = document.getElementById("protyleHljsStyle");
-        if (protyleHljsStyle) {
-            protyleHljsStyle.remove();
-        }
+        // Shiki uses inline styles for token colors.
+        // Do NOT remove protyleHljsStyle — the .hljs class layout styles
+        // (padding, font, overflow) from protyle CSS still depend on it.
         return;
     }
     const protyleHljsStyle = document.getElementById("protyleHljsStyle") as HTMLLinkElement;

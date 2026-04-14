@@ -53,7 +53,7 @@ export class Backlink extends Model {
                     });
                 }
             },
-            msgCallback(data) {
+            msgCallback(this: Backlink, data) {
                 if (data && this.type === "local") {
                     switch (data.cmd) {
                         case "rename":

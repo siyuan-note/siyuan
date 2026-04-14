@@ -57,7 +57,7 @@ export class Outline extends Model {
                     });
                 }
             },
-            msgCallback(data) {
+            msgCallback(this: Outline, data) {
                 if (data) {
                     switch (data.cmd) {
                         case "savedoc":

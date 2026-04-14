@@ -21,7 +21,7 @@ export class Tag extends Model {
         super({
             app,
             id: tab.id,
-            msgCallback(data) {
+            msgCallback(this: Tag, data) {
                 if (data) {
                     switch (data.cmd) {
                         case "transactions":

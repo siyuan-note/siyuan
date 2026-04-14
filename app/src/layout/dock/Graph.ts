@@ -50,7 +50,7 @@ export class Graph extends Model {
                     });
                 }
             },
-            msgCallback(data) {
+            msgCallback(this: Graph, data) {
                 if (data) {
                     switch (data.cmd) {
                         case "mount":

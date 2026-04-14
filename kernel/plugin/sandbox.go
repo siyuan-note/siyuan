@@ -491,8 +491,32 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error
 	return err
 }
 
-// injectRPCRegister adds siyuan.rpc.register method. TODO in Task 9.
+// injectRPCRegister adds siyuan.rpc.register method for RPC method registration.
 func injectRPCRegister(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
-	// TODO: implement in Task 9
-	return nil
+	ctx.SetFunc("__siyuan_rpc_register", func(this *qjs.This) (*qjs.Value, error) {
+		args := this.Args()
+		if len(args) < 2 {
+			panic("rpc.register: name and function required")
+		}
+
+		name := args[0].String()
+		fn := args[1]
+
+		if !fn.IsFunction() {
+			panic("rpc.register: second argument must be a function")
+		}
+
+		if err := p.RegisterRPCMethod(name, fn); err != nil {
+			panic(fmt.Sprintf("rpc.register: %s", err))
+		}
+
+		return ctx.NewNull(), nil
+	})
+
+	_, err := ctx.Eval(`
+		siyuan.rpc = {
+			register: function(name, fn) { return __siyuan_rpc_register(name, fn); }
+		};
+	`)
+	return err
 }

@@ -24,9 +24,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fastschema/qjs"
+	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -365,10 +367,128 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error 
 	return err
 }
 
-// injectSocket adds siyuan.socket method. TODO in Task 8.
+// injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
-	// TODO: implement in Task 8
-	return nil
+	ctx.SetFunc("__siyuan_socket", func(this *qjs.This) (*qjs.Value, error) {
+		args := this.Args()
+		if len(args) < 1 {
+			panic("socket: path required")
+		}
+
+		path := args[0].String()
+		if !strings.HasPrefix(path, "/") || strings.Contains(path, "://") {
+			panic("socket: path must start with / and must not contain a scheme")
+		}
+
+		// Append auth token to query string
+		sep := "?"
+		if strings.Contains(path, "?") {
+			sep = "&"
+		}
+		token := ""
+		if p.TokenFunc != nil {
+			token = p.TokenFunc()
+		}
+		wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s%stoken=%s", util.ServerPort, path, sep, token)
+
+		// Create a JS object representing the WebSocket
+		wsObj := ctx.NewObject()
+		wsObj.SetPropertyStr("readyState", ctx.NewInt32(0))
+		wsObj.SetPropertyStr("onopen", ctx.NewNull())
+		wsObj.SetPropertyStr("onmessage", ctx.NewNull())
+		wsObj.SetPropertyStr("onclose", ctx.NewNull())
+		wsObj.SetPropertyStr("onerror", ctx.NewNull())
+
+		// Internal tracking
+		sendQueue := []string{}
+
+		// Store connection reference (accessed via closure)
+		var conn *websocket.Conn
+		var mu sync.Mutex
+
+		// send method - implemented as a Go function that JS can call
+		sendFn := ctx.Function(func(sendThis *qjs.This) (*qjs.Value, error) {
+			sendArgs := sendThis.Args()
+			if len(sendArgs) < 1 {
+				return ctx.NewUndefined(), nil
+			}
+
+			data := sendArgs[0].String()
+			stateVal := wsObj.GetPropertyStr("readyState")
+			state := int32(0)
+			if stateVal != nil && !stateVal.IsUndefined() {
+				state = stateVal.Int32()
+			}
+
+			mu.Lock()
+			defer mu.Unlock()
+
+			if state == 1 && conn != nil { // OPEN
+				conn.WriteMessage(websocket.TextMessage, []byte(data))
+			} else if state == 0 { // CONNECTING - queue for later
+				sendQueue = append(sendQueue, data)
+			}
+			return ctx.NewUndefined(), nil
+		})
+		wsObj.SetPropertyStr("send", sendFn)
+
+		// close method
+		closeFn := ctx.Function(func(closeThis *qjs.This) (*qjs.Value, error) {
+			mu.Lock()
+			defer mu.Unlock()
+			if conn != nil {
+				conn.Close()
+			}
+			wsObj.SetPropertyStr("readyState", ctx.NewInt32(3)) // CLOSED
+			return ctx.NewUndefined(), nil
+		})
+		wsObj.SetPropertyStr("close", closeFn)
+
+		// Start WebSocket connection in a goroutine
+		go func() {
+			dialer := websocket.Dialer{}
+			c, _, err := dialer.Dial(wsURL, nil)
+			if err != nil {
+				logging.LogErrorf("[plugin:%s] socket connect failed: %s", p.Name, err)
+				return
+			}
+
+			mu.Lock()
+			conn = c
+			mu.Unlock()
+
+			p.TrackSocket(c)
+			wsObj.SetPropertyStr("readyState", ctx.NewInt32(1)) // OPEN
+
+			// Flush send queue
+			mu.Lock()
+			for _, msg := range sendQueue {
+				c.WriteMessage(websocket.TextMessage, []byte(msg))
+			}
+			sendQueue = nil
+			mu.Unlock()
+
+			defer func() {
+				c.Close()
+				p.UntrackSocket(c)
+				wsObj.SetPropertyStr("readyState", ctx.NewInt32(3)) // CLOSED
+			}()
+
+			// Read loop - consumes messages but doesn't dispatch to JS yet
+			// (requires QJS event loop integration for safe callback invocation)
+			for {
+				_, _, readErr := c.ReadMessage()
+				if readErr != nil {
+					return
+				}
+			}
+		}()
+
+		return wsObj, nil
+	})
+
+	_, err := ctx.Eval(`siyuan.socket = function(path, protocols) { return __siyuan_socket(path, protocols); };`)
+	return err
 }
 
 // injectRPCRegister adds siyuan.rpc.register method. TODO in Task 9.

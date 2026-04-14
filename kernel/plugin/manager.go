@@ -80,7 +80,7 @@ func (m *PluginManager) Start() {
 
 	for _, name := range petals {
 		pj := readPluginJSON(name)
-		if pj == nil || !isKernelEligible(pj.Kernel, backend) {
+		if pj == nil || !bazaar.IsTargetSupported(pj.Kernel, backend) {
 			continue
 		}
 
@@ -127,7 +127,7 @@ func (m *PluginManager) Stop() {
 func (m *PluginManager) StartPlugin(name string) {
 	backend := bazaar.GetCurrentBackend()
 	pj := readPluginJSON(name)
-	if pj == nil || !isKernelEligible(pj.Kernel, backend) {
+	if pj == nil || !bazaar.IsTargetSupported(pj.Kernel, backend) {
 		return
 	}
 
@@ -184,19 +184,6 @@ func readPluginJSON(name string) *pluginJSON {
 		return nil
 	}
 	return &pj
-}
-
-// isKernelEligible checks whether the "kernel" field matches the current backend.
-func isKernelEligible(kernel []string, backend string) bool {
-	if len(kernel) == 0 {
-		return false
-	}
-	for _, k := range kernel {
-		if k == "all" || k == backend {
-			return true
-		}
-	}
-	return false
 }
 
 // loadEnabledPetalNames reads petals.json and returns names of enabled petals.

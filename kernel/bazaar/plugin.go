@@ -68,11 +68,11 @@ func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
 	}
 
 	backend := GetCurrentBackend()
-	if !isTargetSupported(plugin.Backends, backend) {
+	if !IsTargetSupported(plugin.Backends, backend) {
 		return true
 	}
 
-	if !isTargetSupported(plugin.Frontends, frontend) {
+	if !IsTargetSupported(plugin.Frontends, frontend) {
 		return true
 	}
 
@@ -92,8 +92,8 @@ func GetCurrentBackend() string {
 	return cachedBackend
 }
 
-// isTargetSupported 检查 platforms 中是否包含 target 或 "all"
-func isTargetSupported(platforms []string, target string) bool {
+// IsTargetSupported 检查 platforms 中是否包含 target 或 "all"
+func IsTargetSupported(platforms []string, target string) bool {
 	// 缺失字段时跳过检查，相当于 all
 	if len(platforms) == 0 {
 		return true

@@ -18,6 +18,8 @@ package plugin
 
 import (
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
 
 func TestIsKernelEligible(t *testing.T) {
@@ -27,8 +29,10 @@ func TestIsKernelEligible(t *testing.T) {
 		backend  string
 		expected bool
 	}{
-		{"nil kernel", nil, "darwin", false},
-		{"empty kernel", []string{}, "darwin", false},
+		// Note: bazaar.IsTargetSupported returns true for empty/nil slice
+		// (missing "kernel" field means supported on all platforms)
+		{"nil kernel", nil, "darwin", true},
+		{"empty kernel", []string{}, "darwin", true},
 		{"all", []string{"all"}, "darwin", true},
 		{"match", []string{"darwin", "linux"}, "darwin", true},
 		{"no match", []string{"windows", "linux"}, "darwin", false},
@@ -37,9 +41,9 @@ func TestIsKernelEligible(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := isKernelEligible(tt.kernel, tt.backend)
+			result := bazaar.IsTargetSupported(tt.kernel, tt.backend)
 			if result != tt.expected {
-				t.Errorf("isKernelEligible(%v, %q) = %v, want %v", tt.kernel, tt.backend, result, tt.expected)
+				t.Errorf("IsTargetSupported(%v, %q) = %v, want %v", tt.kernel, tt.backend, result, tt.expected)
 			}
 		})
 	}

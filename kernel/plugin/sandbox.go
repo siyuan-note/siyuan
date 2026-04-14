@@ -17,11 +17,16 @@
 package plugin
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fastschema/qjs"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // injectSandboxGlobals injects all siyuan.* APIs into the plugin's QJS context.
@@ -95,10 +100,141 @@ func injectLog(ctx *qjs.Context, p *KernelPlugin) error {
 	return err
 }
 
-// injectStorage adds siyuan.storage.* methods. TODO in Task 6.
+// injectStorage adds siyuan.storage.* methods for scoped file CRUD.
 func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
-	// TODO: implement in Task 6
-	return nil
+	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
+
+	// Resolve and validate a relative path against the plugin's storage base directory.
+	resolvePath := func(relPath string) (string, error) {
+		if strings.Contains(relPath, "..") {
+			return "", fmt.Errorf("path traversal not allowed")
+		}
+		abs := filepath.Join(baseDir, filepath.Clean(relPath))
+		// Ensure the resolved path is still within baseDir
+		if !strings.HasPrefix(abs, baseDir) {
+			return "", fmt.Errorf("path traversal not allowed")
+		}
+		return abs, nil
+	}
+
+	// storage.get(path) -> Promise<string>
+	ctx.SetAsyncFunc("__siyuan_storage_get", func(this *qjs.This) {
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.get: path required")))
+			return
+		}
+		go func() {
+			abs, err := resolvePath(args[0].String())
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(err))
+				return
+			}
+			data, err := filelock.ReadFile(abs)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.get: %w", err)))
+				return
+			}
+			this.Promise().Resolve(ctx.NewString(string(data)))
+		}()
+	})
+
+	// storage.put(path, content) -> Promise<void>
+	ctx.SetAsyncFunc("__siyuan_storage_put", func(this *qjs.This) {
+		args := this.Args()
+		if len(args) < 2 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.put: path and content required")))
+			return
+		}
+		go func() {
+			abs, err := resolvePath(args[0].String())
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(err))
+				return
+			}
+			dir := filepath.Dir(abs)
+			if err = os.MkdirAll(dir, 0755); err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.put: mkdir: %w", err)))
+				return
+			}
+			if err = filelock.WriteFile(abs, []byte(args[1].String())); err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.put: %w", err)))
+				return
+			}
+			this.Promise().Resolve(ctx.NewUndefined())
+		}()
+	})
+
+	// storage.remove(path) -> Promise<void>
+	ctx.SetAsyncFunc("__siyuan_storage_remove", func(this *qjs.This) {
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.remove: path required")))
+			return
+		}
+		go func() {
+			abs, err := resolvePath(args[0].String())
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(err))
+				return
+			}
+			if err = os.RemoveAll(abs); err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.remove: %w", err)))
+				return
+			}
+			this.Promise().Resolve(ctx.NewUndefined())
+		}()
+	})
+
+	// storage.list(path) -> Promise<Entry[]>
+	ctx.SetAsyncFunc("__siyuan_storage_list", func(this *qjs.This) {
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.list: path required")))
+			return
+		}
+		go func() {
+			abs, err := resolvePath(args[0].String())
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(err))
+				return
+			}
+			entries, err := os.ReadDir(abs)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.list: %w", err)))
+				return
+			}
+
+			// Build result as JSON string, then parse to JS object
+			result := make([]map[string]interface{}, 0, len(entries))
+			for _, entry := range entries {
+				info, infoErr := entry.Info()
+				if infoErr != nil {
+					continue
+				}
+				result = append(result, map[string]interface{}{
+					"name":      entry.Name(),
+					"isDir":     info.IsDir(),
+					"isSymlink": entry.Type()&os.ModeSymlink != 0,
+					"updated":   info.ModTime().Unix(),
+				})
+			}
+			jsonBytes, _ := json.Marshal(result)
+			jsVal := ctx.ParseJSON(string(jsonBytes))
+			this.Promise().Resolve(jsVal)
+		}()
+	})
+
+	// Wire up siyuan.storage.* methods in JS
+	_, err := ctx.Eval(`
+		siyuan.storage = {
+			get: function(path) { return __siyuan_storage_get(path); },
+			put: function(path, content) { return __siyuan_storage_put(path, content); },
+			remove: function(path) { return __siyuan_storage_remove(path); },
+			list: function(path) { return __siyuan_storage_list(path); }
+		};
+	`)
+	return err
 }
 
 // injectFetch adds siyuan.fetch method. TODO in Task 7.

@@ -30,7 +30,7 @@ import {goBack, goForward} from "../../util/backForward";
 import {getDisplayName, getNotebookName} from "../../util/pathName";
 import {openFileById} from "../../editor/util";
 import {getAllDocks, getAllModels, getAllTabs} from "../../layout/getAll";
-import {focusBlock, focusByOffset, focusByRange, getSelectionOffset} from "../../protyle/util/selection";
+import {focusBlock, focusByRange} from "../../protyle/util/selection";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {bindMenuKeydown} from "../../menus/Menu";
 import {Dialog} from "../../dialog";

@@ -37,7 +37,6 @@ var (
 // InitManager initializes the global PluginManager singleton and starts it.
 func InitManager() {
 	manager := getManager()
-	manager.TokenFunc = func() string { return model.Conf.Api.Token }
 	manager.PetalDisabledFunc = func() bool { return model.Conf.Bazaar.PetalDisabled }
 	manager.TrustFunc = func() bool { return model.Conf.Bazaar.Trust }
 	model.OnKernelPluginStart = manager.StartPlugin
@@ -58,9 +57,8 @@ func getManager() *PluginManager {
 
 // PluginManager discovers, loads, starts, and stops kernel plugins.
 type PluginManager struct {
-	mu        sync.RWMutex
-	plugins   map[string]*KernelPlugin
-	TokenFunc func() string // injected from main.go; returns API auth token
+	mu      sync.RWMutex
+	plugins map[string]*KernelPlugin
 
 	// PetalDisabledFunc and TrustFunc gate plugin loading (mirrors model.loadPetals guards)
 	PetalDisabledFunc func() bool // returns true when petals are globally disabled
@@ -105,7 +103,6 @@ func (m *PluginManager) Start() {
 		}
 
 		kp := NewKernelPlugin(name)
-		kp.TokenFunc = m.TokenFunc
 		m.mu.Lock()
 		m.plugins[name] = kp
 		m.mu.Unlock()
@@ -156,7 +153,6 @@ func (m *PluginManager) StartPlugin(name string) {
 		existing.Stop()
 	}
 	kp := NewKernelPlugin(name)
-	kp.TokenFunc = m.TokenFunc
 	m.plugins[name] = kp
 	m.mu.Unlock()
 

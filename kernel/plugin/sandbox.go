@@ -25,12 +25,13 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/fastschema/qjs"
 	"github.com/gorilla/websocket"
+	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -39,25 +40,25 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 	ctx := p.runtime.Context()
 
 	// Create the `siyuan` global object as an empty object
-	siyuanObj := ctx.NewObject()
-	if siyuanObj == nil {
+	siyuan := ctx.NewObject()
+	if siyuan == nil {
 		return fmt.Errorf("failed to create siyuan object")
 	}
-	ctx.Global().SetPropertyStr("siyuan", siyuanObj)
+	ctx.Global().SetPropertyStr("siyuan", siyuan)
 
 	if err := injectLog(ctx, p); err != nil {
 		return err
 	}
-	if err := injectStorage(ctx, p, siyuanObj); err != nil {
+	if err := injectStorage(ctx, p); err != nil {
 		return err
 	}
-	if err := injectFetch(ctx, p, siyuanObj); err != nil {
+	if err := injectFetch(ctx, p); err != nil {
 		return err
 	}
-	if err := injectSocket(ctx, p, siyuanObj); err != nil {
+	if err := injectSocket(ctx, p); err != nil {
 		return err
 	}
-	if err := injectRPCRegister(ctx, p, siyuanObj); err != nil {
+	if err := injectRPCRegister(ctx, p); err != nil {
 		return err
 	}
 
@@ -98,15 +99,13 @@ func injectLog(ctx *qjs.Context, p *KernelPlugin) error {
 
 	// Wire up siyuan.log in JS - calls the Go binding
 	_, err := ctx.Eval(`
-		siyuan.log = function(level, ...args) {
-			__siyuan_log(level, ...args);
-		};
+		siyuan.log = __siyuan_log;
 	`)
 	return err
 }
 
 // injectStorage adds siyuan.storage.* methods for scoped file CRUD.
-func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
+func injectStorage(ctx *qjs.Context, p *KernelPlugin) error {
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 
 	// Resolve and validate a relative path against the plugin's storage base directory.
@@ -233,17 +232,17 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) erro
 	// Wire up siyuan.storage.* methods in JS
 	_, err := ctx.Eval(`
 		siyuan.storage = {
-			get: function(path) { return __siyuan_storage_get(path); },
-			put: function(path, content) { return __siyuan_storage_put(path, content); },
-			remove: function(path) { return __siyuan_storage_remove(path); },
-			list: function(path) { return __siyuan_storage_list(path); }
+			get: __siyuan_storage_get,
+			put: __siyuan_storage_put,
+			remove: __siyuan_storage_remove,
+			list: __siyuan_storage_list,
 		};
 	`)
 	return err
 }
 
 // injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
-func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
+func injectFetch(ctx *qjs.Context, p *KernelPlugin) error {
 	ctx.SetAsyncFunc("__siyuan_fetch", func(this *qjs.This) {
 		args := this.Args()
 		if len(args) < 1 {
@@ -287,36 +286,19 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error 
 		go func() {
 			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 
-			var bodyReader io.Reader
-			if body != "" {
-				bodyReader = strings.NewReader(body)
-			}
-
-			req, err := http.NewRequest(method, targetURL, bodyReader)
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: create request: %w", err)))
-				return
-			}
-
-			// Inject auth token (via callback, avoids importing model)
-			if p.TokenFunc != nil {
-				if token := p.TokenFunc(); token != "" {
-					req.Header.Set("Authorization", "Token "+token)
-				}
-			}
+			r := req.C().R().
+				SetHeader(model.XAuthTokenKey, p.Token)
 
 			// Apply user headers (Authorization will be overwritten above)
 			for k, v := range headers {
-				if !strings.EqualFold(k, "Authorization") {
-					req.Header.Set(k, v)
-				}
-			}
-			if req.Header.Get("Content-Type") == "" && body != "" {
-				req.Header.Set("Content-Type", "application/json")
+				r.SetHeader(k, v)
 			}
 
-			client := &http.Client{Timeout: 30 * time.Second}
-			resp, err := client.Do(req)
+			if body != "" {
+				r.SetBody(body)
+			}
+
+			resp, err := r.Send(method, targetURL)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: %w", err)))
 				return
@@ -335,32 +317,47 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error 
 				respHeaders[k] = strings.Join(vs, ", ")
 			}
 
-			result := map[string]interface{}{
-				"ok":         resp.StatusCode >= 200 && resp.StatusCode < 300,
-				"status":     resp.StatusCode,
-				"statusText": resp.Status,
-				"_body":      string(respBody),
-				"headers":    respHeaders,
+			respHeadersJSON, err := json.Marshal(respHeaders)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: marshal response headers: %w", err)))
+				return
 			}
 
-			// Convert result to JS object via JSON
-			jsonBytes, _ := json.Marshal(result)
-			jsResult := ctx.ParseJSON(string(jsonBytes))
-			this.Promise().Resolve(jsResult)
+			result := map[string]interface{}{
+				"url":        string(targetURL),
+				"ok":         bool(resp.StatusCode >= 200 && resp.StatusCode < 300),
+				"status":     int32(resp.StatusCode),
+				"statusText": string(resp.Status),
+				"headers":    string(respHeadersJSON),
+				"body":       []byte(respBody),
+			}
+
+			response := ctx.NewObject()
+			response.SetPropertyStr("url", ctx.NewString(result["url"].(string)))
+			response.SetPropertyStr("ok", ctx.NewBool(result["ok"].(bool)))
+			response.SetPropertyStr("status", ctx.NewInt32(result["status"].(int32)))
+			response.SetPropertyStr("statusText", ctx.NewString(result["statusText"].(string)))
+			response.SetPropertyStr("headers", ctx.ParseJSON(result["headers"].(string)))
+			response.SetPropertyStr("body", ctx.NewBytes(result["body"].([]byte)))
+
+			this.Promise().Resolve(response)
 		}()
 	})
 
 	// Wire up siyuan.fetch in JS with Response-like object
 	_, err := ctx.Eval(`
 		siyuan.fetch = async function(path, init) {
-			const raw = await __siyuan_fetch(path, init || {});
+			const response = await __siyuan_fetch(path, init || {});
 			return {
-				ok: raw.ok,
-				status: raw.status,
-				statusText: raw.statusText,
-				headers: raw.headers || {},
-				json: async function() { return JSON.parse(raw._body); },
-				text: async function() { return raw._body; }
+				url: response.url,
+				ok: response.ok,
+				status: response.status,
+				statusText: response.statusText,
+				headers: response.headers,
+				text: async function() { return new TextDecoder().decode(response.body); },
+				json: async function() { return JSON.parse(await this.text()); },
+				bytes: async function() { return response.body; },
+				arrayBuffer: async function() { return response.body.buffer; },
 			};
 		};
 	`)
@@ -368,7 +365,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error 
 }
 
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
-func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
+func injectSocket(ctx *qjs.Context, p *KernelPlugin) error {
 	ctx.SetFunc("__siyuan_socket", func(this *qjs.This) (*qjs.Value, error) {
 		args := this.Args()
 		if len(args) < 1 {
@@ -376,20 +373,24 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error
 		}
 
 		path := args[0].String()
+		protocols := (func() string {
+			if len(args) > 1 {
+				return args[1].String()
+			}
+			return ""
+		})()
+
 		if !strings.HasPrefix(path, "/") || strings.Contains(path, "://") {
 			panic("socket: path must start with / and must not contain a scheme")
 		}
 
-		// Append auth token to query string
-		sep := "?"
-		if strings.Contains(path, "?") {
-			sep = "&"
+		wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
+
+		wsHeader := http.Header{}
+		wsHeader.Set(model.XAuthTokenKey, p.Token)
+		if (protocols) != "" {
+			wsHeader.Set("Sec-Websocket-Protocol", protocols)
 		}
-		token := ""
-		if p.TokenFunc != nil {
-			token = p.TokenFunc()
-		}
-		wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s%stoken=%s", util.ServerPort, path, sep, token)
 
 		// Create a JS object representing the WebSocket
 		wsObj := ctx.NewObject()
@@ -447,7 +448,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error
 		// Start WebSocket connection in a goroutine
 		go func() {
 			dialer := websocket.Dialer{}
-			c, _, err := dialer.Dial(wsURL, nil)
+			c, _, err := dialer.Dial(wsURL, wsHeader)
 			if err != nil {
 				logging.LogErrorf("[plugin:%s] socket connect failed: %s", p.Name, err)
 				return
@@ -487,12 +488,14 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error
 		return wsObj, nil
 	})
 
-	_, err := ctx.Eval(`siyuan.socket = function(path, protocols) { return __siyuan_socket(path, protocols); };`)
+	_, err := ctx.Eval(`
+		siyuan.socket = __siyuan_socket;
+	`)
 	return err
 }
 
 // injectRPCRegister adds siyuan.rpc.register method for RPC method registration.
-func injectRPCRegister(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) error {
+func injectRPCRegister(ctx *qjs.Context, p *KernelPlugin) error {
 	ctx.SetFunc("__siyuan_rpc_register", func(this *qjs.This) (*qjs.Value, error) {
 		args := this.Args()
 		if len(args) < 2 {
@@ -515,7 +518,7 @@ func injectRPCRegister(ctx *qjs.Context, p *KernelPlugin, siyuanObj *qjs.Value) 
 
 	_, err := ctx.Eval(`
 		siyuan.rpc = {
-			register: function(name, fn) { return __siyuan_rpc_register(name, fn); }
+			register: __siyuan_rpc_register,
 		};
 	`)
 	return err

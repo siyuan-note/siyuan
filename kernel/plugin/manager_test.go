@@ -22,7 +22,7 @@ import (
 
 func TestPluginManagerStartWithDisabledPetals(t *testing.T) {
 	m := &PluginManager{
-		plugins: make(map[string]*KernelPlugin),
+		plugins:           make(map[string]*KernelPlugin),
 		PetalDisabledFunc: func() bool { return true },
 	}
 
@@ -36,7 +36,7 @@ func TestPluginManagerStartWithDisabledPetals(t *testing.T) {
 
 func TestPluginManagerStartWithNoTrust(t *testing.T) {
 	m := &PluginManager{
-		plugins: make(map[string]*KernelPlugin),
+		plugins:   make(map[string]*KernelPlugin),
 		TrustFunc: func() bool { return false },
 	}
 
@@ -71,7 +71,6 @@ func TestPluginManagerStop(t *testing.T) {
 func TestPluginManagerStartPlugin(t *testing.T) {
 	m := &PluginManager{
 		plugins: make(map[string]*KernelPlugin),
-		TokenFunc: func() string { return "test-token" },
 	}
 
 	// StartPlugin with non-existent plugin should not panic
@@ -159,31 +158,6 @@ func TestLoadEnabledPetalNamesNoFile(t *testing.T) {
 	// This depends on the actual file system state
 	// In a fresh environment without petals.json, it should return nil or empty
 	_ = names // Just verify it doesn't panic
-}
-
-func TestPluginManagerTokenFunc(t *testing.T) {
-	called := false
-	m := &PluginManager{
-		plugins: make(map[string]*KernelPlugin),
-		TokenFunc: func() string {
-			called = true
-			return "test-token"
-		},
-	}
-
-	// Verify TokenFunc is set
-	if m.TokenFunc == nil {
-		t.Error("expected TokenFunc to be set")
-	}
-
-	// Call the TokenFunc
-	token := m.TokenFunc()
-	if !called {
-		t.Error("expected TokenFunc to be called")
-	}
-	if token != "test-token" {
-		t.Errorf("expected token 'test-token', got %q", token)
-	}
 }
 
 func TestPluginManagerPetalDisabledFunc(t *testing.T) {

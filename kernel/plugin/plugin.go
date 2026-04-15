@@ -24,6 +24,7 @@ import (
 	"github.com/fastschema/qjs"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
 type PluginState int
@@ -53,8 +54,8 @@ func (s PluginState) String() string {
 // KernelPlugin represents a single kernel-side plugin instance.
 // It owns an isolated QJS runtime and serializes all calls into it via mu.
 type KernelPlugin struct {
-	Name      string
-	TokenFunc func() string // injected by PluginManager; returns API token
+	Name  string
+	Token string // JWT for this plugin
 
 	mu       sync.Mutex
 	state    PluginState
@@ -65,8 +66,10 @@ type KernelPlugin struct {
 }
 
 func NewKernelPlugin(name string) *KernelPlugin {
+	token, _ := model.CreatePluginJWT(name)
 	return &KernelPlugin{
 		Name:     name,
+		Token:    token,
 		state:    StateStopped,
 		rpcFuncs: make(map[string]*qjs.Value),
 	}

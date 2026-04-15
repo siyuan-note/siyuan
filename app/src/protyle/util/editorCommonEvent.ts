@@ -573,7 +573,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 target.parentElement.classList.add("protyle-wysiwyg--select");
                 const ghostElement = document.createElement("div");
                 ghostElement.className = protyle.wysiwyg.element.className;
-                ghostElement.append(processClonePHElement(target.parentElement.cloneNode(true) as Element));
+                const cloneElement = processClonePHElement(target.parentElement.cloneNode(true) as Element);
+                cloneElement.querySelectorAll(".iframe").forEach(item => {
+                    item.remove();
+                });
+                ghostElement.append(cloneElement);
                 ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, 0, 0);

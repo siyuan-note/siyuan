@@ -17,7 +17,7 @@ import {getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../../util/image";
-import {resolveLinkDest, genLinkText} from "../toolbar/util";
+import {resolveLinkDest} from "../toolbar/util";
 
 export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
     const dataType = blockElement.dataset.type;
@@ -362,7 +362,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         return;
     }
-    protyle.hint.enableExtend = Constants.BLOCK_HINT_KEYS.concat("{{", "/", "#", "、", "「「", "「『", "『「", "『『",).includes(protyle.hint.splitChar);
+    protyle.hint.enableExtend = protyle.hint.enableExtend ? Constants.BLOCK_HINT_KEYS.concat("{{", "/", "#", "、", "「「", "「『", "『「", "『『",).includes(protyle.hint.splitChar) : false;
     hideElements(protyle.hint.enableExtend ? ["select"] : ["select", "hint"], protyle);
     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
         item.classList.remove("protyle-wysiwyg--hl");

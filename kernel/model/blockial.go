@@ -216,12 +216,16 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 			err = errors.New(Conf.Language(25) + " [" + node.ID + "]")
 			return
 		}
+		if lowerName == "data-task" {
+			err = errors.New(`setting or removing [data-task] attribute is not allowed via this interface. Please use "/api/block/updateTaskListItemMarker" or "/api/block/batchUpdateTaskListItemMarker" to update the task list item marker`)
+			return
+		}
 
 		// 处理文档标签 https://github.com/siyuan-note/siyuan/issues/13311
 		if lowerName == "tags" {
 			var tags []string
-			tmp := strings.Split(value, ",")
-			for _, t := range tmp {
+			tmp := strings.SplitSeq(value, ",")
+			for t := range tmp {
 				t = strings.TrimSpace(t)
 				if "" != t {
 					tags = append(tags, t)

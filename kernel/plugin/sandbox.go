@@ -41,113 +41,109 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 
 	// Create the `siyuan` global object as an empty object
 	siyuan := ctx.NewObject()
-	if siyuan == nil {
-		return fmt.Errorf("failed to create siyuan object")
-	}
-	ctx.Global().SetPropertyStr("siyuan", siyuan)
 
-	if err := injectLog(ctx, p); err != nil {
-		return err
-	}
-	if err := injectStorage(ctx, p); err != nil {
-		return err
-	}
-	if err := injectFetch(ctx, p); err != nil {
-		return err
-	}
-	if err := injectSocket(ctx, p); err != nil {
-		return err
-	}
-	if err := injectRPCRegister(ctx, p); err != nil {
-		return err
-	}
+	injectPlugin(ctx, p, siyuan)
+	injectLogger(ctx, p, siyuan)
+	injectStorage(ctx, p, siyuan)
+	injectFetch(ctx, p, siyuan)
+	injectSocket(ctx, p, siyuan)
+	injectRPC(ctx, p, siyuan)
+
+	ctx.Global().SetPropertyStr("siyuan", siyuan)
 
 	return nil
 }
 
-// injectLog adds siyuan.log(level, ...args) to the QJS context.
-func injectLog(ctx *qjs.Context, p *KernelPlugin) error {
-	// SetFunc signature: func(this *This) (*Value, error)
-	// Get arguments via this.Args()
-	ctx.SetFunc("__siyuan_log", func(this *qjs.This) (*qjs.Value, error) {
-		args := this.Args()
-		if len(args) < 1 {
-			return ctx.NewNull(), nil
+// injectPlugin adds siyuan.plugin to the QJS context.
+func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	plugin := ctx.NewObject()
+
+	plugin.SetPropertyStr("name", ctx.NewString(p.Name))
+
+	siyuan.SetPropertyStr("plugin", plugin)
+	return nil
+}
+
+// injectLogger adds siyuan.logger to the QJS context.
+func injectLogger(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	loggerWrapper := func(logFn func(format string, args ...interface{})) func(this *qjs.This) (*qjs.Value, error) {
+		return func(this *qjs.This) (*qjs.Value, error) {
+			// Get arguments via this.Args()
+			args := this.Args()
+			if len(args) < 1 {
+				return ctx.NewUndefined(), nil
+			}
+
+			prefix := fmt.Sprintf("[plugin:%s]", p.Name)
+
+			parts := make([]string, 0, len(args))
+			for _, arg := range args {
+				parts = append(parts, arg.String())
+			}
+			msg := strings.Join(parts, " ")
+
+			logFn("%s %s", prefix, msg)
+
+			return ctx.NewUndefined(), nil
 		}
+	}
 
-		level := args[0].String()
-		parts := make([]string, 0, len(args)-1)
-		for _, arg := range args[1:] {
-			parts = append(parts, arg.String())
-		}
-		msg := strings.Join(parts, " ")
-		prefix := fmt.Sprintf("[plugin:%s]", p.Name)
+	logger := ctx.NewObject()
 
-		switch level {
-		case "info":
-			logging.LogInfof("%s %s", prefix, msg)
-		case "warn":
-			logging.LogWarnf("%s %s", prefix, msg)
-		case "error":
-			logging.LogErrorf("%s %s", prefix, msg)
-		default:
-			logging.LogInfof("%s %s", prefix, msg)
-		}
+	logger.SetPropertyStr("trace", ctx.Function(loggerWrapper(logging.LogTracef)))
+	logger.SetPropertyStr("debug", ctx.Function(loggerWrapper(logging.LogDebugf)))
+	logger.SetPropertyStr("info", ctx.Function(loggerWrapper(logging.LogInfof)))
+	logger.SetPropertyStr("warn", ctx.Function(loggerWrapper(logging.LogWarnf)))
+	logger.SetPropertyStr("error", ctx.Function(loggerWrapper(logging.LogErrorf)))
 
-		return ctx.NewNull(), nil
-	})
-
-	// Wire up siyuan.log in JS - calls the Go binding
-	_, err := ctx.Eval(`
-		siyuan.log = __siyuan_log;
-	`)
-	return err
+	siyuan.SetPropertyStr("logger", logger)
+	return nil
 }
 
 // injectStorage adds siyuan.storage.* methods for scoped file CRUD.
-func injectStorage(ctx *qjs.Context, p *KernelPlugin) error {
+func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 
 	// Resolve and validate a relative path against the plugin's storage base directory.
 	resolvePath := func(relPath string) (string, error) {
-		if strings.Contains(relPath, "..") {
-			return "", fmt.Errorf("path traversal not allowed")
-		}
 		abs := filepath.Join(baseDir, filepath.Clean(relPath))
 		// Ensure the resolved path is still within baseDir
 		if !strings.HasPrefix(abs, baseDir) {
-			return "", fmt.Errorf("path traversal not allowed")
+			return "", fmt.Errorf("siyuan.storage: path traversal not allowed")
 		}
 		return abs, nil
 	}
 
-	// storage.get(path) -> Promise<string>
-	ctx.SetAsyncFunc("__siyuan_storage_get", func(this *qjs.This) {
+	storage := ctx.NewObject()
+
+	// siyuan.storage.get(path) -> Promise<Uint8Array>
+	storage.SetPropertyStr("get", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 1 {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.get: path required")))
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: path required")))
 			return
 		}
 		go func() {
 			abs, err := resolvePath(args[0].String())
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
-				return
 			}
 			data, err := filelock.ReadFile(abs)
 			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.get: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", err)))
 				return
 			}
-			this.Promise().Resolve(ctx.NewString(string(data)))
+			result := ctx.NewBytes(data)
+			this.Promise().Resolve(result)
 		}()
-	})
+		return
+	}, true))
 
-	// storage.put(path, content) -> Promise<void>
-	ctx.SetAsyncFunc("__siyuan_storage_put", func(this *qjs.This) {
+	// siyuan.storage.put(path, content) -> Promise<void>
+	storage.SetPropertyStr("put", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 2 {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.put: path and content required")))
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: path and content required")))
 			return
 		}
 		go func() {
@@ -158,22 +154,23 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin) error {
 			}
 			dir := filepath.Dir(abs)
 			if err = os.MkdirAll(dir, 0755); err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.put: mkdir: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: mkdir: %w", err)))
 				return
 			}
 			if err = filelock.WriteFile(abs, []byte(args[1].String())); err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.put: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", err)))
 				return
 			}
 			this.Promise().Resolve(ctx.NewUndefined())
 		}()
-	})
+		return
+	}, true))
 
-	// storage.remove(path) -> Promise<void>
-	ctx.SetAsyncFunc("__siyuan_storage_remove", func(this *qjs.This) {
+	// siyuan.storage.remove(path) -> Promise<void>
+	storage.SetPropertyStr("remove", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 1 {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.remove: path required")))
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: path required")))
 			return
 		}
 		go func() {
@@ -183,18 +180,19 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin) error {
 				return
 			}
 			if err = os.RemoveAll(abs); err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.remove: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", err)))
 				return
 			}
 			this.Promise().Resolve(ctx.NewUndefined())
 		}()
-	})
+		return
+	}, true))
 
-	// storage.list(path) -> Promise<Entry[]>
-	ctx.SetAsyncFunc("__siyuan_storage_list", func(this *qjs.This) {
+	// siyuan.storage.list(path) -> Promise<Entry[]>
+	storage.SetPropertyStr("list", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 1 {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.list: path required")))
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: path required")))
 			return
 		}
 		go func() {
@@ -205,7 +203,7 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin) error {
 			}
 			entries, err := os.ReadDir(abs)
 			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("storage.list: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", err)))
 				return
 			}
 
@@ -219,34 +217,32 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin) error {
 				result = append(result, map[string]interface{}{
 					"name":      entry.Name(),
 					"isDir":     info.IsDir(),
-					"isSymlink": entry.Type()&os.ModeSymlink != 0,
+					"isSymlink": util.IsSymlink(entry),
 					"updated":   info.ModTime().Unix(),
 				})
 			}
-			jsonBytes, _ := json.Marshal(result)
-			jsVal := ctx.ParseJSON(string(jsonBytes))
-			this.Promise().Resolve(jsVal)
-		}()
-	})
 
-	// Wire up siyuan.storage.* methods in JS
-	_, err := ctx.Eval(`
-		siyuan.storage = {
-			get: __siyuan_storage_get,
-			put: __siyuan_storage_put,
-			remove: __siyuan_storage_remove,
-			list: __siyuan_storage_list,
-		};
-	`)
-	return err
+			jsonBytes, err := json.Marshal(result)
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(err))
+				return
+			}
+
+			this.Promise().Resolve(ctx.ParseJSON(string(jsonBytes)))
+		}()
+		return
+	}, true))
+
+	siyuan.SetPropertyStr("storage", storage)
+	return nil
 }
 
 // injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
-func injectFetch(ctx *qjs.Context, p *KernelPlugin) error {
-	ctx.SetAsyncFunc("__siyuan_fetch", func(this *qjs.This) {
+func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	siyuan.SetPropertyStr("fetch", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 1 {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: path required")))
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: path required")))
 			return
 		}
 
@@ -254,13 +250,15 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin) error {
 
 		// Path validation: must start with /, no scheme allowed
 		if !strings.HasPrefix(path, "/") || strings.Contains(path, "://") {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: path must start with / and must not contain a scheme")))
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: path must start with / and must not contain a scheme")))
 			return
 		}
 
 		method := "GET"
-		var body string
 		headers := map[string]string{}
+
+		var stringBody string
+		var bytesBody []byte
 
 		// Parse init options if provided
 		if len(args) > 1 && !args[1].IsNull() && !args[1].IsUndefined() {
@@ -269,7 +267,11 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin) error {
 				method = m.String()
 			}
 			if b := init.GetPropertyStr("body"); b != nil && !b.IsUndefined() {
-				body = b.String()
+				if b.IsString() {
+					stringBody = b.String()
+				} else if b.IsByteArray() {
+					bytesBody = b.Bytes()
+				}
 			}
 			if h := init.GetPropertyStr("headers"); h != nil && !h.IsUndefined() && h.IsObject() {
 				// Extract headers via JSON round-trip to avoid complex JS property enumeration
@@ -294,20 +296,22 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin) error {
 				r.SetHeader(k, v)
 			}
 
-			if body != "" {
-				r.SetBody(body)
+			if stringBody != "" {
+				r.SetBody(stringBody)
+			} else if len(bytesBody) > 0 {
+				r.SetBody(bytesBody)
 			}
 
 			resp, err := r.Send(method, targetURL)
 			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err)))
 				return
 			}
 			defer resp.Body.Close()
 
 			respBody, err := io.ReadAll(resp.Body)
 			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: read body: %w", err)))
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: read body: %w", err)))
 				return
 			}
 
@@ -317,56 +321,47 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin) error {
 				respHeaders[k] = strings.Join(vs, ", ")
 			}
 
-			respHeadersJSON, err := json.Marshal(respHeaders)
+			respHeadersJsonBytes, err := json.Marshal(respHeaders)
 			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("fetch: marshal response headers: %w", err)))
+				this.Promise().Reject(ctx.NewError(err))
 				return
 			}
 
-			result := map[string]interface{}{
-				"url":        string(targetURL),
-				"ok":         bool(resp.StatusCode >= 200 && resp.StatusCode < 300),
-				"status":     int32(resp.StatusCode),
-				"statusText": string(resp.Status),
-				"headers":    string(respHeadersJSON),
-				"body":       []byte(respBody),
-			}
-
 			response := ctx.NewObject()
-			response.SetPropertyStr("url", ctx.NewString(result["url"].(string)))
-			response.SetPropertyStr("ok", ctx.NewBool(result["ok"].(bool)))
-			response.SetPropertyStr("status", ctx.NewInt32(result["status"].(int32)))
-			response.SetPropertyStr("statusText", ctx.NewString(result["statusText"].(string)))
-			response.SetPropertyStr("headers", ctx.ParseJSON(result["headers"].(string)))
-			response.SetPropertyStr("body", ctx.NewBytes(result["body"].([]byte)))
+			response.SetPropertyStr("url", ctx.NewString(targetURL))
+			response.SetPropertyStr("ok", ctx.NewBool(resp.StatusCode >= 200 && resp.StatusCode < 300))
+			response.SetPropertyStr("status", ctx.NewInt32(int32(resp.StatusCode)))
+			response.SetPropertyStr("statusText", ctx.NewString(resp.Status))
+			response.SetPropertyStr("headers", ctx.ParseJSON(string(respHeadersJsonBytes)))
+			response.SetPropertyStr("body", ctx.NewBytes(respBody))
+
+			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+				go this.Promise().Resolve(ctx.NewString(string(respBody)))
+				return
+			}, true))
+			response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+				go this.Promise().Resolve(ctx.ParseJSON(string(respBody)))
+				return
+			}, true))
+			response.SetPropertyStr("bytes", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+				go this.Promise().Resolve(ctx.NewBytes(respBody))
+				return
+			}, true))
+			response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+				go this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
+				return
+			}, true))
 
 			this.Promise().Resolve(response)
 		}()
-	})
-
-	// Wire up siyuan.fetch in JS with Response-like object
-	_, err := ctx.Eval(`
-		siyuan.fetch = async function(path, init) {
-			const response = await __siyuan_fetch(path, init || {});
-			return {
-				url: response.url,
-				ok: response.ok,
-				status: response.status,
-				statusText: response.statusText,
-				headers: response.headers,
-				text: async function() { return new TextDecoder().decode(response.body); },
-				json: async function() { return JSON.parse(await this.text()); },
-				bytes: async function() { return response.body; },
-				arrayBuffer: async function() { return response.body.buffer; },
-			};
-		};
-	`)
-	return err
+		return
+	}, true))
+	return nil
 }
 
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
-func injectSocket(ctx *qjs.Context, p *KernelPlugin) error {
-	ctx.SetFunc("__siyuan_socket", func(this *qjs.This) (*qjs.Value, error) {
+func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 1 {
 			panic("socket: path required")
@@ -408,7 +403,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin) error {
 		var mu sync.Mutex
 
 		// send method - implemented as a Go function that JS can call
-		sendFn := ctx.Function(func(sendThis *qjs.This) (*qjs.Value, error) {
+		wsObj.SetPropertyStr("send", ctx.Function(func(sendThis *qjs.This) (*qjs.Value, error) {
 			sendArgs := sendThis.Args()
 			if len(sendArgs) < 1 {
 				return ctx.NewUndefined(), nil
@@ -430,11 +425,10 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin) error {
 				sendQueue = append(sendQueue, data)
 			}
 			return ctx.NewUndefined(), nil
-		})
-		wsObj.SetPropertyStr("send", sendFn)
+		}))
 
 		// close method
-		closeFn := ctx.Function(func(closeThis *qjs.This) (*qjs.Value, error) {
+		wsObj.SetPropertyStr("close", ctx.Function(func(closeThis *qjs.This) (*qjs.Value, error) {
 			mu.Lock()
 			defer mu.Unlock()
 			if conn != nil {
@@ -442,8 +436,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin) error {
 			}
 			wsObj.SetPropertyStr("readyState", ctx.NewInt32(3)) // CLOSED
 			return ctx.NewUndefined(), nil
-		})
-		wsObj.SetPropertyStr("close", closeFn)
+		}))
 
 		// Start WebSocket connection in a goroutine
 		go func() {
@@ -486,40 +479,36 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin) error {
 		}()
 
 		return wsObj, nil
-	})
-
-	_, err := ctx.Eval(`
-		siyuan.socket = __siyuan_socket;
-	`)
-	return err
+	}, false))
+	return nil
 }
 
-// injectRPCRegister adds siyuan.rpc.register method for RPC method registration.
-func injectRPCRegister(ctx *qjs.Context, p *KernelPlugin) error {
-	ctx.SetFunc("__siyuan_rpc_register", func(this *qjs.This) (*qjs.Value, error) {
+// injectRPC adds siyuan.rpc.register method for RPC method registration.
+func injectRPC(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	rpc := ctx.NewObject()
+
+	rpc.SetPropertyStr("register", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 2 {
-			panic("rpc.register: name and function required")
+			err = fmt.Errorf("siyuan.rpc.register: name and function required")
+			return
 		}
 
 		name := args[0].String()
 		fn := args[1]
 
 		if !fn.IsFunction() {
-			panic("rpc.register: second argument must be a function")
+			err = fmt.Errorf("siyuan.rpc.register: second argument must be a function")
+			return
 		}
 
-		if err := p.RegisterRPCMethod(name, fn); err != nil {
-			panic(fmt.Sprintf("rpc.register: %s", err))
+		if err = p.RegisterRPCMethod(name, fn); err != nil {
+			return
 		}
 
-		return ctx.NewNull(), nil
-	})
+		return
+	}, false))
 
-	_, err := ctx.Eval(`
-		siyuan.rpc = {
-			register: __siyuan_rpc_register,
-		};
-	`)
-	return err
+	siyuan.SetPropertyStr("rpc", rpc)
+	return nil
 }

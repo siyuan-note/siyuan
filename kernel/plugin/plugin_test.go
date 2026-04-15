@@ -93,7 +93,7 @@ func TestKernelPluginStartStop(t *testing.T) {
 
 	// Test that a plugin with no kernel.js (empty code) fails to start
 	// because injectSandboxGlobals will fail (it needs a valid runtime)
-	err := kp.Start("")
+	err := kp.Start(`siyuan.logger.debug("Hello from [plugin:test-start-stop]");`)
 	// Should either succeed (with empty code doing nothing) or fail
 	// We just verify it doesn't panic and state is set appropriately
 	if err != nil {

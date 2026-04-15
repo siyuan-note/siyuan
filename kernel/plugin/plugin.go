@@ -19,6 +19,7 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"sync"
 
 	"github.com/fastschema/qjs"
@@ -83,8 +84,8 @@ func (p *KernelPlugin) State() PluginState {
 }
 
 // Start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
-// jsCode is the content of the plugin's kernel.js file.
-func (p *KernelPlugin) Start(jsCode string) (retErr error) {
+// code is the content of the plugin's kernel.js file.
+func (p *KernelPlugin) Start(code string) (retErr error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -121,7 +122,7 @@ func (p *KernelPlugin) Start(jsCode string) (retErr error) {
 	}
 
 	ctx := rt.Context()
-	_, evalErr := ctx.Eval(jsCode)
+	_, evalErr := ctx.Eval(filepath.Join(p.Name, "kernel.js"), qjs.Code(code))
 	p.regOpen = false // close registration window
 
 	if evalErr != nil {

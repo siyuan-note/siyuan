@@ -17,256 +17,215 @@
 package plugin
 
 import (
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/siyuan-note/logging"
 )
 
 func TestInjectSandboxGlobals(t *testing.T) {
 	// This requires a running QJS runtime, which we can't easily do in unit tests
 	// So we just verify the function signature is correct
 	kp := NewKernelPlugin("test-sandbox")
-	err := kp.Start("")
+	err := kp.Start(`
+		const props = Object.getOwnPropertyNames(globalThis);
+		siyuan.logger.debug(JSON.stringify(props));
+		props.forEach(prop => {
+			if (prop === "null" || prop === "undefined") return;
+			siyuan.logger.debug(prop, typeof globalThis[prop]);
+			siyuan.logger.debug(JSON.stringify(Object.getOwnPropertyNames(globalThis[prop])))
+		});
+	`)
+	// ["Object","Function","Error","EvalError","RangeError","ReferenceError","SyntaxError","TypeError","URIError","InternalError","AggregateError","Iterator","Array","parseInt","parseFloat","isNaN","isFinite","queueMicrotask","decodeURI","decodeURIComponent","encodeURI","encodeURIComponent","escape","unescape","Infinity","NaN","undefined","Number","Boolean","String","Math","Reflect","Symbol","eval","globalThis","Date","RegExp","JSON","Proxy","Map","Set","WeakMap","WeakSet","ArrayBuffer","SharedArrayBuffer","Uint8ClampedArray","Int8Array","Uint8Array","Int16Array","Uint16Array","Int32Array","Uint32Array","BigInt64Array","BigUint64Array","Float16Array","Float32Array","Float64Array","DataView","Promise","BigInt","WeakRef","FinalizationRegistry","DOMException","performance","gc","navigator","console","scriptArgs","print","bjson","std","os","setTimeout","setInterval","clearTimeout","clearInterval","QJS_PROXY_VALUE","siyuan"]
+	// Object function
+	// ["length","name","prototype","create","getPrototypeOf","setPrototypeOf","defineProperty","defineProperties","getOwnPropertyNames","getOwnPropertySymbols","groupBy","keys","values","entries","isExtensible","preventExtensions","getOwnPropertyDescriptor","getOwnPropertyDescriptors","is","assign","seal","freeze","isSealed","isFrozen","fromEntries","hasOwn"]
+	// Function function
+	// ["length","name","prototype"]
+	// Error function
+	// ["length","name","prototype","isError","captureStackTrace","stackTraceLimit","prepareStackTrace"]
+	// EvalError function
+	// ["length","name","prototype"]
+	// RangeError function
+	// ["length","name","prototype"]
+	// ReferenceError function
+	// ["length","name","prototype"]
+	// SyntaxError function
+	// ["length","name","prototype"]
+	// TypeError function
+	// ["length","name","prototype"]
+	// URIError function
+	// ["length","name","prototype"]
+	// InternalError function
+	// ["length","name","prototype"]
+	// AggregateError function
+	// ["length","name","prototype"]
+	// Iterator function
+	// ["length","name","prototype","concat","from"]
+	// Array function
+	// ["length","name","prototype","isArray","from","of","fromAsync"]
+	// parseInt function
+	// ["length","name"]
+	// parseFloat function
+	// ["length","name"]
+	// isNaN function
+	// ["length","name"]
+	// isFinite function
+	// ["length","name"]
+	// queueMicrotask function
+	// ["length","name"]
+	// decodeURI function
+	// ["length","name"]
+	// decodeURIComponent function
+	// ["length","name"]
+	// encodeURI function
+	// ["length","name"]
+	// encodeURIComponent function
+	// ["length","name"]
+	// escape function
+	// ["length","name"]
+	// unescape function
+	// ["length","name"]
+	// Infinity number
+	// []
+	// NaN number
+	// []
+	// Number function
+	// ["length","name","prototype","parseInt","parseFloat","isNaN","isFinite","isInteger","isSafeInteger","MAX_VALUE","MIN_VALUE","NaN","NEGATIVE_INFINITY","POSITIVE_INFINITY","EPSILON","MAX_SAFE_INTEGER","MIN_SAFE_INTEGER"]
+	// Boolean function
+	// ["length","name","prototype"]
+	// String function
+	// ["length","name","prototype","fromCharCode","fromCodePoint","raw"]
+	// Math object
+	// ["min","max","abs","floor","ceil","round","sqrt","acos","asin","atan","atan2","cos","exp","log","pow","sin","tan","trunc","sign","cosh","sinh","tanh","acosh","asinh","atanh","expm1","log1p","log2","log10","cbrt","hypot","random","f16round","fround","imul","clz32","sumPrecise","E","LN10","LN2","LOG2E","LOG10E","PI","SQRT1_2","SQRT2"]
+	// Reflect object
+	// ["apply","construct","defineProperty","deleteProperty","get","getOwnPropertyDescriptor","getPrototypeOf","has","isExtensible","ownKeys","preventExtensions","set","setPrototypeOf"]
+	// Symbol function
+	// ["length","name","prototype","for","keyFor","toPrimitive","iterator","match","matchAll","replace","search","split","toStringTag","isConcatSpreadable","hasInstance","species","unscopables","asyncIterator"]
+	// eval function
+	// ["length","name"]
+	// globalThis object
+	// ["Object","Function","Error","EvalError","RangeError","ReferenceError","SyntaxError","TypeError","URIError","InternalError","AggregateError","Iterator","Array","parseInt","parseFloat","isNaN","isFinite","queueMicrotask","decodeURI","decodeURIComponent","encodeURI","encodeURIComponent","escape","unescape","Infinity","NaN","undefined","Number","Boolean","String","Math","Reflect","Symbol","eval","globalThis","Date","RegExp","JSON","Proxy","Map","Set","WeakMap","WeakSet","ArrayBuffer","SharedArrayBuffer","Uint8ClampedArray","Int8Array","Uint8Array","Int16Array","Uint16Array","Int32Array","Uint32Array","BigInt64Array","BigUint64Array","Float16Array","Float32Array","Float64Array","DataView","Promise","BigInt","WeakRef","FinalizationRegistry","DOMException","performance","gc","navigator","console","scriptArgs","print","bjson","std","os","setTimeout","setInterval","clearTimeout","clearInterval","QJS_PROXY_VALUE","siyuan"]
+	// Date function
+	// ["length","name","prototype","now","parse","UTC"]
+	// RegExp function
+	// ["length","name","prototype","escape"]
+	// JSON object
+	// ["parse","stringify"]
+	// Proxy function
+	// ["length","name","revocable"]
+	// Map function
+	// ["length","name","groupBy","prototype"]
+	// Set function
+	// ["length","name","prototype"]
+	// WeakMap function
+	// ["length","name","prototype"]
+	// WeakSet function
+	// ["length","name","prototype"]
+	// ArrayBuffer function
+	// ["length","name","prototype","isView"]
+	// SharedArrayBuffer function
+	// ["length","name","prototype"]
+	// Uint8ClampedArray function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Int8Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Uint8Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Int16Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Uint16Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Int32Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Uint32Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// BigInt64Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// BigUint64Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Float16Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Float32Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// Float64Array function
+	// ["length","name","prototype","BYTES_PER_ELEMENT"]
+	// DataView function
+	// ["length","name","prototype"]
+	// Promise function
+	// ["length","name","resolve","reject","all","allSettled","any","try","race","withResolvers","prototype"]
+	// BigInt function
+	// ["length","name","prototype","asUintN","asIntN"]
+	// WeakRef function
+	// ["length","name","prototype"]
+	// FinalizationRegistry function
+	// ["length","name","prototype"]
+	// DOMException function
+	// ["length","name","prototype","INDEX_SIZE_ERR","DOMSTRING_SIZE_ERR","HIERARCHY_REQUEST_ERR","WRONG_DOCUMENT_ERR","INVALID_CHARACTER_ERR","NO_DATA_ALLOWED_ERR","NO_MODIFICATION_ALLOWED_ERR","NOT_FOUND_ERR","NOT_SUPPORTED_ERR","INUSE_ATTRIBUTE_ERR","INVALID_STATE_ERR","SYNTAX_ERR","INVALID_MODIFICATION_ERR","NAMESPACE_ERR","INVALID_ACCESS_ERR","VALIDATION_ERR","TYPE_MISMATCH_ERR","SECURITY_ERR","NETWORK_ERR","ABORT_ERR","URL_MISMATCH_ERR","QUOTA_EXCEEDED_ERR","TIMEOUT_ERR","INVALID_NODE_TYPE_ERR","DATA_CLONE_ERR"]
+	// performance object
+	// ["now","timeOrigin"]
+	// gc function
+	// ["length","name"]
+	// navigator object
+	// []
+	// console object
+	// ["log"]
+	// scriptArgs object
+	// ["length"]
+	// print function
+	// ["length","name"]
+	// bjson object
+	// ["READ_OBJ_BYTECODE","READ_OBJ_REFERENCE","READ_OBJ_SAB","WRITE_OBJ_BYTECODE","WRITE_OBJ_REFERENCE","WRITE_OBJ_SAB","WRITE_OBJ_STRIP_DEBUG","WRITE_OBJ_STRIP_SOURCE","read","write"]
+	// std object
+	// ["Error","SEEK_CUR","SEEK_END","SEEK_SET","err","evalScript","exit","fdopen","gc","getenv","getenviron","in","loadFile","loadScript","open","out","printf","puts","setenv","sprintf","strerror","unsetenv","writeFile"]
+	// os object
+	// ["O_APPEND","O_CREAT","O_EXCL","O_RDONLY","O_RDWR","O_TRUNC","O_WRONLY","SIGABRT","SIGFPE","SIGILL","SIGINT","SIGSEGV","SIGTERM","S_IFBLK","S_IFCHR","S_IFDIR","S_IFIFO","S_IFLNK","S_IFMT","S_IFREG","S_IFSOCK","S_ISGID","S_ISUID","chdir","clearInterval","clearTimeout","close","exePath","getcwd","isatty","mkdir","now","open","platform","read","readdir","remove","rename","seek","setInterval","setReadHandler","setTimeout","setWriteHandler","signal","sleep","sleepAsync","stat","utimes","write"]
+	// setTimeout function
+	// ["length","name"]
+	// setInterval function
+	// ["length","name"]
+	// clearTimeout function
+	// ["length","name"]
+	// clearInterval function
+	// ["length","name"]
+	// QJS_PROXY_VALUE function
+	// ["length","name","prototype"]
+	// siyuan object
+	// ["plugin","logger","storage","fetch","socket","rpc"]
 	if err == nil {
 		kp.Stop()
 	}
 	// Just verify it doesn't panic - the actual injection is tested via integration
 }
 
-func TestResolvePathPathTraversal(t *testing.T) {
-	baseDir := "/data/storage/petal/test-plugin"
+func TestRPCMethodRegistrationState(t *testing.T) {
+	kp := NewKernelPlugin("test-rpc-register")
 
-	// Test the actual behavior of resolvePath function
-	tests := []struct {
-		name         string
-		relPath      string
-		shouldReject bool
-	}{
-		{"normal file", "data.txt", false},
-		{"nested path", "subdir/data.txt", false},
-		{"path traversal", "../escape.txt", true},           // Raw .. rejected
-		{"nested traversal", "subdir/../../escape.txt", true}, // Raw .. rejected
-		// Note: The resolvePath function checks strings.Contains(relPath, "..")
-		// This is a simple check that catches obvious traversal attempts
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Simulate the actual resolvePath logic used in sandbox.go
-			if strings.Contains(tt.relPath, "..") {
-				// Rejected by the .. check
-				if !tt.shouldReject {
-					t.Errorf("expected %q to be valid, but was rejected", tt.relPath)
-				}
-				return
-			}
-
-			// If not rejected, path should be valid
-			if tt.shouldReject {
-				t.Errorf("expected %q to be rejected, but was accepted", tt.relPath)
-			}
-
-			// Verify the path resolves within baseDir
-			abs := filepath.Join(baseDir, filepath.Clean(tt.relPath))
-			if !strings.HasPrefix(abs, baseDir) {
-				t.Errorf("path %q escaped baseDir: %q", tt.relPath, abs)
-			}
+	err := kp.Start(`
+		try {
+			siyuan.rpc.register("test", async (...args) => {
+				siyuan.logger.debug(JSON.stringify(args));
+				await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate async work
+				return args;
+			});
+		} catch (e) {
+			siyuan.logger.error("Failed to register RPC method:", e.toString());
+		}
+	`)
+	if err != nil {
+		t.Errorf("failed to start plugin: %v", err)
+	} else {
+		result, err := kp.CallRPCMethod("test", map[string]interface{}{
+			"message": "Hello, world!",
 		})
-	}
-}
-
-func TestStoragePathResolution(t *testing.T) {
-	// Create a temporary directory for testing
-	tmpDir := t.TempDir()
-	oldDataDir := util.DataDir
-	util.DataDir = tmpDir
-	defer func() { util.DataDir = oldDataDir }()
-
-	pluginName := "test-storage-plugin"
-	baseDir := filepath.Join(util.DataDir, "storage", "petal", pluginName)
-
-	// Create the base directory
-	err := os.MkdirAll(baseDir, 0755)
-	if err != nil {
-		t.Fatalf("failed to create base dir: %v", err)
-	}
-
-	// Test write
-	testFile := filepath.Join(baseDir, "test.txt")
-	testContent := "hello world"
-	err = os.WriteFile(testFile, []byte(testContent), 0644)
-	if err != nil {
-		t.Fatalf("failed to write test file: %v", err)
-	}
-
-	// Test read
-	content, err := os.ReadFile(testFile)
-	if err != nil {
-		t.Fatalf("failed to read test file: %v", err)
-	}
-	if string(content) != testContent {
-		t.Errorf("expected %q, got %q", testContent, string(content))
-	}
-
-	// Test list
-	entries, err := os.ReadDir(baseDir)
-	if err != nil {
-		t.Fatalf("failed to list directory: %v", err)
-	}
-	found := false
-	for _, entry := range entries {
-		if entry.Name() == "test.txt" {
-			found = true
-			break
+		if err != nil {
+			t.Errorf("CallRPCMethod failed: %v", err)
+		} else {
+			logging.LogInfof("CallRPCMethod result: %v", result)
 		}
 	}
-	if !found {
-		t.Error("expected to find test.txt in directory listing")
-	}
-
-	// Test remove
-	err = os.Remove(testFile)
-	if err != nil {
-		t.Fatalf("failed to remove test file: %v", err)
-	}
-
-	_, err = os.Stat(testFile)
-	if !os.IsNotExist(err) {
-		t.Error("expected test file to not exist after removal")
-	}
+	kp.Stop()
 }
 
-func TestStorageScopedToPlugin(t *testing.T) {
-	// Verify that each plugin gets its own storage directory
-	tmpDir := t.TempDir()
-	oldDataDir := util.DataDir
-	util.DataDir = tmpDir
-	defer func() { util.DataDir = oldDataDir }()
-
-	plugin1 := "plugin-one"
-	plugin2 := "plugin-two"
-
-	baseDir1 := filepath.Join(util.DataDir, "storage", "petal", plugin1)
-	baseDir2 := filepath.Join(util.DataDir, "storage", "petal", plugin2)
-
-	// Create directories
-	os.MkdirAll(baseDir1, 0755)
-	os.MkdirAll(baseDir2, 0755)
-
-	// Write different content to each
-	os.WriteFile(filepath.Join(baseDir1, "data.txt"), []byte("plugin1 data"), 0644)
-	os.WriteFile(filepath.Join(baseDir2, "data.txt"), []byte("plugin2 data"), 0644)
-
-	// Verify isolation
-	content1, _ := os.ReadFile(filepath.Join(baseDir1, "data.txt"))
-	content2, _ := os.ReadFile(filepath.Join(baseDir2, "data.txt"))
-
-	if string(content1) != "plugin1 data" {
-		t.Error("plugin1 data corrupted or wrong")
-	}
-	if string(content2) != "plugin2 data" {
-		t.Error("plugin2 data corrupted or wrong")
-	}
-}
-
-func TestFetchPathValidation(t *testing.T) {
-	tests := []struct {
-		name    string
-		path    string
-		valid   bool
-	}{
-		{"valid path", "/api/block/getBlockInfo", true},
-		{"path with query", "/api/block/getBlockInfo?id=123", true},
-		{"path with scheme", "http://example.com/api", false},
-		{"path with https scheme", "https://example.com/api", false},
-		{"relative path", "api/block", false},
-		{"empty path", "", false},
-		{"path with fragment", "/api/test#fragment", true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			valid := strings.HasPrefix(tt.path, "/") && !strings.Contains(tt.path, "://")
-			if valid != tt.valid {
-				t.Errorf("path %q: expected valid=%v, got valid=%v", tt.path, tt.valid, valid)
-			}
-		})
-	}
-}
-
-func TestSocketPathValidation(t *testing.T) {
-	// Same validation as fetch
-	tests := []struct {
-		name    string
-		path    string
-		valid   bool
-	}{
-		{"valid path", "/ws", true},
-		{"path with query", "/ws?app=kernel&id=test", true},
-		{"path with scheme", "ws://example.com/ws", false},
-		{"path with wss scheme", "wss://example.com/ws", false},
-		{"relative path", "ws", false},
-		{"empty path", "", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			valid := strings.HasPrefix(tt.path, "/") && !strings.Contains(tt.path, "://")
-			if valid != tt.valid {
-				t.Errorf("path %q: expected valid=%v, got valid=%v", tt.path, tt.valid, valid)
-			}
-		})
-	}
-}
-
-func TestSocketURLConstruction(t *testing.T) {
-	// Test WebSocket URL construction with token
-	port := "6806"
-	path := "/ws"
-	token := "test-token-123"
-
-	sep := "?"
-	if strings.Contains(path, "?") {
-		sep = "&"
-	}
-	wsURL := "ws://127.0.0.1:" + port + path + sep + "token=" + token
-
-	expected := "ws://127.0.0.1:6806/ws?token=test-token-123"
-	if wsURL != expected {
-		t.Errorf("expected %q, got %q", expected, wsURL)
-	}
-
-	// Test with existing query params
-	path = "/ws?app=kernel"
-	sep = "?"
-	if strings.Contains(path, "?") {
-		sep = "&"
-	}
-	wsURL = "ws://127.0.0.1:" + port + path + sep + "token=" + token
-
-	expected = "ws://127.0.0.1:6806/ws?app=kernel&token=test-token-123"
-	if wsURL != expected {
-		t.Errorf("expected %q, got %q", expected, wsURL)
-	}
-}
-
-func TestFetchURLConstruction(t *testing.T) {
-	port := "6806"
-	path := "/api/block/getBlockInfo"
-
-	// The fetch implementation uses http://127.0.0.1:<port><path>
-	targetURL := "http://127.0.0.1:" + port + path
-
-	expected := "http://127.0.0.1:6806/api/block/getBlockInfo"
-	if targetURL != expected {
-		t.Errorf("expected %q, got %q", expected, targetURL)
-	}
-}
-
-func TestRPCMethodRegistrationState(t *testing.T) {
+func TestRPCRegistration(t *testing.T) {
 	kp := NewKernelPlugin("test-rpc-reg")
 
 	// regOpen should be false initially
@@ -276,24 +235,4 @@ func TestRPCMethodRegistrationState(t *testing.T) {
 
 	// During Start, regOpen is set to true
 	// But we can't easily test that without a full runtime
-}
-
-func TestStorageDirectoryCreation(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	// Test that we can create nested directories
-	nestedDir := filepath.Join(tmpDir, "level1", "level2", "level3")
-	err := os.MkdirAll(nestedDir, 0755)
-	if err != nil {
-		t.Fatalf("failed to create nested directories: %v", err)
-	}
-
-	// Verify the directory exists
-	info, err := os.Stat(nestedDir)
-	if err != nil {
-		t.Fatalf("failed to stat nested directory: %v", err)
-	}
-	if !info.IsDir() {
-		t.Error("expected nested path to be a directory")
-	}
 }

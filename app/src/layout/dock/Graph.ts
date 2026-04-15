@@ -41,6 +41,7 @@ export class Graph extends Model {
         super({
             app: options.app,
             id: options.tab.id,
+            type: "graph",
             callback() {
                 if (this.type === "local") {
                     fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {

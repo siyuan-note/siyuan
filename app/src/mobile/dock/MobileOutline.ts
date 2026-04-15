@@ -1,12 +1,7 @@
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
 import {hasClosestBlock, hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {
-    isInAndroid,
-    isInHarmony,
-    setStorageVal,
-    writeText
-} from "../../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, setStorageVal, writeText} from "../../protyle/util/compatibility";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
@@ -35,6 +30,7 @@ export class MobileOutline extends Model {
         super({
             app: options.app,
             id: genUUID(),
+            type: "outline",
             msgCallback(data) {
                 if (data) {
                     switch (data.cmd) {

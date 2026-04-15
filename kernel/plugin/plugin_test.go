@@ -114,15 +114,15 @@ func TestKernelPluginStartStop(t *testing.T) {
 }
 
 func TestManagerSingleton(t *testing.T) {
-	m1 := GetManager()
-	m2 := GetManager()
+	m1 := getManager()
+	m2 := getManager()
 	if m1 != m2 {
 		t.Error("GetManager should return the same instance")
 	}
 }
 
 func TestManagerGetPlugin(t *testing.T) {
-	m := GetManager()
+	m := getManager()
 	// Should return nil for non-existent plugin
 	if m.GetPlugin("non-existent") != nil {
 		t.Error("GetPlugin should return nil for non-existent plugin")

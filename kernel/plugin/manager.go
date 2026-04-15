@@ -25,6 +25,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -33,8 +34,20 @@ var (
 	managerOnce sync.Once
 )
 
-// GetManager returns the singleton PluginManager.
-func GetManager() *PluginManager {
+// InitManager initializes the global PluginManager singleton and starts it.
+func InitManager() {
+	manager := getManager()
+	manager.TokenFunc = func() string { return model.Conf.Api.Token }
+	manager.PetalDisabledFunc = func() bool { return model.Conf.Bazaar.PetalDisabled }
+	manager.TrustFunc = func() bool { return model.Conf.Bazaar.Trust }
+	model.OnKernelPluginStart = manager.StartPlugin
+	model.OnKernelPluginStop = manager.StopPlugin
+	model.OnKernelPluginShutdown = manager.Stop
+	manager.Start()
+}
+
+// getManager returns the singleton PluginManager.
+func getManager() *PluginManager {
 	managerOnce.Do(func() {
 		manager = &PluginManager{
 			plugins: make(map[string]*KernelPlugin),

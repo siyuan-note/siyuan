@@ -42,17 +42,6 @@ func main() {
 
 	model.BootSyncData()
 	model.InitBoxes()
-
-	// Wire kernel plugin system
-	mgr := plugin.GetManager()
-	mgr.TokenFunc = func() string { return model.Conf.Api.Token }
-	mgr.PetalDisabledFunc = func() bool { return model.Conf.Bazaar.PetalDisabled }
-	mgr.TrustFunc = func() bool { return model.Conf.Bazaar.Trust }
-	model.OnKernelPluginStart = mgr.StartPlugin
-	model.OnKernelPluginStop = mgr.StopPlugin
-	model.OnKernelPluginShutdown = mgr.Stop
-	mgr.Start()
-
 	model.LoadFlashcards()
 	util.LoadAssetsTexts()
 
@@ -64,6 +53,7 @@ func main() {
 	go model.AutoGenerateFileHistory()
 	go cache.LoadAssets()
 	go util.CheckFileSysStatus()
+	go plugin.InitManager()
 
 	model.WatchAssets()
 	model.WatchEmojis()

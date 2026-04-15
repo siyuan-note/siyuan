@@ -53,7 +53,7 @@ type JSONRPCError struct {
 // HandleRPCHTTP handles POST /api/plugin/rpc/:name
 func HandleRPCHTTP(c *gin.Context) {
 	name := c.Param("name")
-	kp := GetManager().GetPlugin(name)
+	kp := getManager().GetPlugin(name)
 	if kp == nil || kp.State() != StateRunning {
 		resp := JSONRPCResponse{
 			JSONRPC: "2.0",
@@ -88,7 +88,7 @@ func HandleRPCHTTP(c *gin.Context) {
 // HandleRPCWebSocket handles GET /ws/plugin/rpc/:name
 func HandleRPCWebSocket(c *gin.Context) {
 	name := c.Param("name")
-	kp := GetManager().GetPlugin(name)
+	kp := getManager().GetPlugin(name)
 	if kp == nil || kp.State() != StateRunning {
 		c.JSON(http.StatusNotFound, JSONRPCResponse{
 			JSONRPC: "2.0",

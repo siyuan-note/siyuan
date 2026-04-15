@@ -44,6 +44,7 @@ export class Backlink extends Model {
         super({
             app: options.app,
             id: options.tab.id,
+            type: "backlink",
             callback() {
                 if (this.type === "local") {
                     fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {

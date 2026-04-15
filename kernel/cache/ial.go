@@ -24,7 +24,7 @@ import (
 )
 
 var docIALCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 1024 * 100,
+	NumCounters: 100000,
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })
@@ -55,7 +55,7 @@ func ClearDocsIAL() {
 }
 
 var blockIALCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 1024 * 1000,
+	NumCounters: 100000,
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })

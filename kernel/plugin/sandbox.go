@@ -55,7 +55,7 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 	injectStorage(ctx, p, siyuan)
 	injectFetch(ctx, p, siyuan)
 	injectSocket(ctx, p, siyuan)
-	injectRPC(ctx, p, siyuan)
+	injectRpc(ctx, p, siyuan)
 
 	ctx.Global().SetPropertyStr("siyuan", siyuan)
 
@@ -64,7 +64,7 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 
 // injectPlugin adds siyuan.plugin to the QJS context.
 func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
-	i18n, _ := GoAnyToJsValue(ctx, p.I18n)
+	i18n, _ := GoValueToJsValue(ctx, p.I18n)
 
 	plugin := ctx.NewObject()
 
@@ -238,7 +238,7 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				})
 			}
 
-			resultJs, err := GoAnyToJsValue(ctx, result)
+			resultJs, err := GoValueToJsValue(ctx, result)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
 				return
@@ -338,7 +338,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			// ctx.ParseJSON(string(json.Marshal(m))) 2.5x faster than qjs.GoMapToJs(ctx, reflect.ValueOf(m))
-			respHeadersJs, err := GoAnyToJsValue(ctx, respHeaders)
+			respHeadersJs, err := GoValueToJsValue(ctx, respHeaders)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
 				return
@@ -622,8 +622,8 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	return nil
 }
 
-// injectRPC adds siyuan.rpc method for RPC method registration.
-func injectRPC(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+// injectRpc adds siyuan.rpc method for RPC method registration.
+func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	rpc := ctx.NewObject()
 
 	rpc.SetPropertyStr("bind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
@@ -674,7 +674,8 @@ func injectRPC(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	return nil
 }
 
-func GoAnyToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error) {
+// GoValueToJsValue converts a Go value to a QJS Value by JSON serialization round-trip, returning an error if serialization fails.
+func GoValueToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error) {
 	valueBytes, err := json.Marshal(value)
 	if err != nil {
 		return

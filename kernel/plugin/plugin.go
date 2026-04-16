@@ -29,6 +29,12 @@ import (
 
 type PluginState int
 
+type RpcMethod struct {
+	Name         string
+	Descriptions []string
+	Function     *qjs.Value
+}
+
 const (
 	StateLoading PluginState = iota
 	StateRunning
@@ -170,24 +176,28 @@ func (p *KernelPlugin) OnUnload() {
 }
 
 // BindRpcMethod add or updates a JS function as a named RPC method.
-func (p *KernelPlugin) BindRpcMethod(name string, method *qjs.Value) error {
-	p.rpcMethods.Store(name, method)
+func (p *KernelPlugin) BindRpcMethod(name string, function *qjs.Value, descriptions ...string) error {
+	p.rpcMethods.Store(name, &RpcMethod{
+		Name:         name,
+		Descriptions: descriptions,
+		Function:     function,
+	})
 	return nil
 }
 
 // UnbindRpcMethod removes a registered RPC method
-func (p *KernelPlugin) UnbindRpcMethod(name string, method *qjs.Value) error {
+func (p *KernelPlugin) UnbindRpcMethod(name string, function *qjs.Value) error {
 	value, ok := p.rpcMethods.Load(name)
 	if !ok {
 		return nil
 	}
 
-	fn, ok := value.(*qjs.Value)
+	rpcMethod, ok := value.(*RpcMethod)
 	if !ok {
 		return nil
 	}
 
-	if fn.Raw() == method.Raw() {
+	if rpcMethod.Function.Raw() == function.Raw() {
 		p.rpcMethods.Delete(name)
 	}
 	return nil
@@ -224,13 +234,13 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 		paramVal = ctx.NewNull()
 	}
 
-	fn := p.getRpcMethod(method)
-	if fn == nil {
+	rpcMethod := p.getRpcMethod(method)
+	if rpcMethod == nil {
 		return nil, fmt.Errorf("method %q not found", method)
 	}
 
 	// Call the JS function using ctx.Invoke(fn, thisVal, args...)
-	result, err := ctx.Invoke(fn, ctx.Global(), paramVal)
+	result, err := ctx.Invoke(rpcMethod, ctx.Global(), paramVal)
 	if err != nil {
 		return nil, fmt.Errorf("call %q: %w", method, err)
 	}
@@ -278,22 +288,22 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 }
 
 // getRpcMethod retrieves a registered RPC method by name, or nil if not found or not a function.
-func (p *KernelPlugin) getRpcMethod(method string) *qjs.Value {
-	value, ok := p.rpcMethods.Load(method)
+func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
+	value, ok := p.rpcMethods.Load(name)
 	if !ok {
 		return nil
 	}
 
-	fn, ok := value.(*qjs.Value)
+	method, ok := value.(*RpcMethod)
 	if !ok {
 		return nil
 	}
 
-	if !fn.IsFunction() {
+	if !method.Function.IsFunction() {
 		return nil
 	}
 
-	return fn
+	return method.Function
 }
 
 // getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.

@@ -2,7 +2,8 @@ import {addScript} from "../util/addScript";
 import {Constants} from "../../constants";
 import {focusByOffset} from "../util/selection";
 import {setCodeTheme} from "./util";
-import {initShiki, ensureShikiLang, shikiHighlight} from "./shikiInit";
+
+type ShikiModule = typeof import("./shikiInit");
 
 const isShikiEngine = () => {
     return window.siyuan.config.appearance.codeBlockEngine === "shiki";
@@ -90,7 +91,7 @@ const renderBlockHljs = (block: HTMLElement, isPreview: boolean, zoom: number) =
     }
 };
 
-const renderBlockShiki = async (block: HTMLElement, isPreview: boolean, zoom: number) => {
+const renderBlockShiki = async (block: HTMLElement, isPreview: boolean, zoom: number, shiki: ShikiModule) => {
     const wbrElement = block.querySelector("wbr");
     let startIndex = 0;
     if (wbrElement) {
@@ -106,14 +107,14 @@ const renderBlockShiki = async (block: HTMLElement, isPreview: boolean, zoom: nu
     }
 
     let language = getLanguageFromBlock(block, isPreview);
-    language = await ensureShikiLang(language);
+    language = await shiki.ensureShikiLang(language);
 
     block.classList.add("hljs");
     const hljsElement = block.lastElementChild ? block.lastElementChild as HTMLElement : block;
     applyBlockStyles(block, hljsElement);
     const codeText = hljsElement.textContent;
     applyLineNumbers(block, isPreview, zoom);
-    const result = shikiHighlight(
+    const result = shiki.shikiHighlight(
         codeText + (codeText.endsWith("\n") ? "" : "\n"),
         language
     );
@@ -158,7 +159,9 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
     setCodeTheme(cdn);
 
     if (isShikiEngine()) {
-        initShiki().then(() => {
+        import(/* webpackChunkName: "shiki-init" */ "./shikiInit").then((shiki) => {
+            return shiki.initShiki().then(() => shiki);
+        }).then((shiki) => {
             codeElements.forEach((block: HTMLElement) => {
                 if (block.getAttribute("data-render") === "true") {
                     return;
@@ -169,7 +172,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
                     iconElements[0].setAttribute("aria-label", window.siyuan.languages.copy);
                     iconElements[1].setAttribute("aria-label", window.siyuan.languages.more);
                 }
-                renderBlockShiki(block, isPreview, zoom);
+                renderBlockShiki(block, isPreview, zoom, shiki);
             });
         });
     } else {

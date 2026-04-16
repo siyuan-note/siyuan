@@ -17,7 +17,6 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {getShikiLanguageList, isShikiLanguage} from "../render/shikiInit";
 import {copyPlainText, openByMobile, readClipboard, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
@@ -1234,7 +1233,7 @@ export class Toolbar {
         });
     }
 
-    public showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
+    public async showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
         const nodeElement = hasClosestBlock(languageElements[0]);
         if (!nodeElement) {
             return;
@@ -1253,8 +1252,11 @@ export class Toolbar {
 
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages: string[];
+        let shikiModule: typeof import("../render/shikiInit") | null = null;
         if (window.siyuan.config.appearance.codeBlockEngine === "shiki") {
-            hljsLanguages = getShikiLanguageList();
+            shikiModule = await import(/* webpackChunkName: "shiki-init" */ "../render/shikiInit");
+            await shikiModule.initShiki();
+            hljsLanguages = shikiModule.getShikiLanguageList();
         } else {
             hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
         }
@@ -1328,7 +1330,7 @@ export class Toolbar {
                 });
 
                 const isValidLang = window.siyuan.config.appearance.codeBlockEngine === "shiki"
-                    ? isShikiLanguage(value)
+                    ? shikiModule?.isShikiLanguage(value)
                     : window.hljs?.getLanguage(value);
                 if (isValidLang) {
                     // Default languages and their aliases

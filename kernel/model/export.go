@@ -977,6 +977,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
+	luteEngine.SetExportNormalizeTaskListMarker(true)
 
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -2295,6 +2296,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
+	luteEngine.SetExportNormalizeTaskListMarker(true)
 	if "" != cloudAssetsBase {
 		luteEngine.RenderOptions.LinkBase = cloudAssetsBase
 	}
@@ -3386,6 +3388,7 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 
 	assetsOldNew, assetsNewOld := map[string]string{}, map[string]string{}
 	luteEngine := util.NewLute()
+	luteEngine.SetExportNormalizeTaskListMarker(true)
 	for i, p := range docPaths {
 		rootID := util.GetTreeID(p)
 		tree, md, isEmpty := exportMarkdownContent(rootID, ext, exportRefMode, defBlockIDs, false)

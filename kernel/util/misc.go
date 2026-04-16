@@ -26,6 +26,7 @@ import (
 	"unicode"
 
 	"github.com/88250/lute/html"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/siyuan-note/logging"
 )
 
@@ -209,6 +210,11 @@ func GetContainsSubStrs(s string, subStrs []string) (ret []string) {
 		}
 	}
 	return
+}
+
+func SanitizeHTML(h string) string {
+	p := bluemonday.UGCPolicy()
+	return p.Sanitize(h)
 }
 
 func SanitizeSVG(svgInput string) string {

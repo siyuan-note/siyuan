@@ -21,6 +21,7 @@ export class Bookmark extends Model {
         super({
             app,
             id: tab.id,
+            type: "bookmark",
             msgCallback(data) {
                 if (data) {
                     switch (data.cmd) {

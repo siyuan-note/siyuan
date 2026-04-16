@@ -2,7 +2,12 @@ import {addScript, addScriptSync} from "../protyle/util/addScript";
 import {Constants} from "../constants";
 import {onMessage} from "./util/onMessage";
 import {genUUID} from "../util/genID";
-import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../protyle/util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasTopClosestByClassName
+} from "../protyle/util/hasClosest";
 import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
@@ -33,6 +38,7 @@ import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {updateControlAlt} from "../protyle/util/hotKey";
 import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
+import {hideAllElements} from "../protyle/ui/hideElements";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -100,6 +106,9 @@ class App {
                 if (canInput(event.target)) {
                     callMobileAppShowKeyboard();
                 }
+            }
+            if (!hasClosestByClassName(event.target as Element, "protyle-util")) {
+                hideAllElements(["util"]);
             }
         });
         if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {

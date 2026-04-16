@@ -2,7 +2,6 @@ import {getAllEditor, getAllModels} from "../../layout/getAll";
 import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
-import {getFirstBlock} from "../../protyle/wysiwyg/getBlock";
 
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let left = x + 34;

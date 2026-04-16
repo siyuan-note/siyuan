@@ -48,6 +48,7 @@ export class Outline extends Model {
         super({
             app: options.app,
             id: options.tab.id,
+            type: "outline",
             callback() {
                 if (this.type === "local") {
                     fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {

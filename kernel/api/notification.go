@@ -42,6 +42,8 @@ func pushMsg(c *gin.Context) {
 	if nil != arg["timeout"] {
 		timeout = int(arg["timeout"].(float64))
 	}
+
+	msg = util.SanitizeHTML(msg)
 	msgId := util.PushMsg(msg, timeout)
 
 	ret.Data = map[string]any{
@@ -67,6 +69,8 @@ func pushErrMsg(c *gin.Context) {
 	if nil != arg["timeout"] {
 		timeout = int(arg["timeout"].(float64))
 	}
+
+	msg = util.SanitizeHTML(msg)
 	msgId := util.PushErrMsg(msg, timeout)
 
 	ret.Data = map[string]any{

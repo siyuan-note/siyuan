@@ -40,7 +40,7 @@ import (
 // virtualBlockRefCache 用于保存块关联的虚拟引用关键字。
 // 改进打开虚拟引用后加载文档的性能 https://github.com/siyuan-note/siyuan/issues/7378
 var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 102400,
+	NumCounters: 100000,
 	MaxCost:     10240,
 	BufferItems: 64,
 })

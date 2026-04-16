@@ -455,7 +455,7 @@ const bindProviderEvent = () => {
 export const repos = {
     element: undefined as Element,
     genHTML: () => {
-        return `<div class="fn__flex b3-label config__item">
+        return `<div><div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.syncProvider}
         <div class="b3-label__text">${window.siyuan.languages.syncProviderTip}</div>
@@ -538,7 +538,7 @@ export const repos = {
 <div class="b3-label fn__flex">
     <div class="fn__flex-center">${window.siyuan.languages.cloudBackup}</div>
     <div class="b3-list-item__meta fn__flex-center">${window.siyuan.languages.cloudBackupTip}</div>
-</div>`;
+</div></div>`;
     },
     bindEvent: () => {
         bindProviderEvent();

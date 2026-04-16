@@ -35,6 +35,11 @@ type RpcMethod struct {
 	Function     *qjs.Value
 }
 
+type RpcMethodInfo struct {
+	Name         string   `json:"name"`
+	Descriptions []string `json:"descriptions"`
+}
+
 const (
 	StateLoading PluginState = iota
 	StateRunning
@@ -285,6 +290,20 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 	defer p.mu.Unlock()
 
 	delete(p.sockets, conn)
+}
+
+// GetRpcMethodsInfo returns a list of registered RPC methods with their descriptions.
+func (p *KernelPlugin) GetRpcMethodsInfo() (methods []*RpcMethodInfo) {
+	p.rpcMethods.Range(func(name any, value any) bool {
+		if method, ok := value.(*RpcMethod); ok {
+			methods = append(methods, &RpcMethodInfo{
+				Name:         method.Name,
+				Descriptions: method.Descriptions,
+			})
+		}
+		return true
+	})
+	return
 }
 
 // getRpcMethod retrieves a registered RPC method by name, or nil if not found or not a function.

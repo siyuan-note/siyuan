@@ -23,6 +23,17 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
+// PluginManager discovers, loads, starts, and stops kernel plugins.
+type PluginManager struct {
+	mu      sync.RWMutex
+	plugins map[string]*KernelPlugin
+}
+
+type PluginInfo struct {
+	Name    string           `json:"name"`
+	Methods []*RpcMethodInfo `json:"methods"`
+}
+
 var (
 	manager     *PluginManager
 	managerOnce sync.Once
@@ -47,12 +58,6 @@ func GetManager() *PluginManager {
 		}
 	})
 	return manager
-}
-
-// PluginManager discovers, loads, starts, and stops kernel plugins.
-type PluginManager struct {
-	mu      sync.RWMutex
-	plugins map[string]*KernelPlugin
 }
 
 // Start loads and starts all kernel-eligible plugins.
@@ -137,4 +142,18 @@ func (m *PluginManager) GetPlugin(name string) *KernelPlugin {
 	defer m.mu.RUnlock()
 
 	return m.plugins[name]
+}
+
+// GetLoadedPluginInfo returns a list of all loaded plugins with their RPC method info.
+func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	for _, p := range m.plugins {
+		plugins = append(plugins, &PluginInfo{
+			Name:    p.Name,
+			Methods: p.GetRpcMethodsInfo(),
+		})
+	}
+	return plugins
 }

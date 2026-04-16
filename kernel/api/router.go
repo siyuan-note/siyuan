@@ -514,6 +514,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalEnabled)
+	ginServer.Handle("POST", "/api/petal/getLoadedKernelPetals", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getLoadedKernelPetals)
 
 	ginServer.Any("/api/network/echo", model.CheckAuth, model.CheckAdminRole, echo)
 	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, model.CheckAdminRole, forwardProxy)

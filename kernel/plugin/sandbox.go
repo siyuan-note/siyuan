@@ -636,12 +636,17 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		name := args[0].String()
 		method := args[1]
 
+		descriptions := make([]string, len(args)-2)
+		for i := 2; i < len(args); i++ {
+			descriptions[i-2] = args[i].String()
+		}
+
 		if !method.IsFunction() {
 			err = fmt.Errorf("siyuan.rpc.bind: second argument must be a function")
 			return
 		}
 
-		if err = p.BindRpcMethod(name, method); err != nil {
+		if err = p.BindRpcMethod(name, method, descriptions...); err != nil {
 			return
 		}
 

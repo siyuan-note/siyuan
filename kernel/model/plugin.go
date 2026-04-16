@@ -41,15 +41,27 @@ type Petal struct {
 	DisabledInPublish bool   `json:"disabledInPublish"` // Whether disabled in publish mode
 	DisallowInstall   bool   `json:"disallowInstall"`   // Whether disallow install
 
-	JS   string         `json:"js"`   // JS code
-	CSS  string         `json:"css"`  // CSS code
-	I18n map[string]any `json:"i18n"` // i18n text
+	JS     string         `json:"js"`     // JS code
+	CSS    string         `json:"css"`    // CSS code
+	I18n   map[string]any `json:"i18n"`   // i18n text
+	Kernel *KernelPetal   `json:"kernel"` // Kernel plugin info (non-nil when it's a kernel plugin)
 }
+
+type KernelPetal struct {
+	JS           string `json:"js"`           // Kernel JS code
+	Incompatible bool   `json:"incompatible"` // Whether incompatible
+}
+
+var (
+	OnKernelPluginStart    func(petal *Petal) // Called when a plugin is enabled (after loading and starting the plugin)
+	OnKernelPluginStop     func(petal *Petal) // Called when a plugin is disabled (before stopping and unloading the plugin)
+	OnKernelPluginShutdown func()             // Called when SiYuan is shutting down, before stopping all plugins
+)
 
 func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	petals := getPetals()
 
-	found, displayName, incompatible, disabledInPublish, disallowInstall := bazaar.ParseInstalledPlugin(name, "")
+	found, displayName, incompatible, disabledInPublish, disallowInstall, kernelIncompatible := bazaar.ParseInstalledPlugin(name, "")
 	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
@@ -67,6 +79,9 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	ret.Incompatible = incompatible
 	ret.DisabledInPublish = disabledInPublish
 	ret.DisallowInstall = disallowInstall
+	ret.Kernel = &KernelPetal{
+		Incompatible: kernelIncompatible,
+	}
 
 	if enabled && disallowInstall {
 		err = fmt.Errorf("require upgrade SiYuan to use this plugin [%s]", name)
@@ -79,11 +94,11 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	// Hook kernel plugin lifecycle (callbacks avoid circular import with plugin package)
 	if enabled {
 		if OnKernelPluginStart != nil {
-			OnKernelPluginStart(name)
+			OnKernelPluginStart(ret)
 		}
 	} else {
 		if OnKernelPluginStop != nil {
-			OnKernelPluginStop(name)
+			OnKernelPluginStop(ret)
 		}
 	}
 
@@ -103,11 +118,26 @@ func getPetalByName(name string, petals []*Petal) (ret *Petal) {
 
 var loadPetalsFlight singleflight.Group
 
+// IsPetalsEnabled returns whether petals are enabled and trusted to be loaded
+func IsPetalsEnabled() bool {
+	if Conf.Bazaar.PetalDisabled {
+		return false
+	}
+
+	if !Conf.Bazaar.Trust {
+		// 移动端没有集市模块，所以要默认开启，桌面端和 Docker 容器需要用户手动确认过信任后才能开启
+		if util.Container == util.ContainerStd || util.Container == util.ContainerDocker {
+			return false
+		}
+	}
+	return true
+}
+
 func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 	// 调用 setPetalEnabled 接口之后推送消息到所有前端实例，接着会同时调用 loadPetals 接口，合并相同类型的请求为一次执行
 	key := "loadPetals:" + frontend + ":" + strconv.FormatBool(isPublish)
 	v, err, _ := loadPetalsFlight.Do(key, func() (any, error) {
-		return loadPetals(frontend, isPublish), nil
+		return loadPetals(frontend, isPublish, false), nil
 	})
 	if err != nil {
 		return []*Petal{}
@@ -115,29 +145,55 @@ func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 	return v.([]*Petal)
 }
 
-func loadPetals(frontend string, isPublish bool) (ret []*Petal) {
+func LoadKernelPetals() (ret []*Petal) {
+	v, err, _ := loadPetalsFlight.Do("loadKernelPetals", func() (any, error) {
+		return loadPetals("", false, true), nil
+	})
+	if err != nil {
+		return []*Petal{}
+	}
+	return v.([]*Petal)
+}
+
+func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
 	ret = []*Petal{}
 
-	if Conf.Bazaar.PetalDisabled {
+	if !IsPetalsEnabled() {
 		return
-	}
-
-	if !Conf.Bazaar.Trust {
-		// 移动端没有集市模块，所以要默认开启，桌面端和 Docker 容器需要用户手动确认过信任后才能开启
-		if util.ContainerStd == util.Container || util.ContainerDocker == util.Container {
-			return
-		}
 	}
 
 	var petalNames []string
 	petals := getPetals()
 	for _, petal := range petals {
-		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall = bazaar.ParseInstalledPlugin(petal.Name, frontend)
-		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) || petal.DisallowInstall {
-			if petal.DisallowInstall {
-				SetPetalEnabled(petal.Name, false)
-				logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
+		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall, petal.Kernel.Incompatible = bazaar.ParseInstalledPlugin(petal.Name, frontend)
+		if !petal.Enabled {
+			// disabled plugin
+			continue
+		}
+
+		if isKernel {
+			// kernel plugin
+			if petal.Kernel.Incompatible {
+				// incompatible kernel plugin
+				continue
 			}
+		} else {
+			// client plugin
+			if petal.Incompatible {
+				// incompatible client plugin
+				continue
+			}
+
+			if isPublish && petal.DisabledInPublish {
+				// disabled plugin in publish mode
+				continue
+			}
+		}
+
+		if petal.DisallowInstall {
+			// disallow install plugin (require upgrade SiYuan), auto disable it to avoid potential issues, and skip loading
+			SetPetalEnabled(petal.Name, false)
+			logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
 			continue
 		}
 
@@ -154,22 +210,32 @@ func loadCode(petal *Petal) {
 	pluginDir := filepath.Join(util.DataDir, "plugins", petal.Name)
 	jsPath := filepath.Join(pluginDir, "index.js")
 	if !filelock.IsExist(jsPath) {
-		logging.LogErrorf("plugin [%s] js not found", petal.Name)
+		logging.LogErrorf("plugin [%s] index.js not found", petal.Name)
 		return
 	}
 
 	data, err := filelock.ReadFile(jsPath)
 	if err != nil {
-		logging.LogErrorf("read plugin [%s] js failed: %s", petal.Name, err)
+		logging.LogErrorf("read plugin [%s] index.js failed: %s", petal.Name, err)
 		return
 	}
 	petal.JS = string(data)
+
+	kernelJsPath := filepath.Join(pluginDir, "kernel.js")
+	if filelock.IsExist(kernelJsPath) {
+		data, err = filelock.ReadFile(kernelJsPath)
+		if err != nil {
+			logging.LogErrorf("read plugin [%s] kernel.js failed: %s", petal.Name, err)
+		} else {
+			petal.Kernel.JS = string(data)
+		}
+	}
 
 	cssPath := filepath.Join(pluginDir, "index.css")
 	if filelock.IsExist(cssPath) {
 		data, err = filelock.ReadFile(cssPath)
 		if err != nil {
-			logging.LogErrorf("read plugin [%s] css failed: %s", petal.Name, err)
+			logging.LogErrorf("read plugin [%s] index.css failed: %s", petal.Name, err)
 		} else {
 			petal.CSS = string(data)
 		}
@@ -305,10 +371,3 @@ func getPetals() (ret []*Petal) {
 	}
 	return
 }
-
-// Kernel plugin lifecycle hooks - wired by main.go
-var (
-	OnKernelPluginStart    func(name string)
-	OnKernelPluginStop     func(name string)
-	OnKernelPluginShutdown func()
-)

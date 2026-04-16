@@ -53,7 +53,7 @@ type JSONRPCError struct {
 // HandleRPCHTTP handles POST /api/plugin/rpc/:name
 func HandleRPCHTTP(c *gin.Context) {
 	name := c.Param("name")
-	kp := getManager().GetPlugin(name)
+	kp := GetManager().GetPlugin(name)
 	if kp == nil || kp.State() != StateRunning {
 		resp := JSONRPCResponse{
 			JSONRPC: "2.0",
@@ -88,7 +88,7 @@ func HandleRPCHTTP(c *gin.Context) {
 // HandleRPCWebSocket handles GET /ws/plugin/rpc/:name
 func HandleRPCWebSocket(c *gin.Context) {
 	name := c.Param("name")
-	kp := getManager().GetPlugin(name)
+	kp := GetManager().GetPlugin(name)
 	if kp == nil || kp.State() != StateRunning {
 		c.JSON(http.StatusNotFound, JSONRPCResponse{
 			JSONRPC: "2.0",
@@ -130,8 +130,8 @@ func HandleRPCWebSocket(c *gin.Context) {
 }
 
 // dispatchRPC routes a single JSON-RPC request to the plugin's registered JS method.
-func dispatchRPC(kp *KernelPlugin, req *JSONRPCRequest) JSONRPCResponse {
-	result, err := kp.CallRPCMethod(req.Method, req.Params)
+func dispatchRPC(p *KernelPlugin, req *JSONRPCRequest) JSONRPCResponse {
+	result, err := p.CallRpcMethod(req.Method, req.Params)
 	if err != nil {
 		code := -32603 // internal error
 		if err.Error() == fmt.Sprintf("method %q not found", req.Method) ||

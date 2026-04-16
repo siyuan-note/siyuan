@@ -31,6 +31,7 @@ import (
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -56,9 +57,20 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 
 // injectPlugin adds siyuan.plugin to the QJS context.
 func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	i18n, err := json.Marshal(p.I18n)
+	if err != nil {
+		return fmt.Errorf("failed to marshal plugin i18n: %w", err)
+	}
+
 	plugin := ctx.NewObject()
 
 	plugin.SetPropertyStr("name", ctx.NewString(p.Name))
+	plugin.SetPropertyStr("displayName", ctx.NewString(p.DisplayName))
+	plugin.SetPropertyStr("platform", ctx.NewString(bazaar.GetCurrentBackend()))
+	plugin.SetPropertyStr("i18n", ctx.ParseJSON(string(i18n)))
+
+	plugin.SetPropertyStr("onload", ctx.NewNull())
+	plugin.SetPropertyStr("onunload", ctx.NewNull())
 
 	siyuan.SetPropertyStr("plugin", plugin)
 	return nil
@@ -289,7 +301,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 
 			r := req.C().R().
-				SetHeader(model.XAuthTokenKey, p.Token)
+				SetHeader(model.XAuthTokenKey, p.token)
 
 			// Apply user headers (Authorization will be overwritten above)
 			for k, v := range headers {
@@ -321,6 +333,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				respHeaders[k] = strings.Join(vs, ", ")
 			}
 
+			// ctx.ParseJSON(string(json.Marshal(m))) 2.5x faster than qjs.GoMapToJs(ctx, reflect.ValueOf(m))
 			respHeadersJsonBytes, err := json.Marshal(respHeaders)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
@@ -330,7 +343,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			response := ctx.NewObject()
 			response.SetPropertyStr("url", ctx.NewString(targetURL))
 			response.SetPropertyStr("ok", ctx.NewBool(resp.StatusCode >= 200 && resp.StatusCode < 300))
-			response.SetPropertyStr("status", ctx.NewInt32(int32(resp.StatusCode)))
+			response.SetPropertyStr("status", qjs.GoNumberToJs(ctx, resp.StatusCode))
 			response.SetPropertyStr("statusText", ctx.NewString(resp.Status))
 			response.SetPropertyStr("headers", ctx.ParseJSON(string(respHeadersJsonBytes)))
 			response.SetPropertyStr("body", ctx.NewBytes(respBody))
@@ -382,7 +395,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
 
 		wsHeader := http.Header{}
-		wsHeader.Set(model.XAuthTokenKey, p.Token)
+		wsHeader.Set(model.XAuthTokenKey, p.token)
 		if (protocols) != "" {
 			wsHeader.Set("Sec-Websocket-Protocol", protocols)
 		}
@@ -483,14 +496,36 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	return nil
 }
 
-// injectRPC adds siyuan.rpc.register method for RPC method registration.
+// injectRPC adds siyuan.rpc method for RPC method registration.
 func injectRPC(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	rpc := ctx.NewObject()
 
-	rpc.SetPropertyStr("register", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+	rpc.SetPropertyStr("bind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		args := this.Args()
 		if len(args) < 2 {
-			err = fmt.Errorf("siyuan.rpc.register: name and function required")
+			err = fmt.Errorf("siyuan.rpc.bind: name and function required")
+			return
+		}
+
+		name := args[0].String()
+		method := args[1]
+
+		if !method.IsFunction() {
+			err = fmt.Errorf("siyuan.rpc.bind: second argument must be a function")
+			return
+		}
+
+		if err = p.BindRpcMethod(name, method); err != nil {
+			return
+		}
+
+		return
+	}, false))
+
+	rpc.SetPropertyStr("unbind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		args := this.Args()
+		if len(args) < 2 {
+			err = fmt.Errorf("siyuan.rpc.unbind: name and function required")
 			return
 		}
 
@@ -498,11 +533,11 @@ func injectRPC(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		fn := args[1]
 
 		if !fn.IsFunction() {
-			err = fmt.Errorf("siyuan.rpc.register: second argument must be a function")
+			err = fmt.Errorf("siyuan.rpc.unbind: second argument must be a function")
 			return
 		}
 
-		if err = p.RegisterRPCMethod(name, fn); err != nil {
+		if err = p.UnbindRpcMethod(name, fn); err != nil {
 			return
 		}
 

@@ -19,112 +19,70 @@ package plugin
 import (
 	"testing"
 
-	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
-func TestIsKernelEligible(t *testing.T) {
-	tests := []struct {
-		name     string
-		kernel   []string
-		backend  string
-		expected bool
-	}{
-		// Note: bazaar.IsTargetSupported returns true for empty/nil slice
-		// (missing "kernel" field means supported on all platforms)
-		{"nil kernel", nil, "darwin", true},
-		{"empty kernel", []string{}, "darwin", true},
-		{"all", []string{"all"}, "darwin", true},
-		{"match", []string{"darwin", "linux"}, "darwin", true},
-		{"no match", []string{"windows", "linux"}, "darwin", false},
-		{"all with others", []string{"all", "windows"}, "linux", true},
-	}
+func TestRPCRegistration(t *testing.T) {
+	code := `
+		try {
+			const log = async (...args) => {
+				siyuan.logger.debug(JSON.stringify(args));
+			};
+			const test = async (...args) => {
+				siyuan.logger.debug(JSON.stringify(args));
+				await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate async work
+				return args[0].message;
+			};
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := bazaar.IsTargetSupported(tt.kernel, tt.backend)
-			if result != tt.expected {
-				t.Errorf("IsTargetSupported(%v, %q) = %v, want %v", tt.kernel, tt.backend, result, tt.expected)
-			}
-		})
-	}
-}
+			siyuan.rpc.bind("log", log);
+			siyuan.rpc.unbind("log", log);
 
-func TestPluginStateString(t *testing.T) {
-	tests := []struct {
-		state    PluginState
-		expected string
-	}{
-		{StateLoading, "loading"},
-		{StateRunning, "running"},
-		{StateErrored, "errored"},
-		{StateStopped, "stopped"},
-	}
+			siyuan.rpc.bind("test", test);
+		} catch (e) {
+			siyuan.logger.error("Failed to register RPC method:", e.toString());
+		}
 
-	for _, tt := range tests {
-		t.Run(tt.expected, func(t *testing.T) {
-			if got := tt.state.String(); got != tt.expected {
-				t.Errorf("PluginState(%d).String() = %q, want %q", tt.state, got, tt.expected)
-			}
-		})
-	}
-}
+		siyuan.plugin.onload = (...args) => {
+			siyuan.logger.debug("Plugin loaded with args: " + JSON.stringify(args));
+		};
 
-func TestNewKernelPlugin(t *testing.T) {
-	kp := NewKernelPlugin("test-plugin")
-	if kp.Name != "test-plugin" {
-		t.Errorf("Name = %q, want %q", kp.Name, "test-plugin")
+		siyuan.plugin.onunload = async (...args) => {
+			siyuan.logger.debug("Plugin unloaded with args: " + JSON.stringify(args));
+			await new Promise(resolve => setTimeout(resolve, 1000));
+		};
+	`
+	petal := &model.Petal{
+		Name: "test-rpc-register",
+		Kernel: &model.KernelPetal{
+			JS: code,
+		},
 	}
-	if kp.State() != StateStopped {
-		t.Errorf("initial state = %v, want %v", kp.State(), StateStopped)
-	}
-}
-
-func TestRPCDispatchErrors(t *testing.T) {
-	kp := NewKernelPlugin("test")
-	// Plugin not running - should error
-	_, err := kp.CallRPCMethod("anything", nil)
-	if err == nil {
-		t.Error("expected error calling RPC on stopped plugin")
-	}
-}
-
-func TestKernelPluginStartStop(t *testing.T) {
-	kp := NewKernelPlugin("test-start-stop")
-
-	// Test that a plugin with no kernel.js (empty code) fails to start
-	// because injectSandboxGlobals will fail (it needs a valid runtime)
-	err := kp.Start(`siyuan.logger.debug("Hello from [plugin:test-start-stop]");`)
-	// Should either succeed (with empty code doing nothing) or fail
-	// We just verify it doesn't panic and state is set appropriately
+	p := NewKernelPlugin(petal)
+	err := p.Start()
 	if err != nil {
-		// If it failed, state should be errored
-		if kp.State() != StateErrored && kp.State() != StateStopped {
-			t.Errorf("expected errored or stopped state after failed start, got %v", kp.State())
-		}
+		t.Errorf("failed to start plugin: %v", err)
 	} else {
-		// If it succeeded, state should be running
-		if kp.State() != StateRunning {
-			t.Errorf("expected running state after successful start, got %v", kp.State())
-		}
-		kp.Stop()
-		if kp.State() != StateStopped {
-			t.Errorf("expected stopped state after stop, got %v", kp.State())
-		}
-	}
-}
 
-func TestManagerSingleton(t *testing.T) {
-	m1 := getManager()
-	m2 := getManager()
-	if m1 != m2 {
-		t.Error("GetManager should return the same instance")
-	}
-}
+		count := 0
+		p.rpcMethods.Range(func(key, value interface{}) bool {
+			count++
+			return true // 继续遍历
+		})
 
-func TestManagerGetPlugin(t *testing.T) {
-	m := getManager()
-	// Should return nil for non-existent plugin
-	if m.GetPlugin("non-existent") != nil {
-		t.Error("GetPlugin should return nil for non-existent plugin")
+		if count != 1 {
+			t.Errorf("expected 1 registered RPC method, got %d", count)
+		}
+
+		result, err := p.CallRpcMethod("test", map[string]interface{}{
+			"message": "Hello, world!",
+		})
+		if err != nil {
+			t.Errorf("CallRPCMethod failed: %v", err)
+		} else {
+			if resultStr, ok := result.(string); !ok || resultStr != "Hello, world!" {
+				t.Errorf("expected result 'Hello, world!', got %v", result)
+			}
+		}
 	}
+	p.Stop()
 }

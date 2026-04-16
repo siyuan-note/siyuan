@@ -21,15 +21,12 @@ import (
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"golang.org/x/sync/errgroup"
 )
 
 var (
 	manager     *PluginManager
 	managerOnce sync.Once
 )
-
-var g errgroup.Group
 
 // InitManager initializes the global PluginManager singleton and starts it.
 func InitManager() {
@@ -108,13 +105,14 @@ func (m *PluginManager) Stop() {
 // Called when a petal is enabled via SetPetalEnabled.
 func (m *PluginManager) StartPlugin(petal *model.Petal) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
 	if p, ok := m.plugins[petal.Name]; ok {
 		p.Stop()
+		delete(m.plugins, p.Name)
 	}
+
 	p := NewKernelPlugin(petal)
 	m.plugins[p.Name] = p
+	m.mu.Unlock()
 
 	if err := p.Start(); err != nil {
 		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)

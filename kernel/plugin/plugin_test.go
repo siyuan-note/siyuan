@@ -64,7 +64,7 @@ func TestRPCRegistration(t *testing.T) {
 	} else {
 
 		count := 0
-		p.rpcMethods.Range(func(key, value interface{}) bool {
+		p.rpcMethods.Range(func(key, value any) bool {
 			count++
 			return true // 继续遍历
 		})
@@ -73,7 +73,7 @@ func TestRPCRegistration(t *testing.T) {
 			t.Errorf("expected 1 registered RPC method, got %d", count)
 		}
 
-		result, err := p.CallRpcMethod("test", map[string]interface{}{
+		result, err := p.CallRpcMethod("test", map[string]any{
 			"message": "Hello, world!",
 		})
 		if err != nil {

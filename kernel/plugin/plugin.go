@@ -57,12 +57,12 @@ type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
 
-	mu         sync.Mutex
+	mu         sync.RWMutex
 	state      PluginState
 	rpcMethods sync.Map // registered JSON-RPC methods
 
 	runtime *qjs.Runtime
-	sockets []*websocket.Conn // tracked loopback WebSocket connections
+	sockets map[*websocket.Conn]bool // tracked loopback WebSocket connections
 }
 
 func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
@@ -77,8 +77,8 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 
 // State returns the current plugin state (safe for concurrent reads).
 func (p *KernelPlugin) State() PluginState {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 
 	return p.state
 }
@@ -143,10 +143,12 @@ func (p *KernelPlugin) Stop() {
 
 	p.rpcMethods.Clear()
 
-	for _, conn := range p.sockets {
-		conn.Close()
+	for c, _ := range p.sockets {
+		c.Close()
 	}
-	p.sockets = p.sockets[:0:0]
+	for c := range p.sockets {
+		delete(p.sockets, c)
+	}
 
 	if p.runtime != nil {
 		p.runtime.Close()
@@ -192,10 +194,10 @@ func (p *KernelPlugin) UnbindRpcMethod(name string, method *qjs.Value) error {
 }
 
 // CallRpcMethod invokes a registered JS RPC method with the given JSON params.
-// Returns the JS function's return value as a Go interface{}.
-func (p *KernelPlugin) CallRpcMethod(method string, params interface{}) (retResult interface{}, retErr error) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+// Returns the JS function's return value as a Go any.
+func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, retErr error) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -222,7 +224,7 @@ func (p *KernelPlugin) CallRpcMethod(method string, params interface{}) (retResu
 		paramVal = ctx.NewNull()
 	}
 
-	fn := p.getRPCMethod(method)
+	fn := p.getRpcMethod(method)
 	if fn == nil {
 		return nil, fmt.Errorf("method %q not found", method)
 	}
@@ -251,7 +253,7 @@ func (p *KernelPlugin) CallRpcMethod(method string, params interface{}) (retResu
 		return nil, fmt.Errorf("stringify result: %w", stringifyErr)
 	}
 
-	var goResult interface{}
+	var goResult any
 	if err = json.Unmarshal([]byte(jsonStr), &goResult); err != nil {
 		// If it's a primitive that doesn't unmarshal cleanly, return the raw string.
 		return jsonStr, nil
@@ -263,22 +265,20 @@ func (p *KernelPlugin) CallRpcMethod(method string, params interface{}) (retResu
 func (p *KernelPlugin) TrackSocket(conn *websocket.Conn) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	p.sockets = append(p.sockets, conn)
+
+	p.sockets[conn] = true
 }
 
 // UntrackSocket removes a WebSocket connection from the plugin's tracked list.
 func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	for i, c := range p.sockets {
-		if c == conn {
-			p.sockets = append(p.sockets[:i], p.sockets[i+1:]...)
-			return
-		}
-	}
+
+	delete(p.sockets, conn)
 }
 
-func (p *KernelPlugin) getRPCMethod(method string) *qjs.Value {
+// getRpcMethod retrieves a registered RPC method by name, or nil if not found or not a function.
+func (p *KernelPlugin) getRpcMethod(method string) *qjs.Value {
 	value, ok := p.rpcMethods.Load(method)
 	if !ok {
 		return nil
@@ -339,7 +339,7 @@ func (p *KernelPlugin) getJsContextValue(paths []any) (value *qjs.Value, retErr 
 }
 
 // invokeJsLifecycleHook calls a JS lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
-func (p *KernelPlugin) invokeJsLifecycleHook(name string, args ...interface{}) (result *qjs.Value, err error) {
+func (p *KernelPlugin) invokeJsLifecycleHook(name string, args ...any) (result *qjs.Value, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			result = nil

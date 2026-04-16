@@ -36,6 +36,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+const (
+	WebSocketReadyStateConnecting = 0 + iota
+	WebSocketReadyStateOpen
+	WebSocketReadyStateClosing
+	WebSocketReadyStateClosed
+)
+
 // injectSandboxGlobals injects all siyuan.* APIs into the plugin's QJS context.
 func injectSandboxGlobals(p *KernelPlugin) error {
 	ctx := p.runtime.Context()
@@ -57,17 +64,14 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 
 // injectPlugin adds siyuan.plugin to the QJS context.
 func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
-	i18n, err := json.Marshal(p.I18n)
-	if err != nil {
-		return fmt.Errorf("failed to marshal plugin i18n: %w", err)
-	}
+	i18n, _ := GoAnyToJsValue(ctx, p.I18n)
 
 	plugin := ctx.NewObject()
 
 	plugin.SetPropertyStr("name", ctx.NewString(p.Name))
 	plugin.SetPropertyStr("displayName", ctx.NewString(p.DisplayName))
 	plugin.SetPropertyStr("platform", ctx.NewString(bazaar.GetCurrentBackend()))
-	plugin.SetPropertyStr("i18n", ctx.ParseJSON(string(i18n)))
+	plugin.SetPropertyStr("i18n", i18n)
 
 	plugin.SetPropertyStr("onload", ctx.NewNull())
 	plugin.SetPropertyStr("onunload", ctx.NewNull())
@@ -78,7 +82,7 @@ func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 // injectLogger adds siyuan.logger to the QJS context.
 func injectLogger(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
-	loggerWrapper := func(logFn func(format string, args ...interface{})) func(this *qjs.This) (*qjs.Value, error) {
+	loggerWrapper := func(logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
 		return func(this *qjs.This) (*qjs.Value, error) {
 			// Get arguments via this.Args()
 			args := this.Args()
@@ -220,13 +224,13 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			// Build result as JSON string, then parse to JS object
-			result := make([]map[string]interface{}, 0, len(entries))
+			result := make([]map[string]any, 0, len(entries))
 			for _, entry := range entries {
 				info, infoErr := entry.Info()
 				if infoErr != nil {
 					continue
 				}
-				result = append(result, map[string]interface{}{
+				result = append(result, map[string]any{
 					"name":      entry.Name(),
 					"isDir":     info.IsDir(),
 					"isSymlink": util.IsSymlink(entry),
@@ -234,13 +238,13 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				})
 			}
 
-			jsonBytes, err := json.Marshal(result)
+			resultJs, err := GoAnyToJsValue(ctx, result)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
 				return
 			}
 
-			this.Promise().Resolve(ctx.ParseJSON(string(jsonBytes)))
+			this.Promise().Resolve(resultJs)
 		}()
 		return
 	}, true))
@@ -260,9 +264,9 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 		path := args[0].String()
 
-		// Path validation: must start with /, no scheme allowed
-		if !strings.HasPrefix(path, "/") || strings.Contains(path, "://") {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: path must start with / and must not contain a scheme")))
+		// Path validation: must start with /
+		if !strings.HasPrefix(path, "/") {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: path must start with /")))
 			return
 		}
 
@@ -334,7 +338,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			// ctx.ParseJSON(string(json.Marshal(m))) 2.5x faster than qjs.GoMapToJs(ctx, reflect.ValueOf(m))
-			respHeadersJsonBytes, err := json.Marshal(respHeaders)
+			respHeadersJs, err := GoAnyToJsValue(ctx, respHeaders)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
 				return
@@ -345,7 +349,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			response.SetPropertyStr("ok", ctx.NewBool(resp.StatusCode >= 200 && resp.StatusCode < 300))
 			response.SetPropertyStr("status", qjs.GoNumberToJs(ctx, resp.StatusCode))
 			response.SetPropertyStr("statusText", ctx.NewString(resp.Status))
-			response.SetPropertyStr("headers", ctx.ParseJSON(string(respHeadersJsonBytes)))
+			response.SetPropertyStr("headers", respHeadersJs)
 			response.SetPropertyStr("body", ctx.NewBytes(respBody))
 
 			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
@@ -375,118 +379,240 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		var path string
+		var protocols *qjs.Value
+
 		args := this.Args()
 		if len(args) < 1 {
-			panic("socket: path required")
+			err = fmt.Errorf("siyuan.socket: path required")
+			return
 		}
 
-		path := args[0].String()
-		protocols := (func() string {
-			if len(args) > 1 {
-				return args[1].String()
-			}
-			return ""
-		})()
+		if len(args) > 0 && args[0] != nil && !args[1].IsString() {
+			path = args[0].String()
+		}
 
-		if !strings.HasPrefix(path, "/") || strings.Contains(path, "://") {
-			panic("socket: path must start with / and must not contain a scheme")
+		if len(args) > 1 && args[1] != nil && !args[1].IsString() {
+			protocols = args[1]
+		}
+
+		if !strings.HasPrefix(path, "/") {
+			err = fmt.Errorf("siyuan.socket: path must start with /")
+			return
 		}
 
 		wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
 
 		wsHeader := http.Header{}
 		wsHeader.Set(model.XAuthTokenKey, p.token)
-		if (protocols) != "" {
-			wsHeader.Set("Sec-Websocket-Protocol", protocols)
+
+		if protocols != nil {
+			wsHeader.Set("Sec-WebSocket-Protocol", protocols.String())
 		}
 
 		// Create a JS object representing the WebSocket
 		wsObj := ctx.NewObject()
-		wsObj.SetPropertyStr("readyState", ctx.NewInt32(0))
+		wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateConnecting))
+
 		wsObj.SetPropertyStr("onopen", ctx.NewNull())
+		wsObj.SetPropertyStr("onping", ctx.NewNull())
+		wsObj.SetPropertyStr("onpong", ctx.NewNull())
+		wsObj.SetPropertyStr("onerror", ctx.NewNull())
 		wsObj.SetPropertyStr("onmessage", ctx.NewNull())
 		wsObj.SetPropertyStr("onclose", ctx.NewNull())
-		wsObj.SetPropertyStr("onerror", ctx.NewNull())
 
-		// Internal tracking
-		sendQueue := []string{}
+		invokeWsHook := func(name string, args ...*qjs.Value) {
+			hook := wsObj.GetPropertyStr(name)
+			if hook != nil && hook.IsFunction() {
+				wsObj.InvokeJS(name, args...)
+			}
+		}
 
 		// Store connection reference (accessed via closure)
+		var mu sync.RWMutex
 		var conn *websocket.Conn
-		var mu sync.Mutex
+		// send calls may happen before connection is established, so we queue them
+		sendQueue := []*qjs.Value{}
 
 		// send method - implemented as a Go function that JS can call
-		wsObj.SetPropertyStr("send", ctx.Function(func(sendThis *qjs.This) (*qjs.Value, error) {
+		wsObj.SetPropertyStr("send", ctx.Function(func(sendThis *qjs.This) (result *qjs.Value, err error) {
 			sendArgs := sendThis.Args()
 			if len(sendArgs) < 1 {
-				return ctx.NewUndefined(), nil
+				return
 			}
+			data := sendArgs[0]
 
-			data := sendArgs[0].String()
 			stateVal := wsObj.GetPropertyStr("readyState")
-			state := int32(0)
-			if stateVal != nil && !stateVal.IsUndefined() {
-				state = stateVal.Int32()
+			state := 0
+			if stateVal != nil && !stateVal.IsNumber() {
+				state = int(stateVal.Int64())
 			}
 
-			mu.Lock()
-			defer mu.Unlock()
-
-			if state == 1 && conn != nil { // OPEN
-				conn.WriteMessage(websocket.TextMessage, []byte(data))
-			} else if state == 0 { // CONNECTING - queue for later
-				sendQueue = append(sendQueue, data)
-			}
-			return ctx.NewUndefined(), nil
-		}))
-
-		// close method
-		wsObj.SetPropertyStr("close", ctx.Function(func(closeThis *qjs.This) (*qjs.Value, error) {
-			mu.Lock()
-			defer mu.Unlock()
-			if conn != nil {
-				conn.Close()
-			}
-			wsObj.SetPropertyStr("readyState", ctx.NewInt32(3)) // CLOSED
-			return ctx.NewUndefined(), nil
-		}))
-
-		// Start WebSocket connection in a goroutine
-		go func() {
-			dialer := websocket.Dialer{}
-			c, _, err := dialer.Dial(wsURL, wsHeader)
-			if err != nil {
-				logging.LogErrorf("[plugin:%s] socket connect failed: %s", p.Name, err)
+			if state == 1 { // OPEN
+				mu.RLock()
+				if conn != nil {
+					if data.IsString() {
+						conn.WriteMessage(websocket.TextMessage, []byte(data.String()))
+					} else if data.IsByteArray() {
+						conn.WriteMessage(websocket.BinaryMessage, data.Bytes())
+					}
+				}
+				mu.RUnlock()
 				return
 			}
 
-			mu.Lock()
-			conn = c
-			mu.Unlock()
+			if state == 0 { // CONNECTING - queue for later
+				mu.Lock()
+				if conn == nil {
+					sendQueue = append(sendQueue, data)
+					mu.Unlock()
+				}
+				mu.Unlock()
+				return
+			}
 
+			return
+		}))
+
+		// ping method
+		wsObj.SetPropertyStr("ping", ctx.Function(func(pingThis *qjs.This) (result *qjs.Value, err error) {
+			var data string
+
+			args := pingThis.Args()
+			if len(args) > 0 && args[0].IsString() {
+				data = args[0].String()
+			}
+
+			mu.RLock()
+			defer mu.RUnlock()
+			if conn != nil {
+				conn.WriteMessage(websocket.PingMessage, []byte(data))
+			}
+			return
+		}, false))
+
+		// pong method
+		wsObj.SetPropertyStr("pong", ctx.Function(func(pongThis *qjs.This) (result *qjs.Value, err error) {
+			var data string
+
+			args := pongThis.Args()
+			if len(args) > 0 && args[0].IsString() {
+				data = args[0].String()
+			}
+
+			mu.RLock()
+			defer mu.RUnlock()
+			if conn != nil {
+				conn.WriteMessage(websocket.PongMessage, []byte(data))
+			}
+			return
+		}, false))
+
+		// close method
+		wsObj.SetPropertyStr("close", ctx.Function(func(closeThis *qjs.This) (result *qjs.Value, err error) {
+			var code int = 1000
+			var reason string
+
+			args := closeThis.Args()
+			if len(args) > 0 && args[0].IsNumber() {
+				code = int(args[0].Int64())
+			}
+			if len(args) > 1 && args[1].IsString() {
+				reason = args[1].String()
+			}
+
+			mu.RLock()
+			defer mu.RUnlock()
+			if conn != nil {
+				conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+			}
+			return
+		}, false))
+
+		// Start WebSocket connection in a goroutine
+		go func() {
+			defer func() {
+				wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateClosed))
+				invokeWsHook("onclose")
+			}()
+
+			dialer := websocket.Dialer{}
+			c, _, err := dialer.Dial(wsURL, wsHeader)
+			if err != nil {
+				event := ctx.NewObject()
+				event.SetPropertyStr("type", ctx.NewString("error"))
+				event.SetPropertyStr("error", ctx.NewError(err))
+				invokeWsHook("onerror", event)
+				return
+			}
+
+			defer func() {
+				p.UntrackSocket(c)
+				c.Close()
+			}()
 			p.TrackSocket(c)
-			wsObj.SetPropertyStr("readyState", ctx.NewInt32(1)) // OPEN
+
+			c.SetPingHandler(func(data string) (err error) {
+				event := ctx.NewObject()
+				event.SetPropertyStr("type", ctx.NewString("ping"))
+				event.SetPropertyStr("data", ctx.NewString(data))
+				invokeWsHook("onping", event)
+				return
+			})
+			c.SetPongHandler(func(data string) (err error) {
+				event := ctx.NewObject()
+				event.SetPropertyStr("type", ctx.NewString("pong"))
+				event.SetPropertyStr("data", ctx.NewString(data))
+				invokeWsHook("onpong", event)
+				return
+			})
+			c.SetCloseHandler(func(code int, reason string) (err error) {
+				wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateClosing))
+
+				event := ctx.NewObject()
+				event.SetPropertyStr("type", ctx.NewString("close"))
+				event.SetPropertyStr("code", ctx.NewInt64(int64(code)))
+				event.SetPropertyStr("reason", ctx.NewString(reason))
+				invokeWsHook("onclose", event)
+				return
+			})
 
 			// Flush send queue
 			mu.Lock()
-			for _, msg := range sendQueue {
-				c.WriteMessage(websocket.TextMessage, []byte(msg))
+			conn = c
+			wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateOpen))
+			for _, data := range sendQueue {
+				if data.IsString() {
+					c.WriteMessage(websocket.TextMessage, []byte(data.String()))
+				} else if data.IsByteArray() {
+					c.WriteMessage(websocket.BinaryMessage, data.Bytes())
+				}
 			}
-			sendQueue = nil
+			sendQueue = sendQueue[:0:0] // Clear queue
 			mu.Unlock()
-
-			defer func() {
-				c.Close()
-				p.UntrackSocket(c)
-				wsObj.SetPropertyStr("readyState", ctx.NewInt32(3)) // CLOSED
-			}()
 
 			// Read loop - consumes messages but doesn't dispatch to JS yet
 			// (requires QJS event loop integration for safe callback invocation)
 			for {
-				_, _, readErr := c.ReadMessage()
+				messageType, data, readErr := c.ReadMessage()
 				if readErr != nil {
+					event := ctx.NewObject()
+					event.SetPropertyStr("type", ctx.NewString("error"))
+					event.SetPropertyStr("error", ctx.NewError(readErr))
+					invokeWsHook("onerror", event)
 					return
+				}
+				switch messageType {
+				case websocket.TextMessage:
+					event := ctx.NewObject()
+					event.SetPropertyStr("type", ctx.NewString("message"))
+					event.SetPropertyStr("data", ctx.NewString(string(data)))
+					invokeWsHook("onmessage", event)
+				case websocket.BinaryMessage:
+					event := ctx.NewObject()
+					event.SetPropertyStr("type", ctx.NewString("message"))
+					event.SetPropertyStr("data", ctx.NewArrayBuffer(data))
+					invokeWsHook("onmessage", event)
 				}
 			}
 		}()
@@ -546,4 +672,14 @@ func injectRPC(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 	siyuan.SetPropertyStr("rpc", rpc)
 	return nil
+}
+
+func GoAnyToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error) {
+	valueBytes, err := json.Marshal(value)
+	if err != nil {
+		return
+	}
+
+	value = ctx.ParseJSON(string(valueBytes))
+	return
 }

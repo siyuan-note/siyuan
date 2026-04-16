@@ -123,9 +123,69 @@ export const correctHotkey = (app: App) => {
         }, () => {
             /// #if !BROWSER
             sendGlobalShortcut(app);
+            syncAppMenuShortcuts();
             /// #endif
         });
     }
+};
+
+let lastHotkeys: Record<string, string>;
+
+export const syncAppMenuShortcuts = () => {
+    /// #if !BROWSER
+    if (!isMac()) {
+        return;
+    }
+    const appMenuHotkeyItems: Record<string, IKeymapItem> = {
+        config: window.siyuan.config.keymap.general.config,
+        toggleWin: window.siyuan.config.keymap.general.toggleWin,
+        undo: window.siyuan.config.keymap.editor.general.undo,
+        redo: window.siyuan.config.keymap.editor.general.redo,
+    };
+    const hotkey: Record<string, string> = {};
+    Object.keys(appMenuHotkeyItems).forEach(id => {
+        const item = appMenuHotkeyItems[id];
+        hotkey[id] = item.custom || item.default || "";
+    });
+    if (lastHotkeys && Object.keys(appMenuHotkeyItems).every(id => lastHotkeys[id] === hotkey[id])) {
+        return;
+    }
+    lastHotkeys = {...hotkey};
+    ipcRenderer.send(Constants.SIYUAN_SYNC_APP_MENU, {
+        lang: window.siyuan.config.lang,
+        readonly: window.siyuan.config.readonly,
+        hotkey,
+        i18n: {
+            config: window.siyuan.languages.config,
+            about: window.siyuan.languages.appMenuAbout,
+            services: window.siyuan.languages.appMenuServices,
+            toggleMainWindow: window.siyuan.languages.toggleWin,
+            hide: window.siyuan.languages.appMenuHide,
+            hideOthers: window.siyuan.languages.appMenuHideOthers,
+            showAll: window.siyuan.languages.showAll,
+            quit: window.siyuan.languages.appMenuQuit,
+            edit: window.siyuan.languages.edit,
+            undo: window.siyuan.languages.undo,
+            redo: window.siyuan.languages.redo,
+            cut: window.siyuan.languages.cut,
+            copy: window.siyuan.languages.copy,
+            paste: window.siyuan.languages.paste,
+            pasteAndMatchStyle: window.siyuan.languages.appMenuPasteAndMatchStyle,
+            selectAll: window.siyuan.languages.selectAll,
+            window: window.siyuan.languages.appMenuWindow,
+            minimize: window.siyuan.languages.appMenuMinimize,
+            zoom: window.siyuan.languages.zoom,
+            togglefullscreen: window.siyuan.languages.appMenuTogglefullscreen,
+            help: window.siyuan.languages.help,
+            userGuide: window.siyuan.languages.userGuide,
+            feedback: window.siyuan.languages.feedback,
+            debug: window.siyuan.languages.debug,
+            officialWebsite: window.siyuan.languages._trayMenu.officialWebsite,
+            openSource: window.siyuan.languages._trayMenu.openSource,
+            bringAllToFront: window.siyuan.languages.appMenuBringAllToFront,
+        },
+    });
+    /// #endif
 };
 
 export const filterHotkey = (event: KeyboardEvent, app: App) => {

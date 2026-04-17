@@ -53,7 +53,7 @@ var (
 type JsonRpcRequest struct {
 	JsonRpc string          `json:"jsonrpc"`
 	Method  string          `json:"method"`
-	Params  json.RawMessage `json:"params"`
+	Params  json.RawMessage `json:"params,omitempty"`
 	ID      *any            `json:"id,omitempty"`
 }
 

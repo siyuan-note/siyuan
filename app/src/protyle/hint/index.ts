@@ -648,6 +648,7 @@ ${genHintItemHTML(item)}
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
             if (value === "((" || value === "{{") {
+                this.enableExtend = true;
                 if (value === "((") {
                     hintRef("", protyle, "hint");
                 } else {

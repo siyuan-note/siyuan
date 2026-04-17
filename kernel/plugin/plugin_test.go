@@ -19,6 +19,7 @@ package plugin
 import (
 	"testing"
 
+	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
@@ -85,4 +86,30 @@ func TestRPCRegistration(t *testing.T) {
 		}
 	}
 	p.Stop()
+}
+
+func TestTrackSocketInit(t *testing.T) {
+	petal := &model.Petal{Name: "test-track", Kernel: &model.KernelPetal{JS: ``}}
+	p := NewKernelPlugin(petal)
+	// TrackSocket must not panic on a fresh plugin (sockets was nil before the fix)
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("TrackSocket panicked on uninitialized map: %v", r)
+		}
+	}()
+	conn := &websocket.Conn{}
+	p.TrackSocket(conn, true)
+	if _, ok := p.sockets[conn]; !ok {
+		t.Error("expected conn to be tracked in sockets")
+	}
+	if _, ok := p.socketMus[conn]; !ok {
+		t.Error("expected conn to have a mutex in socketMus")
+	}
+	p.UntrackSocket(conn)
+	if len(p.sockets) != 0 {
+		t.Errorf("expected sockets to be empty after untrack, got %d entries", len(p.sockets))
+	}
+	if len(p.socketMus) != 0 {
+		t.Errorf("expected socketMus to be empty after untrack, got %d entries", len(p.socketMus))
+	}
 }

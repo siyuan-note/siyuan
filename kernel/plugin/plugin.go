@@ -78,8 +78,9 @@ type KernelPlugin struct {
 	state      PluginState
 	rpcMethods sync.Map // registered JSON-RPC methods
 
-	runtime *qjs.Runtime
-	sockets map[*websocket.Conn]bool // tracked loopback WebSocket connections
+	runtime   *qjs.Runtime
+	sockets   map[*websocket.Conn]bool        // tracked loopback WebSocket connections (true: server, false: client)
+	socketMus map[*websocket.Conn]*sync.Mutex // per-connection write mutex
 }
 
 func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
@@ -89,6 +90,8 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		token:      token,
 		state:      StateStopped,
 		rpcMethods: sync.Map{},
+		sockets:    make(map[*websocket.Conn]bool),
+		socketMus:  make(map[*websocket.Conn]*sync.Mutex),
 	}
 }
 
@@ -160,11 +163,10 @@ func (p *KernelPlugin) Stop() {
 
 	p.rpcMethods.Clear()
 
-	for c, _ := range p.sockets {
-		c.Close()
-	}
 	for c := range p.sockets {
+		c.Close()
 		delete(p.sockets, c)
+		delete(p.socketMus, c)
 	}
 
 	if p.runtime != nil {
@@ -294,19 +296,19 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
-func (p *KernelPlugin) TrackSocket(conn *websocket.Conn) {
+func (p *KernelPlugin) TrackSocket(conn *websocket.Conn, isServer bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
-	p.sockets[conn] = true
+	p.sockets[conn] = isServer
+	p.socketMus[conn] = &sync.Mutex{}
 }
 
 // UntrackSocket removes a WebSocket connection from the plugin's tracked list.
 func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
 	delete(p.sockets, conn)
+	delete(p.socketMus, conn)
 }
 
 // GetRpcMethodsInfo returns a list of registered RPC methods with their descriptions.

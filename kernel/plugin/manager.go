@@ -93,7 +93,7 @@ func (m *PluginManager) Stop() {
 		wg.Add(1)
 		go func(p *KernelPlugin) {
 			defer wg.Done()
-			p.Stop()
+			p.stop()
 		}(p)
 	}
 	wg.Wait()
@@ -109,17 +109,16 @@ func (m *PluginManager) Stop() {
 // StartPlugin starts a single kernel plugin.
 // Called when a petal is enabled via SetPetalEnabled.
 func (m *PluginManager) StartPlugin(petal *model.Petal) {
+	m.StopPlugin(petal)
+
 	m.mu.Lock()
-	if p, ok := m.plugins[petal.Name]; ok {
-		p.Stop()
-		delete(m.plugins, p.Name)
-	}
+	defer m.mu.Unlock()
 
 	p := NewKernelPlugin(petal)
 	m.plugins[p.Name] = p
 	m.mu.Unlock()
 
-	if err := p.Start(); err != nil {
+	if err := p.start(); err != nil {
 		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)
 	}
 }
@@ -131,7 +130,7 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) {
 	defer m.mu.Unlock()
 
 	if p, ok := m.plugins[petal.Name]; ok {
-		p.Stop()
+		p.stop()
 		delete(m.plugins, p.Name)
 	}
 }

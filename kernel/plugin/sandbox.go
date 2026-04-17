@@ -352,19 +352,26 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			response.SetPropertyStr("headers", respHeadersJs)
 			response.SetPropertyStr("body", ctx.NewBytes(respBody))
 
-			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 				go this.Promise().Resolve(ctx.NewString(string(respBody)))
 				return
 			}, true))
-			response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
-				go this.Promise().Resolve(ctx.ParseJSON(string(respBody)))
+			response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+				go func() {
+					value, err := ParseJsonStringToJsValue(ctx, string(respBody))
+					if err != nil {
+						this.Promise().Reject(ctx.NewError(err))
+						return
+					}
+					this.Promise().Resolve(value)
+				}()
 				return
 			}, true))
-			response.SetPropertyStr("bytes", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+			response.SetPropertyStr("bytes", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 				go this.Promise().Resolve(ctx.NewBytes(respBody))
 				return
 			}, true))
-			response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, error error) {
+			response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 				go this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
 				return
 			}, true))
@@ -647,7 +654,7 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			return
 		}
 
-		if err = p.BindRpcMethod(name, method, descriptions...); err != nil {
+		if err = p.bindRpcMethod(name, method, descriptions...); err != nil {
 			return
 		}
 
@@ -669,7 +676,7 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			return
 		}
 
-		if err = p.UnbindRpcMethod(name, fn); err != nil {
+		if err = p.unbindRpcMethod(name, fn); err != nil {
 			return
 		}
 
@@ -714,5 +721,15 @@ func GoValueToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error
 	}
 
 	value = ctx.ParseJSON(string(valueBytes))
+	return
+}
+
+// ParseJsonStringToJsValue parses a JSON string into a QJS Value, returning an error if parsing fails.
+func ParseJsonStringToJsValue(ctx *qjs.Context, jsonStr string) (result *qjs.Value, err error) {
+	result = ctx.ParseJSON(jsonStr)
+	if ctx.HasException() {
+		result = nil
+		err = ctx.Exception()
+	}
 	return
 }

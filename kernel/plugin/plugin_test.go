@@ -17,8 +17,10 @@
 package plugin
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/fastschema/qjs"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
@@ -59,7 +61,7 @@ func TestRPCRegistration(t *testing.T) {
 		},
 	}
 	p := NewKernelPlugin(petal)
-	err := p.Start()
+	err := p.start()
 	if err != nil {
 		t.Errorf("failed to start plugin: %v", err)
 	} else {
@@ -74,7 +76,7 @@ func TestRPCRegistration(t *testing.T) {
 			t.Errorf("expected 1 registered RPC method, got %d", count)
 		}
 
-		result, err := p.CallRpcMethod("test", map[string]any{
+		result, err := p.callRpcMethod("test", map[string]any{
 			"message": "Hello, world!",
 		})
 		if err != nil {
@@ -85,7 +87,7 @@ func TestRPCRegistration(t *testing.T) {
 			}
 		}
 	}
-	p.Stop()
+	p.stop()
 }
 
 func TestTrackSocketInit(t *testing.T) {
@@ -111,5 +113,100 @@ func TestTrackSocketInit(t *testing.T) {
 	}
 	if len(p.socketMus) != 0 {
 		t.Errorf("expected socketMus to be empty after untrack, got %d entries", len(p.socketMus))
+	}
+}
+
+func TestRpcParamsToJsValue(t *testing.T) {
+	rt, err := qjs.New()
+	if err != nil {
+		t.Fatalf("failed to create QJS runtime: %v", err)
+	}
+	defer rt.Close()
+	ctx := rt.Context()
+
+	jsonStr := `{"key":"value"}`
+	jsonBytes := []byte(jsonStr)
+	rawMsg := json.RawMessage(jsonStr)
+
+	tests := []struct {
+		name      string
+		params    any
+		wantJSON  string
+		wantNil   bool
+		wantError bool
+	}{
+		{
+			name:    "nil params returns nil value",
+			params:  nil,
+			wantNil: true,
+		},
+		{
+			name:     "string params parsed as JSON",
+			params:   jsonStr,
+			wantJSON: jsonStr,
+		},
+		{
+			name:     "string pointer params parsed as JSON",
+			params:   &jsonStr,
+			wantJSON: jsonStr,
+		},
+		{
+			name:     "byte slice params parsed as JSON",
+			params:   jsonBytes,
+			wantJSON: jsonStr,
+		},
+		{
+			name:     "json.RawMessage params parsed as JSON",
+			params:   rawMsg,
+			wantJSON: jsonStr,
+		},
+		{
+			name:     "byte slice pointer params parsed as JSON",
+			params:   &jsonBytes,
+			wantJSON: jsonStr,
+		},
+		{
+			name:     "json.RawMessage pointer params parsed as JSON",
+			params:   &rawMsg,
+			wantJSON: jsonStr,
+		},
+		{
+			name:     "default case marshals map to JSON",
+			params:   map[string]any{"key": "value"},
+			wantJSON: jsonStr,
+		},
+		{
+			name:      "default case returns error for unmarshalable type",
+			params:    make(chan int),
+			wantError: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			value, err := rpcParamsToJsValue(ctx, tc.params)
+			if tc.wantError {
+				if err == nil {
+					t.Error("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tc.wantNil {
+				if value != nil {
+					t.Errorf("expected nil value, got non-nil")
+				}
+				return
+			}
+			got, stringifyErr := value.JSONStringify()
+			if stringifyErr != nil {
+				t.Fatalf("JSONStringify failed: %v", stringifyErr)
+			}
+			if got != tc.wantJSON {
+				t.Errorf("expected JSON %q, got %q", tc.wantJSON, got)
+			}
+		})
 	}
 }

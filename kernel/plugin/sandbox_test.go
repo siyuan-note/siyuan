@@ -42,7 +42,7 @@ func TestSandboxGlobals(t *testing.T) {
 		},
 	}
 	p := NewKernelPlugin(petal)
-	err := p.Start()
+	err := p.start()
 	// ["Object","Function","Error","EvalError","RangeError","ReferenceError","SyntaxError","TypeError","URIError","InternalError","AggregateError","Iterator","Array","parseInt","parseFloat","isNaN","isFinite","queueMicrotask","decodeURI","decodeURIComponent","encodeURI","encodeURIComponent","escape","unescape","Infinity","NaN","undefined","Number","Boolean","String","Math","Reflect","Symbol","eval","globalThis","Date","RegExp","JSON","Proxy","Map","Set","WeakMap","WeakSet","ArrayBuffer","SharedArrayBuffer","Uint8ClampedArray","Int8Array","Uint8Array","Int16Array","Uint16Array","Int32Array","Uint32Array","BigInt64Array","BigUint64Array","Float16Array","Float32Array","Float64Array","DataView","Promise","BigInt","WeakRef","FinalizationRegistry","DOMException","performance","gc","navigator","console","scriptArgs","print","bjson","std","os","setTimeout","setInterval","clearTimeout","clearInterval","QJS_PROXY_VALUE","siyuan"]
 	// Object function
 	// ["length","name","prototype","create","getPrototypeOf","setPrototypeOf","defineProperty","defineProperties","getOwnPropertyNames","getOwnPropertySymbols","groupBy","keys","values","entries","isExtensible","preventExtensions","getOwnPropertyDescriptor","getOwnPropertyDescriptors","is","assign","seal","freeze","isSealed","isFrozen","fromEntries","hasOwn"]
@@ -199,7 +199,7 @@ func TestSandboxGlobals(t *testing.T) {
 	// siyuan object
 	// ["plugin","logger","storage","fetch","socket","rpc"]
 	if err == nil {
-		p.Stop()
+		p.stop()
 	}
 	// Just verify it doesn't panic - the actual injection is tested via integration
 }
@@ -221,7 +221,7 @@ func TestSandboxSiyuan(t *testing.T) {
 		},
 	}
 	p := NewKernelPlugin(petal)
-	err := p.Start()
+	err := p.start()
 	// ["length","name","prototype","create","getPrototypeOf","setPrototypeOf","defineProperty","defineProperties","getOwnPropertyNames","getOwnPropertySymbols","groupBy","keys","values","entries","isExtensible","preventExtensions","getOwnPropertyDescriptor","getOwnPropertyDescriptors","is","assign","seal","freeze","isSealed","isFrozen","fromEntries","hasOwn"]
 	// Function function
 	// ["length","name","prototype"]
@@ -376,7 +376,7 @@ func TestSandboxSiyuan(t *testing.T) {
 	// siyuan object
 	// ["plugin","logger","storage","fetch","socket","rpc"]
 	if err == nil {
-		p.Stop()
+		p.stop()
 	}
 	// Just verify it doesn't panic - the actual injection is tested via integration
 }
@@ -396,10 +396,10 @@ func TestRpcBroadcastBinding(t *testing.T) {
 		Kernel: &model.KernelPetal{JS: code},
 	}
 	p := NewKernelPlugin(petal)
-	if err := p.Start(); err != nil {
+	if err := p.start(); err != nil {
 		t.Fatalf("plugin start: %v", err)
 	}
-	p.Stop()
+	p.stop()
 }
 
 func BenchmarkMapToJsConversion(b *testing.B) {

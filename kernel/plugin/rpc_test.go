@@ -61,7 +61,7 @@ func TestWsWrite(t *testing.T) {
 	p.TrackSocket(serverConn, true)
 
 	data := []byte(`{"jsonrpc":"2.0","method":"test","params":null}`)
-	if err := p.wsWrite(serverConn, data); err != nil {
+	if err := p.writeWebSocketMessage(serverConn, data); err != nil {
 		t.Fatalf("wsWrite: %v", err)
 	}
 
@@ -78,31 +78,8 @@ func TestWsWriteUntracked(t *testing.T) {
 	petal := &model.Petal{Name: "test-wswrite-untracked", Kernel: &model.KernelPetal{JS: ``}}
 	p := NewKernelPlugin(petal)
 	conn := &websocket.Conn{}
-	if err := p.wsWrite(conn, []byte(`{}`)); err != nil {
+	if err := p.writeWebSocketMessage(conn, []byte(`{}`)); err != nil {
 		t.Errorf("expected nil for untracked conn, got: %v", err)
-	}
-}
-
-func TestPushNotificationOmitempty(t *testing.T) {
-	serverConn, clientConn := newTestWsPair(t)
-	defer serverConn.Close()
-	defer clientConn.Close()
-
-	if err := PushNotification(serverConn, "test", nil); err != nil {
-		t.Fatalf("PushNotification: %v", err)
-	}
-
-	_, msg, err := clientConn.ReadMessage()
-	if err != nil {
-		t.Fatalf("read: %v", err)
-	}
-
-	var result map[string]any
-	if err := json.Unmarshal(msg, &result); err != nil {
-		t.Fatalf("unmarshal: %v", err)
-	}
-	if _, ok := result["params"]; ok {
-		t.Errorf("expected params to be omitted, got: %s", msg)
 	}
 }
 

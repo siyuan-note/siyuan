@@ -18,7 +18,6 @@ package plugin
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sync"
 
@@ -45,12 +44,8 @@ const (
 	StateLoading PluginState = iota
 	StateRunning
 	StateErrored
+	StateStopping
 	StateStopped
-)
-
-var (
-	ErrMethodNotFound   = errors.New("method not found")
-	ErrPluginNotRunning = errors.New("plugin not running")
 )
 
 func (s PluginState) String() string {
@@ -105,8 +100,8 @@ func (p *KernelPlugin) State() PluginState {
 	return p.state
 }
 
-// Start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
-func (p *KernelPlugin) Start() (retErr error) {
+// start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
+func (p *KernelPlugin) start() (retErr error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -124,44 +119,53 @@ func (p *KernelPlugin) Start() (retErr error) {
 
 	p.state = StateLoading
 
-	rt, err := qjs.New()
+	runtime, err := qjs.New()
 	if err != nil {
 		p.state = StateErrored
+
 		logging.LogErrorf("[plugin:%s] failed to create QJS runtime: %s", p.Name, err)
 		return fmt.Errorf("create QJS runtime: %w", err)
 	}
-	p.runtime = rt
+	p.runtime = runtime
 
+	// Inject sandbox globals (e.g. globalThis.siyuan) before evaluating plugin code.
 	if err = injectSandboxGlobals(p); err != nil {
 		p.state = StateErrored
+
 		p.runtime.Close()
 		p.runtime = nil
 		logging.LogErrorf("[plugin:%s] failed to inject sandbox globals: %s", p.Name, err)
 		return fmt.Errorf("inject sandbox globals: %w", err)
 	}
 
+	// Load and evaluate kernel.js code in plugin's QJS runtime.
 	_, evalErr := p.runtime.Eval(p.Name+"/kernel.js", qjs.Code(p.Kernel.JS))
 	if evalErr != nil {
 		p.state = StateErrored
+
 		p.runtime.Close()
 		p.runtime = nil
 		logging.LogErrorf("[plugin:%s] eval error: %s", p.Name, evalErr)
 		return evalErr
 	}
 
-	p.OnLoad()
+	// Call plugin onLoad lifecycle hook.
+	p.onLoad()
 
 	p.state = StateRunning
+
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return nil
 }
 
-// Stop cleanly shuts down the plugin: closes sockets, frees QJS runtime.
-func (p *KernelPlugin) Stop() {
+// stop cleanly shuts down the plugin: closes sockets, frees QJS runtime.
+func (p *KernelPlugin) stop() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	p.OnUnload()
+	p.state = StateStopping
+
+	p.onUnload()
 
 	p.rpcMethods.Clear()
 
@@ -179,21 +183,22 @@ func (p *KernelPlugin) Stop() {
 	}
 
 	p.state = StateStopped
+
 	logging.LogDebugf("[plugin:%s] stopped", p.Name)
 }
 
-// OnLoad is called after plugin start.
-func (p *KernelPlugin) OnLoad() {
+// onLoad is called after plugin start.
+func (p *KernelPlugin) onLoad() {
 	p.invokeJsLifecycleHook("onload")
 }
 
-// OnUnload is called before plugin stop.
-func (p *KernelPlugin) OnUnload() {
+// onUnload is called before plugin stop.
+func (p *KernelPlugin) onUnload() {
 	p.invokeJsLifecycleHook("onunload")
 }
 
-// BindRpcMethod add or updates a JS function as a named RPC method.
-func (p *KernelPlugin) BindRpcMethod(name string, function *qjs.Value, descriptions ...string) error {
+// bindRpcMethod add or updates a JS function as a named RPC method.
+func (p *KernelPlugin) bindRpcMethod(name string, function *qjs.Value, descriptions ...string) error {
 	p.rpcMethods.Store(name, &RpcMethod{
 		Name:         name,
 		Descriptions: descriptions,
@@ -202,8 +207,8 @@ func (p *KernelPlugin) BindRpcMethod(name string, function *qjs.Value, descripti
 	return nil
 }
 
-// UnbindRpcMethod removes a registered RPC method
-func (p *KernelPlugin) UnbindRpcMethod(name string, function *qjs.Value) error {
+// unbindRpcMethod removes a registered RPC method
+func (p *KernelPlugin) unbindRpcMethod(name string, function *qjs.Value) error {
 	value, ok := p.rpcMethods.Load(name)
 	if !ok {
 		return nil
@@ -220,38 +225,141 @@ func (p *KernelPlugin) UnbindRpcMethod(name string, function *qjs.Value) error {
 	return nil
 }
 
-// CallRpcMethod invokes a registered JS RPC method with the given JSON params.
+// GetRpcMethodsInfo returns a list of registered RPC methods with their descriptions.
+func (p *KernelPlugin) GetRpcMethodsInfo() (methods []*RpcMethodInfo) {
+	p.rpcMethods.Range(func(name any, value any) bool {
+		if method, ok := value.(*RpcMethod); ok {
+			methods = append(methods, &RpcMethodInfo{
+				Name:         method.Name,
+				Descriptions: method.Descriptions,
+			})
+		}
+		return true
+	})
+	return
+}
+
+// writeWebSocketMessage serializes a single write to conn using the per-connection mutex.
+// Returns nil immediately if conn is no longer tracked (already removed by Stop or UntrackSocket).
+// If Stop races and closes the connection after the tracking check, WriteMessage returns
+// an error which is propagated to the caller.
+func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, data []byte) error {
+	p.socketsMu.RLock()
+	mu, ok := p.socketMus[conn]
+	p.socketsMu.RUnlock()
+	if !ok {
+		return nil
+	}
+
+	// Between RUnlock above and mu.Lock below, Stop() may close the connection.
+	// The subsequent WriteMessage will return an error (use of closed connection),
+	// which callers log and discard.
+	mu.Lock()
+	defer mu.Unlock()
+	return conn.WriteMessage(websocket.TextMessage, data)
+}
+
+// dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
+// Returns responses in the same order as requests. Nil responses indicate notifications.
+func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcRequestRaw) []any {
+	responses := make([]any, len(requests))
+	var wg sync.WaitGroup
+
+	for i, req := range requests {
+		if req.IsNotification() {
+			go func(request *JsonRpcRequestRaw) {
+				p.dispatchRpcRequest(request)
+			}(req)
+			continue
+		}
+		wg.Add(1)
+		go func(index int, request *JsonRpcRequestRaw) {
+			defer wg.Done()
+			responses[index] = p.dispatchRpcRequest(request)
+		}(i, req)
+	}
+
+	wg.Wait()
+	return responses
+}
+
+// dispatchRpcRequest routes a single JSON-RPC request to the plugin's registered JS method.
+// Returns nil for notifications (no ID field).
+func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequestRaw) any {
+	// Validate request structure
+	if err := request.Validate(); err != nil {
+		if request.IsNotification() {
+			return nil
+		}
+		return &JsonRpcErrorResponse{
+			JsonRpc: JsonRpcVersion,
+			Error:   err,
+			ID:      request.ID,
+		}
+	}
+
+	result, err := p.callRpcMethod(request.Method, request.Params)
+
+	// For notifications, return nil (no response)
+	if request.IsNotification() {
+		return nil
+	}
+
+	if err != nil {
+		return &JsonRpcErrorResponse{
+			JsonRpc: JsonRpcVersion,
+			Error:   err,
+			ID:      request.ID,
+		}
+	}
+
+	return &JsonRpcRequestResponse{
+		JsonRpc: JsonRpcVersion,
+		Result:  result,
+		ID:      request.ID,
+	}
+}
+
+// callRpcMethod invokes a registered JS RPC method with the given JSON params.
 // Returns the JS function's return value as a Go any.
-func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, retErr error) {
+func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, rpcErr *JsonRpcError) {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 
 	defer func() {
 		if r := recover(); r != nil {
 			logging.LogErrorf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
-			retErr = fmt.Errorf("internal error in method %q: %v", method, r)
+			rpcErr = &JsonRpcError{
+				Code:    JsonRpcErrorCodeInternalError,
+				Message: fmt.Sprintf("panic in RPC method %q: %v", method, r),
+			}
 		}
 	}()
 
 	if p.state != StateRunning {
-		return nil, fmt.Errorf("%w (state=%s)", ErrPluginNotRunning, p.state)
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.state),
+		}
 	}
 
 	ctx := p.runtime.Context()
 
 	// Convert params to JS value
-	var paramValue *qjs.Value
-	if params != nil {
-		paramsJSON, err := json.Marshal(params)
-		if err != nil {
-			return nil, fmt.Errorf("marshal params: %w", err)
+	paramValue, convertErr := rpcParamsToJsValue(ctx, params)
+	if convertErr != nil {
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("convert params: %v", convertErr),
 		}
-		paramValue = ctx.ParseJSON(string(paramsJSON))
 	}
 
 	rpcMethod := p.getRpcMethod(method)
 	if rpcMethod == nil {
-		return nil, fmt.Errorf("%w: %q", ErrMethodNotFound, method)
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeMethodNotFound,
+			Message: fmt.Sprintf("method not found: %q", method),
+		}
 	}
 
 	// Call the JS function using ctx.Invoke(fn, thisVal, args...)
@@ -270,14 +378,20 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramValue)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("call %q: %w", method, err)
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("call %q: %v", method, err),
+		}
 	}
 
 	// Await if Promise
 	if result != nil && result.IsPromise() {
 		result, err = result.Await()
 		if err != nil {
-			return nil, fmt.Errorf("await %q: %w", method, err)
+			return nil, &JsonRpcError{
+				Code:    JsonRpcErrorCodeInternalError,
+				Message: fmt.Sprintf("await %q: %v", method, err),
+			}
 		}
 	}
 
@@ -288,7 +402,10 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 	// Convert JS result to Go via JSON round-trip using the built-in JSONStringify method.
 	jsonStr, stringifyErr := result.JSONStringify()
 	if stringifyErr != nil {
-		return nil, fmt.Errorf("stringify result: %w", stringifyErr)
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("stringify result: %v", stringifyErr),
+		}
 	}
 
 	var goResult any
@@ -313,20 +430,6 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 	defer p.socketsMu.Unlock()
 	delete(p.sockets, conn)
 	delete(p.socketMus, conn)
-}
-
-// GetRpcMethodsInfo returns a list of registered RPC methods with their descriptions.
-func (p *KernelPlugin) GetRpcMethodsInfo() (methods []*RpcMethodInfo) {
-	p.rpcMethods.Range(func(name any, value any) bool {
-		if method, ok := value.(*RpcMethod); ok {
-			methods = append(methods, &RpcMethodInfo{
-				Name:         method.Name,
-				Descriptions: method.Descriptions,
-			})
-		}
-		return true
-	})
-	return
 }
 
 // getRpcMethod retrieves a registered RPC method by name, or nil if not found or not a function.

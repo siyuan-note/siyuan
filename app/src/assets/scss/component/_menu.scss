@@ -33,6 +33,10 @@
     min-width: 260px;
     max-width: 420px;
     max-height: 50vh;
+
+    &--fontFamily .b3-list-item {
+      line-height: normal;
+    }
   }
 
   &--fullscreen {

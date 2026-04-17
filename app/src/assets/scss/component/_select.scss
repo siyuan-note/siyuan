@@ -14,6 +14,10 @@
   cursor: pointer;
   overflow: hidden; // iphonex
 
+  &::placeholder {
+    color: var(--b3-theme-on-background); // input 伪装 select
+  }
+
   &:hover {
     box-shadow: inset 0 0 0 .6px var(--b3-theme-on-background);
     background-color: var(--b3-theme-surface);

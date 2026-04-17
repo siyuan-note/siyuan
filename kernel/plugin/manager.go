@@ -25,8 +25,12 @@ import (
 
 // PluginManager discovers, loads, starts, and stops kernel plugins.
 type PluginManager struct {
-	mu      sync.RWMutex
+	lifecycleMu sync.Mutex // protects the lifecycle state
+
+	mu      sync.RWMutex // protects the plugins map
 	plugins map[string]*KernelPlugin
+
+	pluginMu sync.Map // map[string]*sync.Mutex, one per plugin name, to serialize start/stop of the same plugin while allowing concurrent start/stop of different plugins
 }
 
 type PluginInfo struct {
@@ -69,6 +73,9 @@ func (m *PluginManager) Start() {
 		}
 	}()
 
+	m.lifecycleMu.Lock()
+	defer m.lifecycleMu.Unlock()
+
 	logging.LogInfof("kernel plugin manager starting")
 
 	petals := model.LoadKernelPetals()
@@ -83,9 +90,7 @@ func (m *PluginManager) Start() {
 	}
 	wg.Wait()
 
-	m.mu.RLock()
 	count := len(m.plugins)
-	m.mu.RUnlock()
 
 	logging.LogInfof("kernel plugin manager started, %d plugin(s) loaded", count)
 }
@@ -98,6 +103,9 @@ func (m *PluginManager) Stop() {
 			logging.LogErrorf("kernel plugin manager failed to stop: %v", r)
 		}
 	}()
+
+	m.lifecycleMu.Lock()
+	defer m.lifecycleMu.Unlock()
 
 	logging.LogInfof("kernel plugin manager stopping")
 
@@ -134,7 +142,11 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) {
 		}
 	}()
 
-	m.StopPlugin(petal)
+	pluginMu := m.getPluginMu(petal.Name)
+	pluginMu.Lock()
+	defer pluginMu.Unlock()
+
+	m.stopPlugin(petal)
 
 	p := NewKernelPlugin(petal)
 
@@ -156,6 +168,16 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) {
 		}
 	}()
 
+	pluginMu := m.getPluginMu(petal.Name)
+	pluginMu.Lock()
+	defer pluginMu.Unlock()
+
+	m.stopPlugin(petal)
+}
+
+// stopPlugin removes and stops the plugin without acquiring the per-plugin mutex.
+// Callers must hold the per-plugin mutex returned by getPluginMu.
+func (m *PluginManager) stopPlugin(petal *model.Petal) {
 	m.mu.Lock()
 	p, ok := m.plugins[petal.Name]
 	if ok {
@@ -168,6 +190,12 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) {
 			logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
 		}
 	}
+}
+
+// getPluginMu returns the per-plugin mutex for the given name, creating it if needed.
+func (m *PluginManager) getPluginMu(name string) *sync.Mutex {
+	v, _ := m.pluginMu.LoadOrStore(name, &sync.Mutex{})
+	return v.(*sync.Mutex)
 }
 
 // GetPlugin returns a loaded KernelPlugin by name, or nil.

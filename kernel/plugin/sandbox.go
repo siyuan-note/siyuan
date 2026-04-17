@@ -95,7 +95,13 @@ func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 // injectLogger adds siyuan.logger to the QJS context.
 func injectLogger(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	loggerWrapper := func(logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
-		return func(this *qjs.This) (*qjs.Value, error) {
+		return func(this *qjs.This) (value *qjs.Value, err error) {
+			defer func() {
+				if r := recover(); r != nil {
+					err = fmt.Errorf("panic during logger: %v", r)
+				}
+			}()
+
 			// Get arguments via this.Args()
 			args := this.Args()
 			if len(args) < 1 {
@@ -118,11 +124,11 @@ func injectLogger(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 	logger := ctx.NewObject()
 
-	logger.SetPropertyStr("trace", ctx.Function(loggerWrapper(logging.LogTracef)))
-	logger.SetPropertyStr("debug", ctx.Function(loggerWrapper(logging.LogDebugf)))
-	logger.SetPropertyStr("info", ctx.Function(loggerWrapper(logging.LogInfof)))
-	logger.SetPropertyStr("warn", ctx.Function(loggerWrapper(logging.LogWarnf)))
-	logger.SetPropertyStr("error", ctx.Function(loggerWrapper(logging.LogErrorf)))
+	logger.SetPropertyStr("trace", ctx.Function(loggerWrapper(logging.LogTracef), false))
+	logger.SetPropertyStr("debug", ctx.Function(loggerWrapper(logging.LogDebugf), false))
+	logger.SetPropertyStr("info", ctx.Function(loggerWrapper(logging.LogInfof), false))
+	logger.SetPropertyStr("warn", ctx.Function(loggerWrapper(logging.LogWarnf), false))
+	logger.SetPropertyStr("error", ctx.Function(loggerWrapper(logging.LogErrorf), false))
 
 	siyuan.SetPropertyStr("logger", logger)
 	return nil
@@ -144,9 +150,20 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 	storage := ctx.NewObject()
 
+	storageMu := sync.Mutex{} // guards all storage operations to prevent
+
 	// siyuan.storage.get(path) -> Promise<Uint8Array>
 	storage.SetPropertyStr("get", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		go func() {
+			storageMu.Lock()
+			defer storageMu.Unlock()
+
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.get: %v", r)))
+				}
+			}()
+
 			args := this.Args()
 			if len(args) < 1 {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: path required")))
@@ -171,6 +188,15 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	// siyuan.storage.put(path, content) -> Promise<void>
 	storage.SetPropertyStr("put", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		go func() {
+			storageMu.Lock()
+			defer storageMu.Unlock()
+
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.put: %v", r)))
+				}
+			}()
+
 			args := this.Args()
 			if len(args) < 2 {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: path and content required")))
@@ -197,7 +223,17 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 	// siyuan.storage.remove(path) -> Promise<void>
 	storage.SetPropertyStr("remove", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+
 		go func() {
+			storageMu.Lock()
+			defer storageMu.Unlock()
+
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.remove: %v", r)))
+				}
+			}()
+
 			args := this.Args()
 			if len(args) < 1 {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: path required")))
@@ -223,12 +259,21 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 	// siyuan.storage.list(path) -> Promise<Entry[]>
 	storage.SetPropertyStr("list", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		args := this.Args()
-		if len(args) < 1 {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: path required")))
-			return
-		}
 		go func() {
+			storageMu.Lock()
+			defer storageMu.Unlock()
+
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.list: %v", r)))
+				}
+			}()
+
+			args := this.Args()
+			if len(args) < 1 {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: path required")))
+				return
+			}
 			abs, err := resolvePath(args[0].String())
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
@@ -273,6 +318,12 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 // injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
 func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	siyuan.SetPropertyStr("fetch", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.fetch: %v", r)))
+			}
+		}()
+
 		args := this.Args()
 		if len(args) < 1 {
 			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: path required")))
@@ -372,11 +423,25 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			response.SetPropertyStr("body", ctx.NewBytes(respBody))
 
 			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				go this.Promise().Resolve(ctx.NewString(string(respBody)))
+				go func() {
+					defer func() {
+						if r := recover(); r != nil {
+							this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.text: %v", r)))
+						}
+					}()
+
+					this.Promise().Resolve(ctx.NewString(string(respBody)))
+				}()
 				return
 			}, true))
 			response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 				go func() {
+					defer func() {
+						if r := recover(); r != nil {
+							this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.json: %v", r)))
+						}
+					}()
+
 					value, err := ParseJsonStringToJsValue(ctx, string(respBody))
 					if err != nil {
 						this.Promise().Reject(ctx.NewError(err))
@@ -386,12 +451,16 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				}()
 				return
 			}, true))
-			response.SetPropertyStr("bytes", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				go this.Promise().Resolve(ctx.NewBytes(respBody))
-				return
-			}, true))
 			response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				go this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
+				go func() {
+					defer func() {
+						if r := recover(); r != nil {
+							this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.arrayBuffer: %v", r)))
+						}
+					}()
+
+					this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
+				}()
 				return
 			}, true))
 
@@ -405,6 +474,12 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.socket: %v", r)))
+			}
+		}()
+
 		var path string
 		var protocol *qjs.Value
 
@@ -685,6 +760,12 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	rpc := ctx.NewObject()
 
 	rpc.SetPropertyStr("bind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("panic during siyuan.rpc.bind: %v", r)
+			}
+		}()
+
 		args := this.Args()
 		if len(args) < 2 {
 			err = fmt.Errorf("siyuan.rpc.bind: name and function required")
@@ -712,6 +793,12 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	}, false))
 
 	rpc.SetPropertyStr("unbind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("panic during siyuan.rpc.unbind: %v", r)
+			}
+		}()
+
 		args := this.Args()
 		if len(args) < 2 {
 			err = fmt.Errorf("siyuan.rpc.unbind: name and function required")
@@ -734,6 +821,12 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	}, false))
 
 	rpc.SetPropertyStr("broadcast", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("panic during siyuan.rpc.broadcast: %v", r)
+			}
+		}()
+
 		args := this.Args()
 		if len(args) < 1 {
 			err = fmt.Errorf("siyuan.rpc.broadcast: method required")

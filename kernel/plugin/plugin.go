@@ -155,7 +155,10 @@ func (p *KernelPlugin) start() (retErr error) {
 		return fmt.Errorf("create plugin dir [%s] failed: %s", baseDir, err)
 	}
 
-	runtime, qjsErr := qjs.New()
+	runtime, qjsErr := qjs.New(qjs.Option{
+		Stdout: &KernelPluginLogger{name: p.Name, logFn: logging.LogInfo},
+		Stderr: &KernelPluginLogger{name: p.Name, logFn: logging.LogError},
+	})
 
 	p.mu.Lock()
 	p.runtime = runtime
@@ -173,7 +176,7 @@ func (p *KernelPlugin) start() (retErr error) {
 	}
 
 	// Load and evaluate kernel.js code in plugin's QJS runtime.
-	_, evalErr := runtime.Eval(p.Name+"/kernel.js", qjs.Code(p.Kernel.JS))
+	_, evalErr := runtime.Eval(p.Name+"/kernel.js", qjs.Code(p.Kernel.JS), qjs.TypeModule(), qjs.FlagAsync())
 	if evalErr != nil {
 		p.error()
 		return fmt.Errorf("eval error: %v", evalErr)

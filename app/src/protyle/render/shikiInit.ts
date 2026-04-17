@@ -1,11 +1,9 @@
-let initPromise: Promise<void> | null = null;
-let modulesPromise: Promise<ShikiModules> | null = null;
+import {addScript} from "../util/addScript";
+import {Constants} from "../../constants";
 
-interface ShikiModules {
-    createHighlighter: (options: any) => Promise<any>;
-    bundledLanguages: Record<string, any>;
-    bundledThemes: Record<string, any>;
-}
+let initPromise: Promise<void> | null = null;
+
+const SHIKI_VERSION = "4.0.2";
 
 const DEFAULT_LANGS = [
     "javascript", "typescript", "java", "python", "go", "rust", "c", "cpp",
@@ -13,21 +11,6 @@ const DEFAULT_LANGS = [
     "bash", "xml", "php", "ruby", "swift", "kotlin", "dart", "lua",
     "plaintext"
 ];
-
-const loadShikiModules = (): Promise<ShikiModules> => {
-    if (!modulesPromise) {
-        modulesPromise = Promise.all([
-            import(/* webpackChunkName: "shiki" */ "shiki"),
-            import(/* webpackChunkName: "shiki-langs" */ "shiki/langs"),
-            import(/* webpackChunkName: "shiki-themes" */ "shiki/themes"),
-        ]).then(([core, langs, themes]) => ({
-            createHighlighter: (core as any).createHighlighter,
-            bundledLanguages: (langs as any).bundledLanguages as Record<string, any>,
-            bundledThemes: (themes as any).bundledThemes as Record<string, any>,
-        }));
-    }
-    return modulesPromise;
-};
 
 const getShikiTheme = () => {
     if (window.siyuan.config.appearance.mode === 0) {
@@ -40,9 +23,8 @@ export const initShiki = (): Promise<void> => {
     if (window.siyuanShiki?.highlighter) {
         const theme = getShikiTheme();
         if (!window.siyuanShiki.loadedThemes.has(theme)) {
-            return loadShikiModules().then(({bundledThemes}) =>
-                window.siyuanShiki.highlighter.loadTheme(bundledThemes[theme])
-            ).then(() => {
+            const themeData = window.shiki.bundledThemes[theme];
+            return window.siyuanShiki.highlighter.loadTheme(themeData).then(() => {
                 window.siyuanShiki.loadedThemes.add(theme);
             });
         }
@@ -53,10 +35,15 @@ export const initShiki = (): Promise<void> => {
         return initPromise;
     }
 
-    initPromise = loadShikiModules().then(({createHighlighter, bundledLanguages, bundledThemes}) => {
+    initPromise = addScript(
+        `${Constants.PROTYLE_CDN}/js/shiki/shiki.min.js?v=${SHIKI_VERSION}`,
+        "protyleShikiScript"
+    ).then(() => {
         const theme = getShikiTheme();
+        const {bundledLanguages, bundledThemes} = window.shiki;
         const langsToLoad = DEFAULT_LANGS.filter(l => l in bundledLanguages);
-        return createHighlighter({
+        return window.shiki.createHighlighterCore({
+            engine: window.shiki.createOnigurumaEngine(),
             themes: [bundledThemes[theme]],
             langs: langsToLoad.map(l => bundledLanguages[l]),
         }).then((highlighter: any) => {

@@ -80,7 +80,6 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.1.3",
-    "shiki": "^4.0.2"
+    "@electron/remote": "^2.1.3"
   }
 }

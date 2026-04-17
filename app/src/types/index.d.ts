@@ -199,6 +199,12 @@ interface Window {
             name: string
         };
     };
+    shiki: {
+        createHighlighterCore: (options: any) => Promise<any>;
+        createOnigurumaEngine: () => any;
+        bundledLanguages: Record<string, any>;
+        bundledThemes: Record<string, any>;
+    };
     siyuanShiki: {
         highlighter: any;
         loadedLanguages: Set<string>;

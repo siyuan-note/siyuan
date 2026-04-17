@@ -55,7 +55,9 @@ export class Model {
             }
         };
         ws.onmessage = (event) => {
-            if (options.msgCallback) {
+            if (options.msgCallback &&
+                // 等待 config 加载完成才接受推送 https://github.com/siyuan-note/siyuan/issues/17508
+                window.siyuan.config) {
                 const data = processMessage(JSON.parse(event.data));
                 options.msgCallback.call(this, data);
             }

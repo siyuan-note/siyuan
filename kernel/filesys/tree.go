@@ -127,7 +127,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		return
 	}
 
-	data, err = correctTreeJSONData(boxID, p, data, luteEngine)
+	data, err = fixTreeJSONData(boxID, p, data, luteEngine)
 	if nil != err {
 		return
 	}
@@ -385,8 +385,8 @@ func afterWriteTree(tree *parse.Tree) {
 	cache.PutDocIAL(tree.Path, docIAL)
 }
 
-// correctTreeJSONData 订正树 JSON 数据。
-func correctTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) ([]byte, error) {
+// fixTreeJSONData 订正树 JSON 数据。
+func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) ([]byte, error) {
 	jsonData = removeUnescapedUnicodeNull(jsonData)
 	var needFix bool
 	ret, needFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)

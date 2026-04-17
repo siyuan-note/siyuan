@@ -299,7 +299,7 @@ interface Window {
 
     reconnectWebSocket(): void;
 
-    showKeyboardToolbar(height: number): void;
+    showKeyboardToolbar(): void;
 
     processIOSPurchaseResponse(code: number): void;
 
@@ -512,6 +512,7 @@ interface ISiyuan {
     emojis?: IEmoji[],
     backStack?: IBackStack[],
     mobile?: {
+        touchRange?: Range
         size: {
             isLandscape?: boolean,
             landscape?: {

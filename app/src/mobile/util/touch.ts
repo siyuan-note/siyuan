@@ -10,6 +10,8 @@ import {activeBlur} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
+import {getRangeByPoint} from "../../protyle/util/selection";
+import {getCurrentEditor} from "../editor";
 
 let clientX: number;
 let clientY: number;
@@ -164,6 +166,15 @@ export const handleTouchStart = (event: TouchEvent) => {
     if (globalTouchStart(event)) {
         return;
     }
+
+    if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element)) {
+        const editor = getCurrentEditor();
+        if (editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&
+            document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+            window.siyuan.mobile.touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
+        }
+    }
+
     firstDirection = null;
     xDiff = undefined;
     yDiff = undefined;

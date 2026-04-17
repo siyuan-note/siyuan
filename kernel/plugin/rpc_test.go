@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -102,5 +103,56 @@ func TestPushNotificationOmitempty(t *testing.T) {
 	}
 	if _, ok := result["params"]; ok {
 		t.Errorf("expected params to be omitted, got: %s", msg)
+	}
+}
+
+func TestBroadcastNotification(t *testing.T) {
+	// Two server connections and one client connection.
+	// BroadcastNotification must deliver to both server conns and skip the client conn.
+	serverConn1, clientConn1 := newTestWsPair(t)
+	serverConn2, clientConn2 := newTestWsPair(t)
+	serverConn3, clientConn3 := newTestWsPair(t) // tracked as client (isServer=false)
+	defer serverConn1.Close()
+	defer clientConn1.Close()
+	defer serverConn2.Close()
+	defer clientConn2.Close()
+	defer serverConn3.Close()
+	defer clientConn3.Close()
+
+	petal := &model.Petal{Name: "test-broadcast", Kernel: &model.KernelPetal{JS: ``}}
+	p := NewKernelPlugin(petal)
+	p.TrackSocket(serverConn1, true)
+	p.TrackSocket(serverConn2, true)
+	p.TrackSocket(serverConn3, false) // outbound — must NOT receive broadcast
+
+	p.BroadcastNotification("ping", map[string]any{"seq": 1})
+
+	readOne := func(c *websocket.Conn) (map[string]any, error) {
+		c.SetReadDeadline(time.Now().Add(2 * time.Second))
+		_, msg, err := c.ReadMessage()
+		if err != nil {
+			return nil, err
+		}
+		var out map[string]any
+		return out, json.Unmarshal(msg, &out)
+	}
+
+	for i, c := range []*websocket.Conn{clientConn1, clientConn2} {
+		got, err := readOne(c)
+		if err != nil {
+			t.Fatalf("server conn %d: read: %v", i+1, err)
+		}
+		if got["method"] != "ping" {
+			t.Errorf("server conn %d: want method=ping, got %v", i+1, got["method"])
+		}
+		if got["jsonrpc"] != "2.0" {
+			t.Errorf("server conn %d: want jsonrpc=2.0, got %v", i+1, got["jsonrpc"])
+		}
+	}
+
+	// clientConn3's server side (serverConn3) is tracked as isServer=false — must NOT receive broadcast
+	clientConn3.SetReadDeadline(time.Now().Add(200 * time.Millisecond))
+	if _, _, err := clientConn3.ReadMessage(); err == nil {
+		t.Error("outbound client conn should not have received broadcast")
 	}
 }

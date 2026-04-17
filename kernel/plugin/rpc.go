@@ -196,10 +196,14 @@ func HandleRpcWebSocket(c *gin.Context) {
 
 		requests, isBatch, jsonErr := parseRequests(message)
 		if jsonErr != nil {
-			writeWsResponse(conn, &JsonRpcErrorResponse{
+			if respBytes, marshalErr := json.Marshal(&JsonRpcErrorResponse{
 				JsonRpc: JsonRpcVersion,
 				Error:   jsonErr,
-			})
+			}); marshalErr == nil {
+				if writeErr := p.wsWrite(conn, respBytes); writeErr != nil {
+					logging.LogWarnf("[plugin:%s] ws write: %s", name, writeErr)
+				}
+			}
 			continue
 		}
 
@@ -208,7 +212,11 @@ func HandleRpcWebSocket(c *gin.Context) {
 		if !isBatch {
 			// Single request - send response only if not a notification
 			if len(responses) > 0 && responses[0] != nil {
-				writeWsResponse(conn, responses[0])
+				if respBytes, marshalErr := json.Marshal(responses[0]); marshalErr == nil {
+					if writeErr := p.wsWrite(conn, respBytes); writeErr != nil {
+						logging.LogWarnf("[plugin:%s] ws write: %s", name, writeErr)
+					}
+				}
 			}
 			continue
 		}
@@ -223,7 +231,11 @@ func HandleRpcWebSocket(c *gin.Context) {
 
 		// Send batch response; if all were notifications, send nothing per spec
 		if len(filtered) > 0 {
-			writeWsResponse(conn, filtered)
+			if respBytes, marshalErr := json.Marshal(filtered); marshalErr == nil {
+				if writeErr := p.wsWrite(conn, respBytes); writeErr != nil {
+					logging.LogWarnf("[plugin:%s] ws write: %s", name, writeErr)
+				}
+			}
 		}
 	}
 }
@@ -257,18 +269,6 @@ func parseRequests(body []byte) (requests []*JsonRpcRequest, isBatch bool, jsonR
 		return nil, false, JsonRpcErrorParseError
 	}
 	return []*JsonRpcRequest{&req}, false, nil
-}
-
-// writeWsResponse writes a response to the WebSocket connection.
-func writeWsResponse(conn *websocket.Conn, data any) {
-	respBytes, err := json.Marshal(data)
-	if err != nil {
-		logging.LogErrorf("failed to marshal ws response: %s", err)
-		return
-	}
-	if err := conn.WriteMessage(websocket.TextMessage, respBytes); err != nil {
-		logging.LogErrorf("failed to write ws message: %s", err)
-	}
 }
 
 // dispatchRequests dispatches multiple JSON-RPC requests concurrently.
@@ -376,6 +376,39 @@ func PushNotification(conn *websocket.Conn, method string, params any) error {
 		return fmt.Errorf("write notification: %w", err)
 	}
 	return nil
+}
+
+// BroadcastNotification sends a JSON-RPC 2.0 notification to all inbound RPC WebSocket clients.
+func (p *KernelPlugin) BroadcastNotification(method string, params any) {
+	notification := struct {
+		JsonRpc string `json:"jsonrpc"`
+		Method  string `json:"method"`
+		Params  any    `json:"params,omitempty"`
+	}{
+		JsonRpc: JsonRpcVersion,
+		Method:  method,
+		Params:  params,
+	}
+	data, err := json.Marshal(notification)
+	if err != nil {
+		logging.LogWarnf("[plugin:%s] broadcast marshal: %s", p.Name, err)
+		return
+	}
+
+	p.mu.RLock()
+	conns := make([]*websocket.Conn, 0, len(p.sockets))
+	for conn, isServer := range p.sockets {
+		if isServer {
+			conns = append(conns, conn)
+		}
+	}
+	p.mu.RUnlock()
+
+	for _, conn := range conns {
+		if err := p.wsWrite(conn, data); err != nil {
+			logging.LogWarnf("[plugin:%s] broadcast: %s", p.Name, err)
+		}
+	}
 }
 
 // wsWrite serializes a single write to conn using the per-connection mutex.

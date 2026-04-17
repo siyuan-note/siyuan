@@ -53,7 +53,7 @@ var (
 type JsonRpcRequest struct {
 	JsonRpc string          `json:"jsonrpc"`
 	Method  string          `json:"method"`
-	Params  json.RawMessage `json:"params,omitempty"`
+	Params  *json.RawMessage `json:"params,omitempty"`
 	ID      *any            `json:"id,omitempty"`
 }
 
@@ -312,8 +312,8 @@ func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) any {
 
 	// Parse params from raw JSON
 	var params any
-	if len(req.Params) > 0 {
-		if err := json.Unmarshal(req.Params, &params); err != nil {
+	if req.Params != nil {
+		if err := json.Unmarshal(*req.Params, &params); err != nil {
 			if req.IsNotification() {
 				return nil
 			}

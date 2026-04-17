@@ -319,29 +319,38 @@ func parseRpcRequests(body []byte) (requests []*JsonRpcInboundRequest, isBatch b
 // rpcParamsToJsValue converts Go RPC params to a *qjs.Value for JS invocation.
 // params is treated as already-encoded JSON when its type is string, []byte, or json.RawMessage
 // (and pointer variants). Any other type is marshalled to JSON first.
-func rpcParamsToJsValue(ctx *qjs.Context, params any) (value *qjs.Value, err error) {
+func rpcParamsToJsValue(ctx *qjs.Context, params any) (value *qjs.Value, jsonStr string, err error) {
 	if params == nil {
-		return nil, nil
+		return
 	}
 
-	var jsonStr string
 	switch v := params.(type) {
 	case string:
 		jsonStr = v
 	case *string:
+		if v == nil {
+			return
+		}
 		jsonStr = *v
 	case []byte:
 		jsonStr = string(v)
 	case json.RawMessage:
 		jsonStr = string(v)
 	case *[]byte:
+		if v == nil {
+			return
+		}
 		jsonStr = string(*v)
 	case *json.RawMessage:
+		if v == nil {
+			return
+		}
 		jsonStr = string(*v)
 	default:
-		b, err := json.Marshal(v)
-		if err != nil {
-			return nil, err
+		b, marshalErr := json.Marshal(v)
+		if marshalErr != nil {
+			err = marshalErr
+			return
 		}
 		jsonStr = string(b)
 	}

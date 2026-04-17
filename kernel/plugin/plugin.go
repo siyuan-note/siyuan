@@ -399,7 +399,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 	ctx := runtime.Context()
 
 	// Convert params to JS value
-	paramValue, convertErr := rpcParamsToJsValue(ctx, params)
+	paramValue, paramJsonStr, convertErr := rpcParamsToJsValue(ctx, params)
 	if convertErr != nil {
 		return nil, &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
@@ -421,11 +421,18 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 	if paramValue == nil {
 		result, err = ctx.Invoke(rpcMethod, ctx.Global())
 	} else if paramValue.IsArray() {
-		var paramsArray []*qjs.Value
-		paramArray, _ := paramValue.ToArray()
-		paramArray.ForEach(func(key *qjs.Value, value *qjs.Value) {
-			paramsArray = append(paramsArray, value)
-		})
+		// ⚠️ Can't spread an valid []*qjs.Value
+		// paramArray, _ := paramValue.ToArray()
+		// paramsArray := make([]*qjs.Value, 0, paramArray.Len())
+		// paramArray.ForEach(func(key *qjs.Value, value *qjs.Value) {
+		// 	jsonStr, _ := value.JSONStringify()
+		// 	paramsArray = append(paramsArray, ctx.NewString(jsonStr))
+		// })
+
+		paramsArray, parseErr := ParseJsonArrayStringToJsValueArray(ctx, paramJsonStr)
+		if parseErr != nil {
+			return nil, JsonRpcErrorParseError
+		}
 		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramsArray...)
 	} else {
 		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramValue)
@@ -466,6 +473,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 		// If it's a primitive that doesn't unmarshal cleanly, return the raw string.
 		return jsonStr, nil
 	}
+
 	return goResult, nil
 }
 

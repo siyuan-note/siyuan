@@ -863,12 +863,7 @@ func GoValueToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error
 		return
 	}
 
-	result = ctx.ParseJSON(string(valueBytes))
-	if ctx.HasException() {
-		result = nil
-		err = ctx.Exception()
-	}
-	return
+	return ParseJsonStringToJsValue(ctx, string(valueBytes))
 }
 
 // ParseJsonStringToJsValue parses a JSON string into a QJS Value, returning an error if parsing fails.
@@ -877,6 +872,23 @@ func ParseJsonStringToJsValue(ctx *qjs.Context, jsonStr string) (result *qjs.Val
 	if ctx.HasException() {
 		result = nil
 		err = ctx.Exception()
+	}
+	return
+}
+
+func ParseJsonArrayStringToJsValueArray(ctx *qjs.Context, jsonStr string) (result []*qjs.Value, err error) {
+	var jsonArray []json.RawMessage
+	err = json.Unmarshal([]byte(jsonStr), &jsonArray)
+	if err != nil {
+		return
+	}
+
+	result = make([]*qjs.Value, len(jsonArray))
+	for i, jsonItem := range jsonArray {
+		result[i], err = ParseJsonStringToJsValue(ctx, string(jsonItem))
+		if err != nil {
+			return
+		}
 	}
 	return
 }

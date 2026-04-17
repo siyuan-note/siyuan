@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
@@ -45,6 +46,11 @@ const (
 	StateRunning
 	StateErrored
 	StateStopped
+)
+
+var (
+	ErrMethodNotFound   = errors.New("method not found")
+	ErrPluginNotRunning = errors.New("plugin not running")
 )
 
 func (s PluginState) String() string {
@@ -222,7 +228,7 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 	}()
 
 	if p.state != StateRunning {
-		return nil, fmt.Errorf("plugin not running (state=%s)", p.state)
+		return nil, fmt.Errorf("%w (state=%s)", ErrPluginNotRunning, p.state)
 	}
 
 	ctx := p.runtime.Context()
@@ -239,7 +245,7 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 
 	rpcMethod := p.getRpcMethod(method)
 	if rpcMethod == nil {
-		return nil, fmt.Errorf("method %q not found", method)
+		return nil, fmt.Errorf("%w: %q", ErrMethodNotFound, method)
 	}
 
 	// Call the JS function using ctx.Invoke(fn, thisVal, args...)

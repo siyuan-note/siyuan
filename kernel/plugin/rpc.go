@@ -17,7 +17,9 @@
 package plugin
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -71,12 +73,20 @@ func (r *JsonRpcRequest) Validate() *JsonRpcError {
 	return nil
 }
 
-// JsonRpcResponse represents a JSON-RPC 2.0 response.
-type JsonRpcResponse struct {
+// JsonRpcRequestResponse represents a JSON-RPC 2.0 success response.
+// result MUST be present (even if null); error MUST NOT be present.
+type JsonRpcRequestResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	Result  any    `json:"result"`
+	ID      any    `json:"id"`
+}
+
+// JsonRpcErrorResponse represents a JSON-RPC 2.0 error response.
+// error MUST be present; result MUST NOT be present.
+type JsonRpcErrorResponse struct {
 	JsonRpc string        `json:"jsonrpc"`
-	Result  any           `json:"result,omitempty"`
-	Error   *JsonRpcError `json:"error,omitempty"`
-	ID      any           `json:"id,omitempty"`
+	Error   *JsonRpcError `json:"error"`
+	ID      any           `json:"id"`
 }
 
 // JsonRpcError represents a JSON-RPC 2.0 error.
@@ -86,75 +96,38 @@ type JsonRpcError struct {
 	Data    any    `json:"data,omitempty"`
 }
 
-// IsBatchRequest checks if the body is a batch request (starts with '[').
-func IsBatchRequest(body []byte) bool {
-	for _, b := range body {
-		if b == ' ' || b == '\t' || b == '\n' || b == '\r' {
-			continue
-		}
-		return b == '['
-	}
-	return false
-}
-
-// ParseRequests parses JSON-RPC requests from the body.
-// Returns requests and a boolean indicating if it's a batch request.
-func ParseRequests(body []byte) ([]*JsonRpcRequest, bool, *JsonRpcError) {
-	if len(body) == 0 {
-		return nil, false, JsonRpcErrorParseError
-	}
-
-	if IsBatchRequest(body) {
-		var requests []*JsonRpcRequest
-		if err := json.Unmarshal(body, &requests); err != nil {
-			return nil, true, JsonRpcErrorParseError
-		}
-		if len(requests) == 0 {
-			return nil, true, JsonRpcErrorInvalidRequest
-		}
-		return requests, true, nil
-	}
-
-	var req JsonRpcRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		return nil, false, JsonRpcErrorParseError
-	}
-	return []*JsonRpcRequest{&req}, false, nil
-}
-
 // HandleRpcHttp handles POST /api/plugin/rpc/:name
 // Supports single call, batch call, and notification (no response for notification).
 func HandleRpcHttp(c *gin.Context) {
 	name := util.GetRequestUrlStringParam(c, "name")
-	kp := GetManager().GetPlugin(name)
-	if kp == nil || kp.State() != StateRunning {
-		resp := JsonRpcResponse{
+	p := GetManager().GetPlugin(name)
+	if p == nil || p.State() != StateRunning {
+		c.JSON(http.StatusOK, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error:   &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Plugin not found or not running"},
-		}
-		c.JSON(http.StatusOK, resp)
+		})
 		return
 	}
 
 	body, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, JsonRpcResponse{
+		c.JSON(http.StatusOK, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error:   JsonRpcErrorParseError,
 		})
 		return
 	}
 
-	requests, isBatch, jsonErr := ParseRequests(body)
+	requests, isBatch, jsonErr := parseRequests(body)
 	if jsonErr != nil {
-		c.JSON(http.StatusOK, JsonRpcResponse{
+		c.JSON(http.StatusOK, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error:   jsonErr,
 		})
 		return
 	}
 
-	responses := dispatchRequests(kp, requests)
+	responses := dispatchRequests(p, requests)
 
 	if !isBatch {
 		// Single request - return single response (or empty for notification)
@@ -167,7 +140,7 @@ func HandleRpcHttp(c *gin.Context) {
 	}
 
 	// Batch request - filter out nil responses (notifications) and return array
-	filtered := make([]*JsonRpcResponse, 0, len(responses))
+	filtered := make([]any, 0, len(responses))
 	for _, resp := range responses {
 		if resp != nil {
 			filtered = append(filtered, resp)
@@ -177,8 +150,8 @@ func HandleRpcHttp(c *gin.Context) {
 	if len(filtered) > 0 {
 		c.JSON(http.StatusOK, filtered)
 	} else {
-		// All notifications in batch - return empty array per spec
-		c.JSON(http.StatusOK, []*JsonRpcResponse{})
+		// All notifications in batch - send nothing per spec (MUST NOT return empty array)
+		c.Status(http.StatusNoContent)
 	}
 }
 
@@ -186,9 +159,9 @@ func HandleRpcHttp(c *gin.Context) {
 // Supports single call, batch call, notification, and server push notifications.
 func HandleRpcWebSocket(c *gin.Context) {
 	name := util.GetRequestUrlStringParam(c, "name")
-	kp := GetManager().GetPlugin(name)
-	if kp == nil || kp.State() != StateRunning {
-		c.JSON(http.StatusNotFound, JsonRpcResponse{
+	p := GetManager().GetPlugin(name)
+	if p == nil || p.State() != StateRunning {
+		c.JSON(http.StatusNotFound, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error:   &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Plugin not found or not running"},
 		})
@@ -206,8 +179,8 @@ func HandleRpcWebSocket(c *gin.Context) {
 	defer conn.Close()
 
 	// Track this connection for server push notifications
-	kp.TrackSocket(conn)
-	defer kp.UntrackSocket(conn)
+	p.TrackSocket(conn)
+	defer p.UntrackSocket(conn)
 
 	for {
 		_, message, readErr := conn.ReadMessage()
@@ -218,17 +191,16 @@ func HandleRpcWebSocket(c *gin.Context) {
 			break
 		}
 
-		requests, isBatch, jsonErr := ParseRequests(message)
+		requests, isBatch, jsonErr := parseRequests(message)
 		if jsonErr != nil {
-			resp := JsonRpcResponse{
+			writeWsResponse(conn, &JsonRpcErrorResponse{
 				JsonRpc: JsonRpcVersion,
 				Error:   jsonErr,
-			}
-			writeWsResponse(conn, &resp)
+			})
 			continue
 		}
 
-		responses := dispatchRequests(kp, requests)
+		responses := dispatchRequests(p, requests)
 
 		if !isBatch {
 			// Single request - send response only if not a notification
@@ -239,19 +211,49 @@ func HandleRpcWebSocket(c *gin.Context) {
 		}
 
 		// Batch request - filter out nil responses (notifications)
-		filtered := make([]*JsonRpcResponse, 0, len(responses))
+		filtered := make([]any, 0, len(responses))
 		for _, resp := range responses {
 			if resp != nil {
 				filtered = append(filtered, resp)
 			}
 		}
 
-		// Send batch response (empty array if all were notifications)
-		if len(filtered) == 0 {
-			filtered = []*JsonRpcResponse{}
+		// Send batch response; if all were notifications, send nothing per spec
+		if len(filtered) > 0 {
+			writeWsResponse(conn, filtered)
 		}
-		writeWsResponse(conn, filtered)
 	}
+}
+
+// isBatchRequest checks if the body is a batch request (starts with '[' and ends with ']').
+func isBatchRequest(body []byte) bool {
+	body = bytes.Trim(body, " \t\n\r")
+	return len(body) > 0 && body[0] == '[' && body[len(body)-1] == ']'
+}
+
+// parseRequests parses JSON-RPC requests from the body.
+// Returns requests and a boolean indicating if it's a batch request.
+func parseRequests(body []byte) (requests []*JsonRpcRequest, isBatch bool, jsonErr *JsonRpcError) {
+	if len(body) == 0 {
+		return nil, false, JsonRpcErrorParseError
+	}
+
+	if isBatchRequest(body) {
+		var requests []*JsonRpcRequest
+		if err := json.Unmarshal(body, &requests); err != nil {
+			return nil, true, JsonRpcErrorParseError
+		}
+		if len(requests) == 0 {
+			return nil, true, JsonRpcErrorInvalidRequest
+		}
+		return requests, true, nil
+	}
+
+	var req JsonRpcRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		return nil, false, JsonRpcErrorParseError
+	}
+	return []*JsonRpcRequest{&req}, false, nil
 }
 
 // writeWsResponse writes a response to the WebSocket connection.
@@ -268,11 +270,17 @@ func writeWsResponse(conn *websocket.Conn, data any) {
 
 // dispatchRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
-func dispatchRequests(p *KernelPlugin, requests []*JsonRpcRequest) []*JsonRpcResponse {
-	responses := make([]*JsonRpcResponse, len(requests))
+func dispatchRequests(p *KernelPlugin, requests []*JsonRpcRequest) []any {
+	responses := make([]any, len(requests))
 	var wg sync.WaitGroup
 
 	for i, req := range requests {
+		if req.IsNotification() {
+			go func(request *JsonRpcRequest) {
+				dispatchRPC(p, request)
+			}(req)
+			continue
+		}
 		wg.Add(1)
 		go func(index int, request *JsonRpcRequest) {
 			defer wg.Done()
@@ -286,11 +294,13 @@ func dispatchRequests(p *KernelPlugin, requests []*JsonRpcRequest) []*JsonRpcRes
 
 // dispatchRPC routes a single JSON-RPC request to the plugin's registered JS method.
 // Returns nil for notifications (no ID field).
-func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) *JsonRpcResponse {
+func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) any {
 	// Validate request structure
 	if err := req.Validate(); err != nil {
-		// For validation errors, still return error even for notifications
-		return &JsonRpcResponse{
+		if req.IsNotification() {
+			return nil
+		}
+		return &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error:   err,
 			ID:      req.ID,
@@ -301,7 +311,10 @@ func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) *JsonRpcResponse {
 	var params any
 	if len(req.Params) > 0 {
 		if err := json.Unmarshal(req.Params, &params); err != nil {
-			return &JsonRpcResponse{
+			if req.IsNotification() {
+				return nil
+			}
+			return &JsonRpcErrorResponse{
 				JsonRpc: JsonRpcVersion,
 				Error:   JsonRpcErrorInvalidParams,
 				ID:      req.ID,
@@ -318,11 +331,10 @@ func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) *JsonRpcResponse {
 
 	if err != nil {
 		code := JsonRpcErrorCodeInternalError
-		if err.Error() == fmt.Sprintf("method %q not found", req.Method) ||
-			contains(err.Error(), "plugin not running") {
+		if errors.Is(err, ErrMethodNotFound) || errors.Is(err, ErrPluginNotRunning) {
 			code = JsonRpcErrorCodeMethodNotFound
 		}
-		return &JsonRpcResponse{
+		return &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error: &JsonRpcError{
 				Code:    code,
@@ -332,7 +344,7 @@ func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) *JsonRpcResponse {
 		}
 	}
 
-	return &JsonRpcResponse{
+	return &JsonRpcRequestResponse{
 		JsonRpc: JsonRpcVersion,
 		Result:  result,
 		ID:      req.ID,
@@ -361,46 +373,4 @@ func PushNotification(conn *websocket.Conn, method string, params any) error {
 		return fmt.Errorf("write notification: %w", err)
 	}
 	return nil
-}
-
-// BroadcastNotification broadcasts a notification to all connected WebSocket clients for a plugin.
-func (p *KernelPlugin) BroadcastNotification(method string, params any) {
-	notification := struct {
-		JsonRpc string `json:"jsonrpc"`
-		Method  string `json:"method"`
-		Params  any    `json:"params"`
-	}{
-		JsonRpc: JsonRpcVersion,
-		Method:  method,
-		Params:  params,
-	}
-
-	data, err := json.Marshal(notification)
-	if err != nil {
-		logging.LogErrorf("[plugin:%s] failed to marshal broadcast: %s", p.Name, err)
-		return
-	}
-
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
-	for conn := range p.sockets {
-		if err := conn.WriteMessage(websocket.TextMessage, data); err != nil {
-			// Connection may be closed, will be cleaned up on next write failure
-			logging.LogDebugf("[plugin:%s] failed to broadcast to connection: %s", p.Name, err)
-		}
-	}
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsHelper(s, substr))
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

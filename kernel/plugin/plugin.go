@@ -261,19 +261,19 @@ func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, data []byte) 
 
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
-func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcRequestRaw) []any {
+func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcInboundRequest) []any {
 	responses := make([]any, len(requests))
 	var wg sync.WaitGroup
 
 	for i, req := range requests {
 		if req.IsNotification() {
-			go func(request *JsonRpcRequestRaw) {
+			go func(request *JsonRpcInboundRequest) {
 				p.dispatchRpcRequest(request)
 			}(req)
 			continue
 		}
 		wg.Add(1)
-		go func(index int, request *JsonRpcRequestRaw) {
+		go func(index int, request *JsonRpcInboundRequest) {
 			defer wg.Done()
 			responses[index] = p.dispatchRpcRequest(request)
 		}(i, req)
@@ -285,7 +285,7 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcRequestRaw) []any 
 
 // dispatchRpcRequest routes a single JSON-RPC request to the plugin's registered JS method.
 // Returns nil for notifications (no ID field).
-func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequestRaw) any {
+func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcInboundRequest) any {
 	// Validate request structure
 	if err := request.Validate(); err != nil {
 		if request.IsNotification() {
@@ -417,10 +417,10 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
-func (p *KernelPlugin) TrackSocket(conn *websocket.Conn, isServer bool) {
+func (p *KernelPlugin) TrackSocket(conn *websocket.Conn, isRpcConnection bool) {
 	p.socketsMu.Lock()
 	defer p.socketsMu.Unlock()
-	p.sockets[conn] = isServer
+	p.sockets[conn] = isRpcConnection
 	p.socketMus[conn] = &sync.Mutex{}
 }
 

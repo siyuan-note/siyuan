@@ -58,8 +58,8 @@ type JsonRpcRequest struct {
 	ID      any    `json:"id,omitempty"`
 }
 
-// JsonRpcRequestRaw represents a JSON-RPC 2.0 request with raw JSON parameters.
-type JsonRpcRequestRaw struct {
+// JsonRpcInboundRequest represents a JSON-RPC 2.0 request with raw JSON parameters.
+type JsonRpcInboundRequest struct {
 	JsonRpc string           `json:"jsonrpc"`
 	Method  string           `json:"method"`
 	Params  *json.RawMessage `json:"params,omitempty"`
@@ -90,12 +90,12 @@ type JsonRpcError struct {
 }
 
 // IsNotification returns true if this request is a notification (no ID field).
-func (r *JsonRpcRequestRaw) IsNotification() bool {
+func (r *JsonRpcInboundRequest) IsNotification() bool {
 	return r.ID == nil
 }
 
 // Validate validates the JSON-RPC request structure.
-func (r *JsonRpcRequestRaw) Validate() *JsonRpcError {
+func (r *JsonRpcInboundRequest) Validate() *JsonRpcError {
 	if r.JsonRpc != JsonRpcVersion {
 		return &JsonRpcError{Code: JsonRpcErrorCodeInvalidRequest, Message: "Invalid jsonrpc version"}
 	}
@@ -250,19 +250,19 @@ func (p *KernelPlugin) BroadcastNotification(method string, params any) {
 
 	p.socketsMu.RLock()
 	conns := make([]*websocket.Conn, 0, len(p.sockets))
-	for conn, isServer := range p.sockets {
-		if isServer {
+	for conn, isRpcConnection := range p.sockets {
+		if isRpcConnection {
 			conns = append(conns, conn)
 		}
 	}
 	p.socketsMu.RUnlock()
 
 	for _, conn := range conns {
-		go func() {
-			if err := p.writeWebSocketMessage(conn, data); err != nil {
+		go func(c *websocket.Conn) {
+			if err := p.writeWebSocketMessage(c, data); err != nil {
 				logging.LogWarnf("[plugin:%s] broadcast: %s", p.Name, err)
 			}
-		}()
+		}(conn)
 	}
 }
 
@@ -273,7 +273,7 @@ func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlu
 	if p == nil || p.State() != StateRunning {
 		c.JSON(errStatus, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
-			Error:   &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Plugin not found or not running"},
+			Error:   &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: "Plugin not found or not running"},
 		})
 		return nil
 	}
@@ -282,13 +282,13 @@ func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlu
 
 // isRpcBatchRequest checks if the body is a batch request (starts with '[' and ends with ']').
 func isRpcBatchRequest(body []byte) bool {
-	body = bytes.Trim(body, " \t\n\r")
+	body = bytes.TrimSpace(body)
 	return len(body) > 0 && body[0] == '[' && body[len(body)-1] == ']'
 }
 
 // parseRpcRequests parses JSON-RPC requests from the body.
 // Returns requests and a boolean indicating if it's a batch request.
-func parseRpcRequests(body []byte) (requests []*JsonRpcRequestRaw, isBatch bool, jsonRpcErr *JsonRpcError) {
+func parseRpcRequests(body []byte) (requests []*JsonRpcInboundRequest, isBatch bool, jsonRpcErr *JsonRpcError) {
 	if len(body) == 0 {
 		return nil, false, JsonRpcErrorParseError
 	}
@@ -303,7 +303,7 @@ func parseRpcRequests(body []byte) (requests []*JsonRpcRequestRaw, isBatch bool,
 		return requests, true, nil
 	}
 
-	var request JsonRpcRequestRaw
+	var request JsonRpcInboundRequest
 	if err := json.Unmarshal(body, &request); err != nil {
 		return nil, false, JsonRpcErrorParseError
 	}

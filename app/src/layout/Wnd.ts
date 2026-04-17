@@ -1006,8 +1006,8 @@ export class Wnd {
                         resize: item.resize,
                         direction,
                     });
-                    this.parent.addLayout(layout, item.id);
-                    const movedWnd = this.parent.children.splice(index, 1)[0];
+                    this.parent.addLayout(layout, item.id, after);
+                    const movedWnd = this.parent.children.splice(after ? index : index + 1, 1)[0];
                     if (movedWnd.resize) {
                         movedWnd.element.previousElementSibling.remove();
                         movedWnd.resize = undefined;

@@ -550,7 +550,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				p.UntrackSocket(c)
 				c.Close()
 			}()
-			p.TrackSocket(c)
+			p.TrackSocket(c, false)
 
 			c.SetPingHandler(func(data string) (err error) {
 				event := ctx.NewObject()
@@ -674,6 +674,32 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			return
 		}
 
+		return
+	}, false))
+
+	rpc.SetPropertyStr("broadcast", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		args := this.Args()
+		if len(args) < 1 {
+			err = fmt.Errorf("siyuan.rpc.broadcast: method required")
+			return
+		}
+
+		method := args[0].String()
+
+		var params any
+		if len(args) > 1 && !args[1].IsNull() && !args[1].IsUndefined() {
+			paramsJSON, jsonErr := args[1].JSONStringify()
+			if jsonErr != nil {
+				err = fmt.Errorf("siyuan.rpc.broadcast: serialize params: %w", jsonErr)
+				return
+			}
+			if jsonErr = json.Unmarshal([]byte(paramsJSON), &params); jsonErr != nil {
+				err = fmt.Errorf("siyuan.rpc.broadcast: parse params: %w", jsonErr)
+				return
+			}
+		}
+
+		p.BroadcastNotification(method, params)
 		return
 	}, false))
 

@@ -395,14 +395,14 @@ func (p *KernelPlugin) BroadcastNotification(method string, params any) {
 		return
 	}
 
-	p.mu.RLock()
+	p.socketsMu.RLock()
 	conns := make([]*websocket.Conn, 0, len(p.sockets))
 	for conn, isServer := range p.sockets {
 		if isServer {
 			conns = append(conns, conn)
 		}
 	}
-	p.mu.RUnlock()
+	p.socketsMu.RUnlock()
 
 	for _, conn := range conns {
 		if err := p.wsWrite(conn, data); err != nil {
@@ -416,9 +416,9 @@ func (p *KernelPlugin) BroadcastNotification(method string, params any) {
 // If Stop races and closes the connection after the tracking check, WriteMessage returns
 // an error which is propagated to the caller.
 func (p *KernelPlugin) wsWrite(conn *websocket.Conn, data []byte) error {
-	p.mu.RLock()
+	p.socketsMu.RLock()
 	mu, ok := p.socketMus[conn]
-	p.mu.RUnlock()
+	p.socketsMu.RUnlock()
 	if !ok {
 		return nil
 	}

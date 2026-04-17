@@ -381,6 +381,27 @@ func TestSandboxSiyuan(t *testing.T) {
 	// Just verify it doesn't panic - the actual injection is tested via integration
 }
 
+func TestRpcBroadcastBinding(t *testing.T) {
+	// Verify siyuan.rpc.broadcast exists and is callable from JS without panicking.
+	// With no connected clients it is a no-op.
+	code := `
+        if (typeof siyuan.rpc.broadcast !== "function") {
+            throw new Error("siyuan.rpc.broadcast is not a function");
+        }
+        siyuan.rpc.broadcast("testEvent", { key: "value" });
+        siyuan.rpc.broadcast("noParams");
+    `
+	petal := &model.Petal{
+		Name:   "test-rpc-broadcast",
+		Kernel: &model.KernelPetal{JS: code},
+	}
+	p := NewKernelPlugin(petal)
+	if err := p.Start(); err != nil {
+		t.Fatalf("plugin start: %v", err)
+	}
+	p.Stop()
+}
+
 func BenchmarkMapToJsConversion(b *testing.B) {
 	m := map[string]any{
 		"string": "hello world",

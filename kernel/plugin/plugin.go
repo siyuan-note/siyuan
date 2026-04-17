@@ -74,14 +74,15 @@ type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
 
-	mu         sync.RWMutex
-	state      PluginState
+	mu      sync.RWMutex
+	state   PluginState
+	runtime *qjs.Runtime
+
 	rpcMethods sync.Map // registered JSON-RPC methods
 
-	runtime    *qjs.Runtime
-	socketsMu  sync.RWMutex                     // separate mutex for sockets map (must not nest inside mu)
-	sockets    map[*websocket.Conn]bool          // tracked loopback WebSocket connections (true: server, false: client)
-	socketMus  map[*websocket.Conn]*sync.Mutex   // per-connection write mutex
+	socketsMu sync.RWMutex                    // separate mutex for sockets map (must not nest inside mu)
+	sockets   map[*websocket.Conn]bool        // tracked loopback WebSocket connections (true: server, false: client)
+	socketMus map[*websocket.Conn]*sync.Mutex // per-connection write mutex
 }
 
 func NewKernelPlugin(petal *model.Petal) *KernelPlugin {

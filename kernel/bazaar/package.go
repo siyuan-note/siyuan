@@ -47,7 +47,7 @@ type Package struct {
 	Version           string        `json:"version"`
 	MinAppVersion     string        `json:"minAppVersion"`
 	DisabledInPublish bool          `json:"disabledInPublish"`
-	Kernel            []string      `json:"kernel"`
+	Kernels           []string      `json:"kernels"`
 	Backends          []string      `json:"backends"`
 	Frontends         []string      `json:"frontends"`
 	DisplayName       LocaleStrings `json:"displayName"`

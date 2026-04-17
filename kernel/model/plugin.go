@@ -44,11 +44,12 @@ type Petal struct {
 	JS     string         `json:"js"`     // JS code
 	CSS    string         `json:"css"`    // CSS code
 	I18n   map[string]any `json:"i18n"`   // i18n text
-	Kernel *KernelPetal   `json:"kernel"` // Kernel plugin info (non-nil when it's a kernel plugin)
+	Kernel KernelPetal    `json:"kernel"` // Kernel plugin info
 }
 
 type KernelPetal struct {
 	JS           string `json:"js"`           // Kernel JS code
+	Existed      bool   `json:"existed"`      // Whether kernel.js is exist
 	Incompatible bool   `json:"incompatible"` // Whether incompatible
 }
 
@@ -79,7 +80,7 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	ret.Incompatible = incompatible
 	ret.DisabledInPublish = disabledInPublish
 	ret.DisallowInstall = disallowInstall
-	ret.Kernel = &KernelPetal{
+	ret.Kernel = KernelPetal{
 		Incompatible: kernelIncompatible,
 	}
 
@@ -91,6 +92,8 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 
 	savePetals(petals)
 
+	loadCode(ret)
+
 	// Hook kernel plugin lifecycle (callbacks avoid circular import with plugin package)
 	if enabled {
 		if OnKernelPluginStart != nil {
@@ -101,8 +104,6 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 			OnKernelPluginStop(ret)
 		}
 	}
-
-	loadCode(ret)
 	return
 }
 
@@ -198,11 +199,18 @@ func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
 		}
 
 		loadCode(petal)
+		if isKernel {
+			if !petal.Kernel.Existed {
+				logging.LogWarnf("plugin [%s] kernel.js not found, skip loading as kernel plugin", petal.Name)
+				continue
+			}
+		}
+
 		ret = append(ret, petal)
 		petalNames = append(petalNames, petal.Name)
 	}
 
-	logging.LogDebugf("loaded petals [frontend=%s, isPublish=%v, petals=[%s]]", frontend, isPublish, strings.Join(petalNames, ","))
+	logging.LogDebugf("loaded petals [frontend=%s, isPublish=%v, isKernel=%v, petals=[%s]]", frontend, isPublish, isKernel, strings.Join(petalNames, ","))
 	return
 }
 
@@ -228,6 +236,7 @@ func loadCode(petal *Petal) {
 			logging.LogErrorf("read plugin [%s] kernel.js failed: %s", petal.Name, err)
 		} else {
 			petal.Kernel.JS = string(data)
+			petal.Kernel.Existed = true
 		}
 	}
 

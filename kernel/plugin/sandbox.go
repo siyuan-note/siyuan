@@ -49,7 +49,12 @@ var (
 
 // injectSandboxGlobals injects all siyuan.* APIs into the plugin's QJS context.
 func injectSandboxGlobals(p *KernelPlugin) error {
-	ctx := p.runtime.Context()
+	runtime := p.Runtime()
+	if runtime == nil {
+		return fmt.Errorf("QJS runtime not initialized")
+	}
+
+	ctx := runtime.Context()
 
 	// Create the `siyuan` global object as an empty object
 	siyuan := ctx.NewObject()
@@ -157,7 +162,7 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", err)))
 				return
 			}
-			result := ctx.NewBytes(data)
+			result := ctx.NewString(string(data))
 			this.Promise().Resolve(result)
 		}()
 		return

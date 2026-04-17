@@ -45,7 +45,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/plugin"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/soheilhy/cmux"
@@ -164,7 +163,6 @@ func Serve(fastMode bool, cookieKey string) {
 	serveExport(ginServer)
 	serveWidgets(ginServer)
 	servePlugins(ginServer)
-	servePluginRPC(ginServer)
 	serveEmojis(ginServer)
 	serveTemplates(ginServer)
 	servePublic(ginServer)
@@ -356,11 +354,6 @@ func serveWidgets(ginServer *gin.Engine) {
 func servePlugins(ginServer *gin.Engine) {
 	plugins := ginServer.Group("/plugins/", model.CheckAuth)
 	plugins.Static("", filepath.Join(util.DataDir, "plugins"))
-}
-
-func servePluginRPC(ginServer *gin.Engine) {
-	ginServer.POST("/api/plugin/rpc/:name", model.CheckAuth, plugin.HandleRpcHttp)
-	ginServer.GET("/ws/plugin/rpc/:name", model.CheckAuth, plugin.HandleRpcWebSocket)
 }
 
 func serveEmojis(ginServer *gin.Engine) {

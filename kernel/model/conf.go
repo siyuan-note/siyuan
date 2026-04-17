@@ -741,14 +741,15 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
 
-	// Stop kernel plugins early in shutdown
-	if OnKernelPluginShutdown != nil {
-		OnKernelPluginShutdown()
-	}
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
 
 	if !force {
+		// Stop kernel plugins early in shutdown
+		if OnKernelPluginShutdown != nil {
+			OnKernelPluginShutdown()
+		}
+
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&
 			((IsSubscriber() && conf.ProviderSiYuan == Conf.Sync.Provider) || conf.ProviderSiYuan != Conf.Sync.Provider) {
 			syncData(true, false)

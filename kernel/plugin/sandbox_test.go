@@ -37,7 +37,7 @@ func TestSandboxGlobals(t *testing.T) {
 	`
 	petal := &model.Petal{
 		Name: "test-sandbox",
-		Kernel: &model.KernelPetal{
+		Kernel: model.KernelPetal{
 			JS: code,
 		},
 	}
@@ -216,7 +216,7 @@ func TestSandboxSiyuan(t *testing.T) {
 				"nested": "深层嵌套",
 			},
 		},
-		Kernel: &model.KernelPetal{
+		Kernel: model.KernelPetal{
 			JS: code,
 		},
 	}
@@ -393,7 +393,7 @@ func TestRpcBroadcastBinding(t *testing.T) {
     `
 	petal := &model.Petal{
 		Name:   "test-rpc-broadcast",
-		Kernel: &model.KernelPetal{JS: code},
+		Kernel: model.KernelPetal{JS: code},
 	}
 	p := NewKernelPlugin(petal)
 	if err := p.start(); err != nil {

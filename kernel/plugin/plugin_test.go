@@ -56,7 +56,7 @@ func TestRPCRegistration(t *testing.T) {
 	`
 	petal := &model.Petal{
 		Name: "test-rpc-register",
-		Kernel: &model.KernelPetal{
+		Kernel: model.KernelPetal{
 			JS: code,
 		},
 	}
@@ -91,7 +91,7 @@ func TestRPCRegistration(t *testing.T) {
 }
 
 func TestTrackSocketInit(t *testing.T) {
-	petal := &model.Petal{Name: "test-track", Kernel: &model.KernelPetal{JS: ``}}
+	petal := &model.Petal{Name: "test-track", Kernel: model.KernelPetal{JS: ``}}
 	p := NewKernelPlugin(petal)
 	// TrackSocket must not panic on a fresh plugin (sockets was nil before the fix)
 	defer func() {

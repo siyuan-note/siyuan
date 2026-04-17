@@ -56,7 +56,7 @@ func TestWsWrite(t *testing.T) {
 	defer serverConn.Close()
 	defer clientConn.Close()
 
-	petal := &model.Petal{Name: "test-wswrite", Kernel: &model.KernelPetal{JS: ``}}
+	petal := &model.Petal{Name: "test-wswrite", Kernel: model.KernelPetal{JS: ``}}
 	p := NewKernelPlugin(petal)
 	p.TrackSocket(serverConn, true)
 
@@ -75,7 +75,7 @@ func TestWsWrite(t *testing.T) {
 }
 
 func TestWsWriteUntracked(t *testing.T) {
-	petal := &model.Petal{Name: "test-wswrite-untracked", Kernel: &model.KernelPetal{JS: ``}}
+	petal := &model.Petal{Name: "test-wswrite-untracked", Kernel: model.KernelPetal{JS: ``}}
 	p := NewKernelPlugin(petal)
 	conn := &websocket.Conn{}
 	if err := p.writeWebSocketMessage(conn, []byte(`{}`)); err != nil {
@@ -96,7 +96,7 @@ func TestBroadcastNotification(t *testing.T) {
 	defer serverConn3.Close()
 	defer clientConn3.Close()
 
-	petal := &model.Petal{Name: "test-broadcast", Kernel: &model.KernelPetal{JS: ``}}
+	petal := &model.Petal{Name: "test-broadcast", Kernel: model.KernelPetal{JS: ``}}
 	p := NewKernelPlugin(petal)
 	p.TrackSocket(serverConn1, true)
 	p.TrackSocket(serverConn2, true)

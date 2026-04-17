@@ -43,9 +43,9 @@ var (
 func InitManager() {
 	m := GetManager()
 
-	model.OnKernelPluginStart = func(petal *model.Petal) { m.StartPlugin(petal) }
-	model.OnKernelPluginStop = func(petal *model.Petal) { m.StopPlugin(petal) }
-	model.OnKernelPluginShutdown = func() { m.Stop() }
+	model.OnKernelPluginStart = func(petal *model.Petal) { GetManager().StartPlugin(petal) }
+	model.OnKernelPluginStop = func(petal *model.Petal) { GetManager().StopPlugin(petal) }
+	model.OnKernelPluginShutdown = func() { GetManager().Stop() }
 
 	m.Start()
 }
@@ -63,6 +63,14 @@ func GetManager() *PluginManager {
 // Start loads and starts all kernel-eligible plugins.
 // Called from main.go after model initialization.
 func (m *PluginManager) Start() {
+	defer func() {
+		if r := recover(); r != nil {
+			logging.LogErrorf("kernel plugin manager failed to start: %v", r)
+		}
+	}()
+
+	logging.LogInfof("kernel plugin manager starting")
+
 	petals := model.LoadKernelPetals()
 
 	wg := sync.WaitGroup{}
@@ -85,6 +93,14 @@ func (m *PluginManager) Start() {
 // Stop shuts down all running kernel plugins.
 // Called from model.Close() before process exit.
 func (m *PluginManager) Stop() {
+	defer func() {
+		if r := recover(); r != nil {
+			logging.LogErrorf("kernel plugin manager failed to stop: %v", r)
+		}
+	}()
+
+	logging.LogInfof("kernel plugin manager stopping")
+
 	m.mu.Lock()
 	plugins := make([]*KernelPlugin, 0, len(m.plugins))
 	for k, p := range m.plugins {
@@ -98,7 +114,9 @@ func (m *PluginManager) Stop() {
 		wg.Add(1)
 		go func(p *KernelPlugin) {
 			defer wg.Done()
-			p.stop()
+			if err := p.stop(); err != nil {
+				logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
+			}
 		}(p)
 	}
 	wg.Wait()
@@ -110,10 +128,17 @@ func (m *PluginManager) Stop() {
 // StartPlugin starts a single kernel plugin.
 // Called when a petal is enabled via SetPetalEnabled.
 func (m *PluginManager) StartPlugin(petal *model.Petal) {
+	defer func() {
+		if r := recover(); r != nil {
+			logging.LogErrorf("[plugin:%s] panic during start: %v", petal.Name, r)
+		}
+	}()
+
 	m.StopPlugin(petal)
 
-	m.mu.Lock()
 	p := NewKernelPlugin(petal)
+
+	m.mu.Lock()
 	m.plugins[p.Name] = p
 	m.mu.Unlock()
 
@@ -125,6 +150,12 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) {
 // StopPlugin stops a single kernel plugin.
 // Called when a petal is disabled via SetPetalEnabled.
 func (m *PluginManager) StopPlugin(petal *model.Petal) {
+	defer func() {
+		if r := recover(); r != nil {
+			logging.LogErrorf("[plugin:%s] panic during stop: %v", petal.Name, r)
+		}
+	}()
+
 	m.mu.Lock()
 	p, ok := m.plugins[petal.Name]
 	if ok {
@@ -133,7 +164,9 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) {
 	m.mu.Unlock()
 
 	if ok {
-		p.stop()
+		if err := p.stop(); err != nil {
+			logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
+		}
 	}
 }
 

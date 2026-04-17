@@ -19,12 +19,15 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/fastschema/qjs"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type PluginState int
@@ -68,7 +71,7 @@ type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
 
-	mu      sync.RWMutex
+	mu      sync.RWMutex // protects state and runtime
 	state   PluginState
 	runtime *qjs.Runtime
 
@@ -99,70 +102,105 @@ func (p *KernelPlugin) State() PluginState {
 	return p.state
 }
 
-// start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
-func (p *KernelPlugin) start() (retErr error) {
+// Runtime returns the plugin's QJS runtime, or nil if not initialized (safe for concurrent reads).
+func (p *KernelPlugin) Runtime() *qjs.Runtime {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+
+	return p.runtime
+}
+
+func (p *KernelPlugin) close() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic during runtime close: %v", r)
+		}
+	}()
+
+	runtime := p.Runtime()
+	if runtime != nil {
+		runtime.Close()
+	}
+	return
+}
+
+// error sets the plugin state to errored and frees the QJS runtime.
+func (p *KernelPlugin) error() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	if err := p.close(); err != nil {
+		logging.LogErrorf("[plugin:%s] failed to close runtime during error handling: %v", p.Name, err)
+	}
+	p.runtime = nil
+
+	p.state = StateErrored
+}
+
+// start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
+func (p *KernelPlugin) start() (retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
-			p.state = StateErrored
-			if p.runtime != nil {
-				p.runtime.Close()
-				p.runtime = nil
-			}
-			logging.LogErrorf("[plugin:%s] panic during start: %v", p.Name, r)
+			p.error()
 			retErr = fmt.Errorf("panic during start: %v", r)
 		}
 	}()
 
+	p.mu.Lock()
 	p.state = StateLoading
+	p.mu.Unlock()
 
-	runtime, err := qjs.New()
-	if err != nil {
-		p.state = StateErrored
-
-		logging.LogErrorf("[plugin:%s] failed to create QJS runtime: %s", p.Name, err)
-		return fmt.Errorf("create QJS runtime: %w", err)
+	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
+	if err := os.MkdirAll(baseDir, 0755); err != nil {
+		return fmt.Errorf("create plugin dir [%s] failed: %s", baseDir, err)
 	}
+
+	runtime, qjsErr := qjs.New()
+
+	p.mu.Lock()
 	p.runtime = runtime
+	p.mu.Unlock()
+
+	if qjsErr != nil {
+		p.error()
+		return fmt.Errorf("create QJS runtime: %v", qjsErr)
+	}
 
 	// Inject sandbox globals (e.g. globalThis.siyuan) before evaluating plugin code.
-	if err = injectSandboxGlobals(p); err != nil {
-		p.state = StateErrored
-
-		p.runtime.Close()
-		p.runtime = nil
-		logging.LogErrorf("[plugin:%s] failed to inject sandbox globals: %s", p.Name, err)
-		return fmt.Errorf("inject sandbox globals: %w", err)
+	if injectErr := injectSandboxGlobals(p); injectErr != nil {
+		p.error()
+		return fmt.Errorf("inject sandbox globals: %v", injectErr)
 	}
 
 	// Load and evaluate kernel.js code in plugin's QJS runtime.
-	_, evalErr := p.runtime.Eval(p.Name+"/kernel.js", qjs.Code(p.Kernel.JS))
+	_, evalErr := runtime.Eval(p.Name+"/kernel.js", qjs.Code(p.Kernel.JS))
 	if evalErr != nil {
-		p.state = StateErrored
-
-		p.runtime.Close()
-		p.runtime = nil
-		logging.LogErrorf("[plugin:%s] eval error: %s", p.Name, evalErr)
-		return evalErr
+		p.error()
+		return fmt.Errorf("eval error: %v", evalErr)
 	}
 
-	// Call plugin onLoad lifecycle hook.
 	p.onLoad()
 
+	p.mu.Lock()
 	p.state = StateRunning
+	p.mu.Unlock()
 
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return nil
 }
 
 // stop cleanly shuts down the plugin: closes sockets, frees QJS runtime.
-func (p *KernelPlugin) stop() {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+func (p *KernelPlugin) stop() (retErr error) {
+	defer func() {
+		if r := recover(); r != nil {
+			p.error()
+			retErr = fmt.Errorf("panic during stop: %v", r)
+		}
+	}()
 
+	p.mu.Lock()
 	p.state = StateStopping
+	p.mu.Unlock()
 
 	p.onUnload()
 
@@ -176,24 +214,31 @@ func (p *KernelPlugin) stop() {
 	}
 	p.socketsMu.Unlock()
 
-	if p.runtime != nil {
-		p.runtime.Close()
-		p.runtime = nil
-	}
+	p.close()
 
+	p.mu.Lock()
+	p.runtime = nil
 	p.state = StateStopped
+	p.mu.Unlock()
 
 	logging.LogDebugf("[plugin:%s] stopped", p.Name)
+	return
 }
 
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoad() {
-	p.invokeJsLifecycleHook("onload")
+	if p.State() == StateLoading {
+		p.invokeJsLifecycleHook("onload")
+	}
+
 }
 
 // onUnload is called before plugin stop.
 func (p *KernelPlugin) onUnload() {
-	p.invokeJsLifecycleHook("onunload")
+	if p.State() == StateStopping {
+		p.invokeJsLifecycleHook("onunload")
+	}
+
 }
 
 // bindRpcMethod add or updates a JS function as a named RPC method.
@@ -322,12 +367,9 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcInboundRequest) any {
 // callRpcMethod invokes a registered JS RPC method with the given JSON params.
 // Returns the JS function's return value as a Go any.
 func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, rpcErr *JsonRpcError) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
 	defer func() {
 		if r := recover(); r != nil {
-			logging.LogErrorf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
+			logging.LogDebugf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
 			rpcErr = &JsonRpcError{
 				Code:    JsonRpcErrorCodeInternalError,
 				Message: fmt.Sprintf("panic in RPC method %q: %v", method, r),
@@ -335,14 +377,23 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 		}
 	}()
 
-	if p.state != StateRunning {
+	state := p.State()
+	runtime := p.Runtime()
+
+	if state != StateRunning {
 		return nil, &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
 			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.state),
 		}
 	}
 
-	ctx := p.runtime.Context()
+	if runtime == nil {
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("QJS runtime not initialized for plugin %s", p.Name),
+		}
+	}
+	ctx := runtime.Context()
 
 	// Convert params to JS value
 	paramValue, convertErr := rpcParamsToJsValue(ctx, params)
@@ -452,14 +503,12 @@ func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
 
 // getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.
 func (p *KernelPlugin) getJsContextValue(paths []any) (value *qjs.Value, retErr error) {
-	defer func() {
-		if r := recover(); r != nil {
-			value = nil
-			retErr = fmt.Errorf("panic in getJsContextValue: %v", r)
-		}
-	}()
+	runtime := p.Runtime()
+	if runtime == nil {
+		return nil, fmt.Errorf("QJS runtime not initialized")
+	}
 
-	ctx := p.runtime.Context()
+	ctx := runtime.Context()
 	if ctx == nil {
 		return
 	}
@@ -494,13 +543,6 @@ func (p *KernelPlugin) getJsContextValue(paths []any) (value *qjs.Value, retErr 
 
 // invokeJsLifecycleHook calls a JS lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
 func (p *KernelPlugin) invokeJsLifecycleHook(name string, args ...any) (result *qjs.Value, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			result = nil
-			err = fmt.Errorf("panic in invokeJsLifecycleHook: %v", r)
-		}
-	}()
-
 	plugin, err := p.getJsContextValue([]any{"siyuan", "plugin"})
 	if err != nil {
 		return

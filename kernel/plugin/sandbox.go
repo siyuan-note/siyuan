@@ -465,7 +465,6 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				mu.Lock()
 				if conn == nil {
 					sendQueue = append(sendQueue, data)
-					mu.Unlock()
 				}
 				mu.Unlock()
 				return

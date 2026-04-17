@@ -355,7 +355,8 @@ func dispatchRPC(p *KernelPlugin, req *JsonRpcRequest) any {
 }
 
 // PushNotification sends a server-to-client notification via WebSocket.
-// This is used for the server to push notifications to connected clients.
+// Callers are responsible for write serialization; do not use on connections
+// also managed by BroadcastNotification / wsWrite without external locking.
 func PushNotification(conn *websocket.Conn, method string, params any) error {
 	notification := struct {
 		JsonRpc string `json:"jsonrpc"`

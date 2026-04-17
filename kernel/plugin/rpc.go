@@ -182,7 +182,7 @@ func HandleRpcWebSocket(c *gin.Context) {
 	defer conn.Close()
 
 	// Track this connection for server push notifications
-	p.TrackSocket(conn)
+	p.TrackSocket(conn, true)
 	defer p.UntrackSocket(conn)
 
 	for {
@@ -360,7 +360,7 @@ func PushNotification(conn *websocket.Conn, method string, params any) error {
 	notification := struct {
 		JsonRpc string `json:"jsonrpc"`
 		Method  string `json:"method"`
-		Params  any    `json:"params"`
+		Params  any    `json:"params,omitempty"`
 	}{
 		JsonRpc: JsonRpcVersion,
 		Method:  method,
@@ -376,4 +376,23 @@ func PushNotification(conn *websocket.Conn, method string, params any) error {
 		return fmt.Errorf("write notification: %w", err)
 	}
 	return nil
+}
+
+// wsWrite serializes a single write to conn using the per-connection mutex.
+// Returns nil immediately if conn is no longer tracked (already removed by Stop or UntrackSocket).
+// If Stop races and closes the connection after the tracking check, WriteMessage returns
+// an error which is propagated to the caller.
+func (p *KernelPlugin) wsWrite(conn *websocket.Conn, data []byte) error {
+	p.mu.RLock()
+	mu, ok := p.socketMus[conn]
+	p.mu.RUnlock()
+	if !ok {
+		return nil
+	}
+	// Between RUnlock above and mu.Lock below, Stop() may close the connection.
+	// The subsequent WriteMessage will return an error (use of closed connection),
+	// which callers log and discard.
+	mu.Lock()
+	defer mu.Unlock()
+	return conn.WriteMessage(websocket.TextMessage, data)
 }

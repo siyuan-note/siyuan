@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/fastschema/qjs"
 	"github.com/gorilla/websocket"
@@ -395,11 +396,11 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			return
 		}
 
-		if len(args) > 0 && args[0] != nil && !args[1].IsString() {
+		if len(args) > 0 && args[0] != nil && args[0].IsString() {
 			path = args[0].String()
 		}
 
-		if len(args) > 1 && args[1] != nil && !args[1].IsString() {
+		if len(args) > 1 && args[1] != nil && args[1].IsString() {
 			protocols = args[1]
 		}
 
@@ -436,7 +437,9 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		}
 
 		// Store connection reference (accessed via closure)
-		var mu sync.RWMutex
+		var mu sync.RWMutex    // guards conn pointer and sendQueue
+		var writeMu sync.Mutex // serializes all conn.WriteMessage calls
+		var closeFired atomic.Bool
 		var conn *websocket.Conn
 		// send calls may happen before connection is established, so we queue them
 		sendQueue := []*qjs.Value{}
@@ -451,27 +454,30 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 			stateVal := wsObj.GetPropertyStr("readyState")
 			state := 0
-			if stateVal != nil && !stateVal.IsNumber() {
+			if stateVal != nil && stateVal.IsNumber() {
 				state = int(stateVal.Int64())
 			}
 
 			if state == 1 { // OPEN
 				mu.RLock()
-				if conn != nil {
-					if data.IsString() {
-						conn.WriteMessage(websocket.TextMessage, []byte(data.String()))
-					} else if data.IsByteArray() {
-						conn.WriteMessage(websocket.BinaryMessage, data.Bytes())
-					}
-				}
+				c := conn
 				mu.RUnlock()
+				if c != nil {
+					writeMu.Lock()
+					if data.IsString() {
+						c.WriteMessage(websocket.TextMessage, []byte(data.String()))
+					} else if data.IsByteArray() {
+						c.WriteMessage(websocket.BinaryMessage, data.Bytes())
+					}
+					writeMu.Unlock()
+				}
 				return
 			}
 
 			if state == 0 { // CONNECTING - queue for later
 				mu.Lock()
 				if conn == nil {
-					sendQueue = append(sendQueue, data)
+					sendQueue = append(sendQueue, data.Clone())
 				}
 				mu.Unlock()
 				return
@@ -490,9 +496,12 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			mu.RLock()
-			defer mu.RUnlock()
-			if conn != nil {
-				conn.WriteMessage(websocket.PingMessage, []byte(data))
+			c := conn
+			mu.RUnlock()
+			if c != nil {
+				writeMu.Lock()
+				c.WriteMessage(websocket.PingMessage, []byte(data))
+				writeMu.Unlock()
 			}
 			return
 		}, false))
@@ -507,9 +516,12 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			mu.RLock()
-			defer mu.RUnlock()
-			if conn != nil {
-				conn.WriteMessage(websocket.PongMessage, []byte(data))
+			c := conn
+			mu.RUnlock()
+			if c != nil {
+				writeMu.Lock()
+				c.WriteMessage(websocket.PongMessage, []byte(data))
+				writeMu.Unlock()
 			}
 			return
 		}, false))
@@ -528,9 +540,12 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			mu.RLock()
-			defer mu.RUnlock()
-			if conn != nil {
-				conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+			c := conn
+			mu.RUnlock()
+			if c != nil {
+				writeMu.Lock()
+				c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+				writeMu.Unlock()
 			}
 			return
 		}, false))
@@ -539,7 +554,6 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		go func() {
 			defer func() {
 				wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateClosed))
-				invokeWsHook("onclose")
 			}()
 
 			dialer := websocket.Dialer{}
@@ -573,6 +587,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 				return
 			})
 			c.SetCloseHandler(func(code int, reason string) (err error) {
+				closeFired.Store(true)
 				wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateClosing))
 
 				event := ctx.NewObject()
@@ -587,15 +602,22 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			mu.Lock()
 			conn = c
 			wsObj.SetPropertyStr("readyState", ctx.NewInt64(WebSocketReadyStateOpen))
-			for _, data := range sendQueue {
+			queueCopy := sendQueue
+			sendQueue = sendQueue[:0:0] // Clear queue
+			mu.Unlock()
+
+			writeMu.Lock()
+			for _, data := range queueCopy {
 				if data.IsString() {
 					c.WriteMessage(websocket.TextMessage, []byte(data.String()))
 				} else if data.IsByteArray() {
 					c.WriteMessage(websocket.BinaryMessage, data.Bytes())
 				}
+				data.Free()
 			}
-			sendQueue = sendQueue[:0:0] // Clear queue
-			mu.Unlock()
+			writeMu.Unlock()
+
+			invokeWsHook("onopen")
 
 			// Read loop - consumes messages but doesn't dispatch to JS yet
 			// (requires QJS event loop integration for safe callback invocation)

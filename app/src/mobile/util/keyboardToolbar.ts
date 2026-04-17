@@ -743,6 +743,13 @@ export const initKeyboardToolbar = () => {
                 renderTextMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
                 window.JSAndroid?.hideKeyboard();
+                setTimeout(() => {
+                    focusByRange(range);
+                    preventRender = true;
+                    setTimeout(() => {
+                        preventRender = false;
+                    }, 1000)
+                }, Constants.TIMEOUT_TRANSITION);
             }
             return;
         } else if (type === "moveup") {

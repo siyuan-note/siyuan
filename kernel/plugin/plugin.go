@@ -64,7 +64,6 @@ func (s PluginState) String() string {
 }
 
 // KernelPlugin represents a single kernel-side plugin instance.
-// It owns an isolated QJS runtime and serializes all calls into it via mu.
 type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
@@ -456,7 +455,7 @@ func (p *KernelPlugin) getJsContextValue(paths []any) (value *qjs.Value, retErr 
 	defer func() {
 		if r := recover(); r != nil {
 			value = nil
-			retErr = fmt.Errorf("panic during start: %v", r)
+			retErr = fmt.Errorf("panic in getJsContextValue: %v", r)
 		}
 	}()
 
@@ -498,7 +497,7 @@ func (p *KernelPlugin) invokeJsLifecycleHook(name string, args ...any) (result *
 	defer func() {
 		if r := recover(); r != nil {
 			result = nil
-			err = fmt.Errorf("panic during start: %v", r)
+			err = fmt.Errorf("panic in invokeJsLifecycleHook: %v", r)
 		}
 	}()
 

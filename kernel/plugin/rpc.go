@@ -19,6 +19,7 @@ package plugin
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -49,6 +50,10 @@ var (
 	JsonRpcErrorInvalidParams  = &JsonRpcError{Code: JsonRpcErrorCodeInvalidParams, Message: "Invalid params"}
 	JsonRpcErrorInternalError  = &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: "Internal error"}
 )
+
+func (e *JsonRpcError) Error() string {
+	return fmt.Sprintf("JSON RPC Error: %d %s", e.Code, e.Message)
+}
 
 // JsonRpcRequest represents a JSON-RPC 2.0 request.
 type JsonRpcRequest struct {

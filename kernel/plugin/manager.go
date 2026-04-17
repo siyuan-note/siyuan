@@ -86,10 +86,15 @@ func (m *PluginManager) Start() {
 // Called from model.Close() before process exit.
 func (m *PluginManager) Stop() {
 	m.mu.Lock()
-	defer m.mu.Unlock()
+	plugins := make([]*KernelPlugin, 0, len(m.plugins))
+	for k, p := range m.plugins {
+		plugins = append(plugins, p)
+		delete(m.plugins, k)
+	}
+	m.mu.Unlock()
 
 	wg := sync.WaitGroup{}
-	for _, p := range m.plugins {
+	for _, p := range plugins {
 		wg.Add(1)
 		go func(p *KernelPlugin) {
 			defer wg.Done()
@@ -98,11 +103,7 @@ func (m *PluginManager) Stop() {
 	}
 	wg.Wait()
 
-	count := len(m.plugins)
-	for k := range m.plugins {
-		delete(m.plugins, k)
-	}
-
+	count := len(plugins)
 	logging.LogInfof("kernel plugin manager stopped, %d plugin(s) unloaded", count)
 }
 
@@ -112,8 +113,6 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) {
 	m.StopPlugin(petal)
 
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
 	p := NewKernelPlugin(petal)
 	m.plugins[p.Name] = p
 	m.mu.Unlock()
@@ -127,11 +126,14 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) {
 // Called when a petal is disabled via SetPetalEnabled.
 func (m *PluginManager) StopPlugin(petal *model.Petal) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if p, ok := m.plugins[petal.Name]; ok {
-		p.stop()
+	p, ok := m.plugins[petal.Name]
+	if ok {
 		delete(m.plugins, p.Name)
+	}
+	m.mu.Unlock()
+
+	if ok {
+		p.stop()
 	}
 }
 

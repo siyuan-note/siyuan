@@ -23,7 +23,6 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/plugin"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -79,11 +78,4 @@ func setPetalEnabled(c *gin.Context) {
 		unloadPluginSet := hashset.New(packageName)
 		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, app)
 	}
-}
-
-func getLoadedKernelPetals(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	ret.Data = plugin.GetManager().GetLoadedPluginInfo()
 }

@@ -144,6 +144,19 @@ func (m *PluginManager) GetPlugin(name string) *KernelPlugin {
 	return m.plugins[name]
 }
 
+func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found bool) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	if p, ok := m.plugins[name]; ok {
+		return &PluginInfo{
+			Name:    p.Name,
+			Methods: p.GetRpcMethodsInfo(),
+		}, true
+	}
+	return nil, false
+}
+
 // GetLoadedPluginInfo returns a list of all loaded plugins with their RPC method info.
 func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 	m.mu.RLock()

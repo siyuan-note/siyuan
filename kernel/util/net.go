@@ -220,6 +220,37 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]any, ok bool) 
 	return
 }
 
+func GetRequestStringParam(c *gin.Context, key string, result *gulu.Result) string {
+	// /path/:name
+	if value := c.Param(key); value != "" {
+		return value
+	}
+
+	// /path?name=xxx
+	if value := c.Query(key); value != "" {
+		return value
+	}
+
+	// /path with JSON body {key: "xxx"}
+	arg, ok := JsonArg(c, result)
+	if !ok {
+		return ""
+	}
+	if arg[key] == nil {
+		result.Code = -2
+		result.Msg = fmt.Sprintf("Request body prop [%s] does not exist", key)
+		return ""
+	}
+
+	value, ok := arg[key].(string)
+	if !ok {
+		result.Code = -3
+		result.Msg = fmt.Sprintf("Request body prop [%s] is not a string", key)
+		return ""
+	}
+	return value
+}
+
 // ParseJsonArg 使用泛型从 JSON 参数中提取指定键的值。
 //   - 如果 required 为 true 但参数缺失，则会在 ret.Msg 中说明需要传入的键
 //   - 如果 rejectEmpty 为 true 但参数值为空，则会在 ret.Msg 中说明该键必须不为空

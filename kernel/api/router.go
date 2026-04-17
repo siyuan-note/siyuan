@@ -514,7 +514,15 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalEnabled)
-	ginServer.Handle("POST", "/api/petal/getLoadedKernelPetals", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getLoadedKernelPetals)
+
+	ginServer.Handle("GET", "/api/plugin", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, listLoadedPlugins)
+	ginServer.Handle("GET", "/api/plugin/rpc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getLoadedPluginInfo)
+	ginServer.Handle("GET", "/api/plugin/rpc/:name", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getLoadedPluginInfo)
+
+	ginServer.Handle("POST", "/api/plugin/getLoadedPluginInfo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getLoadedPluginInfo)
+	ginServer.Handle("POST", "/api/plugin/listLoadedPlugins", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, listLoadedPlugins)
+	ginServer.Handle("POST", "/api/plugin/rpc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, pluginJsonRpcCall)
+	ginServer.Handle("POST", "/api/plugin/rpc/:name", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, pluginJsonRpcCall)
 
 	ginServer.Any("/api/network/echo", model.CheckAuth, model.CheckAdminRole, echo)
 	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, model.CheckAdminRole, forwardProxy)

@@ -510,7 +510,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 		// close method
 		wsObj.SetPropertyStr("close", ctx.Function(func(closeThis *qjs.This) (result *qjs.Value, err error) {
-			var code int = 1000
+			var code int = websocket.CloseNormalClosure
 			var reason string
 
 			args := closeThis.Args()
@@ -596,11 +596,13 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			for {
 				messageType, data, readErr := c.ReadMessage()
 				if readErr != nil {
-					event := ctx.NewObject()
-					event.SetPropertyStr("type", ctx.NewString("error"))
-					event.SetPropertyStr("error", ctx.NewError(readErr))
-					invokeWsHook("onerror", event)
-					return
+					if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure) {
+						event := ctx.NewObject()
+						event.SetPropertyStr("type", ctx.NewString("error"))
+						event.SetPropertyStr("error", ctx.NewError(readErr))
+						invokeWsHook("onerror", event)
+					}
+					break
 				}
 				switch messageType {
 				case websocket.TextMessage:

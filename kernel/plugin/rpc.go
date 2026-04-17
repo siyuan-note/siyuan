@@ -96,16 +96,26 @@ type JsonRpcError struct {
 	Data    any    `json:"data,omitempty"`
 }
 
+// resolveRunningPlugin looks up the plugin by name and writes a -32601 error response if it is
+// not found or not running. Returns nil when the caller should abort.
+func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlugin {
+	p := GetManager().GetPlugin(name)
+	if p == nil || p.State() != StateRunning {
+		c.JSON(errStatus, &JsonRpcErrorResponse{
+			JsonRpc: JsonRpcVersion,
+			Error:   &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Plugin not found or not running"},
+		})
+		return nil
+	}
+	return p
+}
+
 // HandleRpcHttp handles POST /api/plugin/rpc/:name
 // Supports single call, batch call, and notification (no response for notification).
 func HandleRpcHttp(c *gin.Context) {
 	name := util.GetRequestUrlStringParam(c, "name")
-	p := GetManager().GetPlugin(name)
-	if p == nil || p.State() != StateRunning {
-		c.JSON(http.StatusOK, &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error:   &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Plugin not found or not running"},
-		})
+	p := resolveRunningPlugin(c, name, http.StatusOK)
+	if p == nil {
 		return
 	}
 
@@ -118,12 +128,9 @@ func HandleRpcHttp(c *gin.Context) {
 		return
 	}
 
-	requests, isBatch, jsonErr := parseRequests(body)
-	if jsonErr != nil {
-		c.JSON(http.StatusOK, &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error:   jsonErr,
-		})
+	requests, isBatch, jsonRpcErr := parseRequests(body)
+	if jsonRpcErr != nil {
+		c.JSON(http.StatusOK, jsonRpcErr)
 		return
 	}
 
@@ -159,12 +166,8 @@ func HandleRpcHttp(c *gin.Context) {
 // Supports single call, batch call, notification, and server push notifications.
 func HandleRpcWebSocket(c *gin.Context) {
 	name := util.GetRequestUrlStringParam(c, "name")
-	p := GetManager().GetPlugin(name)
-	if p == nil || p.State() != StateRunning {
-		c.JSON(http.StatusNotFound, &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error:   &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Plugin not found or not running"},
-		})
+	p := resolveRunningPlugin(c, name, http.StatusNotFound)
+	if p == nil {
 		return
 	}
 
@@ -233,7 +236,7 @@ func isBatchRequest(body []byte) bool {
 
 // parseRequests parses JSON-RPC requests from the body.
 // Returns requests and a boolean indicating if it's a batch request.
-func parseRequests(body []byte) (requests []*JsonRpcRequest, isBatch bool, jsonErr *JsonRpcError) {
+func parseRequests(body []byte) (requests []*JsonRpcRequest, isBatch bool, jsonRpcErr *JsonRpcError) {
 	if len(body) == 0 {
 		return nil, false, JsonRpcErrorParseError
 	}

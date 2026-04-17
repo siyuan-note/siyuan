@@ -359,8 +359,8 @@ func servePlugins(ginServer *gin.Engine) {
 }
 
 func servePluginRPC(ginServer *gin.Engine) {
-	ginServer.POST("/api/plugin/rpc/:name", model.CheckAuth, plugin.HandleRPCHTTP)
-	ginServer.GET("/ws/plugin/rpc/:name", model.CheckAuth, plugin.HandleRPCWebSocket)
+	ginServer.POST("/api/plugin/rpc/:name", model.CheckAuth, plugin.HandleRpcHttp)
+	ginServer.GET("/ws/plugin/rpc/:name", model.CheckAuth, plugin.HandleRpcWebSocket)
 }
 
 func serveEmojis(ginServer *gin.Engine) {

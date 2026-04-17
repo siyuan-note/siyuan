@@ -220,7 +220,8 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]any, ok bool) 
 	return
 }
 
-func GetRequestStringParam(c *gin.Context, key string, result *gulu.Result) string {
+// GetRequestUrlStringParam extracts a string parameter from URL (path or query parameters).
+func GetRequestUrlStringParam(c *gin.Context, key string) string {
 	// /path/:name
 	if value := c.Param(key); value != "" {
 		return value
@@ -228,6 +229,16 @@ func GetRequestStringParam(c *gin.Context, key string, result *gulu.Result) stri
 
 	// /path?name=xxx
 	if value := c.Query(key); value != "" {
+		return value
+	}
+
+	return ""
+}
+
+// GetRequestStringParam extracts a string parameter from the request (URL or JSON body), with validation and error handling.
+func GetRequestStringParam(c *gin.Context, key string, result *gulu.Result) string {
+	// /path/:name
+	if value := GetRequestUrlStringParam(c, key); value != "" {
 		return value
 	}
 

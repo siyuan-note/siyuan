@@ -228,15 +228,13 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 	ctx := p.runtime.Context()
 
 	// Convert params to JS value
-	var paramVal *qjs.Value
+	var paramValue *qjs.Value
 	if params != nil {
 		paramsJSON, err := json.Marshal(params)
 		if err != nil {
 			return nil, fmt.Errorf("marshal params: %w", err)
 		}
-		paramVal = ctx.ParseJSON(string(paramsJSON))
-	} else {
-		paramVal = ctx.NewNull()
+		paramValue = ctx.ParseJSON(string(paramsJSON))
 	}
 
 	rpcMethod := p.getRpcMethod(method)
@@ -245,7 +243,20 @@ func (p *KernelPlugin) CallRpcMethod(method string, params any) (retResult any, 
 	}
 
 	// Call the JS function using ctx.Invoke(fn, thisVal, args...)
-	result, err := ctx.Invoke(rpcMethod, ctx.Global(), paramVal)
+	var result *qjs.Value
+	var err error
+	if paramValue == nil {
+		result, err = ctx.Invoke(rpcMethod, ctx.Global())
+	} else if paramValue.IsArray() {
+		var paramsArray []*qjs.Value
+		paramArray, _ := paramValue.ToArray()
+		paramArray.ForEach(func(key *qjs.Value, value *qjs.Value) {
+			paramsArray = append(paramsArray, value)
+		})
+		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramsArray...)
+	} else {
+		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramValue)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("call %q: %w", method, err)
 	}

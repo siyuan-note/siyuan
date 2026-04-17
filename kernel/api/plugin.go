@@ -33,14 +33,23 @@ func listLoadedPlugins(c *gin.Context) {
 	ret.Data = plugin.GetManager().GetLoadedPluginsInfo()
 }
 
-func getLoadedPluginInfo(c *gin.Context) {
+func getPluginName(c *gin.Context, ret *gulu.Result) (name string) {
+	name = util.GetRequestStringParam(c, "name", ret)
+	if name == "" {
+		if ret.Code == 0 {
+			ret.Code = -10
+			ret.Msg = "Plugin name is required"
+		}
+	}
+	return
+}
+
+func getLoadedPlugin(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	pluginName := util.GetRequestStringParam(c, "name", ret)
+	pluginName := getPluginName(c, ret)
 	if pluginName == "" {
-		ret.Code = -10
-		ret.Msg = "Plugin name is required"
 		return
 	}
 
@@ -54,8 +63,10 @@ func getLoadedPluginInfo(c *gin.Context) {
 	ret.Data = pluginInfo
 }
 
-func pluginJsonRpcCall(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-	// TODO
+func pluginJsonRpcHttp(c *gin.Context) {
+	plugin.HandleRpcHttp(c)
+}
+
+func pluginJsonRpcWebSocket(c *gin.Context) {
+	plugin.HandleRpcWebSocket(c)
 }

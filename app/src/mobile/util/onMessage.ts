@@ -11,7 +11,6 @@ import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
 import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
-import {handleCrossPlatformKey} from "../../protyle/util/hotKey";
 import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
 
@@ -67,7 +66,6 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
-                handleCrossPlatformKey();
                 break;
             case "setPublish":
                 window.siyuan.config.publish = data.data;

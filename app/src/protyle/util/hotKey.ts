@@ -216,38 +216,3 @@ export const isIncludesHotKey = (hotKey: string) => {
 
     return isInclude;
 };
-
-export const handleCrossPlatformKey = () => {
-    if (!window.siyuan.config.keymap.general) {
-        return;
-    }
-    if (isMac()) {
-        ["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
-            "graphView", "globalGraph", "riffCard"].forEach(key => {
-            window.siyuan.config.keymap.general[key].default = Constants.SIYUAN_KEYMAP.general[key].default.replace("⌥", "⌃");
-            if (window.siyuan.config.keymap.general[key].custom === Constants.SIYUAN_KEYMAP.general[key].default ||
-                window.siyuan.config.keymap.general[key].custom === Constants.SIYUAN_KEYMAP.general[key].default.replace("⌃", "⌥")) {
-                window.siyuan.config.keymap.general[key].custom = window.siyuan.config.keymap.general[key].default;
-            }
-        });
-        window.siyuan.config.keymap.editor.general.redo.default = "⇧⌘Z";
-        if (window.siyuan.config.keymap.editor.general.redo.custom === Constants.SIYUAN_KEYMAP.editor.general.redo.default ||
-            window.siyuan.config.keymap.editor.general.redo.custom === "⌘Y") {
-            window.siyuan.config.keymap.editor.general.redo.custom = "⇧⌘Z";
-        }
-    } else {
-        ["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
-            "graphView", "globalGraph", "riffCard"].forEach(key => {
-            window.siyuan.config.keymap.general[key].default = Constants.SIYUAN_KEYMAP.general[key].default.replace("⌃", "⌥");
-            if (window.siyuan.config.keymap.general[key].custom === Constants.SIYUAN_KEYMAP.general[key].default ||
-                window.siyuan.config.keymap.general[key].custom === Constants.SIYUAN_KEYMAP.general[key].default.replace("⌥", "⌃")) {
-                window.siyuan.config.keymap.general[key].custom = window.siyuan.config.keymap.general[key].default;
-            }
-        });
-        window.siyuan.config.keymap.editor.general.redo.default = "⌘Y";
-        if (window.siyuan.config.keymap.editor.general.redo.custom === Constants.SIYUAN_KEYMAP.editor.general.redo.default ||
-            window.siyuan.config.keymap.editor.general.redo.custom === "⇧⌘Z") {
-            window.siyuan.config.keymap.editor.general.redo.custom = "⌘Y";
-        }
-    }
-};

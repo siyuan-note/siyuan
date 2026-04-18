@@ -26,7 +26,6 @@ import {init} from "./init";
 import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
-import {handleCrossPlatformKey} from "../protyle/util/hotKey";
 import {updateAppearance} from "../config/util/updateAppearance";
 import {renderSnippet} from "../config/util/snippets";
 
@@ -92,7 +91,6 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
-                                handleCrossPlatformKey();
                                 break;
                             case "progress":
                                 progressLoading(data);
@@ -171,7 +169,6 @@ class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
-            handleCrossPlatformKey();
             window.siyuan.isPublish = response.data.isPublish;
             await loadPlugins(this);
             getLocalStorage(() => {

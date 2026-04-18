@@ -335,101 +335,92 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 		}
 
-		go func() {
+		targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
+
+		r := client.R()
+
+		// Apply user headers (Authorization will be overwritten above)
+		for k, v := range headers {
+			r.SetHeader(k, v)
+		}
+		r.SetHeader(model.XAuthTokenKey, p.token)
+
+		if stringBody != "" {
+			r.SetBody(stringBody)
+		} else if len(bytesBody) > 0 {
+			r.SetBody(bytesBody)
+		}
+
+		resp, err := r.Send(method, targetURL)
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err)))
+			return
+		}
+		defer resp.Body.Close()
+
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: read body: %w", err)))
+			return
+		}
+
+		// Build Response-like object
+		respHeaders := map[string]string{}
+		for k, vs := range resp.Header {
+			respHeaders[k] = strings.Join(vs, ", ")
+		}
+
+		// ctx.ParseJSON(string(json.Marshal(m))) 2.5x faster than qjs.GoMapToJs(ctx, reflect.ValueOf(m))
+		respHeadersJs, err := goValueToJsValue(ctx, respHeaders)
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(err))
+			return
+		}
+
+		response := ctx.NewObject()
+		response.SetPropertyStr("url", ctx.NewString(path))
+		response.SetPropertyStr("ok", ctx.NewBool(resp.StatusCode >= 200 && resp.StatusCode < 300))
+		response.SetPropertyStr("status", qjs.GoNumberToJs(ctx, resp.StatusCode))
+		response.SetPropertyStr("statusText", ctx.NewString(resp.Status))
+		response.SetPropertyStr("headers", respHeadersJs)
+
+		response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 			defer func() {
 				if r := recover(); r != nil {
-					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.fetch: %v", r)))
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.text: %v", r)))
 				}
 			}()
 
-			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
+			this.Promise().Resolve(ctx.NewString(string(respBody)))
+			return
+		}, true))
+		response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.json: %v", r)))
+				}
+			}()
 
-			r := client.R()
-
-			// Apply user headers (Authorization will be overwritten above)
-			for k, v := range headers {
-				r.SetHeader(k, v)
-			}
-			r.SetHeader(model.XAuthTokenKey, p.token)
-
-			if stringBody != "" {
-				r.SetBody(stringBody)
-			} else if len(bytesBody) > 0 {
-				r.SetBody(bytesBody)
-			}
-
-			resp, err := r.Send(method, targetURL)
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err)))
-				return
-			}
-			defer resp.Body.Close()
-
-			respBody, err := io.ReadAll(resp.Body)
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: read body: %w", err)))
-				return
-			}
-
-			// Build Response-like object
-			respHeaders := map[string]string{}
-			for k, vs := range resp.Header {
-				respHeaders[k] = strings.Join(vs, ", ")
-			}
-
-			// ctx.ParseJSON(string(json.Marshal(m))) 2.5x faster than qjs.GoMapToJs(ctx, reflect.ValueOf(m))
-			respHeadersJs, err := goValueToJsValue(ctx, respHeaders)
+			value, err = parseJsonStringToJsValue(ctx, string(respBody))
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
 				return
 			}
-
-			response := ctx.NewObject()
-			response.SetPropertyStr("url", ctx.NewString(targetURL))
-			response.SetPropertyStr("ok", ctx.NewBool(resp.StatusCode >= 200 && resp.StatusCode < 300))
-			response.SetPropertyStr("status", qjs.GoNumberToJs(ctx, resp.StatusCode))
-			response.SetPropertyStr("statusText", ctx.NewString(resp.Status))
-			response.SetPropertyStr("headers", respHeadersJs)
-			response.SetPropertyStr("body", ctx.NewBytes(respBody))
-
-			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				defer func() {
-					if r := recover(); r != nil {
-						this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.text: %v", r)))
-					}
-				}()
-
-				this.Promise().Resolve(ctx.NewString(string(respBody)))
-				return
-			}, true))
-			response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				defer func() {
-					if r := recover(); r != nil {
-						this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.json: %v", r)))
-					}
-				}()
-
-				value, err = parseJsonStringToJsValue(ctx, string(respBody))
-				if err != nil {
-					this.Promise().Reject(ctx.NewError(err))
-					return
+			this.Promise().Resolve(value)
+			return
+		}, true))
+		response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.arrayBuffer: %v", r)))
 				}
-				this.Promise().Resolve(value)
-				return
-			}, true))
-			response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				defer func() {
-					if r := recover(); r != nil {
-						this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.arrayBuffer: %v", r)))
-					}
-				}()
+			}()
 
-				this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
-				return
-			}, true))
+			this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
+			return
+		}, true))
 
-			this.Promise().Resolve(response)
-		}()
+		this.Promise().Resolve(response)
 		return
 	}, true))
 	return nil
@@ -437,7 +428,6 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
-	// TODO: test
 	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {

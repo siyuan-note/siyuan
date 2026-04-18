@@ -826,6 +826,16 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		return
 	}
 
+	if err = generateTreeHistory(historyDir, tree); err != nil {
+		return
+	}
+
+	generateAvHistoryInTree(tree, historyDir)
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+}
+
+func generateTreeHistory(historyDir string, tree *parse.Tree) (err error) {
 	historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
 	if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
 		logging.LogErrorf("generate history failed: %s", err)
@@ -842,10 +852,7 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
-
-	generateAvHistoryInTree(tree, historyDir)
-
-	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	return
 }
 
 func generateAvHistoryInTree(tree *parse.Tree, historyDir string) {

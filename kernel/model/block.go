@@ -507,8 +507,8 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 		}
 	}
 
-	refreshUpdated(defNode)
-	refreshUpdated(refNode)
+	treenode.RefreshUpdated(defNode)
+	treenode.RefreshUpdated(refNode)
 
 	refPivot := treenode.NewParagraph("")
 	refNode.InsertBefore(refPivot)

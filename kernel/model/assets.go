@@ -935,6 +935,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 
+	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
@@ -967,6 +968,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					continue
 				}
 
+				generateTreeHistory(historyDir, tree)
 				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
@@ -974,6 +976,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 			}
 		}
 	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
 	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
 	if gulu.File.IsDir(storageAvDir) {

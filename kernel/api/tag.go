@@ -79,6 +79,7 @@ func renameTag(c *gin.Context) {
 	) {
 		return
 	}
+
 	if err := model.RenameTag(oldLabel, newLabel); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

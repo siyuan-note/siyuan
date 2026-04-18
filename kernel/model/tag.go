@@ -19,8 +19,10 @@ package model
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -150,6 +152,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
+	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
@@ -158,6 +161,8 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			util.ClearPushProgress(100)
 			return e
 		}
+
+		generateTreeHistory(historyDir, tree)
 
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)
@@ -202,6 +207,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
 	}
 
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	sql.FlushQueue()
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)

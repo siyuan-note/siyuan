@@ -6,7 +6,10 @@ declare const NODE_ENV: string;
 const _SIYUAN_VERSION = SIYUAN_VERSION;
 const _NODE_ENV = NODE_ENV;
 
-const altNumber = navigator.platform.toUpperCase().indexOf("MAC") > -1 ? "⌃" : "⌥";
+
+const isInMac = navigator.platform.toUpperCase().indexOf("MAC") > -1;
+const altNumber = isInMac ? "⌃" : "⌥";
+const redoHotkey = isInMac ? "⇧⌘Z" : "⌘Y";
 
 const getFunctionKey = () => {
     const fData: { [key: number]: string } = {};
@@ -505,7 +508,7 @@ export abstract class Constants {
                 copyBlockEmbed: {default: "⇧⌘E", custom: "⇧⌘E"},
                 copyHPath: {default: "⇧⌘P", custom: "⇧⌘P"},
                 undo: {default: "⌘Z", custom: "⌘Z"},
-                redo: {default: "⌘Y", custom: "⌘Y"},
+                redo: {default: redoHotkey, custom: redoHotkey},
                 rename: {default: "F2", custom: "F2"},
                 newNameFile: {default: "F3", custom: "F3"},
                 newContentFile: {default: "F4", custom: "F4"},

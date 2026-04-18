@@ -113,7 +113,7 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 	return
 }
 
-func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+func LoadTreeWithFix(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, needFix bool, err error) {
 	rootID := util.GetTreeID(p)
 	if raw, ok := cache.GetTreeData(rootID); ok {
 		ret, err = LoadTreeByData(raw, boxID, p, luteEngine)
@@ -127,7 +127,7 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 		return
 	}
 
-	data, err = correctTreeJSONData(boxID, p, data, luteEngine)
+	data, needFix, err = fixTreeJSONData(boxID, p, data, luteEngine)
 	if nil != err {
 		return
 	}
@@ -136,6 +136,11 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	if nil == err {
 		cache.SetTreeData(rootID, data)
 	}
+	return
+}
+
+func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	ret, _, err = LoadTreeWithFix(boxID, p, luteEngine)
 	return
 }
 
@@ -385,21 +390,20 @@ func afterWriteTree(tree *parse.Tree) {
 	cache.PutDocIAL(tree.Path, docIAL)
 }
 
-// correctTreeJSONData 订正树 JSON 数据。
-func correctTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) ([]byte, error) {
+// fixTreeJSONData 订正树 JSON 数据。
+func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (data []byte, needFix bool, err error) {
 	jsonData = removeUnescapedUnicodeNull(jsonData)
-	var needFix bool
 	ret, needFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
-		return nil, err
+		return
 	}
 
 	ret.Box = boxID
 	ret.Path = p
 
 	if err = treenode.CheckSpec(ret); errors.Is(err, treenode.ErrSpecTooNew) {
-		return nil, err
+		return
 	}
 
 	if treenode.UpgradeSpec(ret) {
@@ -422,29 +426,29 @@ func correctTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute
 	}
 
 	if !needFix {
-		return jsonData, nil
+		return jsonData, false, nil
 	}
 
 	renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions, luteEngine.ParseOptions)
-	data := renderer.Render()
+	data = renderer.Render()
 
 	if !util.UseSingleLineSave {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
 		if err = json.Indent(&buf, data, "", "\t"); err != nil {
-			return nil, err
+			return
 		}
 		data = buf.Bytes()
 	}
 
 	filePath := filepath.Join(util.DataDir, ret.Box, ret.Path)
 	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
-		return nil, err
+		return
 	}
 	if err = filelock.WriteFile(filePath, data); err != nil {
 		logging.LogErrorf("write data [%s] failed: %s", filePath, err)
 	}
-	return data, nil
+	return
 }
 
 func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (ret *parse.Tree, err error) {

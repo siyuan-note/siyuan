@@ -73,6 +73,8 @@ func buildUpdatedTaskListItemBlockDOM(id, marker string, luteEngine *lute.Lute) 
 	markerNode.TaskListItemMarker = liMarker
 	markerNode.TaskListItemChecked = ' ' != markerNode.TaskListItemMarker
 
+	li.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+
 	return luteEngine.RenderNodeBlockDOM(li), nil
 }
 
@@ -107,11 +109,7 @@ func updateTaskListItemMarker(c *gin.Context) {
 	transactions := []*model.Transaction{
 		{
 			DoOperations: []*model.Operation{
-				{
-					Action: "update",
-					ID:     id,
-					Data:   data,
-				},
+				{Action: "update", ID: id, Data: data},
 			},
 		},
 	}
@@ -172,11 +170,7 @@ func batchUpdateTaskListItemMarker(c *gin.Context) {
 			return
 		}
 
-		ops = append(ops, &model.Operation{
-			Action: "update",
-			ID:     id,
-			Data:   data,
-		})
+		ops = append(ops, &model.Operation{Action: "update", ID: id, Data: data})
 	}
 
 	tx := &model.Transaction{DoOperations: ops}

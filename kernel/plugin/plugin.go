@@ -187,6 +187,8 @@ func (p *KernelPlugin) start() (retErr error) {
 	p.state = StateRunning
 	p.mu.Unlock()
 
+	p.onLoaded()
+
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return nil
 }
@@ -232,7 +234,13 @@ func (p *KernelPlugin) onLoad() {
 	if p.State() == StateLoading {
 		p.invokeHook("onload")
 	}
+}
 
+// onLoad is called after plugin start.
+func (p *KernelPlugin) onLoaded() {
+	if p.State() == StateRunning {
+		p.invokeHook("onloaded")
+	}
 }
 
 // onUnload is called before plugin stop.
@@ -240,7 +248,6 @@ func (p *KernelPlugin) onUnload() {
 	if p.State() == StateStopping {
 		p.invokeHook("onunload")
 	}
-
 }
 
 // bindRpcMethod add or updates a JS function as a named RPC method.

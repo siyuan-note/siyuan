@@ -86,6 +86,7 @@ func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	plugin.SetPropertyStr("i18n", i18n)
 
 	plugin.SetPropertyStr("onload", ctx.NewNull())
+	plugin.SetPropertyStr("onloaded", ctx.NewNull())
 	plugin.SetPropertyStr("onunload", ctx.NewNull())
 
 	siyuan.SetPropertyStr("plugin", plugin)
@@ -428,6 +429,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	// FIXME: siyuan.socket 返回 null
 	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -613,6 +615,9 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		go func() {
 			defer func() {
 				setReadyState(WebSocketReadyStateClosed)
+				if r := recover(); r != nil {
+					logging.LogErrorf("panic during siyuan.socket: %v", r)
+				}
 			}()
 
 			dialer := websocket.Dialer{}
@@ -675,7 +680,9 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			mu.Unlock()
 
 			setReadyState(WebSocketReadyStateOpen)
-			invokeWsHook("onopen")
+			event := ctx.NewObject()
+			event.SetPropertyStr("type", ctx.NewString("open"))
+			invokeWsHook("onopen", event)
 
 			// Read loop - consumes messages but doesn't dispatch to JS yet
 			// (requires QJS event loop integration for safe callback invocation)

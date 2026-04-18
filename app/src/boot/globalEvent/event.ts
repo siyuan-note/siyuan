@@ -126,6 +126,7 @@ export const initWindowEvent = (app: App) => {
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
+        window.siyuan.metaIsPressed = false;
         /// #if BROWSER
         setWebViewFocusable();
         /// #endif

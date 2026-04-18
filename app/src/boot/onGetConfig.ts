@@ -138,6 +138,7 @@ export const initWindow = async (app: App) => {
             window.siyuan.altIsPressed = false;
             window.siyuan.ctrlIsPressed = false;
             window.siyuan.shiftIsPressed = false;
+            window.siyuan.metaIsPressed = false;
             document.body.classList.remove("body--blur");
         } else if (cmd === "blur") {
             document.body.classList.add("body--blur");

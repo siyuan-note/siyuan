@@ -181,6 +181,7 @@ class App {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;
                 window.siyuan.altIsPressed = false;
+                window.siyuan.metaIsPressed = false;
             });
             window.addEventListener("blur", () => {
                 setWebViewFocusable();

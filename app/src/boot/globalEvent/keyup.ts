@@ -7,8 +7,12 @@ import {App} from "../../index";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {isWindow} from "../../util/functions";
+import {isPhysicalMetaKeyEvent} from "../../protyle/util/compatibility";
 
 export const windowKeyUp = (app: App, event: KeyboardEvent) => {
+    if (isPhysicalMetaKeyEvent(event)) {
+        window.siyuan.metaIsPressed = false;
+    }
     window.siyuan.ctrlIsPressed = false;
     window.siyuan.shiftIsPressed = false;
     window.siyuan.altIsPressed = false;

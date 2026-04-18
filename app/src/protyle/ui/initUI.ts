@@ -96,7 +96,8 @@ export const initUI = (protyle: IProtyle) => {
         }
         // 浏览器无法区分触控板与鼠标滚轮 https://github.com/w3c/pointerevents/issues/596
         // 用「首轮是否带修饰键 + 空闲窗口」避免惯性或残留累加误触
-        const modifierPressed = isMacOS ? event.metaKey : event.ctrlKey;
+        // Mac 在鼠标不移动的情况下 event.metaKey 状态更新滞后，参考 https://github.com/tldraw/tldraw/issues/7981
+        const modifierPressed = isMacOS ? window.siyuan.metaIsPressed : event.ctrlKey;
         if (!modifierPressed) {
             accumDeltaY = 0;
         }

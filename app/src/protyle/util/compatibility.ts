@@ -296,6 +296,13 @@ export const isNotCtrl = (event: KeyboardEvent | MouseEvent) => {
     return false;
 };
 
+export const isPhysicalMetaKeyEvent = (event: KeyboardEvent) =>
+    event.key === "Meta" ||
+    event.code === "MetaLeft" ||
+    event.code === "MetaRight" ||
+    event.code === "OSLeft" ||
+    event.code === "OSRight";
+
 export const isHuawei = () => {
     return window.siyuan.config.system.osPlatform.toLowerCase().indexOf("huawei") > -1;
 };

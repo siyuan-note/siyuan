@@ -1087,7 +1087,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 				text.InsertBefore(rNode)
 			}
 			block := treenode.ParentBlock(text)
-			refreshUpdated(block)
+			treenode.RefreshUpdated(block)
 			return true
 		}
 	} else if 3 == method {
@@ -1107,7 +1107,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 				text.InsertBefore(rNode)
 			}
 			block := treenode.ParentBlock(text)
-			refreshUpdated(block)
+			treenode.RefreshUpdated(block)
 			return true
 		}
 	}

@@ -73,7 +73,7 @@ func buildUpdatedTaskListItemBlockDOM(id, marker string, luteEngine *lute.Lute) 
 	markerNode.TaskListItemMarker = liMarker
 	markerNode.TaskListItemChecked = ' ' != markerNode.TaskListItemMarker
 
-	li.SetIALAttr("updated", util.CurrentTimeSecondsStr())
+	treenode.RefreshUpdated(li)
 
 	return luteEngine.RenderNodeBlockDOM(li), nil
 }

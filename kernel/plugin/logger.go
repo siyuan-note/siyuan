@@ -47,7 +47,7 @@ func (w *KernelPluginLogger) Write(p []byte) (int, error) {
 }
 
 // loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
-func loggerWrapper(ctx *qjs.Context, pluginName string, logFunc func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
+func loggerWrapper(ctx *qjs.Context, pluginName string, logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
 	return func(this *qjs.This) (value *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -67,7 +67,7 @@ func loggerWrapper(ctx *qjs.Context, pluginName string, logFunc func(format stri
 		}
 		msg := strings.Join(parts, " ")
 
-		go logFunc("[plugin:%s] %s", pluginName, msg)
+		logFn("[plugin:%s] %s", pluginName, msg)
 
 		return ctx.NewUndefined(), nil
 	}

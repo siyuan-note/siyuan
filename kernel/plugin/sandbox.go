@@ -359,7 +359,6 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			resp, err := r.Send(method, targetURL)
-			// TODO: FIXME
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err)))
 				return
@@ -394,44 +393,38 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			response.SetPropertyStr("body", ctx.NewBytes(respBody))
 
 			response.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				go func() {
-					defer func() {
-						if r := recover(); r != nil {
-							this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.text: %v", r)))
-						}
-					}()
-
-					this.Promise().Resolve(ctx.NewString(string(respBody)))
+				defer func() {
+					if r := recover(); r != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.text: %v", r)))
+					}
 				}()
+
+				this.Promise().Resolve(ctx.NewString(string(respBody)))
 				return
 			}, true))
 			response.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				go func() {
-					defer func() {
-						if r := recover(); r != nil {
-							this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.json: %v", r)))
-						}
-					}()
-
-					value, err := parseJsonStringToJsValue(ctx, string(respBody))
-					if err != nil {
-						this.Promise().Reject(ctx.NewError(err))
-						return
+				defer func() {
+					if r := recover(); r != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.json: %v", r)))
 					}
-					this.Promise().Resolve(value)
 				}()
+
+				value, err = parseJsonStringToJsValue(ctx, string(respBody))
+				if err != nil {
+					this.Promise().Reject(ctx.NewError(err))
+					return
+				}
+				this.Promise().Resolve(value)
 				return
 			}, true))
 			response.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-				go func() {
-					defer func() {
-						if r := recover(); r != nil {
-							this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.arrayBuffer: %v", r)))
-						}
-					}()
-
-					this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
+				defer func() {
+					if r := recover(); r != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during response.arrayBuffer: %v", r)))
+					}
 				}()
+
+				this.Promise().Resolve(ctx.NewArrayBuffer(respBody))
 				return
 			}, true))
 

@@ -73,19 +73,9 @@ func buildUpdatedTaskListItemBlockDOM(id, marker string, luteEngine *lute.Lute) 
 	markerNode.TaskListItemMarker = liMarker
 	markerNode.TaskListItemChecked = ' ' != markerNode.TaskListItemMarker
 
-	return luteEngine.RenderNodeBlockDOM(li), nil
-}
+	li.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 
-func buildTaskListItemMarkerUpdateOperations(idToData map[string]string, ids []string) []*model.Operation {
-	updated := util.CurrentTimeSecondsStr()
-	ops := make([]*model.Operation, 0, len(ids)*2)
-	for _, id := range ids {
-		ops = append(ops,
-			&model.Operation{Action: "update", ID: id, Data: idToData[id]},
-			&model.Operation{Action: "doUpdateUpdated", ID: id, Data: updated},
-		)
-	}
-	return ops
+	return luteEngine.RenderNodeBlockDOM(li), nil
 }
 
 func updateTaskListItemMarker(c *gin.Context) {
@@ -116,10 +106,11 @@ func updateTaskListItemMarker(c *gin.Context) {
 		return
 	}
 
-	idToData := map[string]string{id: data}
 	transactions := []*model.Transaction{
 		{
-			DoOperations: buildTaskListItemMarkerUpdateOperations(idToData, []string{id}),
+			DoOperations: []*model.Operation{
+				{Action: "update", ID: id, Data: data},
+			},
 		},
 	}
 
@@ -170,7 +161,7 @@ func batchUpdateTaskListItemMarker(c *gin.Context) {
 	}
 
 	ids := gulu.Str.RemoveDuplicatedElem(idsInOrder)
-	idToData := make(map[string]string, len(ids))
+	ops := make([]*model.Operation, 0, len(ids))
 	for _, id := range ids {
 		data, err := buildUpdatedTaskListItemBlockDOM(id, idToMarker[id], luteEngine)
 		if err != nil {
@@ -179,9 +170,8 @@ func batchUpdateTaskListItemMarker(c *gin.Context) {
 			return
 		}
 
-		idToData[id] = data
+		ops = append(ops, &model.Operation{Action: "update", ID: id, Data: data})
 	}
-	ops := buildTaskListItemMarkerUpdateOperations(idToData, ids)
 
 	tx := &model.Transaction{DoOperations: ops}
 	transactions := []*model.Transaction{tx}

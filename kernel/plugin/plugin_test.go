@@ -184,7 +184,7 @@ func TestRpcParamsToJsValue(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			value, err := rpcParamsToJsValue(ctx, tc.params)
+			_, value, _, err := rpcParamsToJsValue(ctx, tc.params)
 			if tc.wantError {
 				if err == nil {
 					t.Error("expected error, got nil")

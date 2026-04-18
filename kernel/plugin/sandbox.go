@@ -73,7 +73,7 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 
 // injectPlugin adds siyuan.plugin to the QJS context.
 func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
-	i18n, err := GoValueToJsValue(ctx, p.I18n)
+	i18n, err := goValueToJsValue(ctx, p.I18n)
 	if err != nil {
 		i18n = ctx.NewNull()
 	}
@@ -94,41 +94,14 @@ func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 // injectLogger adds siyuan.logger to the QJS context.
 func injectLogger(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
-	loggerWrapper := func(logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
-		return func(this *qjs.This) (value *qjs.Value, err error) {
-			defer func() {
-				if r := recover(); r != nil {
-					err = fmt.Errorf("panic during logger: %v", r)
-				}
-			}()
-
-			// Get arguments via this.Args()
-			args := this.Args()
-			if len(args) < 1 {
-				return ctx.NewUndefined(), nil
-			}
-
-			prefix := fmt.Sprintf("[plugin:%s]", p.Name)
-
-			parts := make([]string, 0, len(args))
-			for _, arg := range args {
-				parts = append(parts, arg.String())
-			}
-			msg := strings.Join(parts, " ")
-
-			logFn("%s %s", prefix, msg)
-
-			return ctx.NewUndefined(), nil
-		}
-	}
 
 	logger := ctx.NewObject()
 
-	logger.SetPropertyStr("trace", ctx.Function(loggerWrapper(logging.LogTracef), false))
-	logger.SetPropertyStr("debug", ctx.Function(loggerWrapper(logging.LogDebugf), false))
-	logger.SetPropertyStr("info", ctx.Function(loggerWrapper(logging.LogInfof), false))
-	logger.SetPropertyStr("warn", ctx.Function(loggerWrapper(logging.LogWarnf), false))
-	logger.SetPropertyStr("error", ctx.Function(loggerWrapper(logging.LogErrorf), false))
+	logger.SetPropertyStr("trace", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogTracef), false))
+	logger.SetPropertyStr("debug", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogDebugf), false))
+	logger.SetPropertyStr("info", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogInfof), false))
+	logger.SetPropertyStr("warn", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogWarnf), false))
+	logger.SetPropertyStr("error", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogErrorf), false))
 
 	siyuan.SetPropertyStr("logger", logger)
 	return nil
@@ -150,164 +123,155 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 	storage := ctx.NewObject()
 
-	storageMu := sync.Mutex{} // guards all storage operations to prevent
+	storageMu := sync.RWMutex{} // guards all storage operations to prevent
 
 	// siyuan.storage.get(path) -> Promise<Uint8Array>
 	storage.SetPropertyStr("get", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		go func() {
-			storageMu.Lock()
-			defer storageMu.Unlock()
+		storageMu.RLock()
+		defer storageMu.RUnlock()
 
-			defer func() {
-				if r := recover(); r != nil {
-					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.get: %v", r)))
-				}
-			}()
-
-			args := this.Args()
-			if len(args) < 1 {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: path required")))
-				return
+		defer func() {
+			if r := recover(); r != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.get: %v", r)))
 			}
-			abs, err := resolvePath(args[0].String())
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-				return
-			}
-			data, err := filelock.ReadFile(abs)
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", err)))
-				return
-			}
-			result := ctx.NewString(string(data))
-			this.Promise().Resolve(result)
 		}()
+
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: path required")))
+			return
+		}
+		abs, err := resolvePath(args[0].String())
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(err))
+			return
+		}
+		data, err := filelock.ReadFile(abs)
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", err)))
+			return
+		}
+		result := ctx.NewString(string(data))
+		this.Promise().Resolve(result)
 		return
 	}, true))
 
 	// siyuan.storage.put(path, content) -> Promise<void>
 	storage.SetPropertyStr("put", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		go func() {
-			storageMu.Lock()
-			defer storageMu.Unlock()
+		storageMu.Lock()
+		defer storageMu.Unlock()
 
-			defer func() {
-				if r := recover(); r != nil {
-					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.put: %v", r)))
-				}
-			}()
-
-			args := this.Args()
-			if len(args) < 2 {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: path and content required")))
-				return
+		defer func() {
+			if r := recover(); r != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.put: %v", r)))
 			}
-			abs, err := resolvePath(args[0].String())
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-				return
-			}
-			dir := filepath.Dir(abs)
-			if err = os.MkdirAll(dir, 0755); err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: mkdir: %w", err)))
-				return
-			}
-			if err = filelock.WriteFile(abs, []byte(args[1].String())); err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", err)))
-				return
-			}
-			this.Promise().Resolve(ctx.NewUndefined())
 		}()
+
+		args := this.Args()
+		if len(args) < 2 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: path and content required")))
+			return
+		}
+		abs, err := resolvePath(args[0].String())
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(err))
+			return
+		}
+		dir := filepath.Dir(abs)
+		if err = os.MkdirAll(dir, 0755); err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: mkdir: %w", err)))
+			return
+		}
+		if err = filelock.WriteFile(abs, []byte(args[1].String())); err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", err)))
+			return
+		}
+		this.Promise().Resolve(ctx.NewUndefined())
 		return
 	}, true))
 
 	// siyuan.storage.remove(path) -> Promise<void>
 	storage.SetPropertyStr("remove", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+		storageMu.Lock()
+		defer storageMu.Unlock()
 
-		go func() {
-			storageMu.Lock()
-			defer storageMu.Unlock()
-
-			defer func() {
-				if r := recover(); r != nil {
-					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.remove: %v", r)))
-				}
-			}()
-
-			args := this.Args()
-			if len(args) < 1 {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: path required")))
-				return
+		defer func() {
+			if r := recover(); r != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.remove: %v", r)))
 			}
-			abs, err := resolvePath(args[0].String())
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-				return
-			}
-			if abs == baseDir {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: cannot remove storage root")))
-				return
-			}
-			if err = os.RemoveAll(abs); err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", err)))
-				return
-			}
-			this.Promise().Resolve(ctx.NewUndefined())
 		}()
+
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: path required")))
+			return
+		}
+		abs, err := resolvePath(args[0].String())
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(err))
+			return
+		}
+		if abs == baseDir {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: cannot remove storage root")))
+			return
+		}
+		if err = os.RemoveAll(abs); err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", err)))
+			return
+		}
+		this.Promise().Resolve(ctx.NewUndefined())
 		return
 	}, true))
 
 	// siyuan.storage.list(path) -> Promise<Entry[]>
 	storage.SetPropertyStr("list", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		go func() {
-			storageMu.Lock()
-			defer storageMu.Unlock()
+		storageMu.RLock()
+		defer storageMu.RUnlock()
 
-			defer func() {
-				if r := recover(); r != nil {
-					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.list: %v", r)))
-				}
-			}()
-
-			args := this.Args()
-			if len(args) < 1 {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: path required")))
-				return
+		defer func() {
+			if r := recover(); r != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.storage.list: %v", r)))
 			}
-			abs, err := resolvePath(args[0].String())
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-				return
-			}
-			entries, err := os.ReadDir(abs)
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", err)))
-				return
-			}
-
-			// Build result as JSON string, then parse to JS object
-			result := make([]map[string]any, 0, len(entries))
-			for _, entry := range entries {
-				info, infoErr := entry.Info()
-				if infoErr != nil {
-					continue
-				}
-				result = append(result, map[string]any{
-					"name":      entry.Name(),
-					"isDir":     info.IsDir(),
-					"isSymlink": util.IsSymlink(entry),
-					"updated":   info.ModTime().Unix(),
-				})
-			}
-
-			resultJs, err := GoValueToJsValue(ctx, result)
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-				return
-			}
-
-			this.Promise().Resolve(resultJs)
 		}()
+
+		args := this.Args()
+		if len(args) < 1 {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: path required")))
+			return
+		}
+		abs, err := resolvePath(args[0].String())
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(err))
+			return
+		}
+		entries, err := os.ReadDir(abs)
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", err)))
+			return
+		}
+
+		// Build result as JSON string, then parse to JS object
+		result := make([]map[string]any, 0, len(entries))
+		for _, entry := range entries {
+			info, infoErr := entry.Info()
+			if infoErr != nil {
+				continue
+			}
+			result = append(result, map[string]any{
+				"name":      entry.Name(),
+				"isDir":     info.IsDir(),
+				"isSymlink": util.IsSymlink(entry),
+				"updated":   info.ModTime().Unix(),
+			})
+		}
+
+		resultJs, err := goValueToJsValue(ctx, result)
+		if err != nil {
+			this.Promise().Reject(ctx.NewError(err))
+			return
+		}
+
+		this.Promise().Resolve(resultJs)
 		return
 	}, true))
 
@@ -372,6 +336,12 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		}
 
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("panic during siyuan.fetch: %v", r)))
+				}
+			}()
+
 			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 
 			r := client.R()
@@ -389,6 +359,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			resp, err := r.Send(method, targetURL)
+			// TODO: FIXME
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err)))
 				return
@@ -408,7 +379,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 			}
 
 			// ctx.ParseJSON(string(json.Marshal(m))) 2.5x faster than qjs.GoMapToJs(ctx, reflect.ValueOf(m))
-			respHeadersJs, err := GoValueToJsValue(ctx, respHeaders)
+			respHeadersJs, err := goValueToJsValue(ctx, respHeaders)
 			if err != nil {
 				this.Promise().Reject(ctx.NewError(err))
 				return
@@ -442,7 +413,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 						}
 					}()
 
-					value, err := ParseJsonStringToJsValue(ctx, string(respBody))
+					value, err := parseJsonStringToJsValue(ctx, string(respBody))
 					if err != nil {
 						this.Promise().Reject(ctx.NewError(err))
 						return
@@ -473,6 +444,7 @@ func injectFetch(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
+	// TODO: test
 	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -775,9 +747,10 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		name := args[0].String()
 		method := args[1]
 
-		descriptions := make([]string, len(args)-2)
-		for i := 2; i < len(args); i++ {
-			descriptions[i-2] = args[i].String()
+		descriptionArgs := args[2:]
+		descriptions := make([]string, len(descriptionArgs))
+		for i, arg := range descriptionArgs {
+			descriptions[i] = arg.String()
 		}
 
 		if !method.IsFunction() {
@@ -856,18 +829,45 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	return nil
 }
 
-// GoValueToJsValue converts a Go value to a QJS Value by JSON serialization round-trip, returning an error if serialization fails.
-func GoValueToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error) {
+// invokeJsLifecycleHook calls a JS lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
+func invokeJsLifecycleHook(ctx *qjs.Context, name string, args ...any) (result *qjs.Value, err error) {
+	plugin, err := getJsContextValue(ctx, []any{"siyuan", "plugin"})
+	if err != nil {
+		return
+	}
+	if plugin == nil {
+		err = fmt.Errorf("globalThis.siyuan.plugin not found in JS context")
+		return
+	}
+
+	hook := plugin.GetPropertyStr(name)
+	if hook != nil && hook.IsFunction() {
+		result, err = plugin.Invoke(name, args...)
+		if err != nil {
+			return
+		}
+		if result != nil {
+			if result.IsPromise() {
+				// Await if Promise
+				result, err = result.Await()
+			}
+		}
+	}
+	return
+}
+
+// goValueToJsValue converts a Go value to a QJS Value by JSON serialization round-trip, returning an error if serialization fails.
+func goValueToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error) {
 	valueBytes, err := json.Marshal(value)
 	if err != nil {
 		return
 	}
 
-	return ParseJsonStringToJsValue(ctx, string(valueBytes))
+	return parseJsonStringToJsValue(ctx, string(valueBytes))
 }
 
-// ParseJsonStringToJsValue parses a JSON string into a QJS Value, returning an error if parsing fails.
-func ParseJsonStringToJsValue(ctx *qjs.Context, jsonStr string) (result *qjs.Value, err error) {
+// parseJsonStringToJsValue parses a JSON string into a QJS Value, returning an error if parsing fails.
+func parseJsonStringToJsValue(ctx *qjs.Context, jsonStr string) (result *qjs.Value, err error) {
 	result = ctx.ParseJSON(jsonStr)
 	if ctx.HasException() {
 		result = nil
@@ -876,7 +876,16 @@ func ParseJsonStringToJsValue(ctx *qjs.Context, jsonStr string) (result *qjs.Val
 	return
 }
 
-func ParseJsonArrayStringToJsValueArray(ctx *qjs.Context, jsonStr string) (result []*qjs.Value, err error) {
+// parseJsonArrayStringToJsValueArray parses a JSON array string into a slice of QJS Values, returning an error if parsing fails.
+func parseJsonArrayStringToJsValueArray(ctx *qjs.Context, jsonStr string) (result []*qjs.Value, err error) {
+	// ⚠️ The code snippet below can't parse to right []*qjs.Value (only parse to [0, 0, ..., 0])
+	// paramArray, _ := paramValue.ToArray()
+	// paramsArray := make([]*qjs.Value, 0, paramArray.Len())
+	// paramArray.ForEach(func(key *qjs.Value, value *qjs.Value) {
+	// 	jsonStr, _ := value.JSONStringify()
+	// 	paramsArray = append(paramsArray, ctx.NewString(jsonStr))
+	// })
+
 	var jsonArray []json.RawMessage
 	err = json.Unmarshal([]byte(jsonStr), &jsonArray)
 	if err != nil {
@@ -885,10 +894,35 @@ func ParseJsonArrayStringToJsValueArray(ctx *qjs.Context, jsonStr string) (resul
 
 	result = make([]*qjs.Value, len(jsonArray))
 	for i, jsonItem := range jsonArray {
-		result[i], err = ParseJsonStringToJsValue(ctx, string(jsonItem))
+		result[i], err = parseJsonStringToJsValue(ctx, string(jsonItem))
 		if err != nil {
 			return
 		}
 	}
+	return
+}
+
+// getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.
+func getJsContextValue(ctx *qjs.Context, paths []any) (value *qjs.Value, retErr error) {
+	this := ctx.Global()
+
+	for _, path := range paths {
+		if this == nil {
+			return
+		}
+
+		switch k := path.(type) {
+		case string:
+			this = this.GetPropertyStr(k)
+		case int64:
+			this = this.GetPropertyIndex(k)
+		case *qjs.Value:
+			this = this.GetProperty(k)
+		default:
+			return nil, fmt.Errorf("unsupported path type: %T", path)
+		}
+	}
+
+	value = this
 	return
 }

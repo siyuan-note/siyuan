@@ -19,6 +19,9 @@ package plugin
 import (
 	"bytes"
 	"fmt"
+	"strings"
+
+	"github.com/fastschema/qjs"
 )
 
 // KernelPluginLogger splits writes by \n and forwards each line to a logging function.
@@ -28,11 +31,12 @@ type KernelPluginLogger struct {
 	logFn func(string)
 }
 
+// Write implements the io.Writer interface, buffering data until a newline is encountered, then logging each line with the plugin name prefix.
 func (w *KernelPluginLogger) Write(p []byte) (int, error) {
 	w.buf.Write(p)
 	for {
 		line, err := w.buf.ReadString('\n')
-		if trimmed := string(bytes.TrimRight([]byte(line), "\r\n")); len(trimmed) > 0 {
+		if trimmed := strings.TrimRight(line, "\r\n"); len(trimmed) > 0 {
 			w.logFn(fmt.Sprintf("[plugin:%s] %s", w.name, trimmed))
 		}
 		if err != nil {
@@ -40,4 +44,31 @@ func (w *KernelPluginLogger) Write(p []byte) (int, error) {
 		}
 	}
 	return len(p), nil
+}
+
+// loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
+func loggerWrapper(ctx *qjs.Context, pluginName string, logFunc func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
+	return func(this *qjs.This) (value *qjs.Value, err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("panic during logger: %v", r)
+			}
+		}()
+
+		// Get arguments via this.Args()
+		args := this.Args()
+		if len(args) < 1 {
+			return ctx.NewUndefined(), nil
+		}
+
+		parts := make([]string, 0, len(args))
+		for _, arg := range args {
+			parts = append(parts, arg.String())
+		}
+		msg := strings.Join(parts, " ")
+
+		go logFunc("[plugin:%s] %s", pluginName, msg)
+
+		return ctx.NewUndefined(), nil
+	}
 }

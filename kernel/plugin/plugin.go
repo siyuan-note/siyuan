@@ -17,7 +17,6 @@
 package plugin
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -231,7 +230,7 @@ func (p *KernelPlugin) stop() (retErr error) {
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoad() {
 	if p.State() == StateLoading {
-		p.invokeJsLifecycleHook("onload")
+		p.invokeHook("onload")
 	}
 
 }
@@ -239,7 +238,7 @@ func (p *KernelPlugin) onLoad() {
 // onUnload is called before plugin stop.
 func (p *KernelPlugin) onUnload() {
 	if p.State() == StateStopping {
-		p.invokeJsLifecycleHook("onunload")
+		p.invokeHook("onunload")
 	}
 
 }
@@ -369,11 +368,11 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcInboundRequest) any {
 
 // callRpcMethod invokes a registered JS RPC method with the given JSON params.
 // Returns the JS function's return value as a Go any.
-func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, rpcErr *JsonRpcError) {
+func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, rpcError *JsonRpcError) {
 	defer func() {
 		if r := recover(); r != nil {
 			logging.LogDebugf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
-			rpcErr = &JsonRpcError{
+			rpcError = &JsonRpcError{
 				Code:    JsonRpcErrorCodeInternalError,
 				Message: fmt.Sprintf("panic in RPC method %q: %v", method, r),
 			}
@@ -396,16 +395,6 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 			Message: fmt.Sprintf("QJS runtime not initialized for plugin %s", p.Name),
 		}
 	}
-	ctx := runtime.Context()
-
-	// Convert params to JS value
-	paramValue, paramJsonStr, convertErr := rpcParamsToJsValue(ctx, params)
-	if convertErr != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("convert params: %v", convertErr),
-		}
-	}
 
 	rpcMethod := p.getRpcMethod(method)
 	if rpcMethod == nil {
@@ -415,66 +404,9 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (retResult any, 
 		}
 	}
 
-	// Call the JS function using ctx.Invoke(fn, thisVal, args...)
-	var result *qjs.Value
-	var err error
-	if paramValue == nil {
-		result, err = ctx.Invoke(rpcMethod, ctx.Global())
-	} else if paramValue.IsArray() {
-		// ⚠️ Can't spread an valid []*qjs.Value
-		// paramArray, _ := paramValue.ToArray()
-		// paramsArray := make([]*qjs.Value, 0, paramArray.Len())
-		// paramArray.ForEach(func(key *qjs.Value, value *qjs.Value) {
-		// 	jsonStr, _ := value.JSONStringify()
-		// 	paramsArray = append(paramsArray, ctx.NewString(jsonStr))
-		// })
-
-		paramsArray, parseErr := ParseJsonArrayStringToJsValueArray(ctx, paramJsonStr)
-		if parseErr != nil {
-			return nil, JsonRpcErrorParseError
-		}
-		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramsArray...)
-	} else {
-		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramValue)
-	}
-	if err != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("call %q: %v", method, err),
-		}
-	}
-
-	// Await if Promise
-	if result != nil && result.IsPromise() {
-		result, err = result.Await()
-		if err != nil {
-			return nil, &JsonRpcError{
-				Code:    JsonRpcErrorCodeInternalError,
-				Message: fmt.Sprintf("await %q: %v", method, err),
-			}
-		}
-	}
-
-	if result == nil || result.IsNull() || result.IsUndefined() {
-		return nil, nil
-	}
-
-	// Convert JS result to Go via JSON round-trip using the built-in JSONStringify method.
-	jsonStr, stringifyErr := result.JSONStringify()
-	if stringifyErr != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("stringify result: %v", stringifyErr),
-		}
-	}
-
-	var goResult any
-	if err = json.Unmarshal([]byte(jsonStr), &goResult); err != nil {
-		// If it's a primitive that doesn't unmarshal cleanly, return the raw string.
-		return jsonStr, nil
-	}
-
-	return goResult, nil
+	ctx := runtime.Context()
+	rpcResult, rpcError = invokeRpcMethod(ctx, method, rpcMethod, params)
+	return
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
@@ -512,69 +444,14 @@ func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
 	return method.Function
 }
 
-// getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.
-func (p *KernelPlugin) getJsContextValue(paths []any) (value *qjs.Value, retErr error) {
+// invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
+func (p *KernelPlugin) invokeHook(name string, args ...any) (result *qjs.Value, err error) {
 	runtime := p.Runtime()
 	if runtime == nil {
 		return nil, fmt.Errorf("QJS runtime not initialized")
 	}
 
 	ctx := runtime.Context()
-	if ctx == nil {
-		return
-	}
 
-	this := ctx.Global()
-
-	for _, path := range paths {
-		if this == nil {
-			return
-		}
-
-		if pathStr, ok := path.(string); ok {
-			this = this.GetPropertyStr(pathStr)
-			continue
-		}
-
-		if pathInt, ok := path.(int64); ok {
-			this = this.GetPropertyIndex(pathInt)
-			continue
-		}
-
-		if pathValue, ok := path.(*qjs.Value); ok {
-			this = this.GetProperty(pathValue)
-			continue
-		}
-		return
-	}
-
-	value = this
-	return
-}
-
-// invokeJsLifecycleHook calls a JS lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
-func (p *KernelPlugin) invokeJsLifecycleHook(name string, args ...any) (result *qjs.Value, err error) {
-	plugin, err := p.getJsContextValue([]any{"siyuan", "plugin"})
-	if err != nil {
-		return
-	}
-	if plugin == nil {
-		err = fmt.Errorf("globalThis.siyuan.plugin not found in JS context")
-		return
-	}
-
-	hook := plugin.GetPropertyStr(name)
-	if hook != nil && hook.IsFunction() {
-		result, err = plugin.Invoke(name, args...)
-		if err != nil {
-			return
-		}
-		if result != nil {
-			if result.IsPromise() {
-				// Await if Promise
-				result, err = result.Await()
-			}
-		}
-	}
-	return
+	return invokeJsLifecycleHook(ctx, name, args...)
 }

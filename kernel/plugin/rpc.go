@@ -17,7 +17,6 @@
 package plugin
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -285,10 +284,10 @@ func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlu
 	return p
 }
 
-// isRpcBatchRequest checks if the body is a batch request (starts with '[' and ends with ']').
-func isRpcBatchRequest(body []byte) bool {
-	body = bytes.TrimSpace(body)
-	return len(body) > 0 && body[0] == '[' && body[len(body)-1] == ']'
+// isJsonArray checks if the json is a array (starts with '[' and ends with ']').
+func isJsonArray[T ~[]byte | ~string](body T) bool {
+	jsonStr := strings.TrimSpace(string(body))
+	return len(jsonStr) > 0 && jsonStr[0] == '[' && jsonStr[len(jsonStr)-1] == ']'
 }
 
 // parseRpcRequests parses JSON-RPC requests from the body.
@@ -298,7 +297,7 @@ func parseRpcRequests(body []byte) (requests []*JsonRpcInboundRequest, isBatch b
 		return nil, false, JsonRpcErrorParseError
 	}
 
-	if isRpcBatchRequest(body) {
+	if isJsonArray(body) {
 		if err := json.Unmarshal(body, &requests); err != nil {
 			return nil, true, JsonRpcErrorParseError
 		}
@@ -316,14 +315,14 @@ func parseRpcRequests(body []byte) (requests []*JsonRpcInboundRequest, isBatch b
 	return requests, false, nil
 }
 
-// rpcParamsToJsValue converts Go RPC params to a *qjs.Value for JS invocation.
-// params is treated as already-encoded JSON when its type is string, []byte, or json.RawMessage
-// (and pointer variants). Any other type is marshalled to JSON first.
-func rpcParamsToJsValue(ctx *qjs.Context, params any) (value *qjs.Value, jsonStr string, err error) {
+// rpcParamsToJsValue converts Go RPC params to a *qjs.Value or []*qjs.Value for JS invocation.
+// It accepts various Go types (string, []byte, json.RawMessage, or any JSON-serializable struct) and returns an error if conversion fails.
+func rpcParamsToJsValue(ctx *qjs.Context, params any) (isArray bool, value *qjs.Value, array []*qjs.Value, err error) {
 	if params == nil {
 		return
 	}
 
+	var jsonStr string
 	switch v := params.(type) {
 	case string:
 		jsonStr = v
@@ -355,6 +354,77 @@ func rpcParamsToJsValue(ctx *qjs.Context, params any) (value *qjs.Value, jsonStr
 		jsonStr = string(b)
 	}
 
-	value, err = ParseJsonStringToJsValue(ctx, jsonStr)
+	isArray = isJsonArray(jsonStr) // quick check to determine if we should parse as array or single value
+	if isArray {
+		array, err = parseJsonArrayStringToJsValueArray(ctx, jsonStr)
+	} else {
+		value, err = parseJsonStringToJsValue(ctx, jsonStr)
+	}
+	return
+}
+
+// invokeRpcMethod calls the given JS function with the provided params and returns the result or error.
+func invokeRpcMethod(ctx *qjs.Context, rpcMethodName string, rpcMethod *qjs.Value, rpcParams any) (rpcResult any, rpcError *JsonRpcError) {
+	// Convert params to JS value
+	isArray, paramValue, paramArray, convertErr := rpcParamsToJsValue(ctx, rpcParams)
+	if convertErr != nil {
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("convert params: %v", convertErr),
+		}
+	}
+
+	// Call the JS function using ctx.Invoke(fn, thisVal, args...)
+	var result *qjs.Value
+	var err error
+	if isArray {
+		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramArray...)
+	} else {
+		if paramValue == nil {
+			result, err = ctx.Invoke(rpcMethod, ctx.Global())
+		} else {
+			result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramValue)
+		}
+	}
+	if err != nil {
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("call %q: %v", rpcMethodName, err),
+		}
+	}
+
+	// Await if Promise
+	if result != nil && result.IsPromise() {
+		result, err = result.Await()
+		if err != nil {
+			return nil, &JsonRpcError{
+				Code:    JsonRpcErrorCodeInternalError,
+				Message: fmt.Sprintf("await %q: %v", rpcMethodName, err),
+			}
+		}
+	}
+
+	// If result is null or undefined, return nil (JSON-RPC allows result to be null, but we treat undefined as null for convenience)
+	if result == nil || result.IsNull() || result.IsUndefined() {
+		return nil, nil
+	}
+
+	// Convert JS result to Go via JSON round-trip using the built-in JSONStringify method.
+	jsonStr, stringifyErr := result.JSONStringify()
+	if stringifyErr != nil {
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("stringify result: %v", stringifyErr),
+		}
+	}
+
+	// Unmarshal JSON string back to Go type (could be any JSON-serializable type: object, array, string, number, bool, or null)
+	if err = json.Unmarshal([]byte(jsonStr), &rpcResult); err != nil {
+		return nil, &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("unmarshal result: %v", err),
+		}
+	}
+
 	return
 }

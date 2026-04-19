@@ -388,24 +388,56 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	start = time.Now()
 	switch sortMode {
 	case util.SortModeNameASC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare4FileTree(docs[i].Name, docs[j].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.PinYinCompare4FileTree(ni, nj)
 		})
 	case util.SortModeNameDESC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare4FileTree(docs[j].Name, docs[i].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.PinYinCompare4FileTree(nj, ni)
 		})
 	case util.SortModeUpdatedASC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })
 	case util.SortModeUpdatedDESC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime > docs[j].Mtime })
 	case util.SortModeAlphanumASC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.NaturalCompare(docs[i].Name, docs[j].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.NaturalCompare(ni, nj)
 		})
 	case util.SortModeAlphanumDESC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.NaturalCompare(docs[j].Name, docs[i].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.NaturalCompare(nj, ni)
 		})
 	case util.SortModeCustom:
 		fileTreeFiles := docs

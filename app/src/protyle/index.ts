@@ -23,6 +23,7 @@ import {
     updateTransaction
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
+import {getDocDisplayName} from "../util/pathName";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
@@ -197,7 +198,7 @@ export class Protyle {
                         case "rename":
                             if (this.protyle.path === data.data.path) {
                                 if (this.protyle.model) {
-                                    this.protyle.model.parent.updateTitle(data.data.title);
+                                    this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                 }
                                 if (this.protyle.background) {
                                     this.protyle.background.ial.title = data.data.title;

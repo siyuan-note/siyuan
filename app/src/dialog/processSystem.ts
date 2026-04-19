@@ -16,7 +16,7 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
-import {setNoteBook} from "../util/pathName";
+import {getDocDisplayName, setNoteBook} from "../util/pathName";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -30,9 +30,10 @@ const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {
         id: rootID
     }, (response) => {
-        tab.updateTitle(response.data.name);
+        const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
+        tab.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
         if (protyle && protyle.title) {
-            protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+            protyle.title.setTitle(response.data.name, titleEmpty);
         }
     });
 };

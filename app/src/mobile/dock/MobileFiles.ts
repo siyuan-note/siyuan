@@ -2,7 +2,7 @@ import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../
 import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
-import {getListDocDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
+import {getDocDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {
     getPublishAccessLevel,
@@ -802,7 +802,7 @@ class="b3-list-item" data-path="${item.path}">
     </span>
     <span class="b3-list-item__icon"${editingPublishAccess ? " fn__none" : ""}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch${editingPublishAccess ? "" : " fn__none"}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
-    <span class="b3-list-item__text">${getListDocDisplayName(item)}</span>
+    <span class="b3-list-item__text">${getDocDisplayName(item.name, item.titleEmpty)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>

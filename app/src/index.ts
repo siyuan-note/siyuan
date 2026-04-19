@@ -7,7 +7,7 @@ import {account} from "./config/account";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
-import {addBaseURL, getIdFromSYProtocol, isSYProtocol, redirectToCheckAuth, setNoteBook} from "./util/pathName";
+import {addBaseURL, getDocDisplayName, getIdFromSYProtocol, isSYProtocol, redirectToCheckAuth, setNoteBook} from "./util/pathName";
 import {registerServiceWorker} from "./util/serviceWorker";
 import {openFileById} from "./editor/util";
 import {
@@ -146,7 +146,7 @@ export class App {
                                         if (initTab) {
                                             const initTabData = JSON.parse(initTab);
                                             if (initTabData.instance === "Editor" && initTabData.rootId === data.data.id) {
-                                                tab.updateTitle(data.data.title);
+                                                tab.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                             }
                                         }
                                     }

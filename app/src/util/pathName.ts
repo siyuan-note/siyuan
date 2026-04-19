@@ -94,6 +94,13 @@ export const getDisplayName = (filePath: string, basename = true, removeSY = fal
     return name;
 };
 
+export const getDocDisplayName = (name: string, titleEmpty?: boolean) => {
+    if (titleEmpty) {
+        return window.siyuan.languages["_kernel"][16];
+    }
+    return getDisplayName(name, true, true);
+};
+
 export const getAssetName = (assetPath: string) => {
     return pathPosix().basename(assetPath, pathPosix().extname(assetPath)).replace(/-\d{14}-\w{7}/, "");
 };
@@ -648,7 +655,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder), "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDisplayName(item.name, true, true)}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDocDisplayName(item.name, item.titleEmpty)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDocDisplayName(item.name, item.titleEmpty)}</span>
     ${countHTML}
 </li>`;
         });

@@ -54,6 +54,7 @@ import (
 type File struct {
 	Path         string `json:"path"`
 	Name         string `json:"name"` // 标题，即 ial["title"]
+	TitleEmpty   bool   `json:"titleEmpty,omitempty"`
 	Icon         string `json:"icon"`
 	Name1        string `json:"name1"` // 命名，即 ial["name"]
 	Alias        string `json:"alias"`
@@ -69,7 +70,6 @@ type File struct {
 	HCtime       string `json:"hCtime"`
 	Sort         int    `json:"sort"`
 	SubFileCount int    `json:"subFileCount"`
-	Hidden       bool   `json:"hidden"`
 
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
@@ -81,6 +81,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Path = fileInfo.path
 	ret.Size = uint64(fileInfo.size)
 	ret.Name = ial["title"] + ".sy"
+	ret.TitleEmpty = ial[NodeAttrTitleEmpty] == "true"
 	ret.Icon = ial["icon"]
 	ret.ID = ial["id"]
 	ret.Name1 = ial["name"]
@@ -387,24 +388,56 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	start = time.Now()
 	switch sortMode {
 	case util.SortModeNameASC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare4FileTree(docs[i].Name, docs[j].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.PinYinCompare4FileTree(ni, nj)
 		})
 	case util.SortModeNameDESC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare4FileTree(docs[j].Name, docs[i].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.PinYinCompare4FileTree(nj, ni)
 		})
 	case util.SortModeUpdatedASC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })
 	case util.SortModeUpdatedDESC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime > docs[j].Mtime })
 	case util.SortModeAlphanumASC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.NaturalCompare(docs[i].Name, docs[j].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.NaturalCompare(ni, nj)
 		})
 	case util.SortModeAlphanumDESC:
+		emptyKey := Conf.Language(16) + ".sy"
 		sort.Slice(docs, func(i, j int) bool {
-			return util.NaturalCompare(docs[j].Name, docs[i].Name)
+			ni, nj := docs[i].Name, docs[j].Name
+			if docs[i].TitleEmpty {
+				ni = emptyKey
+			}
+			if docs[j].TitleEmpty {
+				nj = emptyKey
+			}
+			return util.NaturalCompare(nj, ni)
 		})
 	case util.SortModeCustom:
 		fileTreeFiles := docs
@@ -1686,7 +1719,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 	}
 
 	// 按需同步“无标题”标记（仅更新 IAL，不触发子树重命名等）
-	isTitleEmpty := "" != tree.Root.IALAttr(NodeAttrTitleEmpty)
+	isTitleEmpty := tree.Root.IALAttr(NodeAttrTitleEmpty) == "true"
 	if isTitleEmpty != isEmpty {
 		if isEmpty {
 			tree.Root.SetIALAttr(NodeAttrTitleEmpty, "true")

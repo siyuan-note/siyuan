@@ -18,6 +18,7 @@ import * as dayjs from "dayjs";
 import {openFileById} from "../../editor/util";
 /// #endif
 import {setTitle} from "../../dialog/processSystem";
+import {getDocDisplayName} from "../../util/pathName";
 import {getContenteditableElement, getNoContainerElement} from "../wysiwyg/getBlock";
 import {commonHotkey} from "../wysiwyg/commonHotkey";
 import {nbsp2space} from "../util/normalizeText";
@@ -377,6 +378,9 @@ export class Title {
         protyle.wysiwyg.renderCustom(response.data.ial);
         this.element.setAttribute("data-render", "true");
         this.setTitle(response.data.ial.title, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+        if (protyle.model?.parent) {
+            protyle.model.parent.updateTitle(getDocDisplayName(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true"));
+        }
         let nodeAttrHTML = "";
         if (response.data.ial.bookmark) {
             nodeAttrHTML += `<div class="protyle-attr--bookmark">${Lute.EscapeHTMLStr(response.data.ial.bookmark)}</div>`;

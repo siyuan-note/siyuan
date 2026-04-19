@@ -53,6 +53,8 @@ func RemoveTag(label string) (err error) {
 
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
+	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockIDWithReindex(treeID)
@@ -60,6 +62,8 @@ func RemoveTag(label string) (err error) {
 			util.ClearPushProgress(100)
 			return e
 		}
+
+		generateTreeHistory(historyDir, tree)
 
 		var unlinks []*ast.Node
 		for _, blockID := range blocks {
@@ -106,6 +110,7 @@ func RemoveTag(label string) (err error) {
 		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
 	}
 
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	sql.FlushQueue()
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)

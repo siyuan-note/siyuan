@@ -1704,6 +1704,21 @@ func RenameDoc(boxID, p, title string) (err error) {
 			return
 		}
 
+		subFiles := box.ListFiles(tree.Path)
+		for _, subFile := range subFiles {
+			if !strings.HasSuffix(subFile.path, ".sy") {
+				continue
+			}
+
+			subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
+			if loadErr != nil {
+				continue
+			}
+
+			treenode.SetBlockTreePath(subTree)
+			sql.RenameTreeQueue(subTree)
+		}
+
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
@@ -1717,7 +1732,6 @@ func RenameDoc(boxID, p, title string) (err error) {
 		util.PushEvent(evt)
 	}
 	if titleChanged {
-		box.renameSubTrees(tree)
 		updateRefTextRenameDoc(tree)
 	}
 	if titleChanged || emptyAttrUpdated {

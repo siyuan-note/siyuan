@@ -20,7 +20,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"math"
 	"path"
 	"runtime/debug"
 	"sync"
@@ -44,14 +43,13 @@ var (
 
 type dbQueueOperation struct {
 	inQueueTime                   time.Time
-	action                        string      // upsert/delete/delete_id/rename/rename_sub_tree/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets
-	indexTree                     *parse.Tree // index
+	action                        string      // upsert/delete/delete_id/rename/move/delete_box/delete_box_refs/index/delete_ids/update_block_content/delete_assets
+	indexTree                     *parse.Tree // index/rename/move
 	upsertTree                    *parse.Tree // upsert/update_refs/delete_refs
 	removeTreeBox, removeTreePath string      // delete
 	removeTreeID                  string      // delete_id
 	removeTreeIDs                 []string    // delete_ids
 	box                           string      // delete_box/delete_box_refs/index
-	renameTree                    *parse.Tree // rename/rename_sub_tree
 	block                         *Block      // update_block_content
 	id                            string      // index_node
 	removeAssetHashes             []string    // delete_assets
@@ -124,30 +122,6 @@ func FlushQueue() {
 
 	// logging.LogInfof("flushing database queue, total operations [%d]", total)
 
-	// 如果有重命名子树的操作，则统计各路径前缀的块树数量，数量较大的话阻塞整个队列，以便尽可能合并重命名子树的操作
-	var renameSubTreeOp *dbQueueOperation
-	for _, op := range ops {
-		if "rename_sub_tree" == op.action {
-			renameSubTreeOp = op
-			break
-		}
-	}
-	if nil != renameSubTreeOp {
-		childCount := treenode.CountBlockTreesByPathPrefix(path.Dir(renameSubTreeOp.renameTree.Path))
-		if 512 < childCount {
-			scale := math.Log(float64(childCount)/512.0+1.0) / math.Log(2.0)
-			secs := 1.0 * scale
-			if secs < 1.0 {
-				secs = 1.0
-			}
-			if secs > 12.0 {
-				secs = 12.0
-			}
-			logging.LogInfof("rename sub tree [%s] with large child count [%d], sleep [%.2fs] to wait for more operations", renameSubTreeOp.renameTree.Path, childCount, secs)
-			time.Sleep(time.Duration(secs * float64(time.Second)))
-		}
-	}
-
 	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	if 512 < len(ops) {
 		disableCache()
@@ -218,13 +192,14 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 	case "delete_ids":
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 	case "rename":
-		err = batchUpdateHPath(tx, op.renameTree, context)
+		err = batchUpdateHPath(tx, op.indexTree, context)
 		if err != nil {
 			break
 		}
-		err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
-	case "rename_sub_tree":
-		err = batchUpdatePath(tx, op.renameTree, context)
+
+		err = updateRootContent(tx, path.Base(op.indexTree.HPath), op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
+	case "move":
+		err = batchUpdatePath(tx, op.indexTree, context)
 	case "delete_box":
 		err = deleteByBoxTx(tx, op.box)
 	case "delete_box_refs":
@@ -376,12 +351,12 @@ func RenameTreeQueue(tree *parse.Tree) {
 	defer dbQueueLock.Unlock()
 
 	newOp := &dbQueueOperation{
-		renameTree:  tree,
+		indexTree:   tree,
 		inQueueTime: time.Now(),
 		action:      "rename",
 	}
 	for i, op := range operationQueue {
-		if "rename" == op.action && op.renameTree.ID == tree.ID { // 相同树则覆盖
+		if "rename" == op.action && op.indexTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}
@@ -389,17 +364,17 @@ func RenameTreeQueue(tree *parse.Tree) {
 	appendOperation(newOp)
 }
 
-func RenameSubTreeQueue(tree *parse.Tree) {
+func MoveTreeQueue(tree *parse.Tree) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
 	newOp := &dbQueueOperation{
-		renameTree:  tree,
+		indexTree:   tree,
 		inQueueTime: time.Now(),
-		action:      "rename_sub_tree",
+		action:      "move",
 	}
 	for i, op := range operationQueue {
-		if "rename_sub_tree" == op.action && op.renameTree.ID == tree.ID { // 相同树则覆盖
+		if "move" == op.action && op.indexTree.ID == tree.ID { // 相同树则覆盖
 			operationQueue[i] = newOp
 			return
 		}

@@ -1242,18 +1242,17 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 }
 
 func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
-	ialContent := treenode.IALStr(tree.Root)
-	stmt := "UPDATE blocks SET box = ?, path = ?, hpath = ?, ial = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, ialContent, tree.ID); err != nil {
+	stmt := "UPDATE blocks SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ?, ial = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, ialContent, tree.ID); err != nil {
+	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET box = ?, path = ?, hpath = ?, ial = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, ialContent, tree.ID); err != nil {
+		stmt = "UPDATE blocks_fts_case_insensitive SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 			return
 		}
 	}
@@ -1264,18 +1263,17 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 }
 
 func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err error) {
-	ialContent := treenode.IALStr(tree.Root)
-	stmt := "UPDATE blocks SET hpath = ?, ial = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.HPath, ialContent, tree.ID); err != nil {
+	stmt := "UPDATE blocks SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET hpath = ?, ial = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.HPath, ialContent, tree.ID); err != nil {
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ?, ial = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, tree.HPath, ialContent, tree.ID); err != nil {
+		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 			return
 		}
 	}

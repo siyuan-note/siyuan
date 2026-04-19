@@ -58,18 +58,18 @@ type Block struct {
 	Updated  string
 }
 
-func updateRootContent(tx *sql.Tx, content, updated, id string) (err error) {
-	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, id); err != nil {
+func updateRootContent(tx *sql.Tx, content, updated, ialContent, id string) (err error) {
+	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, id); err != nil {
+	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
+	if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, content, updated, id); err != nil {
+		stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ?, ial = ? WHERE id = ?"
+		if err = execStmtTx(tx, stmt, content, content, updated, ialContent, id); err != nil {
 			return
 		}
 	}

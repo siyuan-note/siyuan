@@ -222,7 +222,8 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		if err != nil {
 			break
 		}
-		err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
+
+		err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), treenode.IALStr(op.renameTree.Root), op.renameTree.ID)
 	case "rename_sub_tree":
 		err = batchUpdatePath(tx, op.renameTree, context)
 	case "delete_box":

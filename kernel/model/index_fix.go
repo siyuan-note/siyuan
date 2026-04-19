@@ -46,6 +46,7 @@ var (
 )
 
 // checkIndex 自动校验数据库索引，仅在数据同步执行完成后执行一次。
+// Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
 func checkIndex() {
 	checkIndexOnce.Do(func() {
 		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {

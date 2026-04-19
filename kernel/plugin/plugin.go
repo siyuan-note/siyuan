@@ -46,6 +46,7 @@ type RpcMethodInfo struct {
 const (
 	PluginStateReady PluginState = iota
 	PluginStateLoading
+	PluginStateLoaded
 	PluginStateRunning
 	PluginStateStopping
 	PluginStateStopped
@@ -58,6 +59,8 @@ func (s PluginState) String() string {
 		return "ready"
 	case PluginStateLoading:
 		return "loading"
+	case PluginStateLoaded:
+		return "loaded"
 	case PluginStateRunning:
 		return "running"
 	case PluginStateStopping:
@@ -182,9 +185,11 @@ func (p *KernelPlugin) start() (retErr error) {
 
 	p.onLoad()
 
-	p.state.Store(int64(PluginStateRunning))
+	p.state.Store(int64(PluginStateLoaded))
 
 	p.onLoaded()
+
+	p.state.Store(int64(PluginStateRunning))
 
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return nil
@@ -237,7 +242,7 @@ func (p *KernelPlugin) onLoad() {
 
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoaded() {
-	if p.State() == PluginStateRunning {
+	if p.State() == PluginStateLoaded {
 		p.invokeHook("onloaded")
 	}
 }

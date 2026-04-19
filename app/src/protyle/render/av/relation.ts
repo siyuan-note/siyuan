@@ -78,11 +78,11 @@ const setDatabase = (avId: string, element: HTMLElement, item: HTMLElement) => {
 
 export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: HTMLElement) => void, excludes = true) => {
     window.siyuan.menus.menu.remove();
-    const menu = new Menu();
+    const menu = new Menu(undefined, undefined, "b3-menu__items fn__flex-column b3-menu__filter");
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter"${isMobile() ? "" : ' style="width: 50vw"'} >
+        label: `<div class="fn__flex-column fn__flex-1"${isMobile() ? "" : ' style="width: min(50vw, 420px)"'}>
     <input class="b3-text-field fn__flex-shrink"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
@@ -158,7 +158,6 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
     const popoverElement = hasTopClosestByClassName(target, "block__popover", true);
     menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
 };

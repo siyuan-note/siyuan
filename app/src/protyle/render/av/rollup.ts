@@ -107,17 +107,15 @@ export const goSearchRollupCol = (options: {
     isRelation: boolean,
 }) => {
     window.siyuan.menus.menu.remove();
-    const menu = new Menu();
+    const menu = new Menu(undefined, undefined, "b3-menu__items fn__flex-column b3-menu__filter");
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages[options.isRelation ? "searchRelation" : "searchRollupProperty"]}"/>
+        label: `<input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages[options.isRelation ? "searchRelation" : "searchRollupProperty"]}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
-    </div>
-</div>`,
+    </div>`,
         bind(element) {
             const listElement = element.querySelector(".b3-list");
             const inputElement = element.querySelector("input");
@@ -159,7 +157,6 @@ export const goSearchRollupCol = (options: {
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
 };
 
 export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[], colData?: IAVColumn }) => {

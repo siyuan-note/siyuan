@@ -5,7 +5,7 @@ export class Menu {
     public isOpen: boolean;
     public element: HTMLElement;
 
-    constructor(id?: string, closeCB?: () => void) {
+    constructor(id?: string, closeCB?: () => void, itemsClass?: string) {
         this.menu = window.siyuan.menus.menu;
         this.isOpen = false;
         this.element = this.menu.element;
@@ -22,6 +22,9 @@ export class Menu {
                 this.menu.element.setAttribute("data-name", id);
             }
             this.menu.removeCB = closeCB;
+        }
+        if (itemsClass) {
+            this.menu.element.lastElementChild.className = itemsClass;
         }
     }
 

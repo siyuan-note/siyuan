@@ -438,17 +438,15 @@ export const editor = {
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLInputElement;
         fontFamilyElement.addEventListener("click", (event: MouseEvent) => {
             event.stopPropagation();
-            const fontMenu = new Menu();
+            const fontMenu = new Menu(undefined, undefined, "b3-menu__items fn__flex-column b3-menu__filter b3-menu__filter--fontFamily");
             fontMenu.addItem({
                 iconHTML: "",
                 type: "empty",
-                label: `<div class="fn__flex-column b3-menu__filter b3-menu__filter--fontFamily">
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.font}"/>
+                label: `<input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.font}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
-    </div>
-</div>`,
+    </div>`,
                 bind: (element) => {
                     const listElement = element.querySelector(".b3-list--background");
                     const inputElement = element.querySelector("input") as HTMLInputElement;
@@ -525,7 +523,6 @@ export const editor = {
                     });
                 }
             });
-            (fontMenu.element.querySelector(".b3-menu__items") as HTMLElement).style.overflow = "initial";
             const rect = fontFamilyElement.getBoundingClientRect();
             fontMenu.open({
                 x: rect.left,

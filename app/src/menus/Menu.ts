@@ -63,11 +63,10 @@ export class Menu {
 
     public showSubMenu(subMenuElement: HTMLElement) {
         const itemsMenuElement = subMenuElement.lastElementChild as HTMLElement;
-        if (itemsMenuElement) {
-            itemsMenuElement.style.maxHeight = "";
-        } else {
+        if (!itemsMenuElement) {
             return;
         }
+        itemsMenuElement.style.maxHeight = "";
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
         const subMenuRect = subMenuElement.getBoundingClientRect();
 
@@ -125,10 +124,11 @@ export class Menu {
 
     public addItem(option: IMenu) {
         const menuItem = new MenuItem(option);
-        if (menuItem) {
-            this.append(menuItem.element, option.index);
-            return menuItem.element;
+        if (!menuItem.element) {
+            return;
         }
+        this.append(menuItem.element, option.index);
+        return menuItem.element;
     }
 
     public removeScrollEvent() {
@@ -152,8 +152,10 @@ export class Menu {
         }
         this.removeScrollEvent();
         this.element.firstElementChild.classList.add("fn__none");
-        this.element.lastElementChild.innerHTML = "";
-        this.element.lastElementChild.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
+        const itemsElement = this.element.lastElementChild as HTMLElement;
+        itemsElement.innerHTML = "";
+        itemsElement.removeAttribute("style");  // 输入框 focus 后 boxShadow 显示不全
+        itemsElement.className = "b3-menu__items";
         this.element.classList.add("fn__none");
         this.element.classList.remove("b3-menu--list", "b3-menu--fullscreen");
         this.element.removeAttribute("style");  // zIndex
@@ -231,6 +233,7 @@ export class MenuItem {
         }
         if (options.type === "empty") {
             this.element = document.createElement("div");
+            this.element.classList.add("b3-menu__empty-body");
             this.element.innerHTML = options.label;
             if (options.bind) {
                 options.bind(this.element);

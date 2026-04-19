@@ -505,17 +505,15 @@ export class Background {
 
     private openTag(protyle: IProtyle, target: HTMLElement) {
         window.siyuan.menus.menu.remove();
-        const menu = new Menu();
+        const menu = new Menu(undefined, undefined, "b3-menu__items fn__flex-column b3-menu__filter");
         menu.addItem({
             iconHTML: "",
             type: "empty",
-            label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
+            label: `<input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.tag}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
         <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
-    </div>
-</div>`,
+    </div>`,
             bind: (element) => {
                 const listElement = element.querySelector(".b3-list--background");
                 fetchPost("/api/search/searchTag", {
@@ -589,10 +587,9 @@ export class Background {
             }
         });
         const itemsElement = menu.element.querySelector(".b3-menu__items");
-        itemsElement.setAttribute("style", "overflow: initial");
         /// #if MOBILE
         menu.fullscreen();
-        itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");
+        itemsElement.setAttribute("style", "padding: 0 8px;height: 100%;");
         /// #else
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.top + rect.height});

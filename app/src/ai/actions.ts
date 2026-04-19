@@ -163,7 +163,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     });
     const menu = new Menu(Constants.MENU_AI, () => {
         focusByRange(protyle.toolbar.range);
-    });
+    }, "b3-menu__items fn__flex-column b3-menu__filter");
     let customHTML = "";
     window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }, index: number) => {
         customHTML += `<div data-action="${escapeAttr(item.memo || item.name)}" data-position="10west" data-index="${index}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
@@ -178,8 +178,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter">
-    <input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.ai}"/>
+        label: `<input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.ai}"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
        <div class="b3-list-item b3-list-item--narrow b3-list-item--focus" data-action="Continue writing">
@@ -203,8 +202,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             ${window.siyuan.languages.aiCustomAction}
         </div>
         ${customHTML}
-    </div>
-</div>`,
+    </div>`,
         bind(element) {
             /// #if MOBILE
             element.setAttribute("style", "height: 100%;padding: 0 16px;");
@@ -286,7 +284,6 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             });
         }
     });
-    menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
     /// #if MOBILE
     menu.fullscreen();
     /// #else

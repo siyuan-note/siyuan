@@ -175,6 +175,12 @@
   &__items {
     overflow: auto;
     padding: 0 8px;
+
+    &.b3-menu__filter .b3-menu__empty-body {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
   }
 
   &__item {

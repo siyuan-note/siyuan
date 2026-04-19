@@ -1003,12 +1003,12 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 		return
 	}
 
-	stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
-	if err = execStmtTx(tx, stmt); err != nil {
-		return
-	}
-
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = "DELETE FROM blocks_fts WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
+		if err = execStmtTx(tx, stmt); err != nil {
+			return
+		}
+	} else {
 		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE ROWID IN (" + strings.Join(rowIDs, ",") + ")"
 		if err = execStmtTx(tx, stmt); err != nil {
 			return
@@ -1022,11 +1022,12 @@ func deleteBlocksByBoxTx(tx *sql.Tx, box string) (err error) {
 	if err = execStmtTx(tx, stmt, box); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE box = ?"
-	if err = execStmtTx(tx, stmt, box); err != nil {
-		return
-	}
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = "DELETE FROM blocks_fts WHERE box = ?"
+		if err = execStmtTx(tx, stmt, box); err != nil {
+			return
+		}
+	} else {
 		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ?"
 		if err = execStmtTx(tx, stmt, box); err != nil {
 			return
@@ -1121,11 +1122,12 @@ func deleteByRootID(tx *sql.Tx, rootID string, context map[string]any) (err erro
 	if err = execStmtTx(tx, stmt, rootID); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, rootID); err != nil {
-		return
-	}
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = "DELETE FROM blocks_fts WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, rootID); err != nil {
+			return
+		}
+	} else {
 		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id = ?"
 		if err = execStmtTx(tx, stmt, rootID); err != nil {
 			return
@@ -1167,11 +1169,12 @@ func batchDeleteByRootIDs(tx *sql.Tx, rootIDs []string, context map[string]any) 
 	if err = execStmtTx(tx, stmt); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE root_id IN " + ids
-	if err = execStmtTx(tx, stmt); err != nil {
-		return
-	}
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = "DELETE FROM blocks_fts WHERE root_id IN " + ids
+		if err = execStmtTx(tx, stmt); err != nil {
+			return
+		}
+	} else {
 		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE root_id IN " + ids
 		if err = execStmtTx(tx, stmt); err != nil {
 			return
@@ -1207,11 +1210,12 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
 		return
 	}
-	stmt = "DELETE FROM blocks_fts WHERE box = ? AND path LIKE ?"
-	if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
-		return
-	}
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = "DELETE FROM blocks_fts WHERE box = ? AND path LIKE ?"
+		if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
+			return
+		}
+	} else {
 		stmt = "DELETE FROM blocks_fts_case_insensitive WHERE box = ? AND path LIKE ?"
 		if err = execStmtTx(tx, stmt, boxID, pathPrefix+"%"); err != nil {
 			return
@@ -1246,11 +1250,12 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
-		return
-	}
-	if !caseSensitive {
+	if caseSensitive {
+		stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
+			return
+		}
+	} else {
 		stmt = "UPDATE blocks_fts_case_insensitive SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
 		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 			return
@@ -1267,16 +1272,19 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
-		return
-	}
-	if !caseSensitive {
+
+	if caseSensitive {
+		stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
+			return
+		}
+	} else {
 		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
 		if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
 			return
 		}
 	}
+
 	ClearCache()
 	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tree.ID)))[:7]
 	eventbus.Publish(eventbus.EvtSQLUpdateBlocksHPaths, context, 1, evtHash)

@@ -22,6 +22,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/fastschema/qjs"
 	"github.com/gin-gonic/gin"
@@ -187,8 +188,8 @@ func HandleRpcWebSocket(c *gin.Context) {
 	for {
 		_, message, readErr := conn.ReadMessage()
 		if readErr != nil {
-			if websocket.IsUnexpectedCloseError(readErr, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				logging.LogErrorf("[plugin:%s] ws read error: %s", name, readErr)
+			if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure) {
+				logging.LogErrorf("[plugin:%s] RPC WebSocket error: %s", name, readErr)
 			}
 			break
 		}
@@ -261,13 +262,17 @@ func (p *KernelPlugin) BroadcastNotification(method string, params any) {
 	}
 	p.socketsMu.RUnlock()
 
+	wg := sync.WaitGroup{}
 	for _, conn := range conns {
+		wg.Add(1)
 		go func(c *websocket.Conn) {
+			defer wg.Done()
 			if err := p.writeWebSocketMessage(c, data); err != nil {
 				logging.LogWarnf("[plugin:%s] broadcast: %s", p.Name, err)
 			}
 		}(conn)
 	}
+	wg.Wait()
 }
 
 // resolveRunningPlugin looks up the plugin by name and writes a -32601 error response if it is

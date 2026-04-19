@@ -116,24 +116,27 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
     });
 };
 
-export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
-    const lineNumber = block.parentElement.getAttribute("lineNumber");
+export const lineNumberRender = (hljsElement: HTMLElement, zoom = 1) => {
+    const lineNumber = hljsElement.parentElement.getAttribute("lineNumber");
     if (lineNumber === "false") {
         return;
     }
     if (!window.siyuan.config.editor.codeSyntaxHighlightLineNum && lineNumber !== "true") {
         return;
     }
+    if (hljsElement.firstElementChild.clientHeight === hljsElement.lastElementChild.clientHeight) {
+        return;
+    }
     // clientHeight 总是取的整数
-    block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
-    const codeElement = block.lastElementChild as HTMLElement;
+    hljsElement.parentElement.style.lineHeight = `${((parseInt(hljsElement.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
+    const codeElement = hljsElement.lastElementChild as HTMLElement;
 
     const lineList = codeElement.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
-    block.firstElementChild.innerHTML = `<span>${lineList.length}</span>`;
-    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
+    hljsElement.firstElementChild.innerHTML = `<span>${lineList.length}</span>`;
+    codeElement.style.paddingLeft = `${hljsElement.firstElementChild.clientWidth + 16}px`;
     let lineNumberHTML = "";
     if (codeElement.style.wordBreak === "break-word") {
         // 代码块开启了换行
@@ -153,7 +156,7 @@ line-height:${codeElementStyle.lineHeight};
 font-weight:${codeElementStyle.fontWeight};
 padding-right:0;max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
         lineNumberTemp.setAttribute("contenteditable", "true");
-        block.insertAdjacentElement("afterend", lineNumberTemp);
+        hljsElement.insertAdjacentElement("afterend", lineNumberTemp);
 
         lineList.map((line) => {
             // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
@@ -169,13 +172,13 @@ padding-right:0;max-height: none;box-sizing: border-box;position: absolute;paddi
         lineNumberHTML = "<span></span>".repeat(lineList.length);
     }
 
-    block.firstElementChild.innerHTML = lineNumberHTML;
+    hljsElement.firstElementChild.innerHTML = lineNumberHTML;
 
     // https://github.com/siyuan-note/siyuan/issues/12726
-    if (block.scrollHeight > block.clientHeight) {
+    if (hljsElement.scrollHeight > hljsElement.clientHeight) {
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
-            if (block.contains(range.startContainer)) {
+            if (hljsElement.contains(range.startContainer)) {
                 const brElement = document.createElement("br");
                 range.insertNode(brElement);
                 brElement.scrollIntoView({block: "nearest"});

@@ -51,7 +51,7 @@ func loggerWrapper(ctx *qjs.Context, pluginName string, logFn func(format string
 	return func(this *qjs.This) (value *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {
-				err = fmt.Errorf("panic during logger: %v", r)
+				err = fmt.Errorf("qjs panic during invoke siyuan.logger.%s: %v", pluginName, r)
 			}
 		}()
 

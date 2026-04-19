@@ -82,7 +82,10 @@ type KernelPlugin struct {
 }
 
 func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
-	token, _ := model.CreatePluginJWT(petal.Name)
+	token, err := model.CreatePluginJWT(petal.Name)
+	if err != nil {
+		logging.LogErrorf("Failed to create plugin JWT for [%s]: %v", petal.Name, err)
+	}
 	return &KernelPlugin{
 		Petal:      petal,
 		token:      token,
@@ -112,7 +115,7 @@ func (p *KernelPlugin) Runtime() *qjs.Runtime {
 func (p *KernelPlugin) close() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("panic during runtime close: %v", r)
+			err = fmt.Errorf("qjs panic during close runtime: %v", r)
 		}
 	}()
 
@@ -125,14 +128,14 @@ func (p *KernelPlugin) close() (err error) {
 
 // error sets the plugin state to errored and frees the QJS runtime.
 func (p *KernelPlugin) error() {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
 	if err := p.close(); err != nil {
 		logging.LogErrorf("[plugin:%s] failed to close runtime during error handling: %v", p.Name, err)
 	}
-	p.runtime = nil
 
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.runtime = nil
 	p.state = StateErrored
 }
 
@@ -141,7 +144,7 @@ func (p *KernelPlugin) start() (retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
-			retErr = fmt.Errorf("panic during start: %v", r)
+			retErr = fmt.Errorf("qjs panic during start: %v", r)
 		}
 	}()
 
@@ -198,7 +201,7 @@ func (p *KernelPlugin) stop() (retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
-			retErr = fmt.Errorf("panic during stop: %v", r)
+			retErr = fmt.Errorf("qjs panic during plugin stop: %v", r)
 		}
 	}()
 
@@ -381,7 +384,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 			logging.LogDebugf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
 			rpcError = &JsonRpcError{
 				Code:    JsonRpcErrorCodeInternalError,
-				Message: fmt.Sprintf("panic in RPC method %q: %v", method, r),
+				Message: fmt.Sprintf("qjs panic in RPC method %q: %v", method, r),
 			}
 		}
 	}()

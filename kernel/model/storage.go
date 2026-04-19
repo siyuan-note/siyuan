@@ -18,6 +18,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -646,27 +647,25 @@ func RemoveLocalStorageVals(keys []string) (err error) {
 	return setLocalStorage(localStorage)
 }
 
-func SetLocalStorageVals(keyVals map[string]any) (removedKeys []string, setKeyVals map[string]any, err error) {
+func SetLocalStorageVals(keyVals map[string]any) (setKeyVals map[string]any, err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 
-	removedKeys = make([]string, 0, len(keyVals))
 	setKeyVals = make(map[string]any, len(keyVals))
 	localStorage := getLocalStorage()
 	for k, v := range keyVals {
 		if v == nil {
-			delete(localStorage, k)
-			removedKeys = append(removedKeys, k)
-		} else {
-			localStorage[k] = v
-			setKeyVals[k] = v
+			err = fmt.Errorf("local storage value for key [%s] must not be empty", k)
+			return
 		}
+		localStorage[k] = v
+		setKeyVals[k] = v
 	}
 	err = setLocalStorage(localStorage)
 	return
 }
 
-func SetLocalStorage(val any) (err error) {
+func SetLocalStorage(val map[string]any) (err error) {
 	localStorageLock.Lock()
 	defer localStorageLock.Unlock()
 	return setLocalStorage(val)
@@ -678,7 +677,7 @@ func GetLocalStorage() (ret map[string]any) {
 	return getLocalStorage()
 }
 
-func setLocalStorage(val any) (err error) {
+func setLocalStorage(val map[string]any) (err error) {
 	dirPath := filepath.Join(util.DataDir, "storage")
 	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [local] dir failed: %s", err)
@@ -742,17 +741,13 @@ func GetOutlineStorage(docID string) (ret map[string]any, err error) {
 	return
 }
 
-func SetOutlineStorage(docID string, val any) (err error) {
+func SetOutlineStorage(docID string, val map[string]any) (err error) {
 	outlineStorageLock.Lock()
 	defer outlineStorageLock.Unlock()
 
 	outlineDoc := &OutlineDoc{
 		DocID: docID,
-		Data:  make(map[string]any),
-	}
-
-	if valMap, ok := val.(map[string]any); ok {
-		outlineDoc.Data = valMap
+		Data:  val,
 	}
 
 	outlineDocs, err := getOutlineDocs()

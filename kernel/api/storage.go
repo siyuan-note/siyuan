@@ -214,18 +214,10 @@ func setLocalStorageVal(c *gin.Context) {
 	}
 	val := arg["val"]
 
-	removedKeys, setKeyVals, err := model.SetLocalStorageVals(map[string]any{key: val})
+	setKeyVals, err := model.SetLocalStorageVals(map[string]any{key: val})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
-		return
-	}
-
-	if len(removedKeys) > 0 {
-		evt := util.NewCmdResult("removeLocalStorageVal", 0, util.PushModeBroadcastMainExcludeSelfApp)
-		evt.AppId = app
-		evt.Data = map[string]any{"key": removedKeys[0]}
-		util.PushEvent(evt)
 		return
 	}
 
@@ -253,25 +245,17 @@ func setLocalStorageVals(c *gin.Context) {
 		return
 	}
 
-	removedKeys, setKeyVals, err := model.SetLocalStorageVals(keyVals)
+	setKeyVals, err := model.SetLocalStorageVals(keyVals)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	if len(removedKeys) > 0 {
-		evtRm := util.NewCmdResult("removeLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
-		evtRm.AppId = app
-		evtRm.Data = map[string]any{"keys": removedKeys}
-		util.PushEvent(evtRm)
-	}
-	if len(setKeyVals) > 0 {
-		evtSet := util.NewCmdResult("setLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
-		evtSet.AppId = app
-		evtSet.Data = map[string]any{"keyVals": setKeyVals}
-		util.PushEvent(evtSet)
-	}
+	evtSet := util.NewCmdResult("setLocalStorageVals", 0, util.PushModeBroadcastMainExcludeSelfApp)
+	evtSet.AppId = app
+	evtSet.Data = map[string]any{"keyVals": setKeyVals}
+	util.PushEvent(evtSet)
 }
 
 func setLocalStorage(c *gin.Context) {
@@ -283,10 +267,8 @@ func setLocalStorage(c *gin.Context) {
 		return
 	}
 
-	val, hasVal := arg["val"]
-	if !hasVal {
-		ret.Code = -1
-		ret.Msg = "Field [val] is required"
+	var val map[string]any
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("val", &val, true, false)) {
 		return
 	}
 
@@ -407,13 +389,11 @@ func setOutlineStorage(c *gin.Context) {
 	}
 
 	var docID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("docID", &docID, true, true)) {
-		return
-	}
-	val, hasVal := arg["val"]
-	if !hasVal {
-		ret.Code = -1
-		ret.Msg = "Field [val] is required"
+	var val map[string]any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("docID", &docID, true, true),
+		util.BindJsonArg("val", &val, true, false),
+	) {
 		return
 	}
 

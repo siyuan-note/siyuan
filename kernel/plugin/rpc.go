@@ -279,7 +279,7 @@ func (p *KernelPlugin) BroadcastNotification(method string, params any) {
 // not found or not running. Returns nil when the caller should abort.
 func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlugin {
 	p := GetManager().GetPlugin(name)
-	if p == nil || p.State() != StateRunning {
+	if p == nil || p.State() != PluginStateRunning {
 		c.JSON(errStatus, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
 			Error:   &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: "Plugin not found or not running"},

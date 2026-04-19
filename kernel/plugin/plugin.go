@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"sync/atomic"
 
 	"github.com/fastschema/qjs"
 	"github.com/gorilla/websocket"
@@ -29,7 +30,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-type PluginState int
+type PluginState int64
 
 type RpcMethod struct {
 	Name         string
@@ -43,23 +44,28 @@ type RpcMethodInfo struct {
 }
 
 const (
-	StateLoading PluginState = iota
-	StateRunning
-	StateErrored
-	StateStopping
-	StateStopped
+	PluginStateReady PluginState = iota
+	PluginStateLoading
+	PluginStateRunning
+	PluginStateStopping
+	PluginStateStopped
+	PluginStateError
 )
 
 func (s PluginState) String() string {
 	switch s {
-	case StateLoading:
+	case PluginStateReady:
+		return "ready"
+	case PluginStateLoading:
 		return "loading"
-	case StateRunning:
+	case PluginStateRunning:
 		return "running"
-	case StateErrored:
-		return "errored"
-	case StateStopped:
+	case PluginStateStopping:
+		return "stopping"
+	case PluginStateStopped:
 		return "stopped"
+	case PluginStateError:
+		return "error"
 	default:
 		return "unknown"
 	}
@@ -70,9 +76,8 @@ type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
 
-	mu      sync.RWMutex // protects state and runtime
-	state   PluginState
-	runtime *qjs.Runtime
+	state   atomic.Int64                //  PluginState
+	runtime atomic.Pointer[qjs.Runtime] // *qjs.Runtime
 
 	rpcMethods sync.Map // registered JSON-RPC methods
 
@@ -86,32 +91,30 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 	if err != nil {
 		logging.LogErrorf("Failed to create plugin JWT for [%s]: %v", petal.Name, err)
 	}
-	return &KernelPlugin{
-		Petal:      petal,
-		token:      token,
-		state:      StateStopped,
-		rpcMethods: sync.Map{},
-		sockets:    make(map[*websocket.Conn]bool),
-		socketMus:  make(map[*websocket.Conn]*sync.Mutex),
+
+	plugin := &KernelPlugin{
+		Petal: petal,
+		token: token,
+
+		sockets:   make(map[*websocket.Conn]bool),
+		socketMus: make(map[*websocket.Conn]*sync.Mutex),
 	}
+	plugin.state.Store(int64(PluginStateReady))
+	plugin.runtime.Store(nil)
+	return plugin
 }
 
 // State returns the current plugin state (safe for concurrent reads).
 func (p *KernelPlugin) State() PluginState {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
-	return p.state
+	return PluginState(p.state.Load())
 }
 
 // Runtime returns the plugin's QJS runtime, or nil if not initialized (safe for concurrent reads).
 func (p *KernelPlugin) Runtime() *qjs.Runtime {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-
-	return p.runtime
+	return p.runtime.Load()
 }
 
+// close frees the QJS runtime.
 func (p *KernelPlugin) close() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -122,6 +125,7 @@ func (p *KernelPlugin) close() (err error) {
 	runtime := p.Runtime()
 	if runtime != nil {
 		runtime.Close()
+		p.runtime.Store(nil)
 	}
 	return
 }
@@ -132,11 +136,7 @@ func (p *KernelPlugin) error() {
 		logging.LogErrorf("[plugin:%s] failed to close runtime during error handling: %v", p.Name, err)
 	}
 
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	p.runtime = nil
-	p.state = StateErrored
+	p.state.Store(int64(PluginStateError))
 }
 
 // start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
@@ -148,9 +148,7 @@ func (p *KernelPlugin) start() (retErr error) {
 		}
 	}()
 
-	p.mu.Lock()
-	p.state = StateLoading
-	p.mu.Unlock()
+	p.state.Store(int64(PluginStateLoading))
 
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
@@ -162,9 +160,7 @@ func (p *KernelPlugin) start() (retErr error) {
 		Stderr: &KernelPluginLogger{name: p.Name, logFn: logging.LogError},
 	})
 
-	p.mu.Lock()
-	p.runtime = runtime
-	p.mu.Unlock()
+	p.runtime.Store(runtime)
 
 	if qjsErr != nil {
 		p.error()
@@ -186,9 +182,7 @@ func (p *KernelPlugin) start() (retErr error) {
 
 	p.onLoad()
 
-	p.mu.Lock()
-	p.state = StateRunning
-	p.mu.Unlock()
+	p.state.Store(int64(PluginStateRunning))
 
 	p.onLoaded()
 
@@ -197,17 +191,21 @@ func (p *KernelPlugin) start() (retErr error) {
 }
 
 // stop cleanly shuts down the plugin: closes sockets, frees QJS runtime.
-func (p *KernelPlugin) stop() (retErr error) {
+func (p *KernelPlugin) stop() (ok bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
-			retErr = fmt.Errorf("qjs panic during plugin stop: %v", r)
+			ok = false
+			err = fmt.Errorf("panic during plugin stop: %v", r)
 		}
 	}()
 
-	p.mu.Lock()
-	p.state = StateStopping
-	p.mu.Unlock()
+	if p.State() != PluginStateRunning {
+		ok = false
+		return
+	}
+
+	p.state.Store(int64(PluginStateStopping))
 
 	p.onUnload()
 
@@ -222,33 +220,31 @@ func (p *KernelPlugin) stop() (retErr error) {
 	p.socketsMu.Unlock()
 
 	p.close()
-
-	p.mu.Lock()
-	p.runtime = nil
-	p.state = StateStopped
-	p.mu.Unlock()
+	p.state.Store(int64(PluginStateStopped))
 
 	logging.LogDebugf("[plugin:%s] stopped", p.Name)
+
+	ok = true
 	return
 }
 
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoad() {
-	if p.State() == StateLoading {
+	if p.State() == PluginStateLoading {
 		p.invokeHook("onload")
 	}
 }
 
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoaded() {
-	if p.State() == StateRunning {
+	if p.State() == PluginStateRunning {
 		p.invokeHook("onloaded")
 	}
 }
 
 // onUnload is called before plugin stop.
 func (p *KernelPlugin) onUnload() {
-	if p.State() == StateStopping {
+	if p.State() == PluginStateStopping {
 		p.invokeHook("onunload")
 	}
 }
@@ -392,7 +388,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	state := p.State()
 	runtime := p.Runtime()
 
-	if state != StateRunning {
+	if state != PluginStateRunning {
 		return nil, &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
 			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.state),

@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -25,16 +26,16 @@ import (
 
 // PluginManager discovers, loads, starts, and stops kernel plugins.
 type PluginManager struct {
-	lifecycleMu sync.Mutex // protects the lifecycle state
+	lifecycleMu sync.Mutex // protects the lifecycle state of the manager (starting/stopping), allowing concurrent start/stop of different plugins while preventing concurrent start/stop of the entire manager
 
-	mu      sync.RWMutex // protects the plugins map
-	plugins map[string]*KernelPlugin
+	plugins sync.Map // map[string]*KernelPlugin
 
 	pluginMu sync.Map // map[string]*sync.Mutex, one per plugin name, to serialize start/stop of the same plugin while allowing concurrent start/stop of different plugins
 }
 
 type PluginInfo struct {
 	Name    string           `json:"name"`
+	State   string           `json:"state"`
 	Methods []*RpcMethodInfo `json:"methods"`
 }
 
@@ -57,9 +58,7 @@ func InitManager() {
 // GetManager returns the singleton PluginManager.
 func GetManager() *PluginManager {
 	managerOnce.Do(func() {
-		manager = &PluginManager{
-			plugins: make(map[string]*KernelPlugin),
-		}
+		manager = &PluginManager{}
 	})
 	return manager
 }
@@ -80,19 +79,20 @@ func (m *PluginManager) Start() {
 
 	petals := model.LoadKernelPetals()
 
+	all := len(petals)
+	counter := int64(0)
+
 	wg := sync.WaitGroup{}
 	for _, petal := range petals {
-		wg.Add(1)
-		go func(petal *model.Petal) {
-			defer wg.Done()
-			m.StartPlugin(petal)
-		}(petal)
+		wg.Go(func() {
+			if ok := m.StartPlugin(petal); ok {
+				atomic.AddInt64(&counter, 1)
+			}
+		})
 	}
 	wg.Wait()
 
-	count := len(m.plugins)
-
-	logging.LogInfof("kernel plugin manager started, %d plugin(s) loaded", count)
+	logging.LogInfof("kernel plugin manager started, %d/%d plugin(s) loaded", counter, all)
 }
 
 // Stop shuts down all running kernel plugins.
@@ -109,36 +109,36 @@ func (m *PluginManager) Stop() {
 
 	logging.LogInfof("kernel plugin manager stopping")
 
-	m.mu.Lock()
-	plugins := make([]*KernelPlugin, 0, len(m.plugins))
-	for k, p := range m.plugins {
-		plugins = append(plugins, p)
-		delete(m.plugins, k)
-	}
-	m.mu.Unlock()
+	all := int64(0)
+	counter := int64(0)
 
 	wg := sync.WaitGroup{}
-	for _, p := range plugins {
-		wg.Add(1)
-		go func(p *KernelPlugin) {
-			defer wg.Done()
-			if err := p.stop(); err != nil {
+	m.plugins.Range(func(key, value any) bool {
+		atomic.AddInt64(&all, 1)
+		p := value.(*KernelPlugin)
+		wg.Go(func() {
+			ok, err := p.stop()
+			if err != nil {
 				logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
 			}
-		}(p)
-	}
+			if ok {
+				atomic.AddInt64(&counter, 1)
+			}
+		})
+		return true
+	})
 	wg.Wait()
 
-	count := len(plugins)
-	logging.LogInfof("kernel plugin manager stopped, %d plugin(s) unloaded", count)
+	logging.LogInfof("kernel plugin manager stopped, %d/%d plugin(s) unloaded", counter, all)
 }
 
 // StartPlugin starts a single kernel plugin.
 // Called when a petal is enabled via SetPetalEnabled.
-func (m *PluginManager) StartPlugin(petal *model.Petal) {
+func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			logging.LogErrorf("[plugin:%s] panic during start: %v", petal.Name, r)
+			ok = false
 		}
 	}()
 
@@ -150,13 +150,16 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) {
 
 	p := NewKernelPlugin(petal)
 
-	m.mu.Lock()
-	m.plugins[p.Name] = p
-	m.mu.Unlock()
+	m.plugins.Store(p.Name, p)
 
 	if err := p.start(); err != nil {
 		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)
+		ok = false
+		return
 	}
+
+	ok = true
+	return
 }
 
 // StopPlugin stops a single kernel plugin.
@@ -178,15 +181,11 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) {
 // stopPlugin removes and stops the plugin without acquiring the per-plugin mutex.
 // Callers must hold the per-plugin mutex returned by getPluginMu.
 func (m *PluginManager) stopPlugin(petal *model.Petal) {
-	m.mu.Lock()
-	p, ok := m.plugins[petal.Name]
-	if ok {
-		delete(m.plugins, p.Name)
-	}
-	m.mu.Unlock()
+	value, loaded := m.plugins.LoadAndDelete(petal.Name)
 
-	if ok {
-		if err := p.stop(); err != nil {
+	if loaded {
+		p := value.(*KernelPlugin)
+		if _, err := p.stop(); err != nil {
 			logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
 		}
 	}
@@ -200,17 +199,17 @@ func (m *PluginManager) getPluginMu(name string) *sync.Mutex {
 
 // GetPlugin returns a loaded KernelPlugin by name, or nil.
 func (m *PluginManager) GetPlugin(name string) *KernelPlugin {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	return m.plugins[name]
+	value, loaded := m.plugins.Load(name)
+	if loaded {
+		return value.(*KernelPlugin)
+	}
+	return nil
 }
 
 func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found bool) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	if p, ok := m.plugins[name]; ok {
+	value, loaded := m.plugins.Load(name)
+	if loaded {
+		p := value.(*KernelPlugin)
 		return &PluginInfo{
 			Name:    p.Name,
 			Methods: p.GetRpcMethodsInfo(),
@@ -221,14 +220,14 @@ func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found 
 
 // GetLoadedPluginInfo returns a list of all loaded plugins with their RPC method info.
 func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	for _, p := range m.plugins {
+	m.plugins.Range(func(key, value any) bool {
+		p := value.(*KernelPlugin)
 		plugins = append(plugins, &PluginInfo{
 			Name:    p.Name,
+			State:   p.State().String(),
 			Methods: p.GetRpcMethodsInfo(),
 		})
-	}
+		return true
+	})
 	return plugins
 }

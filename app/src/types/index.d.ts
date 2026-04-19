@@ -709,6 +709,7 @@ interface IOpenFileOptions {
     scrollPosition?: ScrollLogicalPosition,
     assetPath?: string, // asset 必填
     fileName?: string, // file 必填
+    rootTitleEmpty?: boolean,
     rootIcon?: string, // 文档图标
     id?: string,  // file 必填
     rootID?: string, // file 必填

@@ -720,13 +720,14 @@ func getBlockInfo(c *gin.Context) {
 	rootTitle := root.IAL["title"]
 	rootTitle = html.UnescapeString(rootTitle)
 	icon := root.IAL["icon"]
-	ret.Data = map[string]string{
-		"box":         block.Box,
-		"path":        block.Path,
-		"rootID":      block.RootID,
-		"rootTitle":   rootTitle,
-		"rootChildID": rootChildID,
-		"rootIcon":    icon,
+	ret.Data = map[string]any{
+		"box":            block.Box,
+		"path":           block.Path,
+		"rootID":         block.RootID,
+		"rootTitle":      rootTitle,
+		"rootTitleEmpty": root.IAL[model.NodeAttrTitleEmpty] == "true",
+		"rootChildID":    rootChildID,
+		"rootIcon":       icon,
 	}
 }
 

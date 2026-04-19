@@ -66,6 +66,10 @@ func injectSandboxGlobals(p *KernelPlugin) error {
 	injectSocket(ctx, p, siyuan)
 	injectRpc(ctx, p, siyuan)
 
+	if err := ObjectFreeze(ctx, siyuan); err != nil {
+		return fmt.Errorf("failed to freeze siyuan object: %w", err)
+	}
+
 	ctx.Global().SetPropertyStr("siyuan", siyuan)
 
 	return nil
@@ -89,7 +93,12 @@ func injectPlugin(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	plugin.SetPropertyStr("onloaded", ctx.NewNull())
 	plugin.SetPropertyStr("onunload", ctx.NewNull())
 
+	if err := ObjectSeal(ctx, plugin); err != nil {
+		return fmt.Errorf("failed to seal siyuan.plugin object: %w", err)
+	}
+
 	siyuan.SetPropertyStr("plugin", plugin)
+
 	return nil
 }
 
@@ -104,7 +113,12 @@ func injectLogger(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 	logger.SetPropertyStr("warn", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogWarnf), false))
 	logger.SetPropertyStr("error", ctx.Function(loggerWrapper(ctx, p.Name, logging.LogErrorf), false))
 
+	if err := ObjectFreeze(ctx, logger); err != nil {
+		return fmt.Errorf("failed to freeze siyuan.logger object: %w", err)
+	}
+
 	siyuan.SetPropertyStr("logger", logger)
+
 	return nil
 }
 
@@ -275,6 +289,10 @@ func injectStorage(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		this.Promise().Resolve(resultJs)
 		return
 	}, true))
+
+	if err := ObjectFreeze(ctx, storage); err != nil {
+		return fmt.Errorf("failed to freeze siyuan.storage object: %w", err)
+	}
 
 	siyuan.SetPropertyStr("storage", storage)
 	return nil
@@ -815,7 +833,37 @@ func injectRpc(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		return
 	}, false))
 
+	if err := ObjectFreeze(ctx, rpc); err != nil {
+		return fmt.Errorf("failed to freeze siyuan.rpc object: %w", err)
+	}
+
 	siyuan.SetPropertyStr("rpc", rpc)
+	return nil
+}
+
+// ObjectSeal applies Object.seal to the given JS object to prevent plugins from tampering with injected APIs, returning an error if sealing fails.
+func ObjectSeal(ctx *qjs.Context, object *qjs.Value) error {
+	Object := ctx.Global().GetPropertyStr("Object")
+	if Object == nil || !Object.IsObject() {
+		return fmt.Errorf("Object not found in global context")
+	}
+	_, err := Object.InvokeJS("seal", object)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ObjectFreeze applies Object.freeze to the given JS object to prevent plugins from tampering with injected APIs, returning an error if freezing fails.
+func ObjectFreeze(ctx *qjs.Context, object *qjs.Value) error {
+	Object := ctx.Global().GetPropertyStr("Object")
+	if Object == nil || !Object.IsObject() {
+		return fmt.Errorf("Object not found in global context")
+	}
+	_, err := Object.InvokeJS("freeze", object)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

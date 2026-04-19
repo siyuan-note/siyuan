@@ -31,6 +31,7 @@ import (
 func main() {
 	util.Boot()
 
+	model.InitJwtKey()
 	model.InitConf()
 	go server.Serve(false, model.Conf.CookieKey)
 	model.InitAppearance()

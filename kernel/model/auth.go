@@ -55,6 +55,14 @@ var (
 	jwtKey = make([]byte, 32)
 )
 
+func InitJwtKey() error {
+	if _, err := rand.Read(jwtKey); err != nil {
+		logging.LogErrorf("generate JWT signing key failed: %s", err)
+		return err
+	}
+	return nil
+}
+
 func GetBasicAuthAccount(username string) *Account {
 	return accountsMap[username]
 }

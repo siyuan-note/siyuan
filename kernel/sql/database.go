@@ -1261,6 +1261,32 @@ func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err 
 			return
 		}
 	}
+
+	stmt = "UPDATE spans SET box = ?, path = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.ID); err != nil {
+		return
+	}
+	stmt = "UPDATE assets SET box = ?, docpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.ID); err != nil {
+		return
+	}
+	stmt = "UPDATE refs SET box = ?, path = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.ID); err != nil {
+		return
+	}
+	stmt = "UPDATE refs SET def_block_path = ? WHERE def_block_root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Path, tree.ID); err != nil {
+		return
+	}
+	stmt = "UPDATE file_annotation_refs SET box = ?, path = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.ID); err != nil {
+		return
+	}
+	stmt = "UPDATE attributes SET box = ?, path = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.ID); err != nil {
+		return
+	}
+
 	ClearCache()
 	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tree.ID)))[:7]
 	eventbus.Publish(eventbus.EvtSQLUpdateBlocksHPaths, context, 1, evtHash)

@@ -1717,7 +1717,6 @@ func RenameDoc(boxID, p, title string) (err error) {
 		util.PushEvent(evt)
 	}
 	if titleChanged {
-		box.renameSubTrees(tree)
 		updateRefTextRenameDoc(tree)
 	}
 	if titleChanged || emptyAttrUpdated {

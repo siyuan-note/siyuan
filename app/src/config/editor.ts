@@ -525,6 +525,7 @@ export const editor = {
                     });
                 }
             });
+            (fontMenu.element.querySelector(".b3-menu__items") as HTMLElement).style.overflow = "initial";
             const rect = fontFamilyElement.getBoundingClientRect();
             fontMenu.open({
                 x: rect.left,

@@ -34,8 +34,8 @@
     max-width: 420px;
     max-height: 50vh;
 
-    &--fontFamily .b3-list-item {
-      line-height: normal;
+    &--fontFamily .b3-list-item .fn__flex-1 {
+      overflow: visible;
     }
   }
 

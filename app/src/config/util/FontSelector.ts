@@ -7,7 +7,6 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
     let searchValue = "";
     let allFonts: string[] = [];
     let filteredFonts: string[] = [];
-    let selectedIndex = -1;
 
     const highlightText = (text: string, search: string): string => {
         if (!search) return text;
@@ -32,7 +31,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             "</mark>" + escaped.substring(index + lowerSearch.length);
     };
 
-    const renderFontList = (container: HTMLElement, fonts: string[], startIndex: number = 0) => {
+    const renderFontList = (container: HTMLElement, fonts: string[]) => {
         container.innerHTML = "";
         if (fonts.length === 0 && !searchValue) {
             container.innerHTML = `<div class="font-selector__empty">
@@ -42,62 +41,29 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
         }
 
         // Default font option (reset to empty string)
-        const isDefaultHighlighted = selectedIndex === -1 && (!searchValue || window.siyuan.languages.default.toLowerCase().includes(searchValue.toLowerCase()));
         const isDefaultSelected = currentFont === "";
         const defaultItem = document.createElement("div");
         defaultItem.className = "font-selector__item" +
-            (isDefaultSelected ? " font-selector__item--selected" : "") +
-            (isDefaultHighlighted && !isDefaultSelected ? " font-selector__item--hovered" : "");
-        defaultItem.setAttribute("data-index", "-1");
+            (isDefaultSelected ? " font-selector__item--selected" : "");
         defaultItem.innerHTML = `<span class="font-selector__font-name" style="font-family:var(--b3-font-family)">${highlightText(window.siyuan.languages.default, searchValue)}</span>`;
         defaultItem.addEventListener("click", () => {
             dialog.destroy();
             callback("");
         });
-        defaultItem.addEventListener("mouseenter", () => {
-            selectedIndex = -1;
-            updateSelection(container, -1);
-        });
         container.appendChild(defaultItem);
 
-        fonts.forEach((font, index) => {
+        fonts.forEach((font) => {
             const item = document.createElement("div");
             const isSelected = font === currentFont;
-            const isHighlighted = index === selectedIndex;
             item.className = "font-selector__item" +
-                (isSelected ? " font-selector__item--selected" : "") +
-                (isHighlighted && !isSelected ? " font-selector__item--hovered" : "");
-            item.setAttribute("data-index", (startIndex + index).toString());
+                (isSelected ? " font-selector__item--selected" : "");
             item.innerHTML = `<span class="font-selector__font-name" style="font-family:${CSS.escape(font)},var(--b3-font-family)">${escapeAndHighlight(font, searchValue)}</span>`;
             item.addEventListener("click", () => {
                 dialog.destroy();
                 callback(font);
             });
-            item.addEventListener("mouseenter", () => {
-                selectedIndex = startIndex + index;
-                updateSelection(container, startIndex);
-            });
             container.appendChild(item);
         });
-    };
-
-    const updateSelection = (container: HTMLElement, startIndex: number) => {
-        const items = container.querySelectorAll(".font-selector__item");
-        items.forEach((item, index) => {
-            const itemIndex = startIndex + index;
-            const isCurrentSelected = itemIndex === selectedIndex;
-            if (isCurrentSelected) {
-                item.classList.add("font-selector__item--hovered");
-            } else {
-                item.classList.remove("font-selector__item--hovered");
-            }
-        });
-        if (selectedIndex >= 0 && selectedIndex >= startIndex && selectedIndex < startIndex + items.length) {
-            const targetItem = items[selectedIndex - startIndex];
-            if (targetItem) {
-                targetItem.scrollIntoView({block: "nearest", behavior: "smooth"});
-            }
-        }
     };
 
     const dialog = new Dialog({
@@ -148,7 +114,6 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
 
     const filterFonts = () => {
         filteredFonts = searchValue ? allFonts.filter(f => f.toLowerCase().includes(searchValue.toLowerCase())) : allFonts;
-        selectedIndex = -1;
         renderFontList(allFontsList, filteredFonts);
         fontCount.textContent = filteredFonts.length.toString();
     };
@@ -165,12 +130,6 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
                 item.addEventListener("click", () => {
                     dialog.destroy();
                     callback(font);
-                });
-                item.addEventListener("mouseenter", () => {
-                    recentFontsList.querySelectorAll(".font-selector__recent-item").forEach(el => el.classList.remove("font-selector__item--hovered"));
-                    if (!item.classList.contains("font-selector__item--selected")) {
-                        item.classList.add("font-selector__item--hovered");
-                    }
                 });
                 recentFontsList.appendChild(item);
             });
@@ -194,42 +153,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
     });
 
     searchInput.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            const maxIndex = filteredFonts.length - 1;
-            if (selectedIndex === -1) {
-                selectedIndex = 0;
-                updateSelection(allFontsList, 0);
-            } else if (selectedIndex < maxIndex) {
-                selectedIndex++;
-                updateSelection(allFontsList, 0);
-            } else if (selectedIndex === maxIndex) {
-                selectedIndex = -1;
-                updateSelection(allFontsList, -1);
-            }
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            if (selectedIndex === -1) {
-                selectedIndex = filteredFonts.length - 1;
-                updateSelection(allFontsList, 0);
-            } else if (selectedIndex > 0) {
-                selectedIndex--;
-                updateSelection(allFontsList, 0);
-            } else if (selectedIndex === 0) {
-                selectedIndex = -1;
-                updateSelection(allFontsList, -1);
-            }
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            if (selectedIndex === -1) {
-                dialog.destroy();
-                callback("");
-            } else if (selectedIndex >= 0 && selectedIndex < filteredFonts.length) {
-                const selectedFont = filteredFonts[selectedIndex];
-                dialog.destroy();
-                callback(selectedFont);
-            }
-        } else if (e.key === "Escape") {
+        if (e.key === "Escape") {
             dialog.destroy();
         }
     });

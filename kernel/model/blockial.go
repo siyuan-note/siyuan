@@ -182,6 +182,11 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 
 	pushBlockAttrs(oldAttrs, node)
 
+	if ("true" == oldAttrs["custom-hidden"] && "true" != nameValues["custom-hidden"]) ||
+		"true" != oldAttrs["custom-hidden"] && "true" == nameValues["custom-hidden"] {
+		ReloadFiletree()
+	}
+
 	go func() {
 		sql.FlushQueue()
 		refreshDynamicRefText(node, tree)

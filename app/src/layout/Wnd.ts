@@ -1009,7 +1009,11 @@ export class Wnd {
                     this.parent.addLayout(layout, item.id, after);
                     const movedWnd = this.parent.children.splice(after ? index : index + 1, 1)[0];
                     if (movedWnd.resize) {
-                        movedWnd.element.previousElementSibling.remove();
+                        if (movedWnd.element.previousElementSibling && movedWnd.element.previousElementSibling.classList.contains("layout__resize")) {
+                            movedWnd.element.previousElementSibling.remove();
+                        } else if (movedWnd.element.nextElementSibling && movedWnd.element.nextElementSibling.classList.contains("layout__resize")) {
+                            movedWnd.element.nextElementSibling.remove();
+                        }
                         movedWnd.resize = undefined;
                     }
                     if (after) {

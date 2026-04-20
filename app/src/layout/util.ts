@@ -864,7 +864,8 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     }
     resizeElement.classList.add("layout__resize");
     if (after) {
-        obj.element.insertAdjacentElement("beforebegin", resizeElement);
+        obj.element.insertAdjacentElement((obj.element.previousElementSibling && !obj.element.previousElementSibling.classList.contains("layout__resize")) ?
+            "beforebegin" : "afterend", resizeElement);
     } else {
         obj.element.insertAdjacentElement("afterend", resizeElement);
     }

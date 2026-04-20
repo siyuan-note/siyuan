@@ -668,7 +668,15 @@ func setFollowSystemLockScreen(c *gin.Context) {
 func getSysFonts(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	ret.Data = util.LoadSysFonts()
+	fonts := util.LoadSysFonts()
+
+	// TODO: 字重 https://github.com/siyuan-note/siyuan/issues/10313
+	var families []string
+	for _, font := range fonts {
+		families = append(families, font.Family)
+	}
+	families = gulu.Str.RemoveDuplicatedElem(families)
+	ret.Data = families
 }
 
 func version(c *gin.Context) {

@@ -1,12 +1,11 @@
 /// #if !MOBILE
-import {getAllEditor, getAllModels, getAllWnds} from "../../layout/getAll";
+import {getAllModels, getAllWnds} from "../../layout/getAll";
 /// #endif
 import {addLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {hideAllElements, hideElements} from "../ui/hideElements";
 import {hasClosestByClassName} from "../util/hasClosest";
-import {reloadProtyle} from "../util/reload";
 import {resize} from "../util/resize";
 import {disabledProtyle, enableProtyle} from "../util/onGet";
 import {isWindow} from "../../util/functions";
@@ -20,16 +19,6 @@ export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
     hideElements(["toolbar"], protyle);
     fetchPost(`/api/format/net${type}2LocalAssets`, {
         id: protyle.block.rootID
-    }, () => {
-        /// #if MOBILE
-        reloadProtyle(protyle, false);
-        /// #else
-        getAllEditor().forEach(item => {
-            if (item.protyle.block.rootID === protyle.block.rootID) {
-                reloadProtyle(item.protyle, item.protyle.element === protyle.element);
-            }
-        });
-        /// #endif
     });
 };
 

@@ -80,7 +80,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret = &File{}
 	ret.Path = fileInfo.path
 	ret.Size = uint64(fileInfo.size)
-	ret.Name = ial["title"] + ".sy"
+	ret.Name = ial["title"]
 	ret.Icon = ial["icon"]
 	ret.ID = ial["id"]
 	ret.Name1 = ial["name"]

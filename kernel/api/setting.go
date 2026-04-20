@@ -329,9 +329,13 @@ func setEditor(c *gin.Context) {
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude
 	oldReadOnly := model.Conf.Editor.ReadOnly
 
+	recentFonts := model.Conf.Editor.RecentFonts
+	if nil == recentFonts {
+		recentFonts = []string{}
+	}
+	editor.RecentFonts = make([]string, len(recentFonts))
+	copy(editor.RecentFonts, recentFonts)
 	if oldFontFamily != editor.FontFamily {
-		editor.RecentFonts = make([]string, len(model.Conf.Editor.RecentFonts))
-		copy(editor.RecentFonts, model.Conf.Editor.RecentFonts)
 		editor.AddRecentFont(editor.FontFamily)
 	}
 

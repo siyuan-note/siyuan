@@ -1,7 +1,9 @@
 import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
+import {escapeHtml} from "../../util/escape";
 
 export const openFontSelector = (currentFont: string, recentFonts: string[], callback: (font: string) => void) => {
+    recentFonts = recentFonts || [];
     let searchValue = "";
     let allFonts: string[] = [];
     let filteredFonts: string[] = [];
@@ -18,14 +20,46 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             "</mark>" + text.substring(index + search.length);
     };
 
+    const escapeAndHighlight = (text: string, search: string): string => {
+        const escaped = escapeHtml(text);
+        if (!search) return escaped;
+        const lowerEscaped = escaped.toLowerCase();
+        const lowerSearch = search.toLowerCase();
+        const index = lowerEscaped.indexOf(lowerSearch);
+        if (index === -1) return escaped;
+        return escaped.substring(0, index) +
+            "<mark>" + escaped.substring(index, index + lowerSearch.length) +
+            "</mark>" + escaped.substring(index + lowerSearch.length);
+    };
+
     const renderFontList = (container: HTMLElement, fonts: string[], startIndex: number = 0) => {
         container.innerHTML = "";
-        if (fonts.length === 0) {
+        if (fonts.length === 0 && !searchValue) {
             container.innerHTML = `<div class="font-selector__empty">
                 <span>${window.siyuan.languages.emptyContent}</span>
             </div>`;
             return;
         }
+
+        // Default font option (reset to empty string)
+        const isDefaultHighlighted = selectedIndex === -1 && (!searchValue || window.siyuan.languages.default.toLowerCase().includes(searchValue.toLowerCase()));
+        const isDefaultSelected = currentFont === "";
+        const defaultItem = document.createElement("div");
+        defaultItem.className = "font-selector__item" +
+            (isDefaultSelected ? " font-selector__item--selected" : "") +
+            (isDefaultHighlighted && !isDefaultSelected ? " font-selector__item--hovered" : "");
+        defaultItem.setAttribute("data-index", "-1");
+        defaultItem.innerHTML = `<span class="font-selector__font-name" style="font-family:var(--b3-font-family)">${highlightText(window.siyuan.languages.default, searchValue)}</span>`;
+        defaultItem.addEventListener("click", () => {
+            dialog.destroy();
+            callback("");
+        });
+        defaultItem.addEventListener("mouseenter", () => {
+            selectedIndex = -1;
+            updateSelection(container, -1);
+        });
+        container.appendChild(defaultItem);
+
         fonts.forEach((font, index) => {
             const item = document.createElement("div");
             const isSelected = font === currentFont;
@@ -34,7 +68,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
                 (isSelected ? " font-selector__item--selected" : "") +
                 (isHighlighted && !isSelected ? " font-selector__item--hovered" : "");
             item.setAttribute("data-index", (startIndex + index).toString());
-            item.innerHTML = `<span class="font-selector__font-name" style="font-family:'${font}',var(--b3-font-family)">${highlightText(font, searchValue)}</span>`;
+            item.innerHTML = `<span class="font-selector__font-name" style="font-family:${CSS.escape(font)},var(--b3-font-family)">${escapeAndHighlight(font, searchValue)}</span>`;
             item.addEventListener("click", () => {
                 dialog.destroy();
                 callback(font);
@@ -97,7 +131,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             </div>
         </div>`,
         width: "480px",
-        height: "520px",
+        height: "600px",
     });
 
     const searchInput = dialog.element.querySelector("#fontSearch") as HTMLInputElement;
@@ -123,7 +157,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
                 const item = document.createElement("div");
                 const isSelected = font === currentFont;
                 item.className = "font-selector__recent-item" + (isSelected ? " font-selector__item--selected" : "");
-                item.innerHTML = `<span class="font-selector__font-name" style="font-family:'${font}',var(--b3-font-family)">${font}</span>`;
+                item.innerHTML = `<span class="font-selector__font-name" style="font-family:${CSS.escape(font)},var(--b3-font-family)">${escapeHtml(font)}</span>`;
                 item.addEventListener("click", () => {
                     dialog.destroy();
                     callback(font);
@@ -159,24 +193,38 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
         if (e.key === "ArrowDown") {
             e.preventDefault();
             const maxIndex = filteredFonts.length - 1;
-            if (selectedIndex < maxIndex) {
-                selectedIndex++;
-                updateSelection(allFontsList, 0);
-            } else if (selectedIndex === -1 && maxIndex >= 0) {
+            if (selectedIndex === -1) {
                 selectedIndex = 0;
                 updateSelection(allFontsList, 0);
+            } else if (selectedIndex < maxIndex) {
+                selectedIndex++;
+                updateSelection(allFontsList, 0);
+            } else if (selectedIndex === maxIndex) {
+                selectedIndex = -1;
+                updateSelection(allFontsList, -1);
             }
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
-            if (selectedIndex > 0) {
+            if (selectedIndex === -1) {
+                selectedIndex = filteredFonts.length - 1;
+                updateSelection(allFontsList, 0);
+            } else if (selectedIndex > 0) {
                 selectedIndex--;
                 updateSelection(allFontsList, 0);
+            } else if (selectedIndex === 0) {
+                selectedIndex = -1;
+                updateSelection(allFontsList, -1);
             }
-        } else if (e.key === "Enter" && selectedIndex >= 0 && selectedIndex < filteredFonts.length) {
+        } else if (e.key === "Enter") {
             e.preventDefault();
-            const selectedFont = filteredFonts[selectedIndex];
-            dialog.destroy();
-            callback(selectedFont);
+            if (selectedIndex === -1) {
+                dialog.destroy();
+                callback("");
+            } else if (selectedIndex >= 0 && selectedIndex < filteredFonts.length) {
+                const selectedFont = filteredFonts[selectedIndex];
+                dialog.destroy();
+                callback(selectedFont);
+            }
         } else if (e.key === "Escape") {
             dialog.destroy();
         }

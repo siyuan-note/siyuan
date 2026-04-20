@@ -118,7 +118,7 @@
 
     &__recent {
         flex-shrink: 0;
-        max-height: 30%;
+        max-height: 108px;
         overflow: hidden;
 
         &-list {
@@ -126,6 +126,8 @@
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
+            max-height: 108px;
+            overflow: hidden;
         }
     }
 
@@ -181,6 +183,7 @@
         border-radius: 6px;
         cursor: pointer;
         transition: all 0.12s ease;
+        overflow: hidden;
 
         &--hovered {
             background: var(--b3-theme-surface-variant);
@@ -203,12 +206,14 @@
         font-size: 14px;
         color: var(--b3-theme-on-surface);
         line-height: 1.4;
+        overflow: hidden;
+        word-break: break-all;
 
         mark {
-            background: var(--b3-theme-primary-lightest);
-            color: var(--b3-theme-primary);
+            background: var(--b3-theme-secondary-lightest);
+            color: var(--b3-theme-secondary);
             border-radius: 2px;
-            padding: 0 2px;
+            padding: 1px 2px;
         }
     }
 

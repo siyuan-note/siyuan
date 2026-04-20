@@ -123,20 +123,21 @@ func (w *Worker) RunSync(fn func() (result any, err any), ctx context.Context) (
 		// The worker will continue to execute and write to resCh (buffered channel, no leak).
 		resCh <- Result{result, err}
 	}, ctx)
+
 	if err != nil {
 		return
 	}
+
 	select {
 	case r := <-resCh:
 		result = r.value
 		err = r.err
-		return
 	case <-ctx.Done():
 		// Task has been enqueued, the worker will execute and write to resCh (buffered channel, no leak).
 		// The caller gives up waiting, but there are no side effects on the worker side.
 		err = ctx.Err()
-		return
 	}
+	return
 }
 
 // Close gracefully closes the queue, waiting for all enqueued tasks to complete before returning.

@@ -141,7 +141,7 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 	// siyuan.storage.get(path) -> Promise<Uint8Array>
 	storage.SetPropertyStr("get", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -161,27 +161,19 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			content := ctx.NewObject()
-			ObjectSetDataMethods(ctx, content, data)
+			ObjectSetDataMethods(p, ctx, content, data)
 
 			result = content
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(result.(*qjs.Value))
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.storage.get: %w", err)
+		})
 		return
 	}, true))
 
 	// siyuan.storage.put(path, content) -> Promise<void>
 	storage.SetPropertyStr("put", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 2 {
 				err = fmt.Errorf("path and content required")
@@ -204,24 +196,17 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 				err = fmt.Errorf("failed to write file: %w", writeErr)
 				return
 			}
-			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(nil)
-			}
-		}, p.context)
 
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", runError)))
-		}
+			return
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.storage.put: %w", err)
+		})
 		return
 	}, true))
 
 	// siyuan.storage.remove(path) -> Promise<void>
 	storage.SetPropertyStr("remove", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -244,23 +229,15 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 				return
 			}
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(nil)
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.storage.remove: %w", err)
+		})
 		return
 	}, true))
 
 	// siyuan.storage.list(path) -> Promise<Entry[]>
 	storage.SetPropertyStr("list", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -275,7 +252,7 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			entries, readErr := os.ReadDir(abs)
 			if readErr != nil {
-				err = fmt.Errorf("failed to read directory: %w", abs, readErr)
+				err = fmt.Errorf("failed to read directory: %w", readErr)
 				return
 			}
 
@@ -295,17 +272,9 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			result, err = goValueToJsValue(ctx, results)
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(result.(*qjs.Value))
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.storage.list: %w", err)
+		})
 		return
 	}, true))
 
@@ -320,7 +289,7 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 // injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
 func injectFetch(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	siyuan.SetPropertyStr("fetch", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -416,20 +385,12 @@ func injectFetch(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			response.SetPropertyStr("statusText", ctx.NewString(resp.Status))
 			response.SetPropertyStr("headers", respHeadersJs)
 
-			ObjectSetDataMethods(ctx, response, respBody)
+			ObjectSetDataMethods(p, ctx, response, respBody)
 			result = response
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(result.(*qjs.Value))
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.fetch: %w", err)
+		})
 		return
 	}, true))
 	return nil
@@ -767,7 +728,12 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	rpc := ctx.NewObject()
 
 	rpc.SetPropertyStr("bind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		defer func() {
+			if r := recover(); r != nil {
+				logging.LogErrorf("qjs panic during siyuan.rpc.bind: %v", r)
+			}
+		}()
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 2 {
 				err = fmt.Errorf("name and function required")
@@ -794,22 +760,14 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.bind: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(nil)
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.bind: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.rpc.bind: %w", err)
+		})
 		return
 	}, true))
 
 	rpc.SetPropertyStr("unbind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 2 {
 				err = fmt.Errorf("name and function required")
@@ -830,22 +788,14 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.unbind: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(nil)
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.unbind: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.rpc.unbind: %w", err)
+		})
 		return
 	}, true))
 
 	rpc.SetPropertyStr("broadcast", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runError := p.worker.Run(func() (result any, err any) {
+		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("method required")
@@ -869,17 +819,9 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			p.BroadcastNotification(method, params)
 			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.broadcast: %w", err.(error))))
-			} else {
-				this.Promise().Resolve(nil)
-			}
-		}, p.context)
-
-		if runError != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.broadcast: %w", runError)))
-		}
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.rpc.broadcast: %w", err)
+		})
 		return
 	}, true))
 
@@ -959,7 +901,11 @@ func PromiseRun(p *KernelPlugin, ctx *qjs.Context, this *qjs.This, fn func() (re
 		if err != nil {
 			this.Promise().Reject(ctx.NewError(errorf(err.(error))))
 		} else {
-			this.Promise().Resolve(result.(*qjs.Value))
+			if result != nil {
+				this.Promise().Resolve(result.(*qjs.Value))
+			} else {
+				this.Promise().Resolve(nil)
+			}
 		}
 	}, p.context)
 
@@ -968,53 +914,33 @@ func PromiseRun(p *KernelPlugin, ctx *qjs.Context, this *qjs.This, fn func() (re
 	}
 }
 
-func ObjectSetDataMethods(ctx *qjs.Context, object *qjs.Value, data []byte) {
+func ObjectSetDataMethods(p *KernelPlugin, ctx *qjs.Context, object *qjs.Value, data []byte) {
 	object.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("qjs panic during response.text: %v", r)
-			}
-
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-			} else {
-				this.Promise().Resolve(result)
-			}
-		}()
-
-		result = ctx.NewString(string(data))
+		PromiseRun(p, ctx, this, func() (result any, err any) {
+			result = ctx.NewString(string(data))
+			return
+		}, func(err error) error {
+			return fmt.Errorf("response.text: %w", err)
+		})
 		return
 	}, true))
 	object.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("qjs panic during response.json: %v", r)
-			}
-
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-			} else {
-				this.Promise().Resolve(result)
-			}
-		}()
-
-		result, err = parseJsonStringToJsValue(ctx, string(data))
+		PromiseRun(p, ctx, this, func() (result any, err any) {
+			v, e := parseJsonStringToJsValue(ctx, string(data))
+			result, err = v, e
+			return
+		}, func(err error) error {
+			return fmt.Errorf("response.json: %w", err)
+		})
 		return
 	}, true))
 	object.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("qjs panic during response.arrayBuffer: %v", r)
-			}
-
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err))
-			} else {
-				this.Promise().Resolve(result)
-			}
-		}()
-
-		result = ctx.NewArrayBuffer(data)
+		PromiseRun(p, ctx, this, func() (result any, err any) {
+			result = ctx.NewArrayBuffer(data)
+			return
+		}, func(err error) error {
+			return fmt.Errorf("response.arrayBuffer: %w", err)
+		})
 		return
 	}, true))
 }
@@ -1044,8 +970,10 @@ func invokeJsLifecycleHook(ctx *qjs.Context, name string) (result *qjs.Value, er
 		}
 		if result != nil {
 			if result.IsPromise() {
-				// Await if Promise
-				result, err = result.Await()
+				// ⚠️ Await can block other promises‘ await inside the hook
+				// result, err = result.Await()
+
+				// ⚠️ then / cache / finally can’t be called
 			}
 		}
 	}
@@ -1239,6 +1167,7 @@ func invokeRpcMethod(ctx *qjs.Context, rpcMethodName string, rpcMethod *qjs.Valu
 
 	// Await if Promise
 	if result != nil && result.IsPromise() {
+		// TODO: ⚠️ Await can block other promises‘ await inside the hook
 		result, err = result.Await()
 		if err != nil {
 			return nil, &JsonRpcError{
@@ -1270,5 +1199,18 @@ func invokeRpcMethod(ctx *qjs.Context, rpcMethodName string, rpcMethod *qjs.Valu
 		}
 	}
 
+	return
+}
+
+// PromiseAwait is a helper that checks if the given value is a Promise and awaits it if so, returning the resolved value or an error if it's not a Promise or if awaiting fails.
+func PromiseAwait(promise any) (result *qjs.Value, err error) {
+	if promise != nil {
+		promiseValue, ok := promise.(*qjs.Value)
+		if ok && promiseValue.IsPromise() {
+			result, err = promiseValue.Await()
+			return
+		}
+	}
+	err = fmt.Errorf("value is not a Promise")
 	return
 }

@@ -486,4 +486,6 @@ func (p *KernelPlugin) invokeHook(name string) {
 	p.worker.RunSync(func() (any, any) {
 		return invokeJsLifecycleHook(ctx, name)
 	}, p.context)
+
+	// TODO: await hook promise
 }

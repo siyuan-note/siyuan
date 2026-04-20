@@ -561,7 +561,7 @@ func injectSocket(ctx *qjs.Context, p *KernelPlugin, siyuan *qjs.Value) error {
 		invokeWsHook := func(name string, args ...*qjs.Value) {
 			hook := wsObj.GetPropertyStr(name)
 			if hook != nil && hook.IsFunction() {
-				wsObj.InvokeJS(name, args...)
+				ctx.Invoke(hook, wsObj, args...)
 			}
 		}
 
@@ -930,10 +930,22 @@ func ObjectSeal(ctx *qjs.Context, object *qjs.Value) (err error) {
 	}()
 
 	Object := ctx.Global().GetPropertyStr("Object")
-	if Object == nil || !Object.IsObject() {
+	if Object == nil {
 		return fmt.Errorf("Object not found in global context")
 	}
-	_, invokeErr := Object.InvokeJS("seal", object)
+	if !Object.IsObject() {
+		return fmt.Errorf("Object is not an object in global context")
+	}
+
+	seal := Object.GetPropertyStr("seal")
+	if seal == nil {
+		return fmt.Errorf("Object.seal not found in global context")
+	}
+	if !seal.IsFunction() {
+		return fmt.Errorf("Object.seal is not a function in global context")
+	}
+
+	_, invokeErr := ctx.Invoke(seal, Object, object)
 	if invokeErr != nil {
 		return invokeErr
 	}
@@ -949,10 +961,22 @@ func ObjectFreeze(ctx *qjs.Context, object *qjs.Value) (err error) {
 	}()
 
 	Object := ctx.Global().GetPropertyStr("Object")
-	if Object == nil || !Object.IsObject() {
+	if Object == nil {
 		return fmt.Errorf("Object not found in global context")
 	}
-	_, invokeErr := Object.InvokeJS("freeze", object)
+	if !Object.IsObject() {
+		return fmt.Errorf("Object is not an object in global context")
+	}
+
+	freeze := Object.GetPropertyStr("freeze")
+	if freeze == nil {
+		return fmt.Errorf("Object.freeze not found in global context")
+	}
+	if !freeze.IsFunction() {
+		return fmt.Errorf("Object.freeze is not a function in global context")
+	}
+
+	_, invokeErr := ctx.Invoke(freeze, Object, object)
 	if invokeErr != nil {
 		return invokeErr
 	}
@@ -960,7 +984,7 @@ func ObjectFreeze(ctx *qjs.Context, object *qjs.Value) (err error) {
 }
 
 // invokeJsLifecycleHook calls a JS lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
-func invokeJsLifecycleHook(ctx *qjs.Context, name string, args ...any) (result *qjs.Value, err error) {
+func invokeJsLifecycleHook(ctx *qjs.Context, name string) (result *qjs.Value, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("qjs panic during invoke siyuan.plugin.%s: %v", name, r)
@@ -978,7 +1002,7 @@ func invokeJsLifecycleHook(ctx *qjs.Context, name string, args ...any) (result *
 
 	hook := plugin.GetPropertyStr(name)
 	if hook != nil && hook.IsFunction() {
-		result, err = plugin.Invoke(name, args...)
+		result, err = ctx.Invoke(hook, plugin)
 		if err != nil {
 			return
 		}

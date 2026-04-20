@@ -456,7 +456,7 @@ func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
 }
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
-func (p *KernelPlugin) invokeHook(name string, args ...any) (result *qjs.Value, err error) {
+func (p *KernelPlugin) invokeHook(name string) (result *qjs.Value, err error) {
 	runtime := p.Runtime()
 	if runtime == nil {
 		return nil, fmt.Errorf("QJS runtime not initialized")
@@ -464,5 +464,5 @@ func (p *KernelPlugin) invokeHook(name string, args ...any) (result *qjs.Value, 
 
 	ctx := runtime.Context()
 
-	return invokeJsLifecycleHook(ctx, name, args...)
+	return invokeJsLifecycleHook(ctx, name)
 }

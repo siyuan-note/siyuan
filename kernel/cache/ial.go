@@ -17,9 +17,8 @@
 package cache
 
 import (
-	"strings"
+	"maps"
 
-	"github.com/88250/lute/editor"
 	"github.com/dgraph-io/ristretto"
 )
 
@@ -40,9 +39,7 @@ func GetDocIAL(p string) (ret map[string]string) {
 	}
 
 	ret = map[string]string{}
-	for k, v := range ial.(map[string]string) {
-		ret[k] = strings.ReplaceAll(v, editor.IALValEscNewLine, "\n")
-	}
+	maps.Copy(ret, ial.(map[string]string))
 	return
 }
 

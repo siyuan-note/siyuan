@@ -199,7 +199,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		if "" == title {
 			title = "Untitled"
 		}
-		hPathBuilder.WriteString(util.UnescapeHTML(title))
+		hPathBuilder.WriteString(title)
 		hPathBuilder.WriteString("/")
 	}
 	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
@@ -228,6 +228,10 @@ func DocIAL(absPath string) (ret map[string]string) {
 	}
 	file.Close()
 	filelock.Unlock(absPath)
+
+	for k, v := range ret {
+		ret[k] = html.UnescapeAttrVal(v)
+	}
 	return
 }
 
@@ -386,7 +390,7 @@ func removeUnescapedUnicodeNull(data []byte) []byte {
 }
 
 func afterWriteTree(tree *parse.Tree) {
-	docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
+	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	cache.PutDocIAL(tree.Path, docIAL)
 }
 

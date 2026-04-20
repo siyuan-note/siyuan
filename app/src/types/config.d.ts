@@ -450,6 +450,7 @@ declare namespace Config {
          * The font used in the editor
          */
         fontFamily: string;
+        recentFonts: string[];
         /**
          * The font size used in the editor
          */

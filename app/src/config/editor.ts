@@ -10,7 +10,7 @@ import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
 import {resize} from "../protyle/util/resize";
 import {setReadOnly} from "./util/setReadOnly";
-import {Menu} from "../plugin/Menu";
+import {openFontSelector} from "./util/FontSelector";
 
 export const editor = {
     element: undefined as Element,
@@ -435,41 +435,13 @@ export const editor = {
 
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
         fontFamilyElement.addEventListener("click", () => {
-            fetchPost("/api/system/getSysFonts", {}, (response) => {
-                const fontMenu = new Menu();
-                fontMenu.addItem({
-                    iconHTML: "",
-                    checked: window.siyuan.config.editor.fontFamily === "",
-                    label: `<div style='var(--b3-font-family);'>${window.siyuan.languages.default}</div>`,
-                    click: () => {
-                        if ("" === window.siyuan.config.editor.fontFamily) {
-                            return;
-                        }
-                        fontFamilyElement.value = "";
-                        fontFamilyElement.style.fontFamily = "";
-                        setEditor();
-                    }
-                });
-                response.data.forEach((item: string) => {
-                    fontMenu.addItem({
-                        iconHTML: "",
-                        checked: window.siyuan.config.editor.fontFamily === item,
-                        label: `<div style='font-family:"${item}",var(--b3-font-family);'>${item}</div>`,
-                        click: () => {
-                            if (item === window.siyuan.config.editor.fontFamily) {
-                                return;
-                            }
-                            fontFamilyElement.value = item;
-                            fontFamilyElement.style.fontFamily = item + ",var(--b3-font-family)";
-                            setEditor();
-                        }
-                    });
-                });
-                const rect = fontFamilyElement.getBoundingClientRect();
-                fontMenu.open({
-                    x: rect.left,
-                    y: rect.bottom
-                });
+            openFontSelector(window.siyuan.config.editor.fontFamily, window.siyuan.config.editor.recentFonts, (font) => {
+                if (font === window.siyuan.config.editor.fontFamily) {
+                    return;
+                }
+                fontFamilyElement.value = font;
+                fontFamilyElement.style.fontFamily = font ? font + ",var(--b3-font-family)" : "";
+                setEditor();
             });
         });
 

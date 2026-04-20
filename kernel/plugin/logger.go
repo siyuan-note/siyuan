@@ -20,8 +20,6 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
-
-	"github.com/fastschema/qjs"
 )
 
 // KernelPluginLogger splits writes by \n and forwards each line to a logging function.
@@ -44,33 +42,4 @@ func (w *KernelPluginLogger) Write(p []byte) (int, error) {
 		}
 	}
 	return len(p), nil
-}
-
-// loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
-func loggerWrapper(ctx *qjs.Context, pluginName string, logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
-	return func(this *qjs.This) (result *qjs.Value, err error) {
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("qjs panic during invoke siyuan.logger.%s: %v", pluginName, r)
-			}
-		}()
-
-		// Get arguments via this.Args()
-		args := this.Args()
-		if len(args) < 1 {
-			result = ctx.NewUndefined()
-			return
-		}
-
-		parts := make([]string, 0, len(args))
-		for _, arg := range args {
-			parts = append(parts, arg.String())
-		}
-		msg := strings.Join(parts, " ")
-
-		logFn("[plugin:%s] %s", pluginName, msg)
-
-		result = ctx.NewUndefined()
-		return
-	}
 }

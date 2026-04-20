@@ -17,6 +17,7 @@
 package plugin
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -81,6 +82,8 @@ type KernelPlugin struct {
 
 	state   atomic.Int64                //  PluginState
 	runtime atomic.Pointer[qjs.Runtime] // *qjs.Runtime
+	worker  *Worker                     // Worker for serializing plugin tasks (e.g. RPC calls) on a single goroutine
+	context context.Context             // Context for managing plugin lifecycle and cancellation
 
 	rpcMethods sync.Map // registered JSON-RPC methods
 
@@ -99,9 +102,13 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		Petal: petal,
 		token: token,
 
+		worker:  NewWorker(64),
+		context: context.Background(),
+
 		sockets:   make(map[*websocket.Conn]bool),
 		socketMus: make(map[*websocket.Conn]*sync.Mutex),
 	}
+
 	plugin.state.Store(int64(PluginStateReady))
 	plugin.runtime.Store(nil)
 	return plugin
@@ -115,6 +122,18 @@ func (p *KernelPlugin) State() PluginState {
 // Runtime returns the plugin's QJS runtime, or nil if not initialized (safe for concurrent reads).
 func (p *KernelPlugin) Runtime() *qjs.Runtime {
 	return p.runtime.Load()
+}
+
+func (p *KernelPlugin) Context() *qjs.Context {
+	runtime := p.Runtime()
+	if runtime == nil {
+		return nil
+	}
+	context := runtime.Context()
+	if context == nil {
+		return nil
+	}
+	return context
 }
 
 // close frees the QJS runtime.
@@ -213,6 +232,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	p.state.Store(int64(PluginStateStopping))
 
 	p.onUnload()
+	p.worker.Close()
 
 	p.rpcMethods.Clear()
 
@@ -391,19 +411,19 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	}()
 
 	state := p.State()
-	runtime := p.Runtime()
 
 	if state != PluginStateRunning {
 		return nil, &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.state),
+			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.State()),
 		}
 	}
 
-	if runtime == nil {
+	ctx := p.Context()
+	if ctx == nil {
 		return nil, &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("QJS runtime not initialized for plugin %s", p.Name),
+			Message: fmt.Sprintf("QJS context not initialized for plugin %s", p.Name),
 		}
 	}
 
@@ -415,9 +435,10 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}
 	}
 
-	ctx := runtime.Context()
-	rpcResult, rpcError = invokeRpcMethod(ctx, method, rpcMethod, params)
-	return
+	runResult, runError := p.worker.Run(func() (any, any) {
+		return invokeRpcMethod(ctx, method, rpcMethod, params)
+	}, p.context)
+	return runResult, runError.(*JsonRpcError)
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
@@ -456,13 +477,13 @@ func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
 }
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
-func (p *KernelPlugin) invokeHook(name string) (result *qjs.Value, err error) {
-	runtime := p.Runtime()
-	if runtime == nil {
-		return nil, fmt.Errorf("QJS runtime not initialized")
+func (p *KernelPlugin) invokeHook(name string) {
+	ctx := p.Context()
+	if ctx == nil {
+		return
 	}
 
-	ctx := runtime.Context()
-
-	return invokeJsLifecycleHook(ctx, name)
+	p.worker.Run(func() (any, any) {
+		return invokeJsLifecycleHook(ctx, name)
+	}, p.context)
 }

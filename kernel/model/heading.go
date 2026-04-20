@@ -399,7 +399,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (sr
 	headingNode.SetIALAttr("type", "doc")
 	headingNode.SetIALAttr("id", srcHeadingID)
 	headingNode.SetIALAttr("title", headingText)
-	headingNode.RemoveIALAttr("custom-hidden")
+	headingNode.RemoveIALAttr(DocHiddenAttr)
 	newTree.Root.KramdownIAL = headingNode.KramdownIAL
 
 	topLevel := treenode.TopHeadingLevel(newTree)

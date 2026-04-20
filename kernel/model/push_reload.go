@@ -139,12 +139,12 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	subFiles, err := os.ReadDir(subDir)
 	if err == nil {
 		for _, subFile := range subFiles {
-			if "true" == tree.Root.IALAttr("custom-hidden") {
+			if "true" == tree.Root.IALAttr(DocHiddenAttr) {
 				continue
 			}
 
 			subDocIAL := filesys.DocIAL(filepath.Join(subDir, subFile.Name()))
-			if "true" == subDocIAL["custom-hidden"] {
+			if "true" == subDocIAL[DocHiddenAttr] {
 				continue
 			}
 

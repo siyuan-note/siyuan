@@ -182,8 +182,8 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 
 	pushBlockAttrs(oldAttrs, node)
 
-	if ("true" == oldAttrs["custom-hidden"] && "true" != nameValues["custom-hidden"]) ||
-		"true" != oldAttrs["custom-hidden"] && "true" == nameValues["custom-hidden"] {
+	if ("true" == oldAttrs[DocHiddenAttr] && "true" != nameValues[DocHiddenAttr]) ||
+		"true" != oldAttrs[DocHiddenAttr] && "true" == nameValues[DocHiddenAttr] {
 		ReloadFiletree()
 	}
 

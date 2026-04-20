@@ -300,7 +300,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				continue
 			}
 			if ial := box.docIAL(parentDocPath); nil != ial {
-				if !showHidden && "true" == ial["custom-hidden"] {
+				if !showHidden && "true" == ial[DocHiddenAttr] {
 					continue
 				}
 
@@ -309,7 +309,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				if err == nil {
 					for _, subFile := range subFiles {
 						subDocFilePath := path.Join(file.path, subFile.Name())
-						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL["custom-hidden"] {
+						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL[DocHiddenAttr] {
 							continue
 						}
 
@@ -347,7 +347,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		}
 
 		if ial := box.docIAL(file.path); nil != ial {
-			if !showHidden && "true" == ial["custom-hidden"] {
+			if !showHidden && "true" == ial[DocHiddenAttr] {
 				continue
 			}
 
@@ -1090,6 +1090,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 const (
 	DailyNoteAttrPrefix = "custom-dailynote-"
 	NodeAttrTitleEmpty  = "custom-sy-title-empty"
+	DocHiddenAttr       = "custom-hidden"
 )
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {

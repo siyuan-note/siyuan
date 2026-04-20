@@ -111,6 +111,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (
 	listItemNode.SetIALAttr("id", srcListItemID)
 	listItemNode.SetIALAttr("title", listItemText)
 	listItemNode.RemoveIALAttr("fold")
+	listItemNode.RemoveIALAttr("custom-hidden")
 	newTree.Root.KramdownIAL = listItemNode.KramdownIAL
 	srcLiParent := listItemNode.Parent
 	listItemNode.Unlink()

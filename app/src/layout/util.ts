@@ -703,7 +703,8 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             blockId: json.blockId,
             mode: json.mode,
             scrollPosition: json.scrollPosition,
-            action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
+            action: Array.isArray(json.action) ? json.action.concat(Constants.CB_GET_FOCUS) :
+                (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]),
         });
     }
     return model;

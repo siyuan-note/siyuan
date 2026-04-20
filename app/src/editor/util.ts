@@ -361,7 +361,6 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     editor.parent.parent.switchTab(editor.parent.headElement);
     editor.parent.parent.showHeading();
     if (options.mode !== "preview" && !editor.editor.protyle.preview.element.classList.contains("fn__none")) {
-        // TODO https://github.com/siyuan-note/siyuan/issues/3059
         return true;
     }
     if (options.zoomIn) {
@@ -441,9 +440,6 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     // https://github.com/siyuan-note/siyuan/issues/16445
     if (options.action?.includes(Constants.CB_GET_OUTLINE)) {
         hideElements(["select"], editor.editor.protyle);
-    }
-    if (options.mode) {
-        setEditMode(editor.editor.protyle, options.mode);
     }
 };
 
@@ -633,6 +629,9 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
             let blockId = "";
             if (protyle && protyle.block) {
                 blockId = protyle.block.rootID;
+                if (!blockId && reload && item.type === "local") {
+                    blockId = item.blockId;
+                }
             }
             if (blockId === item.blockId && !reload && item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
                 return;

@@ -12,6 +12,8 @@ import {App} from "../index";
 import {exportByMobile, isInAndroid, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
 import {showMessage} from "../dialog/message";
+import {Editor} from "../editor";
+import {setEditMode} from "../protyle/util/setEditMode";
 
 export const exportAsset = (src: string) => {
     return {
@@ -164,7 +166,11 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         label: window.siyuan.languages.preview,
         click: () => {
             ids.forEach((id) => {
-                openFileById({app, id, mode: "preview"});
+                openFileById({
+                    app, id, mode: "preview", afterOpen(editor: Editor) {
+                        setEditMode(editor.editor.protyle, "preview");
+                    }
+                });
             });
         }
     });

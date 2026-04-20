@@ -351,6 +351,10 @@ func PushReloadProtyle(rootID string) {
 	BroadcastByType("protyle", "reload", 0, "", rootID)
 }
 
+func PushIsSyncing(rootID string, isSyncing bool) {
+	BroadcastByType("protyle", "isSyncing", 0, "", map[string]any{"rootID": rootID, "isSyncing": isSyncing})
+}
+
 func PushSetRefDynamicText(rootID, blockID, defBlockID, refText string) {
 	BroadcastByType("main", "setRefDynamicText", 0, "", map[string]any{"rootID": rootID, "blockID": blockID, "defBlockID": defBlockID, "refText": refText})
 }

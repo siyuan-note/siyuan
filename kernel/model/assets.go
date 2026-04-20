@@ -246,7 +246,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	err = netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, true)
 	go func() {
 		time.Sleep(128 * time.Microsecond)
-		ReloadProtyle(rootID)
+		util.PushIsSyncing(rootID, false)
 	}()
 	return
 }

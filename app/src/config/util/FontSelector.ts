@@ -22,7 +22,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
         container.innerHTML = "";
         if (fonts.length === 0) {
             container.innerHTML = `<div class="font-selector__empty">
-                <span>${window.siyuan.languages.empty || "无匹配字体"}</span>
+                <span>${window.siyuan.languages.emptyContent}</span>
             </div>`;
             return;
         }
@@ -77,7 +77,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             <div class="font-selector__recent" id="recentFontsContainer">
                 <div class="font-selector__section-header">
                     <svg class="font-selector__section-icon"><use xlink:href="#iconStar"></use></svg>
-                    <span class="font-selector__section-title">${window.siyuan.languages.recentItems || "最近"}</span>
+                    <span class="font-selector__section-title">${window.siyuan.languages.recentDocs}</span>
                 </div>
                 <div class="font-selector__recent-list" id="recentFontsList"></div>
             </div>
@@ -85,7 +85,7 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             <div class="font-selector__all" id="allFontsContainer">
                 <div class="font-selector__section-header">
                     <svg class="font-selector__section-icon"><use xlink:href="#iconFont"></use></svg>
-                    <span class="font-selector__section-title">${window.siyuan.languages.allItems || "全部"}</span>
+                    <span class="font-selector__section-title">${window.siyuan.languages.all}</span>
                     <span class="font-selector__count" id="fontCount">0</span>
                 </div>
                 <div class="font-selector__list" id="allFontsList"></div>

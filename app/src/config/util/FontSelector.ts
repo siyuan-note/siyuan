@@ -86,7 +86,11 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
         items.forEach((item, index) => {
             const itemIndex = startIndex + index;
             const isCurrentSelected = itemIndex === selectedIndex;
-            item.classList.toggle("font-selector__item--hovered", isCurrentSelected && !item.classList.contains("font-selector__item--selected"));
+            if (isCurrentSelected) {
+                item.classList.add("font-selector__item--hovered");
+            } else {
+                item.classList.remove("font-selector__item--hovered");
+            }
         });
         if (selectedIndex >= 0 && selectedIndex >= startIndex && selectedIndex < startIndex + items.length) {
             const targetItem = items[selectedIndex - startIndex];

@@ -185,7 +185,7 @@
         transition: all 0.12s ease;
         overflow: hidden;
 
-        &--hovered {
+        &:hover {
             background: var(--b3-theme-surface-variant);
         }
 

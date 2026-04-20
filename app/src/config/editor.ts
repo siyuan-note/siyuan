@@ -473,7 +473,7 @@ export const editor = {
 </div>`;
                             });
                             listElement.innerHTML = html || `<div class="b3-list-item b3-list-item--narrow b3-list-item--readonly"><div class="fn__flex-1">${window.siyuan.languages.emptyContent}</div></div>`;
-                            listElement.querySelector(`.b3-list-item[data-font="${window.siyuan.config.editor.fontFamily}"]`)
+                            listElement.querySelector(`.b3-list-item[data-font="${CSS.escape(window.siyuan.config.editor.fontFamily)}"]`)
                                 ?.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
                             listElement.querySelector(".b3-list-item")?.classList.add("b3-list-item--focus");
                         };

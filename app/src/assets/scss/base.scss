@@ -24,6 +24,7 @@
 @use "component/typography" as *;
 @use "pdf/pdf" as *;
 @use "business/config" as *;
+@use "business/fontSelector" as *;
 @use "business/search" as *;
 @use "pickr/pcr" as *;
 @use "viewerjs/viewer" as *;

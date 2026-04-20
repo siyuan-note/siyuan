@@ -14,17 +14,15 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
         const index = lowerText.indexOf(lowerSearch);
         if (index === -1) return text;
         return text.substring(0, index) +
-            "<mark style='background-color: var(--b3-theme-primary-lightest); color: inherit;'>" +
-            text.substring(index, index + search.length) +
-            "</mark>" +
-            text.substring(index + search.length);
+            "<mark>" + text.substring(index, index + search.length) +
+            "</mark>" + text.substring(index + search.length);
     };
 
     const renderFontList = (container: HTMLElement, fonts: string[], startIndex: number = 0) => {
         container.innerHTML = "";
         if (fonts.length === 0) {
-            container.innerHTML = `<div class="b3-list-item--readonly fn__flex-center" style="padding: 24px; opacity: 0.6; cursor: default">
-                <span>${window.siyuan.languages.empty || "无结果"}</span>
+            container.innerHTML = `<div class="font-selector__empty">
+                <span>${window.siyuan.languages.empty || "无匹配字体"}</span>
             </div>`;
             return;
         }
@@ -32,75 +30,81 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             const item = document.createElement("div");
             const isSelected = font === currentFont;
             const isHighlighted = index === selectedIndex;
-            item.className = "b3-list-item" + (isSelected ? " b3-list-item--focus" : "") + (isHighlighted ? " b3-list-item--current" : "");
+            item.className = "font-selector__item" +
+                (isSelected ? " font-selector__item--selected" : "") +
+                (isHighlighted && !isSelected ? " font-selector__item--hovered" : "");
             item.setAttribute("data-index", (startIndex + index).toString());
-            item.innerHTML = `<span class="b3-list-item__text" style="font-family:'${font}',var(--b3-font-family)">${highlightText(font, searchValue)}</span>
-                ${isSelected ? '<svg style="width: 16px; height: 16px; margin-left: auto; color: var(--b3-theme-primary);"><use xlink:href="#iconCheck"></use></svg>' : ""}`;
+            item.innerHTML = `<span class="font-selector__font-name" style="font-family:'${font}',var(--b3-font-family)">${highlightText(font, searchValue)}</span>`;
             item.addEventListener("click", () => {
                 dialog.destroy();
                 callback(font);
             });
             item.addEventListener("mouseenter", () => {
                 selectedIndex = startIndex + index;
-                updateSelection();
+                updateSelection(container, startIndex);
             });
             container.appendChild(item);
         });
     };
 
-    const updateSelection = () => {
-        const items = allFontsList.querySelectorAll(".b3-list-item");
+    const updateSelection = (container: HTMLElement, startIndex: number) => {
+        const items = container.querySelectorAll(".font-selector__item");
         items.forEach((item, index) => {
-            item.classList.toggle("b3-list-item--current", index === selectedIndex);
+            const itemIndex = startIndex + index;
+            const isCurrentSelected = itemIndex === selectedIndex;
+            item.classList.toggle("font-selector__item--hovered", isCurrentSelected && !item.classList.contains("font-selector__item--selected"));
         });
-        if (selectedIndex >= 0 && selectedIndex < items.length) {
-            items[selectedIndex].scrollIntoView({block: "nearest", behavior: "smooth"});
+        if (selectedIndex >= 0 && selectedIndex >= startIndex && selectedIndex < startIndex + items.length) {
+            const targetItem = items[selectedIndex - startIndex];
+            if (targetItem) {
+                targetItem.scrollIntoView({block: "nearest", behavior: "smooth"});
+            }
         }
     };
 
     const dialog = new Dialog({
         title: window.siyuan.languages.font,
-        content: `<div class="fn__flex-column" style="height: 100%">
-    <div class="b3-form__icon" style="padding: 8px 16px; position: relative;">
-        <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-        <input class="b3-text-field fn__block b3-form__icon-input" id="fontSearch" placeholder="${window.siyuan.languages.search}" style="padding-right: 32px">
-        <svg id="clearSearch" class="b3-form__icon-icon fn__pointer" style="position: absolute; right: 16px; top: 50%; transform: translateY(-50%); opacity: 0.5; display: none;"><use xlink:href="#iconCloseRound"></use></svg>
-    </div>
-    <div class="fn__hr--b" style="margin: 0"></div>
-    <div class="fn__flex-1" style="overflow: hidden">
-        <div class="fn__flex-column" style="height: 100%; overflow: hidden">
-            <div id="recentFontsContainer" class="fn__none" style="flex: 0 0 auto; max-height: 30%; overflow: auto; padding: 8px 0;">
-                <div class="b3-list-item--readonly" style="padding: 8px 16px 4px; opacity: 0.7; cursor: default; display: flex; align-items: center; gap: 4px;">
-                    <svg style="width: 14px; height: 14px; color: var(--b3-theme-primary);"><use xlink:href="#iconStar"></use></svg>
-                    <span class="b3-list-item__text">${window.siyuan.languages.recentItems || "最近使用"}</span>
-                    <span id="recentCount" style="opacity: 0.5; font-size: 12px;"></span>
+        content: `<div class="font-selector">
+            <div class="font-selector__search">
+                <div class="font-selector__search-wrapper">
+                    <svg class="font-selector__search-icon"><use xlink:href="#iconSearch"></use></svg>
+                    <input class="font-selector__search-input" id="fontSearch" placeholder="${window.siyuan.languages.search}" autocomplete="off" spellcheck="false">
+                    <button class="font-selector__clear-btn" id="clearSearch">
+                        <svg><use xlink:href="#iconCloseRound"></use></svg>
+                    </button>
                 </div>
-                <div id="recentFontsList" style="padding: 0 8px;"></div>
             </div>
-            <div id="allFontsContainer" style="flex: 1; overflow: auto; padding: 8px 0;">
-                <div class="b3-list-item--readonly" style="padding: 8px 16px 4px; opacity: 0.7; cursor: default; display: flex; align-items: center; gap: 4px;">
-                    <svg style="width: 14px; height: 14px;"><use xlink:href="#iconFont"></use></svg>
-                    <span class="b3-list-item__text">${window.siyuan.languages.allItems || "全部字体"} (<span id="fontCount">0</span>)</span>
+            <div class="font-selector__recent" id="recentFontsContainer">
+                <div class="font-selector__section-header">
+                    <svg class="font-selector__section-icon"><use xlink:href="#iconStar"></use></svg>
+                    <span class="font-selector__section-title">${window.siyuan.languages.recentItems || "最近"}</span>
                 </div>
-                <div id="allFontsList" style="padding: 0 8px;"></div>
+                <div class="font-selector__recent-list" id="recentFontsList"></div>
             </div>
-            <div id="loadingState" class="fn__flex-center" style="flex: 1; opacity: 0.6;">
-                <span>${window.siyuan.languages.loading || "加载中..."}</span>
+            <div class="font-selector__divider"></div>
+            <div class="font-selector__all" id="allFontsContainer">
+                <div class="font-selector__section-header">
+                    <svg class="font-selector__section-icon"><use xlink:href="#iconFont"></use></svg>
+                    <span class="font-selector__section-title">${window.siyuan.languages.allItems || "全部"}</span>
+                    <span class="font-selector__count" id="fontCount">0</span>
+                </div>
+                <div class="font-selector__list" id="allFontsList"></div>
             </div>
-        </div>
-    </div>
-</div>`,
-        width: "520px",
-        height: "480px",
+            <div class="font-selector__loading" id="loadingState">
+                <div class="font-selector__loading-dot"></div>
+                <div class="font-selector__loading-dot"></div>
+                <div class="font-selector__loading-dot"></div>
+            </div>
+        </div>`,
+        width: "480px",
+        height: "520px",
     });
 
     const searchInput = dialog.element.querySelector("#fontSearch") as HTMLInputElement;
     const clearSearchBtn = dialog.element.querySelector("#clearSearch") as HTMLElement;
     const recentFontsContainer = dialog.element.querySelector("#recentFontsContainer") as HTMLElement;
     const recentFontsList = dialog.element.querySelector("#recentFontsList") as HTMLElement;
-    const recentCount = dialog.element.querySelector("#recentCount") as HTMLElement;
     const allFontsList = dialog.element.querySelector("#allFontsList") as HTMLElement;
-    const allFontsContainer = dialog.element.querySelector("#allFontsContainer") as HTMLElement;
     const fontCount = dialog.element.querySelector("#fontCount") as HTMLElement;
     const loadingState = dialog.element.querySelector("#loadingState") as HTMLElement;
 
@@ -114,21 +118,21 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
     const showRecentFonts = () => {
         if (recentFonts.length > 0) {
             recentFontsContainer.classList.remove("fn__none");
-            recentCount.textContent = `(${recentFonts.length})`;
             recentFontsList.innerHTML = "";
             recentFonts.forEach((font) => {
                 const item = document.createElement("div");
                 const isSelected = font === currentFont;
-                item.className = "b3-list-item" + (isSelected ? " b3-list-item--focus" : "");
-                item.innerHTML = `<span class="b3-list-item__text" style="font-family:'${font}',var(--b3-font-family)">${font}</span>
-                    ${isSelected ? '<svg style="width: 16px; height: 16px; margin-left: auto; color: var(--b3-theme-primary);"><use xlink:href="#iconCheck"></use></svg>' : ""}`;
+                item.className = "font-selector__recent-item" + (isSelected ? " font-selector__item--selected" : "");
+                item.innerHTML = `<span class="font-selector__font-name" style="font-family:'${font}',var(--b3-font-family)">${font}</span>`;
                 item.addEventListener("click", () => {
                     dialog.destroy();
                     callback(font);
                 });
                 item.addEventListener("mouseenter", () => {
-                    recentFontsList.querySelectorAll(".b3-list-item").forEach(el => el.classList.remove("b3-list-item--current"));
-                    item.classList.add("b3-list-item--current");
+                    recentFontsList.querySelectorAll(".font-selector__recent-item").forEach(el => el.classList.remove("font-selector__item--hovered"));
+                    if (!item.classList.contains("font-selector__item--selected")) {
+                        item.classList.add("font-selector__item--hovered");
+                    }
                 });
                 recentFontsList.appendChild(item);
             });
@@ -139,14 +143,14 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
 
     searchInput.addEventListener("input", (e) => {
         searchValue = (e.target as HTMLInputElement).value;
-        clearSearchBtn.style.display = searchValue ? "block" : "none";
+        clearSearchBtn.classList.toggle("font-selector__clear-btn--visible", searchValue.length > 0);
         filterFonts();
     });
 
     clearSearchBtn.addEventListener("click", () => {
         searchInput.value = "";
         searchValue = "";
-        clearSearchBtn.style.display = "none";
+        clearSearchBtn.classList.remove("font-selector__clear-btn--visible");
         filterFonts();
         searchInput.focus();
     });
@@ -157,16 +161,16 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
             const maxIndex = filteredFonts.length - 1;
             if (selectedIndex < maxIndex) {
                 selectedIndex++;
-                updateSelection();
-            } else if (selectedIndex === -1) {
+                updateSelection(allFontsList, 0);
+            } else if (selectedIndex === -1 && maxIndex >= 0) {
                 selectedIndex = 0;
-                updateSelection();
+                updateSelection(allFontsList, 0);
             }
         } else if (e.key === "ArrowUp") {
             e.preventDefault();
             if (selectedIndex > 0) {
                 selectedIndex--;
-                updateSelection();
+                updateSelection(allFontsList, 0);
             }
         } else if (e.key === "Enter" && selectedIndex >= 0 && selectedIndex < filteredFonts.length) {
             e.preventDefault();
@@ -176,17 +180,6 @@ export const openFontSelector = (currentFont: string, recentFonts: string[], cal
         } else if (e.key === "Escape") {
             dialog.destroy();
         }
-    });
-
-    allFontsContainer.addEventListener("scroll", () => {
-        const containerRect = allFontsContainer.getBoundingClientRect();
-        const items = allFontsList.querySelectorAll(".b3-list-item");
-        items.forEach((item, index) => {
-            const itemRect = item.getBoundingClientRect();
-            if (itemRect.top >= containerRect.top && itemRect.bottom <= containerRect.bottom) {
-                selectedIndex = index;
-            }
-        });
     });
 
     fetchPost("/api/system/getSysFonts", {}, (response) => {

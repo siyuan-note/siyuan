@@ -34,10 +34,6 @@ import (
 )
 
 func RemoveTag(label string) (err error) {
-	if "" == label {
-		return
-	}
-
 	util.PushEndlessProgress(Conf.Language(116))
 	util.RandomSleep(1000, 2000)
 

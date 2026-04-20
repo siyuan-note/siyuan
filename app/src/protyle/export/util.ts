@@ -27,6 +27,7 @@ export const afterExport = (exportPath: string, msgId: string) => {
 
 export const exportImage = (id: string) => {
     const exportDialog = new Dialog({
+        disableAnimation: true,
         title: window.siyuan.languages.exportAsImage,
         content: `<div class="b3-dialog__content" style="${isMobile() ? "padding:8px;" : ""};background-color: var(--b3-theme-background)">
     <div style="${isMobile() ? "margin: 8px 0" : "padding: 48px;margin: 8px 0"}" class="export-img">

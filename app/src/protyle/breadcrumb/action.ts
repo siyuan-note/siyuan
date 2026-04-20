@@ -100,7 +100,7 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
 };
 
 export const updateReadonly = (target: Element, protyle: IProtyle) => {
-    if (!window.siyuan.config.readonly) {
+    if (!window.siyuan.config.readonly && protyle.element.getAttribute("disabled-forever") !== "true") {
         const isReadonly = target.querySelector("use").getAttribute("xlink:href") !== "#iconUnlock";
         if (window.siyuan.config.editor.readOnly) {
             if (isReadonly) {

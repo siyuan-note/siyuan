@@ -252,7 +252,7 @@ const setHTML = (options: {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
         if (protyle.element.hasAttribute("disabled-forever")) {
-            if (protyle.wysiwyg.element.getAttribute("custom-sy-readonly") === "false") {
+            if (protyle.wysiwyg.element.getAttribute("custom-sy-readonly") !== "true") {
                 protyle.disabled = false;
             }
             protyle.element.removeAttribute("disabled-forever");

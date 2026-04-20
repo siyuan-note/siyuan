@@ -24,6 +24,7 @@ type Editor struct {
 	FontSize                        int            `json:"fontSize"`                        // 字体大小
 	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
 	FontFamily                      string         `json:"fontFamily"`                      // 字体
+	RecentFonts                     []string       `json:"recentFonts"`                     // 最近使用的字体
 	CodeSyntaxHighlightLineNum      bool           `json:"codeSyntaxHighlightLineNum"`      // 代码块是否显示行号
 	CodeTabSpaces                   int            `json:"codeTabSpaces"`                   // 代码块中 Tab 转换空格数，配置为 0 则表示不转换
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
@@ -103,5 +104,22 @@ func NewEditor() *Editor {
 		HeadingEmbedMode:                0,
 		PasteURLAutoConvert:             false,
 		Markdown:                        util.MarkdownSettings,
+		RecentFonts:                     []string{},
+	}
+}
+
+func (e *Editor) AddRecentFont(fontFamily string) {
+	if fontFamily == "" {
+		return
+	}
+	for i, f := range e.RecentFonts {
+		if f == fontFamily {
+			e.RecentFonts = append(e.RecentFonts[:i], e.RecentFonts[i+1:]...)
+			break
+		}
+	}
+	e.RecentFonts = append([]string{fontFamily}, e.RecentFonts...)
+	if len(e.RecentFonts) > 8 {
+		e.RecentFonts = e.RecentFonts[:8]
 	}
 }

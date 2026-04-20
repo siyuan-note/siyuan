@@ -210,7 +210,7 @@ func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
 		petalNames = append(petalNames, petal.Name)
 	}
 
-	logging.LogDebugf("loaded petals [frontend=%s, isPublish=%v, isKernel=%v, petals=[%s]]", frontend, isPublish, isKernel, strings.Join(petalNames, ","))
+	logging.LogInfof("loaded petals [frontend=%s, isPublish=%v, isKernel=%v, petals=[%s]]", frontend, isPublish, isKernel, strings.Join(petalNames, ","))
 	return
 }
 

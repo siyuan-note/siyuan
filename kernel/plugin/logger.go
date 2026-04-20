@@ -48,7 +48,7 @@ func (w *KernelPluginLogger) Write(p []byte) (int, error) {
 
 // loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
 func loggerWrapper(ctx *qjs.Context, pluginName string, logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
-	return func(this *qjs.This) (value *qjs.Value, err error) {
+	return func(this *qjs.This) (result *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {
 				err = fmt.Errorf("qjs panic during invoke siyuan.logger.%s: %v", pluginName, r)
@@ -58,7 +58,8 @@ func loggerWrapper(ctx *qjs.Context, pluginName string, logFn func(format string
 		// Get arguments via this.Args()
 		args := this.Args()
 		if len(args) < 1 {
-			return ctx.NewUndefined(), nil
+			result = ctx.NewUndefined()
+			return
 		}
 
 		parts := make([]string, 0, len(args))
@@ -69,6 +70,7 @@ func loggerWrapper(ctx *qjs.Context, pluginName string, logFn func(format string
 
 		logFn("[plugin:%s] %s", pluginName, msg)
 
-		return ctx.NewUndefined(), nil
+		result = ctx.NewUndefined()
+		return
 	}
 }

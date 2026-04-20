@@ -435,7 +435,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}
 	}
 
-	runResult, runError := p.worker.Run(func() (any, any) {
+	runResult, runError := p.worker.RunSync(func() (any, any) {
 		return invokeRpcMethod(ctx, method, rpcMethod, params)
 	}, p.context)
 	return runResult, runError.(*JsonRpcError)
@@ -483,7 +483,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 		return
 	}
 
-	p.worker.Run(func() (any, any) {
+	p.worker.RunSync(func() (any, any) {
 		return invokeJsLifecycleHook(ctx, name)
 	}, p.context)
 }

@@ -227,6 +227,9 @@ func DocAssets(rootID string) (ret []string, err error) {
 }
 
 func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
+	syncingFiles.Store(rootID, true)
+	defer syncingFiles.Delete(rootID)
+
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
@@ -241,6 +244,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	}
 
 	err = netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, true)
+	ReloadProtyle(rootID)
 	return
 }
 

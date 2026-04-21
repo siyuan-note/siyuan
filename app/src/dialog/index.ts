@@ -90,8 +90,8 @@ left:${left || "auto"};top:${top || "auto"}">
     public resize() {
         if (this.resizeCallback) {
             const containerElement = this.element.querySelector(".b3-dialog__container") as HTMLElement;
-            if (containerElement && (!containerElement.style.height.endsWith("px") || containerElement.style.width.endsWith("px"))) {
-                this.resizeCallback("rd");
+            if (containerElement && containerElement.style.maxWidth !== "none") {
+                this.resizeCallback("l");
             }
         }
     }

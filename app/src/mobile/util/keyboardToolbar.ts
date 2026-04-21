@@ -748,7 +748,7 @@ export const initKeyboardToolbar = () => {
                     preventRender = true;
                     setTimeout(() => {
                         preventRender = false;
-                    }, 1000)
+                    }, 1000);
                 }, Constants.TIMEOUT_TRANSITION);
             }
             return;

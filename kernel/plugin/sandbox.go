@@ -123,7 +123,7 @@ func injectEvent(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	event.SetPropertyStr("emit", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
 		// lifecycle:<id> 生命周期响应
 		// rpc:<id> RPC 调用响应
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 2 {
 				err = fmt.Errorf("topic and event required")
@@ -151,9 +151,20 @@ func injectEvent(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			p.bus.Publish(topic, eventJson)
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.event.emit: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.event.emit: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.event.emit: %w", runErr)))
+		}
 		return
 	}, true))
 
@@ -184,7 +195,7 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 	// siyuan.storage.get(path) -> Promise<Uint8Array>
 	storage.SetPropertyStr("get", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -208,15 +219,26 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			result = content
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.storage.get: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.get: %w", runErr)))
+		}
 		return
 	}, true))
 
 	// siyuan.storage.put(path, content) -> Promise<void>
 	storage.SetPropertyStr("put", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 2 {
 				err = fmt.Errorf("path and content required")
@@ -241,15 +263,26 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.storage.put: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.put: %w", runErr)))
+		}
 		return
 	}, true))
 
 	// siyuan.storage.remove(path) -> Promise<void>
 	storage.SetPropertyStr("remove", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -272,15 +305,26 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 				return
 			}
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.storage.remove: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.remove: %w", runErr)))
+		}
 		return
 	}, true))
 
 	// siyuan.storage.list(path) -> Promise<Entry[]>
 	storage.SetPropertyStr("list", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -315,9 +359,20 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			result, err = goValueToJsValue(ctx, results)
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.storage.list: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.storage.list: %w", runErr)))
+		}
 		return
 	}, true))
 
@@ -332,7 +387,7 @@ func injectStorage(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 // injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
 func injectFetch(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	siyuan.SetPropertyStr("fetch", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("path required")
@@ -431,9 +486,20 @@ func injectFetch(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			ObjectSetDataMethods(p, ctx, response, respBody)
 			result = response
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.fetch: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.fetch: %w", runErr)))
+		}
 		return
 	}, true))
 	return nil
@@ -442,7 +508,7 @@ func injectFetch(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 // injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
 func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	siyuan.SetPropertyStr("socket", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			var path string
 			var protocol *qjs.Value
 
@@ -523,7 +589,7 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			// send method - implemented as a Go function that JS can call
 			wsObj.SetPropertyStr("send", ctx.Function(func(sendThis *qjs.This) (result *qjs.Value, err error) {
-				PromiseRun(p, ctx, this, func() (result any, err any) {
+				runErr := p.worker.Run(func() (result any, err any) {
 					sendArgs := sendThis.Args()
 					if len(sendArgs) < 1 {
 						return
@@ -555,15 +621,26 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 						return
 					}
 					return
-				}, func(err error) error {
-					return fmt.Errorf("siyuan.socket.send: %w", err)
-				})
+				}, func(result any, err any) {
+					if err != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.send: %w", err.(error))))
+					} else {
+						if result != nil {
+							this.Promise().Resolve(result.(*qjs.Value))
+						} else {
+							this.Promise().Resolve()
+						}
+					}
+				}, p.context)
+				if runErr != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.send: %w", runErr)))
+				}
 				return
 			}, true))
 
 			// ping method
 			wsObj.SetPropertyStr("ping", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-				PromiseRun(p, ctx, this, func() (result any, err any) {
+				runErr := p.worker.Run(func() (result any, err any) {
 					var data string
 					args := this.Args()
 					if len(args) > 0 && args[0].IsString() {
@@ -575,15 +652,26 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 						writeMessage(c, websocket.PingMessage, []byte(data))
 					}
 					return
-				}, func(err error) error {
-					return fmt.Errorf("siyuan.socket.ping: %w", err)
-				})
+				}, func(result any, err any) {
+					if err != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.ping: %w", err.(error))))
+					} else {
+						if result != nil {
+							this.Promise().Resolve(result.(*qjs.Value))
+						} else {
+							this.Promise().Resolve()
+						}
+					}
+				}, p.context)
+				if runErr != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.ping: %w", runErr)))
+				}
 				return
 			}, true))
 
 			// pong method
 			wsObj.SetPropertyStr("pong", ctx.Function(func(pongThis *qjs.This) (result *qjs.Value, err error) {
-				PromiseRun(p, ctx, this, func() (result any, err any) {
+				runErr := p.worker.Run(func() (result any, err any) {
 					var data string
 					args := pongThis.Args()
 					if len(args) > 0 && args[0].IsString() {
@@ -595,15 +683,26 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 						writeMessage(c, websocket.PongMessage, []byte(data))
 					}
 					return
-				}, func(err error) error {
-					return fmt.Errorf("siyuan.socket.pong: %w", err)
-				})
+				}, func(result any, err any) {
+					if err != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.pong: %w", err.(error))))
+					} else {
+						if result != nil {
+							this.Promise().Resolve(result.(*qjs.Value))
+						} else {
+							this.Promise().Resolve()
+						}
+					}
+				}, p.context)
+				if runErr != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.pong: %w", runErr)))
+				}
 				return
 			}, true))
 
 			// close method
 			wsObj.SetPropertyStr("close", ctx.Function(func(closeThis *qjs.This) (result *qjs.Value, err error) {
-				PromiseRun(p, ctx, this, func() (result any, err any) {
+				runErr := p.worker.Run(func() (result any, err any) {
 					code := websocket.CloseNormalClosure
 					var reason string
 
@@ -620,9 +719,20 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 						writeMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
 					}
 					return
-				}, func(err error) error {
-					return fmt.Errorf("siyuan.socket.close: %w", err)
-				})
+				}, func(result any, err any) {
+					if err != nil {
+						this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.close: %w", err.(error))))
+					} else {
+						if result != nil {
+							this.Promise().Resolve(result.(*qjs.Value))
+						} else {
+							this.Promise().Resolve()
+						}
+					}
+				}, p.context)
+				if runErr != nil {
+					this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket.close: %w", runErr)))
+				}
 				return
 			}, true))
 
@@ -758,9 +868,20 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			result = wsObj
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.socket: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.socket: %w", runErr)))
+		}
 		return
 	}, true))
 	return nil
@@ -776,7 +897,7 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 				logging.LogErrorf("qjs panic during siyuan.rpc.bind: %v", r)
 			}
 		}()
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 2 {
 				err = fmt.Errorf("name and function required")
@@ -797,14 +918,25 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.rpc.bind: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.bind: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.bind: %w", runErr)))
+		}
 		return
 	}, true))
 
 	rpc.SetPropertyStr("unsubscribe", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("method name is required")
@@ -818,14 +950,25 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.rpc.unbind: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.unbind: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.unbind: %w", runErr)))
+		}
 		return
 	}, true))
 
 	rpc.SetPropertyStr("broadcast", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			args := this.Args()
 			if len(args) < 1 {
 				err = fmt.Errorf("method required")
@@ -849,9 +992,20 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 
 			p.BroadcastNotification(method, params)
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.rpc.broadcast: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.broadcast: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("siyuan.rpc.broadcast: %w", runErr)))
+		}
 		return
 	}, true))
 
@@ -925,53 +1079,66 @@ func ObjectFreeze(ctx *qjs.Context, object *qjs.Value) (err error) {
 	return
 }
 
-// PromiseRun is a helper that runs a function in the plugin worker and resolves/rejects a JS Promise based on the outcome, using the provided error format string for error messages.
-// ⛔️ This function can cause panic!
-func PromiseRun(p *KernelPlugin, ctx *qjs.Context, this *qjs.This, fn func() (result any, err any), errorf func(err error) error) {
-	runError := p.worker.Run(fn, func(result any, err any) {
-		if err != nil {
-			this.Promise().Reject(ctx.NewError(errorf(err.(error))))
-		} else {
-			if result != nil {
-				this.Promise().Resolve(result.(*qjs.Value))
-			} else {
-				this.Promise().Resolve()
-			}
-		}
-	}, p.context)
-
-	if runError != nil {
-		this.Promise().Reject(ctx.NewError(errorf(runError)))
-	}
-}
-
 func ObjectSetDataMethods(p *KernelPlugin, ctx *qjs.Context, object *qjs.Value, data []byte) {
 	object.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			result = ctx.NewString(string(data))
 			return
-		}, func(err error) error {
-			return fmt.Errorf("response.text: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("response.text: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("response.text: %w", runErr)))
+		}
 		return
 	}, true))
 	object.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			v, e := parseJsonStringToJsValue(ctx, string(data))
 			result, err = v, e
 			return
-		}, func(err error) error {
-			return fmt.Errorf("response.json: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("response.json: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("response.json: %w", runErr)))
+		}
 		return
 	}, true))
 	object.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		runErr := p.worker.Run(func() (result any, err any) {
 			result = ctx.NewArrayBuffer(data)
 			return
-		}, func(err error) error {
-			return fmt.Errorf("response.arrayBuffer: %w", err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(fmt.Errorf("response.arrayBuffer: %w", err.(error))))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(fmt.Errorf("response.arrayBuffer: %w", runErr)))
+		}
 		return
 	}, true))
 }
@@ -1098,31 +1265,7 @@ func getJsContextValue(ctx *qjs.Context, paths []any) (value *qjs.Value, retErr 
 // loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
 func loggerWrapper(p *KernelPlugin, ctx *qjs.Context, logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
 	return func(this *qjs.This) (result *qjs.Value, err error) {
-		// ⬇️ panic - Option 1
-		// PromiseRun(p, ctx, this, func() (result any, err any) {
-		// 	// Get arguments via this.Args()
-		// 	args := this.Args()
-		// 	if len(args) < 1 {
-		// 		return
-		// 	}
-
-		// 	parts := make([]string, 0, len(args))
-		// 	for _, arg := range args {
-		// 		parts = append(parts, arg.String())
-		// 	}
-		// 	msg := strings.Join(parts, " ")
-
-		// 	logFn("[plugin:%s] %s", p.Name, msg)
-		// 	return
-		// }, func(err error) error {
-		// 	return fmt.Errorf("siyuan.logger.%s: %w", p.Name, err)
-		// })
-		// return
-		// ⬆️ panic
-
-		// ⬇️ success - Option 2
 		runErr := p.worker.Run(func() (result any, err any) {
-			// Get arguments via this.Args()
 			args := this.Args()
 			if len(args) < 1 {
 				return
@@ -1152,7 +1295,6 @@ func loggerWrapper(p *KernelPlugin, ctx *qjs.Context, logFn func(format string, 
 		}
 		this.Promise().Resolve()
 		return
-		// ⬆️ success
 	}
 }
 

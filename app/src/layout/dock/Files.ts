@@ -1062,7 +1062,7 @@ data-type="navigation-root" data-path="/">
         if (!fileItemElement) {
             return;
         }
-        fileItemElement.setAttribute("data-name", Lute.EscapeHTMLStr(data.title));
+        fileItemElement.setAttribute("data-name", data.title);
         fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
     }
 

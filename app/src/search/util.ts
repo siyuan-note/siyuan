@@ -3,7 +3,7 @@ import {getAllModels} from "../layout/getAll";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {escapeAriaLabel, escapeGreat, escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeLessThans, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
@@ -485,7 +485,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             }
                             config.hPath = hPathList.join(" ");
                             config.page = 1;
-                            searchPathInputElement.innerHTML = `${escapeGreat(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+                            searchPathInputElement.innerHTML = `${escapeLessThans(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
                             searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
                             const includeElement = element.querySelector("#searchInclude");
                             includeElement.firstElementChild.classList.add("ft__primary");
@@ -1018,7 +1018,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     }
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (item.hPath) {
-        searchPathInputElement.innerHTML = `${escapeGreat(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+        searchPathInputElement.innerHTML = `${escapeLessThans(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
         searchPathInputElement.setAttribute("aria-label", escapeHtml(item.hPath));
     } else {
         searchPathInputElement.innerHTML = "";
@@ -1403,7 +1403,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(title)}">${escapeLessThans(title)}</span>
 </div><div>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
@@ -1445,7 +1445,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
 ${getAttr(item)}
 ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span>` : ""}
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeLessThans(title)}</span>
 ${countHTML}
 </div>`;
         }

@@ -1,4 +1,4 @@
-import {escapeAriaLabel, escapeGreat, escapeHtml} from "../../util/escape";
+import {escapeAriaLabel, escapeLessThans, escapeHtml} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {setPanelFocus} from "../util";
@@ -832,7 +832,7 @@ export class Files extends Model {
         const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
-            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
+            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeLessThans));
             if (data.data.subFileCount === 0) {
                 liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
             } else {

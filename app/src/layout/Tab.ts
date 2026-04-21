@@ -4,7 +4,7 @@ import {Model} from "./Model";
 import {Editor} from "../editor";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {escapeGreat, escapeHtml} from "../util/escape";
+import {escapeLessThans, escapeHtml} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
@@ -73,12 +73,12 @@ export class Tab {
                         id
                     }, (response) => {
                         if (!this.headElement.getAttribute("aria-label")) {
-                            showTooltip(escapeGreat(response.data), this.headElement);
+                            showTooltip(escapeLessThans(response.data), this.headElement);
                         }
-                        this.headElement.setAttribute("aria-label", escapeGreat(response.data));
+                        this.headElement.setAttribute("aria-label", escapeLessThans(response.data));
                     });
                 } else {
-                    this.headElement.setAttribute("aria-label", escapeGreat(this.title));
+                    this.headElement.setAttribute("aria-label", escapeLessThans(this.title));
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {

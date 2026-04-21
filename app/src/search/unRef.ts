@@ -2,7 +2,7 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getArticle, getAttr} from "./util";
-import {escapeAriaLabel, escapeGreat} from "../util/escape";
+import {escapeAriaLabel, escapeLessThans} from "../util/escape";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {getDisplayName, getNotebookName} from "../util/pathName";
@@ -110,7 +110,7 @@ export const getUnRefList = (element: Element, edit: Protyle, page = 1) => {
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
 ${getAttr(item)}
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeLessThans(title)}</span>
 </div>`;
         });
         if (response.data.blocks.length > 0) {

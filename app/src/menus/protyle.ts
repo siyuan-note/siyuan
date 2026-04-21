@@ -573,7 +573,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         }, {
             id: "link",
-            label: window.siyuan.languages.link,
+            label: window.siyuan.languages.hyperlink,
             iconHTML: "",
             click() {
                 element.outerHTML = `<span data-type="a" data-href="siyuan://blocks/${element.getAttribute("data-id")}">${element.innerHTML}</span><wbr>`;

@@ -459,6 +459,11 @@ func IsSensitivePath(p string) bool {
 		return true
 	}
 
+	// *.db/*.log
+	if strings.HasSuffix(p, ".db") || strings.HasSuffix(p, ".log") {
+		return true
+	}
+
 	// 用户家目录下的敏感目录（小写比较）
 	homePrefixes := []string{
 		strings.ToLower(filepath.Join(HomeDir, ".ssh")),

@@ -1,4 +1,5 @@
 {
+  "hyperlink": "하이퍼링크",
   "copyDoc": "전체 복사",
   "position": "위치",
   "insertColumnLeft1": "왼쪽에 ${x} 열 삽입",

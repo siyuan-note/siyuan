@@ -993,6 +993,7 @@ export class Wnd {
             this.parent.direction = direction;
             if (direction === "tb") {
                 this.parent.element.classList.add("fn__flex-column");
+                this.parent.element.style.minHeight = "8px";
                 this.parent.element.classList.remove("fn__flex");
             } else {
                 this.parent.element.classList.remove("fn__flex-column");
@@ -1006,10 +1007,14 @@ export class Wnd {
                         resize: item.resize,
                         direction,
                     });
-                    this.parent.addLayout(layout, item.id);
-                    const movedWnd = this.parent.children.splice(index, 1)[0];
+                    this.parent.addLayout(layout, item.id, after);
+                    const movedWnd = this.parent.children.splice(after ? index : index + 1, 1)[0];
                     if (movedWnd.resize) {
-                        movedWnd.element.previousElementSibling.remove();
+                        if (movedWnd.element.previousElementSibling && movedWnd.element.previousElementSibling.classList.contains("layout__resize")) {
+                            movedWnd.element.previousElementSibling.remove();
+                        } else if (movedWnd.element.nextElementSibling && movedWnd.element.nextElementSibling.classList.contains("layout__resize")) {
+                            movedWnd.element.nextElementSibling.remove();
+                        }
                         movedWnd.resize = undefined;
                     }
                     if (after) {

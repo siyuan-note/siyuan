@@ -98,6 +98,9 @@ export const onGetConfig = (isStart: boolean, app: App) => {
                     }
                 });
             }
+            window.siyuan.dialogs.forEach(item => {
+                item.resize();
+            });
         }, Constants.TIMEOUT_RESIZE);
     });
 };

@@ -80,7 +80,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret = &File{}
 	ret.Path = fileInfo.path
 	ret.Size = uint64(fileInfo.size)
-	ret.Name = ial["title"] + ".sy"
+	ret.Name = ial["title"]
 	ret.Icon = ial["icon"]
 	ret.ID = ial["id"]
 	ret.Name1 = ial["name"]
@@ -300,7 +300,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				continue
 			}
 			if ial := box.docIAL(parentDocPath); nil != ial {
-				if !showHidden && "true" == ial["custom-hidden"] {
+				if !showHidden && "true" == ial[DocHiddenAttr] {
 					continue
 				}
 
@@ -309,7 +309,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				if err == nil {
 					for _, subFile := range subFiles {
 						subDocFilePath := path.Join(file.path, subFile.Name())
-						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL["custom-hidden"] {
+						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL[DocHiddenAttr] {
 							continue
 						}
 
@@ -347,7 +347,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		}
 
 		if ial := box.docIAL(file.path); nil != ial {
-			if !showHidden && "true" == ial["custom-hidden"] {
+			if !showHidden && "true" == ial[DocHiddenAttr] {
 				continue
 			}
 
@@ -1090,6 +1090,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 const (
 	DailyNoteAttrPrefix = "custom-dailynote-"
 	NodeAttrTitleEmpty  = "custom-sy-title-empty"
+	DocHiddenAttr       = "custom-hidden"
 )
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
@@ -1564,7 +1565,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 		return
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpDelete)
+	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -1704,6 +1705,21 @@ func RenameDoc(boxID, p, title string) (err error) {
 			return
 		}
 
+		subFiles := box.ListFiles(tree.Path)
+		for _, subFile := range subFiles {
+			if !strings.HasSuffix(subFile.path, ".sy") {
+				continue
+			}
+
+			subTree, loadErr := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
+			if loadErr != nil {
+				continue
+			}
+
+			treenode.SetBlockTreePath(subTree)
+			sql.RenameTreeQueue(subTree)
+		}
+
 		refText := getNodeRefText(tree.Root)
 		evt := util.NewCmdResult("rename", 0, util.PushModeBroadcast)
 		evt.Data = map[string]any{
@@ -1717,7 +1733,6 @@ func RenameDoc(boxID, p, title string) (err error) {
 		util.PushEvent(evt)
 	}
 	if titleChanged {
-		box.renameSubTrees(tree)
 		updateRefTextRenameDoc(tree)
 	}
 	if titleChanged || emptyAttrUpdated {

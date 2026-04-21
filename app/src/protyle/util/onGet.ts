@@ -251,7 +251,12 @@ const setHTML = (options: {
         if (protyle.breadcrumb) {
             protyle.breadcrumb.element.nextElementSibling.textContent = "";
         }
-        protyle.element.removeAttribute("disabled-forever");
+        if (protyle.element.hasAttribute("disabled-forever")) {
+            if (protyle.wysiwyg.element.getAttribute("custom-sy-readonly") !== "true") {
+                protyle.disabled = false;
+            }
+            protyle.element.removeAttribute("disabled-forever");
+        }
         if (options.action.includes(Constants.CB_GET_OPENNEW) && window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
             enableProtyle(protyle);
         } else {

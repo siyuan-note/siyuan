@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -34,25 +35,31 @@ import (
 
 func RemoveBookmark(bookmark string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
+	defer util.PushClearProgress()
 
 	bookmarks := sql.QueryBookmarkBlocks()
 	treeBlocks := map[string][]string{}
-	for _, tag := range bookmarks {
-		if blocks, ok := treeBlocks[tag.RootID]; !ok {
-			treeBlocks[tag.RootID] = []string{tag.ID}
+	for _, bm := range bookmarks {
+		if blocks, ok := treeBlocks[bm.RootID]; !ok {
+			treeBlocks[bm.RootID] = []string{bm.ID}
 		} else {
-			treeBlocks[tag.RootID] = append(blocks, tag.ID)
+			treeBlocks[bm.RootID] = append(blocks, bm.ID)
 		}
+	}
+
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
 	}
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockID(treeID)
 		if nil != e {
-			util.PushClearProgress()
 			return e
 		}
 
+		changed := false
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)
 			if nil == node {
@@ -62,16 +69,24 @@ func RemoveBookmark(bookmark string) (err error) {
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
 				node.RemoveIALAttr("bookmark")
 				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+				changed = true
 			}
 		}
 
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); err != nil {
-			util.ClearPushProgress(100)
-			return
+		if changed {
+			generateTreeHistory(tree, historyDir)
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
+			if err = writeTreeUpsertQueue(tree); err != nil {
+				util.ClearPushProgress(100)
+				return
+			}
 		}
+
 		util.RandomSleep(50, 150)
 	}
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	sql.FlushQueue()
 
 	util.ReloadUI()
 	return
@@ -92,25 +107,31 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(110))
+	defer util.ClearPushProgress(100)
 
 	bookmarks := sql.QueryBookmarkBlocks()
 	treeBlocks := map[string][]string{}
-	for _, tag := range bookmarks {
-		if blocks, ok := treeBlocks[tag.RootID]; !ok {
-			treeBlocks[tag.RootID] = []string{tag.ID}
+	for _, bm := range bookmarks {
+		if blocks, ok := treeBlocks[bm.RootID]; !ok {
+			treeBlocks[bm.RootID] = []string{bm.ID}
 		} else {
-			treeBlocks[tag.RootID] = append(blocks, tag.ID)
+			treeBlocks[bm.RootID] = append(blocks, bm.ID)
 		}
 	}
 
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
+	
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockID(treeID)
 		if nil != e {
-			util.ClearPushProgress(100)
 			return e
 		}
 
+		changed := false
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)
 			if nil == node {
@@ -120,16 +141,24 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == oldBookmark {
 				node.SetIALAttr("bookmark", newBookmark)
 				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+				changed = true
 			}
 		}
 
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); err != nil {
-			util.ClearPushProgress(100)
-			return
+		if changed {
+			generateTreeHistory(tree, historyDir)
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
+			if err = writeTreeUpsertQueue(tree); err != nil {
+				util.ClearPushProgress(100)
+				return
+			}
 		}
+
 		util.RandomSleep(50, 150)
 	}
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
+	sql.FlushQueue()
 
 	util.ReloadUI()
 	return

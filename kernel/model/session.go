@@ -55,8 +55,10 @@ func LogoutAuth(c *gin.Context) {
 	util.RemoveWorkspaceSession(session)
 	if err := session.Save(c); err != nil {
 		logging.LogErrorf("saves session failed: " + err.Error())
-		ret.Code = -1
-		ret.Msg = "save session failed"
+		session.Clear(c)
+		ret.Code = 1
+		ret.Msg = Conf.Language(258)
+		return
 	}
 
 	util.BroadcastByType("main", "logoutAuth", 0, "", nil)
@@ -98,7 +100,9 @@ func LoginAuth(c *gin.Context) {
 			workspaceSession.Captcha = gulu.Rand.String(7) // https://github.com/siyuan-note/siyuan/issues/13147
 			if err := session.Save(c); err != nil {
 				logging.LogErrorf("save session failed: " + err.Error())
-				c.Status(http.StatusInternalServerError)
+				session.Clear(c)
+				ret.Code = 1
+				ret.Msg = Conf.Language(258)
 				return
 			}
 			return
@@ -149,7 +153,9 @@ func LoginAuth(c *gin.Context) {
 	logging.LogInfof("auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), maxAge)
 	if err := session.Save(c); err != nil {
 		logging.LogErrorf("save session failed: " + err.Error())
-		c.Status(http.StatusInternalServerError)
+		session.Clear(c)
+		ret.Code = 1
+		ret.Msg = Conf.Language(258)
 		return
 	}
 

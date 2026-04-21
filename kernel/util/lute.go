@@ -83,7 +83,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetCallout(true)
 	ret.SetDataTask(true)
 	ret.SetArbitraryTaskListItemMarker(true)
-	ret.SetExportNormalizeTaskListMarker(true)
+	ret.SetExportNormalizeTaskListMarker(false) // 只有导出 Markdown 的场景才将其设置为 true
 	return
 }
 

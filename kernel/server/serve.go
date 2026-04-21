@@ -241,12 +241,13 @@ func Serve(fastMode bool, cookieKey string) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
+	httpHandler := ginServer.Handler()
 	util.HttpServer = &http.Server{
-		Handler: ginServer,
+		Handler: httpHandler,
 	}
 
 	if useTLS && (util.FixedPort == util.ServerPort || util.IsPortOpen(util.FixedPort)) {
-		if err = util.ServeMultiplexed(ln, ginServer, certPath, keyPath, util.HttpServer); err != nil {
+		if err = util.ServeMultiplexed(ln, httpHandler, certPath, keyPath, util.HttpServer); err != nil {
 			if errors.Is(err, http.ErrServerClosed) || errors.Is(err, cmux.ErrListenerClosed) {
 				return
 			}
@@ -318,6 +319,11 @@ func serveExport(ginServer *gin.Engine) {
 		}
 
 		fullPath := filepath.Join(exportBaseDir, decodedPath)
+		if !gulu.File.IsSubPath(exportBaseDir, fullPath) {
+			c.Status(http.StatusUnauthorized)
+			return
+		}
+
 		if util.IsSensitivePath(fullPath) {
 			logging.LogErrorf("refuse to export sensitive file [%s]", c.Request.URL.Path)
 			c.Status(http.StatusForbidden)

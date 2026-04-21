@@ -1515,6 +1515,7 @@ export class WYSIWYG {
                                                 selectCellElements[0].colSpan = colSpan;
                                                 selectCellElements[0].rowSpan = rowSpan;
                                                 focusByWbr(selectCellElements[0], document.createRange());
+                                                document.execCommand("insertHTML", false, "");
                                                 updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
                                             }
                                         });
@@ -2517,7 +2518,10 @@ export class WYSIWYG {
                         input(protyle, blockElement, range, true, event);
                     }, Constants.TIMEOUT_INPUT);
                 } else {
-                    input(protyle, blockElement, range, true, event);
+                    clearTimeout(timeout); // https://github.com/siyuan-note/siyuan/issues/9179
+                    timeout = window.setTimeout(() => {
+                        input(protyle, blockElement, range, true, event);
+                    });
                 }
             }
             event.stopPropagation();

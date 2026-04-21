@@ -227,6 +227,9 @@ func DocAssets(rootID string) (ret []string, err error) {
 }
 
 func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
+	syncingFiles.Store(rootID, true)
+	defer syncingFiles.Delete(rootID)
+
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
@@ -241,6 +244,10 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	}
 
 	err = netAssets2LocalAssets0(tree, onlyImg, originalURL, assetsDirPath, true)
+	go func() {
+		time.Sleep(128 * time.Microsecond)
+		util.PushReloadProtyle(rootID)
+	}()
 	return
 }
 
@@ -780,7 +787,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 	unusedAssets := UnusedAssets(false)
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -850,7 +857,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		return absPath
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -935,6 +942,11 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
+
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
@@ -967,6 +979,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					continue
 				}
 
+				generateTreeHistory(tree, historyDir)
 				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
@@ -974,6 +987,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 			}
 		}
 	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
 	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
 	if gulu.File.IsDir(storageAvDir) {

@@ -42,7 +42,7 @@ export class Layout {
         }
     }
 
-    addLayout(child: Layout, id?: string) {
+    addLayout(child: Layout, id?: string, after = true) {
         if (!id) {
             this.children.splice(this.children.length, 0, child);
             if (this) {
@@ -51,8 +51,12 @@ export class Layout {
         } else {
             this.children.find((item, index) => {
                 if (item.id === id) {
-                    this.children.splice(index + 1, 0, child);
-                    item.element.after(child.element);
+                    this.children.splice(after ? index + 1 : index, 0, child);
+                    if (after) {
+                        item.element.after(child.element);
+                    } else {
+                        item.element.before(child.element);
+                    }
                     return true;
                 }
             });
@@ -62,7 +66,7 @@ export class Layout {
         } else {
             child.element.style[(this && this.direction === "lr") ? "width" : "height"] = child.size;
         }
-        addResize(child);
+        addResize(child, after);
         child.parent = this;
     }
 

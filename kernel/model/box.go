@@ -466,24 +466,10 @@ func isSkipFile(filename string) bool {
 
 func moveTree(tree *parse.Tree) {
 	treenode.SetBlockTreePath(tree)
-
-	if hidden := tree.Root.IALAttr("custom-hidden"); "true" == hidden {
-		tree.Root.RemoveIALAttr("custom-hidden")
-		filesys.WriteTree(tree)
-	}
-
-	sql.RemoveTreeQueue(tree.ID)
-	sql.IndexTreeQueue(tree)
+	sql.MoveTreeQueue(tree)
 
 	box := Conf.Box(tree.Box)
-	box.renameSubTrees(tree)
-
-	refreshDocInfo(tree)
-}
-
-func (box *Box) renameSubTrees(tree *parse.Tree) {
 	subFiles := box.ListFiles(tree.Path)
-
 	luteEngine := util.NewLute()
 	for _, subFile := range subFiles {
 		if !strings.HasSuffix(subFile.path, ".sy") {
@@ -496,10 +482,12 @@ func (box *Box) renameSubTrees(tree *parse.Tree) {
 		}
 
 		treenode.SetBlockTreePath(subTree)
-		sql.RenameSubTreeQueue(subTree)
+		sql.MoveTreeQueue(subTree)
 		msg := fmt.Sprintf(Conf.Language(107), html.EscapeString(subTree.HPath))
 		util.PushStatusBar(msg)
 	}
+
+	refreshDocInfo(tree)
 }
 
 func parseKTree(kramdown []byte) (ret *parse.Tree) {

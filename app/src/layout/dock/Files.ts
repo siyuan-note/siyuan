@@ -1062,7 +1062,7 @@ data-type="navigation-root" data-path="/">
         if (!fileItemElement) {
             return;
         }
-        fileItemElement.setAttribute("data-name", Lute.EscapeHTMLStr(data.title));
+        fileItemElement.setAttribute("data-name", data.title);
         fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
     }
 
@@ -1357,7 +1357,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block${editingPublishAccess ? " fn__none" : ""}" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-position="parentE"
-aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
+aria-label="${ariaLabel}">${getDisplayName(Lute.EscapeHTMLStr(item.name), true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>

@@ -786,13 +786,6 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                     name = getAssetName(value) + pathPosix().extname(value);
                 }
                 // https://github.com/siyuan-note/siyuan/issues/12308
-                if (link) {
-                    htmlValue.push({
-                        type: "file",
-                        content: link,
-                        name
-                    });
-                }
                 if (html) {
                     const tempElement = document.createElement("template");
                     tempElement.innerHTML = html;
@@ -811,13 +804,27 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
                             });
                         }
                     });
-                    if (htmlValue.length === 0 && value) {
+                }
+                if (link) {
+                    const hasExited = htmlValue.find(valueItem => {
+                        if (valueItem.content === link) {
+                            return true;
+                        }
+                    });
+                    if (!hasExited) {
                         htmlValue.push({
                             type: "file",
-                            content: "",
-                            name: value
+                            content: link,
+                            name
                         });
                     }
+                }
+                if (htmlValue.length === 0 && value) {
+                    htmlValue.push({
+                        type: "file",
+                        content: "",
+                        name: value
+                    });
                 }
                 newValue = oldValue.mAsset.concat(htmlValue);
             }

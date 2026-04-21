@@ -21,6 +21,7 @@ export class Tag extends Model {
         super({
             app,
             id: tab.id,
+            type: "tag",
             msgCallback(data) {
                 if (data) {
                     switch (data.cmd) {

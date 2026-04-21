@@ -703,7 +703,8 @@ export const newModelByInitData = (app: App, tab: Tab, json: any) => {
             blockId: json.blockId,
             mode: json.mode,
             scrollPosition: json.scrollPosition,
-            action: typeof json.action === "string" ? (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]) : json.action.concat(Constants.CB_GET_FOCUS),
+            action: Array.isArray(json.action) ? json.action.concat(Constants.CB_GET_FOCUS) :
+                (json.action ? [json.action, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]),
         });
     }
     return model;
@@ -864,7 +865,8 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     }
     resizeElement.classList.add("layout__resize");
     if (after) {
-        obj.element.insertAdjacentElement("beforebegin", resizeElement);
+        obj.element.insertAdjacentElement((obj.element.previousElementSibling && !obj.element.previousElementSibling.classList.contains("layout__resize")) ?
+            "beforebegin" : "afterend", resizeElement);
     } else {
         obj.element.insertAdjacentElement("afterend", resizeElement);
     }
@@ -934,6 +936,13 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             item.element.style.minWidth = "8px";
         } else {
             item.element.style.minWidth = "";
+        }
+
+        if (!item.element.style.height && !item.element.classList.contains("layout__center") &&
+            item.element.classList.contains("fn__flex-column")) {
+            item.element.style.minHeight = "8px";
+        } else {
+            item.element.style.minHeight = "";
         }
     });
     if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2) {

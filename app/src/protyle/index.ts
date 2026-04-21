@@ -48,6 +48,7 @@ import {getAllModels} from "../layout/getAll";
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 import {setFoldById, zoomOut} from "../menus/protyle";
+import {setEditMode} from "./util/setEditMode";
 
 export class Protyle {
 
@@ -533,5 +534,9 @@ export class Protyle {
 
     public renderAVAttribute(element: HTMLElement, id: string, cb?: (element: HTMLElement) => void) {
         renderAVAttribute(element, id, this.protyle, cb);
+    }
+
+    public switchMode(mode: TEditorMode) {
+        setEditMode(this.protyle, mode);
     }
 }

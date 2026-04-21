@@ -243,7 +243,14 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 
 func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	luteEngine := util.NewLute()
-	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	ret, needFix, err := filesys.LoadTreeWithFix(bt.BoxID, bt.Path, luteEngine)
+	if nil != err {
+		return
+	}
+	if needFix {
+		treenode.UpsertBlockTree(ret)
+		sql.IndexTreeQueue(ret)
+	}
 	return
 }
 

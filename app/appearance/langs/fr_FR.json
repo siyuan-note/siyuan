@@ -1,4 +1,5 @@
 {
+  "hyperlink": "Hyperlien",
   "copyDoc": "Copier tout le texte",
   "position": "Position",
   "insertColumnLeft1": "Insérer ${x} colonnes à gauche",

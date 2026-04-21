@@ -1,4 +1,5 @@
-[中文](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING_zh_CN.md)
+**English**
+| [中文](CONTRIBUTING_zh_CN.md)
 
 ## Get the source code
 
@@ -14,10 +15,10 @@ Install pnpm: `npm install -g pnpm@10.33.0`
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@40.8.5 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@40.9.1 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@40.8.5 -D`
+  * `pnpm install electron@40.9.1 -D`
 
 NPM mirror:
 
@@ -27,7 +28,7 @@ NPM mirror:
 
 Enter the app folder and execute:
 
-* `pnpm install electron@40.8.5 -D`
+* `pnpm install electron@40.9.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

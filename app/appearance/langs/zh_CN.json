@@ -1,4 +1,5 @@
 {
+  "hyperlink": "超链接",
   "copyDoc": "复制全文",
   "position": "位置",
   "insertColumnLeft1": "在左侧插入 ${x} 列",

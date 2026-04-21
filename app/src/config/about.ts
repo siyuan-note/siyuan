@@ -57,7 +57,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="downloadInstallPkg" type="checkbox"${window.siyuan.config.system.downloadInstallPkg ? " checked" : ""}>
 </label>
-<div class="b3-label${isBrowser() ? " fn__none" : ""}">
+<div class="b3-label${(isBrowser() && !isInMobileApp() && !isIPad()) ? " fn__none" : ""}">
     <label class="fn__flex config__item">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about11}

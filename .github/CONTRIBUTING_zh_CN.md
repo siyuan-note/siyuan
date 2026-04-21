@@ -1,4 +1,5 @@
-[English](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md)
+[English](CONTRIBUTING.md)
+| **中文**
 
 ## 获取源码
 
@@ -14,10 +15,10 @@
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@40.8.5 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@40.9.1 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@40.8.5 -D`
+  * `pnpm install electron@40.9.1 -D`
 
 NPM 镜像：
 
@@ -27,7 +28,7 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@40.8.5 -D`
+* `pnpm install electron@40.9.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

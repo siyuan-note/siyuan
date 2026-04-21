@@ -56,7 +56,7 @@ func RemoveUnusedAttributeView(id string) {
 		return
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -94,7 +94,7 @@ func RemoveUnusedAttributeViews() (ret []string) {
 
 	unusedAttributeViews := UnusedAttributeViews(false)
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -3808,7 +3808,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	refreshRelatedSrcAvs(avID, tx)
 
-	historyDir, err := GetHistoryDir(HistoryOpUpdate)
+	historyDir, err := getHistoryDir(HistoryOpUpdate)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -3844,8 +3844,8 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 func removeNodeAvID(node *ast.Node, avID string, tx *Transaction, tree *parse.Tree) (err error) {
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	if ast.NodeDocument == node.Type {
-		delete(attrs, "custom-hidden")
-		node.RemoveIALAttr("custom-hidden")
+		delete(attrs, DocHiddenAttr)
+		node.RemoveIALAttr(DocHiddenAttr)
 	}
 
 	if avs := attrs[av.NodeAttrNameAvs]; "" != avs {

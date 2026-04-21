@@ -547,13 +547,13 @@ export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle
             const offset = getSelectionOffset(cellElement, nodeElement, range);
             cellElement.classList.add("range");
             const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
-            cellElement.classList.remove("range");
+            cellElement.removeAttribute("class");
             const cloneCellElement = cloneNode.querySelector(".range");
             const cloneRange = focusByOffset(cloneCellElement, offset.end, offset.end, false);
             if (cloneRange) {
                 cloneRange.insertNode(document.createElement("wbr"));
             }
-            cloneCellElement.classList.remove("range");
+            cloneCellElement.removeAttribute("class");
             protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
         }
     } else {

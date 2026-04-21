@@ -14,6 +14,7 @@ export class Dialog {
     private disableClose: boolean;
     public editors: { [key: string]: Protyle };
     public data: any;
+    private resizeCallback: (type: string) => void;
 
     constructor(options: {
         positionId?: string,
@@ -29,6 +30,7 @@ export class Dialog {
         resizeCallback?: (type: string) => void,
         containerClassName?: string
     }) {
+        this.resizeCallback = options.resizeCallback;
         this.disableClose = options.disableClose;
         this.id = genUUID();
         window.siyuan.dialogs.push(this);
@@ -83,6 +85,15 @@ left:${left || "auto"};top:${top || "auto"}">
         /// #if !MOBILE
         moveResize(this.element.querySelector(".b3-dialog__container"), options.resizeCallback);
         /// #endif
+    }
+
+    public resize() {
+        if (this.resizeCallback) {
+            const containerElement = this.element.querySelector(".b3-dialog__container") as HTMLElement;
+            if (containerElement && (!containerElement.style.height.endsWith("px") || containerElement.style.width.endsWith("px"))) {
+                this.resizeCallback("rd");
+            }
+        }
     }
 
     public destroy(options?: IObject) {

@@ -77,6 +77,9 @@ export const init = (app: App) => {
                     }
                 });
             }
+            window.siyuan.dialogs.forEach(item => {
+                item.resize();
+            });
         }, Constants.TIMEOUT_RESIZE);
     });
 };

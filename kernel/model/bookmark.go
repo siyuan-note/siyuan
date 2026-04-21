@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
@@ -36,6 +35,7 @@ import (
 
 func RemoveBookmark(bookmark string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
+	defer util.PushClearProgress()
 
 	bookmarks := sql.QueryBookmarkBlocks()
 	treeBlocks := map[string][]string{}
@@ -47,13 +47,15 @@ func RemoveBookmark(bookmark string) (err error) {
 		}
 	}
 
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockID(treeID)
 		if nil != e {
-			util.PushClearProgress()
 			return e
 		}
 
@@ -72,7 +74,7 @@ func RemoveBookmark(bookmark string) (err error) {
 		}
 
 		if changed {
-			generateTreeHistory(historyDir, tree)
+			generateTreeHistory(tree, historyDir)
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				util.ClearPushProgress(100)
@@ -105,6 +107,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(110))
+	defer util.ClearPushProgress(100)
 
 	bookmarks := sql.QueryBookmarkBlocks()
 	treeBlocks := map[string][]string{}
@@ -116,12 +119,15 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 		}
 	}
 
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
+	
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockID(treeID)
 		if nil != e {
-			util.ClearPushProgress(100)
 			return e
 		}
 
@@ -140,7 +146,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 		}
 
 		if changed {
-			generateTreeHistory(historyDir, tree)
+			generateTreeHistory(tree, historyDir)
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
 			if err = writeTreeUpsertQueue(tree); err != nil {
 				util.ClearPushProgress(100)

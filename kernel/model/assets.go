@@ -787,7 +787,7 @@ func RemoveUnusedAssets() (ret []string) {
 
 	unusedAssets := UnusedAssets(false)
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -857,7 +857,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		return absPath
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpClean)
+	historyDir, err := getHistoryDir(HistoryOpClean)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
@@ -942,7 +942,11 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
+
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
@@ -975,7 +979,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 					continue
 				}
 
-				generateTreeHistory(historyDir, tree)
+				generateTreeHistory(tree, historyDir)
 				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 

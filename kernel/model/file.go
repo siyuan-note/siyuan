@@ -1565,7 +1565,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 		return
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpDelete)
+	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return

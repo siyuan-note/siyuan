@@ -513,9 +513,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	renameRootTitles := map[string]string{}
 	cachedTrees := map[string]*parse.Tree{}
 
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
 	if err != nil {
-		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
@@ -543,7 +542,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			continue
 		}
 
-		generateTreeHistory(historyDir, tree)
+		generateTreeHistory(tree, historyDir)
 
 		cachedTrees[bt.RootID] = tree
 	}

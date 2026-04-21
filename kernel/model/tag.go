@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -49,7 +48,10 @@ func RemoveTag(label string) (err error) {
 
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
@@ -59,7 +61,7 @@ func RemoveTag(label string) (err error) {
 			return e
 		}
 
-		generateTreeHistory(historyDir, tree)
+		generateTreeHistory(tree, historyDir)
 
 		var unlinks []*ast.Node
 		for _, blockID := range blocks {
@@ -153,7 +155,10 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
@@ -163,7 +168,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			return e
 		}
 
-		generateTreeHistory(historyDir, tree)
+		generateTreeHistory(tree, historyDir)
 
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)

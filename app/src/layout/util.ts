@@ -937,6 +937,13 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
         } else {
             item.element.style.minWidth = "";
         }
+
+        if (!item.element.style.height && !item.element.classList.contains("layout__center") &&
+            item.element.classList.contains("fn__flex-column")) {
+            item.element.style.minHeight = "8px";
+        } else {
+            item.element.style.minHeight = "";
+        }
     });
     if (layout.direction === "lr" && layout.element.scrollWidth > layout.element.clientWidth + 2) {
         let index = Math.ceil(screen.width / 8);

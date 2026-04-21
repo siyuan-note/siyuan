@@ -993,6 +993,7 @@ export class Wnd {
             this.parent.direction = direction;
             if (direction === "tb") {
                 this.parent.element.classList.add("fn__flex-column");
+                this.parent.element.style.minHeight = "8px";
                 this.parent.element.classList.remove("fn__flex");
             } else {
                 this.parent.element.classList.remove("fn__flex-column");

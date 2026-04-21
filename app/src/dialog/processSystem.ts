@@ -50,14 +50,15 @@ export const reloadSync = (
         hideMessage();
     }
     /// #if MOBILE
-    if (window.siyuan.mobile.popEditor) {
+    if (window.siyuan.mobile.popEditor && window.siyuan.mobile.popEditor.protyle) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.popEditor.protyle.block.rootID)) {
             hideElements(["dialog"]);
         } else {
             reloadProtyle(window.siyuan.mobile.popEditor.protyle, false, updateReadonly);
         }
     }
-    if (window.siyuan.mobile.editor) {
+    if (document.getElementById("empty").classList.contains("fn__none") &&
+        window.siyuan.mobile.editor && window.siyuan.mobile.editor.protyle) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
             setEmpty(app);
         } else {

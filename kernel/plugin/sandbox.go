@@ -50,17 +50,13 @@ var (
 	client *req.Client = req.C()
 )
 
-// injectSandboxGlobals injects all siyuan.* APIs into the plugin's QJS context.
-func injectSandboxGlobals(p *KernelPlugin) error {
-	ctx := p.Context()
-	if ctx == nil {
-		return fmt.Errorf("QJS context not initialized")
-	}
-
+// injectGlobalContext injects all siyuan.* APIs into the plugin's QJS global context.
+func injectGlobalContext(p *KernelPlugin, ctx *qjs.Context) error {
 	// Create the `siyuan` global object as an empty object
 	siyuan := ctx.NewObject()
 
 	injectPlugin(p, ctx, siyuan)
+	injectEvent(p, ctx, siyuan)
 	injectLogger(p, ctx, siyuan)
 	injectStorage(p, ctx, siyuan)
 	injectFetch(p, ctx, siyuan)
@@ -90,12 +86,8 @@ func injectPlugin(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	plugin.SetPropertyStr("platform", ctx.NewString(bazaar.GetCurrentBackend()))
 	plugin.SetPropertyStr("i18n", i18n)
 
-	plugin.SetPropertyStr("onload", ctx.NewNull())
-	plugin.SetPropertyStr("onloaded", ctx.NewNull())
-	plugin.SetPropertyStr("onunload", ctx.NewNull())
-
-	if err := ObjectSeal(ctx, plugin); err != nil {
-		return fmt.Errorf("failed to seal siyuan.plugin object: %w", err)
+	if err := ObjectFreeze(ctx, plugin); err != nil {
+		return fmt.Errorf("failed to freeze siyuan.plugin object: %w", err)
 	}
 
 	siyuan.SetPropertyStr("plugin", plugin)
@@ -119,6 +111,57 @@ func injectLogger(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	}
 
 	siyuan.SetPropertyStr("logger", logger)
+
+	return nil
+}
+
+// injectEvent adds siyuan.event to the QJS context.
+func injectEvent(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
+	event := ctx.NewObject()
+
+	event.SetPropertyStr("on", ctx.NewNull())
+	event.SetPropertyStr("emit", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
+		// lifecycle:<id> 生命周期响应
+		// rpc:<id> RPC 调用响应
+		PromiseRun(p, ctx, this, func() (result any, err any) {
+			args := this.Args()
+			if len(args) < 2 {
+				err = fmt.Errorf("topic and event required")
+				return
+			}
+
+			topicJs := args[0]
+			if topicJs == nil || !topicJs.IsString() {
+				err = fmt.Errorf("topic required")
+				return
+			}
+			topic := topicJs.String()
+
+			eventJs := args[1]
+			if eventJs == nil || !eventJs.IsObject() {
+				err = fmt.Errorf("event required")
+				return
+			}
+
+			eventJson, stringifyErr := eventJs.JSONStringify()
+			if stringifyErr != nil {
+				err = stringifyErr
+				return
+			}
+
+			p.bus.Publish(topic, eventJson)
+			return
+		}, func(err error) error {
+			return fmt.Errorf("siyuan.event.emit: %w", err)
+		})
+		return
+	}, true))
+
+	if err := ObjectSeal(ctx, event); err != nil {
+		return fmt.Errorf("failed to seal siyuan.plugin.event object: %w", err)
+	}
+
+	siyuan.SetPropertyStr("event", event)
 
 	return nil
 }
@@ -727,7 +770,7 @@ func injectSocket(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	rpc := ctx.NewObject()
 
-	rpc.SetPropertyStr("bind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+	rpc.SetPropertyStr("subscribe", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		defer func() {
 			if r := recover(); r != nil {
 				logging.LogErrorf("qjs panic during siyuan.rpc.bind: %v", r)
@@ -741,20 +784,14 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 			}
 
 			name := args[0].String()
-			method := args[1]
 
-			descriptionArgs := args[2:]
+			descriptionArgs := args[1:]
 			descriptions := make([]string, len(descriptionArgs))
 			for i, arg := range descriptionArgs {
 				descriptions[i] = arg.String()
 			}
 
-			if !method.IsFunction() {
-				err = fmt.Errorf("second argument must be a function")
-				return
-			}
-
-			if bindErr := p.bindRpcMethod(name, method, descriptions...); bindErr != nil {
+			if bindErr := p.subscribeRpcMethod(name, descriptions...); bindErr != nil {
 				err = bindErr
 				return
 			}
@@ -766,23 +803,16 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 		return
 	}, true))
 
-	rpc.SetPropertyStr("unbind", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
+	rpc.SetPropertyStr("unsubscribe", ctx.Function(func(this *qjs.This) (value *qjs.Value, err error) {
 		PromiseRun(p, ctx, this, func() (result any, err any) {
 			args := this.Args()
-			if len(args) < 2 {
-				err = fmt.Errorf("name and function required")
+			if len(args) < 1 {
+				err = fmt.Errorf("method name is required")
 				return
 			}
 
 			name := args[0].String()
-			fn := args[1]
-
-			if !fn.IsFunction() {
-				err = fmt.Errorf("second argument must be a function")
-				return
-			}
-
-			if unbindErr := p.unbindRpcMethod(name, fn); unbindErr != nil {
+			if unbindErr := p.unsubscribeRpcMethod(name); unbindErr != nil {
 				err = unbindErr
 				return
 			}
@@ -896,6 +926,7 @@ func ObjectFreeze(ctx *qjs.Context, object *qjs.Value) (err error) {
 }
 
 // PromiseRun is a helper that runs a function in the plugin worker and resolves/rejects a JS Promise based on the outcome, using the provided error format string for error messages.
+// ⛔️ This function can cause panic!
 func PromiseRun(p *KernelPlugin, ctx *qjs.Context, this *qjs.This, fn func() (result any, err any), errorf func(err error) error) {
 	runError := p.worker.Run(fn, func(result any, err any) {
 		if err != nil {
@@ -904,7 +935,7 @@ func PromiseRun(p *KernelPlugin, ctx *qjs.Context, this *qjs.This, fn func() (re
 			if result != nil {
 				this.Promise().Resolve(result.(*qjs.Value))
 			} else {
-				this.Promise().Resolve(nil)
+				this.Promise().Resolve()
 			}
 		}
 	}, p.context)
@@ -945,37 +976,39 @@ func ObjectSetDataMethods(p *KernelPlugin, ctx *qjs.Context, object *qjs.Value, 
 	}, true))
 }
 
-// invokeJsLifecycleHook calls a JS lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
-func invokeJsLifecycleHook(ctx *qjs.Context, name string) (result *qjs.Value, err error) {
+// dispatchEvent calls the globalThis.siyuan.plugin.event.on hook with the given event object.
+// If it returns `true`, the caller should await the result by receiving a event with the specified topic.
+func dispatchEvent(p *KernelPlugin, ctx *qjs.Context, e any) (await bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("qjs panic during invoke siyuan.plugin.%s: %v", name, r)
+			err = fmt.Errorf("qjs panic during invoke siyuan.event.on: %v", r)
 		}
 	}()
 
-	plugin, err := getJsContextValue(ctx, []any{"siyuan", "plugin"})
+	event, err := getJsContextValue(ctx, []any{"siyuan", "event"})
 	if err != nil {
 		return
 	}
-	if plugin == nil {
-		err = fmt.Errorf("globalThis.siyuan.plugin not found in JS context")
+	if event == nil {
+		err = fmt.Errorf("globalThis.siyuan.event not found in JS context")
 		return
 	}
 
-	hook := plugin.GetPropertyStr(name)
+	hook := event.GetPropertyStr("on")
 	if hook != nil && hook.IsFunction() {
-		result, err = ctx.Invoke(hook, plugin)
-		if err != nil {
+		// ⚠️ Option of using eval() also causes deadlocks
+		eventJs, parseErr := goValueToJsValue(ctx, e)
+		if parseErr != nil {
+			err = parseErr
 			return
 		}
-		if result != nil {
-			if result.IsPromise() {
-				// ⚠️ Await can block other promises‘ await inside the hook
-				// result, err = result.Await()
-
-				// ⚠️ then / cache / finally can’t be called
-			}
+		invokeResult, InvokeErr := ctx.Invoke(hook, event, eventJs)
+		if InvokeErr != nil {
+			err = InvokeErr
+			return
 		}
+
+		await = invokeResult.IsBool() && invokeResult.Bool()
 	}
 	return
 }
@@ -1065,7 +1098,30 @@ func getJsContextValue(ctx *qjs.Context, paths []any) (value *qjs.Value, retErr 
 // loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
 func loggerWrapper(p *KernelPlugin, ctx *qjs.Context, logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
 	return func(this *qjs.This) (result *qjs.Value, err error) {
-		PromiseRun(p, ctx, this, func() (result any, err any) {
+		// ⬇️ panic - Option 1
+		// PromiseRun(p, ctx, this, func() (result any, err any) {
+		// 	// Get arguments via this.Args()
+		// 	args := this.Args()
+		// 	if len(args) < 1 {
+		// 		return
+		// 	}
+
+		// 	parts := make([]string, 0, len(args))
+		// 	for _, arg := range args {
+		// 		parts = append(parts, arg.String())
+		// 	}
+		// 	msg := strings.Join(parts, " ")
+
+		// 	logFn("[plugin:%s] %s", p.Name, msg)
+		// 	return
+		// }, func(err error) error {
+		// 	return fmt.Errorf("siyuan.logger.%s: %w", p.Name, err)
+		// })
+		// return
+		// ⬆️ panic
+
+		// ⬇️ success - Option 2
+		runErr := p.worker.Run(func() (result any, err any) {
 			// Get arguments via this.Args()
 			args := this.Args()
 			if len(args) < 1 {
@@ -1080,10 +1136,23 @@ func loggerWrapper(p *KernelPlugin, ctx *qjs.Context, logFn func(format string, 
 
 			logFn("[plugin:%s] %s", p.Name, msg)
 			return
-		}, func(err error) error {
-			return fmt.Errorf("siyuan.logger.%s: %w", p.Name, err)
-		})
+		}, func(result any, err any) {
+			if err != nil {
+				this.Promise().Reject(ctx.NewError(err.(error)))
+			} else {
+				if result != nil {
+					this.Promise().Resolve(result.(*qjs.Value))
+				} else {
+					this.Promise().Resolve()
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			this.Promise().Reject(ctx.NewError(runErr))
+		}
+		this.Promise().Resolve()
 		return
+		// ⬆️ success
 	}
 }
 
@@ -1136,6 +1205,7 @@ func rpcParamsToJsValue(ctx *qjs.Context, params any) (isArray bool, value *qjs.
 }
 
 // invokeRpcMethod calls the given JS function with the provided params and returns the result or error.
+// Can't be called in Worker, otherwise it will cause deadlock when the JS function tries to call back into Go (e.g., via siyuan.rpc.broadcast) and waits for the result while the Worker is blocked waiting for the JS function to return.
 func invokeRpcMethod(ctx *qjs.Context, rpcMethodName string, rpcMethod *qjs.Value, rpcParams any) (rpcResult any, rpcError *JsonRpcError) {
 	// Convert params to JS value
 	isArray, paramValue, paramArray, convertErr := rpcParamsToJsValue(ctx, rpcParams)
@@ -1167,7 +1237,6 @@ func invokeRpcMethod(ctx *qjs.Context, rpcMethodName string, rpcMethod *qjs.Valu
 
 	// Await if Promise
 	if result != nil && result.IsPromise() {
-		// TODO: ⚠️ Await can block other promises‘ await inside the hook
 		result, err = result.Await()
 		if err != nil {
 			return nil, &JsonRpcError{

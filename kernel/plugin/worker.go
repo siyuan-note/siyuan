@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
+
+	"github.com/siyuan-note/logging"
 )
 
 type Continuation func(result any, err any)
@@ -87,6 +89,12 @@ func (w *Worker) loop() {
 
 func (t *Task) do() (result any, err any) {
 	defer func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logging.LogErrorf("task callback panicked: %v\n", r)
+			}
+		}()
+
 		if r := recover(); r != nil {
 			err = fmt.Errorf("task panicked: %v", r)
 		}

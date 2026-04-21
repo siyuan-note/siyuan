@@ -24,7 +24,9 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/asaskevich/EventBus"
 	"github.com/fastschema/qjs"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -36,12 +38,30 @@ type PluginState int64
 type RpcMethod struct {
 	Name         string
 	Descriptions []string
-	Function     *qjs.Value
 }
 
 type RpcMethodInfo struct {
 	Name         string   `json:"name"`
 	Descriptions []string `json:"descriptions"`
+}
+
+const (
+	PluginEventTypeLifecycle = "lifecycle"
+	PluginEventTypeRpc       = "rpc"
+)
+
+type PluginEvent struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+}
+
+type PluginLifecycleEvent struct {
+	*PluginEvent
+	Detail *PluginLifecycleEventDetail `json:"detail"`
+}
+
+type PluginLifecycleEventDetail struct {
+	Name string `json:"name"` // "load", "loaded", "unload"
 }
 
 const (
@@ -80,12 +100,18 @@ type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
 
-	state   atomic.Int64                //  PluginState
+	file    string                      // file path for qjs runtime (e.g. "plugin-name/kernel.js")
+	options []qjs.EvalOptionFunc        // options for evaluating in qjs runtime
 	runtime atomic.Pointer[qjs.Runtime] // *qjs.Runtime
-	worker  *Worker                     // Worker for serializing plugin tasks (e.g. RPC calls) on a single goroutine
-	context context.Context             // Context for managing plugin lifecycle and cancellation
 
-	rpcMethods sync.Map // registered JSON-RPC methods
+	state   atomic.Int64    //  PluginState
+	worker  *Worker         // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
+	context context.Context // Context for managing plugin lifecycle and cancellation
+
+	bus     EventBus.Bus   // Event bus for plugin events and RPC request/response dispatch
+	handler func(e string) // Event handler subscribed to plugin events
+
+	rpcMethods sync.Map // string -> *RpcMethod, registered JSON-RPC methods
 
 	socketsMu sync.RWMutex                    // separate mutex for sockets map (must not nest inside mu)
 	sockets   map[*websocket.Conn]bool        // tracked loopback WebSocket connections (true: server, false: client)
@@ -102,6 +128,14 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		Petal: petal,
 		token: token,
 
+		file: fmt.Sprintf("%s/kernel.js", petal.Name),
+		options: []qjs.EvalOptionFunc{
+			qjs.TypeGlobal(),
+			qjs.TypeModule(),
+			qjs.FlagAsync(),
+		},
+
+		bus:     EventBus.New(),
 		worker:  NewWorker(64),
 		context: context.Background(),
 
@@ -134,6 +168,11 @@ func (p *KernelPlugin) Context() *qjs.Context {
 		return nil
 	}
 	return context
+}
+
+// Eval evaluates JavaScript code in the plugin's QJS context, returning the result or error.
+func (p *KernelPlugin) Eval(ctx *qjs.Context, code string) (result *qjs.Value, err error) {
+	return ctx.Eval(p.file, append(p.options, qjs.Code(code))...)
 }
 
 // close frees the QJS runtime.
@@ -189,17 +228,29 @@ func (p *KernelPlugin) start() (retErr error) {
 		return fmt.Errorf("create QJS runtime: %v", qjsErr)
 	}
 
+	ctx := p.Context()
+	if ctx == nil {
+		p.error()
+		return fmt.Errorf("failed to get QJS context")
+	}
+
 	// Inject sandbox globals (e.g. globalThis.siyuan) before evaluating plugin code.
-	if injectErr := injectSandboxGlobals(p); injectErr != nil {
+	if injectErr := injectGlobalContext(p, ctx); injectErr != nil {
 		p.error()
 		return fmt.Errorf("inject sandbox globals: %v", injectErr)
 	}
 
 	// Load and evaluate kernel.js code in plugin's QJS runtime.
-	_, evalErr := runtime.Eval(p.Name+"/kernel.js", qjs.Code(p.Kernel.JS), qjs.TypeModule(), qjs.FlagAsync())
+	_, evalErr := p.Eval(ctx, p.Kernel.JS)
 	if evalErr != nil {
 		p.error()
 		return fmt.Errorf("eval error: %v", evalErr)
+	}
+
+	subscribeErr := p.subscribeEvents(ctx)
+	if subscribeErr != nil {
+		p.error()
+		return fmt.Errorf("subscribe plugin events: %v", subscribeErr)
 	}
 
 	p.onLoad()
@@ -232,7 +283,6 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	p.state.Store(int64(PluginStateStopping))
 
 	p.onUnload()
-	p.worker.Close()
 
 	p.rpcMethods.Clear()
 
@@ -243,6 +293,9 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 		delete(p.socketMus, c)
 	}
 	p.socketsMu.Unlock()
+
+	p.unsubscribeEvents()
+	p.worker.Close()
 
 	p.close()
 	p.state.Store(int64(PluginStateStopped))
@@ -256,50 +309,65 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoad() {
 	if p.State() == PluginStateLoading {
-		p.invokeHook("onload")
+		p.invokeHook("load")
 	}
 }
 
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoaded() {
 	if p.State() == PluginStateLoaded {
-		p.invokeHook("onloaded")
+		p.invokeHook("loaded")
 	}
 }
 
 // onUnload is called before plugin stop.
 func (p *KernelPlugin) onUnload() {
 	if p.State() == PluginStateStopping {
-		p.invokeHook("onunload")
+		p.invokeHook("unload")
 	}
 }
 
-// bindRpcMethod add or updates a JS function as a named RPC method.
-func (p *KernelPlugin) bindRpcMethod(name string, function *qjs.Value, descriptions ...string) error {
+// subscribeRpcMethod add or updates a JS function as a named RPC method.
+func (p *KernelPlugin) subscribeRpcMethod(name string, descriptions ...string) error {
 	p.rpcMethods.Store(name, &RpcMethod{
 		Name:         name,
 		Descriptions: descriptions,
-		Function:     function,
 	})
 	return nil
 }
 
-// unbindRpcMethod removes a registered RPC method
-func (p *KernelPlugin) unbindRpcMethod(name string, function *qjs.Value) error {
-	value, ok := p.rpcMethods.Load(name)
+// unsubscribeRpcMethod removes a registered RPC method
+func (p *KernelPlugin) unsubscribeRpcMethod(name string) error {
+	_, ok := p.rpcMethods.LoadAndDelete(name)
 	if !ok {
 		return nil
-	}
-
-	rpcMethod, ok := value.(*RpcMethod)
-	if !ok {
-		return nil
-	}
-
-	if rpcMethod.Function.Raw() == function.Raw() {
-		p.rpcMethods.Delete(name)
 	}
 	return nil
+}
+
+// subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS context.
+func (p *KernelPlugin) subscribeEvents(ctx *qjs.Context) (err error) {
+	p.handler = func(e string) {
+		p.worker.Run(func() (result any, err any) {
+			return dispatchEvent(p, ctx, e)
+		}, nil, p.context)
+	}
+
+	if err = p.bus.Subscribe(PluginEventTypeLifecycle, p.handler); err != nil {
+		return
+	}
+	if err = p.bus.Subscribe(PluginEventTypeRpc, p.handler); err != nil {
+		return
+	}
+	return
+}
+
+// unsubscribeEvents unsubscribes from plugin events.
+func (p *KernelPlugin) unsubscribeEvents() {
+	if p.handler != nil {
+		p.bus.Unsubscribe(PluginEventTypeLifecycle, p.handler)
+		p.bus.Unsubscribe(PluginEventTypeRpc, p.handler)
+	}
 }
 
 // GetRpcMethodsInfo returns a list of registered RPC methods with their descriptions.
@@ -435,10 +503,9 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}
 	}
 
-	runResult, runError := p.worker.RunSync(func() (any, any) {
-		return invokeRpcMethod(ctx, method, rpcMethod, params)
-	}, p.context)
-	return runResult, runError.(*JsonRpcError)
+	// TODO: 使用事件总线派遣 RPC request
+	// TODO: 使用事件总线接受 RPC response
+	return
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
@@ -458,7 +525,7 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 }
 
 // getRpcMethod retrieves a registered RPC method by name, or nil if not found or not a function.
-func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
+func (p *KernelPlugin) getRpcMethod(name string) *RpcMethod {
 	value, ok := p.rpcMethods.Load(name)
 	if !ok {
 		return nil
@@ -469,11 +536,7 @@ func (p *KernelPlugin) getRpcMethod(name string) *qjs.Value {
 		return nil
 	}
 
-	if !method.Function.IsFunction() {
-		return nil
-	}
-
-	return method.Function
+	return method
 }
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
@@ -483,9 +546,40 @@ func (p *KernelPlugin) invokeHook(name string) {
 		return
 	}
 
-	p.worker.RunSync(func() (any, any) {
-		return invokeJsLifecycleHook(ctx, name)
-	}, p.context)
+	id := uuid.NewString()
+	event := &PluginLifecycleEvent{
+		PluginEvent: &PluginEvent{
+			ID:   id,
+			Type: PluginEventTypeLifecycle,
+		},
+		Detail: &PluginLifecycleEventDetail{
+			Name: name,
+		},
+	}
 
-	// TODO: await hook promise
+	done := make(chan struct{})
+	topic := fmt.Sprintf("%s:%s", PluginEventTypeLifecycle, id)
+	handler := func(e string) {
+		logging.LogDebugf("[plugin:%s] received lifecycle response event for hook %q: %s", p.Name, name, e)
+		close(done)
+	}
+	if err := p.bus.SubscribeOnce(topic, handler); err != nil {
+		logging.LogErrorf("[plugin:%s] subscribe lifecycle response event: %s", p.Name, err)
+	}
+
+	await, err := p.worker.RunSync(func() (any, any) {
+		return dispatchEvent(p, ctx, event)
+	}, p.context)
+	if err != nil {
+		logging.LogErrorf("[plugin:%s] dispatch lifecycle event: %s", p.Name, err.(error))
+		return
+	}
+
+	if !await.(bool) {
+		// if err := p.bus.Unsubscribe(topic, handler); err != nil {
+		// 	logging.LogErrorf("[plugin:%s] unsubscribe lifecycle response event: %s", p.Name, err)
+		// }
+		close(done)
+	}
+	<-done
 }

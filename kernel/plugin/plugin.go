@@ -524,6 +524,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 	}
 	if err := p.bus.SubscribeOnce(topic, handler); err != nil {
 		logging.LogErrorf("[plugin:%s] subscribe lifecycle response event: %s", p.Name, err)
+		return
 	}
 
 	await, err := p.worker.RunSync(func() (any, any) {
@@ -534,7 +535,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 		return
 	}
 
-	if !await.(bool) {
+	if await, _ := await.(bool); !await {
 		if err := p.bus.Unsubscribe(topic, handler); err != nil {
 			logging.LogErrorf("[plugin:%s] unsubscribe lifecycle response event: %s", p.Name, err)
 		}

@@ -644,17 +644,29 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 				}
 				return rt.ToValue(sendPromise)
 			}
-			data := sendCall.Argument(0)
+			// Extract Go primitives from goja.Value on the JS goroutine (FunctionCall body)
+			// before entering worker.Run, since goja values must not cross goroutines.
+			var sendBytes []byte
+			var sendStr string
+			var isBinary bool
+			if abExport, ok := sendCall.Argument(0).Export().(goja.ArrayBuffer); ok {
+				raw := abExport.Bytes()
+				sendBytes = make([]byte, len(raw))
+				copy(sendBytes, raw)
+				isBinary = true
+			} else {
+				sendStr = sendCall.Argument(0).String()
+			}
 			_ = p.worker.Run(func() (any, any) {
 				state := WebSocketState(readyState.Load())
 				if state == WebSocketReadyStateOpen {
 					c := conn.Load()
 					if c != nil {
 						var sendErr error
-						if abExport, ok := data.Export().(goja.ArrayBuffer); ok {
-							sendErr = writeMessage(c, websocket.BinaryMessage, abExport.Bytes())
+						if isBinary {
+							sendErr = writeMessage(c, websocket.BinaryMessage, sendBytes)
 						} else {
-							sendErr = writeMessage(c, websocket.TextMessage, []byte(data.String()))
+							sendErr = writeMessage(c, websocket.TextMessage, []byte(sendStr))
 						}
 						if sendErr != nil {
 							if err := sendReject(rt.NewGoError(sendErr)); err != nil {
@@ -665,10 +677,10 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 					}
 				} else if state == WebSocketReadyStateConnecting {
 					sendQueueMu.Lock()
-					if abExport, ok := data.Export().(goja.ArrayBuffer); ok {
-						sendQueue = append(sendQueue, abExport.Bytes())
+					if isBinary {
+						sendQueue = append(sendQueue, sendBytes)
 					} else {
-						sendQueue = append(sendQueue, data.String())
+						sendQueue = append(sendQueue, sendStr)
 					}
 					sendQueueMu.Unlock()
 				}
@@ -682,11 +694,11 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 
 		wsObj.Set("ping", rt.ToValue(func(pingCall goja.FunctionCall) goja.Value {
 			pingPromise, pingResolve, _ := rt.NewPromise()
+			var pingData string
+			if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
+				pingData = pingCall.Argument(0).String()
+			}
 			_ = p.worker.Run(func() (any, any) {
-				var pingData string
-				if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
-					pingData = pingCall.Argument(0).String()
-				}
 				c := conn.Load()
 				if c != nil {
 					writeMessage(c, websocket.PingMessage, []byte(pingData))
@@ -701,11 +713,11 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 
 		wsObj.Set("pong", rt.ToValue(func(pongCall goja.FunctionCall) goja.Value {
 			pongPromise, pongResolve, _ := rt.NewPromise()
+			var pongData string
+			if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
+				pongData = pongCall.Argument(0).String()
+			}
 			_ = p.worker.Run(func() (any, any) {
-				var pongData string
-				if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
-					pongData = pongCall.Argument(0).String()
-				}
 				c := conn.Load()
 				if c != nil {
 					writeMessage(c, websocket.PongMessage, []byte(pongData))
@@ -720,15 +732,15 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 
 		wsObj.Set("close", rt.ToValue(func(closeCall goja.FunctionCall) goja.Value {
 			closePromise, closeResolve, _ := rt.NewPromise()
+			code := websocket.CloseNormalClosure
+			var reason string
+			if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
+				code = int(closeCall.Argument(0).ToInteger())
+			}
+			if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
+				reason = closeCall.Argument(1).String()
+			}
 			_ = p.worker.Run(func() (any, any) {
-				code := websocket.CloseNormalClosure
-				var reason string
-				if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
-					code = int(closeCall.Argument(0).ToInteger())
-				}
-				if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
-					reason = closeCall.Argument(1).String()
-				}
 				c := conn.Load()
 				if c != nil {
 					writeMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))

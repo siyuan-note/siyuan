@@ -281,7 +281,7 @@ export class WYSIWYG {
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")]);
+                countBlockWord([nodeElement.getAttribute("data-node-id")], protyle.block.rootID);
                 selectElements = [nodeElement];
             }
             let html = "";
@@ -630,7 +630,7 @@ export class WYSIWYG {
                         !selectElements[0].classList.contains("sb")) {
                         // 单个 p 不选中
                     } else {
-                        const ids: string[] = [];
+                        const ids: (string | null)[] = [];
                         if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&
                             (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 || endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
                             showMessage(window.siyuan.languages.crossKeepLazyLoad);
@@ -645,7 +645,7 @@ export class WYSIWYG {
                                 });
                             }
                         });
-                        countBlockWord(ids);
+                        countBlockWord(ids, protyle.block.rootID);
                         if (toDown) {
                             focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
                         } else {
@@ -690,11 +690,11 @@ export class WYSIWYG {
                         ctrlParentElement.removeAttribute("select-start");
                         ctrlParentElement.removeAttribute("select-end");
                     }
-                    const ids: string[] = [];
+                    const ids: (string | null)[] = [];
                     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                         ids.push(item.getAttribute("data-node-id"));
                     });
-                    countBlockWord(ids);
+                    countBlockWord(ids, protyle.block.rootID);
                 }
                 return;
             }
@@ -1722,12 +1722,12 @@ export class WYSIWYG {
                     }
                 }
 
-                const ids: string[] = [];
+                const ids: (string | null)[] = [];
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));
                 });
-                countBlockWord(ids);
+                countBlockWord(ids, protyle.block.rootID);
                 // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
@@ -2556,7 +2556,7 @@ export class WYSIWYG {
             if ((event.shiftKey || isOnlyMeta(event)) && !event.isComposing && range.toString() !== "") {
                 // 工具栏
                 protyle.toolbar.render(protyle, range, event);
-                countSelectWord(range);
+                countSelectWord(range, protyle.block.rootID);
             }
 
             if (event.eventPhase !== 3 && !event.shiftKey && (event.key.indexOf("Arrow") > -1 || event.key === "Home" || event.key === "End" || event.key === "PageUp" || event.key === "PageDown") && !event.isComposing) {

@@ -239,7 +239,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
 
                     nextElement.classList.add("protyle-wysiwyg--select");
-                    countBlockWord([nextElement.getAttribute("data-node-id")]);
+                    countBlockWord([nextElement.getAttribute("data-node-id")], protyle.block.rootID);
                     const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
                     if (bottom > 0) {
                         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
@@ -280,7 +280,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     if (previousElement) {
                         previousElement.classList.add("protyle-wysiwyg--select");
-                        countBlockWord([previousElement.getAttribute("data-node-id")]);
+                        countBlockWord([previousElement.getAttribute("data-node-id")], protyle.block.rootID);
                         const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
                         if (top < 0) {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
@@ -518,11 +518,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.classList.remove("protyle-wysiwyg--select");
                 });
                 topElement.classList.add("protyle-wysiwyg--select");
+                const ids: (string | null)[] = [];
+                ids.push(topElement.getAttribute("data-node-id"));
                 let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
                 while (nextElement) {
                     nextElement.classList.add("protyle-wysiwyg--select");
+                    ids.push(nextElement.getAttribute("data-node-id"));
                     nextElement = event.key === "Home" ? nextElement.previousElementSibling : nextElement.nextElementSibling;
                 }
+                countBlockWord(ids, protyle.block.rootID);
                 if (event.key === "Home") {
                     protyle.wysiwyg.element.firstElementChild.scrollIntoView();
                 } else {

@@ -770,7 +770,10 @@ export class Wnd {
     }
 
     private removeTabAction = (id: string, isBatchClose = false, animate = true, isSaveLayout = true) => {
-        clearCounter();
+        const closing = this.children.find(t => t.id === id);
+        if (closing && closing.model instanceof Editor) {
+            clearCounter(closing.model.editor.protyle.block.rootID);
+        }
         this.children.find((item, index) => {
             if (item.id === id) {
                 if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {

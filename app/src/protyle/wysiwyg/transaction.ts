@@ -80,7 +80,11 @@ const promiseTransaction = () => {
         }]
     }, (response) => {
         if (window.siyuan.transactions.length === 0) {
-            countBlockWord([], protyle.block.rootID, true);
+            const ids: (string | null)[] = [];
+            protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                ids.push(item.getAttribute("data-node-id"));
+            });
+            countBlockWord(ids, protyle.block.rootID);
         } else {
             promiseTransaction();
         }

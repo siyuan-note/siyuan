@@ -22,12 +22,14 @@ import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
 import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
+import {openSetting} from "../config";
+import {mountHelp} from "../util/mount";
 import {openChangelog} from "./openChangelog";
 import {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
-import {correctHotkey} from "./globalEvent/commonHotkey";
+import {correctHotkey, syncAppMenuShortcuts} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {processSYLink} from "../editor/openLink";
 import {getAllEditor} from "../layout/getAll";
@@ -171,6 +173,12 @@ export const initWindow = async (app: App) => {
             data.app = app;
         }
         openFile(data);
+    });
+    ipcRenderer.on(Constants.SIYUAN_OPEN_SETTING, () => {
+        openSetting(app);
+    });
+    ipcRenderer.on(Constants.SIYUAN_OPEN_HELP, () => {
+        mountHelp();
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {
         if (isWindow()) {
@@ -380,6 +388,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             }
         });
     }
+    syncAppMenuShortcuts();
     /// #else
     if (!isWindow()) {
         document.querySelector(".toolbar").classList.add("toolbar--browser");

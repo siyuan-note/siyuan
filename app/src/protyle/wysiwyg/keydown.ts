@@ -716,7 +716,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 末尾按向下/右箭头丢失焦点 https://ld246.com/article/1629954026096
                 const lastEditElement = getContenteditableElement(nodeElement);
                 // 代码块需替换最后一个 /n  https://github.com/siyuan-note/siyuan/issues/3221
-                if (lastEditElement && !lastEditElement.querySelector(".emoji") &&
+                if (lastEditElement && !nodeElement.classList.contains("table") &&
+                    !lastEditElement.querySelector(".emoji") &&
                     lastEditElement.textContent.replace(/\n$/, "").length <= getSelectionOffset(lastEditElement, undefined, range).end) {
                     event.stopPropagation();
                     event.preventDefault();
@@ -725,7 +726,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (selectText === "" && event.key === "ArrowLeft" && nodeElement === getFirstBlock(protyle.wysiwyg.element.firstElementChild)) {
                 // 页面向左箭头丢失焦点 https://github.com/siyuan-note/siyuan/issues/2768
                 const firstEditElement = getContenteditableElement(nodeElement);
-                if (firstEditElement && getSelectionOffset(firstEditElement, undefined, range).start === 0) {
+                if (firstEditElement && !nodeElement.classList.contains("table") &&
+                    getSelectionOffset(firstEditElement, undefined, range).start === 0) {
                     event.stopPropagation();
                     event.preventDefault();
                     focusByRange(range);

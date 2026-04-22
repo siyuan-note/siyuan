@@ -9,7 +9,7 @@ import (
 
 func TestGoValueToJsValue_String(t *testing.T) {
 	rt := goja.New()
-	v, err := goValueToJsValue(rt, "hello")
+	v, err := goValueToJsValueSafely(rt, "hello")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,7 +20,7 @@ func TestGoValueToJsValue_String(t *testing.T) {
 
 func TestGoValueToJsValue_Int(t *testing.T) {
 	rt := goja.New()
-	v, err := goValueToJsValue(rt, 42)
+	v, err := goValueToJsValueSafely(rt, 42)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestGoValueToJsValue_LargeInt64(t *testing.T) {
 	rt := goja.New()
 	// SiYuan block ID style value — fits in int64, must round-trip correctly
 	const id = int64(20060102150405)
-	v, err := goValueToJsValue(rt, map[string]any{"id": id})
+	v, err := goValueToJsValueSafely(rt, map[string]any{"id": id})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestGoValueToJsValue_LargeInt64(t *testing.T) {
 
 func TestGoValueToJsValue_Null(t *testing.T) {
 	rt := goja.New()
-	v, err := goValueToJsValue(rt, nil)
+	v, err := goValueToJsValueSafely(rt, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestGoValueToJsValue_Null(t *testing.T) {
 
 func TestGoValueToJsValue_Array(t *testing.T) {
 	rt := goja.New()
-	v, err := goValueToJsValue(rt, []string{"a", "b"})
+	v, err := goValueToJsValueSafely(rt, []string{"a", "b"})
 	if err != nil {
 		t.Fatal(err)
 	}

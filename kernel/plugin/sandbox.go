@@ -71,10 +71,7 @@ func injectGlobalContext(p *KernelPlugin, rt *goja.Runtime) error {
 
 // injectPlugin adds siyuan.plugin to the goja context.
 func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
-	i18n, err := goValueToJsValue(rt, p.I18n)
-	if err != nil {
-		i18n = goja.Null()
-	}
+	i18n := rt.ToValue(p.I18n)
 
 	plugin := rt.NewObject()
 	plugin.Set("name", p.Name)
@@ -370,7 +367,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 				})
 			}
 			_ = p.worker.Run(func() (any, any) {
-				v, convertErr := goValueToJsValue(rt, results)
+				v, convertErr := goValueToJsValueSafely(rt, results)
 				if convertErr != nil {
 					if err := reject(rt.NewGoError(convertErr)); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.list reject: %v", p.Name, err)
@@ -409,7 +406,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 	object.Set("json", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 		_ = p.worker.Run(func() (any, any) {
-			v, e := goValueToJsValue(rt, json.RawMessage(data))
+			v, e := goValueToJsValueSafely(rt, json.RawMessage(data))
 			if e != nil {
 				if err := reject(rt.NewGoError(e)); err != nil {
 					logging.LogErrorf("[plugin:%s] json reject: %v", p.Name, err)
@@ -527,13 +524,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 				respHeaders[k] = strings.Join(vs, ", ")
 			}
 			_ = p.worker.Run(func() (any, any) {
-				respHeadersJs, convertErr := goValueToJsValue(rt, respHeaders)
-				if convertErr != nil {
-					if err := reject(rt.NewGoError(fmt.Errorf("failed to convert response headers: %w", convertErr))); err != nil {
-						logging.LogErrorf("[plugin:%s] fetch reject: %v", p.Name, err)
-					}
-					return nil, nil
-				}
+				respHeadersJs := rt.ToValue(respHeaders)
 				response := rt.NewObject()
 				response.Set("url", rt.ToValue(path))
 				response.Set("ok", rt.ToValue(resp.StatusCode >= 200 && resp.StatusCode < 300))
@@ -986,8 +977,10 @@ func ObjectSeal(rt *goja.Runtime, obj *goja.Object) error {
 	return err
 }
 
-// goValueToJsValue converts a Go value to a goja.Value by JSON serialization round-trip, returning an error if serialization fails.
-func goValueToJsValue(rt *goja.Runtime, value any) (goja.Value, error) {
+// goValueToJsValueSafely converts a Go value to a goja.Value via a JSON round-trip.
+// Use this instead of rt.ToValue when the value may contain int64 fields (e.g. SiYuan block IDs, Unix timestamps) or json.RawMessage: rt.ToValue maps int64 to IEEE 754 double, which silently loses precision for values > 2^53.
+// The JSON round-trip preserves integer values exactly by routing them through json.Number → Int64() before handing them to goja.
+func goValueToJsValueSafely(rt *goja.Runtime, value any) (goja.Value, error) {
 	b, err := json.Marshal(value)
 	if err != nil {
 		return nil, err
@@ -1001,6 +994,7 @@ func goValueToJsValue(rt *goja.Runtime, value any) (goja.Value, error) {
 	return rt.ToValue(convertJsonNumbers(parsed)), nil
 }
 
+// convertJsonNumbers recursively converts json.Number values in the given data structure to int64 or float64 where possible, preserving precision for large integers.
 func convertJsonNumbers(v any) any {
 	switch val := v.(type) {
 	case json.Number:
@@ -1077,11 +1071,7 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 		return
 	}
 
-	eventJs, parseErr := goValueToJsValue(rt, e)
-	if parseErr != nil {
-		err = parseErr
-		return
-	}
+	eventJs := rt.ToValue(e)
 
 	invokeResult, invokeErr := fn(event, eventJs)
 	if invokeErr != nil {

@@ -30,6 +30,7 @@ import (
 	"github.com/dop251/goja_nodejs/eventloop"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
+	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -98,7 +99,7 @@ type KernelPlugin struct {
 	context context.Context // Context for managing plugin lifecycle and cancellation
 
 	bus     EventBus.Bus   // Event bus for plugin events and RPC request/response dispatch
-	handler func(e string) // Event handler subscribed to plugin events
+	handler func(e []byte) // Event handler subscribed to plugin events
 
 	rpcMethods sync.Map // string -> *RpcMethod, registered JSON-RPC methods
 
@@ -308,9 +309,11 @@ func (p *KernelPlugin) unsubscribeRpcMethod(name string) error {
 
 // subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.
 func (p *KernelPlugin) subscribeEvents() (err error) {
-	p.handler = func(e string) {
+	p.handler = func(e []byte) {
+		event := R{}
+		lo.Must0(json.Unmarshal([]byte(e), &event))
 		p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			return dispatchEvent(p, rt, e)
+			return dispatchEvent(p, rt, event)
 		}, nil)
 	}
 

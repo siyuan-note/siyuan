@@ -188,7 +188,7 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 				return
 			}
 
-			p.bus.Publish(topic, string(eventJson))
+			p.bus.Publish(topic, eventJson)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -1289,14 +1289,14 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 		return
 	}
 
-	on := eventObj.Get("on")
-	hook, ok := goja.AssertFunction(on)
+	handlerValue := eventObj.Get("handler")
+	handler, ok := goja.AssertFunction(handlerValue)
 	if !ok {
 		return
 	}
 
 	eventJs := rt.ToValue(e)
-	invokeResult, invokeErr := hook(event, eventJs)
+	invokeResult, invokeErr := handler(event, eventJs)
 	if invokeErr != nil {
 		err = invokeErr
 		return

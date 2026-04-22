@@ -484,6 +484,11 @@ const initMainWindow = () => {
         }
     });
 
+    currentWindow.webContents.on('render-process-gone', (event, details) => {
+        console.log('Reason: ', details.reason);
+        console.log('Exit code', details.exitCode);
+    });
+
     if (windowState.isDevToolsOpened) {
         currentWindow.webContents.openDevTools({mode: "bottom"});
     }

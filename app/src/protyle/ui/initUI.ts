@@ -83,21 +83,21 @@ export const initUI = (protyle: IProtyle) => {
     let wheelTimeout: number;
     const wheelId = genUUID();
     const isMacOS = isMac();
-    const ZOOM_THRESHOLD = 20; // 按下 Ctrl / Cmd 滚动时累加 deltaY，达到阈值时改动一级字号
+    const ZOOM_THRESHOLD = 20; // 累加 deltaY 达到阈值时改动一级字号，避免单次缩放触发多次事件导致跳级
     const WHEEL_IDLE_MS = 200; // 单轮滚动的间隔时间，超过该时间后重置累加值
     let accumDeltaY = 0;
     let resetTimer: number;
     let wheelActive = false; // 记录是否处于同一轮滚动中
-    let modifierOnset = false; // 记录同一轮滚动的首次滚动是否按下 Ctrl / Cmd
-    protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
+    let modifierOnset = false; // 记录同一轮滚动的首次滚动是否按下 Ctrl/Cmd
+    protyle.contentElement.addEventListener("wheel", (event: WheelEvent) => {
         if (!window.siyuan.config.editor.fontSizeScrollZoom || event.shiftKey || event.deltaY === 0) {
-            // 用 event.shiftKey || event.deltaY === 0 检测横向滚动，因为 Mac 触控板快速划动时 deltaX 可能很大，即使容器并不能发生横向滚动
+            // 用 event.shiftKey || event.deltaY === 0 检测横向滚动，因为触控板快速划动时 deltaX 可能很大，即使容器并不能发生横向滚动
             return;
         }
-        // 浏览器无法区分触控板与鼠标滚轮 https://github.com/w3c/pointerevents/issues/596
         // 用「首轮是否带修饰键 + 空闲窗口」避免惯性或残留累加误触
-        // Mac 在鼠标不移动的情况下 event.metaKey 状态更新滞后，参考 https://github.com/tldraw/tldraw/issues/7981
-        const modifierPressed = isMacOS ? window.siyuan.metaIsPressed : event.ctrlKey;
+        // 浏览器无法区分触控板与鼠标滚轮 https://github.com/w3c/pointerevents/issues/596 ，浏览器将触控板双指捏合与张开映射为带 ctrlKey 的 wheel
+        // Mac 在鼠标不移动的情况下 metaKey 状态更新滞后，参考 https://github.com/tldraw/tldraw/issues/7981 用 keydown/keyup 维护 metaIsPressed 状态
+        const modifierPressed = isMacOS ? window.siyuan.metaIsPressed || event.ctrlKey : event.ctrlKey;
         if (!modifierPressed) {
             accumDeltaY = 0;
         }
@@ -111,28 +111,24 @@ export const initUI = (protyle: IProtyle) => {
             modifierOnset = modifierPressed;
         }
         if (!modifierPressed || !modifierOnset) {
-            // 触控板惯性会在松手后仍产生滚轮事件，避免划动后再按下 Ctrl / Cmd 会调整字号 https://ld246.com/article/1764296257377
-            // 要在单轮滚动的最后一个滚动事件触发之后等待 WHEEL_IDLE_MS 再按下 Ctrl / Cmd 滚动才能调整字号
+            // 触控板惯性会在松手后仍产生滚轮事件，避免划动后再按下 Ctrl/Cmd 会调整字号 https://ld246.com/article/1764296257377
+            // 要在单轮滚动的最后一个滚动事件触发之后等待 WHEEL_IDLE_MS 时间间隔之后再按下 Ctrl/Cmd 滚动才能调整字号
             return;
         }
-        // 仅 Windows 按下 Ctrl 之后滚动鼠标无法滚动容器，其他情况下都需要 preventDefault 阻止编辑器滚动
-        event.preventDefault();
         event.stopPropagation();
         if (accumDeltaY !== 0 && Math.sign(event.deltaY) !== Math.sign(accumDeltaY)) {
             accumDeltaY = 0;
         }
         accumDeltaY += event.deltaY;
-        if (accumDeltaY <= -ZOOM_THRESHOLD) {
-            if (window.siyuan.config.editor.fontSize >= 72) {
-                return;
-            }
+        let stepped = false;
+        if (accumDeltaY <= -ZOOM_THRESHOLD && window.siyuan.config.editor.fontSize < 72) {
             window.siyuan.config.editor.fontSize++;
-        } else if (accumDeltaY >= ZOOM_THRESHOLD) {
-            if (window.siyuan.config.editor.fontSize <= 9) {
-                return;
-            }
+            stepped = true;
+        } else if (accumDeltaY >= ZOOM_THRESHOLD && window.siyuan.config.editor.fontSize > 9) {
             window.siyuan.config.editor.fontSize--;
-        } else {
+            stepped = true;
+        }
+        if (!stepped) {
             return;
         }
         accumDeltaY = 0;
@@ -155,7 +151,7 @@ export const initUI = (protyle: IProtyle) => {
                 });
             });
         }, Constants.TIMEOUT_LOAD);
-    }, {passive: false});
+    }, {passive: true}); // 调整字号有时候会滚动编辑器，目前使用 passive: true 没有解决方法
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         hideElements(["hint", "util"], protyle);
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009

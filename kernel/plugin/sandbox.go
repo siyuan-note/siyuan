@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -30,6 +31,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/gorilla/websocket"
 	"github.com/imroc/req/v3"
+	"github.com/samber/lo"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
@@ -51,128 +53,137 @@ var (
 )
 
 // injectGlobalContext injects all siyuan.* APIs into the plugin's goja global context.
-func injectGlobalContext(p *KernelPlugin, rt *goja.Runtime) error {
+func injectGlobalContext(p *KernelPlugin, rt *goja.Runtime) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("failed to inject global context: %v", r)
+		}
+	}()
+
 	siyuan := rt.NewObject()
 
-	injectPlugin(p, rt, siyuan)
-	injectEvent(p, rt, siyuan)
-	injectLogger(p, rt, siyuan)
-	injectStorage(p, rt, siyuan)
-	injectFetch(p, rt, siyuan)
-	injectSocket(p, rt, siyuan)
-	injectRpc(p, rt, siyuan)
+	lo.Must0(injectPlugin(p, rt, siyuan))
+	lo.Must0(injectEvent(p, rt, siyuan))
+	lo.Must0(injectLogger(p, rt, siyuan))
+	lo.Must0(injectStorage(p, rt, siyuan))
+	lo.Must0(injectFetch(p, rt, siyuan))
+	lo.Must0(injectSocket(p, rt, siyuan))
+	lo.Must0(injectRpc(p, rt, siyuan))
 
-	if err := ObjectFreeze(rt, siyuan); err != nil {
-		return fmt.Errorf("failed to freeze siyuan object: %w", err)
-	}
+	lo.Must0(ObjectFreeze(rt, siyuan))
 
-	return rt.GlobalObject().Set("siyuan", siyuan)
+	lo.Must0(rt.GlobalObject().Set("siyuan", siyuan))
+	return
 }
 
 // injectPlugin adds siyuan.plugin to the goja context.
-func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
-	i18n := rt.ToValue(p.I18n)
+func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("injectPlugin: %v", r)
+		}
+	}()
 
 	plugin := rt.NewObject()
-	plugin.Set("name", p.Name)
-	plugin.Set("displayName", p.DisplayName)
-	plugin.Set("platform", bazaar.GetCurrentBackend())
-	plugin.Set("i18n", i18n)
 
-	if err := ObjectFreeze(rt, plugin); err != nil {
-		return fmt.Errorf("failed to freeze siyuan.plugin object: %w", err)
-	}
+	lo.Must0(plugin.Set("name", p.Name))
+	lo.Must0(plugin.Set("displayName", p.DisplayName))
+	lo.Must0(plugin.Set("platform", bazaar.GetCurrentBackend()))
+	lo.Must0(plugin.Set("i18n", p.I18n))
 
-	return siyuan.Set("plugin", plugin)
+	lo.Must0(ObjectFreeze(rt, plugin))
+
+	lo.Must0(siyuan.Set("plugin", plugin))
+	return
 }
 
 // injectLogger adds siyuan.logger to the goja context.
-func injectLogger(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
+func injectLogger(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("injectLogger: %v", r)
+		}
+	}()
+
 	logger := rt.NewObject()
 
-	logger.Set("trace", rt.ToValue(loggerWrapper(p, rt, logging.LogTracef)))
-	logger.Set("debug", rt.ToValue(loggerWrapper(p, rt, logging.LogDebugf)))
-	logger.Set("info", rt.ToValue(loggerWrapper(p, rt, logging.LogInfof)))
-	logger.Set("warn", rt.ToValue(loggerWrapper(p, rt, logging.LogWarnf)))
-	logger.Set("error", rt.ToValue(loggerWrapper(p, rt, logging.LogErrorf)))
+	lo.Must0(logger.Set("trace", rt.ToValue(loggerWrapper(p, rt, logging.LogTracef))))
+	lo.Must0(logger.Set("debug", rt.ToValue(loggerWrapper(p, rt, logging.LogDebugf))))
+	lo.Must0(logger.Set("info", rt.ToValue(loggerWrapper(p, rt, logging.LogInfof))))
+	lo.Must0(logger.Set("warn", rt.ToValue(loggerWrapper(p, rt, logging.LogWarnf))))
+	lo.Must0(logger.Set("error", rt.ToValue(loggerWrapper(p, rt, logging.LogErrorf))))
 
-	if err := ObjectFreeze(rt, logger); err != nil {
-		return fmt.Errorf("failed to freeze siyuan.logger object: %w", err)
-	}
+	lo.Must0(ObjectFreeze(rt, logger))
 
-	return siyuan.Set("logger", logger)
-}
-
-// loggerWrapper returns a JS-callable function that logs a message at the given level.
-// Logging is synchronous (in-process, no I/O), so resolve is called inline without worker.Run.
-func loggerWrapper(p *KernelPlugin, rt *goja.Runtime, logFn func(format string, args ...any)) func(goja.FunctionCall) goja.Value {
-	return func(call goja.FunctionCall) goja.Value {
-		promise, resolve, _ := rt.NewPromise()
-		parts := make([]string, 0, len(call.Arguments))
-		for _, arg := range call.Arguments {
-			parts = append(parts, arg.String())
-		}
-		msg := strings.Join(parts, " ")
-		logFn("[plugin:%s] %s", p.Name, msg)
-		if err := resolve(goja.Undefined()); err != nil {
-			logging.LogErrorf("[plugin:%s] logger resolve: %v", p.Name, err)
-		}
-		return rt.ToValue(promise)
-	}
+	lo.Must0(siyuan.Set("logger", logger))
+	return
 }
 
 // injectEvent adds siyuan.event to the goja context.
-func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
+func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("injectLogger: %v", r)
+		}
+	}()
+
 	event := rt.NewObject()
 
-	event.Set("on", goja.Null())
+	lo.Must0(event.Set("on", goja.Null()))
 
-	event.Set("emit", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(event.Set("emit", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
-		if len(call.Arguments) < 2 {
-			if err := reject(rt.NewGoError(fmt.Errorf("topic and event required"))); err != nil {
-				logging.LogErrorf("[plugin:%s] event.emit reject: %v", p.Name, err)
+		runErr := p.worker.Run(func() (result any, err error) {
+			if len(call.Arguments) < 2 {
+				err = fmt.Errorf("topic and event required")
+				return
 			}
-			return rt.ToValue(promise)
+
+			topic := call.Argument(0).String()
+			if topic == "" {
+				err = fmt.Errorf("topic required")
+				return
+			}
+
+			eventGo := call.Argument(1).Export()
+			eventJson, marshalErr := json.Marshal(eventGo)
+			if marshalErr != nil {
+				err = marshalErr
+				return
+			}
+
+			p.bus.Publish(topic, string(eventJson))
+			return
+		}, func(result any, err error) {
+			if lo.IsNil(err) {
+				resolve(goja.Undefined())
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] event.emit reject: %v", p.Name, rejectErr)
+				}
+			}
+		}, p.context)
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] event.emit worker run: %v", p.Name, runErr)
 		}
 
-		topic := call.Argument(0).String()
-		eventArg := call.Argument(1)
-
-		_ = p.worker.Run(func() (any, any) {
-			if topic == "" {
-				if err := reject(rt.NewGoError(fmt.Errorf("topic required"))); err != nil {
-					logging.LogErrorf("[plugin:%s] event.emit reject: %v", p.Name, err)
-				}
-				return nil, nil
-			}
-			exported := eventArg.Export()
-			eventJSON, marshalErr := json.Marshal(exported)
-			if marshalErr != nil {
-				if err := reject(rt.NewGoError(marshalErr)); err != nil {
-					logging.LogErrorf("[plugin:%s] event.emit reject: %v", p.Name, err)
-				}
-				return nil, nil
-			}
-			p.bus.Publish(topic, string(eventJSON))
-			if err := resolve(goja.Undefined()); err != nil {
-				logging.LogErrorf("[plugin:%s] event.emit resolve: %v", p.Name, err)
-			}
-			return nil, nil
-		}, nil, p.context)
-
 		return rt.ToValue(promise)
-	}))
+	})))
 
-	if err := ObjectSeal(rt, event); err != nil {
-		return fmt.Errorf("failed to seal siyuan.event object: %w", err)
-	}
+	lo.Must0(ObjectSeal(rt, event))
 
-	return siyuan.Set("event", event)
+	lo.Must0(siyuan.Set("event", event))
+	return
 }
 
 // injectStorage adds siyuan.storage.* methods for scoped file CRUD.
-func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
+func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("injectStorage: %v", r)
+		}
+	}()
+
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 
 	resolvePath := func(relPath string) (string, error) {
@@ -186,7 +197,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 	storage := rt.NewObject()
 
 	// siyuan.storage.get(path) -> Promise<{text, json, arrayBuffer}>
-	storage.Set("get", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("get", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 		if len(call.Arguments) < 1 {
 			if err := reject(rt.NewGoError(fmt.Errorf("path required"))); err != nil {
@@ -198,35 +209,35 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 		go func() {
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(resolveErr)); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.get reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			data, readErr := filelock.ReadFile(abs)
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				if readErr != nil {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to read file: %w", readErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.get reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}
 				content := rt.NewObject()
 				ObjectSetDataMethods(p, rt, content, data)
 				if err := resolve(content); err != nil {
 					logging.LogErrorf("[plugin:%s] storage.get resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 		}()
 		return rt.ToValue(promise)
-	}))
+	})))
 
 	// siyuan.storage.put(path, content) -> Promise<void>
-	storage.Set("put", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("put", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 		if len(call.Arguments) < 2 {
 			if err := reject(rt.NewGoError(fmt.Errorf("path and content required"))); err != nil {
@@ -239,44 +250,44 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 		go func() {
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(resolveErr)); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.put reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			dir := filepath.Dir(abs)
 			mkdirErr := os.MkdirAll(dir, 0755)
 			if mkdirErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to make directory: %w", mkdirErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.put reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			writeErr := filelock.WriteFile(abs, []byte(content))
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				if writeErr != nil {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to write file: %w", writeErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.put reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}
 				if err := resolve(goja.Undefined()); err != nil {
 					logging.LogErrorf("[plugin:%s] storage.put resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 		}()
 		return rt.ToValue(promise)
-	}))
+	})))
 
 	// siyuan.storage.remove(path) -> Promise<void>
-	storage.Set("remove", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("remove", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 		if len(call.Arguments) < 1 {
 			if err := reject(rt.NewGoError(fmt.Errorf("path required"))); err != nil {
@@ -288,42 +299,42 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 		go func() {
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(resolveErr)); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.remove reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			if abs == baseDir {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(fmt.Errorf("cannot remove storage root"))); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.remove reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			removeErr := os.RemoveAll(abs)
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				if removeErr != nil {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to remove: %w", removeErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.remove reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}
 				if err := resolve(goja.Undefined()); err != nil {
 					logging.LogErrorf("[plugin:%s] storage.remove resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 		}()
 		return rt.ToValue(promise)
-	}))
+	})))
 
 	// siyuan.storage.list(path) -> Promise<Entry[]>
-	storage.Set("list", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("list", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 		if len(call.Arguments) < 1 {
 			if err := reject(rt.NewGoError(fmt.Errorf("path required"))); err != nil {
@@ -335,21 +346,21 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 		go func() {
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(resolveErr)); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.list reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			entries, readErr := os.ReadDir(abs)
 			if readErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to read directory: %w", readErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.list reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
@@ -366,70 +377,27 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error
 					"updated":   info.ModTime().Unix(),
 				})
 			}
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				v, convertErr := goValueToJsValueSafely(rt, results)
 				if convertErr != nil {
 					if err := reject(rt.NewGoError(convertErr)); err != nil {
 						logging.LogErrorf("[plugin:%s] storage.list reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}
 				if err := resolve(v); err != nil {
 					logging.LogErrorf("[plugin:%s] storage.list resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 		}()
 		return rt.ToValue(promise)
-	}))
+	})))
 
-	if err := ObjectFreeze(rt, storage); err != nil {
-		return fmt.Errorf("failed to freeze siyuan.storage object: %w", err)
-	}
+	lo.Must0(ObjectFreeze(rt, storage))
 
-	return siyuan.Set("storage", storage)
-}
-
-// ObjectSetDataMethods attaches text(), json(), and arrayBuffer() methods to a JS object,
-// each returning a Promise that resolves with the corresponding representation of data.
-func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte) {
-	object.Set("text", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-		promise, resolve, _ := rt.NewPromise()
-		_ = p.worker.Run(func() (any, any) {
-			if err := resolve(rt.ToValue(string(data))); err != nil {
-				logging.LogErrorf("[plugin:%s] text resolve: %v", p.Name, err)
-			}
-			return nil, nil
-		}, nil, p.context)
-		return rt.ToValue(promise)
-	}))
-	object.Set("json", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-		promise, resolve, reject := rt.NewPromise()
-		_ = p.worker.Run(func() (any, any) {
-			v, e := goValueToJsValueSafely(rt, json.RawMessage(data))
-			if e != nil {
-				if err := reject(rt.NewGoError(e)); err != nil {
-					logging.LogErrorf("[plugin:%s] json reject: %v", p.Name, err)
-				}
-				return nil, nil
-			}
-			if err := resolve(v); err != nil {
-				logging.LogErrorf("[plugin:%s] json resolve: %v", p.Name, err)
-			}
-			return nil, nil
-		}, nil, p.context)
-		return rt.ToValue(promise)
-	}))
-	object.Set("arrayBuffer", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-		promise, resolve, _ := rt.NewPromise()
-		_ = p.worker.Run(func() (any, any) {
-			if err := resolve(rt.ToValue(rt.NewArrayBuffer(data))); err != nil {
-				logging.LogErrorf("[plugin:%s] arrayBuffer resolve: %v", p.Name, err)
-			}
-			return nil, nil
-		}, nil, p.context)
-		return rt.ToValue(promise)
-	}))
+	lo.Must0(siyuan.Set("storage", storage))
+	return
 }
 
 // injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
@@ -480,11 +448,11 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 		go func() {
 			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 			if !strings.HasPrefix(path, "/") {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(fmt.Errorf("path must start with /"))); err != nil {
 						logging.LogErrorf("[plugin:%s] fetch reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
@@ -500,22 +468,22 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 			}
 			resp, sendErr := r.Send(method, targetURL)
 			if sendErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to send request: %w", sendErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] fetch reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
 			defer resp.Body.Close()
 			respBody, readErr := io.ReadAll(resp.Body)
 			if readErr != nil {
-				_ = p.worker.Run(func() (any, any) {
+				_ = p.worker.Run(func() (result any, err error) {
 					if err := reject(rt.NewGoError(fmt.Errorf("failed to read response body: %w", readErr))); err != nil {
 						logging.LogErrorf("[plugin:%s] fetch reject: %v", p.Name, err)
 					}
-					return nil, nil
+					return
 				}, nil, p.context)
 				return
 			}
@@ -523,7 +491,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 			for k, vs := range resp.Header {
 				respHeaders[k] = strings.Join(vs, ", ")
 			}
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				respHeadersJs := rt.ToValue(respHeaders)
 				response := rt.NewObject()
 				response.Set("url", rt.ToValue(path))
@@ -535,7 +503,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 				if err := resolve(response); err != nil {
 					logging.LogErrorf("[plugin:%s] fetch resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 		}()
 		return rt.ToValue(promise)
@@ -648,7 +616,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			} else {
 				sendStr = sendCall.Argument(0).String()
 			}
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				state := WebSocketState(readyState.Load())
 				if state == WebSocketReadyStateOpen {
 					c := conn.Load()
@@ -663,7 +631,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 							if err := sendReject(rt.NewGoError(sendErr)); err != nil {
 								logging.LogErrorf("[plugin:%s] socket.send reject: %v", p.Name, err)
 							}
-							return nil, nil
+							return
 						}
 					}
 				} else if state == WebSocketReadyStateConnecting {
@@ -678,7 +646,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 				if err := sendResolve(goja.Undefined()); err != nil {
 					logging.LogErrorf("[plugin:%s] socket.send resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 			return rt.ToValue(sendPromise)
 		}))
@@ -689,7 +657,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
 				pingData = pingCall.Argument(0).String()
 			}
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				c := conn.Load()
 				if c != nil {
 					writeMessage(c, websocket.PingMessage, []byte(pingData))
@@ -697,7 +665,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 				if err := pingResolve(goja.Undefined()); err != nil {
 					logging.LogErrorf("[plugin:%s] socket.ping resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 			return rt.ToValue(pingPromise)
 		}))
@@ -708,7 +676,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
 				pongData = pongCall.Argument(0).String()
 			}
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				c := conn.Load()
 				if c != nil {
 					writeMessage(c, websocket.PongMessage, []byte(pongData))
@@ -716,7 +684,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 				if err := pongResolve(goja.Undefined()); err != nil {
 					logging.LogErrorf("[plugin:%s] socket.pong resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 			return rt.ToValue(pongPromise)
 		}))
@@ -731,7 +699,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
 				reason = closeCall.Argument(1).String()
 			}
-			_ = p.worker.Run(func() (any, any) {
+			_ = p.worker.Run(func() (result any, err error) {
 				c := conn.Load()
 				if c != nil {
 					writeMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
@@ -739,7 +707,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 				if err := closeResolve(goja.Undefined()); err != nil {
 					logging.LogErrorf("[plugin:%s] socket.close resolve: %v", p.Name, err)
 				}
-				return nil, nil
+				return
 			}, nil, p.context)
 			return rt.ToValue(closePromise)
 		}))
@@ -754,12 +722,12 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			dialer := websocket.Dialer{}
 			c, _, dialErr := dialer.Dial(wsURL, wsHeader)
 			if dialErr != nil {
-				_, _ = p.worker.RunSync(func() (any, any) {
+				_, _ = p.worker.RunSync(func() (result any, err error) {
 					event := rt.NewObject()
 					event.Set("type", rt.ToValue("error"))
 					event.Set("error", rt.NewGoError(dialErr))
 					invokeWsHook("onerror", event)
-					return nil, nil
+					return
 				}, p.context)
 				return
 			}
@@ -771,43 +739,43 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			p.TrackSocket(c, false)
 
 			c.SetPingHandler(func(data string) error {
-				_, runError := p.worker.RunSync(func() (any, any) {
+				_, runError := p.worker.RunSync(func() (result any, err error) {
 					event := rt.NewObject()
 					event.Set("type", rt.ToValue("ping"))
 					event.Set("data", rt.ToValue(data))
 					invokeWsHook("onping", event)
-					return nil, nil
+					return
 				}, p.context)
 				if runError != nil {
-					return runError.(error)
+					return runError
 				}
 				return nil
 			})
 			c.SetPongHandler(func(data string) error {
-				_, runError := p.worker.RunSync(func() (any, any) {
+				_, runError := p.worker.RunSync(func() (result any, err error) {
 					event := rt.NewObject()
 					event.Set("type", rt.ToValue("pong"))
 					event.Set("data", rt.ToValue(data))
 					invokeWsHook("onpong", event)
-					return nil, nil
+					return
 				}, p.context)
 				if runError != nil {
-					return runError.(error)
+					return runError
 				}
 				return nil
 			})
 			c.SetCloseHandler(func(code int, reason string) error {
-				_, runError := p.worker.RunSync(func() (any, any) {
+				_, runError := p.worker.RunSync(func() (result any, err error) {
 					setReadyState(WebSocketReadyStateClosing)
 					event := rt.NewObject()
 					event.Set("type", rt.ToValue("close"))
 					event.Set("code", rt.ToValue(int64(code)))
 					event.Set("reason", rt.ToValue(reason))
 					invokeWsHook("onclose", event)
-					return nil, nil
+					return
 				}, p.context)
 				if runError != nil {
-					return runError.(error)
+					return runError
 				}
 				return nil
 			})
@@ -825,44 +793,44 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error 
 			sendQueue = nil
 			sendQueueMu.Unlock()
 
-			_, _ = p.worker.RunSync(func() (any, any) {
+			_, _ = p.worker.RunSync(func() (result any, err error) {
 				setReadyState(WebSocketReadyStateOpen)
 				event := rt.NewObject()
 				event.Set("type", rt.ToValue("open"))
 				invokeWsHook("onopen", event)
-				return nil, nil
+				return
 			}, p.context)
 
 			for {
 				messageType, data, readErr := c.ReadMessage()
 				if readErr != nil {
 					if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure) {
-						_, _ = p.worker.RunSync(func() (any, any) {
+						_, _ = p.worker.RunSync(func() (result any, err error) {
 							event := rt.NewObject()
 							event.Set("type", rt.ToValue("error"))
 							event.Set("error", rt.NewGoError(readErr))
 							invokeWsHook("onerror", event)
-							return nil, nil
+							return
 						}, p.context)
 					}
 					break
 				}
 				switch messageType {
 				case websocket.TextMessage:
-					_, _ = p.worker.RunSync(func() (any, any) {
+					_, _ = p.worker.RunSync(func() (result any, err error) {
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("message"))
 						event.Set("data", rt.ToValue(string(data)))
 						invokeWsHook("onmessage", event)
-						return nil, nil
+						return
 					}, p.context)
 				case websocket.BinaryMessage:
-					_, _ = p.worker.RunSync(func() (any, any) {
+					_, _ = p.worker.RunSync(func() (result any, err error) {
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("message"))
 						event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
 						invokeWsHook("onmessage", event)
-						return nil, nil
+						return
 					}, p.context)
 				}
 			}
@@ -940,12 +908,12 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 		if len(call.Arguments) > 1 && !goja.IsNull(call.Argument(1)) && !goja.IsUndefined(call.Argument(1)) {
 			params = call.Argument(1).Export()
 		}
-		_ = p.worker.Run(func() (any, any) {
+		_ = p.worker.Run(func() (result any, err error) {
 			p.BroadcastNotification(method, params)
 			if err := resolve(goja.Undefined()); err != nil {
 				logging.LogErrorf("[plugin:%s] rpc.broadcast resolve: %v", p.Name, err)
 			}
-			return nil, nil
+			return
 		}, nil, p.context)
 		return rt.ToValue(promise)
 	}))
@@ -959,22 +927,101 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) error {
 
 // ObjectFreeze calls Object.freeze() on the given goja object.
 func ObjectFreeze(rt *goja.Runtime, obj *goja.Object) error {
-	freeze, ok := goja.AssertFunction(rt.GlobalObject().Get("Object").(*goja.Object).Get("freeze"))
+	Object, ok := rt.GlobalObject().Get("Object").(*goja.Object)
 	if !ok {
-		return fmt.Errorf("Object.freeze is not a function")
+		return fmt.Errorf("globalThis.Object is not an object")
 	}
-	_, err := freeze(goja.Undefined(), obj)
+	freeze, ok := goja.AssertFunction(Object.Get("freeze"))
+	if !ok {
+		return fmt.Errorf("globalThis.Object.freeze is not a function")
+	}
+	_, err := freeze(Object, obj)
 	return err
 }
 
 // ObjectSeal calls Object.seal() on the given goja object.
 func ObjectSeal(rt *goja.Runtime, obj *goja.Object) error {
-	seal, ok := goja.AssertFunction(rt.GlobalObject().Get("Object").(*goja.Object).Get("seal"))
+	Object, ok := rt.GlobalObject().Get("Object").(*goja.Object)
 	if !ok {
-		return fmt.Errorf("Object.seal is not a function")
+		return fmt.Errorf("globalThis.Object is not an object")
 	}
-	_, err := seal(goja.Undefined(), obj)
+	seal, ok := goja.AssertFunction(Object.Get("seal"))
+	if !ok {
+		return fmt.Errorf("globalThis.Object.seal is not a function")
+	}
+	_, err := seal(Object, obj)
 	return err
+}
+
+// ObjectSetDataMethods attaches text(), json(), and arrayBuffer() methods to a JS object,
+// each returning a Promise that resolves with the corresponding representation of data.
+func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte) {
+	object.Set("text", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+		promise, resolve, _ := rt.NewPromise()
+		_ = p.worker.Run(func() (result any, err error) {
+			if err := resolve(rt.ToValue(string(data))); err != nil {
+				logging.LogErrorf("[plugin:%s] text resolve: %v", p.Name, err)
+			}
+			return
+		}, nil, p.context)
+		return rt.ToValue(promise)
+	}))
+	object.Set("json", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+		_ = p.worker.Run(func() (result any, err error) {
+			v, e := goValueToJsValueSafely(rt, json.RawMessage(data))
+			if e != nil {
+				if err := reject(rt.NewGoError(e)); err != nil {
+					logging.LogErrorf("[plugin:%s] json reject: %v", p.Name, err)
+				}
+				return
+			}
+			if err := resolve(v); err != nil {
+				logging.LogErrorf("[plugin:%s] json resolve: %v", p.Name, err)
+			}
+			return
+		}, nil, p.context)
+		return rt.ToValue(promise)
+	}))
+	object.Set("arrayBuffer", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+		promise, resolve, _ := rt.NewPromise()
+		_ = p.worker.Run(func() (result any, err error) {
+			if err := resolve(rt.ToValue(rt.NewArrayBuffer(data))); err != nil {
+				logging.LogErrorf("[plugin:%s] arrayBuffer resolve: %v", p.Name, err)
+			}
+			return
+		}, nil, p.context)
+		return rt.ToValue(promise)
+	}))
+}
+
+// loggerWrapper returns a JS-callable function that logs a message at the given level.
+// Logging is synchronous (in-process, no I/O), so resolve is called inline without worker.Run.
+func loggerWrapper(p *KernelPlugin, rt *goja.Runtime, logFn func(format string, args ...any)) func(goja.FunctionCall) goja.Value {
+	return func(call goja.FunctionCall) goja.Value {
+		promise, resolve, _ := rt.NewPromise()
+
+		runErr := p.worker.Run(func() (result any, err error) {
+			parts := make([]string, 0, len(call.Arguments))
+			for _, arg := range call.Arguments {
+				parts = append(parts, arg.String())
+			}
+			msg := strings.Join(parts, " ")
+
+			logFn("[plugin:%s] %s", p.Name, msg)
+			return
+		}, func(result any, err error) {
+
+		}, p.context)
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] loggerWrapper worker run: %v", p.Name, runErr)
+		}
+
+		if err := resolve(goja.Undefined()); err != nil {
+			logging.LogErrorf("[plugin:%s] logger resolve: %v", p.Name, err)
+		}
+		return rt.ToValue(promise)
+	}
 }
 
 // goValueToJsValueSafely converts a Go value to a goja.Value via a JSON round-trip.
@@ -1020,26 +1067,26 @@ func convertJsonNumbers(v any) any {
 }
 
 // getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.
-func getJsContextValue(rt *goja.Runtime, paths []any) (goja.Value, error) {
+func getJsContextValue(rt *goja.Runtime, paths []any) (value goja.Value, err error) {
 	var cur goja.Value = rt.GlobalObject()
 	for _, path := range paths {
 		obj, ok := cur.(*goja.Object)
 		if !ok {
-			return nil, fmt.Errorf("path %v: expected object, got %T", path, cur)
+			err = fmt.Errorf("path %v: expected object, got %T", path, cur)
+			return
 		}
+
 		switch k := path.(type) {
 		case string:
 			cur = obj.Get(k)
-		case int64:
-			cur = obj.Get(fmt.Sprintf("%d", k))
+		case int:
+			cur = obj.Get(strconv.Itoa(k))
 		default:
-			return nil, fmt.Errorf("unsupported path type: %T", path)
-		}
-		if cur == nil || goja.IsNull(cur) || goja.IsUndefined(cur) {
-			return nil, nil
+			err = fmt.Errorf("unsupported path type: %T", path)
+			return
 		}
 	}
-	return cur, nil
+	return
 }
 
 // dispatchEvent calls the globalThis.siyuan.event.on hook with the given event object.

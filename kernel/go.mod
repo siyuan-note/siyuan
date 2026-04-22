@@ -88,6 +88,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require github.com/samber/lo v1.53.0 // indirect
+
 require (
 	dario.cat/mergo v1.0.2 // indirect
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect

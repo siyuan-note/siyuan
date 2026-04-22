@@ -26,18 +26,19 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
-type Continuation func(result any, err any)
+type TaskExecutor func() (result any, err error)
+type TaskCallback func(result any, err error)
 
 // Task is the smallest unit of work submitted to the queue.
 // The fn signature is func() (any, error), with business parameters captured by the caller via closure.
 type Task struct {
-	fn       func() (result any, err any)
-	callback Continuation
+	executor TaskExecutor
+	callback TaskCallback
 }
 
 type Result struct {
 	value any
-	err   any
+	err   error
 }
 
 // Worker guarantees that all tasks are executed serially on a single goroutine.
@@ -87,7 +88,7 @@ func (w *Worker) loop() {
 	}
 }
 
-func (t *Task) do() (result any, err any) {
+func (t *Task) do() (result any, err error) {
 	defer func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -102,20 +103,20 @@ func (t *Task) do() (result any, err any) {
 			t.callback(result, err)
 		}
 	}()
-	result, err = t.fn()
+	result, err = t.executor()
 	return
 }
 
 // Run submits a task and blocks waiting for its result.
 // If ctx is canceled while waiting to enqueue, it returns ctx.Err() immediately and the task will not be executed.
-func (w *Worker) Run(fn func() (result any, err any), callback Continuation, ctx context.Context) error {
+func (w *Worker) Run(fn TaskExecutor, callback TaskCallback, ctx context.Context) error {
 	// Each call creates a unique result channel for the task, ensuring that results are correctly matched to their callers without interference.
 	if w.closed.Load() {
 		return ErrQueueClosed
 	}
 
 	select {
-	case w.mailbox <- Task{fn: fn, callback: callback}:
+	case w.mailbox <- Task{executor: fn, callback: callback}:
 		return nil
 	case <-ctx.Done():
 		return ctx.Err()
@@ -124,9 +125,9 @@ func (w *Worker) Run(fn func() (result any, err any), callback Continuation, ctx
 	}
 }
 
-func (w *Worker) RunSync(fn func() (result any, err any), ctx context.Context) (result any, err any) {
+func (w *Worker) RunSync(fn TaskExecutor, ctx context.Context) (result any, err error) {
 	resCh := make(chan Result, 1)
-	err = w.Run(fn, func(result any, err any) {
+	err = w.Run(fn, func(result any, err error) {
 		// Imediately return after writing to resCh, without blocking the worker.
 		// The worker will continue to execute and write to resCh (buffered channel, no leak).
 		resCh <- Result{result, err}

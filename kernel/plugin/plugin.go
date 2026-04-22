@@ -106,6 +106,7 @@ func (s PluginState) String() string {
 type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
+	file  string // kernel.js file path named in js runtime (e.g. "plugin-name/kernel.js")
 
 	runtime atomic.Pointer[goja.Runtime] // *goja.Runtime
 
@@ -132,6 +133,7 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 	plugin := &KernelPlugin{
 		Petal: petal,
 		token: token,
+		file:  fmt.Sprintf("%s/kernel.js", petal.Name),
 
 		bus:     EventBus.New(),
 		worker:  NewWorker(64),
@@ -158,7 +160,7 @@ func (p *KernelPlugin) Runtime() *goja.Runtime {
 
 // Eval evaluates JavaScript code in the plugin's goja runtime, returning the result or error.
 func (p *KernelPlugin) Eval(rt *goja.Runtime, code string) (goja.Value, error) {
-	return rt.RunScript(p.Name+"/kernel.js", code)
+	return rt.RunScript(p.file, code)
 }
 
 // close interrupts the goja runtime and clears the pointer.
@@ -312,7 +314,7 @@ func (p *KernelPlugin) unsubscribeRpcMethod(name string) error {
 // subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.
 func (p *KernelPlugin) subscribeEvents(rt *goja.Runtime) (err error) {
 	p.handler = func(e string) {
-		p.worker.Run(func() (result any, err any) {
+		p.worker.Run(func() (result any, err error) {
 			return dispatchEvent(p, rt, e)
 		}, nil, p.context)
 	}
@@ -463,7 +465,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		Params:      params,
 	}
 
-	result, dispatchErr := p.worker.RunSync(func() (any, any) {
+	result, dispatchErr := p.worker.RunSync(func() (any, error) {
 		return dispatchEvent(p, p.Runtime(), event)
 	}, p.context)
 	if dispatchErr != nil {
@@ -527,7 +529,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 		return
 	}
 
-	await, err := p.worker.RunSync(func() (any, any) {
+	await, err := p.worker.RunSync(func() (any, error) {
 		return dispatchEvent(p, rt, event)
 	}, p.context)
 	if err != nil {

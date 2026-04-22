@@ -206,6 +206,7 @@ func (m *PluginManager) GetPlugin(name string) *KernelPlugin {
 	return nil
 }
 
+// GetLoadedPlugin returns the plugin info for a loaded KernelPlugin by name, or nil.
 func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found bool) {
 	value, loaded := m.plugins.Load(name)
 	if loaded {

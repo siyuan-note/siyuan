@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,7 +26,7 @@ import (
 	"sync/atomic"
 
 	"github.com/asaskevich/EventBus"
-	"github.com/fastschema/qjs"
+	"github.com/dop251/goja"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
@@ -64,6 +65,12 @@ type PluginLifecycleEventDetail struct {
 	Name string `json:"name"` // "load", "loaded", "unload"
 }
 
+type PluginRpcEvent struct {
+	*PluginEvent
+	Method string `json:"method"`
+	Params any    `json:"params,omitempty"`
+}
+
 const (
 	PluginStateReady PluginState = iota
 	PluginStateLoading
@@ -100,9 +107,7 @@ type KernelPlugin struct {
 	*model.Petal
 	token string // JWT for this plugin
 
-	file    string                      // file path for qjs runtime (e.g. "plugin-name/kernel.js")
-	options []qjs.EvalOptionFunc        // options for evaluating in qjs runtime
-	runtime atomic.Pointer[qjs.Runtime] // *qjs.Runtime
+	runtime atomic.Pointer[goja.Runtime] // *goja.Runtime
 
 	state   atomic.Int64    //  PluginState
 	worker  *Worker         // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
@@ -128,13 +133,6 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		Petal: petal,
 		token: token,
 
-		file: fmt.Sprintf("%s/kernel.js", petal.Name),
-		options: []qjs.EvalOptionFunc{
-			qjs.TypeGlobal(),
-			qjs.TypeModule(),
-			qjs.FlagAsync(),
-		},
-
 		bus:     EventBus.New(),
 		worker:  NewWorker(64),
 		context: context.Background(),
@@ -153,45 +151,33 @@ func (p *KernelPlugin) State() PluginState {
 	return PluginState(p.state.Load())
 }
 
-// Runtime returns the plugin's QJS runtime, or nil if not initialized (safe for concurrent reads).
-func (p *KernelPlugin) Runtime() *qjs.Runtime {
+// Runtime returns the plugin's goja runtime, or nil if not initialized (safe for concurrent reads).
+func (p *KernelPlugin) Runtime() *goja.Runtime {
 	return p.runtime.Load()
 }
 
-func (p *KernelPlugin) Context() *qjs.Context {
-	runtime := p.Runtime()
-	if runtime == nil {
-		return nil
-	}
-	context := runtime.Context()
-	if context == nil {
-		return nil
-	}
-	return context
+// Eval evaluates JavaScript code in the plugin's goja runtime, returning the result or error.
+func (p *KernelPlugin) Eval(rt *goja.Runtime, code string) (goja.Value, error) {
+	return rt.RunScript(p.Name+"/kernel.js", code)
 }
 
-// Eval evaluates JavaScript code in the plugin's QJS context, returning the result or error.
-func (p *KernelPlugin) Eval(ctx *qjs.Context, code string) (result *qjs.Value, err error) {
-	return ctx.Eval(p.file, append(p.options, qjs.Code(code))...)
-}
-
-// close frees the QJS runtime.
+// close interrupts the goja runtime and clears the pointer.
 func (p *KernelPlugin) close() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("qjs panic during close runtime: %v", r)
+			err = fmt.Errorf("goja panic during close runtime: %v", r)
 		}
 	}()
 
 	runtime := p.Runtime()
 	if runtime != nil {
-		runtime.Close()
+		runtime.Interrupt(fmt.Errorf("plugin stopped"))
 		p.runtime.Store(nil)
 	}
 	return
 }
 
-// error sets the plugin state to errored and frees the QJS runtime.
+// error sets the plugin state to errored and frees the goja runtime.
 func (p *KernelPlugin) error() {
 	if err := p.close(); err != nil {
 		logging.LogErrorf("[plugin:%s] failed to close runtime during error handling: %v", p.Name, err)
@@ -200,12 +186,12 @@ func (p *KernelPlugin) error() {
 	p.state.Store(int64(PluginStateError))
 }
 
-// start creates the QJS runtime, injects sandbox globals, and evaluates kernel.js.
+// start creates the goja runtime, injects sandbox globals, and evaluates kernel.js.
 func (p *KernelPlugin) start() (retErr error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
-			retErr = fmt.Errorf("qjs panic during start: %v", r)
+			retErr = fmt.Errorf("goja panic during start: %v", r)
 		}
 	}()
 
@@ -216,56 +202,34 @@ func (p *KernelPlugin) start() (retErr error) {
 		return fmt.Errorf("create plugin dir [%s] failed: %s", baseDir, err)
 	}
 
-	runtime, qjsErr := qjs.New(qjs.Option{
-		Stdout: &KernelPluginLogger{name: p.Name, logFn: logging.LogInfo},
-		Stderr: &KernelPluginLogger{name: p.Name, logFn: logging.LogError},
-	})
+	rt := goja.New()
+	p.runtime.Store(rt)
 
-	p.runtime.Store(runtime)
-
-	if qjsErr != nil {
-		p.error()
-		return fmt.Errorf("create QJS runtime: %v", qjsErr)
-	}
-
-	ctx := p.Context()
-	if ctx == nil {
-		p.error()
-		return fmt.Errorf("failed to get QJS context")
-	}
-
-	// Inject sandbox globals (e.g. globalThis.siyuan) before evaluating plugin code.
-	if injectErr := injectGlobalContext(p, ctx); injectErr != nil {
+	if injectErr := injectGlobalContext(p, rt); injectErr != nil {
 		p.error()
 		return fmt.Errorf("inject sandbox globals: %v", injectErr)
 	}
 
-	// Load and evaluate kernel.js code in plugin's QJS runtime.
-	_, evalErr := p.Eval(ctx, p.Kernel.JS)
-	if evalErr != nil {
+	if _, evalErr := p.Eval(rt, p.Kernel.JS); evalErr != nil {
 		p.error()
 		return fmt.Errorf("eval error: %v", evalErr)
 	}
 
-	subscribeErr := p.subscribeEvents(ctx)
-	if subscribeErr != nil {
+	if subscribeErr := p.subscribeEvents(rt); subscribeErr != nil {
 		p.error()
 		return fmt.Errorf("subscribe plugin events: %v", subscribeErr)
 	}
 
 	p.onLoad()
-
 	p.state.Store(int64(PluginStateLoaded))
-
 	p.onLoaded()
-
 	p.state.Store(int64(PluginStateRunning))
 
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return nil
 }
 
-// stop cleanly shuts down the plugin: closes sockets, frees QJS runtime.
+// stop cleanly shuts down the plugin: closes sockets, frees goja runtime.
 func (p *KernelPlugin) stop() (ok bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -313,7 +277,7 @@ func (p *KernelPlugin) onLoad() {
 	}
 }
 
-// onLoad is called after plugin start.
+// onLoaded is called after plugin start.
 func (p *KernelPlugin) onLoaded() {
 	if p.State() == PluginStateLoaded {
 		p.invokeHook("loaded")
@@ -345,11 +309,11 @@ func (p *KernelPlugin) unsubscribeRpcMethod(name string) error {
 	return nil
 }
 
-// subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS context.
-func (p *KernelPlugin) subscribeEvents(ctx *qjs.Context) (err error) {
+// subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.
+func (p *KernelPlugin) subscribeEvents(rt *goja.Runtime) (err error) {
 	p.handler = func(e string) {
 		p.worker.Run(func() (result any, err any) {
-			return dispatchEvent(p, ctx, e)
+			return dispatchEvent(p, rt, e)
 		}, nil, p.context)
 	}
 
@@ -465,47 +429,62 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcInboundRequest) any {
 	}
 }
 
-// callRpcMethod invokes a registered JS RPC method with the given JSON params.
-// Returns the JS function's return value as a Go any.
+// callRpcMethod invokes a registered JS RPC method via the event bus and awaits the response.
 func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, rpcError *JsonRpcError) {
 	defer func() {
 		if r := recover(); r != nil {
 			logging.LogDebugf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
 			rpcError = &JsonRpcError{
 				Code:    JsonRpcErrorCodeInternalError,
-				Message: fmt.Sprintf("qjs panic in RPC method %q: %v", method, r),
+				Message: fmt.Sprintf("goja panic in RPC method %q: %v", method, r),
 			}
 		}
 	}()
 
-	state := p.State()
-
-	if state != PluginStateRunning {
+	if p.State() != PluginStateRunning {
 		return nil, &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
 			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.State()),
 		}
 	}
 
-	ctx := p.Context()
-	if ctx == nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("QJS context not initialized for plugin %s", p.Name),
-		}
+	id := uuid.NewString()
+	topic := fmt.Sprintf("%s:%s", PluginEventTypeRpc, id)
+
+	done := make(chan string, 1)
+	handler := func(e string) { done <- e }
+	if err := p.bus.SubscribeOnce(topic, handler); err != nil {
+		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: err.Error()}
 	}
 
-	rpcMethod := p.getRpcMethod(method)
-	if rpcMethod == nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeMethodNotFound,
-			Message: fmt.Sprintf("method not found: %q", method),
-		}
+	event := &PluginRpcEvent{
+		PluginEvent: &PluginEvent{ID: id, Type: PluginEventTypeRpc},
+		Method:      method,
+		Params:      params,
 	}
 
-	// TODO: 使用事件总线派遣 RPC request
-	// TODO: 使用事件总线接受 RPC response
-	return
+	result, dispatchErr := p.worker.RunSync(func() (any, any) {
+		return dispatchEvent(p, p.Runtime(), event)
+	}, p.context)
+	if dispatchErr != nil {
+		if err := p.bus.Unsubscribe(topic, handler); err != nil {
+			logging.LogErrorf("[plugin:%s] unsubscribe rpc response event: %s", p.Name, err)
+		}
+		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: fmt.Sprintf("%v", dispatchErr)}
+	}
+
+	if await, _ := result.(bool); !await {
+		if err := p.bus.Unsubscribe(topic, handler); err != nil {
+			logging.LogErrorf("[plugin:%s] unsubscribe rpc response event: %s", p.Name, err)
+		}
+		return nil, &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: fmt.Sprintf("method not found: %q", method)}
+	}
+
+	resultJSON := <-done
+	if err := json.Unmarshal([]byte(resultJSON), &rpcResult); err != nil {
+		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: fmt.Sprintf("unmarshal result: %v", err)}
+	}
+	return rpcResult, nil
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
@@ -524,37 +503,17 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 	delete(p.socketMus, conn)
 }
 
-// getRpcMethod retrieves a registered RPC method by name, or nil if not found or not a function.
-func (p *KernelPlugin) getRpcMethod(name string) *RpcMethod {
-	value, ok := p.rpcMethods.Load(name)
-	if !ok {
-		return nil
-	}
-
-	method, ok := value.(*RpcMethod)
-	if !ok {
-		return nil
-	}
-
-	return method
-}
-
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
 func (p *KernelPlugin) invokeHook(name string) {
-	ctx := p.Context()
-	if ctx == nil {
+	rt := p.Runtime()
+	if rt == nil {
 		return
 	}
 
 	id := uuid.NewString()
 	event := &PluginLifecycleEvent{
-		PluginEvent: &PluginEvent{
-			ID:   id,
-			Type: PluginEventTypeLifecycle,
-		},
-		Detail: &PluginLifecycleEventDetail{
-			Name: name,
-		},
+		PluginEvent: &PluginEvent{ID: id, Type: PluginEventTypeLifecycle},
+		Detail:      &PluginLifecycleEventDetail{Name: name},
 	}
 
 	done := make(chan struct{})
@@ -568,7 +527,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 	}
 
 	await, err := p.worker.RunSync(func() (any, any) {
-		return dispatchEvent(p, ctx, event)
+		return dispatchEvent(p, rt, event)
 	}, p.context)
 	if err != nil {
 		logging.LogErrorf("[plugin:%s] dispatch lifecycle event: %s", p.Name, err.(error))
@@ -576,9 +535,9 @@ func (p *KernelPlugin) invokeHook(name string) {
 	}
 
 	if !await.(bool) {
-		// if err := p.bus.Unsubscribe(topic, handler); err != nil {
-		// 	logging.LogErrorf("[plugin:%s] unsubscribe lifecycle response event: %s", p.Name, err)
-		// }
+		if err := p.bus.Unsubscribe(topic, handler); err != nil {
+			logging.LogErrorf("[plugin:%s] unsubscribe lifecycle response event: %s", p.Name, err)
+		}
 		close(done)
 	}
 	<-done

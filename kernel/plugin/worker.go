@@ -81,13 +81,12 @@ func (w *Worker) RunSync(fn TaskExecutor) (result any, err error) {
 	})
 
 	if err != nil {
+		close(response)
 		return
 	}
 
-	select {
-	case r := <-response:
-		result = r.value
-		err = r.err
-	}
+	r := <-response
+	result = r.value
+	err = r.err
 	return
 }

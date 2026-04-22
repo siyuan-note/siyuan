@@ -20,6 +20,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"path"
 	"runtime/debug"
 	"sync"
@@ -121,6 +122,30 @@ func FlushQueue() {
 	start := time.Now()
 
 	// logging.LogInfof("flushing database queue, total operations [%d]", total)
+
+	// 如果有重命名树的操作，则统计各路径前缀的块树数量，数量较大的话阻塞整个队列，以便尽可能合并重命名树的操作 RenameTreeQueue(tree)
+	var renameTreeOp *dbQueueOperation
+	for _, op := range ops {
+		if "rename" == op.action {
+			renameTreeOp = op
+			break
+		}
+	}
+	if nil != renameTreeOp {
+		childCount := treenode.CountBlockTreesByPathPrefix(path.Dir(renameTreeOp.indexTree.Path))
+		if 512 < childCount {
+			scale := math.Log(float64(childCount)/512.0+1.0) / math.Log(2.0)
+			secs := 1.0 * scale
+			if secs < 1.0 {
+				secs = 1.0
+			}
+			if secs > 12.0 {
+				secs = 12.0
+			}
+			logging.LogInfof("rename tree [%s] with large child count [%d], sleep [%.2fs] to wait for more operations", renameTreeOp.indexTree.Path, childCount, secs)
+			time.Sleep(time.Duration(secs * float64(time.Second)))
+		}
+	}
 
 	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	if 512 < len(ops) {

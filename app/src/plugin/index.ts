@@ -17,7 +17,7 @@ import {Setting} from "./Setting";
 import {clearOBG} from "../layout/dock/util";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
-import {afterLoadPlugin, loadPlugins} from "./loader";
+import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 
 export class Plugin {
@@ -450,6 +450,7 @@ export class Plugin {
             }
             window.siyuan.config.keymap.plugin[this.name][type2]["default"] = hotkey;
         }
+        addPluginDock(this);
         return this.docks[type2];
     }
 

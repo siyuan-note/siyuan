@@ -27,6 +27,7 @@ import (
 
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/eventloop"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
@@ -46,30 +47,12 @@ type RpcMethodInfo struct {
 	Descriptions []string `json:"descriptions"`
 }
 
+type R map[string]any
+
 const (
 	PluginEventTypeLifecycle = "lifecycle"
 	PluginEventTypeRpc       = "rpc"
 )
-
-type PluginEvent struct {
-	ID   string `json:"id"`
-	Type string `json:"type"`
-}
-
-type PluginLifecycleEvent struct {
-	*PluginEvent
-	Detail *PluginLifecycleEventDetail `json:"detail"`
-}
-
-type PluginLifecycleEventDetail struct {
-	Name string `json:"name"` // "load", "loaded", "unload"
-}
-
-type PluginRpcEvent struct {
-	*PluginEvent
-	Method string `json:"method"`
-	Params any    `json:"params,omitempty"`
-}
 
 const (
 	PluginStateReady PluginState = iota
@@ -108,7 +91,7 @@ type KernelPlugin struct {
 	token string // JWT for this plugin
 	file  string // kernel.js file path named in js runtime (e.g. "plugin-name/kernel.js")
 
-	runtime atomic.Pointer[goja.Runtime] // *goja.Runtime
+	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
 
 	state   atomic.Int64    //  PluginState
 	worker  *Worker         // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
@@ -144,7 +127,6 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 	}
 
 	plugin.state.Store(int64(PluginStateReady))
-	plugin.runtime.Store(nil)
 	return plugin
 }
 
@@ -153,9 +135,32 @@ func (p *KernelPlugin) State() PluginState {
 	return PluginState(p.state.Load())
 }
 
-// Runtime returns the plugin's goja runtime, or nil if not initialized (safe for concurrent reads).
-func (p *KernelPlugin) Runtime() *goja.Runtime {
-	return p.runtime.Load()
+// InitRuntime initializes the goja runtime and evaluates kernel.js.
+func (p *KernelPlugin) InitRuntime() (err error) {
+	p.runtime = eventloop.NewEventLoop(eventloop.EnableConsole(true))
+	p.worker.Start(p.runtime)
+
+	p.runtime.Run(func(rt *goja.Runtime) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("goja panic during event loop run: %v", r)
+			}
+		}()
+
+		EnableExtendModules(p, rt)
+
+		if enableErr := EnableSiyuanModule(p, rt); enableErr != nil {
+			err = fmt.Errorf("EnableSiyuanModule: %v", enableErr)
+			return
+		}
+
+		if _, runErr := rt.RunScript(p.file, p.Kernel.JS); runErr != nil {
+			err = fmt.Errorf("RunScript: %v", runErr)
+			return
+		}
+	})
+	p.runtime.Start()
+	return
 }
 
 // Eval evaluates JavaScript code in the plugin's goja runtime, returning the result or error.
@@ -171,10 +176,11 @@ func (p *KernelPlugin) close() (err error) {
 		}
 	}()
 
-	runtime := p.Runtime()
-	if runtime != nil {
-		runtime.Interrupt(fmt.Errorf("plugin stopped"))
-		p.runtime.Store(nil)
+	p.worker.Stop()
+
+	if p.runtime != nil {
+		p.runtime.Stop() // Stops the event loop and waits for it to finish.
+		// p.runtime.Terminate() // Interrupts the runtime and causes all executing code to throw an exception.
 	}
 	return
 }
@@ -204,26 +210,19 @@ func (p *KernelPlugin) start() (retErr error) {
 		return fmt.Errorf("create plugin dir [%s] failed: %s", baseDir, err)
 	}
 
-	rt := goja.New()
-	p.runtime.Store(rt)
-
-	if injectErr := injectGlobalContext(p, rt); injectErr != nil {
+	if runtimeErr := p.InitRuntime(); runtimeErr != nil {
 		p.error()
-		return fmt.Errorf("inject sandbox globals: %v", injectErr)
+		return fmt.Errorf("start runtime: %v", runtimeErr)
 	}
 
-	if _, evalErr := p.Eval(rt, p.Kernel.JS); evalErr != nil {
-		p.error()
-		return fmt.Errorf("eval error: %v", evalErr)
-	}
-
-	if subscribeErr := p.subscribeEvents(rt); subscribeErr != nil {
+	if subscribeErr := p.subscribeEvents(); subscribeErr != nil {
 		p.error()
 		return fmt.Errorf("subscribe plugin events: %v", subscribeErr)
 	}
 
 	p.onLoad()
 	p.state.Store(int64(PluginStateLoaded))
+
 	p.onLoaded()
 	p.state.Store(int64(PluginStateRunning))
 
@@ -261,7 +260,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	p.socketsMu.Unlock()
 
 	p.unsubscribeEvents()
-	p.worker.Close()
+	p.worker.Stop()
 
 	p.close()
 	p.state.Store(int64(PluginStateStopped))
@@ -312,9 +311,9 @@ func (p *KernelPlugin) unsubscribeRpcMethod(name string) error {
 }
 
 // subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.
-func (p *KernelPlugin) subscribeEvents(rt *goja.Runtime) (err error) {
+func (p *KernelPlugin) subscribeEvents() (err error) {
 	p.handler = func(e string) {
-		p.worker.Run(func() (result any, err error) {
+		p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 			return dispatchEvent(p, rt, e)
 		}, nil, p.context)
 	}
@@ -459,14 +458,17 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: err.Error()}
 	}
 
-	event := &PluginRpcEvent{
-		PluginEvent: &PluginEvent{ID: id, Type: PluginEventTypeRpc},
-		Method:      method,
-		Params:      params,
+	event := R{
+		"id":   id,
+		"type": PluginEventTypeRpc,
+		"detail": R{
+			"method": method,
+			"params": params,
+		},
 	}
 
-	result, dispatchErr := p.worker.RunSync(func() (any, error) {
-		return dispatchEvent(p, p.Runtime(), event)
+	result, dispatchErr := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
+		return dispatchEvent(p, rt, event)
 	}, p.context)
 	if dispatchErr != nil {
 		if err := p.bus.Unsubscribe(topic, handler); err != nil {
@@ -507,15 +509,13 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
 func (p *KernelPlugin) invokeHook(name string) {
-	rt := p.Runtime()
-	if rt == nil {
-		return
-	}
-
 	id := uuid.NewString()
-	event := &PluginLifecycleEvent{
-		PluginEvent: &PluginEvent{ID: id, Type: PluginEventTypeLifecycle},
-		Detail:      &PluginLifecycleEventDetail{Name: name},
+	event := R{
+		"id":   id,
+		"type": PluginEventTypeLifecycle,
+		"detail": R{
+			"name": name,
+		},
 	}
 
 	done := make(chan struct{})
@@ -529,11 +529,11 @@ func (p *KernelPlugin) invokeHook(name string) {
 		return
 	}
 
-	await, err := p.worker.RunSync(func() (any, error) {
+	await, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
 		return dispatchEvent(p, rt, event)
 	}, p.context)
 	if err != nil {
-		logging.LogErrorf("[plugin:%s] dispatch lifecycle event: %s", p.Name, err.(error))
+		logging.LogErrorf("[plugin:%s] dispatch lifecycle event: %s", p.Name, err)
 		return
 	}
 

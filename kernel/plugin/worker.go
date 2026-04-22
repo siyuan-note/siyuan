@@ -23,11 +23,13 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/dop251/goja"
+	"github.com/dop251/goja_nodejs/eventloop"
 	"github.com/siyuan-note/logging"
 )
 
-type TaskExecutor func() (result any, err error)
-type TaskCallback func(result any, err error)
+type TaskExecutor func(rt *goja.Runtime) (result any, err error)
+type TaskCallback func(rt *goja.Runtime, result any, err error)
 
 // Task is the smallest unit of work submitted to the queue.
 // The fn signature is func() (any, error), with business parameters captured by the caller via closure.
@@ -63,23 +65,27 @@ func NewWorker(mailboxSize int) *Worker {
 		done:    make(chan struct{}),
 	}
 	w.closed.Store(false)
-	go w.loop()
 	return w
 }
 
+// Start launches the worker goroutine that processes tasks from the mailbox.
+func (w *Worker) Start(l *eventloop.EventLoop) {
+	go w.loop(l)
+}
+
 // loop is the single worker goroutine that consumes tasks serially.
-func (w *Worker) loop() {
+func (w *Worker) loop(l *eventloop.EventLoop) {
 	defer close(w.done)
 	for {
 		select {
 		case t := <-w.mailbox:
-			t.do()
+			t.do(l)
 		case <-w.stop:
 			// When the stop signal is received, we first drain the mailbox to ensure all enqueued tasks are completed before exiting.
 			for {
 				select {
 				case t := <-w.mailbox:
-					t.do()
+					t.do(l)
 				default:
 					return
 				}
@@ -88,22 +94,27 @@ func (w *Worker) loop() {
 	}
 }
 
-func (t *Task) do() (result any, err error) {
-	defer func() {
+func (t *Task) do(l *eventloop.EventLoop) (result any, err error) {
+	l.RunOnLoop(func(rt *goja.Runtime) {
 		defer func() {
+			defer func() {
+				// catch panic from callback
+				if r := recover(); r != nil {
+					logging.LogErrorf("task callback panicked: %v\n", r)
+				}
+			}()
+
+			// catch panic from executor
 			if r := recover(); r != nil {
-				logging.LogErrorf("task callback panicked: %v\n", r)
+				err = fmt.Errorf("task executor panicked: %v", r)
+			}
+			if t.callback != nil {
+				t.callback(rt, result, err)
 			}
 		}()
 
-		if r := recover(); r != nil {
-			err = fmt.Errorf("task panicked: %v", r)
-		}
-		if t.callback != nil {
-			t.callback(result, err)
-		}
-	}()
-	result, err = t.executor()
+		result, err = t.executor(rt)
+	})
 	return
 }
 
@@ -127,7 +138,7 @@ func (w *Worker) Run(fn TaskExecutor, callback TaskCallback, ctx context.Context
 
 func (w *Worker) RunSync(fn TaskExecutor, ctx context.Context) (result any, err error) {
 	resCh := make(chan Result, 1)
-	err = w.Run(fn, func(result any, err error) {
+	err = w.Run(fn, func(rt *goja.Runtime, result any, err error) {
 		// Imediately return after writing to resCh, without blocking the worker.
 		// The worker will continue to execute and write to resCh (buffered channel, no leak).
 		resCh <- Result{result, err}
@@ -149,9 +160,9 @@ func (w *Worker) RunSync(fn TaskExecutor, ctx context.Context) (result any, err 
 	return
 }
 
-// Close gracefully closes the queue, waiting for all enqueued tasks to complete before returning.
+// Stop signals the worker to stop accepting new tasks and exit after processing current tasks.
 // Can be safely called multiple times; subsequent calls will have no effect.
-func (w *Worker) Close() {
+func (w *Worker) Stop() {
 	w.once.Do(func() {
 		// Notify the worker to stop accepting new tasks and exit after processing current tasks.
 		w.closed.Store(true)

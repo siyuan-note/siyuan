@@ -9,6 +9,6 @@ Some areas we don't consider security vulnerabilities:
 * Arbitrary file write: Writing files outside the workspace path (e.g., exporting files) is a common user need
 * Chart/Formula/ABC rendering code injection: This is a common user need, for details please refer to https://github.com/siyuan-note/siyuan/pull/6917
 * SQL injection
-* Pandoc Argument Injection: Allowing the setting of `--lua-filter` is essential
+* Pandoc Argument Injection: Allowing the setting of `--lua-filter` is a common user need
 
 Thank you very much!

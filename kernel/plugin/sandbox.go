@@ -27,7 +27,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/fastschema/qjs"
+	"github.com/dop251/goja"
 	"github.com/gorilla/websocket"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
@@ -1017,411 +1017,116 @@ func injectRpc(p *KernelPlugin, ctx *qjs.Context, siyuan *qjs.Value) error {
 	return nil
 }
 
-// ObjectSeal applies Object.seal to the given JS object to prevent plugins from tampering with injected APIs, returning an error if sealing fails.
-func ObjectSeal(ctx *qjs.Context, object *qjs.Value) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("qjs panic during invoke Object.seal: %v", r)
-		}
-	}()
+// ObjectFreeze is a no-op stub; the real implementation will be added in Task 6.
+func ObjectFreeze(_ *goja.Runtime, _ *goja.Object) error { return nil }
 
-	Object := ctx.Global().GetPropertyStr("Object")
-	if Object == nil {
-		return fmt.Errorf("Object not found in global context")
-	}
-	if !Object.IsObject() {
-		return fmt.Errorf("Object is not an object in global context")
-	}
+// ObjectSeal is a no-op stub; the real implementation will be added in Task 6.
+func ObjectSeal(_ *goja.Runtime, _ *goja.Object) error { return nil }
 
-	seal := Object.GetPropertyStr("seal")
-	if seal == nil {
-		return fmt.Errorf("Object.seal not found in global context")
-	}
-	if !seal.IsFunction() {
-		return fmt.Errorf("Object.seal is not a function in global context")
-	}
-
-	_, invokeErr := ctx.Invoke(seal, Object, object)
-	if invokeErr != nil {
-		return invokeErr
-	}
-	return
-}
-
-// ObjectFreeze applies Object.freeze to the given JS object to prevent plugins from tampering with injected APIs, returning an error if freezing fails.
-func ObjectFreeze(ctx *qjs.Context, object *qjs.Value) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("qjs panic during invoke Object.freeze: %v", r)
-		}
-	}()
-
-	Object := ctx.Global().GetPropertyStr("Object")
-	if Object == nil {
-		return fmt.Errorf("Object not found in global context")
-	}
-	if !Object.IsObject() {
-		return fmt.Errorf("Object is not an object in global context")
-	}
-
-	freeze := Object.GetPropertyStr("freeze")
-	if freeze == nil {
-		return fmt.Errorf("Object.freeze not found in global context")
-	}
-	if !freeze.IsFunction() {
-		return fmt.Errorf("Object.freeze is not a function in global context")
-	}
-
-	_, invokeErr := ctx.Invoke(freeze, Object, object)
-	if invokeErr != nil {
-		return invokeErr
-	}
-	return
-}
-
-func ObjectSetDataMethods(p *KernelPlugin, ctx *qjs.Context, object *qjs.Value, data []byte) {
-	object.SetPropertyStr("text", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runErr := p.worker.Run(func() (result any, err any) {
-			result = ctx.NewString(string(data))
-			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("response.text: %w", err.(error))))
-			} else {
-				if result != nil {
-					this.Promise().Resolve(result.(*qjs.Value))
-				} else {
-					this.Promise().Resolve()
-				}
-			}
-		}, p.context)
-		if runErr != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("response.text: %w", runErr)))
-		}
-		return
-	}, true))
-	object.SetPropertyStr("json", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runErr := p.worker.Run(func() (result any, err any) {
-			v, e := parseJsonStringToJsValue(ctx, string(data))
-			result, err = v, e
-			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("response.json: %w", err.(error))))
-			} else {
-				if result != nil {
-					this.Promise().Resolve(result.(*qjs.Value))
-				} else {
-					this.Promise().Resolve()
-				}
-			}
-		}, p.context)
-		if runErr != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("response.json: %w", runErr)))
-		}
-		return
-	}, true))
-	object.SetPropertyStr("arrayBuffer", ctx.Function(func(this *qjs.This) (result *qjs.Value, err error) {
-		runErr := p.worker.Run(func() (result any, err any) {
-			result = ctx.NewArrayBuffer(data)
-			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(fmt.Errorf("response.arrayBuffer: %w", err.(error))))
-			} else {
-				if result != nil {
-					this.Promise().Resolve(result.(*qjs.Value))
-				} else {
-					this.Promise().Resolve()
-				}
-			}
-		}, p.context)
-		if runErr != nil {
-			this.Promise().Reject(ctx.NewError(fmt.Errorf("response.arrayBuffer: %w", runErr)))
-		}
-		return
-	}, true))
-}
-
-// dispatchEvent calls the globalThis.siyuan.plugin.event.on hook with the given event object.
-// If it returns `true`, the caller should await the result by receiving a event with the specified topic.
-func dispatchEvent(p *KernelPlugin, ctx *qjs.Context, e any) (await bool, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("qjs panic during invoke siyuan.event.on: %v", r)
-		}
-	}()
-
-	event, err := getJsContextValue(ctx, []any{"siyuan", "event"})
+// goValueToJsValue converts a Go value to a goja.Value by JSON serialization round-trip, returning an error if serialization fails.
+func goValueToJsValue(rt *goja.Runtime, value any) (goja.Value, error) {
+	b, err := json.Marshal(value)
 	if err != nil {
-		return
+		return nil, err
 	}
-	if event == nil {
-		err = fmt.Errorf("globalThis.siyuan.event not found in JS context")
-		return
+	var parsed any
+	dec := json.NewDecoder(strings.NewReader(string(b)))
+	dec.UseNumber()
+	if err = dec.Decode(&parsed); err != nil {
+		return nil, err
 	}
-
-	hook := event.GetPropertyStr("on")
-	if hook != nil && hook.IsFunction() {
-		// ⚠️ Option of using eval() also causes deadlocks
-		eventJs, parseErr := goValueToJsValue(ctx, e)
-		if parseErr != nil {
-			err = parseErr
-			return
-		}
-		invokeResult, InvokeErr := ctx.Invoke(hook, event, eventJs)
-		if InvokeErr != nil {
-			err = InvokeErr
-			return
-		}
-
-		await = invokeResult.IsBool() && invokeResult.Bool()
-	}
-	return
+	return rt.ToValue(convertJsonNumbers(parsed)), nil
 }
 
-// goValueToJsValue converts a Go value to a QJS Value by JSON serialization round-trip, returning an error if serialization fails.
-func goValueToJsValue(ctx *qjs.Context, value any) (result *qjs.Value, err error) {
-	valueBytes, err := json.Marshal(value)
-	if err != nil {
-		return
-	}
-
-	return parseJsonStringToJsValue(ctx, string(valueBytes))
-}
-
-// parseJsonStringToJsValue parses a JSON string into a QJS Value, returning an error if parsing fails.
-func parseJsonStringToJsValue(ctx *qjs.Context, jsonStr string) (result *qjs.Value, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("qjs panic during parseJsonStringToJsValue: %v", r)
+func convertJsonNumbers(v any) any {
+	switch val := v.(type) {
+	case json.Number:
+		if i, err := val.Int64(); err == nil {
+			return i
 		}
-	}()
-
-	result = ctx.ParseJSON(jsonStr)
-	if ctx.HasException() {
-		result = nil
-		err = ctx.Exception()
-	}
-	return
-}
-
-// parseJsonArrayStringToJsValueArray parses a JSON array string into a slice of QJS Values, returning an error if parsing fails.
-func parseJsonArrayStringToJsValueArray(ctx *qjs.Context, jsonStr string) (result []*qjs.Value, err error) {
-	// ⚠️ The code snippet below can't parse to right []*qjs.Value (only parse to [0, 0, ..., 0])
-	// paramArray, _ := paramValue.ToArray()
-	// paramsArray := make([]*qjs.Value, 0, paramArray.Len())
-	// paramArray.ForEach(func(key *qjs.Value, value *qjs.Value) {
-	// 	jsonStr, _ := value.JSONStringify()
-	// 	paramsArray = append(paramsArray, ctx.NewString(jsonStr))
-	// })
-
-	var jsonArray []json.RawMessage
-	err = json.Unmarshal([]byte(jsonStr), &jsonArray)
-	if err != nil {
-		return
-	}
-
-	result = make([]*qjs.Value, len(jsonArray))
-	for i, jsonItem := range jsonArray {
-		result[i], err = parseJsonStringToJsValue(ctx, string(jsonItem))
-		if err != nil {
-			return
+		if f, err := val.Float64(); err == nil {
+			return f
 		}
+		return val.String()
+	case map[string]any:
+		for k, mv := range val {
+			val[k] = convertJsonNumbers(mv)
+		}
+		return val
+	case []any:
+		for i, mv := range val {
+			val[i] = convertJsonNumbers(mv)
+		}
+		return val
 	}
-	return
+	return v
 }
 
 // getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.
-func getJsContextValue(ctx *qjs.Context, paths []any) (value *qjs.Value, retErr error) {
-	defer func() {
-		if r := recover(); r != nil {
-			retErr = fmt.Errorf("qjs panic during getJsContextValue: %v", r)
-		}
-	}()
-
-	this := ctx.Global()
-
+func getJsContextValue(rt *goja.Runtime, paths []any) (goja.Value, error) {
+	var cur goja.Value = rt.GlobalObject()
 	for _, path := range paths {
-		if this == nil {
-			return
+		obj, ok := cur.(*goja.Object)
+		if !ok {
+			return nil, fmt.Errorf("path %v: expected object, got %T", path, cur)
 		}
-
 		switch k := path.(type) {
 		case string:
-			this = this.GetPropertyStr(k)
+			cur = obj.Get(k)
 		case int64:
-			this = this.GetPropertyIndex(k)
-		case *qjs.Value:
-			this = this.GetProperty(k)
+			cur = obj.Get(fmt.Sprintf("%d", k))
 		default:
 			return nil, fmt.Errorf("unsupported path type: %T", path)
 		}
-	}
-	value = this
-	return
-}
-
-// loggerWrapper creates a function that can be registered as a JavaScript logger method (e.g., debug, info, error) for the plugin. It formats the log message with the plugin name and forwards it to the provided logFn.
-func loggerWrapper(p *KernelPlugin, ctx *qjs.Context, logFn func(format string, args ...any)) func(this *qjs.This) (*qjs.Value, error) {
-	return func(this *qjs.This) (result *qjs.Value, err error) {
-		runErr := p.worker.Run(func() (result any, err any) {
-			args := this.Args()
-			if len(args) < 1 {
-				return
-			}
-
-			parts := make([]string, 0, len(args))
-			for _, arg := range args {
-				parts = append(parts, arg.String())
-			}
-			msg := strings.Join(parts, " ")
-
-			logFn("[plugin:%s] %s", p.Name, msg)
-			return
-		}, func(result any, err any) {
-			if err != nil {
-				this.Promise().Reject(ctx.NewError(err.(error)))
-			} else {
-				if result != nil {
-					this.Promise().Resolve(result.(*qjs.Value))
-				} else {
-					this.Promise().Resolve()
-				}
-			}
-		}, p.context)
-		if runErr != nil {
-			this.Promise().Reject(ctx.NewError(runErr))
+		if cur == nil || goja.IsNull(cur) || goja.IsUndefined(cur) {
+			return nil, nil
 		}
-		this.Promise().Resolve()
-		return
 	}
+	return cur, nil
 }
 
-// rpcParamsToJsValue converts Go RPC params to a *qjs.Value or []*qjs.Value for JS invocation.
-// It accepts various Go types (string, []byte, json.RawMessage, or any JSON-serializable struct) and returns an error if conversion fails.
-func rpcParamsToJsValue(ctx *qjs.Context, params any) (isArray bool, value *qjs.Value, array []*qjs.Value, err error) {
-	if params == nil {
+// dispatchEvent calls the globalThis.siyuan.event.on hook with the given event object.
+// If it returns `true`, the caller should await the result by receiving an event with the specified topic.
+func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("goja panic during dispatchEvent: %v", r)
+		}
+	}()
+
+	event, err := getJsContextValue(rt, []any{"siyuan", "event"})
+	if err != nil || event == nil {
 		return
 	}
 
-	var jsonStr string
-	switch v := params.(type) {
-	case string:
-		jsonStr = v
-	case *string:
-		if v == nil {
-			return
-		}
-		jsonStr = *v
-	case []byte:
-		jsonStr = string(v)
-	case json.RawMessage:
-		jsonStr = string(v)
-	case *[]byte:
-		if v == nil {
-			return
-		}
-		jsonStr = string(*v)
-	case *json.RawMessage:
-		if v == nil {
-			return
-		}
-		jsonStr = string(*v)
-	default:
-		b, marshalErr := json.Marshal(v)
-		if marshalErr != nil {
-			err = marshalErr
-			return
-		}
-		jsonStr = string(b)
+	eventObj, ok := event.(*goja.Object)
+	if !ok {
+		return
 	}
 
-	isArray = isJsonArray(jsonStr) // quick check to determine if we should parse as array or single value
-	if isArray {
-		array, err = parseJsonArrayStringToJsValueArray(ctx, jsonStr)
-	} else {
-		value, err = parseJsonStringToJsValue(ctx, jsonStr)
-	}
-	return
-}
-
-// invokeRpcMethod calls the given JS function with the provided params and returns the result or error.
-// Can't be called in Worker, otherwise it will cause deadlock when the JS function tries to call back into Go (e.g., via siyuan.rpc.broadcast) and waits for the result while the Worker is blocked waiting for the JS function to return.
-func invokeRpcMethod(ctx *qjs.Context, rpcMethodName string, rpcMethod *qjs.Value, rpcParams any) (rpcResult any, rpcError *JsonRpcError) {
-	// Convert params to JS value
-	isArray, paramValue, paramArray, convertErr := rpcParamsToJsValue(ctx, rpcParams)
-	if convertErr != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("convert params: %v", convertErr),
-		}
+	hook := eventObj.Get("on")
+	if hook == nil || goja.IsNull(hook) || goja.IsUndefined(hook) {
+		return
 	}
 
-	// Call the JS function using ctx.Invoke(fn, thisVal, args...)
-	var result *qjs.Value
-	var err error
-	if isArray {
-		result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramArray...)
-	} else {
-		if paramValue == nil {
-			result, err = ctx.Invoke(rpcMethod, ctx.Global())
-		} else {
-			result, err = ctx.Invoke(rpcMethod, ctx.Global(), paramValue)
-		}
-	}
-	if err != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("call %q: %v", rpcMethodName, err),
-		}
+	fn, ok := goja.AssertFunction(hook)
+	if !ok {
+		return
 	}
 
-	// Await if Promise
-	if result != nil && result.IsPromise() {
-		result, err = result.Await()
-		if err != nil {
-			return nil, &JsonRpcError{
-				Code:    JsonRpcErrorCodeInternalError,
-				Message: fmt.Sprintf("await %q: %v", rpcMethodName, err),
-			}
-		}
+	eventJs, parseErr := goValueToJsValue(rt, e)
+	if parseErr != nil {
+		err = parseErr
+		return
 	}
 
-	// If result is null or undefined, return nil (JSON-RPC allows result to be null, but we treat undefined as null for convenience)
-	if result == nil || result.IsNull() || result.IsUndefined() {
-		return nil, nil
+	invokeResult, invokeErr := fn(event, eventJs)
+	if invokeErr != nil {
+		err = invokeErr
+		return
 	}
 
-	// Convert JS result to Go via JSON round-trip using the built-in JSONStringify method.
-	jsonStr, stringifyErr := result.JSONStringify()
-	if stringifyErr != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("stringify result: %v", stringifyErr),
-		}
-	}
-
-	// Unmarshal JSON string back to Go type (could be any JSON-serializable type: object, array, string, number, bool, or null)
-	if err = json.Unmarshal([]byte(jsonStr), &rpcResult); err != nil {
-		return nil, &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("unmarshal result: %v", err),
-		}
-	}
-
-	return
-}
-
-// PromiseAwait is a helper that checks if the given value is a Promise and awaits it if so, returning the resolved value or an error if it's not a Promise or if awaiting fails.
-func PromiseAwait(promise any) (result *qjs.Value, err error) {
-	if promise != nil {
-		promiseValue, ok := promise.(*qjs.Value)
-		if ok && promiseValue.IsPromise() {
-			result, err = promiseValue.Await()
-			return
-		}
-	}
-	err = fmt.Errorf("value is not a Promise")
+	// Strict true-only: do NOT use ToBoolean() — any truthy object (e.g. a Promise) would deadlock invokeHook.
+	await = invokeResult != nil && invokeResult.Export() == true
 	return
 }

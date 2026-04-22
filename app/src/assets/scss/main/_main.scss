@@ -60,13 +60,11 @@ html[data-frontend="browser-desktop"] {
 }
 
 .toolbar {
-  background-color: var(--b3-toolbar-background);
   box-sizing: border-box;
   height: 32px;
   line-height: 32px;
   padding: 0 5px 0 var(--b3-toolbar-left-mac);
   overflow: hidden; // 最小化后右上角显示不全
-  border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
     padding-left: calc(env(titlebar-area-x, 0px) + 5px);
@@ -189,12 +187,10 @@ html[data-frontend="browser-desktop"] {
 }
 
 .status {
-  background-color: var(--b3-theme-surface);
   box-sizing: border-box;
   z-index: 2;
   height: 32px;
   line-height: 32px;
-  border-top: .5px solid var(--b3-border-color);
   padding: 0 5px;
 
   .toolbar__item {

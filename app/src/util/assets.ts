@@ -91,7 +91,7 @@ export const loadAssets = (data: Config.IAppearance) => {
     /// #if BROWSER
     if (!window.webkit?.messageHandlers && !window.JSAndroid && !window.JSHarmony &&
         ("serviceWorker" in window.navigator) && ("caches" in window) && ("fetch" in window) && navigator.serviceWorker) {
-        document.head.insertAdjacentHTML("afterbegin", `<meta name="theme-color" content="${getComputedStyle(document.body).getPropertyValue("--b3-toolbar-background").trim()}">`);
+        document.head.insertAdjacentHTML("afterbegin", `<meta name="theme-color" content="${getComputedStyle(document.body).getPropertyValue("--b3-body-background").trim()}">`);
     }
     /// #endif
     setCodeTheme();

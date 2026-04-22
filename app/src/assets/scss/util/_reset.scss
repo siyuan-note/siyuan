@@ -14,7 +14,7 @@ body {
   margin: 0;
   font-family: var(--b3-font-family);
   color: var(--b3-theme-on-background);
-  background-color: var(--b3-theme-background);
+  background-color: var(--b3-body-background);
   -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: var(--b3-list-hover);
@@ -29,9 +29,7 @@ body {
   }
 
   &.body--blur {
-    .toolbar {
-      background: var(--b3-toolbar-blur-background);
-    }
+    background-color: var(--b3-body-blur-background);
 
     .layout {
       &__wnd--active .layout-tab-bar .item--focus {

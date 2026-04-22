@@ -164,7 +164,7 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 
 	event := rt.NewObject()
 
-	lo.Must0(event.Set("on", goja.Null()))
+	lo.Must0(event.Set("handler", goja.Null()))
 
 	lo.Must0(event.Set("emit", rt.ToValue(func(call goja.FunctionCall) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
@@ -200,7 +200,7 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 					logging.LogErrorf("[plugin:%s] siyuan.event.emit reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.event.emit worker run: %v", p.Name, runErr)
 		}
@@ -277,7 +277,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					logging.LogErrorf("[plugin:%s] siyuan.storage.get reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.get worker run: %v", p.Name, runErr)
 		}
@@ -320,7 +320,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					logging.LogErrorf("[plugin:%s] siyuan.storage.put reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.put worker run: %v", p.Name, runErr)
 		}
@@ -362,7 +362,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					logging.LogErrorf("[plugin:%s] siyuan.storage.remove reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.remove worker run: %v", p.Name, runErr)
 		}
@@ -415,7 +415,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					logging.LogErrorf("[plugin:%s] siyuan.storage.list reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.storage.list worker run: %v", p.Name, runErr)
 		}
@@ -531,7 +531,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 					logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.fetch worker run: %v", p.Name, runErr)
 		}
@@ -679,7 +679,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							logging.LogErrorf("[plugin:%s] siyuan.socket.send reject: %v", p.Name, rejectErr)
 						}
 					}
-				}, p.context)
+				})
 				if sendRunErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.socket.send worker run: %v", p.Name, sendRunErr)
 				}
@@ -710,7 +710,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							logging.LogErrorf("[plugin:%s] siyuan.socket.ping reject: %v", p.Name, rejectErr)
 						}
 					}
-				}, p.context)
+				})
 				if pingRunErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.socket.ping worker run: %v", p.Name, pingRunErr)
 				}
@@ -741,7 +741,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							logging.LogErrorf("[plugin:%s] siyuan.socket.pong reject: %v", p.Name, rejectErr)
 						}
 					}
-				}, p.context)
+				})
 				if pongRunErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.socket.pong worker run: %v", p.Name, pongRunErr)
 				}
@@ -776,7 +776,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							logging.LogErrorf("[plugin:%s] siyuan.socket.close reject: %v", p.Name, rejectErr)
 						}
 					}
-				}, p.context)
+				})
 				if closeRunErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.socket.close worker run: %v", p.Name, closeRunErr)
 				}
@@ -809,7 +809,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						event.Set("error", rt.NewGoError(dialErr))
 						s.invokeWsHook("onerror", event)
 						return
-					}, p.context)
+					})
 					return
 				}
 
@@ -826,7 +826,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						event.Set("data", rt.ToValue(data))
 						s.invokeWsHook("onping", event)
 						return
-					}, p.context)
+					})
 					return runError
 				})
 				c.SetPongHandler(func(data string) error {
@@ -836,7 +836,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						event.Set("data", rt.ToValue(data))
 						s.invokeWsHook("onpong", event)
 						return
-					}, p.context)
+					})
 					return runError
 				})
 				c.SetCloseHandler(func(code int, reason string) error {
@@ -848,7 +848,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						event.Set("reason", rt.ToValue(reason))
 						s.invokeWsHook("onclose", event)
 						return
-					}, p.context)
+					})
 					return runError
 				})
 
@@ -872,7 +872,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					event.Set("type", rt.ToValue("open"))
 					s.invokeWsHook("onopen", event)
 					return
-				}, p.context)
+				})
 
 				for {
 					messageType, data, readErr := c.ReadMessage()
@@ -884,7 +884,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 								event.Set("error", rt.NewGoError(readErr))
 								s.invokeWsHook("onerror", event)
 								return
-							}, p.context)
+							})
 						}
 						break
 					}
@@ -896,7 +896,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							event.Set("data", rt.ToValue(string(data)))
 							s.invokeWsHook("onmessage", event)
 							return
-						}, p.context)
+						})
 					case websocket.BinaryMessage:
 						_, _ = p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
 							event := rt.NewObject()
@@ -904,7 +904,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
 							s.invokeWsHook("onmessage", event)
 							return
-						}, p.context)
+						})
 					}
 				}
 			}()
@@ -921,7 +921,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					logging.LogErrorf("[plugin:%s] siyuan.socket reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.socket worker run: %v", p.Name, runErr)
 		}
@@ -967,7 +967,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 					logging.LogErrorf("[plugin:%s] siyuan.rpc.subscribe reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.rpc.subscribe worker run: %v", p.Name, runErr)
 		}
@@ -996,7 +996,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 					logging.LogErrorf("[plugin:%s] siyuan.rpc.unsubscribe reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.rpc.unsubscribe worker run: %v", p.Name, runErr)
 		}
@@ -1035,7 +1035,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 					logging.LogErrorf("[plugin:%s] siyuan.rpc.broadcast reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.rpc.broadcast worker run: %v", p.Name, runErr)
 		}
@@ -1104,7 +1104,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 					logging.LogErrorf("[plugin:%s] text reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] text worker run: %v", p.Name, runErr)
 		}
@@ -1125,7 +1125,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 					logging.LogErrorf("[plugin:%s] json reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] json worker run: %v", p.Name, runErr)
 		}
@@ -1146,7 +1146,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 					logging.LogErrorf("[plugin:%s] arrayBuffer reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] arrayBuffer worker run: %v", p.Name, runErr)
 		}
@@ -1181,7 +1181,7 @@ func loggerWrapper(p *KernelPlugin, rt *goja.Runtime, logFn func(format string, 
 					logging.LogErrorf("[plugin:%s] siyuan.logger reject: %v", p.Name, rejectErr)
 				}
 			}
-		}, p.context)
+		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.logger worker run: %v", p.Name, runErr)
 		}

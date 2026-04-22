@@ -770,95 +770,95 @@ export class Wnd {
     }
 
     private removeTabAction = (id: string, isBatchClose = false, animate = true, isSaveLayout = true) => {
-        const closing = this.children.find(t => t.id === id);
-        if (closing && closing.model instanceof Editor) {
-            clearCounter(closing.model.editor.protyle.block.rootID);
-        }
         this.children.find((item, index) => {
-            if (item.id === id) {
-                if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
-                    window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
-                }
-                if (item.headElement) {
-                    const tabJSON = {};
-                    layoutToJSON(item, tabJSON);
-                    window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
-                    setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
-                }
-                if (item.model instanceof Custom && item.model.beforeDestroy) {
-                    item.model.beforeDestroy();
-                }
-                if (item.model instanceof Editor) {
-                    saveScroll(item.model.editor.protyle);
-                    // 更新文档关闭时间（批量关闭页签时由 closeTabByType 批量处理，这里不单独调用）
-                    if (!isBatchClose) {
-                        fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
-                    }
-                }
-                if (this.children.length === 1) {
-                    this.destroyModel(this.children[0].model);
-                    this.children = [];
-                    if (["bottom", "left", "right"].includes(this.parent.type)) {
-                        item.panelElement.remove();
-                    } else {
-                        recordBeforeResizeTop();
-                        this.remove();
-                    }
-                    // 关闭分屏页签后光标消失
-                    const editors = getAllModels().editor;
-                    if (editors.length === 0) {
-                        clearOBG();
-                    } else {
-                        editors.forEach(item => {
-                            if (!item.element.classList.contains("fn__none")) {
-                                setPanelFocus(item.parent.parent.headersElement.parentElement.parentElement);
-                                updatePanelByEditor({
-                                    protyle: item.editor.protyle,
-                                    focus: true,
-                                    pushBackStack: true,
-                                    reload: false,
-                                    resize: true,
-                                });
-                                return;
-                            }
-                        });
-                    }
-                    return;
-                }
-                if (item.headElement) {
-                    if (item.headElement.classList.contains("item--focus")) {
-                        let latestHeadElement: HTMLElement;
-                        Array.from(item.headElement.parentElement.children).forEach((headItem: HTMLElement) => {
-                            if (headItem !== item.headElement &&
-                                headItem.style.maxWidth !== "0px"   // 不对比已移除但还在动画效果中的元素 https://github.com/siyuan-note/siyuan/issues/7878
-                            ) {
-                                if (!latestHeadElement) {
-                                    latestHeadElement = headItem;
-                                } else if (headItem.getAttribute("data-activetime") > latestHeadElement.getAttribute("data-activetime")) {
-                                    latestHeadElement = headItem;
-                                }
-                            }
-                        });
-                        if (latestHeadElement && !isBatchClose) {
-                            this.switchTab(latestHeadElement, true, true, false, false);
-                            this.showHeading();
-                        }
-                    }
-                    if (animate) {
-                        item.headElement.setAttribute("style", "max-width: 0px;");
-                        setTimeout(() => {
-                            item.headElement.remove();
-                        }, 200);
-                    } else {
-                        item.headElement.remove();
-                    }
-                }
-                item.panelElement.remove();
-                this.destroyModel(item.model);
-                this.children.splice(index, 1);
-                resizeTabs(false);
-                return true;
+            if (item.id !== id) {
+                return;
             }
+            if (item.model instanceof Editor) {
+                clearCounter(item.model.editor.protyle.block.rootID);
+            }
+            if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
+            }
+            if (item.headElement) {
+                const tabJSON = {};
+                layoutToJSON(item, tabJSON);
+                window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].push(tabJSON);
+                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
+            }
+            if (item.model instanceof Custom && item.model.beforeDestroy) {
+                item.model.beforeDestroy();
+            }
+            if (item.model instanceof Editor) {
+                saveScroll(item.model.editor.protyle);
+                // 更新文档关闭时间（批量关闭页签时由 closeTabByType 批量处理，这里不单独调用）
+                if (!isBatchClose) {
+                    fetchPost("/api/storage/updateRecentDocCloseTime", {rootID: item.model.editor.protyle.block.rootID});
+                }
+            }
+            if (this.children.length === 1) {
+                this.destroyModel(this.children[0].model);
+                this.children = [];
+                if (["bottom", "left", "right"].includes(this.parent.type)) {
+                    item.panelElement.remove();
+                } else {
+                    recordBeforeResizeTop();
+                    this.remove();
+                }
+                // 关闭分屏页签后光标消失
+                const editors = getAllModels().editor;
+                if (editors.length === 0) {
+                    clearOBG();
+                } else {
+                    editors.forEach(item => {
+                        if (!item.element.classList.contains("fn__none")) {
+                            setPanelFocus(item.parent.parent.headersElement.parentElement.parentElement);
+                            updatePanelByEditor({
+                                protyle: item.editor.protyle,
+                                focus: true,
+                                pushBackStack: true,
+                                reload: false,
+                                resize: true,
+                            });
+                            return;
+                        }
+                    });
+                }
+                return;
+            }
+            if (item.headElement) {
+                if (item.headElement.classList.contains("item--focus")) {
+                    let latestHeadElement: HTMLElement;
+                    Array.from(item.headElement.parentElement.children).forEach((headItem: HTMLElement) => {
+                        if (headItem !== item.headElement &&
+                            headItem.style.maxWidth !== "0px"   // 不对比已移除但还在动画效果中的元素 https://github.com/siyuan-note/siyuan/issues/7878
+                        ) {
+                            if (!latestHeadElement) {
+                                latestHeadElement = headItem;
+                            } else if (headItem.getAttribute("data-activetime") > latestHeadElement.getAttribute("data-activetime")) {
+                                latestHeadElement = headItem;
+                            }
+                        }
+                    });
+                    if (latestHeadElement && !isBatchClose) {
+                        this.switchTab(latestHeadElement, true, true, false, false);
+                        this.showHeading();
+                    }
+                }
+                if (animate) {
+                    item.headElement.setAttribute("style", "max-width: 0px;");
+                    setTimeout(() => {
+                        item.headElement.remove();
+                    }, 200);
+                } else {
+                    item.headElement.remove();
+                }
+            }
+            item.panelElement.remove();
+            this.destroyModel(item.model);
+            this.children.splice(index, 1);
+            resizeTabs(false);
+            return true;
         });
         // 初始化移除窗口，但 centerLayout 还没有赋值 https://ld246.com/article/1658718634416
         if (window.siyuan.layout.centerLayout) {

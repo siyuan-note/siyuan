@@ -60,23 +60,24 @@ type Printer struct {
 	name string // plugin name for log prefix
 }
 
-func (p *Printer) print(s string, logf func(format string, v ...interface{})) {
-	rows := strings.Split(s, "\n")
-	for _, row := range rows {
-		logf("[plugin:%s] %s", p.name, row)
-	}
-}
-
 func (p *Printer) Log(s string) {
-	p.print(s, logging.LogInfof)
+	go print(p.name, s, logging.LogInfof)
 }
 
 func (p *Printer) Warn(s string) {
-	p.print(s, logging.LogWarnf)
+	go print(p.name, s, logging.LogWarnf)
 }
 
 func (p *Printer) Error(s string) {
-	p.print(s, logging.LogErrorf)
+	go print(p.name, s, logging.LogErrorf)
+}
+
+// print logs the message line by line with the plugin name as prefix, using the provided log function.
+func print(name, s string, logf func(format string, v ...interface{})) {
+	rows := strings.Split(s, "\n")
+	for _, row := range rows {
+		logf("[plugin:%s] %s", name, row)
+	}
 }
 
 // EnableExtendModules registers extended modules (e.g. url, buffer) to the plugin's goja runtime.
@@ -1309,10 +1310,8 @@ func loggerWrapper(p *KernelPlugin, logf func(format string, args ...any)) func(
 				parts = append(parts, arg.String())
 			}
 			msg := strings.Join(parts, " ")
-			rows := strings.Split(msg, "\n")
-			for _, row := range rows {
-				logf("[plugin:%s] %s", p.Name, row)
-			}
+
+			go print(p.Name, msg, logf)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {

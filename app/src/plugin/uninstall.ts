@@ -56,47 +56,12 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             // rm dock
             const docksKeys = Object.keys(plugin.docks);
             docksKeys.forEach(key => {
-                let dockIconElement;
-                if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] &&
-                    window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
-                    dockIconElement = document.querySelector(`.dock__item[data-type="${key}"]`);
-                    if (dockIconElement) {
-                        let index = 0;
-                        let previousElement = dockIconElement;
-                        while (previousElement.previousElementSibling) {
-                            index++;
-                            previousElement = previousElement.previousElementSibling;
-                        }
-                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].index = index;
-                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].show = dockIconElement.classList.contains("dock__item--active");
-                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].size = {
-                            height: parseInt(dockIconElement.getAttribute("data-height")) || null,
-                            width: parseInt(dockIconElement.getAttribute("data-width")) || null
-                        };
-                    }
-                }
-
                 if (window.siyuan.layout.leftDock && Object.keys(window.siyuan.layout.leftDock.data).includes(key)) {
                     window.siyuan.layout.leftDock.remove(key);
-                    if (dockIconElement) {
-                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].position =
-                            "Left" + (dockIconElement.getAttribute("data-index") === "0" ? "Top" : "Bottom");
-                    }
                 } else if (window.siyuan.layout.rightDock && Object.keys(window.siyuan.layout.rightDock.data).includes(key)) {
                     window.siyuan.layout.rightDock.remove(key);
-                    if (dockIconElement) {
-                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].position =
-                            "Right" + (dockIconElement.getAttribute("data-index") === "0" ? "Top" : "Bottom");
-                    }
                 } else if (window.siyuan.layout.bottomDock && Object.keys(window.siyuan.layout.bottomDock.data).includes(key)) {
                     window.siyuan.layout.bottomDock.remove(key);
-                    if (dockIconElement) {
-                        window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key].position =
-                            "Bottom" + (dockIconElement.getAttribute("data-index") === "0" ? "Left" : "Right");
-                    }
-                }
-                if (dockIconElement) {
-                    setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
                 }
             });
             /// #endif

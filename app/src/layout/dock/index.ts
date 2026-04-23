@@ -1,4 +1,4 @@
-import {updateHotkeyTip} from "../../protyle/util/compatibility";
+import {setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {Layout} from "../index";
 import {Wnd} from "../Wnd";
 import {Tab} from "../Tab";
@@ -15,7 +15,7 @@ import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
 import {resetFloatDockSize} from "./util";
-import {hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {App} from "../../index";
 import {Plugin} from "../../plugin";
 import {Custom} from "./Custom";
@@ -571,6 +571,9 @@ export class Dock {
                     });
                 }
             }
+            if (isSaveLayout) {
+                this.saveLocalPlugin(type, {show: false});
+            }
         } else {
             this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {
                 item.classList.remove("dock__item--active", "dock__item--activefocus");
@@ -723,6 +726,9 @@ export class Dock {
             if (document.activeElement) {
                 (document.activeElement as HTMLElement).blur();
             }
+            if (isSaveLayout) {
+                this.saveLocalPlugin(type, {show: true});
+            }
         }
 
         // dock 中两个面板的显示关系
@@ -826,6 +832,28 @@ export class Dock {
         setTimeout(() => {
             saveLayout();
         }, Constants.TIMEOUT_TRANSITION);
+        let position: TPluginDockPosition;
+        if (hasClosestByAttribute(sourceElement, "id", "dockLeft")) {
+            position = "Left" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
+        } else if (hasClosestByAttribute(sourceElement, "id", "dockRight")) {
+            position = "Right" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
+        } else if (hasClosestByAttribute(sourceElement, "id", "dockBottom")) {
+            position = "Bottom" + (index === 0 ? "Left" : "Right") as TPluginDockPosition;
+        }
+        let sortIndex = 0;
+        let previousElement = sourceElement;
+        while (previousElement.previousElementSibling) {
+            sortIndex++;
+            previousElement = previousElement.previousElementSibling;
+        }
+        this.saveLocalPlugin(type, {
+            index: sortIndex,
+            position,
+            size: {
+                height: null,
+                width: null,
+            }
+        });
     }
 
     public remove(key: TDock | string) {
@@ -835,7 +863,7 @@ export class Dock {
         if (custom.parent) {
             custom.parent.parent.removeTab(custom.parent.id);
         }
-        if (this.element.querySelectorAll(".dock__item").length === 1   ) {
+        if (this.element.querySelectorAll(".dock__item").length === 1) {
             this.element.classList.add("fn__none");
         }
         delete this.data[key];
@@ -857,6 +885,12 @@ export class Dock {
                 }
                 item.setAttribute("data-height", this.layout.element.clientHeight.toString());
             }
+            this.saveLocalPlugin(item.getAttribute("data-type"), {
+                size: {
+                    width: parseInt(item.getAttribute("data-width")) || null,
+                    height: parseInt(item.getAttribute("data-height")) || null
+                }
+            });
         });
     }
 
@@ -920,5 +954,22 @@ export class Dock {
                 this.toggleModel(data[0].type, true, false, false, false);
             }
         }
+    }
+
+    private saveLocalPlugin(dockType: TDock | string, options: {
+        position?: TPluginDockPosition,
+        size?: Config.IUILayoutDockPanelSize,
+        index?: number,
+        show?: boolean
+    }) {
+        this.app.plugins.find(pluginItem => {
+            if (Object.keys(pluginItem.docks).includes(dockType)) {
+                Object.keys(options).forEach((item: "position") => {
+                    window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][pluginItem.name][dockType][item] = options[item];
+                });
+                setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
+                return true;
+            }
+        });
     }
 }

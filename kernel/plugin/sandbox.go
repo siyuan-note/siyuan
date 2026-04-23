@@ -1149,10 +1149,12 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
-				resolve(rt.ToValue(result))
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.text() resolve: %v", p.Name, resolveErr)
+				}
 			} else {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] text reject: %v", p.Name, rejectErr)
+					logging.LogErrorf("[plugin:%s] data.text() reject: %v", p.Name, rejectErr)
 				}
 			}
 		})
@@ -1170,10 +1172,12 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
-				resolve(rt.ToValue(result))
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.json() resolve: %v", p.Name, resolveErr)
+				}
 			} else {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] json reject: %v", p.Name, rejectErr)
+					logging.LogErrorf("[plugin:%s] data.json() reject: %v", p.Name, rejectErr)
 				}
 			}
 		})
@@ -1191,10 +1195,12 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
-				resolve(rt.ToValue(result))
+				if resolveErr := resolve(rt.ToValue(result)); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.arrayBuffer() resolve: %v", p.Name, resolveErr)
+				}
 			} else {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] arrayBuffer reject: %v", p.Name, rejectErr)
+					logging.LogErrorf("[plugin:%s] data.arrayBuffer() reject: %v", p.Name, rejectErr)
 				}
 			}
 		})

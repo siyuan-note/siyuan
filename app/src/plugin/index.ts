@@ -126,12 +126,13 @@ export class Plugin {
         // 兼容 3.4.1 以前同步数据使用重载插件的问题
         uninstall(this.app, this.name, true);
         loadPlugins(this.app, [this.name], false).then(() => {
-            this.app.plugins.forEach(item => {
+            this.app.plugins.find(item => {
                 if (this.name === item.name) {
                     afterLoadPlugin(item);
                     getAllEditor().forEach(editor => {
                         editor.protyle.toolbar.update(editor.protyle);
                     });
+                    return true;
                 }
             });
         });

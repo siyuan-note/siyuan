@@ -127,7 +127,7 @@ export class Plugin {
         uninstall(this.app, this.name, true);
         loadPlugins(this.app, [this.name], false).then(() => {
             this.app.plugins.forEach(item => {
-                if (this.name.includes(item.name)) {
+                if (this.name === item.name) {
                     afterLoadPlugin(item);
                     getAllEditor().forEach(editor => {
                         editor.protyle.toolbar.update(editor.protyle);

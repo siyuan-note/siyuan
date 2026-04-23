@@ -226,9 +226,9 @@ func (p *KernelPlugin) start() (retErr error) {
 
 	p.onLoad()
 	p.state.Store(int64(PluginStateLoaded))
-
 	p.onLoaded()
 	p.state.Store(int64(PluginStateRunning))
+	p.onRunning()
 
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return nil
@@ -274,17 +274,24 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	return
 }
 
-// onLoad is called after plugin start.
+// onLoad is called before plugin loaded.
 func (p *KernelPlugin) onLoad() {
 	if p.State() == PluginStateLoading {
 		p.invokeHook("onload")
 	}
 }
 
-// onLoaded is called after plugin start.
+// onLoaded is called after plugin loaded.
 func (p *KernelPlugin) onLoaded() {
 	if p.State() == PluginStateLoaded {
 		p.invokeHook("onloaded")
+	}
+}
+
+// onRunning is called after plugin running.
+func (p *KernelPlugin) onRunning() {
+	if p.State() == PluginStateRunning {
+		p.invokeHook("onrunning")
 	}
 }
 
@@ -318,7 +325,7 @@ func (p *KernelPlugin) unbindRpcMethod(name string) error {
 func (p *KernelPlugin) subscribeEvents() (err error) {
 	p.handler = func(e []byte) {
 		event := R{}
-		lo.Must0(json.Unmarshal([]byte(e), &event))
+		lo.Must0(json.Unmarshal(e, &event))
 		p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 			return dispatchEvent(p, rt, event)
 		}, nil)
@@ -414,25 +421,25 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) any {
 		}
 	}
 
-	result, err := p.callRpcMethod(request.Method, request.Params)
-
 	// For notifications, return nil (no response)
 	if request.IsNotification() {
+		go p.callRpcMethod(request.Method, request.Params)
 		return nil
-	}
+	} else {
+		result, err := p.callRpcMethod(request.Method, request.Params)
+		if err != nil {
+			return &JsonRpcErrorResponse{
+				JsonRpc: JsonRpcVersion,
+				Error:   err,
+				ID:      request.ID,
+			}
+		}
 
-	if err != nil {
-		return &JsonRpcErrorResponse{
+		return &JsonRpcRequestResponse{
 			JsonRpc: JsonRpcVersion,
-			Error:   err,
+			Result:  result,
 			ID:      request.ID,
 		}
-	}
-
-	return &JsonRpcRequestResponse{
-		JsonRpc: JsonRpcVersion,
-		Result:  result,
-		ID:      request.ID,
 	}
 }
 
@@ -476,7 +483,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 
 	done := make(chan TaskResult, 1)
 
-	p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+	p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 		rpcParams := []goja.Value{}
 		jsParams := rt.ToValue(params)
 		if isJsArray(rt, jsParams) {
@@ -489,9 +496,9 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}
 		invokeFunction(func(result TaskResult) {
 			done <- result
-		}, rt, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
+		}, rt, true, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
 		return
-	})
+	}, nil)
 
 	result := <-done
 	if result.err != nil {
@@ -524,9 +531,20 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
 func (p *KernelPlugin) invokeHook(name string) {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic during lifecycle hook invocation: %v", r)
+		}
+
+		if err != nil {
+			logging.LogErrorf("[plugin:%s] lifecycle hook [%q] error: %v", p.Name, name, err)
+		}
+	}()
+
 	done := make(chan TaskResult, 1)
 
-	p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 		lifecycle, err := getJsContextValue(rt, []any{"siyuan", "plugin", "lifecycle"})
 		if err != nil {
 			return
@@ -550,12 +568,18 @@ func (p *KernelPlugin) invokeHook(name string) {
 
 		invokeFunction(func(result TaskResult) {
 			done <- result
-		}, rt, hook, lifecycle)
+		}, rt, true, hook, lifecycle)
 		return
-	})
+	}, nil)
+
+	if runErr != nil {
+		close(done)
+		err = runErr
+		return
+	}
 
 	result := <-done
 	if result.err != nil {
-		logging.LogErrorf("[plugin:%s] lifecycle hook %q error: %v", p.Name, name, result.err)
+		err = result.err
 	}
 }

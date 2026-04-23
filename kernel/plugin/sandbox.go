@@ -136,6 +136,7 @@ func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lifecycle := rt.NewObject()
 	lo.Must0(lifecycle.Set("onload", goja.Null()))
 	lo.Must0(lifecycle.Set("onloaded", goja.Null()))
+	lo.Must0(lifecycle.Set("onrunning", goja.Null()))
 	lo.Must0(lifecycle.Set("onunload", goja.Null()))
 	lo.Must0(ObjectSeal(rt, lifecycle))
 
@@ -464,84 +465,95 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			if len(call.Arguments) < 1 {
+			var path string
+			if len(call.Arguments) > 0 && goja.IsString(call.Argument(0)) {
+				path = call.Argument(0).String()
+			} else {
 				err = fmt.Errorf("path required")
 				return
 			}
-			path := call.Argument(0).String()
+
 			if !strings.HasPrefix(path, "/") {
 				err = fmt.Errorf("path must start with /")
 				return
 			}
+
 			method := "GET"
 			headers := map[string]string{}
-			var stringBody string
-			var bytesBody []byte
+			var bodyString string
+			var bodyBytes []byte
 			if len(call.Arguments) > 1 {
 				init := call.Argument(1)
-				if !goja.IsUndefined(init) && !goja.IsNull(init) {
+				if init != nil && !goja.IsUndefined(init) && !goja.IsNull(init) {
 					if initObj := init.ToObject(rt); initObj != nil {
-						if m := initObj.Get("method"); m != nil && !goja.IsUndefined(m) {
+						if m := initObj.Get("method"); m != nil && goja.IsString(m) {
 							method = m.String()
 						}
-						if b := initObj.Get("body"); b != nil && !goja.IsUndefined(b) {
-							if !goja.IsNull(b) {
-								if abExport, ok := b.Export().(goja.ArrayBuffer); ok {
-									bytesBody = abExport.Bytes()
-								} else {
-									stringBody = b.String()
+
+						if h := initObj.Get("headers"); h != nil && !goja.IsUndefined(h) && !goja.IsNull(h) {
+							if hObj := h.ToObject(rt); hObj != nil {
+								if hMap, ok := h.Export().(map[string]string); ok {
+									for k, v := range hMap {
+										headers[k] = v
+									}
 								}
 							}
 						}
-						if h := initObj.Get("headers"); !goja.IsUndefined(h) && !goja.IsNull(h) {
-							if hObj := h.ToObject(rt); hObj != nil {
-								exported := h.Export()
-								if hMap, ok := exported.(map[string]interface{}); ok {
-									for k, v := range hMap {
-										headers[k] = fmt.Sprintf("%v", v)
-									}
+
+						if b := initObj.Get("body"); b != nil && !goja.IsUndefined(b) && !goja.IsNull(b) {
+
+							if goja.IsString(b) {
+								bodyString = b.String()
+							} else {
+								body := b.Export()
+								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
+									bodyBytes = arrayBuffer.Bytes()
 								}
 							}
 						}
 					}
 				}
 			}
+
 			targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 			r := client.R()
 			for k, v := range headers {
 				r.SetHeader(k, v)
 			}
 			r.SetHeader(model.XAuthTokenKey, p.token)
-			if stringBody != "" {
-				r.SetBody(stringBody)
-			} else if len(bytesBody) > 0 {
-				r.SetBody(bytesBody)
+
+			if bodyString != "" {
+				r.SetBody(bodyString)
+			} else if len(bodyBytes) > 0 {
+				r.SetBody(bodyBytes)
 			}
+
 			resp, sendErr := r.Send(method, targetURL)
 			if sendErr != nil {
 				err = fmt.Errorf("failed to send request: %w", sendErr)
 				return
 			}
+
 			defer resp.Body.Close()
 			body, readErr := io.ReadAll(resp.Body)
 			if readErr != nil {
 				err = fmt.Errorf("failed to read response body: %w", readErr)
 				return
 			}
-			hdrs := map[string]string{}
+
+			responseHeader := map[string]string{}
 			for k, vs := range resp.Header {
-				hdrs[k] = strings.Join(vs, ", ")
+				responseHeader[k] = strings.Join(vs, ", ")
 			}
+
 			response := rt.NewObject()
-			response.Set("url", rt.ToValue(path))
-			response.Set("ok", rt.ToValue(resp.StatusCode >= 200 && resp.StatusCode < 300))
-			response.Set("status", rt.ToValue(resp.StatusCode))
-			response.Set("statusText", rt.ToValue(resp.Status))
-			response.Set("headers", rt.ToValue(hdrs))
-			if setErr := ObjectSetDataMethods(p, rt, response, body); setErr != nil {
-				err = setErr
-				return
-			}
+			lo.Must0(response.Set("url", rt.ToValue(path)))
+			lo.Must0(response.Set("ok", rt.ToValue(resp.StatusCode >= 200 && resp.StatusCode < 300)))
+			lo.Must0(response.Set("status", rt.ToValue(resp.StatusCode)))
+			lo.Must0(response.Set("statusText", rt.ToValue(resp.Status)))
+			lo.Must0(response.Set("headers", rt.ToValue(responseHeader)))
+			lo.Must0(ObjectSetDataMethods(p, rt, response, body))
+
 			result = response
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
@@ -583,6 +595,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				err = fmt.Errorf("path required")
 				return
 			}
+
 			if !strings.HasPrefix(path, "/") {
 				err = fmt.Errorf("path must start with /")
 				return
@@ -1400,10 +1413,18 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 }
 
 // invokeFunction calls a goja.Callable with the given this and arguments, handling both synchronous return values and Promises.
-func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, fn goja.Callable, this goja.Value, args ...goja.Value) {
+func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, async bool, fn goja.Callable, this goja.Value, args ...goja.Value) {
 	resultJs, err := fn(this, args...)
+	if callback == nil {
+		return
+	}
+
 	result := resultJs.Export()
 	if isGoPromise(result) {
+		if !async {
+			panic(fmt.Errorf("synchronous function returned a Promise"))
+		}
+
 		resultObj := resultJs.ToObject(rt)
 		if resultObj == nil {
 			callback(TaskResult{nil, fmt.Errorf("expected promise object, got %T", result)})
@@ -1425,9 +1446,9 @@ func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, fn goja.
 			callback(TaskResult{nil, fmt.Errorf("promise rejected: %v", call.Argument(0).Export())})
 		}))
 	} else {
+		logging.LogDebugf("invokeFunction result: %T %v, err: %v", result, result, err)
 		callback(TaskResult{result, err})
 	}
-	rt.NewArray()
 }
 
 // isJsPromise checks if a goja.Value is a JavaScript Promise.

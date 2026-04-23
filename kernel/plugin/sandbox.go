@@ -202,14 +202,9 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 				return
 			}
 
-			eventGo := call.Argument(1).Export()
-			eventJson, marshalErr := json.Marshal(eventGo)
-			if marshalErr != nil {
-				err = marshalErr
-				return
-			}
+			event := call.Argument(1).Export()
 
-			p.bus.Publish(topic, eventJson)
+			p.bus.Publish(topic, event)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -1228,7 +1223,13 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			result, err = goValueToJsValueSafely(rt, json.RawMessage(data))
+			var value any
+			if unmarshalErr := json.Unmarshal(data, &value); unmarshalErr != nil {
+				err = unmarshalErr
+				return
+			}
+
+			result = rt.ToValue(value)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -1330,48 +1331,6 @@ func loggerWrapper(p *KernelPlugin, logf func(format string, args ...any)) func(
 
 		return rt.ToValue(promise)
 	}
-}
-
-// goValueToJsValueSafely converts a Go value to a goja.Value via a JSON round-trip.
-// Use this instead of rt.ToValue when the value may contain int64 fields (e.g. SiYuan block IDs, Unix timestamps) or json.RawMessage: rt.ToValue maps int64 to IEEE 754 double, which silently loses precision for values > 2^53.
-// The JSON round-trip preserves integer values exactly by routing them through json.Number → Int64() before handing them to goja.
-func goValueToJsValueSafely(rt *goja.Runtime, value any) (goja.Value, error) {
-	b, err := json.Marshal(value)
-	if err != nil {
-		return nil, err
-	}
-	var parsed any
-	dec := json.NewDecoder(strings.NewReader(string(b)))
-	dec.UseNumber()
-	if err = dec.Decode(&parsed); err != nil {
-		return nil, err
-	}
-	return rt.ToValue(convertJsonNumbers(parsed)), nil
-}
-
-// convertJsonNumbers recursively converts json.Number values in the given data structure to int64 or float64 where possible, preserving precision for large integers.
-func convertJsonNumbers(v any) any {
-	switch val := v.(type) {
-	case json.Number:
-		if i, err := val.Int64(); err == nil {
-			return i
-		}
-		if f, err := val.Float64(); err == nil {
-			return f
-		}
-		return val.String()
-	case R:
-		for k, mv := range val {
-			val[k] = convertJsonNumbers(mv)
-		}
-		return val
-	case []any:
-		for i, mv := range val {
-			val[i] = convertJsonNumbers(mv)
-		}
-		return val
-	}
-	return v
 }
 
 // getJsContextValue safely retrieves a nested value from the plugin's JS context, returning nil if any step fails.

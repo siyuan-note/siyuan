@@ -18,7 +18,6 @@ package plugin
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -51,8 +50,8 @@ type RpcMethodInfo struct {
 type R map[string]any
 
 const (
-	PluginEventTypeLifecycle = "lifecycle"
-	PluginEventTypeRpc       = "rpc"
+	EventBusTopicPlugin  = "plugin"  // Topic to kernel plugin
+	EventBusTopicRuntime = "runtime" // Topic to javascript runtime
 )
 
 const (
@@ -98,8 +97,7 @@ type KernelPlugin struct {
 	state   atomic.Int64    //  PluginState
 	context context.Context // Context for managing plugin lifecycle and cancellation
 
-	bus     EventBus.Bus   // Event bus for plugin events and RPC request/response dispatch
-	handler func(e []byte) // Event handler subscribed to plugin events
+	bus EventBus.Bus // Event bus for plugin events and RPC request/response dispatch
 
 	rpcMethods sync.Map // string -> *RpcMethod, registered JSON-RPC methods
 
@@ -219,7 +217,7 @@ func (p *KernelPlugin) start() (retErr error) {
 		return fmt.Errorf("start runtime: %v", runtimeErr)
 	}
 
-	if subscribeErr := p.subscribeEvents(); subscribeErr != nil {
+	if subscribeErr := p.subscribeEventHandlers(); subscribeErr != nil {
 		p.error()
 		return fmt.Errorf("subscribe plugin events: %v", subscribeErr)
 	}
@@ -263,7 +261,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	}
 	p.socketsMu.Unlock()
 
-	p.unsubscribeEvents()
+	p.unsubscribeEventHandlers()
 
 	p.close()
 	p.state.Store(int64(PluginStateStopped))
@@ -321,31 +319,42 @@ func (p *KernelPlugin) unbindRpcMethod(name string) error {
 	return nil
 }
 
-// subscribeEvents subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.
-func (p *KernelPlugin) subscribeEvents() (err error) {
-	p.handler = func(e []byte) {
-		event := R{}
-		lo.Must0(json.Unmarshal(e, &event))
-		p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			return dispatchEvent(p, rt, event)
-		}, nil)
-	}
+// runtimeEventHandler dispatches an event to the plugin's goja runtime
+func (p *KernelPlugin) runtimeEventHandler(event any) {
+	p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+		return dispatchEvent(p, rt, event)
+	}, nil)
+}
 
-	if err = p.bus.Subscribe(PluginEventTypeLifecycle, p.handler); err != nil {
-		return
-	}
-	if err = p.bus.Subscribe(PluginEventTypeRpc, p.handler); err != nil {
-		return
-	}
+// pluginEventHandler handles events sent to the plugin
+func (p *KernelPlugin) pluginEventHandler(event any) {
+
+}
+
+// subscribeEventHandlers subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.
+func (p *KernelPlugin) subscribeEventHandlers() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = r.(error)
+		}
+	}()
+
+	lo.Must0(p.bus.Subscribe(EventBusTopicRuntime, p.runtimeEventHandler))
+	lo.Must0(p.bus.Subscribe(EventBusTopicPlugin, p.pluginEventHandler))
 	return
 }
 
-// unsubscribeEvents unsubscribes from plugin events.
-func (p *KernelPlugin) unsubscribeEvents() {
-	if p.handler != nil {
-		p.bus.Unsubscribe(PluginEventTypeLifecycle, p.handler)
-		p.bus.Unsubscribe(PluginEventTypeRpc, p.handler)
-	}
+// unsubscribeEventHandlers unsubscribes from plugin events.
+func (p *KernelPlugin) unsubscribeEventHandlers() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = r.(error)
+		}
+	}()
+
+	lo.Must0(p.bus.Unsubscribe(EventBusTopicRuntime, p.runtimeEventHandler))
+	lo.Must0(p.bus.Unsubscribe(EventBusTopicPlugin, p.pluginEventHandler))
+	return
 }
 
 // GetRpcMethodsInfo returns a list of registered RPC methods with their descriptions.

@@ -62,14 +62,6 @@ type JsonRpcRequest struct {
 	ID      any    `json:"id,omitempty"`
 }
 
-// JsonRpcInboundRequest represents a JSON-RPC 2.0 request with raw JSON parameters.
-type JsonRpcInboundRequest struct {
-	JsonRpc string           `json:"jsonrpc"`
-	Method  string           `json:"method"`
-	Params  *json.RawMessage `json:"params,omitempty"`
-	ID      any              `json:"id,omitempty"`
-}
-
 // JsonRpcRequestResponse represents a JSON-RPC 2.0 success response.
 // result MUST be present (even if null); error MUST NOT be present.
 type JsonRpcRequestResponse struct {
@@ -94,12 +86,12 @@ type JsonRpcError struct {
 }
 
 // IsNotification returns true if this request is a notification (no ID field).
-func (r *JsonRpcInboundRequest) IsNotification() bool {
+func (r *JsonRpcRequest) IsNotification() bool {
 	return r.ID == nil
 }
 
 // Validate validates the JSON-RPC request structure.
-func (r *JsonRpcInboundRequest) Validate() *JsonRpcError {
+func (r *JsonRpcRequest) Validate() *JsonRpcError {
 	if r.JsonRpc != JsonRpcVersion {
 		return &JsonRpcError{Code: JsonRpcErrorCodeInvalidRequest, Message: "Invalid jsonrpc version"}
 	}
@@ -296,7 +288,7 @@ func isJsonArray[T ~[]byte | ~string](body T) bool {
 
 // parseRpcRequests parses JSON-RPC requests from the body.
 // Returns requests and a boolean indicating if it's a batch request.
-func parseRpcRequests(body []byte) (requests []*JsonRpcInboundRequest, isBatch bool, jsonRpcErr *JsonRpcError) {
+func parseRpcRequests(body []byte) (requests []*JsonRpcRequest, isBatch bool, jsonRpcErr *JsonRpcError) {
 	if len(body) == 0 {
 		return nil, false, JsonRpcErrorParseError
 	}
@@ -311,7 +303,7 @@ func parseRpcRequests(body []byte) (requests []*JsonRpcInboundRequest, isBatch b
 		return requests, true, nil
 	}
 
-	var request JsonRpcInboundRequest
+	var request JsonRpcRequest
 	if err := json.Unmarshal(body, &request); err != nil {
 		return nil, false, JsonRpcErrorParseError
 	}

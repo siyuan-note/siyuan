@@ -28,7 +28,6 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
@@ -378,19 +377,19 @@ func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, data []byte) 
 
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
-func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcInboundRequest) []any {
+func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcRequest) []any {
 	responses := make([]any, len(requests))
 	var wg sync.WaitGroup
 
 	for i, req := range requests {
 		if req.IsNotification() {
-			go func(request *JsonRpcInboundRequest) {
+			go func(request *JsonRpcRequest) {
 				p.dispatchRpcRequest(request)
 			}(req)
 			continue
 		}
 		wg.Add(1)
-		go func(index int, request *JsonRpcInboundRequest) {
+		go func(index int, request *JsonRpcRequest) {
 			defer wg.Done()
 			responses[index] = p.dispatchRpcRequest(request)
 		}(i, req)
@@ -402,7 +401,7 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcInboundRequest) []
 
 // dispatchRpcRequest routes a single JSON-RPC request to the plugin's registered JS method.
 // Returns nil for notifications (no ID field).
-func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcInboundRequest) any {
+func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) any {
 	// Validate request structure
 	if err := request.Validate(); err != nil {
 		if request.IsNotification() {
@@ -450,52 +449,61 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	}()
 
 	if p.State() != PluginStateRunning {
-		return nil, &JsonRpcError{
+		rpcError = &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
 			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.State()),
 		}
+		return
 	}
 
-	id := uuid.NewString()
-	topic := fmt.Sprintf("%s:%s", PluginEventTypeRpc, id)
-
-	done := make(chan string, 1)
-	handler := func(e string) { done <- e }
-	if err := p.bus.SubscribeOnce(topic, handler); err != nil {
-		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: err.Error()}
+	value, ok := p.rpcMethods.Load(method)
+	if !ok {
+		rpcError = &JsonRpcError{
+			Code:    JsonRpcErrorCodeMethodNotFound,
+			Message: fmt.Sprintf("method %q not found", method),
+		}
+		return
 	}
 
-	event := R{
-		"id":   id,
-		"type": PluginEventTypeRpc,
-		"detail": R{
-			"method": method,
-			"params": params,
-		},
+	rpcMethod, ok := value.(*RpcMethod)
+	if !ok {
+		rpcError = &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("invalid method type for %q", method),
+		}
+		return
 	}
 
-	result, dispatchErr := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
-		return dispatchEvent(p, rt, event)
+	done := make(chan TaskResult, 1)
+
+	p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+		rpcParams := []goja.Value{}
+		jsParams := rt.ToValue(params)
+		if isJsArray(rt, jsParams) {
+			rt.ForOf(jsParams, func(cur goja.Value) bool {
+				rpcParams = append(rpcParams, cur)
+				return true
+			})
+		} else {
+			rpcParams = append(rpcParams, jsParams)
+		}
+		invokeFunction(func(result TaskResult) {
+			done <- result
+		}, rt, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
+		return
 	})
-	if dispatchErr != nil {
-		if err := p.bus.Unsubscribe(topic, handler); err != nil {
-			logging.LogErrorf("[plugin:%s] unsubscribe rpc response event: %s", p.Name, err)
+
+	result := <-done
+	if result.err != nil {
+		rpcError = &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: fmt.Sprintf("error invoking method %q: %v", method, result.err),
 		}
-		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: fmt.Sprintf("%v", dispatchErr)}
+		return
 	}
 
-	if await, _ := result.(bool); !await {
-		if err := p.bus.Unsubscribe(topic, handler); err != nil {
-			logging.LogErrorf("[plugin:%s] unsubscribe rpc response event: %s", p.Name, err)
-		}
-		return nil, &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: fmt.Sprintf("method not found: %q", method)}
-	}
-
-	resultJSON := <-done
-	if err := json.Unmarshal([]byte(resultJSON), &rpcResult); err != nil {
-		return nil, &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: fmt.Sprintf("unmarshal result: %v", err)}
-	}
-	return rpcResult, nil
+	rpcResult = result.value
+	return
 }
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.

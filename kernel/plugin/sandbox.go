@@ -115,9 +115,9 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectEvent(p, rt, siyuan))
 	lo.Must0(injectLogger(p, rt, siyuan))
 	lo.Must0(injectStorage(p, rt, siyuan))
+	lo.Must0(injectRpc(p, rt, siyuan))
 	lo.Must0(injectFetch(p, rt, siyuan))
 	lo.Must0(injectSocket(p, rt, siyuan))
-	lo.Must0(injectRpc(p, rt, siyuan))
 
 	lo.Must0(ObjectFreeze(rt, siyuan))
 
@@ -479,7 +479,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 			var bytesBody []byte
 			if len(call.Arguments) > 1 {
 				init := call.Argument(1)
-				if !goja.IsNull(init) && !goja.IsUndefined(init) {
+				if !goja.IsUndefined(init) && !goja.IsNull(init) {
 					if initObj := init.ToObject(rt); initObj != nil {
 						if m := initObj.Get("method"); m != nil && !goja.IsUndefined(m) {
 							method = m.String()
@@ -964,7 +964,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 
 	rpc := rt.NewObject()
 
-	lo.Must0(rpc.Set("subscribe", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+	lo.Must0(rpc.Set("bind", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -1018,7 +1018,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		return rt.ToValue(promise)
 	})))
 
-	lo.Must0(rpc.Set("unsubscribe", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+	lo.Must0(rpc.Set("unbind", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -1223,16 +1223,30 @@ func loggerWrapper(p *KernelPlugin, logf func(format string, args ...any)) func(
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 			parts := make([]string, 0, len(call.Arguments))
 			for _, arg := range call.Arguments {
+				if goja.IsString(arg) {
+					parts = append(parts, arg.String())
+					continue
+				}
+
+				if arg == nil {
+					parts = append(parts, "null")
+					continue
+				}
+
+				if goja.IsUndefined(arg) || goja.IsNull(arg) {
+					parts = append(parts, arg.String())
+					continue
+				}
+
 				argObj := arg.ToObject(rt)
 				if argObj != nil {
 					if argJson, marshalErr := argObj.MarshalJSON(); marshalErr == nil {
 						parts = append(parts, string(argJson))
-					} else {
-						parts = append(parts, arg.String())
+						continue
 					}
-				} else {
-					parts = append(parts, arg.String())
 				}
+
+				parts = append(parts, arg.String())
 			}
 			msg := strings.Join(parts, " ")
 			rows := strings.Split(msg, "\n")
@@ -1312,6 +1326,11 @@ func getJsContextValue(rt *goja.Runtime, paths []any) (value goja.Value, err err
 			return
 		}
 
+		if goja.IsUndefined(cursor) || goja.IsNull(cursor) {
+			err = fmt.Errorf("path %v: value is %s", key, cursor.String())
+			return
+		}
+
 		obj := cursor.ToObject(rt)
 		if obj == nil {
 			err = fmt.Errorf("path %v: expected object, got %T", key, cursor)
@@ -1351,6 +1370,10 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 		err = fmt.Errorf("globalThis.siyuan.event not found")
 		return
 	}
+	if goja.IsUndefined(event) || goja.IsNull(event) {
+		err = fmt.Errorf("globalThis.siyuan.event is %s", event.String())
+		return
+	}
 
 	eventObj := event.ToObject(rt)
 	if eventObj == nil {
@@ -1380,8 +1403,7 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, fn goja.Callable, this goja.Value, args ...goja.Value) {
 	resultJs, err := fn(this, args...)
 	result := resultJs.Export()
-	_, ok := result.(*goja.Promise)
-	if ok {
+	if isGoPromise(result) {
 		resultObj := resultJs.ToObject(rt)
 		if resultObj == nil {
 			callback(TaskResult{nil, fmt.Errorf("expected promise object, got %T", result)})
@@ -1404,5 +1426,54 @@ func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, fn goja.
 		}))
 	} else {
 		callback(TaskResult{result, err})
+	}
+	rt.NewArray()
+}
+
+// isJsPromise checks if a goja.Value is a JavaScript Promise.
+func isJsPromise(jsValue goja.Value) bool {
+	if jsValue == nil {
+		return false
+	}
+
+	goValue := jsValue.Export()
+	return isGoPromise(goValue)
+}
+
+// isGoPromise checks if a Go value is a *goja.Promise.
+func isGoPromise(goValue any) bool {
+	if goValue == nil {
+		return false
+	}
+
+	_, ok := goValue.(*goja.Promise)
+	return ok
+}
+
+// isJsArray checks if a goja.Value is a JavaScript Array.
+func isJsArray(rt *goja.Runtime, jsValue goja.Value) bool {
+	if jsValue == nil {
+		return false
+	}
+
+	if goja.IsUndefined(jsValue) || goja.IsNull(jsValue) {
+		return false
+	}
+
+	jsObject := jsValue.ToObject(rt)
+	return isJsObjectArray(jsObject)
+}
+
+// isJsObjectArray checks if a goja.Object is a JavaScript Array by inspecting its class name.
+func isJsObjectArray(jsObject *goja.Object) bool {
+	if jsObject == nil {
+		return false
+	}
+
+	switch jsObject.ClassName() {
+	case "Array":
+		return true
+	default:
+		return false
 	}
 }

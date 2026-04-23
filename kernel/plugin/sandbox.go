@@ -141,6 +141,7 @@ func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	plugin := rt.NewObject()
 	lo.Must0(plugin.Set("name", p.Name))
+	lo.Must0(plugin.Set("version", p.Version))
 	lo.Must0(plugin.Set("displayName", p.DisplayName))
 	lo.Must0(plugin.Set("platform", bazaar.GetCurrentBackend()))
 	lo.Must0(plugin.Set("i18n", p.I18n))

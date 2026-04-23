@@ -36,6 +36,7 @@ import (
 type Petal struct {
 	Name              string `json:"name"`              // Plugin name
 	DisplayName       string `json:"displayName"`       // Plugin display name
+	Version           string `json:"version"`           // Plugin version
 	Enabled           bool   `json:"enabled"`           // Whether enabled
 	Incompatible      bool   `json:"incompatible"`      // Whether incompatible
 	DisabledInPublish bool   `json:"disabledInPublish"` // Whether disabled in publish mode
@@ -62,7 +63,7 @@ var (
 func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 	petals := getPetals()
 
-	found, displayName, incompatible, disabledInPublish, disallowInstall, kernelIncompatible := bazaar.ParseInstalledPlugin(name, "")
+	found, version, displayName, incompatible, disabledInPublish, disallowInstall, kernelIncompatible := bazaar.ParseInstalledPlugin(name, "")
 	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
@@ -75,6 +76,7 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 		}
 		petals = append(petals, ret)
 	}
+	ret.Version = version
 	ret.DisplayName = displayName
 	ret.Enabled = enabled
 	ret.Incompatible = incompatible
@@ -166,7 +168,7 @@ func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
 	var petalNames []string
 	petals := getPetals()
 	for _, petal := range petals {
-		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall, petal.Kernel.Incompatible = bazaar.ParseInstalledPlugin(petal.Name, frontend)
+		_, petal.Version, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish, petal.DisallowInstall, petal.Kernel.Incompatible = bazaar.ParseInstalledPlugin(petal.Name, frontend)
 		if !petal.Enabled {
 			// disabled plugin
 			continue

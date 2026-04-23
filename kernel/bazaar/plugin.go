@@ -25,7 +25,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish, disallowInstall, kernelIncompatible bool) {
+func ParseInstalledPlugin(name, frontend string) (found bool, version, displayName string, incompatible, disabledInPublish, disallowInstall, kernelIncompatible bool) {
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
 	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
 		return
@@ -52,6 +52,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		}
 
 		found = true
+		version = plugin.Version
 		displayName = GetPreferredLocaleString(plugin.DisplayName, plugin.Name)
 		incompatible = IsIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish

@@ -1212,12 +1212,12 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		return
 	}
 
-	luteEngine := util.NewLute()
-	tree, err := filesys.LoadTree(boxID, p, luteEngine)
-	if err != nil {
+	bt := treenode.GetBlockTreeByBoxPath(boxID, p)
+	if nil == bt {
+		err = ErrBlockNotFound
 		return
 	}
-	hPath = tree.HPath
+	hPath = bt.HPath
 	return
 }
 
@@ -1229,14 +1229,13 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		bt := treenode.GetBlockTreeByPath(p)
+		bt := treenode.GetBlockTreeByBoxPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
 			continue
 		}
 
-		hpath := html.UnescapeString(bt.HPath)
-		hPaths = append(hPaths, box.Name+hpath)
+		hPaths = append(hPaths, box.Name+bt.HPath)
 	}
 	return
 }

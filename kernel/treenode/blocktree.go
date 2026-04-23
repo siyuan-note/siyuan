@@ -153,10 +153,10 @@ func GetBlockTreesByType(typ string) (ret []*BlockTree) {
 	return
 }
 
-func GetBlockTreeByPath(path string) (ret *BlockTree) {
+func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
 	ret = &BlockTree{}
-	sqlStmt := "SELECT * FROM blocktrees WHERE path = ?"
-	err := queryRow(sqlStmt, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND path = ?"
+	err := queryRow(sqlStmt, boxID, path).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
 		if errors.Is(err, sql.ErrNoRows) {

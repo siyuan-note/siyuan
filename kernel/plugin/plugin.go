@@ -197,11 +197,11 @@ func (p *KernelPlugin) error() {
 }
 
 // start creates the goja runtime, injects sandbox globals, and evaluates kernel.js.
-func (p *KernelPlugin) start() (retErr error) {
+func (p *KernelPlugin) start() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
-			retErr = fmt.Errorf("goja panic during start: %v", r)
+			err = fmt.Errorf("goja panic during start: %v", r)
 		}
 	}()
 
@@ -228,8 +228,12 @@ func (p *KernelPlugin) start() (retErr error) {
 	p.state.Store(int64(PluginStateRunning))
 	p.onRunning()
 
+	p.bus.Publish(EventBusTopicRuntime, R{
+		"type": "start",
+	})
+
 	logging.LogDebugf("[plugin:%s] started", p.Name)
-	return nil
+	return
 }
 
 // stop cleanly shuts down the plugin: closes sockets, frees goja runtime.
@@ -246,6 +250,10 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 		ok = false
 		return
 	}
+
+	p.bus.Publish(EventBusTopicRuntime, R{
+		"type": "stop",
+	})
 
 	p.state.Store(int64(PluginStateStopping))
 
@@ -328,7 +336,7 @@ func (p *KernelPlugin) runtimeEventHandler(event any) {
 
 // pluginEventHandler handles events sent to the plugin
 func (p *KernelPlugin) pluginEventHandler(event any) {
-
+	logging.LogDebugf("[plugin:%s] receive event: %#v", p.Name, event)
 }
 
 // subscribeEventHandlers subscribes to plugin lifecycle and RPC events, dispatching them to the plugin's JS runtime.

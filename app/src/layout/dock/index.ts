@@ -538,10 +538,15 @@ export class Dock {
             target.classList.remove("dock__item--active", "dock__item--activefocus");
             // dock 隐藏
             if (this.element.querySelectorAll(".dock__item--active").length === 0) {
-                if (this.position === "Left" || this.position === "Right") {
+                if (this.position === "Left") {
                     this.layout.element.style.width = "0px";
+                    this.layout.element.style.marginRight = "0px";
+                } else if (this.position === "Right") {
+                    this.layout.element.style.width = "0px";
+                    this.layout.element.style.marginLeft = "0px";
                 } else {
                     this.layout.element.style.height = "0px";
+                    this.layout.element.style.marginTop = "0px";
                 }
                 this.resizeElement.classList.add("fn__none");
                 clearTimeout(this.hideResizeTimeout);
@@ -695,10 +700,15 @@ export class Dock {
                 });
             }
             // dock 显示
-            if (this.position === "Left" || this.position === "Right") {
+            if (this.position === "Left") {
                 this.layout.element.style.width = this.getMaxSize() + "px";
+                this.layout.element.style.marginRight = "4px";
+            } else if (this.position === "Right") {
+                this.layout.element.style.width = this.getMaxSize() + "px";
+                this.layout.element.style.marginLeft = "4px";
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
+                this.layout.element.style.marginTop = "4px";
             }
             if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag")?.classList.add("fn__hidden");

@@ -27,6 +27,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
@@ -229,6 +230,7 @@ func (p *KernelPlugin) start() (err error) {
 	p.onRunning()
 
 	p.bus.Publish(EventBusTopicRuntime, R{
+		"id":   uuid.NewString(),
 		"type": "start",
 	})
 
@@ -252,6 +254,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	}
 
 	p.bus.Publish(EventBusTopicRuntime, R{
+		"id":   uuid.NewString(),
 		"type": "stop",
 	})
 

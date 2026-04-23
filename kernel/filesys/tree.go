@@ -400,6 +400,7 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (d
 	ret, needFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
+		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)
 		return
 	}
 
@@ -459,6 +460,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
+		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)
 		return
 	}
 

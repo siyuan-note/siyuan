@@ -1470,7 +1470,6 @@ func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, async bo
 		if !async {
 			panic(fmt.Errorf("synchronous function returned a Promise"))
 		}
-
 		resultObj := resultJs.ToObject(rt)
 		if resultObj == nil {
 			callback(TaskResult{nil, fmt.Errorf("expected promise object, got %T", result)})
@@ -1487,12 +1486,17 @@ func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, async bo
 		}
 
 		then(resultObj, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
-			callback(TaskResult{call.Argument(0).Export(), nil})
+			// ⚠️ call.Arguments always is an empty array.
+			promise, ok := result.(*goja.Promise)
+			if ok {
+				callback(TaskResult{promise.Result().Export(), nil})
+			} else {
+				callback(TaskResult{result, nil})
+			}
 		}), rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
 			callback(TaskResult{nil, fmt.Errorf("promise rejected: %v", call.Argument(0).Export())})
 		}))
 	} else {
-		logging.LogDebugf("invokeFunction result: %T %v, err: %v", result, result, err)
 		callback(TaskResult{result, err})
 	}
 }

@@ -31,7 +31,7 @@ type Worker struct {
 	loop *eventloop.EventLoop
 }
 
-type Result struct {
+type TaskResult struct {
 	value any
 	err   error
 }
@@ -75,9 +75,9 @@ func (w *Worker) Run(executor TaskExecutor, callback TaskCallback) error {
 }
 
 func (w *Worker) RunSync(fn TaskExecutor) (result any, err error) {
-	response := make(chan Result, 1)
+	response := make(chan TaskResult, 1)
 	err = w.Run(fn, func(rt *goja.Runtime, result any, err error) {
-		response <- Result{result, err}
+		response <- TaskResult{result, err}
 	})
 
 	if err != nil {

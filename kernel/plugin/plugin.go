@@ -41,6 +41,7 @@ type PluginState int64
 type RpcMethod struct {
 	Name         string
 	Descriptions []string
+	Method       goja.Callable
 }
 
 type RpcMethodInfo struct {
@@ -147,7 +148,13 @@ func (p *KernelPlugin) InitRuntime() (err error) {
 			}
 		}()
 
-		EnableExtendModules(p, rt)
+		// Use JSON struct tags for field name mapping, with fallback to original names if "json" tag is absent.
+		rt.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+
+		if enableErr := EnableExtendModules(p, rt); enableErr != nil {
+			err = fmt.Errorf("EnableExtendModules: %v", enableErr)
+			return
+		}
 
 		if enableErr := EnableSiyuanModule(p, rt); enableErr != nil {
 			err = fmt.Errorf("EnableSiyuanModule: %v", enableErr)
@@ -271,35 +278,36 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 // onLoad is called after plugin start.
 func (p *KernelPlugin) onLoad() {
 	if p.State() == PluginStateLoading {
-		p.invokeHook("load")
+		p.invokeHook("onload")
 	}
 }
 
 // onLoaded is called after plugin start.
 func (p *KernelPlugin) onLoaded() {
 	if p.State() == PluginStateLoaded {
-		p.invokeHook("loaded")
+		p.invokeHook("onloaded")
 	}
 }
 
 // onUnload is called before plugin stop.
 func (p *KernelPlugin) onUnload() {
 	if p.State() == PluginStateStopping {
-		p.invokeHook("unload")
+		p.invokeHook("onunload")
 	}
 }
 
-// subscribeRpcMethod add or updates a JS function as a named RPC method.
-func (p *KernelPlugin) subscribeRpcMethod(name string, descriptions ...string) error {
+// bindRpcMethod add or updates a JS function as a named RPC method.
+func (p *KernelPlugin) bindRpcMethod(name string, method goja.Callable, descriptions ...string) error {
 	p.rpcMethods.Store(name, &RpcMethod{
 		Name:         name,
 		Descriptions: descriptions,
+		Method:       method,
 	})
 	return nil
 }
 
-// unsubscribeRpcMethod removes a registered RPC method
-func (p *KernelPlugin) unsubscribeRpcMethod(name string) error {
+// unbindRpcMethod removes a registered RPC method
+func (p *KernelPlugin) unbindRpcMethod(name string) error {
 	_, ok := p.rpcMethods.LoadAndDelete(name)
 	if !ok {
 		return nil
@@ -508,38 +516,38 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.
 func (p *KernelPlugin) invokeHook(name string) {
-	id := uuid.NewString()
-	event := R{
-		"id":   id,
-		"type": PluginEventTypeLifecycle,
-		"detail": R{
-			"name": name,
-		},
-	}
+	done := make(chan TaskResult, 1)
 
-	done := make(chan struct{})
-	handler := func(e string) {
-		logging.LogDebugf("[plugin:%s] received lifecycle response event for hook %q: %s", p.Name, name, e)
-		close(done)
-	}
-	if err := p.bus.SubscribeOnce(id, handler); err != nil {
-		logging.LogErrorf("[plugin:%s] subscribe lifecycle response event: %s", p.Name, err)
-		return
-	}
-
-	await, err := p.worker.RunSync(func(rt *goja.Runtime) (any, error) {
-		return dispatchEvent(p, rt, event)
-	})
-	if err != nil {
-		logging.LogErrorf("[plugin:%s] dispatch lifecycle event: %s", p.Name, err)
-		return
-	}
-
-	if await, _ := await.(bool); !await {
-		if err := p.bus.Unsubscribe(id, handler); err != nil {
-			logging.LogErrorf("[plugin:%s] unsubscribe lifecycle response event: %s", p.Name, err)
+	p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+		lifecycle, err := getJsContextValue(rt, []any{"siyuan", "plugin", "lifecycle"})
+		if err != nil {
+			return
 		}
-		close(done)
+		if lifecycle == nil {
+			err = fmt.Errorf("globalThis.siyuan.plugin.lifecycle not found")
+			return
+		}
+
+		pluginObj := lifecycle.ToObject(rt)
+		if pluginObj == nil {
+			err = fmt.Errorf("globalThis.siyuan.plugin.lifecycle is not an object")
+			return
+		}
+
+		hookValue := pluginObj.Get(name)
+		hook, ok := goja.AssertFunction(hookValue)
+		if !ok {
+			return
+		}
+
+		invokeFunction(func(result TaskResult) {
+			done <- result
+		}, rt, hook, lifecycle)
+		return
+	})
+
+	result := <-done
+	if result.err != nil {
+		logging.LogErrorf("[plugin:%s] lifecycle hook %q error: %v", p.Name, name, result.err)
 	}
-	<-done
 }

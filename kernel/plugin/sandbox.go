@@ -60,20 +60,33 @@ type Printer struct {
 	name string // plugin name for log prefix
 }
 
-func (p Printer) Log(s string) {
-	logging.LogInfof("[plugin:%s] %s", p.name, s)
+func (p *Printer) print(s string, logf func(format string, v ...interface{})) {
+	rows := strings.Split(s, "\n")
+	for _, row := range rows {
+		logf("[plugin:%s] %s", p.name, row)
+	}
 }
 
-func (p Printer) Warn(s string) {
-	logging.LogWarnf("[plugin:%s] %s", p.name, s)
+func (p *Printer) Log(s string) {
+	p.print(s, logging.LogInfof)
 }
 
-func (p Printer) Error(s string) {
-	logging.LogErrorf("[plugin:%s] %s", p.name, s)
+func (p *Printer) Warn(s string) {
+	p.print(s, logging.LogWarnf)
+}
+
+func (p *Printer) Error(s string) {
+	p.print(s, logging.LogErrorf)
 }
 
 // EnableExtendModules registers extended modules (e.g. url, buffer) to the plugin's goja runtime.
-func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) {
+func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("failed to enable extend modules: %v", r)
+		}
+	}()
+
 	registry := require.NewRegistry()
 
 	registry.Enable(rt)
@@ -85,6 +98,7 @@ func EnableExtendModules(p *KernelPlugin, rt *goja.Runtime) {
 	url.Enable(rt)
 	buffer.Enable(rt)
 	console.Enable(rt)
+	return
 }
 
 // EnableSiyuanModule injects all siyuan.* APIs into the plugin's goja global context.
@@ -119,13 +133,18 @@ func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		}
 	}()
 
-	plugin := rt.NewObject()
+	lifecycle := rt.NewObject()
+	lo.Must0(lifecycle.Set("onload", goja.Null()))
+	lo.Must0(lifecycle.Set("onloaded", goja.Null()))
+	lo.Must0(lifecycle.Set("onunload", goja.Null()))
+	lo.Must0(ObjectSeal(rt, lifecycle))
 
+	plugin := rt.NewObject()
 	lo.Must0(plugin.Set("name", p.Name))
 	lo.Must0(plugin.Set("displayName", p.DisplayName))
 	lo.Must0(plugin.Set("platform", bazaar.GetCurrentBackend()))
 	lo.Must0(plugin.Set("i18n", p.I18n))
-
+	lo.Must0(plugin.Set("lifecycle", lifecycle))
 	lo.Must0(ObjectFreeze(rt, plugin))
 
 	lo.Must0(siyuan.Set("plugin", plugin))
@@ -142,11 +161,11 @@ func injectLogger(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	logger := rt.NewObject()
 
-	lo.Must0(logger.Set("trace", rt.ToValue(loggerWrapper(p, rt, logging.LogTracef))))
-	lo.Must0(logger.Set("debug", rt.ToValue(loggerWrapper(p, rt, logging.LogDebugf))))
-	lo.Must0(logger.Set("info", rt.ToValue(loggerWrapper(p, rt, logging.LogInfof))))
-	lo.Must0(logger.Set("warn", rt.ToValue(loggerWrapper(p, rt, logging.LogWarnf))))
-	lo.Must0(logger.Set("error", rt.ToValue(loggerWrapper(p, rt, logging.LogErrorf))))
+	lo.Must0(logger.Set("trace", rt.ToValue(loggerWrapper(p, logging.LogTracef))))
+	lo.Must0(logger.Set("debug", rt.ToValue(loggerWrapper(p, logging.LogDebugf))))
+	lo.Must0(logger.Set("info", rt.ToValue(loggerWrapper(p, logging.LogInfof))))
+	lo.Must0(logger.Set("warn", rt.ToValue(loggerWrapper(p, logging.LogWarnf))))
+	lo.Must0(logger.Set("error", rt.ToValue(loggerWrapper(p, logging.LogErrorf))))
 
 	lo.Must0(ObjectFreeze(rt, logger))
 
@@ -166,7 +185,7 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 
 	lo.Must0(event.Set("handler", goja.Null()))
 
-	lo.Must0(event.Set("emit", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(event.Set("emit", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -235,7 +254,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	storage := rt.NewObject()
 
 	// siyuan.storage.get(path) -> Promise<{text, json, arrayBuffer}>
-	lo.Must0(storage.Set("get", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("get", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -286,7 +305,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	})))
 
 	// siyuan.storage.put(path, content) -> Promise<void>
-	lo.Must0(storage.Set("put", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("put", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -329,7 +348,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	})))
 
 	// siyuan.storage.remove(path) -> Promise<void>
-	lo.Must0(storage.Set("remove", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("remove", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -371,7 +390,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	})))
 
 	// siyuan.storage.list(path) -> Promise<Entry[]>
-	lo.Must0(storage.Set("list", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(storage.Set("list", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -385,25 +404,28 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				err = resolveErr
 				return
 			}
+
 			entries, readErr := os.ReadDir(abs)
 			if readErr != nil {
 				err = fmt.Errorf("failed to read directory: %w", readErr)
 				return
 			}
-			results := make([]map[string]any, 0, len(entries))
+
+			results := make([]R, 0, len(entries))
 			for _, entry := range entries {
 				info, infoErr := entry.Info()
 				if infoErr != nil {
 					continue
 				}
-				results = append(results, map[string]any{
+				results = append(results, R{
 					"name":      entry.Name(),
 					"isDir":     info.IsDir(),
 					"isSymlink": util.IsSymlink(entry),
 					"updated":   info.ModTime().Unix(),
 				})
 			}
-			result, err = goValueToJsValueSafely(rt, results)
+
+			result = results
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -437,7 +459,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 		}
 	}()
 
-	lo.Must0(siyuan.Set("fetch", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(siyuan.Set("fetch", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -549,7 +571,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		}
 	}()
 
-	lo.Must0(siyuan.Set("socket", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(siyuan.Set("socket", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -941,21 +963,41 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 
 	rpc := rt.NewObject()
 
-	lo.Must0(rpc.Set("subscribe", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(rpc.Set("subscribe", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			if len(call.Arguments) < 1 {
-				err = fmt.Errorf("method name required")
+			var name string
+			var method goja.Callable
+			var descriptions []string
+
+			if len(call.Arguments) < 2 {
+				err = fmt.Errorf("method name and function required")
 				return
 			}
-			name := call.Argument(0).String()
-			descArgs := call.Arguments[1:]
-			descriptions := make([]string, len(descArgs))
+			nameArg := call.Argument(0)
+			methodArg := call.Argument(1)
+			descArgs := call.Arguments[2:]
+
+			if goja.IsString(nameArg) {
+				name = nameArg.String()
+			} else {
+				err = fmt.Errorf("first argument must be method name string")
+				return
+			}
+
+			if methodJs, ok := goja.AssertFunction(methodArg); ok {
+				method = methodJs
+			} else {
+				err = fmt.Errorf("second argument must be a function")
+			}
+
+			descriptions = make([]string, len(descArgs))
 			for i, a := range descArgs {
 				descriptions[i] = a.String()
 			}
-			err = p.subscribeRpcMethod(name, descriptions...)
+
+			err = p.bindRpcMethod(name, method, descriptions...)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -975,16 +1017,25 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		return rt.ToValue(promise)
 	})))
 
-	lo.Must0(rpc.Set("unsubscribe", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(rpc.Set("unsubscribe", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			var name string
 			if len(call.Arguments) < 1 {
 				err = fmt.Errorf("method name required")
 				return
 			}
-			name := call.Argument(0).String()
-			err = p.unsubscribeRpcMethod(name)
+
+			nameArg := call.Argument(0)
+			if goja.IsString(nameArg) {
+				name = nameArg.String()
+			} else {
+				err = fmt.Errorf("first argument must be method name string")
+				return
+			}
+
+			err = p.unbindRpcMethod(name)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -1004,7 +1055,7 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		return rt.ToValue(promise)
 	})))
 
-	lo.Must0(rpc.Set("broadcast", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(rpc.Set("broadcast", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -1090,7 +1141,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		}
 	}()
 
-	lo.Must0(object.Set("text", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(object.Set("text", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -1111,7 +1162,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 		return rt.ToValue(promise)
 	})))
-	lo.Must0(object.Set("json", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(object.Set("json", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -1132,7 +1183,7 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 		return rt.ToValue(promise)
 	})))
-	lo.Must0(object.Set("arrayBuffer", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+	lo.Must0(object.Set("arrayBuffer", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -1158,18 +1209,29 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 // loggerWrapper returns a JS-callable function that logs a message at the given level.
 // Logging is synchronous (in-process, no I/O), so resolve is called inline without worker.Run.
-func loggerWrapper(p *KernelPlugin, rt *goja.Runtime, logFn func(format string, args ...any)) func(goja.FunctionCall) goja.Value {
-	return func(call goja.FunctionCall) goja.Value {
+func loggerWrapper(p *KernelPlugin, logf func(format string, args ...any)) func(goja.FunctionCall, *goja.Runtime) goja.Value {
+	return func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 			parts := make([]string, 0, len(call.Arguments))
 			for _, arg := range call.Arguments {
-				parts = append(parts, arg.String())
+				argObj := arg.ToObject(rt)
+				if argObj != nil {
+					if argJson, marshalErr := argObj.MarshalJSON(); marshalErr == nil {
+						parts = append(parts, string(argJson))
+					} else {
+						parts = append(parts, arg.String())
+					}
+				} else {
+					parts = append(parts, arg.String())
+				}
 			}
 			msg := strings.Join(parts, " ")
-
-			logFn("[plugin:%s] %s", p.Name, msg)
+			rows := strings.Split(msg, "\n")
+			for _, row := range rows {
+				logf("[plugin:%s] %s", p.Name, row)
+			}
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -1218,7 +1280,7 @@ func convertJsonNumbers(v any) any {
 			return f
 		}
 		return val.String()
-	case map[string]any:
+	case R:
 		for k, mv := range val {
 			val[k] = convertJsonNumbers(mv)
 		}
@@ -1305,4 +1367,35 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 	// Strict true-only: do NOT use ToBoolean() — any truthy object (e.g. a Promise) would deadlock invokeHook.
 	await = invokeResult.ToBoolean() == true
 	return
+}
+
+// invokeFunction calls a goja.Callable with the given this and arguments, handling both synchronous return values and Promises.
+func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, fn goja.Callable, this goja.Value, args ...goja.Value) {
+	resultJs, err := fn(this, args...)
+	result := resultJs.Export()
+	_, ok := result.(*goja.Promise)
+	if ok {
+		resultObj := resultJs.ToObject(rt)
+		if resultObj == nil {
+			callback(TaskResult{nil, fmt.Errorf("expected promise object, got %T", result)})
+		}
+
+		thenValue := resultObj.Get("then")
+		if thenValue == nil {
+			callback(TaskResult{nil, fmt.Errorf("promise object has no 'then' property")})
+		}
+
+		then, ok := goja.AssertFunction(thenValue)
+		if !ok {
+			callback(TaskResult{nil, fmt.Errorf("'promise.then property is not a function")})
+		}
+
+		then(resultObj, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
+			callback(TaskResult{call.Argument(0).Export(), nil})
+		}), rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
+			callback(TaskResult{nil, fmt.Errorf("promise rejected: %v", call.Argument(0).Export())})
+		}))
+	} else {
+		callback(TaskResult{result, err})
+	}
 }

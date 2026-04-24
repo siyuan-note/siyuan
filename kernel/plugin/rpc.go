@@ -39,6 +39,10 @@ const (
 	JsonRpcErrorCodeMethodNotFound JsonRpcErrorCode = -32601
 	JsonRpcErrorCodeInvalidParams  JsonRpcErrorCode = -32602
 	JsonRpcErrorCodeInternalError  JsonRpcErrorCode = -32603
+
+	// Server-defined error codes (-32099 to -32000)
+	JsonRpcErrorCodePluginNotLoaded  JsonRpcErrorCode = -32001
+	JsonRpcErrorCodePluginNotRunning JsonRpcErrorCode = -32002
 )
 
 var (
@@ -47,6 +51,9 @@ var (
 	JsonRpcErrorMethodNotFound = &JsonRpcError{Code: JsonRpcErrorCodeMethodNotFound, Message: "Method not found"}
 	JsonRpcErrorInvalidParams  = &JsonRpcError{Code: JsonRpcErrorCodeInvalidParams, Message: "Invalid params"}
 	JsonRpcErrorInternalError  = &JsonRpcError{Code: JsonRpcErrorCodeInternalError, Message: "Internal error"}
+
+	JsonRpcErrorPluginNotLoaded  = &JsonRpcError{Code: JsonRpcErrorCodePluginNotLoaded, Message: "Plugin not loaded"}
+	JsonRpcErrorPluginNotRunning = &JsonRpcError{Code: JsonRpcErrorCodePluginNotRunning, Message: "Plugin not running"}
 )
 
 func (e *JsonRpcError) Error() string {
@@ -85,7 +92,7 @@ func (r JsonRpcRequest) MarshalJSON() ([]byte, error) {
 
 func (r *JsonRpcRequest) UnmarshalJSON(data []byte) error {
 	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields() // Reject unknown fields to prevent silent errors from typos
+	// decoder.DisallowUnknownFields() // Reject unknown fields violates the JSON-RPC spec
 	type JsonRpcRequestObject struct {
 		JsonRpc util.Optional[string] `json:"jsonrpc"`
 		Method  util.Optional[string] `json:"method"`
@@ -356,29 +363,21 @@ func HandleRpcWebSocket(c *gin.Context) {
 	}
 }
 
-// resolveRunningPlugin looks up the plugin by name and writes a -32601 error response if it is
-// not found or not running. Returns nil when the caller should abort.
+// resolveRunningPlugin looks up the plugin by name and writes an error response if it is
+// not found (-32001) or not running (-32002). Returns nil when the caller should abort.
 func resolveRunningPlugin(c *gin.Context, name string, errStatus int) *KernelPlugin {
 	p := GetManager().GetPlugin(name)
 	if p == nil {
 		c.JSON(errStatus, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
-			Error: &JsonRpcError{
-				Code:    JsonRpcErrorInternalError.Code,
-				Message: JsonRpcErrorInternalError.Message,
-				Data:    "Plugin not loaded",
-			},
+			Error:   JsonRpcErrorPluginNotLoaded,
 		})
 		return nil
 	}
 	if p.State() != PluginStateRunning {
 		c.JSON(errStatus, &JsonRpcErrorResponse{
 			JsonRpc: JsonRpcVersion,
-			Error: &JsonRpcError{
-				Code:    JsonRpcErrorInternalError.Code,
-				Message: JsonRpcErrorInternalError.Message,
-				Data:    "Plugin not running",
-			},
+			Error:   JsonRpcErrorPluginNotRunning,
 		})
 		return nil
 	}

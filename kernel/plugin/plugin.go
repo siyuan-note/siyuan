@@ -267,6 +267,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 
 	p.socketsMu.Lock()
 	for c := range p.sockets {
+		c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseGoingAway, "plugin stopping"))
 		c.Close()
 		delete(p.sockets, c)
 		delete(p.socketMus, c)

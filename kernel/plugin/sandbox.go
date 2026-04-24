@@ -27,6 +27,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/buffer"
@@ -53,7 +54,7 @@ const (
 )
 
 var (
-	client *req.Client = req.C()
+	client *req.Client = req.C().SetTimeout(time.Minute)
 )
 
 type Printer struct {
@@ -931,7 +932,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					}
 
 					if err != nil {
-						p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 							event := rt.NewObject()
 							event.Set("type", rt.ToValue("error"))
 							event.Set("error", rt.NewGoError(err))

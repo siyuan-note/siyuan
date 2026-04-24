@@ -1445,8 +1445,7 @@ func getJsContextValue(rt *goja.Runtime, paths []any) (value goja.Value, err err
 }
 
 // dispatchEvent calls the globalThis.siyuan.event.on hook with the given event object.
-// If it returns `true`, the caller should await the result by receiving an event with the specified topic.
-func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err error) {
+func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (async bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("goja panic during dispatchEvent: %v", r)
@@ -1485,8 +1484,7 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (await bool, err er
 		return
 	}
 
-	// Strict true-only: do NOT use ToBoolean() — any truthy object (e.g. a Promise) would deadlock invokeHook.
-	await = invokeResult.ToBoolean() == true
+	async = isJsPromise(invokeResult)
 	return
 }
 

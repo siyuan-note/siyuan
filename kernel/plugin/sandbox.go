@@ -181,7 +181,7 @@ func injectLogger(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = fmt.Errorf("injectLogger: %v", r)
+			err = fmt.Errorf("injectEvent: %v", r)
 		}
 	}()
 
@@ -803,6 +803,8 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							d: messageData,
 						})
 						messagesMu.Unlock()
+					default:
+						err = fmt.Errorf("WebSocket is not open (state: %d)", state)
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -1122,16 +1124,16 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
 				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.rpc.subscribe resolve: %v", p.Name, resolveErr)
+					logging.LogErrorf("[plugin:%s] siyuan.rpc.bind resolve: %v", p.Name, resolveErr)
 				}
 			} else {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.rpc.subscribe reject: %v", p.Name, rejectErr)
+					logging.LogErrorf("[plugin:%s] siyuan.rpc.bind reject: %v", p.Name, rejectErr)
 				}
 			}
 		})
 		if runErr != nil {
-			logging.LogErrorf("[plugin:%s] siyuan.rpc.subscribe worker run: %v", p.Name, runErr)
+			logging.LogErrorf("[plugin:%s] siyuan.rpc.bind worker run: %v", p.Name, runErr)
 		}
 
 		return rt.ToValue(promise)
@@ -1160,16 +1162,16 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
 				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.rpc.unsubscribe resolve: %v", p.Name, resolveErr)
+					logging.LogErrorf("[plugin:%s] siyuan.rpc.unbind resolve: %v", p.Name, resolveErr)
 				}
 			} else {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.rpc.unsubscribe reject: %v", p.Name, rejectErr)
+					logging.LogErrorf("[plugin:%s] siyuan.rpc.unbind reject: %v", p.Name, rejectErr)
 				}
 			}
 		})
 		if runErr != nil {
-			logging.LogErrorf("[plugin:%s] siyuan.rpc.unsubscribe worker run: %v", p.Name, runErr)
+			logging.LogErrorf("[plugin:%s] siyuan.rpc.unbind worker run: %v", p.Name, runErr)
 		}
 
 		return rt.ToValue(promise)

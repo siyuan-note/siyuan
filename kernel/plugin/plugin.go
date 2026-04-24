@@ -17,7 +17,6 @@
 package plugin
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -96,8 +95,7 @@ type KernelPlugin struct {
 	worker  Worker               // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
 
-	state   atomic.Int64    //  PluginState
-	context context.Context // Context for managing plugin lifecycle and cancellation
+	state   atomic.Int64 //  PluginState
 
 	bus EventBus.Bus // Event bus for plugin events and RPC request/response dispatch
 
@@ -119,8 +117,7 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		token: token,
 		file:  fmt.Sprintf("%s/kernel.js", petal.Name),
 
-		bus:     EventBus.New(),
-		context: context.Background(),
+		bus: EventBus.New(),
 
 		sockets:   make(map[*websocket.Conn]bool),
 		socketMus: make(map[*websocket.Conn]*sync.Mutex),
@@ -167,11 +164,6 @@ func (p *KernelPlugin) InitRuntime() (err error) {
 	})
 	p.runtime.Start()
 	return
-}
-
-// Eval evaluates JavaScript code in the plugin's goja runtime, returning the result or error.
-func (p *KernelPlugin) Eval(rt *goja.Runtime, code string) (goja.Value, error) {
-	return rt.RunScript(p.file, code)
 }
 
 // close interrupts the goja runtime and clears the pointer.
@@ -325,10 +317,7 @@ func (p *KernelPlugin) bindRpcMethod(name string, method goja.Callable, descript
 
 // unbindRpcMethod removes a registered RPC method
 func (p *KernelPlugin) unbindRpcMethod(name string) error {
-	_, ok := p.rpcMethods.LoadAndDelete(name)
-	if !ok {
-		return nil
-	}
+	p.rpcMethods.LoadAndDelete(name)
 	return nil
 }
 
@@ -458,16 +447,16 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest)
 			continue
 		}
 
+		if request.Request == nil {
+			responses[i] = nil
+			continue
+		}
+
 		// For notifications, dispatch without waiting for a response.
 		if request.Request.IsNotification() {
 			go func(request *JsonRpcRequest) {
 				p.dispatchRpcRequest(request)
 			}(request.Request)
-			responses[i] = nil
-			continue
-		}
-
-		if request.Request == nil {
 			responses[i] = nil
 			continue
 		}

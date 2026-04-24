@@ -540,7 +540,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 	lo.Must0(siyuan.Set("fetch", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+		runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 			var path string
 			if len(call.Arguments) > 0 && goja.IsString(call.Argument(0)) {
 				path = call.Argument(0).String()
@@ -668,12 +668,8 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 			}()
 
 			return
-		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.fetch resolve: %v", p.Name, resolveErr)
-				}
-			} else {
+		}, func(rt *goja.Runtime, _ any, err error) {
+			if !lo.IsNil(err) {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)
 				}

@@ -213,6 +213,7 @@ func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found 
 		p := value.(*KernelPlugin)
 		return &PluginInfo{
 			Name:    p.Name,
+			State:   p.State().String(),
 			Methods: p.GetRpcMethodsInfo(),
 		}, true
 	}

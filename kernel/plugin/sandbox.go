@@ -729,7 +729,6 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				wsObj         *goja.Object
 				wsURL         string
 				wsHeader      http.Header
-				writeMessage  func(*websocket.Conn, int, []byte) error
 				setReadyState func(WebSocketState)
 				invokeWsHook  func(string, ...goja.Value)
 			}
@@ -742,7 +741,6 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			var readyState atomic.Int64
 			var messagesMu sync.Mutex
 			var messages []message
-			var wsWriteMu sync.Mutex
 
 			wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
 			wsHeader := http.Header{}
@@ -752,12 +750,6 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			}
 
 			wsObj := rt.NewObject()
-
-			writeMessage := func(c *websocket.Conn, messageType int, data []byte) error {
-				wsWriteMu.Lock()
-				defer wsWriteMu.Unlock()
-				return c.WriteMessage(messageType, data)
-			}
 
 			setReadyState := func(state WebSocketState) {
 				readyState.Store(int64(state))
@@ -800,9 +792,8 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					state := WebSocketState(readyState.Load())
 					switch state {
 					case WebSocketReadyStateOpen:
-						c := conn.Load()
-						if c != nil {
-							err = writeMessage(c, messageType, messageData)
+						if c := conn.Load(); c != nil {
+							err = p.writeWebSocketMessage(c, messageType, messageData)
 						}
 					case WebSocketReadyStateConnecting:
 						messagesMu.Lock()
@@ -839,9 +830,8 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
 						pingData = pingCall.Argument(0).String()
 					}
-					c := conn.Load()
-					if c != nil {
-						err = writeMessage(c, websocket.PingMessage, []byte(pingData))
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.PingMessage, []byte(pingData))
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -870,9 +860,8 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
 						pongData = pongCall.Argument(0).String()
 					}
-					c := conn.Load()
-					if c != nil {
-						err = writeMessage(c, websocket.PongMessage, []byte(pongData))
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.PongMessage, []byte(pongData))
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -905,9 +894,8 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
 						reason = closeCall.Argument(1).String()
 					}
-					c := conn.Load()
-					if c != nil {
-						err = writeMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -932,7 +920,6 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				wsObj:         wsObj,
 				wsURL:         wsURL,
 				wsHeader:      wsHeader,
-				writeMessage:  writeMessage,
 				setReadyState: setReadyState,
 				invokeWsHook:  invokeWsHook,
 			}
@@ -1010,7 +997,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					// Flush messages sent before the connection is established
 					messagesMu.Lock()
 					for _, m := range messages {
-						s.writeMessage(c, m.t, m.d)
+						p.writeWebSocketMessage(c, m.t, m.d)
 					}
 					messages = nil
 					messagesMu.Unlock()
@@ -1029,7 +1016,7 @@ func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				for {
 					messageType, data, readErr := c.ReadMessage()
 					if readErr != nil {
-						if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure) {
+						if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
 							err = readErr
 						}
 						return
@@ -1201,9 +1188,20 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 				method = m.String()
 			}
 
-			var params any
-			if len(call.Arguments) > 1 {
-				params = call.Argument(1).Export()
+			var params util.Optional[any]
+			arg := call.Argument(1)
+			if goja.IsUndefined(arg) {
+				params.Value = nil
+				params.Exists = false
+				params.IsNull = false
+			} else if goja.IsNull(arg) {
+				params.Value = nil
+				params.Exists = true
+				params.IsNull = true
+			} else {
+				params.Value = arg.Export()
+				params.Exists = true
+				params.IsNull = false
 			}
 
 			p.BroadcastNotification(method, params)

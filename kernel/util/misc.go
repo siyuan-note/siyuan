@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"regexp"
@@ -29,6 +30,41 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/siyuan-note/logging"
 )
+
+// Optional is a generic type that represents an optional value, which can be in one of three states:
+//   - not set (Exists=false)
+//   - set to a non-null value (Exists=true, IsNull=false)
+//   - explicitly set to null (Exists=true, IsNull=true).
+//
+// This allows distinguishing between "not provided" and "explicitly null" when unmarshaling JSON.
+type Optional[T any] struct {
+	Value  T
+	Exists bool
+	IsNull bool
+}
+
+func (o Optional[T]) IsZero() bool { return !o.Exists }
+
+func (o Optional[T]) IsNullValue() bool { return o.Exists && o.IsNull }
+
+func (o Optional[T]) HasValue() bool { return o.Exists && !o.IsNull }
+
+func (o *Optional[T]) UnmarshalJSON(data []byte) error {
+	o.Exists = true
+	if string(data) == "null" {
+		o.IsNull = true
+		return nil
+	}
+	o.IsNull = false
+	return json.Unmarshal(data, &o.Value)
+}
+
+func (o Optional[T]) MarshalJSON() ([]byte, error) {
+	if !o.Exists || o.IsNull {
+		return []byte("null"), nil
+	}
+	return json.Marshal(o.Value)
+}
 
 func GetDuplicateName(master string) (ret string) {
 	if "" == master {

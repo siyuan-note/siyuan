@@ -18,6 +18,7 @@ package plugin
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -384,14 +385,19 @@ func (p *KernelPlugin) GetRpcMethodsInfo() (methods []*RpcMethodInfo) {
 
 // writeWebSocketMessage serializes a single write to conn using the per-connection mutex.
 // Returns nil immediately if conn is no longer tracked (already removed by Stop or UntrackSocket).
-// If Stop races and closes the connection after the tracking check, WriteMessage returns
-// an error which is propagated to the caller.
-func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, data []byte) error {
+// If Stop races and closes the connection after the tracking check, WriteMessage returns an error which is propagated to the caller.
+func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, messageType int, data []byte) (err error) {
+	if conn == nil {
+		err = fmt.Errorf("WebSocket connection is nil")
+		return
+	}
+
 	p.socketsMu.RLock()
 	mu, ok := p.socketMus[conn]
 	p.socketsMu.RUnlock()
 	if !ok {
-		return nil
+		err = fmt.Errorf("WebSocket connection not tracked")
+		return
 	}
 
 	// Between RUnlock above and mu.Lock below, Stop() may close the connection.
@@ -399,27 +405,78 @@ func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, data []byte) 
 	// which callers log and discard.
 	mu.Lock()
 	defer mu.Unlock()
-	return conn.WriteMessage(websocket.TextMessage, data)
+	err = conn.WriteMessage(messageType, data)
+	return
+}
+
+// BroadcastNotification sends a JSON-RPC 2.0 notification to all inbound RPC WebSocket clients.
+func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional[any]) {
+	notification := JsonRpcRequest{
+		JsonRpc: JsonRpcVersion,
+		Method:  method,
+		Params:  params,
+	}
+	data, err := json.Marshal(notification)
+	if err != nil {
+		logging.LogWarnf("[plugin:%s] broadcast marshal: %s", p.Name, err)
+		return
+	}
+
+	p.socketsMu.RLock()
+	conns := make([]*websocket.Conn, 0, len(p.sockets))
+	for conn, isRpcConnection := range p.sockets {
+		if isRpcConnection {
+			conns = append(conns, conn)
+		}
+	}
+	p.socketsMu.RUnlock()
+
+	wg := sync.WaitGroup{}
+	for _, conn := range conns {
+		wg.Add(1)
+		go func(c *websocket.Conn) {
+			defer wg.Done()
+			if err := p.writeWebSocketMessage(c, websocket.TextMessage, data); err != nil {
+				logging.LogWarnf("[plugin:%s] RPC WebSocket notification write failed: %s", p.Name, err)
+			}
+		}(conn)
+	}
+	wg.Wait()
 }
 
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
-func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcRequest) []any {
-	responses := make([]any, len(requests))
+func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest) []*JsonRpcProcessingResponse {
+	responses := make([]*JsonRpcProcessingResponse, len(requests))
 	var wg sync.WaitGroup
 
-	for i, req := range requests {
-		if req.IsNotification() {
-			go func(request *JsonRpcRequest) {
-				p.dispatchRpcRequest(request)
-			}(req)
+	for i, request := range requests {
+		// For requests that failed JSON parsing or validation, return the error immediately without dispatching.
+		if request.Error != nil {
+			responses[i] = &JsonRpcProcessingResponse{Error: request.Error}
 			continue
 		}
+
+		// For notifications, dispatch without waiting for a response.
+		if request.Request.IsNotification() {
+			go func(request *JsonRpcRequest) {
+				p.dispatchRpcRequest(request)
+			}(request.Request)
+			responses[i] = nil
+			continue
+		}
+
+		if request.Request == nil {
+			responses[i] = nil
+			continue
+		}
+
+		// For normal requests, dispatch concurrently and collect responses.
 		wg.Add(1)
 		go func(index int, request *JsonRpcRequest) {
 			defer wg.Done()
 			responses[index] = p.dispatchRpcRequest(request)
-		}(i, req)
+		}(i, request.Request)
 	}
 
 	wg.Wait()
@@ -428,37 +485,47 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcRequest) []any {
 
 // dispatchRpcRequest routes a single JSON-RPC request to the plugin's registered JS method.
 // Returns nil for notifications (no ID field).
-func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) any {
+func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) *JsonRpcProcessingResponse {
 	// Validate request structure
-	if err := request.Validate(); err != nil {
+	if rpcError := request.Validate(); rpcError != nil {
+		// For notifications, return nil (no response).
 		if request.IsNotification() {
 			return nil
 		}
-		return &JsonRpcErrorResponse{
-			JsonRpc: JsonRpcVersion,
-			Error:   err,
-			ID:      request.ID,
+
+		// For invalid requests, return error response.
+		return &JsonRpcProcessingResponse{
+			Error: &JsonRpcErrorResponse{
+				JsonRpc: JsonRpcVersion,
+				Error:   rpcError,
+				ID:      request.ID,
+			},
 		}
 	}
 
-	// For notifications, return nil (no response)
+	// For notifications, call the method without waiting for a response and return nil.
 	if request.IsNotification() {
-		go p.callRpcMethod(request.Method, request.Params)
+		go p.callRpcMethod(request.Method, request.Params.Value)
 		return nil
-	} else {
-		result, err := p.callRpcMethod(request.Method, request.Params)
-		if err != nil {
-			return &JsonRpcErrorResponse{
-				JsonRpc: JsonRpcVersion,
-				Error:   err,
-				ID:      request.ID,
-			}
-		}
+	}
 
-		return &JsonRpcRequestResponse{
-			JsonRpc: JsonRpcVersion,
-			Result:  result,
-			ID:      request.ID,
+	// For normal requests, call the method and return response or error.
+	rpcResult, rpcError := p.callRpcMethod(request.Method, request.Params.Value)
+	if rpcError == nil {
+		return &JsonRpcProcessingResponse{
+			Response: &JsonRpcRequestResponse{
+				JsonRpc: JsonRpcVersion,
+				Result:  rpcResult,
+				ID:      request.ID,
+			},
+		}
+	} else {
+		return &JsonRpcProcessingResponse{
+			Error: &JsonRpcErrorResponse{
+				JsonRpc: JsonRpcVersion,
+				Error:   rpcError,
+				ID:      request.ID,
+			},
 		}
 	}
 }
@@ -467,10 +534,11 @@ func (p *KernelPlugin) dispatchRpcRequest(request *JsonRpcRequest) any {
 func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, rpcError *JsonRpcError) {
 	defer func() {
 		if r := recover(); r != nil {
-			logging.LogDebugf("[plugin:%s] panic in RPC method %q: %v", p.Name, method, r)
+			logging.LogDebugf("[plugin:%s] panic in RPC method [%s]: %v", p.Name, method, r)
 			rpcError = &JsonRpcError{
 				Code:    JsonRpcErrorCodeInternalError,
-				Message: fmt.Sprintf("goja panic in RPC method %q: %v", method, r),
+				Message: JsonRpcErrorInternalError.Message,
+				Data:    fmt.Sprintf("goja panic in RPC method [%s]: %v", method, r),
 			}
 		}
 	}()
@@ -478,7 +546,8 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	if p.State() != PluginStateRunning {
 		rpcError = &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("plugin %s not running (state: %s)", p.Name, p.State()),
+			Message: JsonRpcErrorInternalError.Message,
+			Data:    fmt.Sprintf("plugin [%s] not running (state: [%s])", p.Name, p.State()),
 		}
 		return
 	}
@@ -487,7 +556,8 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	if !ok {
 		rpcError = &JsonRpcError{
 			Code:    JsonRpcErrorCodeMethodNotFound,
-			Message: fmt.Sprintf("method %q not found", method),
+			Message: JsonRpcErrorMethodNotFound.Message,
+			Data:    fmt.Sprintf("method [%s] not found in plugin [%s]", method, p.Name),
 		}
 		return
 	}
@@ -496,7 +566,8 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	if !ok {
 		rpcError = &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("invalid method type for %q", method),
+			Message: JsonRpcErrorInternalError.Message,
+			Data:    fmt.Sprintf("invalid method type for [%s]", method),
 		}
 		return
 	}
@@ -507,13 +578,18 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		rpcParams := []goja.Value{}
 		jsParams := rt.ToValue(params)
 		if isJsArray(rt, jsParams) {
+			// If params is an array, convert to []goja.Value for variadic JS function calls.
 			rt.ForOf(jsParams, func(cur goja.Value) bool {
 				rpcParams = append(rpcParams, cur)
 				return true
 			})
-		} else {
+		} else if !goja.IsUndefined(jsParams) && !goja.IsNull(jsParams) {
+			// If params is not an array but is defined, pass as single argument.
 			rpcParams = append(rpcParams, jsParams)
+		} else {
+			// If params is undefined or null, pass no arguments.
 		}
+
 		invokeFunction(func(result TaskResult) {
 			done <- result
 		}, rt, true, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
@@ -524,7 +600,8 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	if result.err != nil {
 		rpcError = &JsonRpcError{
 			Code:    JsonRpcErrorCodeInternalError,
-			Message: fmt.Sprintf("error invoking method %q: %v", method, result.err),
+			Message: JsonRpcErrorInternalError.Message,
+			Data:    fmt.Sprintf("error invoking method %q: %v", method, result.err),
 		}
 		return
 	}
@@ -535,6 +612,10 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 
 // TrackSocket adds a WebSocket connection to the plugin's tracked list.
 func (p *KernelPlugin) TrackSocket(conn *websocket.Conn, isRpcConnection bool) {
+	if conn == nil {
+		return
+	}
+
 	p.socketsMu.Lock()
 	defer p.socketsMu.Unlock()
 	p.sockets[conn] = isRpcConnection
@@ -543,6 +624,10 @@ func (p *KernelPlugin) TrackSocket(conn *websocket.Conn, isRpcConnection bool) {
 
 // UntrackSocket removes a WebSocket connection from the plugin's tracked list.
 func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
+	if conn == nil {
+		return
+	}
+
 	p.socketsMu.Lock()
 	defer p.socketsMu.Unlock()
 	delete(p.sockets, conn)

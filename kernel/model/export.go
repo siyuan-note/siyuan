@@ -933,8 +933,8 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 	// 只复制图标文件夹中的 icon.js 文件
 	iconName := Conf.Appearance.Icon
-	// 如果使用的不是内建图标（ant 或 material），需要复制 material 作为后备
-	if iconName != "ant" && iconName != "material" && iconName != "" {
+	// 如果使用的不是内建图标（material），需要复制 material 作为后备
+	if iconName != "material" && iconName != "" {
 		srcIconFile := filepath.Join(appearancePath, "icons", "material", "icon.js")
 		toIconDir := filepath.Join(savePath, "appearance", "icons", "material")
 		if err := os.MkdirAll(toIconDir, 0755); err != nil {
@@ -1130,8 +1130,8 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 
 		// 只复制图标文件夹中的 icon.js 文件
 		iconName := Conf.Appearance.Icon
-		// 如果使用的不是内建图标（ant 或 material），需要复制 material 作为后备
-		if iconName != "ant" && iconName != "material" && iconName != "" {
+		// 如果使用的不是内建图标（material），需要复制 material 作为后备
+		if iconName != "material" && iconName != "" {
 			srcIconFile := filepath.Join(appearancePath, "icons", "material", "icon.js")
 			toIconDir := filepath.Join(savePath, "appearance", "icons", "material")
 			if err := os.MkdirAll(toIconDir, 0755); err != nil {

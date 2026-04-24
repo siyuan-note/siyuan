@@ -964,6 +964,9 @@ export class Dock {
     }) {
         this.app.plugins.find(pluginItem => {
             if (Object.keys(pluginItem.docks).includes(dockType)) {
+                if (!window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][pluginItem.name][dockType]) {
+                    window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][pluginItem.name][dockType] = pluginItem.docks[dockType].config;
+                }
                 Object.keys(options).forEach((item: "position") => {
                     window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][pluginItem.name][dockType][item] = options[item];
                 });

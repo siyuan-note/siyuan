@@ -574,7 +574,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 
 	done := make(chan TaskResult, 1)
 
-	p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 		rpcParams := []goja.Value{}
 		jsParams := rt.ToValue(params)
 		if isJsArray(rt, jsParams) {
@@ -595,6 +595,14 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}, rt, true, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
 		return
 	}, nil)
+	if runErr != nil {
+		rpcError = &JsonRpcError{
+			Code:    JsonRpcErrorCodeInternalError,
+			Message: JsonRpcErrorInternalError.Message,
+			Data:    fmt.Sprintf("failed to dispatch RPC method %q: %v", method, runErr),
+		}
+		return
+	}
 
 	result := <-done
 	if result.err != nil {
@@ -668,6 +676,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 		hookValue := pluginObj.Get(name)
 		hook, ok := goja.AssertFunction(hookValue)
 		if !ok {
+			done <- TaskResult{}
 			return
 		}
 
@@ -675,7 +684,11 @@ func (p *KernelPlugin) invokeHook(name string) {
 			done <- result
 		}, rt, true, hook, lifecycle)
 		return
-	}, nil)
+	}, func(rt *goja.Runtime, result any, err error) {
+		if err != nil {
+			done <- TaskResult{err: err}
+		}
+	})
 
 	if runErr != nil {
 		close(done)

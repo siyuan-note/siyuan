@@ -298,9 +298,9 @@
         }
 
         &__graphic {
-          padding: 4px 0 4px 8px;
-          height: 14px;
-          width: 14px;
+          padding-right: 8px;
+          height: 16px;
+          width: 16px;
           flex-shrink: 0;
           line-height: 1em;
         }
@@ -358,8 +358,8 @@
   }
 
   svg {
-    height: 14px;
-    width: 15.5px;
+    height: 16px;
+    width: 17.5px;
   }
 
   &--vertical {
@@ -381,7 +381,7 @@
   }
 
   &__item {
-    padding: 6px;
+    padding: 5px;
     color: var(--b3-theme-on-surface-light);
     display: flex;
     border-radius: var(--b3-border-radius);

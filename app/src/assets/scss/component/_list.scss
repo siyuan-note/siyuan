@@ -202,18 +202,18 @@
 
     &__graphic {
       margin-right: 4px;
-      padding: 0 2px;
       flex-shrink: 0;
-      height: 14px;
-      width: 14px;
-      line-height: 14px;
+      padding: 0 1px;
+      height: 16px;
+      width: 16px;
+      line-height: 16px;
       font-size: 12px;
       font-family: var(--b3-font-family-emoji);
 
       // doc icon in the bookmark panel
       svg {
-        width: 12px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
       }
     }
 
@@ -271,15 +271,15 @@
       align-items: center;
       color: var(--b3-theme-on-surface-light);
       height: 22px;
-      padding: 0 4px;
+      padding: 0 3px;
       margin-left: 4px;
       display: flex;
       translate: var(--b3-transition);
       border-radius: var(--b3-border-radius);
 
       svg {
-        height: 14px;
-        width: 14px;
+        height: 16px;
+        width: 16px;
       }
 
       &:hover {

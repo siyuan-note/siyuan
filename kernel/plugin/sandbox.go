@@ -270,26 +270,48 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				return
 			}
 
-			data, readErr := filelock.ReadFile(abs)
-			if readErr != nil {
-				err = readErr
-				return
-			}
+			go func() (result []byte, err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = fmt.Errorf("panic during siyuan.storage.get: %v", r)
+					}
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						if err != nil {
+							return nil, err
+						}
 
-			content := rt.NewObject()
-			if setErr := ObjectSetDataMethods(p, rt, content, data); setErr != nil {
-				err = setErr
-				return
-			}
+						content := rt.NewObject()
+						if err = ObjectSetDataMethods(p, rt, content, result); err != nil {
+							return nil, err
+						}
 
-			result = content
+						return content, nil
+					}, func(rt *goja.Runtime, result any, err error) {
+						if lo.IsNil(err) {
+							if resolveErr := resolve(result); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.get resolve: %v", p.Name, resolveErr)
+							}
+						} else {
+							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.get reject: %v", p.Name, rejectErr)
+							}
+						}
+					})
+				}()
+
+				data, readErr := filelock.ReadFile(abs)
+				if readErr != nil {
+					err = readErr
+					return
+				}
+
+				result = data
+				return
+			}()
+
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.storage.get resolve: %v", p.Name, resolveErr)
-				}
-			} else {
+			if !lo.IsNil(err) {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.storage.get reject: %v", p.Name, rejectErr)
 				}
@@ -318,21 +340,41 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				err = resolveErr
 				return
 			}
-			if mkdirErr := os.MkdirAll(filepath.Dir(abs), 0755); mkdirErr != nil {
-				err = fmt.Errorf("failed to make directory: %w", mkdirErr)
+
+			go func() (result any, err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = fmt.Errorf("panic during siyuan.storage.put: %v", r)
+					}
+
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						if lo.IsNil(err) {
+							if resolveErr := resolve(result); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.put resolve: %v", p.Name, resolveErr)
+							}
+						} else {
+							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.put reject: %v", p.Name, rejectErr)
+							}
+						}
+						return
+					}, nil)
+				}()
+
+				if mkdirErr := os.MkdirAll(filepath.Dir(abs), 0755); mkdirErr != nil {
+					err = fmt.Errorf("failed to make directory: %w", mkdirErr)
+					return
+				}
+				if writeErr := filelock.WriteFile(abs, []byte(content)); writeErr != nil {
+					err = fmt.Errorf("failed to write file: %w", writeErr)
+					return
+				}
 				return
-			}
-			if writeErr := filelock.WriteFile(abs, []byte(content)); writeErr != nil {
-				err = fmt.Errorf("failed to write file: %w", writeErr)
-				return
-			}
+			}()
+
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.storage.put resolve: %v", p.Name, resolveErr)
-				}
-			} else {
+			if !lo.IsNil(err) {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.storage.put reject: %v", p.Name, rejectErr)
 				}
@@ -364,17 +406,37 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				err = fmt.Errorf("cannot remove storage root")
 				return
 			}
-			if removeErr := os.RemoveAll(abs); removeErr != nil {
-				err = fmt.Errorf("failed to remove: %w", removeErr)
+
+			go func() (result any, err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = fmt.Errorf("panic during siyuan.storage.remove: %v", r)
+					}
+
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						if lo.IsNil(err) {
+							if resolveErr := resolve(result); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.remove resolve: %v", p.Name, resolveErr)
+							}
+						} else {
+							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.remove reject: %v", p.Name, rejectErr)
+							}
+						}
+						return
+					}, nil)
+				}()
+
+				if removeErr := os.RemoveAll(abs); removeErr != nil {
+					err = fmt.Errorf("failed to remove: %w", removeErr)
+					return
+				}
 				return
-			}
+			}()
+
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.storage.remove resolve: %v", p.Name, resolveErr)
-				}
-			} else {
+			if !lo.IsNil(err) {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.storage.remove reject: %v", p.Name, rejectErr)
 				}
@@ -403,34 +465,52 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				return
 			}
 
-			entries, readErr := os.ReadDir(abs)
-			if readErr != nil {
-				err = fmt.Errorf("failed to read directory: %w", readErr)
-				return
-			}
+			go func() (result any, err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = fmt.Errorf("panic during siyuan.storage.list: %v", r)
+					}
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						if lo.IsNil(err) {
+							if resolveErr := resolve(result); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.list resolve: %v", p.Name, resolveErr)
+							}
+						} else {
+							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.storage.list reject: %v", p.Name, rejectErr)
+							}
+						}
+						return
+					}, nil)
+				}()
 
-			results := make([]R, 0, len(entries))
-			for _, entry := range entries {
-				info, infoErr := entry.Info()
-				if infoErr != nil {
-					continue
+				entries, readErr := os.ReadDir(abs)
+				if readErr != nil {
+					err = fmt.Errorf("failed to read directory: %w", readErr)
+					return
 				}
-				results = append(results, R{
-					"name":      entry.Name(),
-					"isDir":     info.IsDir(),
-					"isSymlink": util.IsSymlink(entry),
-					"updated":   info.ModTime().Unix(),
-				})
-			}
 
-			result = results
+				results := make([]R, 0, len(entries))
+				for _, entry := range entries {
+					info, infoErr := entry.Info()
+					if infoErr != nil {
+						continue
+					}
+					results = append(results, R{
+						"name":      entry.Name(),
+						"isDir":     info.IsDir(),
+						"isSymlink": util.IsSymlink(entry),
+						"updated":   info.ModTime().Unix(),
+					})
+				}
+
+				result = results
+				return
+			}()
+
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.storage.list resolve: %v", p.Name, resolveErr)
-				}
-			} else {
+			if !lo.IsNil(err) {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.storage.list reject: %v", p.Name, rejectErr)
 				}
@@ -518,7 +598,7 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 					}
 
 					if err != nil {
-						p.worker.Run(func(rt *goja.Runtime) (result any, runErr error) {
+						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)
 							}
@@ -590,9 +670,9 @@ func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
-				// if resolveErr := resolve(result); resolveErr != nil {
-				// 	logging.LogErrorf("[plugin:%s] siyuan.fetch resolve: %v", p.Name, resolveErr)
-				// }
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.fetch resolve: %v", p.Name, resolveErr)
+				}
 			} else {
 				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
 					logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)

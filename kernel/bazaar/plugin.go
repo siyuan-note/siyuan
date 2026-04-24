@@ -88,7 +88,7 @@ func IsIncompatibleKernelPlugin(plugin *Package) bool {
 		return true
 	}
 
-	return !IsTargetSupported(plugin.Backends, GetCurrentBackend())
+	return !IsTargetSupported(plugin.Kernels, GetCurrentBackend())
 }
 
 var cachedBackend string

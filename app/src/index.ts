@@ -42,6 +42,7 @@ import {getDockByType} from "./layout/tabUtil";
 import {Tag} from "./layout/dock/Tag";
 import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
+import {setBodyHighlight} from "./util/assets";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -219,6 +220,7 @@ export class App {
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
             window.siyuan.isPublish = response.data.isPublish;
+            setBodyHighlight();
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {

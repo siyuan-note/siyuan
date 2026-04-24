@@ -29,7 +29,7 @@ body {
   }
 
   &.body--blur {
-    background-color: var(--b3-body-blur-background);
+    --b3-body-background-hl-opacity: 0.06;
 
     .layout {
       &__wnd--active .layout-tab-bar .item--focus {

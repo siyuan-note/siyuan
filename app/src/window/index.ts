@@ -28,6 +28,7 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {updateAppearance} from "../config/util/updateAppearance";
 import {renderSnippet} from "../config/util/snippets";
+import {setBodyHighlight} from "../util/assets";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -169,6 +170,7 @@ class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
+            setBodyHighlight();
             window.siyuan.isPublish = response.data.isPublish;
             await loadPlugins(this);
             getLocalStorage(() => {

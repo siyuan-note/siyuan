@@ -18,6 +18,7 @@ import {
 } from "../protyle/util/compatibility";
 import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
+import {getWorkspaceName} from "./noRelyPCFunction";
 
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
@@ -399,4 +400,12 @@ export const getThemeMode = () => {
     } else {
         return window.siyuan.config.appearance.mode === 0 ? "light" : "dark";
     }
+};
+
+export const setBodyHighlight = () => {
+    const hue = (getWorkspaceName().charAt(0).toUpperCase().charCodeAt(0) * 137) % 360;
+    if (!hue) {
+        return;
+    }
+    document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 65%, 55%`);
 };

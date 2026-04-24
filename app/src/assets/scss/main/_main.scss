@@ -25,6 +25,10 @@ html {
   left: 0;
 }
 
+body {
+  background-image: radial-gradient(circle at 24% 0%, hsl(var(--b3-body-background-hl), var(--b3-body-background-hl-opacity)) 0%, transparent 30%);
+}
+
 .fullscreen {
   position: fixed;
   top: 0;

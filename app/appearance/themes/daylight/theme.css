@@ -34,7 +34,8 @@
 
     /* 背景色 */
     --b3-body-background: #EBECF0;
-    --b3-body-blur-background: var(--b3-theme-surface);
+    --b3-body-background-hl-opacity: 0.12;
+    --b3-body-background-hl: 219, 86%, 57%;
 
     /* 顶部工具栏 */
     --b3-toolbar-color: var(--b3-theme-on-surface);

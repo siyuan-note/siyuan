@@ -78,12 +78,12 @@
     border: 0;
     background: transparent;
     flex-shrink: 0;
-    padding: 5px;
+    padding: 4px;
     display: flex;
     align-items: center;
     border-radius: var(--b3-border-radius);
     transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
-    line-height: 14px;
+    line-height: 16px;
 
     &:hover:not([disabled]):not(.block__icon--text):not(.block__icon--warning),
     &--active {
@@ -106,8 +106,8 @@
     }
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 16px;
+      width: 16px;
     }
   }
 

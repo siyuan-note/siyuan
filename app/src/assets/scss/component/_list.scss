@@ -138,7 +138,7 @@
       display: flex;
       align-items: center;
       height: 22px;
-      padding: 0 4px;
+      padding: 0 2px;
       color: var(--b3-theme-on-surface-light);
       transition: var(--b3-transition);
       border-radius: var(--b3-border-radius);
@@ -219,8 +219,8 @@
 
     &__arrow {
       flex-shrink: 0;
-      height: 10px;
-      width: 10px;
+      height: 14px;
+      width: 14px;
       transition: transform .15s cubic-bezier(0, 0, .2, 1), opacity 1s cubic-bezier(0, 0, .2, 1);
 
       &--open {

@@ -82,7 +82,7 @@
   button {
     border: 0;
     background-color: transparent;
-    padding: 4px;
+    padding: 4px 3px;
     cursor: pointer;
     position: relative;
 
@@ -107,7 +107,7 @@
   svg {
     color: var(--b3-theme-on-surface-light);
     height: calc(var(--b3-font-size-editor) * 1.625);
-    width: 14px;
+    width: 16px;
     float: left;
     transition: var(--b3-color-transition);
   }

@@ -201,6 +201,7 @@ func InitConf() {
 		// v3.6.6 移除了 ant 图标包，如果用户之前选择了 ant 图标包，升级后改为 material 图标包，避免图标显示异常 https://github.com/siyuan-note/siyuan/issues/7976
 		Conf.Appearance.Icon = "material"
 	}
+	os.RemoveAll(filepath.Join(util.IconsPath, "ant"))
 	if nil == Conf.UILayout {
 		Conf.UILayout = &conf.UILayout{}
 	}

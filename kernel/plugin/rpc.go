@@ -61,6 +61,28 @@ type JsonRpcRequest struct {
 	ID      util.Optional[any] `json:"id,omitempty"`
 }
 
+func (r JsonRpcRequest) MarshalJSON() ([]byte, error) {
+	m := map[string]any{
+		"jsonrpc": r.JsonRpc,
+		"method":  r.Method,
+	}
+	if r.Params.Exists {
+		if r.Params.IsNull {
+			m["params"] = nil
+		} else {
+			m["params"] = r.Params.Value
+		}
+	}
+	if r.ID.Exists {
+		if r.ID.IsNull {
+			m["id"] = nil
+		} else {
+			m["id"] = r.ID.Value
+		}
+	}
+	return json.Marshal(m)
+}
+
 func (r *JsonRpcRequest) UnmarshalJSON(data []byte) error {
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields() // Reject unknown fields to prevent silent errors from typos

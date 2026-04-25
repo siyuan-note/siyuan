@@ -307,7 +307,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsMaterial" style="p
   <symbol id="iconKeymap" viewBox="30 -930 900 900">
     <path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
   </symbol>
-  <symbol id="iconFont" viewBox="30 -930 900 900">
+  <symbol id="iconFont" viewBox="0 -960 960 960">
     <path d="M220-280l210-560h100l210 560h-96l-50-144H368l-52 144h-96Zm176-224h168l-82-232h-4l-82 232Z"/>
     <path d="M80 0v-160h800V0H80Z" fill="var(--b3-theme-error)"/>
   </symbol>
@@ -585,7 +585,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsMaterial" style="p
   <symbol id="iconAlignRight" viewBox="30 -930 900 900">
     <path d="M120-760v-80h720v80H120Zm240 160v-80h480v80H360ZM120-440v-80h720v80H120Zm240 160v-80h480v80H360ZM120-120v-80h720v80H120Z"/>
   </symbol>
-  <symbol id="iconBold" viewBox="30 -930 900 900">
+  <symbol id="iconBold" viewBox="60 -900 840 840">
     <path d="M272-200v-560h221q65 0 120 40t55 111q0 51-23 78.5T602-491q25 11 55.5 41t30.5 90q0 89-65 124.5T501-200H272Zm121-112h104q48 0 58.5-24.5T566-372q0-11-10.5-35.5T494-432H393v120Zm0-228h93q33 0 48-17t15-38q0-24-17-39t-44-15h-95v109Z"/>
   </symbol>
   <symbol id="iconIndent" viewBox="30 -930 900 900">

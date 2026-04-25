@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20260222162348"
+		"updated": "20250330192734"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-6nam42g",
 				"id": "20240530101000-n0tipvh",
-				"updated": "20251230142024"
+				"updated": "20260425180748"
 			},
 			"Children": [
 				{
@@ -73,7 +73,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-7ed5u6l",
-				"updated": "20251230142024"
+				"updated": "20260425180748"
 			},
 			"Children": [
 				{
@@ -135,7 +135,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -159,7 +159,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/paragraph-20210512171139-2x8lgt5.svg"
+											"Data": "assets/paragraph-block-20260425165426-oay2mn8.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -212,7 +212,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -236,7 +236,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/heading-20210512171149-56npt09.svg"
+											"Data": "assets/heading-block-20260425165426-u0noubu.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -289,7 +289,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -313,7 +313,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/math-block-20210512171155-9w2eti5.svg"
+											"Data": "assets/formula-block-20260425165426-wompa7r.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -366,7 +366,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -390,7 +390,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/code-block-20210512171201-pw7hrv2.svg"
+											"Data": "assets/code-block-20260425165426-coms7xv.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -439,7 +439,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -463,7 +463,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/table-20210512171208-hgfm17w.svg"
+											"Data": "assets/table-block-20260425165426-knfl9o2.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -512,7 +512,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -536,7 +536,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/embed-block-20250330183922-6b1vv80.svg"
+											"Data": "assets/embed-block-20260425165426-1m1ufx0.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -581,7 +581,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -605,7 +605,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/html-block-20220429115636-e80k6ty.svg"
+											"Data": "assets/html-block-20260425165426-qje2gkf.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -654,7 +654,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -678,7 +678,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/database-20251230141500-2trhu14.svg"
+											"Data": "assets/database-block-20260425165426-vgzt70f.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -723,7 +723,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -747,7 +747,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/unordered-list-20210512171214-90nb6w0.svg"
+											"Data": "assets/unordered-list-block-20260425165426-nr12e3p.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -796,7 +796,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -820,7 +820,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/ordered-list-20210512171220-ghfzj2f.svg"
+											"Data": "assets/ordered-list-block-20260425165426-xju1xnf.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -869,7 +869,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -893,7 +893,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/task-list-20210512171226-br51zxn.svg"
+											"Data": "assets/task-list-block-20260425165426-641pl4h.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -942,7 +942,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -966,7 +966,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/list-item-20210512171231-2yc3wfd.svg"
+											"Data": "assets/listitem-block-20260425175517-4uac18s.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -1015,7 +1015,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -1039,7 +1039,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/blockquote-20210512171236-9dl6ui9.svg"
+											"Data": "assets/blockquote-block-20260425165426-hdgswh2.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -1058,7 +1058,11 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロック引用"
+									"Data": "ブロック"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "引用"
 								}
 							]
 						},
@@ -1084,7 +1088,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -1108,7 +1112,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/callout-20251209210931-cq1e6w6.svg"
+											"Data": "assets/callout-block-20260425165426-n22bky2.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -1153,7 +1157,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -1177,7 +1181,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/super-block-20210512171243-ydsukhs.svg"
+											"Data": "assets/super-block-20260425165426-ae8e5uq.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -1226,7 +1230,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​​"
 								},
 								{
 									"Type": "NodeImage",
@@ -1250,7 +1254,7 @@
 										},
 										{
 											"Type": "NodeLinkDest",
-											"Data": "assets/doc-20210512171251-8qzw4l4.svg"
+											"Data": "assets/doc-block-20260425165426-b4lweek.png"
 										},
 										{
 											"Type": "NodeCloseParen"
@@ -1298,7 +1302,7 @@
 			"Properties": {
 				"ID": "20240530101000-rjjxxn8",
 				"id": "20240530101000-p035stn",
-				"updated": "20250330192657"
+				"updated": "20260425180829"
 			},
 			"Children": [
 				{
@@ -1355,71 +1359,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-x44k3wv",
 				"id": "20240530101000-flxhi3g",
-				"updated": "20250330192657"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
-					"Type": "NodeText",
-					"Data": "段落ブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-1fudjd0",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-1fudjd0",
-				"updated": "20250330192657"
+				"updated": "20260425180829"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "paragraph"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/paragraph-20210512171139-2x8lgt5.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "段落ブロック"
 				}
 			]
 		},
@@ -1470,7 +1416,6 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-uc2bqf0",
 				"id": "20240530101000-03pf2kg",
 				"updated": "20250330192658"
 			},
@@ -1478,53 +1423,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "見出しブロック"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-eou4hx6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-eou4hx6",
-				"updated": "20250330192658"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "heading"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/heading-20210512171149-56npt09.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
 				}
 			]
 		},
@@ -1548,71 +1446,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-3zmufme",
 				"id": "20240530101000-8lyvhuw",
 				"updated": "20250330192701"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "数式ブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-odo84wi",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-odo84wi",
-				"updated": "20250330192701"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "math-block"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/math-block-20210512171155-9w2eti5.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "数式ブロック"
 				}
 			]
 		},
@@ -1642,71 +1482,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-l4vyrww",
 				"id": "20240530101000-1m00fmd",
 				"updated": "20250330192702"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "コードブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-03jmilp",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-03jmilp",
-				"updated": "20250330192702"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "code-block"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/code-block-20210512171201-pw7hrv2.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "コードブロック"
 				}
 			]
 		},
@@ -1743,71 +1525,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-1iwbq48",
 				"id": "20240530101000-riwihza",
 				"updated": "20260222162348"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "テーブルブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-eagtq2l",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-eagtq2l",
-				"updated": "20250330192704"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "table"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/table-20210512171208-hgfm17w.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "テーブルブロック"
 				}
 			]
 		},
@@ -2026,53 +1750,6 @@
 			]
 		},
 		{
-			"ID": "20250330192111-tckkhbh",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20250330192111-tckkhbh",
-				"updated": "20250330192707"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "embed-block"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/embed-block-20250330183922-6b1vv80.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				}
-			]
-		},
-		{
 			"ID": "20250330192120-xz91z81",
 			"Type": "NodeParagraph",
 			"Properties": {
@@ -2102,71 +1779,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-l2cwfzo",
 				"id": "20240530101000-3b4bvhu",
 				"updated": "20251230141957"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "HTML ブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-tz1nxgt",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-tz1nxgt",
-				"updated": "20250330192711"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "html-block"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/html-block-20220429115636-e80k6ty.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "HTML ブロック"
 				}
 			]
 		},
@@ -2332,53 +1951,6 @@
 			]
 		},
 		{
-			"ID": "20251230142001-2h2tzno",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20251230142001-2h2tzno",
-				"updated": "20251230142009"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "database"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/database-20251230141500-2trhu14.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				}
-			]
-		},
-		{
 			"ID": "20251230142010-ihoh4dv",
 			"Type": "NodeAttributeView",
 			"Properties": {
@@ -2426,71 +1998,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-opc0x0f",
 				"id": "20240530101000-qkndmzb",
 				"updated": "20250330192713"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "順序なしリストブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-db1lmb5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-db1lmb5",
-				"updated": "20250330192713"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "unordered-list"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/unordered-list-20210512171214-90nb6w0.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "順序なしリストブロック"
 				}
 			]
 		},
@@ -2670,71 +2184,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-r2zyx14",
 				"id": "20240530101000-90qe1d4",
 				"updated": "20250330192715"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "順序付きリストブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-gzvm0yr",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-gzvm0yr",
-				"updated": "20250330192715"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "ordered-list"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/ordered-list-20210512171220-ghfzj2f.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "順序付きリストブロック"
 				}
 			]
 		},
@@ -2879,71 +2335,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-a5nrp88",
 				"id": "20240530101000-go4k70s",
 				"updated": "20250330192728"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "タスクリストブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-3prs519",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-3prs519",
-				"updated": "20250330192728"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "task-list"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/task-list-20210512171226-br51zxn.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "タスクリストブロック"
 				}
 			]
 		},
@@ -3111,71 +2509,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-xaefotq",
 				"id": "20240530101000-y5kx7kx",
 				"updated": "20251021231004"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "リスト項目ブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-79gov9r",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-79gov9r",
-				"updated": "20250330192723"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "list-item"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/list-item-20210512171231-2yc3wfd.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "リスト項目ブロック"
 				}
 			]
 		},
@@ -3286,61 +2626,17 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-wiptkl9",
 				"id": "20240530101000-op92isk",
 				"updated": "20251209213141"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ブロック引用"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-11y5vip",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-11y5vip",
-				"updated": "20251209213051"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "blockquote"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/blockquote-20210512171236-9dl6ui9.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
+					"Data": "ブロック"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "引用"
 				}
 			]
 		},
@@ -3418,53 +2714,6 @@
 			]
 		},
 		{
-			"ID": "20251209213449-2pylem5",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20251209213449-2pylem5",
-				"updated": "20251209213509"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "callout"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/callout-20251209210931-cq1e6w6.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				}
-			]
-		},
-		{
 			"ID": "20251209213158-l1k56n4",
 			"Type": "NodeCallout",
 			"Properties": {
@@ -3521,71 +2770,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-ow6baqu",
 				"id": "20240530101000-cb0jgj8",
 				"updated": "20250330192732"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "スーパーブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-337eb44",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-337eb44",
-				"updated": "20250330192732"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "super-block"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/super-block-20210512171243-ydsukhs.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "スーパーブロック"
 				}
 			]
 		},
@@ -3644,71 +2835,13 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"ID": "20240530101000-p6iu660",
 				"id": "20240530101000-gtx9sbs",
 				"updated": "20250330192734"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "### ",
-					"Properties": {
-						"id": ""
-					}
-				},
-				{
 					"Type": "NodeText",
-					"Data": "ドキュメントブロック",
-					"Properties": {
-						"id": ""
-					}
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-wv0d7p8",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20240530101000-wv0d7p8",
-				"updated": "20250330192734"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeImage",
-					"Data": "span",
-					"Children": [
-						{
-							"Type": "NodeBang"
-						},
-						{
-							"Type": "NodeOpenBracket"
-						},
-						{
-							"Type": "NodeLinkText",
-							"Data": "doc"
-						},
-						{
-							"Type": "NodeCloseBracket"
-						},
-						{
-							"Type": "NodeOpenParen"
-						},
-						{
-							"Type": "NodeLinkDest",
-							"Data": "assets/doc-20210512171251-8qzw4l4.svg"
-						},
-						{
-							"Type": "NodeCloseParen"
-						}
-					]
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "ドキュメントブロック"
 				}
 			]
 		},

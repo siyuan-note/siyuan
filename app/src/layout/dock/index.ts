@@ -14,7 +14,7 @@ import {getDockByType, resizeTabs} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
-import {resetFloatDockSize} from "./util";
+import {adjustDockPadding, resetFloatDockSize} from "./util";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {App} from "../../index";
 import {Plugin} from "../../plugin";
@@ -854,6 +854,7 @@ export class Dock {
                 width: null,
             }
         });
+        adjustDockPadding();
     }
 
     public remove(key: TDock | string) {
@@ -865,6 +866,7 @@ export class Dock {
         }
         if (this.element.querySelectorAll(".dock__item").length === 1) {
             this.element.classList.add("fn__none");
+            adjustDockPadding();
         }
         delete this.data[key];
     }
@@ -949,6 +951,7 @@ export class Dock {
             // https://github.com/siyuan-note/siyuan/issues/8614
             if (!window.siyuan.config.uiLayout.hideDock) {
                 this.element.classList.remove("fn__none");
+                adjustDockPadding();
             }
             if (data[0].show) {
                 this.toggleModel(data[0].type, true, false, false, false);

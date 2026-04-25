@@ -189,10 +189,10 @@
   }
 
   &__arrow {
-    height: 10px;
-    width: 10px;
+    height: 14px;
+    width: 14px;
     color: var(--b3-theme-on-surface-light);
-    margin: 0 4px;
+    margin: 0 2px;
     flex-shrink: 0;
   }
 
@@ -229,8 +229,8 @@
     }
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 16px;
+      width: 16px;
       flex-shrink: 0;
       color: var(--b3-theme-on-surface);
 

@@ -413,5 +413,5 @@ export const setBodyHighlight = () => {
     // 2. 使用较大的质数(137)扰乱，确保 HSL 颜色分布更均匀
     const hue = (charCodeSum * 137) % 360;
     // 3. 调整 HSL：饱和度设为 75%(更艳)，亮度设为 45%(更浓郁)
-    document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 75%, 45%`);
+    document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 75%, 35%`);
 };

@@ -137,20 +137,20 @@ html[data-frontend="browser-desktop"] {
     }
 
     &--win {
-      padding: 9px;
+      padding: 9px 16px;
       margin: 0;
       height: 31.5px;
       border-radius: 0;
     }
 
     &--close {
-      padding: 9px 16px;
+      padding: 9px 15px;
       margin: 0;
       height: 31.5px;
       border-radius: 0;
 
       svg {
-        width: 10px !important;
+        width: 16px !important;
       }
 
       &:hover {

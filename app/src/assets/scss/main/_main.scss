@@ -266,7 +266,7 @@ html[data-frontend="browser-desktop"] {
   &:not(.fullscreen):hover .block__icons .fn__space,
   &.fullscreen .block__icons .block__icon:not([disabled]) {
     opacity: 1;
-    display: block;
+    display: flex;
     @starting-style {
       opacity: 0;
     }

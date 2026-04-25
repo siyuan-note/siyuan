@@ -109,11 +109,11 @@ export const loadAssets = (data: Config.IAppearance) => {
     }
 
     // load icons
-    const isBuiltInIcon = ["material"].includes(data.icon);
+    const isBuiltInIcon = data.icon === "material";
     const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
-    const iconDefaultURL = `/appearance/icons/${isBuiltInIcon ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
+    const iconDefaultURL = `/appearance/icons/material/icon.js?v=${Constants.SIYUAN_VERSION}`;
     const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
 
     if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
@@ -122,26 +122,12 @@ export const loadAssets = (data: Config.IAppearance) => {
         if (isBuiltInIcon) {
             iconScriptElement?.remove();
             Array.from(document.body.children).forEach((item) => {
-                if (item.tagName === "svg" &&
-                    !item.getAttribute("data-name") &&
-                    !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                if (item.tagName === "svg" && !item.getAttribute("data-name") && "iconsMaterial" !== item.id) {
                     item.remove();
                 }
             });
         }
         return;
-    }
-    if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) {
-        iconDefaultScriptElement.remove();
-        if (data.icon === "ant") {
-            document.querySelectorAll("#iconsMaterial").forEach(item => {
-                item.remove();
-            });
-        } else {
-            document.querySelectorAll("#iconsAnt").forEach(item => {
-                item.remove();
-            });
-        }
     }
     addScript(iconDefaultURL, "iconDefaultScript").then(() => {
         iconScriptElement?.remove();
@@ -149,9 +135,7 @@ export const loadAssets = (data: Config.IAppearance) => {
             addScript(iconThirdURL, "iconScript").then(() => {
                 Array.from(document.body.children).forEach((item, index) => {
                     if (item.tagName === "svg" &&
-                        index !== 0 &&
-                        !item.getAttribute("data-name") &&
-                        !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                        index !== 0 && !item.getAttribute("data-name") && "iconsMaterial" !== item.id) {
                         item.remove();
                     }
                 });

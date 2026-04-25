@@ -1,5 +1,6 @@
 @use "../util/mixin";
 @use "../util/function";
+@use "../component/svg";
 
 .block__popover {
   width: 80vw;
@@ -396,31 +397,6 @@
     &-text {
       margin-left: 6px;
     }
-  }
-}
-
-.svg {
-  fill: currentColor;
-  display: inline-block;
-  stroke-width: 0;
-  stroke: currentColor;
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-
-  &--mid {
-    width: 16px;
-    height: 16px;
-  }
-
-  &--small {
-    width: 12px;
-    height: 12px;
-  }
-
-  &--smaller {
-    width: 10px;
-    height: 10px;
   }
 }
 

@@ -403,9 +403,15 @@ export const getThemeMode = () => {
 };
 
 export const setBodyHighlight = () => {
-    const hue = (getWorkspaceName().charAt(0).toUpperCase().charCodeAt(0) * 137) % 360;
-    if (!hue) {
+    const name = getWorkspaceName();
+    if (!name) {
         return;
     }
-    document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 65%, 55%`);
+
+    // 1. 简单的哈希处理：累加前两个字符的编码，增加中文的区分度
+    const charCodeSum = name.charCodeAt(0) + (name.length > 1 ? name.charCodeAt(1) : 0);
+    // 2. 使用较大的质数(137)扰乱，确保 HSL 颜色分布更均匀
+    const hue = (charCodeSum * 137) % 360;
+    // 3. 调整 HSL：饱和度设为 75%(更艳)，亮度设为 45%(更浓郁)
+    document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 75%, 45%`);
 };

@@ -381,6 +381,15 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
+					"TextMarkTextContent": "uk_UA"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
 					"TextMarkTextContent": "zh_CHT"
 				},
 				{

@@ -290,8 +290,8 @@ declare namespace Config {
         | "pt_BR"
         | "ru_RU"
         | "sk_SK"
-        | "uk_UA"
         | "tr_TR"
+        | "uk_UA"
         | "zh_CN"
         | "zh_CHT";
 

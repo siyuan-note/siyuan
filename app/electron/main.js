@@ -484,7 +484,7 @@ const initMainWindow = () => {
         }
     });
 
-    currentWindow.webContents.on('render-process-gone', (event, details) => {
+    currentWindow.webContents.on("render-process-gone", (event, details) => {
         writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
     });
 

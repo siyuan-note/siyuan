@@ -410,7 +410,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsMaterial" style="p
   <symbol id="iconMath" viewBox="30 -930 900 900">
     <path d="M240-160v-80l260-240-260-240v-80h480v120H431l215 200-215 200h289v120H240Z"/>
   </symbol>
-  <symbol id="iconClose" viewBox="30 -930 900 900">
+  <symbol id="iconClose" viewBox="120 -840 720 720">
     <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>
   </symbol>
   <symbol id="iconRestore" viewBox="-2 -2 36 36">

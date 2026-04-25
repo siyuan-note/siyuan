@@ -22,18 +22,18 @@
   }
 
   &__dockl + .layout__resize {
-    margin: 0 0 0 -4px;
-    width: 4px;
+    margin: 0 0 0 var(--b3-layout-space-margin);
+    width: var(--b3-layout-space);
   }
 
   &__center + .layout__resize {
-    margin: 0 -4px 0 0;
-    width: 4px;
+    margin: 0 var(--b3-layout-space-margin) 0 0;
+    width: var(--b3-layout-space);
   }
 
   & > .layout__resize {
-    margin: 0 0 -4px 0;
-    height: 4px;
+    margin: 0 0 var(--b3-layout-space-margin) 0;
+    height: var(--b3-layout-space);
   }
 
   &__dockl + .layout__resize:after, &__center + .layout__resize:after, & > .layout__resize:after {

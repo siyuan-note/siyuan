@@ -31,10 +31,12 @@
     --b3-font-family-kbd: var(--b3-font-family-protyle);
     --b3-font-size: 14px;
 
-    /* 背景色 */
+    /* 背景 */
     --b3-body-background: #2e3236;
     --b3-body-background-hl-opacity: 0.24;
     --b3-body-background-hl: 219, 86%, 57%;
+    --b3-layout-space: 4px;
+    --b3-layout-space-margin: -4px;
 
     /* 顶部工具栏 */
     --b3-toolbar-color: var(--b3-theme-on-surface);

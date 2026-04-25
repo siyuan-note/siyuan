@@ -705,13 +705,13 @@ export class Dock {
             // dock 显示
             if (this.position === "Left") {
                 this.layout.element.style.width = this.getMaxSize() + "px";
-                this.layout.element.style.marginRight = "4px";
+                this.layout.element.style.marginRight = "var(--b3-layout-space)";
             } else if (this.position === "Right") {
                 this.layout.element.style.width = this.getMaxSize() + "px";
-                this.layout.element.style.marginLeft = "4px";
+                this.layout.element.style.marginLeft = "var(--b3-layout-space)";
             } else {
                 this.layout.element.style.height = this.getMaxSize() + "px";
-                this.layout.element.style.marginTop = "4px";
+                this.layout.element.style.marginTop = "var(--b3-layout-space)";
             }
             if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag")?.classList.add("fn__hidden");

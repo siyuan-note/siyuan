@@ -243,9 +243,8 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsMaterial" style="p
   <symbol id="iconUncheck" viewBox="30 -930 900 900">
     <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Z"/>
   </symbol>
-  <symbol id="iconListItem" viewBox="-2 -2 36 36">
-    <path d="M7.778 17.683v-3.403h24.222v3.403h-24.222z"></path>
-    <path d="M5.4 16c0 1.49-1.209 2.7-2.7 2.7-1.49 0-2.7-1.21-2.7-2.7s1.21-2.7 2.7-2.7c1.491 0 2.7 1.21 2.7 2.7z"></path>
+  <symbol id="iconListItem" viewBox="30 -930 900 900">
+    <path d="M360-440v-80h480v80H360ZM200-400q-33 0-56.5-23.5T120-480q0-33 23.5-56.5T200-560q33 0 56.5 23.5T280-480q0 33-23.5 56.5T200-400Z"></path>
   </symbol>
   <symbol id="iconDot" viewBox="0 0 20 20">
     <path d="M5.501 9.999c0 2.485 2.016 4.499 4.501 4.499s4.497-2.016 4.497-4.499c0-2.485-2.012-4.497-4.497-4.497s-4.501 2.012-4.501 4.497z"></path>

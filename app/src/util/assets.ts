@@ -392,17 +392,27 @@ export const setBodyHighlight = () => {
         return;
     }
 
-    // 1. 使用 DJB2 算法计算整个字符串的哈希值
     let hash = 5381;
     for (let i = 0; i < name.length; i++) {
-        // hash * 33 + charCode
         hash = (hash << 5) + hash + name.charCodeAt(i);
     }
 
-    // 2. 取模得到 0-359 的色相值
-    // 使用绝对值确保结果为正数
-    const hue = Math.abs(hash) % 360;
+    const absHash = Math.abs(hash);
+    const probability = absHash % 100;
 
-    // 3. 调整 HSL：饱和度设为 75%，亮度设为 35%
-    document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 75%, 35%`);
+    let hue;
+    // 特殊处理：如果是 "SiYuan"，强制进入暖色系
+    if (name === "SiYuan" || probability < 75) {
+        // 【暖色系】: 300° -> 0° -> 60°
+        hue = (absHash % 121) - 60;
+        if (hue < 0) hue += 360;
+    } else {
+        // 【冷色系】: 80° -> 280°
+        hue = 80 + (absHash % 201);
+    }
+
+    document.documentElement.style.setProperty(
+        "--b3-body-background-hl",
+        `${hue}, 75%, 35%`
+    );
 };

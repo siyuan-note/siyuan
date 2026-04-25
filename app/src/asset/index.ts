@@ -30,7 +30,6 @@ export class Asset extends Model {
             options.tab.headElement.classList.add("item--unupdate");
         }
         this.element = options.tab.panelElement;
-        this.element.style.background = "var(--b3-theme-background)";
         this.path = options.path;
         this.pdfId = options.page;
         this.element.addEventListener("click", (event) => {

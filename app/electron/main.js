@@ -485,8 +485,7 @@ const initMainWindow = () => {
     });
 
     currentWindow.webContents.on('render-process-gone', (event, details) => {
-        console.log('Reason: ', details.reason);
-        console.log('Exit code', details.exitCode);
+        writeLog("Render process gone [reason=" + details.reason + ", exitCode=" + details.exitCode + "]");
     });
 
     if (windowState.isDevToolsOpened) {

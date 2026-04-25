@@ -399,7 +399,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 fragment.appendChild(doc.body.firstChild);
             }
 
-            container.innerHTML = '';
             container.appendChild(fragment);
 
             document.body.removeChild(iframe);
@@ -408,7 +407,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
         if (1024 * 512 < siyuanHTML.length) {
-            await streamInsert(tempElement, siyuanHTML)
+            await streamInsert(tempElement, siyuanHTML);
         } else {
             tempElement.innerHTML = siyuanHTML;
         }

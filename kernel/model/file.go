@@ -653,7 +653,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	query = filterQueryInvisibleChars(query)
 	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
-		typeFilter := buildTypeFilter(queryTypes)
+		typeFilter := buildTypeFilter(queryTypes, nil)
 		switch queryMethod {
 		case 0:
 			query = stringQuery(query)

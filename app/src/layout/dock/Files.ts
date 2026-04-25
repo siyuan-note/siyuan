@@ -205,6 +205,7 @@ export class Files extends Model {
         });
         this.actionsElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
+            let isFocus = true;
             while (target && !target.isEqualNode(this.actionsElement)) {
                 const type = target.getAttribute("data-type");
                 if (type === "min") {
@@ -212,6 +213,7 @@ export class Files extends Model {
                     event.preventDefault();
                     event.stopPropagation();
                     window.siyuan.menus.menu.remove();
+                    isFocus = false;
                     break;
                 } else if (type === "focus") {
                     selectOpenTab();
@@ -225,7 +227,9 @@ export class Files extends Model {
                 }
                 target = target.parentElement;
             }
-            setPanelFocus(this.element.parentElement);
+            if (isFocus) {
+                setPanelFocus(this.element.parentElement);
+            }
         });
         this.element.addEventListener("mousedown", (event) => {
             // 点击鼠标滚轮关闭

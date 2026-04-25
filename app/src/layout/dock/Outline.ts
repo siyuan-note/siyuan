@@ -287,6 +287,7 @@ export class Outline extends Model {
                     switch (type) {
                         case "min":
                             getDockByType("outline").toggleModel("outline", false, true);
+                            isFocus = false;
                             break;
                         case "search":
                             inputElement.classList.remove("fn__none");

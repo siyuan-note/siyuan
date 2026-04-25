@@ -688,7 +688,7 @@ export abstract class Constants {
                     type: "outline",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconAlignCenter",
+                    icon: "iconOutline",
                     hotkeyLangId: "outline",
                 }, {
                     type: "inbox",

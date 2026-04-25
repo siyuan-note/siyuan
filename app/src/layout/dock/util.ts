@@ -152,7 +152,7 @@ export const openOutline = async (options: {
         options.title = response.data.name || window.siyuan.languages.untitled;
     }
     newWnd.addTab(new Tab({
-        icon: "iconAlignCenter",
+        icon: "iconOutline",
         title: options.title,
         callback(tab: Tab) {
             tab.addModel(new Outline({

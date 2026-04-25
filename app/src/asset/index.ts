@@ -113,7 +113,7 @@ export class Asset extends Model {
                 <svg><use xlink:href="#iconImage"></use></svg>
               </button>
               <button id="viewOutline" class="toolbarButton b3-tooltips b3-tooltips__ne" aria-label="${window.siyuan.languages.outline}">
-                 <svg><use xlink:href="#iconAlignCenter"></use></svg>
+                 <svg><use xlink:href="#iconOutline"></use></svg>
               </button>
               <button id="viewAttachments" class="toolbarButton fn__none" data-l10n-id="attachments">
                  <span data-l10n-id="attachments_label">Attachments</span>

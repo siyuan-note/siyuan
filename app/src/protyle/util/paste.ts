@@ -376,8 +376,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         return;
     } else if (siyuanHTML) {
         async function streamInsert(container: HTMLElement, bigHtmlString: string) {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
             document.body.appendChild(iframe);
 
             const doc = iframe.contentWindow.document;

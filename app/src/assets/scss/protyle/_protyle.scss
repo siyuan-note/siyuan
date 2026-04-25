@@ -377,11 +377,11 @@
 
   &__icon {
     position: absolute;
-    left: -24px;
+    left: -22px;
     top: 50%;
     opacity: 0;
-    margin: -15px 4px 0 0;
-    padding: 8px 4px 8px 4px;
+    margin: -17px 0 0 0;
+    padding: 9px 3px 9px 3px;
     transition: var(--b3-transition);
     color: var(--b3-theme-on-surface-light);
     cursor: pointer;
@@ -392,8 +392,8 @@
     }
 
     svg {
-      height: 14px;
-      width: 14px;
+      height: 16px;
+      width: 16px;
       float: left;
     }
   }

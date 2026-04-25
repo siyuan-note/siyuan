@@ -388,7 +388,9 @@ export const getThemeMode = () => {
 
 export const setBodyHighlight = () => {
     const name = getWorkspaceName();
-    if (!name) { return; }
+    if (!name) {
+        return;
+    }
 
     let hash = 5381;
     for (let i = 0; i < name.length; i++) {

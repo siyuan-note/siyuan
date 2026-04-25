@@ -62,7 +62,7 @@ export class Tree {
             if (item.type === "bookmark") {
                 iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconBookmark"></use></svg>';
             } else if (item.type === "tag") {
-                iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg>';
+                iconHTML = '<svg class="b3-list-item__graphic"><use xlink:href="#iconTag"></use></svg>';
             } else if (item.type === "backlink") {
                 titleTip = ` aria-label="${escapeAriaLabel(item.hPath)}"`;
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;

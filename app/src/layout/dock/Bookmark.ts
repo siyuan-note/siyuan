@@ -54,7 +54,7 @@ export class Bookmark extends Model {
         this.element.classList.add("fn__flex-column", "file-tree", "sy__bookmark", "dockPanel");
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo fn__flex-1">
-        <svg class="block__logoicon"><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.bookmark}
+        <svg class="block__logoicon"><use xlink:href="#iconBookmarks"></use></svg>${window.siyuan.languages.bookmark}
     </div>
     <span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>

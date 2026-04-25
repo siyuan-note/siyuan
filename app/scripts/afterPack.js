@@ -8,7 +8,7 @@ module.exports = async function afterPack(context) {
 
 async function removeLanguagePacks(appOutDir, packager, platform) {
   // 支持的语言都要保留，否则影响开发者工具字体显示
-  const wantedLanguages = ["ar_SA", "de_DE", "en_US", "es_ES", "fr_FR", "he_IL", "it_IT", "ja_JP", "ko_KR", "pl_PL", "pt_BR", "ru_RU", "sk_SK", "tr_TR", "zh_CHT", "zh_CN"];
+  const wantedLanguages = ["ar_SA", "de_DE", "en_US", "es_ES", "fr_FR", "he_IL", "it_IT", "ja_JP", "ko_KR", "pl_PL", "pt_BR", "ru_RU", "sk_SK", "tr_TR", "uk_UA", "zh_CHT", "zh_CN"];
   const keepPrefixes = new Set(wantedLanguages.map(lang => lang.substring(0, 2)));
 
   let resourcePath;

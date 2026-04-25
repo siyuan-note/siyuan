@@ -204,7 +204,8 @@ const resolveAppLanguage = (languageTags) => {
         "pt": "pt_BR",
         "ru": "ru_RU",
         "sk": "sk_SK",
-        "tr": "tr_TR"
+        "tr": "tr_TR",
+        "uk": "uk_UA",
     };
 
     return languageMapping[language] || "en_US";

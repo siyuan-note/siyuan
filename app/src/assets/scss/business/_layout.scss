@@ -396,7 +396,7 @@
 
     &:hover:not(.dock__item--activefocus),
     &--active {
-      background-color: var(--b3-theme-background-light);
+      background-color: var(--b3-toolbar-hover);
     }
 
     &--activefocus {

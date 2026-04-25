@@ -33,7 +33,8 @@ body {
 
     .layout {
       &__wnd--active .layout-tab-bar .item--focus {
-        box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
+        background-color: var(--b3-theme-surface-light);
+        box-shadow: 0 0 0 1px var(--b3-border-color) inset;
 
         & > .item__text {
           color: var(--b3-theme-on-surface);

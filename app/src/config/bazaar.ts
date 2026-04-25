@@ -312,7 +312,8 @@ export const bazaar = {
             name: item.name,
             repoURL: item.repoURL,
             repoHash: item.repoHash,
-            downloaded: true
+            downloaded: true,
+            isUpdateItem: true
         };
         return `<div class="b3-card" data-obj='${JSON.stringify(dataObj)}'>
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
@@ -487,7 +488,7 @@ type="checkbox">
             plugins: [] as IBazaarItem[],
         }
     },
-    _renderReadme(bazaarType: TBazaarType, data: IBazaarItem, downloaded: boolean) {
+    _renderReadme(bazaarType: TBazaarType, data: IBazaarItem, downloaded: boolean, isUpdateItem = false) {
         const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
         const urls = data.repoURL.split("/");
         urls.pop();
@@ -507,7 +508,8 @@ type="checkbox">
             name: data.name,
             repoURL: data.repoURL,
             repoHash: data.repoHash,
-            downloaded
+            downloaded,
+            isUpdateItem
         };
         readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
@@ -595,7 +597,7 @@ type="checkbox">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
-        if (downloaded) {
+        if (downloaded && !isUpdateItem) {
             const mdElement = readmeElement.querySelector(".item__readme");
             mdElement.innerHTML = data.preferredReadme || "";
             highlightRender(mdElement);
@@ -914,7 +916,7 @@ type="checkbox">
                         } else {
                             data = (dataObj.downloaded ? bazaar._data.downloaded : bazaar._data[bazaarType]).find((item: IBazaarItem) => item.repoURL === dataObj.repoURL);
                         }
-                        bazaar._renderReadme(bazaarType, data, dataObj.downloaded);
+                        bazaar._renderReadme(bazaarType, data, dataObj.downloaded, !!dataObj.isUpdateItem);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -1103,9 +1105,12 @@ type="checkbox">
         }
         if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
             const dataObj = JSON.parse(bazaar.element.querySelector("#configBazaarReadme > .item__side").getAttribute("data-obj"));
-            bazaar._renderReadme((dataObj.bazaarType) as TBazaarType,
+            bazaar._renderReadme(
+                (dataObj.bazaarType) as TBazaarType,
                 response.data.packages.find((item: IBazaarItem) => item.repoURL === dataObj.repoURL),
-                dataObj.downloaded);
+                dataObj.downloaded,
+                !!dataObj.isUpdateItem
+            );
         }
         let html = "";
         response.data.packages.forEach((item: IBazaarItem) => {

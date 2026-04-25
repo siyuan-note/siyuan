@@ -408,10 +408,17 @@ export const setBodyHighlight = () => {
         return;
     }
 
-    // 1. 简单的哈希处理：累加前两个字符的编码，增加中文的区分度
-    const charCodeSum = name.charCodeAt(0) + (name.length > 1 ? name.charCodeAt(1) : 0);
-    // 2. 使用较大的质数(137)扰乱，确保 HSL 颜色分布更均匀
-    const hue = (charCodeSum * 137) % 360;
-    // 3. 调整 HSL：饱和度设为 75%(更艳)，亮度设为 45%(更浓郁)
+    // 1. 使用 DJB2 算法计算整个字符串的哈希值
+    let hash = 5381;
+    for (let i = 0; i < name.length; i++) {
+        // hash * 33 + charCode
+        hash = (hash << 5) + hash + name.charCodeAt(i);
+    }
+
+    // 2. 取模得到 0-359 的色相值
+    // 使用绝对值确保结果为正数
+    const hue = Math.abs(hash) % 360;
+
+    // 3. 调整 HSL：饱和度设为 75%，亮度设为 35%
     document.documentElement.style.setProperty("--b3-body-background-hl", `${hue}, 75%, 35%`);
 };

@@ -688,7 +688,7 @@ export abstract class Constants {
                     type: "outline",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconAlignCenter",
+                    icon: "iconOutline",
                     hotkeyLangId: "outline",
                 }, {
                     type: "inbox",
@@ -700,7 +700,7 @@ export abstract class Constants {
                     type: "bookmark",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconBookmark",
+                    icon: "iconBookmarks",
                     hotkeyLangId: "bookmark",
                 }, {
                     type: "tag",

@@ -8,7 +8,7 @@ import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import {escapeLessThans, escapeHtml} from "../../util/escape";
+import {escapeLessThans, escapeHtml, escapeAttr} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
@@ -172,7 +172,7 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeLessThans(title)}</span>
+<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeHtml(title)}</span>
 </div><div>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
@@ -208,7 +208,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
     </div>
     <div class="fn__flex">
         ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span><span class="fn__space"></span>` : ""}
-        <span class="b3-list-item__text b3-list-item__meta">${escapeLessThans(title)}</span>
+        <span class="b3-list-item__text b3-list-item__meta">${escapeHtml(title)}</span>
     </div>
 </div>`;
         }
@@ -901,7 +901,7 @@ const getUnRefListMobile = (element: Element, page = 1) => {
     ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__text b3-list-item__meta">${escapeLessThans(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta">${escapeHtml(title)}</span>
 </div>`;
         });
         element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>

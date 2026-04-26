@@ -444,6 +444,11 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 	wg.Wait()
 }
 
+func (p *KernelPlugin) handleHttpRequest(request *HttpRequest, scope AccessScope) (response *R, err error) {
+	// TODO: Invoke siyuan.server[scope].handler
+	return
+}
+
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
 func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest) []*JsonRpcProcessingResponse {
@@ -649,7 +654,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 
 	done := make(chan TaskResult, 1)
 
-	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		lifecycle, err := getJsContextValue(rt, []any{"siyuan", "plugin", "lifecycle"})
 		if err != nil {
 			return
@@ -668,6 +673,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 		hookValue := pluginObj.Get(name)
 		hook, ok := goja.AssertFunction(hookValue)
 		if !ok {
+			err = fmt.Errorf("globalThis.siyuan.plugin.lifecycle.%s not bound to a function", name)
 			return
 		}
 
@@ -675,12 +681,13 @@ func (p *KernelPlugin) invokeHook(name string) {
 			done <- result
 		}, rt, true, hook, lifecycle)
 		return
-	}, nil)
-
+	}, func(_ *goja.Runtime, _ any, err error) {
+		if err != nil {
+			done <- TaskResult{err: err}
+		}
+	})
 	if runErr != nil {
-		close(done)
-		err = runErr
-		return
+		done <- TaskResult{err: runErr}
 	}
 
 	result := <-done

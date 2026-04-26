@@ -894,14 +894,14 @@ const getUnRefListMobile = (element: Element, page = 1) => {
         }
         let resultHTML = "";
         response.data.blocks.forEach((item: IBlock, index: number) => {
-            const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+            const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
             resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
 <div class="b3-list-item__first">
     <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
     ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__text b3-list-item__meta">${escapeHtml(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta">${title}</span>
 </div>`;
         });
         element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>

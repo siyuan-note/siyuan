@@ -200,6 +200,7 @@
       position: relative;
       background-color: var(--b3-theme-background);
       border-bottom: 1px solid var(--b3-theme-background-light);
+      padding: 0 4px;
 
       &::-webkit-scrollbar {
         display: none;
@@ -223,12 +224,8 @@
         flex-shrink: 0;
         overflow: hidden;
         color: var(--b3-theme-on-surface);
-        margin: 6px 0 6px 8px;
+        margin: 6px 4px;
         border-radius: var(--b3-border-radius);
-
-        &:last-child {
-          margin-right: 8px;
-        }
 
         &--full {
           max-width: none;
@@ -250,7 +247,7 @@
         &--readonly {
           cursor: default;
           max-width: none;
-          margin-left: 0;
+          margin-left: -8px;
         }
 
         &--pin {

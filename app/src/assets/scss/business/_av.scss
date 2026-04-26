@@ -66,16 +66,15 @@
       background-color: transparent;
 
       .item__graphic {
-        height: calc(1.625em - 10px);
-        width: calc(1.625em - 10px);
-        padding: 10px 5px 10px 8px;
-        line-height: calc(1.625em - 10px);
+        height: calc(1.625em - 8px);
+        width: calc(1.625em - 8px);
+        line-height: calc(1.625em - 8px);
+        padding: 8px 0 8px 8px;
         font-size: inherit;
         text-align: center;
       }
 
       .item__text {
-        padding-left: 5px;
         line-height: normal;
       }
     }

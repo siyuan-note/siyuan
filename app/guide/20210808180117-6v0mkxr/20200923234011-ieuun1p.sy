@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260315155722"
+		"updated": "20260426175923"
 	},
 	"Children": [
 		{
@@ -60,7 +60,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528120135-bznvpp6",
-				"updated": "20241018102340"
+				"updated": "20260426175923"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528120142-hprb4ja",
-						"updated": "20241018102340"
+						"updated": "20260426175923"
 					},
 					"Children": [
 						{
@@ -91,7 +91,7 @@
 							"HeadingLevel": 2,
 							"Properties": {
 								"id": "20201225220954-keui8uy",
-								"updated": "20241018102340"
+								"updated": "20260426175923"
 							},
 							"Children": [
 								{
@@ -106,7 +106,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20201225220954-dlgzk1o",
-								"updated": "20241018102340"
+								"updated": "20260426175923"
 							},
 							"Children": [
 								{
@@ -118,7 +118,7 @@
 									},
 									"Properties": {
 										"id": "20201225220954-e913snx",
-										"updated": "20241018102340"
+										"updated": "20260426175923"
 									},
 									"Children": [
 										{
@@ -126,7 +126,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20210131161940-kfs31q6",
-												"updated": "20241018102340"
+												"updated": "20260426175923"
 											},
 											"Children": [
 												{
@@ -140,7 +140,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ menu of the doc tree panel, and create a new doc under the notebook"
+													"Data": "​ menu of the doc panel, and create a new doc under the notebook"
 												}
 											]
 										}

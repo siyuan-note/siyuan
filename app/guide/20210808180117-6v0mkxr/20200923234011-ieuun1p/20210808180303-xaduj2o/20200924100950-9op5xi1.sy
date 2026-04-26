@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20251024173332"
+		"updated": "20260426175817"
 	},
 	"Children": [
 		{
@@ -2912,12 +2912,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20250115160409"
+				"updated": "20260426175817"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Doc tree"
+					"Data": "Document"
 				}
 			]
 		},
@@ -15126,12 +15126,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20250929214205"
+				"updated": "20260426175814"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Doc Tree panel"
+					"Data": "Document panel"
 				}
 			]
 		},

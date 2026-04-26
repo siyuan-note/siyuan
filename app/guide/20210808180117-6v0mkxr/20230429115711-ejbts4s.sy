@@ -7,7 +7,7 @@
 		"id": "20230429115711-ejbts4s",
 		"title": "Glossary",
 		"type": "doc",
-		"updated": "20250115163213"
+		"updated": "20260426180041"
 	},
 	"Children": [
 		{
@@ -595,7 +595,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429120050-09mig9d",
-				"updated": "20230429120115"
+				"updated": "20260426180041"
 			},
 			"Children": [
 				{
@@ -609,12 +609,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429120050-c9xun18",
-				"updated": "20230429120050"
+				"updated": "20260426180041"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Panels refer to functional areas opened from the dock, such as the document tree, outline, and backlinks."
+					"Data": "Panels refer to functional areas opened from the dock, such as the document panel, outline, and backlinks."
 				}
 			]
 		},

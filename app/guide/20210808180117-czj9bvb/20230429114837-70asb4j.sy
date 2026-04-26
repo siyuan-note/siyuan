@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20250115163216"
+		"updated": "20260426175514"
 	},
 	"Children": [
 		{
@@ -645,7 +645,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-krbd42o",
-				"updated": "20230429102142"
+				"updated": "20260426175514"
 			},
 			"Children": [
 				{
@@ -659,12 +659,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429114837-5m6ncf0",
-				"updated": "20230429102409"
+				"updated": "20260426175514"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "面板指的是从停靠栏上打开的功能区域，比如文档树、大纲和反链等。"
+					"Data": "面板指的是从停靠栏上打开的功能区域，比如文档、大纲和反链等。"
 				}
 			]
 		},

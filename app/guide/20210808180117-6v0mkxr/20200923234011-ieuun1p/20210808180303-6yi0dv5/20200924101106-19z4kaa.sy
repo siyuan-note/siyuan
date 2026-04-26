@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20230419153642"
+		"updated": "20260426180016"
 	},
 	"Children": [
 		{
@@ -209,7 +209,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210118104710-tmyyac4"
+				"id": "20210118104710-tmyyac4",
+				"updated": "20260426180016"
 			},
 			"Children": [
 				{
@@ -252,7 +253,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118104710-2sb91b3",
-				"updated": "20210512160955"
+				"updated": "20260426180016"
 			},
 			"Children": [
 				{
@@ -266,7 +267,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -275,7 +276,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", the named content block will be displayed with a frame in the editor. If you name and memo the document block, when the mouse is hovering over the doc tree document, the relevant naming and memo of the document will appear."
+					"Data": "​, the named content block will be displayed with a frame in the editor. If you name and memo the document block, when the mouse is hovering over the doc in the document panel, the relevant naming and memo of the document will appear."
 				}
 			]
 		},

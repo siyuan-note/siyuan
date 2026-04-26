@@ -129,7 +129,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         </span>
         <span class="fn__space"></span>
         <span id="searchAsset" aria-label="${window.siyuan.languages.searchAssetContent}" class="block__icon block__icon--show ariaLabel" data-position="9south">
-            <svg><use xlink:href="#iconExact"></use></svg>
+            <svg><use xlink:href="#iconSearchAsset"></use></svg>
         </span>
     </div>
     <div class="b3-form__icon search__header">

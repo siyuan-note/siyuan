@@ -3,6 +3,7 @@ appId: "org.b3log.siyuan"
 asar: false
 compression: "normal"
 copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
+license: "AGPL-3.0"
 artifactName: "siyuan-${version}-${os}-arm64.${ext}"
 extraMetadata:
   main: "electron/main.js"
@@ -16,7 +17,7 @@ extraFiles:
     to: "LICENSE"
 
 linux:
-  icon: "src/assets/icon.icns"
+  icon: "src/assets/icon.png"
   category: "Utility"
   executableName: "siyuan"
   desktop: {
@@ -36,6 +37,8 @@ linux:
     - target: "AppImage"
       arch: "arm64"
     - target: "deb"
+      arch: "arm64"
+    - target: "rpm"
       arch: "arm64"
 
 extraResources:

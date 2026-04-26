@@ -111,7 +111,7 @@ export class Outline extends Model {
     </span>
     <span class="fn__space"></span>
     <span data-type="expandLevel" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandLevel}">
-        <svg><use xlink:href="#iconList"></use></svg>
+        <svg><use xlink:href="#iconExpandLevel"></use></svg>
     </span>
     <span class="fn__space"></span>
     <span data-type="expand" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">

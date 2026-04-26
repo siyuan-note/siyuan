@@ -55,6 +55,7 @@ export class Tree {
     }
 
     private genHTML(data: (IBlockTree & { folded?: boolean })[]) {
+        const isM = isMobile();
         let html = `<ul${data[0].depth === 0 ? " class='b3-list b3-list--background'" : ""}>`;
         data.forEach((item) => {
             let titleTip = "";
@@ -68,7 +69,7 @@ export class Tree {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
                 titleTip = ` aria-label="${escapeAriaLabel(Lute.BlockDOM2Content(item.name))}"`;
-                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: 16px;"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
+                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: ${isM ? 20 : 16}px;"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
             if (item.count) {
@@ -76,16 +77,16 @@ export class Tree {
             }
             const hasChild = (item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0);
             let style = "";
-            if (isMobile()) {
+            if (isM) {
                 if (item.depth > 0) {
                     style = `padding-left: ${(item.depth - 1) * 20 + 24}px`;
                 }
             } else {
                 style = `padding-left: ${(item.depth * 18) || 4}px;margin-right: 2px`;
             }
-            const showArrow = hasChild || (item.type === "backlink" && !isMobile());
+            const showArrow = hasChild || (item.type === "backlink" && !isM);
             // data-id 需要添加 item.id，否则大纲更新时 name 不一致导致 https://github.com/siyuan-note/siyuan/issues/11843
-            html += `<li class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}" 
+            html += `<li class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}" 
 ${item.id ? 'data-node-id="' + item.id + '"' : ""} 
 ${item.box ? 'data-notebook-id="' + item.box + '"' : ""} 
 style="--file-toggle-width:${item.depth === 0 ? 22 : ((item.depth + 1) * 18)}px" 
@@ -112,6 +113,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
     }
 
     private genBlockHTML(data: IBlock[], show = false, type: string) {
+        const isM = isMobile();
         let html = `<ul class="${!show ? "fn__none" : ""}">`;
         data.forEach((item: IBlock & {
             subType: string;
@@ -127,7 +129,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
             }
             let iconHTML;
             if (type === "outline") {
-                iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: 16px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
+                iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: ${isM?20:16}px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
             } else {
                 if (item.type === "NodeDocument") {
                     iconHTML = `<span data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span>`;
@@ -136,14 +138,14 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
                 }
             }
             let style = "";
-            if (isMobile()) {
+            if (isM) {
                 if (item.depth > 0) {
                     style = `padding-left: ${(item.depth - 1) * 20 + 24}px`;
                 }
             } else {
                 style = `padding-left: ${item.depth * 18 || 4}px;margin-right: 2px`;
             }
-            html += `<li class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}"  
+            html += `<li class="b3-list-item${isM ? "" : " b3-list-item--hide-action"}"  
 style="--file-toggle-width:${item.depth === 0 ? 22 : ((item.depth + 1) * 18)}px" 
 data-node-id="${item.id}" 
 data-ref-text="${encodeURIComponent(item.refText)}" 

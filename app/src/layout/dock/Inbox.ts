@@ -39,7 +39,6 @@ export class Inbox extends Model {
         <span class="fn__space"></span>
         <span class="inboxSelectCount ft__smaller ft__on-surface"></span>
     </div>
-    <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
     <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>

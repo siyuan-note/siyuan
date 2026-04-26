@@ -43,29 +43,29 @@
     }
 
     &__graphic {
-      width: 18px;
-      height: 18px;
-      line-height: 18px;
-      font-size: 18px;
+      width: 20apx;
+      height: 20px;
+      line-height: 20px;
+      font-size: 20px;
     }
 
     &__toggle {
       height: 32px;
-      padding: 4px;
+      padding: 4px 4px 4px 0;
     }
 
     &__arrow {
-      height: 12px;
-      width: 12px;
+      height: 16px;
+      width: 16px;
     }
 
     &__action {
-      padding: 8px;
-      height: 16px;
+      padding: 6px;
+      height: 20px;
 
       svg {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
       }
     }
   }
@@ -104,11 +104,11 @@
   }
 
   &__icon {
-    height: 16px;
-    width: 16px;
+    height: 20px;
+    width: 20px;
     padding: 10px;
     flex-shrink: 0;
-    margin: 6px 4px;
+    margin: 4px;
     color: var(--b3-theme-on-surface);
     border-radius: var(--b3-border-radius);
 
@@ -339,10 +339,10 @@
     }
 
     svg {
-      height: 16px;
-      width: 16px;
+      height: 20px;
+      width: 20px;
       float: left;
-      padding: 13px 9px;
+      padding: 11px 7px;
       margin: 3px;
       border-radius: var(--b3-border-radius);
 

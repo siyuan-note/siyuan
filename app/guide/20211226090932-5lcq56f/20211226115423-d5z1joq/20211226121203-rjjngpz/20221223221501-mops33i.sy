@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20241018105514"
+		"updated": "20260426180222"
 	},
 	"Children": [
 		{
@@ -253,7 +253,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230219092911-kawl9n2",
-				"updated": "20230324110737"
+				"updated": "20260426180222"
 			},
 			"Children": [
 				{
@@ -282,7 +282,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230219092911-jluw0db",
-				"updated": "20230324110737"
+				"updated": "20260426180222"
 			},
 			"Children": [
 				{
@@ -331,7 +331,7 @@
 					},
 					"Properties": {
 						"id": "20230219092911-i1eqodd",
-						"updated": "20230219092941"
+						"updated": "20260426180222"
 					},
 					"Children": [
 						{
@@ -339,12 +339,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230219092911-5sewtmn",
-								"updated": "20230219092941"
+								"updated": "20260426180222"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在文檔樹面板中右擊文檔或者在編輯器中點擊文檔塊標 "
+									"Data": "在文檔面板中右擊文檔或者在編輯器中點擊文檔塊標 "
 								},
 								{
 									"Type": "NodeTextMark",

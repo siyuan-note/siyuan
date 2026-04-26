@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -28,6 +29,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/samber/lo"
@@ -444,8 +446,30 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 	wg.Wait()
 }
 
-func (p *KernelPlugin) handleHttpRequest(request *HttpRequest, scope AccessScope) (response *R, err error) {
-	// TODO: Invoke siyuan.server[scope].handler
+func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (response *HttpResponse, err error) {
+	// TODO: echo request for testing, replace with invoking siyuan.server[scope].http.handler
+	response = &HttpResponse{
+		StatusCode: http.StatusOK,
+		Body: &ResponseBody{
+			Data: &ResponseSerializedData{
+				Type: SerializedTypeJSON,
+				Data: request,
+			},
+		},
+	}
+	// bind data get methods using ObjectSetDataMethods
+	// request.request.body.data?
+	// request.request.body.form?.files[*].data
+	return
+}
+
+func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
+	// TODO: Invoke siyuan.server[scope].ws.handler
+	return
+}
+
+func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
+	// TODO: Invoke siyuan.server[scope].sse.handler
 	return
 }
 

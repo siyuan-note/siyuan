@@ -22,7 +22,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"math"
 	"net"
 	"net/http"
 	"net/textproto"
@@ -56,12 +55,9 @@ func echo(c *gin.Context) {
 
 	var (
 		password      string
-		passwordSet   bool
 		multipartForm *MultipartForm
 		rawData       any
 	)
-
-	password, passwordSet = c.Request.URL.User.Password()
 
 	if form, err := c.MultipartForm(); err != nil || nil == form {
 		multipartForm = nil
@@ -81,10 +77,10 @@ func echo(c *gin.Context) {
 					logging.LogWarnf("echo open form [%s] file [%s] error: %s", k, handler.Filename, err.Error())
 				} else {
 					content := make([]byte, handler.Size)
-					if _, err := file.Read(content); err != nil {
+					if n, err := file.Read(content); err != nil {
 						logging.LogWarnf("echo read form [%s] file [%s] error: %s", k, handler.Filename, err.Error())
 					} else {
-						files[i].Content = base64.StdEncoding.EncodeToString(content)
+						files[i].Content = base64.StdEncoding.EncodeToString(content[:n])
 					}
 				}
 			}
@@ -97,8 +93,8 @@ func echo(c *gin.Context) {
 		logging.LogWarnf("echo get raw data error: %s", err.Error())
 		rawData = nil
 	}
-	c.Request.ParseForm()
-	c.Request.ParseMultipartForm(math.MaxInt64)
+
+	username, password, ok := c.Request.BasicAuth()
 
 	ret.Data = map[string]any{
 		"Context": map[string]any{
@@ -144,10 +140,9 @@ func echo(c *gin.Context) {
 			"Port":            c.Request.URL.Port(),
 		},
 		"User": map[string]any{
-			"Username":    c.Request.URL.User.Username(),
-			"Password":    password,
-			"PasswordSet": passwordSet,
-			"String":      c.Request.URL.User.String(),
+			"Exists":   ok,
+			"Username": username,
+			"Password": password,
 		},
 	}
 }

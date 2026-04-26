@@ -1,12 +1,12 @@
 @use "../util/mixin";
 
 .b3-card {
-  box-shadow: var(--b3-point-shadow);
+  box-shadow: var(--b3-point-shadow) inset;
   background-color: var(--b3-theme-surface);
   border-radius: var(--b3-border-radius);
   overflow: hidden;
   position: relative;
-  transition: var(--b3-transition);
+  transition: var(--b3-background-transition);
   cursor: pointer;
   display: flex;
 

@@ -40,17 +40,35 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
             }
         }
     }
-    if (!window.hljs.getLanguage(language)) {
-        language = "plaintext";
+
+    const useShiki = window.siyuan.config.appearance.codeBlockEngine === "shiki";
+
+    if (useShiki) {
+        import(/* webpackChunkName: "shiki-init" */ "../render/shikiInit").then((shiki) => {
+            return shiki.ensureShikiLang(language).then((resolvedLang) => {
+                const result = shiki.shikiHighlight(text.substr(0, text.length - 1), resolvedLang);
+                wbrElement.insertAdjacentHTML("afterend", result.html + "<br>");
+                range.setStart(wbrElement.nextSibling, 0);
+                const brElement = wbrElement.parentElement.querySelector("br");
+                setLastNodeRange(brElement.previousSibling as Element, range, false);
+                brElement.remove();
+                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                wbrElement.remove();
+            });
+        });
+    } else {
+        if (!window.hljs.getLanguage(language)) {
+            language = "plaintext";
+        }
+        wbrElement.insertAdjacentHTML("afterend", window.hljs.highlight(text.substr(0, text.length - 1), {
+            language,
+            ignoreIllegals: true
+        }).value + "<br>");
+        range.setStart(wbrElement.nextSibling, 0);
+        const brElement = wbrElement.parentElement.querySelector("br");
+        setLastNodeRange(brElement.previousSibling as Element, range, false);
+        brElement.remove();
+        updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+        wbrElement.remove();
     }
-    wbrElement.insertAdjacentHTML("afterend", window.hljs.highlight(text.substr(0, text.length - 1), {
-        language,
-        ignoreIllegals: true
-    }).value + "<br>");
-    range.setStart(wbrElement.nextSibling, 0);
-    const brElement = wbrElement.parentElement.querySelector("br");
-    setLastNodeRange(brElement.previousSibling as Element, range, false);
-    brElement.remove();
-    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-    wbrElement.remove();
 };

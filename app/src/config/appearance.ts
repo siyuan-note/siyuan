@@ -12,6 +12,7 @@ import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {useShell} from "../util/pathName";
 import {setStatusBar} from "./util/setStatusBar";
+import {highlightRender} from "../protyle/render/highlightRender";
 
 export const appearance = {
     element: undefined as Element,
@@ -85,10 +86,21 @@ export const appearance = {
         </div>
         <div class="fn__hr"></div>
         <div class="fn__flex config__item">
+            <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.codeBlockEngine || "Code Block Engine"}</div>
+            <span class="fn__space"></span>
+            <select id="codeBlockEngine" class="b3-select fn__size200">
+                <option value="hljs" ${window.siyuan.config.appearance.codeBlockEngine !== "shiki" ? "selected" : ""}>Highlight.js</option>
+                <option value="shiki" ${window.siyuan.config.appearance.codeBlockEngine === "shiki" ? "selected" : ""}>Shiki</option>
+            </select>
+        </div>
+        <div class="fn__hr"></div>
+        <div class="fn__flex config__item">
             <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.appearance2}</div>
             <span class="fn__space"></span>
             <select id="codeBlockThemeLight" class="b3-select fn__size200">
-                ${genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE, window.siyuan.config.appearance.codeBlockThemeLight)}
+                ${window.siyuan.config.appearance.codeBlockEngine === "shiki"
+                    ? genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE_SHIKI, window.siyuan.config.appearance.codeBlockThemeLight)
+                    : genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE, window.siyuan.config.appearance.codeBlockThemeLight)}
             </select>
         </div>
         <div class="fn__hr"></div>
@@ -96,7 +108,9 @@ export const appearance = {
             <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.appearance3}</div>
             <span class="fn__space"></span>
             <select id="codeBlockThemeDark" class="b3-select fn__size200">
-                ${genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE, window.siyuan.config.appearance.codeBlockThemeDark)}
+                ${window.siyuan.config.appearance.codeBlockEngine === "shiki"
+                    ? genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE_SHIKI, window.siyuan.config.appearance.codeBlockThemeDark)
+                    : genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE, window.siyuan.config.appearance.codeBlockThemeDark)}
             </select>
         </div>
     </div>
@@ -190,6 +204,7 @@ export const appearance = {
             icon: (appearance.element.querySelector("#icon") as HTMLSelectElement).value,
             mode: modeElementValue === 2 ? (OSTheme === "light" ? 0 : 1) : modeElementValue,
             modeOS: modeElementValue === 2,
+            codeBlockEngine: (appearance.element.querySelector("#codeBlockEngine") as HTMLSelectElement).value,
             codeBlockThemeDark: (appearance.element.querySelector("#codeBlockThemeDark") as HTMLSelectElement).value,
             codeBlockThemeLight: (appearance.element.querySelector("#codeBlockThemeLight") as HTMLSelectElement).value,
             themeDark,
@@ -231,7 +246,24 @@ export const appearance = {
             useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
         });
         /// #endif
+        const engineSelect = appearance.element.querySelector("#codeBlockEngine") as HTMLSelectElement;
+        engineSelect.addEventListener("change", () => {
+            const isShiki = engineSelect.value === "shiki";
+            const lightSelect = appearance.element.querySelector("#codeBlockThemeLight") as HTMLSelectElement;
+            const darkSelect = appearance.element.querySelector("#codeBlockThemeDark") as HTMLSelectElement;
+            if (isShiki) {
+                lightSelect.innerHTML = genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE_SHIKI, "github-light");
+                darkSelect.innerHTML = genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE_SHIKI, "github-dark");
+            } else {
+                lightSelect.innerHTML = genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_LIGHT_CODE, "github");
+                darkSelect.innerHTML = genOptions(Constants.SIYUAN_CONFIG_APPEARANCE_DARK_CODE, "base16/dracula");
+            }
+            appearance._send();
+        });
         appearance.element.querySelectorAll("select").forEach(item => {
+            if (item.id === "codeBlockEngine") {
+                return;
+            }
             item.addEventListener("change", () => {
                 appearance._send();
             });
@@ -278,5 +310,12 @@ export const appearance = {
         }
         loadAssets(data);
         document.querySelector("#barMode use")?.setAttribute("xlink:href", `#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}`);
+        // Force re-render all code blocks when engine or theme changes
+        document.querySelectorAll('.code-block .hljs[data-render="true"]').forEach((item) => {
+            item.removeAttribute("data-render");
+        });
+        document.querySelectorAll(".protyle-wysiwyg").forEach((wysiwyg) => {
+            highlightRender(wysiwyg);
+        });
     }
 };

@@ -507,7 +507,7 @@ ${getIconScript(servePath)}
         document.title = response.data.name
         window.siyuan = {
           config: {
-            appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
+            appearance: { mode: 0, codeBlockEngine: "hljs", codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
             editor: { 
               allowSVGScriptTip: ${window.siyuan.config.editor.allowSVGScript},
               allowHTMLBLockScript: ${window.siyuan.config.editor.allowHTMLBLockScript},
@@ -801,7 +801,7 @@ ${getIconScript(servePath)}
     ${mobileHtml.js}
     window.siyuan = {
       config: {
-        appearance: { mode: ${mode}, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
+        appearance: { mode: ${mode}, codeBlockEngine: "hljs", codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },
         editor: { 
           codeLineWrap: true,
           fontSize: ${window.siyuan.config.editor.fontSize},

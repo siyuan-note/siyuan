@@ -1164,6 +1164,7 @@
   "appearance3": "深色模式下代碼塊語法突顯主題",
   "appearance2": "淺色模式下代碼塊語法突顯主題",
   "appearance1": "代碼塊主題",
+  "codeBlockEngine": "程式碼區塊渲染引擎",
   "appearance10": "關閉按鈕設置",
   "appearance11": "點擊關閉按鈕後縮小到託盤中",
   "appearance16": "隱藏底部狀態欄",

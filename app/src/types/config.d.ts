@@ -199,6 +199,10 @@ declare namespace Config {
          */
         closeButtonBehavior: number;
         /**
+         * Code block rendering engine: "hljs" or "shiki"
+         */
+        codeBlockEngine: string;
+        /**
          * Dark code block theme
          */
         codeBlockThemeDark: string;

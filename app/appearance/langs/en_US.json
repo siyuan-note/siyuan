@@ -1164,6 +1164,7 @@
   "appearance3": "Select the syntax highlighting theme used in dark mode",
   "appearance2": "Select the syntax highlighting theme used in light mode",
   "appearance1": "Code Block Theme",
+  "codeBlockEngine": "Code block rendering engine",
   "appearance10": "Close button settings",
   "appearance11": "shrink to the tray after clicking the close button",
   "appearance16": "Hide bottom status bar",

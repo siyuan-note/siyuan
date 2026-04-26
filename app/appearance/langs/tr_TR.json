@@ -1164,6 +1164,7 @@
   "appearance3": "Karanlık modda kullanılacak sözdizimi teması",
   "appearance2": "Aydınlık modda kullanılacak sözdizimi teması",
   "appearance1": "Kod bloğu teması",
+  "codeBlockEngine": "Kod bloğu işleme motoru",
   "appearance10": "Kapatma düğmesi ayarları",
   "appearance11": "Kapatma tuşuna tıklayınca simge durumuna küçült",
   "appearance16": "Alt durum çubuğunu gizle",

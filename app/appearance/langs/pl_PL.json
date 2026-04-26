@@ -1164,6 +1164,7 @@
   "appearance3": "Wybierz motyw podświetlenia składni używany w trybie ciemnym",
   "appearance2": "Wybierz motyw podświetlenia składni używany w trybie jasnym",
   "appearance1": "Motyw bloku kodu",
+  "codeBlockEngine": "Silnik renderowania bloku kodu",
   "appearance10": "Ustawienia przycisku zamykania",
   "appearance11": "zmniejsz do zasobnika po kliknięciu przycisku zamykania",
   "appearance16": "Ukryj dolny pasek stanu",

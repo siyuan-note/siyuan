@@ -1164,6 +1164,7 @@
   "appearance3": "Seleziona il tema di evidenziazione della sintassi utilizzato in modalità scura",
   "appearance2": "Seleziona il tema di evidenziazione della sintassi utilizzato in modalità chiara",
   "appearance1": "Tema del blocco di codice",
+  "codeBlockEngine": "Motore di rendering del blocco di codice",
   "appearance10": "Impostazioni del pulsante di chiusura",
   "appearance11": "Riduci a icona dopo aver cliccato sul pulsante di chiusura",
   "appearance16": "Nascondi la barra di stato inferiore",

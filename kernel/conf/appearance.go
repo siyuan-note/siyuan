@@ -29,6 +29,7 @@ type Appearance struct {
 	Icons               []string           `json:"icons"`               // 图标列表
 	Icon                string             `json:"icon"`                // 选择的图标
 	IconVer             string             `json:"iconVer"`             // 选择的图标版本
+	CodeBlockEngine     string             `json:"codeBlockEngine"`     // 代码块渲染引擎：hljs 或 shiki
 	CodeBlockThemeLight string             `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
 	CodeBlockThemeDark  string             `json:"codeBlockThemeDark"`  // 暗黑模式下代码块主题
 	Lang                string             `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
@@ -45,6 +46,7 @@ func NewAppearance() *Appearance {
 		ThemeDark:           "midnight",
 		ThemeLight:          "daylight",
 		Icon:                "material",
+		CodeBlockEngine:     "hljs",
 		CodeBlockThemeLight: "github",
 		CodeBlockThemeDark:  "base16/dracula",
 		Lang:                "en_US",

@@ -199,6 +199,19 @@ interface Window {
             name: string
         };
     };
+    shiki: {
+        createHighlighterCore: (options: any) => Promise<any>;
+        createOnigurumaEngine: () => any;
+        bundledLanguages: Record<string, any>;
+        bundledThemes: Record<string, any>;
+    };
+    siyuanShiki: {
+        highlighter: any;
+        loadedLanguages: Set<string>;
+        loadedThemes: Set<string>;
+        bundledLanguages: Record<string, any>;
+        bundledThemes: Record<string, any>;
+    };
     katex: {
         renderToString(math: string, option: {
             displayMode: boolean;

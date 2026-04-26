@@ -4,6 +4,134 @@ import {focusByOffset} from "../util/selection";
 import {setCodeTheme} from "./util";
 import {escapeHtml} from "../../util/escape";
 
+type ShikiModule = typeof import("./shikiInit");
+
+const isShikiEngine = () => {
+    return window.siyuan.config.appearance.codeBlockEngine === "shiki";
+};
+
+const getLanguageFromBlock = (block: HTMLElement, isPreview: boolean): string => {
+    let language: string;
+    if (isPreview) {
+        language = block.parentElement.getAttribute("data-language");
+    } else if (block.previousElementSibling) {
+        language = block.previousElementSibling.firstElementChild.textContent;
+    } else {
+        // bazaar readme
+        language = block.className.replace("language-", "");
+    }
+    return language;
+};
+
+const applyBlockStyles = (block: HTMLElement, hljsElement: HTMLElement) => {
+    const autoEnter = block.parentElement.getAttribute("linewrap");
+    const ligatures = block.parentElement.getAttribute("ligatures");
+    if (autoEnter === "true" || (autoEnter !== "false" && window.siyuan.config.editor.codeLineWrap)) {
+        hljsElement.style.setProperty("white-space", "pre-wrap");
+        hljsElement.style.setProperty("word-break", "break-word");
+    } else {
+        hljsElement.style.setProperty("white-space", "pre");
+        hljsElement.style.setProperty("word-break", "initial");
+    }
+    if (ligatures === "true" || (ligatures !== "false" && window.siyuan.config.editor.codeLigatures)) {
+        hljsElement.style.fontVariantLigatures = "normal";
+    } else {
+        hljsElement.style.fontVariantLigatures = "none";
+    }
+};
+
+const applyLineNumbers = (block: HTMLElement, isPreview: boolean, zoom: number) => {
+    const lineNumber = block.parentElement.getAttribute("linenumber");
+    if (block.firstElementChild) {
+        if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
+            block.firstElementChild.className = "protyle-linenumber__rows";
+            block.firstElementChild.setAttribute("contenteditable", "false");
+            lineNumberRender(block, zoom);
+            block.style.display = "";
+        } else {
+            block.firstElementChild.className = "fn__none";
+            block.firstElementChild.innerHTML = "";
+            (block.lastElementChild as HTMLElement).style.paddingLeft = "";
+            block.style.display = "block";
+        }
+    }
+};
+
+const renderBlockHljs = (block: HTMLElement, isPreview: boolean, zoom: number) => {
+    const wbrElement = block.querySelector("wbr");
+    let startIndex = 0;
+    if (wbrElement) {
+        let previousSibling = wbrElement.previousSibling;
+        while (previousSibling) {
+            startIndex += previousSibling.textContent.length;
+            while (!previousSibling.previousSibling && previousSibling.parentElement.tagName !== "DIV") {
+                previousSibling = previousSibling.parentElement;
+            }
+            previousSibling = previousSibling.previousSibling;
+        }
+        wbrElement.remove();
+    }
+
+    let language = getLanguageFromBlock(block, isPreview);
+    if (!window.hljs.getLanguage(language)) {
+        language = "plaintext";
+    }
+    block.classList.add("hljs");
+    const hljsElement = block.lastElementChild ? block.lastElementChild as HTMLElement : block;
+    applyBlockStyles(block, hljsElement);
+    const codeText = hljsElement.textContent;
+    applyLineNumbers(block, isPreview, zoom);
+    hljsElement.innerHTML = window.hljs.highlight(
+        codeText + (codeText.endsWith("\n") ? "" : "\n"),
+        {
+            language,
+            ignoreIllegals: true
+        }).value;
+    if (wbrElement && getSelection().rangeCount > 0) {
+        focusByOffset(block, startIndex, startIndex);
+    }
+};
+
+const renderBlockShiki = async (block: HTMLElement, isPreview: boolean, zoom: number, shiki: ShikiModule) => {
+    const wbrElement = block.querySelector("wbr");
+    let startIndex = 0;
+    if (wbrElement) {
+        let previousSibling = wbrElement.previousSibling;
+        while (previousSibling) {
+            startIndex += previousSibling.textContent.length;
+            while (!previousSibling.previousSibling && previousSibling.parentElement.tagName !== "DIV") {
+                previousSibling = previousSibling.parentElement;
+            }
+            previousSibling = previousSibling.previousSibling;
+        }
+        wbrElement.remove();
+    }
+
+    let language = getLanguageFromBlock(block, isPreview);
+    language = await shiki.ensureShikiLang(language);
+
+    block.classList.add("hljs");
+    const hljsElement = block.lastElementChild ? block.lastElementChild as HTMLElement : block;
+    applyBlockStyles(block, hljsElement);
+    const codeText = hljsElement.textContent;
+    applyLineNumbers(block, isPreview, zoom);
+    const result = shiki.shikiHighlight(
+        codeText + (codeText.endsWith("\n") ? "" : "\n"),
+        language
+    );
+    hljsElement.innerHTML = result.html;
+    // Apply Shiki theme background and foreground colors
+    if (result.bg) {
+        block.style.backgroundColor = result.bg;
+    }
+    if (result.fg) {
+        block.style.color = result.fg;
+    }
+    if (wbrElement && getSelection().rangeCount > 0) {
+        focusByOffset(block, startIndex, startIndex);
+    }
+};
+
 export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, zoom = 1) => {
     let codeElements: NodeListOf<Element>;
     let isPreview = false;
@@ -31,8 +159,10 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
 
     setCodeTheme(cdn);
 
-    addScript(`${cdn}/js/highlight.js/highlight.min.js?v=11.11.1`, "protyleHljsScript").then(() => {
-        addScript(`${cdn}/js/highlight.js/third-languages.js?v=2.0.1`, "protyleHljsThirdScript").then(() => {
+    if (isShikiEngine()) {
+        import(/* webpackChunkName: "shiki-init" */ "./shikiInit").then((shiki) => {
+            return shiki.initShiki().then(() => shiki);
+        }).then((shiki) => {
             codeElements.forEach((block: HTMLElement) => {
                 if (block.getAttribute("data-render") === "true") {
                     return;
@@ -43,78 +173,27 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
                     iconElements[0].setAttribute("aria-label", window.siyuan.languages.copy);
                     iconElements[1].setAttribute("aria-label", window.siyuan.languages.more);
                 }
-                const wbrElement = block.querySelector("wbr");
-                let startIndex = 0;
-                if (wbrElement) {
-                    let previousSibling = wbrElement.previousSibling;
-                    while (previousSibling) {
-                        startIndex += previousSibling.textContent.length;
-                        while (!previousSibling.previousSibling && previousSibling.parentElement.tagName !== "DIV") {
-                            // 高亮 span 中输入
-                            previousSibling = previousSibling.parentElement;
-                        }
-                        previousSibling = previousSibling.previousSibling;
-                    }
-                    wbrElement.remove();
-                }
-
-                let language;
-                if (isPreview) {
-                    language = block.parentElement.getAttribute("data-language"); // preview
-                } else if (block.previousElementSibling) {
-                    language = block.previousElementSibling.firstElementChild.textContent;
-                } else {
-                    // bazaar readme
-                    language = block.className.replace("language-", "");
-                }
-                if (!window.hljs.getLanguage(language)) {
-                    language = "plaintext";
-                }
-                block.classList.add("hljs");
-                const autoEnter = block.parentElement.getAttribute("linewrap");
-                const ligatures = block.parentElement.getAttribute("ligatures");
-                const lineNumber = block.parentElement.getAttribute("linenumber");
-                const hljsElement = block.lastElementChild ? block.lastElementChild as HTMLElement : block;
-                if (autoEnter === "true" || (autoEnter !== "false" && window.siyuan.config.editor.codeLineWrap)) {
-                    hljsElement.style.setProperty("white-space", "pre-wrap");
-                    hljsElement.style.setProperty("word-break", "break-word");
-                } else {
-                    // https://ld246.com/article/1684031600711 该属性会导致有 tab 后光标跳至末尾，目前无解
-                    hljsElement.style.setProperty("white-space", "pre");
-                    hljsElement.style.setProperty("word-break", "initial");
-                }
-                if (ligatures === "true" || (ligatures !== "false" && window.siyuan.config.editor.codeLigatures)) {
-                    hljsElement.style.fontVariantLigatures = "normal";
-                } else {
-                    hljsElement.style.fontVariantLigatures = "none";
-                }
-                const codeText = hljsElement.textContent;
-                if (block.firstElementChild) {
-                    if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
-                        // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
-                        block.firstElementChild.className = "protyle-linenumber__rows";
-                        block.firstElementChild.setAttribute("contenteditable", "false");
-                        lineNumberRender(block, zoom);
-                        block.style.display = "";
-                    } else {
-                        block.firstElementChild.className = "fn__none";
-                        block.firstElementChild.innerHTML = "";
-                        hljsElement.style.paddingLeft = "";
-                        block.style.display = "block";
-                    }
-                }
-                hljsElement.innerHTML = window.hljs.highlight(
-                    codeText + (codeText.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
-                    {
-                        language,
-                        ignoreIllegals: true
-                    }).value;
-                if (wbrElement && getSelection().rangeCount > 0) {
-                    focusByOffset(block, startIndex, startIndex);
-                }
+                renderBlockShiki(block, isPreview, zoom, shiki);
             });
         });
-    });
+    } else {
+        addScript(`${cdn}/js/highlight.js/highlight.min.js?v=11.11.1`, "protyleHljsScript").then(() => {
+            addScript(`${cdn}/js/highlight.js/third-languages.js?v=2.0.1`, "protyleHljsThirdScript").then(() => {
+                codeElements.forEach((block: HTMLElement) => {
+                    if (block.getAttribute("data-render") === "true") {
+                        return;
+                    }
+                    block.setAttribute("data-render", "true");
+                    const iconElements = block.parentElement.querySelectorAll(".protyle-icon");
+                    if (iconElements.length === 2) {
+                        iconElements[0].setAttribute("aria-label", window.siyuan.languages.copy);
+                        iconElements[1].setAttribute("aria-label", window.siyuan.languages.more);
+                    }
+                    renderBlockHljs(block, isPreview, zoom);
+                });
+            });
+        });
+    }
 };
 
 export const lineNumberRender = (hljsElement: HTMLElement, zoom = 1) => {

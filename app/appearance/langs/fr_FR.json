@@ -1164,6 +1164,7 @@
   "appearance3": "Thème de mise en évidence de la syntaxe des blocs de code en mode Sombre",
   "appearance2": "Thème de mise en évidence de la syntaxe des blocs de code en mode Clair",
   "appearance1": "Thème du bloc de codes",
+  "codeBlockEngine": "Moteur de rendu des blocs de code",
 "appearance10": "Paramètres du bouton fermer",
     "appearance11": "Réduire dans la barre des tâches après avoir cliqué sur le bouton fermer",
   "appearance16": "Masquer la barre d'état inférieure",

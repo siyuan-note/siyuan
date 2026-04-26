@@ -1233,7 +1233,7 @@ export class Toolbar {
         });
     }
 
-    public showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
+    public async showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
         const nodeElement = hasClosestBlock(languageElements[0]);
         if (!nodeElement) {
             return;
@@ -1251,7 +1251,15 @@ export class Toolbar {
         const listElement = this.subElement.lastElementChild.lastElementChild as HTMLElement;
 
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
-        let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        let hljsLanguages: string[];
+        let shikiModule: typeof import("../render/shikiInit") | null = null;
+        if (window.siyuan.config.appearance.codeBlockEngine === "shiki") {
+            shikiModule = await import(/* webpackChunkName: "shiki-init" */ "../render/shikiInit");
+            await shikiModule.initShiki();
+            hljsLanguages = shikiModule.getShikiLanguageList();
+        } else {
+            hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
+        }
 
         const eventDetail = {languages: hljsLanguages, type: "init", listElement};
         if (protyle.app && protyle.app.plugins) {
@@ -1321,7 +1329,10 @@ export class Toolbar {
                     return 0;
                 });
 
-                if (window.hljs?.getLanguage(value)) {
+                const isValidLang = window.siyuan.config.appearance.codeBlockEngine === "shiki"
+                    ? shikiModule?.isShikiLanguage(value)
+                    : window.hljs?.getLanguage(value);
+                if (isValidLang) {
                     // Default languages and their aliases
                     matchLanguages = [value].concat(matchLanguages.filter(item => item !== value));
                 }

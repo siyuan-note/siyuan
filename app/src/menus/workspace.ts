@@ -7,14 +7,7 @@ import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/p
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {
-    isInAndroid,
-    isInHarmony,
-    isInMobileApp,
-    isIPad,
-    setStorageVal,
-    writeText
-} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInMobileApp, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -516,7 +509,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "recentDocs",
                 label: window.siyuan.languages.recentDocs,
-                icon: "iconFile",
+                icon: "iconRecentDocs",
                 accelerator: window.siyuan.config.keymap.general.recentDocs.custom,
                 click: () => {
                     openRecentDocs();

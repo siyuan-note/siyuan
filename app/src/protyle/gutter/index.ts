@@ -1928,6 +1928,7 @@ export class Gutter {
         if (!protyle.options.backlinkData) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
+                icon: "iconEnter",
                 accelerator: `${window.siyuan.config.keymap.general.enter.custom ? updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom) + "/" : ""}${updateHotkeyAfterTip("⌘" + window.siyuan.languages.click)}`,
                 label: window.siyuan.languages.enter,
                 click: () => {
@@ -1936,6 +1937,7 @@ export class Gutter {
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enterBack",
+                icon: "iconEnterBack",
                 accelerator: window.siyuan.config.keymap.general.enterBack.custom,
                 label: window.siyuan.languages.enterBack,
                 click: () => {

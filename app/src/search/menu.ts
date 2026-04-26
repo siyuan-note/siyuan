@@ -218,7 +218,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
-        width: isMobile() ? "92vw" : "520px",
+        width: isMobile() ? "92vw" : "600px",
         height: "70vh",
     });
     filterDialog.element.setAttribute("data-key", Constants.DIALOG_SEARCHTYPE);

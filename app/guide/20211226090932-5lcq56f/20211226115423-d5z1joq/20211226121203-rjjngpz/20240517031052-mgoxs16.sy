@@ -6,7 +6,7 @@
 		"id": "20240517031052-mgoxs16",
 		"title": "發布服務",
 		"type": "doc",
-		"updated": "20260317200702"
+		"updated": "20260426231912"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160433-v2hgbex",
-				"updated": "20260317200702"
+				"updated": "20260426231912"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160433-ubgzvn4",
-				"updated": "20260317200702"
+				"updated": "20260426231912"
 			},
 			"Children": [
 				{
@@ -265,7 +265,7 @@
 					},
 					"Properties": {
 						"id": "20260315160433-twduxmc",
-						"updated": "20260317200702"
+						"updated": "20260426231912"
 					},
 					"Children": [
 						{
@@ -288,7 +288,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260315160438-p4ogqy6",
-								"updated": "20260317200702"
+								"updated": "20260426231912"
 							},
 							"Children": [
 								{
@@ -365,7 +365,7 @@
 									},
 									"Properties": {
 										"id": "20260315160433-on7vsqb",
-										"updated": "20260315160433"
+										"updated": "20260426231912"
 									},
 									"Children": [
 										{
@@ -373,7 +373,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260315160433-1ljedcx",
-												"updated": "20260315160433"
+												"updated": "20260426231912"
 											},
 											"Children": [
 												{
@@ -383,7 +383,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "文件樹面板"
+													"TextMarkTextContent": "文件面板"
 												},
 												{
 													"Type": "NodeText",

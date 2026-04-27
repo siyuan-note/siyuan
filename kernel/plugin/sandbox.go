@@ -1326,6 +1326,29 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 
 		return rt.ToValue(promise)
 	})))
+	lo.Must0(object.Set("buffer", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			result = buffer.WrapBytes(rt, data)
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(rt.ToValue(result)); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] data.buffer() resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] data.buffer() reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] buffer worker run: %v", p.Name, runErr)
+		}
+
+		return rt.ToValue(promise)
+	})))
 	lo.Must0(object.Set("arrayBuffer", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 

@@ -17,8 +17,10 @@
 package plugin
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -27,6 +29,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/samber/lo"
@@ -95,7 +98,8 @@ type KernelPlugin struct {
 	worker  Worker               // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
 
-	state   atomic.Int64 //  PluginState
+	state   atomic.Int64    //  PluginState
+	context context.Context // Context for managing plugin lifecycle and cancellation
 
 	bus EventBus.Bus // Event bus for plugin events and RPC request/response dispatch
 
@@ -117,7 +121,8 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		token: token,
 		file:  fmt.Sprintf("%s/kernel.js", petal.Name),
 
-		bus: EventBus.New(),
+		bus:     EventBus.New(),
+		context: context.Background(),
 
 		sockets:   make(map[*websocket.Conn]bool),
 		socketMus: make(map[*websocket.Conn]*sync.Mutex),
@@ -164,6 +169,11 @@ func (p *KernelPlugin) InitRuntime() (err error) {
 	})
 	p.runtime.Start()
 	return
+}
+
+// Eval evaluates JavaScript code in the plugin's goja runtime, returning the result or error.
+func (p *KernelPlugin) Eval(rt *goja.Runtime, code string) (goja.Value, error) {
+	return rt.RunScript(p.file, code)
 }
 
 // close interrupts the goja runtime and clears the pointer.
@@ -259,7 +269,6 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 
 	p.socketsMu.Lock()
 	for c := range p.sockets {
-		c.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseGoingAway, "plugin stopping"))
 		c.Close()
 		delete(p.sockets, c)
 		delete(p.socketMus, c)
@@ -317,7 +326,10 @@ func (p *KernelPlugin) bindRpcMethod(name string, method goja.Callable, descript
 
 // unbindRpcMethod removes a registered RPC method
 func (p *KernelPlugin) unbindRpcMethod(name string) error {
-	p.rpcMethods.LoadAndDelete(name)
+	_, ok := p.rpcMethods.LoadAndDelete(name)
+	if !ok {
+		return nil
+	}
 	return nil
 }
 
@@ -434,6 +446,33 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 	wg.Wait()
 }
 
+func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (response *HttpResponse, err error) {
+	// TODO: echo request for testing, replace with invoking siyuan.server[scope].http.handler
+	response = &HttpResponse{
+		StatusCode: http.StatusOK,
+		Body: &ResponseBody{
+			Data: &ResponseSerializedData{
+				Type: SerializedTypeJSON,
+				Data: request,
+			},
+		},
+	}
+	// bind data get methods using ObjectSetDataMethods
+	// request.request.body.data?
+	// request.request.body.form?.files[*].data
+	return
+}
+
+func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
+	// TODO: Invoke siyuan.server[scope].ws.handler
+	return
+}
+
+func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
+	// TODO: Invoke siyuan.server[scope].sse.handler
+	return
+}
+
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
 func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest) []*JsonRpcProcessingResponse {
@@ -447,16 +486,16 @@ func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest)
 			continue
 		}
 
-		if request.Request == nil {
-			responses[i] = nil
-			continue
-		}
-
 		// For notifications, dispatch without waiting for a response.
 		if request.Request.IsNotification() {
 			go func(request *JsonRpcRequest) {
 				p.dispatchRpcRequest(request)
 			}(request.Request)
+			responses[i] = nil
+			continue
+		}
+
+		if request.Request == nil {
 			responses[i] = nil
 			continue
 		}
@@ -564,7 +603,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 
 	done := make(chan TaskResult, 1)
 
-	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+	p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 		rpcParams := []goja.Value{}
 		jsParams := rt.ToValue(params)
 		if isJsArray(rt, jsParams) {
@@ -585,14 +624,6 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		}, rt, true, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
 		return
 	}, nil)
-	if runErr != nil {
-		rpcError = &JsonRpcError{
-			Code:    JsonRpcErrorCodeInternalError,
-			Message: JsonRpcErrorInternalError.Message,
-			Data:    fmt.Sprintf("failed to dispatch RPC method %q: %v", method, runErr),
-		}
-		return
-	}
 
 	result := <-done
 	if result.err != nil {
@@ -647,7 +678,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 
 	done := make(chan TaskResult, 1)
 
-	runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		lifecycle, err := getJsContextValue(rt, []any{"siyuan", "plugin", "lifecycle"})
 		if err != nil {
 			return
@@ -666,7 +697,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 		hookValue := pluginObj.Get(name)
 		hook, ok := goja.AssertFunction(hookValue)
 		if !ok {
-			done <- TaskResult{}
+			err = fmt.Errorf("globalThis.siyuan.plugin.lifecycle.%s not bound to a function", name)
 			return
 		}
 
@@ -674,16 +705,13 @@ func (p *KernelPlugin) invokeHook(name string) {
 			done <- result
 		}, rt, true, hook, lifecycle)
 		return
-	}, func(rt *goja.Runtime, result any, err error) {
+	}, func(_ *goja.Runtime, _ any, err error) {
 		if err != nil {
 			done <- TaskResult{err: err}
 		}
 	})
-
 	if runErr != nil {
-		close(done)
-		err = runErr
-		return
+		done <- TaskResult{err: runErr}
 	}
 
 	result := <-done

@@ -292,6 +292,11 @@ func HandleRpcWebSocket(c *gin.Context) {
 		return
 	}
 
+	if c.IsWebsocket() == false {
+		c.String(http.StatusBadRequest, "This endpoint only accepts WebSocket connections")
+		return
+	}
+
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}

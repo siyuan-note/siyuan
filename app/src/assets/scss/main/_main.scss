@@ -195,16 +195,7 @@ html[data-frontend="browser-desktop"] {
   z-index: 2;
   height: 32px;
   line-height: 32px;
-  padding: 0 5px;
-
-  .toolbar__item {
-    color: var(--b3-theme-on-surface);
-
-    &:hover {
-      color: var(--b3-theme-on-background);
-      background-color: var(--b3-theme-background-light) !important;
-    }
-  }
+  padding: 0 7px;
 
   &__msg {
     color: var(--b3-theme-on-surface);

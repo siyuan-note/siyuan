@@ -6,7 +6,7 @@
 		"id": "20240610233601-ylh1mvk",
 		"title": "サービスを公開",
 		"type": "doc",
-		"updated": "20260317200509"
+		"updated": "20260427075628"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160203-l0m0q2g",
-				"updated": "20260317200509"
+				"updated": "20260427075628"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160203-kmbr9ic",
-				"updated": "20260317200509"
+				"updated": "20260427075628"
 			},
 			"Children": [
 				{
@@ -265,7 +265,7 @@
 					},
 					"Properties": {
 						"id": "20260315160203-f3fj1m0",
-						"updated": "20260317200509"
+						"updated": "20260427075628"
 					},
 					"Children": [
 						{
@@ -288,7 +288,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20260315160406-950zvew",
-								"updated": "20260317200509"
+								"updated": "20260427075628"
 							},
 							"Children": [
 								{
@@ -365,7 +365,7 @@
 									},
 									"Properties": {
 										"id": "20260315160203-ctlex3g",
-										"updated": "20260315160503"
+										"updated": "20260427075628"
 									},
 									"Children": [
 										{
@@ -373,7 +373,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20260315160203-obefee6",
-												"updated": "20260315160503"
+												"updated": "20260427075628"
 											},
 											"Children": [
 												{
@@ -383,7 +383,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "kbd",
-													"TextMarkTextContent": "ドキュメントツリーパネル"
+													"TextMarkTextContent": "ドキュメントパネル"
 												},
 												{
 													"Type": "NodeText",

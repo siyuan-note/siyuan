@@ -268,7 +268,7 @@ export const initRightMenu = (app: App) => {
             } else if (target.id === "menuPublish") {
                 openModel({
                     title: window.siyuan.languages.publish,
-                    icon: "iconLanguage",
+                    icon: "iconPublish",
                     html: publish.genHTML(),
                     bindEvent(modelMainElement: HTMLElement) {
                         publish.element = modelMainElement;

@@ -196,12 +196,12 @@ export class Dock {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     ghostElement?.remove();
+                    document.querySelectorAll(".dock__split").forEach((splitItem: HTMLElement) => {
+                        splitItem.style.removeProperty("display");
+                    });
                     if (item.style.opacity !== "0.38") {
                         return;
                     }
-                    document.querySelectorAll(".dock__split").forEach((item: HTMLElement) => {
-                        item.style.display = "";
-                    });
                     item.style.opacity = "";
                     if (!moveItem.classList.contains("fn__none")) {
                         let dock;

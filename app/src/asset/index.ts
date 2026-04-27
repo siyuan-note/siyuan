@@ -286,7 +286,7 @@ export class Asset extends Model {
           <div id="toolbarContainer">
             <div id="toolbarViewer">
                 <button id="sidebarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
-                    <svg><use xlink:href="#iconLayoutRight"></use></svg>
+                    <svg><use xlink:href="#iconLayoutLeft"></use></svg>
                 </button>
                 <button id="viewFindButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
                   <svg><use xlink:href="#iconSearch"></use></svg>

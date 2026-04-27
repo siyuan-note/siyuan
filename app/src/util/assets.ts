@@ -109,20 +109,20 @@ export const loadAssets = (data: Config.IAppearance) => {
     }
 
     // load icons
-    const isBuiltInIcon = data.icon === "material";
+    const isBuiltInIcon = data.icon === "lithe";
     const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
-    const iconDefaultURL = `/appearance/icons/material/icon.js?v=${Constants.SIYUAN_VERSION}`;
+    const iconDefaultURL = `/appearance/icons/litheness/icon.js?v=${Constants.SIYUAN_VERSION}`;
     const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
 
     if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
         (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
-        // 第三方图标切换到 material
+        // 第三方图标切换到默认 litheness
         if (isBuiltInIcon) {
             iconScriptElement?.remove();
             Array.from(document.body.children).forEach((item) => {
-                if (item.tagName === "svg" && !item.getAttribute("data-name") && "iconsMaterial" !== item.id) {
+                if (item.tagName === "svg" && !item.getAttribute("data-name") && "iconsLitheness" !== item.id) {
                     item.remove();
                 }
             });
@@ -135,7 +135,7 @@ export const loadAssets = (data: Config.IAppearance) => {
             addScript(iconThirdURL, "iconScript").then(() => {
                 Array.from(document.body.children).forEach((item, index) => {
                     if (item.tagName === "svg" &&
-                        index !== 0 && !item.getAttribute("data-name") && "iconsMaterial" !== item.id) {
+                        index !== 0 && !item.getAttribute("data-name") && "iconsLitheness" !== item.id) {
                         item.remove();
                     }
                 });

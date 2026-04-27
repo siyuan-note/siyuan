@@ -664,7 +664,7 @@ export const exportMd = (id: string) => {
             }, {
                 id: "exportWord",
                 label: "Word .docx",
-                icon: "iconExact",
+                icon: "iconDocx",
                 click: () => {
                     saveExport({type: "word", id});
                 }

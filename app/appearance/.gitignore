@@ -4,6 +4,5 @@ themes/*
 !themes/midnight/
 
 icons/
-!icons/ant/
-!icons/material/
+!icons/litheness/
 !icons/index.html

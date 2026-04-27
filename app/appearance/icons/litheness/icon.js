@@ -1,5 +1,8 @@
 document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="position: absolute; width: 0; height: 0; overflow: hidden;">
 <defs>
+  <symbol id="iconTurnInto" stroke-width="1.7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m15.194 13.707 3.814 1.86-1.86 3.814"/><path d="M16.47214 7.52786 A 5 10 0 1 0 13 21.79796"/><path d="M21.79796 11 A 10 5 0 1 0 19 15.57071"/>
+  </symbol>   
   <symbol id="iconGlobe" stroke-width="1.7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>
   </symbol>      
@@ -153,8 +156,8 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="
   <symbol id="iconScrollVert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M12 2v20"/><path d="m8 18 4 4 4-4"/><path d="m8 6 4-4 4 4"/>
   </symbol>
-  <symbol id="iconSparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>
+  <symbol id="iconSparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>
   </symbol>
   <symbol id="iconDatabase" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>
@@ -309,17 +312,15 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="
   <symbol id="iconUnderline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M6 4v6a6 6 0 0 0 12 0V4"/><line x1="4" x2="20" y1="20" y2="20"/>
   </symbol>
-  <symbol id="iconA" viewBox="0 0 32 32">
-    <path d="M12.99 18.677h6.021l1.156 3.172q0.108 0.277 0.331 0.432t0.51 0.155q0.495 0 0.755-0.395t0.091-0.833l-4.605-12.382q-0.108-0.277-0.344-0.436t-0.534-0.159h-0.696q-0.298 0-0.531 0.159t-0.341 0.436l-4.656 12.403q-0.169 0.438 0.091 0.823t0.755 0.385q0.287 0 0.51-0.159t0.331-0.449l1.156-3.151zM13.569 17.031l2.39-6.554h0.133l2.338 6.554h-4.861zM16.002 28.667q-2.628 0-4.94-0.997t-4.023-2.707-2.708-4.021-0.998-4.939 0.997-4.94 2.707-4.023 4.021-2.708 4.939-0.998 4.94 0.997 4.023 2.707 2.708 4.021 0.998 4.939-0.997 4.94-2.707 4.023-4.021 2.708-4.939 0.998zM23.55 23.55q3.117-3.117 3.117-7.55t-3.117-7.55-7.55-3.117-7.55 3.117-3.117 7.55 3.117 7.55 7.55 3.117 7.55-3.117z"></path>
+  <symbol id="iconA" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9.5 16v-6.5a2.5 2.5 0 1 1 5 0v6.5" /><path d="M9.5 13h5" />
   </symbol>
-  <symbol id="iconM" viewBox="0 0 32 32">
-    <path d="M16.002 28.667q-2.628 0-4.94-0.997t-4.023-2.707-2.708-4.021-0.998-4.939 0.997-4.94 2.707-4.023 4.021-2.708 4.939-0.998 4.94 0.997 4.023 2.707 2.708 4.021 0.998 4.939-0.997 4.94-2.707 4.023-4.021 2.708-4.939 0.998zM16 26.667q4.433 0 7.55-3.117t3.117-7.55-3.117-7.55-7.55-3.117-7.55 3.117-3.117 7.55 3.117 7.55 7.55 3.117z"></path>
-    <path d="M9.333 21.717v-11.097q0-0.537 0.375-0.912t0.914-0.375h0.573q0.404 0 0.738 0.225t0.467 0.608l3.6 9.516 3.549-9.453q0.154-0.41 0.509-0.653t0.796-0.243h0.423q0.576 0 0.982 0.407t0.406 0.983v10.994q0 0.396-0.275 0.673t-0.675 0.277-0.675-0.277-0.275-0.673v-9.201l-3.72 9.634q-0.083 0.229-0.283 0.373t-0.45 0.144h-0.633q-0.25 0-0.451-0.144t-0.284-0.373l-3.712-9.567v9.134q0 0.396-0.275 0.673t-0.675 0.277-0.675-0.277-0.275-0.673z"></path>
+  <symbol id="iconM" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M8.5 16v-8.5l3.5 5.5l3.5 -5.5v8.5" />
   </symbol>
-  <symbol id="iconN" viewBox="0 0 32 32">
-    <path d="M16.002 28.667q-2.628 0-4.94-0.997t-4.023-2.707-2.708-4.021-0.998-4.939 0.997-4.94 2.707-4.023 4.021-2.708 4.939-0.998 4.94 0.997 4.023 2.707 2.708 4.021 0.998 4.939-0.997 4.94-2.707 4.023-4.021 2.708-4.939 0.998zM16 26.667q4.433 0 7.55-3.117t3.117-7.55-3.117-7.55-7.55-3.117-7.55 3.117-3.117 7.55 3.117 7.55 7.55 3.117z"></path>
-    <path d="M10.283 21.717q-0.396 0-0.673-0.275t-0.277-0.675v-10.147q0-0.537 0.375-0.912t0.914-0.375h1.25q0.45 0 0.796 0.243t0.509 0.653l7.915 10.153v-10.049q0-0.396 0.275-0.673t0.675-0.277 0.675 0.277 0.275 0.673v10.147q0 0.576-0.407 0.982t-0.983 0.406h-1.25q-0.45 0-0.796-0.243t-0.509-0.653l-7.915-10.153v10.049q0 0.396-0.275 0.673t-0.675 0.277z"></path>
-  </symbol>  
+  <symbol id="iconN" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9.5 16v-8.5l5 8.5v-8.5" />
+  </symbol>
   <symbol id="iconYuque" viewBox="-2 -2 36 36">
     <path d="M29.177 10.542c-0.381-1.515 0.381-3.931 2.823-4.785l-2.612-0.138s-0.988-3.462-5.523-3.769c-4.535-0.312-7.5-0.115-7.5-0.115s3.362 2.138 2.015 5.95c-0.985 2.019-2.531 3.677-4.185 5.565-0.050 0.050-0.096 0.1-0.135 0.142-5.469 6.165-14.062 15.973-14.062 15.973 9.458 2.477 15.796-0.242 19.546-3.504 0.788-0.008 1.381-0.012 1.781-0.012 5.223 0 9.638-4.523 9.458-9.554-0.123-3.458-1.227-4.238-1.608-5.754z"></path>
   </symbol>
@@ -452,14 +453,11 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="
   <symbol id="iconMarkdown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 7a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" /><path d="M7 15v-6l2 2l2 -2v6" /><path d="M14 13l2 2l2 -2m-2 2v-6" />
   </symbol>
-  <symbol id="iconLanguage" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
+  <symbol id="iconBookmarks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/>
   </symbol>
-  <symbol id="iconBookmarks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M12 6v8l3-3 3 3V6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>
-  </symbol>
-  <symbol id="iconBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z"/>
+  <symbol id="iconBookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/>
   </symbol>
   <symbol id="iconH1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="m17 12 3-2v8"/>

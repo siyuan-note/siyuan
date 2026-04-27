@@ -265,7 +265,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     window.siyuan.menus.menu.append(new MenuItem({
         id: "turnInto",
         label: window.siyuan.languages.turnInto,
-        icon: "iconRefresh",
+        icon: "iconTurnInto",
         submenu: [{
             id: "text",
             iconHTML: "",
@@ -624,7 +624,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "turnInto",
             label: window.siyuan.languages.turnInto,
-            icon: "iconRefresh",
+            icon: "iconTurnInto",
             submenu
         }).element);
     }
@@ -1656,7 +1656,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "turnIntoRef",
                 label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.ref}</b>`,
-                icon: "iconRef",
+                icon: "iconTurnInto",
                 click() {
                     linkElement.setAttribute("data-subtype", "s");
                     const types = linkElement.getAttribute("data-type").split(" ");
@@ -1680,7 +1680,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         window.siyuan.menus.menu.append(new MenuItem({
             id: "turnIntoText",
             label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
-            icon: "iconRefresh",
+            icon: "iconTurnInto",
             click() {
                 inputElements[0].value = "";
                 inputElements[2].value = "";
@@ -1881,7 +1881,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         id: "turnIntoText",
         label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
-        icon: "iconRefresh",
+        icon: "iconTurnInto",
         click() {
             protyle.toolbar.range.setStart(tagElement.firstChild, 0);
             protyle.toolbar.range.setEnd(tagElement.lastChild, tagElement.lastChild.textContent.length);

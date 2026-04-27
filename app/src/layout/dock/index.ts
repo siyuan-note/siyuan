@@ -25,7 +25,7 @@ import {Constants} from "../../constants";
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink"];
 
 export class Dock {
-    public element: HTMLElement;
+    public elements: HTMLElement[];
     public layout: Layout;
     private position: TDockPosition;
     private app: App;
@@ -48,69 +48,44 @@ export class Dock {
                 this.resizeElement = this.layout.element.nextElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout__dockl");
                 this.layout.element.insertAdjacentHTML("beforeend", '<div class="layout__dockresize layout__dockresize--lr"></div>');
+                this.elements = Array.from(document.querySelectorAll(`#dock${options.position} .dock__items`));
                 break;
             case "Right":
                 this.layout = window.siyuan.layout.layout.children[0].children[2] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout__dockr");
                 this.layout.element.insertAdjacentHTML("beforeend", '<div class="layout__dockresize layout__dockresize--lr"></div>');
+                this.elements = Array.from(document.querySelectorAll(`#dock${options.position} .dock__items`));
                 break;
             case "Bottom":
                 this.layout = window.siyuan.layout.layout.children[1] as Layout;
                 this.resizeElement = this.layout.element.previousElementSibling as HTMLElement;
                 this.layout.element.classList.add("layout__dockb");
                 this.layout.element.insertAdjacentHTML("beforeend", '<div class="layout__dockresize"></div>');
+                this.elements = [document.getElementById("dockLeft").lastElementChild as HTMLElement, document.getElementById("dockRight").lastElementChild as HTMLElement];
                 break;
         }
         this.app = options.app;
-        this.element = document.getElementById("dock" + options.position);
-        const dockClass = options.position === "Bottom" ? ' class="fn__flex dock__items"' : ' class="dock__items"';
-        this.element.innerHTML = `<div${dockClass}></div><div class="fn__flex-1 dock__item--space"></div><div${dockClass}></div>`;
         this.position = options.position;
         this.pin = options.data.pin;
         this.data = {};
-        let showDock = false;
-        if (options.data.data.length !== 0) {
-            if (!showDock) {
-                options.data.data[0].find(item => {
-                    if (TYPES.includes(item.type)) {
-                        showDock = true;
-                        return true;
-                    }
-                });
-            }
-            if (!showDock && options.data.data[1]) {
-                options.data.data[1].find(item => {
-                    if (TYPES.includes(item.type)) {
-                        showDock = true;
-                        return true;
-                    }
-                });
-            }
-        }
-        if (!showDock) {
-            this.element.firstElementChild.innerHTML = `<span class="dock__item dock__item--pin ariaLabel" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
-    <svg><use xlink:href="#icon${this.pin ? "Unpin" : "Pin"}"></use></svg>
-</span>`;
-            this.element.classList.add("fn__none");
-        } else {
+        if (options.data.data[0]) {
             this.genButton(options.data.data[0], 0);
-            if (options.data.data[1]) {
-                this.genButton(options.data.data[1], 1);
-            }
-            this.element.classList.remove("fn__none");
         }
-        const activeElements = this.element.querySelectorAll(".dock__item--active");
-
+        if (options.data.data[1]) {
+            this.genButton(options.data.data[1], 1);
+        }
+        const activeElements = [this.elements[0].querySelector(".dock__item--active"),
+            this.elements[1].querySelector(".dock__item--active")];
         // 初始化文件树
-        this.element.querySelectorAll(".dock__item").forEach(item => {
-            if (item.getAttribute("data-type") === "file" && !item.classList.contains("dock__item--active")) {
-                this.toggleModel("file", true, false, false, false);
-                this.toggleModel("file", false, false, false, false);
-            }
-        });
+        const fileElement = document.querySelector('.dock__item[data-type="file"]');
+        if (fileElement && !fileElement.classList.contains("dock__item--active") &&
+            (this.elements[0].contains(fileElement) || this.elements[1].contains(fileElement))) {
+            this.toggleModel("file", true, false, false, false);
+            this.toggleModel("file", false, false, false, false);
+        }
 
-        if (activeElements.length === 0) {
+        if (!activeElements[0] && !activeElements[1]) {
             this.resizeElement.classList.add("fn__none");
             // 如果没有打开的侧栏，隐藏 layout 的子元素
             if (this.layout.children.length > 1) {
@@ -121,128 +96,72 @@ export class Dock {
             }
         } else {
             activeElements.forEach(item => {
-                this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
+                if (item) {
+                    this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
+                }
             });
         }
-        this.element.addEventListener("click", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && !target.isEqualNode(this.element)) {
-                const type = target.getAttribute("data-type") as TDock;
-                if (type) {
-                    this.toggleModel(type, false, true);
-                    event.preventDefault();
-                    break;
-                } else if (target.classList.contains("dock__item")) {
-                    this.togglePin();
-                    target.setAttribute("aria-label", this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin);
-                    target.querySelector("use").setAttribute("xlink:href", this.pin ? "#iconUnpin" : "#iconPin");
-                    event.preventDefault();
-                    break;
-                }
-                target = target.parentElement;
-            }
-        });
-
-        this.element.addEventListener("mousedown", (event: MouseEvent) => {
-            const item = hasClosestByClassName(event.target as HTMLElement, "dock__item");
-            if (!item || !item.getAttribute("data-type")) {
-                return;
-            }
-            const documentSelf = document;
-            documentSelf.ondragstart = () => false;
-            let ghostElement: HTMLElement;
-            let selectItem: HTMLElement;
-            const moveItem = document.createElement("span");
-            moveItem.classList.add("dock__item", "fn__none");
-            moveItem.style.background = "var(--b3-theme-primary-light)";
-            moveItem.innerHTML = "<svg></svg>";
-            moveItem.id = "dockMoveItem";
-            documentSelf.onmousemove = (moveEvent: MouseEvent) => {
-                if (window.siyuan.config.readonly ||
-                    Math.abs(moveEvent.clientY - event.clientY) < 3 && Math.abs(moveEvent.clientX - event.clientX) < 3) {
+        if (this.position !== "Bottom") {
+            this.elements[0].parentElement.addEventListener("mousedown", (event: MouseEvent) => {
+                const item = hasClosestByClassName(event.target as HTMLElement, "dock__item");
+                if (!item || !item.getAttribute("data-type")) {
                     return;
                 }
-                moveEvent.preventDefault();
-                moveEvent.stopPropagation();
-                if (!ghostElement) {
-                    item.style.opacity = "0.38";
-                    ghostElement = item.cloneNode(true) as HTMLElement;
-                    ghostElement.setAttribute("data-ghost-type", "dock");
-                    this.element.append(ghostElement);
-                    ghostElement.setAttribute("data-original", JSON.stringify({
-                        position: this.position,
-                        index: item.getAttribute("data-index"),
-                        previousType: item.previousElementSibling?.getAttribute("data-type"),
-                        type: item.getAttribute("data-type"),
-                    }));
-                    ghostElement.setAttribute("id", "dragGhost");
-                    ghostElement.setAttribute("style", `background-color:var(--b3-theme-background-light);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
-                }
-                if (this.position === "Bottom") {
-                    ghostElement.style.top = (moveEvent.clientY - 40) + "px";
-                    ghostElement.style.left = (moveEvent.clientX - 20) + "px";
-                } else {
-                    ghostElement.style.top = (moveEvent.clientY - 20) + "px";
-                    if (this.position === "Left") {
-                        ghostElement.style.left = (moveEvent.clientX) + "px";
-                    } else {
-                        ghostElement.style.left = (moveEvent.clientX - 40) + "px";
+                const documentSelf = document;
+                documentSelf.ondragstart = () => false;
+                let ghostElement: HTMLElement;
+                let selectItem: HTMLElement;
+                const moveItem = document.createElement("span");
+                moveItem.classList.add("dock__item", "fn__none");
+                moveItem.style.background = "var(--b3-theme-primary-light)";
+                moveItem.innerHTML = "<svg></svg>";
+                moveItem.id = "dockMoveItem";
+                document.querySelectorAll(".dock__split").forEach((splitItem: HTMLElement) => {
+                    splitItem.style.setProperty("display", "block", "important");
+                });
+                documentSelf.onmousemove = (moveEvent: MouseEvent) => {
+                    if (window.siyuan.config.readonly ||
+                        Math.abs(moveEvent.clientY - event.clientY) < 3 && Math.abs(moveEvent.clientX - event.clientX) < 3) {
+                        return;
                     }
-                }
+                    moveEvent.preventDefault();
+                    moveEvent.stopPropagation();
+                    if (!ghostElement) {
+                        item.style.opacity = "0.38";
+                        ghostElement = item.cloneNode(true) as HTMLElement;
+                        ghostElement.setAttribute("data-ghost-type", "dock");
+                        this.elements[0].parentElement.append(ghostElement);
+                        ghostElement.setAttribute("id", "dragGhost");
+                        ghostElement.setAttribute("style", `background-color:var(--b3-theme-background-light);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
+                    }
 
-                const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
-                    hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement ||
-                    hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item--space") as HTMLElement;
-                if (targetItem && selectItem && targetItem === selectItem) {
-                    if (selectItem.classList.contains("dock__item--space")) {
-                        const selectRect = selectItem.getBoundingClientRect();
-                        if (selectItem.parentElement.id === "dockBottom") {
-                            if (moveEvent.clientX < selectRect.right && moveEvent.clientX > selectRect.right - 40) {
-                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
-                                if (lastFirstElement && lastFirstElement === item) {
+                    ghostElement.style.top = (moveEvent.clientY - 42) + "px";
+                    ghostElement.style.left = (moveEvent.clientX - 21) + "px";
+
+                    const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
+                        hasClosestByClassName(moveEvent.target as HTMLElement, "dock__split") as HTMLElement ||
+                        hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item--space") as HTMLElement;
+                    if (targetItem && selectItem && targetItem === selectItem) {
+                        if (selectItem.classList.contains("dock__item--space") ||
+                            selectItem.classList.contains("dock__split")) {
+                            const selectRect = selectItem.getBoundingClientRect();
+                            if (moveEvent.clientY > selectRect.top + selectRect.height / 2) {
+                                if (selectItem.nextElementSibling && item === selectItem.nextElementSibling.firstElementChild) {
                                     moveItem.classList.add("fn__none");
                                 } else {
+                                    selectItem.nextElementSibling.insertAdjacentElement("afterbegin", moveItem);
                                     moveItem.classList.remove("fn__none");
-                                    lastFirstElement.before(moveItem);
-                                }
-                            }
-                        } else {
-                            if (moveEvent.clientY < selectRect.bottom && moveEvent.clientY > selectRect.bottom - 40) {
-                                const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
-                                if (lastFirstElement && lastFirstElement === item) {
-                                    moveItem.classList.add("fn__none");
-                                } else {
-                                    moveItem.classList.remove("fn__none");
-                                    lastFirstElement.before(moveItem);
-                                }
-                            }
-                        }
-                    } else if (selectItem.classList.contains("dock__item--pin")) {
-                        if (item.nextElementSibling && item.nextElementSibling === selectItem) {
-                            moveItem.classList.add("fn__none");
-                        } else {
-                            moveItem.classList.remove("fn__none");
-                            selectItem.before(moveItem);
-                        }
-                    } else if (selectItem.classList.contains("dock__item")) {
-                        const selectRect = selectItem.getBoundingClientRect();
-                        if (selectItem.parentElement.parentElement.id === "dockBottom") {
-                            if (selectRect.left + selectRect.width / 2 > moveEvent.clientX) {
-                                if (item.nextElementSibling && item.nextElementSibling === selectItem) {
-                                    moveItem.classList.add("fn__none");
-                                } else {
-                                    moveItem.classList.remove("fn__none");
-                                    selectItem.before(moveItem);
                                 }
                             } else {
-                                if (item.previousElementSibling && item.previousElementSibling === selectItem) {
+                                if (selectItem.nextElementSibling && item === selectItem.previousElementSibling.lastElementChild) {
                                     moveItem.classList.add("fn__none");
                                 } else {
+                                    selectItem.previousElementSibling.insertAdjacentElement("beforeend", moveItem);
                                     moveItem.classList.remove("fn__none");
-                                    selectItem.after(moveItem);
                                 }
                             }
-                        } else {
+                        } else if (selectItem.classList.contains("dock__item")) {
+                            const selectRect = selectItem.getBoundingClientRect();
                             if (selectRect.top + selectRect.height / 2 > moveEvent.clientY) {
                                 if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
@@ -259,54 +178,50 @@ export class Dock {
                                 }
                             }
                         }
-                    } else if (selectItem.childElementCount === 0) {
-                        moveItem.classList.remove("fn__none");
-                        selectItem.append(moveItem);
-                    } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.id === "dockMoveItem") {
-                        moveItem.classList.remove("fn__none");
-                    } else if (selectItem.childElementCount === 1 && selectItem.firstElementChild.classList.contains("dock__item--pin")) {
-                        moveItem.classList.remove("fn__none");
-                        selectItem.insertAdjacentElement("afterbegin", moveItem);
-                    } else if (selectItem.childElementCount === 2 &&
-                        selectItem.firstElementChild.id === "dockMoveItem" && selectItem.lastElementChild.classList.contains("dock__item--pin")) {
-                        moveItem.classList.remove("fn__none");
+                        return;
                     }
-                    return;
-                }
-                if (!targetItem || targetItem.style.position === "fixed" || (targetItem === item) || targetItem.id === "dockMoveItem") {
-                    if (targetItem && targetItem === item) {
-                        moveItem.classList.add("fn__none");
+                    if (!targetItem || targetItem.style.position === "fixed" || (targetItem === item) || targetItem.id === "dockMoveItem") {
+                        if (targetItem && targetItem === item) {
+                            moveItem.classList.add("fn__none");
+                        }
+                        return;
                     }
-                    return;
-                }
-                selectItem = targetItem;
-            };
+                    selectItem = targetItem;
+                };
 
-            documentSelf.onmouseup = () => {
-                documentSelf.onmousemove = null;
-                documentSelf.onmouseup = null;
-                documentSelf.ondragstart = null;
-                documentSelf.onselectstart = null;
-                documentSelf.onselect = null;
-                ghostElement?.remove();
-                if (item.style.opacity !== "0.38") {
-                    return;
-                }
-                item.style.opacity = "";
-                if (!moveItem.classList.contains("fn__none")) {
-                    let dock;
-                    if (moveItem.parentElement.parentElement.id === "dockBottom") {
-                        dock = window.siyuan.layout.bottomDock;
-                    } else if (moveItem.parentElement.parentElement.id === "dockLeft") {
-                        dock = window.siyuan.layout.leftDock;
-                    } else if (moveItem.parentElement.parentElement.id === "dockRight") {
-                        dock = window.siyuan.layout.rightDock;
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    ghostElement?.remove();
+                    if (item.style.opacity !== "0.38") {
+                        return;
                     }
-                    dock.add(moveItem.parentElement === dock.element.firstElementChild ? 0 : 1, item, moveItem.previousElementSibling?.getAttribute("data-type"));
-                }
-                moveItem.remove();
-            };
-        });
+                    document.querySelectorAll(".dock__split").forEach((item: HTMLElement) => {
+                        item.style.display = "";
+                    });
+                    item.style.opacity = "";
+                    if (!moveItem.classList.contains("fn__none")) {
+                        let dock;
+                        if (window.siyuan.layout.leftDock.elements[0].contains(moveItem) ||
+                            window.siyuan.layout.leftDock.elements[1].contains(moveItem)) {
+                            dock = window.siyuan.layout.leftDock;
+                        } else if (window.siyuan.layout.rightDock.elements[0].contains(moveItem) ||
+                            window.siyuan.layout.rightDock.elements[1].contains(moveItem)) {
+                            dock = window.siyuan.layout.rightDock;
+                        } else if (window.siyuan.layout.bottomDock.elements[0].contains(moveItem) ||
+                            window.siyuan.layout.bottomDock.elements[1].contains(moveItem)) {
+                            dock = window.siyuan.layout.bottomDock;
+                        }
+                        dock.add(dock.elements[0].contains(moveItem) ? 0 : 1,
+                            item, moveItem.previousElementSibling?.getAttribute("data-type"));
+                    }
+                    moveItem.remove();
+                };
+            });
+        }
 
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
             if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu") ||
@@ -367,7 +282,7 @@ export class Dock {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 this.setSize();
-                this.element.querySelectorAll(".dock__item--active").forEach(item => {
+                [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[0].querySelectorAll(".dock__item--active")].forEach(item => {
                     const customModel = this.data[item.getAttribute("data-type") as TDock];
                     if (customModel && customModel instanceof Custom && customModel.resize) {
                         customModel.resize();
@@ -377,7 +292,7 @@ export class Dock {
         });
 
         if (window.siyuan.config.uiLayout.hideDock) {
-            this.element.classList.add("fn__none");
+            this.elements[0].parentElement.classList.add("fn__none");
         }
         if (!this.pin) {
             setTimeout(() => {
@@ -391,7 +306,8 @@ export class Dock {
 
     public togglePin() {
         this.pin = !this.pin;
-        const hasActive = this.element.querySelector(".dock__item--active");
+        const hasActive = this.elements[0].querySelector(".dock__item--active") ||
+            this.elements[1].querySelector(".dock__item--active");
         if (!this.pin) {
             this.resetDockPosition(hasActive ? true : false);
             this.resizeElement.classList.add("fn__none");
@@ -423,7 +339,9 @@ export class Dock {
     }
 
     public showDock(reset = false) {
-        if (!reset && (this.pin || !this.element.querySelector(".dock__item--active") || this.layout.element.style.opacity === "1")) {
+        if (!reset && (this.pin || this.layout.element.style.opacity === "1") ||
+            (!this.elements[0].querySelector(".dock__item--active") && !this.elements[1].querySelector(".dock__item--active"))
+        ) {
             return;
         }
         if (!reset && (this.position === "Left" || this.position === "Right") &&
@@ -452,11 +370,13 @@ export class Dock {
         this.layout.element.style.transform = "";
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
         if (this.position === "Left") {
-            this.layout.element.style.left = `${this.element.clientWidth}px`;
+            this.layout.element.style.left = `${this.elements[0].clientWidth}px`;
         } else if (this.position === "Right") {
-            this.layout.element.style.right = `${this.element.clientWidth}px`;
+            this.layout.element.style.right = `${this.elements[0].clientWidth}px`;
         } else if (this.position === "Bottom") {
-            this.layout.element.style.bottom = `${this.element.offsetHeight + document.getElementById("status").offsetHeight}px`;
+            this.layout.element.style.bottom = `${document.getElementById("status").offsetHeight}px`;
+            this.layout.element.style.left = this.elements[0].clientWidth + "px";
+            this.layout.element.style.right = this.elements[1].clientWidth + "px";
         }
     }
 
@@ -496,24 +416,25 @@ export class Dock {
             return;
         }
         this.layout.element.style.opacity = "0";
-        this.element.querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
+        this.elements[0].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
+        this.elements[1].querySelector(".dock__item--activefocus")?.classList.remove("dock__item--activefocus");
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
-    public toggleModel(type: TDock | string, show = false, close = false, hide = false, isSaveLayout = true) {
+    public toggleModel(type: TDock | string, show = false, close = false, removeDock = false, isSaveLayout = true) {
         if (!type) {
             return;
         }
         if (this.pin) {
             recordBeforeResizeTop();
         }
-        const target = this.element.querySelector(`[data-type="${type}"]`) as HTMLElement;
+        const target = document.querySelector(`.dock__item[data-type="${type}"]`) as HTMLElement;
         if (show && target.classList.contains("dock__item--active")) {
             target.classList.remove("dock__item--active", "dock__item--activefocus");
         }
         const index = parseInt(target.getAttribute("data-index"));
         const wnd = this.layout.children[index] as Wnd;
-        if (target.classList.contains("dock__item--active") || hide) {
+        if (target.classList.contains("dock__item--active") || removeDock) {
             if (!close) {
                 let needFocus = false;
                 Array.from(wnd.element.querySelector(".layout-tab-container").children).find(item => {
@@ -537,7 +458,8 @@ export class Dock {
 
             target.classList.remove("dock__item--active", "dock__item--activefocus");
             // dock 隐藏
-            if (this.element.querySelectorAll(".dock__item--active").length === 0) {
+            if (!this.elements[0].querySelector(".dock__item--active") &&
+                !this.elements[1].querySelector(".dock__item--active")) {
                 if (this.position === "Left") {
                     this.layout.element.style.width = "0px";
                     this.layout.element.style.marginRight = "0px";
@@ -575,7 +497,7 @@ export class Dock {
                 this.saveLocalPlugin(type, {show: false});
             }
         } else {
-            this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).forEach(item => {
+            this.elements[index].querySelectorAll(".dock__item--active").forEach(item => {
                 item.classList.remove("dock__item--active", "dock__item--activefocus");
             });
             target.classList.add("dock__item--active", "dock__item--activefocus");
@@ -734,8 +656,8 @@ export class Dock {
         // dock 中两个面板的显示关系
         const anotherIndex = index === 0 ? 1 : 0;
         const anotherWnd = this.layout.children[anotherIndex] as Wnd;
-        const anotherHasActive = this.element.querySelectorAll(`.dock__item--active[data-index="${anotherIndex}"]`).length > 0;
-        const hasActive = this.element.querySelectorAll(`.dock__item--active[data-index="${index}"]`).length > 0;
+        const anotherHasActive = this.elements[anotherIndex].querySelectorAll(".dock__item--active").length > 0;
+        const hasActive = this.elements[index].querySelectorAll(".dock__item--active").length > 0;
         if (hasActive && anotherHasActive) {
             let lastWnd = wnd;
             if (anotherIndex === 0) {
@@ -744,7 +666,7 @@ export class Dock {
                 lastWnd = anotherWnd;
                 anotherWnd.element.previousElementSibling.classList.remove("fn__none");
             }
-            const lastActiveElement = this.element.querySelector('.dock__item--active[data-index="1"]');
+            const lastActiveElement = this.elements[1].querySelector(".dock__item--active");
             if (this.position === "Left" || this.position === "Right") {
                 const dataHeight = parseInt(lastActiveElement.getAttribute("data-height"));
                 if (dataHeight !== 0 && !isNaN(dataHeight)) {
@@ -786,7 +708,7 @@ export class Dock {
         }
         resizeTabs(isSaveLayout);
         this.showDock();
-        if (target.classList.contains("dock__item--active") && !hide && (type === "graph" || type === "globalGraph")) {
+        if (target.classList.contains("dock__item--active") && !removeDock && (type === "graph" || type === "globalGraph")) {
             const graph = this.data[type] as Graph;
             graph.onGraph(false);
         }
@@ -797,8 +719,8 @@ export class Dock {
         sourceElement.setAttribute("data-width", "");
         const type = sourceElement.getAttribute("data-type") as TDock;
         const sourceDock = getDockByType(type);
-        if (sourceDock.element.querySelectorAll(".dock__item").length === 2) {
-            sourceDock.element.classList.add("fn__none");
+        if (sourceDock.elements[0].parentElement.querySelectorAll(".dock__item").length === 1) {
+            sourceDock.elements[0].parentElement.classList.add("fn__none");
         }
         const sourceWnd = sourceDock.layout.children[parseInt(sourceElement.getAttribute("data-index"))] as Wnd;
         const sourceId = sourceElement.getAttribute("data-id");
@@ -814,15 +736,11 @@ export class Dock {
         // 目标处理
         sourceElement.setAttribute("data-index", index.toString());
         if (previousType) {
-            this.element.querySelector(`[data-type="${previousType}"]`).after(sourceElement);
+            this.elements[0].parentElement.querySelector(`[data-type="${previousType}"]`).after(sourceElement);
         } else {
-            if (index === 0) {
-                this.element.firstElementChild.insertAdjacentElement("afterbegin", sourceElement);
-            } else {
-                this.element.lastElementChild.insertAdjacentElement("afterbegin", sourceElement);
-            }
+            this.elements[index].insertAdjacentElement("afterbegin", sourceElement);
         }
-        this.element.classList.remove("fn__none");
+        this.elements[0].parentElement.classList.remove("fn__none");
         resetFloatDockSize();
         this.data[type] = true;
         if (hasActive) {
@@ -833,12 +751,20 @@ export class Dock {
             saveLayout();
         }, Constants.TIMEOUT_TRANSITION);
         let position: TPluginDockPosition;
-        if (hasClosestByAttribute(sourceElement, "id", "dockLeft")) {
-            position = "Left" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
-        } else if (hasClosestByAttribute(sourceElement, "id", "dockRight")) {
-            position = "Right" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
-        } else if (hasClosestByAttribute(sourceElement, "id", "dockBottom")) {
-            position = "Bottom" + (index === 0 ? "Left" : "Right") as TPluginDockPosition;
+        const leftDockElement = hasClosestByAttribute(sourceElement, "id", "dockLeft");
+        const rightDockElement = hasClosestByAttribute(sourceElement, "id", "dockRight");
+        if (leftDockElement) {
+            if (leftDockElement.lastElementChild.contains(sourceElement)) {
+                position = "BottomLeft";
+            } else {
+                position = "Left" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
+            }
+        } else if (rightDockElement) {
+            if (rightDockElement.lastElementChild.contains(sourceElement)) {
+                position = "BottomRight";
+            } else {
+                position = "Right" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
+            }
         }
         let sortIndex = 0;
         let previousElement = sourceElement;
@@ -855,24 +781,28 @@ export class Dock {
             }
         });
         adjustDockPadding();
+        this.adjustSplit();
+        sourceDock.adjustSplit();
     }
 
     public remove(key: TDock | string) {
         this.toggleModel(key, false, true, true);
-        this.element.querySelector(`[data-type="${key}"]`).remove();
+        this.elements[0].parentElement.querySelector(`[data-type="${key}"]`).remove();
         const custom = this.data[key] as Custom;
         if (custom.parent) {
             custom.parent.parent.removeTab(custom.parent.id);
         }
-        if (this.element.querySelectorAll(".dock__item").length === 1) {
-            this.element.classList.add("fn__none");
+        if (this.elements[0].parentElement.querySelectorAll(".dock__item").length === 1) {
+            this.elements[0].parentElement.classList.add("fn__none");
             adjustDockPadding();
         }
         delete this.data[key];
+        this.adjustSplit();
     }
 
     public setSize() {
-        const activesElement = this.element.querySelectorAll(".dock__item--active");
+        const activesElement = [...this.elements[0].querySelectorAll(".dock__item--active"),
+            ...this.elements[1].querySelectorAll(".dock__item--active")];
         activesElement.forEach((item) => {
             if (this.position === "Left" || this.position === "Right") {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
@@ -898,7 +828,7 @@ export class Dock {
 
     private getMaxSize() {
         let max = 0;
-        this.element.querySelectorAll(".dock__item--active").forEach((item) => {
+        [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[1].querySelectorAll(".dock__item--active")].forEach((item) => {
             let size;
             if (this.position === "Left" || this.position === "Right") {
                 size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 232);
@@ -929,38 +859,37 @@ export class Dock {
 </span>`;
             this.data[item.type] = true;
         });
-        if (index === 0) {
-            if (typeof tabIndex === "number") {
-                if (this.element.firstElementChild.children[tabIndex]) {
-                    this.element.firstElementChild.children[tabIndex].insertAdjacentHTML("beforebegin", html);
-                } else {
-                    this.element.firstElementChild.lastElementChild.insertAdjacentHTML("beforebegin", html);
-                }
+        if (typeof tabIndex === "number") {
+            if (this.elements[index].children[tabIndex]) {
+                this.elements[index].children[tabIndex].insertAdjacentHTML("beforebegin", html);
             } else {
-                this.element.firstElementChild.innerHTML = `${html}<span class="dock__item dock__item--pin ariaLabel" aria-label="${this.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}">
-    <svg><use xlink:href="#icon${this.pin ? "Unpin" : "Pin"}"></use></svg>
-</span>`;
+                this.elements[index].insertAdjacentHTML("beforeend", html);
             }
         } else {
-            if (typeof tabIndex === "number") {
-                if (this.element.lastElementChild.children[tabIndex]) {
-                    this.element.lastElementChild.children[tabIndex].insertAdjacentHTML("beforebegin", html);
-                } else {
-                    this.element.lastElementChild.insertAdjacentHTML("beforeend", html);
-                }
-            } else {
-                this.element.lastElementChild.innerHTML = html;
-            }
+            this.elements[index].innerHTML = html;
         }
-
+        // https://github.com/siyuan-note/siyuan/issues/8614
+        if (!window.siyuan.config.uiLayout.hideDock) {
+            this.elements[0].parentElement.classList.remove("fn__none");
+        }
+        // plugin
         if (typeof tabIndex === "number") {
-            // https://github.com/siyuan-note/siyuan/issues/8614
             if (!window.siyuan.config.uiLayout.hideDock) {
-                this.element.classList.remove("fn__none");
                 adjustDockPadding();
             }
             if (data[0].show) {
                 this.toggleModel(data[0].type, true, false, false, false);
+            }
+        }
+        this.adjustSplit();
+    }
+
+    private adjustSplit() {
+        if (this.position !== "Bottom") {
+            if (this.elements[0].innerHTML && this.elements[1].innerHTML) {
+                this.elements[0].nextElementSibling.classList.remove("fn__none");
+            } else {
+                this.elements[0].nextElementSibling.classList.add("fn__none");
             }
         }
     }

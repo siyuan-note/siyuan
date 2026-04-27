@@ -262,17 +262,17 @@ export const selectOpenTab = async () => {
 
 export const adjustDockPadding = () => {
     const layoutElement = window.siyuan.layout.layout.children[0].element;
-    if (window.siyuan.layout.leftDock.element.classList.contains("fn__none")) {
+    if (window.siyuan.layout.leftDock.elements[0].parentElement.classList.contains("fn__none")) {
         layoutElement.style.marginLeft = "var(--b3-layout-space)";
     } else {
         layoutElement.style.marginLeft = "";
     }
-    if (window.siyuan.layout.rightDock.element.classList.contains("fn__none")) {
+    if (window.siyuan.layout.rightDock.elements[0].parentElement.classList.contains("fn__none")) {
         layoutElement.style.marginRight = "var(--b3-layout-space)";
     } else {
         layoutElement.style.marginRight = "";
     }
-    if (window.siyuan.layout.bottomDock.element.classList.contains("fn__none") && window.siyuan.config.appearance.hideStatusBar) {
+    if (window.siyuan.config.appearance.hideStatusBar) {
         layoutElement.style.marginBottom = "var(--b3-layout-space)";
     } else {
         layoutElement.style.marginBottom = "";

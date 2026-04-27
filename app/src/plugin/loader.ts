@@ -111,6 +111,9 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
 
 const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: Plugin, type: string) => {
     const dockKeys = Object.keys(plugin.docks);
+    if (dockKeys.length === 0) {
+        return;
+    }
     dockItem.forEach((tabItem: Config.IUILayoutDockTab, tabIndex: number) => {
         if (dockKeys.includes(tabItem.type) &&
             !document.querySelector(`.dock .dock__item[data-type="${tabItem.type}"]`)) {

@@ -56,14 +56,11 @@ export const switchTabByIndex = (index: number) => {
             indexElement = activeDockIcoElement.previousElementSibling;
             if (!indexElement) {
                 indexElement = activeDockIcoElement.parentElement.lastElementChild;
-                if (indexElement.classList.contains("dock__item--pin")) {
-                    indexElement = indexElement.previousElementSibling;
-                }
             }
         } else if (index === -3) {
             // 下一个
             indexElement = activeDockIcoElement.nextElementSibling;
-            if (!indexElement || indexElement.classList.contains("dock__item--pin")) {
+            if (!indexElement) {
                 indexElement = activeDockIcoElement.parentElement.firstElementChild;
             }
         }

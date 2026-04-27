@@ -8,6 +8,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {showMessage} from "../../dialog/message";
 import {cancelDrag} from "./dragover";
 import {nbsp2space, removeZWJ} from "../../protyle/util/normalizeText";
+import {getDockByType} from "../../layout/tabUtil";
 
 export const globalClickHideMenu = (element: HTMLElement) => {
     if (!window.siyuan.menus.menu.element.contains(element) && !hasClosestByAttribute(element, "data-menu", "true")) {
@@ -60,6 +61,14 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         window.siyuan.layout.bottomDock.hideDock();
         window.siyuan.layout.leftDock.hideDock();
         window.siyuan.layout.rightDock.hideDock();
+    }
+    // Dock item click
+    const dockItemElement = hasClosestByClassName(event.target as HTMLElement, "dock__item");
+    if (dockItemElement) {
+        const type = dockItemElement.getAttribute("data-type") as TDock
+        if (type) {
+            getDockByType(type).toggleModel(type, false, true);
+        }
     }
 
     if (!hasClosestByClassName(event.target, "pdf__outer")) {

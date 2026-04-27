@@ -24,7 +24,7 @@ body {
   overflow: hidden;
 
   // body 使用字号导致显示不全 https://github.com/siyuan-note/siyuan/issues/11670#issuecomment-2282329358
-  & > #dockBottom, & > .fn__flex-1 {
+  & > .fn__flex-1 {
     font-size: 14px;
   }
 

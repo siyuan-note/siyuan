@@ -80,7 +80,7 @@ const dockToJSON = (dock: Dock) => {
     const json = [];
     const subDockToJSON = (index: number) => {
         const data: Config.IUILayoutDockTab[] = [];
-        dock.element.querySelectorAll(`span[data-index="${index}"]`).forEach(item => {
+        dock.elements[index].querySelectorAll(".dock__item").forEach(item => {
             data.push({
                 type: item.getAttribute("data-type"),
                 size: {

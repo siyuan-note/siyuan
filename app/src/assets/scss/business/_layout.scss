@@ -340,43 +340,32 @@
 }
 
 .dock {
-  height: 42px;
   display: flex;
-  padding: 0 42px;
   user-select: none;
   box-sizing: border-box;
   -webkit-user-select: none;
+  width: 42px;
+  flex-direction: column;
+  height: 100%;
 
-  &:hover .dock__item--pin {
-    opacity: 1;
-  }
+  &__split {
+    height: 17px;
+    position: relative;
 
-  &__items {
-    min-height: 26px;
-    min-width: 26px;
+    &:after {
+      height: 1px;
+      background: var(--b3-theme-on-surface-light);
+      content: "";
+      position: absolute;
+      top: 8px;
+      width: 28px;
+      left: 7px;
+    }
   }
 
   svg {
     height: 16px;
     width: 17.5px;
-  }
-
-  &--vertical {
-    width: 42px;
-    flex-direction: column;
-    height: 100%;
-    padding: 0;
-
-    .dock__item {
-      &[data-index="0"]::after {
-        top: -32px;
-        bottom: auto;
-      }
-
-      &[data-index="1"]::after {
-        bottom: 100%;
-      }
-    }
   }
 
   &__item {
@@ -386,11 +375,6 @@
     border-radius: var(--b3-border-radius);
     margin: 7px;
     cursor: pointer;
-
-    &--pin {
-      opacity: 0;
-      transition: var(--b3-transition);
-    }
 
     &:hover:not(.dock__item--activefocus),
     &--active {

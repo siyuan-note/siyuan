@@ -59,7 +59,7 @@ func InitAppearance() {
 		Conf.Appearance.ThemeJS = false
 	}
 	if !gulu.Str.Contains(Conf.Appearance.Icon, Conf.Appearance.Icons) {
-		Conf.Appearance.Icon = "material"
+		Conf.Appearance.Icon = "litheness"
 	}
 	Conf.m.Unlock()
 

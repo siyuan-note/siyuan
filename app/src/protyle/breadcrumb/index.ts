@@ -354,7 +354,7 @@ ${padHTML}
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "netAssets2LocalAssets",
                     label: window.siyuan.languages.netAssets2LocalAssets,
-                    icon: "iconTransform",
+                    icon: "iconDownloadAssets",
                     accelerator: window.siyuan.config.keymap.editor.general.netAssets2LocalAssets.custom,
                     click() {
                         net2LocalAssets(protyle, "Assets");
@@ -363,7 +363,7 @@ ${padHTML}
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "uploadAssets2CDN",
                     label: window.siyuan.languages.uploadAssets2CDN,
-                    icon: "iconCloudSucc",
+                    icon: "iconUploadAssets",
                     click() {
                         if (!needSubscribe()) {
                             confirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
@@ -389,6 +389,7 @@ ${padHTML}
             if (!protyle.scroll?.element.classList.contains("fn__none")) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "keepLazyLoad",
+                    icon: "iconKeepContent",
                     current: protyle.scroll.keepLazyLoad,
                     label: window.siyuan.languages.keepLazyLoad,
                     click: () => {
@@ -504,7 +505,7 @@ ${padHTML}
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "fullWidth",
                     label: window.siyuan.languages.fullWidth,
-                    icon: "iconDock",
+                    icon: "iconFullWidth",
                     type: "submenu",
                     submenu: [{
                         id: "enable",

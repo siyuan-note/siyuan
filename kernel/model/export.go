@@ -933,10 +933,10 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 	// 只复制图标文件夹中的 icon.js 文件
 	iconName := Conf.Appearance.Icon
-	// 如果使用的不是内建图标（material），需要复制 material 作为后备
-	if iconName != "material" && iconName != "" {
-		srcIconFile := filepath.Join(appearancePath, "icons", "material", "icon.js")
-		toIconDir := filepath.Join(savePath, "appearance", "icons", "material")
+	// 如果使用的不是内建图标（litheness），需要复制 litheness 作为后备
+	if iconName != "litheness" && iconName != "" {
+		srcIconFile := filepath.Join(appearancePath, "icons", "litheness", "icon.js")
+		toIconDir := filepath.Join(savePath, "appearance", "icons", "litheness")
 		if err := os.MkdirAll(toIconDir, 0755); err != nil {
 			logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
 			return
@@ -1130,10 +1130,10 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 
 		// 只复制图标文件夹中的 icon.js 文件
 		iconName := Conf.Appearance.Icon
-		// 如果使用的不是内建图标（material），需要复制 material 作为后备
-		if iconName != "material" && iconName != "" {
-			srcIconFile := filepath.Join(appearancePath, "icons", "material", "icon.js")
-			toIconDir := filepath.Join(savePath, "appearance", "icons", "material")
+		// 如果使用的不是内建图标（litheness），需要复制 litheness 作为后备
+		if iconName != "litheness" && iconName != "" {
+			srcIconFile := filepath.Join(appearancePath, "icons", "litheness", "icon.js")
+			toIconDir := filepath.Join(savePath, "appearance", "icons", "litheness")
 			if err := os.MkdirAll(toIconDir, 0755); err != nil {
 				logging.LogErrorf("mkdir [%s] failed: %s", toIconDir, err)
 				return

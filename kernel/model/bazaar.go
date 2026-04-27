@@ -416,5 +416,5 @@ func isBuiltInTheme(name string) bool {
 
 // isBuiltInIcon 通过包名或目录名判断是否为内置图标
 func isBuiltInIcon(name string) bool {
-	return "material" == name
+	return "litheness" == name
 }

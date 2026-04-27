@@ -97,7 +97,7 @@ export const query = {
             <input class="b3-switch" id="audioBlock" type="checkbox"${window.siyuan.config.search.audioBlock ? " checked" : ""}/>
         </label>
         <label class="fn__flex">
-            <svg class="svg"><use xlink:href="#iconLanguage"></use></svg>
+            <svg class="svg"><use xlink:href="#iconGlobe"></use></svg>
             <span class="fn__space"></span>
             <div class="fn__flex-1">
                 IFrame

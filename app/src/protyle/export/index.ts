@@ -25,8 +25,8 @@ const getPluginStyle = async () => {
 };
 
 const getIconScript = (servePath: string) => {
-    const isBuiltInIcon = ["material"].includes(window.siyuan.config.appearance.icon);
-    const html = isBuiltInIcon ? "" : `<script src="${servePath}appearance/icons/material/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
+    const isBuiltInIcon = ["litheness"].includes(window.siyuan.config.appearance.icon);
+    const html = isBuiltInIcon ? "" : `<script src="${servePath}appearance/icons/litheness/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
     return html + `<script src="${servePath}appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?v=${Constants.SIYUAN_VERSION}"></script>`;
 };
 

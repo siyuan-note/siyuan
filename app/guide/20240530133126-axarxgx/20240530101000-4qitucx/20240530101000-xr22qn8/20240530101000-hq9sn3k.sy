@@ -1369,7 +1369,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "material"
+													"TextMarkTextContent": "litheness"
 												},
 												{
 													"Type": "NodeText",
@@ -1406,7 +1406,7 @@
 												{
 													"ID": "20240530101000-6regnhi",
 													"Type": "NodeCodeBlockCode",
-													"Data": "\u003cscript src=\"material/icon.js\"\u003e\u003c/script\u003e\n",
+													"Data": "\u003cscript src=\"litheness/icon.js\"\u003e\u003c/script\u003e\n",
 													"Properties": {
 														"ID": "20240530101000-tsvstz0",
 														"id": "20240530101000-6regnhi"

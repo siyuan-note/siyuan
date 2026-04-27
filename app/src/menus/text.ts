@@ -23,7 +23,7 @@ export const textMenu = (target: Element) => {
     menu.addItem({
         id: "selectAll",
         label: window.siyuan.languages.selectAll,
-        icon: "iconSelect",
+        icon: "iconSelectAll",
         click() {
             if (getSelection().rangeCount === 0) {
                 return;

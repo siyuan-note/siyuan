@@ -71,9 +71,9 @@ func pluginJsonRpcWebSocket(c *gin.Context) {
 	plugin.HandleRpcWebSocket(c)
 }
 
-func pluginPublicWebServer(c *gin.Context) {
-	plugin.HandleHttpRequest(c, plugin.AccessScopePublic)
-}
+// func pluginPublicWebServer(c *gin.Context) {
+// 	plugin.HandleHttpRequest(c, plugin.AccessScopePublic)
+// }
 
 func pluginPrivateWebServer(c *gin.Context) {
 	plugin.HandleHttpRequest(c, plugin.AccessScopePrivate)

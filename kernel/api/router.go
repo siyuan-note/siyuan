@@ -522,7 +522,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("GET", "/ws/plugin/rpc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, pluginJsonRpcWebSocket)
 	ginServer.Handle("GET", "/ws/plugin/rpc/:name", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, pluginJsonRpcWebSocket)
 
-	ginServer.Any("/plugin/public/:name/*path", pluginPublicWebServer)
+	// ginServer.Any("/plugin/public/:name/*path", pluginPublicWebServer)
 	ginServer.Any("/plugin/private/:name/*path", model.CheckAuth, model.CheckAdminRole, pluginPrivateWebServer)
 
 	ginServer.Handle("POST", "/api/plugin/getLoadedPlugin", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getLoadedPlugin)

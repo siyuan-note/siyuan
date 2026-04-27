@@ -149,9 +149,8 @@ type ResponseSerializedData struct {
 }
 
 type ResponseFile struct {
-	Name string `json:"name"` // e.g. "index.html"
-	Path string `json:"path"` // e.g. "/data/plugin/<name>/app/index.html"
-	Data []byte `json:"data"` // content of the file (if Path is empty string, Data will be used as the file content; if Path is not empty, it will be used as the file content and Data will be ignored)
+	Name string `json:"name"` // e.g. "index.html". If Name is not empty, the file will be sent with Content-Disposition header.
+	Path string `json:"path"` // e.g. "/data/plugins/<plugin-name>/app/index.html"
 }
 
 type ResponseString struct {
@@ -380,21 +379,12 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 			}
 			return
 		} else if response.Body.File != nil {
-			if response.Body.File.Path != "" {
-				// If Path is not empty, use it as the file content and ignore Data.
-				// This is for streaming large files without loading the whole content into memory.
-				if response.Body.File.Name != "" {
-					c.FileAttachment(response.Body.File.Path, response.Body.File.Name)
-				} else {
-					c.File(response.Body.File.Path)
-				}
+			// If Path is not empty, use it as the file content and ignore Data.
+			// This is for streaming large files without loading the whole content into memory.
+			if response.Body.File.Name != "" {
+				c.FileAttachment(response.Body.File.Path, response.Body.File.Name)
 			} else {
-				// If Path is empty, use Data as the file content.
-				_, writeErr := c.Writer.Write(response.Body.File.Data)
-				if writeErr != nil {
-					c.String(http.StatusInternalServerError, "Error occurred while writing file content for plugin [%s]: %s", name, writeErr)
-					return
-				}
+				c.File(response.Body.File.Path)
 			}
 			return
 		} else if response.Body.String != nil {

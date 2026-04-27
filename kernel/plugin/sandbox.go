@@ -1671,3 +1671,24 @@ func isJsObjectArray(jsObject *goja.Object) bool {
 		return false
 	}
 }
+
+// jsValueToBytes attempts to convert a goja.Value to a byte slice, supporting string, Buffer, ArrayBuffer, etc.
+func jsValueToBytes(rt *goja.Runtime, value goja.Value) (data []byte, err error) {
+	if goValue := value.Export(); goValue != nil {
+		switch d := goValue.(type) {
+		case string: // string
+			data = []byte(d)
+		case []byte: // Buffer
+			data = d
+		case goja.ArrayBuffer: // ArrayBuffer
+			data = d.Bytes()
+		case buffer.Buffer: // ?
+			data = buffer.Bytes(rt, value)
+		default:
+			err = fmt.Errorf("unsupported data type: %T", goValue)
+		}
+		return
+	}
+	err = fmt.Errorf("js value cannot be exported to a valid Go value")
+	return
+}

@@ -763,14 +763,41 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 
 		jsRequest := rt.ToValue(request)
 		invokeFunction(func(rt *goja.Runtime, result *CallResult) {
-
-			resultObj := result.Value.ToObject(rt)
-			if resultObj == nil {
+			responseObj := result.Value.ToObject(rt)
+			if responseObj == nil {
 				done <- &ServerHandlerResult{Error: fmt.Errorf("handler did not return an object")}
 				return
 			}
 
-			resultJson, marshalErr := resultObj.MarshalJSON()
+			// convert response.body?.raw?.data from (string | Buffer | ArrayBuffer) to []byte
+			var raw *[]byte
+			if bodyValue := responseObj.Get("body"); !goja.IsUndefined(bodyValue) && !goja.IsNull(bodyValue) {
+				// response.body
+				if bodyObj := bodyValue.ToObject(rt); bodyObj != nil {
+					if rawValue := bodyObj.Get("raw"); !goja.IsUndefined(rawValue) && !goja.IsNull(rawValue) {
+						// response.body.raw
+						if rawObj := rawValue.ToObject(rt); rawObj != nil {
+							if dataValue := rawObj.Get("data"); !goja.IsUndefined(dataValue) && !goja.IsNull(dataValue) {
+								// response.body.raw.data
+								dataBytes, convertErr := jsValueToBytes(rt, dataValue)
+								if convertErr == nil {
+									raw = &dataBytes
+									rawObj.Set("data", goja.Null())
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// ❌ panic: invalid memory address or nil pointer dereference
+			// response := HttpResponse{}
+			// if err := rt.ExportTo(responseObj, &response); err != nil {
+			// 	done <- &ServerHandlerResult{Error: fmt.Errorf("invalid response format: %v", err)}
+			// 	return
+			// }
+
+			resultJson, marshalErr := responseObj.MarshalJSON()
 			if marshalErr != nil {
 				done <- &ServerHandlerResult{Error: marshalErr}
 				return
@@ -780,6 +807,10 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 			if unmarshalErr := json.Unmarshal(resultJson, &response); unmarshalErr != nil {
 				done <- &ServerHandlerResult{Error: fmt.Errorf("invalid response format: %v", unmarshalErr)}
 				return
+			}
+
+			if raw != nil && response.Body != nil && response.Body.Raw != nil {
+				response.Body.Raw.Data = *raw
 			}
 
 			done <- &ServerHandlerResult{Value: &response}
@@ -793,7 +824,6 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 	if runErr != nil {
 		done <- &ServerHandlerResult{Error: runErr}
 	}
-	logging.LogDebugf("7")
 
 	result := <-done
 	if result.Error != nil {

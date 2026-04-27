@@ -16,15 +16,8 @@
     height: 100%;
 
     .b3-label:not(.b3-label--inner) {
-      padding: 0;
-      margin: 16px 24px 32px;
-      box-shadow: 0 15px 0 0 var(--b3-theme-background), 0 16px 0 0 var(--b3-border-color);
-      border-bottom: 0;
-
-      &:last-child {
-        margin-bottom: 16px;
-        box-shadow: none;
-      }
+      margin: 0 16px;
+      padding: 16px 0;
     }
 
     label.b3-label:not(.b3-label--inner) {
@@ -45,41 +38,59 @@
     textarea.b3-text-field {
       resize: vertical;
     }
+
+    .config-group {
+      background-color: var(--b3-theme-surface);
+      margin: 16px 24px;
+      border-radius: var(--b3-border-radius-b);
+
+      &__title {
+        display: block;
+        padding: 24px 40px 0 40px;
+      }
+    }
+
   }
 
-  &__panel > .b3-tab-bar {
-    user-select: none;
-    width: 240px;
-    overflow: auto;
-    padding: 8px 0;
-    box-sizing: border-box;
+  &__panel {
+    background-color: var(--b3-theme-background);
+    border-radius: var(--b3-border-radius-b);
 
-    .config__tab-hr {
-      margin: 16px 0;
-      background: var(--b3-border-color);
-      height: 1px;
-    }
+    & > .b3-tab-bar {
+      user-select: none;
+      width: 240px;
+      overflow: auto;
+      padding: 8px 0;
+      box-sizing: border-box;
+      border-right: 1px solid var(--b3-border-color);
 
-    .config__tab-title {
-      display: flex;
-      align-items: center;
-      height: 32px;
-      padding: 0 12px;
-      margin-bottom: 8px;
-    }
+      .config__tab-hr {
+        margin: 16px 0;
+        background: var(--b3-border-color);
+        height: 1px;
+      }
 
-    .b3-form__icon {
-      margin: 0 8px 8px;
-    }
+      .config__tab-title {
+        display: flex;
+        align-items: center;
+        height: 32px;
+        padding: 0 12px;
+        margin-bottom: 8px;
+      }
 
-    .b3-list-item {
-      line-height: 38px;
+      .b3-form__icon {
+        margin: 0 8px 8px;
+      }
 
-      &__graphic {
-        margin-right: 0;
-        padding: 0 8px 0 4px;
-        height: 16px;
-        width: 16px;
+      .b3-list-item {
+        line-height: 38px;
+
+        &__graphic {
+          margin-right: 0;
+          padding: 0 8px 0 4px;
+          height: 16px;
+          width: 16px;
+        }
       }
     }
   }

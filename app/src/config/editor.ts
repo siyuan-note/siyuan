@@ -341,70 +341,73 @@ export const editor = {
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="allowHTMLBLockScript" type="checkbox"${window.siyuan.config.editor.allowHTMLBLockScript ? " checked" : ""}/>
 </label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineAsterisk}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineAsteriskTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineAsterisk" type="checkbox"${window.siyuan.config.editor.markdown.inlineAsterisk ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineUnderscore}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineUnderscoreTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineUnderscore" type="checkbox"${window.siyuan.config.editor.markdown.inlineUnderscore ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineSup}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineSupTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineSup" type="checkbox"${window.siyuan.config.editor.markdown.inlineSup ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineSub}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineSubTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineSub" type="checkbox"${window.siyuan.config.editor.markdown.inlineSub ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineTag}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineTagTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineTag" type="checkbox"${window.siyuan.config.editor.markdown.inlineTag ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineMath}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineMathTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineMath" type="checkbox"${window.siyuan.config.editor.markdown.inlineMath ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineStrikethrough}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineStrikethroughTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineStrikethrough" type="checkbox"${window.siyuan.config.editor.markdown.inlineStrikethrough ? " checked" : ""}/>
-</label>
-<label class="fn__flex b3-label">
-    <div class="fn__flex-1">
-        ${window.siyuan.languages.editorMarkdownInlineMark}
-        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineMarkTip}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineMark" type="checkbox"${window.siyuan.config.editor.markdown.inlineMark ? " checked" : ""}/>
-</label>`;
+<b class="config-group__title">${window.siyuan.languages.config}</b>
+<div class="config-group">
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineAsterisk}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineAsteriskTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineAsterisk" type="checkbox"${window.siyuan.config.editor.markdown.inlineAsterisk ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineUnderscore}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineUnderscoreTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineUnderscore" type="checkbox"${window.siyuan.config.editor.markdown.inlineUnderscore ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineSup}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineSupTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineSup" type="checkbox"${window.siyuan.config.editor.markdown.inlineSup ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineSub}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineSubTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineSub" type="checkbox"${window.siyuan.config.editor.markdown.inlineSub ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineTag}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineTagTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineTag" type="checkbox"${window.siyuan.config.editor.markdown.inlineTag ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineMath}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineMathTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineMath" type="checkbox"${window.siyuan.config.editor.markdown.inlineMath ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineStrikethrough}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineStrikethroughTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineStrikethrough" type="checkbox"${window.siyuan.config.editor.markdown.inlineStrikethrough ? " checked" : ""}/>
+    </label>
+    <label class="fn__flex b3-label">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.editorMarkdownInlineMark}
+            <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineMarkTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" id="editorMarkdownInlineMark" type="checkbox"${window.siyuan.config.editor.markdown.inlineMark ? " checked" : ""}/>
+    </label>
+</div>`;
     },
     bindEvent: async () => {
         /// #if !BROWSER

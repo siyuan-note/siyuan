@@ -184,16 +184,7 @@ export const ai = {
     </div>
 </div>`;
         /// #endif
-        return `<div class="fn__flex-column" style="height: 100%">
-<div class="layout-tab-bar fn__flex">
-    <div data-type="openai" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">OpenAI</span><span class="fn__flex-1"></span></div>
-</div>
-<div class="fn__flex-1">
-    <div data-type="openai">
-        ${responsiveHTML}
-    </div>
-</div>
-</div>`;
+        return responsiveHTML;
     },
     bindEvent: () => {
         const togglePassword = ai.element.querySelector('.b3-form__icona-icon[data-action="togglePassword"]');

@@ -141,7 +141,7 @@ export const openSetting = (app: App) => {
       <div class="config__tab-container" data-name="editor">${editor.genHTML()}</div>
       <div class="config__tab-container fn__none" data-name="filetree"></div>
       <div class="config__tab-container fn__none" data-name="card"></div>
-      <div class="config__tab-container config__tab-container--top fn__none" data-name="AI"></div>
+      <div class="config__tab-container fn__none" data-name="AI"></div>
       <div class="config__tab-container config__tab-container--top fn__none" data-name="image"></div>
       <div class="config__tab-container fn__none" data-name="export"></div>
       <div class="config__tab-container fn__none" data-name="appearance"></div>

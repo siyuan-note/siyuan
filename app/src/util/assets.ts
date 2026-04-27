@@ -109,7 +109,7 @@ export const loadAssets = (data: Config.IAppearance) => {
     }
 
     // load icons
-    const isBuiltInIcon = data.icon === "lithe";
+    const isBuiltInIcon = data.icon === "litheness";
     const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号

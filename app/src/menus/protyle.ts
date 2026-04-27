@@ -864,7 +864,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "selectAll",
             label: window.siyuan.languages.selectAll,
-            icon: "iconSelect",
+            icon: "iconSelectAll",
             accelerator: "⌘A",
             click() {
                 selectAll(protyle, nodeElement, range);

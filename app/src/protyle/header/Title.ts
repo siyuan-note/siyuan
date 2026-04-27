@@ -292,7 +292,7 @@ export class Title {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "selectAll",
                     label: window.siyuan.languages.selectAll,
-                    icon: "iconSelect",
+                    icon: "iconSelectAll",
                     accelerator: "⌘A",
                     click: () => {
                         range.selectNodeContents(this.editElement);

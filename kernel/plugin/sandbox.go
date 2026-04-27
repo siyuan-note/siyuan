@@ -57,6 +57,20 @@ var (
 	client *req.Client = req.C().SetTimeout(time.Minute)
 )
 
+type FunctionResult[T any] struct {
+	Value T
+	Error error
+}
+
+type CallResult FunctionResult[goja.Value]
+
+func (r *CallResult) TaskResult() *TaskResult {
+	if r.Error != nil {
+		return &TaskResult{err: r.Error}
+	}
+	return &TaskResult{value: r.Value.Export()}
+}
+
 type Printer struct {
 	name string // plugin name for log prefix
 }
@@ -118,6 +132,7 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectLogger(p, rt, siyuan))
 	lo.Must0(injectStorage(p, rt, siyuan))
 	lo.Must0(injectRpc(p, rt, siyuan))
+	lo.Must0(injectServer(p, rt, siyuan))
 	lo.Must0(injectFetch(p, rt, siyuan))
 	lo.Must0(injectSocket(p, rt, siyuan))
 
@@ -1233,6 +1248,44 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 	return
 }
 
+// injectServer adds siyuan.server to the goja context.
+func injectServer(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("injectServer: %v", r)
+		}
+	}()
+
+	http := rt.NewObject()
+	ws := rt.NewObject()
+	sse := rt.NewObject()
+
+	lo.Must0(http.Set("handler", goja.Null()))
+	lo.Must0(ws.Set("handler", goja.Null()))
+	lo.Must0(sse.Set("handler", goja.Null()))
+
+	lo.Must0(ObjectSeal(rt, http))
+	lo.Must0(ObjectSeal(rt, ws))
+	lo.Must0(ObjectSeal(rt, sse))
+
+	private := rt.NewObject()
+
+	lo.Must0(private.Set(string(RequestTypeHTTP), http))
+	lo.Must0(private.Set(string(RequestTypeWS), ws))
+	lo.Must0(private.Set(string(RequestTypeSSE), sse))
+
+	lo.Must0(ObjectFreeze(rt, private))
+
+	server := rt.NewObject()
+
+	lo.Must0(server.Set("private", private))
+
+	lo.Must0(ObjectFreeze(rt, server))
+
+	lo.Must0(siyuan.Set("server", server))
+	return
+}
+
 // ObjectFreeze calls Object.freeze() on the given goja object.
 func ObjectFreeze(rt *goja.Runtime, obj *goja.Object) error {
 	Object := rt.GlobalObject().Get("Object").ToObject(rt)
@@ -1265,7 +1318,7 @@ func ObjectSeal(rt *goja.Runtime, obj *goja.Object) error {
 	return err
 }
 
-// ObjectSetDataMethods attaches text(), json(), and arrayBuffer() methods to a JS object,
+// ObjectSetDataMethods attaches text(), json(), buffer() and arrayBuffer() methods to a JS object,
 // each returning a Promise that resolves with the corresponding representation of data.
 func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object, data []byte) (err error) {
 	defer func() {
@@ -1373,6 +1426,15 @@ func ObjectSetDataMethods(p *KernelPlugin, rt *goja.Runtime, object *goja.Object
 		return rt.ToValue(promise)
 	})))
 	return
+}
+
+// NewDataObject creates a new JS object with text(), json(), buffer() and arrayBuffer() methods for the given data.
+func NewDataObject(p *KernelPlugin, rt *goja.Runtime, data []byte) (*goja.Object, error) {
+	obj := rt.NewObject()
+	if err := ObjectSetDataMethods(p, rt, obj, data); err != nil {
+		return nil, err
+	}
+	return obj, nil
 }
 
 // loggerWrapper returns a JS-callable function that logs a message at the given level.
@@ -1515,9 +1577,14 @@ func dispatchEvent(p *KernelPlugin, rt *goja.Runtime, e any) (async bool, err er
 }
 
 // invokeFunction calls a goja.Callable with the given this and arguments, handling both synchronous return values and Promises.
-func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, async bool, fn goja.Callable, this goja.Value, args ...goja.Value) {
-	resultJs, err := fn(this, args...)
+func invokeFunction(callback func(rt *goja.Runtime, result *CallResult), rt *goja.Runtime, async bool, fn goja.Callable, this goja.Value, args ...goja.Value) {
+	resultJs, invokeErr := fn(this, args...)
 	if callback == nil {
+		return
+	}
+
+	if invokeErr != nil {
+		callback(rt, &CallResult{Error: invokeErr})
 		return
 	}
 
@@ -1528,32 +1595,32 @@ func invokeFunction(callback func(result TaskResult), rt *goja.Runtime, async bo
 		}
 		resultObj := resultJs.ToObject(rt)
 		if resultObj == nil {
-			callback(TaskResult{nil, fmt.Errorf("expected promise object, got %T", result)})
+			callback(rt, &CallResult{Error: fmt.Errorf("expected promise object, got %T", result)})
 		}
 
 		thenValue := resultObj.Get("then")
 		if thenValue == nil {
-			callback(TaskResult{nil, fmt.Errorf("promise object has no 'then' property")})
+			callback(rt, &CallResult{Error: fmt.Errorf("promise object has no 'then' property")})
 		}
 
 		then, ok := goja.AssertFunction(thenValue)
 		if !ok {
-			callback(TaskResult{nil, fmt.Errorf("'promise.then property is not a function")})
+			callback(rt, &CallResult{Error: fmt.Errorf("'promise.then property is not a function")})
 		}
 
 		then(resultObj, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
 			// ⚠️ call.Arguments always is an empty array.
 			promise, ok := result.(*goja.Promise)
 			if ok {
-				callback(TaskResult{promise.Result().Export(), nil})
+				callback(rt, &CallResult{Value: promise.Result()})
 			} else {
-				callback(TaskResult{result, nil})
+				callback(rt, &CallResult{Value: resultJs})
 			}
 		}), rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {
-			callback(TaskResult{nil, fmt.Errorf("promise rejected: %v", call.Argument(0).Export())})
+			callback(rt, &CallResult{Error: fmt.Errorf("promise rejected: %v", call.Argument(0).Export())})
 		}))
 	} else {
-		callback(TaskResult{result, err})
+		callback(rt, &CallResult{Value: resultJs})
 	}
 }
 

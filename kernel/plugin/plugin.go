@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -447,19 +446,7 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 }
 
 func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (response *HttpResponse, err error) {
-	// TODO: echo request for testing, replace with invoking siyuan.server[scope].http.handler
-	response = &HttpResponse{
-		StatusCode: http.StatusOK,
-		Body: &ResponseBody{
-			Data: &ResponseSerializedData{
-				Type: SerializedTypeJSON,
-				Data: request,
-			},
-		},
-	}
-	// bind data get methods using ObjectSetDataMethods
-	// request.request.body.data?
-	// request.request.body.form?.files[*].data
+	response, err = p.invokeServerHandler(scope, RequestTypeHTTP, request)
 	return
 }
 
@@ -601,7 +588,7 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 		return
 	}
 
-	done := make(chan TaskResult, 1)
+	done := make(chan *TaskResult, 1)
 
 	p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 		rpcParams := []goja.Value{}
@@ -619,8 +606,8 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 			// If params is undefined or null, pass no arguments.
 		}
 
-		invokeFunction(func(result TaskResult) {
-			done <- result
+		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
+			done <- result.TaskResult()
 		}, rt, true, rpcMethod.Method, rt.GlobalObject(), rpcParams...)
 		return
 	}, nil)
@@ -701,8 +688,8 @@ func (p *KernelPlugin) invokeHook(name string) {
 			return
 		}
 
-		invokeFunction(func(result TaskResult) {
-			done <- result
+		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
+			done <- *result.TaskResult()
 		}, rt, true, hook, lifecycle)
 		return
 	}, func(_ *goja.Runtime, _ any, err error) {
@@ -718,4 +705,102 @@ func (p *KernelPlugin) invokeHook(name string) {
 	if result.err != nil {
 		err = result.err
 	}
+}
+
+type ServerHandlerResult FunctionResult[*HttpResponse]
+
+// invokeServerHandler invokes the appropriate server handler (HTTP, WebSocket, SSE) based on the request type and access scope.
+func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType RequestType, request *Request) (response *HttpResponse, err error) {
+	done := make(chan *ServerHandlerResult, 1)
+
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+		// Get handler object: siyuan.server[scope][requestType]
+		handlerObjValue, getObjErr := getJsContextValue(rt, []any{"siyuan", "server", string(scope), string(requestType)})
+		if getObjErr != nil {
+			err = getObjErr
+			return
+		}
+
+		handlerObj := handlerObjValue.ToObject(rt)
+		if handlerObj == nil {
+			err = fmt.Errorf("globalThis.siyuan.server[%s][%s] is not an object", scope, requestType)
+			return
+		}
+
+		// Get handler: siyuan.server[scope][requestType].handler
+		handlerValue := handlerObj.Get("handler")
+		if goja.IsUndefined(handlerValue) || goja.IsNull(handlerValue) {
+			err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, requestType)
+			return
+		}
+		handler, ok := goja.AssertFunction(handlerValue)
+		if !ok {
+			err = fmt.Errorf("siyuan.server[%s][%s].handler is not a function", scope, requestType)
+			return
+		}
+
+		// convert body raw data to js object
+		if request.Request.Body.Data != nil {
+			request.Request.Body.Data, err = NewDataObject(p, rt, *request.Request.Body.Data.(*[]byte))
+			if err != nil {
+				return
+			}
+		}
+
+		// convert body form files data to js object
+		if request.Request.Body.Form != nil {
+			for _, fileList := range request.Request.Body.Form.File {
+				for _, file := range fileList {
+					if file.Data != nil {
+						file.Data, err = NewDataObject(p, rt, *file.Data.(*[]byte))
+						if err != nil {
+							return
+						}
+					}
+				}
+			}
+		}
+
+		jsRequest := rt.ToValue(request)
+		invokeFunction(func(rt *goja.Runtime, result *CallResult) {
+
+			resultObj := result.Value.ToObject(rt)
+			if resultObj == nil {
+				done <- &ServerHandlerResult{Error: fmt.Errorf("handler did not return an object")}
+				return
+			}
+
+			resultJson, marshalErr := resultObj.MarshalJSON()
+			if marshalErr != nil {
+				done <- &ServerHandlerResult{Error: marshalErr}
+				return
+			}
+
+			response := HttpResponse{}
+			if unmarshalErr := json.Unmarshal(resultJson, &response); unmarshalErr != nil {
+				done <- &ServerHandlerResult{Error: fmt.Errorf("invalid response format: %v", unmarshalErr)}
+				return
+			}
+
+			done <- &ServerHandlerResult{Value: &response}
+		}, rt, true, handler, handlerObj, jsRequest)
+		return
+	}, func(_ *goja.Runtime, _ any, err error) {
+		if err != nil {
+			done <- &ServerHandlerResult{Error: err}
+		}
+	})
+	if runErr != nil {
+		done <- &ServerHandlerResult{Error: runErr}
+	}
+	logging.LogDebugf("7")
+
+	result := <-done
+	if result.Error != nil {
+		err = result.Error
+	} else {
+		response = result.Value
+	}
+
+	return
 }

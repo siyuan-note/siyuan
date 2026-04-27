@@ -19,8 +19,6 @@ package plugin
 import (
 	"fmt"
 	"net/http"
-	"net/textproto"
-	"net/url"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,6 +30,7 @@ const (
 
 type AccessScope string
 type SerializedType string
+type RequestType string
 
 const (
 	AccessScopePublic  AccessScope = "public"
@@ -48,6 +47,10 @@ const (
 	SerializedTypeYAML     SerializedType = "YAML"
 	SerializedTypeTOML     SerializedType = "TOML"
 	SerializedTypeProtoBuf SerializedType = "ProtoBuf"
+
+	RequestTypeHTTP RequestType = "http"
+	RequestTypeWS   RequestType = "ws"
+	RequestTypeSSE  RequestType = "sse"
 )
 
 type Request struct {
@@ -64,7 +67,8 @@ type RequestUrl struct {
 	Fragment        string       `json:"fragment"` // e.g. "hash abc"
 	EscapedFragment string       `json:"hash"`     // e.g. "hash%20abc"
 	RawQuery        string       `json:"search"`   // e.g. a=1&b=2
-	Query           url.Values   `json:"query"`    // e.g. {"a": ["1"], "b": ["2"]}
+
+	Query map[string][]string `json:"query"` // e.g. {"a": ["1"], "b": ["2"]}
 }
 
 type RequestUser struct {
@@ -80,13 +84,14 @@ type RequestContent struct {
 	ProtoMajor int    `json:"protoMajor"` // e.g. 1
 	ProtoMinor int    `json:"protoMinor"` // e.g. 1
 
-	/* Request Header */
-	Header        http.Header    `json:"headers"`       // e.g. {"Content-Type": ["application/json"], "Accept": ["*/*"]}
-	ContentType   string         `json:"contentType"`   // e.g. "application/json"
-	ContentLength int64          `json:"contentLength"` // e.g. 123
-	Referer       string         `json:"referer"`       // e.g. "http://127.0.0.1:6806/stage/build/app/"
-	UserAgent     string         `json:"userAgent"`     // e.g. "SiYuan/3.6.5 https://b3log.org/siyuan Electron Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) SiYuan/3.6.5 Chrome/144.0.7559.236 Electron/40.9.1 Safari/537.36"
-	Cookies       []*http.Cookie `json:"cookies"`       // e.g. [{"Name": "siyuan", "Value": "abc123", "Quoted": false, "Path": "", "Domain": "", "Expires": "0001-01-01T00:00:00Z", "RawExpires": "", "MaxAge": 0, "Secure": false, "HttpOnly": false, "SameSite": 0, "Partitioned": false, "Raw": "", "Unparsed": null}]
+	/* Request Headers */
+	Headers map[string][]string `json:"headers"` // e.g. {"Content-Type": ["application/json"], "Accept": ["*/*"]}
+	Cookies map[string][]string `json:"cookies"` // e.g. {"siyuan": ["abc123"]}
+
+	ContentType   string `json:"contentType"`   // e.g. "application/json"
+	ContentLength int64  `json:"contentLength"` // e.g. 123
+	Referer       string `json:"referer"`       // e.g. "http://127.0.0.1:6806/stage/build/app/"
+	UserAgent     string `json:"userAgent"`     // e.g. "SiYuan/3.6.5 https://b3log.org/siyuan Electron Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) SiYuan/3.6.5 Chrome/144.0.7559.236 Electron/40.9.1 Safari/537.36"
 
 	/* Request Body */
 	Body RequestBody `json:"body"`
@@ -94,7 +99,7 @@ type RequestContent struct {
 
 type RequestBody struct {
 	Form *RequestForm `json:"form"` // parsed form data if Content-Type is application/x-www-form-urlencoded or multipart/form-data
-	Data []byte       `json:"data"` // content of all request body (if form != nil, it will be an empty byte array)
+	Data any          `json:"data"` // *[]byte | *goja.Object, content of all request body (if form != nil, it will be an empty byte array)
 }
 
 type RequestForm struct {
@@ -103,10 +108,10 @@ type RequestForm struct {
 }
 
 type RequestFile struct {
-	Filename string               `json:"filename"` // e.g. "hello.txt"
-	Headers  textproto.MIMEHeader `json:"headers"`  // e.g. {"Content-Disposition": ["form-data; name=\"file1\"; filename=\"hello.txt\""], "Content-Type": ["text/plain"]}
-	Size     int64                `json:"size"`     // e.g. 123
-	Data     []byte               `json:"data"`     // content of the file
+	Filename string              `json:"filename"` // e.g. "hello.txt"
+	Headers  map[string][]string `json:"headers"`  // e.g. {"Content-Disposition": ["form-data; name=\"file1\"; filename=\"hello.txt\""], "Content-Type": ["text/plain"]}
+	Size     int64               `json:"size"`     // e.g. 123
+	Data     any                 `json:"data"`     // *[]byte | *goja.Object, content of the file
 }
 
 type RequestContext struct {
@@ -117,17 +122,17 @@ type RequestContext struct {
 	RemoteIP   string `json:"remoteIp"`   // e.g. "127.0.0.1"
 	RemoteAddr string `json:"remoteAddr"` // e.g. "127.0.0.1:54321"
 
-	Params gin.Params `json:"params"` // e.g. [{"Key": "name", "Value": "plugin-sample"}, {"Key": "path", "Value": "/api/hello"}]
+	Params map[string][]string `json:"params"` // e.g. [{"Key": "name", "Value": "plugin-sample"}, {"Key": "path", "Value": "/api/hello"}]
 
 	IsWebsocket bool `json:"-"`
 	IsSse       bool `json:"-"`
 }
 
 type HttpResponse struct {
-	StatusCode int            `json:"statusCode"` // e.g. 200
-	Headers    http.Header    `json:"headers"`    // e.g. {"Content-Type": ["application/json"], "Set-Cookie": ["siyuan=abc123; Path=/; HttpOnly"]}
-	Cookies    []*http.Cookie `json:"cookies"`    // e.g. [{"Name": "plugin-sample", "Value": "abc123", "Quoted": false, "Path": "/plugin/private/plugin-sample/", "Domain": "", "Expires": "0001-01-01T00:00:00Z", "RawExpires": "", "MaxAge": 0, "Secure": false, "HttpOnly": false, "SameSite": 0, "Partitioned": false, "Raw": "", "Unparsed": null}]
-	Body       *ResponseBody  `json:"body"`       // response body, can be either raw data or a file
+	StatusCode int                 `json:"statusCode"` // e.g. 200
+	Headers    map[string][]string `json:"headers"`    // e.g. {"Content-Type": ["application/json"], "Set-Cookie": ["siyuan=abc123; Path=/; HttpOnly"]}
+	Cookies    []*http.Cookie      `json:"cookies"`    // e.g. [{"Name": "plugin-sample", "Value": "abc123", "Quoted": false, "Path": "/plugin/private/plugin-sample/", "Domain": "", "Expires": "0001-01-01T00:00:00Z", "RawExpires": "", "MaxAge": 0, "Secure": false, "HttpOnly": false, "SameSite": 0, "Partitioned": false, "Raw": "", "Unparsed": null}]
+	Body       *ResponseBody       `json:"body"`       // response body, can be either raw data or a file
 }
 
 type ResponseBody struct {
@@ -170,7 +175,7 @@ func isSseRequest(c *gin.Context) bool {
 
 func parseRequest(c *gin.Context) (request *Request, err error) {
 	var form *RequestForm
-	var data []byte
+	var data *[]byte
 	// c.MultipartForm() will parse application/x-www-form-urlencoded and multipart/form-data
 	if multipartForm, formErr := c.MultipartForm(); formErr != nil {
 		// Not a form request, do nothing and leave form as nil
@@ -197,7 +202,8 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 						err = fmt.Errorf("read form part [%s] file [%s] error: %s", partName, handler.Filename, readErr.Error())
 						return
 					} else {
-						files[i].Data = content[:n]
+						fileData := content[:n]
+						files[i].Data = &fileData
 					}
 				}
 			}
@@ -215,7 +221,7 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 		if rawData, readErr := c.GetRawData(); readErr != nil {
 			// request don't have body, do nothing
 		} else {
-			data = rawData
+			data = &rawData
 		}
 	}
 
@@ -226,6 +232,20 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 			Username: username,
 			Password: password,
 		}
+	}
+
+	headers := map[string][]string(c.Request.Header)
+	delete(headers, "Cookie")
+	delete(headers, "Authorization")
+
+	cookies := make(map[string][]string)
+	for _, cookie := range c.Request.Cookies() {
+		cookies[cookie.Name] = append(cookies[cookie.Name], cookie.Value)
+	}
+
+	params := make(map[string][]string)
+	for _, param := range c.Params {
+		params[param.Key] = append(params[param.Key], param.Value)
 	}
 
 	request = &Request{
@@ -246,12 +266,12 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 			ProtoMajor: c.Request.ProtoMajor,
 			ProtoMinor: c.Request.ProtoMinor,
 
-			Header:        c.Request.Header,
+			Headers:       headers,
+			Cookies:       cookies,
 			ContentType:   c.ContentType(),
 			ContentLength: c.Request.ContentLength,
 			Referer:       c.Request.Referer(),
 			UserAgent:     c.Request.UserAgent(),
-			Cookies:       c.Request.Cookies(),
 
 			Body: RequestBody{
 				Form: form,
@@ -264,7 +284,7 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 			ClientIP:   c.ClientIP(),
 			RemoteIP:   c.RemoteIP(),
 			RemoteAddr: c.Request.RemoteAddr,
-			Params:     c.Params,
+			Params:     params,
 
 			IsWebsocket: c.IsWebsocket(),
 			IsSse:       isSseRequest(c),

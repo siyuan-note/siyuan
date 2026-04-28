@@ -116,6 +116,8 @@
     margin: 0 8px;
     display: flex;
     align-items: center;
+    font-weight: 500;
+    color: var(--b3-theme-on-background);
 
     &--icon {
       margin-left: 0;

@@ -524,10 +524,10 @@ func PruneBroadcastChannels() []string {
 //	"http://localhost:6806/es/broadcast/subscribe?retry=1000&channel=test1&channel=test2"
 func broadcastSubscribe(c *gin.Context) {
 	// REF: https://github.com/gin-gonic/examples/blob/master/server-sent-event/main.go
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
-	c.Writer.Header().Set("Cache-Control", "no-cache")
-	c.Writer.Header().Set("Connection", "keep-alive")
-	c.Writer.Header().Set("Transfer-Encoding", "chunked")
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("Transfer-Encoding", "chunked")
 
 	defer UnifiedSSE.WaitGroup.Done()
 	UnifiedSSE.WaitGroup.Add(1)

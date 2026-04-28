@@ -761,13 +761,13 @@ func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (r
 
 			// convert response.body?.raw?.data from (string | Buffer | ArrayBuffer) to []byte
 			var raw *[]byte
-			if bodyValue := responseObj.Get("body"); !goja.IsUndefined(bodyValue) && !goja.IsNull(bodyValue) {
+			if bodyValue := responseObj.Get("body"); isJsValueNotNull(bodyValue) {
 				// response.body
 				if bodyObj := bodyValue.ToObject(rt); bodyObj != nil {
-					if rawValue := bodyObj.Get("raw"); !goja.IsUndefined(rawValue) && !goja.IsNull(rawValue) {
+					if rawValue := bodyObj.Get("raw"); isJsValueNotNull(rawValue) {
 						// response.body.raw
 						if rawObj := rawValue.ToObject(rt); rawObj != nil {
-							if dataValue := rawObj.Get("data"); !goja.IsUndefined(dataValue) && !goja.IsNull(dataValue) {
+							if dataValue := rawObj.Get("data"); isJsValueNotNull(dataValue) {
 								// response.body.raw.data
 								dataBytes, convertErr := jsValueToBytes(rt, dataValue)
 								if convertErr == nil {
@@ -843,6 +843,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			conn.Close()
 		})
 	}
+	defer doClose()
 
 	var readyState atomic.Int64
 	var bufferedAmount atomic.Int64
@@ -850,9 +851,9 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 	readyState.Store(int64(WebSocketReadyStateConnecting))
 	bufferedAmount.Store(0)
 
-	messagesCh := make(chan WebSocketMessage, 256)
-	senderDoneCh := make(chan struct{})
-	handlerDone := make(chan error, 1)
+	messages := make(chan *WebSocketMessage, 256) // buffered channel for messages to send to client
+	senderDone := make(chan struct{})             // used to stop message sender goroutine
+	handlerDone := make(chan error, 1)            // used to receive handler error or close signal
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeHTTP)
@@ -921,7 +922,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				done := make(chan FunctionResult[int], 1)
 
 				select {
-				case messagesCh <- WebSocketMessage{t: messageType, d: messageData, done: done}:
+				case messages <- &WebSocketMessage{t: messageType, d: messageData, done: done}:
 					go func() {
 						select {
 						case result := <-done:
@@ -943,7 +944,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 									}
 								}
 							})
-						case <-senderDoneCh:
+						case <-senderDone:
 						}
 					}()
 				default:
@@ -1075,23 +1076,23 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 
 		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
 			if result.Error != nil {
-				logging.LogWarnf("[plugin:%s] ws server handler error: %v", p.Name, result.Error)
+				handlerDone <- result.Error
+			} else {
+				// Emit onopen after giving the handler a chance to register the callback.
+				event := rt.NewObject()
+				event.Set("type", rt.ToValue("open"))
+				invokePortHook("onopen", event)
 			}
 		}, rt, true, handler, handlerObj, jsRequest)
-
-		// Emit onopen after giving the handler a chance to register the callback.
-		event := rt.NewObject()
-		event.Set("type", rt.ToValue("open"))
-		invokePortHook("onopen", event)
 
 		// Sender goroutine: drains messagesCh and writes to the connection.
 		go func() {
 			for {
 				select {
-				case m := <-messagesCh:
+				case m := <-messages:
 					amount, writeErr := p.writeWebSocketMessage(conn, m.t, m.d)
 					m.done <- FunctionResult[int]{Value: amount, Error: writeErr}
-				case <-senderDoneCh:
+				case <-senderDone:
 					return
 				}
 			}
@@ -1100,7 +1101,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		// Reader goroutine: reads incoming frames and dispatches events to JS.
 		go func() (goErr error) {
 			defer func() {
-				close(senderDoneCh)
+				close(senderDone)
 				if r := recover(); r != nil {
 					goErr = fmt.Errorf("panic during ws server handler: %v", r)
 				}
@@ -1218,10 +1219,6 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		message any
 	}
 
-	events := make(chan sseEvent, 64)
-	closed := make(chan struct{})
-	handlerDone := make(chan error, 1)
-
 	ctx, cancel := context.WithCancel(c.Request.Context())
 
 	sseID := p.TrackSSE(cancel)
@@ -1232,6 +1229,10 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 			p.UntrackSSE(sseID)
 		})
 	}
+	defer doClose()
+
+	events := make(chan sseEvent, 64)
+	handlerDone := make(chan error, 1) // using to receive handler error or close signal
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)
@@ -1268,7 +1269,6 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 			message := call.Argument(1).Export()
 			select {
 			case events <- sseEvent{name, message}:
-			case <-closed:
 			case <-ctx.Done():
 			}
 			return goja.Undefined()
@@ -1279,6 +1279,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 			return goja.Undefined()
 		})
 
+		lo.Must0(port.Set("onopen", goja.Null()))
 		lo.Must0(port.Set("onclose", goja.Null()))
 
 		lo.Must0(port.Set("send", port_send))
@@ -1292,15 +1293,19 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 			if result.Error != nil {
 				handlerDone <- result.Error
 			} else {
+				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+					event := rt.NewObject()
+					event.Set("type", rt.ToValue("open"))
+					invokePortHook("onopen", event)
+					return
+				}, nil)
+
 				handlerDone <- nil
 			}
 		}, rt, true, handler, handlerObj, jsRequest)
 
 		go func() {
-			select {
-			case <-closed:
-			case <-ctx.Done():
-			}
+			<-ctx.Done()
 			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 				event := rt.NewObject()
 				event.Set("type", rt.ToValue("close"))
@@ -1324,8 +1329,6 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		case e := <-events:
 			c.SSEvent(e.name, e.message)
 			c.Writer.Flush()
-		case <-closed:
-			return
 		case <-ctx.Done():
 			return
 		case handlerErr := <-handlerDone:

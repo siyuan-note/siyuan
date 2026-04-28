@@ -369,10 +369,6 @@ func invokeFunction(callback func(rt *goja.Runtime, result *CallResult), rt *goj
 		}
 
 		thenValue := resultObj.Get("then")
-		if thenValue == nil {
-			callback(rt, &CallResult{Error: fmt.Errorf("promise object has no 'then' property")})
-		}
-
 		then, ok := goja.AssertFunction(thenValue)
 		if !ok {
 			callback(rt, &CallResult{Error: fmt.Errorf("'promise.then property is not a function")})
@@ -442,6 +438,11 @@ func isJsObjectArray(jsObject *goja.Object) bool {
 	}
 }
 
+// isJsValueNotNull checks if a goja.Value is not nil, undefined or null.
+func isJsValueNotNull(jsValue goja.Value) bool {
+	return jsValue != nil && !goja.IsUndefined(jsValue) && !goja.IsNull(jsValue)
+}
+
 // jsValueToBytes attempts to convert a goja.Value to a byte slice, supporting string, Buffer, ArrayBuffer, etc.
 func jsValueToBytes(rt *goja.Runtime, value goja.Value) (data []byte, err error) {
 	if goValue := value.Export(); goValue != nil {
@@ -480,7 +481,7 @@ func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestT
 
 	// Get handler: siyuan.server[scope][requestType].handler
 	handlerValue := handlerObj.Get("handler")
-	if goja.IsUndefined(handlerValue) || goja.IsNull(handlerValue) {
+	if !isJsValueNotNull(handlerValue) {
 		err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, requestType)
 		return
 	}

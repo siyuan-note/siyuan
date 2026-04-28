@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 )
 
 const (
@@ -57,6 +59,7 @@ type Request struct {
 	URL     RequestUrl     `json:"url"`
 	Request RequestContent `json:"request"`
 	Context RequestContext `json:"context"`
+	Port    *goja.Object   `json:"port"`
 }
 
 type RequestUrl struct {
@@ -299,24 +302,26 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 
 	p := GetManager().GetPlugin(name)
 	if p == nil {
-		c.String(http.StatusNotFound, "Plugin [%s] not found", name)
+		c.String(http.StatusNotFound, "[plugin:%s] not found", name)
 		return
 	}
 	if p.State() != PluginStateRunning {
-		c.String(http.StatusServiceUnavailable, "Plugin [%s] is not running", name)
+		c.String(http.StatusServiceUnavailable, "[plugin:%s] is not running", name)
 		return
 	}
 
 	request, parseErr := parseRequest(c)
 	if parseErr != nil {
-		c.String(http.StatusBadRequest, "Error occurred while parsing HTTP request for plugin [%s]: %s", name, parseErr)
+		c.String(http.StatusBadRequest, "[plugin:%s] Error occurred while parsing HTTP request: %s", name, parseErr)
 		return
 	}
 
 	if request.Context.IsWebsocket {
 		handleErr := p.handleWebSocketRequest(c, request, scope)
 		if handleErr != nil {
-			c.String(http.StatusInternalServerError, "Error occurred while plugin [%s] handling [%s] scope WebSocket request: %s", name, scope, handleErr)
+			msg := fmt.Sprintf("[plugin:%s] Error occurred while handling WebSocket request: %s", name, handleErr)
+			logging.LogWarn(msg)
+			c.String(http.StatusInternalServerError, msg)
 		}
 		return
 	}
@@ -324,14 +329,18 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 	if request.Context.IsSse {
 		handleErr := p.handleServerSentEventRequest(c, request, scope)
 		if handleErr != nil {
-			c.String(http.StatusInternalServerError, "Error occurred while plugin [%s] handling [%s] scope SSE request: %s", name, scope, handleErr)
+			msg := fmt.Sprintf("[plugin:%s] Error occurred while handling SSE request: %s", name, handleErr)
+			logging.LogWarn(msg)
+			c.String(http.StatusInternalServerError, msg)
 		}
 		return
 	}
 
 	response, handleErr := p.handleHttpRequest(request, scope)
 	if handleErr != nil {
-		c.String(http.StatusInternalServerError, "Error occurred while plugin [%s] handling [%s] scope HTTP request: %s", name, scope, handleErr)
+		msg := fmt.Sprintf("[plugin:%s] Error occurred while handling HTTP request: %s", name, handleErr)
+		logging.LogWarn(msg)
+		c.String(http.StatusInternalServerError, msg)
 		return
 	}
 
@@ -375,7 +384,7 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 				c.ProtoBuf(response.StatusCode, response.Body.Data.Data)
 
 			default:
-				c.String(http.StatusInternalServerError, "Unsupported serialized data type [%s] in plugin [%s] response", response.Body.Data.Type, name)
+				c.String(http.StatusInternalServerError, "[plugin:%s] Unsupported serialized data type [%s] in response", name, response.Body.Data.Type)
 			}
 			return
 		} else if response.Body.File != nil {

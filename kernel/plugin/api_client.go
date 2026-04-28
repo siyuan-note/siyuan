@@ -74,7 +74,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							method = m.String()
 						}
 
-						if h := initObj.Get("headers"); h != nil && !goja.IsUndefined(h) && !goja.IsNull(h) {
+						if h := initObj.Get("headers"); isJsValueNotNull(h) {
 							if hObj := h.ToObject(rt); hObj != nil {
 								if hMap, ok := h.Export().(map[string]string); ok {
 									for k, v := range hMap {
@@ -84,7 +84,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							}
 						}
 
-						if b := initObj.Get("body"); b != nil && !goja.IsUndefined(b) && !goja.IsNull(b) {
+						if b := initObj.Get("body"); isJsValueNotNull(b) {
 
 							if goja.IsString(b) {
 								bodyString = b.String()
@@ -230,9 +230,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			readyState.Store(int64(WebSocketReadyStateConnecting))
 			bufferedAmount.Store(0)
 
-			messagesCh := make(chan WebSocketMessage, 256)
-			connReadyCh := make(chan *websocket.Conn, 1)
-			senderDoneCh := make(chan struct{})
+			messages := make(chan WebSocketMessage, 256) // buffered channel for messages to send to server
+			senderDone := make(chan struct{})            // used to stop message sender goroutine
+			connReady := make(chan *websocket.Conn, 1)   // used to signal when the WebSocket connection is ready to send messages
 
 			wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
 			wsHeader := http.Header{}
@@ -290,7 +290,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					done := make(chan FunctionResult[int], 1)
 
 					select {
-					case messagesCh <- WebSocketMessage{
+					case messages <- WebSocketMessage{
 						t:    messageType,
 						d:    messageData,
 						done: done,
@@ -316,7 +316,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 										}
 									}
 								})
-							case <-senderDoneCh:
+							case <-senderDone:
 							}
 						}()
 					default:
@@ -458,16 +458,16 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			go func() {
 				var c *websocket.Conn
 				select {
-				case c = <-connReadyCh:
-				case <-senderDoneCh:
+				case c = <-connReady:
+				case <-senderDone:
 					return
 				}
 				for {
 					select {
-					case m := <-messagesCh:
+					case m := <-messages:
 						amount, writeErr := p.writeWebSocketMessage(c, m.t, m.d)
 						m.done <- FunctionResult[int]{Value: amount, Error: writeErr}
-					case <-senderDoneCh:
+					case <-senderDone:
 						return
 					}
 				}
@@ -475,7 +475,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			go func() (err error) {
 				defer func() {
-					close(senderDoneCh)
+					close(senderDone)
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.client.socket: %v", r)
 					}
@@ -546,7 +546,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					return runError
 				})
 
-				connReadyCh <- c
+				connReady <- c
 
 				_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
 					conn.Store(c)

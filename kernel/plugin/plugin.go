@@ -856,7 +856,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 	handlerDone := make(chan error, 1)            // used to receive handler error or close signal
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeHTTP)
+		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeWS)
 		if getHandlerErr != nil {
 			err = getHandlerErr
 			return
@@ -1099,27 +1099,24 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		}()
 
 		// Reader goroutine: reads incoming frames and dispatches events to JS.
-		go func() (goErr error) {
+		go func() (err error) {
 			defer func() {
 				close(senderDone)
 				if r := recover(); r != nil {
-					goErr = fmt.Errorf("panic during ws server handler: %v", r)
+					err = fmt.Errorf("panic during ws server handler: %v", r)
 				}
 				doClose()
 				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-					if goErr != nil {
+					if err != nil {
 						errEvent := rt.NewObject()
 						errEvent.Set("type", rt.ToValue("error"))
-						errEvent.Set("error", rt.NewGoError(goErr))
+						errEvent.Set("error", rt.NewGoError(err))
 						invokePortHook("onerror", errEvent)
 					}
 					setPortReadyState(rt, WebSocketReadyStateClosed)
-					closeEvent := rt.NewObject()
-					closeEvent.Set("type", rt.ToValue("close"))
-					invokePortHook("onclose", closeEvent)
 					return
 				}, nil)
-				handlerDone <- goErr
+				handlerDone <- err
 			}()
 
 			conn.SetPingHandler(func(data string) error {
@@ -1164,7 +1161,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				messageType, data, readErr := conn.ReadMessage()
 				if readErr != nil {
 					if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-						goErr = readErr
+						err = readErr
 					}
 					return
 				}
@@ -1177,7 +1174,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 						invokePortHook("onmessage", event)
 						return
 					}, nil); runErr != nil {
-						goErr = runErr
+						err = runErr
 						return
 					}
 				case websocket.BinaryMessage:
@@ -1188,7 +1185,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 						invokePortHook("onmessage", event)
 						return
 					}, nil); runErr != nil {
-						goErr = runErr
+						err = runErr
 						return
 					}
 				}

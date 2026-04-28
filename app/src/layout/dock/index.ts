@@ -311,11 +311,7 @@ export class Dock {
         if (!this.pin) {
             this.resetDockPosition(hasActive ? true : false);
             this.resizeElement.classList.add("fn__none");
-            if (hasActive) {
-                this.showDock(true);
-            } else {
-                this.hideDock(true);
-            }
+            this.hideDock(true);
         } else {
             this.layout.element.style.opacity = "";
             this.layout.element.style.transform = "";
@@ -328,13 +324,13 @@ export class Dock {
         resizeTabs();
     }
 
-    public resetDockPosition(show: boolean) {
+    private resetDockPosition(show: boolean) {
         if (this.position === "Left") {
-            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;opacity:${show ? 1 : 0};`);
+            this.layout.element.setAttribute("style", `margin-right: var(--b3-layout-space);width:${this.layout.element.clientWidth}px;opacity:${show ? 1 : 0};`);
         } else if (this.position === "Right") {
-            this.layout.element.setAttribute("style", `width:${this.layout.element.clientWidth}px;opacity:${show ? 1 : 0};`);
+            this.layout.element.setAttribute("style", `margin-left: var(--b3-layout-space);width:${this.layout.element.clientWidth}px;opacity:${show ? 1 : 0};`);
         } else {
-            this.layout.element.setAttribute("style", `height:${this.layout.element.clientHeight}px;opacity:${show ? 1 : 0};`);
+            this.layout.element.setAttribute("style", `margin-top: var(--b3-layout-space);height:${this.layout.element.clientHeight}px;opacity:${show ? 1 : 0};`);
         }
     }
 
@@ -396,9 +392,9 @@ export class Dock {
         const dialogElement = document.querySelector(".b3-dialog") as HTMLElement;
         const blockElement = document.querySelector(".block__popover") as HTMLElement;
         const menuElement = document.querySelector("#commonMenu:not(.fn__none)") as HTMLElement;
-        if ((dialogElement && dialogElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上修改 emoji 时
+        if (!reset && ((dialogElement && dialogElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上修改 emoji 时
             (blockElement && blockElement.style.zIndex > this.layout.element.style.zIndex) ||  // 文档树上弹出悬浮层
-            (menuElement && menuElement.style.zIndex > this.layout.element.style.zIndex)  // 面板上弹出菜单时
+            (menuElement && menuElement.style.zIndex > this.layout.element.style.zIndex))  // 面板上弹出菜单时
         ) {
             return;
         }

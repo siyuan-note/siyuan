@@ -1289,6 +1289,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			lo.Must0(esObj.Set("onopen", goja.Null()))
 			lo.Must0(esObj.Set("onmessage", goja.Null()))
 			lo.Must0(esObj.Set("onerror", goja.Null()))
+			lo.Must0(esObj.Set("onclose", goja.Null()))
 
 			ctx, cancel := context.WithCancel(context.Background())
 			sseID := p.TrackSSE(cancel)
@@ -1325,12 +1326,23 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 				sseClient := sse.NewClient(esURL)
 				sseClient.Headers[model.XAuthTokenKey] = p.token
+
 				sseClient.OnConnect(func(_ *sse.Client) {
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 						setReadyState(EventSourceOpen)
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("open"))
 						invokeEsHook("onopen", event)
+						return
+					}, nil)
+				})
+
+				sseClient.OnDisconnect(func(_ *sse.Client) {
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						setReadyState(EventSourceClosed)
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("close"))
+						invokeEsHook("onclose", event)
 						return
 					}, nil)
 				})

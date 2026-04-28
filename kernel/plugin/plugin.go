@@ -469,7 +469,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 }
 
 func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	// TODO: Invoke siyuan.server[scope].sse.handler
+	// TODO: Invoke siyuan.server[scope].es.handler
 	return
 }
 

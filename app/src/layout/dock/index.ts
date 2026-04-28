@@ -132,10 +132,10 @@ export class Dock {
                         ghostElement.setAttribute("data-ghost-type", "dock");
                         this.elements[0].parentElement.append(ghostElement);
                         ghostElement.setAttribute("id", "dragGhost");
-                        ghostElement.setAttribute("style", `background-color:var(--b3-theme-background-light);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
+                        ghostElement.setAttribute("style", `pointer-events: none;background-color:var(--b3-theme-background-light);position: fixed; top: ${event.clientY}px; left: ${event.clientX}px; z-index:999997;`);
                     }
 
-                    ghostElement.style.top = (moveEvent.clientY - 42) + "px";
+                    ghostElement.style.top = (moveEvent.clientY - 21) + "px";
                     ghostElement.style.left = (moveEvent.clientX - 21) + "px";
 
                     const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||

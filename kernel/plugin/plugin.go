@@ -463,113 +463,6 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 	wg.Wait()
 }
 
-func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (response *HttpResponse, err error) {
-	response, err = p.invokeServerHandler(scope, RequestTypeHTTP, request)
-	return
-}
-
-func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	// TODO: Invoke siyuan.server[scope].ws.handler
-	return
-}
-
-func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	type sseEvent struct {
-		name    string
-		message any
-	}
-
-	events := make(chan sseEvent, 64)
-	closed := make(chan struct{})
-	handlerDone := make(chan error, 1)
-
-	var closeOnce sync.Once
-	close := func() {
-		closeOnce.Do(func() { close(closed) })
-	}
-
-	ctx := c.Request.Context()
-
-	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)
-		if getHandlerErr != nil {
-			err = getHandlerErr
-			return
-		}
-
-		jsRequest, convertErr := requestGoToJs(p, rt, request)
-		if convertErr != nil {
-			err = convertErr
-			return
-		}
-
-		jsRequestObj := jsRequest.ToObject(rt)
-		if jsRequestObj == nil {
-			err = fmt.Errorf("failed to convert request value to object")
-			return
-		}
-
-		port := rt.NewObject()
-		lo.Must0(port.Set("onopen", goja.Null()))
-		lo.Must0(port.Set("onmessage", goja.Null()))
-		lo.Must0(port.Set("onclose", goja.Null()))
-		lo.Must0(port.Set("onerror", goja.Null()))
-
-		lo.Must0(port.Set("send", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-			name := call.Argument(0).String()
-			message := call.Argument(1).Export()
-			select {
-			case events <- sseEvent{name, message}:
-			case <-closed:
-			case <-ctx.Done():
-			}
-			return goja.Undefined()
-		})))
-
-		lo.Must0(port.Set("close", rt.ToValue(func(call goja.FunctionCall) goja.Value {
-			close()
-			return goja.Undefined()
-		})))
-
-		lo.Must0(ObjectSeal(rt, port))
-		lo.Must0(jsRequestObj.Set("port", port))
-
-		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
-			if result.Error != nil {
-				handlerDone <- result.Error
-			} else {
-				handlerDone <- nil
-			}
-		}, rt, true, handler, handlerObj, jsRequest)
-		return
-	}, func(_ *goja.Runtime, _ any, err error) {
-		if err != nil {
-			handlerDone <- err
-		}
-	})
-	if runErr != nil {
-		return runErr
-	}
-
-	for {
-		select {
-		case e := <-events:
-			c.SSEvent(e.name, e.message)
-			c.Writer.Flush()
-		case <-closed:
-			return
-		case <-ctx.Done():
-			return
-		case handlerErr := <-handlerDone:
-			if handlerErr != nil {
-				err = handlerErr
-				return
-			}
-			// Handler completed successfully; keep streaming until port.close() or client disconnect.
-		}
-	}
-}
-
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.
 // Returns responses in the same order as requests. Nil responses indicate notifications.
 func (p *KernelPlugin) dispatchRpcRequests(requests []*JsonRpcProcessingRequest) []*JsonRpcProcessingResponse {
@@ -834,15 +727,13 @@ func (p *KernelPlugin) invokeHook(name string) {
 	}
 }
 
-type ServerHandlerResult FunctionResult[*HttpResponse]
-
-// invokeServerHandler invokes the appropriate server handler (HTTP, WebSocket, SSE) based on the request type and access scope.
-func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType RequestType, request *Request) (response *HttpResponse, err error) {
-	done := make(chan *ServerHandlerResult, 1)
+// handleHttpRequest dispatches an HTTP request to the plugin's JS handler and returns the response.
+func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (response *HttpResponse, err error) {
+	type handleResult FunctionResult[*HttpResponse]
+	done := make(chan *handleResult, 1)
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-
-		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)
+		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeHTTP)
 		if getHandlerErr != nil {
 			err = getHandlerErr
 			return
@@ -857,7 +748,7 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 		invokeFunction(func(rt *goja.Runtime, result *CallResult) {
 			responseObj := result.Value.ToObject(rt)
 			if responseObj == nil {
-				done <- &ServerHandlerResult{Error: fmt.Errorf("handler did not return an object")}
+				done <- &handleResult{Error: fmt.Errorf("handler did not return an object")}
 				return
 			}
 
@@ -891,13 +782,13 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 
 			resultJson, marshalErr := responseObj.MarshalJSON()
 			if marshalErr != nil {
-				done <- &ServerHandlerResult{Error: marshalErr}
+				done <- &handleResult{Error: marshalErr}
 				return
 			}
 
 			response := HttpResponse{}
 			if unmarshalErr := json.Unmarshal(resultJson, &response); unmarshalErr != nil {
-				done <- &ServerHandlerResult{Error: fmt.Errorf("invalid response format: %v", unmarshalErr)}
+				done <- &handleResult{Error: fmt.Errorf("invalid response format: %v", unmarshalErr)}
 				return
 			}
 
@@ -905,16 +796,16 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 				response.Body.Raw.Data = *raw
 			}
 
-			done <- &ServerHandlerResult{Value: &response}
+			done <- &handleResult{Value: &response}
 		}, rt, true, handler, handlerObj, jsRequest)
 		return
 	}, func(_ *goja.Runtime, _ any, err error) {
 		if err != nil {
-			done <- &ServerHandlerResult{Error: err}
+			done <- &handleResult{Error: err}
 		}
 	})
 	if runErr != nil {
-		done <- &ServerHandlerResult{Error: runErr}
+		done <- &handleResult{Error: runErr}
 	}
 
 	result := <-done
@@ -925,4 +816,107 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 	}
 
 	return
+}
+
+func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
+	// TODO: Invoke siyuan.server[scope].ws.handler
+	return
+}
+
+// handleServerSentEventRequest dispatches an SSE request to the plugin's JS handler and streams events until completion or client disconnect.
+func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
+	type sseEvent struct {
+		name    string
+		message any
+	}
+
+	events := make(chan sseEvent, 64)
+	closed := make(chan struct{})
+	handlerDone := make(chan error, 1)
+
+	var closeOnce sync.Once
+	close := func() {
+		closeOnce.Do(func() { close(closed) })
+	}
+
+	ctx := c.Request.Context()
+
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)
+		if getHandlerErr != nil {
+			err = getHandlerErr
+			return
+		}
+
+		jsRequest, convertErr := requestGoToJs(p, rt, request)
+		if convertErr != nil {
+			err = convertErr
+			return
+		}
+
+		jsRequestObj := jsRequest.ToObject(rt)
+		if jsRequestObj == nil {
+			err = fmt.Errorf("failed to convert request value to object")
+			return
+		}
+
+		port := rt.NewObject()
+		lo.Must0(port.Set("onopen", goja.Null()))
+		lo.Must0(port.Set("onmessage", goja.Null()))
+		lo.Must0(port.Set("onclose", goja.Null()))
+		lo.Must0(port.Set("onerror", goja.Null()))
+
+		lo.Must0(port.Set("send", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			name := call.Argument(0).String()
+			message := call.Argument(1).Export()
+			select {
+			case events <- sseEvent{name, message}:
+			case <-closed:
+			case <-ctx.Done():
+			}
+			return goja.Undefined()
+		})))
+
+		lo.Must0(port.Set("close", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			close()
+			return goja.Undefined()
+		})))
+
+		lo.Must0(ObjectSeal(rt, port))
+		lo.Must0(jsRequestObj.Set("port", port))
+
+		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
+			if result.Error != nil {
+				handlerDone <- result.Error
+			} else {
+				handlerDone <- nil
+			}
+		}, rt, true, handler, handlerObj, jsRequest)
+		return
+	}, func(_ *goja.Runtime, _ any, err error) {
+		if err != nil {
+			handlerDone <- err
+		}
+	})
+	if runErr != nil {
+		return runErr
+	}
+
+	for {
+		select {
+		case e := <-events:
+			c.SSEvent(e.name, e.message)
+			c.Writer.Flush()
+		case <-closed:
+			return
+		case <-ctx.Done():
+			return
+		case handlerErr := <-handlerDone:
+			if handlerErr != nil {
+				err = handlerErr
+				return
+			}
+			// Handler completed successfully; keep streaming until port.close() or client disconnect.
+		}
+	}
 }

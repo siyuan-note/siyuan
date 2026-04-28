@@ -324,7 +324,7 @@ func HandleRpcWebSocket(c *gin.Context) {
 		results := parseRpcRequests(message)
 		if results.GlobalError != nil {
 			if respBytes, marshalErr := json.Marshal(results.GlobalError); marshalErr == nil {
-				if writeErr := p.writeWebSocketMessage(conn, websocket.TextMessage, respBytes); writeErr != nil {
+				if _, writeErr := p.writeWebSocketMessage(conn, websocket.TextMessage, respBytes); writeErr != nil {
 					logging.LogWarnf("[plugin:%s] RPC WebSocket response write failed: %s", name, writeErr)
 				}
 			}
@@ -358,7 +358,7 @@ func HandleRpcWebSocket(c *gin.Context) {
 
 		if needToSend {
 			if marshalErr == nil {
-				if writeErr := p.writeWebSocketMessage(conn, websocket.TextMessage, responseBytes); writeErr != nil {
+				if _, writeErr := p.writeWebSocketMessage(conn, websocket.TextMessage, responseBytes); writeErr != nil {
 					logging.LogWarnf("[plugin:%s] RPC WebSocket response write failed: %s", name, writeErr)
 				}
 			} else {

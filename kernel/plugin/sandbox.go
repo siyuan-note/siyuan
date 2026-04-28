@@ -901,16 +901,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 			}
 
-			type message struct {
-				t    int
-				d    []byte
-				done chan FunctionResult[int]
-			}
-
 			var conn atomic.Pointer[websocket.Conn]
 			var readyState atomic.Int64
 			var bufferedAmount atomic.Int64
-			messagesCh := make(chan message, 256)
+			messagesCh := make(chan WebSocketMessage, 256)
 			connReadyCh := make(chan *websocket.Conn, 1)
 			senderDoneCh := make(chan struct{})
 
@@ -986,7 +980,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					done := make(chan FunctionResult[int], 1)
 
 					select {
-					case messagesCh <- message{
+					case messagesCh <- WebSocketMessage{
 						t:    messageType,
 						d:    messageData,
 						done: done,

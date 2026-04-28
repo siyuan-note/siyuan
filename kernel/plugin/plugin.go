@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -48,6 +49,12 @@ type RpcMethod struct {
 type RpcMethodInfo struct {
 	Name         string   `json:"name"`
 	Descriptions []string `json:"descriptions"`
+}
+
+type WebSocketMessage struct {
+	t    int
+	d    []byte
+	done chan FunctionResult[int]
 }
 
 type R map[string]any
@@ -819,7 +826,350 @@ func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (r
 }
 
 func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	// TODO: Invoke siyuan.server[scope].ws.handler
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	conn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if upgradeErr != nil {
+		return upgradeErr
+	}
+
+	var readyState atomic.Int64
+	var bufferedAmount atomic.Int64
+	messagesCh := make(chan WebSocketMessage, 256)
+	senderDoneCh := make(chan struct{})
+	handlerDone := make(chan error, 1)
+
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeHTTP)
+		if getHandlerErr != nil {
+			err = getHandlerErr
+			return
+		}
+
+		jsRequest, convertErr := requestGoToJs(p, rt, request)
+		if convertErr != nil {
+			err = convertErr
+			return
+		}
+
+		port := rt.NewObject()
+		lo.Must0(port.Set("binaryType", rt.ToValue("arraybuffer")))
+		lo.Must0(port.Set("bufferedAmount", rt.ToValue(0)))
+		lo.Must0(port.Set("readyState", rt.ToValue(int64(WebSocketReadyStateOpen))))
+
+		lo.Must0(port.Set("onopen", goja.Null()))
+		lo.Must0(port.Set("onping", goja.Null()))
+		lo.Must0(port.Set("onpong", goja.Null()))
+		lo.Must0(port.Set("onmessage", goja.Null()))
+		lo.Must0(port.Set("onclose", goja.Null()))
+		lo.Must0(port.Set("onerror", goja.Null()))
+
+		readyState.Store(int64(WebSocketReadyStateOpen))
+
+		invokePortHook := func(name string, args ...goja.Value) {
+			hook := port.Get(name)
+			if fn, ok := goja.AssertFunction(hook); ok {
+				if _, callErr := fn(port, args...); callErr != nil {
+					logging.LogErrorf("[plugin:%s] ws server port hook %q: %v", p.Name, name, callErr)
+				}
+			}
+		}
+
+		setPortReadyState := func(rt *goja.Runtime, state WebSocketState) {
+			readyState.Store(int64(state))
+			port.Set("readyState", rt.ToValue(state))
+		}
+
+		updatePortBufferedAmount := func(rt *goja.Runtime, delta int) {
+			bufferedAmount.Add(int64(delta))
+			port.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load()))
+		}
+
+		lo.Must0(port.Set("send", rt.ToValue(func(sendCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			sendPromise, sendResolve, sendReject := rt.NewPromise()
+
+			sendRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+				var messageData []byte
+				var messageType int
+				if len(sendCall.Arguments) >= 1 {
+					data := sendCall.Argument(0)
+					if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
+						messageType = websocket.BinaryMessage
+						messageData = arrayBuffer.Bytes()
+					} else {
+						messageType = websocket.TextMessage
+						messageData = []byte(data.String())
+					}
+				}
+
+				state := WebSocketState(readyState.Load())
+				if state == WebSocketReadyStateClosing || state == WebSocketReadyStateClosed {
+					err = fmt.Errorf("WebSocket is not open (state: %d)", state)
+					return
+				}
+
+				updatePortBufferedAmount(rt, len(messageData))
+				done := make(chan FunctionResult[int], 1)
+
+				select {
+				case messagesCh <- WebSocketMessage{t: messageType, d: messageData, done: done}:
+					go func() {
+						select {
+						case result := <-done:
+							p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+								if result.Error == nil {
+									updatePortBufferedAmount(rt, -result.Value)
+								} else {
+									err = result.Error
+								}
+								return
+							}, func(rt *goja.Runtime, result any, err error) {
+								if lo.IsNil(err) {
+									if resolveErr := sendResolve(result); resolveErr != nil {
+										logging.LogErrorf("[plugin:%s] ws server port.send resolve: %v", p.Name, resolveErr)
+									}
+								} else {
+									if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
+										logging.LogErrorf("[plugin:%s] ws server port.send reject: %v", p.Name, rejectErr)
+									}
+								}
+							})
+						case <-senderDoneCh:
+						}
+					}()
+				default:
+					updatePortBufferedAmount(rt, -len(messageData))
+					err = fmt.Errorf("WebSocket send buffer full")
+				}
+				return
+			}, func(rt *goja.Runtime, _ any, err error) {
+				if !lo.IsNil(err) {
+					if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.send reject: %v", p.Name, rejectErr)
+					}
+				}
+			})
+			if sendRunErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server port.send worker run: %v", p.Name, sendRunErr)
+			}
+
+			return rt.ToValue(sendPromise)
+		})))
+
+		lo.Must0(port.Set("close", rt.ToValue(func(closeCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			closePromise, closeResolve, closeReject := rt.NewPromise()
+
+			closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+				code := websocket.CloseNormalClosure
+				var reason string
+				if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
+					code = int(closeCall.Argument(0).ToInteger())
+				}
+				if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
+					reason = closeCall.Argument(1).String()
+				}
+				_, err = p.writeWebSocketMessage(conn, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+				return
+			}, func(rt *goja.Runtime, result any, err error) {
+				if lo.IsNil(err) {
+					if resolveErr := closeResolve(result); resolveErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.close resolve: %v", p.Name, resolveErr)
+					}
+				} else {
+					if rejectErr := closeReject(rt.NewGoError(err)); rejectErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.close reject: %v", p.Name, rejectErr)
+					}
+				}
+			})
+			if closeRunErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server port.close worker run: %v", p.Name, closeRunErr)
+			}
+
+			return rt.ToValue(closePromise)
+		})))
+
+		lo.Must0(port.Set("ping", rt.ToValue(func(pingCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			pingPromise, pingResolve, pingReject := rt.NewPromise()
+
+			pingRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+				var pingData string
+				if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
+					pingData = pingCall.Argument(0).String()
+				}
+				_, err = p.writeWebSocketMessage(conn, websocket.PingMessage, []byte(pingData))
+				return
+			}, func(rt *goja.Runtime, result any, err error) {
+				if lo.IsNil(err) {
+					if resolveErr := pingResolve(result); resolveErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.ping resolve: %v", p.Name, resolveErr)
+					}
+				} else {
+					if rejectErr := pingReject(rt.NewGoError(err)); rejectErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.ping reject: %v", p.Name, rejectErr)
+					}
+				}
+			})
+			if pingRunErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server port.ping worker run: %v", p.Name, pingRunErr)
+			}
+
+			return rt.ToValue(pingPromise)
+		})))
+
+		lo.Must0(port.Set("pong", rt.ToValue(func(pongCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			pongPromise, pongResolve, pongReject := rt.NewPromise()
+
+			pongRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+				var pongData string
+				if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
+					pongData = pongCall.Argument(0).String()
+				}
+				_, err = p.writeWebSocketMessage(conn, websocket.PongMessage, []byte(pongData))
+				return
+			}, func(rt *goja.Runtime, result any, err error) {
+				if lo.IsNil(err) {
+					if resolveErr := pongResolve(result); resolveErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.pong resolve: %v", p.Name, resolveErr)
+					}
+				} else {
+					if rejectErr := pongReject(rt.NewGoError(err)); rejectErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.pong reject: %v", p.Name, rejectErr)
+					}
+				}
+			})
+			if pongRunErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server port.pong worker run: %v", p.Name, pongRunErr)
+			}
+
+			return rt.ToValue(pongPromise)
+		})))
+
+		lo.Must0(jsRequest.ToObject(rt).Set("port", port))
+
+		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
+			if result.Error != nil {
+				logging.LogWarnf("[plugin:%s] ws server handler error: %v", p.Name, result.Error)
+			}
+		}, rt, true, handler, handlerObj, jsRequest)
+
+		// Emit onopen after giving the handler a chance to register the callback.
+		event := rt.NewObject()
+		event.Set("type", rt.ToValue("open"))
+		invokePortHook("onopen", event)
+
+		p.TrackSocket(conn, false)
+
+		// Sender goroutine: drains messagesCh and writes to the connection.
+		go func() {
+			for {
+				select {
+				case m := <-messagesCh:
+					amount, writeErr := p.writeWebSocketMessage(conn, m.t, m.d)
+					m.done <- FunctionResult[int]{Value: amount, Error: writeErr}
+				case <-senderDoneCh:
+					return
+				}
+			}
+		}()
+
+		// Reader goroutine: reads incoming frames and dispatches events to JS.
+		go func() (goErr error) {
+			defer func() {
+				close(senderDoneCh)
+				if r := recover(); r != nil {
+					goErr = fmt.Errorf("panic during ws server handler: %v", r)
+				}
+				p.UntrackSocket(conn)
+				conn.Close()
+				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+					if goErr != nil {
+						errEvent := rt.NewObject()
+						errEvent.Set("type", rt.ToValue("error"))
+						errEvent.Set("error", rt.NewGoError(goErr))
+						invokePortHook("onerror", errEvent)
+					}
+					setPortReadyState(rt, WebSocketReadyStateClosed)
+					closeEvent := rt.NewObject()
+					closeEvent.Set("type", rt.ToValue("close"))
+					invokePortHook("onclose", closeEvent)
+					return
+				}, nil)
+				handlerDone <- goErr
+			}()
+
+			conn.SetPingHandler(func(data string) error {
+				_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					event := rt.NewObject()
+					event.Set("type", rt.ToValue("ping"))
+					event.Set("data", rt.ToValue(data))
+					invokePortHook("onping", event)
+					return
+				})
+				return runError
+			})
+			conn.SetPongHandler(func(data string) error {
+				_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					event := rt.NewObject()
+					event.Set("type", rt.ToValue("pong"))
+					event.Set("data", rt.ToValue(data))
+					invokePortHook("onpong", event)
+					return
+				})
+				return runError
+			})
+
+			for {
+				messageType, data, readErr := conn.ReadMessage()
+				if readErr != nil {
+					if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+						goErr = readErr
+					}
+					return
+				}
+				switch messageType {
+				case websocket.TextMessage:
+					if runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("text"))
+						event.Set("data", rt.ToValue(string(data)))
+						invokePortHook("onmessage", event)
+						return
+					}, nil); runErr != nil {
+						goErr = runErr
+						return
+					}
+				case websocket.BinaryMessage:
+					if runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("binary"))
+						event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
+						invokePortHook("onmessage", event)
+						return
+					}, nil); runErr != nil {
+						goErr = runErr
+						return
+					}
+				}
+			}
+		}()
+
+		return
+	}, func(_ *goja.Runtime, _ any, runErr error) {
+		if runErr != nil {
+			p.UntrackSocket(conn)
+			conn.Close()
+			handlerDone <- runErr
+		}
+	})
+
+	if runErr != nil {
+		p.UntrackSocket(conn)
+		conn.Close()
+		return runErr
+	}
+
+	err = <-handlerDone
 	return
 }
 

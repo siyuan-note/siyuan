@@ -88,7 +88,7 @@
     --b3-font-color4: var(--b3-card-success-color);
     --b3-font-color5: var(--b3-theme-on-surface);
     --b3-font-color6: var(--b3-theme-primary);
-    --b3-font-color7: #f3a92f;
+    --b3-font-color7: var(--b3-theme-secondary);
     --b3-font-color8: var(--b3-theme-error);
     --b3-font-color9: #f5539e;
     --b3-font-color10: #00eeff;

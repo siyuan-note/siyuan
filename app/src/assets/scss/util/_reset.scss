@@ -98,6 +98,10 @@ body {
     &.body--blur .layout-tab-bar {
       opacity: .38;
     }
+
+    .layout__center {
+      border-radius: 0;
+    }
   }
 
   &.body--fullscreen:not(.body--win32):not(.body--window) .toolbar {

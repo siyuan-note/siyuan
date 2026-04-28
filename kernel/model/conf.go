@@ -198,7 +198,7 @@ func InitConf() {
 	}
 	Conf.Appearance.Lang = Conf.Lang
 	if "ant" == Conf.Appearance.Icon || "material" == Conf.Appearance.Icon {
-		// v3.6.6 移除了 ant/material 图标包，如果用户之前选择了这两个其中之一，升级后改为 litheness 图标包，避免图标显示异常 https://github.com/siyuan-note/siyuan/issues/7976
+		// v3.7.0 移除了 ant/material 图标包，如果用户之前选择了这两个其中之一，升级后改为 litheness 图标包，避免图标显示异常 https://github.com/siyuan-note/siyuan/issues/7976
 		Conf.Appearance.Icon = "litheness"
 	}
 	os.RemoveAll(filepath.Join(util.IconsPath, "ant"))

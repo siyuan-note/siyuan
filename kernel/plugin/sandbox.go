@@ -17,7 +17,6 @@
 package plugin
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
@@ -39,6 +38,7 @@ import (
 	"github.com/dop251/goja_nodejs/url"
 	"github.com/gorilla/websocket"
 	"github.com/imroc/req/v3"
+	sse "github.com/r3labs/sse/v2"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -1323,101 +1323,32 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					}, nil)
 				}()
 
-				req, reqErr := http.NewRequestWithContext(ctx, http.MethodGet, esURL, nil)
-				if reqErr != nil {
-					err = reqErr
-					return
-				}
-				req.Header.Set(SseHeaderAcceptName, SseHeaderAcceptValue)
-				req.Header.Set(model.XAuthTokenKey, p.token)
-
-				httpClient := &http.Client{}
-				resp, respErr := httpClient.Do(req)
-				if respErr != nil {
-					if errors.Is(respErr, context.Canceled) {
+				sseClient := sse.NewClient(esURL)
+				sseClient.Headers[model.XAuthTokenKey] = p.token
+				sseClient.OnConnect(func(_ *sse.Client) {
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						setReadyState(EventSourceOpen)
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("open"))
+						invokeEsHook("onopen", event)
 						return
-					}
-					err = respErr
-					return
-				}
-				defer resp.Body.Close()
-
-				_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
-					setReadyState(EventSourceOpen)
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("open"))
-					invokeEsHook("onopen", event)
-					return
+					}, nil)
 				})
-				if runErr != nil {
-					err = runErr
-					return
-				}
 
-				var dataLines []string
-				var eventType string
-				var lastEventID string
-
-				scanner := bufio.NewScanner(resp.Body)
-				for scanner.Scan() {
-					line := scanner.Text()
-
-					if line == "" {
-						if len(dataLines) > 0 {
-							data := strings.Join(dataLines, "\n")
-							typ := eventType
-							if typ == "" {
-								typ = "message"
-							}
-							id := lastEventID
-
-							runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-								event := rt.NewObject()
-								event.Set("type", rt.ToValue(typ))
-								event.Set("data", rt.ToValue(data))
-								event.Set("lastEventId", rt.ToValue(id))
-								invokeEsHook("onmessage", event)
-								return
-							}, nil)
-							if runErr != nil {
-								err = runErr
-								return
-							}
+				err = sseClient.SubscribeRawWithContext(ctx, func(msg *sse.Event) {
+					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						typ := "message"
+						if len(msg.Event) > 0 {
+							typ = string(msg.Event)
 						}
-						dataLines = nil
-						eventType = ""
-						continue
-					}
-
-					if strings.HasPrefix(line, ":") {
-						continue
-					}
-
-					var field, value string
-					if idx := strings.Index(line, ":"); idx >= 0 {
-						field = line[:idx]
-						value = line[idx+1:]
-						value = strings.TrimLeft(value, " ")
-					} else {
-						field = line
-						value = ""
-					}
-
-					switch field {
-					case "data":
-						dataLines = append(dataLines, value)
-					case "event":
-						eventType = value
-					case "id":
-						if !strings.Contains(value, "\x00") {
-							lastEventID = value
-						}
-					}
-				}
-
-				if scanErr := scanner.Err(); scanErr != nil && !errors.Is(scanErr, context.Canceled) {
-					err = scanErr
-				}
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue(typ))
+						event.Set("data", rt.ToValue(string(msg.Data)))
+						event.Set("lastEventId", rt.ToValue(string(msg.ID)))
+						invokeEsHook("onmessage", event)
+						return
+					}, nil)
+				})
 				return
 			}()
 

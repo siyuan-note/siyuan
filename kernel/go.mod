@@ -58,6 +58,7 @@ require (
 	github.com/panjf2000/ants/v2 v2.12.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pdfcpu/pdfcpu v0.11.0
+	github.com/r3labs/sse/v2 v2.10.0
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20251204023435-65660522892e
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
@@ -89,6 +90,8 @@ require (
 	golang.org/x/time v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
+
+require gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 
 require (
 	dario.cat/mergo v1.0.2 // indirect

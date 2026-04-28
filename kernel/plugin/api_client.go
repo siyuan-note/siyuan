@@ -639,12 +639,15 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 			}
 
-			setReadyState(EventSourceConnecting)
+			lo.Must0(esObj.Set("readyState", rt.ToValue(EventSourceConnecting)))
 			lo.Must0(esObj.Set("url", rt.ToValue(path)))
+
 			lo.Must0(esObj.Set("onopen", goja.Null()))
 			lo.Must0(esObj.Set("onmessage", goja.Null()))
 			lo.Must0(esObj.Set("onclose", goja.Null()))
 			lo.Must0(esObj.Set("onerror", goja.Null()))
+
+			setReadyState(EventSourceConnecting)
 
 			ctx, cancel := context.WithCancel(context.Background())
 			sseID := p.TrackSSE(cancel)

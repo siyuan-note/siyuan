@@ -327,6 +327,23 @@ func forwardProxy(c *gin.Context) {
 	//	elapsed.Seconds(), len(bodyData), data["url"], headers, contentType, arg["payload"], data["status"], shortBody)
 }
 
+// ssrfSafeDialer returns a net.Dialer whose Control hook blocks private IPs.
+func ssrfSafeDialer(timeout time.Duration) *net.Dialer {
+	return &net.Dialer{
+		Timeout: timeout,
+		Control: func(network, address string, _ syscall.RawConn) error {
+			host, _, err := net.SplitHostPort(address)
+			if err != nil {
+				return err
+			}
+			if ip := net.ParseIP(host); ip != nil && isPrivateIP(ip) {
+				return fmt.Errorf("ip address [%s] is prohibited", host)
+			}
+			return nil
+		},
+	}
+}
+
 // 校验 IP 是否为私有内网地址
 func isPrivateIP(ip net.IP) bool {
 	return ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsPrivate() || ip.IsUnspecified()
@@ -334,21 +351,7 @@ func isPrivateIP(ip net.IP) bool {
 
 // 创建安全的 HTTP Client，防止 SSRF 和 DNS 重绑定
 func getSafeClient(timeout time.Duration) *req.Client {
-	dialer := &net.Dialer{
-		Timeout: timeout,
-		// Control 函数在解析出 IP 后、建立连接前执行，是防御 DNS Rebinding 的关键
-		Control: func(network, address string, c syscall.RawConn) error {
-			host, _, err := net.SplitHostPort(address)
-			if err != nil {
-				return err
-			}
-			ip := net.ParseIP(host)
-			if ip != nil && isPrivateIP(ip) {
-				return fmt.Errorf("ip address [%s] is prohibited", host)
-			}
-			return nil
-		},
-	}
+	dialer := ssrfSafeDialer(timeout)
 
 	client := req.C()
 	client.SetTimeout(timeout)
@@ -401,23 +404,6 @@ func parseForwardProxyParams(c *gin.Context) (parsedURL *url.URL, headers *http.
 		}
 	}
 	return
-}
-
-// ssrfSafeDialer returns a net.Dialer whose Control hook blocks private IPs.
-func ssrfSafeDialer(connectTimeout time.Duration) *net.Dialer {
-	return &net.Dialer{
-		Timeout: connectTimeout,
-		Control: func(network, address string, _ syscall.RawConn) error {
-			host, _, err := net.SplitHostPort(address)
-			if err != nil {
-				return err
-			}
-			if ip := net.ParseIP(host); ip != nil && isPrivateIP(ip) {
-				return fmt.Errorf("ip address [%s] is prohibited", host)
-			}
-			return nil
-		},
-	}
 }
 
 // forwardResponseHeaders copies src headers into dst with a "Siyuan-Proxy-" prefix on each key.

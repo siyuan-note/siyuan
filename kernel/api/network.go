@@ -482,6 +482,8 @@ func httpProxy(c *gin.Context) {
 // Query params:
 //   - u: RawURLEncoding base64 of the target ws/wss URL
 //   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as handshake headers
+//
+// Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
 func wsProxy(c *gin.Context) {
 	targetURL, targetHeaders, err := parseForwardProxyParams(c)
 	if err != nil {
@@ -555,6 +557,8 @@ func wsProxy(c *gin.Context) {
 // Query params:
 //   - u: RawURLEncoding base64 of the target http/https URL
 //   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as request headers
+//
+// Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
 func esProxy(c *gin.Context) {
 	targetURL, targetHeaders, err := parseForwardProxyParams(c)
 	if err != nil {

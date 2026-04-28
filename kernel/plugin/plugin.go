@@ -107,6 +107,10 @@ type KernelPlugin struct {
 	socketsMu sync.RWMutex                    // separate mutex for sockets map (must not nest inside mu)
 	sockets   map[*websocket.Conn]bool        // tracked loopback WebSocket connections (true: server, false: client)
 	socketMus map[*websocket.Conn]*sync.Mutex // per-connection write mutex
+
+	sseCancelsMu sync.Mutex
+	sseCancels   map[uint64]context.CancelFunc
+	sseNextID    uint64
 }
 
 func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
@@ -125,6 +129,8 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 
 		sockets:   make(map[*websocket.Conn]bool),
 		socketMus: make(map[*websocket.Conn]*sync.Mutex),
+
+		sseCancels: make(map[uint64]context.CancelFunc),
 	}
 
 	plugin.state.Store(int64(PluginStateReady))
@@ -273,6 +279,13 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 		delete(p.socketMus, c)
 	}
 	p.socketsMu.Unlock()
+
+	p.sseCancelsMu.Lock()
+	for id, cancel := range p.sseCancels {
+		cancel()
+		delete(p.sseCancels, id)
+	}
+	p.sseCancelsMu.Unlock()
 
 	p.unsubscribeEventHandlers()
 
@@ -648,6 +661,23 @@ func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
 	defer p.socketsMu.Unlock()
 	delete(p.sockets, conn)
 	delete(p.socketMus, conn)
+}
+
+// TrackSSE registers an SSE cancel function and returns its ID for later removal.
+func (p *KernelPlugin) TrackSSE(cancel context.CancelFunc) uint64 {
+	p.sseCancelsMu.Lock()
+	defer p.sseCancelsMu.Unlock()
+	id := p.sseNextID
+	p.sseNextID++
+	p.sseCancels[id] = cancel
+	return id
+}
+
+// UntrackSSE removes a previously registered SSE cancel function by ID.
+func (p *KernelPlugin) UntrackSSE(id uint64) {
+	p.sseCancelsMu.Lock()
+	defer p.sseCancelsMu.Unlock()
+	delete(p.sseCancels, id)
 }
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.

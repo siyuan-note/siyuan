@@ -848,11 +848,11 @@ export class Dock {
             if (typeof tabIndex === "undefined" && !TYPES.includes(item.type)) {
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/7976 历史兼容 3.6.5->3.6.6
+            // https://github.com/siyuan-note/siyuan/issues/7976 历史兼容 3.6.5->3.7.0
             if (item.type === "outline") {
                 item.icon = "iconOutline";
-            } else if (item.type === "bookmark") {
-                item.icon = "iconBookmarks";
+            } else if (item.type === "tags") {
+                item.icon = "tag";
             }
             html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
     <svg><use xlink:href="#${item.icon}"></use></svg>

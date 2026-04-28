@@ -700,13 +700,13 @@ export abstract class Constants {
                     type: "bookmark",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconBookmarks",
+                    icon: "iconBookmark",
                     hotkeyLangId: "bookmark",
                 }, {
                     type: "tag",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconTags",
+                    icon: "iconTag",
                     hotkeyLangId: "tag",
                 }]
             ]

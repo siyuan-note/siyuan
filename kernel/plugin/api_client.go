@@ -226,6 +226,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			var conn atomic.Pointer[websocket.Conn]
 			var readyState atomic.Int64
 			var bufferedAmount atomic.Int64
+
+			readyState.Store(int64(WebSocketReadyStateConnecting))
+			bufferedAmount.Store(0)
+
 			messagesCh := make(chan WebSocketMessage, 256)
 			connReadyCh := make(chan *websocket.Conn, 1)
 			senderDoneCh := make(chan struct{})
@@ -238,20 +242,6 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			}
 
 			wsObj := rt.NewObject()
-
-			lo.Must0(wsObj.Set("binaryType", rt.ToValue("arraybuffer")))
-			lo.Must0(wsObj.Set("bufferedAmount", rt.ToValue(0)))
-			lo.Must0(wsObj.Set("extensions", rt.ToValue("")))
-			lo.Must0(wsObj.Set("protocol", rt.ToValue("")))
-			lo.Must0(wsObj.Set("readyState", rt.ToValue(int64(WebSocketReadyStateConnecting))))
-			lo.Must0(wsObj.Set("url", rt.ToValue("wsURL")))
-
-			lo.Must0(wsObj.Set("onopen", goja.Null()))
-			lo.Must0(wsObj.Set("onping", goja.Null()))
-			lo.Must0(wsObj.Set("onpong", goja.Null()))
-			lo.Must0(wsObj.Set("onerror", goja.Null()))
-			lo.Must0(wsObj.Set("onmessage", goja.Null()))
-			lo.Must0(wsObj.Set("onclose", goja.Null()))
 
 			invokeWsHook := func(name string, args ...goja.Value) {
 				hook := wsObj.Get(name)
@@ -272,9 +262,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				wsObj.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load()))
 			}
 
-			setReadyState(rt, WebSocketReadyStateConnecting)
-
-			lo.Must0(wsObj.Set("send", rt.ToValue(func(sendCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			ws_send := rt.ToValue(func(sendCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				sendPromise, sendResolve, sendReject := rt.NewPromise()
 
 				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
@@ -349,9 +337,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 
 				return rt.ToValue(sendPromise)
-			})))
+			})
 
-			lo.Must0(wsObj.Set("ping", rt.ToValue(func(pingCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			ws_ping := rt.ToValue(func(pingCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				pingPromise, pingResolve, pingReject := rt.NewPromise()
 
 				pingRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -379,9 +367,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 
 				return rt.ToValue(pingPromise)
-			})))
+			})
 
-			lo.Must0(wsObj.Set("pong", rt.ToValue(func(pongCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			ws_pong := rt.ToValue(func(pongCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				pongPromise, pongResolve, pongReject := rt.NewPromise()
 
 				pongRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -409,9 +397,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 
 				return rt.ToValue(pongPromise)
-			})))
+			})
 
-			lo.Must0(wsObj.Set("close", rt.ToValue(func(closeCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			ws_close := rt.ToValue(func(closeCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				closePromise, closeResolve, closeReject := rt.NewPromise()
 
 				closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
@@ -443,7 +431,28 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 
 				return rt.ToValue(closePromise)
-			})))
+			})
+
+			lo.Must0(wsObj.Set("binaryType", rt.ToValue("arraybuffer")))
+			lo.Must0(wsObj.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load())))
+			lo.Must0(wsObj.Set("extensions", rt.ToValue("")))
+			lo.Must0(wsObj.Set("protocol", rt.ToValue("")))
+			lo.Must0(wsObj.Set("readyState", rt.ToValue(readyState.Load())))
+			lo.Must0(wsObj.Set("url", rt.ToValue("wsURL")))
+
+			lo.Must0(wsObj.Set("onopen", goja.Null()))
+			lo.Must0(wsObj.Set("onping", goja.Null()))
+			lo.Must0(wsObj.Set("onpong", goja.Null()))
+			lo.Must0(wsObj.Set("onerror", goja.Null()))
+			lo.Must0(wsObj.Set("onmessage", goja.Null()))
+			lo.Must0(wsObj.Set("onclose", goja.Null()))
+
+			lo.Must0(wsObj.Set("send", ws_send))
+			lo.Must0(wsObj.Set("ping", ws_ping))
+			lo.Must0(wsObj.Set("pong", ws_pong))
+			lo.Must0(wsObj.Set("close", ws_close))
+
+			lo.Must0(ObjectSeal(rt, wsObj))
 
 			// Start a goroutine to send messages from the channel to the WebSocket connection
 			go func() {
@@ -489,11 +498,15 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					return
 				}
 
-				defer func() {
-					p.UntrackSocket(c)
-					c.Close()
-				}()
 				p.TrackSocket(c, false)
+				var closeOnce sync.Once
+				doClose := func() {
+					closeOnce.Do(func() {
+						p.UntrackSocket(c)
+						c.Close()
+					})
+				}
+				defer doClose()
 
 				c.SetPingHandler(func(data string) error {
 					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
@@ -626,11 +639,14 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			}
 
 			var readyState atomic.Int64
+
+			readyState.Store(int64(EventSourceConnecting))
+
 			esURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 
 			ctx, cancel := context.WithCancel(context.Background())
-			sseID := p.TrackSSE(cancel)
 
+			sseID := p.TrackSSE(cancel)
 			var closeOnce sync.Once
 			doClose := func() {
 				closeOnce.Do(func() {
@@ -661,7 +677,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				return goja.Undefined()
 			})
 
-			lo.Must0(esObj.Set("readyState", rt.ToValue(EventSourceConnecting)))
+			lo.Must0(esObj.Set("readyState", rt.ToValue(readyState.Load())))
 			lo.Must0(esObj.Set("url", rt.ToValue(path)))
 
 			lo.Must0(esObj.Set("onopen", goja.Null()))

@@ -829,18 +829,13 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
+
 	conn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	var readyState atomic.Int64
-	var bufferedAmount atomic.Int64
-
-	messagesCh := make(chan WebSocketMessage, 256)
-	senderDoneCh := make(chan struct{})
-	handlerDone := make(chan error, 1)
-
+	p.TrackSocket(conn, false)
 	var closeOnce sync.Once
 	doClose := func() {
 		closeOnce.Do(func() {
@@ -849,7 +844,15 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		})
 	}
 
+	var readyState atomic.Int64
+	var bufferedAmount atomic.Int64
+
 	readyState.Store(int64(WebSocketReadyStateConnecting))
+	bufferedAmount.Store(0)
+
+	messagesCh := make(chan WebSocketMessage, 256)
+	senderDoneCh := make(chan struct{})
+	handlerDone := make(chan error, 1)
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeHTTP)
@@ -1051,8 +1054,8 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		})
 
 		lo.Must0(port.Set("binaryType", rt.ToValue("arraybuffer")))
-		lo.Must0(port.Set("bufferedAmount", rt.ToValue(0)))
-		lo.Must0(port.Set("readyState", rt.ToValue(int64(WebSocketReadyStateConnecting))))
+		lo.Must0(port.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load())))
+		lo.Must0(port.Set("readyState", rt.ToValue(readyState.Load())))
 
 		lo.Must0(port.Set("onopen", goja.Null()))
 		lo.Must0(port.Set("onping", goja.Null()))
@@ -1080,8 +1083,6 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		event := rt.NewObject()
 		event.Set("type", rt.ToValue("open"))
 		invokePortHook("onopen", event)
-
-		p.TrackSocket(conn, false)
 
 		// Sender goroutine: drains messagesCh and writes to the connection.
 		go func() {
@@ -1221,14 +1222,16 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 	closed := make(chan struct{})
 	handlerDone := make(chan error, 1)
 
+	ctx, cancel := context.WithCancel(c.Request.Context())
+
+	sseID := p.TrackSSE(cancel)
 	var closeOnce sync.Once
 	doClose := func() {
 		closeOnce.Do(func() {
-			close(closed)
+			cancel()
+			p.UntrackSSE(sseID)
 		})
 	}
-
-	ctx := c.Request.Context()
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)

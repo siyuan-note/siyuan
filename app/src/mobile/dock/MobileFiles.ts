@@ -541,15 +541,11 @@ export class MobileFiles extends Model {
     private genSort() {
         window.siyuan.menus.menu.remove();
         const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
-            window.siyuan.config.fileTree.sort = sort;
             fetchPost("/api/setting/setFiletree", {
-                sort: window.siyuan.config.fileTree.sort,
-                alwaysSelectOpenedFile: window.siyuan.config.fileTree.alwaysSelectOpenedFile,
-                refCreateSavePath: window.siyuan.config.fileTree.refCreateSavePath,
-                docCreateSavePath: window.siyuan.config.fileTree.docCreateSavePath,
-                openFilesUseCurrentTab: window.siyuan.config.fileTree.openFilesUseCurrentTab,
-                maxListCount: window.siyuan.config.fileTree.maxListCount,
-            }, () => {
+                ...window.siyuan.config.fileTree,
+                sort,
+            }, (response) => {
+                window.siyuan.config.fileTree = response.data;
                 setNoteBook(() => {
                     this.init(false);
                 });

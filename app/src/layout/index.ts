@@ -1,11 +1,8 @@
+/// #if !MOBILE
 import {Wnd} from "./Wnd";
 import {genUUID} from "../util/genID";
 import {addResize, fixWndFlex1} from "./util";
 import {resizeTabs} from "./tabUtil";
-/// #if MOBILE
-// 检测移动端是否引入了桌面端的代码
-console.error("Need remove unused code");
-/// #endif
 
 export class Layout {
     public element: HTMLElement;
@@ -109,3 +106,4 @@ export class Layout {
         child.parent = this;
     }
 }
+/// #endif

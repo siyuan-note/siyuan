@@ -372,6 +372,14 @@ func setExport(c *gin.Context) {
 		return
 	}
 
+	// 重置为空字符串表示恢复内置 Pandoc：先落盘清空自定义路径，再重新初始化并写回默认路径
+	if "" == export.PandocBin {
+		model.Conf.Export = export
+		model.Conf.Save()
+		util.InitPandoc()
+		export.PandocBin = util.PandocBinPath
+	}
+
 	if "" != export.PandocBin {
 		if !util.IsValidPandocBin(export.PandocBin) {
 			util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)

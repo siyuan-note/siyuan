@@ -8,7 +8,7 @@ import {Files} from "./dock/Files";
 import {Outline} from "./dock/Outline";
 import {Bookmark} from "./dock/Bookmark";
 import {Tag} from "./dock/Tag";
-import {getAllModels, getAllTabs, getAllWnds} from "./getAll";
+import {getAllEditor, getAllModels, getAllTabs, getAllWnds} from "./getAll";
 import {Asset} from "../asset";
 import {Search} from "../search";
 import {Dock} from "./dock";
@@ -69,11 +69,12 @@ export const setPanelFocus = (element: Element, isSaveLayout = true) => {
 export const getWndByLayout: (layout: Layout) => Wnd = (layout: Layout) => {
     const wndsTemp: Wnd[] = [];
     getAllWnds(layout, wndsTemp);
-    return wndsTemp.sort((a, b) => {
+    const sorted = wndsTemp.sort((a, b) => {
         if (a.element.querySelector(".fn__flex .item--focus")?.getAttribute("data-activetime") > b.element.querySelector(".fn__flex .item--focus")?.getAttribute("data-activetime")) {
             return -1;
         }
-    })[0];
+    });
+    return (sorted[0] ?? null) as unknown as Wnd;
 };
 
 const dockToJSON = (dock: Dock) => {
@@ -93,7 +94,6 @@ const dockToJSON = (dock: Dock) => {
                 title: item.getAttribute("data-title"),
                 show: item.classList.contains("dock__item--active"),
                 icon: item.querySelector("use").getAttribute("xlink:href").substring(1),
-                hotkey: item.getAttribute("data-hotkey") || "",
                 hotkeyLangId: item.getAttribute("data-hotkeylangid") || ""
             });
         });
@@ -175,9 +175,9 @@ export const exportLayout = async (options: {
     cb: () => void,
     errorExit: boolean
 }) => {
-    const editors = getAllModels().editor;
+    const editors = getAllEditor();
     for (let i = 0; i < editors.length; i++) {
-        await saveScroll(editors[i].editor.protyle);
+        await saveScroll(editors[i].protyle);
     }
     if (isWindow()) {
         const layoutJSON: any = {
@@ -190,6 +190,7 @@ export const exportLayout = async (options: {
     }
     const useElement = document.querySelector("#barDock use");
     if (!useElement) {
+        options.cb();
         return;
     }
     const layoutJSON: any = {

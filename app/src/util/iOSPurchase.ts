@@ -14,7 +14,7 @@ export const processIOSPurchaseResponse = (code: number) => {
             detail: document.querySelector("#modelMain #refresh")
         }));
         /// #else
-        document.querySelector('.config__tab-container[data-name="account"] #refresh').dispatchEvent(new Event("click"));
+        document.querySelector("#configAccountMain #refresh")?.dispatchEvent(new Event("click"));
         /// #endif
     } else {
         // -1：Invalid cloud region 云端区域无效

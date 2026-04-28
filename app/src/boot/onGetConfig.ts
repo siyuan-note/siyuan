@@ -9,7 +9,7 @@ import {afterExport} from "../protyle/export/util";
 import {onWindowsMsg} from "../window/onWindowsMsg";
 /// #endif
 import {Constants} from "../constants";
-import {appearance} from "../config/appearance";
+import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
@@ -22,6 +22,9 @@ import {replaceLocalPath} from "../editor/rename";
 import {initBar} from "../layout/topBar";
 import {openChangelog} from "./openChangelog";
 import {App} from "../index";
+/// #if !MOBILE
+import {openSetting} from "../config";
+/// #endif
 import {initWindowEvent} from "./globalEvent/event";
 import {sendGlobalShortcut} from "./globalEvent/keydown";
 import {closeWindow} from "../window/closeWin";
@@ -64,6 +67,12 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             sendGlobalShortcut(app);
             /// #endif
             openChangelog();
+            /// #if !MOBILE
+            // 临时：启动后直接打开设置
+            window.setTimeout(() => {
+                openSetting(app);
+            }, 0);
+            /// #endif
         } catch (e) {
             resetLayout();
         }
@@ -74,7 +83,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     /// #if !BROWSER
     initNativeDialogOverride();
     /// #endif
-    appearance.onSetAppearance(window.siyuan.config.appearance);
+    appearanceConfigApi.apply(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
     renderSnippet();

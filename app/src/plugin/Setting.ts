@@ -54,19 +54,19 @@ export class Setting {
             if (typeof item.direction === "undefined") {
                 item.direction = (!actionElement || "TEXTAREA" === actionElement.tagName) ? "row" : "column";
             }
+            const titleBlock = `<div class="config-name">${item.title}</div>
+        ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}`;
             if (item.direction === "row") {
-                html = `<${tagName} class="b3-label">
+                html = `<${tagName} class="b3-label config-item">
     <div class="fn__block">
-        ${item.title}
-        ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}
+        ${titleBlock}
         <div class="fn__hr"></div>
     </div>
 </${tagName}>`;
             } else {
-                html = `<${tagName} class="fn__flex b3-label config__item">
+                html = `<${tagName} class="fn__flex b3-label config-item${tagName === "label" ? "" : " config-wrap"}">
     <div class="fn__flex-1">
-        ${item.title}
-        ${item.description ? `<div class="b3-label__text">${item.description}</div>` : ""}
+        ${titleBlock}
     </div>
     <span class="fn__space${actionElement ? "" : " fn__none"}"></span>
 </${tagName}>`;

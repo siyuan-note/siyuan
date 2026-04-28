@@ -32,10 +32,7 @@ export const setTabPosition = (onlyPadding = false) => {
     const wndsTemp: Wnd[] = [];
     if (isWindowMode) {
         getAllWnds(window.siyuan.layout.layout, wndsTemp);
-    } else if (window.siyuan.config.appearance.hideToolbar) {
-        if (!window.siyuan.layout.centerLayout) {
-            return;
-        }
+    } else if (window.siyuan.layout?.centerLayout) {
         getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
     }
 

@@ -325,10 +325,11 @@ export const setMode = (modeElementValue: number) => {
             mode = 0;
         }
     }
-    fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
+    fetchPost("/api/setting/setAppearance", {
+        ...window.siyuan.config.appearance,
         mode,
         modeOS: modeElementValue === 2,
-    }));
+    });
     /// #endif
 };
 

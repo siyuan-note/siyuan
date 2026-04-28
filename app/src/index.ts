@@ -3,7 +3,7 @@ import {Menus} from "./menus";
 import {Model} from "./layout/Model";
 import {onGetConfig} from "./boot/onGetConfig";
 import {initBlockPopover} from "./block/popover";
-import {account} from "./config/account";
+import {onSetaccount} from "./config/tabs/accountUi";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
@@ -43,7 +43,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {getDockByType} from "./layout/tabUtil";
 import {Tag} from "./layout/dock/Tag";
-import {updateAppearance} from "./config/util/updateAppearance";
+import {appearanceConfigApi} from "./config/tabs/appearanceRuntime";
 import {renderSnippet} from "./config/util/snippets";
 import {setBodyHighlight} from "./util/assets";
 import {reloadSync} from "./util/reloadSync";
@@ -76,7 +76,7 @@ export class App {
                             redirectToCheckAuth();
                             break;
                         case "setAppearance":
-                            updateAppearance(data.data);
+                            appearanceConfigApi.apply(data.data);
                             break;
                         case "setSnippet":
                             window.siyuan.config.snippet = data.data;
@@ -256,7 +256,7 @@ export class App {
                     fetchPost("/api/setting/getCloudUser", {}, userResponse => {
                         window.siyuan.user = userResponse.data;
                         onGetConfig(response.data.start, this);
-                        account.onSetaccount();
+                        onSetaccount();
                         setTitle("", true);
                         initMessage();
                         /// #if BROWSER && !MOBILE

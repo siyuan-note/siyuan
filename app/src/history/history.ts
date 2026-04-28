@@ -454,7 +454,7 @@ const renderRmNotebook = (element: HTMLElement) => {
     });
 };
 
-export const openHistory = (app: App) => {
+export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") => {
     if (window.siyuan.config.readonly) {
         return;
     }
@@ -584,6 +584,9 @@ export const openHistory = (app: App) => {
             bindEvent(element) {
                 element.firstElementChild.setAttribute("style", "background-color:var(--b3-theme-background);height:100%");
                 bindEvent(app, element.firstElementChild);
+                if (tab !== "doc") {
+                    element.firstElementChild.querySelector(`.layout-tab-bar [data-type="${tab}"]`)?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                }
             }
         });
     } else {
@@ -597,8 +600,12 @@ export const openHistory = (app: App) => {
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
-        dialog.element.querySelector("input").focus();
         bindEvent(app, dialog.element, dialog);
+        if (tab !== "doc") {
+            dialog.element.querySelector(`.layout-tab-bar [data-type="${tab}"]`)?.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+        } else {
+            dialog.element.querySelector("input").focus();
+        }
         resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideWidth");
     }
 };

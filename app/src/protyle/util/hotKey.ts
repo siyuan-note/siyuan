@@ -42,14 +42,27 @@ export const matchAuxiliaryHotKey = (hotKey: string, event: KeyboardEvent) => {
     return true;
 };
 
-const replaceDirect = (hotKey: string, keyCode: string) => {
-    const hotKeys = hotKey.replace(keyCode, Constants.ZWSP).split("");
-    hotKeys.forEach((item, index) => {
-        if (item === Constants.ZWSP) {
-            hotKeys[index] = keyCode;
+/** 将快捷键字符串拆分为修饰键与主键，例如 ⌥F10 → ["⌥", "F10"] */
+const parseHotKeyTokens = (hotKey: string): string[] => {
+    const modifiers: string[] = [];
+    let i = 0;
+    while (i < hotKey.length && "⌃⌥⇧⌘".includes(hotKey[i])) {
+        modifiers.push(hotKey[i]);
+        i++;
+    }
+    const rest = hotKey.slice(i);
+    if (!rest) {
+        return modifiers;
+    }
+    for (const key of ["PageUp", "PageDown", "Home", "End"]) {
+        if (rest === key) {
+            return [...modifiers, key];
         }
-    });
-    return hotKeys;
+    }
+    if (/^F(?:1[0-2]|[1-9])$/.test(rest)) {
+        return [...modifiers, rest];
+    }
+    return [...modifiers, rest];
 };
 
 export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
@@ -77,26 +90,7 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
         return false;
     }
 
-    let hotKeys = hotKey.split("");
-    if (hotKey.indexOf("F") > -1) {
-        hotKeys.forEach((item, index) => {
-            if (item === "F") {
-                // F1-F12
-                hotKeys[index] = "F" + hotKeys.splice(index + 1, 1);
-                if (hotKeys[index + 1]) {
-                    hotKeys[index + 1] += hotKeys.splice(index + 1, 1);
-                }
-            }
-        });
-    } else if (hotKey.indexOf("PageUp") > -1) {
-        hotKeys = replaceDirect(hotKey, "PageUp");
-    } else if (hotKey.indexOf("PageDown") > -1) {
-        hotKeys = replaceDirect(hotKey, "PageDown");
-    } else if (hotKey.indexOf("Home") > -1) {
-        hotKeys = replaceDirect(hotKey, "Home");
-    } else if (hotKey.indexOf("End") > -1) {
-        hotKeys = replaceDirect(hotKey, "End");
-    }
+    const hotKeys = parseHotKeyTokens(hotKey);
 
     // 是否匹配 ⇧[]
     if (hotKey.startsWith("⇧") && hotKeys.length === 2) {

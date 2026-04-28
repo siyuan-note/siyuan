@@ -1,4 +1,8 @@
 @media (max-width: 750px) {
+  .config-about__motto {
+    display: none;
+  }
+
   .config {
     &__panel {
       & > .config__side {
@@ -17,13 +21,9 @@
           height: 25px;
         }
       }
-
-      .config-account {
-        flex-direction: column;
-        min-height: 100%;
-      }
     }
 
+    // 该类名目前只有旧的插件设置使用
     &__item {
       flex-wrap: wrap;
 
@@ -37,6 +37,62 @@
       .searchByKeyLabel {
         width: 100%;
         margin-top: 8px;
+      }
+    }
+
+    &-wrap {
+      flex-wrap: wrap;
+      align-items: flex-start;
+
+      & > .fn__flex-1 {
+        flex: 1 1 100%;
+        min-width: 0;
+      }
+
+      & > .fn__space {
+        display: none;
+      }
+
+      & > .b3-text-field,
+      & > .b3-select,
+      & > .b3-button,
+      & > .b3-tooltips,
+      & > .b3-form__icona,
+      & > .fn__size200,
+      .searchByKeyLabel {
+        flex: 1 1 100%;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 8px;
+      }
+    }
+
+    &-wrap--range {
+      .config-range__desktop {
+        display: none;
+      }
+
+      .config-range__mobile {
+        display: block;
+        flex: 1 1 100%;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 8px;
+      }
+    }
+
+    &-item--save-path {
+      .config-wrap {
+        & > .fn__space {
+          display: none;
+        }
+
+        & > .b3-select,
+        & > .b3-text-field {
+          flex: 1 1 100%;
+          width: 100%;
+          max-width: 100%;
+        }
       }
     }
 

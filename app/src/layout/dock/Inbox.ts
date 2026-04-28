@@ -4,7 +4,7 @@ import {setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 /// #endif
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
+import {isInIOS, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {Model} from "../Model";
 import {needSubscribe} from "../../util/needSubscribe";
 import {MenuItem} from "../../menus/Menu";
@@ -360,7 +360,7 @@ ${data.shorthandContent}
         ${window.siyuan.languages.inboxTip}
     </li>
     <li class="b3-list--empty">
-        ${window.siyuan.config.system.container === "ios" ? window.siyuan.languages._kernel[122] : window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL(""))}
+        ${isInIOS() ? window.siyuan.languages._kernel[295] : window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL(""))}
     </li>
 </ul>`;
             loadingElement.classList.add("fn__none");

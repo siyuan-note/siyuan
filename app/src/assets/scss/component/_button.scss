@@ -159,6 +159,11 @@
     background-color: var(--b3-card-success-background);
   }
 
+  &--pink {
+    color: var(--b3-theme-on-secondary);
+    background-color: #ea4aaa;
+  }
+
   &--small {
     padding: 0 4px;
     font-size: 12px;

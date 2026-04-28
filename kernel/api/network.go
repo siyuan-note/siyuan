@@ -420,6 +420,63 @@ func ssrfSafeDialer(connectTimeout time.Duration) *net.Dialer {
 	}
 }
 
+// forwardResponseHeaders copies src headers into dst with a "Siyuan-Proxy-" prefix on each key.
+func forwardResponseHeaders(dst http.Header, src http.Header) {
+	for k, vs := range src {
+		for _, v := range vs {
+			dst.Add("Siyuan-Proxy-"+k, v)
+		}
+	}
+}
+
+// httpProxy proxies an HTTP request to a remote HTTP endpoint.
+//
+// Query params:
+//   - u: RawURLEncoding base64 of the target http/https URL
+//   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as request headers
+//
+// The request method and body are taken from the incoming request.
+// Target response headers are forwarded with a "Siyuan-Proxy-" prefix.
+func httpProxy(c *gin.Context) {
+	targetURL, targetHeaders, err := parseForwardProxyParams(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	if targetURL.Scheme != "http" && targetURL.Scheme != "https" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "only http/https is allowed"})
+		return
+	}
+
+	transport := &http.Transport{
+		DialContext: ssrfSafeDialer(30 * time.Second).DialContext,
+	}
+	httpClient := &http.Client{Transport: transport}
+
+	proxyReq, reqErr := http.NewRequestWithContext(c.Request.Context(), c.Request.Method, targetURL.String(), c.Request.Body)
+	if reqErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "create request failed: " + reqErr.Error()})
+		return
+	}
+	for k, vs := range *targetHeaders {
+		for _, v := range vs {
+			proxyReq.Header.Add(k, v)
+		}
+	}
+
+	resp, respErr := httpClient.Do(proxyReq)
+	if respErr != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "connect target failed: " + respErr.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	forwardResponseHeaders(c.Writer.Header(), resp.Header)
+	c.Writer.WriteHeader(resp.StatusCode)
+	io.Copy(c.Writer, resp.Body)
+}
+
 // wsProxy proxies a WebSocket connection to a remote WebSocket endpoint.
 //
 // Query params:
@@ -442,17 +499,21 @@ func wsProxy(c *gin.Context) {
 		HandshakeTimeout: 30 * time.Second,
 	}
 
-	targetConn, _, dialErr := wsDialer.DialContext(c.Request.Context(), targetURL.String(), *targetHeaders)
+	targetConn, targetResp, dialErr := wsDialer.DialContext(c.Request.Context(), targetURL.String(), *targetHeaders)
 	if dialErr != nil {
 		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "dial target failed: " + dialErr.Error()})
 		return
 	}
 	defer targetConn.Close()
 
+	upgradeHeaders := http.Header{}
+	if targetResp != nil {
+		forwardResponseHeaders(upgradeHeaders, targetResp.Header)
+	}
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}
-	clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, nil)
+	clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, upgradeHeaders)
 	if upgradeErr != nil {
 		logging.LogErrorf("ws forward proxy upgrade failed: %s", upgradeErr.Error())
 		return
@@ -532,11 +593,7 @@ func esProxy(c *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	for k, vs := range resp.Header {
-		for _, v := range vs {
-			c.Writer.Header().Add(k, v)
-		}
-	}
+	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
 
 	clientGone := c.Writer.CloseNotify()

@@ -115,6 +115,7 @@
     width: 100%;
     position: relative;
     z-index: 4; // 需大于 #sidebarContainer https://github.com/siyuan-note/siyuan/issues/11759
+    flex-shrink: 0;
 
     &:hover::after {
       background-color: var(--b3-scroll-color);

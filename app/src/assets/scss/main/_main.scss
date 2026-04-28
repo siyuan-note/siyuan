@@ -26,7 +26,11 @@ html {
 }
 
 body {
-  background-image: radial-gradient(ellipse 60% 40% at 20% -15%, hsl(var(--b3-body-background-hl), var(--b3-body-background-hl-opacity)) 0%, transparent 100%);
+  background-image: radial-gradient(
+    ellipse 66% 20% at 0% 0%,
+    hsla(var(--b3-body-background-hl), calc(var(--b3-body-background-hl-opacity) * 0.5)) 0%,
+    transparent 100%
+  );
 }
 
 .fullscreen {

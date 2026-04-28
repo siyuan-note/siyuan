@@ -392,27 +392,41 @@ export const setBodyHighlight = () => {
         return;
     }
 
-    let hash = 5381;
-    for (let i = 0; i < name.length; i++) {
-        hash = (hash << 5) + hash + name.charCodeAt(i);
-    }
+    // 预定义颜色：赤橙黄绿青蓝紫（提高饱和度和亮度）
+    const colors = [
+        { h: 0, s: 85, l: 50 },    // 赤 - 鲜艳红
+        { h: 30, s: 90, l: 52 },   // 橙 - 亮橙色
+        { h: 50, s: 88, l: 50 },   // 黄 - 金黄色
+        { h: 140, s: 80, l: 48 },  // 绿 - 翠绿色
+        { h: 185, s: 85, l: 50 },  // 青 - 亮青色
+        { h: 230, s: 82, l: 52 },  // 蓝 - 宝蓝色
+        { h: 280, s: 85, l: 50 },  // 紫 - 亮紫色
+    ];
 
-    const absHash = Math.abs(hash);
-    const probability = absHash % 100;
+    let hue, saturation, lightness;
 
-    let hue;
-    // 特殊处理：如果是 "SiYuan"，强制进入暖色系
-    if (name === "SiYuan" || probability < 75) {
-        // 【暖色系】: 300° -> 0° -> 60°
-        hue = (absHash % 121) - 60;
-        if (hue < 0) hue += 360;
+    if (name === "SiYuan") {
+        // SiYuan 专用：更艳丽的紫色
+        hue = 280;
+        saturation = 85;
+        lightness = 48;
     } else {
-        // 【冷色系】: 80° -> 280°
-        hue = 80 + (absHash % 201);
+        // 根据工作空间名生成稳定的索引
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+            hash = (hash << 5) - hash + name.charCodeAt(i);
+            hash |= 0;
+        }
+
+        const index = Math.abs(hash) % colors.length;
+        const color = colors[index];
+        hue = color.h;
+        saturation = color.s;
+        lightness = color.l;
     }
 
     document.documentElement.style.setProperty(
         "--b3-body-background-hl",
-        `${hue}, 75%, 35%`
+        `${hue}, ${saturation}%, ${lightness}%`
     );
 };

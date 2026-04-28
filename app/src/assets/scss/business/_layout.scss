@@ -352,7 +352,7 @@
     height: 17px;
     position: relative;
 
-    &:after {
+    &::after {
       height: 1px;
       background: var(--b3-theme-on-surface-light);
       content: "";
@@ -360,6 +360,7 @@
       top: 8px;
       width: 28px;
       left: 7px;
+      border-radius: var(--b3-border-radius);
     }
   }
 

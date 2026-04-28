@@ -147,7 +147,7 @@ export const keymap = {
         </label>
         <div class="fn__space"></div>
         <button id="clearSearchBtn" class="b3-button b3-button--outline fn__flex-center fn__size200">
-            <svg style="height: 14px"><use xlink:href="#iconClose"></use></svg>
+            <svg><use xlink:href="#iconClose"></use></svg>
             ${window.siyuan.languages.clear}
         </button>
     </div>

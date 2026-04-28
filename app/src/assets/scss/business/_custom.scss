@@ -40,7 +40,7 @@
 
   &__avheader {
     display: flex;
-    padding: 0 8px 0 32px;
+    padding: 0 8px 0 40px;
     align-items: center;
     min-height: 42px;
 
@@ -68,6 +68,8 @@
     transition: var(--b3-background-transition);
     min-height: 34px;
     align-self: flex-start;
+    margin-left: 4px;
+    padding-left: 4px;
 
     span {
       text-overflow: ellipsis;
@@ -103,7 +105,7 @@
   }
 
   .b3-button[data-type="addColumn"] {
-    margin-left: 28px;
+    margin-left: 36px;
 
     svg {
       width: 16px;

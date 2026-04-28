@@ -642,7 +642,7 @@ const addAttrViewColAnimation = (options: {
     } else {
         options.blockElement.querySelector(".fn__hr").insertAdjacentHTML("beforebegin", `<div class="block__icons av__row" data-id="${nodeId}" data-col-id="${options.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
-    <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
+    <div class="block__logo block__logo--icon ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${getColNameByType(options.type)}">
         <svg class="block__logoicon"><use xlink:href="#${getColIconByType(options.type)}"></use></svg>
         <span>${getColNameByType(options.type)}</span>
     </div>

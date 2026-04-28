@@ -113,9 +113,13 @@
 
   &__logo {
     white-space: nowrap;
-    margin-right: 8px;
+    margin: 0 8px;
     display: flex;
     align-items: center;
+
+    &--icon {
+      margin-left: 0;
+    }
   }
 
   &__logoicon {

@@ -1,4 +1,6 @@
 {
+  "switchToFloatingLayout": "Переключиться на плавающий макет",
+  "switchToFixedLayout": "Переключиться на фиксированный макет",
   "hyperlink": "Гиперссылка",
   "copyDoc": "Копировать весь текст",
   "position": "Позиция",

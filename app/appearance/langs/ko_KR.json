@@ -1,4 +1,6 @@
 {
+  "switchToFloatingLayout": "플로팅 레이아웃으로 전환",
+  "switchToFixedLayout": "고정 레이아웃으로 전환",
   "hyperlink": "하이퍼링크",
   "copyDoc": "전체 복사",
   "position": "위치",

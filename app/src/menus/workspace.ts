@@ -124,11 +124,11 @@ const editLayout = (layoutName?: string) => {
     });
 };
 
-const togglePinDock = (id: string, dock: Dock, icon: string) => {
+const togglePinDock = (id: string, dock: Dock, pinIcon: string, unpinIcon: string) => {
     return {
         id,
-        label: `${dock.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}`,
-        icon,
+        label: `${dock.pin ? window.siyuan.languages.switchToFloatingLayout : window.siyuan.languages.switchToFixedLayout}`,
+        icon: `${dock.pin ? unpinIcon : pinIcon}`,
         current: !dock.pin,
         click() {
             dock.togglePin();
@@ -170,9 +170,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         });
         if (!window.siyuan.config.readonly) {
             dockMenu.push({id: "separator_1", type: "separator"});
-            dockMenu.push(togglePinDock("leftDock", window.siyuan.layout.leftDock, "iconLeftTop"));
-            dockMenu.push(togglePinDock("rightDock", window.siyuan.layout.rightDock, "iconRightTop"));
-            dockMenu.push(togglePinDock("bottomDock", window.siyuan.layout.bottomDock, "iconBottomLeft"));
+            dockMenu.push(togglePinDock("leftDock", window.siyuan.layout.leftDock, "iconPanelLeft", "iconPanelLeftDashed"));
+            dockMenu.push(togglePinDock("rightDock", window.siyuan.layout.rightDock, "iconPanelRight", "iconPanelRightDashed"));
+            dockMenu.push(togglePinDock("bottomDock", window.siyuan.layout.bottomDock, "iconPanelBottom", "iconPanelBottomDashed"));
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "panels",

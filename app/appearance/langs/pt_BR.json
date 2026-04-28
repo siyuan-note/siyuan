@@ -1,4 +1,6 @@
 {
+  "switchToFloatingLayout": "Mudar para layout flutuante",
+  "switchToFixedLayout": "Mudar para layout fixo",
   "hyperlink": "Hiperlink",
   "copyDoc": "Copiar todo o texto",
   "position": "Posição",

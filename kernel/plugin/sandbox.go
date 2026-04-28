@@ -19,7 +19,6 @@ package plugin
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -132,9 +131,8 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectLogger(p, rt, siyuan))
 	lo.Must0(injectStorage(p, rt, siyuan))
 	lo.Must0(injectRpc(p, rt, siyuan))
+	lo.Must0(injectClient(p, rt, siyuan))
 	lo.Must0(injectServer(p, rt, siyuan))
-	lo.Must0(injectFetch(p, rt, siyuan))
-	lo.Must0(injectSocket(p, rt, siyuan))
 
 	lo.Must0(ObjectFreeze(rt, siyuan))
 
@@ -545,551 +543,6 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	return
 }
 
-// injectFetch adds siyuan.fetch method that tunnels HTTP requests to the kernel's REST API.
-func injectFetch(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("injectFetch: %v", r)
-		}
-	}()
-
-	lo.Must0(siyuan.Set("fetch", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
-		promise, resolve, reject := rt.NewPromise()
-
-		runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-			var path string
-			if len(call.Arguments) > 0 && goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
-				return
-			}
-
-			if !strings.HasPrefix(path, "/") {
-				err = fmt.Errorf("path must start with /")
-				return
-			}
-
-			method := "GET"
-			headers := map[string]string{}
-			var bodyString string
-			var bodyBytes []byte
-			if len(call.Arguments) > 1 {
-				init := call.Argument(1)
-				if init != nil && !goja.IsUndefined(init) && !goja.IsNull(init) {
-					if initObj := init.ToObject(rt); initObj != nil {
-						if m := initObj.Get("method"); m != nil && goja.IsString(m) {
-							method = m.String()
-						}
-
-						if h := initObj.Get("headers"); h != nil && !goja.IsUndefined(h) && !goja.IsNull(h) {
-							if hObj := h.ToObject(rt); hObj != nil {
-								if hMap, ok := h.Export().(map[string]string); ok {
-									for k, v := range hMap {
-										headers[k] = v
-									}
-								}
-							}
-						}
-
-						if b := initObj.Get("body"); b != nil && !goja.IsUndefined(b) && !goja.IsNull(b) {
-
-							if goja.IsString(b) {
-								bodyString = b.String()
-							} else {
-								body := b.Export()
-								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
-									bodyBytes = arrayBuffer.Bytes()
-								}
-							}
-						}
-					}
-				}
-			}
-
-			go func() (err error) {
-				defer func() {
-					if r := recover(); r != nil {
-						err = fmt.Errorf("panic during siyuan.fetch: %v", r)
-					}
-
-					if err != nil {
-						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-								logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)
-							}
-							return
-						}, nil)
-					}
-				}()
-
-				targetURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
-				r := client.R()
-				for k, v := range headers {
-					r.SetHeader(k, v)
-				}
-				r.SetHeader(model.XAuthTokenKey, p.token)
-
-				if bodyString != "" {
-					r.SetBody(bodyString)
-				} else if len(bodyBytes) > 0 {
-					r.SetBody(bodyBytes)
-				}
-
-				resp, sendErr := r.Send(method, targetURL)
-				if sendErr != nil {
-					err = sendErr
-					return
-				}
-
-				defer resp.Body.Close()
-				body, readErr := io.ReadAll(resp.Body)
-				if readErr != nil {
-					err = fmt.Errorf("failed to read response body: %w", readErr)
-					return
-				}
-
-				responseHeader := map[string]string{}
-				for k, vs := range resp.Header {
-					responseHeader[k] = strings.Join(vs, ", ")
-				}
-
-				runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					response := rt.NewObject()
-					lo.Must0(response.Set("url", rt.ToValue(path)))
-					lo.Must0(response.Set("ok", rt.ToValue(resp.StatusCode >= 200 && resp.StatusCode < 300)))
-					lo.Must0(response.Set("status", rt.ToValue(resp.StatusCode)))
-					lo.Must0(response.Set("statusText", rt.ToValue(resp.Status)))
-					lo.Must0(response.Set("headers", rt.ToValue(responseHeader)))
-					lo.Must0(ObjectSetDataMethods(p, rt, response, body))
-					result = response
-					return
-				}, func(rt *goja.Runtime, result any, err error) {
-					if lo.IsNil(err) {
-						if resolveErr := resolve(result); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.fetch resolve: %v", p.Name, resolveErr)
-						}
-					} else {
-						if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)
-						}
-					}
-				})
-				if runErr != nil {
-					err = runErr
-					return
-				}
-
-				return
-			}()
-
-			return
-		}, func(rt *goja.Runtime, _ any, err error) {
-			if !lo.IsNil(err) {
-				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.fetch reject: %v", p.Name, rejectErr)
-				}
-			}
-		})
-		if runErr != nil {
-			logging.LogErrorf("[plugin:%s] siyuan.fetch worker run: %v", p.Name, runErr)
-		}
-
-		return rt.ToValue(promise)
-	})))
-	return
-}
-
-// injectSocket adds siyuan.socket method with browser-compatible WebSocket API.
-func injectSocket(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("injectSocket: %v", r)
-		}
-	}()
-
-	lo.Must0(siyuan.Set("socket", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
-		promise, resolve, reject := rt.NewPromise()
-
-		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			var path string
-			if len(call.Arguments) > 0 && goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
-				return
-			}
-
-			if !strings.HasPrefix(path, "/") {
-				err = fmt.Errorf("path must start with /")
-				return
-			}
-
-			var protocols []string
-			if len(call.Arguments) > 1 {
-				proto := call.Argument(1)
-				if !goja.IsNull(proto) && !goja.IsUndefined(proto) {
-					if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
-						if arr, ok := proto.Export().([]interface{}); ok {
-							for _, v := range arr {
-								protocols = append(protocols, fmt.Sprintf("%v", v))
-							}
-						}
-					} else {
-						protocols = []string{proto.String()}
-					}
-				}
-			}
-
-			type socket struct {
-				wsObj         *goja.Object
-				wsURL         string
-				wsHeader      http.Header
-				setReadyState func(WebSocketState)
-				invokeWsHook  func(string, ...goja.Value)
-			}
-			type message struct {
-				t int
-				d []byte
-			}
-
-			var conn atomic.Pointer[websocket.Conn]
-			var readyState atomic.Int64
-			var messagesMu sync.Mutex
-			var messages []message
-
-			wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
-			wsHeader := http.Header{}
-			wsHeader.Set(model.XAuthTokenKey, p.token)
-			if len(protocols) > 0 {
-				wsHeader.Set("Sec-WebSocket-Protocol", strings.Join(protocols, ", "))
-			}
-
-			wsObj := rt.NewObject()
-
-			setReadyState := func(state WebSocketState) {
-				readyState.Store(int64(state))
-				wsObj.Set("readyState", rt.ToValue(state))
-			}
-
-			invokeWsHook := func(name string, args ...goja.Value) {
-				hook := wsObj.Get(name)
-				if fn, ok := goja.AssertFunction(hook); ok {
-					if _, callErr := fn(wsObj, args...); callErr != nil {
-						logging.LogErrorf("[plugin:%s] ws hook %q: %v", p.Name, name, callErr)
-					}
-				}
-			}
-
-			setReadyState(WebSocketReadyStateConnecting)
-			lo.Must0(wsObj.Set("onopen", goja.Null()))
-			lo.Must0(wsObj.Set("onping", goja.Null()))
-			lo.Must0(wsObj.Set("onpong", goja.Null()))
-			lo.Must0(wsObj.Set("onerror", goja.Null()))
-			lo.Must0(wsObj.Set("onmessage", goja.Null()))
-			lo.Must0(wsObj.Set("onclose", goja.Null()))
-
-			lo.Must0(wsObj.Set("send", rt.ToValue(func(sendCall goja.FunctionCall) goja.Value {
-				sendPromise, sendResolve, sendReject := rt.NewPromise()
-
-				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					var messageData []byte
-					var messageType int
-					if len(sendCall.Arguments) >= 1 {
-						data := sendCall.Argument(0)
-						if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
-							messageType = websocket.BinaryMessage
-							messageData = arrayBuffer.Bytes()
-						} else {
-							messageType = websocket.TextMessage
-							messageData = []byte(data.String())
-						}
-					}
-					state := WebSocketState(readyState.Load())
-					switch state {
-					case WebSocketReadyStateOpen:
-						if c := conn.Load(); c != nil {
-							err = p.writeWebSocketMessage(c, messageType, messageData)
-						}
-					case WebSocketReadyStateConnecting:
-						messagesMu.Lock()
-						messages = append(messages, message{
-							t: messageType,
-							d: messageData,
-						})
-						messagesMu.Unlock()
-					default:
-						err = fmt.Errorf("WebSocket is not open (state: %d)", state)
-					}
-					return
-				}, func(rt *goja.Runtime, result any, err error) {
-					if lo.IsNil(err) {
-						if resolveErr := sendResolve(result); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.send resolve: %v", p.Name, resolveErr)
-						}
-					} else {
-						if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.send reject: %v", p.Name, rejectErr)
-						}
-					}
-				})
-				if sendRunErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.socket.send worker run: %v", p.Name, sendRunErr)
-				}
-
-				return rt.ToValue(sendPromise)
-			})))
-
-			lo.Must0(wsObj.Set("ping", rt.ToValue(func(pingCall goja.FunctionCall) goja.Value {
-				pingPromise, pingResolve, pingReject := rt.NewPromise()
-
-				pingRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					var pingData string
-					if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
-						pingData = pingCall.Argument(0).String()
-					}
-					if c := conn.Load(); c != nil {
-						err = p.writeWebSocketMessage(c, websocket.PingMessage, []byte(pingData))
-					}
-					return
-				}, func(rt *goja.Runtime, result any, err error) {
-					if lo.IsNil(err) {
-						if resolveErr := pingResolve(result); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.ping resolve: %v", p.Name, resolveErr)
-						}
-					} else {
-						if rejectErr := pingReject(rt.NewGoError(err)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.ping reject: %v", p.Name, rejectErr)
-						}
-					}
-				})
-				if pingRunErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.socket.ping worker run: %v", p.Name, pingRunErr)
-				}
-
-				return rt.ToValue(pingPromise)
-			})))
-
-			lo.Must0(wsObj.Set("pong", rt.ToValue(func(pongCall goja.FunctionCall) goja.Value {
-				pongPromise, pongResolve, pongReject := rt.NewPromise()
-
-				pongRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					var pongData string
-					if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
-						pongData = pongCall.Argument(0).String()
-					}
-					if c := conn.Load(); c != nil {
-						err = p.writeWebSocketMessage(c, websocket.PongMessage, []byte(pongData))
-					}
-					return
-				}, func(rt *goja.Runtime, result any, err error) {
-					if lo.IsNil(err) {
-						if resolveErr := pongResolve(result); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.pong resolve: %v", p.Name, resolveErr)
-						}
-					} else {
-						if rejectErr := pongReject(rt.NewGoError(err)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.pong reject: %v", p.Name, rejectErr)
-						}
-					}
-				})
-				if pongRunErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.socket.pong worker run: %v", p.Name, pongRunErr)
-				}
-
-				return rt.ToValue(pongPromise)
-			})))
-
-			lo.Must0(wsObj.Set("close", rt.ToValue(func(closeCall goja.FunctionCall) goja.Value {
-				closePromise, closeResolve, closeReject := rt.NewPromise()
-
-				closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					code := websocket.CloseNormalClosure
-					var reason string
-					if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
-						code = int(closeCall.Argument(0).ToInteger())
-					}
-					if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
-						reason = closeCall.Argument(1).String()
-					}
-					if c := conn.Load(); c != nil {
-						err = p.writeWebSocketMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
-					}
-					return
-				}, func(rt *goja.Runtime, result any, err error) {
-					if lo.IsNil(err) {
-						if resolveErr := closeResolve(result); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.close resolve: %v", p.Name, resolveErr)
-						}
-					} else {
-						if rejectErr := closeReject(rt.NewGoError(err)); rejectErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.socket.close reject: %v", p.Name, rejectErr)
-						}
-					}
-				})
-				if closeRunErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.socket.close worker run: %v", p.Name, closeRunErr)
-				}
-
-				return rt.ToValue(closePromise)
-			})))
-
-			s := &socket{
-				wsObj:         wsObj,
-				wsURL:         wsURL,
-				wsHeader:      wsHeader,
-				setReadyState: setReadyState,
-				invokeWsHook:  invokeWsHook,
-			}
-
-			go func() (err error) {
-				defer func() {
-					if r := recover(); r != nil {
-						err = fmt.Errorf("panic during siyuan.socket: %v", r)
-					}
-
-					if err != nil {
-						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-							event := rt.NewObject()
-							event.Set("type", rt.ToValue("error"))
-							event.Set("error", rt.NewGoError(err))
-							s.invokeWsHook("onerror", event)
-							return
-						}, nil)
-					}
-				}()
-
-				dialer := websocket.Dialer{}
-				c, _, dialErr := dialer.Dial(s.wsURL, s.wsHeader)
-				if dialErr != nil {
-					err = dialErr
-					return
-				}
-
-				defer func() {
-					p.UntrackSocket(c)
-					c.Close()
-				}()
-				p.TrackSocket(c, false)
-
-				c.SetPingHandler(func(data string) error {
-					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
-						event := rt.NewObject()
-						event.Set("type", rt.ToValue("ping"))
-						event.Set("data", rt.ToValue(data))
-						s.invokeWsHook("onping", event)
-						return
-					})
-					return runError
-				})
-				c.SetPongHandler(func(data string) error {
-					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
-						event := rt.NewObject()
-						event.Set("type", rt.ToValue("pong"))
-						event.Set("data", rt.ToValue(data))
-						s.invokeWsHook("onpong", event)
-						return
-					})
-					return runError
-				})
-				c.SetCloseHandler(func(code int, reason string) error {
-					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
-						s.setReadyState(WebSocketReadyStateClosing)
-						event := rt.NewObject()
-						event.Set("type", rt.ToValue("close"))
-						event.Set("code", rt.ToValue(int64(code)))
-						event.Set("reason", rt.ToValue(reason))
-						s.invokeWsHook("onclose", event)
-						return
-					})
-					return runError
-				})
-
-				_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
-					// Store the connection for later use in send/ping/pong/close
-					conn.Store(c)
-
-					// Transition to open state
-					s.setReadyState(WebSocketReadyStateOpen)
-
-					// Flush messages sent before the connection is established
-					messagesMu.Lock()
-					for _, m := range messages {
-						p.writeWebSocketMessage(c, m.t, m.d)
-					}
-					messages = nil
-					messagesMu.Unlock()
-
-					// Emit the open event
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("open"))
-					s.invokeWsHook("onopen", event)
-					return
-				})
-				if runErr != nil {
-					err = runErr
-					return
-				}
-
-				for {
-					messageType, data, readErr := c.ReadMessage()
-					if readErr != nil {
-						if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-							err = readErr
-						}
-						return
-					}
-					switch messageType {
-					case websocket.TextMessage:
-						runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-							event := rt.NewObject()
-							event.Set("type", rt.ToValue("message"))
-							event.Set("data", rt.ToValue(string(data)))
-							s.invokeWsHook("onmessage", event)
-							return
-						}, nil)
-						if runErr != nil {
-							err = runErr
-							return
-						}
-					case websocket.BinaryMessage:
-						runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-							event := rt.NewObject()
-							event.Set("type", rt.ToValue("message"))
-							event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
-							s.invokeWsHook("onmessage", event)
-							return
-						}, nil)
-						if runErr != nil {
-							err = runErr
-							return
-						}
-					}
-				}
-			}()
-
-			result = wsObj
-			return
-		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.socket resolve: %v", p.Name, resolveErr)
-				}
-			} else {
-				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.socket reject: %v", p.Name, rejectErr)
-				}
-			}
-		})
-		if runErr != nil {
-			logging.LogErrorf("[plugin:%s] siyuan.socket worker run: %v", p.Name, runErr)
-		}
-
-		return rt.ToValue(promise)
-	})))
-	return
-}
-
 // injectRpc adds siyuan.rpc method for RPC method registration.
 func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
 	defer func() {
@@ -1245,6 +698,782 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 	lo.Must0(ObjectFreeze(rt, rpc))
 
 	lo.Must0(siyuan.Set("rpc", rpc))
+	return
+}
+
+// injectClient adds siyuan.server to the goja context.
+func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("injectClient: %v", r)
+		}
+	}()
+
+	client := rt.NewObject()
+
+	lo.Must0(siyuan.Set("fetch", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			var path string
+			if len(call.Arguments) > 0 && goja.IsString(call.Argument(0)) {
+				path = call.Argument(0).String()
+			} else {
+				err = fmt.Errorf("path required")
+				return
+			}
+
+			if !strings.HasPrefix(path, "/") {
+				err = fmt.Errorf("path must start with /")
+				return
+			}
+
+			var protocols []string
+			if len(call.Arguments) > 1 {
+				proto := call.Argument(1)
+				if !goja.IsNull(proto) && !goja.IsUndefined(proto) {
+					if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
+						if arr, ok := proto.Export().([]interface{}); ok {
+							for _, v := range arr {
+								protocols = append(protocols, fmt.Sprintf("%v", v))
+							}
+						}
+					} else {
+						protocols = []string{proto.String()}
+					}
+				}
+			}
+
+			type socket struct {
+				wsObj         *goja.Object
+				wsURL         string
+				wsHeader      http.Header
+				setReadyState func(WebSocketState)
+				invokeWsHook  func(string, ...goja.Value)
+			}
+			type message struct {
+				t int
+				d []byte
+			}
+
+			var conn atomic.Pointer[websocket.Conn]
+			var readyState atomic.Int64
+			var messagesMu sync.Mutex
+			var messages []message
+
+			wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
+			wsHeader := http.Header{}
+			wsHeader.Set(model.XAuthTokenKey, p.token)
+			if len(protocols) > 0 {
+				wsHeader.Set("Sec-WebSocket-Protocol", strings.Join(protocols, ", "))
+			}
+
+			wsObj := rt.NewObject()
+
+			setReadyState := func(state WebSocketState) {
+				readyState.Store(int64(state))
+				wsObj.Set("readyState", rt.ToValue(state))
+			}
+
+			invokeWsHook := func(name string, args ...goja.Value) {
+				hook := wsObj.Get(name)
+				if fn, ok := goja.AssertFunction(hook); ok {
+					if _, callErr := fn(wsObj, args...); callErr != nil {
+						logging.LogErrorf("[plugin:%s] ws hook %q: %v", p.Name, name, callErr)
+					}
+				}
+			}
+
+			setReadyState(WebSocketReadyStateConnecting)
+			lo.Must0(wsObj.Set("onopen", goja.Null()))
+			lo.Must0(wsObj.Set("onping", goja.Null()))
+			lo.Must0(wsObj.Set("onpong", goja.Null()))
+			lo.Must0(wsObj.Set("onerror", goja.Null()))
+			lo.Must0(wsObj.Set("onmessage", goja.Null()))
+			lo.Must0(wsObj.Set("onclose", goja.Null()))
+
+			lo.Must0(wsObj.Set("send", rt.ToValue(func(sendCall goja.FunctionCall) goja.Value {
+				sendPromise, sendResolve, sendReject := rt.NewPromise()
+
+				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					var messageData []byte
+					var messageType int
+					if len(sendCall.Arguments) >= 1 {
+						data := sendCall.Argument(0)
+						if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
+							messageType = websocket.BinaryMessage
+							messageData = arrayBuffer.Bytes()
+						} else {
+							messageType = websocket.TextMessage
+							messageData = []byte(data.String())
+						}
+					}
+					state := WebSocketState(readyState.Load())
+					switch state {
+					case WebSocketReadyStateOpen:
+						if c := conn.Load(); c != nil {
+							err = p.writeWebSocketMessage(c, messageType, messageData)
+						}
+					case WebSocketReadyStateConnecting:
+						messagesMu.Lock()
+						messages = append(messages, message{
+							t: messageType,
+							d: messageData,
+						})
+						messagesMu.Unlock()
+					default:
+						err = fmt.Errorf("WebSocket is not open (state: %d)", state)
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := sendResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.send resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.send reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if sendRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.send worker run: %v", p.Name, sendRunErr)
+				}
+
+				return rt.ToValue(sendPromise)
+			})))
+
+			lo.Must0(wsObj.Set("ping", rt.ToValue(func(pingCall goja.FunctionCall) goja.Value {
+				pingPromise, pingResolve, pingReject := rt.NewPromise()
+
+				pingRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					var pingData string
+					if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
+						pingData = pingCall.Argument(0).String()
+					}
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.PingMessage, []byte(pingData))
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := pingResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.ping resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := pingReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.ping reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if pingRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.ping worker run: %v", p.Name, pingRunErr)
+				}
+
+				return rt.ToValue(pingPromise)
+			})))
+
+			lo.Must0(wsObj.Set("pong", rt.ToValue(func(pongCall goja.FunctionCall) goja.Value {
+				pongPromise, pongResolve, pongReject := rt.NewPromise()
+
+				pongRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					var pongData string
+					if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
+						pongData = pongCall.Argument(0).String()
+					}
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.PongMessage, []byte(pongData))
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := pongResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.pong resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := pongReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.pong reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if pongRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.pong worker run: %v", p.Name, pongRunErr)
+				}
+
+				return rt.ToValue(pongPromise)
+			})))
+
+			lo.Must0(wsObj.Set("close", rt.ToValue(func(closeCall goja.FunctionCall) goja.Value {
+				closePromise, closeResolve, closeReject := rt.NewPromise()
+
+				closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					code := websocket.CloseNormalClosure
+					var reason string
+					if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
+						code = int(closeCall.Argument(0).ToInteger())
+					}
+					if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
+						reason = closeCall.Argument(1).String()
+					}
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := closeResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.close resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := closeReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.close reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if closeRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.close worker run: %v", p.Name, closeRunErr)
+				}
+
+				return rt.ToValue(closePromise)
+			})))
+
+			s := &socket{
+				wsObj:         wsObj,
+				wsURL:         wsURL,
+				wsHeader:      wsHeader,
+				setReadyState: setReadyState,
+				invokeWsHook:  invokeWsHook,
+			}
+
+			go func() (err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = fmt.Errorf("panic during siyuan.client.socket: %v", r)
+					}
+
+					if err != nil {
+						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("error"))
+							event.Set("error", rt.NewGoError(err))
+							s.invokeWsHook("onerror", event)
+							return
+						}, nil)
+					}
+				}()
+
+				dialer := websocket.Dialer{}
+				c, _, dialErr := dialer.Dial(s.wsURL, s.wsHeader)
+				if dialErr != nil {
+					err = dialErr
+					return
+				}
+
+				defer func() {
+					p.UntrackSocket(c)
+					c.Close()
+				}()
+				p.TrackSocket(c, false)
+
+				c.SetPingHandler(func(data string) error {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("ping"))
+						event.Set("data", rt.ToValue(data))
+						s.invokeWsHook("onping", event)
+						return
+					})
+					return runError
+				})
+				c.SetPongHandler(func(data string) error {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("pong"))
+						event.Set("data", rt.ToValue(data))
+						s.invokeWsHook("onpong", event)
+						return
+					})
+					return runError
+				})
+				c.SetCloseHandler(func(code int, reason string) error {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+						s.setReadyState(WebSocketReadyStateClosing)
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("close"))
+						event.Set("code", rt.ToValue(int64(code)))
+						event.Set("reason", rt.ToValue(reason))
+						s.invokeWsHook("onclose", event)
+						return
+					})
+					return runError
+				})
+
+				_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					// Store the connection for later use in send/ping/pong/close
+					conn.Store(c)
+
+					// Transition to open state
+					s.setReadyState(WebSocketReadyStateOpen)
+
+					// Flush messages sent before the connection is established
+					messagesMu.Lock()
+					for _, m := range messages {
+						p.writeWebSocketMessage(c, m.t, m.d)
+					}
+					messages = nil
+					messagesMu.Unlock()
+
+					// Emit the open event
+					event := rt.NewObject()
+					event.Set("type", rt.ToValue("open"))
+					s.invokeWsHook("onopen", event)
+					return
+				})
+				if runErr != nil {
+					err = runErr
+					return
+				}
+
+				for {
+					messageType, data, readErr := c.ReadMessage()
+					if readErr != nil {
+						if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+							err = readErr
+						}
+						return
+					}
+					switch messageType {
+					case websocket.TextMessage:
+						runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("message"))
+							event.Set("data", rt.ToValue(string(data)))
+							s.invokeWsHook("onmessage", event)
+							return
+						}, nil)
+						if runErr != nil {
+							err = runErr
+							return
+						}
+					case websocket.BinaryMessage:
+						runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("message"))
+							event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
+							s.invokeWsHook("onmessage", event)
+							return
+						}, nil)
+						if runErr != nil {
+							err = runErr
+							return
+						}
+					}
+				}
+			}()
+
+			result = wsObj
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] siyuan.client.socket worker run: %v", p.Name, runErr)
+		}
+
+		return rt.ToValue(promise)
+	})))
+
+	lo.Must0(client.Set("socket", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			var path string
+			if len(call.Arguments) > 0 && goja.IsString(call.Argument(0)) {
+				path = call.Argument(0).String()
+			} else {
+				err = fmt.Errorf("path required")
+				return
+			}
+
+			if !strings.HasPrefix(path, "/") {
+				err = fmt.Errorf("path must start with /")
+				return
+			}
+
+			var protocols []string
+			if len(call.Arguments) > 1 {
+				proto := call.Argument(1)
+				if !goja.IsNull(proto) && !goja.IsUndefined(proto) {
+					if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
+						if arr, ok := proto.Export().([]interface{}); ok {
+							for _, v := range arr {
+								protocols = append(protocols, fmt.Sprintf("%v", v))
+							}
+						}
+					} else {
+						protocols = []string{proto.String()}
+					}
+				}
+			}
+
+			type socket struct {
+				wsObj         *goja.Object
+				wsURL         string
+				wsHeader      http.Header
+				setReadyState func(WebSocketState)
+				invokeWsHook  func(string, ...goja.Value)
+			}
+			type message struct {
+				t int
+				d []byte
+			}
+
+			var conn atomic.Pointer[websocket.Conn]
+			var readyState atomic.Int64
+			var messagesMu sync.Mutex
+			var messages []message
+
+			wsURL := fmt.Sprintf("ws://127.0.0.1:%s%s", util.ServerPort, path)
+			wsHeader := http.Header{}
+			wsHeader.Set(model.XAuthTokenKey, p.token)
+			if len(protocols) > 0 {
+				wsHeader.Set("Sec-WebSocket-Protocol", strings.Join(protocols, ", "))
+			}
+
+			wsObj := rt.NewObject()
+
+			setReadyState := func(state WebSocketState) {
+				readyState.Store(int64(state))
+				wsObj.Set("readyState", rt.ToValue(state))
+			}
+
+			invokeWsHook := func(name string, args ...goja.Value) {
+				hook := wsObj.Get(name)
+				if fn, ok := goja.AssertFunction(hook); ok {
+					if _, callErr := fn(wsObj, args...); callErr != nil {
+						logging.LogErrorf("[plugin:%s] ws hook %q: %v", p.Name, name, callErr)
+					}
+				}
+			}
+
+			setReadyState(WebSocketReadyStateConnecting)
+			lo.Must0(wsObj.Set("onopen", goja.Null()))
+			lo.Must0(wsObj.Set("onping", goja.Null()))
+			lo.Must0(wsObj.Set("onpong", goja.Null()))
+			lo.Must0(wsObj.Set("onerror", goja.Null()))
+			lo.Must0(wsObj.Set("onmessage", goja.Null()))
+			lo.Must0(wsObj.Set("onclose", goja.Null()))
+
+			lo.Must0(wsObj.Set("send", rt.ToValue(func(sendCall goja.FunctionCall) goja.Value {
+				sendPromise, sendResolve, sendReject := rt.NewPromise()
+
+				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					var messageData []byte
+					var messageType int
+					if len(sendCall.Arguments) >= 1 {
+						data := sendCall.Argument(0)
+						if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
+							messageType = websocket.BinaryMessage
+							messageData = arrayBuffer.Bytes()
+						} else {
+							messageType = websocket.TextMessage
+							messageData = []byte(data.String())
+						}
+					}
+					state := WebSocketState(readyState.Load())
+					switch state {
+					case WebSocketReadyStateOpen:
+						if c := conn.Load(); c != nil {
+							err = p.writeWebSocketMessage(c, messageType, messageData)
+						}
+					case WebSocketReadyStateConnecting:
+						messagesMu.Lock()
+						messages = append(messages, message{
+							t: messageType,
+							d: messageData,
+						})
+						messagesMu.Unlock()
+					default:
+						err = fmt.Errorf("WebSocket is not open (state: %d)", state)
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := sendResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.send resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.send reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if sendRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.send worker run: %v", p.Name, sendRunErr)
+				}
+
+				return rt.ToValue(sendPromise)
+			})))
+
+			lo.Must0(wsObj.Set("ping", rt.ToValue(func(pingCall goja.FunctionCall) goja.Value {
+				pingPromise, pingResolve, pingReject := rt.NewPromise()
+
+				pingRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					var pingData string
+					if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
+						pingData = pingCall.Argument(0).String()
+					}
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.PingMessage, []byte(pingData))
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := pingResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.ping resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := pingReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.ping reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if pingRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.ping worker run: %v", p.Name, pingRunErr)
+				}
+
+				return rt.ToValue(pingPromise)
+			})))
+
+			lo.Must0(wsObj.Set("pong", rt.ToValue(func(pongCall goja.FunctionCall) goja.Value {
+				pongPromise, pongResolve, pongReject := rt.NewPromise()
+
+				pongRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					var pongData string
+					if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
+						pongData = pongCall.Argument(0).String()
+					}
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.PongMessage, []byte(pongData))
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := pongResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.pong resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := pongReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.pong reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if pongRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.pong worker run: %v", p.Name, pongRunErr)
+				}
+
+				return rt.ToValue(pongPromise)
+			})))
+
+			lo.Must0(wsObj.Set("close", rt.ToValue(func(closeCall goja.FunctionCall) goja.Value {
+				closePromise, closeResolve, closeReject := rt.NewPromise()
+
+				closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+					code := websocket.CloseNormalClosure
+					var reason string
+					if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
+						code = int(closeCall.Argument(0).ToInteger())
+					}
+					if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
+						reason = closeCall.Argument(1).String()
+					}
+					if c := conn.Load(); c != nil {
+						err = p.writeWebSocketMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+					}
+					return
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if resolveErr := closeResolve(result); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.close resolve: %v", p.Name, resolveErr)
+						}
+					} else {
+						if rejectErr := closeReject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.close reject: %v", p.Name, rejectErr)
+						}
+					}
+				})
+				if closeRunErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket.close worker run: %v", p.Name, closeRunErr)
+				}
+
+				return rt.ToValue(closePromise)
+			})))
+
+			s := &socket{
+				wsObj:         wsObj,
+				wsURL:         wsURL,
+				wsHeader:      wsHeader,
+				setReadyState: setReadyState,
+				invokeWsHook:  invokeWsHook,
+			}
+
+			go func() (err error) {
+				defer func() {
+					if r := recover(); r != nil {
+						err = fmt.Errorf("panic during siyuan.client.socket: %v", r)
+					}
+
+					if err != nil {
+						p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("error"))
+							event.Set("error", rt.NewGoError(err))
+							s.invokeWsHook("onerror", event)
+							return
+						}, nil)
+					}
+				}()
+
+				dialer := websocket.Dialer{}
+				c, _, dialErr := dialer.Dial(s.wsURL, s.wsHeader)
+				if dialErr != nil {
+					err = dialErr
+					return
+				}
+
+				defer func() {
+					p.UntrackSocket(c)
+					c.Close()
+				}()
+				p.TrackSocket(c, false)
+
+				c.SetPingHandler(func(data string) error {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("ping"))
+						event.Set("data", rt.ToValue(data))
+						s.invokeWsHook("onping", event)
+						return
+					})
+					return runError
+				})
+				c.SetPongHandler(func(data string) error {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("pong"))
+						event.Set("data", rt.ToValue(data))
+						s.invokeWsHook("onpong", event)
+						return
+					})
+					return runError
+				})
+				c.SetCloseHandler(func(code int, reason string) error {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+						s.setReadyState(WebSocketReadyStateClosing)
+						event := rt.NewObject()
+						event.Set("type", rt.ToValue("close"))
+						event.Set("code", rt.ToValue(int64(code)))
+						event.Set("reason", rt.ToValue(reason))
+						s.invokeWsHook("onclose", event)
+						return
+					})
+					return runError
+				})
+
+				_, runErr := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					// Store the connection for later use in send/ping/pong/close
+					conn.Store(c)
+
+					// Transition to open state
+					s.setReadyState(WebSocketReadyStateOpen)
+
+					// Flush messages sent before the connection is established
+					messagesMu.Lock()
+					for _, m := range messages {
+						p.writeWebSocketMessage(c, m.t, m.d)
+					}
+					messages = nil
+					messagesMu.Unlock()
+
+					// Emit the open event
+					event := rt.NewObject()
+					event.Set("type", rt.ToValue("open"))
+					s.invokeWsHook("onopen", event)
+					return
+				})
+				if runErr != nil {
+					err = runErr
+					return
+				}
+
+				for {
+					messageType, data, readErr := c.ReadMessage()
+					if readErr != nil {
+						if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+							err = readErr
+						}
+						return
+					}
+					switch messageType {
+					case websocket.TextMessage:
+						runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("message"))
+							event.Set("data", rt.ToValue(string(data)))
+							s.invokeWsHook("onmessage", event)
+							return
+						}, nil)
+						if runErr != nil {
+							err = runErr
+							return
+						}
+					case websocket.BinaryMessage:
+						runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("message"))
+							event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
+							s.invokeWsHook("onmessage", event)
+							return
+						}, nil)
+						if runErr != nil {
+							err = runErr
+							return
+						}
+					}
+				}
+			}()
+
+			result = wsObj
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.client.socket reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] siyuan.client.socket worker run: %v", p.Name, runErr)
+		}
+
+		return rt.ToValue(promise)
+	})))
+
+	lo.Must0(ObjectFreeze(rt, client))
+
+	lo.Must0(siyuan.Set("client", client))
 	return
 }
 

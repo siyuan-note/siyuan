@@ -496,7 +496,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				p.TrackSocket(c, false)
 
 				c.SetPingHandler(func(data string) error {
-					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("ping"))
 						event.Set("data", rt.ToValue(data))
@@ -506,7 +506,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					return runError
 				})
 				c.SetPongHandler(func(data string) error {
-					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("pong"))
 						event.Set("data", rt.ToValue(data))
@@ -516,12 +516,17 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					return runError
 				})
 				c.SetCloseHandler(func(code int, reason string) error {
-					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
+					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
+						closeError := &websocket.CloseError{
+							Code: code,
+							Text: reason,
+						}
 						setReadyState(rt, WebSocketReadyStateClosing)
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("close"))
 						event.Set("code", rt.ToValue(int64(code)))
 						event.Set("reason", rt.ToValue(reason))
+						event.Set("wasClean", !websocket.IsUnexpectedCloseError(closeError, websocket.CloseNormalClosure))
 						invokeWsHook("onclose", event)
 						return
 					})
@@ -623,6 +628,17 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			var readyState atomic.Int64
 			esURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 
+			ctx, cancel := context.WithCancel(context.Background())
+			sseID := p.TrackSSE(cancel)
+
+			var closeOnce sync.Once
+			doClose := func() {
+				closeOnce.Do(func() {
+					cancel()
+					p.UntrackSSE(sseID)
+				})
+			}
+
 			esObj := rt.NewObject()
 
 			setReadyState := func(state EventSourceState) {
@@ -639,6 +655,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 			}
 
+			es_close := rt.ToValue(func(goja.FunctionCall) goja.Value {
+				setReadyState(EventSourceClosed)
+				doClose()
+				return goja.Undefined()
+			})
+
 			lo.Must0(esObj.Set("readyState", rt.ToValue(EventSourceConnecting)))
 			lo.Must0(esObj.Set("url", rt.ToValue(path)))
 
@@ -647,24 +669,11 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			lo.Must0(esObj.Set("onclose", goja.Null()))
 			lo.Must0(esObj.Set("onerror", goja.Null()))
 
+			lo.Must0(esObj.Set("close", es_close))
+
+			lo.Must0(ObjectSeal(rt, esObj))
+
 			setReadyState(EventSourceConnecting)
-
-			ctx, cancel := context.WithCancel(context.Background())
-			sseID := p.TrackSSE(cancel)
-
-			var closeOnce sync.Once
-			close := func() {
-				closeOnce.Do(func() {
-					cancel()
-					p.UntrackSSE(sseID)
-				})
-			}
-
-			lo.Must0(esObj.Set("close", rt.ToValue(func(goja.FunctionCall) goja.Value {
-				setReadyState(EventSourceClosed)
-				close()
-				return goja.Undefined()
-			})))
 
 			go func() (err error) {
 				defer func() {
@@ -672,7 +681,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						err = fmt.Errorf("panic during siyuan.client.event: %v", r)
 					}
 
-					close()
+					doClose()
 
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 						if EventSourceState(readyState.Load()) != EventSourceClosed {

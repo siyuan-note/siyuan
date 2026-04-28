@@ -901,13 +901,6 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 			}
 
-			type socket struct {
-				wsObj         *goja.Object
-				wsURL         string
-				wsHeader      http.Header
-				setReadyState func(WebSocketState)
-				invokeWsHook  func(string, ...goja.Value)
-			}
 			type message struct {
 				t int
 				d []byte
@@ -915,6 +908,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			var conn atomic.Pointer[websocket.Conn]
 			var readyState atomic.Int64
+			var bufferedAmount atomic.Int64
 			var messagesMu sync.Mutex
 			var messages []message
 
@@ -927,10 +921,19 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			wsObj := rt.NewObject()
 
-			setReadyState := func(state WebSocketState) {
-				readyState.Store(int64(state))
-				wsObj.Set("readyState", rt.ToValue(state))
-			}
+			lo.Must0(wsObj.Set("binaryType", rt.ToValue("arraybuffer")))
+			lo.Must0(wsObj.Set("bufferedAmount", rt.ToValue(0)))
+			lo.Must0(wsObj.Set("extensions", rt.ToValue("")))
+			lo.Must0(wsObj.Set("protocol", rt.ToValue("")))
+			lo.Must0(wsObj.Set("readyState", rt.ToValue(int64(WebSocketReadyStateConnecting))))
+			lo.Must0(wsObj.Set("url", rt.ToValue("wsURL")))
+
+			lo.Must0(wsObj.Set("onopen", goja.Null()))
+			lo.Must0(wsObj.Set("onping", goja.Null()))
+			lo.Must0(wsObj.Set("onpong", goja.Null()))
+			lo.Must0(wsObj.Set("onerror", goja.Null()))
+			lo.Must0(wsObj.Set("onmessage", goja.Null()))
+			lo.Must0(wsObj.Set("onclose", goja.Null()))
 
 			invokeWsHook := func(name string, args ...goja.Value) {
 				hook := wsObj.Get(name)
@@ -941,35 +944,46 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 			}
 
-			setReadyState(WebSocketReadyStateConnecting)
-			lo.Must0(wsObj.Set("onopen", goja.Null()))
-			lo.Must0(wsObj.Set("onping", goja.Null()))
-			lo.Must0(wsObj.Set("onpong", goja.Null()))
-			lo.Must0(wsObj.Set("onerror", goja.Null()))
-			lo.Must0(wsObj.Set("onmessage", goja.Null()))
-			lo.Must0(wsObj.Set("onclose", goja.Null()))
+			setReadyState := func(rt *goja.Runtime, state WebSocketState) {
+				readyState.Store(int64(state))
+				wsObj.Set("readyState", rt.ToValue(state))
+			}
+
+			updateBufferedAmount := func(rt *goja.Runtime, delta int) {
+				bufferedAmount.Add(int64(delta))
+				wsObj.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load()))
+			}
+
+			setReadyState(rt, WebSocketReadyStateConnecting)
 
 			lo.Must0(wsObj.Set("send", rt.ToValue(func(sendCall goja.FunctionCall) goja.Value {
 				sendPromise, sendResolve, sendReject := rt.NewPromise()
 
-				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					var messageData []byte
-					var messageType int
-					if len(sendCall.Arguments) >= 1 {
-						data := sendCall.Argument(0)
-						if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
-							messageType = websocket.BinaryMessage
-							messageData = arrayBuffer.Bytes()
-						} else {
-							messageType = websocket.TextMessage
-							messageData = []byte(data.String())
-						}
+				var messageData []byte
+				var messageType int
+				if len(sendCall.Arguments) >= 1 {
+					data := sendCall.Argument(0)
+					if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
+						messageType = websocket.BinaryMessage
+						messageData = arrayBuffer.Bytes()
+					} else {
+						messageType = websocket.TextMessage
+						messageData = []byte(data.String())
 					}
+				}
+				updateBufferedAmount(rt, len(messageData))
+
+				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
 					state := WebSocketState(readyState.Load())
 					switch state {
 					case WebSocketReadyStateOpen:
 						if c := conn.Load(); c != nil {
-							err = p.writeWebSocketMessage(c, messageType, messageData)
+							if amount, writeErr := p.writeWebSocketMessage(c, messageType, messageData); writeErr != nil {
+								err = writeErr
+								return
+							} else {
+								updateBufferedAmount(rt, -amount)
+							}
 						}
 					case WebSocketReadyStateConnecting:
 						messagesMu.Lock()
@@ -1009,7 +1023,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						pingData = pingCall.Argument(0).String()
 					}
 					if c := conn.Load(); c != nil {
-						err = p.writeWebSocketMessage(c, websocket.PingMessage, []byte(pingData))
+						_, err = p.writeWebSocketMessage(c, websocket.PingMessage, []byte(pingData))
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -1039,7 +1053,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						pongData = pongCall.Argument(0).String()
 					}
 					if c := conn.Load(); c != nil {
-						err = p.writeWebSocketMessage(c, websocket.PongMessage, []byte(pongData))
+						_, err = p.writeWebSocketMessage(c, websocket.PongMessage, []byte(pongData))
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -1073,7 +1087,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						reason = closeCall.Argument(1).String()
 					}
 					if c := conn.Load(); c != nil {
-						err = p.writeWebSocketMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+						_, err = p.writeWebSocketMessage(c, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -1094,14 +1108,6 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				return rt.ToValue(closePromise)
 			})))
 
-			s := &socket{
-				wsObj:         wsObj,
-				wsURL:         wsURL,
-				wsHeader:      wsHeader,
-				setReadyState: setReadyState,
-				invokeWsHook:  invokeWsHook,
-			}
-
 			go func() (err error) {
 				defer func() {
 					if r := recover(); r != nil {
@@ -1113,18 +1119,20 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							event := rt.NewObject()
 							event.Set("type", rt.ToValue("error"))
 							event.Set("error", rt.NewGoError(err))
-							s.invokeWsHook("onerror", event)
+							invokeWsHook("onerror", event)
 							return
 						}, nil)
 					}
 				}()
 
 				dialer := websocket.Dialer{}
-				c, _, dialErr := dialer.Dial(s.wsURL, s.wsHeader)
+				c, _, dialErr := dialer.Dial(wsURL, wsHeader)
 				if dialErr != nil {
 					err = dialErr
 					return
 				}
+
+				wsObj.Set("protocol", c.Subprotocol())
 
 				defer func() {
 					p.UntrackSocket(c)
@@ -1137,7 +1145,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("ping"))
 						event.Set("data", rt.ToValue(data))
-						s.invokeWsHook("onping", event)
+						invokeWsHook("onping", event)
 						return
 					})
 					return runError
@@ -1147,19 +1155,19 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("pong"))
 						event.Set("data", rt.ToValue(data))
-						s.invokeWsHook("onpong", event)
+						invokeWsHook("onpong", event)
 						return
 					})
 					return runError
 				})
 				c.SetCloseHandler(func(code int, reason string) error {
 					_, runError := p.worker.RunSync(func(rt *goja.Runtime) (result any, err error) {
-						s.setReadyState(WebSocketReadyStateClosing)
+						setReadyState(rt, WebSocketReadyStateClosing)
 						event := rt.NewObject()
 						event.Set("type", rt.ToValue("close"))
 						event.Set("code", rt.ToValue(int64(code)))
 						event.Set("reason", rt.ToValue(reason))
-						s.invokeWsHook("onclose", event)
+						invokeWsHook("onclose", event)
 						return
 					})
 					return runError
@@ -1170,7 +1178,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					conn.Store(c)
 
 					// Transition to open state
-					s.setReadyState(WebSocketReadyStateOpen)
+					setReadyState(rt, WebSocketReadyStateOpen)
 
 					// Flush messages sent before the connection is established
 					messagesMu.Lock()
@@ -1183,7 +1191,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					// Emit the open event
 					event := rt.NewObject()
 					event.Set("type", rt.ToValue("open"))
-					s.invokeWsHook("onopen", event)
+					invokeWsHook("onopen", event)
 					return
 				})
 				if runErr != nil {
@@ -1205,7 +1213,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							event := rt.NewObject()
 							event.Set("type", rt.ToValue("message"))
 							event.Set("data", rt.ToValue(string(data)))
-							s.invokeWsHook("onmessage", event)
+							invokeWsHook("onmessage", event)
 							return
 						}, nil)
 						if runErr != nil {
@@ -1217,7 +1225,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							event := rt.NewObject()
 							event.Set("type", rt.ToValue("message"))
 							event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
-							s.invokeWsHook("onmessage", event)
+							invokeWsHook("onmessage", event)
 							return
 						}, nil)
 						if runErr != nil {
@@ -1872,6 +1880,7 @@ func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestT
 	return
 }
 
+// requestGoToJs converts a Go Request to a JavaScript value.
 func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsRequest goja.Value, err error) {
 	// convert body raw data to js object
 	if request.Request.Body.Data != nil {

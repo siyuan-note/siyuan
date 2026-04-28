@@ -400,7 +400,7 @@ func (p *KernelPlugin) GetRpcMethodsInfo() (methods []*RpcMethodInfo) {
 // writeWebSocketMessage serializes a single write to conn using the per-connection mutex.
 // Returns nil immediately if conn is no longer tracked (already removed by Stop or UntrackSocket).
 // If Stop races and closes the connection after the tracking check, WriteMessage returns an error which is propagated to the caller.
-func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, messageType int, data []byte) (err error) {
+func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, messageType int, data []byte) (amount int, err error) {
 	if conn == nil {
 		err = fmt.Errorf("WebSocket connection is nil")
 		return
@@ -420,6 +420,11 @@ func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, messageType i
 	mu.Lock()
 	defer mu.Unlock()
 	err = conn.WriteMessage(messageType, data)
+	if err != nil {
+		return
+	}
+
+	amount = len(data)
 	return
 }
 
@@ -450,7 +455,7 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 		wg.Add(1)
 		go func(c *websocket.Conn) {
 			defer wg.Done()
-			if err := p.writeWebSocketMessage(c, websocket.TextMessage, data); err != nil {
+			if _, err := p.writeWebSocketMessage(c, websocket.TextMessage, data); err != nil {
 				logging.LogWarnf("[plugin:%s] RPC WebSocket notification write failed: %s", p.Name, err)
 			}
 		}(conn)

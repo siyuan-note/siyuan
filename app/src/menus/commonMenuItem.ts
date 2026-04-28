@@ -676,6 +676,7 @@ export const exportMd = (id: string) => {
                 submenu: [{
                     id: "exportReStructuredText",
                     label: "reStructuredText",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportReStructuredText", {
@@ -688,6 +689,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportAsciiDoc",
                     label: "AsciiDoc",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportAsciiDoc", {
@@ -700,6 +702,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportTextile",
                     label: "Textile",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportTextile", {
@@ -712,6 +715,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportOPML",
                     label: "OPML",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportOPML", {
@@ -724,6 +728,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportOrgMode",
                     label: "Org-Mode",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportOrgMode", {
@@ -736,6 +741,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportMediaWiki",
                     label: "MediaWiki",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportMediaWiki", {
@@ -748,6 +754,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportODT",
                     label: "ODT",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportODT", {
@@ -760,6 +767,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportRTF",
                     label: "RTF",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportRTF", {
@@ -772,6 +780,7 @@ export const exportMd = (id: string) => {
                 }, {
                     id: "exportEPUB",
                     label: "EPUB",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportEPUB", {
@@ -781,8 +790,7 @@ export const exportMd = (id: string) => {
                             openByMobile(response.data.zip);
                         });
                     }
-                },
-                ]
+                }]
             },
             /// #else
             {

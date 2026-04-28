@@ -1,5 +1,23 @@
 document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="position: absolute; width: 0; height: 0; overflow: hidden;">
 <defs>
+  <symbol id="iconPanelLeft" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>
+  </symbol>
+  <symbol id="iconPanelBottom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/>
+  </symbol>
+  <symbol id="iconPanelRight" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>
+  </symbol>  
+  <symbol id="iconPanelLeftDashed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 14v1"/><path d="M9 19v2"/><path d="M9 3v2"/><path d="M9 9v1"/>
+  </symbol>
+  <symbol id="iconPanelBottomDashed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M14 15h1"/><path d="M19 15h2"/><path d="M3 15h2"/><path d="M9 15h1"/>
+  </symbol>
+  <symbol id="iconPanelRightDashed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 14v1"/><path d="M15 19v2"/><path d="M15 3v2"/><path d="M15 9v1"/>
+  </symbol>    
   <symbol id="iconSelectAll" stroke-width="1.7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <path d="M5 3a2 2 0 0 0-2 2"/><path d="M19 3a2 2 0 0 1 2 2"/><path d="M21 19a2 2 0 0 1-2 2"/><path d="M5 21a2 2 0 0 1-2-2"/><path d="M9 3h1"/><path d="M9 21h1"/><path d="M14 3h1"/><path d="M14 21h1"/><path d="M3 9v1"/><path d="M21 9v1"/><path d="M3 14v1"/><path d="M21 14v1"/>
   </symbol>

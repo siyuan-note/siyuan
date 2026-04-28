@@ -1,4 +1,6 @@
 {
+  "switchToFloatingLayout": "Cambiar a diseño flotante",
+  "switchToFixedLayout": "Cambiar a diseño fijo",
   "hyperlink": "Hipervínculo",
   "copyDoc": "Copiar todo el texto",
   "position": "Posición",

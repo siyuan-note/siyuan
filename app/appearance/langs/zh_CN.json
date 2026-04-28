@@ -1,4 +1,6 @@
 {
+  "switchToFloatingLayout": "切换到浮动布局",
+  "switchToFixedLayout": "切换到固定布局",
   "hyperlink": "超链接",
   "copyDoc": "复制全文",
   "position": "位置",

@@ -50,7 +50,7 @@ const (
 
 	RequestTypeHTTP RequestType = "http"
 	RequestTypeWS   RequestType = "ws"
-	RequestTypeSSE  RequestType = "sse"
+	RequestTypeSSE  RequestType = "es"
 )
 
 type Request struct {

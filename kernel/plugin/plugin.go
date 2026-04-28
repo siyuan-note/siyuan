@@ -478,35 +478,29 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 	closed := make(chan struct{})
 	handlerDone := make(chan error, 1)
 
-	var once sync.Once
+	var closeOnce sync.Once
 	close := func() {
-		once.Do(func() { close(closed) })
+		closeOnce.Do(func() { close(closed) })
 	}
 
 	ctx := c.Request.Context()
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-		handlerObjValue, getObjErr := getJsContextValue(rt, []any{"siyuan", "server", string(scope), string(RequestTypeSSE)})
-		if getObjErr != nil {
-			err = getObjErr
+		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)
+		if getHandlerErr != nil {
+			err = getHandlerErr
 			return
 		}
 
-		handlerObj := handlerObjValue.ToObject(rt)
-		if handlerObj == nil {
-			err = fmt.Errorf("globalThis.siyuan.server[%s][%s] is not an object", scope, RequestTypeSSE)
+		jsRequest, convertErr := requestGoToJs(p, rt, request)
+		if convertErr != nil {
+			err = convertErr
 			return
 		}
 
-		handlerValue := handlerObj.Get("handler")
-		if goja.IsUndefined(handlerValue) || goja.IsNull(handlerValue) {
-			err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, RequestTypeSSE)
-			return
-		}
-
-		handler, ok := goja.AssertFunction(handlerValue)
-		if !ok {
-			err = fmt.Errorf("siyuan.server[%s][%s].handler is not a function", scope, RequestTypeSSE)
+		jsRequestObj := jsRequest.ToObject(rt)
+		if jsRequestObj == nil {
+			err = fmt.Errorf("failed to convert request value to object")
 			return
 		}
 
@@ -533,9 +527,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		})))
 
 		lo.Must0(ObjectSeal(rt, port))
-
-		jsRequest := rt.ToValue(request)
-		lo.Must0(jsRequest.ToObject(rt).Set("port", port))
+		lo.Must0(jsRequestObj.Set("port", port))
 
 		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
 			if result.Error != nil {
@@ -545,12 +537,11 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 			}
 		}, rt, true, handler, handlerObj, jsRequest)
 		return
-	}, func(_ *goja.Runtime, _ any, runErr error) {
-		if runErr != nil {
-			handlerDone <- runErr
+	}, func(_ *goja.Runtime, _ any, err error) {
+		if err != nil {
+			handlerDone <- err
 		}
 	})
-
 	if runErr != nil {
 		return runErr
 	}
@@ -845,54 +836,19 @@ func (p *KernelPlugin) invokeServerHandler(scope AccessScope, requestType Reques
 	done := make(chan *ServerHandlerResult, 1)
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-		// Get handler object: siyuan.server[scope][requestType]
-		handlerObjValue, getObjErr := getJsContextValue(rt, []any{"siyuan", "server", string(scope), string(requestType)})
-		if getObjErr != nil {
-			err = getObjErr
+
+		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeSSE)
+		if getHandlerErr != nil {
+			err = getHandlerErr
 			return
 		}
 
-		handlerObj := handlerObjValue.ToObject(rt)
-		if handlerObj == nil {
-			err = fmt.Errorf("globalThis.siyuan.server[%s][%s] is not an object", scope, requestType)
+		jsRequest, convertErr := requestGoToJs(p, rt, request)
+		if convertErr != nil {
+			err = convertErr
 			return
 		}
 
-		// Get handler: siyuan.server[scope][requestType].handler
-		handlerValue := handlerObj.Get("handler")
-		if goja.IsUndefined(handlerValue) || goja.IsNull(handlerValue) {
-			err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, requestType)
-			return
-		}
-		handler, ok := goja.AssertFunction(handlerValue)
-		if !ok {
-			err = fmt.Errorf("siyuan.server[%s][%s].handler is not a function", scope, requestType)
-			return
-		}
-
-		// convert body raw data to js object
-		if request.Request.Body.Data != nil {
-			request.Request.Body.Data, err = NewDataObject(p, rt, *request.Request.Body.Data.(*[]byte))
-			if err != nil {
-				return
-			}
-		}
-
-		// convert body form files data to js object
-		if request.Request.Body.Form != nil {
-			for _, fileList := range request.Request.Body.Form.File {
-				for _, file := range fileList {
-					if file.Data != nil {
-						file.Data, err = NewDataObject(p, rt, *file.Data.(*[]byte))
-						if err != nil {
-							return
-						}
-					}
-				}
-			}
-		}
-
-		jsRequest := rt.ToValue(request)
 		invokeFunction(func(rt *goja.Runtime, result *CallResult) {
 			responseObj := result.Value.ToObject(rt)
 			if responseObj == nil {

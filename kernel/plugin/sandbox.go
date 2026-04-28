@@ -1294,10 +1294,17 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ctx, cancel := context.WithCancel(context.Background())
 			sseID := p.TrackSSE(cancel)
 
+			var closeOnce sync.Once
+			close := func() {
+				closeOnce.Do(func() {
+					cancel()
+					p.UntrackSSE(sseID)
+				})
+			}
+
 			lo.Must0(esObj.Set("close", rt.ToValue(func(goja.FunctionCall) goja.Value {
 				setReadyState(EventSourceClosed)
-				cancel()
-				p.UntrackSSE(sseID)
+				close()
 				return goja.Undefined()
 			})))
 
@@ -1307,8 +1314,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						err = fmt.Errorf("panic during siyuan.client.event: %v", r)
 					}
 
-					cancel()
-					p.UntrackSSE(sseID)
+					close()
 
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 						if EventSourceState(readyState.Load()) != EventSourceClosed {
@@ -1832,5 +1838,63 @@ func jsValueToBytes(rt *goja.Runtime, value goja.Value) (data []byte, err error)
 		return
 	}
 	err = fmt.Errorf("js value cannot be exported to a valid Go value")
+	return
+}
+
+// getRequestHandler retrieves the handler function and its containing object for a given scope and request type from the plugin's JS context.
+func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestType) (handler goja.Callable, handlerObj *goja.Object, err error) {
+	// Get handler object: siyuan.server[scope][requestType]
+	handlerObjValue, getObjErr := getJsContextValue(rt, []any{"siyuan", "server", string(scope), string(requestType)})
+	if getObjErr != nil {
+		err = getObjErr
+		return
+	}
+
+	handlerObj = handlerObjValue.ToObject(rt)
+	if handlerObj == nil {
+		err = fmt.Errorf("globalThis.siyuan.server[%s][%s] is not an object", scope, requestType)
+		return
+	}
+
+	// Get handler: siyuan.server[scope][requestType].handler
+	handlerValue := handlerObj.Get("handler")
+	if goja.IsUndefined(handlerValue) || goja.IsNull(handlerValue) {
+		err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, requestType)
+		return
+	}
+
+	handler, ok := goja.AssertFunction(handlerValue)
+	if !ok {
+		err = fmt.Errorf("siyuan.server[%s][%s].handler is not a function", scope, requestType)
+		return
+	}
+
+	return
+}
+
+func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsRequest goja.Value, err error) {
+	// convert body raw data to js object
+	if request.Request.Body.Data != nil {
+		request.Request.Body.Data, err = NewDataObject(p, rt, *request.Request.Body.Data.(*[]byte))
+		if err != nil {
+			return
+		}
+	}
+
+	// convert body form files data to js object
+	if request.Request.Body.Form != nil {
+		for _, fileList := range request.Request.Body.Form.File {
+			for _, file := range fileList {
+				if file.Data != nil {
+					file.Data, err = NewDataObject(p, rt, *file.Data.(*[]byte))
+					if err != nil {
+						return
+					}
+				}
+			}
+		}
+	}
+
+	jsRequest = rt.ToValue(request)
 	return
 }

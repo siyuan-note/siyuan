@@ -469,8 +469,109 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 }
 
 func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	// TODO: Invoke siyuan.server[scope].es.handler
-	return
+	type sseEvent struct {
+		name    string
+		message any
+	}
+
+	events := make(chan sseEvent, 64)
+	closed := make(chan struct{})
+	handlerDone := make(chan error, 1)
+
+	var once sync.Once
+	close := func() {
+		once.Do(func() { close(closed) })
+	}
+
+	ctx := c.Request.Context()
+
+	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+		handlerObjValue, getObjErr := getJsContextValue(rt, []any{"siyuan", "server", string(scope), string(RequestTypeSSE)})
+		if getObjErr != nil {
+			err = getObjErr
+			return
+		}
+
+		handlerObj := handlerObjValue.ToObject(rt)
+		if handlerObj == nil {
+			err = fmt.Errorf("globalThis.siyuan.server[%s][%s] is not an object", scope, RequestTypeSSE)
+			return
+		}
+
+		handlerValue := handlerObj.Get("handler")
+		if goja.IsUndefined(handlerValue) || goja.IsNull(handlerValue) {
+			err = fmt.Errorf("siyuan.server[%s][%s].handler is not set", scope, RequestTypeSSE)
+			return
+		}
+
+		handler, ok := goja.AssertFunction(handlerValue)
+		if !ok {
+			err = fmt.Errorf("siyuan.server[%s][%s].handler is not a function", scope, RequestTypeSSE)
+			return
+		}
+
+		port := rt.NewObject()
+		lo.Must0(port.Set("onopen", goja.Null()))
+		lo.Must0(port.Set("onmessage", goja.Null()))
+		lo.Must0(port.Set("onclose", goja.Null()))
+		lo.Must0(port.Set("onerror", goja.Null()))
+
+		lo.Must0(port.Set("send", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			name := call.Argument(0).String()
+			message := call.Argument(1).Export()
+			select {
+			case events <- sseEvent{name, message}:
+			case <-closed:
+			case <-ctx.Done():
+			}
+			return goja.Undefined()
+		})))
+
+		lo.Must0(port.Set("close", rt.ToValue(func(call goja.FunctionCall) goja.Value {
+			close()
+			return goja.Undefined()
+		})))
+
+		lo.Must0(ObjectSeal(rt, port))
+
+		jsRequest := rt.ToValue(request)
+		lo.Must0(jsRequest.ToObject(rt).Set("port", port))
+
+		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
+			if result.Error != nil {
+				handlerDone <- result.Error
+			} else {
+				handlerDone <- nil
+			}
+		}, rt, true, handler, handlerObj, jsRequest)
+		return
+	}, func(_ *goja.Runtime, _ any, runErr error) {
+		if runErr != nil {
+			handlerDone <- runErr
+		}
+	})
+
+	if runErr != nil {
+		return runErr
+	}
+
+	for {
+		select {
+		case e := <-events:
+			c.SSEvent(e.name, e.message)
+			c.Writer.Flush()
+		case <-closed:
+			return
+		case <-ctx.Done():
+			return
+		case handlerErr := <-handlerDone:
+			if handlerErr != nil {
+				err = handlerErr
+				return
+			}
+			// Handler completed successfully; keep streaming until port.close() or client disconnect.
+		}
+	}
 }
 
 // dispatchRpcRequests dispatches multiple JSON-RPC requests concurrently.

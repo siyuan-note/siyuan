@@ -1258,21 +1258,21 @@ func injectServer(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	http := rt.NewObject()
 	ws := rt.NewObject()
-	sse := rt.NewObject()
+	es := rt.NewObject()
 
 	lo.Must0(http.Set("handler", goja.Null()))
 	lo.Must0(ws.Set("handler", goja.Null()))
-	lo.Must0(sse.Set("handler", goja.Null()))
+	lo.Must0(es.Set("handler", goja.Null()))
 
 	lo.Must0(ObjectSeal(rt, http))
 	lo.Must0(ObjectSeal(rt, ws))
-	lo.Must0(ObjectSeal(rt, sse))
+	lo.Must0(ObjectSeal(rt, es))
 
 	private := rt.NewObject()
 
 	lo.Must0(private.Set(string(RequestTypeHTTP), http))
 	lo.Must0(private.Set(string(RequestTypeWS), ws))
-	lo.Must0(private.Set(string(RequestTypeSSE), sse))
+	lo.Must0(private.Set(string(RequestTypeSSE), es))
 
 	lo.Must0(ObjectFreeze(rt, private))
 

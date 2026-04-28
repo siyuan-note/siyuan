@@ -534,6 +534,9 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Any("/api/network/echo/*path", model.CheckAuth, model.CheckAdminRole, echo)
 	ginServer.Handle("POST", "/api/network/forwardProxy", model.CheckAuth, model.CheckAdminRole, forwardProxy)
 
+	ginServer.Handle("GET", "/ws/network/proxy", model.CheckAuth, model.CheckAdminRole, wsProxy)
+	ginServer.Handle("GET", "/es/network/proxy", model.CheckAuth, model.CheckAdminRole, esProxy)
+
 	ginServer.Handle("GET", "/ws/broadcast", model.CheckAuth, model.CheckAdminRole, broadcast)
 	ginServer.Handle("GET", "/es/broadcast/subscribe", model.CheckAuth, model.CheckAdminRole, broadcastSubscribe)
 

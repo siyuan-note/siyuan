@@ -20,6 +20,7 @@ import (
 	"encoding/base32"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -32,6 +33,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -273,7 +275,7 @@ func forwardProxy(c *gin.Context) {
 		return
 	}
 
-	elapsed := time.Now().Sub(started)
+	elapsed := time.Since(started)
 
 	responseEncoding := "text"
 	if responseEncodingArg := arg["responseEncoding"]; nil != responseEncodingArg {
@@ -353,4 +355,207 @@ func getSafeClient(timeout time.Duration) *req.Client {
 	client.SetDial(dialer.DialContext)
 	client.SetRedirectPolicy(req.MaxRedirectPolicy(3))
 	return client
+}
+
+// parseForwardProxyParams decodes the `u` and `h` query parameters.
+//
+// Query params:
+//   - `u`: RawURLEncoding base64 of the target URL string.
+//   - `h`: RawURLEncoding base64 of a JSON object map[string][]string.
+func parseForwardProxyParams(c *gin.Context) (parsedURL *url.URL, headers *http.Header, err error) {
+	uParam := c.Query("u")
+	if uParam == "" {
+		err = fmt.Errorf("missing query param [u]")
+		return
+	}
+	uBytes, decErr := base64.RawURLEncoding.DecodeString(uParam)
+	if decErr != nil {
+		err = fmt.Errorf("decode [u] failed: %s", decErr.Error())
+		return
+	}
+	parsedURL, err = url.ParseRequestURI(string(uBytes))
+	if err != nil {
+		err = fmt.Errorf("parse [u] failed: %s", err.Error())
+		return
+	}
+
+	h := http.Header{}
+	headers = &h
+	hParam := c.Query("h")
+	if hParam == "" {
+		return
+	}
+	hBytes, decErr := base64.RawURLEncoding.DecodeString(hParam)
+	if decErr != nil {
+		err = fmt.Errorf("decode [h] failed: %s", decErr.Error())
+		return
+	}
+	var record map[string][]string
+	if jsonErr := json.Unmarshal(hBytes, &record); jsonErr != nil {
+		err = fmt.Errorf("parse [h] failed: %s", jsonErr.Error())
+		return
+	}
+	for k, vs := range record {
+		for _, v := range vs {
+			h.Add(k, v)
+		}
+	}
+	return
+}
+
+// ssrfSafeDialer returns a net.Dialer whose Control hook blocks private IPs.
+func ssrfSafeDialer(connectTimeout time.Duration) *net.Dialer {
+	return &net.Dialer{
+		Timeout: connectTimeout,
+		Control: func(network, address string, _ syscall.RawConn) error {
+			host, _, err := net.SplitHostPort(address)
+			if err != nil {
+				return err
+			}
+			if ip := net.ParseIP(host); ip != nil && isPrivateIP(ip) {
+				return fmt.Errorf("ip address [%s] is prohibited", host)
+			}
+			return nil
+		},
+	}
+}
+
+// wsProxy proxies a WebSocket connection to a remote WebSocket endpoint.
+//
+// Query params:
+//   - u: RawURLEncoding base64 of the target ws/wss URL
+//   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as handshake headers
+func wsProxy(c *gin.Context) {
+	targetURL, targetHeaders, err := parseForwardProxyParams(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	if targetURL.Scheme != "ws" && targetURL.Scheme != "wss" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "only ws/wss is allowed"})
+		return
+	}
+
+	wsDialer := &websocket.Dialer{
+		NetDialContext:   ssrfSafeDialer(30 * time.Second).DialContext,
+		HandshakeTimeout: 30 * time.Second,
+	}
+
+	targetConn, _, dialErr := wsDialer.DialContext(c.Request.Context(), targetURL.String(), *targetHeaders)
+	if dialErr != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "dial target failed: " + dialErr.Error()})
+		return
+	}
+	defer targetConn.Close()
+
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	clientConn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if upgradeErr != nil {
+		logging.LogErrorf("ws forward proxy upgrade failed: %s", upgradeErr.Error())
+		return
+	}
+	defer clientConn.Close()
+
+	errChan := make(chan error, 2)
+	go func() {
+		for {
+			msgType, msg, readErr := targetConn.ReadMessage()
+			if readErr != nil {
+				errChan <- readErr
+				return
+			}
+			if writeErr := clientConn.WriteMessage(msgType, msg); writeErr != nil {
+				errChan <- writeErr
+				return
+			}
+		}
+	}()
+	go func() {
+		for {
+			msgType, msg, readErr := clientConn.ReadMessage()
+			if readErr != nil {
+				errChan <- readErr
+				return
+			}
+			if writeErr := targetConn.WriteMessage(msgType, msg); writeErr != nil {
+				errChan <- writeErr
+				return
+			}
+		}
+	}()
+	<-errChan
+}
+
+// esProxy proxies an EventSource (SSE) stream from a remote HTTP endpoint.
+//
+// Query params:
+//   - u: RawURLEncoding base64 of the target http/https URL
+//   - h: RawURLEncoding base64 of JSON map[string][]string forwarded as request headers
+func esProxy(c *gin.Context) {
+	targetURL, targetHeaders, err := parseForwardProxyParams(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": err.Error()})
+		return
+	}
+
+	if targetURL.Scheme != "http" && targetURL.Scheme != "https" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "only http/https is allowed"})
+		return
+	}
+
+	transport := &http.Transport{
+		DialContext: ssrfSafeDialer(30 * time.Second).DialContext,
+	}
+	httpClient := &http.Client{Transport: transport}
+
+	proxyReq, reqErr := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, targetURL.String(), nil)
+	if reqErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "create request failed: " + reqErr.Error()})
+		return
+	}
+	for k, vs := range *targetHeaders {
+		for _, v := range vs {
+			proxyReq.Header.Add(k, v)
+		}
+	}
+	if proxyReq.Header.Get("Accept") == "" {
+		proxyReq.Header.Set("Accept", "text/event-stream")
+	}
+
+	resp, respErr := httpClient.Do(proxyReq)
+	if respErr != nil {
+		c.JSON(http.StatusBadGateway, gin.H{"code": -1, "msg": "connect target failed: " + respErr.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	for k, vs := range resp.Header {
+		for _, v := range vs {
+			c.Writer.Header().Add(k, v)
+		}
+	}
+	c.Writer.WriteHeader(resp.StatusCode)
+
+	clientGone := c.Writer.CloseNotify()
+	buf := make([]byte, 4096)
+	for {
+		select {
+		case <-clientGone:
+			return
+		default:
+			n, readErr := resp.Body.Read(buf)
+			if n > 0 {
+				if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
+					return
+				}
+				c.Writer.Flush()
+			}
+			if readErr != nil {
+				return
+			}
+		}
+	}
 }

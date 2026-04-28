@@ -848,7 +848,7 @@ export class Dock {
             if (typeof tabIndex === "undefined" && !TYPES.includes(item.type)) {
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/7976 历史兼容 3.6.5->3.7.0
+            // https://github.com/siyuan-note/siyuan/issues/7976 历史兼容 3.6.5->3.6.6
             if (item.type === "outline") {
                 item.icon = "iconOutline";
             } else if (item.type === "tags") {

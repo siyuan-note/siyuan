@@ -604,11 +604,10 @@ func esProxy(c *gin.Context) {
 	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
 
-	clientGone := c.Writer.CloseNotify()
 	buf := make([]byte, 4096)
 	for {
 		select {
-		case <-clientGone:
+		case <-c.Request.Context().Done():
 			return
 		default:
 			n, readErr := resp.Body.Read(buf)

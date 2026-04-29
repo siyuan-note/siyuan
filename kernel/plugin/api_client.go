@@ -233,13 +233,17 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			wsObj := rt.NewObject()
 
-			invokeWsHook := func(name string, args ...goja.Value) {
+			invokeHook := func(_ *goja.Runtime, name string, args ...goja.Value) {
 				hook := wsObj.Get(name)
 				if fn, ok := goja.AssertFunction(hook); ok {
 					if _, callErr := fn(wsObj, args...); callErr != nil {
 						logging.LogErrorf("[plugin:%s] ws hook %q: %v", p.Name, name, callErr)
 					}
 				}
+			}
+
+			setProtocol := func(rt *goja.Runtime, protocol string) {
+				wsObj.Set("protocol", rt.ToValue(protocol))
 			}
 
 			setReadyState := func(rt *goja.Runtime, state WebSocketState) {
@@ -252,88 +256,21 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				wsObj.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load()))
 			}
 
-			h := &gwsEventHandler{}
+			h := &WsEventHandler{}
 
-			h.onOpen = func(conn *gws.Conn) {
-				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-					wsObj.Set("protocol", conn.SubProtocol())
-					setReadyState(rt, WebSocketReadyStateOpen)
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("open"))
-					invokeWsHook("onopen", event)
-					return
-				}, nil)
+			manager := &WsManager{
+				BufferedAmount: &bufferedAmount,
+
+				InvokeHook:    invokeHook,
+				SetProtocol:   setProtocol,
+				SetReadyState: setReadyState,
 			}
 
-			h.onClose = func(conn *gws.Conn, closeErr error) {
-				gwsConn.Store(nil)
-				p.UntrackGwsSocket(conn)
-				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-					if closeErr != nil {
-						errEvent := rt.NewObject()
-						errEvent.Set("type", rt.ToValue("error"))
-						errEvent.Set("error", rt.NewGoError(closeErr))
-						invokeWsHook("onerror", errEvent)
-					}
-
-					if closeError, ok := closeErr.(*gws.CloseError); ok {
-						setReadyState(rt, WebSocketReadyStateClosing)
-						closeEvent := rt.NewObject()
-						closeEvent.Set("type", rt.ToValue("close"))
-						closeEvent.Set("code", rt.ToValue(closeError.Code))
-						closeEvent.Set("reason", rt.ToValue(string(closeError.Reason)))
-						closeEvent.Set("wasClean", rt.ToValue(bufferedAmount.Load() == 0))
-						invokeWsHook("onclose", closeEvent)
-					}
-					setReadyState(rt, WebSocketReadyStateClosed)
-					return
-				}, nil)
-			}
-
-			h.onPing = func(conn *gws.Conn, payload []byte) {
-				p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("ping"))
-					event.Set("data", rt.ToValue(string(payload)))
-					invokeWsHook("onping", event)
-					return
-				})
-			}
-
-			h.onPong = func(conn *gws.Conn, payload []byte) {
-				p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("pong"))
-					event.Set("data", rt.ToValue(string(payload)))
-					invokeWsHook("onpong", event)
-					return
-				})
-			}
-
-			h.onMessage = func(conn *gws.Conn, message *gws.Message) {
-				defer message.Close()
-				opcode := message.Opcode
-				data := make([]byte, message.Data.Len())
-				copy(data, message.Bytes()) // message.Bytes() points into gws-managed memory reclaimed by message.Close() (deferred above)
-				runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-					event := rt.NewObject()
-					switch opcode {
-					case gws.OpcodeText:
-						event.Set("type", rt.ToValue("text"))
-						event.Set("data", rt.ToValue(string(data)))
-					case gws.OpcodeBinary:
-						event.Set("type", rt.ToValue("binary"))
-						event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
-					default:
-						return
-					}
-					invokeWsHook("onmessage", event)
-					return
-				}, nil)
-				if runErr != nil {
-					logging.LogErrorf("[plugin:%s] invoke ws.onmessage handler error: %v", p.Name, runErr)
-				}
-			}
+			h.BindOnOpen(manager)
+			h.BindOnClose(manager)
+			h.BindOnPing(manager)
+			h.BindOnPong(manager)
+			h.BindOnMessage(manager)
 
 			var openOnce sync.Once
 
@@ -353,7 +290,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 									event := rt.NewObject()
 									event.Set("type", rt.ToValue("error"))
 									event.Set("error", rt.NewGoError(dialErr))
-									invokeWsHook("onerror", event)
+									invokeHook(rt, "onerror", event)
 									return
 								}, nil)
 								p.worker.Run(func(rt *goja.Runtime) (_ any, dialErr2 error) {
@@ -367,7 +304,6 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 								return
 							}
 							gwsConn.Store(conn)
-							p.TrackGwsSocket(conn, false)
 							// Resolve the open promise before starting ReadLoop so the caller
 							// can await open() and then rely on onopen for additional setup.
 							p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
@@ -628,12 +564,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			ctx, cancel := context.WithCancel(context.Background())
 
-			sseID := p.TrackSSE(cancel)
 			var closeOnce sync.Once
 			doClose := func() {
 				closeOnce.Do(func() {
 					cancel()
-					p.UntrackSSE(sseID)
 				})
 			}
 

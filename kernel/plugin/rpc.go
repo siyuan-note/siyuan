@@ -299,7 +299,7 @@ func HandleRpcWebSocket(c *gin.Context) {
 
 	connDone := make(chan struct{})
 
-	h := &gwsEventHandler{}
+	h := &WsEventHandler{}
 
 	h.onClose = func(socket *gws.Conn, err error) {
 		close(connDone)
@@ -363,8 +363,8 @@ func HandleRpcWebSocket(c *gin.Context) {
 		return
 	}
 
-	p.TrackGwsSocket(socket, true)
-	defer p.UntrackGwsSocket(socket)
+	p.TrackRpcSocket(socket)
+	defer p.UntrackRpcSocket(socket)
 
 	go socket.ReadLoop()
 	<-connDone

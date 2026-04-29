@@ -438,9 +438,14 @@ func isJsObjectArray(jsObject *goja.Object) bool {
 	}
 }
 
+// isJsValueNotUndefined checks if a goja.Value is not nil and not undefined.
+func isJsValueNotUndefined(jsValue goja.Value) bool {
+	return jsValue != nil && !goja.IsUndefined(jsValue)
+}
+
 // isJsValueNotNull checks if a goja.Value is not nil, undefined or null.
 func isJsValueNotNull(jsValue goja.Value) bool {
-	return jsValue != nil && !goja.IsUndefined(jsValue) && !goja.IsNull(jsValue)
+	return isJsValueNotUndefined(jsValue) && !goja.IsNull(jsValue)
 }
 
 // jsValueToBytes attempts to convert a goja.Value to a byte slice, supporting string, Buffer, ArrayBuffer, etc.

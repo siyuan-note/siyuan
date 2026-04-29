@@ -19,6 +19,7 @@ package plugin
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -31,7 +32,7 @@ import (
 	"github.com/dop251/goja_nodejs/eventloop"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 	"github.com/samber/lo"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -51,10 +52,47 @@ type RpcMethodInfo struct {
 	Descriptions []string `json:"descriptions"`
 }
 
-type WebSocketMessage struct {
-	t    int
-	d    []byte
-	done chan FunctionResult[int]
+// gwsEventHandler implements gws.Event with settable callback fields so closures
+// capturing the JS runtime context can be assigned after the upgrader/dialer is created.
+type gwsEventHandler struct {
+	gws.BuiltinEventHandler
+	onOpen    func(*gws.Conn)
+	onClose   func(*gws.Conn, error)
+	onPing    func(*gws.Conn, []byte)
+	onPong    func(*gws.Conn, []byte)
+	onMessage func(*gws.Conn, *gws.Message)
+}
+
+func (h *gwsEventHandler) OnOpen(socket *gws.Conn) {
+	if h.onOpen != nil {
+		h.onOpen(socket)
+	}
+}
+
+func (h *gwsEventHandler) OnClose(socket *gws.Conn, err error) {
+	if h.onClose != nil {
+		h.onClose(socket, err)
+	}
+}
+
+func (h *gwsEventHandler) OnPing(socket *gws.Conn, payload []byte) {
+	if h.onPing != nil {
+		h.onPing(socket, payload)
+	}
+}
+
+func (h *gwsEventHandler) OnPong(socket *gws.Conn, payload []byte) {
+	if h.onPong != nil {
+		h.onPong(socket, payload)
+	}
+}
+
+func (h *gwsEventHandler) OnMessage(socket *gws.Conn, message *gws.Message) {
+	if h.onMessage != nil {
+		h.onMessage(socket, message)
+	} else {
+		message.Close()
+	}
 }
 
 type R map[string]any
@@ -111,9 +149,8 @@ type KernelPlugin struct {
 
 	rpcMethods sync.Map // string -> *RpcMethod, registered JSON-RPC methods
 
-	socketsMu sync.RWMutex                    // separate mutex for sockets map (must not nest inside mu)
-	sockets   map[*websocket.Conn]bool        // tracked loopback WebSocket connections (true: server, false: client)
-	socketMus map[*websocket.Conn]*sync.Mutex // per-connection write mutex
+	socketsMu  sync.RWMutex       // mutex for gwsSockets map
+	gwsSockets map[*gws.Conn]bool // tracked gws WebSocket connections (true: RPC server, false: regular)
 
 	sseCancelsMu sync.Mutex
 	sseCancels   map[uint64]context.CancelFunc
@@ -134,8 +171,7 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		bus:     EventBus.New(),
 		context: context.Background(),
 
-		sockets:   make(map[*websocket.Conn]bool),
-		socketMus: make(map[*websocket.Conn]*sync.Mutex),
+		gwsSockets: make(map[*gws.Conn]bool),
 
 		sseCancels: make(map[uint64]context.CancelFunc),
 	}
@@ -280,10 +316,9 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	p.rpcMethods.Clear()
 
 	p.socketsMu.Lock()
-	for c := range p.sockets {
-		c.Close()
-		delete(p.sockets, c)
-		delete(p.socketMus, c)
+	for c := range p.gwsSockets {
+		c.NetConn().Close()
+		delete(p.gwsSockets, c)
 	}
 	p.socketsMu.Unlock()
 
@@ -404,37 +439,6 @@ func (p *KernelPlugin) GetRpcMethodsInfo() (methods []*RpcMethodInfo) {
 	return
 }
 
-// writeWebSocketMessage serializes a single write to conn using the per-connection mutex.
-// Returns nil immediately if conn is no longer tracked (already removed by Stop or UntrackSocket).
-// If Stop races and closes the connection after the tracking check, WriteMessage returns an error which is propagated to the caller.
-func (p *KernelPlugin) writeWebSocketMessage(conn *websocket.Conn, messageType int, data []byte) (amount int, err error) {
-	if conn == nil {
-		err = fmt.Errorf("WebSocket connection is nil")
-		return
-	}
-
-	p.socketsMu.RLock()
-	mu, ok := p.socketMus[conn]
-	p.socketsMu.RUnlock()
-	if !ok {
-		err = fmt.Errorf("WebSocket connection not tracked")
-		return
-	}
-
-	// Between RUnlock above and mu.Lock below, Stop() may close the connection.
-	// The subsequent WriteMessage will return an error (use of closed connection),
-	// which callers log and discard.
-	mu.Lock()
-	defer mu.Unlock()
-	err = conn.WriteMessage(messageType, data)
-	if err != nil {
-		return
-	}
-
-	amount = len(data)
-	return
-}
-
 // BroadcastNotification sends a JSON-RPC 2.0 notification to all inbound RPC WebSocket clients.
 func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional[any]) {
 	notification := JsonRpcRequest{
@@ -449,23 +453,26 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 	}
 
 	p.socketsMu.RLock()
-	conns := make([]*websocket.Conn, 0, len(p.sockets))
-	for conn, isRpcConnection := range p.sockets {
+	conns := make([]*gws.Conn, 0, len(p.gwsSockets))
+	for conn, isRpcConnection := range p.gwsSockets {
 		if isRpcConnection {
 			conns = append(conns, conn)
 		}
 	}
 	p.socketsMu.RUnlock()
 
-	wg := sync.WaitGroup{}
+	var wg sync.WaitGroup
 	for _, conn := range conns {
 		wg.Add(1)
-		go func(c *websocket.Conn) {
+		c := conn
+		payload := make([]byte, len(data))
+		copy(payload, data)
+		c.WriteAsync(gws.OpcodeText, payload, func(writeErr error) {
 			defer wg.Done()
-			if _, err := p.writeWebSocketMessage(c, websocket.TextMessage, data); err != nil {
-				logging.LogWarnf("[plugin:%s] RPC WebSocket notification write failed: %s", p.Name, err)
+			if writeErr != nil {
+				logging.LogWarnf("[plugin:%s] RPC WebSocket notification write failed: %s", p.Name, writeErr)
 			}
-		}(conn)
+		})
 	}
 	wg.Wait()
 }
@@ -636,28 +643,24 @@ func (p *KernelPlugin) callRpcMethod(method string, params any) (rpcResult any, 
 	return
 }
 
-// TrackSocket adds a WebSocket connection to the plugin's tracked list.
-func (p *KernelPlugin) TrackSocket(conn *websocket.Conn, isRpcConnection bool) {
+// TrackGwsSocket adds a gws WebSocket connection to the plugin's tracked list.
+func (p *KernelPlugin) TrackGwsSocket(conn *gws.Conn, isRpcConnection bool) {
 	if conn == nil {
 		return
 	}
-
 	p.socketsMu.Lock()
 	defer p.socketsMu.Unlock()
-	p.sockets[conn] = isRpcConnection
-	p.socketMus[conn] = &sync.Mutex{}
+	p.gwsSockets[conn] = isRpcConnection
 }
 
-// UntrackSocket removes a WebSocket connection from the plugin's tracked list.
-func (p *KernelPlugin) UntrackSocket(conn *websocket.Conn) {
+// UntrackGwsSocket removes a gws WebSocket connection from the plugin's tracked list.
+func (p *KernelPlugin) UntrackGwsSocket(conn *gws.Conn) {
 	if conn == nil {
 		return
 	}
-
 	p.socketsMu.Lock()
 	defer p.socketsMu.Unlock()
-	delete(p.sockets, conn)
-	delete(p.socketMus, conn)
+	delete(p.gwsSockets, conn)
 }
 
 // TrackSSE registers an SSE cancel function and returns its ID for later removal.
@@ -826,34 +829,31 @@ func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (r
 }
 
 func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
-	}
+	h := &gwsEventHandler{}
+	upgrader := gws.NewUpgrader(h, &gws.ServerOption{
+		Authorize: func(r *http.Request, _ gws.SessionStorage) bool { return true },
+	})
 
-	conn, upgradeErr := upgrader.Upgrade(c.Writer, c.Request, nil)
+	socket, upgradeErr := upgrader.Upgrade(c.Writer, c.Request)
 	if upgradeErr != nil {
 		return upgradeErr
 	}
 
-	p.TrackSocket(conn, false)
+	p.TrackGwsSocket(socket, false)
 	var closeOnce sync.Once
 	doClose := func() {
 		closeOnce.Do(func() {
-			p.UntrackSocket(conn)
-			conn.Close()
+			p.UntrackGwsSocket(socket)
+			socket.NetConn().Close()
 		})
 	}
 	defer doClose()
 
 	var readyState atomic.Int64
 	var bufferedAmount atomic.Int64
-
 	readyState.Store(int64(WebSocketReadyStateConnecting))
-	bufferedAmount.Store(0)
 
-	messages := make(chan *WebSocketMessage, 256) // buffered channel for messages to send to client
-	senderDone := make(chan struct{})             // used to stop message sender goroutine
-	handlerDone := make(chan error, 1)            // used to receive handler error or close signal
+	connDone := make(chan error, 1)
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 		handler, handlerObj, getHandlerErr := getRequestHandler(rt, scope, RequestTypeWS)
@@ -895,19 +895,109 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			port.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load()))
 		}
 
+		// Wire up gws event callbacks capturing the JS runtime context.
+		h.onOpen = func(conn *gws.Conn) {
+			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+				setPortReadyState(rt, WebSocketReadyStateOpen)
+				event := rt.NewObject()
+				event.Set("type", rt.ToValue("open"))
+				invokePortHook("onopen", event)
+				return
+			}, nil)
+		}
+
+		h.onClose = func(conn *gws.Conn, closeErr error) {
+			doClose()
+			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+				var ce *gws.CloseError
+				if closeErr != nil && !errors.As(closeErr, &ce) {
+					errEvent := rt.NewObject()
+					errEvent.Set("type", rt.ToValue("error"))
+					errEvent.Set("error", rt.NewGoError(closeErr))
+					invokePortHook("onerror", errEvent)
+				}
+				if ce != nil {
+					setPortReadyState(rt, WebSocketReadyStateClosing)
+					closeEvent := rt.NewObject()
+					closeEvent.Set("type", rt.ToValue("close"))
+					closeEvent.Set("code", rt.ToValue(int64(ce.Code)))
+					closeEvent.Set("reason", rt.ToValue(string(ce.Reason)))
+					closeEvent.Set("wasClean", rt.ToValue(ce.Code == 1000 || ce.Code == 1001))
+					invokePortHook("onclose", closeEvent)
+				}
+				setPortReadyState(rt, WebSocketReadyStateClosed)
+				return
+			}, nil)
+			var retErr error
+			if closeErr != nil {
+				var ce *gws.CloseError
+				if !errors.As(closeErr, &ce) || (ce.Code != 1000 && ce.Code != 1001) {
+					retErr = closeErr
+				}
+			}
+			connDone <- retErr
+		}
+
+		h.onPing = func(conn *gws.Conn, payload []byte) {
+			p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
+				event := rt.NewObject()
+				event.Set("type", rt.ToValue("ping"))
+				event.Set("data", rt.ToValue(string(payload)))
+				invokePortHook("onping", event)
+				return
+			})
+		}
+
+		h.onPong = func(conn *gws.Conn, payload []byte) {
+			p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
+				event := rt.NewObject()
+				event.Set("type", rt.ToValue("pong"))
+				event.Set("data", rt.ToValue(string(payload)))
+				invokePortHook("onpong", event)
+				return
+			})
+		}
+
+		h.onMessage = func(conn *gws.Conn, message *gws.Message) {
+			defer message.Close()
+			opcode := message.Opcode
+			data := make([]byte, message.Data.Len())
+			copy(data, message.Bytes())
+			runMsgErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+				event := rt.NewObject()
+				switch opcode {
+				case gws.OpcodeText:
+					event.Set("type", rt.ToValue("text"))
+					event.Set("data", rt.ToValue(string(data)))
+				case gws.OpcodeBinary:
+					event.Set("type", rt.ToValue("binary"))
+					event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
+				default:
+					return
+				}
+				invokePortHook("onmessage", event)
+				return
+			}, nil)
+			if runMsgErr != nil {
+				doClose()
+			}
+		}
+
 		port_send := rt.ToValue(func(sendCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 			sendPromise, sendResolve, sendReject := rt.NewPromise()
 
 			sendRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 				var messageData []byte
-				var messageType int
+				var opcode gws.Opcode
 				if len(sendCall.Arguments) >= 1 {
 					data := sendCall.Argument(0)
 					if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
-						messageType = websocket.BinaryMessage
-						messageData = arrayBuffer.Bytes()
+						opcode = gws.OpcodeBinary
+						b := arrayBuffer.Bytes()
+						messageData = make([]byte, len(b))
+						copy(messageData, b)
 					} else {
-						messageType = websocket.TextMessage
+						opcode = gws.OpcodeText
 						messageData = []byte(data.String())
 					}
 				}
@@ -919,38 +1009,26 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				}
 
 				updatePortBufferedAmount(rt, len(messageData))
-				done := make(chan FunctionResult[int], 1)
-
-				select {
-				case messages <- &WebSocketMessage{t: messageType, d: messageData, done: done}:
-					go func() {
-						select {
-						case result := <-done:
-							p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-								if result.Error == nil {
-									updatePortBufferedAmount(rt, -result.Value)
-								} else {
-									err = result.Error
-								}
-								return
-							}, func(rt *goja.Runtime, result any, err error) {
-								if lo.IsNil(err) {
-									if resolveErr := sendResolve(result); resolveErr != nil {
-										logging.LogErrorf("[plugin:%s] ws server port.send resolve: %v", p.Name, resolveErr)
-									}
-								} else {
-									if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
-										logging.LogErrorf("[plugin:%s] ws server port.send reject: %v", p.Name, rejectErr)
-									}
-								}
-							})
-						case <-senderDone:
+				socket.WriteAsync(opcode, messageData, func(writeErr error) {
+					p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+						if writeErr == nil {
+							updatePortBufferedAmount(rt, -len(messageData))
+						} else {
+							err = writeErr
 						}
-					}()
-				default:
-					updatePortBufferedAmount(rt, -len(messageData))
-					err = fmt.Errorf("WebSocket send buffer full")
-				}
+						return
+					}, func(rt *goja.Runtime, result any, err error) {
+						if lo.IsNil(err) {
+							if resolveErr := sendResolve(result); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] ws server port.send resolve: %v", p.Name, resolveErr)
+							}
+						} else {
+							if rejectErr := sendReject(rt.NewGoError(err)); rejectErr != nil {
+								logging.LogErrorf("[plugin:%s] ws server port.send reject: %v", p.Name, rejectErr)
+							}
+						}
+					})
+				})
 				return
 			}, func(rt *goja.Runtime, _ any, err error) {
 				if !lo.IsNil(err) {
@@ -974,7 +1052,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				if len(pingCall.Arguments) > 0 && !goja.IsUndefined(pingCall.Argument(0)) {
 					pingData = pingCall.Argument(0).String()
 				}
-				_, err = p.writeWebSocketMessage(conn, websocket.PingMessage, []byte(pingData))
+				err = socket.WritePing([]byte(pingData))
 				return
 			}, func(rt *goja.Runtime, result any, err error) {
 				if lo.IsNil(err) {
@@ -1002,7 +1080,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				if len(pongCall.Arguments) > 0 && !goja.IsUndefined(pongCall.Argument(0)) {
 					pongData = pongCall.Argument(0).String()
 				}
-				_, err = p.writeWebSocketMessage(conn, websocket.PongMessage, []byte(pongData))
+				err = socket.WritePong([]byte(pongData))
 				return
 			}, func(rt *goja.Runtime, result any, err error) {
 				if lo.IsNil(err) {
@@ -1026,15 +1104,16 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			closePromise, closeResolve, closeReject := rt.NewPromise()
 
 			closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-				code := websocket.CloseNormalClosure
-				var reason string
-				if len(closeCall.Arguments) > 0 && !goja.IsUndefined(closeCall.Argument(0)) {
-					code = int(closeCall.Argument(0).ToInteger())
+				code := uint16(1000)
+				var reason []byte
+				if !isJsValueNotNull(closeCall.Argument(0)) {
+					code = uint16(closeCall.Argument(0).ToInteger())
 				}
-				if len(closeCall.Arguments) > 1 && !goja.IsUndefined(closeCall.Argument(1)) {
-					reason = closeCall.Argument(1).String()
+				if !isJsValueNotNull(closeCall.Argument(1)) {
+					reason = []byte(closeCall.Argument(1).String())
 				}
-				_, err = p.writeWebSocketMessage(conn, websocket.CloseMessage, websocket.FormatCloseMessage(code, reason))
+				setPortReadyState(rt, WebSocketReadyStateClosing)
+				err = socket.WriteClose(code, reason)
 				return
 			}, func(rt *goja.Runtime, result any, err error) {
 				if lo.IsNil(err) {
@@ -1054,6 +1133,33 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			return rt.ToValue(closePromise)
 		})
 
+		var openOnce sync.Once
+		startReadLoop := func() { go socket.ReadLoop() }
+
+		port_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			openPromise, openResolve, openReject := rt.NewPromise()
+
+			openRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+				openOnce.Do(startReadLoop)
+				return
+			}, func(rt *goja.Runtime, _ any, err error) {
+				if lo.IsNil(err) {
+					if resolveErr := openResolve(nil); resolveErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.open resolve: %v", p.Name, resolveErr)
+					}
+				} else {
+					if rejectErr := openReject(rt.NewGoError(err)); rejectErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.open reject: %v", p.Name, rejectErr)
+					}
+				}
+			})
+			if openRunErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server port.open worker run: %v", p.Name, openRunErr)
+			}
+
+			return rt.ToValue(openPromise)
+		})
+
 		lo.Must0(port.Set("binaryType", rt.ToValue("arraybuffer")))
 		lo.Must0(port.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load())))
 		lo.Must0(port.Set("readyState", rt.ToValue(readyState.Load())))
@@ -1069,134 +1175,26 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		lo.Must0(port.Set("ping", port_ping))
 		lo.Must0(port.Set("pong", port_pong))
 		lo.Must0(port.Set("close", port_close))
+		lo.Must0(port.Set("open", port_open))
 
 		lo.Must0(ObjectSeal(rt, port))
-
 		lo.Must0(jsRequestObj.Set("port", port))
 
 		invokeFunction(func(_ *goja.Runtime, result *CallResult) {
 			if result.Error != nil {
-				handlerDone <- result.Error
-			} else {
-				// Emit onopen after giving the handler a chance to register the callback.
-				event := rt.NewObject()
-				event.Set("type", rt.ToValue("open"))
-				invokePortHook("onopen", event)
-			}
-		}, rt, true, handler, handlerObj, jsRequest)
-
-		// Sender goroutine: drains messagesCh and writes to the connection.
-		go func() {
-			for {
-				select {
-				case m := <-messages:
-					amount, writeErr := p.writeWebSocketMessage(conn, m.t, m.d)
-					m.done <- FunctionResult[int]{Value: amount, Error: writeErr}
-				case <-senderDone:
-					return
-				}
-			}
-		}()
-
-		// Reader goroutine: reads incoming frames and dispatches events to JS.
-		go func() (err error) {
-			defer func() {
-				close(senderDone)
-				if r := recover(); r != nil {
-					err = fmt.Errorf("panic during ws server handler: %v", r)
-				}
 				doClose()
-				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-					if err != nil {
-						errEvent := rt.NewObject()
-						errEvent.Set("type", rt.ToValue("error"))
-						errEvent.Set("error", rt.NewGoError(err))
-						invokePortHook("onerror", errEvent)
-					}
-					setPortReadyState(rt, WebSocketReadyStateClosed)
-					return
-				}, nil)
-				handlerDone <- err
-			}()
-
-			conn.SetPingHandler(func(data string) error {
-				_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("ping"))
-					event.Set("data", rt.ToValue(data))
-					invokePortHook("onping", event)
-					return
-				})
-				return runError
-			})
-			conn.SetPongHandler(func(data string) error {
-				_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("pong"))
-					event.Set("data", rt.ToValue(data))
-					invokePortHook("onpong", event)
-					return
-				})
-				return runError
-			})
-			conn.SetCloseHandler(func(code int, reason string) error {
-				_, runError := p.worker.RunSync(func(rt *goja.Runtime) (_ any, _ error) {
-					closeError := &websocket.CloseError{
-						Code: code,
-						Text: reason,
-					}
-					setPortReadyState(rt, WebSocketReadyStateClosing)
-					event := rt.NewObject()
-					event.Set("type", rt.ToValue("close"))
-					event.Set("code", rt.ToValue(int64(code)))
-					event.Set("reason", rt.ToValue(reason))
-					event.Set("wasClean", !websocket.IsUnexpectedCloseError(closeError, websocket.CloseNormalClosure))
-					invokePortHook("onclose", event)
-					return
-				})
-				return runError
-			})
-
-			for {
-				messageType, data, readErr := conn.ReadMessage()
-				if readErr != nil {
-					if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-						err = readErr
-					}
-					return
-				}
-				switch messageType {
-				case websocket.TextMessage:
-					if runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-						event := rt.NewObject()
-						event.Set("type", rt.ToValue("text"))
-						event.Set("data", rt.ToValue(string(data)))
-						invokePortHook("onmessage", event)
-						return
-					}, nil); runErr != nil {
-						err = runErr
-						return
-					}
-				case websocket.BinaryMessage:
-					if runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-						event := rt.NewObject()
-						event.Set("type", rt.ToValue("binary"))
-						event.Set("data", rt.ToValue(rt.NewArrayBuffer(data)))
-						invokePortHook("onmessage", event)
-						return
-					}, nil); runErr != nil {
-						err = runErr
-						return
-					}
-				}
+				connDone <- result.Error
+				return
 			}
-		}()
+			// Auto-open if the handler did not call port.open() explicitly.
+			openOnce.Do(startReadLoop)
+		}, rt, true, handler, handlerObj, jsRequest)
 
 		return
 	}, func(_ *goja.Runtime, _ any, runErr error) {
 		if runErr != nil {
 			doClose()
-			handlerDone <- runErr
+			connDone <- runErr
 		}
 	})
 
@@ -1205,7 +1203,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		return runErr
 	}
 
-	err = <-handlerDone
+	err = <-connDone
 	return
 }
 

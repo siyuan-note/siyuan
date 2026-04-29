@@ -24,7 +24,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
+	"github.com/lxzan/gws"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -297,48 +297,38 @@ func HandleRpcWebSocket(c *gin.Context) {
 		return
 	}
 
-	upgrader := websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool { return true },
+	connDone := make(chan struct{})
+
+	h := &gwsEventHandler{}
+
+	h.onClose = func(socket *gws.Conn, err error) {
+		close(connDone)
 	}
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		logging.LogErrorf("[plugin:%s] RPC WebSocket upgrade failed: %s", name, err)
-		// upgrader.Upgrade has already written an HTTP error response, so just return without writing another response
-		return
-	}
-	defer conn.Close()
 
-	// Track this connection for server push notifications
-	p.TrackSocket(conn, true)
-	defer p.UntrackSocket(conn)
+	h.onMessage = func(socket *gws.Conn, message *gws.Message) {
+		defer message.Close()
 
-	for {
-		_, message, readErr := conn.ReadMessage()
-		if readErr != nil {
-			if websocket.IsUnexpectedCloseError(readErr, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-				logging.LogErrorf("[plugin:%s] RPC WebSocket read failed: %s", name, readErr)
-			}
-			break
-		}
-
-		results := parseRpcRequests(message)
+		results := parseRpcRequests(message.Bytes())
 		if results.GlobalError != nil {
 			if respBytes, marshalErr := json.Marshal(results.GlobalError); marshalErr == nil {
-				if _, writeErr := p.writeWebSocketMessage(conn, websocket.TextMessage, respBytes); writeErr != nil {
-					logging.LogWarnf("[plugin:%s] RPC WebSocket response write failed: %s", name, writeErr)
-				}
+				socket.WriteAsync(gws.OpcodeText, respBytes, func(err error) {
+					if err != nil {
+						logging.LogWarnf("[plugin:%s] RPC WebSocket response write failed: %s", name, err)
+					}
+				})
+			} else {
+				logging.LogErrorf("[plugin:%s] RPC WebSocket response marshal failed: %s", name, marshalErr)
 			}
-			continue
+			return
 		}
 
 		responses := p.dispatchRpcRequests(results.Requests)
 
-		var needToSend bool
 		var responseBytes []byte
 		var marshalErr error
+		var needToSend bool
 
 		if !results.Batch {
-			// Single request - send response only if not a notification
 			if len(responses) > 0 && responses[0] != nil {
 				if response := responses[0].JsonRpcResponse(); response != nil {
 					needToSend = true
@@ -346,10 +336,7 @@ func HandleRpcWebSocket(c *gin.Context) {
 				}
 			}
 		} else {
-			// Batch request - filter out nil responses (notifications)
 			filtered := filterRpcResponses(responses)
-
-			// Send batch response; if all were notifications, send nothing per spec
 			if len(filtered) > 0 {
 				needToSend = true
 				responseBytes, marshalErr = json.Marshal(filtered)
@@ -357,15 +344,30 @@ func HandleRpcWebSocket(c *gin.Context) {
 		}
 
 		if needToSend {
-			if marshalErr == nil {
-				if _, writeErr := p.writeWebSocketMessage(conn, websocket.TextMessage, responseBytes); writeErr != nil {
-					logging.LogWarnf("[plugin:%s] RPC WebSocket response write failed: %s", name, writeErr)
-				}
-			} else {
+			if marshalErr != nil {
 				logging.LogErrorf("[plugin:%s] RPC response marshal failed: %s", name, marshalErr)
+				return
 			}
+			socket.WriteAsync(gws.OpcodeText, responseBytes, func(err error) {
+				if err != nil {
+					logging.LogWarnf("[plugin:%s] RPC WebSocket response write failed: %s", name, err)
+				}
+			})
 		}
 	}
+
+	upgrader := gws.NewUpgrader(h, &gws.ServerOption{})
+	socket, err := upgrader.Upgrade(c.Writer, c.Request)
+	if err != nil {
+		logging.LogErrorf("[plugin:%s] RPC WebSocket upgrade failed: %s", name, err)
+		return
+	}
+
+	p.TrackGwsSocket(socket, true)
+	defer p.UntrackGwsSocket(socket)
+
+	go socket.ReadLoop()
+	<-connDone
 }
 
 // resolveRunningPlugin looks up the plugin by name and writes an error response if it is

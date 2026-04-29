@@ -41,14 +41,15 @@ export const setTabPosition = (onlyPadding = false) => {
                 headerElement.style.paddingLeft = (dragRect.left - rect.left) + "px";
             }
 
+            // 不能取 clientWidth，因为设置了 min-width(103) 导致 clientWidth 大于实际宽度
             if (rect.right + 1 >= centerRect.right) {
-                if (paddingRight + headerElement.lastElementChild.clientWidth > rect.width) {
+                if (paddingRight + 103 > rect.width) {
                     headerElement.style.visibility = "hidden";
                 } else {
                     (headerElement.lastElementChild as HTMLElement).style.marginRight = paddingRight + "px";
                 }
             } else if (rect.right > dragRect.right) {
-                if (paddingRight + headerElement.lastElementChild.clientWidth > rect.width) {
+                if (paddingRight + 103 > rect.width) {
                     headerElement.style.visibility = "hidden";
                 } else {
                     (headerElement.lastElementChild as HTMLElement).style.marginRight = (rect.right - dragRect.right) + "px";

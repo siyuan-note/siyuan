@@ -1042,6 +1042,8 @@
   "heading4": "제목 4",
   "heading5": "제목 5",
   "heading6": "제목 6",
+  "unorderedList": "순서 없는 목록",
+  "searchSubTypeListTip": "목록 하위 유형(순서/순서 없음/작업)은 목록 항목에도 적용됩니다.",
   "outlineExpandLevel": "펼치기 레벨",
   "expandAll": "모두 펼치기",
   "outlineKeepCurrentExpand": "현재 펼침 상태 유지",

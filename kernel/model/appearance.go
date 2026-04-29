@@ -245,6 +245,15 @@ func LoadIcons() {
 			t.Label = name + Conf.Language(288)
 		} else {
 			t.Label = name
+			if len(iconConf.DisplayName) > 0 {
+				v := strings.TrimSpace(iconConf.DisplayName[util.Lang])
+				if "" == v {
+					v = strings.TrimSpace(iconConf.DisplayName["default"])
+				}
+				if "" != v && name != v {
+					t.Label = v + " (" + name + ")"
+				}
+			}
 		}
 		icons = append(icons, t)
 		if currentIcon == name {

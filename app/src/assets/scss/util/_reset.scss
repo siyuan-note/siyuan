@@ -139,6 +139,10 @@ body {
       border-top-right-radius: var(--b3-border-radius-b);
     }
 
+    .layout__wnd--center .layout-tab-bar .item {
+      margin: 7px 4px 6px 4px;
+    }
+
     .toolbar #drag {
       -webkit-app-region: none;
       color: transparent;

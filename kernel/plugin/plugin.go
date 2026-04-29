@@ -19,7 +19,6 @@ package plugin
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -928,14 +927,6 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				setPortReadyState(rt, WebSocketReadyStateClosed)
 				return
 			}, nil)
-			var retErr error
-			if closeErr != nil {
-				var ce *gws.CloseError
-				if !errors.As(closeErr, &ce) || (ce.Code != 1000 && ce.Code != 1001) {
-					retErr = closeErr
-				}
-			}
-			connDone <- retErr
 		}
 
 		h.onPing = func(conn *gws.Conn, payload []byte) {

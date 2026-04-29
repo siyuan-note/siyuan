@@ -1,7 +1,7 @@
 .b3-text-field {
   border: 0;
   border-radius: var(--b3-border-radius);
-  box-shadow: inset 0 0 0 .6px var(--b3-theme-on-surface);
+  box-shadow: inset 0 0 0 .6px var(--b3-theme-on-surface-light);
   padding: 4px 8px;
   line-height: 20px;
   box-sizing: border-box;
@@ -13,7 +13,7 @@
   font-size: 14px;
 
   &:not(.b3-text-field--text):hover {
-    box-shadow: inset 0 0 0 .6px var(--b3-theme-on-background);
+    box-shadow: inset 0 0 0 .6px var(--b3-theme-on-surface);
   }
 
   &:not(.b3-text-field--text):focus {

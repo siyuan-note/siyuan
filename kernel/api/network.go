@@ -513,6 +513,15 @@ func wsProxy(c *gin.Context) {
 		for {
 			msgType, msg, readErr := targetConn.ReadMessage()
 			if readErr != nil {
+				if closeError, ok := readErr.(*websocket.CloseError); ok {
+					clientConn.WriteMessage(
+						websocket.CloseMessage,
+						websocket.FormatCloseMessage(
+							closeError.Code,
+							closeError.Text,
+						),
+					)
+				}
 				errChan <- readErr
 				return
 			}
@@ -526,6 +535,15 @@ func wsProxy(c *gin.Context) {
 		for {
 			msgType, msg, readErr := clientConn.ReadMessage()
 			if readErr != nil {
+				if closeError, ok := readErr.(*websocket.CloseError); ok {
+					targetConn.WriteMessage(
+						websocket.CloseMessage,
+						websocket.FormatCloseMessage(
+							closeError.Code,
+							closeError.Text,
+						),
+					)
+				}
 				errChan <- readErr
 				return
 			}

@@ -1775,6 +1775,7 @@
     "284": "Acesso negado",
     "285": "A senha está incorreta",
     "286": "[%s] já foi revertido",
-    "287": "O código de autorização de acesso não pode conter apenas espaços. Para desativá-lo, basta limpar o campo de entrada"
+    "287": "O código de autorização de acesso não pode conter apenas espaços. Para desativá-lo, basta limpar o campo de entrada",
+    "288": " (Padrão)"
   }
 }

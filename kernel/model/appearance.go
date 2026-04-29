@@ -58,7 +58,7 @@ func InitAppearance() {
 		Conf.Appearance.ThemeLight = "daylight"
 		Conf.Appearance.ThemeJS = false
 	}
-	if !gulu.Str.Contains(Conf.Appearance.Icon, Conf.Appearance.Icons) {
+	if !containIcon(Conf.Appearance.Icon, Conf.Appearance.Icons) {
 		Conf.Appearance.Icon = "litheness"
 	}
 	Conf.m.Unlock()
@@ -72,7 +72,7 @@ func SetIcon(icon string) error {
 	Conf.m.Lock()
 	defer Conf.m.Unlock()
 
-	if !gulu.Str.Contains(icon, Conf.Appearance.Icons) {
+	if !containIcon(icon, Conf.Appearance.Icons) {
 		return fmt.Errorf("icon [%s] not exists or not available", icon)
 	}
 	Conf.Appearance.Icon = icon
@@ -120,6 +120,15 @@ func SetTheme(theme string, modes []int, appearanceMode string) error {
 func containTheme(name string, themes []*conf.AppearanceTheme) bool {
 	for _, t := range themes {
 		if t.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
+func containIcon(name string, icons []*conf.AppearanceIcon) bool {
+	for _, i := range icons {
+		if i.Name == name {
 			return true
 		}
 	}
@@ -219,7 +228,7 @@ func LoadIcons() {
 		return
 	}
 
-	var icons []string
+	var icons []*conf.AppearanceIcon
 	var iconVer string
 	currentIcon := Conf.Appearance.Icon
 	for _, iconDir := range iconDirs {
@@ -231,7 +240,13 @@ func LoadIcons() {
 		if err != nil || nil == iconConf {
 			continue
 		}
-		icons = append(icons, name)
+		t := &conf.AppearanceIcon{Name: name}
+		if isBuiltInIcon(name) {
+			t.Label = name + Conf.Language(288)
+		} else {
+			t.Label = name
+		}
+		icons = append(icons, t)
 		if currentIcon == name {
 			iconVer = iconConf.Version
 		}

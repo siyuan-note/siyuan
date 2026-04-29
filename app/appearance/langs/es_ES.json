@@ -1775,6 +1775,7 @@
     "284": "Acceso denegado",
     "285": "La contraseña es incorrecta",
     "286": "[%s] ya ha sido revertido",
-    "287": "El código de autorización de acceso no puede contener solo espacios. Si desea desactivarlo, simplemente borre el cuadro de entrada"
+    "287": "El código de autorización de acceso no puede contener solo espacios. Si desea desactivarlo, simplemente borre el cuadro de entrada",
+    "288": " (Por defecto)"
   }
 }

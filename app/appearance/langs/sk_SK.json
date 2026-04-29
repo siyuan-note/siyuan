@@ -1775,6 +1775,7 @@
     "284": "Prístup zakázaný",
     "285": "Nesprávne heslo",
     "286": "[%s] bol vrátený",
-    "287": "Prístupový autorizačný kód nemôže obsahovať iba medzery. Ak ho chcete zakázať, jednoducho vymažte vstupné pole"
+    "287": "Prístupový autorizačný kód nemôže obsahovať iba medzery. Ak ho chcete zakázať, jednoducho vymažte vstupné pole",
+    "288": " (Predvolené)"
   }
 }

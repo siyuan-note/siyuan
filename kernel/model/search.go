@@ -1520,7 +1520,7 @@ func buildTypeFilter(types, subTypes map[string]bool) string {
 
 	if 0 == len(clauses) {
 		// Match nothing without producing invalid SQL when concatenated after AND.
-		return "1 = 0"
+		return "(1 = 0)"
 	}
 	return "(" + strings.Join(clauses, " OR ") + ")"
 }

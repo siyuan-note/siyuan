@@ -234,9 +234,9 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             if (!groupEl) {
                 return;
             }
-            const isOpen = groupEl.classList.toggle("fn__none");
+            const isHidden = groupEl.classList.toggle("fn__none");
             if (arrow) {
-                arrow.style.transform = isOpen ? "" : "rotate(90deg)";
+                arrow.style.transform = isHidden ? "" : "rotate(90deg)";
             }
         });
     });

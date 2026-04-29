@@ -298,7 +298,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
 }`;
     }
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Emojis Additional", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${window.siyuan.config.editor.fontWeight ? `font-weight: ${window.siyuan.config.editor.fontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {
@@ -394,13 +394,13 @@ export const setBodyHighlight = () => {
 
     // 预定义颜色：赤橙黄绿青蓝紫（提高饱和度和亮度）
     const colors = [
-        { h: 0, s: 85, l: 50 },    // 赤 - 鲜艳红
-        { h: 30, s: 90, l: 52 },   // 橙 - 亮橙色
-        { h: 50, s: 88, l: 50 },   // 黄 - 金黄色
-        { h: 140, s: 80, l: 48 },  // 绿 - 翠绿色
-        { h: 185, s: 85, l: 50 },  // 青 - 亮青色
-        { h: 230, s: 82, l: 52 },  // 蓝 - 宝蓝色
-        { h: 280, s: 85, l: 50 },  // 紫 - 亮紫色
+        {h: 0, s: 85, l: 50},    // 赤 - 鲜艳红
+        {h: 30, s: 90, l: 52},   // 橙 - 亮橙色
+        {h: 50, s: 88, l: 50},   // 黄 - 金黄色
+        {h: 140, s: 80, l: 48},  // 绿 - 翠绿色
+        {h: 185, s: 85, l: 50},  // 青 - 亮青色
+        {h: 230, s: 82, l: 52},  // 蓝 - 宝蓝色
+        {h: 280, s: 85, l: 50},  // 紫 - 亮紫色
     ];
 
     let hue, saturation, lightness;

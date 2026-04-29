@@ -193,6 +193,17 @@ func parseFont(font *sfnt.Font) *Font {
 			}
 		}
 
+		// 自动匹配 W1-W9（部分字体使用不带前导零的缩写）
+		if weight == 400 {
+			for i := 1; i <= 9; i++ {
+				wStr := "w" + strconv.Itoa(i)
+				if strings.Contains(s, wStr) {
+					weight = i * 100
+					break
+				}
+			}
+		}
+
 		// 自动匹配标准关键词
 		if weight == 400 { // 如果 W 系列没匹配到
 			switch {

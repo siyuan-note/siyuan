@@ -456,6 +456,10 @@ declare namespace Config {
          */
         fontFamily: string;
         /**
+         * The font weight used in the editor, 0 means not set
+         */
+        fontWeight: number;
+        /**
          * The font size used in the editor
          */
         fontSize: number;

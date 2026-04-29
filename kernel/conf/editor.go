@@ -24,6 +24,7 @@ type Editor struct {
 	FontSize                        int            `json:"fontSize"`                        // 字体大小
 	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
 	FontFamily                      string         `json:"fontFamily"`                      // 字体
+	FontWeight                      int            `json:"fontWeight"`                      // 字重
 	CodeSyntaxHighlightLineNum      bool           `json:"codeSyntaxHighlightLineNum"`      // 代码块是否显示行号
 	CodeTabSpaces                   int            `json:"codeTabSpaces"`                   // 代码块中 Tab 转换空格数，配置为 0 则表示不转换
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行

@@ -437,6 +437,7 @@ export const editor = {
         /// #endif
 
         const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
+        fontFamilyElement.dataset.weight = String(window.siyuan.config.editor.fontWeight || 0);
         fontFamilyElement.addEventListener("click", () => {
             fetchPost("/api/system/getSysFonts", {}, (response) => {
                 const fontMenu = new Menu();
@@ -450,20 +451,22 @@ export const editor = {
                         }
                         fontFamilyElement.value = "";
                         fontFamilyElement.style.fontFamily = "";
+                        fontFamilyElement.dataset.weight = "0";
                         setEditor();
                     }
                 });
-                response.data.forEach((item: string) => {
+                response.data.forEach((item: {family: string; weight: number; displayName: string}) => {
                     fontMenu.addItem({
                         iconHTML: "",
-                        checked: window.siyuan.config.editor.fontFamily === item,
-                        label: `<div style='font-family:"${item}",var(--b3-font-family);'>${item}</div>`,
+                        checked: window.siyuan.config.editor.fontFamily === item.family && window.siyuan.config.editor.fontWeight === item.weight,
+                        label: `<div style='font-family:"${item.family}",var(--b3-font-family);'>${item.displayName}</div>`,
                         click: () => {
-                            if (item === window.siyuan.config.editor.fontFamily) {
+                            if (item.family === window.siyuan.config.editor.fontFamily && item.weight === window.siyuan.config.editor.fontWeight) {
                                 return;
                             }
-                            fontFamilyElement.value = item;
-                            fontFamilyElement.style.fontFamily = item + ",var(--b3-font-family)";
+                            fontFamilyElement.value = item.family;
+                            fontFamilyElement.style.fontFamily = item.family + ",var(--b3-font-family)";
+                            fontFamilyElement.dataset.weight = String(item.weight);
                             setEditor();
                         }
                     });
@@ -556,6 +559,7 @@ export const editor = {
                 generateHistoryInterval: parseInt((editor.element.querySelector("#generateHistoryInterval") as HTMLInputElement).value),
                 historyRetentionDays: parseInt((editor.element.querySelector("#historyRetentionDays") as HTMLInputElement).value),
                 fontFamily: fontFamilyElement.value,
+                fontWeight: parseInt(fontFamilyElement.dataset.weight || "0"),
                 emoji: window.siyuan.config.editor.emoji
             }, response => {
                 editor._onSetEditor(response.data);

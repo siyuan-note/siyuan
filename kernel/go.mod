@@ -49,6 +49,7 @@ require (
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/klippa-app/go-pdfium v1.17.2
+	github.com/lxzan/gws v1.9.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mitchellh/go-ps v1.0.0
@@ -91,10 +92,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require (
-	github.com/lxzan/gws v1.9.1 // indirect
-	gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
-)
+require gopkg.in/cenkalti/backoff.v1 v1.1.0 // indirect
 
 require (
 	dario.cat/mergo v1.0.2 // indirect

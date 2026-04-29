@@ -466,7 +466,7 @@ func (p *KernelPlugin) BroadcastNotification(method string, params util.Optional
 		wg.Add(1)
 		c := conn
 		payload := make([]byte, len(data))
-		copy(payload, data)
+		copy(payload, data) // each conn needs its own copy; WriteAsync is async and all conns share the same source slice
 		c.WriteAsync(gws.OpcodeText, payload, func(writeErr error) {
 			defer wg.Done()
 			if writeErr != nil {
@@ -909,20 +909,20 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 		h.onClose = func(conn *gws.Conn, closeErr error) {
 			doClose()
 			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-				var ce *gws.CloseError
-				if closeErr != nil && !errors.As(closeErr, &ce) {
+				if closeErr != nil {
 					errEvent := rt.NewObject()
 					errEvent.Set("type", rt.ToValue("error"))
 					errEvent.Set("error", rt.NewGoError(closeErr))
 					invokePortHook("onerror", errEvent)
 				}
-				if ce != nil {
+
+				if closeError, ok := closeErr.(*gws.CloseError); ok {
 					setPortReadyState(rt, WebSocketReadyStateClosing)
 					closeEvent := rt.NewObject()
 					closeEvent.Set("type", rt.ToValue("close"))
-					closeEvent.Set("code", rt.ToValue(int64(ce.Code)))
-					closeEvent.Set("reason", rt.ToValue(string(ce.Reason)))
-					closeEvent.Set("wasClean", rt.ToValue(ce.Code == 1000 || ce.Code == 1001))
+					closeEvent.Set("code", rt.ToValue(closeError.Code))
+					closeEvent.Set("reason", rt.ToValue(string(closeError.Reason)))
+					closeEvent.Set("wasClean", rt.ToValue(bufferedAmount.Load() == 0))
 					invokePortHook("onclose", closeEvent)
 				}
 				setPortReadyState(rt, WebSocketReadyStateClosed)
@@ -962,7 +962,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			defer message.Close()
 			opcode := message.Opcode
 			data := make([]byte, message.Data.Len())
-			copy(data, message.Bytes())
+			copy(data, message.Bytes()) // message.Bytes() points into gws-managed memory reclaimed by message.Close() (deferred above)
 			runMsgErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 				event := rt.NewObject()
 				switch opcode {
@@ -983,6 +983,33 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			}
 		}
 
+		var openOnce sync.Once
+		startReadLoop := func() { go socket.ReadLoop() }
+
+		port_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
+			openPromise, openResolve, openReject := rt.NewPromise()
+
+			openRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+				openOnce.Do(startReadLoop)
+				return
+			}, func(rt *goja.Runtime, _ any, err error) {
+				if lo.IsNil(err) {
+					if resolveErr := openResolve(nil); resolveErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.open resolve: %v", p.Name, resolveErr)
+					}
+				} else {
+					if rejectErr := openReject(rt.NewGoError(err)); rejectErr != nil {
+						logging.LogErrorf("[plugin:%s] ws server port.open reject: %v", p.Name, rejectErr)
+					}
+				}
+			})
+			if openRunErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server port.open worker run: %v", p.Name, openRunErr)
+			}
+
+			return rt.ToValue(openPromise)
+		})
+
 		port_send := rt.ToValue(func(sendCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 			sendPromise, sendResolve, sendReject := rt.NewPromise()
 
@@ -995,7 +1022,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 						opcode = gws.OpcodeBinary
 						b := arrayBuffer.Bytes()
 						messageData = make([]byte, len(b))
-						copy(messageData, b)
+						copy(messageData, b) // ArrayBuffer.Bytes() points into JS engine memory; copy before async send
 					} else {
 						opcode = gws.OpcodeText
 						messageData = []byte(data.String())
@@ -1133,49 +1160,22 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			return rt.ToValue(closePromise)
 		})
 
-		var openOnce sync.Once
-		startReadLoop := func() { go socket.ReadLoop() }
-
-		port_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
-			openPromise, openResolve, openReject := rt.NewPromise()
-
-			openRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-				openOnce.Do(startReadLoop)
-				return
-			}, func(rt *goja.Runtime, _ any, err error) {
-				if lo.IsNil(err) {
-					if resolveErr := openResolve(nil); resolveErr != nil {
-						logging.LogErrorf("[plugin:%s] ws server port.open resolve: %v", p.Name, resolveErr)
-					}
-				} else {
-					if rejectErr := openReject(rt.NewGoError(err)); rejectErr != nil {
-						logging.LogErrorf("[plugin:%s] ws server port.open reject: %v", p.Name, rejectErr)
-					}
-				}
-			})
-			if openRunErr != nil {
-				logging.LogErrorf("[plugin:%s] ws server port.open worker run: %v", p.Name, openRunErr)
-			}
-
-			return rt.ToValue(openPromise)
-		})
-
 		lo.Must0(port.Set("binaryType", rt.ToValue("arraybuffer")))
 		lo.Must0(port.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load())))
 		lo.Must0(port.Set("readyState", rt.ToValue(readyState.Load())))
 
 		lo.Must0(port.Set("onopen", goja.Null()))
+		lo.Must0(port.Set("onmessage", goja.Null()))
 		lo.Must0(port.Set("onping", goja.Null()))
 		lo.Must0(port.Set("onpong", goja.Null()))
-		lo.Must0(port.Set("onmessage", goja.Null()))
 		lo.Must0(port.Set("onclose", goja.Null()))
 		lo.Must0(port.Set("onerror", goja.Null()))
 
+		lo.Must0(port.Set("open", port_open))
 		lo.Must0(port.Set("send", port_send))
 		lo.Must0(port.Set("ping", port_ping))
 		lo.Must0(port.Set("pong", port_pong))
 		lo.Must0(port.Set("close", port_close))
-		lo.Must0(port.Set("open", port_open))
 
 		lo.Must0(ObjectSeal(rt, port))
 		lo.Must0(jsRequestObj.Set("port", port))

@@ -1,4 +1,4 @@
-{
+﻿{
   "switchToFloatingLayout": "Prepnúť na plávajúce rozloženie",
   "switchToFixedLayout": "Prepnúť na pevné rozloženie",
   "hyperlink": "Hypertextový odkaz",
@@ -1732,8 +1732,8 @@
     "241": "Presun do vlastného podnadpisu nie je podporovaný",
     "242": "Vyžaduje sa aspoň %s voľného miesta",
     "243": "Zobrazených je len prvých [%d] značiek (vrátane podznačiek), ak to chcete upraviť, zmeňte [Nastavenia - Dokumenty - Maximálny počet v zozname]",
-    "244": "Indexácia nebola dokončená, vykonajte [Prestavať index] pred vypnutím",
-    "245": "Indexácia nebola dokončená, aplikáciu ukončujte normálne",
+    "244": "",
+    "245": "",
     "246": "Názov dokumentu nesmie obsahovať /, nahradené podčiarkovníkom",
     "247": "Súbor [%s] je príliš veľký a bol ignorovaný pri synchronizácii",
     "248": "Cieľový nadpis je v kontajneri a nemožno ho použiť ako cieľ",

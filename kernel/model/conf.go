@@ -599,15 +599,8 @@ func InitConf() {
 	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
 
 	if 1 == Conf.DataIndexState {
-		// 上次未正常完成数据索引
-		go func() {
-			util.WaitForUILoaded()
-			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
-				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(245), 15000)
-			} else {
-				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(244), 15000)
-			}
-		}()
+		// 上次未正常完成数据索引，后续会由 recoverWAL() 恢复
+		logging.LogInfof("data index state is [%d], will recover through WAL", Conf.DataIndexState)
 	}
 
 	Conf.DataIndexState = 0

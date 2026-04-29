@@ -34,6 +34,7 @@ import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
 import {updateCardHV} from "../card/util";
 import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
+import {initWindowOpenOverride} from "../protyle/util/compatibility";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
@@ -211,6 +212,7 @@ class App {
 
 const siyuanApp = new App();
 
+initWindowOpenOverride(siyuanApp);
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
     window.siyuan.ws.send("ping", {});

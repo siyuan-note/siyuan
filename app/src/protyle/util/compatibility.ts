@@ -4,9 +4,8 @@ import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-/// #if MOBILE
-import {processSYLink} from "../../editor/openLink";
-/// #endif
+import type {App} from "../../index";
+import {isBrowser} from "../../util/functions";
 import {getDefaultType} from "../../search/getDefault";
 
 export const isPhablet = () => {
@@ -70,7 +69,8 @@ export const openByMobile = (uri: string) => {
         return;
     }
     /// #if MOBILE
-    if (processSYLink(window.siyuan.ws.app, uri)) {
+    if (uri.startsWith("siyuan://")) {
+        import("../../editor/openLink").then(({processSYLink}) => processSYLink(window.siyuan.ws.app, uri));
         return;
     }
     /// #endif
@@ -580,8 +580,21 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
     });
 };
 
-/// #if !BROWSER
+export const initWindowOpenOverride = (app: App) => {
+    const originalOpen = window.open;
+    window.open = function(url?: string | URL, target?: string, features?: string): WindowProxy | null {
+        const urlStr = typeof url === "string" ? url : (url instanceof URL ? url.href : "");
+        if (urlStr.startsWith("siyuan://") && (!isBrowser() || target !== "_blank")) {
+            import("../../editor/openLink").then(({processSYLink}) => processSYLink(app, urlStr));
+            return null;
+        }
+        // 浏览器可以通过 window.open("siyuan://blocks/20221031001313-rk7sd0e", "_blank") 打开本地客户端
+        return originalOpen.call(window, url, target, features);
+    };
+};
+
 export const initNativeDialogOverride = () => {
+    /// #if !BROWSER
     const originalAlert = window.alert;
     const originalConfirm = window.confirm;
 
@@ -614,6 +627,6 @@ export const initNativeDialogOverride = () => {
             return originalConfirm.call(this, message);
         }
     };
+    /// #endif
 };
-/// #endif
 

@@ -393,9 +393,7 @@ export class Wnd {
                     newWnd.moveTab(oldTab);
                 }
                 resizeTabs();
-                /// #if !BROWSER
                 setTabPosition();
-                /// #endif
                 dragElement.removeAttribute("style");
                 return;
             }
@@ -636,10 +634,10 @@ export class Wnd {
             this.removeOverCounter(isSaveLayout);
         }
         /// #if !BROWSER
-        setTabPosition();
         setModelsHash();
         /// #endif
         if (isSaveLayout) {
+            setTabPosition();
             saveLayout();
         }
     }
@@ -874,12 +872,12 @@ export class Wnd {
             }
         }
         if (isSaveLayout) {
+            setTabPosition();
             saveLayout();
         }
         /// #if !BROWSER
         webFrame.clearCache();
         ipcRenderer.send(Constants.SIYUAN_CMD, "clearCache");
-        setTabPosition();
         setModelsHash();
         /// #endif
     };
@@ -974,9 +972,7 @@ export class Wnd {
 
         tab.parent = this;
         hideAllElements(["toolbar"]);
-        /// #if !BROWSER
         setTabPosition();
-        /// #endif
     }
 
     public split(direction: Config.TUILayoutDirection, after = true) {

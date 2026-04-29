@@ -265,6 +265,9 @@ export const initBar = (app: App) => {
         });
     });
     barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom)));
+    if (window.siyuan.config.appearance.hideToolbar) {
+        document.body.classList.add("body--toolbar-hide");
+    }
 };
 
 export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {

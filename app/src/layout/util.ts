@@ -31,6 +31,7 @@ import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
+import {setTabPosition} from "../window/setHeader";
 
 export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     if (element.getAttribute("data-type") === "wnd") {
@@ -470,7 +471,10 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         afterLoadPlugin(item);
     });
     saveLayout();
-    resizeTopBar();
+    // 等待 dock 面板动画结束
+    setTimeout(() => {
+        setTabPosition();
+    }, Constants.TIMEOUT_TRANSITION);
 };
 
 export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, breakObj?: IObject) => {

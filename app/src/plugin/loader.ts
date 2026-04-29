@@ -161,7 +161,6 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         });
     }
     /// #if !MOBILE
-    resizeTopBar();
     plugin.statusBarIcons.forEach(element => {
         if (document.contains(element)) {
             return;
@@ -173,6 +172,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
             statusElement.insertAdjacentElement("afterbegin", element);
         }
     });
+    resizeTopBar();
     /// #endif
     addPluginDock(plugin);
 };

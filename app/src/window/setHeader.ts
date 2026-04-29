@@ -6,41 +6,66 @@ import {Asset} from "../asset";
 import {Constants} from "../constants";
 
 export const setTabPosition = () => {
-    if (!isWindow()) {
+    const isWindowMode = isWindow();
+    const wndsTemp: Wnd[] = [];
+    if (isWindowMode) {
+        getAllWnds(window.siyuan.layout.layout, wndsTemp);
+    } else if (window.siyuan.config.appearance.hideToolbar){
+        if (!window.siyuan.layout.centerLayout) {
+            return;
+        }
+        getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
+    }
+
+    if (wndsTemp.length === 0) {
         return;
     }
-    const wndsTemp: Wnd[] = [];
-    getAllWnds(window.siyuan.layout.layout, wndsTemp);
+
+    const centerRect = (isWindowMode ? window.siyuan.layout.layout : window.siyuan.layout.centerLayout).element.getBoundingClientRect();
+    const dragRect = document.getElementById("drag")?.getBoundingClientRect();
+    const paddingLeft = ("darwin" === window.siyuan.config.system.os && isWindowMode) ?
+        parseInt(getComputedStyle(document.body).getPropertyValue("--b3-toolbar-left-mac")) : dragRect.left - centerRect.left;
+    const paddingRight = isWindowMode ?
+        document.querySelector(".toolbar__window").clientWidth : centerRect.right - dragRect.right;
     wndsTemp.forEach(async item => {
+        item.element.classList.remove("layout__wnd--right", "layout__wnd--left", "layout__wnd--center");
+        (item.element.querySelector(".layout-tab-container") as HTMLElement).style.backgroundColor = "";
         const headerElement = item.headersElement.parentElement;
         const rect = headerElement.getBoundingClientRect();
         const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
+        headerElement.style.paddingLeft = "";
+        (headerElement.lastElementChild as HTMLElement).style.marginRight = "";
         if (rect.top <= 0) {
+            // empty
+            if (headerElement.classList.contains("fn__none")) {
+                (item.element.querySelector(".layout-tab-container") as HTMLElement).style.backgroundColor = "transparent";
+                return;
+            }
+            // header transparent
+            item.element.classList.add("layout__wnd--center");
+            if (!isWindowMode) {
+                if (rect.left - 1 <= centerRect.left) {
+                    item.element.classList.add("layout__wnd--left");
+                }
+                if (rect.right + 1 >= centerRect.right) {
+                    item.element.classList.add("layout__wnd--right");
+                }
+            }
             dragElement.parentElement.parentElement.style.minWidth = "95px";
             dragElement.style.height = dragElement.parentElement.clientHeight + "px";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
+
+            // header padding
+            if (rect.left - 1 <= centerRect.left) {
+                headerElement.style.paddingLeft = paddingLeft + "px";
+            }
+            if (rect.right + 1 >= centerRect.right) {
+                (headerElement.lastElementChild as HTMLElement).style.marginRight = paddingRight + "px";
+            }
         } else {
             dragElement.parentElement.parentElement.style.minWidth = "";
             dragElement.style.height = "";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "";
-        }
-        const headersLastElement = headerElement.lastElementChild as HTMLElement;
-        if ("darwin" === window.siyuan.config.system.os) {
-            const isFullScreen = document.body.classList.contains("body--fullscreen");
-            if (rect.top <= 0 && rect.left <= 0 && !isFullScreen) {
-                // 用 marginLeft 左侧底部无线条
-                item.headersElement.style.paddingLeft = "var(--b3-toolbar-left-mac)";
-                headersLastElement.style.paddingRight = "42px";
-            } else {
-                item.headersElement.style.paddingLeft = "";
-                headersLastElement.style.paddingRight = "";
-            }
-        }
-        // 显示器缩放后像素存在小数点偏差 https://github.com/siyuan-note/siyuan/issues/7355
-        if (rect.top <= 0 && rect.right + 8 >= window.innerWidth) {
-            headersLastElement.style.paddingRight = (42 * ("darwin" === window.siyuan.config.system.os ? 1 : 4)) + "px";
-        } else {
-            headersLastElement.style.paddingRight = "";
         }
     });
 };

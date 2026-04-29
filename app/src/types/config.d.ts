@@ -215,6 +215,10 @@ declare namespace Config {
          */
         hideStatusBar: boolean;
         /**
+         * Whether to hide toolbar
+         */
+        hideToolbar: boolean;
+        /**
          * The name of the icon currently in use
          */
         icon: string;

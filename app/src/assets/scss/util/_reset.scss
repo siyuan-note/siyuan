@@ -114,6 +114,52 @@ body {
     }
   }
 
+  &.body--toolbar-hide {
+
+    #dockLeft, #dockRight {
+      padding-top: 42px;
+    }
+
+    .toolbar {
+      height: 42px;
+      position: absolute;
+      width: 100%;
+    }
+
+    .layout__dockl:not(.layout--float),
+    .layout__dockr:not(.layout--float) {
+      margin-top: 42px;
+    }
+
+    .layout__wnd--left .layout-tab-container {
+      border-top-left-radius: var(--b3-border-radius-b);
+    }
+
+    .layout__wnd--right .layout-tab-container {
+      border-top-right-radius: var(--b3-border-radius-b);
+    }
+
+    .toolbar #drag {
+      -webkit-app-region: none;
+      color: transparent;
+    }
+
+    .layout__empty {
+      background-color: transparent;
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        height: 42px;
+        -webkit-app-region: drag;
+        left: 0;
+        width: 100%;
+      }
+    }
+  }
+
+
   #maxWindow {
     display: flex;
   }

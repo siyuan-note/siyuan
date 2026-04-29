@@ -7,6 +7,7 @@ import {resizeTopBar} from "../layout/util";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
+import {setTabPosition} from "../window/setHeader";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -49,6 +50,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             }
             /// #if !MOBILE
             resizeTopBar();
+            setTabPosition();
             // rm statusBar
             plugin.statusBarIcons.forEach(item => {
                 item.remove();

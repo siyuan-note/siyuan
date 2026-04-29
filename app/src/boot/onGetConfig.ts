@@ -143,18 +143,10 @@ export const initWindow = async (app: App) => {
             document.body.classList.add("body--blur");
         } else if (cmd === "enter-full-screen") {
             document.body.classList.add("body--fullscreen");
-            if ("darwin" === window.siyuan.config.system.os) {
-                if (isWindow()) {
-                    setTabPosition();
-                }
-            }
+            setTabPosition();
         } else if (cmd === "leave-full-screen") {
             document.body.classList.remove("body--fullscreen");
-            if ("darwin" === window.siyuan.config.system.os) {
-                if (isWindow()) {
-                    setTabPosition();
-                }
-            }
+            setTabPosition();
         } else if (cmd === "maximize") {
             document.body.classList.add("body--maximize");
         } else if (cmd === "unmaximize") {

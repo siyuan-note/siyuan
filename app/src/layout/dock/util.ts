@@ -10,6 +10,7 @@ import {Wnd} from "../Wnd";
 import {fetchSyncPost} from "../../util/fetch";
 import {Files} from "./Files";
 import {Editor} from "../../editor";
+import {setTabPosition} from "../../window/setHeader";
 
 export const openBacklink = async (options: {
     app: App,
@@ -151,6 +152,9 @@ export const openOutline = async (options: {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.rootId});
         options.title = response.data.name || window.siyuan.languages.untitled;
     }
+    newWnd.element.style.width = "200px";
+    newWnd.element.classList.remove("fn__flex-1");
+    fixWndFlex1(newWnd.parent);
     newWnd.addTab(new Tab({
         icon: "iconOutline",
         title: options.title,
@@ -163,11 +167,7 @@ export const openOutline = async (options: {
                 isPreview: options.isPreview,
             }));
         }
-    }), false, false);
-    newWnd.element.style.width = "200px";
-    newWnd.element.classList.remove("fn__flex-1");
-    fixWndFlex1(newWnd.parent);
-    saveLayout();
+    }), false, true);
 };
 
 export const resetFloatDockSize = () => {
@@ -200,6 +200,7 @@ export const toggleDockBar = (useElement: Element) => {
     resizeTabs();
     resetFloatDockSize();
     adjustDockPadding();
+    setTabPosition();
 };
 
 export const clearOBG = () => {

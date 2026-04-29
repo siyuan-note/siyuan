@@ -336,7 +336,7 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 		return
 	}
 
-	response, handleErr := p.handleHttpRequest(request, scope)
+	response, handleErr := p.handleHttpRequest(c, request, scope)
 	if handleErr != nil {
 		msg := fmt.Sprintf("[plugin:%s] Error occurred while handling HTTP request: %s", name, handleErr)
 		logging.LogWarn(msg)

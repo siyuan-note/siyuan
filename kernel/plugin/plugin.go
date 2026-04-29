@@ -667,7 +667,7 @@ func (p *KernelPlugin) invokeHook(name string) {
 }
 
 // handleHttpRequest dispatches an HTTP request to the plugin's JS handler and returns the response.
-func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (response *HttpResponse, err error) {
+func (p *KernelPlugin) handleHttpRequest(c *gin.Context, request *Request, scope AccessScope) (response *HttpResponse, err error) {
 	type handleResult FunctionResult[*HttpResponse]
 	done := make(chan *handleResult, 1)
 
@@ -685,6 +685,11 @@ func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (r
 		}
 
 		invokeFunction(func(rt *goja.Runtime, result *CallResult) {
+			if result.Error != nil {
+				done <- &handleResult{Error: result.Error}
+				return
+			}
+
 			responseObj := result.Value.ToObject(rt)
 			if responseObj == nil {
 				done <- &handleResult{Error: fmt.Errorf("handler did not return an object")}
@@ -747,11 +752,15 @@ func (p *KernelPlugin) handleHttpRequest(request *Request, scope AccessScope) (r
 		done <- &handleResult{Error: runErr}
 	}
 
-	result := <-done
-	if result.Error != nil {
-		err = result.Error
-	} else {
-		response = result.Value
+	select {
+	case result := <-done:
+		if result.Error != nil {
+			err = result.Error
+		} else {
+			response = result.Value
+		}
+	case <-c.Request.Context().Done():
+		err = c.Request.Context().Err()
 	}
 	return
 }
@@ -1077,6 +1086,8 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 	select {
 	case err = <-done:
 	case <-ctx.Done():
+	case <-c.Request.Context().Done():
+		err = c.Request.Context().Err()
 	}
 	return
 }
@@ -1212,6 +1223,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		case <-ctx.Done():
 			return
 		case <-c.Request.Context().Done():
+			err = c.Request.Context().Err()
 			return
 		case handlerErr := <-done:
 			if handlerErr != nil {

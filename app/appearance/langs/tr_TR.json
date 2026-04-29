@@ -1774,6 +1774,7 @@
     "283": "Şifre",
     "284": "Erişim yasaklandı",
     "285": "Şifre yanlış",
-    "286": "[%s] geri alındı"
+    "286": "[%s] geri alındı",
+    "287": "Erişim yetkilendirme kodu yalnızca boşluklardan oluşamaz. Devre dışı bırakmak için giriş kutusunu doğrudan temizleyin"
   }
 }

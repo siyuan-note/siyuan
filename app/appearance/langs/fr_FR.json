@@ -1774,6 +1774,7 @@
     "283": "Mot de passe",
     "284": "Accès refusé",
     "285": "Le mot de passe est incorrect",
-    "286": "[%s] a déjà été restauré"
+    "286": "[%s] a déjà été restauré",
+    "287": "Le code d'autorisation d'accès ne peut pas contenir uniquement des espaces. Pour le désactiver, effacez directement le champ de saisie"
   }
 }

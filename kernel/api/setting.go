@@ -293,6 +293,7 @@ func setEditor(c *gin.Context) {
 	}
 
 	oldGenerateHistoryInterval := model.Conf.Editor.GenerateHistoryInterval
+	oldFontFamily := model.Conf.Editor.FontFamily
 
 	editor := conf.NewEditor()
 	if err = gulu.JSON.UnmarshalJSON(param, editor); err != nil {
@@ -327,6 +328,16 @@ func setEditor(c *gin.Context) {
 	oldVirtualBlockRefInclude := model.Conf.Editor.VirtualBlockRefInclude
 	oldVirtualBlockRefExclude := model.Conf.Editor.VirtualBlockRefExclude
 	oldReadOnly := model.Conf.Editor.ReadOnly
+
+	recentFonts := model.Conf.Editor.RecentFonts
+	if nil == recentFonts {
+		recentFonts = []string{}
+	}
+	editor.RecentFonts = make([]string, len(recentFonts))
+	copy(editor.RecentFonts, recentFonts)
+	if oldFontFamily != editor.FontFamily {
+		editor.AddRecentFont(editor.FontFamily)
+	}
 
 	model.Conf.Editor = editor
 	model.Conf.Save()

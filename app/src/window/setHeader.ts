@@ -45,13 +45,13 @@ export const setTabPosition = (onlyPadding = false) => {
             if (rect.right + 1 >= centerRect.right) {
                 if (paddingRight + 103 > rect.width) {
                     headerElement.style.visibility = "hidden";
-                } else {
+                } else if (paddingRight > 0) {
                     (headerElement.lastElementChild as HTMLElement).style.marginRight = paddingRight + "px";
                 }
             } else if (rect.right > dragRect.right) {
                 if (paddingRight + 103 > rect.width) {
                     headerElement.style.visibility = "hidden";
-                } else {
+                } else if (rect.right - dragRect.right > 0) {
                     (headerElement.lastElementChild as HTMLElement).style.marginRight = (rect.right - dragRect.right) + "px";
                 }
             }

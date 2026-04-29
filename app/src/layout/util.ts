@@ -659,15 +659,18 @@ export const resizeTopBar = () => {
     }
     barMoreElement.setAttribute("data-hideids", hideIds.join(","));
 
-    const width = dragElement.clientWidth;
-    const dragRect = dragElement.getBoundingClientRect();
-    const left = dragRect.left;
-    const right = window.innerWidth - dragRect.right;
-    if (left > right && left - right < width / 3) {
-        dragElement.style.paddingRight = (left - right) + "px";
-    } else if (left < right && right - left < width / 3) {
-        dragElement.style.paddingLeft = (right - left) + "px";
+    if (!window.siyuan.config.appearance.hideToolbar) {
+        const width = dragElement.clientWidth;
+        const dragRect = dragElement.getBoundingClientRect();
+        const left = dragRect.left;
+        const right = window.innerWidth - dragRect.right;
+        if (left > right && left - right < width / 3) {
+            dragElement.style.paddingRight = (left - right) + "px";
+        } else if (left < right && right - left < width / 3) {
+            dragElement.style.paddingLeft = (right - left) + "px";
+        }
     }
+
     window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].forEach((id: string) => {
         toolbarElement.querySelector("#" + id)?.classList.add("fn__none");
     });

@@ -27,9 +27,9 @@ html {
 
 body {
   background-image: radial-gradient(
-    ellipse 45% 20% at 0% 0%,
-    hsla(var(--b3-body-background-hl), calc(var(--b3-body-background-hl-opacity) * 0.5)) 0%,
-    transparent 100%
+                  ellipse 45% 20% at 0% 0%,
+                  hsla(var(--b3-body-background-hl), calc(var(--b3-body-background-hl-opacity) * 0.5)) 0%,
+                  transparent 100%
   );
 }
 
@@ -42,11 +42,13 @@ body {
   z-index: 8;
   border-radius: 0;
 
+  &.sy__graph {
+    background-color: var(--b3-theme-background);
+  }
+
   & > .protyle-breadcrumb,
   & > .block__icons { // 关系图、card
     padding-left: var(--b3-toolbar-left-mac);
-    height: 32px;
-    min-height: 32px;
   }
 
   .protyle-breadcrumb > .protyle-breadcrumb__space,

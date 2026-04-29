@@ -17,7 +17,7 @@
   }
 
   &:not(.b3-text-field--text):focus {
-    box-shadow: inset 0 0 0 1px var(--b3-theme-primary), 0 0 0 3px var(--b3-theme-primary-lightest);
+    box-shadow: inset 0 0 0 .6px var(--b3-theme-primary-light), 0 0 0 2px var(--b3-theme-primary-lighter);
   }
 
   &[type="color"] {

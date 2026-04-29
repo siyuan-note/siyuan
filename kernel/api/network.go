@@ -445,6 +445,10 @@ func httpProxy(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"code": -1, "msg": "create request failed: " + reqErr.Error()})
 		return
 	}
+
+	proxyReq.ContentLength = c.Request.ContentLength
+	proxyReq.Header.Set("Content-Type", c.ContentType())
+
 	for k, vs := range *targetHeaders {
 		for _, v := range vs {
 			proxyReq.Header.Add(k, v)
@@ -460,7 +464,9 @@ func httpProxy(c *gin.Context) {
 
 	forwardResponseHeaders(c.Writer.Header(), resp.Header)
 	c.Writer.WriteHeader(resp.StatusCode)
-	io.Copy(c.Writer, resp.Body)
+	if _, err := io.Copy(c.Writer, resp.Body); err != nil {
+		logging.LogWarnf("http proxy copy response failed: %s", err.Error())
+	}
 }
 
 // wsProxy proxies a WebSocket connection to a remote WebSocket endpoint.
@@ -606,20 +612,15 @@ func esProxy(c *gin.Context) {
 
 	buf := make([]byte, 4096)
 	for {
-		select {
-		case <-c.Request.Context().Done():
-			return
-		default:
-			n, readErr := resp.Body.Read(buf)
-			if n > 0 {
-				if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
-					return
-				}
-				c.Writer.Flush()
-			}
-			if readErr != nil {
+		n, readErr := resp.Body.Read(buf)
+		if n > 0 {
+			if _, writeErr := c.Writer.Write(buf[:n]); writeErr != nil {
 				return
 			}
+			c.Writer.Flush()
+		}
+		if readErr != nil {
+			return
 		}
 	}
 }

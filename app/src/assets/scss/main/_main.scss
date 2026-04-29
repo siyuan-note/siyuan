@@ -153,10 +153,6 @@ html[data-frontend="browser-desktop"] {
       height: 31.5px;
       border-radius: 0;
 
-      svg {
-        width: 16px !important;
-      }
-
       &:hover {
         color: var(--b3-theme-on-error);
         background-color: var(--b3-theme-error)
@@ -173,7 +169,7 @@ html[data-frontend="browser-desktop"] {
 
     .toolbar__item {
       padding: 13.25px;
-      height: auto;
+      height: 42px;
       margin: 0;
       border-radius: 0;
 

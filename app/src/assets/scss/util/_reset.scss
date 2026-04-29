@@ -55,6 +55,7 @@ body {
   }
 
   &.body--win32 {
+    --b3-toolbar-left-mac: 0;
     -webkit-font-smoothing: auto;
 
     .toolbar {
@@ -65,7 +66,7 @@ body {
       & > .protyle-breadcrumb,
       & > .block__icons {
         padding-left: 10px;
-        padding-right: 108px;
+        padding-right: 126px;
       }
 
       & > .block__icons > .search__label {
@@ -156,6 +157,18 @@ body {
         left: 0;
         width: 100%;
       }
+    }
+
+    .fullscreen > .protyle-breadcrumb, .fullscreen > .block__icons {
+      padding-left: var(--b3-toolbar-left-mac);
+      height: 42px;
+      min-height: 42px;
+    }
+
+    .toolbar__item--win,
+    .toolbar__item--close {
+      padding: 13.25px;
+      height: 42px;
     }
   }
 

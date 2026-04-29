@@ -22,7 +22,7 @@ export const setTabPosition = () => {
     }
 
     const centerRect = (isWindowMode ? window.siyuan.layout.layout : window.siyuan.layout.centerLayout).element.getBoundingClientRect();
-    const dragRect = document.getElementById("drag")?.getBoundingClientRect();
+    const dragRect = document.getElementById("drag")?.getBoundingClientRect() || { left: 0, right: 0 };
     const paddingLeft = ("darwin" === window.siyuan.config.system.os && isWindowMode) ?
         parseInt(getComputedStyle(document.body).getPropertyValue("--b3-toolbar-left-mac")) : dragRect.left - centerRect.left;
     const paddingRight = isWindowMode ?

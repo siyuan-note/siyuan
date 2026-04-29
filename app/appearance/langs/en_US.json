@@ -1774,6 +1774,7 @@
     "283": "Password",
     "284": "Access denied",
     "285": "Password is incorrect",
-    "286": "[%s] has already been rolled back"
+    "286": "[%s] has already been rolled back",
+    "287": "The access auth code cannot contain only spaces. To disable it, just clear the input box"
   }
 }

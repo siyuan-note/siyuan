@@ -101,11 +101,6 @@
     .b3-list--background li.b3-list-item--focus {
       background-color: var(--b3-theme-primary-lightest);
     }
-
-    .graph__svg,
-    .inbox__list {
-      background-color: var(--b3-theme-background);
-    }
   }
 
   &__resize {

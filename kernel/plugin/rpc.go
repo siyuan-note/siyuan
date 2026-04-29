@@ -18,10 +18,12 @@ package plugin
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lxzan/gws"
@@ -297,13 +299,7 @@ func HandleRpcWebSocket(c *gin.Context) {
 		return
 	}
 
-	connDone := make(chan struct{})
-
-	h := &WsEventHandler{}
-
-	h.onClose = func(socket *gws.Conn, err error) {
-		close(connDone)
-	}
+	h := &WsEventHandler{p: p}
 
 	h.onMessage = func(socket *gws.Conn, message *gws.Message) {
 		defer message.Close()
@@ -363,11 +359,30 @@ func HandleRpcWebSocket(c *gin.Context) {
 		return
 	}
 
-	p.TrackRpcSocket(socket)
-	defer p.UntrackRpcSocket(socket)
+	ctx, cancel := context.WithCancel(p.context)
 
-	go socket.ReadLoop()
-	<-connDone
+	var openOnce sync.Once
+	var closeOnce sync.Once
+
+	doOpen := func() {
+		go openOnce.Do(func() {
+			p.TrackRpcSocket(socket)
+			socket.ReadLoop()
+			cancel()
+		})
+	}
+
+	doClose := func() {
+		closeOnce.Do(func() {
+			p.UntrackRpcSocket(socket)
+			socket.NetConn().Close()
+			cancel()
+		})
+	}
+
+	defer doClose()
+	doOpen()
+	<-ctx.Done()
 }
 
 // resolveRunningPlugin looks up the plugin by name and writes an error response if it is

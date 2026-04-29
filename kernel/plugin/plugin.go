@@ -1086,8 +1086,6 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 	select {
 	case err = <-done:
 	case <-ctx.Done():
-	case <-c.Request.Context().Done():
-		err = c.Request.Context().Err()
 	}
 	return
 }

@@ -97,7 +97,8 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 			}
 
-			go func() (err error) {
+			go func() {
+				var err error
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.client.fetch: %v", r)
@@ -169,8 +170,6 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					err = runErr
 					return
 				}
-
-				return
 			}()
 
 			return
@@ -562,7 +561,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			esURL := fmt.Sprintf("http://127.0.0.1:%s%s", util.ServerPort, path)
 
-			ctx, cancel := context.WithCancel(context.Background())
+			ctx, cancel := context.WithCancel(p.context)
 
 			var closeOnce sync.Once
 			doClose := func() {
@@ -607,7 +606,8 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			setReadyState(EventSourceConnecting)
 
-			go func() (err error) {
+			go func() {
+				var err error
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.client.event: %v", r)
@@ -616,13 +616,13 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					doClose()
 
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+						if err != nil && !errors.Is(err, context.Canceled) {
+							event := rt.NewObject()
+							event.Set("type", rt.ToValue("error"))
+							event.Set("error", rt.NewGoError(err))
+							invokeEsHook("onerror", event)
+						}
 						if EventSourceState(readyState.Load()) != EventSourceClosed {
-							if err != nil && !errors.Is(err, context.Canceled) {
-								event := rt.NewObject()
-								event.Set("type", rt.ToValue("error"))
-								event.Set("error", rt.NewGoError(err))
-								invokeEsHook("onerror", event)
-							}
 							setReadyState(EventSourceClosed)
 						}
 						return
@@ -666,7 +666,6 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						return
 					}, nil)
 				})
-				return
 			}()
 
 			result = esObj

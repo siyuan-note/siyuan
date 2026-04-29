@@ -70,10 +70,9 @@ func (h *WsEventHandler) OnPong(socket *gws.Conn, payload []byte) {
 }
 
 func (h *WsEventHandler) OnMessage(socket *gws.Conn, message *gws.Message) {
+	defer message.Close()
 	if h.onMessage != nil {
 		h.onMessage(socket, message)
-	} else {
-		message.Close()
 	}
 }
 
@@ -153,7 +152,6 @@ func (h *WsEventHandler) BindOnPong(manager *WsManager) {
 
 func (h *WsEventHandler) BindOnMessage(manager *WsManager) {
 	h.onMessage = func(conn *gws.Conn, message *gws.Message) {
-		defer message.Close()
 		opcode := message.Opcode
 		data := make([]byte, message.Data.Len())
 		copy(data, message.Bytes()) // message.Bytes() points into gws-managed memory reclaimed by message.Close() (deferred above)

@@ -5,12 +5,12 @@ import {Editor} from "../editor";
 import {Asset} from "../asset";
 import {Constants} from "../constants";
 
-export const setTabPosition = () => {
+export const setTabPosition = (onlyPadding = false) => {
     const isWindowMode = isWindow();
     const wndsTemp: Wnd[] = [];
     if (isWindowMode) {
         getAllWnds(window.siyuan.layout.layout, wndsTemp);
-    } else if (window.siyuan.config.appearance.hideToolbar){
+    } else if (window.siyuan.config.appearance.hideToolbar) {
         if (!window.siyuan.layout.centerLayout) {
             return;
         }
@@ -22,19 +22,47 @@ export const setTabPosition = () => {
     }
 
     const centerRect = (isWindowMode ? window.siyuan.layout.layout : window.siyuan.layout.centerLayout).element.getBoundingClientRect();
-    const dragRect = document.getElementById("drag")?.getBoundingClientRect() || { left: 0, right: 0 };
+    const dragRect = document.getElementById("drag")?.getBoundingClientRect() || {left: 0, right: 0};
     const paddingLeft = ("darwin" === window.siyuan.config.system.os && isWindowMode) ?
         parseInt(getComputedStyle(document.body).getPropertyValue("--b3-toolbar-left-mac")) : dragRect.left - centerRect.left;
     const paddingRight = isWindowMode ?
         document.querySelector(".toolbar__window").clientWidth : centerRect.right - dragRect.right;
-    wndsTemp.forEach(async item => {
-        item.element.classList.remove("layout__wnd--right", "layout__wnd--left", "layout__wnd--center");
-        (item.element.querySelector(".layout-tab-container") as HTMLElement).style.backgroundColor = "";
+    wndsTemp.forEach(item => {
         const headerElement = item.headersElement.parentElement;
         const rect = headerElement.getBoundingClientRect();
-        const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
         headerElement.style.paddingLeft = "";
         (headerElement.lastElementChild as HTMLElement).style.marginRight = "";
+        headerElement.style.visibility = "";
+        if (rect.top <= 0) {
+            // header padding
+            if (rect.left - 1 <= centerRect.left) {
+                headerElement.style.paddingLeft = paddingLeft + "px";
+            } else if (rect.left < dragRect.left) {
+                headerElement.style.paddingLeft = (dragRect.left - rect.left) + "px";
+            }
+
+            if (rect.right + 1 >= centerRect.right) {
+                if (paddingRight + headerElement.lastElementChild.clientWidth > rect.width) {
+                    headerElement.style.visibility = "hidden";
+                } else {
+                    (headerElement.lastElementChild as HTMLElement).style.marginRight = paddingRight + "px";
+                }
+            } else if (rect.right > dragRect.right) {
+                if (paddingRight + headerElement.lastElementChild.clientWidth > rect.width) {
+                    headerElement.style.visibility = "hidden";
+                } else {
+                    (headerElement.lastElementChild as HTMLElement).style.marginRight = (rect.right - dragRect.right) + "px";
+                }
+            }
+        }
+
+        if (onlyPadding) {
+            return;
+        }
+
+        item.element.classList.remove("layout__wnd--right", "layout__wnd--left", "layout__wnd--center");
+        (item.element.querySelector(".layout-tab-container") as HTMLElement).style.backgroundColor = "";
+        const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
         if (rect.top <= 0) {
             // empty
             if (headerElement.classList.contains("fn__none")) {
@@ -54,14 +82,6 @@ export const setTabPosition = () => {
             dragElement.parentElement.parentElement.style.minWidth = "95px";
             dragElement.style.height = dragElement.parentElement.clientHeight + "px";
             (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
-
-            // header padding
-            if (rect.left - 1 <= centerRect.left) {
-                headerElement.style.paddingLeft = paddingLeft + "px";
-            }
-            if (rect.right + 1 >= centerRect.right) {
-                (headerElement.lastElementChild as HTMLElement).style.marginRight = paddingRight + "px";
-            }
         } else {
             dragElement.parentElement.parentElement.style.minWidth = "";
             dragElement.style.height = "";

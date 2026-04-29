@@ -92,6 +92,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             adjustLayout();
             resizeTabs();
             resizeTopBar();
+            setTabPosition(true);
             window.siyuan.menus.menu.resetPosition();
             firstResize = true;
             if (getSelection().rangeCount > 0) {

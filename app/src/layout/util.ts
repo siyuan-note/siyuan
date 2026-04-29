@@ -849,6 +849,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 documentSelf.onselectstart = null;
                 documentSelf.onselect = null;
                 adjustLayout(isWindow() ? window.siyuan.layout.centerLayout : undefined);
+                setTabPosition(true);
                 resizeTabs();
                 if (!isWindow()) {
                     window.siyuan.layout.leftDock.setSize();

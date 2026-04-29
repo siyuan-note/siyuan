@@ -19,6 +19,7 @@ import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
+import {setTabPosition} from "../window/setHeader";
 
 export class Plugin {
     private app: App;
@@ -224,6 +225,7 @@ export class Plugin {
             iconElement.addEventListener("click", options.callback);
             iconElement.setAttribute("data-location", options.position || "right");
             resizeTopBar();
+            setTabPosition(true);
         }
         if (isMobile() && window.siyuan.storage) {
             if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {

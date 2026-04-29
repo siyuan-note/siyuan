@@ -50,7 +50,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             }
             /// #if !MOBILE
             resizeTopBar();
-            setTabPosition();
+            setTabPosition(true);
             // rm statusBar
             plugin.statusBarIcons.forEach(item => {
                 item.remove();

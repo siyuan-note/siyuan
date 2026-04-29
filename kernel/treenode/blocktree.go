@@ -623,6 +623,8 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
+			closeDatabase()
+			util.RemoveDatabaseFile(util.BlockTreeDBPath)
 			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 		}
@@ -640,6 +642,8 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 			logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", sqlStmt, err, logging.ShortStack())
 
 			if strings.Contains(err.Error(), "database disk image is malformed") {
+				closeDatabase()
+				util.RemoveDatabaseFile(util.BlockTreeDBPath)
 				initDatabase(true)
 				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 			}

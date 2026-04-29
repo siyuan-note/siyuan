@@ -255,7 +255,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				wsObj.Set("bufferedAmount", rt.ToValue(bufferedAmount.Load()))
 			}
 
-			h := &WsEventHandler{}
+			h := &WsEventHandler{p: p}
 
 			manager := &WsManager{
 				BufferedAmount: &bufferedAmount,
@@ -273,10 +273,19 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 			var openOnce sync.Once
 
+			ctx, cancel := context.WithCancel(p.context)
+			var closeOnce sync.Once
+			doClose := func() {
+				closeOnce.Do(func() {
+					cancel()
+				})
+			}
+
 			ws_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				openPromise, openResolve, openReject := rt.NewPromise()
 
 				openRunErr := p.worker.Run(func(rt *goja.Runtime) (opening any, err error) {
+					opening = false
 					openOnce.Do(func() {
 						opening = true
 						go func() {
@@ -300,9 +309,14 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 										logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
 									}
 								})
+								doClose()
 								return
 							}
 							gwsConn.Store(conn)
+							go func() {
+								<-ctx.Done()
+								conn.NetConn().Close()
+							}()
 							// Resolve the open promise before starting ReadLoop so the caller
 							// can await open() and then rely on onopen for additional setup.
 							p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
@@ -312,12 +326,13 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 								return
 							}, nil)
 							conn.ReadLoop()
+							doClose()
 						}()
 					})
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
 					if lo.IsNil(err) {
-						if opening, ok := result.(bool); ok && !opening {
+						if opening, ok := result.(bool); !ok || !opening {
 							if resolveErr := openResolve(nil); resolveErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
 							}
@@ -411,6 +426,8 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					}
 					if c := gwsConn.Load(); c != nil {
 						err = c.WritePing([]byte(pingData))
+					} else {
+						err = fmt.Errorf("WebSocket not yet connected")
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
@@ -441,6 +458,8 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					}
 					if c := gwsConn.Load(); c != nil {
 						err = c.WritePong([]byte(pongData))
+					} else {
+						err = fmt.Errorf("WebSocket not yet connected")
 					}
 					return
 				}, func(rt *goja.Runtime, result any, err error) {

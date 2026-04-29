@@ -74,12 +74,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					}
 
 					if h := initObj.Get("headers"); isJsValueNotNull(h) {
-						if hObj := h.ToObject(rt); hObj != nil {
-							if hMap, ok := h.Export().(map[string]string); ok {
-								for k, v := range hMap {
-									headers[k] = v
-								}
-							}
+						if exportErr := rt.ExportTo(h, &headers); exportErr != nil {
+							err = fmt.Errorf("failed to export headers: %w", exportErr)
+							return
 						}
 					}
 
@@ -90,7 +87,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 						} else {
 							body := b.Export()
 							if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
-								bodyBytes = arrayBuffer.Bytes()
+								src := arrayBuffer.Bytes()
+								bodyBytes = make([]byte, len(src))
+								copy(bodyBytes, src)
 							}
 						}
 					}
@@ -182,6 +181,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		})
 		if runErr != nil {
 			logging.LogErrorf("[plugin:%s] siyuan.client.fetch worker run: %v", p.Name, runErr)
+			if rejectErr := reject(rt.NewGoError(runErr)); rejectErr != nil {
+				logging.LogErrorf("[plugin:%s] siyuan.client.fetch reject: %v", p.Name, rejectErr)
+			}
 		}
 
 		return rt.ToValue(promise)

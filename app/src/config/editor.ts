@@ -11,6 +11,8 @@ import {Constants} from "../constants";
 import {resize} from "../protyle/util/resize";
 import {setReadOnly} from "./util/setReadOnly";
 import {Menu} from "../plugin/Menu";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {upDownHint} from "../util/upDownHint";
 
 export const editor = {
     element: undefined as Element,
@@ -287,7 +289,7 @@ export const editor = {
         <div class="b3-label__text">${window.siyuan.languages.font1}</div>
     </div>
     <span class="fn__space"></span>
-    <input readonly="readonly" placeholder="${window.siyuan.languages.default}" id="fontFamily" class="b3-text-field fn__flex-center fn__size200" style="font-family:'${window.siyuan.config.editor.fontFamily}',var(--b3-font-family);" value="${window.siyuan.config.editor.fontFamily}"/>
+    <input readonly="readonly" placeholder="${window.siyuan.languages.default}" id="fontFamily" class="b3-select fn__flex-center fn__size200" style="font-family:'${window.siyuan.config.editor.fontFamily}',var(--b3-font-family);" value="${window.siyuan.config.editor.fontFamily}"/>
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -436,43 +438,98 @@ export const editor = {
         }
         /// #endif
 
-        const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLSelectElement;
-        fontFamilyElement.addEventListener("click", () => {
-            fetchPost("/api/system/getSysFonts", {}, (response) => {
-                const fontMenu = new Menu();
-                fontMenu.addItem({
-                    iconHTML: "",
-                    checked: window.siyuan.config.editor.fontFamily === "",
-                    label: `<div style='var(--b3-font-family);'>${window.siyuan.languages.default}</div>`,
-                    click: () => {
-                        if ("" === window.siyuan.config.editor.fontFamily) {
+        const fontFamilyElement = editor.element.querySelector("#fontFamily") as HTMLInputElement;
+        fontFamilyElement.addEventListener("click", (event: MouseEvent) => {
+            event.stopPropagation();
+            const fontMenu = new Menu(undefined, undefined, "b3-menu__items fn__flex-column b3-menu__filter b3-menu__filter--fontFamily");
+            fontMenu.addItem({
+                iconHTML: "",
+                type: "empty",
+                label: `<input class="b3-text-field fn__flex-shrink" placeholder="${window.siyuan.languages.font}"/>
+    <div class="fn__hr"></div>
+    <div class="b3-list fn__flex-1 b3-list--background">
+        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+    </div>`,
+                bind: (element) => {
+                    const listElement = element.querySelector(".b3-list--background");
+                    const inputElement = element.querySelector("input") as HTMLInputElement;
+                    inputElement.disabled = true;
+                    fetchPost("/api/system/getSysFonts", {}, (response) => {
+                        if (!inputElement.isConnected) {
                             return;
                         }
-                        fontFamilyElement.value = "";
-                        fontFamilyElement.style.fontFamily = "";
-                        setEditor();
-                    }
-                });
-                response.data.forEach((item: string) => {
-                    fontMenu.addItem({
-                        iconHTML: "",
-                        checked: window.siyuan.config.editor.fontFamily === item,
-                        label: `<div style='font-family:"${item}",var(--b3-font-family);'>${item}</div>`,
-                        click: () => {
-                            if (item === window.siyuan.config.editor.fontFamily) {
+                        inputElement.disabled = false;
+                        const renderList = (keyword: string) => {
+                            keyword = keyword.trim().toLowerCase();
+                            let html = "";
+                            if (!keyword || window.siyuan.languages.default.toLowerCase().includes(keyword)) {
+                                html += `<div class="b3-list-item b3-list-item--narrow" data-font="">
+    <div class="fn__flex-1" style="font-family:var(--b3-font-family)">${highlightSearchMark(window.siyuan.languages.default, keyword)}</div>
+</div>`;
+                            }
+                            response.data.forEach((item: string) => {
+                                if (keyword && !item.toLowerCase().includes(keyword)) {
+                                    return;
+                                }
+                                html += `<div class="b3-list-item b3-list-item--narrow" data-font="${item}">
+    <div class="fn__flex-1" style="font-family:&quot;${item}&quot;,var(--b3-font-family)">${highlightSearchMark(item, keyword)}</div>
+</div>`;
+                            });
+                            listElement.innerHTML = html || `<div class="b3-list-item b3-list-item--narrow b3-list-item--readonly"><div class="fn__flex-1">${window.siyuan.languages.emptyContent}</div></div>`;
+                            listElement.querySelector(`.b3-list-item[data-font="${CSS.escape(window.siyuan.config.editor.fontFamily)}"]`)
+                                ?.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>');
+                            listElement.querySelector(".b3-list-item")?.classList.add("b3-list-item--focus");
+                        };
+                        renderList("");
+                        const applyFont = (listItem: HTMLElement | null | false) => {
+                            if (!listItem || listItem.classList.contains("b3-list-item--readonly")) {
                                 return;
                             }
-                            fontFamilyElement.value = item;
-                            fontFamilyElement.style.fontFamily = item + ",var(--b3-font-family)";
+                            const font = listItem.getAttribute("data-font") || "";
+                            if (font === window.siyuan.config.editor.fontFamily) {
+                                fontMenu.close();
+                                return;
+                            }
+                            fontFamilyElement.value = font;
+                            fontFamilyElement.style.fontFamily = font ? font + ",var(--b3-font-family)" : "";
                             setEditor();
-                        }
+                            fontMenu.close();
+                        };
+                        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                            event.stopPropagation();
+                            if (event.isComposing) {
+                                return;
+                            }
+                            upDownHint(listElement, event);
+                            if (event.key === "Enter") {
+                                const focused = listElement.querySelector(".b3-list-item--focus") as HTMLElement | null;
+                                applyFont(focused);
+                            } else if (event.key === "Escape") {
+                                fontMenu.close();
+                            }
+                        });
+                        inputElement.addEventListener("compositionend", () => {
+                            renderList(inputElement.value);
+                        });
+                        inputElement.addEventListener("input", (event: InputEvent) => {
+                            if (event.isComposing) {
+                                return;
+                            }
+                            event.stopPropagation();
+                            renderList(inputElement.value);
+                        });
+                        listElement.addEventListener("click", (event) => {
+                            const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
+                            applyFont(listItemElement);
+                        });
+                        inputElement.focus();
                     });
-                });
-                const rect = fontFamilyElement.getBoundingClientRect();
-                fontMenu.open({
-                    x: rect.left,
-                    y: rect.bottom
-                });
+                }
+            });
+            const rect = fontFamilyElement.getBoundingClientRect();
+            fontMenu.open({
+                x: rect.left,
+                y: rect.bottom
             });
         });
 
@@ -610,4 +667,24 @@ export const editor = {
 
         setInlineStyle();
     }
+};
+
+const highlightSearchMark = (text: string, keywordLower: string) => {
+    if (!keywordLower) {
+        return text;
+    }
+    const lowerText = text.toLowerCase();
+    let result = "";
+    let i = 0;
+    while (i < text.length) {
+        const idx = lowerText.indexOf(keywordLower, i);
+        if (idx === -1) {
+            result += text.slice(i);
+            break;
+        }
+        result += text.slice(i, idx);
+        result += "<mark>" + text.slice(idx, idx + keywordLower.length) + "</mark>";
+        i = idx + keywordLower.length;
+    }
+    return result;
 };

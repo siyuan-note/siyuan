@@ -33,6 +33,10 @@
     min-width: 260px;
     max-width: 420px;
     max-height: 50vh;
+
+    &--fontFamily .b3-list-item .fn__flex-1 {
+      overflow: visible;
+    }
   }
 
   &--fullscreen {
@@ -171,6 +175,12 @@
   &__items {
     overflow: auto;
     padding: 0 8px;
+
+    &.b3-menu__filter .b3-menu__empty-body {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
   }
 
   &__item {

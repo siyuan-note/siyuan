@@ -315,7 +315,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				opcode := message.Opcode
 				data := make([]byte, message.Data.Len())
 				copy(data, message.Bytes()) // message.Bytes() points into gws-managed memory reclaimed by message.Close() (deferred above)
-				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+				runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 					event := rt.NewObject()
 					switch opcode {
 					case gws.OpcodeText:
@@ -330,6 +330,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					invokeWsHook("onmessage", event)
 					return
 				}, nil)
+				if runErr != nil {
+					logging.LogErrorf("[plugin:%s] invoke ws.onmessage handler error: %v", p.Name, runErr)
+				}
 			}
 
 			var openOnce sync.Once
@@ -337,10 +340,9 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				openPromise, openResolve, openReject := rt.NewPromise()
 
-				openRunErr := p.worker.Run(func(rt *goja.Runtime) (taskResult any, err error) {
-					var ranFirst bool
+				openRunErr := p.worker.Run(func(rt *goja.Runtime) (opening any, err error) {
 					openOnce.Do(func() {
-						ranFirst = true
+						opening = true
 						go func() {
 							conn, _, dialErr := gws.NewClient(h, &gws.ClientOption{
 								Addr:          wsURL,
@@ -368,30 +370,26 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							p.TrackGwsSocket(conn, false)
 							// Resolve the open promise before starting ReadLoop so the caller
 							// can await open() and then rely on onopen for additional setup.
-							p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) { return },
-								func(rt *goja.Runtime, _ any, _ error) {
-									if resolveErr := openResolve(nil); resolveErr != nil {
-										logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
-									}
-								})
+							p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+								if resolveErr := openResolve(nil); resolveErr != nil {
+									logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
+								}
+								return
+							}, nil)
 							conn.ReadLoop()
 						}()
 					})
-					if !ranFirst {
-						// Subsequent calls: signal callback to resolve immediately.
-						taskResult = true
-					}
 					return
-				}, func(rt *goja.Runtime, taskResult any, err error) {
-					if !lo.IsNil(err) {
+				}, func(rt *goja.Runtime, result any, err error) {
+					if lo.IsNil(err) {
+						if opening, ok := result.(bool); ok && !opening {
+							if resolveErr := openResolve(nil); resolveErr != nil {
+								logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
+							}
+						}
+					} else {
 						if rejectErr := openReject(rt.NewGoError(err)); rejectErr != nil {
 							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
-						}
-						return
-					}
-					if resolveNow, _ := taskResult.(bool); resolveNow {
-						if resolveErr := openResolve(nil); resolveErr != nil {
-							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
 						}
 					}
 				})

@@ -954,7 +954,7 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 			opcode := message.Opcode
 			data := make([]byte, message.Data.Len())
 			copy(data, message.Bytes()) // message.Bytes() points into gws-managed memory reclaimed by message.Close() (deferred above)
-			runMsgErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+			runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 				event := rt.NewObject()
 				switch opcode {
 				case gws.OpcodeText:
@@ -969,8 +969,8 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 				invokePortHook("onmessage", event)
 				return
 			}, nil)
-			if runMsgErr != nil {
-				doClose()
+			if runErr != nil {
+				logging.LogErrorf("[plugin:%s] ws server invoke onmessage handler error: %v", p.Name, runErr)
 			}
 		}
 

@@ -96,6 +96,7 @@ func ClearQueue() {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 	operationQueue = nil
+	clearWALEntries()
 }
 
 var flushingTx = atomic.Bool{}
@@ -104,7 +105,7 @@ func FlushQueue() {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
-	ops := getOperations()
+	ops, walSnapshot := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
 		return
@@ -202,6 +203,8 @@ func FlushQueue() {
 	util.BroadcastByType("main", "databaseIndexCommit", 0, "", nil)
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
+
+	clearWAL(walSnapshot)
 }
 
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {
@@ -447,16 +450,18 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 	appendOperation(newOp)
 }
 
-func getOperations() (ops []*dbQueueOperation) {
+func getOperations() (ops []*dbQueueOperation, walSnapshot int64) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
 	ops = operationQueue
 	operationQueue = nil
+	walSnapshot = walSize.Load()
 	return
 }
 
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
+	appendToWAL(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
 }

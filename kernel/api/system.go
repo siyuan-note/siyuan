@@ -345,7 +345,6 @@ func exportConf(c *gin.Context) {
 	clonedConf.Repo = nil
 	clonedConf.Publish = nil
 	clonedConf.CloudRegion = 0
-	clonedConf.DataIndexState = 0
 
 	data, err = gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
 	if err != nil {

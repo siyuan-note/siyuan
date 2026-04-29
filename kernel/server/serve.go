@@ -474,6 +474,7 @@ func serveAppearance(ginServer *gin.Engine) {
 					util.ReportFileSysFatalError(err)
 					return
 				}
+				enUSData = bytes.TrimPrefix(enUSData, []byte("\xef\xbb\xbf"))
 				enUSMap := map[string]any{}
 				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); err != nil {
 					logging.LogErrorf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
@@ -487,6 +488,7 @@ func serveAppearance(ginServer *gin.Engine) {
 						c.JSON(200, enUSMap)
 						return
 					}
+					data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 
 					langMap := map[string]any{}
 					if err = gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {

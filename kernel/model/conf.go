@@ -674,6 +674,7 @@ func initLang() {
 			logging.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
 			continue
 		}
+		data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 		langMap := map[string]any{}
 		if err := gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
 			logging.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)

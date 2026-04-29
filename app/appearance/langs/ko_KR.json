@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "공개되지 않으며 비밀번호 필요",
   "publishAccessForbiddenComment": "접근 금지됨",
   "copyMirror": "미러 복사",
-  "duplicateMirror": "미러 사본 복제",
-  "duplicateCompletely": "완전한 사본 복제",
+  "duplicateMirror": "미러 사본 만들기",
+  "duplicateCompletely": "완전한 사본 만들기",
   "isMsStoreVerTip": "현재 사용 중인 버전은 Microsoft Store 버전입니다. Microsoft Store에서 업데이트를 확인하세요",
   "andSubFile": "<b>${x}</b> 및 그 하위 문서 ${y}개를 삭제하시겠습니까?",
   "confirmDeleteTip": "<b>${x}</b>을(를) 삭제하시겠습니까?",
@@ -1775,6 +1775,7 @@
     "284": "접근 금지됨",
     "285": "비밀번호가 올바르지 않습니다",
     "286": "[%s] 이미 롤백되었습니다",
-    "287": "액세스 인증 코드는 공백만 포함할 수 없습니다. 비활성화하려면 입력 칸을 직접 비우세요"
+    "287": "액세스 인증 코드는 공백만 포함할 수 없습니다. 비활성화하려면 입력 칸을 직접 비우세요",
+    "288": " (기본)"
   }
 }

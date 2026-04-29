@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Neviditeľné pre verejnosť, prístup chránený heslom",
   "publishAccessForbiddenComment": "Prístup zakázaný",
   "copyMirror": "Kopírovať zrkadlo",
-  "duplicateMirror": "Duplikovať zrkadlo",
-  "duplicateCompletely": "Duplikovať úplne",
+  "duplicateMirror": "Vytvoriť zrkadlovú kópiu",
+  "duplicateCompletely": "Vytvoriť úplnú kópiu",
   "isMsStoreVerTip": "Používate verziu z Microsoft Store, skontrolujte aktualizácie tam",
   "andSubFile": "Naozaj chcete odstrániť <b>${x}</b> a jeho ${y} poddokumentov?",
   "confirmDeleteTip": "Naozaj chcete odstrániť <b>${x}</b>?",
@@ -1775,6 +1775,7 @@
     "284": "Prístup zakázaný",
     "285": "Nesprávne heslo",
     "286": "[%s] bol vrátený",
-    "287": "Prístupový autorizačný kód nemôže obsahovať iba medzery. Ak ho chcete zakázať, jednoducho vymažte vstupné pole"
+    "287": "Prístupový autorizačný kód nemôže obsahovať iba medzery. Ak ho chcete zakázať, jednoducho vymažte vstupné pole",
+    "288": " (Predvolené)"
   }
 }

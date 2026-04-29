@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "No visible públicamente, requiere contraseña para acceder",
   "publishAccessForbiddenComment": "Acceso prohibido",
   "copyMirror": "Copiar espejo",
-  "duplicateMirror": "Espejo duplicado",
-  "duplicateCompletely": "Duplicar completamente",
+  "duplicateMirror": "Crear copia espejo",
+  "duplicateCompletely": "Crear copia completa",
   "isMsStoreVerTip": "La versión utilizada actualmente es la versión de Microsoft Store, verifique si hay actualizaciones en Microsoft Store",
   "andSubFile": "¿Está seguro de que desea eliminar <b>${x}</b> y sus subdocumentos ${y}?",
   "confirmDeleteTip": "¿Está seguro de eliminar <b>${x}</b>?",
@@ -1775,6 +1775,7 @@
     "284": "Acceso denegado",
     "285": "La contraseña es incorrecta",
     "286": "[%s] ya ha sido revertido",
-    "287": "El código de autorización de acceso no puede contener solo espacios. Si desea desactivarlo, simplemente borre el cuadro de entrada"
+    "287": "El código de autorización de acceso no puede contener solo espacios. Si desea desactivarlo, simplemente borre el cuadro de entrada",
+    "288": " (Por defecto)"
   }
 }

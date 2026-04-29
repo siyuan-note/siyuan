@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Not publicly visible, requires password to access",
   "publishAccessForbiddenComment": "Access forbidden",
   "copyMirror": "Copy mirror",
-  "duplicateMirror": "Duplicate mirror",
-  "duplicateCompletely": "Duplicate completely",
+  "duplicateMirror": "Create mirror copy",
+  "duplicateCompletely": "Create complete copy",
   "isMsStoreVerTip": "The currently used version is the Microsoft Store version, please check for updates in the Microsoft Store",
   "andSubFile": "Are you sure you want to delete <b>${x}</b> and its ${y} subdocs?",
   "confirmDeleteTip": "Are you sure to delete <b>${x}</b>?",
@@ -1775,6 +1775,7 @@
     "284": "Access denied",
     "285": "Password is incorrect",
     "286": "[%s] has already been rolled back",
-    "287": "The access auth code cannot contain only spaces. To disable it, just clear the input box"
+    "287": "The access auth code cannot contain only spaces. To disable it, just clear the input box",
+    "288": " (Default)"
   }
 }

@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "公眾不可見，需密碼才能存取",
   "publishAccessForbiddenComment": "禁止存取",
   "copyMirror": "複製鏡像",
-  "duplicateMirror": "複製為鏡像副本",
-  "duplicateCompletely": "複製為完整副本",
+  "duplicateMirror": "建立鏡像副本",
+  "duplicateCompletely": "建立完整副本",
   "isMsStoreVerTip": "目前使用的版本為 Microsoft Store 版本，請在 Microsoft Store 中檢查更新",
   "andSubFile": "決定刪除 <b>${x}</b> 及其 ${y} 個子文件嗎？",
   "confirmDeleteTip": "確定刪除<b>${x}</b> 嗎？",
@@ -1775,6 +1775,7 @@
     "284": "禁止訪問",
     "285": "密碼不正確",
     "286": "[%s] 已經回滾完畢",
-    "287": "授權碼不能只包含空格。如需停用，請直接清空輸入框"
+    "287": "授權碼不能只包含空格。如需停用，請直接清空輸入框",
+    "288": "（預設圖標）"
   }
 }

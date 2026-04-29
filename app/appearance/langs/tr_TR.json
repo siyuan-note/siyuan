@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Herkese görünmez, şifre ile erişilebilir",
   "publishAccessForbiddenComment": "Erişim yasaklandı",
   "copyMirror": "Yansıyı kopyala",
-  "duplicateMirror": "Yansıyı çoğalt",
-  "duplicateCompletely": "Tam kopyala",
+  "duplicateMirror": "Ayna kopyası oluştur",
+  "duplicateCompletely": "Tam kopya oluştur",
   "isMsStoreVerTip": "Kullanılan sürüm Microsoft Store sürümüdür, lütfen Microsoft Store’dan güncellemeleri kontrol et",
   "andSubFile": "<b>${x}</b> ve onun ${y} alt dosyasını silmek istediğine emin misin?",
   "confirmDeleteTip": "<b>${x}</b> öğesini silmek istediğine emin misin?",
@@ -1775,6 +1775,7 @@
     "284": "Erişim yasaklandı",
     "285": "Şifre yanlış",
     "286": "[%s] geri alındı",
-    "287": "Erişim yetkilendirme kodu yalnızca boşluklardan oluşamaz. Devre dışı bırakmak için giriş kutusunu doğrudan temizleyin"
+    "287": "Erişim yetkilendirme kodu yalnızca boşluklardan oluşamaz. Devre dışı bırakmak için giriş kutusunu doğrudan temizleyin",
+    "288": " (Varsayılan)"
   }
 }

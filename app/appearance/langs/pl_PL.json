@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Nie jest widoczny publicznie, wymaga hasła do dostępu",
   "publishAccessForbiddenComment": "Dostęp zabroniony",
   "copyMirror": "Kopiuj lustro",
-  "duplicateMirror": "Duplikuj lustro",
-  "duplicateCompletely": "Duplikuj całkowicie",
+  "duplicateMirror": "Utwórz kopię lustrzaną",
+  "duplicateCompletely": "Utwórz pełną kopię",
   "isMsStoreVerTip": "Aktualnie używana wersja to wersja Microsoft Store, proszę sprawdzić aktualizacje w Microsoft Store",
   "andSubFile": "Czy jesteś pewny, że chcesz usunąć <b>${x}</b> i jego ${y} poddokumenty?",
   "confirmDeleteTip": "Czy na pewno chcesz usunąć <b>${x}</b>?",
@@ -1775,6 +1775,7 @@
     "284": "Dostęp zabroniony",
     "285": "Hasło jest nieprawidłowe",
     "286": "[%s] został cofnięty",
-    "287": "Kod autoryzacji dostępu nie może składać się wyłącznie ze spacji. Aby go wyłączyć, po prostu wyczyść pole wprowadzania"
+    "287": "Kod autoryzacji dostępu nie może składać się wyłącznie ze spacji. Aby go wyłączyć, po prostu wyczyść pole wprowadzania",
+    "288": " (Domyślny)"
   }
 }

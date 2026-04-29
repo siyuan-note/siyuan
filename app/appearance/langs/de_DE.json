@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Für Öffentlichkeit nicht sichtbar, Zugriff erfordert Passwort",
   "publishAccessForbiddenComment": "Zugriff verboten",
   "copyMirror": "Spiegel kopieren",
-  "duplicateMirror": "Spiegel duplizieren",
-  "duplicateCompletely": "Vollständig duplizieren",
+  "duplicateMirror": "Spiegelkopie erstellen",
+  "duplicateCompletely": "Vollständige Kopie erstellen",
   "isMsStoreVerTip": "Die derzeit verwendete Version ist die Microsoft Store-Version, bitte überprüfen Sie die Updates im Microsoft Store",
   "andSubFile": "Sind Sie sicher, dass Sie <b>${x}</b> und seine ${y} Unterdokumente löschen möchten?",
   "confirmDeleteTip": "Sind Sie sicher, dass Sie <b>${x}</b> löschen möchten?",
@@ -1775,6 +1775,7 @@
     "284": "Zugriff verweigert",
     "285": "Passwort ist falsch",
     "286": "[%s] wurde bereits zurückgesetzt",
-    "287": "Der Zugriffsautorisierungscode darf nicht nur aus Leerzeichen bestehen. Um ihn zu deaktivieren, leeren Sie das Eingabefeld direkt"
+    "287": "Der Zugriffsautorisierungscode darf nicht nur aus Leerzeichen bestehen. Um ihn zu deaktivieren, leeren Sie das Eingabefeld direkt",
+    "288": " (Standard)"
   }
 }

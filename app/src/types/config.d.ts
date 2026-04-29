@@ -225,7 +225,7 @@ declare namespace Config {
         /**
          * List of installed icon names
          */
-        icons: string[];
+        icons: { label: string; name: string }[];
         /**
          * The version number of the icon currently in use
          */

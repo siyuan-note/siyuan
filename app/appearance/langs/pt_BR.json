@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Não visível publicamente, requer senha para acessar",
   "publishAccessForbiddenComment": "Acesso proibido",
   "copyMirror": "Copiar espelho",
-  "duplicateMirror": "Duplicar espelho",
-  "duplicateCompletely": "Duplicar completamente",
+  "duplicateMirror": "Criar cópia espelhada",
+  "duplicateCompletely": "Criar cópia completa",
   "isMsStoreVerTip": "A versão atualmente usada é da Microsoft Store, verifique atualizações na Microsoft Store",
   "andSubFile": "Tem certeza que deseja excluir <b>${x}</b> e seus ${y} subdocumentos?",
   "confirmDeleteTip": "Tem certeza que deseja excluir <b>${x}</b>?",
@@ -1775,6 +1775,7 @@
     "284": "Acesso negado",
     "285": "A senha está incorreta",
     "286": "[%s] já foi revertido",
-    "287": "O código de autorização de acesso não pode conter apenas espaços. Para desativá-lo, basta limpar o campo de entrada"
+    "287": "O código de autorização de acesso não pode conter apenas espaços. Para desativá-lo, basta limpar o campo de entrada",
+    "288": " (Padrão)"
   }
 }

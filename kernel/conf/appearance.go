@@ -26,7 +26,7 @@ type Appearance struct {
 	ThemeDark           string             `json:"themeDark"`           // 选择的暗黑模式外观主题
 	ThemeLight          string             `json:"themeLight"`          // 选择的明亮模式外观主题
 	ThemeVer            string             `json:"themeVer"`            // 选择的主题版本
-	Icons               []string           `json:"icons"`               // 图标列表
+	Icons               []*AppearanceIcon  `json:"icons"`               // 图标列表
 	Icon                string             `json:"icon"`                // 选择的图标
 	IconVer             string             `json:"iconVer"`             // 选择的图标版本
 	CodeBlockThemeLight string             `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
@@ -56,5 +56,10 @@ func NewAppearance() *Appearance {
 
 type AppearanceTheme struct {
 	Name  string `json:"name"`  // daylight
+	Label string `json:"label"` // i18n display name
+}
+
+type AppearanceIcon struct {
+	Name  string `json:"name"`  // litheness
 	Label string `json:"label"` // i18n display name
 }

@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Non visibile al pubblico, richiede password per l'accesso",
   "publishAccessForbiddenComment": "Accesso vietato",
   "copyMirror": "Copia specchio",
-  "duplicateMirror": "Duplica specchio",
-  "duplicateCompletely": "Duplica completamente",
+  "duplicateMirror": "Crea copia speculare",
+  "duplicateCompletely": "Crea copia completa",
   "isMsStoreVerTip": "La versione attualmente utilizzata è la versione Microsoft Store, controlla gli aggiornamenti nel Microsoft Store",
   "andSubFile": "Sei sicuro di voler eliminare <b>${x}</b> e i suoi ${y} sotto-documenti?",
   "confirmDeleteTip": "Sei sicuro di voler eliminare <b>${x}</b>?",
@@ -1775,6 +1775,7 @@
     "284": "Accesso negato",
     "285": "La password è errata",
     "286": "[%s] è già stato ripristinato",
-    "287": "Il codice di autorizzazione di accesso non può contenere solo spazi. Per disabilitarlo, svuota direttamente il campo di input"
+    "287": "Il codice di autorizzazione di accesso non può contenere solo spazi. Per disabilitarlo, svuota direttamente il campo di input",
+    "288": " (Predefinito)"
   }
 }

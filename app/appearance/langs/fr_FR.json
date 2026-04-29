@@ -143,8 +143,8 @@
   "publishAccessPrivateComment": "Pas visible publiquement, nécessite un mot de passe pour accéder",
   "publishAccessForbiddenComment": "Accès interdit",
   "copyMirror": "Copier le miroir",
-  "duplicateMirror": "Miroir en double",
-  "duplicateCompletely": "Dupliquer complètement",
+  "duplicateMirror": "Créer une copie miroir",
+  "duplicateCompletely": "Créer une copie complète",
   "isMsStoreVerTip": "La version actuellement utilisée est la version du Microsoft Store, veuillez vérifier les mises à jour dans le Microsoft Store",
   "andSubFile": "Êtes-vous sûr de vouloir supprimer <b>${x}</b> et ses sous-documents ${y} ?",
   "confirmDeleteTip": "Êtes-vous sûr de supprimer <b>${x}</b> ?",
@@ -1775,6 +1775,7 @@
     "284": "Accès refusé",
     "285": "Le mot de passe est incorrect",
     "286": "[%s] a déjà été restauré",
-    "287": "Le code d'autorisation d'accès ne peut pas contenir uniquement des espaces. Pour le désactiver, effacez directement le champ de saisie"
+    "287": "Le code d'autorisation d'accès ne peut pas contenir uniquement des espaces. Pour le désactiver, effacez directement le champ de saisie",
+    "288": " (Default)"
   }
 }

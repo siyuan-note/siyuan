@@ -290,10 +290,14 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
     }
 
     webFrame.setZoomFactor(zoom);
+    const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
+    if (window.siyuan.config.appearance.hideToolbar) {
+        position.y += 5;
+    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",
         zoom,
-        position: Constants.SIZE_ZOOM.find((item) => item.zoom === zoom).position
+        position
     });
     window.siyuan.storage[Constants.LOCAL_ZOOM] = zoom;
     setStorageVal(Constants.LOCAL_ZOOM, zoom);

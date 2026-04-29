@@ -16,14 +16,19 @@ import {initWindowEvent} from "../boot/globalEvent/event";
 import {getAllEditor} from "../layout/getAll";
 /// #if !BROWSER
 import {initNativeDialogOverride} from "../protyle/util/compatibility";
+import {setTabPosition} from "./setHeader";
 /// #endif
 
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+    const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
+    if (window.siyuan.config.appearance.hideToolbar) {
+        position.y += 5;
+    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",
         zoom: window.siyuan.storage[Constants.LOCAL_ZOOM],
-        position: Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position
+        position
     });
     initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
@@ -33,25 +38,28 @@ export const init = (app: App) => {
         if (layout.layout) {
             JSONToCenter(app, layout.layout);
             window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
-            afterLayout(app);
-            return;
+        } else {
+            const tabsJSON = JSON.parse(getSearch("json"));
+            tabsJSON[tabsJSON.length - 1].active = true;
+            JSONToCenter(app, {
+                direction: "lr",
+                resize: "lr",
+                size: "auto",
+                type: "center",
+                instance: "Layout",
+                children: [{
+                    instance: "Wnd",
+                    children: tabsJSON
+                }]
+            });
+            window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
+            adjustLayout(window.siyuan.layout.centerLayout);
         }
-        const tabsJSON = JSON.parse(getSearch("json"));
-        tabsJSON[tabsJSON.length - 1].active = true;
-        JSONToCenter(app, {
-            direction: "lr",
-            resize: "lr",
-            size: "auto",
-            type: "center",
-            instance: "Layout",
-            children: [{
-                instance: "Wnd",
-                children: tabsJSON
-            }]
-        });
-        window.siyuan.layout.centerLayout = window.siyuan.layout.layout;
-        adjustLayout(window.siyuan.layout.centerLayout);
         afterLayout(app);
+        // 等待 dock 面板动画结束
+        setTimeout(() => {
+            setTabPosition();
+        }, Constants.TIMEOUT_TRANSITION);
     });
     initStatus(true);
     initWindow(app);

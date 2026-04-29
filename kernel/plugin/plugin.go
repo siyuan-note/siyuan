@@ -35,6 +35,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/smallnest/chanx"
 )
 
 type PluginState int64
@@ -1097,7 +1098,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 	}
 	defer doClose()
 
-	events := make(chan sseEvent, 64)
+	events := chanx.NewUnboundedChan[sseEvent](ctx, 16)
 	done := make(chan error, 1) // using to receive handler error or close signal
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
@@ -1125,7 +1126,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 			hook := port.Get(name)
 			if fn, ok := goja.AssertFunction(hook); ok {
 				if _, callErr := fn(port, args...); callErr != nil {
-					logging.LogErrorf("[plugin:%s] ws server port hook %q: %v", p.Name, name, callErr)
+					logging.LogErrorf("[plugin:%s] sse server port hook %q: %v", p.Name, name, callErr)
 				}
 			}
 		}
@@ -1133,10 +1134,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		port_send := rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 			name := call.Argument(0).String()
 			message := call.Argument(1).Export()
-			select {
-			case events <- sseEvent{name, message}:
-			case <-ctx.Done():
-			}
+			events.In <- sseEvent{name, message}
 			return goja.Undefined()
 		})
 
@@ -1161,30 +1159,34 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 				case done <- result.Error:
 				case <-ctx.Done():
 				}
-			} else {
+				return
+			}
+			// Only start the onclose goroutine when the handler succeeds, so that
+			// onclose is never dispatched without a prior onopen.
+			go func() {
+				<-ctx.Done()
 				p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 					event := rt.NewObject()
-					event.Set("type", rt.ToValue("open"))
-					invokePortHook("onopen", event)
+					event.Set("type", rt.ToValue("close"))
+					invokePortHook("onclose", event)
 					return
 				}, nil)
+			}()
 
-				select {
-				case done <- nil:
-				case <-ctx.Done():
-				}
-			}
-		}, rt, true, handler, handlerObj, jsRequest)
-
-		go func() {
-			<-ctx.Done()
+			// Fire onopen first; signal done only after onopen has executed so that
+			// any port.send() calls inside onopen are enqueued before streaming begins.
 			p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
 				event := rt.NewObject()
-				event.Set("type", rt.ToValue("close"))
-				invokePortHook("onclose", event)
+				event.Set("type", rt.ToValue("open"))
+				invokePortHook("onopen", event)
 				return
-			}, nil)
-		}()
+			}, func(_ *goja.Runtime, _ any, err error) {
+				select {
+				case done <- err:
+				case <-ctx.Done():
+				}
+			})
+		}, rt, true, handler, handlerObj, jsRequest)
 
 		return
 	}, func(_ *goja.Runtime, _ any, err error) {
@@ -1204,7 +1206,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 
 	for {
 		select {
-		case e := <-events:
+		case e := <-events.Out:
 			c.SSEvent(e.name, e.message)
 			c.Writer.Flush()
 		case <-ctx.Done():

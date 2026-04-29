@@ -74,6 +74,7 @@ require (
 	github.com/siyuan-note/httpclient v0.0.0-20260408083825-43e4476ad2b3
 	github.com/siyuan-note/logging v0.0.0-20260117134552-88b424dfe7f1
 	github.com/siyuan-note/riff v0.0.0-20251022131846-228528e70754
+	github.com/smallnest/chanx v1.2.0
 	github.com/soheilhy/cmux v0.1.5
 	github.com/spf13/cast v1.10.0
 	github.com/steambap/captcha v1.4.1

@@ -96,6 +96,10 @@
     }
   }
 
+  &--dragging {
+    opacity: .4;
+  }
+
   svg:not(.b3-chip__close) {
     margin-right: 6px;
     margin-left: -5px;

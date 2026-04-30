@@ -34,6 +34,7 @@ type Appearance struct {
 	Lang                string             `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
 	ThemeJS             bool               `json:"themeJS"`             // 是否启用了主题 JavaScript
 	CloseButtonBehavior int                `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
+	HideToolbar         bool               `json:"hideToolbar"`         // 是否隐藏顶栏工具栏
 	HideStatusBar       bool               `json:"hideStatusBar"`       // 是否隐藏底部状态栏
 	StatusBar           *util.StatusBar    `json:"statusBar"`           // 底部状态栏配置
 }
@@ -49,6 +50,7 @@ func NewAppearance() *Appearance {
 		CodeBlockThemeDark:  "base16/dracula",
 		Lang:                "en_US",
 		CloseButtonBehavior: 0,
+		HideToolbar:         true,
 		HideStatusBar:       false,
 		StatusBar:           &util.StatusBar{},
 	}

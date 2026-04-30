@@ -9,7 +9,7 @@ import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {useShell} from "../util/pathName";
 import {Constants} from "../constants";
-import {openByMobile} from "../protyle/util/compatibility";
+import {openByMobile, saveZipExport} from "../protyle/util/compatibility";
 import {exitSiYuan} from "../dialog/processSystem";
 
 export const exportConfig = {
@@ -317,7 +317,7 @@ export const exportConfig = {
         });
         exportConfig.element.querySelector("#exportConf").addEventListener("click", async () => {
             fetchPost("/api/system/exportConf", {}, response => {
-                openByMobile(response.data.zip);
+                saveZipExport(response.data.zip);
             });
         });
         /// #if !BROWSER

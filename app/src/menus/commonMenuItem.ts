@@ -6,7 +6,15 @@ import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, openByMobile, writeText} from "../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    isInIOS,
+    isInMobileApp,
+    openByMobile,
+    saveZipExport,
+    writeText
+} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -614,7 +622,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }, {
@@ -627,7 +635,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }, {
@@ -683,7 +691,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -696,7 +704,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -709,7 +717,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -722,7 +730,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -735,7 +743,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -748,7 +756,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -761,7 +769,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -774,7 +782,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
@@ -787,7 +795,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }]

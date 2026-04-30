@@ -3,6 +3,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import * as fs from "fs";
 /// #endif
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
@@ -96,6 +97,28 @@ export const openByMobile = (uri: string) => {
     } else {
         window.open(uri);
     }
+};
+
+export const saveZipExport = async (zipPath: string) => {
+    if (!zipPath) {
+        return;
+    }
+    /// #if !BROWSER
+    const fileName = zipPath.substring(zipPath.lastIndexOf("/") + 1);
+    const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "showSaveDialog",
+        defaultPath: fileName,
+        properties: ["showOverwriteConfirmation"],
+    });
+    if (result.canceled || !result.filePath) {
+        return;
+    }
+    const response = await fetch(zipPath);
+    const arrayBuffer = await response.arrayBuffer();
+    fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
+    /// #else
+    openByMobile(zipPath);
+    /// #endif
 };
 
 export const exportByMobile = (uri: string) => {

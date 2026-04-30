@@ -96,13 +96,13 @@
   }
 
   &-query {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 8px 16px;
+    margin-top: 8px;
 
     label,
     .label {
-      width: 16%;
-      margin: 8px 17% 0 0;
       color: var(--b3-theme-on-surface);
       align-items: center;
     }

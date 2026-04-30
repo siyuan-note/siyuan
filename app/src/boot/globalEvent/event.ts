@@ -8,11 +8,7 @@ import {Constants} from "../../constants";
 import {isIPad} from "../../protyle/util/compatibility";
 import {globalTouchEnd, globalTouchStart} from "./touch";
 import {initDockMenu} from "../../menus/dock";
-import {
-    hasClosestByAttribute,
-    hasClosestByClassName,
-    isInEmbedBlock
-} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
 import {initTabMenu} from "../../menus/tab";
 import {getInstanceById} from "../../layout/util";
 import {Tab} from "../../layout/Tab";
@@ -22,6 +18,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
+import {initTouchDragBridge} from "../../protyle/util/touchDrag";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -161,6 +158,9 @@ export const initWindowEvent = (app: App) => {
                 event.preventDefault();
                 return;
             }
+            if (window.siyuan.touchDragActive) {
+                return;
+            }
             if (new Date().getTime() - time <= 900) {
                 return;
             }
@@ -209,4 +209,5 @@ export const initWindowEvent = (app: App) => {
             }
         }
     }, false);
+    initTouchDragBridge();
 };

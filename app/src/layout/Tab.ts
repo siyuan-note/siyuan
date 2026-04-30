@@ -4,11 +4,10 @@ import {Model} from "./Model";
 import {Editor} from "../editor";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {escapeLessThans, escapeHtml} from "../util/escape";
+import {escapeHtml, escapeLessThans} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
-import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";
@@ -82,11 +81,6 @@ export class Tab {
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
-                if (isTouchDevice()) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
                 window.getSelection().removeAllRanges();
                 hideTooltip();
                 const tabElement = hasClosestByTag(event.target, "LI");
@@ -139,7 +133,9 @@ export class Tab {
                         }
                     });
                 }
+                /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "addRegionStyle"});
+                /// #endif
             });
         }
 

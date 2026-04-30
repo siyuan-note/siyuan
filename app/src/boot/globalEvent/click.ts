@@ -65,7 +65,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     // Dock item click
     const dockItemElement = hasClosestByClassName(event.target as HTMLElement, "dock__item");
     if (dockItemElement) {
-        const type = dockItemElement.getAttribute("data-type") as TDock
+        const type = dockItemElement.getAttribute("data-type") as TDock;
         if (type) {
             getDockByType(type).toggleModel(type, false, true);
         }

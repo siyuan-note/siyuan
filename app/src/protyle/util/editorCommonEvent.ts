@@ -20,7 +20,8 @@ import {getAllEditor} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {blockRender} from "../render/blockRender";
-import {uploadLocalFiles} from "../upload";
+/// #else
+import {uploadFiles, uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -30,8 +31,6 @@ import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
-/// #else
-import {uploadFiles} from "../upload";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
@@ -581,9 +580,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, 0, 0);
-                setTimeout(() => {
-                    ghostElement.remove();
-                });
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
 
                 window.siyuan.dragElement = protyle.wysiwyg.element;
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
@@ -651,9 +654,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ghostElement.setAttribute("style", "left: 1px;top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
-                    setTimeout(() => {
-                        ghostElement.remove();
-                    });
+                    if (window.siyuan.touchDragActive) {
+                        window.siyuan.touchDragGhost = ghostElement;
+                    } else {
+                        setTimeout(() => {
+                            ghostElement.remove();
+                        });
+                    }
                     window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {

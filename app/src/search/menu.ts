@@ -240,6 +240,57 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             }
         });
     });
+    // Keep parent and subtype toggles in sync. buildTypeFilter drops subtype
+    // clauses when the parent type is disabled, so:
+    //   - checking a subtype implies the user wants the parent included
+    //   - unchecking a parent implies the user no longer wants its subtype filters
+    const subtypeParents: Record<string, string[]> = {
+        h1: ["heading"], h2: ["heading"], h3: ["heading"],
+        h4: ["heading"], h5: ["heading"], h6: ["heading"],
+        o: ["list", "listItem"],
+        u: ["list", "listItem"],
+        t: ["list", "listItem"],
+    };
+    const parentSubtypes: Record<string, string[]> = {
+        heading: ["h1", "h2", "h3", "h4", "h5", "h6"],
+        list: ["o", "u", "t"],
+        listItem: ["o", "u", "t"],
+    };
+    filterDialog.element.querySelectorAll("[data-subtype]").forEach((subtypeBox: HTMLInputElement) => {
+        subtypeBox.addEventListener("change", () => {
+            if (!subtypeBox.checked) {
+                return;
+            }
+            const subtype = subtypeBox.getAttribute("data-subtype");
+            const parents = subtypeParents[subtype];
+            if (!parents) {
+                return;
+            }
+            parents.forEach((parentType) => {
+                const parentBox = filterDialog.element.querySelector(`[data-type="${parentType}"]`) as HTMLInputElement | null;
+                if (parentBox && !parentBox.checked) {
+                    parentBox.checked = true;
+                }
+            });
+        });
+    });
+    Object.keys(parentSubtypes).forEach((parentType) => {
+        const parentBox = filterDialog.element.querySelector(`[data-type="${parentType}"]`) as HTMLInputElement | null;
+        if (!parentBox) {
+            return;
+        }
+        parentBox.addEventListener("change", () => {
+            if (parentBox.checked) {
+                return;
+            }
+            parentSubtypes[parentType].forEach((subtype) => {
+                const subtypeBox = filterDialog.element.querySelector(`[data-subtype="${subtype}"]`) as HTMLInputElement | null;
+                if (subtypeBox && subtypeBox.checked) {
+                    subtypeBox.checked = false;
+                }
+            });
+        });
+    });
     const btnsElement = filterDialog.element.querySelectorAll(".b3-button");
     btnsElement[0].addEventListener("click", () => {
         filterDialog.destroy();

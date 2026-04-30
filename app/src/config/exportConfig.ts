@@ -9,7 +9,7 @@ import {isBrowser} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {useShell} from "../util/pathName";
 import {Constants} from "../constants";
-import {openByMobile, saveZipExport} from "../protyle/util/compatibility";
+import {saveExportFile, saveZipExport} from "../protyle/util/compatibility";
 import {exitSiYuan} from "../dialog/processSystem";
 
 export const exportConfig = {
@@ -296,7 +296,7 @@ export const exportConfig = {
         exportConfig.element.querySelector("#exportData").addEventListener("click", async () => {
             /// #if BROWSER
             fetchPost("/api/export/exportData", {}, response => {
-                openByMobile(response.data.zip);
+                saveExportFile(response.data.zip);
             });
             /// #else
             const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {

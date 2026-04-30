@@ -100,6 +100,21 @@ export const openByMobile = (uri: string) => {
     }
 };
 
+export const saveExportFile = (uri: string) => {
+    if (!uri) {
+        return;
+    }
+    if (isInAndroid()) {
+        window.JSAndroid.saveExportFile(uri);
+    } else if (isInIOS()) {
+        openByMobile(uri);
+    } else if (isInHarmony()) {
+        window.JSHarmony.openExternal(uri);
+    } else {
+        window.open(uri);
+    }
+};
+
 export const saveZipExport = async (zipPath: string) => {
     if (!zipPath) {
         return;
@@ -119,7 +134,7 @@ export const saveZipExport = async (zipPath: string) => {
     fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
     showMessage(window.siyuan.languages.exported);
     /// #else
-    openByMobile(zipPath);
+    saveExportFile(zipPath);
     /// #endif
 };
 
@@ -130,7 +145,7 @@ export const exportByMobile = (uri: string) => {
     if (isInIOS()) {
         openByMobile(uri);
     } else if (isInAndroid()) {
-        window.JSAndroid.exportByDefault(uri);
+        window.JSAndroid.saveExportFile(uri);
     } else if (isInHarmony()) {
         window.JSHarmony.exportByDefault(uri);
     } else {

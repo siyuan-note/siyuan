@@ -17,6 +17,7 @@ import {
     isMac,
     isOnlyMeta,
     openByMobile,
+    saveExportFile,
     updateHotkeyAfterTip,
     updateHotkeyTip,
     writeText
@@ -1654,7 +1655,7 @@ export class Gutter {
                         id: nodeElement.getAttribute("data-av-id"),
                         blockID: id,
                     }, response => {
-                        openByMobile(response.data.zip);
+                        saveExportFile(response.data.zip);
                     });
                 }
             }).element);

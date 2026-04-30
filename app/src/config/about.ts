@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {isInMobileApp, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInMobileApp, isIPad, isMac, openByMobile, saveExportFile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -325,7 +325,7 @@ ${checkUpdateHTML}
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {
-                openByMobile(response.data.zip);
+                saveExportFile(response.data.zip);
             });
         });
         const updateElement = about.element.querySelector("#checkUpdateBtn");

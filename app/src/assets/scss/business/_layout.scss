@@ -90,6 +90,7 @@
       height: 6px;
       width: 100%;
       position: absolute;
+      touch-action: none;
 
       &--lr {
         cursor: col-resize;
@@ -116,6 +117,7 @@
     position: relative;
     z-index: 4; // 需大于 #sidebarContainer https://github.com/siyuan-note/siyuan/issues/11759
     flex-shrink: 0;
+    touch-action: none;
 
     &:hover::after {
       background-color: var(--b3-scroll-color);
@@ -217,6 +219,7 @@
         line-height: 22px;
         cursor: pointer;
         user-select: none;
+        touch-action: none;
         display: flex;
         align-items: center;
         transition: var(--b3-transition);
@@ -386,6 +389,7 @@
     border-radius: var(--b3-border-radius);
     margin: 7px;
     cursor: pointer;
+    touch-action: none;
 
     &:hover:not(.dock__item--activefocus),
     &--active {
@@ -397,4 +401,11 @@
       background-color: var(--b3-theme-primary);
     }
   }
+}
+
+/* Touch drag support for dialog and editor resize handles */
+[class*="resize__"],
+.av__widthdrag,
+.av__drag-fill {
+  touch-action: none;
 }

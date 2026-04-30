@@ -1,4 +1,4 @@
-import {escapeAriaLabel, escapeLessThans, escapeHtml} from "../../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {setPanelFocus} from "../util";
@@ -25,7 +25,6 @@ import {
     hasClosestByTag,
     hasTopClosestByTag
 } from "../../protyle/util/hasClosest";
-import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 /// #if !BROWSER
@@ -446,11 +445,6 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
-            if (isTouchDevice()) {
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
             window.getSelection().removeAllRanges();
             hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
@@ -486,9 +480,13 @@ export class Files extends Model {
                 event.dataTransfer.dropEffect = "move";
                 window.siyuan.dragElement = document.createElement("div");
                 window.siyuan.dragElement.innerText = ids;
-                setTimeout(() => {
-                    ghostElement.remove();
-                });
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
             }
         });
         this.element.addEventListener("dragend", (event) => {

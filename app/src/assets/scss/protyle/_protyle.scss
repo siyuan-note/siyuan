@@ -101,6 +101,7 @@
       left: 0;
       height: 100%;
       width: 100%;
+      touch-action: none;
     }
   }
 
@@ -456,6 +457,7 @@ table + .protyle-action__table {
     width: 6px;
     cursor: col-resize;
     z-index: 2;
+    touch-action: none;
 
     &:hover::after {
       background-color: var(--b3-theme-primary-light);

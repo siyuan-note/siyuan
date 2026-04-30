@@ -25,6 +25,7 @@
         width: 6px;
         margin: 0 -6px 0 0;
         height: auto;
+        touch-action: none;
 
         &::after {
           width: .5px;

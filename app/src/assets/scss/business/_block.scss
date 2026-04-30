@@ -25,6 +25,7 @@
 
       & > .resize__move {
         height: 42px;
+        touch-action: none;
       }
     }
   }

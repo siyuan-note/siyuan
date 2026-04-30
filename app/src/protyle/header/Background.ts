@@ -413,6 +413,70 @@ export class Background {
                 target = target.parentElement;
             }
         });
+
+        let dragSourceElement: HTMLElement | null = null;
+
+        this.element.addEventListener("dragstart", (event: DragEvent) => {
+            const target = event.target as HTMLElement;
+            if (target.closest(".b3-chip__close") || protyle.disabled) {
+                event.preventDefault();
+                return;
+            }
+            const chipElement = target.closest(".b3-chips__doctag .b3-chip") as HTMLElement;
+            if (!chipElement) {
+                event.preventDefault();
+                return;
+            }
+            dragSourceElement = chipElement;
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", "");
+            chipElement.classList.add("b3-chip--dragging");
+        });
+
+        this.element.addEventListener("dragover", (event: DragEvent) => {
+            if (!dragSourceElement) {
+                return;
+            }
+            const target = event.target as HTMLElement;
+            const chipElement = target.closest(".b3-chips__doctag .b3-chip") as HTMLElement;
+            if (!chipElement || chipElement === dragSourceElement) {
+                return;
+            }
+            event.preventDefault();
+            const rect = chipElement.getBoundingClientRect();
+            if (event.clientX < rect.left + rect.width / 2) {
+                chipElement.before(dragSourceElement);
+            } else {
+                chipElement.after(dragSourceElement);
+            }
+        });
+
+        this.element.addEventListener("drop", (event: DragEvent) => {
+            if (!dragSourceElement) {
+                return;
+            }
+            event.preventDefault();
+            const tags = this.getTags();
+            this.ial.tags = tags.toString();
+            fetchPost("/api/attr/setBlockAttrs", {
+                id: protyle.block.rootID,
+                attrs: {"tags": tags.toString()}
+            });
+        });
+
+        this.element.addEventListener("dragend", () => {
+            if (!dragSourceElement) {
+                return;
+            }
+            dragSourceElement.classList.remove("b3-chip--dragging");
+            if (dragSourceElement.parentElement) {
+                const currentTags = this.getTags().toString();
+                if (currentTags !== this.ial.tags) {
+                    this.render(this.ial, protyle.block.rootID);
+                }
+            }
+            dragSourceElement = null;
+        });
     }
 
     private removeTag(protyle: IProtyle, cb?: () => void) {
@@ -447,7 +511,7 @@ export class Background {
                 if (!item.replace(/ /g, "")) {
                     return;
                 }
-                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                html += `<div draggable="true" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = `${html}
 <div class="protyle-background__action fn__flex-center">

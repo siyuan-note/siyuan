@@ -146,6 +146,25 @@ body {
     .toolbar #drag {
       -webkit-app-region: none;
       color: transparent;
+      height: 42px;
+      position: relative;
+
+      &::before,
+      &::after {
+        content: "";
+        width: var(--b3-toolbar-drag-left);
+        height: 42px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        -webkit-app-region: drag;
+      }
+
+      &::after {
+        left: auto;
+        right: 0;
+        width: var(--b3-toolbar-drag-right);
+      }
     }
 
     .layout__empty {

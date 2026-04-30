@@ -211,13 +211,13 @@ declare namespace Config {
          */
         darkThemes: string[];
         /**
-         * Whether to hide status bar
-         */
-        hideStatusBar: boolean;
-        /**
          * Whether to hide toolbar
          */
         hideToolbar: boolean;
+        /**
+         * Whether to hide status bar
+         */
+        hideStatusBar: boolean;
         /**
          * The name of the icon currently in use
          */

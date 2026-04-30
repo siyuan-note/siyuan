@@ -1043,7 +1043,7 @@
   "heading5": "Titre 5",
   "heading6": "Titre 6",
   "unorderedList": "Liste non ordonnée",
-  "searchSubTypeListTip": "Les sous-types de liste (Ordonnée/Non ordonnée/Tâche) s'appliquent aussi aux éléments de liste.",
+  "searchSubTypeListTip": "Les sous-types de liste (Ordonnée/Non ordonnée/Tâche) s'appliquent aussi aux éléments de liste",
   "outlineExpandLevel": "Niveau d'expansion",
   "expandAll": "Tout développer",
   "outlineKeepCurrentExpand": "Maintenir le titre actuel développé",

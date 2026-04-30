@@ -1043,7 +1043,7 @@
   "heading5": "見出し5",
   "heading6": "見出し6",
   "unorderedList": "番号なしリスト",
-  "searchSubTypeListTip": "リストのサブタイプ（番号付き / 番号なし / タスク）はリスト項目にも適用されます。",
+  "searchSubTypeListTip": "リストのサブタイプ（番号付き / 番号なし / タスク）はリスト項目にも適用されます",
   "outlineExpandLevel": "展開レベル",
   "expandAll": "すべて展開",
   "outlineKeepCurrentExpand": "現在の見出しを展開し続ける",

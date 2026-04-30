@@ -1043,7 +1043,7 @@
   "heading5": "五级标题",
   "heading6": "六级标题",
   "unorderedList": "无序列表",
-  "searchSubTypeListTip": "列表子类型（有序/无序/任务）同样适用于列表项。",
+  "searchSubTypeListTip": "列表子类型（有序/无序/任务）同样适用于列表项",
   "outlineExpandLevel": "展开层级",
   "expandAll": "全部展开",
   "outlineKeepCurrentExpand": "保持当前标题展开",

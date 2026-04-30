@@ -55,42 +55,42 @@
   &__panel {
     background-color: var(--b3-theme-background);
     border-radius: var(--b3-border-radius-b);
+  }
 
-    & > .b3-tab-bar {
-      user-select: none;
-      width: 240px;
+  &__side {
+    user-select: none;
+    width: 240px;
+    padding: 8px 0;
+    box-sizing: border-box;
+    border-right: 1px solid var(--b3-border-color);
+    display: flex;
+    flex-direction: column;
+
+    .config__tab-title {
+      display: flex;
+      align-items: center;
+      height: 32px;
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    & > .b3-list {
+      flex: 1;
       overflow: auto;
-      padding: 8px 0;
-      box-sizing: border-box;
-      border-right: 1px solid var(--b3-border-color);
+    }
 
-      .config__tab-hr {
-        margin: 16px 0;
-        background: var(--b3-border-color);
-        height: 1px;
-      }
+    .b3-form__icon {
+      margin: 0 8px 8px;
+    }
 
-      .config__tab-title {
-        display: flex;
-        align-items: center;
-        height: 32px;
-        padding: 0 12px;
-        margin-bottom: 8px;
-      }
+    .b3-list-item {
+      line-height: 38px;
 
-      .b3-form__icon {
-        margin: 0 8px 8px;
-      }
-
-      .b3-list-item {
-        line-height: 38px;
-
-        &__graphic {
-          margin-right: 0;
-          padding: 0 8px 0 4px;
-          height: 16px;
-          width: 16px;
-        }
+      &__graphic {
+        margin-right: 0;
+        padding: 0 8px 0 4px;
+        height: 16px;
+        width: 16px;
       }
     }
   }

@@ -130,7 +130,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         });
 
         let currentTabElement: HTMLElement;
-        element.querySelectorAll(".b3-tab-bar li").forEach((item: HTMLElement, index) => {
+        element.querySelectorAll(".config__side li").forEach((item: HTMLElement, index) => {
             if (indexList.includes(index)) {
                 if (!currentTabElement) {
                     currentTabElement = item;

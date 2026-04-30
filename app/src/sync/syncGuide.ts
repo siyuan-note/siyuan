@@ -164,9 +164,9 @@ export const syncGuide = (app?: App) => {
     if (0 === window.siyuan.config.sync.provider && needSubscribe("") && app) {
         const dialogSetting = openSetting(app);
         if (window.siyuan.user) {
-            dialogSetting.element.querySelector('.b3-tab-bar [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
+            dialogSetting.element.querySelector('.config__side [data-name="repos"]').dispatchEvent(new CustomEvent("click"));
         } else {
-            dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
+            dialogSetting.element.querySelector('.config__side [data-name="account"]').dispatchEvent(new CustomEvent("click"));
             dialogSetting.element.querySelector('.config__tab-container[data-name="account"]').setAttribute("data-action", "go-repos");
         }
         return;

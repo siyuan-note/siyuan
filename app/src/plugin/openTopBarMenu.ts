@@ -15,7 +15,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         label: window.siyuan.languages.manage,
         ignore: isHuawei() || window.siyuan.config.readonly,
         click() {
-            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+            openSetting(app).element.querySelector('.config__side [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
         }
     });
     menu.addSeparator({id: "separator_1", ignore: isHuawei() || window.siyuan.config.readonly});

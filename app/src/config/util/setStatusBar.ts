@@ -12,7 +12,7 @@ export const setStatusBar = (element: HTMLElement) => {
 <div class="b3-label">
     ${window.siyuan.languages.statusBarMsgPushTip}
     <div class="fn__hr"></div>
-    <div class="b3-tab-bar b3-list b3-list--background">
+    <div class="b3-list b3-list--background">
         <label class="b3-list-item">
             <div class="fn__flex-1 ft__on-surface">
                ${window.siyuan.languages["_taskAction"]["task.database.index.commit"]}
@@ -42,7 +42,8 @@ export const setStatusBar = (element: HTMLElement) => {
             <input class="b3-switch fn__flex-center" id="msgTaskHistoryGenerateFileDisabled" type="checkbox"${window.siyuan.config.appearance.statusBar.msgTaskHistoryGenerateFileDisabled ? "" : " checked"}>
         </label>
     </div>
-</div>`, destroyCallback() {
+</div>`,
+            destroyCallback() {
                 const statusBar = {
                     msgTaskDatabaseIndexCommitDisabled: !(dialog.element.querySelector("#msgTaskDatabaseIndexCommitDisabled") as HTMLInputElement).checked,
                     msgTaskAssetDatabaseIndexCommitDisabled: !(dialog.element.querySelector("#msgTaskAssetDatabaseIndexCommitDisabled") as HTMLInputElement).checked,

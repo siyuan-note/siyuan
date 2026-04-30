@@ -1,7 +1,7 @@
 @media (max-width: 750px) {
   .config {
     &__panel {
-      & > .b3-tab-bar {
+      & > .config__side {
         width: auto;
 
         .b3-list-item__text,
@@ -11,10 +11,6 @@
 
         .b3-list-item__graphic {
           padding-right: 5px;
-        }
-
-        .config__tab-hr {
-          margin: 0 0 4px 0;
         }
 
         .config__tab-title {

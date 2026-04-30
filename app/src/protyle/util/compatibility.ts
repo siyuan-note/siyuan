@@ -9,6 +9,7 @@ import * as fs from "fs";
 import {processSYLink} from "../../editor/openLink";
 /// #endif
 import {getDefaultType} from "../../search/getDefault";
+import {showMessage} from "../../dialog/message";
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
@@ -116,6 +117,7 @@ export const saveZipExport = async (zipPath: string) => {
     const response = await fetch(zipPath);
     const arrayBuffer = await response.arrayBuffer();
     fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
+    showMessage(window.siyuan.languages.exported);
     /// #else
     openByMobile(zipPath);
     /// #endif

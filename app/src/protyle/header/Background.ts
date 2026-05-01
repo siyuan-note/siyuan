@@ -479,19 +479,16 @@ export class Background {
                     break;
                 }
             }
-            if (targetChip !== lastTargetChip) {
-                if (lastTargetChip) {
-                    lastTargetChip.classList.remove("b3-chip--insert-before", "b3-chip--insert-after");
-                }
+            if (targetChip && targetChip !== lastTargetChip) {
                 lastTargetChip = targetChip;
-                if (targetChip) {
-                    const rect = targetChip.getBoundingClientRect();
-                    if (dragMouseX < rect.left + rect.width / 2) {
-                        targetChip.classList.add("b3-chip--insert-before");
-                    } else {
-                        targetChip.classList.add("b3-chip--insert-after");
-                    }
+                const rect = targetChip.getBoundingClientRect();
+                if (dragMouseX < rect.left + rect.width / 2) {
+                    targetChip.before(dragSourceElement);
+                } else {
+                    targetChip.after(dragSourceElement);
                 }
+            } else if (!targetChip) {
+                lastTargetChip = null;
             }
         };
 
@@ -519,16 +516,7 @@ export class Background {
                 dragClone.remove();
                 dragClone = null;
             }
-            if (lastTargetChip) {
-                const insertBefore = lastTargetChip.classList.contains("b3-chip--insert-before");
-                lastTargetChip.classList.remove("b3-chip--insert-before", "b3-chip--insert-after");
-                if (insertBefore) {
-                    lastTargetChip.before(dragSourceElement);
-                } else {
-                    lastTargetChip.after(dragSourceElement);
-                }
-                lastTargetChip = null;
-            }
+            lastTargetChip = null;
             document.body.style.cursor = "";
             document.body.style.userSelect = "";
             if (dragSourceElement.parentElement) {
@@ -572,12 +560,11 @@ export class Background {
         this.element.setAttribute("data-node-id", rootId);
         if (tags) {
             let html = "";
-            const colors = ["secondary", "primary", "info", "success", "warning", "error", "pink"];
-            Array.from(new Set(tags.split(",").map(item => item.trim()))).forEach((item, index) => {
+            Array.from(new Set(tags.split(",").map(item => item.trim()))).forEach((item) => {
                 if (!item.replace(/ /g, "")) {
                     return;
                 }
-                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = `${html}
 <div class="protyle-background__action fn__flex-center">

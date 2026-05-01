@@ -415,64 +415,130 @@ export class Background {
         });
 
         let dragSourceElement: HTMLElement | null = null;
+        let dragClone: HTMLElement | null = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let dragCloneWidth = 0;
+        let dragCloneHeight = 0;
+        let lastTargetChip: HTMLElement | null = null;
+        let dragMouseX = 0;
+        let dragMouseY = 0;
+        let rafPending = false;
 
-        this.element.addEventListener("dragstart", (event: DragEvent) => {
+        this.element.addEventListener("mousedown", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
             if (target.closest(".b3-chip__close") || protyle.disabled) {
-                event.preventDefault();
                 return;
             }
             const chipElement = target.closest(".b3-chips__doctag .b3-chip") as HTMLElement;
             if (!chipElement) {
-                event.preventDefault();
                 return;
             }
+            event.preventDefault();
             dragSourceElement = chipElement;
-            event.dataTransfer.effectAllowed = "move";
-            event.dataTransfer.setData("text/plain", "");
-            chipElement.classList.add("b3-chip--dragging");
-        });
-
-        this.element.addEventListener("dragover", (event: DragEvent) => {
-            if (!dragSourceElement) {
-                return;
-            }
-            const target = event.target as HTMLElement;
-            const chipElement = target.closest(".b3-chips__doctag .b3-chip") as HTMLElement;
-            if (!chipElement || chipElement === dragSourceElement) {
-                return;
-            }
-            event.preventDefault();
             const rect = chipElement.getBoundingClientRect();
-            if (event.clientX < rect.left + rect.width / 2) {
-                chipElement.before(dragSourceElement);
-            } else {
-                chipElement.after(dragSourceElement);
-            }
+            dragOffsetX = rect.width / 2;
+            dragOffsetY = rect.height / 2;
+            dragCloneWidth = rect.width;
+            dragCloneHeight = rect.height;
+            dragMouseX = event.clientX;
+            dragMouseY = event.clientY;
+            lastTargetChip = null;
+            chipElement.classList.add("b3-chip--dragging");
+            dragClone = chipElement.cloneNode(true) as HTMLElement;
+            dragClone.classList.add("b3-chip--dragclone");
+            dragClone.style.position = "fixed";
+            dragClone.style.left = `${event.clientX - dragOffsetX}px`;
+            dragClone.style.top = `${event.clientY - dragOffsetY}px`;
+            dragClone.style.width = `${dragCloneWidth}px`;
+            dragClone.style.pointerEvents = "none";
+            dragClone.style.zIndex = "999997";
+            document.body.appendChild(dragClone);
+            document.body.style.cursor = "grabbing";
+            document.body.style.userSelect = "none";
         });
 
-        this.element.addEventListener("drop", (event: DragEvent) => {
+        const processDragFrame = () => {
+            if (!dragSourceElement || !dragClone) {
+                return;
+            }
+            const cloneLeft = dragMouseX - dragOffsetX;
+            const cloneTop = dragMouseY - dragOffsetY;
+            dragClone.style.left = `${cloneLeft}px`;
+            dragClone.style.top = `${cloneTop}px`;
+
+            let targetChip: HTMLElement | null = null;
+            const elementsAtPoint = document.elementsFromPoint(dragMouseX, dragMouseY);
+            for (const el of elementsAtPoint) {
+                if (el === dragClone || el === dragSourceElement) {
+                    continue;
+                }
+                const chip = (el as HTMLElement).closest(".b3-chips__doctag .b3-chip") as HTMLElement;
+                if (chip && chip !== dragSourceElement) {
+                    targetChip = chip;
+                    break;
+                }
+            }
+            if (targetChip !== lastTargetChip) {
+                if (lastTargetChip) {
+                    lastTargetChip.classList.remove("b3-chip--insert-before", "b3-chip--insert-after");
+                }
+                lastTargetChip = targetChip;
+                if (targetChip) {
+                    const rect = targetChip.getBoundingClientRect();
+                    if (dragMouseX < rect.left + rect.width / 2) {
+                        targetChip.classList.add("b3-chip--insert-before");
+                    } else {
+                        targetChip.classList.add("b3-chip--insert-after");
+                    }
+                }
+            }
+        };
+
+        document.addEventListener("mousemove", (event: MouseEvent) => {
             if (!dragSourceElement) {
                 return;
             }
-            event.preventDefault();
-            const tags = this.getTags();
-            this.ial.tags = tags.toString();
-            fetchPost("/api/attr/setBlockAttrs", {
-                id: protyle.block.rootID,
-                attrs: {"tags": tags.toString()}
-            });
+            dragMouseX = event.clientX;
+            dragMouseY = event.clientY;
+            if (!rafPending) {
+                rafPending = true;
+                requestAnimationFrame(() => {
+                    rafPending = false;
+                    processDragFrame();
+                });
+            }
         });
 
-        this.element.addEventListener("dragend", () => {
+        document.addEventListener("mouseup", () => {
             if (!dragSourceElement) {
                 return;
             }
             dragSourceElement.classList.remove("b3-chip--dragging");
+            if (dragClone) {
+                dragClone.remove();
+                dragClone = null;
+            }
+            if (lastTargetChip) {
+                const insertBefore = lastTargetChip.classList.contains("b3-chip--insert-before");
+                lastTargetChip.classList.remove("b3-chip--insert-before", "b3-chip--insert-after");
+                if (insertBefore) {
+                    lastTargetChip.before(dragSourceElement);
+                } else {
+                    lastTargetChip.after(dragSourceElement);
+                }
+                lastTargetChip = null;
+            }
+            document.body.style.cursor = "";
+            document.body.style.userSelect = "";
             if (dragSourceElement.parentElement) {
-                const currentTags = this.getTags().toString();
-                if (currentTags !== this.ial.tags) {
-                    this.render(this.ial, protyle.block.rootID);
+                const tags = this.getTags();
+                if (tags.toString() !== this.ial.tags) {
+                    this.ial.tags = tags.toString();
+                    fetchPost("/api/attr/setBlockAttrs", {
+                        id: protyle.block.rootID,
+                        attrs: {"tags": tags.toString()}
+                    });
                 }
             }
             dragSourceElement = null;
@@ -511,7 +577,7 @@ export class Background {
                 if (!item.replace(/ /g, "")) {
                     return;
                 }
-                html += `<div draggable="true" class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = `${html}
 <div class="protyle-background__action fn__flex-center">

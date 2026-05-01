@@ -97,7 +97,15 @@
   }
 
   &--dragging {
-    opacity: .4;
+    opacity: .38;
+  }
+
+  &--insert-before {
+    box-shadow: -3px 0 0 var(--b3-theme-primary);
+  }
+
+  &--insert-after {
+    box-shadow: 3px 0 0 var(--b3-theme-primary);
   }
 
   svg:not(.b3-chip__close) {

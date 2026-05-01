@@ -747,6 +747,7 @@
     border-radius: 50%;
     box-sizing: border-box;
     cursor: ns-resize;
+    touch-action: none;
   }
 
   &__celltext {
@@ -816,6 +817,7 @@
     right: -2.5px;
     transition: var(--b3-background-transition);
     z-index: 1;
+    touch-action: none;
 
     &:hover {
       background-color: var(--b3-theme-primary);

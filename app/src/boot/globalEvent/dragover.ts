@@ -53,7 +53,7 @@ const scrollAnimation = (timestamp: number) => {
     dragoverScroll.lastTime = timestamp;
 };
 
-export const dragOverScroll = (moveEvent: MouseEvent | { clientY: number }, contentRect: DOMRect, element: Element) => {
+export const dragOverScroll = (moveEvent: MouseEvent, contentRect: DOMRect, element: Element) => {
     const dragToUp = moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB;
     if (dragToUp ||
         moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {

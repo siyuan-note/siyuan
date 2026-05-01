@@ -402,10 +402,3 @@
     }
   }
 }
-
-/* Touch drag support for dialog and editor resize handles */
-[class*="resize__"],
-.av__widthdrag,
-.av__drag-fill {
-  touch-action: none;
-}

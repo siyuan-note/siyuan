@@ -20,8 +20,7 @@ import {getAllEditor} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {blockRender} from "../render/blockRender";
-/// #else
-import {uploadFiles, uploadLocalFiles} from "../upload";
+import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -31,6 +30,8 @@ import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
+/// #else
+import {uploadFiles} from "../upload";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";

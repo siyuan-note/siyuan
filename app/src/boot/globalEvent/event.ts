@@ -150,15 +150,17 @@ export const initWindowEvent = (app: App) => {
         // 触摸屏背景和嵌入块按钮显示
         globalTouchStart(event);
     }, false);
+
     document.addEventListener("touchend", (event) => {
+        if (window.siyuan.touchDragActive) {
+            return;
+        }
+        // pad 端长按事件
         if (isIPad()) {
             // https://github.com/siyuan-note/siyuan/issues/9113
             if (globalTouchEnd(event, undefined, time, app)) {
                 event.stopImmediatePropagation();
                 event.preventDefault();
-                return;
-            }
-            if (window.siyuan.touchDragActive) {
                 return;
             }
             if (new Date().getTime() - time <= 900) {

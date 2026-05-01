@@ -18,7 +18,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
-import {initTouchDragBridge} from "../../util/touchDrag";
+import {initTouchDragBridge} from "../../util/touchDragBridge";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {

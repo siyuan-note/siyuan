@@ -1540,7 +1540,7 @@
     "49": "Por favor, especifique o caminho de salvamento da nota diária nas Configurações do Bloco de Notas",
     "50": "Resolvendo referência [%s]",
     "51": "Cache do bloco de conteúdo [%d]",
-    "52": "Toda vez que você inicia e abre o guia do usuário, os dados nele são redefinidos, por favor não salve nenhum dado no guia do usuário",
+    "52": "Você está editando o guia do usuário. Não edite aqui, porque o conteúdo editado aqui não será salvo. Registre suas notas em um caderno criado por você",
     "53": "A sincronização de dados não foi ativada",
     "54": "Indexando referências...",
     "55": "Referências indexadas de [%d] documentos",

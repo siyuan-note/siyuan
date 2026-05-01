@@ -1540,7 +1540,7 @@
     "49": "Specifica il percorso di salvataggio delle note giornaliere nelle impostazioni del taccuino",
     "50": "Risoluzione del riferimento [%s]",
     "51": "Cache del blocco di contenuto [%d]",
-    "52": "Ogni volta che avvii e apri la guida utente, i dati in essa verranno resettati, quindi non salvare dati nella guida utente",
+    "52": "Stai modificando la guida utente. Non modificare qui, perché il contenuto modificato qui non verrà salvato. Prendi appunti in un taccuino creato da te",
     "53": "La sincronizzazione dei dati non è stata abilitata",
     "54": "Indicizzazione dei riferimenti in corso...",
     "55": "Indicizzati i riferimenti di [%d] documenti",

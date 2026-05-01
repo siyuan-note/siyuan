@@ -1540,7 +1540,7 @@
     "49": "Zadajte cestu pre denné záznamy v nastaveniach",
     "50": "Riešim referenciu [%s]",
     "51": "Kešujem blok obsahu [%d]",
-    "52": "Dáta v príručke sa pri štarte resetujú, neukladajte tam nič vlastné",
+    "52": "Práve upravujete používateľskú príručku. Neupravujte ju tu, pretože zmeny vykonané tu sa neuložia. Poznámky si zapisujte do poznámkového bloku, ktorý ste si vytvorili",
     "53": "Synchronizácia nie je povolená",
     "54": "Indexujem referencie...",
     "55": "Zaindexované referencie pre %d dokumentov",

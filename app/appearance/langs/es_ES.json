@@ -1540,7 +1540,7 @@
     "49": "Por favor, especifique la ruta de guardado de las notas diarias en la Configuración de la Libreta",
     "50": "Resolviendo referencia [%s]",
     "51": "Bloque de contenido de la caché [%d]",
-    "52": "Cada vez que inicie y abra la guía del usuario, los datos que contiene se restablecerán, así que no guarde ningún dato en la guía del usuario",
+    "52": "Está editando la guía del usuario. No edite aquí, porque el contenido editado aquí no se guardará. Tome sus notas en un cuaderno creado por usted mismo",
     "53": "No se ha habilitado la sincronizacion de datos",
     "54": "Indexando referencias...",
     "55": "Referencias indexadas de [%d] documentos",

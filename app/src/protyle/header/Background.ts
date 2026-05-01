@@ -419,7 +419,6 @@ export class Background {
         let dragOffsetX = 0;
         let dragOffsetY = 0;
         let dragCloneWidth = 0;
-        let dragCloneHeight = 0;
         let lastTargetChip: HTMLElement | null = null;
         let dragMouseX = 0;
         let dragMouseY = 0;
@@ -440,7 +439,6 @@ export class Background {
             dragOffsetX = rect.width / 2;
             dragOffsetY = rect.height / 2;
             dragCloneWidth = rect.width;
-            dragCloneHeight = rect.height;
             dragMouseX = event.clientX;
             dragMouseY = event.clientY;
             lastTargetChip = null;

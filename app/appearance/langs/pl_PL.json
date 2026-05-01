@@ -1540,7 +1540,7 @@
     "49": "Proszę określić ścieżkę zapisu codziennej notatki w Ustawieniach notesu",
     "50": "Rozwiązywanie odniesienia [%s]",
     "51": "Buforowanie bloku zawartości [%d]",
-    "52": "Za każdym razem, gdy uruchamiasz i otwierasz podręcznik użytkownika, dane w nim zostaną zresetowane, więc proszę nie zapisywać żadnych danych w podręczniku użytkownika",
+    "52": "Edytujesz teraz podręcznik użytkownika. Proszę nie edytować go tutaj, ponieważ zmiany wprowadzone tutaj nie zostaną zapisane. Zapisuj notatki w utworzonym przez siebie notatniku",
     "53": "Synchronizacja danych nie została włączona",
     "54": "Indeksowanie odniesień...",
     "55": "Indeksowane odniesienia [%d] dokumentów",

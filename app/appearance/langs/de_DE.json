@@ -1540,7 +1540,7 @@
     "49": "Bitte geben Sie den Speicherpfad für tägliche Notizen in den Notizbuch-Einstellungen an",
     "50": "Entschlüsselung der Referenz [%s]",
     "51": "Inhaltsblock [%d] cachen",
-    "52": "Jedes Mal, wenn Sie starten und das Benutzerhandbuch öffnen, wird der Inhalt zurückgesetzt, speichern Sie also keine Daten im Benutzerhandbuch",
+    "52": "Sie bearbeiten gerade das Benutzerhandbuch. Bitte bearbeiten Sie es nicht hier, da die hier vorgenommenen Änderungen nicht gespeichert werden. Notieren Sie Ihre Inhalte bitte in einem selbst erstellten Notizbuch",
     "53": "Die Datensynchronisation wurde nicht aktiviert",
     "54": "Indizierung der Referenzen...",
     "55": "Indizierte Referenzen von [%d] Dokumenten",

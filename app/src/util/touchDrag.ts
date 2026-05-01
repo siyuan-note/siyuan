@@ -1,4 +1,4 @@
-import {stopScrollAnimation} from "../../boot/globalEvent/dragover";
+import {stopScrollAnimation} from "../boot/globalEvent/dragover";
 
 const DRAG_THRESHOLD = 5;
 

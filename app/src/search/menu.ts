@@ -8,6 +8,7 @@ import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
+import {getDefaultSubType} from "./getDefault";
 
 export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     const filterDialog = new Dialog({
@@ -297,7 +298,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     });
     btnsElement[1].addEventListener("click", () => {
         if (!config.subTypes) {
-            config.subTypes = {h1: false, h2: false, h3: false, h4: false, h5: false, h6: false, o: false, u: false, t: false};
+            config.subTypes = getDefaultSubType();
         }
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             const subtype = item.getAttribute("data-subtype");

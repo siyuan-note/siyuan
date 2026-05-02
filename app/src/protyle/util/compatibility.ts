@@ -107,7 +107,7 @@ export const saveExportFile = (uri: string) => {
     if (isInAndroid()) {
         window.JSAndroid.saveExportFile(uri);
     } else if (isInIOS()) {
-        openByMobile(uri);
+        window.webkit.messageHandlers.saveExportFile.postMessage(uri);
     } else if (isInHarmony()) {
         window.JSHarmony.saveExportFile(uri);
     } else {
@@ -143,7 +143,7 @@ export const exportByMobile = (uri: string) => {
         return;
     }
     if (isInIOS()) {
-        openByMobile(uri);
+        window.webkit.messageHandlers.saveExportFile.postMessage(uri);
     } else if (isInAndroid()) {
         window.JSAndroid.saveExportFile(uri);
     } else if (isInHarmony()) {

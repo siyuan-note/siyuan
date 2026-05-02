@@ -225,6 +225,7 @@ interface Window {
     webkit: {
         nativeCallbacks: { [key: string]: (id: number) => void },
         messageHandlers: {
+            saveExportFile: { postMessage: (url: string) => void }
             openLink: { postMessage: (url: string) => void }
             startKernelFast: { postMessage: (url: string) => void }
             changeStatusBar: { postMessage: (url: string) => void }

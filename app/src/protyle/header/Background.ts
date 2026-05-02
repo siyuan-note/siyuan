@@ -414,120 +414,106 @@ export class Background {
             }
         });
 
-        let dragSourceElement: HTMLElement | null = null;
-        let dragClone: HTMLElement | null = null;
-        let dragOffsetX = 0;
-        let dragOffsetY = 0;
-        let dragCloneWidth = 0;
-        let lastTargetChip: HTMLElement | null = null;
-        let dragMouseX = 0;
-        let dragMouseY = 0;
-        let rafPending = false;
-
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             const target = event.target as HTMLElement;
-            if (target.closest(".b3-chip__close") || protyle.disabled) {
+            if (protyle.disabled) {
                 return;
             }
-            const chipElement = target.closest(".b3-chips__doctag .b3-chip") as HTMLElement;
-            if (!chipElement) {
-                return;
+
+            // 记录是否初始点击在关闭按钮上
+            const isCloseBtn = !!target.closest(".b3-chip__close");
+
+            let chipElement = target.closest(".b3-chip") as HTMLElement;
+            if (!chipElement && target.closest(".b3-chips__doctag")) {
+                const rects = Array.from(this.element.querySelectorAll(".b3-chip")).map(el => ({
+                    el: el as HTMLElement,
+                    rect: el.getBoundingClientRect()
+                }));
+                if (rects.length > 0) {
+                    chipElement = rects.reduce((prev, curr) => {
+                        return Math.abs(curr.rect.left + curr.rect.width / 2 - event.clientX) <
+                        Math.abs(prev.rect.left + prev.rect.width / 2 - event.clientX) ? curr : prev;
+                    }).el;
+                }
             }
+
+            if (!chipElement) return;
+
             event.preventDefault();
-            dragSourceElement = chipElement;
-            const rect = chipElement.getBoundingClientRect();
-            dragOffsetX = rect.width / 2;
-            dragOffsetY = rect.height / 2;
-            dragCloneWidth = rect.width;
-            dragMouseX = event.clientX;
-            dragMouseY = event.clientY;
-            lastTargetChip = null;
-            chipElement.classList.add("b3-chip--dragging");
-            dragClone = chipElement.cloneNode(true) as HTMLElement;
-            dragClone.classList.add("b3-chip--dragclone");
-            dragClone.style.position = "fixed";
-            dragClone.style.left = `${event.clientX - dragOffsetX}px`;
-            dragClone.style.top = `${event.clientY - dragOffsetY}px`;
-            dragClone.style.width = `${dragCloneWidth}px`;
-            dragClone.style.pointerEvents = "none";
-            dragClone.style.zIndex = "999997";
-            document.body.appendChild(dragClone);
-            document.body.style.cursor = "grabbing";
-            document.body.style.userSelect = "none";
-        });
+            const startX = event.clientX;
+            const startY = event.clientY;
+            let isDragging = false;
+            let dragClone: HTMLElement | null = null;
 
-        const processDragFrame = () => {
-            if (!dragSourceElement || !dragClone) {
-                return;
-            }
-            const cloneLeft = dragMouseX - dragOffsetX;
-            const cloneTop = dragMouseY - dragOffsetY;
-            dragClone.style.left = `${cloneLeft}px`;
-            dragClone.style.top = `${cloneTop}px`;
+            const onMouseMove = (moveEvent: MouseEvent) => {
+                const deltaX = moveEvent.clientX - startX;
+                const deltaY = moveEvent.clientY - startY;
 
-            let targetChip: HTMLElement | null = null;
-            const elementsAtPoint = document.elementsFromPoint(dragMouseX, dragMouseY);
-            for (const el of elementsAtPoint) {
-                if (el === dragClone || el === dragSourceElement) {
-                    continue;
-                }
-                const chip = (el as HTMLElement).closest(".b3-chips__doctag .b3-chip") as HTMLElement;
-                if (chip && chip !== dragSourceElement) {
-                    targetChip = chip;
-                    break;
-                }
-            }
-            if (targetChip && targetChip !== lastTargetChip) {
-                lastTargetChip = targetChip;
-                const rect = targetChip.getBoundingClientRect();
-                if (dragMouseX < rect.left + rect.width / 2) {
-                    targetChip.before(dragSourceElement);
-                } else {
-                    targetChip.after(dragSourceElement);
-                }
-            } else if (!targetChip) {
-                lastTargetChip = null;
-            }
-        };
+                if (!isDragging) {
+                    if (Math.abs(deltaX) < 3 && Math.abs(deltaY) < 3) return;
+                    isDragging = true;
 
-        document.addEventListener("mousemove", (event: MouseEvent) => {
-            if (!dragSourceElement) {
-                return;
-            }
-            dragMouseX = event.clientX;
-            dragMouseY = event.clientY;
-            if (!rafPending) {
-                rafPending = true;
-                requestAnimationFrame(() => {
-                    rafPending = false;
-                    processDragFrame();
-                });
-            }
-        });
-
-        document.addEventListener("mouseup", () => {
-            if (!dragSourceElement) {
-                return;
-            }
-            dragSourceElement.classList.remove("b3-chip--dragging");
-            if (dragClone) {
-                dragClone.remove();
-                dragClone = null;
-            }
-            lastTargetChip = null;
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
-            if (dragSourceElement.parentElement) {
-                const tags = this.getTags();
-                if (tags.toString() !== this.ial.tags) {
-                    this.ial.tags = tags.toString();
-                    fetchPost("/api/attr/setBlockAttrs", {
-                        id: protyle.block.rootID,
-                        attrs: {"tags": tags.toString()}
+                    dragClone = chipElement.cloneNode(true) as HTMLElement;
+                    dragClone.classList.add("b3-chip--dragclone");
+                    const rect = chipElement.getBoundingClientRect();
+                    Object.assign(dragClone.style, {
+                        position: "fixed",
+                        left: `${rect.left}px`,
+                        top: `${rect.top}px`,
+                        zIndex: "9999",
+                        pointerEvents: "none",
+                        willChange: "transform"
                     });
+                    document.body.appendChild(dragClone);
+                    chipElement.classList.add("b3-chip--dragging");
+                    document.body.style.cursor = "grabbing";
                 }
-            }
-            dragSourceElement = null;
+
+                if (dragClone) {
+                    dragClone.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
+                }
+
+                const pointTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                const targetChip = pointTarget?.closest(".b3-chip") as HTMLElement;
+
+                if (targetChip && targetChip !== chipElement && this.tagsElement.contains(targetChip)) {
+                    const rect = targetChip.getBoundingClientRect();
+                    if (moveEvent.clientX > rect.left + rect.width / 2) {
+                        targetChip.after(chipElement);
+                    } else {
+                        targetChip.before(chipElement);
+                    }
+                }
+            };
+
+            const onMouseUp = () => {
+                window.removeEventListener("mousemove", onMouseMove);
+                window.removeEventListener("mouseup", onMouseUp);
+                document.body.style.cursor = "";
+
+                if (isDragging) {
+                    if (dragClone) {
+                        dragClone.remove();
+                        dragClone = null;
+                    }
+                    chipElement.classList.remove("b3-chip--dragging");
+
+                    const tags = this.getTags();
+                    const tagsString = tags.toString();
+                    if (tagsString !== this.ial.tags) {
+                        this.ial.tags = tagsString;
+                        fetchPost("/api/attr/setBlockAttrs", {
+                            id: protyle.block.rootID,
+                            attrs: {"tags": tagsString}
+                        });
+                    }
+                } else if (isCloseBtn) {
+                    target.closest(".b3-chip__close").dispatchEvent(new MouseEvent('click', {bubbles: true}));
+                }
+            };
+
+            window.addEventListener("mousemove", onMouseMove);
+            window.addEventListener("mouseup", onMouseUp);
         });
     }
 

@@ -415,11 +415,10 @@ export class Background {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
-            const target = event.target as HTMLElement;
             if (protyle.disabled) {
                 return;
             }
-
+            const target = event.target as HTMLElement;
             // 记录是否初始点击在关闭按钮上
             const isCloseBtn = !!target.closest(".b3-chip__close");
 

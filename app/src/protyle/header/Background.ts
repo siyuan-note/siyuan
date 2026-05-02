@@ -415,14 +415,13 @@ export class Background {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
-            if (protyle.disabled) {
-                return;
-            }
-            const target = event.target as HTMLElement;
-            // 记录是否初始点击在关闭按钮上
-            const isCloseBtn = !!target.closest(".b3-chip__close");
+            if (protyle.disabled) return;
 
+            const target = event.target as HTMLElement;
+            const isCloseBtn = !!target.closest(".b3-chip__close");
             let chipElement = target.closest(".b3-chip") as HTMLElement;
+
+            // 自动定位最近的标签逻辑
             if (!chipElement && target.closest(".b3-chips__doctag")) {
                 const rects = Array.from(this.element.querySelectorAll(".b3-chip")).map(el => ({
                     el: el as HTMLElement,
@@ -438,65 +437,98 @@ export class Background {
 
             if (!chipElement) return;
 
-            event.preventDefault();
+            // --- 核心变量初始化 ---
             const startX = event.clientX;
             const startY = event.clientY;
+            const initialRect = chipElement.getBoundingClientRect();
+
+            // 计算鼠标点击位置相对于元素左上角的偏移，这是“跟手”的关键
+            const offsetX = startX - initialRect.left;
+            const offsetY = startY - initialRect.top;
+
             let isDragging = false;
             let dragClone: HTMLElement | null = null;
+            let rafId: number | null = null;
 
             const onMouseMove = (moveEvent: MouseEvent) => {
                 const deltaX = moveEvent.clientX - startX;
                 const deltaY = moveEvent.clientY - startY;
 
+                // 阈值判断：移动超过 5 像素才视为拖拽，防止手抖误操作
                 if (!isDragging) {
-                    if (Math.abs(deltaX) < 3 && Math.abs(deltaY) < 3) return;
+                    if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
                     isDragging = true;
 
+                    // 创建克隆体
                     dragClone = chipElement.cloneNode(true) as HTMLElement;
                     dragClone.classList.add("b3-chip--dragclone");
-                    const rect = chipElement.getBoundingClientRect();
+
+                    // 初始样式设置
                     Object.assign(dragClone.style, {
                         position: "fixed",
-                        left: `${rect.left}px`,
-                        top: `${rect.top}px`,
+                        left: `${initialRect.left}px`,
+                        top: `${initialRect.top}px`,
+                        width: `${initialRect.width}px`,
+                        height: `${initialRect.height}px`,
+                        margin: "0",
                         zIndex: "9999",
                         pointerEvents: "none",
-                        willChange: "transform"
+                        willChange: "transform", // 告知浏览器开启硬件加速
+                        opacity: "0.8",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
                     });
+
                     document.body.appendChild(dragClone);
-                    chipElement.classList.add("b3-chip--dragging");
+                    chipElement.classList.add("b3-chip--dragging"); // 占位符设为透明/灰色
                     document.body.style.cursor = "grabbing";
+                    event.preventDefault();
                 }
 
-                if (dragClone) {
-                    dragClone.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
-                }
+                if (isDragging && dragClone) {
+                    if (rafId) cancelAnimationFrame(rafId);
 
-                const pointTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-                const targetChip = pointTarget?.closest(".b3-chip") as HTMLElement;
+                    rafId = requestAnimationFrame(() => {
+                        // 使用 translate3d 提高性能
+                        // 核心逻辑：当前鼠标位置 - 初始位置 - 点击时的内部偏移
+                        const translateX = moveEvent.clientX - initialRect.left - offsetX;
+                        const translateY = moveEvent.clientY - initialRect.top - offsetY;
+                        dragClone.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
 
-                if (targetChip && targetChip !== chipElement && this.tagsElement.contains(targetChip)) {
-                    const rect = targetChip.getBoundingClientRect();
-                    if (moveEvent.clientX > rect.left + rect.width / 2) {
-                        targetChip.after(chipElement);
-                    } else {
-                        targetChip.before(chipElement);
-                    }
+                        // 排序碰撞检测
+                        const pointTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                        const targetChip = pointTarget?.closest(".b3-chip") as HTMLElement;
+
+                        if (targetChip && targetChip !== chipElement && this.tagsElement.contains(targetChip)) {
+                            const rect = targetChip.getBoundingClientRect();
+                            // 根据鼠标位置决定插入在目标的前面还是后面
+                            if (moveEvent.clientX > rect.left + rect.width / 2) {
+                                targetChip.after(chipElement);
+                            } else {
+                                targetChip.before(chipElement);
+                            }
+                        }
+                    });
                 }
             };
 
-            const onMouseUp = () => {
+            const onMouseUp = (upEvent: MouseEvent) => {
                 window.removeEventListener("mousemove", onMouseMove);
-                window.removeEventListener("mouseup", onMouseUp);
+                window.removeEventListener("mouseup", onMouseUp, true);
+                if (rafId) cancelAnimationFrame(rafId);
                 document.body.style.cursor = "";
 
                 if (isDragging) {
+                    // 阻止拖拽结束后可能触发的点击事件（搜索或打开链接）
+                    upEvent.preventDefault();
+                    upEvent.stopPropagation();
+
                     if (dragClone) {
                         dragClone.remove();
                         dragClone = null;
                     }
                     chipElement.classList.remove("b3-chip--dragging");
 
+                    // 持久化排序结果
                     const tags = this.getTags();
                     const tagsString = tags.toString();
                     if (tagsString !== this.ial.tags) {
@@ -507,12 +539,14 @@ export class Background {
                         });
                     }
                 } else if (isCloseBtn) {
+                    // 如果没拖拽且点在关闭按钮上
                     target.closest(".b3-chip__close").dispatchEvent(new MouseEvent('click', {bubbles: true}));
                 }
             };
 
+            // 使用捕获阶段监听 mouseup，确保能第一时间拦截拖拽后的 click
             window.addEventListener("mousemove", onMouseMove);
-            window.addEventListener("mouseup", onMouseUp);
+            window.addEventListener("mouseup", onMouseUp, true);
         });
     }
 

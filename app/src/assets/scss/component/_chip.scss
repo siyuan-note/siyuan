@@ -97,7 +97,8 @@
     }
   }
 
-  &--dragging {
+  &--dragging,
+  &--dragging:hover {
     opacity: .38;
   }
 

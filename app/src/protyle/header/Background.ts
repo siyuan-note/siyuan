@@ -548,7 +548,7 @@ export class Background {
                 if (!item.replace(/ /g, "")) {
                     return;
                 }
-                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                html += `<div class="b3-chip b3-chip--middle b3-chip--pointer" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconClose"></use></svg></div>`;
             });
             this.tagsElement.innerHTML = `${html}
 <div class="protyle-background__action fn__flex-center">

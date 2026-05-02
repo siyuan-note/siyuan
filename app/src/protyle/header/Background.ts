@@ -102,6 +102,7 @@ export class Background {
     private actionElements: NodeListOf<Element>;
     private tagsElement: HTMLElement;
     private transparentData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+    private dragOccurred = false;
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -205,6 +206,10 @@ export class Background {
             });
         });
         this.element.addEventListener("click", (event) => {
+            if (this.dragOccurred) {
+                this.dragOccurred = false;
+                return;
+            }
             let target = event.target as HTMLElement;
             hideElements(["gutter"], protyle);
 
@@ -415,6 +420,7 @@ export class Background {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            this.dragOccurred = false;
             if (protyle.disabled) return;
 
             const target = event.target as HTMLElement;
@@ -448,7 +454,6 @@ export class Background {
 
             let isDragging = false;
             let dragClone: HTMLElement | null = null;
-            let rafId: number | null = null;
 
             const onMouseMove = (moveEvent: MouseEvent) => {
                 const deltaX = moveEvent.clientX - startX;
@@ -466,14 +471,14 @@ export class Background {
                     // 初始样式设置
                     Object.assign(dragClone.style, {
                         position: "fixed",
-                        left: `${initialRect.left}px`,
-                        top: `${initialRect.top}px`,
+                        left: `${moveEvent.clientX - offsetX}px`,
+                        top: `${moveEvent.clientY - offsetY}px`,
                         width: `${initialRect.width}px`,
                         height: `${initialRect.height}px`,
                         margin: "0",
                         zIndex: "9999",
                         pointerEvents: "none",
-                        willChange: "transform", // 告知浏览器开启硬件加速
+                        transition: "none",
                         opacity: "0.8",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
                     });
@@ -485,39 +490,32 @@ export class Background {
                 }
 
                 if (isDragging && dragClone) {
-                    if (rafId) cancelAnimationFrame(rafId);
+                    dragClone.style.left = `${moveEvent.clientX - offsetX}px`;
+                    dragClone.style.top = `${moveEvent.clientY - offsetY}px`;
 
-                    rafId = requestAnimationFrame(() => {
-                        // 使用 translate3d 提高性能
-                        // 核心逻辑：当前鼠标位置 - 初始位置 - 点击时的内部偏移
-                        const translateX = moveEvent.clientX - initialRect.left - offsetX;
-                        const translateY = moveEvent.clientY - initialRect.top - offsetY;
-                        dragClone.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+                    // 排序碰撞检测
+                    const pointTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                    const targetChip = pointTarget?.closest(".b3-chip") as HTMLElement;
 
-                        // 排序碰撞检测
-                        const pointTarget = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-                        const targetChip = pointTarget?.closest(".b3-chip") as HTMLElement;
-
-                        if (targetChip && targetChip !== chipElement && this.tagsElement.contains(targetChip)) {
-                            const rect = targetChip.getBoundingClientRect();
-                            // 根据鼠标位置决定插入在目标的前面还是后面
-                            if (moveEvent.clientX > rect.left + rect.width / 2) {
-                                targetChip.after(chipElement);
-                            } else {
-                                targetChip.before(chipElement);
-                            }
+                    if (targetChip && targetChip !== chipElement && this.tagsElement.contains(targetChip)) {
+                        const rect = targetChip.getBoundingClientRect();
+                        // 根据鼠标位置决定插入在目标的前面还是后面
+                        if (moveEvent.clientX > rect.left + rect.width / 2) {
+                            targetChip.after(chipElement);
+                        } else {
+                            targetChip.before(chipElement);
                         }
-                    });
+                    }
                 }
             };
 
             const onMouseUp = (upEvent: MouseEvent) => {
                 window.removeEventListener("mousemove", onMouseMove);
                 window.removeEventListener("mouseup", onMouseUp, true);
-                if (rafId) cancelAnimationFrame(rafId);
                 document.body.style.cursor = "";
 
                 if (isDragging) {
+                    this.dragOccurred = true;
                     // 阻止拖拽结束后可能触发的点击事件（搜索或打开链接）
                     upEvent.preventDefault();
                     upEvent.stopPropagation();

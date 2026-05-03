@@ -120,7 +120,7 @@ export const saveZipExport = async (zipPath: string) => {
         return;
     }
     /// #if !BROWSER
-    const fileName = zipPath.substring(zipPath.lastIndexOf("/") + 1);
+    const fileName = decodeURIComponent(zipPath.substring(zipPath.lastIndexOf("/") + 1));
     const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
         cmd: "showSaveDialog",
         defaultPath: fileName,

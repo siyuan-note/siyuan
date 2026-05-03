@@ -46,7 +46,7 @@
   * [パッケージマネージャー](#パッケージマネージャー)
   * [Docker ホスティング](#docker-ホスティング)
   * [Unraid ホスティング](#unraid-ホスティング)
-  * [TrueNas ホスティング](#truenas-ホスティング)
+  * [TrueNAS ホスティング](#truenas-ホスティング)
   * [インサイダープレビュー](#インサイダープレビュー)
 * [🏘️ コミュニティ](#️-コミュニティ)
 * [🛠️ 開発ガイド](#️-開発ガイド)
@@ -316,7 +316,7 @@ Publish parameters: --accessAuthCode=******（アクセス認証コード）
 
 </details>
 
-### TrueNas ホスティング
+### TrueNAS ホスティング
 
 <details>
 <summary>TrueNasデプロイメント</summary>
@@ -400,7 +400,7 @@ SiYuanは完全にオープンソースであり、貢献を歓迎します：
 * [ユーザーインターフェースとカーネル](https://github.com/siyuan-note/siyuan)
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
-* [harmony](https://github.com/siyuan-note/siyuan-harmony)
+* [HarmonyOS](https://github.com/siyuan-note/siyuan-harmony)
 * [Chromeクリッピング拡張](https://github.com/siyuan-note/siyuan-chrome)
 
 詳細については[開発ガイド](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md)をご覧ください。

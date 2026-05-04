@@ -443,6 +443,8 @@ export class Background {
 
             if (!chipElement) return;
 
+            event.preventDefault();
+
             // --- 核心变量初始化 ---
             const startX = event.clientX;
             const startY = event.clientY;

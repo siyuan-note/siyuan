@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260426231826"
+		"updated": "20260504121430"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20260426231826"
+				"updated": "20260504121430"
 			},
 			"Children": [
 				{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20260426231826"
+				"updated": "20260504121430"
 			},
 			"Children": [
 				{
@@ -2366,7 +2366,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "页面重置"
+									"Data": "界面重置"
 								}
 							]
 						},
@@ -2423,7 +2423,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "页面放大"
+									"Data": "界面放大"
 								}
 							]
 						},
@@ -2480,7 +2480,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "页面缩小"
+									"Data": "界面缩小"
 								}
 							]
 						},

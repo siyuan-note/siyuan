@@ -10,5 +10,6 @@ Some areas we don't consider security vulnerabilities:
 * Chart/Formula/ABC rendering code injection: This is a common user need, for details please refer to https://github.com/siyuan-note/siyuan/pull/6917
 * SQL injection
 * Pandoc Argument Injection: Allowing the setting of `--lua-filter` is a common user need
+* SSRF `netImg2LocalAssets` / `netAssets2LocalAssets`
 
 Thank you very much!

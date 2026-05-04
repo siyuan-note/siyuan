@@ -106,7 +106,7 @@ class App {
                     callMobileAppShowKeyboard();
                 }
             }
-            if (!hasClosestByClassName(event.target as Element, "protyle-util")) {
+            if (document.contains(event.target) && !hasClosestByClassName(event.target as Element, "protyle-util")) {
                 hideAllElements(["util"]);
             }
         });

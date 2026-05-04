@@ -512,8 +512,8 @@ export class Background {
             };
 
             const onMouseUp = (upEvent: MouseEvent) => {
-                window.removeEventListener("mousemove", onMouseMove);
-                window.removeEventListener("mouseup", onMouseUp, true);
+                document.onmousemove = null;
+                document.onmouseup = null;
                 document.body.style.cursor = "";
 
                 if (isDragging) {
@@ -544,9 +544,8 @@ export class Background {
                 }
             };
 
-            // 使用捕获阶段监听 mouseup，确保能第一时间拦截拖拽后的 click
-            window.addEventListener("mousemove", onMouseMove);
-            window.addEventListener("mouseup", onMouseUp, true);
+            document.onmousemove = (e) => onMouseMove(e as MouseEvent);
+            document.onmouseup = (e) => onMouseUp(e as MouseEvent);
         });
     }
 

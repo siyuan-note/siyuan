@@ -76,7 +76,9 @@ const handleManualTouchStart = (e: TouchEvent) => {
         !target.closest(".av__widthdrag") &&
         !target.closest(".av__drag-fill") &&
         !target.closest(".protyle-action__drag") &&
-        !target.closest(".table__resize")) return;
+        !target.closest(".table__resize") &&
+        !target.closest(".protyle-background__img") &&
+        !target.closest(".b3-chip")) return;
 
     const touch = e.touches[0];
     dispatchSyntheticMouse("mousedown", touch.clientX, touch.clientY, target);

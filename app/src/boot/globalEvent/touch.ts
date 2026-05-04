@@ -17,19 +17,6 @@ import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
 import {hideTooltip} from "../../dialog/tooltip";
 
-export const globalTouchStart = (event: TouchEvent) => {
-    const target = event.target as HTMLElement;
-    const backgroundElement = hasClosestByClassName(target, "protyle-background");
-    if (backgroundElement) {
-        if (backgroundElement.classList.contains("protyle-background--enable")) {
-            backgroundElement.classList.add("protyle-background--mobileshow");
-        }
-    } else {
-        document.querySelector(".protyle-background--mobileshow")?.classList.remove("protyle-background--mobileshow");
-    }
-    return false;
-};
-
 export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, app: App) => {
     const target = event.target as HTMLElement;
     const isIPadBoolean = isIPad();

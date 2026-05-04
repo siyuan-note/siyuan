@@ -6,7 +6,7 @@ import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
 import {isIPad} from "../../protyle/util/compatibility";
-import {globalTouchEnd, globalTouchStart} from "./touch";
+import {globalTouchEnd} from "./touch";
 import {initDockMenu} from "../../menus/dock";
 import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
 import {initTabMenu} from "../../menus/tab";
@@ -147,8 +147,6 @@ export const initWindowEvent = (app: App) => {
             embedBlockElement.firstElementChild.classList.toggle("protyle-icons--show");
             return;
         }
-        // 触摸屏背景和嵌入块按钮显示
-        globalTouchStart(event);
     }, false);
 
     document.addEventListener("touchend", (event) => {

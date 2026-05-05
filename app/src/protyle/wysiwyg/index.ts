@@ -3235,7 +3235,7 @@ export class WYSIWYG {
                                 if (preciseBlock) {
                                     if (preciseBlock.classList.contains("list")) {
                                         // 命中 list 容器空白区，找最近 li（这里解决的是点击右侧的列表项间隙，也就是鼠标位于列表内容之中的情况）
-                                        const nearestLi = getNearestLi(blockElement, event.clientY);
+                                        const nearestLi = getNearestLi(preciseBlock, event.clientY);
                                         if (nearestLi) {
                                             blockElement = nearestLi as HTMLElement;
                                         }

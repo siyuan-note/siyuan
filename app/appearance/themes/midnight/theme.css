@@ -226,11 +226,6 @@
     --b3-font-family: "Emojis Additional", "Emojis Reset", BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Yu Gothic UI", arial, sans-serif, emojis;
 }
 
-/* https://github.com/siyuan-note/siyuan/issues/6440 */
-.protyle-action--order::after {
-    mix-blend-mode: screen;
-}
-
 .b3-text-field::-webkit-calendar-picker-indicator {
     filter: invert(1)
 }

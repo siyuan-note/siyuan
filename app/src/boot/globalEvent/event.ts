@@ -6,15 +6,8 @@ import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
 import {isIPad} from "../../protyle/util/compatibility";
-import {globalTouchEnd} from "./touch";
-import {initDockMenu} from "../../menus/dock";
-import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
-import {initTabMenu} from "../../menus/tab";
-import {getInstanceById} from "../../layout/util";
-import {Tab} from "../../layout/Tab";
+import {hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
 import {hideTooltip} from "../../dialog/tooltip";
-import {openFileById} from "../../editor/util";
-import {checkFold} from "../../util/noRelyPCFunction";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
@@ -154,60 +147,16 @@ export const initWindowEvent = (app: App) => {
             return;
         }
         // pad 端长按事件
-        if (isIPad()) {
-            // https://github.com/siyuan-note/siyuan/issues/9113
-            if (globalTouchEnd(event, undefined, time, app)) {
-                event.stopImmediatePropagation();
-                event.preventDefault();
-                return;
-            }
-            if (new Date().getTime() - time <= 900) {
-                return;
-            }
-            const target = event.target as HTMLElement;
-            // dock right menu
-            const dockElement = hasClosestByClassName(target, "dock__item");
-            if (dockElement && dockElement.getAttribute("data-type")) {
-                const dockRect = dockElement.getBoundingClientRect();
-                initDockMenu(dockElement).popup({x: dockRect.right, y: dockRect.top});
-                event.stopImmediatePropagation();
-                event.preventDefault();
-                return;
-            }
-
-            // tab right menu
-            const tabElement = hasClosestByAttribute(target, "data-type", "tab-header");
-            if (tabElement) {
-                const tabRect = tabElement.getBoundingClientRect();
-                initTabMenu(app, (getInstanceById(tabElement.getAttribute("data-id")) as Tab)).popup({
-                    x: tabRect.left,
-                    y: tabRect.bottom
-                });
-                hideTooltip();
-                event.stopImmediatePropagation();
-                event.preventDefault();
-                return;
-            }
-
-            const backlinkBreadcrumbItemElement = hasClosestByClassName(target, "protyle-breadcrumb__item");
-            if (backlinkBreadcrumbItemElement) {
-                const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id") || backlinkBreadcrumbItemElement.getAttribute("data-node-id");
-                if (breadcrumbId) {
-                    checkFold(breadcrumbId, (zoomIn) => {
-                        openFileById({
-                            app,
-                            id: breadcrumbId,
-                            action: zoomIn ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT],
-                            zoomIn,
-                        });
-                        window.siyuan.menus.menu.remove();
-                    });
-                }
-                event.stopImmediatePropagation();
-                event.preventDefault();
-                return;
-            }
+        if (isIPad() && new Date().getTime() - time > 900) {
+            event.target.dispatchEvent(new MouseEvent("contextmenu", {
+                bubbles: true,
+                cancelable: true,
+                clientX: event.changedTouches[0].clientX,
+                clientY: event.changedTouches[0].clientY,
+            }));
+            event.stopImmediatePropagation();
+            event.preventDefault();
         }
-    }, false);
+    });
     initTouchDragBridge();
 };

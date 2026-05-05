@@ -8,8 +8,6 @@ import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
-import {App} from "../../index";
-import {globalTouchEnd} from "../../boot/globalEvent/touch";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 
@@ -33,13 +31,21 @@ const popSide = (render = true) => {
     }
 };
 
-export const handleTouchEnd = (event: TouchEvent, app: App) => {
+export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
-    if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
+
+    if (isIPhone() && typeof yDiff === "undefined" && new Date().getTime() - time > 900) {
+        target.dispatchEvent(new MouseEvent("contextmenu", {
+            bubbles: true,
+            cancelable: true,
+            clientX: event.changedTouches[0].clientX,
+            clientY: event.changedTouches[0].clientY,
+        }));
         event.stopImmediatePropagation();
         event.preventDefault();
         return;
     }
+
     if (typeof yDiff === "undefined" && window.siyuan.mobile.editor.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {

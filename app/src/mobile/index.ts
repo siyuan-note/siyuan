@@ -174,9 +174,7 @@ class App {
             });
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
-            document.addEventListener("touchend", (event) => {
-                handleTouchEnd(event, siyuanApp);
-            }, false);
+            document.addEventListener("touchend", handleTouchEnd, false);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;

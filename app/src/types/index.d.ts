@@ -296,6 +296,8 @@ interface Window {
 
     Protyle: import("../protyle/method").default;
 
+    lockscreenByMode(): void;
+
     goBack(): void;
 
     showMessage(message: string, timeout: number, type: string, messageId?: string): void;

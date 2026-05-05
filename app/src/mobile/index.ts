@@ -16,7 +16,7 @@ import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets, loadAssets} from "../util/assets";
-import {bootSync} from "../dialog/processSystem";
+import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
@@ -217,6 +217,11 @@ window.reconnectWebSocket = () => {
     window.siyuan.mobile.docks.file.send("ping", {});
     window.siyuan.mobile.editor.protyle.ws.send("ping", {});
     window.siyuan.mobile.popEditor?.protyle.ws.send("ping", {});
+};
+window.lockscreenByMode = () => {
+    if (window.siyuan.config.system.lockScreenMode === 1) {
+        lockScreen(siyuanApp);
+    }
 };
 window.goBack = goBack;
 window.showMessage = showMessage;

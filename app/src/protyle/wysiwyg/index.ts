@@ -3243,7 +3243,7 @@ export class WYSIWYG {
                                         // 命中具体 li 或其他块
                                         blockElement = preciseBlock as HTMLElement;
                                         // 命中 li 但是 li 可能有子项，此时若 toStart=false，应该聚焦到当前li，而不是他的最后一个子项
-                                        toFirstChild = true;
+                                        toFirstChild = preciseBlock.classList.contains("li");
                                     }
                                 }
                             } else {

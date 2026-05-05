@@ -138,7 +138,9 @@ export class App {
                                 progressLoading(data);
                                 break;
                             case "setLocalStorageVal":
-                                window.siyuan.storage[data.data.key] = data.data.val;
+                                if (window.siyuan.storage) {
+                                    window.siyuan.storage[data.data.key] = data.data.val;
+                                }
                                 break;
                             case "rename":
                                 getAllTabs().forEach((tab) => {

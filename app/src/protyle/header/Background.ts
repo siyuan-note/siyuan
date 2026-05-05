@@ -589,6 +589,7 @@ export class Background {
             this.tagsElement.classList.remove("fn__none");
             this.actionElements[0].classList.add("fn__none");
         } else {
+            this.tagsElement.innerHTML = "";
             this.tagsElement.classList.add("fn__none");
             this.actionElements[0].classList.remove("fn__none");
         }

@@ -222,7 +222,7 @@ func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]any, ok bool) 
 
 // ParseJsonArg 使用泛型从 JSON 参数中提取指定键的值。
 //   - 如果 required 为 true 但参数缺失，则会在 ret.Msg 中说明需要传入的键
-//   - 如果 rejectEmpty 为 true 但参数值为空，则会在 ret.Msg 中说明该键必须不为空
+//   - 如果 rejectEmpty 为 true 但参数值为空，则会在 ret.Msg 中说明该键必须不为空（字符串去空白后、空数组、无任何键的对象）
 //   - 如果参数存在但类型不匹配，则会在 ret.Msg 中说明该键期望的类型
 //   - 返回值 ok 为 false 时，表示提取失败、类型不匹配或不满足非空约束
 func ParseJsonArg[T any](key string, arg map[string]any, ret *gulu.Result, required, rejectEmpty bool) (value T, ok bool) {
@@ -273,6 +273,8 @@ func ParseJsonArg[T any](key string, arg map[string]any, ret *gulu.Result, requi
 				value = any(t).(T)
 			}
 		case []any:
+			bad = len(x) == 0
+		case map[string]any:
 			bad = len(x) == 0
 		}
 		if bad {

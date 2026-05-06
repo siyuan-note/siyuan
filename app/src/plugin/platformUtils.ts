@@ -20,6 +20,10 @@ export const updateHotkeyTip = compatibility.updateHotkeyTip;
 export const getLocalStorage = compatibility.getLocalStorage;
 export const setStorageVal = compatibility.setStorageVal;
 
+export const getStorageVal = (key: string): any => {
+    return window.siyuan.storage?.[key] ?? null; // 不存在时与接口响应一致使用 null
+};
+
 /**
  * @param {string} [options.timeoutType="defalut"] 仅在 Windows 和 Linux 有效，"default" 表示使用默认的超时机制，"never" 表示通知将一直显示，直到用户手动关闭它。
  * @returns 通知 id

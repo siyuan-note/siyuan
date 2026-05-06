@@ -243,7 +243,7 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 	for _, child := range children {
 		var unlinks []*ast.Node
 
-		parentHeadingLevel := 0
+		parentHeadingLevel := 1
 		for prev := child; nil != prev; prev = prev.Previous {
 			if ast.NodeHeading == prev.Type {
 				parentHeadingLevel = prev.HeadingLevel
@@ -298,8 +298,8 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 							}
 
 							n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-							if 1 > n.HeadingLevel {
-								n.HeadingLevel = 1
+							if 2 > n.HeadingLevel {
+								n.HeadingLevel = 2
 							} else if 6 < n.HeadingLevel {
 								n.HeadingLevel = 6
 							}
@@ -350,13 +350,14 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 								break
 							}
 						}
-						if parentHeadingLevel >= embedTopLevel {
-							for _, hChild := range hChildren {
-								if ast.NodeHeading == hChild.Type {
-									hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-									if 6 < hChild.HeadingLevel {
-										hChild.HeadingLevel = 6
-									}
+
+						for _, hChild := range hChildren {
+							if ast.NodeHeading == hChild.Type {
+								hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+								if 2 > hChild.HeadingLevel {
+									hChild.HeadingLevel = 2
+								} else if 6 < hChild.HeadingLevel {
+									hChild.HeadingLevel = 6
 								}
 							}
 						}

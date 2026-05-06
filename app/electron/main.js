@@ -404,7 +404,6 @@ const initMainWindow = () => {
         fullscreenable: true,
         fullscreen: windowState.fullscreen,
         trafficLightPosition: {x: 8, y: 8},
-        transparent: "darwin" === process.platform, // 避免缩放窗口时出现边框
         webPreferences: {
             nodeIntegration: true,
             webviewTag: true,
@@ -1147,7 +1146,6 @@ app.whenReady().then(() => {
             minWidth: 493,
             minHeight: 376,
             fullscreenable: true,
-            transparent: "darwin" === process.platform, // 避免缩放窗口时出现边框
             frame: "darwin" === process.platform,
             icon: path.join(appDir, "stage", "icon-large.png"),
             titleBarStyle: "hidden",

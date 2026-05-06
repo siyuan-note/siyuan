@@ -581,7 +581,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             });
                         } else if (dataType === "doc") {
                             fetchPost("/api/history/rollbackDocHistory", {
-                                notebook: target.parentElement.getAttribute("data-notebook-id"),
                                 historyPath: target.parentElement.getAttribute("data-path")
                             });
                         } else if (dataType === "av") {

@@ -340,15 +340,15 @@ const initMainWindow = () => {
     } catch (e) {
         writeLog("get screen size failed: " + e);
     }
-    const windowState = Object.assign({}, {
-        isMaximized: false,
-        fullscreen: false,
-        isDevToolsOpened: false,
-        x: 0,
-        y: 0,
-        width: defaultWidth,
-        height: defaultHeight,
-    }, oldWindowState);
+    const windowState = {
+        isMaximized: oldWindowState.isMaximized ?? false,
+        fullscreen: oldWindowState.fullscreen ?? false,
+        isDevToolsOpened: oldWindowState.isDevToolsOpened ?? false,
+        x: oldWindowState.x ?? 0,
+        y: oldWindowState.y ?? 0,
+        width: oldWindowState.width ?? defaultWidth,
+        height: oldWindowState.height ?? defaultHeight,
+    };
 
     writeLog("window stat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], " +
         "default [x=0, y=0, width=" + defaultWidth + ", height=" + defaultHeight + "], " +
@@ -405,10 +405,10 @@ const initMainWindow = () => {
         trafficLightPosition: {x: 8, y: 8},
         transparent: "darwin" === process.platform, // 避免缩放窗口时出现边框
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             webviewTag: true,
             webSecurity: false,
-            contextIsolation: false,
+            contextIsolation: true,
             autoplayPolicy: "user-gesture-required" // 桌面端禁止自动播放多媒体 https://github.com/siyuan-note/siyuan/issues/7587
         },
         frame: "darwin" === process.platform,

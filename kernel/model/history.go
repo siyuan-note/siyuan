@@ -227,13 +227,23 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	return
 }
 
-func RollbackDocHistory(boxID, historyPath string) (err error) {
+func RollbackDocHistory(historyPath string) (err error) {
 	if !gulu.File.IsExist(historyPath) {
 		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
 	}
 
 	FlushTxQueue()
+
+	relPath := strings.TrimPrefix(historyPath, util.HistoryDir)
+	relPath = strings.TrimPrefix(relPath, string(os.PathSeparator))
+	relPath = filepath.ToSlash(relPath)
+	parts := strings.SplitN(relPath, "/", 3)
+	if len(parts) < 3 {
+		logging.LogWarnf("invalid history path [%s]", historyPath)
+		return
+	}
+	boxID := parts[1]
 
 	box, needResetTree, err := getRollbackBox(boxID)
 	if err != nil {
@@ -258,11 +268,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	var avIDs []string
 	tree, _ := loadTree(srcPath, util.NewLute())
 	if nil != tree {
-		historyDir := strings.TrimPrefix(historyPath, util.HistoryDir+string(os.PathSeparator))
-		if strings.Contains(historyDir, string(os.PathSeparator)) {
-			historyDir = historyDir[:strings.Index(historyDir, string(os.PathSeparator))]
-		}
-		historyDir = filepath.Join(util.HistoryDir, historyDir)
+		historyDir := filepath.Join(util.HistoryDir, parts[0])
 
 		avNodes := tree.Root.ChildrenByType(ast.NodeAttributeView)
 		for _, avNode := range avNodes {

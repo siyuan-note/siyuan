@@ -150,7 +150,6 @@ export const openDocHistory = (options: {
                         .replace("${time}", target.previousElementSibling.previousElementSibling.textContent.trim());
                     confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                         fetchPost("/api/history/rollbackDocHistory", {
-                            notebook: options.notebookId,
                             historyPath: dataPath
                         });
                     });

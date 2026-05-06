@@ -283,19 +283,25 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 				if "d" == sqlBlock.Type {
 					if 0 == blockEmbedMode {
 						// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
-						// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233 https://github.com/siyuan-note/siyuan/issues/12741
+						// Improve export of heading levels in embedded blocks
+						// https://github.com/siyuan-note/siyuan/issues/12233
+						// https://github.com/siyuan-note/siyuan/issues/12741
+						// https://github.com/siyuan-note/siyuan/issues/17629
 						embedTopLevel := 0
+						embedFirstHeading := subTree.Root.ChildByType(ast.NodeHeading)
+						if nil != embedFirstHeading {
+							embedTopLevel = embedFirstHeading.HeadingLevel
+						}
 						ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 							if !entering || ast.NodeHeading != n.Type {
 								return ast.WalkContinue
 							}
 
-							embedTopLevel = n.HeadingLevel
-							if parentHeadingLevel >= embedTopLevel {
-								n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-								if 6 < n.HeadingLevel {
-									n.HeadingLevel = 6
-								}
+							n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+							if 1 > n.HeadingLevel {
+								n.HeadingLevel = 1
+							} else if 6 < n.HeadingLevel {
+								n.HeadingLevel = 6
 							}
 							return ast.WalkContinue
 						})

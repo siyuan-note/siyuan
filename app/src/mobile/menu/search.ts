@@ -8,7 +8,7 @@ import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import {escapeLessThans, escapeHtml, escapeAttr} from "../../util/escape";
+import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";

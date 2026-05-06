@@ -18,45 +18,7 @@ interface TouchDragState {
 let dragState: TouchDragState | null = null;
 let lastDragOverElement: Element | null = null;
 
-// ── Manual mousedown bridge ──────────────────────────────────────────
-
 let manualTouchActive = false;
-
-const dispatchSyntheticMouse = (type: string, clientX: number, clientY: number, target: Element) => {
-    const mouseEvent = new MouseEvent(type, {
-        bubbles: true,
-        cancelable: true,
-        clientX,
-        clientY,
-        button: 0,
-        view: window,
-    });
-    target.dispatchEvent(mouseEvent);
-};
-
-const callDocumentMouseMove = (clientX: number, clientY: number) => {
-    if (typeof document.onmousemove !== "function") return;
-    const target = document.elementFromPoint(clientX, clientY);
-    if (!target) return;
-    const fakeEvent = new MouseEvent("mousemove", {
-        clientX,
-        clientY,
-        cancelable: true,
-        bubbles: true,
-    });
-    target.dispatchEvent(fakeEvent);
-};
-
-const callDocumentMouseUp = (clientX: number, clientY: number) => {
-    if (typeof document.onmouseup !== "function") return;
-    const target = document.elementFromPoint(clientX, clientY) || document.body;
-    const fakeEvent = new MouseEvent("mouseup", {
-        clientX,
-        clientY,
-        bubbles: true,
-    });
-    target.dispatchEvent(fakeEvent);
-};
 
 const handleManualTouchStart = (e: TouchEvent) => {
     if (dragState) return;
@@ -81,7 +43,15 @@ const handleManualTouchStart = (e: TouchEvent) => {
         !target.closest(".b3-chip")) return;
 
     const touch = e.touches[0];
-    dispatchSyntheticMouse("mousedown", touch.clientX, touch.clientY, target);
+    const mouseEvent = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+        clientX:touch.clientX,
+        clientY:touch.clientY,
+        button: 0,
+        view: window,
+    });
+    target.dispatchEvent(mouseEvent);
     manualTouchActive = true;
 };
 
@@ -90,9 +60,14 @@ const handleManualTouchMove = (e: TouchEvent) => {
     if (!manualTouchActive) return;
 
     const touch = e.touches[0];
-    if (document.onmousemove) {
+    if (document.onmousemove && typeof document.onmousemove === "function" && (touch.target as Element)?.nodeType === 1) {
         e.preventDefault();
-        callDocumentMouseMove(touch.clientX, touch.clientY);
+        touch.target.dispatchEvent( new MouseEvent("mousemove", {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            cancelable: true,
+            bubbles: true,
+        }));
     }
 };
 
@@ -101,12 +76,16 @@ const handleManualTouchEnd = (e: TouchEvent) => {
     if (!manualTouchActive) return;
 
     if (document.onmouseup) {
-        callDocumentMouseUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+        if (typeof document.onmouseup !== "function") return;
+        const target = e.changedTouches[0].target || document.body;
+        target.dispatchEvent(new MouseEvent("mouseup", {
+            clientX:e.changedTouches[0].clientX,
+            clientY:e.changedTouches[0].clientY,
+            bubbles: true,
+        }));
     }
     manualTouchActive = false;
 };
-
-// ── Native Drag API bridge ───────────────────────────────────────────
 
 const getDraggableAncestor = (el: HTMLElement): HTMLElement | null => {
     let current: HTMLElement | null = el;
@@ -283,7 +262,7 @@ const cleanupDrag = () => {
     lastDragOverElement = null;
 };
 
-const handleTouchStart = (e: TouchEvent) => {
+const handleDragStart = (e: TouchEvent) => {
     if (e.touches.length !== 1) return;
 
     const target = e.target as HTMLElement;
@@ -306,7 +285,7 @@ const handleTouchStart = (e: TouchEvent) => {
     };
 };
 
-const handleTouchMove = (e: TouchEvent) => {
+const handleDragMove = (e: TouchEvent) => {
     if (!dragState) return;
 
     const touch = e.touches[0];
@@ -340,7 +319,7 @@ const handleTouchMove = (e: TouchEvent) => {
     continueTouchDrag(touch);
 };
 
-const handleTouchEnd = (e: TouchEvent) => {
+const handleDragEnd = (e: TouchEvent) => {
     if (!dragState) return;
 
     if (dragState.isDragging) {
@@ -351,7 +330,7 @@ const handleTouchEnd = (e: TouchEvent) => {
     cleanupDrag();
 };
 
-const handleTouchCancel = () => {
+const handleCancel = () => {
     if (dragState?.isDragging) {
         cleanupDrag();
     }
@@ -362,13 +341,13 @@ const handleTouchCancel = () => {
 
 export const initTouchDragBridge = () => {
     // Native Drag API bridge (for [draggable="true"] elements)
-    document.addEventListener("touchstart", handleTouchStart, {passive: false});
-    document.addEventListener("touchmove", handleTouchMove, {passive: false});
-    document.addEventListener("touchend", handleTouchEnd);
-    document.addEventListener("touchcancel", handleTouchCancel);
-
+    document.addEventListener("touchstart", handleDragStart, {passive: false});
+    document.addEventListener("touchmove", handleDragMove, {passive: false});
+    document.addEventListener("touchend", handleDragEnd);
     // Manual mousedown bridge (for dock / dialog / outline)
     document.addEventListener("touchstart", handleManualTouchStart, {passive: false});
     document.addEventListener("touchmove", handleManualTouchMove, {passive: false});
     document.addEventListener("touchend", handleManualTouchEnd);
+
+    document.addEventListener("touchcancel", handleCancel);
 };

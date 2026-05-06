@@ -2,7 +2,7 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {fixWndFlex1, getInstanceById, getWndByLayout, saveLayout} from "../util";
+import {fixWndFlex1, getInstanceById, getWndByLayout} from "../util";
 import {getDockByType, resizeTabs} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";

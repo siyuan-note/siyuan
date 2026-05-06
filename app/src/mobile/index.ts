@@ -38,6 +38,7 @@ import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
+import {initTouchDragBridge} from "../util/touchDragBridge";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -203,6 +204,7 @@ class App {
                     }
                 }
             });
+            initTouchDragBridge();
         });
     }
 }

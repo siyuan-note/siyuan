@@ -540,7 +540,7 @@ export class Background {
                     }
                 } else if (isCloseBtn) {
                     // 如果没拖拽且点在关闭按钮上
-                    target.closest(".b3-chip__close").dispatchEvent(new MouseEvent('click', {bubbles: true}));
+                    target.closest(".b3-chip__close").dispatchEvent(new MouseEvent("click", {bubbles: true}));
                 }
             };
 

@@ -163,12 +163,17 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
-    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" || (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
+    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" ||
+        (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
         activeBlur();
         return;
     }
-
+    // 存在其他拖拽元素时
+    const otherTouchElement = hasClosestByClassName(event.touches[0].target as Element, "b3-chip");
+    if (otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) {
+        return;
+    }
     if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element)) {
         const editor = getCurrentEditor();
         if (editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&

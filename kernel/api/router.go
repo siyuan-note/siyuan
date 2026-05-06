@@ -76,19 +76,22 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/clearTempFiles", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, clearTempFiles)
 	ginServer.Handle("POST", "/api/system/rebuildDataIndex", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rebuildDataIndex)
 
-	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorage, deprecated) // TODO 请使用 /api/storage/setLocalStorageVal，该端点计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/16664#issuecomment-3694774305
 	ginServer.Handle("POST", "/api/storage/getLocalStorage", model.CheckAuth, getLocalStorage)
+	ginServer.Handle("POST", "/api/storage/getLocalStorageVal", model.CheckAuth, getLocalStorageVal)
+	ginServer.Handle("POST", "/api/storage/getLocalStorageVals", model.CheckAuth, getLocalStorageVals)
+	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorage, deprecated) // TODO 请使用 /api/storage/setLocalStorageVal，该端点计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/16664#issuecomment-3694774305
 	ginServer.Handle("POST", "/api/storage/setLocalStorageVal", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorageVal)
+	ginServer.Handle("POST", "/api/storage/setLocalStorageVals", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorageVals)
+	ginServer.Handle("POST", "/api/storage/removeLocalStorageVal", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeLocalStorageVal)
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVals", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeLocalStorageVals)
-	ginServer.Handle("POST", "/api/storage/setCriterion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setCriterion)
 	ginServer.Handle("POST", "/api/storage/getCriteria", model.CheckAuth, getCriteria)
+	ginServer.Handle("POST", "/api/storage/setCriterion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setCriterion)
 	ginServer.Handle("POST", "/api/storage/removeCriterion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeCriterion)
 	ginServer.Handle("POST", "/api/storage/getRecentDocs", model.CheckAuth, getRecentDocs)
+	ginServer.Handle("POST", "/api/storage/updateRecentDocOpenTime", model.CheckAuth, updateRecentDocOpenTime)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocViewTime", model.CheckAuth, updateRecentDocViewTime)
 	ginServer.Handle("POST", "/api/storage/updateRecentDocCloseTime", model.CheckAuth, updateRecentDocCloseTime)
 	ginServer.Handle("POST", "/api/storage/batchUpdateRecentDocCloseTime", model.CheckAuth, batchUpdateRecentDocCloseTime)
-	ginServer.Handle("POST", "/api/storage/updateRecentDocOpenTime", model.CheckAuth, updateRecentDocOpenTime)
-
 	ginServer.Handle("POST", "/api/storage/getOutlineStorage", model.CheckAuth, getOutlineStorage)
 	ginServer.Handle("POST", "/api/storage/setOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setOutlineStorage)
 	ginServer.Handle("POST", "/api/storage/removeOutlineStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeOutlineStorage)

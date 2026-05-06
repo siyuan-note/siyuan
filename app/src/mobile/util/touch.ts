@@ -173,8 +173,12 @@ export const handleTouchStart = (event: TouchEvent) => {
     // 存在其他拖拽元素时
     const otherTouchElement = hasClosestByClassName(target, "b3-chip");
     if ((otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) ||
-        hasClosestByClassName(target, "protyle-gutters") ||
+        target.closest(".protyle-gutters")||
+        target.closest('[style^="--file-toggle-width"]') ||
         (target.tagName === "IMG" && target.style.cursor === "move" && target.parentElement.classList.contains("protyle-background__img"))) {
+        clientX = null;
+        clientY = null;
+        time = 0;
         return;
     }
     if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element)) {

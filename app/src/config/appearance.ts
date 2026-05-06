@@ -179,7 +179,17 @@ export const appearance = {
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="closeButtonBehavior" type="checkbox"${window.siyuan.config.appearance.closeButtonBehavior === 0 ? "" : " checked"}>
-</label>`;
+</label>
+<div class="b3-label">
+    <label class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.desktopMode}
+            <div class="b3-label__text">${window.siyuan.languages.mobileModeTip}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="desktopMode" type="checkbox" checked>
+    </label>
+</div>`;
     },
     _send: () => {
         const themeLight = (appearance.element.querySelector("#themeLight") as HTMLSelectElement).value;
@@ -213,6 +223,12 @@ export const appearance = {
     },
     bindEvent: () => {
         setStatusBar(appearance.element.querySelector("#statusBarSetting"));
+        appearance.element.querySelector("#desktopMode")?.addEventListener("change", (event) => {
+            event.stopImmediatePropagation();
+            const checked = (event.target as HTMLInputElement).checked;
+            document.cookie = "siyuan-desktop-mode=" + (checked ? "true" : "false") + ";path=/;max-age=31536000";
+            window.location.href = "/";
+        });
         appearance.element.querySelector("#codeSnippet").addEventListener("click", () => {
             openSnippets();
         });

@@ -34,7 +34,8 @@ const popSide = (render = true) => {
 export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
 
-    if (isIPhone() && typeof yDiff === "undefined" && new Date().getTime() - time > 900) {
+    if (!window.siyuan.touchDragActive && isIPhone() && typeof yDiff === "undefined" &&
+        new Date().getTime() - time > 900) {
         target.dispatchEvent(new MouseEvent("contextmenu", {
             bubbles: true,
             cancelable: true,
@@ -163,15 +164,17 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
-    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" ||
-        (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
+    const target = event.touches[0].target as HTMLElement;
+    if (0 < event.touches.length && (target.tagName === "VIDEO" || target.tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
         activeBlur();
         return;
     }
     // 存在其他拖拽元素时
-    const otherTouchElement = hasClosestByClassName(event.touches[0].target as Element, "b3-chip");
-    if (otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) {
+    const otherTouchElement = hasClosestByClassName(target, "b3-chip");
+    if ((otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) ||
+        hasClosestByClassName(target, "protyle-gutters") ||
+        (target.tagName === "IMG" && target.style.cursor === "move" && target.parentElement.classList.contains("protyle-background__img"))) {
         return;
     }
     if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element)) {

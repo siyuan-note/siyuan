@@ -423,6 +423,23 @@ func serveAppearance(ginServer *gin.Engine) {
 		queryParams.Set("r", gulu.Rand.String(7))
 		location.RawQuery = queryParams.Encode()
 
+		siyuanDesktopMode, desktopCookieErr := c.Request.Cookie("siyuan-desktop-mode")
+		if nil == desktopCookieErr {
+			if "true" == siyuanDesktopMode.Value {
+				if strings.Contains(userAgentHeader, "Electron") {
+					location.Path = "/stage/build/app/"
+				} else {
+					location.Path = "/stage/build/desktop/"
+				}
+				c.Redirect(302, location.String())
+				return
+			} else if "false" == siyuanDesktopMode.Value {
+				location.Path = "/stage/build/mobile/"
+				c.Redirect(302, location.String())
+				return
+			}
+		}
+
 		if strings.Contains(userAgentHeader, "Electron") {
 			location.Path = "/stage/build/app/"
 		} else if strings.Contains(userAgentHeader, "Pad") ||

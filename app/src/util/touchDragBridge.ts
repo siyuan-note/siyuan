@@ -46,8 +46,8 @@ const handleManualTouchStart = (e: TouchEvent) => {
     const mouseEvent = new MouseEvent("mousedown", {
         bubbles: true,
         cancelable: true,
-        clientX:touch.clientX,
-        clientY:touch.clientY,
+        clientX: touch.clientX,
+        clientY: touch.clientY,
         button: 0,
         view: window,
     });
@@ -79,8 +79,8 @@ const handleManualTouchEnd = (e: TouchEvent) => {
         if (typeof document.onmouseup !== "function") return;
         const target = e.changedTouches[0].target || document.body;
         target.dispatchEvent(new MouseEvent("mouseup", {
-            clientX:e.changedTouches[0].clientX,
-            clientY:e.changedTouches[0].clientY,
+            clientX: e.changedTouches[0].clientX,
+            clientY: e.changedTouches[0].clientY,
             bubbles: true,
         }));
     }

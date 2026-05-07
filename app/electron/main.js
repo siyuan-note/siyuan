@@ -202,6 +202,7 @@ const resolveAppLanguage = (languageTags) => {
         "it": "it_IT",
         "ja": "ja_JP",
         "ko": "ko_KR",
+        "nl": "nl_NL",
         "pl": "pl_PL",
         "pt": "pt_BR",
         "ru": "ru_RU",

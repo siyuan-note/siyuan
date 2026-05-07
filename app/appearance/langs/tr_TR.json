@@ -1745,7 +1745,7 @@
     "251": "Toplam kullanılmayan varlık [%d], burada yalnızca [%d] listelendi",
     "252": "\uD83D\uDEA8 Microsoft Defender çekirdeği yanlışlıkla silebilir, verileri yok edebilir ve performansı düşürebilir. SiYuan kurulum ve çalışma alanı yollarını istisna listesine eklemen önerilir<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Ekle</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--cancel\">Yoksay</button>",
     "253": "Dosya [%s] sıkıştırılıyor, lütfen bekle...",
-    "254": "[Bölge ID] hatalı Bölge ID, lütfen S3 hizmet sağlayıcısının belgelerini kontrol ederek doğru şekilde yapılandır",
+    "254": "[Region ID] hatalı Bölge ID, lütfen S3 hizmet sağlayıcısının belgelerini kontrol ederek doğru şekilde yapılandır",
     "255": "Hedef site hotlink koruması etkinleştirmiş, bu nedenle [%d] kaynak indirilemiyor",
     "256": "Belirtilen yol [%s], bir üst çalışma alanı yolu [%s] içeriyor",
     "257": "Beni 30 gün hatırla",

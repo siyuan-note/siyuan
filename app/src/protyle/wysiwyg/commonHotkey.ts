@@ -167,7 +167,7 @@ export const upSelect = (options: {
     } else {
         options.cb(selectElements);
     }
-    const ids: string[] = [];
+    const ids: (string | null)[] = [];
     options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
         ids.push(item.getAttribute("data-node-id"));
     });
@@ -221,7 +221,7 @@ export const downSelect = (options: {
     } else {
         options.cb(selectElements);
     }
-    const ids: string[] = [];
+    const ids: (string | null)[] = [];
     options.protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
         ids.push(item.getAttribute("data-node-id"));
     });

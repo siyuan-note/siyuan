@@ -312,6 +312,7 @@ export abstract class Constants {
         es_ES: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
         he_IL: "20210808180117-6v0mkxr",
+        hi_IN: "20210808180117-6v0mkxr",
         it_IT: "20210808180117-6v0mkxr",
         ja_JP: "20240530133126-axarxgx",
         ko_KR: "20210808180117-6v0mkxr",

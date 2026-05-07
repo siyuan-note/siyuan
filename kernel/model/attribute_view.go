@@ -1630,26 +1630,6 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 	return
 }
 
-func SearchAttributeViewNonRelationKey(avID, keyword string) (ret []*av.Key) {
-	waitForSyncingStorages()
-
-	ret = []*av.Key{}
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return
-	}
-
-	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeRelation != keyValues.Key.Type && av.KeyTypeRollup != keyValues.Key.Type && av.KeyTypeLineNumber != keyValues.Key.Type {
-			if strings.Contains(strings.ToLower(keyValues.Key.Name), strings.ToLower(keyword)) {
-				ret = append(ret, keyValues.Key)
-			}
-		}
-	}
-	return
-}
-
 func SearchAttributeViewRollupDestKeys(avID, keyword string) (ret []*av.Key) {
 	waitForSyncingStorages()
 
@@ -5005,10 +4985,13 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (
 		if _, ok := v["itemID"]; ok {
 			itemID = v["itemID"].(string)
 		} else if _, ok := v["rowID"]; ok {
-			// TODO 计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
+			// TODO 该参数将于 2026 年 12 月 1 日后删除
 			itemID = v["rowID"].(string)
-			logging.LogWarnf("[%s] parameter [%s] is deprecated, it will be removed at [%s], visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
-				"/api/av/batchSetAttributeViewBlockAttrs", "rowID", "2026-06-30")
+			msg := fmt.Sprintf("[%s] parameter [%s] is deprecated, visit [https://github.com/siyuan-note/siyuan/issues/15727] for details",
+				"/api/av/batchSetAttributeViewBlockAttrs", "rowID")
+			logging.LogWarnf(msg)
+			err = fmt.Errorf(msg)
+			return
 		}
 		valueData := v["value"]
 		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)

@@ -161,36 +161,3 @@ func batchSetBlockAttrs(c *gin.Context) {
 		return
 	}
 }
-
-func resetBlockAttrs(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	attrs := arg["attrs"].(map[string]any)
-	nameValues := map[string]string{}
-	for name, value := range attrs {
-		if nil == value {
-			// 接口会先清空所有属性，nil 值可忽略
-			continue
-		}
-		strValue, ok := value.(string)
-		if !ok {
-			ret.Code = -1
-			ret.Msg = fmt.Sprintf("the value of attr [%s] must be a string", name)
-			return
-		}
-		nameValues[name] = strValue
-	}
-	err := model.ResetBlockAttrs(id, nameValues)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-}

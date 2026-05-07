@@ -298,6 +298,7 @@ declare namespace Config {
         | "sk_SK"
         | "tr_TR"
         | "uk_UA"
+        | "th_TH"
         | "nl_NL"
         | "zh_CN"
         | "zh_CHT";

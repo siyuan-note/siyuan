@@ -207,6 +207,7 @@ const resolveAppLanguage = (languageTags) => {
         "pt": "pt_BR",
         "ru": "ru_RU",
         "sk": "sk_SK",
+        "th": "th_TH",
         "tr": "tr_TR",
         "uk": "uk_UA",
     };

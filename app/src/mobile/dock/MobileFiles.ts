@@ -321,7 +321,7 @@ export class MobileFiles extends Model {
 
                 const ghostElement = document.createElement("ul");
                 ghostElement.append(state.selectedElement.cloneNode(true));
-                ghostElement.setAttribute("style", `touch-action: none;margin-left: -50%;margin-top:20px;z-index:8;position: fixed;top:${touch.clientX}px;left:${touch.clientY}px`);
+                ghostElement.setAttribute("style", `background-color: var(--b3-theme-surface);width: 100%;touch-action: none;margin-left: -50%;margin-top:20px;z-index:${window.siyuan.zIndex};position: fixed;top:${touch.clientX}px;left:${touch.clientY}px`);
                 ghostElement.setAttribute("class", "b3-list b3-list--background");
                 document.body.append(ghostElement);
 

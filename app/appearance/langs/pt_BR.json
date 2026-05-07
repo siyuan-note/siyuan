@@ -1745,7 +1745,7 @@
     "251": "Total de ativos não utilizados [%d], apenas [%d] listados aqui",
     "252": "\uD83D\uDEA8 O Microsoft Defender pode excluir erroneamente o kernel, excluir dados e reduzir significativamente o desempenho. Recomenda-se adicionar o caminho de instalação do SiYuan e o caminho do espaço de trabalho à lista de exclusão<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Adicionar</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--cancel\">Ignorar</button>",
     "253": "Comprimindo arquivo [%s], por favor aguarde...",
-    "254": "[ID da Região] ID da Região incorreta, por favor consulte a documentação do provedor de serviços S3 para configurar o ID da Região",
+    "254": "[Region ID] ID da Região incorreta, por favor consulte a documentação do provedor de serviços S3 para configurar o ID da Região",
     "255": "O site de destino ativou proteção contra hotlinking, portanto não é possível baixar [%d] recursos",
     "256": "O caminho especificado [%s] tem um caminho de espaço de trabalho pai [%s]",
     "257": "Lembre-se de mim por 30 dias",

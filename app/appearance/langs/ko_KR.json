@@ -1745,7 +1745,7 @@
     "251": "총 사용되지 않은 에셋 [%d]개, 여기에는 [%d]개만 나열됨",
     "252": "\uD83D\uDEA8 Microsoft Defender가 커널을 실수로 삭제하거나 데이터를 삭제하고 성능을 크게 저하시킬 수 있습니다. SiYuan 설치 경로와 작업 공간 경로를 제외 목록에 추가하는 것이 좋습니다<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">추가</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--cancel\">무시</button>",
     "253": "파일 [%s] 압축 중, 잠시만 기다려 주세요...",
-    "254": "[지역 ID] 잘못된 지역 ID입니다. S3 서비스 제공업체의 문서를 참조하여 지역 ID를 구성하세요",
+    "254": "[Region ID] 잘못된 지역 ID입니다. S3 서비스 제공업체의 문서를 참조하여 지역 ID를 구성하세요",
     "255": "대상 사이트에서 핫링크 보호를 활성화했으므로 [%d] 리소스를 다운로드할 수 없습니다",
     "256": "지정된 경로 [%s]에 상위 작업 공간 경로 [%s]이(가) 있습니다",
     "257": "30일 동안 기억하기",

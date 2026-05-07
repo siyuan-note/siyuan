@@ -20,7 +20,8 @@ import {getAllEditor} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
 import {blockRender} from "../render/blockRender";
-import {uploadLocalFiles} from "../upload";
+/// #else
+import {uploadFiles, uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -30,8 +31,6 @@ import {setFold, zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
-/// #else
-import {uploadFiles} from "../upload";
 /// #endif
 import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
@@ -1176,12 +1175,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.dataTransfer.types.includes("Files") && !isBrowser()) {
                     const files: ILocalFiles[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        files.push({
-                            path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                            size: event.dataTransfer.files[i].size
-                        });
+                        const filePath = webUtils.getPathForFile(event.dataTransfer.files[i]);
+                        if (filePath) {
+                            files.push({
+                                path: filePath,
+                                size: event.dataTransfer.files[i].size
+                            });
+                        } else {
+                            paste(protyle, event);
+                            break;
+                        }
                     }
-                    uploadLocalFiles(files, protyle, !event.altKey);
+                    if (files.length > 0) {
+                        uploadLocalFiles(files, protyle, !event.altKey);
+                    }
                 } else {
                     paste(protyle, event);
                 }

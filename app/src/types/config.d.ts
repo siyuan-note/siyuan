@@ -288,6 +288,7 @@ declare namespace Config {
         | "fr_FR"
         | "he_IL"
         | "hi_IN"
+        | "id_ID"
         | "it_IT"
         | "ja_JP"
         | "ko_KR"

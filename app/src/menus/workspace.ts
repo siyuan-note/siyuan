@@ -74,7 +74,7 @@ const editLayout = (layoutName?: string) => {
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout) => {
             if (layoutItem.name === layoutName) {
                 layoutItem.name = value;
-                layoutItem.time = new Date().getTime();
+                layoutItem.time = Date.now();
                 setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                 return true;
             }
@@ -91,7 +91,7 @@ const editLayout = (layoutName?: string) => {
             window.siyuan.storage[Constants.LOCAL_LAYOUTS].find((layoutItem: ISaveLayout) => {
                 if (layoutItem.name === layoutName) {
                     layoutItem.name = value;
-                    layoutItem.time = new Date().getTime();
+                    layoutItem.time = Date.now();
                     layoutItem.layout = getAllLayout();
                     layoutItem.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
@@ -104,7 +104,7 @@ const editLayout = (layoutName?: string) => {
             if (item.name === value) {
                 confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
                     item.layout = getAllLayout();
-                    item.time = new Date().getTime();
+                    item.time = Date.now();
                     item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                 });
@@ -116,7 +116,7 @@ const editLayout = (layoutName?: string) => {
         }
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
             name: value,
-            time: new Date().getTime(),
+            time: Date.now(),
             layout: getAllLayout(),
             filesPaths: window.siyuan.storage[Constants.LOCAL_FILESPATHS]
         });

@@ -282,7 +282,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         }
     }
     let clickTimeout: number;
-    let lastClickTime = new Date().getTime();
+    let lastClickTime = Date.now();
 
     searchInputElement.value = config.k || "";
     replaceInputElement.value = config.r || "";
@@ -803,7 +803,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     let isDblClick = event.detail === 2;
                     /// #if BROWSER
                     if (isIPad()) { // 需要进行 ipad 判断 https://github.com/siyuan-note/siyuan/issues/12704
-                        const newDate = new Date().getTime();
+                        const newDate = Date.now();
                         isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK;
                         isDblClick = !isClick;
                         lastClickTime = newDate;

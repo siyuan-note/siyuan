@@ -90,7 +90,7 @@ export class Model {
         if (!this.ws) { // Inbox 无 ws
             return;
         }
-        this.reqId = process ? 0 : new Date().getTime();
+        this.reqId = process ? 0 : Date.now();
         this.ws.send(JSON.stringify({
             cmd,
             reqId: this.reqId,

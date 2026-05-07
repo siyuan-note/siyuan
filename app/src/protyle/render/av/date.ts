@@ -5,7 +5,7 @@ export const getDateHTML = (cellElements: HTMLElement[]) => {
     const cellValue = genCellValueByElement("date", cellElements[0]).date;
     const isNotTime = cellValue.isNotTime;
     let value = "";
-    const currentDate = new Date().getTime();
+    const currentDate = Date.now();
     if (cellValue.isNotEmpty) {
         value = dayjs(cellValue.content).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
         const year = value.split("-")[0];
@@ -84,7 +84,7 @@ export const bindDateEvent = (options: {
     inputElements[2].addEventListener("change", () => {
         if (inputElements[2].checked) {
             if (!inputElements[1].dataset.value) {
-                const currentDate = new Date().getTime();
+                const currentDate = Date.now();
                 inputElements[1].dataset.value = dayjs(currentDate).format("YYYY-MM-DD HH:mm");
                 inputElements[1].value = dayjs(currentDate).format(inputElements[3].checked ? "YYYY-MM-DD HH:mm" : "YYYY-MM-DD");
             }

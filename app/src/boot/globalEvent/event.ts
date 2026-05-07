@@ -127,7 +127,7 @@ export const initWindowEvent = (app: App) => {
 
     let time = 0;
     document.addEventListener("touchstart", (event) => {
-        time = new Date().getTime();
+        time = Date.now();
         // https://github.com/siyuan-note/siyuan/issues/6328
         const target = event.target as HTMLElement;
         if (hasClosestByClassName(target, "protyle-icons") ||
@@ -147,7 +147,8 @@ export const initWindowEvent = (app: App) => {
             return;
         }
         // pad 端长按事件
-        if (isIPad() && new Date().getTime() - time > 900) {
+        const currentTime = Date.now();
+        if (isIPad() && currentTime - time > 900 && currentTime - time < 2000) {
             event.target.dispatchEvent(new MouseEvent("contextmenu", {
                 bubbles: true,
                 cancelable: true,

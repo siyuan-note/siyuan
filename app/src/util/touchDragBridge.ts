@@ -60,14 +60,17 @@ const handleManualTouchMove = (e: TouchEvent) => {
     if (!manualTouchActive) return;
 
     const touch = e.touches[0];
-    if (document.onmousemove && typeof document.onmousemove === "function" && (touch.target as Element)?.nodeType === 1) {
+    if (document.onmousemove && typeof document.onmousemove === "function") {
         e.preventDefault();
-        touch.target.dispatchEvent( new MouseEvent("mousemove", {
-            clientX: touch.clientX,
-            clientY: touch.clientY,
-            cancelable: true,
-            bubbles: true,
-        }));
+        const elementUnderFinger = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (elementUnderFinger) {
+            elementUnderFinger.dispatchEvent(new MouseEvent("mousemove", {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                cancelable: true,
+                bubbles: true,
+            }));
+        }
     }
 };
 

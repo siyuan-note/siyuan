@@ -1745,7 +1745,7 @@
     "251": "Celkom %d nepoužitých príloh, zobrazených %d",
     "252": "🚨 Microsoft Defender môže spomaľovať jadro alebo mazať dáta, pridajte SiYuan do výnimiek",
     "253": "Komprimujem súbor [%s]...",
-    "254": "[Region ID] Nesprávne ID regiónu, pozrite si dokumentáciu poskytovateľa služieb S3 a nakonfigurujte región I.",
+    "254": "[Region ID] Nesprávne ID regiónu, pozrite si dokumentáciu poskytovateľa služieb S3 a nakonfigurujte ID regiónu",
     "255": "Ochrana proti hotlinkovaniu zabránila stiahnutiu %d zdrojov",
     "256": "Zadaná cesta je nadradená inému workspace",
     "257": "Zapamätať na 30 dní",

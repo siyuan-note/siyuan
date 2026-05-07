@@ -8,7 +8,7 @@ import * as fs from "fs";
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
 /// #endif
-import {getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {showMessage} from "../../dialog/message";
 
 export const isPhablet = () => {
@@ -566,6 +566,7 @@ export const getLocalStorage = (cb: () => void) => {
             k: "",
             r: "",
             types: getDefaultType(),
+            subTypes: getDefaultSubType(),
             replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
@@ -600,6 +601,11 @@ export const getLocalStorage = (cb: () => void) => {
         if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES);
+        }
+        // Migrate stored search data to include subTypes when absent
+        if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes ||
+            Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes).length === 0) {
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes = getDefaultSubType();
         }
         cb();
     });

@@ -1042,6 +1042,8 @@
   "heading4": "Überschrift 4",
   "heading5": "Überschrift 5",
   "heading6": "Überschrift 6",
+  "unorderedList": "Ungeordnete Liste",
+  "searchSubTypeListTip": "Listen-Untertypen (Geordnet/Ungeordnet/Aufgabe) gelten auch für Listenelemente",
   "outlineExpandLevel": "Expansionsebene",
   "expandAll": "Alle erweitern",
   "outlineKeepCurrentExpand": "Aktuelle Erweiterung beibehalten",

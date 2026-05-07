@@ -41,7 +41,7 @@ import {resize} from "../protyle/util/resize";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
-import {getDefaultType} from "./getDefault";
+import {getDefaultSubType, getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
 import {highlightById} from "../util/highlightById";
@@ -357,6 +357,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     r: "",
                     page: 1,
                     types: getDefaultType(),
+                    subTypes: getDefaultSubType(),
                     replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                 }, config, edit, true);
                 element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
@@ -423,6 +424,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit, true);
                 }
@@ -623,6 +625,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit, true);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
@@ -1249,6 +1252,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
         r: replaceInputElement.value,
         method: config.method,
         types: config.types,
+        subTypes: config.subTypes,
         paths: config.idPath || [],
         groupBy: config.group,
         orderBy: config.sort,
@@ -1339,6 +1343,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 query: config.query,
                 method: config.method,
                 types: config.types,
+                subTypes: config.subTypes,
                 paths: config.idPath || [],
                 groupBy: config.group,
                 orderBy: config.sort,

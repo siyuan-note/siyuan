@@ -25,7 +25,7 @@ import {
 } from "../../search/assets";
 import {addClearButton} from "../../util/addClearButton";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {
     saveAssetKeyList,
     saveKeyList,
@@ -59,6 +59,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
         r: replaceInputElement.value,
         ids: isAll ? [] : [currentId],
         types: config.types,
+        subTypes: config.subTypes,
         method: config.method,
         replaceTypes: config.replaceTypes,
         paths: config.idPath || [],
@@ -288,6 +289,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 query: config.query,
                 method: config.method,
                 types: config.types,
+                subTypes: config.subTypes,
                 paths: config.idPath || [],
                 groupBy: config.group,
                 orderBy: config.sort,
@@ -416,6 +418,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
                 }
@@ -562,6 +565,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");

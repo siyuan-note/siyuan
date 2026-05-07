@@ -2218,6 +2218,26 @@ declare namespace Config {
          */
         sort?: number;
         types?: IUILayoutTabSearchConfigTypes;
+        subTypes?: IUILayoutTabSearchConfigSubTypes;
+    }
+
+    /**
+     * Search subtype filtering. When all flags within a category (heading or
+     * list) are false, that category is not subtype-filtered (parent type
+     * filter applies as before). When at least one flag is true, only blocks
+     * matching the selected subtypes are returned for that category.
+     */
+    export interface IUILayoutTabSearchConfigSubTypes {
+        h1: boolean;
+        h2: boolean;
+        h3: boolean;
+        h4: boolean;
+        h5: boolean;
+        h6: boolean;
+        // List subtypes — apply to both list and listItem
+        o: boolean;
+        u: boolean;
+        t: boolean;
     }
 
     /**

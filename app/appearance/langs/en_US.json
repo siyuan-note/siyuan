@@ -1042,6 +1042,8 @@
   "heading4": "Heading 4",
   "heading5": "Heading 5",
   "heading6": "Heading 6",
+  "unorderedList": "Unordered List",
+  "searchSubTypeListTip": "List subtypes (Ordered/Unordered/Task) also apply to list items",
   "outlineExpandLevel": "Expand level",
   "expandAll": "Expand all",
   "outlineKeepCurrentExpand": "Keep current expand",

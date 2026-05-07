@@ -1042,6 +1042,8 @@
   "heading4": "כותרת 4",
   "heading5": "כותרת 5",
   "heading6": "כותרת 6",
+  "unorderedList": "רשימה לא מסודרת",
+  "searchSubTypeListTip": "סוגי-משנה של רשימה (מסודרת/לא מסודרת/משימה) חלים גם על פריטי רשימה",
   "outlineExpandLevel": "רמת הרחבה",
   "expandAll": "הרחב הכל",
   "outlineKeepCurrentExpand": "שמור כותרת נוכחית מורחבת",

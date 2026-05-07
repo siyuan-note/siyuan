@@ -3211,7 +3211,52 @@ export class WYSIWYG {
                         if (embedElement) {
                             blockElement = embedElement;
                         }
-                        newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
+
+                        // 如果是列表块（list/li），需要修正 blockElement 为最近的 li 元素，而不是 list 容器 https://github.com/siyuan-note/siyuan/issues/17604
+                        let toFirstChild = false;
+                        if (blockElement.classList.contains("list") || blockElement.classList.contains("li")) {
+                            const getNearestLi = (container: Element, clientY: number) => {
+                                const liElements = container.querySelectorAll(":scope > .li");
+                                let nearestLi: Element | null = null;
+                                let nearestDistance = Infinity;
+                                liElements.forEach(li => {
+                                    const rect = li.getBoundingClientRect();
+                                    const distance = Math.abs(rect.top + rect.height / 2 - clientY);
+                                    if (distance < nearestDistance) {
+                                        nearestDistance = distance;
+                                        nearestLi = li;
+                                    }
+                                });
+                                return nearestLi;
+                            };
+                            const preciseElement = document.elementFromPoint(event.clientX, event.clientY);
+                            if (preciseElement && preciseElement !== this.element) {
+                                const preciseBlock = hasClosestBlock(preciseElement);
+                                if (preciseBlock) {
+                                    if (preciseBlock.classList.contains("list")) {
+                                        // 命中 list 容器空白区，找最近 li（这里解决的是点击右侧的列表项间隙，也就是鼠标位于列表内容之中的情况）
+                                        const nearestLi = getNearestLi(preciseBlock, event.clientY);
+                                        if (nearestLi) {
+                                            blockElement = nearestLi as HTMLElement;
+                                        }
+                                    } else {
+                                        // 命中具体 li 或其他块
+                                        blockElement = preciseBlock as HTMLElement;
+                                        // 命中 li 但是 li 可能有子项，此时若 toStart=false，应该聚焦到当前li，而不是他的最后一个子项
+                                        toFirstChild = preciseBlock.classList.contains("li");
+                                    }
+                                }
+                            } else {
+                                // 命中空白区域或 wysiwyg element，回退到 nearestLi（这里解决的是点击左侧的列表项间隙，也就是鼠标位于列表内容左侧的空白区的情况）
+                                const nearestLi = getNearestLi(blockElement, event.clientY);
+                                if (nearestLi) {
+                                    blockElement = nearestLi as HTMLElement;
+                                }
+                            }
+                        }
+
+                        const toStart = event.clientX < rect.left + parseInt(this.element.style.paddingLeft);
+                        newRange = focusBlock(blockElement, undefined, toStart, toFirstChild) || newRange;
                         if (protyle.options.render.breadcrumb) {
                             protyle.breadcrumb.render(protyle, false, blockElement);
                         }

@@ -40,6 +40,79 @@ export const getColIndex = (cellElement: HTMLElement) => {
     return index;
 };
 
+const getTableElement = (nodeElement: Element | HTMLTableElement) => {
+    if (!nodeElement) {
+        return undefined;
+    }
+    if (nodeElement.tagName === "TABLE") {
+        return nodeElement as HTMLTableElement;
+    }
+    return nodeElement.querySelector("table");
+};
+
+const getAllTableRows = (tableElement: HTMLTableElement) => {
+    return Array.from(tableElement.querySelectorAll("thead > tr, tbody > tr")) as HTMLTableRowElement[];
+};
+
+const moveRowToUpDOM = (rowElement: HTMLTableRowElement) => {
+    if (rowElement.parentElement.tagName === "THEAD") {
+        return false;
+    }
+    if (rowElement.previousElementSibling) {
+        rowElement.after(rowElement.previousElementSibling);
+    } else {
+        const headElement = rowElement.parentElement.previousElementSibling.firstElementChild as HTMLTableRowElement;
+        headElement.querySelectorAll("th").forEach(item => {
+            const tdElement = document.createElement("td");
+            tdElement.innerHTML = item.innerHTML;
+            item.parentNode.replaceChild(tdElement, item);
+        });
+        rowElement.querySelectorAll("td").forEach(item => {
+            const thElement = document.createElement("th");
+            thElement.innerHTML = item.innerHTML;
+            item.parentNode.replaceChild(thElement, item);
+        });
+        rowElement.after(headElement);
+        rowElement.parentElement.previousElementSibling.append(rowElement);
+    }
+    return true;
+};
+
+const moveRowToDownDOM = (rowElement: HTMLTableRowElement) => {
+    if ((rowElement.parentElement.tagName === "TBODY" && !rowElement.nextElementSibling) ||
+        (rowElement.parentElement.tagName === "THEAD" && !rowElement.parentElement.nextElementSibling)) {
+        return false;
+    }
+    if (rowElement.nextElementSibling) {
+        rowElement.before(rowElement.nextElementSibling);
+    } else {
+        const firstRowElement = rowElement.parentElement.nextElementSibling.firstElementChild as HTMLTableRowElement;
+        firstRowElement.querySelectorAll("td").forEach(item => {
+            const thElement = document.createElement("th");
+            thElement.innerHTML = item.innerHTML;
+            item.parentNode.replaceChild(thElement, item);
+        });
+        rowElement.querySelectorAll("th").forEach(item => {
+            const tdElement = document.createElement("td");
+            tdElement.innerHTML = item.innerHTML;
+            item.parentNode.replaceChild(tdElement, item);
+        });
+        rowElement.after(firstRowElement);
+        rowElement.parentElement.nextElementSibling.insertAdjacentElement("afterbegin", rowElement);
+    }
+    return true;
+};
+
+export const hasTableMerge = (nodeElement: Element | HTMLTableElement) => {
+    const tableElement = getTableElement(nodeElement);
+    if (!tableElement) {
+        return false;
+    }
+    return Array.from(tableElement.querySelectorAll("th, td")).some((item: HTMLTableCellElement) => {
+        return item.classList.contains("fn__none") || item.colSpan > 1 || item.rowSpan > 1;
+    });
+};
+
 // 光标设置到前一个表格中
 const goPreviousCell = (cellElement: HTMLElement, range: Range, isSelected = true) => {
     let previousElement = cellElement.previousElementSibling;
@@ -377,6 +450,94 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
     colElements[cellIndex].before(colElements[cellIndex + 1]);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
     focusByWbr(nodeElement, range);
+};
+
+export const moveRowToIndex = (protyle: IProtyle, range: Range, rowElement: HTMLTableRowElement, nodeElement: Element, targetIndex: number) => {
+    const tableElement = getTableElement(nodeElement);
+    if (!tableElement) {
+        return false;
+    }
+    const rows = getAllTableRows(tableElement);
+    let sourceIndex = rows.indexOf(rowElement);
+    if (sourceIndex < 0 || targetIndex < 0 || targetIndex > rows.length) {
+        return false;
+    }
+    const actualIndex = targetIndex > sourceIndex ? targetIndex - 1 : targetIndex;
+    if (actualIndex === sourceIndex) {
+        return false;
+    }
+    range.insertNode(document.createElement("wbr"));
+    const html = nodeElement.outerHTML;
+    while (sourceIndex > actualIndex) {
+        if (!moveRowToUpDOM(rowElement)) {
+            break;
+        }
+        sourceIndex--;
+    }
+    while (sourceIndex < actualIndex) {
+        if (!moveRowToDownDOM(rowElement)) {
+            break;
+        }
+        sourceIndex++;
+    }
+    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    focusByWbr(nodeElement, range);
+    scrollToView(nodeElement, rowElement, protyle);
+    return true;
+};
+
+export const moveColumnToIndex = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element, targetIndex: number) => {
+    const tableElement = getTableElement(nodeElement);
+    if (!tableElement || tableElement.rows.length === 0) {
+        return false;
+    }
+    const sourceIndex = getColIndex(cellElement);
+    const colCount = tableElement.rows[0].cells.length;
+    if (sourceIndex < 0 || sourceIndex >= colCount || targetIndex < 0 || targetIndex > colCount) {
+        return false;
+    }
+    const actualIndex = targetIndex > sourceIndex ? targetIndex - 1 : targetIndex;
+    if (actualIndex === sourceIndex) {
+        return false;
+    }
+    range.insertNode(document.createElement("wbr"));
+    const html = nodeElement.outerHTML;
+    tableElement.querySelectorAll("tr").forEach((trElement: HTMLTableRowElement) => {
+        const sourceCell = trElement.cells[sourceIndex];
+        if (!sourceCell) {
+            return;
+        }
+        sourceCell.remove();
+        const referenceCell = trElement.cells[actualIndex];
+        if (referenceCell) {
+            trElement.insertBefore(sourceCell, referenceCell);
+        } else {
+            trElement.appendChild(sourceCell);
+        }
+    });
+    const colgroupElement = tableElement.querySelector("colgroup");
+    const sourceColElement = colgroupElement?.children[sourceIndex] as HTMLTableColElement;
+    if (sourceColElement) {
+        sourceColElement.remove();
+        const referenceCol = colgroupElement.children[actualIndex] as HTMLTableColElement;
+        if (referenceCol) {
+            colgroupElement.insertBefore(sourceColElement, referenceCol);
+        } else {
+            colgroupElement.appendChild(sourceColElement);
+        }
+    }
+    const focusCell = tableElement.rows[0].cells[Math.min(actualIndex, tableElement.rows[0].cells.length - 1)] as HTMLElement;
+    if (focusCell) {
+        const scrollElement = nodeElement.firstElementChild as HTMLElement;
+        if (focusCell.offsetLeft < scrollElement.scrollLeft) {
+            scrollElement.scrollLeft = focusCell.offsetLeft;
+        } else if (focusCell.offsetLeft + focusCell.clientWidth > scrollElement.scrollLeft + scrollElement.clientWidth) {
+            scrollElement.scrollLeft = focusCell.offsetLeft + focusCell.clientWidth - scrollElement.clientWidth;
+        }
+    }
+    updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
+    focusByWbr(nodeElement, range);
+    return true;
 };
 
 export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) => {

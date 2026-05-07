@@ -25,7 +25,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ParseInstalledPlugin(name, frontend string) (found bool, displayName string, incompatible, disabledInPublish, disallowInstall bool) {
+func ParseInstalledPlugin(name, frontend string) (found bool, version, displayName string, incompatible, disabledInPublish, disallowInstall, kernelIncompatible bool) {
 	pluginsPath := filepath.Join(util.DataDir, "plugins")
 	if !util.IsPathRegularDirOrSymlinkDir(pluginsPath) {
 		return
@@ -52,10 +52,12 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 		}
 
 		found = true
+		version = plugin.Version
 		displayName = GetPreferredLocaleString(plugin.DisplayName, plugin.Name)
 		incompatible = IsIncompatiblePlugin(plugin, frontend)
 		disabledInPublish = plugin.DisabledInPublish
 		disallowInstall = isBelowRequiredAppVersion(plugin)
+		kernelIncompatible = IsIncompatibleKernelPlugin(plugin)
 	}
 	return
 }
@@ -67,21 +69,31 @@ func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
 		return false
 	}
 
-	backend := getCurrentBackend()
-	if !isTargetSupported(plugin.Backends, backend) {
+	backend := GetCurrentBackend()
+	if !IsTargetSupported(plugin.Backends, backend) {
 		return true
 	}
 
-	if !isTargetSupported(plugin.Frontends, frontend) {
+	if !IsTargetSupported(plugin.Frontends, frontend) {
 		return true
 	}
 
 	return false
 }
 
+// IsIncompatibleKernelPlugin 判断内核插件是否与当前环境不兼容
+func IsIncompatibleKernelPlugin(plugin *Package) bool {
+	// plugin.json 中 kernel 字段不存在时视为不兼容（允许安装插件但不启动其中的内核插件）
+	if len(plugin.Kernels) == 0 {
+		return true
+	}
+
+	return !IsTargetSupported(plugin.Kernels, GetCurrentBackend())
+}
+
 var cachedBackend string
 
-func getCurrentBackend() string {
+func GetCurrentBackend() string {
 	if cachedBackend == "" {
 		if util.Container == util.ContainerStd {
 			cachedBackend = runtime.GOOS
@@ -92,8 +104,8 @@ func getCurrentBackend() string {
 	return cachedBackend
 }
 
-// isTargetSupported 检查 platforms 中是否包含 target 或 "all"
-func isTargetSupported(platforms []string, target string) bool {
+// IsTargetSupported 检查 platforms 中是否包含 target 或 "all"
+func IsTargetSupported(platforms []string, target string) bool {
 	// 缺失字段时跳过检查，相当于 all
 	if len(platforms) == 0 {
 		return true

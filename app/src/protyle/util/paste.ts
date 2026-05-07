@@ -355,7 +355,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     }
 
-    const nodeElement = hasClosestBlock(event.target);
+
+    let nodeElement = hasClosestBlock(event.target);
+    const range = getEditorRange(protyle.wysiwyg.element);
+    if (!nodeElement) {
+        nodeElement = hasClosestBlock(range.startContainer);
+    }
     if (!nodeElement) {
         if (files && files.length > 0) {
             uploadFiles(protyle, files);
@@ -368,7 +373,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         item.classList.remove("protyle-wysiwyg--hl");
     });
     const code = processPasteCode(textHTML, textPlain, originalTextHTML, protyle);
-    const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552

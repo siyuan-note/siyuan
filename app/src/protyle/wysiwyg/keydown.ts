@@ -658,7 +658,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement === protyle.wysiwyg.element.firstElementChild)) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20 || nodeElement.classList.contains("av")) {
+                    // 代码块中光标在第一行之后时不应跳到标题，因为 getSelectionPosition 对非第一行的计算是错误的 https://github.com/siyuan-note/siyuan/issues/17602
+                    let skipJumpToTitle = false;
+                    if (nodeElement.classList.contains("code-block")) {
+                        const hljsElement = nodeElement.querySelector(".hljs");
+                        const codeText = hljsElement?.textContent || "";
+                        const firstNewlineIndex = codeText.indexOf("\n");
+                        // 有多行并且在第一行之后，则需要skipJumpToTitle
+                        if (firstNewlineIndex !== -1 && position.start > firstNewlineIndex) {
+                            skipJumpToTitle = true;
+                        }
+                    }
+                    if ((getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20 || nodeElement.classList.contains("av")) && !skipJumpToTitle) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {

@@ -104,4 +104,6 @@ export class Model {
             // 6：非自我应用主会话广播
         }));
     }
+
+    public destroy(): void {}
 }

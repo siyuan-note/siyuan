@@ -36,7 +36,9 @@ export class Custom extends Model {
         this.data = options.data;
         this.type = options.type;
         this.init = options.init;
-        this.destroy = options.destroy;
+        if (typeof options.destroy === "function") {
+            this.destroy = options.destroy;
+        }
         this.beforeDestroy = options.beforeDestroy;
         this.resize = options.resize;
         this.update = options.update;

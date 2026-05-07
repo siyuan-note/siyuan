@@ -52,6 +52,7 @@ export class Hint {
     public splitChar = "";
     public lastIndex = -1;
     private source: THintSource;
+    private emojiObserverCleanups: (() => void)[] = [];
 
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
@@ -402,7 +403,9 @@ ${genHintItemHTML(item)}
             } else {
                 panelElement.nextElementSibling.classList.remove("fn__none");
             }
-            lazyLoadEmojiImg(panelElement);
+            this.emojiObserverCleanups.forEach(fn => fn());
+            this.emojiObserverCleanups.length = 0;
+            this.emojiObserverCleanups.push(lazyLoadEmojiImg(panelElement));
         } else {
             // max-height：min(402px,40vh) 和 .protyle-hint 保持一致，否则 emoji 不显示底部导航
             this.element.innerHTML = `<div style="padding:0;max-height:min(402px,40vh);width:366px" class="emojis">
@@ -424,8 +427,10 @@ ${genHintItemHTML(item)}
             ).join("")}
 </div>
 </div>`;
-            lazyLoadEmoji(this.element);
-            lazyLoadEmojiImg(this.element);
+            this.emojiObserverCleanups.forEach(fn => fn());
+            this.emojiObserverCleanups.length = 0;
+            this.emojiObserverCleanups.push(lazyLoadEmoji(this.element));
+            this.emojiObserverCleanups.push(lazyLoadEmojiImg(this.element));
         }
         const firstEmojiElement = this.element.querySelector(".emojis__item");
         if (firstEmojiElement) {
@@ -1080,5 +1085,10 @@ ${genHintItemHTML(item)}
             return lastItem;
         }
         return undefined;
+    }
+
+    public disconnectEmojiObservers() {
+        this.emojiObserverCleanups.forEach(fn => fn());
+        this.emojiObserverCleanups.length = 0;
     }
 }

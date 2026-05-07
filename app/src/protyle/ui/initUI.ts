@@ -24,6 +24,23 @@ import {
 } from "../util/hasClosest";
 import {hideElements} from "./hideElements";
 
+const removeFnsByProtyle = new WeakMap<IProtyle, Array<() => void>>();
+
+function registerDestroyListener(protyle: IProtyle, removeFn: () => void) {
+    let list = removeFnsByProtyle.get(protyle);
+    if (!list) {
+        list = [];
+        removeFnsByProtyle.set(protyle, list);
+    }
+    list.push(removeFn);
+}
+
+export const removeDestroyListeners = (protyle: IProtyle) => {
+    const list = removeFnsByProtyle.get(protyle);
+    removeFnsByProtyle.delete(protyle);
+    list?.forEach((fn) => fn());
+};
+
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
@@ -83,7 +100,7 @@ export const initUI = (protyle: IProtyle) => {
     let wheelTimeout: number;
     const wheelId = genUUID();
     const isMacOS = isMac();
-    protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
+    const onContentMousewheel = (event: WheelEvent) => {
         if (!window.siyuan.config.editor.fontSizeScrollZoom || (isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
             return;
         }
@@ -120,8 +137,12 @@ export const initUI = (protyle: IProtyle) => {
                 });
             });
         }, Constants.TIMEOUT_LOAD);
-    }, {passive: true});
-    protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+    };
+    protyle.contentElement.addEventListener("mousewheel", onContentMousewheel, {passive: true});
+    registerDestroyListener(protyle, () => {
+        protyle.contentElement.removeEventListener("mousewheel", onContentMousewheel, {passive: true} as EventListenerOptions);
+    });
+    const onContentClick = (event: MouseEvent & { target: HTMLElement }) => {
         hideElements(["hint", "util"], protyle);
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||
@@ -182,10 +203,14 @@ export const initUI = (protyle: IProtyle) => {
             }
             protyle.toolbar.range = range;
         }
+    };
+    protyle.contentElement.addEventListener("click", onContentClick);
+    registerDestroyListener(protyle, () => {
+        protyle.contentElement.removeEventListener("click", onContentClick);
     });
     let overAttr = false;
     /// #if !MOBILE
-    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & {
+    const onElementMouseover = (event: KeyboardEvent & {
         target: HTMLElement
     }) => {
         // attr
@@ -268,6 +293,10 @@ export const initUI = (protyle: IProtyle) => {
                 }
             }
         }
+    };
+    protyle.element.addEventListener("mouseover", onElementMouseover);
+    registerDestroyListener(protyle, () => {
+        protyle.element.removeEventListener("mouseover", onElementMouseover);
     });
     /// #endif
 };

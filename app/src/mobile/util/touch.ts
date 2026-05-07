@@ -175,6 +175,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     const otherTouchElement = hasClosestByClassName(target, "b3-chip");
     if ((otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) ||
         target.closest(".protyle-gutters") ||
+        target.closest(".av__gallery") ||
         target.closest('[style^="--file-toggle-width"]') ||
         (target.tagName === "IMG" && target.style.cursor === "move" && target.parentElement.classList.contains("protyle-background__img"))) {
         clientX = null;

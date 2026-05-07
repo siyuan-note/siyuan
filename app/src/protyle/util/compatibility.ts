@@ -106,10 +106,13 @@ export const saveExportFile = (uri: string) => {
     }
     if (isInAndroid()) {
         window.JSAndroid.saveExportFile(uri);
+        showMessage(window.siyuan.languages.exported);
     } else if (isInIOS()) {
         window.webkit.messageHandlers.saveExportFile.postMessage(uri);
+        showMessage(window.siyuan.languages.exported);
     } else if (isInHarmony()) {
         window.JSHarmony.saveExportFile(uri);
+        showMessage(window.siyuan.languages.exported);
     } else {
         window.open(uri);
     }
@@ -136,21 +139,6 @@ export const saveZipExport = async (zipPath: string) => {
     /// #else
     saveExportFile(zipPath);
     /// #endif
-};
-
-export const exportByMobile = (uri: string) => {
-    if (!uri) {
-        return;
-    }
-    if (isInIOS()) {
-        window.webkit.messageHandlers.saveExportFile.postMessage(uri);
-    } else if (isInAndroid()) {
-        window.JSAndroid.saveExportFile(uri);
-    } else if (isInHarmony()) {
-        window.JSHarmony.saveExportFile(uri);
-    } else {
-        window.open(uri);
-    }
 };
 
 export const readText = () => {

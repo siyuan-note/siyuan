@@ -48,6 +48,7 @@ class App {
             closedTabs: [],
             ctrlIsPressed: false,
             altIsPressed: false,
+            metaIsPressed: false,
             ws: new Model({
                 app: this,
                 id: genUUID(),

@@ -269,6 +269,9 @@ const handleDragStart = (e: TouchEvent) => {
     if (e.touches.length !== 1) return;
 
     const target = e.target as HTMLElement;
+    if (target.classList.contains("av__widthdrag")) {
+        return;
+    }
     const draggable = getDraggableAncestor(target);
     if (!draggable) return;
 

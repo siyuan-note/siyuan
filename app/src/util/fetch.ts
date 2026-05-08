@@ -17,7 +17,7 @@ export const fetchPost = (
     if (data) {
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph",
             "/api/block/getRecentUpdatedBlocks", "/api/search/fullTextSearchBlock"].includes(url)) {
-            window.siyuan.reqIds[url] = new Date().getTime();
+            window.siyuan.reqIds[url] = Date.now();
             if (data.type === "local" && url === "/api/graph/getLocalGraph") {
                 // 当打开文档A的关系图、关系图、文档A后刷新，由于防止请求重复处理，文档A关系图无法渲染。
             } else {
@@ -26,7 +26,7 @@ export const fetchPost = (
         }
         // 并发导出后端接受顺序不一致
         if (url === "/api/transactions") {
-            data.reqId = new Date().getTime();
+            data.reqId = Date.now();
         }
         if (data instanceof FormData) {
             init.body = data;

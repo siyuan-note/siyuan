@@ -556,7 +556,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             } else if (key === "memo") {
                 memoHTML = `<div class="protyle-attr--memo ariaLabel" aria-label="${escapeHTML}" data-position="north"><svg><use xlink:href="#iconM"></use></svg></div>`;
             } else if (key === "custom-avs" && data.new["av-names"]) {
-                avHTML = `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${data.new["av-names"]}</div>`;
+                avHTML = `<div class="protyle-attr--av"><svg><use xlink:href="#iconDatabase"></use></svg>${Lute.EscapeHTMLStr(data.new["av-names"])}</div>`;
             }
         });
         let nodeAttrHTML = bookmarkHTML + nameHTML + aliasHTML + memoHTML + avHTML;
@@ -1380,7 +1380,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
 
     const lastTransaction = window.siyuan.transactions[window.siyuan.transactions.length - 1];
     let needDebounce = false;
-    const time = new Date().getTime();
+    const time = Date.now();
     if (lastTransaction && lastTransaction.doOperations.length === 1 && lastTransaction.doOperations[0].action === "update" &&
         doOperations.length === 1 && doOperations[0].action === "update" &&
         lastTransaction.doOperations[0].id === doOperations[0].id &&

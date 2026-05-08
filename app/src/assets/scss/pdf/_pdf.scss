@@ -363,7 +363,7 @@
   border: none;
   background: none;
   cursor: pointer;
-  padding: 5px;
+  padding: 4px;
   user-select: none;
   width: 24px;
   box-sizing: border-box;
@@ -379,8 +379,8 @@
   }
 
   & > svg {
-    height: 14px;
-    width: 14px;
+    height: 16px;
+    width: 16px;
   }
 
   &[disabled] {

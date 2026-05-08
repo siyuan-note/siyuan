@@ -3,7 +3,7 @@ import {getAllModels} from "../layout/getAll";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
-import {escapeAriaLabel, escapeGreat, escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {fetchPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
@@ -41,7 +41,7 @@ import {resize} from "../protyle/util/resize";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
-import {getDefaultType} from "./getDefault";
+import {getDefaultSubType, getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
 import {highlightById} from "../util/highlightById";
@@ -72,6 +72,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
             group: localData.group,
             sort: localData.sort,
             types: Object.assign({}, localData.types),
+            subTypes: Object.assign({}, localData.subTypes),
             replaceTypes: Object.assign({}, localData.replaceTypes),
             removed: localData.removed,
             page: 1
@@ -103,7 +104,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <span id="searchResult" class="fn__flex-shrink ft__selectnone"></span>
         <span class="fn__space"></span>
         <span class="fn__flex-1${closeCB ? " resize__move" : ""}" style="min-height: 100%"></span>
-        <span id="searchPathInput" data-position="9south" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(config.hPath)}">
+        <span id="searchPathInput" data-position="9south" class="search__path ft__on-surface fn__flex-center ft__smaller fn__ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(escapeHtml(config.hPath)))}">
             ${escapeHtml(config.hPath)}
             <svg class="search__rmpath${config.hPath ? "" : " fn__none"}"><use xlink:href="#iconCloseRound"></use></svg>
         </span>
@@ -129,7 +130,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         </span>
         <span class="fn__space"></span>
         <span id="searchAsset" aria-label="${window.siyuan.languages.searchAssetContent}" class="block__icon block__icon--show ariaLabel" data-position="9south">
-            <svg><use xlink:href="#iconExact"></use></svg>
+            <svg><use xlink:href="#iconSearchAsset"></use></svg>
         </span>
     </div>
     <div class="b3-form__icon search__header">
@@ -237,7 +238,6 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     const searchPanelElement = element.querySelector("#searchList");
     const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
     const replaceInputElement = element.querySelector("#replaceInput") as HTMLInputElement;
-
     const edit = new Protyle(app, element.querySelector("#searchPreview") as HTMLElement, {
         blockId: "",
         render: {
@@ -283,7 +283,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         }
     }
     let clickTimeout: number;
-    let lastClickTime = new Date().getTime();
+    let lastClickTime = Date.now();
 
     searchInputElement.value = config.k || "";
     replaceInputElement.value = config.r || "";
@@ -358,6 +358,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     r: "",
                     page: 1,
                     types: getDefaultType(),
+                    subTypes: getDefaultSubType(),
                     replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                 }, config, edit, true);
                 element.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
@@ -424,6 +425,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit, true);
                 }
@@ -485,7 +487,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                             }
                             config.hPath = hPathList.join(" ");
                             config.page = 1;
-                            searchPathInputElement.innerHTML = `${escapeGreat(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+                            searchPathInputElement.innerHTML = `${escapeHtml(config.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
                             searchPathInputElement.setAttribute("aria-label", escapeHtml(config.hPath));
                             const includeElement = element.querySelector("#searchInclude");
                             includeElement.firstElementChild.classList.add("ft__primary");
@@ -624,6 +626,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config, edit, true);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
@@ -804,7 +807,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     let isDblClick = event.detail === 2;
                     /// #if BROWSER
                     if (isIPad()) { // 需要进行 ipad 判断 https://github.com/siyuan-note/siyuan/issues/12704
-                        const newDate = new Date().getTime();
+                        const newDate = Date.now();
                         isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK;
                         isDblClick = !isClick;
                         lastClickTime = newDate;
@@ -1018,7 +1021,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     }
     const searchPathInputElement = element.querySelector("#searchPathInput");
     if (item.hPath) {
-        searchPathInputElement.innerHTML = `${escapeGreat(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
+        searchPathInputElement.innerHTML = `${escapeHtml(item.hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
         searchPathInputElement.setAttribute("aria-label", escapeHtml(item.hPath));
     } else {
         searchPathInputElement.innerHTML = "";
@@ -1155,6 +1158,7 @@ export const getArticle = (options: {
                 query: options.value || null,
                 queryMethod: options.config?.method || null,
                 queryTypes: options.config?.types || null,
+                querySubTypes: options.config?.subTypes || null,
                 mode: zoomIn ? 0 : 3,
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
@@ -1167,6 +1171,7 @@ export const getArticle = (options: {
                     key: options.value || null,
                     method: options.config?.method || null,
                     types: options.config?.types || null,
+                    subTypes: options.config?.subTypes || null,
                 };
                 // https://ld246.com/article/1770132984152
                 if (options.edit.protyle.options.render.title) {
@@ -1250,6 +1255,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
         r: replaceInputElement.value,
         method: config.method,
         types: config.types,
+        subTypes: config.subTypes,
         paths: config.idPath || [],
         groupBy: config.group,
         orderBy: config.sort,
@@ -1340,6 +1346,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 query: config.query,
                 method: config.method,
                 types: config.types,
+                subTypes: config.subTypes,
                 paths: config.idPath || [],
                 groupBy: config.group,
                 orderBy: config.sort,
@@ -1395,7 +1402,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
     let currentData;
     let newData;
     data.forEach((item) => {
-        const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+        const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
         let countHTML = "";
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
@@ -1403,7 +1410,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(escapeHtml(title))}">${title}</span>
 </div><div>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
@@ -1445,7 +1452,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
 ${getAttr(item)}
 ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span>` : ""}
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
+<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(escapeHtml(title))}">${title}</span>
 ${countHTML}
 </div>`;
         }

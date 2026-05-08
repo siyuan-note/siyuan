@@ -6,7 +6,15 @@ import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {onExport, saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, openByMobile, writeText} from "../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    isInIOS,
+    isInMobileApp,
+    openByMobile,
+    saveZipExport,
+    writeText
+} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -614,7 +622,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }, {
@@ -627,7 +635,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }, {
@@ -664,7 +672,7 @@ export const exportMd = (id: string) => {
             }, {
                 id: "exportWord",
                 label: "Word .docx",
-                icon: "iconExact",
+                icon: "iconDocx",
                 click: () => {
                     saveExport({type: "word", id});
                 }
@@ -676,113 +684,121 @@ export const exportMd = (id: string) => {
                 submenu: [{
                     id: "exportReStructuredText",
                     label: "reStructuredText",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportReStructuredText", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportAsciiDoc",
                     label: "AsciiDoc",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportAsciiDoc", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportTextile",
                     label: "Textile",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportTextile", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportOPML",
                     label: "OPML",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportOPML", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportOrgMode",
                     label: "Org-Mode",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportOrgMode", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportMediaWiki",
                     label: "MediaWiki",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportMediaWiki", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportODT",
                     label: "ODT",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportODT", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportRTF",
                     label: "RTF",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportRTF", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
                 }, {
                     id: "exportEPUB",
                     label: "EPUB",
+                    iconHTML: "",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportEPUB", {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            openByMobile(response.data.zip);
+                            saveZipExport(response.data.zip);
                         });
                     }
-                },
-                ]
+                }]
             },
             /// #else
             {

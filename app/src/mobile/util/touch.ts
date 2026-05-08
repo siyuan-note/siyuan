@@ -7,9 +7,7 @@ import {
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
-import {isIPhone} from "../../protyle/util/compatibility";
-import {App} from "../../index";
-import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
+import {isChromeBrowser, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 
@@ -33,13 +31,22 @@ const popSide = (render = true) => {
     }
 };
 
-export const handleTouchEnd = (event: TouchEvent, app: App) => {
+export const handleTouchEnd = (event: TouchEvent) => {
     const target = event.target as HTMLElement;
-    if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
+    const currentTime = Date.now();
+    if (!window.siyuan.touchDragActive && isIPhone() && !isChromeBrowser() && typeof yDiff === "undefined" &&
+        currentTime - time > 900 && currentTime - time < 2000) {
+        target.dispatchEvent(new MouseEvent("contextmenu", {
+            bubbles: true,
+            cancelable: true,
+            clientX: event.changedTouches[0].clientX,
+            clientY: event.changedTouches[0].clientY,
+        }));
         event.stopImmediatePropagation();
         event.preventDefault();
         return;
     }
+
     if (typeof yDiff === "undefined" && window.siyuan.mobile.editor.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
@@ -80,7 +87,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     }
 
     let scrollEnable = false;
-    if (new Date().getTime() - time < 1000) {
+    if (Date.now() - time < 1000) {
         scrollEnable = true;
     } else if (Math.abs(xDiff) > window.innerWidth / 3) {
         scrollEnable = true;
@@ -157,16 +164,24 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
-    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" || (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
+    time = Date.now();
+    const target = event.touches[0].target as HTMLElement;
+    if (0 < event.touches.length && (target.tagName === "VIDEO" || target.tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
         activeBlur();
         return;
     }
-
-    if (globalTouchStart(event)) {
+    // 存在其他拖拽元素时
+    const otherTouchElement = hasClosestByClassName(target, "b3-chip");
+    if ((otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) ||
+        target.closest(".protyle-gutters") ||
+        target.closest(".av__gallery") ||
+        target.closest('[style^="--file-toggle-width"]') ||
+        (target.tagName === "IMG" && target.style.cursor === "move" && target.parentElement.classList.contains("protyle-background__img"))) {
+        clientX = null;
+        clientY = null;
         return;
     }
-
     if (getSelection().rangeCount > 0 && hasClosestBlock(event.target as Element)) {
         const editor = getCurrentEditor();
         if (editor && !editor.protyle.disabled && event.touches[0].clientY > window.innerHeight / 2 &&
@@ -184,11 +199,9 @@ export const handleTouchStart = (event: TouchEvent) => {
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
         clientY = event.touches[0].clientY;
-        time = new Date().getTime();
     } else {
         clientX = null;
         clientY = null;
-        time = 0;
         event.stopImmediatePropagation();
     }
     isFirstMove = true;

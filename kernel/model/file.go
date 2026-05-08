@@ -80,7 +80,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret = &File{}
 	ret.Path = fileInfo.path
 	ret.Size = uint64(fileInfo.size)
-	ret.Name = ial["title"] + ".sy"
+	ret.Name = ial["title"]
 	ret.Icon = ial["icon"]
 	ret.ID = ial["id"]
 	ret.Name1 = ial["name"]
@@ -300,7 +300,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				continue
 			}
 			if ial := box.docIAL(parentDocPath); nil != ial {
-				if !showHidden && "true" == ial["custom-hidden"] {
+				if !showHidden && "true" == ial[DocHiddenAttr] {
 					continue
 				}
 
@@ -309,7 +309,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				if err == nil {
 					for _, subFile := range subFiles {
 						subDocFilePath := path.Join(file.path, subFile.Name())
-						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL["custom-hidden"] {
+						if subIAL := box.docIAL(subDocFilePath); "true" == subIAL[DocHiddenAttr] {
 							continue
 						}
 
@@ -347,7 +347,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		}
 
 		if ial := box.docIAL(file.path); nil != ial {
-			if !showHidden && "true" == ial["custom-hidden"] {
+			if !showHidden && "true" == ial[DocHiddenAttr] {
 				continue
 			}
 
@@ -457,7 +457,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	return
 }
 
-func GetDoc(startID, endID, id string, index int, query string, queryTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
+func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
@@ -653,7 +653,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	query = filterQueryInvisibleChars(query)
 	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
-		typeFilter := buildTypeFilter(queryTypes)
+		typeFilter := buildTypeFilter(queryTypes, querySubTypes)
 		switch queryMethod {
 		case 0:
 			query = stringQuery(query)
@@ -1090,6 +1090,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 const (
 	DailyNoteAttrPrefix = "custom-dailynote-"
 	NodeAttrTitleEmpty  = "custom-sy-title-empty"
+	DocHiddenAttr       = "custom-hidden"
 )
 
 func CreateDailyNote(boxID string) (p string, existed bool, err error) {
@@ -1211,12 +1212,12 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		return
 	}
 
-	luteEngine := util.NewLute()
-	tree, err := filesys.LoadTree(boxID, p, luteEngine)
-	if err != nil {
+	bt := treenode.GetBlockTreeByBoxPath(boxID, p)
+	if nil == bt {
+		err = ErrBlockNotFound
 		return
 	}
-	hPath = tree.HPath
+	hPath = bt.HPath
 	return
 }
 
@@ -1228,14 +1229,13 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		bt := treenode.GetBlockTreeByPath(p)
+		bt := treenode.GetBlockTreeByBoxPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
 			continue
 		}
 
-		hpath := html.UnescapeString(bt.HPath)
-		hPaths = append(hPaths, box.Name+hpath)
+		hPaths = append(hPaths, box.Name+bt.HPath)
 	}
 	return
 }
@@ -1564,7 +1564,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) (ret *parse.Tree) {
 		return
 	}
 
-	historyDir, err := GetHistoryDir(HistoryOpDelete)
+	historyDir, err := getHistoryDir(HistoryOpDelete)
 	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return

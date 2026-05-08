@@ -197,6 +197,12 @@ func InitConf() {
 		util.Lang = Conf.Lang
 	}
 	Conf.Appearance.Lang = Conf.Lang
+	if "ant" == Conf.Appearance.Icon || "material" == Conf.Appearance.Icon {
+		// v3.7.0 移除了 ant/material 图标包，如果用户之前选择了这两个其中之一，升级后改为 litheness 图标包，避免图标显示异常 https://github.com/siyuan-note/siyuan/issues/7976
+		Conf.Appearance.Icon = "litheness"
+	}
+	os.RemoveAll(filepath.Join(util.IconsPath, "ant"))
+	os.RemoveAll(filepath.Join(util.IconsPath, "material"))
 	if nil == Conf.UILayout {
 		Conf.UILayout = &conf.UILayout{}
 	}
@@ -593,15 +599,8 @@ func InitConf() {
 	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
 
 	if 1 == Conf.DataIndexState {
-		// 上次未正常完成数据索引
-		go func() {
-			util.WaitForUILoaded()
-			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
-				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(245), 15000)
-			} else {
-				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(244), 15000)
-			}
-		}()
+		// 上次未正常完成数据索引，后续会由 recoverWAL() 恢复
+		logging.LogInfof("data index state is [%d], will recover through WAL", Conf.DataIndexState)
 	}
 
 	Conf.DataIndexState = 0
@@ -675,6 +674,7 @@ func initLang() {
 			logging.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
 			continue
 		}
+		data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 		langMap := map[string]any{}
 		if err := gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
 			logging.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)

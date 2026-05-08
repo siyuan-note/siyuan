@@ -66,18 +66,52 @@ export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
 export GOOS=linux
 
+setup_cc() {
+    local arch=$1
+    local target_prefix
+    if [[ "$arch" == "amd64" ]]; then
+        target_prefix="x86_64-linux-musl"
+    elif [[ "$arch" == "arm64" ]]; then
+        target_prefix="aarch64-linux-musl"
+    fi
+
+    local original_cc=~/${target_prefix}-cross/bin/${target_prefix}-gcc
+
+    if [ -x "$original_cc" ]; then
+        export CC="$original_cc"
+    elif command -v ${target_prefix}-gcc >/dev/null 2>&1; then
+        export CC=$(command -v ${target_prefix}-gcc)
+    elif [[ "$arch" == "amd64" && "$(uname -m)" == "x86_64" ]] && command -v musl-gcc >/dev/null 2>&1; then
+        export CC=$(command -v musl-gcc)
+    elif [[ "$arch" == "arm64" && "$(uname -m)" == "aarch64" ]] && command -v musl-gcc >/dev/null 2>&1; then
+        export CC=$(command -v musl-gcc)
+    else
+        local muslbin_dir="$PROJECT_ROOT/muslbin"
+        local toolchain_dir="$muslbin_dir/${target_prefix}-cross"
+        local downloaded_cc="$toolchain_dir/bin/${target_prefix}-gcc"
+        
+        if [ ! -x "$downloaded_cc" ]; then
+            echo "CC not found, downloading ${target_prefix}-cross..."
+            mkdir -p "$muslbin_dir"
+            curl -L "https://musl.cc/${target_prefix}-cross.tgz" | tar -xz -C "$muslbin_dir"
+        fi
+        export CC="$downloaded_cc"
+    fi
+    echo "Using CC=$CC"
+}
+
 if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel amd64'
     export GOARCH=amd64
-    export CC=~/x86_64-linux-musl-cross/bin/x86_64-linux-musl-gcc
+    setup_cc amd64
     go build -buildmode=pie -tags fts5 -v -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
 fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel arm64'
     export GOARCH=arm64
-    export CC=~/aarch64-linux-musl-cross/bin/aarch64-linux-musl-gcc
+    setup_cc arm64
     go build -buildmode=pie -tags fts5 -v -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
 fi
 

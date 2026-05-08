@@ -65,7 +65,7 @@
 
 ## 💡 Introduction
 
-SiYuan is a privacy-first personal knowledge management system, support fine-grained block-level reference and Markdown
+SiYuan is a privacy-first personal knowledge management system, supporting fine-grained block-level reference and Markdown
 WYSIWYG.
 
 Welcome to [SiYuan English Discussion Forum](https://liuyun.io) to learn more.
@@ -89,7 +89,7 @@ Most features are free, even for commercial use.
   * List outline
   * Block zoom-in
   * Million-word large document editing
-  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
+  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staves, etc.
   * Web clipping
   * PDF Annotation link
 * Export
@@ -145,7 +145,7 @@ Some features are only available to paid members, for more details please refer 
 
 ## 🚀 Download Setup
 
-It is recommended to give priority to installing through the application market on the desktop and mobile, so that you can upgrade the version with one click in the future.
+It is recommended to give priority to installing through the application market on desktop and mobile, so that you can upgrade the version with one click in the future.
 
 ### App Market
 
@@ -220,9 +220,9 @@ docker run -d \
 * `PGID`: Custom group ID (optional, defaults to `1000` if not provided)
 * `workspace_dir_host`: The workspace folder path on the host
 * `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
-  * In alternative, it's possible to set the path via the `SIYUAN_WORKSPACE_PATH` env variable. The commandline will always have the priority, if both are set
+  * Alternatively, it's possible to set the path via the `SIYUAN_WORKSPACE_PATH` env variable. The commandline will always have the priority, if both are set
 * `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
-  * In alternative, it's possible to set the auth code via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
+  * Alternatively, it's possible to set the auth code via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
   * To disable the Access authorization code set the env variable `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
@@ -278,9 +278,9 @@ If you use custom `PUID` and `PGID` values, the entrypoint script will ensure th
 
 #### Hidden port
 
-Use NGINX reverse proxy to hide port 6806, please note:
+Use an NGINX reverse proxy to hide port 6806. Please note:
 
-* Configure WebSocket reverse proxy `/ws`
+* Configure the WebSocket reverse proxy for `/ws`
 
 #### Note
 
@@ -322,7 +322,7 @@ Publish parameters: --accessAuthCode=******(Access authorization code)
 <details>
 <summary>TrueNAS Deployment</summary>
 
-Note: First run below commands in the TrueNAS Shell. please update `Pool_1/Apps_Data/siyuan to match your dataset for Apps.
+Note: First, run the commands below in the TrueNAS Shell. Please update `Pool_1/Apps_Data/siyuan` to match your dataset path.
 
 ```shell
 zfs create Pool_1/Apps_Data/siyuan
@@ -330,7 +330,7 @@ chown -R 1001:1002 /mnt/Pool_1/Apps_Data/siyuan
 chmod 755 /mnt/Pool_1/Apps_Data/siyuan
 ```
 
-Navigate to Apps - DiscoverApps - More Options(on top right, besies Custom App) - Install via YAML
+Navigate to Apps - DiscoverApps - More Options (on top right, besides Custom App) - Install via YAML
 
 Template reference:
 
@@ -371,7 +371,7 @@ See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.githu
 
 ### How does SiYuan store data?
 
-The data is saved in the workspace folder, in the workspace data folder:
+The data is saved in the workspace data folder:
 
 * `assets` is used to save all inserted assets
 * `emojis` is used to save emoji images
@@ -387,7 +387,7 @@ The data is saved in the workspace folder, in the workspace data folder:
 
 Data synchronization through third-party synchronization disks is not supported, otherwise data may be corrupted.
 
-Although it does not support third-party sync disks, it supports connect with third-party cloud storage (Member's privileges).
+Although it does not support third-party sync disks, it supports connecting with third-party cloud storage (Members' privileges).
 
 In addition, you can also consider manually exporting and importing data to achieve data synchronization:
 
@@ -409,22 +409,22 @@ For more details, please refer to [Development Guide](https://github.com/siyuan-
 ### How to upgrade to a new version?
 
 * If installed via app store, please update via app store
-* If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
+* If it is installed through the installation package on the desktop, you can enable the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download the latest version of the installation package and prompt to install
 * If it is installed by manual installation package, please download the installation package again to install
 
 You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official Download](https://b3log.org/siyuan/en/download.html) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
 ### What if some blocks (such as paragraph blocks in list items) cannot find the block icon?
 
-The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
+The block icon is omitted for the first sub-block under the list item. You can move the cursor into this block and trigger its block menu with <kbd>Ctrl+/</kbd> .
 
 ### What should I do if the data repo key is lost?
 
-* If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd> retrieve
+* If the data repo key is correctly initialized on multiple devices previously, the key is the same on all devices and can be retrieved in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd>
 * If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:
 
   1. Manually back up the data, you can use <kbd>Export Data</kbd> or directly copy the <kbd>workspace/data/</kbd> folder on the file system
-  2. <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data rep key</kbd> - <kbd>Reset data repo</kbd>
+  2. <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Reset data repo</kbd>
   3. Reinitialize the data repo key. After initializing the key on one device, other devices import the key
   4. The cloud uses the new synchronization directory, the old synchronization directory is no longer available and can be deleted
   5. The existing cloud snapshots are no longer available and can be deleted
@@ -437,9 +437,9 @@ Member's privileges can only be used after payment, please refer to [Pricing](ht
 
 ## 🙏 Acknowledgement
 
-The birth of SiYuan is inseparable from many open source projects and contributors, please refer to the project source code kernel/go.mod, app/package.json and project homepage.
+The birth of SiYuan is inseparable from many open source projects and contributors. Please refer to the project source code kernel/go.mod, app/package.json and project homepage.
 
-The growth of SiYuan is inseparable from user feedback and promotion, thank you for everyone's help to SiYuan ❤️
+The growth of SiYuan is inseparable from user feedback and promotion. Thank you, everyone, for your help with SiYuan ❤️
 
 ### Contributors
 

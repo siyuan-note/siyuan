@@ -156,7 +156,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         name: "tag",
         lang: "tag",
         hotkey: window.siyuan.config.keymap.editor.insert.tag.custom,
-        icon: "iconTags",
+        icon: "iconTag",
         tipPosition: "n",
     }, {
         name: "code",

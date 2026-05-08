@@ -14,7 +14,7 @@ body {
   margin: 0;
   font-family: var(--b3-font-family);
   color: var(--b3-theme-on-background);
-  background-color: var(--b3-theme-background);
+  background-color: var(--b3-body-background);
   -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: var(--b3-list-hover);
@@ -24,18 +24,17 @@ body {
   overflow: hidden;
 
   // body 使用字号导致显示不全 https://github.com/siyuan-note/siyuan/issues/11670#issuecomment-2282329358
-  & > #dockBottom, & > .fn__flex-1 {
+  & > .fn__flex-1 {
     font-size: 14px;
   }
 
   &.body--blur {
-    .toolbar {
-      background: var(--b3-toolbar-blur-background);
-    }
+    --b3-body-background-hl-opacity: 0.12;
 
     .layout {
       &__wnd--active .layout-tab-bar .item--focus {
-        box-shadow: inset 0 -2px 0 0 var(--b3-theme-background-light);
+        background-color: var(--b3-theme-surface-light);
+        box-shadow: 0 0 0 1px var(--b3-border-color) inset;
 
         & > .item__text {
           color: var(--b3-theme-on-surface);
@@ -45,11 +44,6 @@ body {
       &__tab--active {
         .b3-list--background .b3-list-item--focus {
           background-color: var(--b3-list-hover);
-        }
-
-        .graph__svg,
-        .inbox__list {
-          background-color: var(--b3-theme-surface);
         }
       }
     }
@@ -61,6 +55,7 @@ body {
   }
 
   &.body--win32 {
+    --b3-toolbar-left-mac: 0;
     -webkit-font-smoothing: auto;
 
     .toolbar {
@@ -71,7 +66,7 @@ body {
       & > .protyle-breadcrumb,
       & > .block__icons {
         padding-left: 10px;
-        padding-right: 108px;
+        padding-right: 126px;
       }
 
       & > .block__icons > .search__label {
@@ -84,7 +79,6 @@ body {
     .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
-        height: 42px;
         padding-right: 42px;
       }
     }
@@ -98,6 +92,10 @@ body {
 
     &.body--blur .layout-tab-bar {
       opacity: .38;
+    }
+
+    .layout__center {
+      border-radius: 0;
     }
   }
 
@@ -115,6 +113,85 @@ body {
       display: flex;
     }
   }
+
+  &.body--toolbar-hide {
+
+    #dockLeft, #dockRight {
+      padding-top: 42px;
+    }
+
+    .toolbar {
+      height: 42px;
+      position: absolute;
+      width: 100%;
+    }
+
+    .layout__dockl:not(.layout--float),
+    .layout__dockr:not(.layout--float) {
+      margin-top: 42px;
+    }
+
+    .layout__wnd--left .layout-tab-container {
+      border-top-left-radius: var(--b3-border-radius-b);
+    }
+
+    .layout__wnd--right .layout-tab-container {
+      border-top-right-radius: var(--b3-border-radius-b);
+    }
+
+    .layout__wnd--center .layout-tab-bar .item {
+      margin: 7px 4px 6px 4px;
+    }
+
+    .toolbar #drag {
+      -webkit-app-region: none;
+      color: transparent;
+      height: 42px;
+      position: relative;
+
+      &::before,
+      &::after {
+        content: "";
+        width: var(--b3-toolbar-drag-left);
+        height: 42px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        -webkit-app-region: drag;
+      }
+
+      &::after {
+        left: auto;
+        right: 0;
+        width: var(--b3-toolbar-drag-right);
+      }
+    }
+
+    .layout__empty {
+      background-color: transparent;
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        height: 42px;
+        -webkit-app-region: drag;
+        left: 0;
+        width: 100%;
+      }
+    }
+
+    .fullscreen > .protyle-breadcrumb, .fullscreen > .block__icons {
+      padding-left: var(--b3-toolbar-left-mac);
+    }
+
+    .toolbar__item--win,
+    .toolbar__item--close {
+      padding: 13.25px;
+      height: 42px;
+    }
+  }
+
 
   #maxWindow {
     display: flex;

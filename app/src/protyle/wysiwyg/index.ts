@@ -2518,7 +2518,10 @@ export class WYSIWYG {
                         input(protyle, blockElement, range, true, event);
                     }, Constants.TIMEOUT_INPUT);
                 } else {
-                    input(protyle, blockElement, range, true, event);
+                    clearTimeout(timeout); // https://github.com/siyuan-note/siyuan/issues/9179
+                    timeout = window.setTimeout(() => {
+                        input(protyle, blockElement, range, true, event);
+                    });
                 }
             }
             event.stopPropagation();

@@ -87,14 +87,17 @@ func initDatabase(forceRebuild bool) {
 	}
 
 	initDBConnection()
+	initQueueWAL()
 	treenode.InitBlockTree(forceRebuild)
 
 	if !forceRebuild {
 		// 检查数据库结构版本，如果版本不一致的话说明改过表结构，需要重建
 		if util.DatabaseVer == getDatabaseVer() {
+			recoverWAL()
 			return
 		}
 		logging.LogInfof("the database structure is changed, rebuilding database...")
+		clearWALEntries()
 	}
 
 	// 不存在库或者版本不一致都会走到这里
@@ -1318,6 +1321,7 @@ func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]any) (err
 }
 
 func CloseDatabase() {
+	closeQueueWAL()
 	if err := db.Close(); err != nil {
 		logging.LogErrorf("close database failed: %s", err)
 	}
@@ -1506,6 +1510,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []any) (err error) {
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmtSQL, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
+			closeDatabase()
 			util.RemoveDatabaseFile(util.DBPath)
 			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
@@ -1521,6 +1526,8 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...any) (err error) {
 		logging.LogErrorf("exec database stmt [%s] failed: %s\n  %s", stmt, err, logging.ShortStack())
 
 		if strings.Contains(err.Error(), "database disk image is malformed") {
+			closeDatabase()
+			util.RemoveDatabaseFile(util.DBPath)
 			initDatabase(true)
 			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmt, args)
 		}
@@ -1581,7 +1588,9 @@ func closeDatabase() {
 		return
 	}
 
-	db.Close()
+	if err := db.Close(); err != nil {
+		logging.LogErrorf("close database failed: %s", err)
+	}
 	debug.FreeOSMemory()
 	db = nil
 	runtime.GC()

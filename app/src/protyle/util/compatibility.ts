@@ -3,11 +3,13 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import * as fs from "fs";
 /// #endif
 /// #if MOBILE
 import {processSYLink} from "../../editor/openLink";
 /// #endif
-import {getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
+import {showMessage} from "../../dialog/message";
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
@@ -98,19 +100,45 @@ export const openByMobile = (uri: string) => {
     }
 };
 
-export const exportByMobile = (uri: string) => {
+export const saveExportFile = (uri: string) => {
     if (!uri) {
         return;
     }
-    if (isInIOS()) {
-        openByMobile(uri);
-    } else if (isInAndroid()) {
-        window.JSAndroid.exportByDefault(uri);
+    if (isInAndroid()) {
+        window.JSAndroid.saveExportFile(uri);
+        showMessage(window.siyuan.languages.exported);
+    } else if (isInIOS()) {
+        window.webkit.messageHandlers.saveExportFile.postMessage(uri);
+        showMessage(window.siyuan.languages.exported);
     } else if (isInHarmony()) {
-        window.JSHarmony.exportByDefault(uri);
+        window.JSHarmony.saveExportFile(uri);
+        showMessage(window.siyuan.languages.exported);
     } else {
         window.open(uri);
     }
+};
+
+export const saveZipExport = async (zipPath: string) => {
+    if (!zipPath) {
+        return;
+    }
+    /// #if !BROWSER
+    const fileName = decodeURIComponent(zipPath.substring(zipPath.lastIndexOf("/") + 1));
+    const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+        cmd: "showSaveDialog",
+        defaultPath: fileName,
+        properties: ["showOverwriteConfirmation"],
+    });
+    if (result.canceled || !result.filePath) {
+        return;
+    }
+    const response = await fetch(zipPath);
+    const arrayBuffer = await response.arrayBuffer();
+    fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
+    showMessage(window.siyuan.languages.exported);
+    /// #else
+    saveExportFile(zipPath);
+    /// #endif
 };
 
 export const readText = () => {
@@ -526,6 +554,7 @@ export const getLocalStorage = (cb: () => void) => {
             k: "",
             r: "",
             types: getDefaultType(),
+            subTypes: getDefaultSubType(),
             replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
@@ -560,6 +589,11 @@ export const getLocalStorage = (cb: () => void) => {
         if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes ||
             Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes).length === 0) {
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA].replaceTypes = Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES);
+        }
+        // Migrate stored search data to include subTypes when absent
+        if (!window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes ||
+            Object.keys(window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes).length === 0) {
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA].subTypes = getDefaultSubType();
         }
         cb();
     });

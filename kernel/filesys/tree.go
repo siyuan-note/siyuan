@@ -199,7 +199,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		if "" == title {
 			title = "Untitled"
 		}
-		hPathBuilder.WriteString(util.UnescapeHTML(title))
+		hPathBuilder.WriteString(title)
 		hPathBuilder.WriteString("/")
 	}
 	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
@@ -228,6 +228,10 @@ func DocIAL(absPath string) (ret map[string]string) {
 	}
 	file.Close()
 	filelock.Unlock(absPath)
+
+	for k, v := range ret {
+		ret[k] = html.UnescapeAttrVal(v)
+	}
 	return
 }
 
@@ -319,7 +323,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	tree.Root.SetIALAttr("type", "doc")
 	renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	data = renderer.Render()
-	data = removeUnescapedUnicodeNull(data)
+	data, _ = removeUnescapedUnicodeNull(data)
 	if !util.UseSingleLineSave {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
@@ -338,14 +342,14 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 
 // removeUnescapedUnicodeNull 只移除未被转义的 `\u0000` 字面序列。
 // 判断方法：在匹配到 `\u0000` 时向前数连续的 `\` 个数，若为偶数则视为未转义并移除。
-func removeUnescapedUnicodeNull(data []byte) []byte {
+func removeUnescapedUnicodeNull(data []byte) (ret []byte, needFix bool) {
 	patLen := 6 // len(`\u0000`)
 	n := len(data)
 	if n < patLen {
-		return data
+		return data, false
 	}
 	if !bytes.Contains(data, []byte(`\u0000`)) {
-		return data
+		return data, false
 	}
 
 	dst := make([]byte, 0, n)
@@ -382,20 +386,24 @@ func removeUnescapedUnicodeNull(data []byte) []byte {
 		dst = append(dst, data[i])
 		i++
 	}
-	return dst
+	return dst, len(dst) != n
 }
 
 func afterWriteTree(tree *parse.Tree) {
-	docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
+	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	cache.PutDocIAL(tree.Path, docIAL)
 }
 
 // fixTreeJSONData 订正树 JSON 数据。
 func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (data []byte, needFix bool, err error) {
-	jsonData = removeUnescapedUnicodeNull(jsonData)
-	ret, needFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	jsonData, needFix = removeUnescapedUnicodeNull(jsonData)
+	ret, parseNeedFix, err := dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
+	if parseNeedFix {
+		needFix = true
+	}
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
+		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)
 		return
 	}
 
@@ -455,6 +463,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	ret, _, err = dataparser.ParseJSON(jsonData, luteEngine.ParseOptions)
 	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
+		err = fmt.Errorf("parse json [%s] to tree failed: %w", boxID+p, err)
 		return
 	}
 

@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -34,10 +33,6 @@ import (
 )
 
 func RemoveTag(label string) (err error) {
-	if "" == label {
-		return
-	}
-
 	util.PushEndlessProgress(Conf.Language(116))
 	util.RandomSleep(1000, 2000)
 
@@ -53,7 +48,10 @@ func RemoveTag(label string) (err error) {
 
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
@@ -63,7 +61,7 @@ func RemoveTag(label string) (err error) {
 			return e
 		}
 
-		generateTreeHistory(historyDir, tree)
+		generateTreeHistory(tree, historyDir)
 
 		var unlinks []*ast.Node
 		for _, blockID := range blocks {
@@ -157,7 +155,10 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	var reloadTreeIDs []string
 	updateNodes := map[string]*ast.Node{}
-	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
+	historyDir, err := getHistoryDir(HistoryOpReplace)
+	if nil != err {
+		return
+	}
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
@@ -167,7 +168,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			return e
 		}
 
-		generateTreeHistory(historyDir, tree)
+		generateTreeHistory(tree, historyDir)
 
 		for _, blockID := range blocks {
 			node := treenode.GetNodeInTree(tree, blockID)
@@ -246,7 +247,7 @@ type Tag struct {
 
 type Tags []*Tag
 
-func BuildTags(ignoreMaxListHintArg bool, appID string) (ret *Tags) {
+func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags) {
 	FlushTxQueue()
 	sql.FlushQueue()
 
@@ -256,8 +257,8 @@ func BuildTags(ignoreMaxListHintArg bool, appID string) (ret *Tags) {
 	for label := range labels {
 		tags = buildTags(tags, strings.Split(label, "/"), 0)
 	}
-	appendTagChildren(&tags, labels)
-	sortTags(tags)
+	appendTagChildren(&tags, labels, sortVal)
+	sortTags(tags, sortVal)
 
 	var total int
 	tmp := &Tags{}
@@ -281,8 +282,8 @@ func countTag(tag *Tag, total *int) {
 	}
 }
 
-func sortTags(tags Tags) {
-	switch Conf.Tag.Sort {
+func sortTags(tags Tags, sortVal int) {
+	switch sortVal {
 	case util.SortModeNameASC:
 		sort.Slice(tags, func(i, j int) bool {
 			return util.PinYinCompare(tags[i].Name, tags[j].Name)
@@ -386,19 +387,19 @@ func labelTags() (ret map[string]Tags) {
 	return
 }
 
-func appendTagChildren(tags *Tags, labels map[string]Tags) {
+func appendTagChildren(tags *Tags, labels map[string]Tags, sortVal int) {
 	for _, tag := range *tags {
 		tag.Label = tag.Name
 		if _, ok := labels[tag.Label]; ok {
 			tag.Count = len(labels[tag.Label]) + 1
 		}
-		appendChildren0(tag, labels)
-		sortTags(tag.Children)
+		appendChildren0(tag, labels, sortVal)
+		sortTags(tag.Children, sortVal)
 	}
 }
 
-func appendChildren0(tag *Tag, labels map[string]Tags) {
-	sortTags(tag.tags)
+func appendChildren0(tag *Tag, labels map[string]Tags, sortVal int) {
+	sortTags(tag.tags, sortVal)
 	for _, t := range tag.tags {
 		t.Label = tag.Label + "/" + t.Name
 		if _, ok := labels[t.Label]; ok {
@@ -407,7 +408,7 @@ func appendChildren0(tag *Tag, labels map[string]Tags) {
 		tag.Children = append(tag.Children, t)
 	}
 	for _, child := range tag.tags {
-		appendChildren0(child, labels)
+		appendChildren0(child, labels, sortVal)
 	}
 }
 

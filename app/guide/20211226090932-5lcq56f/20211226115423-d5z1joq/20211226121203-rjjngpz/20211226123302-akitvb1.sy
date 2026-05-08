@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20250115151219"
+		"updated": "20260426180205"
 	},
 	"Children": [
 		{
@@ -507,7 +507,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223850-k4b4s53",
-				"updated": "20250115151219"
+				"updated": "20260426180205"
 			},
 			"Children": [
 				{
@@ -521,12 +521,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223850-d79osla",
-				"updated": "20250115151219"
+				"updated": "20260426180205"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在文檔樹上選擇文檔後右鍵選擇 "
+					"Data": "在文檔上選擇文檔後右鍵選擇 "
 				},
 				{
 					"Type": "NodeTextMark",

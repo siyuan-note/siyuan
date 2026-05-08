@@ -1,8 +1,9 @@
 import IAppearance = Config.IAppearance;
 import {exportLayout} from "../../layout/util";
 import {appearance} from "../appearance";
+import {adjustDockPadding} from "../../layout/dock/util";
 
-export const updateAppearance = async (data:IAppearance) => {
+export const updateAppearance = async (data: IAppearance) => {
     if (window.siyuan.config.appearance.themeJS) {
         if (data.mode !== window.siyuan.config.appearance.mode ||
             (data.mode === window.siyuan.config.appearance.mode && (
@@ -35,6 +36,8 @@ export const updateAppearance = async (data:IAppearance) => {
         } else {
             document.getElementById("status").classList.remove("fn__none");
         }
+        window.siyuan.config.appearance.hideStatusBar = data.hideStatusBar;
+        adjustDockPadding();
     }
     appearance.onSetAppearance(data);
 };

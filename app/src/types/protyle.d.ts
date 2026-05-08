@@ -1,5 +1,3 @@
-import IUILayoutTabSearchConfigTypes = Config.IUILayoutTabSearchConfigTypes;
-
 interface ILuteNode {
     TokensStr: () => string;
     __internal_object__: {
@@ -526,7 +524,8 @@ interface IProtyle {
     query?: {
         key: string,
         method: number
-        types: IUILayoutTabSearchConfigTypes
+        types: Config.IUILayoutTabSearchConfigTypes
+        subTypes: Config.IUILayoutTabSearchConfigSubTypes
     },
     block: {
         id?: string,

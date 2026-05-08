@@ -170,7 +170,7 @@ func indexBox(boxID string) {
 			return
 		}
 
-		docIAL := parse.IAL2MapUnEsc(tree.Root.KramdownIAL)
+		docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 		if "" == docIAL["updated"] { // 早期的数据可能没有 updated 属性，这里进行订正
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)

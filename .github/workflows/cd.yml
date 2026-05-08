@@ -90,23 +90,14 @@ jobs:
       matrix:
         config:
           - os: ubuntu-24.04
-            name: ubuntu build linux.AppImage
+            name: ubuntu build linux
             kernel_path: "../app/kernel-linux/SiYuan-Kernel"
             build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist-linux"
             goos: "linux"
             goarch: "amd64"
-            suffix: "linux.AppImage"
-          - os: ubuntu-24.04
-            name: ubuntu build linux.tar.gz
-            kernel_path: "../app/kernel-linux/SiYuan-Kernel"
-            build_args_prefix: "-s -w -X"
-            build_args_suffix: "Mode=prod"
-            electron_args: "dist-linux"
-            goos: "linux"
-            goarch: "amd64"
-            suffix: "linux.tar.gz"
+            suffix: "linux"
           - os: macos-latest
             name: macos build mac.dmg
             kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
@@ -222,11 +213,16 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ matrix.config.goarch }}
 
+      - name: Install RPM build tools
+        if: matrix.config.goos == 'linux'
+        run: sudo apt-get install -y rpm
+
       - name: Building Electron App
         run: pnpm run ${{ matrix.config.electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 
       - name: Upload Release
+        if: matrix.config.goos != 'linux'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -235,3 +231,16 @@ jobs:
           asset_name: siyuan-${{ needs.create_release.outputs.release_version }}-${{ matrix.config.suffix }}
           asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-${{ needs.create_release.outputs.version }}-${{ matrix.config.suffix }}
           asset_content_type: application/octet-stream
+
+      - name: Upload Linux Release Assets
+        if: matrix.config.goos == 'linux'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ needs.create_release.outputs.version }}"
+          BUILD_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build"
+          for ext in AppImage tar.gz deb rpm; do
+            asset="${BUILD_DIR}/siyuan-${VERSION}-linux.${ext}"
+            echo "Uploading linux.${ext}..."
+            gh release upload "${{ github.ref_name }}" "${asset}" --clobber
+          done

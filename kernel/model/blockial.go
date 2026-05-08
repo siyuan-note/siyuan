@@ -182,6 +182,10 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 
 	pushBlockAttrs(oldAttrs, node)
 
+	if ("true" == oldAttrs[DocHiddenAttr]) != ("true" == nameValues[DocHiddenAttr]) {
+		ReloadFiletree()
+	}
+
 	go func() {
 		sql.FlushQueue()
 		refreshDynamicRefText(node, tree)
@@ -263,47 +267,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	if html.EscapeAttrVal(oldAttrs["tags"]) != newAttrsUnEsc["tags"] {
 		ReloadTag()
 	}
-	return
-}
-
-func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
-	if util.ReadOnly {
-		return
-	}
-
-	FlushTxQueue()
-
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return err
-	}
-
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		return fmt.Errorf(Conf.Language(15), id)
-	}
-
-	oldAttrs := parse.IAL2Map(node.KramdownIAL)
-	node.ClearIALAttrs()
-
-	_, err = setNodeAttrs0(node, nameValues)
-	if err != nil {
-		return
-	}
-
-	if err = indexWriteTreeUpsertQueue(tree); err != nil {
-		return
-	}
-
-	IncSync()
-	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-
-	pushBlockAttrs(oldAttrs, node)
-
-	go func() {
-		sql.FlushQueue()
-		refreshDynamicRefText(node, tree)
-	}()
 	return
 }
 

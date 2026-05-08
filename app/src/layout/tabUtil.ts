@@ -56,14 +56,11 @@ export const switchTabByIndex = (index: number) => {
             indexElement = activeDockIcoElement.previousElementSibling;
             if (!indexElement) {
                 indexElement = activeDockIcoElement.parentElement.lastElementChild;
-                if (indexElement.classList.contains("dock__item--pin")) {
-                    indexElement = indexElement.previousElementSibling;
-                }
             }
         } else if (index === -3) {
             // 下一个
             indexElement = activeDockIcoElement.nextElementSibling;
-            if (!indexElement || indexElement.classList.contains("dock__item--pin")) {
+            if (!indexElement) {
                 indexElement = activeDockIcoElement.parentElement.firstElementChild;
             }
         }
@@ -176,7 +173,7 @@ export const newCenterEmptyTab = (app: App) => {
             <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.globalSearch.custom)}</span>
         </div>
         <div id="editorEmptyRecent" class="b3-list-item">
-            <svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg>
+            <svg class="b3-list-item__graphic"><use xlink:href="#iconRecentDocs"></use></svg>
             <span>${window.siyuan.languages.recentDocs}</span>
             <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.recentDocs.custom)}</span>
         </div>
@@ -186,7 +183,7 @@ export const newCenterEmptyTab = (app: App) => {
             <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.dataHistory.custom)}</span>
         </div>
         <div class="b3-list-item${window.siyuan.config.readonly ? " fn__none" : ""}" id="editorEmptyFile">
-            <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+            <svg class="b3-list-item__graphic"><use xlink:href="#iconAddDoc"></use></svg>
             <span>${window.siyuan.languages.newFile}</span>
             <span class="b3-list-item__meta">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span>
         </div>

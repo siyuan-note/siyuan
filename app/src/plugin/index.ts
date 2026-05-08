@@ -8,6 +8,7 @@ import {getAllEditor, getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
 import {resizeTopBar, setPanelFocus} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
+import {setTabPosition} from "../window/setHeader";
 ///#else
 import {MobileCustom} from "../mobile/dock/MobileCustom";
 /// #endif
@@ -17,7 +18,7 @@ import {Setting} from "./Setting";
 import {clearOBG} from "../layout/dock/util";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
-import {afterLoadPlugin, loadPlugins} from "./loader";
+import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 
 export class Plugin {
@@ -126,9 +127,14 @@ export class Plugin {
         // 兼容 3.4.1 以前同步数据使用重载插件的问题
         uninstall(this.app, this.name, true);
         loadPlugins(this.app, [this.name], false).then(() => {
-            afterLoadPlugin(this);
-            getAllEditor().forEach(editor => {
-                editor.protyle.toolbar.update(editor.protyle);
+            this.app.plugins.find(item => {
+                if (this.name === item.name) {
+                    afterLoadPlugin(item);
+                    getAllEditor().forEach(editor => {
+                        editor.protyle.toolbar.update(editor.protyle);
+                    });
+                    return true;
+                }
             });
         });
     }
@@ -219,6 +225,9 @@ export class Plugin {
             iconElement.addEventListener("click", options.callback);
             iconElement.setAttribute("data-location", options.position || "right");
             resizeTopBar();
+            /// #if !MOBILE
+            setTabPosition(true);
+            /// #endif
         }
         if (isMobile() && window.siyuan.storage) {
             if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
@@ -450,6 +459,7 @@ export class Plugin {
             }
             window.siyuan.config.keymap.plugin[this.name][type2]["default"] = hotkey;
         }
+        addPluginDock(this);
         return this.docks[type2];
     }
 

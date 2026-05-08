@@ -138,7 +138,7 @@ func RemoveBox(boxID string) (err error) {
 
 	if !isUserGuide {
 		var historyDir string
-		historyDir, err = GetHistoryDir(HistoryOpDelete)
+		historyDir, err = getHistoryDir(HistoryOpDelete)
 		if err != nil {
 			logging.LogErrorf("get history dir failed: %s", err)
 			return

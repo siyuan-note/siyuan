@@ -28,7 +28,7 @@ import {openEditorTab} from "./util";
 import {makeCard} from "../card/makeCard";
 import {transaction} from "../protyle/wysiwyg/transaction";
 import {emitOpenMenu} from "../plugin/EventBus";
-import {openByMobile} from "../protyle/util/compatibility";
+import {saveZipExport} from "../protyle/util/compatibility";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 
 const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
@@ -159,7 +159,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                     ids: blockIDs,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }, {
@@ -172,7 +172,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                     ids: blockIDs,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }]
@@ -393,7 +393,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     id: notebookId,
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }, {
@@ -406,7 +406,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     notebook: notebookId
                 }, response => {
                     hideMessage(msgId);
-                    openByMobile(response.data.zip);
+                    saveZipExport(response.data.zip);
                 });
             }
         }]

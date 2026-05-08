@@ -312,14 +312,19 @@ export abstract class Constants {
         es_ES: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
         he_IL: "20210808180117-6v0mkxr",
+        hi_IN: "20210808180117-6v0mkxr",
+        id_ID: "20210808180117-6v0mkxr",
         it_IT: "20210808180117-6v0mkxr",
         ja_JP: "20240530133126-axarxgx",
         ko_KR: "20210808180117-6v0mkxr",
         pl_PL: "20210808180117-6v0mkxr",
         pt_BR: "20210808180117-6v0mkxr",
         ru_RU: "20210808180117-6v0mkxr",
+        th_TH: "20210808180117-6v0mkxr",
+        nl_NL: "20210808180117-6v0mkxr",
         sk_SK: "20210808180117-6v0mkxr",
         tr_TR: "20210808180117-6v0mkxr",
+        uk_UA: "20210808180117-6v0mkxr",
         zh_CHT: "20211226090932-5lcq56f",
         zh_CN: "20210808180117-czj9bvb",
     };
@@ -687,7 +692,7 @@ export abstract class Constants {
                     type: "outline",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconAlignCenter",
+                    icon: "iconOutline",
                     hotkeyLangId: "outline",
                 }, {
                     type: "inbox",
@@ -705,7 +710,7 @@ export abstract class Constants {
                     type: "tag",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconTags",
+                    icon: "iconTag",
                     hotkeyLangId: "tag",
                 }]
             ]

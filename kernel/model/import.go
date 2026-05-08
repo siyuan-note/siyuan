@@ -1448,7 +1448,15 @@ func htmlBlock2Inline(tree *parse.Tree) {
 	for n, htmlA := range aHtmlBlocks {
 		href := domAttrValue(htmlA, "href")
 		title := domAttrValue(htmlA, "title")
-		anchor := util2.DomText(htmlA)
+		anchor := strings.TrimSpace(util2.DomText(htmlA))
+
+		if "" == anchor {
+			unlinks = append(unlinks, n)
+			if nil != n.Next && ast.NodeText == n.Next.Type && "</a>" == n.NextNodeText() {
+				unlinks = append(unlinks, n.Next)
+			}
+			continue
+		}
 
 		p := treenode.NewParagraph(n.ID)
 		a := &ast.Node{Type: ast.NodeLink}

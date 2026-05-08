@@ -123,7 +123,7 @@ func findReplace(c *gin.Context) {
 		return
 	}
 
-	_, _, _, paths, boxes, types, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+	_, _, _, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockArgs(arg)
 
 	k := arg["k"].(string)
 	r := arg["r"].(string)
@@ -143,7 +143,7 @@ func findReplace(c *gin.Context) {
 		}
 	}
 
-	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, method, orderBy, groupBy)
+	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, subTypes, method, orderBy, groupBy)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -395,7 +395,7 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
-	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchBlockArgs(arg)
+	page, pageSize, query, paths, boxes, types, subTypes, method, orderBy, groupBy := parseSearchBlockArgs(arg)
 
 	// SQL mode requires admin privileges, consistent with /api/query/sql
 	if method == 2 && !model.IsAdminRoleContext(c) {
@@ -404,7 +404,7 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
-	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
+	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
@@ -418,7 +418,7 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 }
 
-func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) {
+func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) {
 	page = 1
 	if nil != arg["page"] {
 		page = int(arg["page"].(float64))
@@ -462,6 +462,14 @@ func parseSearchBlockArgs(arg map[string]any) (page, pageSize int, query string,
 		types = map[string]bool{}
 		for t, b := range typesArg {
 			types[t] = b.(bool)
+		}
+	}
+
+	if nil != arg["subTypes"] {
+		subTypesArg := arg["subTypes"].(map[string]any)
+		subTypes = map[string]bool{}
+		for t, b := range subTypesArg {
+			subTypes[t] = b.(bool)
 		}
 	}
 

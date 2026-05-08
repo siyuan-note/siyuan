@@ -393,9 +393,7 @@ export class Wnd {
                     newWnd.moveTab(oldTab);
                 }
                 resizeTabs();
-                /// #if !BROWSER
                 setTabPosition();
-                /// #endif
                 dragElement.removeAttribute("style");
                 return;
             }
@@ -636,10 +634,10 @@ export class Wnd {
             this.removeOverCounter(isSaveLayout);
         }
         /// #if !BROWSER
-        setTabPosition();
         setModelsHash();
         /// #endif
         if (isSaveLayout) {
+            setTabPosition();
             saveLayout();
         }
     }
@@ -874,12 +872,12 @@ export class Wnd {
             }
         }
         if (isSaveLayout) {
+            setTabPosition();
             saveLayout();
         }
         /// #if !BROWSER
         webFrame.clearCache();
         ipcRenderer.send(Constants.SIYUAN_CMD, "clearCache");
-        setTabPosition();
         setModelsHash();
         /// #endif
     };
@@ -974,9 +972,7 @@ export class Wnd {
 
         tab.parent = this;
         hideAllElements(["toolbar"]);
-        /// #if !BROWSER
         setTabPosition();
-        /// #endif
     }
 
     public split(direction: Config.TUILayoutDirection, after = true) {
@@ -993,6 +989,7 @@ export class Wnd {
             this.parent.direction = direction;
             if (direction === "tb") {
                 this.parent.element.classList.add("fn__flex-column");
+                this.parent.element.style.minHeight = "8px";
                 this.parent.element.classList.remove("fn__flex");
             } else {
                 this.parent.element.classList.remove("fn__flex-column");
@@ -1009,7 +1006,11 @@ export class Wnd {
                     this.parent.addLayout(layout, item.id, after);
                     const movedWnd = this.parent.children.splice(after ? index : index + 1, 1)[0];
                     if (movedWnd.resize) {
-                        movedWnd.element.previousElementSibling.remove();
+                        if (movedWnd.element.previousElementSibling && movedWnd.element.previousElementSibling.classList.contains("layout__resize")) {
+                            movedWnd.element.previousElementSibling.remove();
+                        } else if (movedWnd.element.nextElementSibling && movedWnd.element.nextElementSibling.classList.contains("layout__resize")) {
+                            movedWnd.element.nextElementSibling.remove();
+                        }
                         movedWnd.resize = undefined;
                     }
                     if (after) {

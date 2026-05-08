@@ -74,6 +74,7 @@ export const getDocByScroll = (options: {
             query: options.protyle.query?.key,
             queryMethod: options.protyle.query?.method,
             queryTypes: options.protyle.query?.types,
+            querySubTypes: options.protyle.query?.subTypes,
             highlight: !isSupportCSSHL(),
         }, response => {
             if (response.code === 1) {
@@ -82,6 +83,7 @@ export const getDocByScroll = (options: {
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
                     queryTypes: options.protyle.query?.types,
+                    querySubTypes: options.protyle.query?.subTypes,
                     highlight: !isSupportCSSHL(),
                 }, response => {
                     onGet({
@@ -120,6 +122,7 @@ export const getDocByScroll = (options: {
         query: options.protyle.query?.key,
         queryMethod: options.protyle.query?.method,
         queryTypes: options.protyle.query?.types,
+        querySubTypes: options.protyle.query?.subTypes,
         highlight: !isSupportCSSHL(),
     }, response => {
         onGet({

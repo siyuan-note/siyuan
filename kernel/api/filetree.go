@@ -1146,6 +1146,14 @@ func getDoc(c *gin.Context) {
 			queryTypes[t] = b.(bool)
 		}
 	}
+	var querySubTypes map[string]bool
+	if querySubTypesArg := arg["querySubTypes"]; nil != querySubTypesArg {
+		typesArg := querySubTypesArg.(map[string]any)
+		querySubTypes = map[string]bool{}
+		for t, b := range typesArg {
+			querySubTypes[t] = b.(bool)
+		}
+	}
 
 	m := arg["mode"] // 0: 仅当前 ID，1：向上 2：向下，3：上下都加载，4：加载末尾
 	mode := 0
@@ -1186,7 +1194,7 @@ func getDoc(c *gin.Context) {
 	}
 
 	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
-		model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
+		model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
 	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
 		return

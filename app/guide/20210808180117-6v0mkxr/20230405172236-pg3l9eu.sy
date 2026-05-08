@@ -7,7 +7,7 @@
 		"id": "20230405172236-pg3l9eu",
 		"title": "Performance Optimization",
 		"type": "doc",
-		"updated": "20250825114750"
+		"updated": "20260426180046"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230405172238-x56gmi0",
-				"updated": "20230405172238"
+				"updated": "20260426180046"
 			},
 			"Children": [
 				{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230405172238-lknsx9c",
-				"updated": "20230405172238"
+				"updated": "20260426180046"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230405172238-3rel2m1",
-				"updated": "20230405172414"
+				"updated": "20260426180046"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 					},
 					"Properties": {
 						"id": "20230405172238-3vv1mxu",
-						"updated": "20230405172238"
+						"updated": "20260426180046"
 					},
 					"Children": [
 						{
@@ -80,12 +80,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230405172238-pew1c0t",
-								"updated": "20230405172238"
+								"updated": "20260426180046"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Number of content blocks: The number of content blocks has a large impact on performance, such as expanding the document tree, searching, and writing data. But don't worry too much, usually the number of content blocks in the order of millions will not have much impact, unless the size of each block is large"
+									"Data": "Number of content blocks: The number of content blocks has a large impact on performance, such as expanding the document panel, searching, and writing data. But don't worry too much, usually the number of content blocks in the order of millions will not have much impact, unless the size of each block is large"
 								}
 							]
 						}

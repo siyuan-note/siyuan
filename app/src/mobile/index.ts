@@ -16,7 +16,7 @@ import {handleTouchEnd, handleTouchMove, handleTouchStart} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets, loadAssets} from "../util/assets";
-import {bootSync} from "../dialog/processSystem";
+import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
 import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
@@ -38,6 +38,7 @@ import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {nbsp2space} from "../protyle/util/normalizeText";
 import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
+import {initTouchDragBridge} from "../util/touchDragBridge";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -106,7 +107,7 @@ class App {
                     callMobileAppShowKeyboard();
                 }
             }
-            if (!hasClosestByClassName(event.target as Element, "protyle-util")) {
+            if (document.contains(event.target) && !hasClosestByClassName(event.target as Element, "protyle-util")) {
                 hideAllElements(["util"]);
             }
         });
@@ -174,9 +175,7 @@ class App {
             });
             document.addEventListener("touchstart", handleTouchStart, false);
             document.addEventListener("touchmove", handleTouchMove, false);
-            document.addEventListener("touchend", (event) => {
-                handleTouchEnd(event, siyuanApp);
-            }, false);
+            document.addEventListener("touchend", handleTouchEnd, false);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
                 window.siyuan.shiftIsPressed = false;
@@ -205,6 +204,7 @@ class App {
                     }
                 }
             });
+            initTouchDragBridge();
         });
     }
 }
@@ -217,6 +217,11 @@ window.reconnectWebSocket = () => {
     window.siyuan.mobile.docks.file.send("ping", {});
     window.siyuan.mobile.editor.protyle.ws.send("ping", {});
     window.siyuan.mobile.popEditor?.protyle.ws.send("ping", {});
+};
+window.lockscreenByMode = () => {
+    if (window.siyuan.config.system.lockScreenMode === 1) {
+        lockScreen(siyuanApp);
+    }
 };
 window.goBack = goBack;
 window.showMessage = showMessage;

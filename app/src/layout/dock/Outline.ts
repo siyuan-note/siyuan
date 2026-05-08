@@ -98,9 +98,7 @@ export class Outline extends Model {
         this.type = options.type;
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__outline", "dockPanel");
         options.tab.panelElement.innerHTML = `<div class="block__icons fn__hidescrollbar">
-    <div class="block__logo fn__flex-1">
-        <svg class="block__logoicon"><use xlink:href="#iconAlignCenter"></use></svg>${window.siyuan.languages.outline}
-    </div>
+    <div class="block__logo fn__flex-1">${window.siyuan.languages.outline}</div>
     <input class="b3-text-field search__label fn__none fn__size200" placeholder="${window.siyuan.languages.filterKeywordEnter}" />
     <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}">
         <svg><use xlink:href='#iconFilter'></use></svg>
@@ -111,7 +109,7 @@ export class Outline extends Model {
     </span>
     <span class="fn__space"></span>
     <span data-type="expandLevel" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandLevel}">
-        <svg><use xlink:href="#iconList"></use></svg>
+        <svg><use xlink:href="#iconExpandLevel"></use></svg>
     </span>
     <span class="fn__space"></span>
     <span data-type="expand" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.expandAll}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.expand.custom)}">
@@ -287,6 +285,7 @@ export class Outline extends Model {
                     switch (type) {
                         case "min":
                             getDockByType("outline").toggleModel("outline", false, true);
+                            isFocus = false;
                             break;
                         case "search":
                             inputElement.classList.remove("fn__none");

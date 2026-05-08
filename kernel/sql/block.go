@@ -127,13 +127,13 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 		return
 	}
 	if caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
+		stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
 		if err = execStmtTx(tx, stmt, content, id); err != nil {
 			tx.Rollback()
 			return
 		}
 	} else {
-		stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
+		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
 		if err = execStmtTx(tx, stmt, content, id); err != nil {
 			tx.Rollback()
 			return

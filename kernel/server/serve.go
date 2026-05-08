@@ -423,6 +423,23 @@ func serveAppearance(ginServer *gin.Engine) {
 		queryParams.Set("r", gulu.Rand.String(7))
 		location.RawQuery = queryParams.Encode()
 
+		siyuanDesktopMode, desktopCookieErr := c.Request.Cookie("siyuan-desktop-mode")
+		if nil == desktopCookieErr {
+			if "true" == siyuanDesktopMode.Value {
+				if strings.Contains(userAgentHeader, "Electron") {
+					location.Path = "/stage/build/app/"
+				} else {
+					location.Path = "/stage/build/desktop/"
+				}
+				c.Redirect(302, location.String())
+				return
+			} else if "false" == siyuanDesktopMode.Value {
+				location.Path = "/stage/build/mobile/"
+				c.Redirect(302, location.String())
+				return
+			}
+		}
+
 		if strings.Contains(userAgentHeader, "Electron") {
 			location.Path = "/stage/build/app/"
 		} else if strings.Contains(userAgentHeader, "Pad") ||
@@ -474,6 +491,7 @@ func serveAppearance(ginServer *gin.Engine) {
 					util.ReportFileSysFatalError(err)
 					return
 				}
+				enUSData = bytes.TrimPrefix(enUSData, []byte("\xef\xbb\xbf"))
 				enUSMap := map[string]any{}
 				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); err != nil {
 					logging.LogErrorf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
@@ -487,6 +505,7 @@ func serveAppearance(ginServer *gin.Engine) {
 						c.JSON(200, enUSMap)
 						return
 					}
+					data = bytes.TrimPrefix(data, []byte("\xef\xbb\xbf"))
 
 					langMap := map[string]any{}
 					if err = gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {

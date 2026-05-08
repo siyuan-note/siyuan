@@ -600,6 +600,14 @@ func serveAuthPage(c *gin.Context) {
 	c.Data(http.StatusOK, "text/html; charset=utf-8", data)
 }
 
+// 资源 GET 带 download=true 时以附件返回，便于浏览器 window.open 触发下载而非内联预览
+func setAssetsAttachmentDisposition(c *gin.Context, pathForBaseName string) {
+	if !strings.EqualFold(c.Query("download"), "true") {
+		return
+	}
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filepath.Base(pathForBaseName)))
+}
+
 func serveAssets(ginServer *gin.Engine) {
 	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
@@ -641,6 +649,7 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		// 返回原始文件
+		setAssetsAttachmentDisposition(context, p)
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 
@@ -662,6 +671,7 @@ func serveSVG(context *gin.Context, assetAbsPath string) bool {
 			data = []byte(util.SanitizeSVG(string(data)))
 		}
 
+		setAssetsAttachmentDisposition(context, assetAbsPath)
 		context.Data(200, "image/svg+xml", data)
 		return true
 	}
@@ -680,6 +690,7 @@ func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool
 			}
 		}
 
+		setAssetsAttachmentDisposition(context, assetAbsPath)
 		http.ServeFile(context.Writer, context.Request, thumbnailPath)
 		return true
 	}

@@ -17,7 +17,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {copyPlainText, openByMobile, readClipboard, setStorageVal} from "../util/compatibility";
+import {copyPlainText, readClipboard, saveExportFile, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -1018,7 +1018,7 @@ export class Toolbar {
                     formData.append("file", blob);
                     formData.append("type", "image/svg+xml");
                     fetchPost("/api/export/exportAsFile", formData, (response) => {
-                        openByMobile(response.data.file);
+                        saveExportFile(response.data.file);
                         hideMessage(msgId);
                     });
                 });
@@ -1033,7 +1033,7 @@ export class Toolbar {
                         formData.append("file", blob);
                         formData.append("type", "image/png");
                         fetchPost("/api/export/exportAsFile", formData, (response) => {
-                            openByMobile(response.data.file);
+                            saveExportFile(response.data.file);
                             hideMessage(msgId);
                         });
                     });

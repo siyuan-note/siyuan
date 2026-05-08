@@ -16,7 +16,6 @@ import {
     isInHarmony,
     isMac,
     isOnlyMeta,
-    openByMobile,
     saveExportFile,
     updateHotkeyAfterTip,
     updateHotkeyTip,
@@ -1582,7 +1581,7 @@ export class Gutter {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
                         fetchPost("/api/export/exportCodeBlock", {id}, (response) => {
                             hideMessage(msgId);
-                            openByMobile(response.data.path);
+                            saveExportFile(response.data.path);
                         });
                     }
                 }]

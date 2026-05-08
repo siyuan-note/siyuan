@@ -100,45 +100,53 @@ export const openByMobile = (uri: string) => {
     }
 };
 
-export const saveExportFile = (uri: string) => {
+export const saveExportFile = async (uri: string) => {
     if (!uri) {
         return;
     }
-    if (isInAndroid()) {
-        window.JSAndroid.saveExportFile(uri);
-        showMessage(window.siyuan.languages.exported);
-    } else if (isInIOS()) {
-        window.webkit.messageHandlers.saveExportFile.postMessage(uri);
-        showMessage(window.siyuan.languages.exported);
-    } else if (isInHarmony()) {
-        window.JSHarmony.saveExportFile(uri);
-        showMessage(window.siyuan.languages.exported);
-    } else {
-        window.open(uri);
-    }
-};
-
-export const saveZipExport = async (zipPath: string) => {
-    if (!zipPath) {
-        return;
-    }
     /// #if !BROWSER
-    const fileName = decodeURIComponent(zipPath.substring(zipPath.lastIndexOf("/") + 1));
-    const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-        cmd: "showSaveDialog",
-        defaultPath: fileName,
-        properties: ["showOverwriteConfirmation"],
-    });
-    if (result.canceled || !result.filePath) {
+    try {
+        const fileName = decodeURIComponent(uri.substring(uri.lastIndexOf("/") + 1));
+        const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "showSaveDialog",
+            defaultPath: fileName,
+            properties: ["showOverwriteConfirmation"],
+        });
+        if (result.canceled || !result.filePath) {
+            return;
+        }
+        const response = await fetch(uri);
+        const arrayBuffer = await response.arrayBuffer();
+        fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
+        showMessage(window.siyuan.languages.exported);
         return;
+    } catch (e) {
+        console.warn("saveExportFile failed:", e);
     }
-    const response = await fetch(zipPath);
-    const arrayBuffer = await response.arrayBuffer();
-    fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
-    showMessage(window.siyuan.languages.exported);
     /// #else
-    saveExportFile(zipPath);
+    try {
+        if (isInAndroid()) {
+            window.JSAndroid.saveExportFile(uri);
+            showMessage(window.siyuan.languages.exported);
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.saveExportFile.postMessage(uri);
+            showMessage(window.siyuan.languages.exported);
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.saveExportFile(uri);
+            showMessage(window.siyuan.languages.exported);
+            return;
+        }
+    } catch (e) {
+        console.warn("saveExportFile failed:", e);
+    }
     /// #endif
+    const openUrl = new URL(uri, `${location.origin}/`);
+    openUrl.searchParams.set("download", "true");
+    window.open(openUrl.href);
 };
 
 export const readText = () => {

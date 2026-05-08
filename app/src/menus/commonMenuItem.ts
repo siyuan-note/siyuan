@@ -12,7 +12,7 @@ import {
     isInIOS,
     isInMobileApp,
     openByMobile,
-    saveZipExport,
+    saveExportFile,
     writeText
 } from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -622,7 +622,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    saveZipExport(response.data.zip);
+                    saveExportFile(response.data.zip);
                 });
             }
         }, {
@@ -635,7 +635,7 @@ export const exportMd = (id: string) => {
                     id,
                 }, response => {
                     hideMessage(msgId);
-                    saveZipExport(response.data.zip);
+                    saveExportFile(response.data.zip);
                 });
             }
         }, {
@@ -691,7 +691,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -704,7 +704,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -717,7 +717,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -730,7 +730,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -743,7 +743,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -756,7 +756,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -769,7 +769,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -782,7 +782,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }, {
@@ -795,7 +795,7 @@ export const exportMd = (id: string) => {
                             id,
                         }, response => {
                             hideMessage(msgId);
-                            saveZipExport(response.data.zip);
+                            saveExportFile(response.data.zip);
                         });
                     }
                 }]

@@ -3216,9 +3216,7 @@ export class WYSIWYG {
                         if (blockElement.classList.contains("list") || blockElement.classList.contains("li")) {
                             if (protyle.options.render.breadcrumb) {
                                 const breadcrumbElement = hasClosestBlock(newRange.startContainer);
-                                if (protyle.options.render.breadcrumb) {
-                                    protyle.breadcrumb.render(protyle, false, breadcrumbElement);
-                                }
+                                protyle.breadcrumb.render(protyle, false, breadcrumbElement);
                             }
                         } else {
                             newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;

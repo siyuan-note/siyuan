@@ -639,14 +639,7 @@ export const focusByRange = (range: Range) => {
     selection.addRange(range);
 };
 
-/**
- * 将光标定位到指定块元素
- * @param element - 目标块元素
- * @param parentElement - 可选的父元素，当块内无法定位时聚焦此元素
- * @param toStart - true: 定位到块开头; false: 定位到块末尾
- * @param toFirstChild - 当 toStart=false 时，true: 聚焦到第一个可编辑项; false: 聚焦到最后一个可编辑项
- */
-export const focusBlock = (element: Element, parentElement?: HTMLElement, toStart = true, toFirstChild = false): false | Range => {
+export const focusBlock = (element: Element, parentElement?: HTMLElement, toStart = true): false | Range => {
     if (!element) {
         return false;
     }
@@ -711,13 +704,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
     if (toStart) {
         cursorElement = getContenteditableElement(element);
     } else {
-        
-        let items = Array.from(element.querySelectorAll('[contenteditable="true"]'));
-        // 有时候toStart=false，但是需要聚焦到第一个可编辑项，而不是最后一个可编辑项
-        if (!toFirstChild) {
-            items = items.reverse();
-        }
-        items.find(item => {
+        Array.from(element.querySelectorAll('[contenteditable="true"]')).reverse().find(item => {
             if (item.getBoundingClientRect().width > 0) {
                 cursorElement = item;
                 return true;

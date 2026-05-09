@@ -760,7 +760,7 @@ func (p *KernelPlugin) handleHttpRequest(c *gin.Context, request *Request, scope
 			response = result.Value
 		}
 	case <-c.Request.Context().Done():
-		err = c.Request.Context().Err()
+		// err = c.Request.Context().Err()
 	}
 	return
 }
@@ -1221,7 +1221,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		case <-ctx.Done():
 			return
 		case <-c.Request.Context().Done():
-			err = c.Request.Context().Err()
+			// err = c.Request.Context().Err()
 			return
 		case handlerErr := <-done:
 			if handlerErr != nil {

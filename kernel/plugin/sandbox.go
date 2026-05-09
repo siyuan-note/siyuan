@@ -505,8 +505,8 @@ func getRequestHandler(rt *goja.Runtime, scope AccessScope, requestType RequestT
 // requestGoToJs converts a Go Request to a JavaScript value.
 func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsRequest goja.Value, err error) {
 	// convert body raw data to js object
-	if request.Request.Body.Data != nil {
-		request.Request.Body.Data, err = NewDataObject(p, rt, *request.Request.Body.Data.(*[]byte))
+	if data, ok := request.Request.Body.Data.(*[]byte); ok && data != nil {
+		request.Request.Body.Data, err = NewDataObject(p, rt, *data)
 		if err != nil {
 			return
 		}
@@ -516,8 +516,8 @@ func requestGoToJs(p *KernelPlugin, rt *goja.Runtime, request *Request) (jsReque
 	if request.Request.Body.Form != nil {
 		for _, fileList := range request.Request.Body.Form.File {
 			for _, file := range fileList {
-				if file.Data != nil {
-					file.Data, err = NewDataObject(p, rt, *file.Data.(*[]byte))
+				if data, ok := file.Data.(*[]byte); ok && data != nil {
+					file.Data, err = NewDataObject(p, rt, *data)
 					if err != nil {
 						return
 					}

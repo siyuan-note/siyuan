@@ -447,7 +447,9 @@ func httpProxy(c *gin.Context) {
 	}
 
 	proxyReq.ContentLength = c.Request.ContentLength
-	proxyReq.Header.Set("Content-Type", c.ContentType())
+	if c.ContentType() != "" {
+		proxyReq.Header.Set("Content-Type", c.ContentType())
+	}
 
 	for k, vs := range *targetHeaders {
 		for _, v := range vs {

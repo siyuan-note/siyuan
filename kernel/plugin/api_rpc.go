@@ -139,6 +139,9 @@ func injectRpc(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err erro
 			var method string
 			if m := call.Argument(0); goja.IsString(m) {
 				method = m.String()
+			} else {
+				err = fmt.Errorf("first argument must be method name string")
+				return
 			}
 
 			var params util.Optional[any]

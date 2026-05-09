@@ -366,12 +366,14 @@ func invokeFunction(callback func(rt *goja.Runtime, result *CallResult), rt *goj
 		resultObj := resultJs.ToObject(rt)
 		if resultObj == nil {
 			callback(rt, &CallResult{Error: fmt.Errorf("expected promise object, got %T", result)})
+			return
 		}
 
 		thenValue := resultObj.Get("then")
 		then, ok := goja.AssertFunction(thenValue)
 		if !ok {
 			callback(rt, &CallResult{Error: fmt.Errorf("'promise.then property is not a function")})
+			return
 		}
 
 		then(resultObj, rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) {

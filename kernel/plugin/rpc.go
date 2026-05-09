@@ -115,7 +115,7 @@ func (r *JsonRpcRequest) UnmarshalJSON(data []byte) error {
 	}
 
 	// Validate method field
-	if !request.Method.Exists {
+	if !request.Method.HasValue() {
 		return fmt.Errorf("missing method field")
 	}
 
@@ -148,8 +148,8 @@ func (r *JsonRpcRequest) Validate() *JsonRpcError {
 	} else if _, ok := r.Params.Value.(map[string]any); ok {
 	} else {
 		return &JsonRpcError{
-			Code:    JsonRpcErrorCodeInvalidRequest,
-			Message: JsonRpcErrorInvalidRequest.Message,
+			Code:    JsonRpcErrorCodeInvalidParams,
+			Message: JsonRpcErrorInvalidParams.Message,
 			Data:    "Invalid params: must be array or object if present",
 		}
 	}

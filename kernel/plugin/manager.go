@@ -142,6 +142,11 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 		}
 	}()
 
+	if petal.Kernel.Incompatible || !petal.Kernel.Existed {
+		ok = false
+		return
+	}
+
 	pluginMu := m.getPluginMu(petal.Name)
 	pluginMu.Lock()
 	defer pluginMu.Unlock()

@@ -106,8 +106,8 @@ type RequestBody struct {
 }
 
 type RequestForm struct {
-	Value map[string][]string      `json:"values"` // e.g. {"field1": ["value1"], "field2": ["value2-1", "value2-2"]}
-	File  map[string][]RequestFile `json:"files"`  // e.g. {"file1": [{"Filename": "hello.txt", "Headers": {"Content-Disposition": ["form-data; name=\"file1\"; filename=\"hello.txt\""], "Content-Type": ["text/plain"]}, "Size": 123, "Data": []byte{...}}]}
+	Value map[string][]string       `json:"values"` // e.g. {"field1": ["value1"], "field2": ["value2-1", "value2-2"]}
+	File  map[string][]*RequestFile `json:"files"`  // e.g. {"file1": [{"Filename": "hello.txt", "Headers": {"Content-Disposition": ["form-data; name=\"file1\"; filename=\"hello.txt\""], "Content-Type": ["text/plain"]}, "Size": 123, "Data": []byte{...}}]}
 }
 
 type RequestFile struct {
@@ -185,29 +185,32 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 		// multipart/form-data
 		form = &RequestForm{
 			Value: multipartForm.Value,
-			File:  make(map[string][]RequestFile),
+			File:  make(map[string][]*RequestFile),
 		}
 
 		for partName, fileHandlers := range multipartForm.File {
-			files := make([]RequestFile, len(fileHandlers))
+			files := make([]*RequestFile, len(fileHandlers))
 			form.File[partName] = files
 			for i, handler := range fileHandlers {
-				files[i].Filename = handler.Filename
-				files[i].Headers = handler.Header
-				files[i].Size = handler.Size
-				if file, openErr := handler.Open(); openErr != nil {
+				files[i] = &RequestFile{
+					Filename: handler.Filename,
+					Headers:  handler.Header,
+					Size:     handler.Size,
+				}
+				file, openErr := handler.Open()
+				if openErr != nil {
 					err = fmt.Errorf("open form part [%s] file [%s] error: %s", partName, handler.Filename, openErr.Error())
 					return
-				} else {
-					content := make([]byte, handler.Size)
-					if n, readErr := file.Read(content); readErr != nil {
-						err = fmt.Errorf("read form part [%s] file [%s] error: %s", partName, handler.Filename, readErr.Error())
-						return
-					} else {
-						fileData := content[:n]
-						files[i].Data = &fileData
-					}
 				}
+				content := make([]byte, handler.Size)
+				n, readErr := file.Read(content)
+				file.Close()
+				if readErr != nil {
+					err = fmt.Errorf("read form part [%s] file [%s] error: %s", partName, handler.Filename, readErr.Error())
+					return
+				}
+				fileData := content[:n]
+				files[i].Data = &fileData
 			}
 		}
 	} else if len(c.Request.PostForm) > 0 {
@@ -236,7 +239,7 @@ func parseRequest(c *gin.Context) (request *Request, err error) {
 		}
 	}
 
-	headers := map[string][]string(c.Request.Header)
+	headers := map[string][]string(c.Request.Header.Clone())
 	delete(headers, "Cookie")
 	delete(headers, "Authorization")
 

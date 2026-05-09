@@ -106,7 +106,17 @@ export const saveExportFile = async (uri: string) => {
     }
     /// #if !BROWSER
     try {
-        const fileName = decodeURIComponent(uri.substring(uri.lastIndexOf("/") + 1));
+        const resolved = new URL(uri, `${location.origin}/`);
+        const pathSeg = resolved.pathname.substring(resolved.pathname.lastIndexOf("/") + 1);
+        let fileName: string;
+        try {
+            fileName = decodeURIComponent(pathSeg);
+        } catch {
+            fileName = pathSeg;
+        }
+        if (!fileName) {
+            fileName = "download";
+        }
         const result = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
             cmd: "showSaveDialog",
             defaultPath: fileName,
@@ -115,7 +125,12 @@ export const saveExportFile = async (uri: string) => {
         if (result.canceled || !result.filePath) {
             return;
         }
-        const response = await fetch(uri);
+        const response = await fetch(resolved.href);
+        if (!response.ok) {
+            throw new Error(
+                `HTTP ${response.status} ${response.statusText}: ${response.url || resolved.href}`
+            );
+        }
         const arrayBuffer = await response.arrayBuffer();
         fs.writeFileSync(result.filePath, Buffer.from(arrayBuffer));
         showMessage(window.siyuan.languages.exported);

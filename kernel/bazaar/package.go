@@ -131,17 +131,30 @@ func ParsePackageJSON(filePath string) (ret *Package, err error) {
 	return
 }
 
-// sanitizePackageDisplayStrings 对集市包直接显示的信息做 HTML 转义，避免 XSS。
+// sanitizePackageDisplayStrings 对集市包可能直接显示的信息做 HTML 转义，避免 XSS。
 func sanitizePackageDisplayStrings(pkg *Package) {
 	if pkg == nil {
 		return
 	}
+	pkg.Name = html.EscapeString(pkg.Name)
 	pkg.Author = html.EscapeString(pkg.Author)
+	pkg.Version = html.EscapeString(pkg.Version)
 	for k, v := range pkg.DisplayName {
 		pkg.DisplayName[k] = html.EscapeString(v)
 	}
 	for k, v := range pkg.Description {
 		pkg.Description[k] = html.EscapeString(v)
+	}
+	if pkg.Funding != nil {
+		pkg.Funding.OpenCollective = html.EscapeString(pkg.Funding.OpenCollective)
+		pkg.Funding.Patreon = html.EscapeString(pkg.Funding.Patreon)
+		pkg.Funding.GitHub = html.EscapeString(pkg.Funding.GitHub)
+		for i, v := range pkg.Funding.Custom {
+			pkg.Funding.Custom[i] = html.EscapeString(v)
+		}
+	}
+	for i, kw := range pkg.Keywords {
+		pkg.Keywords[i] = html.EscapeString(kw)
 	}
 }
 
@@ -177,7 +190,11 @@ func getPreferredFunding(funding *Funding) string {
 		return v
 	}
 	if 0 < len(funding.Custom) {
-		return funding.Custom[0]
+		v := funding.Custom[0]
+		if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "mailto:") {
+			return v
+		}
+		return ""
 	}
 	return ""
 }

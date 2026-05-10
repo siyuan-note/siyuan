@@ -12,7 +12,7 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Plugin} from "../plugin";
 import {App} from "../index";
-import {escapeAttr} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
@@ -235,7 +235,10 @@ export const bazaar = {
             return "";
         }
         try {
-            new URL(funding);
+            const url = new URL(funding);
+            if (!["http:", "https:", "mailto:"].includes(url.protocol)) {
+                throw new Error("not an allowed URL protocol");
+            }
             return `<span class="fn__space--small"></span><a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
         } catch (e) {
             return `<span class="fn__space--small"></span><span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
@@ -272,7 +275,7 @@ export const bazaar = {
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
-            ${item.preferredName}
+            ${escapeHtml(item.preferredName)}
             <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">
                 ${item.preferredDesc || ""}
             </div>
@@ -319,7 +322,7 @@ export const bazaar = {
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            ${item.preferredName}
+            ${escapeHtml(item.preferredName)}
             <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
         </div>
     </div>
@@ -428,7 +431,7 @@ export const bazaar = {
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            ${item.preferredName}
+            ${escapeHtml(item.preferredName)}
             <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
         </div>
     </div>
@@ -521,11 +524,11 @@ type="checkbox">
     </div>
     <img class="item__img" src="${data.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
     <div>
-        <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.preferredName}</a>
+        <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${escapeHtml(data.preferredName)}</a>
     </div>
     <div class="fn__hr"></div>
     <div>
-        <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${data.name}</a>
+        <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${escapeHtml(data.name)}</a>
     </div>
     <div class="block__icons">
         <span class="fn__flex-1"></span>
@@ -539,7 +542,7 @@ type="checkbox">
     </div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${data.version}</div>
+    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${escapeHtml(data.version)}</div>
     <div class="fn__hr"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${downloaded ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${downloaded ? data.hInstallDate : data.hUpdated}</div>
     <div class="fn__hr${downloaded ? " fn__none" : ""}"></div>

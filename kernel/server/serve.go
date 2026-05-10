@@ -668,9 +668,18 @@ func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool
 }
 
 func serveRepoDiff(ginServer *gin.Engine) {
+	repoDiffBaseDir := filepath.Join(util.TempDir, "repo", "diff")
 	ginServer.GET("/repo/diff/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
-		requestPath := context.Param("path")
-		p := filepath.Join(util.TempDir, "repo", "diff", requestPath)
+		requestPath := filepath.Clean(context.Param("path"))
+		if strings.Contains(requestPath, "..") {
+			context.Status(http.StatusUnauthorized)
+			return
+		}
+		p := filepath.Join(repoDiffBaseDir, requestPath)
+		if !gulu.File.IsSubPath(repoDiffBaseDir, p) {
+			context.Status(http.StatusUnauthorized)
+			return
+		}
 		http.ServeFile(context.Writer, context.Request, p)
 	})
 }

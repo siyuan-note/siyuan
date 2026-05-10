@@ -312,7 +312,7 @@ func CheckAuth(c *gin.Context) {
 			return
 		}
 		if strings.HasPrefix(c.Request.RequestURI, "/api/sync/performSync") {
-			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
+			if util.IsMobileContainer() {
 				c.Set(RoleContextKey, RoleAdministrator)
 				c.Next()
 				return

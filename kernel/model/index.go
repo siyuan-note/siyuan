@@ -395,7 +395,7 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLUpdateBlocksHPaths, func(context map[string]any, blockCount int, hash string) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 
@@ -407,7 +407,7 @@ func subscribeSQLEvents() {
 	})
 
 	eventbus.Subscribe(eventbus.EvtSQLInsertHistory, func(context map[string]any) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 
@@ -419,7 +419,7 @@ func subscribeSQLEvents() {
 	})
 
 	eventbus.Subscribe(eventbus.EvtSQLInsertAssetContent, func(context map[string]any) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 

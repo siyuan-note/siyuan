@@ -1740,7 +1740,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			upsertTrees++
 		}
 
-		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+		if util.IsMobileContainer() && strings.HasPrefix(file.Path, "/assets/") {
 			absPath := filepath.Join(util.DataDir, file.Path)
 			HandleAssetsChangeEvent(absPath)
 		}
@@ -1790,7 +1790,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			}
 		}
 
-		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+		if util.IsMobileContainer() && strings.HasPrefix(file.Path, "/assets/") {
 			absPath := filepath.Join(util.DataDir, file.Path)
 			HandleAssetsRemoveEvent(absPath)
 		}
@@ -1946,7 +1946,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	FlushTxQueue()
 
 	checkChunks := true
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+	if util.IsMobileContainer() {
 		// 因为移动端私有数据空间不会存在外部操作导致分块损坏的情况，所以不需要检查分块以提升性能 https://github.com/siyuan-note/siyuan/issues/13216
 		checkChunks = false
 	}

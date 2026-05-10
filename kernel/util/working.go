@@ -403,6 +403,11 @@ const (
 	FixedPort = "6806"      // 固定端口
 )
 
+// IsMobileContainer 表示当前内核运行在 Android、iOS 或鸿蒙客户端上。
+func IsMobileContainer() bool {
+	return ContainerAndroid == Container || ContainerIOS == Container || ContainerHarmony == Container
+}
+
 func initPathDir() {
 	if err := os.MkdirAll(ConfDir, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create conf folder [%s] failed: %s", ConfDir, err)

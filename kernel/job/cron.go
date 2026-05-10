@@ -47,7 +47,7 @@ func StartCron() {
 	go every(24*time.Hour, model.AutoPurgeRepoJob)
 	go every(30*time.Minute, model.AutoCheckMicrosoftDefenderJob)
 	go every(24*time.Hour, model.ClearOutdatedHistoryDirJob)
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+	if util.IsMobileContainer() {
 		go every(7*time.Second, model.AutoConsumeShorthandsJob)
 	}
 }

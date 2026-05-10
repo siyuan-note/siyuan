@@ -139,7 +139,7 @@ func InitConf() {
 
 	if "" != util.Lang {
 		initialized := false
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			// 移动端以上次设置的外观语言为准
 			if "" != Conf.Lang && util.Lang != Conf.Lang {
 				util.Lang = Conf.Lang
@@ -829,7 +829,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		}
 		util.HttpServing = false
 
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			return
 		}
 

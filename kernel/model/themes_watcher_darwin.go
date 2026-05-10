@@ -33,7 +33,7 @@ import (
 var themesWatcher *watcher.Watcher
 
 func WatchThemes() {
-	if !isFileWatcherAvailable() {
+	if util.IsMobileContainer() {
 		return
 	}
 

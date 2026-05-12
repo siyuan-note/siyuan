@@ -156,6 +156,18 @@ func setBazaar(c *gin.Context) {
 		return
 	}
 
+	if bazaar.PetalDisabled || !bazaar.Trust {
+		// disable all kernel plugins
+		if model.OnKernelPluginsStop != nil {
+			model.OnKernelPluginsStop()
+		}
+	} else {
+		// enable all kernel plugins
+		if model.OnKernelPluginsStart != nil {
+			model.OnKernelPluginsStart()
+		}
+	}
+
 	model.Conf.Bazaar = bazaar
 	model.Conf.Save()
 

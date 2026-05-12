@@ -24,9 +24,17 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
+type PluginManagerState int64
+
+const (
+	PluginManagerStateStopped PluginManagerState = iota
+	PluginManagerStateRunning
+)
+
 // PluginManager discovers, loads, starts, and stops kernel plugins.
 type PluginManager struct {
-	lifecycleMu sync.Mutex // protects the lifecycle state of the manager (starting/stopping), allowing concurrent start/stop of different plugins while preventing concurrent start/stop of the entire manager
+	state       PluginManagerState // protected by lifecycleMu
+	lifecycleMu sync.RWMutex       // protects the lifecycle state of the manager (starting/stopping), allowing concurrent start/stop of different plugins while preventing concurrent start/stop of the entire manager
 
 	plugins sync.Map // map[string]*KernelPlugin
 
@@ -60,9 +68,17 @@ func InitManager() {
 // GetManager returns the singleton PluginManager.
 func GetManager() *PluginManager {
 	managerOnce.Do(func() {
-		manager = &PluginManager{}
+		manager = &PluginManager{
+			state: PluginManagerStateStopped,
+		}
 	})
 	return manager
+}
+
+func (m *PluginManager) State() PluginManagerState {
+	m.lifecycleMu.RLock()
+	defer m.lifecycleMu.RUnlock()
+	return m.state
 }
 
 // Start loads and starts all kernel-eligible plugins.
@@ -73,6 +89,16 @@ func (m *PluginManager) Start() {
 			logging.LogErrorf("kernel plugin manager failed to start: %v", r)
 		}
 	}()
+
+	if m.State() == PluginManagerStateRunning {
+		logging.LogInfof("kernel plugin manager is already running, skipping start")
+		return
+	}
+
+	if model.Conf.Bazaar.PetalDisabled || !model.Conf.Bazaar.Trust {
+		logging.LogInfof("kernel plugins are disabled by configuration, skipping start")
+		return
+	}
 
 	m.lifecycleMu.Lock()
 	defer m.lifecycleMu.Unlock()
@@ -94,6 +120,7 @@ func (m *PluginManager) Start() {
 	}
 	wg.Wait()
 
+	m.state = PluginManagerStateRunning
 	logging.LogInfof("kernel plugin manager started, %d/%d plugin(s) loaded", counter, all)
 }
 
@@ -105,6 +132,11 @@ func (m *PluginManager) Stop() {
 			logging.LogErrorf("kernel plugin manager failed to stop: %v", r)
 		}
 	}()
+
+	if m.State() == PluginManagerStateStopped {
+		logging.LogInfof("kernel plugin manager is already stopped, skipping stop")
+		return
+	}
 
 	m.lifecycleMu.Lock()
 	defer m.lifecycleMu.Unlock()
@@ -131,6 +163,7 @@ func (m *PluginManager) Stop() {
 	})
 	wg.Wait()
 
+	m.state = PluginManagerStateStopped
 	logging.LogInfof("kernel plugin manager stopped, %d/%d plugin(s) unloaded", counter, all)
 }
 

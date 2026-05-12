@@ -1044,6 +1044,28 @@ func changeSort(c *gin.Context) {
 	model.ChangeFileTreeSort(notebook, paths)
 }
 
+func setSort(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	sortsArg := arg["sorts"].([]any)
+	sorts := make([]*model.SortItem, 0, len(sortsArg))
+	for _, s := range sortsArg {
+		item := s.(map[string]any)
+		sorts = append(sorts, &model.SortItem{
+			ID:   item["id"].(string),
+			Sort: int(item["sort"].(float64)),
+		})
+	}
+
+	model.SetFileTreeSort(sorts)
+}
+
 func searchDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

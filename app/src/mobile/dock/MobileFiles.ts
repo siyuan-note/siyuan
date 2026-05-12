@@ -788,6 +788,32 @@ export class MobileFiles extends Model {
         fileItemElement.querySelector(".b3-list-item__text").innerHTML = escapeHtml(data.title);
     }
 
+    public onFiletreeSortChanged(data: { notebook: string, parentPath: string }) {
+        let listPath = data.parentPath;
+        if (listPath !== "/") {
+            listPath += ".sy";
+        }
+        const liElement = this.element.querySelector(`ul[data-url="${data.notebook}"] li[data-path="${listPath}"]`);
+        if (!liElement) {
+            return;
+        }
+        if (liElement.nextElementSibling && liElement.nextElementSibling.tagName === "UL") {
+            fetchPost("/api/filetree/listDocsByPath", {
+                notebook: data.notebook,
+                path: listPath,
+                app: Constants.SIYUAN_APPID,
+            }, response => {
+                this.onLsHTML(response.data);
+            });
+        }
+    }
+
+    public onNotebookSortChanged() {
+        setNoteBook(() => {
+            this.init(false);
+        });
+    }
+
     private onMount(data: { data: { box: INotebook, existed?: boolean }, callback?: string }) {
         if (data.data.existed) {
             return;

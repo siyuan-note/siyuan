@@ -2007,6 +2007,78 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	pushFiletreeSortChanged(sortFolderIDs)
 }
 
+type SortItem struct {
+	ID   string
+	Sort int
+}
+
+func SetFileTreeSort(sorts []*SortItem) {
+	FlushTxQueue()
+
+	notebookSorts := map[string]int{}
+	docSortsByBox := map[string]map[string]int{}
+
+	for _, item := range sorts {
+		bt := treenode.GetBlockTree(item.ID)
+		if nil != bt {
+			boxID := bt.BoxID
+			if nil == docSortsByBox[boxID] {
+				docSortsByBox[boxID] = map[string]int{}
+			}
+			docSortsByBox[boxID][item.ID] = item.Sort
+			continue
+		}
+
+		box := Conf.GetBox(item.ID)
+		if nil != box {
+			boxConf := box.GetConf()
+			if boxConf.Sort != item.Sort {
+				boxConf.Sort = item.Sort
+				box.SaveConf(boxConf)
+				notebookSorts[item.ID] = item.Sort
+			}
+		}
+	}
+
+	if 0 < len(notebookSorts) {
+		notebookIDs := make([]string, 0, len(Conf.GetOpenedBoxes()))
+		for _, openedBox := range Conf.GetOpenedBoxes() {
+			notebookIDs = append(notebookIDs, openedBox.ID)
+		}
+		util.BroadcastByType("main", "notebookSortChanged", 0, "", map[string]any{
+			"notebookIDs": notebookIDs,
+		})
+	}
+
+	for boxID, sortVals := range docSortsByBox {
+		confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+		fullSortIDs, err := readSortConfMap(confPath)
+		if err != nil {
+			continue
+		}
+
+		changed := map[string]int{}
+		for id, newSort := range sortVals {
+			oldSort := fullSortIDs[id]
+			if oldSort != newSort {
+				changed[id] = newSort
+			}
+		}
+		if 0 == len(changed) {
+			continue
+		}
+
+		maps.Copy(fullSortIDs, changed)
+		if err = writeSortConfMap(confPath, fullSortIDs); err != nil {
+			continue
+		}
+
+		pushFiletreeSortChanged(changed)
+	}
+
+	IncSync()
+}
+
 func (box *Box) fillSort(files *[]*File) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
 	fullSortIDs, err := readSortConfMap(confPath)
@@ -2191,6 +2263,7 @@ func pushFiletreeSortChanged(sortIDs map[string]int) {
 
 	parentPath := path.Dir(bt.Path)
 	util.BroadcastByType("main", "filetreeSortChanged", 0, "", map[string]any{
+		"notebook":   bt.BoxID,
 		"parentPath": parentPath,
 		"childIDs":   childIDs,
 	})

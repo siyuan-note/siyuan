@@ -101,6 +101,12 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "openFileById":
                 openMobileFileById(app, data.data.id);
                 break;
+            case "filetreeSortChanged":
+                window.siyuan.mobile.docks.file.onFiletreeSortChanged(data.data);
+                break;
+            case "notebookSortChanged":
+                window.siyuan.mobile.docks.file.onNotebookSortChanged();
+                break;
             case"txerr":
                 transactionError(data.msg);
                 break;

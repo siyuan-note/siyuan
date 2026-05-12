@@ -96,6 +96,9 @@ type KernelPlugin struct {
 	token string // JWT for this plugin
 	file  string // kernel.js file path named in js runtime (e.g. "plugin-name/kernel.js")
 
+	pluginDir  string // Base directory for this plugin (e.g. /path/to/workspace/data/plugins/plugin-name)
+	storageDir string // Base directory for this plugin's storage (e.g. /path/to/workspace/data/storage/petal/plugin-name)
+
 	worker  Worker               // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
 
@@ -122,6 +125,9 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		Petal: petal,
 		token: token,
 		file:  fmt.Sprintf("%s/kernel.js", petal.Name),
+
+		pluginDir:  filepath.Join(util.DataDir, "plugins", petal.Name),
+		storageDir: filepath.Join(util.DataDir, "storage", "petal", petal.Name),
 
 		bus: EventBus.New(),
 
@@ -201,7 +207,7 @@ func (p *KernelPlugin) error() {
 }
 
 // start creates the goja runtime, injects sandbox globals, and evaluates kernel.js.
-func (p *KernelPlugin) start() (err error) {
+func (p *KernelPlugin) start(ctx context.Context) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
@@ -210,7 +216,7 @@ func (p *KernelPlugin) start() (err error) {
 	}()
 
 	p.state.Store(int64(PluginStateLoading))
-	p.context, p.cancel = context.WithCancel(context.Background())
+	p.context, p.cancel = context.WithCancel(ctx)
 
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 	if err := os.MkdirAll(baseDir, 0755); err != nil {

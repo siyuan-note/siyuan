@@ -17,11 +17,15 @@
 package plugin
 
 import (
+	"context"
+	"path/filepath"
 	"sync"
 	"sync/atomic"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type PluginManagerState int64
@@ -36,9 +40,14 @@ type PluginManager struct {
 	state       PluginManagerState // protected by lifecycleMu
 	lifecycleMu sync.RWMutex       // protects the lifecycle state of the manager (starting/stopping), allowing concurrent start/stop of different plugins while preventing concurrent start/stop of the entire manager
 
-	plugins sync.Map // map[string]*KernelPlugin
+	pluginsDir string // base directory for plugins (e.g. /path/to/workspace/data/plugins)
 
-	pluginMu sync.Map // map[string]*sync.Mutex, one per plugin name, to serialize start/stop of the same plugin while allowing concurrent start/stop of different plugins
+	context context.Context   // Context for managing plugin manager lifecycle
+	watcher *fsnotify.Watcher // watcher for kernel plugin source file changes, to trigger hot reload
+
+	plugins   sync.Map // map[string]*KernelPlugin
+	pluginsMu sync.Map // map[string]*sync.Mutex, one per plugin name, to serialize start/stop of the same plugin while allowing concurrent start/stop of different plugins
+
 }
 
 type PluginInfo struct {
@@ -68,8 +77,53 @@ func InitManager() {
 // GetManager returns the singleton PluginManager.
 func GetManager() *PluginManager {
 	managerOnce.Do(func() {
+		context := context.Background()
+
+		watcher, err := fsnotify.NewWatcher()
+		if err != nil {
+			logging.LogErrorf("failed to create kernel plugin source file watcher: %s", err)
+		} else if watcher != nil {
+			go func() {
+				defer watcher.Close()
+
+				for {
+					select {
+					case <-context.Done():
+						return
+					case event, ok := <-watcher.Events:
+						if !ok {
+							return
+						}
+
+						pluginDir, fileName := filepath.Split(event.Name)
+						pluginName := filepath.Base(pluginDir)
+						if fileName == "kernel.js" {
+							switch event.Op {
+							case fsnotify.Create, fsnotify.Write:
+								petal := model.GetPetalByName(pluginName)
+								if petal != nil && petal.Enabled {
+									logging.LogInfof("[plugin:%s] kernel plugin source file kernel.js changed", petal.Name)
+									go model.SetPetalEnabled(petal.Name, petal.Enabled)
+								}
+							}
+						}
+					case err, ok := <-watcher.Errors:
+						if !ok {
+							return
+						}
+						logging.LogErrorf("kernel plugin source file watcher error: %s", err)
+					}
+				}
+			}()
+		}
+
 		manager = &PluginManager{
 			state: PluginManagerStateStopped,
+
+			pluginsDir: filepath.Join(util.DataDir, "plugins"),
+
+			context: context,
+			watcher: watcher,
 		}
 	})
 	return manager
@@ -149,16 +203,13 @@ func (m *PluginManager) Stop() {
 	wg := sync.WaitGroup{}
 	m.plugins.Range(func(key, value any) bool {
 		atomic.AddInt64(&all, 1)
-		p := value.(*KernelPlugin)
-		wg.Go(func() {
-			ok, err := p.stop()
-			if err != nil {
-				logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
-			}
-			if ok {
-				atomic.AddInt64(&counter, 1)
-			}
-		})
+		if p, ok := value.(*KernelPlugin); ok {
+			wg.Go(func() {
+				if ok := m.StopPlugin(p.Petal); ok {
+					atomic.AddInt64(&counter, 1)
+				}
+			})
+		}
 		return true
 	})
 	wg.Wait()
@@ -177,22 +228,29 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 		}
 	}()
 
+	if model.Conf.Bazaar.PetalDisabled || !model.Conf.Bazaar.Trust {
+		ok = false
+		return
+	}
+
 	if petal.Kernel.Incompatible || !petal.Kernel.Existed {
 		ok = false
 		return
 	}
 
+	m.StopPlugin(petal) // stop first in case it's already running, to allow hot reload
+
 	pluginMu := m.getPluginMu(petal.Name)
 	pluginMu.Lock()
 	defer pluginMu.Unlock()
 
-	m.stopPlugin(petal)
+	m.addWatchPluginDir(petal.Name)
 
 	p := NewKernelPlugin(petal)
 
 	m.plugins.Store(p.Name, p)
 
-	if err := p.start(); err != nil {
+	if err := p.start(m.context); err != nil {
 		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)
 		ok = false
 		return
@@ -204,10 +262,11 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 
 // StopPlugin stops a single kernel plugin.
 // Called when a petal is disabled via SetPetalEnabled.
-func (m *PluginManager) StopPlugin(petal *model.Petal) {
+func (m *PluginManager) StopPlugin(petal *model.Petal) (ok bool) {
 	defer func() {
 		if r := recover(); r != nil {
 			logging.LogErrorf("[plugin:%s] panic during stop: %v", petal.Name, r)
+			ok = false
 		}
 	}()
 
@@ -215,25 +274,27 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) {
 	pluginMu.Lock()
 	defer pluginMu.Unlock()
 
-	m.stopPlugin(petal)
-}
+	m.removeWatchPluginDir(petal.Name)
 
-// stopPlugin removes and stops the plugin without acquiring the per-plugin mutex.
-// Callers must hold the per-plugin mutex returned by getPluginMu.
-func (m *PluginManager) stopPlugin(petal *model.Petal) {
 	value, loaded := m.plugins.LoadAndDelete(petal.Name)
 
 	if loaded {
 		p := value.(*KernelPlugin)
-		if _, err := p.stop(); err != nil {
+		if success, err := p.stop(); err != nil {
 			logging.LogErrorf("[plugin:%s] stop failed: %s", p.Name, err)
+			ok = false
+		} else {
+			ok = success
 		}
+	} else {
+		ok = false
 	}
+	return
 }
 
 // getPluginMu returns the per-plugin mutex for the given name, creating it if needed.
 func (m *PluginManager) getPluginMu(name string) *sync.Mutex {
-	v, _ := m.pluginMu.LoadOrStore(name, &sync.Mutex{})
+	v, _ := m.pluginsMu.LoadOrStore(name, &sync.Mutex{})
 	return v.(*sync.Mutex)
 }
 
@@ -248,9 +309,8 @@ func (m *PluginManager) GetPlugin(name string) *KernelPlugin {
 
 // GetLoadedPlugin returns the plugin info for a loaded KernelPlugin by name, or nil.
 func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found bool) {
-	value, loaded := m.plugins.Load(name)
-	if loaded {
-		p := value.(*KernelPlugin)
+	p := m.GetPlugin(name)
+	if p != nil {
 		return &PluginInfo{
 			Name:    p.Name,
 			State:   p.State().String(),
@@ -272,4 +332,14 @@ func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 		return true
 	})
 	return plugins
+}
+
+// addWatchPluginDir adds the plugin's base directory to the fsnotify watcher to enable hot reload on source changes.
+func (m *PluginManager) addWatchPluginDir(name string) {
+	m.watcher.Add(filepath.Join(m.pluginsDir, name))
+}
+
+// removeWatchPluginDir removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
+func (m *PluginManager) removeWatchPluginDir(name string) {
+	m.watcher.Remove(filepath.Join(m.pluginsDir, name))
 }

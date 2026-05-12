@@ -37,11 +37,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		}
 	}()
 
-	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
-
 	resolvePath := func(relPath string) (abs string, err error) {
-		abs = filepath.Join(baseDir, filepath.Clean(relPath))
-		if !(abs == baseDir || strings.HasPrefix(abs, baseDir+string(filepath.Separator))) {
+		abs = filepath.Join(p.storageDir, filepath.Clean(relPath))
+		if !(abs == p.storageDir || strings.HasPrefix(abs, p.storageDir+string(filepath.Separator))) {
 			err = fmt.Errorf("siyuan.storage: path traversal not allowed")
 		}
 		return
@@ -210,7 +208,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				err = resolveErr
 				return
 			}
-			if abs == baseDir {
+			if abs == p.storageDir {
 				err = fmt.Errorf("cannot remove storage root")
 				return
 			}

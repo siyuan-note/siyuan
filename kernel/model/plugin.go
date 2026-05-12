@@ -120,6 +120,11 @@ func getPetalByName(name string, petals []*Petal) (ret *Petal) {
 	return
 }
 
+func GetPetalByName(name string) (ret *Petal) {
+	petals := getPetals()
+	return getPetalByName(name, petals)
+}
+
 var loadPetalsFlight singleflight.Group
 
 // IsPetalsEnabled returns whether petals are enabled and trusted to be loaded

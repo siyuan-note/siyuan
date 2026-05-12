@@ -127,6 +127,11 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if util.ReadOnly {
+				err = fmt.Errorf("The current kernel is in read-only mode, storage.put is not allowed")
+				return
+			}
+
 			if len(call.Arguments) < 2 {
 				err = fmt.Errorf("path and content required")
 				return
@@ -190,6 +195,11 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		promise, resolve, reject := rt.NewPromise()
 
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if util.ReadOnly {
+				err = fmt.Errorf("The current kernel is in read-only mode, storage.remove is not allowed")
+				return
+			}
+
 			if len(call.Arguments) < 1 {
 				err = fmt.Errorf("path required")
 				return

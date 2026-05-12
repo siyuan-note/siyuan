@@ -28,6 +28,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
+	"github.com/gin-contrib/sse"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/lxzan/gws"
@@ -1092,11 +1093,6 @@ func (p *KernelPlugin) handleWebSocketRequest(c *gin.Context, request *Request, 
 
 // handleServerSentEventRequest dispatches an SSE request to the plugin's JS handler and streams events until completion or client disconnect.
 func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Request, scope AccessScope) (err error) {
-	type sseEvent struct {
-		name    string
-		message any
-	}
-
 	ctx, cancel := context.WithCancel(p.context)
 
 	var closeOnce sync.Once
@@ -1107,7 +1103,7 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 	}
 	defer doClose()
 
-	events := chanx.NewUnboundedChan[sseEvent](ctx, 16)
+	events := chanx.NewUnboundedChan[sse.Event](ctx, 16)
 	done := make(chan error, 1) // using to receive handler error or close signal
 
 	runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
@@ -1141,10 +1137,33 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 		}
 
 		port_send := rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
-			name := call.Argument(0).String()
-			message := call.Argument(1).Export()
-			events.In <- sseEvent{name, message}
-			return goja.Undefined()
+			if eventJs := call.Argument(0); isJsValueNotNull(eventJs) {
+				if eventObj := eventJs.ToObject(rt); eventObj != nil {
+					e := sse.Event{}
+
+					if data := eventObj.Get("data"); isJsValueNotUndefined(data) {
+						e.Data = data.Export()
+					} else {
+						panic(rt.NewGoError(fmt.Errorf("event.data is required")))
+					}
+
+					if event := eventObj.Get("event"); goja.IsString(event) {
+						e.Event = event.String()
+					}
+
+					if id := eventObj.Get("id"); goja.IsString(id) {
+						e.Id = id.String()
+					}
+
+					if retry := eventObj.Get("retry"); goja.IsNumber(retry) {
+						e.Retry = uint(retry.ToInteger())
+					}
+
+					events.In <- e
+					return goja.Undefined()
+				}
+			}
+			panic(rt.NewGoError(fmt.Errorf("invalid event object")))
 		})
 
 		port_close := rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
@@ -1216,7 +1235,8 @@ func (p *KernelPlugin) handleServerSentEventRequest(c *gin.Context, request *Req
 	for {
 		select {
 		case e := <-events.Out:
-			c.SSEvent(e.name, e.message)
+			// c.SSEvent(e.Event, e.Data)
+			c.Render(-1, e)
 			c.Writer.Flush()
 		case <-ctx.Done():
 			return

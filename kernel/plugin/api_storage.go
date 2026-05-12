@@ -45,6 +45,98 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 		return
 	}
 
+	watcher := rt.NewObject()
+
+	// siyuan.storage.watcher.add(path) -> Promise<void>
+	lo.Must0(watcher.Set("add", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			var path string
+			if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
+				path = call.Argument(0).String()
+			} else {
+				err = fmt.Errorf("path required")
+				return
+			}
+
+			abs, resolveErr := resolvePath(path)
+			if resolveErr != nil {
+				err = resolveErr
+				return
+			}
+
+			addErr := p.addStorageWatch(abs)
+			if addErr != nil {
+				err = fmt.Errorf("failed to add storage path to watcher: %v", addErr)
+				return
+			}
+
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.add resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.add reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.add worker run: %v", p.Name, runErr)
+		}
+
+		return rt.ToValue(promise)
+	})))
+
+	// siyuan.storage.watcher.remove(path) -> void
+	lo.Must0(watcher.Set("remove", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
+		promise, resolve, reject := rt.NewPromise()
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			var path string
+			if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
+				path = call.Argument(0).String()
+			} else {
+				err = fmt.Errorf("path required")
+				return
+			}
+
+			abs, resolveErr := resolvePath(path)
+			if resolveErr != nil {
+				err = resolveErr
+				return
+			}
+
+			addErr := p.removeStorageWatch(abs)
+			if addErr != nil {
+				err = fmt.Errorf("failed to remove storage path from watcher: %v", addErr)
+				return
+			}
+
+			return
+		}, func(rt *goja.Runtime, result any, err error) {
+			if lo.IsNil(err) {
+				if resolveErr := resolve(result); resolveErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.remove resolve: %v", p.Name, resolveErr)
+				}
+			} else {
+				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+					logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.remove reject: %v", p.Name, rejectErr)
+				}
+			}
+		})
+		if runErr != nil {
+			logging.LogErrorf("[plugin:%s] siyuan.storage.watcher.remove worker run: %v", p.Name, runErr)
+		}
+
+		return rt.ToValue(promise)
+	})))
+
+	lo.Must0(ObjectFreeze(rt, watcher))
+
 	storage := rt.NewObject()
 
 	// siyuan.storage.get(path) -> Promise<{text, json, arrayBuffer}>
@@ -328,6 +420,9 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 
 		return rt.ToValue(promise)
 	})))
+
+	// siyuan.storage.watcher
+	lo.Must0(storage.Set("watcher", watcher))
 
 	lo.Must0(ObjectFreeze(rt, storage))
 

@@ -28,6 +28,7 @@ import (
 	"github.com/asaskevich/EventBus"
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/eventloop"
+	"github.com/fsnotify/fsnotify"
 	"github.com/gin-contrib/sse"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -101,6 +102,7 @@ type KernelPlugin struct {
 
 	worker  Worker               // Worker for serializing plugin js-call-go (e.g. logger) and go-call-js (e.g. RPC calls) tasks on a single goroutine
 	runtime *eventloop.EventLoop // goja event loop runtime for this plugin
+	watcher *fsnotify.Watcher    // watcher for kernel plugin storage file changes
 
 	state atomic.Int64 //  PluginState
 
@@ -115,10 +117,17 @@ type KernelPlugin struct {
 	sockets   map[*gws.Conn]bool // tracked gws WebSocket connections (true: RPC server, false: regular)
 }
 
-func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
+func NewKernelPlugin(ctx context.Context, petal *model.Petal) *KernelPlugin {
 	token, err := model.CreatePluginJWT(petal.Name)
 	if err != nil {
 		logging.LogErrorf("Failed to create plugin JWT for [%s]: %v", petal.Name, err)
+	}
+
+	context, cancel := context.WithCancel(ctx)
+
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		logging.LogErrorf("[plugin:%s] failed to create storage watcher: %s", petal.Name, err)
 	}
 
 	plugin := &KernelPlugin{
@@ -129,6 +138,11 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 		pluginDir:  filepath.Join(util.DataDir, "plugins", petal.Name),
 		storageDir: filepath.Join(util.DataDir, "storage", "petal", petal.Name),
 
+		watcher: watcher,
+
+		context: context,
+		cancel:  cancel,
+
 		bus: EventBus.New(),
 
 		sockets: make(map[*gws.Conn]bool),
@@ -136,6 +150,15 @@ func NewKernelPlugin(petal *model.Petal) *KernelPlugin {
 
 	plugin.state.Store(int64(PluginStateReady))
 	return plugin
+}
+
+// createEventMessage creates a standardized event message with a unique ID, type, and detail payload.
+func createEventMessage(eventType string, detail any) R {
+	return R{
+		"id":     uuid.NewString(),
+		"type":   eventType,
+		"detail": detail,
+	}
 }
 
 // State returns the current plugin state (safe for concurrent reads).
@@ -207,7 +230,7 @@ func (p *KernelPlugin) error() {
 }
 
 // start creates the goja runtime, injects sandbox globals, and evaluates kernel.js.
-func (p *KernelPlugin) start(ctx context.Context) (err error) {
+func (p *KernelPlugin) start() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			p.error()
@@ -216,7 +239,6 @@ func (p *KernelPlugin) start(ctx context.Context) (err error) {
 	}()
 
 	p.state.Store(int64(PluginStateLoading))
-	p.context, p.cancel = context.WithCancel(ctx)
 
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
@@ -233,16 +255,15 @@ func (p *KernelPlugin) start(ctx context.Context) (err error) {
 		return fmt.Errorf("subscribe plugin events: %v", subscribeErr)
 	}
 
+	go p.startStorageWatch()
+
 	p.onLoad()
 	p.state.Store(int64(PluginStateLoaded))
 	p.onLoaded()
 	p.state.Store(int64(PluginStateRunning))
 	p.onRunning()
 
-	p.bus.Publish(EventBusTopicRuntime, R{
-		"id":   uuid.NewString(),
-		"type": "start",
-	})
+	p.bus.Publish(EventBusTopicRuntime, createEventMessage("start", nil))
 
 	logging.LogDebugf("[plugin:%s] started", p.Name)
 	return
@@ -263,10 +284,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 		return
 	}
 
-	p.bus.Publish(EventBusTopicRuntime, R{
-		"id":   uuid.NewString(),
-		"type": "stop",
-	})
+	p.bus.Publish(EventBusTopicRuntime, createEventMessage("stop", nil))
 
 	p.state.Store(int64(PluginStateStopping))
 
@@ -614,6 +632,66 @@ func (p *KernelPlugin) UntrackRpcSocket(conn *gws.Conn) {
 	p.socketsMu.Lock()
 	defer p.socketsMu.Unlock()
 	delete(p.sockets, conn)
+}
+
+// startStorageWatch starts a goroutine to watch for file changes in the plugin's storage directory and dispatches events to the plugin.
+func (p *KernelPlugin) startStorageWatch() {
+	if p.watcher == nil {
+		return
+	}
+
+	defer p.watcher.Close()
+
+	for {
+		select {
+		case <-p.context.Done():
+			return
+		case event, ok := <-p.watcher.Events:
+			if !ok {
+				return
+			}
+
+			switch event.Op {
+			case fsnotify.Create, fsnotify.Write, fsnotify.Rename, fsnotify.Remove:
+				path, relErr := filepath.Rel(p.storageDir, event.Name)
+				if relErr != nil {
+					logging.LogErrorf("[plugin:%s] failed to get relative storage path for [%s]: %v", p.Name, event.Name, relErr)
+					return
+				}
+				p.bus.Publish(EventBusTopicRuntime, createEventMessage("fs-notify", R{
+					"operation": event.Op.String(),
+					"path":      path,
+				}))
+			}
+		case err, ok := <-p.watcher.Errors:
+			if !ok {
+				return
+			}
+			logging.LogErrorf("[plugin:%s] storage watcher error: %s", p.Name, err)
+		}
+	}
+}
+
+// addStorageWatch adds a path to the fsnotify watcher to watch for storage file/directory changes.
+func (p *KernelPlugin) addStorageWatch(path string) (err error) {
+	if p.watcher == nil {
+		err = fmt.Errorf("fsnotify watcher not initialized")
+		return
+	}
+
+	err = p.watcher.Add(path)
+	return
+}
+
+// removeStorageWatch removes a path from the fsnotify watcher to stop watching for storage file/directory changes.
+func (p *KernelPlugin) removeStorageWatch(path string) (err error) {
+	if p.watcher == nil {
+		err = fmt.Errorf("fsnotify watcher not initialized")
+		return
+	}
+
+	err = p.watcher.Remove(path)
+	return
 }
 
 // invokeHook calls a lifecycle hook (e.g. onload) if it exists, awaiting if it returns a Promise.

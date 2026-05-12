@@ -102,7 +102,7 @@ func GetManager() *PluginManager {
 							case fsnotify.Create, fsnotify.Write:
 								petal := model.GetPetalByName(pluginName)
 								if petal != nil && petal.Enabled {
-									logging.LogInfof("[plugin:%s] kernel plugin source file kernel.js changed", petal.Name)
+									logging.LogInfof("[plugin:%s] source file kernel.js changed, reloading plugin", petal.Name)
 									go model.SetPetalEnabled(petal.Name, petal.Enabled)
 								}
 							}
@@ -244,13 +244,13 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 	pluginMu.Lock()
 	defer pluginMu.Unlock()
 
-	m.addWatchPluginDir(petal.Name)
+	m.addPluginSourceWatch(petal.Name)
 
-	p := NewKernelPlugin(petal)
+	p := NewKernelPlugin(m.context, petal)
 
 	m.plugins.Store(p.Name, p)
 
-	if err := p.start(m.context); err != nil {
+	if err := p.start(); err != nil {
 		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)
 		ok = false
 		return
@@ -274,7 +274,7 @@ func (m *PluginManager) StopPlugin(petal *model.Petal) (ok bool) {
 	pluginMu.Lock()
 	defer pluginMu.Unlock()
 
-	m.removeWatchPluginDir(petal.Name)
+	m.removePluginSourceWatch(petal.Name)
 
 	value, loaded := m.plugins.LoadAndDelete(petal.Name)
 
@@ -334,12 +334,24 @@ func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 	return plugins
 }
 
-// addWatchPluginDir adds the plugin's base directory to the fsnotify watcher to enable hot reload on source changes.
-func (m *PluginManager) addWatchPluginDir(name string) {
-	m.watcher.Add(filepath.Join(m.pluginsDir, name))
+// addPluginSourceWatch adds the plugin's base directory to the fsnotify watcher to watch for source file changes for hot reload.
+func (m *PluginManager) addPluginSourceWatch(name string) {
+	if m.watcher == nil {
+		return
+	}
+	path := filepath.Join(m.pluginsDir, name)
+	if err := m.watcher.Add(path); err != nil {
+		logging.LogErrorf("failed to add kernel plugin source path [%s] to watcher: %s", path, err)
+	}
 }
 
-// removeWatchPluginDir removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
-func (m *PluginManager) removeWatchPluginDir(name string) {
-	m.watcher.Remove(filepath.Join(m.pluginsDir, name))
+// removePluginSourceWatch removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
+func (m *PluginManager) removePluginSourceWatch(name string) {
+	if m.watcher == nil {
+		return
+	}
+	path := filepath.Join(m.pluginsDir, name)
+	if err := m.watcher.Remove(path); err != nil {
+		logging.LogErrorf("failed to remove kernel plugin source path [%s] from watcher: %s", path, err)
+	}
 }

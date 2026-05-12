@@ -747,8 +747,8 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	if !force {
 		// Stop kernel plugins early in shutdown
-		if OnKernelPluginShutdown != nil {
-			OnKernelPluginShutdown()
+		if OnKernelPluginsStop != nil {
+			OnKernelPluginsStop()
 		}
 
 		if Conf.Sync.Enabled && 3 != Conf.Sync.Mode &&

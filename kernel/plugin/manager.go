@@ -50,7 +50,9 @@ func InitManager() {
 
 	model.OnKernelPluginStart = func(petal *model.Petal) { GetManager().StartPlugin(petal) }
 	model.OnKernelPluginStop = func(petal *model.Petal) { GetManager().StopPlugin(petal) }
-	model.OnKernelPluginShutdown = func() { GetManager().Stop() }
+
+	model.OnKernelPluginsStart = func() { GetManager().Start() }
+	model.OnKernelPluginsStop = func() { GetManager().Stop() }
 
 	m.Start()
 }

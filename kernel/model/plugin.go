@@ -55,9 +55,10 @@ type KernelPetal struct {
 }
 
 var (
-	OnKernelPluginStart    func(petal *Petal) // Called when a plugin is enabled (after loading and starting the plugin)
-	OnKernelPluginStop     func(petal *Petal) // Called when a plugin is disabled (before stopping and unloading the plugin)
-	OnKernelPluginShutdown func()             // Called when SiYuan is shutting down, before stopping all plugins
+	OnKernelPluginStart  func(petal *Petal) // Called when a plugin is enabled (after loading and starting the plugin)
+	OnKernelPluginStop   func(petal *Petal) // Called when a plugin is disabled (before stopping and unloading the plugin)
+	OnKernelPluginsStart func()             // Called to start all valid plugins
+	OnKernelPluginsStop  func()             // Called to stopping all valid plugins
 )
 
 func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {

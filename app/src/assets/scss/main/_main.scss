@@ -41,6 +41,7 @@ body {
   height: 100vh !important;
   z-index: 8;
   border-radius: 0;
+  background-color: var(--b3-theme-background);
 
   &.sy__graph {
     background-color: var(--b3-theme-background);

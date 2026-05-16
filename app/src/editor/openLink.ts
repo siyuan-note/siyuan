@@ -157,27 +157,33 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
                 case "open-app":
                     /// #if !BROWSER
                     openBy(linkAddress, "app");
+                    /// #else
+                    openByMobile(linkAddress);
+                    /// #endif
                     break;
                 case "show-folder":
                     /// #if !BROWSER
                     openBy(linkAddress, "folder");
-                    break;
-                default:
+                    /// #else
                     openByMobile(linkAddress);
+                    /// #endif
                     break;
             }
         } else {
             switch (action) {
-                case "open-app":
-                    /// #if !BROWSER
-                    openBy(linkAddress, "app");
-                    break;
                 case "show-folder":
                     /// #if !BROWSER
                     openBy(linkAddress, "folder");
+                    /// #else
+                    openByMobile(linkAddress);
+                    /// #endif
                     break;
                 default:
+                    /// #if !BROWSER
+                    openBy(linkAddress, "app");
+                    /// #else
                     openByMobile(linkAddress);
+                    /// #endif
                     break;
             }
         }

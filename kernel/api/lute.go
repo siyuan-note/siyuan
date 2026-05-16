@@ -221,3 +221,38 @@ func spinBlockDOM(c *gin.Context) {
 		"dom": dom,
 	}
 }
+
+// md2HTML 将 Markdown 转换为 HTML。
+func md2HTML(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var markdown, mode string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("markdown", &markdown, true, false),
+		util.BindJsonArg("mode", &mode, false, false),
+	) {
+		return
+	}
+
+	var html string
+	switch mode {
+	case "protyle-preview":
+		html = model.MarkdownToProtylePreviewHTML(markdown)
+	case "":
+		html = model.MarkdownToMarkdownStrHTML(markdown)
+	default:
+		ret.Code = -1
+		ret.Msg = "unknown [mode]"
+		return
+	}
+
+	ret.Data = map[string]any{
+		"html": html,
+	}
+}

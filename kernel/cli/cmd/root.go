@@ -67,7 +67,6 @@ var rootCmd = &cobra.Command{
 		util.Mode = "prod"
 		util.InitWorkspace(workspacePath, util.WorkingDir)
 
-		os.MkdirAll(util.QueueDir, 0755)
 		logging.SetLogPath(filepath.Join(util.TempDir, "siyuan-cli.log"))
 		logging.SetLogToStdout(false)
 

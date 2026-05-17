@@ -34,6 +34,49 @@ var databaseCmd = &cobra.Command{
 	Short: "Manage databases (attribute views)",
 }
 
+var databaseSearchCmd = &cobra.Command{
+	Use:   "search <keyword>",
+	Short: "Search databases by name",
+	Args:  cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		results := model.SearchAttributeView(args[0], nil)
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(results, "", "  ")
+			fmt.Println(string(data))
+		default:
+			printAvSearchResults(results)
+		}
+		return nil
+	},
+}
+
+var databaseGetCmd = &cobra.Command{
+	Use:   "get --av <avID>",
+	Short: "Get database content",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		if avID == "" {
+			return fmt.Errorf("--av is required")
+		}
+		attrView := model.GetAttributeView(avID)
+		if attrView == nil {
+			return fmt.Errorf("database not found: %s", avID)
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(attrView, "", "  ")
+			fmt.Println(string(data))
+		default:
+			fmt.Printf("ID:    %s\n", attrView.ID)
+			fmt.Printf("Name:  %s\n", attrView.Name)
+			fmt.Printf("Keys:  %d  Views: %d\n\n", len(attrView.KeyValues), len(attrView.Views))
+			printDatabaseTable(attrView)
+		}
+		return nil
+	},
+}
+
 var databaseRenderCmd = &cobra.Command{
 	Use:   "render --av <avID>",
 	Short: "Render database data",
@@ -67,6 +110,19 @@ var databaseRenderCmd = &cobra.Command{
 		}
 		return nil
 	},
+}
+
+func printAvSearchResults(results []*model.AvSearchResult) {
+	if len(results) == 0 {
+		fmt.Println("No results found.")
+		return
+	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "ID\tNAME\tHPATH")
+	for _, r := range results {
+		fmt.Fprintf(w, "%s\t%s\t%s\n", r.AvID, r.AvName, r.HPath)
+	}
+	w.Flush()
 }
 
 func printDatabaseTable(attrView *av.AttributeView) {
@@ -175,6 +231,8 @@ func formatValue(v *av.Value) string {
 }
 
 func init() {
+	databaseGetCmd.Flags().String("av", "", "attribute view ID (required)")
+
 	databaseRenderCmd.Flags().String("av", "", "attribute view ID (required)")
 	databaseRenderCmd.Flags().String("view", "", "view ID (default: current view)")
 	databaseRenderCmd.Flags().String("query", "", "search query within the view")
@@ -182,5 +240,7 @@ func init() {
 	databaseRenderCmd.Flags().IntP("size", "s", 50, "page size")
 
 	rootCmd.AddCommand(databaseCmd)
+	databaseCmd.AddCommand(databaseSearchCmd)
+	databaseCmd.AddCommand(databaseGetCmd)
 	databaseCmd.AddCommand(databaseRenderCmd)
 }

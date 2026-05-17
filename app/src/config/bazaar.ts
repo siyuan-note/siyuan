@@ -276,8 +276,8 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
             ${escapeHtml(item.preferredName)}
-            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">
-                ${item.preferredDesc || ""}
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc)}">
+                ${escapeHtml(item.preferredDesc)}
             </div>
         </div>
         <div class="b3-card__actions">
@@ -290,7 +290,7 @@ export const bazaar = {
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconAccount"></use></svg>
                 <span class="fn__space--small"></span>
-                ${item.author}
+                ${escapeHtml(item.author)}
             </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
             <span class="fn__space--small"></span>
@@ -323,7 +323,7 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(item.preferredName)}
-            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc)}">${escapeHtml(item.preferredDesc)}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -432,7 +432,7 @@ export const bazaar = {
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(item.preferredName)}
-            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc)}">${escapeHtml(item.preferredDesc)}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -537,7 +537,7 @@ type="checkbox">
             '<span class="block__icon block__icon--show block__icon--text" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>'
         }
         <span class="fn__space"></span>
-        <a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a>
+        <a href="${urls.join("/")}" target="_blank" title="Creator">${escapeHtml(data.author)}</a>
         <span class="fn__flex-1"></span>
     </div>
     <div class="fn__hr--b"></div>
@@ -592,7 +592,7 @@ type="checkbox">
     <div class="b3-typography${data.preferredDesc ? "" : " fn__none"}">
         <blockquote>
             <p>
-                ${data.preferredDesc || ""}
+                ${escapeHtml(data.preferredDesc)}
             </p>
          </blockquote>
     </div>

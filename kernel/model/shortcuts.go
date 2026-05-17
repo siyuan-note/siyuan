@@ -68,15 +68,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 		}
 	}
 
-	var hPath string
-	box := Conf.Box(boxID)
-	if nil != box {
-		boxConf := box.GetConf()
-		hPath = boxConf.ShorthandSavePath
-	}
-	if "" == hPath {
-		hPath = Conf.FileTree.ShorthandSavePath
-	}
+	hPath := Conf.FileTree.ShorthandSavePath
 	if "" != hPath {
 		var renderErr error
 		hPath, renderErr = RenderGoTemplate(hPath)
@@ -202,6 +194,7 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	}
 
 	FlushTxQueue()
+	box := Conf.Box(boxID)
 	for _, id := range retIDs {
 		b, _ := GetBlock(id, nil)
 		PushCreate(box, b.Path, nil)

@@ -971,21 +971,9 @@ func getShorthandSavePath(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	box := model.Conf.Box(notebook)
 
-	var shorthandSaveBox string
+	shorthandSaveBox := model.Conf.FileTree.ShorthandSaveBox
 	shorthandSavePathTpl := model.Conf.FileTree.ShorthandSavePath
-	if nil != box {
-		boxConf := box.GetConf()
-		shorthandSaveBox = boxConf.ShorthandSaveBox
-		shorthandSavePathTpl = boxConf.ShorthandSavePath
-	}
-	if "" == shorthandSaveBox {
-		shorthandSaveBox = model.Conf.FileTree.ShorthandSaveBox
-	}
-	if "" == shorthandSavePathTpl {
-		shorthandSavePathTpl = model.Conf.FileTree.ShorthandSavePath
-	}
 
 	if "" == shorthandSaveBox {
 		shorthandSaveBox = notebook

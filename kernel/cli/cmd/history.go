@@ -21,6 +21,8 @@ import (
 	"fmt"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
 )
@@ -114,6 +116,11 @@ var historyRollbackCmd = &cobra.Command{
 		if err := model.RollbackDocHistory(historyPath); err != nil {
 			return err
 		}
+		docID := util.GetTreeID(historyPath)
+		if bt := treenode.GetBlockTree(docID); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
+		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")
 		return nil
 	},

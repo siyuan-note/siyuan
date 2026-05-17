@@ -915,6 +915,10 @@ func CheckoutRepo(id string) {
 	task.AppendTask(task.RepoCheckout, checkoutRepo, id)
 }
 
+func CheckoutRepoDirect(id string) {
+	checkoutRepo(id)
+}
+
 func checkoutRepo(id string) {
 	var err error
 	if 1 > len(Conf.Repo.Key) {
@@ -966,7 +970,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	FullReindex(true)
+	FullReindexDirect()
 
 	if syncEnabled {
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)

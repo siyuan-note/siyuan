@@ -75,6 +75,14 @@ func AppendPushReloadProtyleEntry(id string) {
 	appendPushEntry(pushEntry{Action: "reloadProtyle", ID: id})
 }
 
+func AppendPushReloadAttrViewEntry(avID string) {
+	appendPushEntry(pushEntry{Action: "reloadAttrView", ID: avID})
+}
+
+func AppendPushReloadUIEntry() {
+	appendPushEntry(pushEntry{Action: "reloadUI"})
+}
+
 func AppendPushReloadFiletreeEntry() {
 	appendPushEntry(pushEntry{Action: "reloadFiletree"})
 }
@@ -158,6 +166,10 @@ func PollPushQueue() {
 			if bt != nil {
 				util.PushReloadProtyle(bt.RootID)
 			}
+		case "reloadAttrView":
+			util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]any{"id": e.ID})
+		case "reloadUI":
+			util.ReloadUI()
 		case "reloadFiletree":
 			util.BroadcastByType("filetree", "reloadFiletree", 0, "", nil)
 		case "reloadTag":

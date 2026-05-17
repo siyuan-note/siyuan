@@ -807,6 +807,10 @@ func FullReindex(needResetScroll bool) {
 	}
 }
 
+func FullReindexDirect() {
+	fullReindex()
+}
+
 func fullReindex() {
 	pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = true, true
 	defer func() {

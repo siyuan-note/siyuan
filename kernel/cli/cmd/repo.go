@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 
 	"github.com/spf13/cobra"
 )
@@ -132,7 +133,9 @@ var repoCheckoutCmd = &cobra.Command{
 		if id == "" {
 			return fmt.Errorf("--id is required")
 		}
-		model.CheckoutRepo(id)
+		model.CheckoutRepoDirect(id)
+		model.AppendPushReloadFiletreeEntry()
+		model.AppendPushReloadUIEntry()
 		fmt.Println("ok")
 		return nil
 	},
@@ -237,6 +240,9 @@ var repoFileRollbackCmd = &cobra.Command{
 		}
 		if err := model.RollbackRepoSnapshotFile(id); err != nil {
 			return err
+		}
+		if bt := treenode.GetBlockTree(id); bt != nil {
+			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
 		fmt.Println("ok")
 		return nil

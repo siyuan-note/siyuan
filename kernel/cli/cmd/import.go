@@ -53,6 +53,7 @@ var importMdCmd = &cobra.Command{
 		if err := model.ImportFromLocalPath(notebook, absPath, resolvePath(notebook, toPath, hpath)); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")
 		return nil
 	},
@@ -81,6 +82,7 @@ var importSYCmd = &cobra.Command{
 		if err := model.ImportSY(absPath, notebook, resolvePath(notebook, toPath, hpath)); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")
 		return nil
 	},

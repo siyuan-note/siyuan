@@ -55,7 +55,7 @@ import {openBy, openFileById} from "../../editor/util";
 /// #endif
 import {alignImgCenter, alignImgLeft, commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
-import {foldRecursiveHotkey, setFold} from "../util/blockFold";
+import {foldBlocksRecursively, getFoldBlock, setFold} from "../util/blockFold";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -310,51 +310,27 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         const nodeType = nodeElement.getAttribute("data-type");
         if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) && !event.repeat) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                setFold(protyle, selectElements[0]);
-            } else {
-                if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                    if (nodeElement.parentElement.childElementCount > 3) {
-                        setFold(protyle, nodeElement.parentElement);
-                    } else {
-                        setFold(protyle, nodeElement);
-                    }
-                } else if (nodeType === "NodeHeading") {
-                    setFold(protyle, nodeElement);
-                } else {
-                    setFold(protyle, getTopAloneElement(nodeElement));
-                }
-            }
+            getFoldBlock(protyle, nodeElement, (elements) => {
+                setFold(protyle, elements[0]);
+            });
             event.stopPropagation();
             event.preventDefault();
             return false;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.foldRecursive.custom, event) && !event.repeat) {
-            foldRecursiveHotkey(protyle, nodeElement);
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) && !event.repeat) {
+            getFoldBlock(protyle, nodeElement, (elements) => {
+                setFold(protyle, elements[0], true);
+            });
             event.stopPropagation();
             event.preventDefault();
             return;
         }
 
-        if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) && !event.repeat) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                setFold(protyle, selectElements[0], true);
-            } else {
-                if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                    if (nodeElement.parentElement.childElementCount > 3) {
-                        setFold(protyle, nodeElement.parentElement, true);
-                    } else {
-                        setFold(protyle, nodeElement, true);
-                    }
-                } else if (nodeType === "NodeHeading") {
-                    setFold(protyle, nodeElement, true);
-                } else {
-                    setFold(protyle, getTopAloneElement(nodeElement), true);
-                }
-            }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.foldRecursive.custom, event) && !event.repeat) {
+            getFoldBlock(protyle, nodeElement, (elements) => {
+                foldBlocksRecursively(protyle, elements);
+            });
             event.stopPropagation();
             event.preventDefault();
             return;

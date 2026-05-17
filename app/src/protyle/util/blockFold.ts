@@ -188,22 +188,21 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
     }
 };
 
-export const foldRecursiveHotkey = (protyle: IProtyle, nodeElement: HTMLElement) => {
+export const getFoldBlock = (protyle: IProtyle, nodeElement: HTMLElement, cb: (elements: Element[]) => void) => {
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
     if (selectElements.length > 0) {
-        foldBlocksRecursively(protyle, selectElements);
+        cb(selectElements);
     } else if (nodeElement) {
-        const nodeType = nodeElement.getAttribute("data-type");
         if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
             if (nodeElement.parentElement.childElementCount > 3) {
-                foldBlocksRecursively(protyle, [nodeElement.parentElement]);
+                cb([nodeElement.parentElement]);
             } else {
-                foldBlocksRecursively(protyle, [nodeElement]);
+                cb([nodeElement]);
             }
-        } else if (nodeType === "NodeHeading") {
-            foldBlocksRecursively(protyle, [nodeElement]);
+        } else if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+            cb([nodeElement]);
         } else {
-            foldBlocksRecursively(protyle, [getTopAloneElement(nodeElement)]);
+            cb([getTopAloneElement(nodeElement)]);
         }
     }
     return true;

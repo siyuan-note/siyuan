@@ -32,7 +32,7 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 
 !macro customInstall
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
-    nsExec::ExecToLog 'setx PATH "$INSTDIR;%PATH%"'
+    nsExec::ExecToLog 'setx PATH "$INSTDIR\resources\kernel;%PATH%"'
 !macroend
 
 !macro customUnInstall

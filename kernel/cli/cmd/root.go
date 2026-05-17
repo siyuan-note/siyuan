@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -106,6 +107,7 @@ func findAppDir() string {
 }
 
 func init() {
+	rootCmd.Use = strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe")
 	rootCmd.Short = "SiYuan Kernel v" + util.Ver
 	rootCmd.Long = "SiYuan Kernel v" + util.Ver + ". Manage workspace data directly or start the HTTP server."
 

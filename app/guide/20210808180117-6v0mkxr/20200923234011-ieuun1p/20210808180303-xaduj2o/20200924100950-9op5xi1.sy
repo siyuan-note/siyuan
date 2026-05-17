@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260517165154"
+		"updated": "20260517211244"
 	},
 	"Children": [
 		{
@@ -3745,7 +3745,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260517165154"
+				"updated": "20260517211235"
 			},
 			"Children": [
 				{
@@ -3764,7 +3764,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260517165154"
+				"updated": "20260517211235"
 			},
 			"Children": [
 				{
@@ -3782,9 +3782,9 @@
 				0
 			],
 			"Properties": {
-				"colgroup": "width: 453px;||",
+				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260517165154"
+				"updated": "20260517211235"
 			},
 			"Children": [
 				{
@@ -7225,7 +7225,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/Expand"
+									"Data": "Fold/Expand"
 								}
 							]
 						},
@@ -7282,7 +7282,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/Expand Recursively"
+									"Data": "Fold/Expand Recursively"
 								}
 							]
 						},
@@ -13893,7 +13893,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002116-wyh4u48",
-				"updated": "20250115161021"
+				"updated": "20260517211244"
 			},
 			"Children": [
 				{
@@ -13908,7 +13908,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210528103541-wdfi8b5",
-				"updated": "20250115161021"
+				"updated": "20260517211244"
 			},
 			"Children": [
 				{
@@ -13927,7 +13927,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210601185420-1s8e9uy",
-				"updated": "20250115161021"
+				"updated": "20260517211244"
 			},
 			"Children": [
 				{
@@ -14064,7 +14064,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/Expand"
+									"Data": "Fold/Expand"
 								}
 							]
 						},
@@ -14366,7 +14366,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221105230824-p1mp4c2",
-				"updated": "20251021230901"
+				"updated": "20260517211202"
 			},
 			"Children": [
 				{
@@ -14386,7 +14386,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20221105230832-4q1qwpt",
-				"updated": "20251021230901"
+				"updated": "20260517211202"
 			},
 			"Children": [
 				{
@@ -14598,7 +14598,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/expand all siblings"
+									"Data": "Fold/expand all siblings"
 								},
 								{
 									"Type": "NodeBr",
@@ -14732,7 +14732,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/expand current level"
+									"Data": "Fold/expand current level"
 								}
 							]
 						},
@@ -14777,7 +14777,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/expand all sub-levels"
+									"Data": "Fold/expand all sub-levels"
 								}
 							]
 						},

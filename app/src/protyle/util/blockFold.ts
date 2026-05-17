@@ -94,25 +94,24 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
     return {fold: !hasFold ? 1 : 0, undoOperations, doOperations};
 };
 
+const isFoldable = (el: Element) => {
+    const type = el.getAttribute("data-type");
+    return type === "NodeHeading" ||
+        (type === "NodeCallout" && el.querySelector(".callout-content").childElementCount > 1) ||
+        ((type === "NodeListItem" || type === "NodeBlockquote" || type === "NodeSuperBlock") && el.childElementCount > 3);
+};
+
 export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]) => {
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
-
     const result: Set<Element> = new Set();
-    const isFoldable = (el: Element) => {
-        const type = el.getAttribute("data-type");
-        return type === "NodeHeading" ||
-            ((type === "NodeListItem" || type === "NodeBlockquote" || type === "NodeSuperBlock") && el.childElementCount > 3);
-    };
-
     nodeElements.forEach(element => {
         if (isFoldable(element)) {
             result.add(element);
         }
-        element.querySelectorAll("[data-type='NodeHeading'], [data-type='NodeListItem'], [data-type='NodeBlockquote'], [data-type='NodeSuperBlock']").forEach(child => {
+        element.querySelectorAll("[data-type='NodeHeading'], .li, .bq, .sb, .callout").forEach(child => {
             if (isFoldable(child)) {
                 // Skip headings inside list items to avoid "double dot" and gutter icon conflicts
-                if (child.getAttribute("data-type") === "NodeHeading" && child.parentElement?.getAttribute("data-type") === "NodeListItem") {
+                if (child.getAttribute("data-type") === "NodeHeading" &&
+                    child.parentElement?.getAttribute("data-type") === "NodeListItem") {
                     return;
                 }
                 result.add(child);
@@ -128,10 +127,11 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
                     if (isFoldable(nextElement)) {
                         result.add(nextElement);
                     }
-                    nextElement.querySelectorAll("[data-type='NodeHeading'], [data-type='NodeListItem'], [data-type='NodeBlockquote'], [data-type='NodeSuperBlock']").forEach(child => {
+                    nextElement.querySelectorAll("[data-type='NodeHeading'], .li, .bq, .sb, .callout").forEach(child => {
                         if (isFoldable(child)) {
                             // Skip headings inside list items to avoid "double dot" and gutter icon conflicts
-                            if (child.getAttribute("data-type") === "NodeHeading" && child.parentElement?.getAttribute("data-type") === "NodeListItem") {
+                            if (child.getAttribute("data-type") === "NodeHeading" &&
+                                child.parentElement?.getAttribute("data-type") === "NodeListItem") {
                                 return;
                             }
                             result.add(child);
@@ -162,12 +162,11 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
         return 0;
     });
 
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
     elementsToFold.forEach(element => {
         const hasFold = element.getAttribute("fold") === "1";
-        if (isFoldAll && hasFold) {
-            return;
-        }
-        if (!isFoldAll && !hasFold) {
+        if ((isFoldAll && hasFold) || (!isFoldAll && !hasFold)) {
             return;
         }
         const ops = setFold(protyle, element, !isFoldAll, false, false, true);
@@ -180,7 +179,7 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
         preventScroll(protyle);
-        scrollCenter(protyle, isFoldAll ? elementsToFold[elementsToFold.length - 1] : elementsToFold[0]);
+        scrollCenter(protyle, elementsToFold[0]);
     }
 };
 

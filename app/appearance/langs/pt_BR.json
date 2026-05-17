@@ -1034,6 +1034,7 @@
   "memo": "Memorando",
   "name": "Nome",
   "fold": "Recolher/Expandir",
+  "foldRecursive": "Recolher/Expandir recursivamente",
   "zoom": "Zoom",
   "invalid": "Inválido",
   "conflict": "Conflito",

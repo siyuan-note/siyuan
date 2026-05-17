@@ -1034,6 +1034,7 @@
   "memo": "Memo",
   "name": "Naam",
   "fold": "In-/Uitklappen",
+  "foldRecursive": "Recursief in-/uitklappen",
   "zoom": "Zoomen",
   "invalid": "Ongeldig",
   "conflict": "Conflict",

@@ -420,17 +420,6 @@ export class Gutter {
                     }
                 }
                 foldElement.classList.remove("protyle-wysiwyg--hl");
-            } else if (event.ctrlKey) {
-                let foldElement: Element;
-                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
-                    if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
-                        foldElement = item;
-                        return true;
-                    }
-                });
-                if (foldElement) {
-                    foldBlocksRecursively(protyle, [foldElement]);
-                }
             } else if (event.shiftKey && !protyle.disabled) {
                 // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                 openAttr(protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`), "bookmark", protyle);

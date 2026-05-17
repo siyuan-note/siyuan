@@ -71,8 +71,8 @@ func AppendPushReloadDocInfoEntry(box, p string) {
 	appendPushEntry(pushEntry{Action: "reloadDocInfo", Box: box, Path: p})
 }
 
-func AppendPushSavedocEntry(id string) {
-	appendPushEntry(pushEntry{Action: "savedoc", ID: id})
+func AppendPushReloadProtyleEntry(id string) {
+	appendPushEntry(pushEntry{Action: "reloadProtyle", ID: id})
 }
 
 func AppendPushReloadFiletreeEntry() {
@@ -153,10 +153,10 @@ func PollPushQueue() {
 			renderer := render.NewJSONRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 			size := uint64(len(renderer.Render()))
 			refreshDocInfo0(tree, size)
-		case "savedoc":
+		case "reloadProtyle":
 			bt := treenode.GetBlockTree(e.ID)
 			if bt != nil {
-				util.PushSaveDoc(bt.RootID, "cli", nil)
+				util.PushReloadProtyle(bt.RootID)
 			}
 		case "reloadFiletree":
 			util.BroadcastByType("filetree", "reloadFiletree", 0, "", nil)

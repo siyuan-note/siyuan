@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260504121953"
+		"updated": "20260517165255"
 	},
 	"Children": [
 		{
@@ -3693,7 +3693,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20250529111052"
+				"updated": "20260517165255"
 			},
 			"Children": [
 				{
@@ -3719,7 +3719,7 @@
 			"Properties": {
 				"ID": "20240530101000-tkbdrth",
 				"id": "20240530101000-9wkmh8w",
-				"updated": "20250529111052"
+				"updated": "20260517165255"
 			},
 			"Children": [
 				{
@@ -3739,7 +3739,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-1isfzez",
-				"updated": "20250529111052"
+				"updated": "20260517165255"
 			},
 			"Children": [
 				{
@@ -7276,6 +7276,72 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘↓"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "再帰的に折りたたみ/展開"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "↑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥⌘↑"
 								},
 								{
 									"Type": "NodeText",

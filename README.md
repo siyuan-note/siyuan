@@ -204,7 +204,7 @@ The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan
 Use the following parameters when running the container with `docker run b3log/siyuan`:
 
 * `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
-* `--accessAuthCode`: Specifies the access authorization code
+* `--accessAuthCode`: Specifies the lock screen password
 
 More parameters can be found using `--help`. Here’s an example of a startup command with the new environment variables:
 
@@ -223,9 +223,9 @@ docker run -d \
 * `workspace_dir_host`: The workspace folder path on the host
 * `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
   * Alternatively, it's possible to set the path via the `SIYUAN_WORKSPACE_PATH` env variable. The commandline will always have the priority, if both are set
-* `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
-  * Alternatively, it's possible to set the auth code via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
-  * To disable the Access authorization code set the env variable `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
+* `accessAuthCode`: Lock screen password (please **be sure to modify**, otherwise anyone can access your data)
+  * Alternatively, it's possible to set the lock screen password via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
+  * To disable the lock screen password set the env variable `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
 
@@ -314,7 +314,7 @@ Container Path: /home/siyuan
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
-Publish parameters: --accessAuthCode=******(Access authorization code)
+Publish parameters: --accessAuthCode=******(Lock screen password)
 ```
 
 </details>

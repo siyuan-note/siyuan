@@ -204,7 +204,7 @@ Docker görüntüsü oluşturulurken giriş noktası şu şekilde ayarlanır: `E
 `docker run b3log/siyuan` komutunu çalıştırırken aşağıdaki parametreleri kullanabilirsin:
 
 * `--workspace`: çalışma alanı klasör yolunu belirtir, host üzerinde `-v` parametresiyle bağlanır  
-* `--accessAuthCode`: erişim yetkilendirme kodunu belirtir  
+* `--accessAuthCode`: ekran kilidi şifresini belirtir  
 
 Tüm parametreleri görmek için `--help` komutunu kullanabilirsin. Yeni ortam değişkenleriyle bir örnek başlatma komutu aşağıdadır:
 
@@ -223,9 +223,9 @@ docker run -d \
 * `workspace_dir_host`: Ana makinedeki (host) çalışma alanı klasör yolu  
 * `workspace_dir_container`: Konteyner içindeki çalışma alanı klasör yolu (`--workspace` parametresiyle belirtilir)  
   * Alternatif olarak, bu yol `SIYUAN_WORKSPACE_PATH` ortam değişkeniyle de ayarlanabilir. Eğer her iki yöntem de kullanılırsa, **komut satırı önceliklidir**.  
-* `accessAuthCode`: Erişim yetkilendirme kodu (**kesinlikle değiştir**, aksi halde herkes verilerine erişebilir)  
-  * Alternatif olarak, yetkilendirme kodu `SIYUAN_ACCESS_AUTH_CODE` ortam değişkeniyle de ayarlanabilir. Yine, hem komut satırı hem ortam değişkeni kullanılırsa, **komut satırı önceliklidir**.  
-  * Erişim yetkilendirme kodunu devre dışı bırakmak için şu ortam değişkenini ayarla: `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`  
+* `accessAuthCode`: Ekran kilidi şifresi (**kesinlikle değiştir**, aksi halde herkes verilerine erişebilir)  
+  * Alternatif olarak, ekran kilidi şifresi `SIYUAN_ACCESS_AUTH_CODE` ortam değişkeniyle de ayarlanabilir. Yine, hem komut satırı hem ortam değişkeni kullanılırsa, **komut satırı önceliklidir**.  
+  * Ekran kilidi şifresini devre dışı bırakmak için şu ortam değişkenini ayarla: `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`  
 
 Kurulumu basitleştirmek için, host ve konteyner üzerindeki çalışma alanı yollarını aynı şekilde ayarlaman önerilir. Örneğin her ikisini de `/siyuan/workspace` olarak tanımlayabilirsin. Buna karşılık gelen başlatma komutu şu şekildedir:
 
@@ -314,7 +314,7 @@ Container Path: /home/siyuan
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
-Publish parameters: --accessAuthCode=******(Access authorization code)
+Publish parameters: --accessAuthCode=******(Lock screen password)
 ```
 
 </details>

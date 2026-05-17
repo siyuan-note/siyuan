@@ -210,7 +210,7 @@
 使用 `docker run b3log/siyuan` 运行容器时，请带入以下参数：
 
 * `--workspace`：指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
-* `--accessAuthCode`：指定访问授权码
+* `--accessAuthCode`：指定锁屏密码
 
 更多的参数可参考 `--help`。下面是一条启动命令示例：
 
@@ -229,9 +229,9 @@ docker run -d \
 * `workspace_dir_host`：宿主机上的工作空间文件夹路径
 * `workspace_dir_container`：容器内工作空间文件夹路径，和后面 `--workspace` 指定成一样的
   * 另外，也可以通过 `SIYUAN_WORKSPACE_PATH` 环境变量设置路径。如果两者都设置了，命令行的值将优先
-* `accessAuthCode`：访问授权码，请**务必修改**，否则任何人都可以读写你的数据
-  * 另外，也可以通过 `SIYUAN_ACCESS_AUTH_CODE` 环境变量设置授权码。如果两者都设置了，命令行的值将优先
-  * 可通过设置环境变量 `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` 禁用访问授权码
+* `accessAuthCode`：锁屏密码，请**务必修改**，否则任何人都可以读写你的数据
+  * 另外，也可以通过 `SIYUAN_ACCESS_AUTH_CODE` 环境变量设置锁屏密码。如果两者都设置了，命令行的值将优先
+  * 可通过设置环境变量 `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` 禁用锁屏密码
 
 为了简化，建议将 workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 `workspace_dir_host` 和 `workspace_dir_container` 都配置为 `/siyuan/workspace`，对应的启动命令示例：
 
@@ -319,7 +319,7 @@ Container Path: /home/siyuan
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
-Publish parameters: --accessAuthCode=******（访问授权码）
+Publish parameters: --accessAuthCode=******（锁屏密码）
 ```
 
 </details>
@@ -381,7 +381,7 @@ services:
    * 域名：如你需要通过域名访问，请在此处填写你的域名
    * 允许外部访问：如你需通过 `IP+Port` 直接访问，请勾选，如你已经设置了域名，请不要勾选此处
    * 端口：默认 `6806`，可自行修改
-   * 访问授权码：默认随机生成
+    * 锁屏密码：默认随机生成
    * 内存限制：0为不限制，根据实际需要设置
 5. 提交后面板会自动进行应用初始化，大概需要`1-3`分钟，初始化完成后即可访问
 
@@ -429,12 +429,12 @@ services:
 
 1. 登录1Panel面板，在左侧菜单栏中点击 `应用商店`
 2. 在 `应用商店-实用工具` 中找到 `思源笔记`，点击`安装`，也可以在搜索框直接搜索
-3. 配置访问授权码等基本信息，点击 `确定`
+3. 配置锁屏密码等基本信息，点击 `确定`
 
     - 名称：应用名称，默认 `siyuan`
     - 版本：默认最新发行版
     - 端口：默认 `6806`
-    - 访问授权码：访问笔记时需要使用的`访问密码`
+    - 锁屏密码：访问笔记时需要使用的`锁屏密码`
     - 端口外部访问：如你需通过 `IP+Port` 直接访问，请勾选，同时会开放服务器防火墙端口
     - CPU限制：默认为0，不限制，可根据实际需要设置
     - 内存限制：默认为0，不限制，可根据实际需要设置

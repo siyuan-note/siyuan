@@ -229,6 +229,42 @@ const setHTML = (options: {
     if (options.action.includes(Constants.CB_GET_BACKLINK)) {
         foldPassiveType(options.expand, protyle.wysiwyg.element);
     }
+    // Focus mode visual unfold
+    if (protyle.block.showAll && protyle.block.id !== protyle.block.rootID) {
+        const focusedBlock = protyle.wysiwyg.element.querySelector(`:scope > [data-node-id="${protyle.block.id}"]`) as HTMLElement;
+        if (focusedBlock) {
+            focusedBlock.classList.add("protyle-wysiwyg--focus-unfold");
+            
+            const isFolded = focusedBlock.getAttribute("fold") === "1";
+            const blockType = focusedBlock.getAttribute("data-type");
+            
+            if (isFolded && blockType === "NodeHeading") {
+                fetchPost("/api/block/getHeadingChildrenDOM", {
+                    id: protyle.block.id,
+                    removeFoldAttr: true,
+                }, (response) => {
+                    if (response.code === 0 && response.data) {
+                        const template = document.createElement("template");
+                        template.innerHTML = response.data;
+                        const allElements = Array.from(template.content.children);
+                        
+                        allElements.slice(1).reverse().forEach((child: Element) => {
+                            child.setAttribute("data-focus-unfold-child", "true");
+                            focusedBlock.insertAdjacentElement("afterend", child);
+                        });
+                        
+                        const parentElement = focusedBlock.parentElement;
+                        if (parentElement) {
+                            processRender(parentElement);
+                            highlightRender(parentElement);
+                            avRender(parentElement, protyle);
+                            blockRender(protyle, parentElement);
+                        }
+                    }
+                });
+            }
+        }
+    }
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);

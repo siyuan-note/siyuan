@@ -2673,7 +2673,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304
-                    if (parentElement && parentElement.getAttribute("fold") === "1") {
+                    if (parentElement && parentElement.getAttribute("fold") === "1" && !parentElement.classList.contains("protyle-wysiwyg--focus-unfold")) {
                         return;
                     }
                     // 列表项中的引述块中的第二个段落块块标和引述块左侧样式重叠

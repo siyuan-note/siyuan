@@ -411,13 +411,6 @@ func setNotebookConf(c *gin.Context) {
 
 	boxConf.DocCreateSavePath = util.TrimSpaceInPath(boxConf.DocCreateSavePath)
 
-	boxConf.ShorthandSavePath = util.TrimSpaceInPath(boxConf.ShorthandSavePath)
-	if "" != boxConf.ShorthandSavePath {
-		if !strings.HasPrefix(boxConf.ShorthandSavePath, "/") {
-			boxConf.ShorthandSavePath = "/" + boxConf.ShorthandSavePath
-		}
-	}
-
 	box.SaveConf(boxConf)
 	ret.Data = boxConf
 }

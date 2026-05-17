@@ -30,8 +30,6 @@ type BoxConf struct {
 	DocCreateSavePath     string `json:"docCreateSavePath"`     // 新建文档存储路径
 	DailyNoteSavePath     string `json:"dailyNoteSavePath"`     // 新建日记存储路径
 	DailyNoteTemplatePath string `json:"dailyNoteTemplatePath"` // 新建日记使用的模板路径
-	ShorthandSaveBox      string `json:"shorthandSaveBox"`      // 闪念速记存储笔记本
-	ShorthandSavePath     string `json:"shorthandSavePath"`     // 闪念速记存储路径
 	SortMode              int    `json:"sortMode"`              // 排序方式
 }
 

@@ -32,7 +32,30 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 
 !macro customInstall
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
-    nsExec::ExecToLog 'setx PATH "$INSTDIR\resources\kernel;%PATH%"'
+    nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if(($p.Split(\";\") | ?{$_ -eq $k}).Count -eq 0){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}else{Write-Host \"already in PATH\"}"'
+!macroend
+
+!macro customUnInstall
+    ${IfNot} ${isUpdated}
+        MessageBox MB_YESNO "是否需要彻底删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\
+            Do you want to delete the global configuration ($PROFILE\.config\siyuan\)?$\n" \
+            /SD IDYES IDYES AcceptedRMConf IDNO SkippedRMConf
+            AcceptedRMConf:
+                RMDir /r "$PROFILE\.config\siyuan\"
+            SkippedRMConf:
+    ${EndIf}
+
+    ${IfNot} ${isUpdated}
+        MessageBox MB_YESNO "是否需要彻底删除默认工作空间（$PROFILE\SiYuan\）？$\n$\n\
+            Do you want to completely delete the default workspace ($PROFILE\SiYuan\)?$\n" \
+            /SD IDNO IDYES AcceptedRMWorkspace IDNO SkippedRMWrokspace
+            AcceptedRMWorkspace:
+                RMDir /r "$PROFILE\SiYuan\"
+            SkippedRMWrokspace:
+    ${EndIf}
+
+    RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
+    nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");$p=($p.Split(\";\") | ?{$_ -ne $k}) -join \";\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")"'
 !macroend
 
 !macro customUnInstall

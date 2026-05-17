@@ -22,6 +22,7 @@ import (
 	"math/rand"
 	"os"
 	"path"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -42,13 +43,11 @@ var documentListCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		notebook, _ := cmd.Flags().GetString("notebook")
 		docPath, _ := cmd.Flags().GetString("path")
+		hpath, _ := cmd.Flags().GetString("hpath")
 		if notebook == "" {
 			return fmt.Errorf("--notebook is required")
 		}
-		if docPath == "" {
-			docPath = "/"
-		}
-		files, _, err := model.ListDocTree(notebook, docPath, 0, false, false, 128)
+		files, _, err := model.ListDocTree(notebook, resolvePath(notebook, docPath, hpath), 0, false, false, 128)
 		if err != nil {
 			return err
 		}
@@ -186,18 +185,72 @@ var documentRenameCmd = &cobra.Command{
 	},
 }
 
+var documentMoveCmd = &cobra.Command{
+	Use:   "move --id <id> --notebook <id>",
+	Short: "Move a document to another notebook",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("id")
+		toNotebook, _ := cmd.Flags().GetString("notebook")
+		toPath, _ := cmd.Flags().GetString("path")
+		hpath, _ := cmd.Flags().GetString("hpath")
+		if id == "" || toNotebook == "" {
+			return fmt.Errorf("--id and --notebook are required")
+		}
+		tree, err := model.LoadTreeByBlockID(id)
+		if err != nil {
+			return err
+		}
+		if err := model.MoveDocs([]string{tree.Path}, toNotebook, resolvePath(toNotebook, toPath, hpath), nil); err != nil {
+			return err
+		}
+		fmt.Println("ok")
+		return nil
+	},
+}
+
+var documentDuplicateCmd = &cobra.Command{
+	Use:   "duplicate --id <id>",
+	Short: "Duplicate a document",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("id")
+		if id == "" {
+			return fmt.Errorf("--id is required")
+		}
+		tree, err := model.LoadTreeByBlockID(id)
+		if err != nil {
+			return err
+		}
+		model.DuplicateDoc(tree)
+		fmt.Println("ok")
+		return nil
+	},
+}
+
+func resolvePath(boxID, userPath, hpath string) string {
+	if userPath != "" {
+		return userPath
+	}
+	if hpath != "" {
+		if bt := treenode.GetBlockTreeRootByHPath(boxID, hpath); bt != nil {
+			return strings.TrimSuffix(bt.Path, ".sy") + "/"
+		}
+	}
+	return "/"
+}
+
 func printDocumentTable(files []*model.File) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tSIZE\tCOUNT\tMTIME")
+	fmt.Fprintln(w, "ID\tNAME\tPATH\tSIZE\tCOUNT\tMTIME")
 	for _, f := range files {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%d\t%s\n", f.ID, f.Name, f.HSize, f.Count, f.HMtime)
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%d\t%s\n", f.ID, f.Name, f.Path, f.HSize, f.Count, f.HMtime)
 	}
 	w.Flush()
 }
 
 func init() {
 	documentListCmd.Flags().String("notebook", "", "notebook ID")
-	documentListCmd.Flags().String("path", "", "subdirectory path (default /)")
+	documentListCmd.Flags().String("path", "", "internal path (default /)")
+	documentListCmd.Flags().String("hpath", "", "human-readable path, e.g. /归档/文章")
 
 	documentCreateCmd.Flags().String("notebook", "", "notebook ID")
 	documentCreateCmd.Flags().String("title", "", "document title")
@@ -209,12 +262,21 @@ func init() {
 	documentRenameCmd.Flags().String("id", "", "document block ID")
 	documentRenameCmd.Flags().String("title", "", "new document title")
 
+	documentMoveCmd.Flags().String("id", "", "document block ID to move")
+	documentMoveCmd.Flags().String("notebook", "", "target notebook ID")
+	documentMoveCmd.Flags().String("path", "", "target internal path (default /)")
+	documentMoveCmd.Flags().String("hpath", "", "target human-readable path")
+
+	documentDuplicateCmd.Flags().String("id", "", "document block ID to duplicate")
+
 	rootCmd.AddCommand(documentCmd)
 	documentCmd.AddCommand(documentListCmd)
 	documentCmd.AddCommand(documentCreateCmd)
 	documentCmd.AddCommand(documentGetCmd)
 	documentCmd.AddCommand(documentRemoveCmd)
 	documentCmd.AddCommand(documentRenameCmd)
+	documentCmd.AddCommand(documentMoveCmd)
+	documentCmd.AddCommand(documentDuplicateCmd)
 }
 
 func generateDocID() string {

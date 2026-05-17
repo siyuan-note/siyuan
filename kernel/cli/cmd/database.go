@@ -216,6 +216,93 @@ var databaseCleanCmd = &cobra.Command{
 	},
 }
 
+var databaseItemCmd = &cobra.Command{
+	Use:   "item",
+	Short: "Manage database rows (items)",
+}
+
+var databaseItemAddCmd = &cobra.Command{
+	Use:   "add --av <avID>",
+	Short: "Add a row to database",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		content, _ := cmd.Flags().GetString("content")
+		blockID, _ := cmd.Flags().GetString("block")
+		viewID, _ := cmd.Flags().GetString("view")
+		groupID, _ := cmd.Flags().GetString("group")
+		previousID, _ := cmd.Flags().GetString("previous")
+		isDetached, _ := cmd.Flags().GetBool("detached")
+		ignoreFill, _ := cmd.Flags().GetBool("ignore-default-fill")
+		if avID == "" {
+			return fmt.Errorf("--av is required")
+		}
+		if !isDetached && blockID == "" {
+			return fmt.Errorf("--block is required for non-detached rows")
+		}
+
+		src := map[string]any{
+			"isDetached": isDetached,
+		}
+		if blockID != "" {
+			src["id"] = blockID
+		}
+		if content != "" {
+			src["content"] = content
+		}
+		srcs := []map[string]any{src}
+
+		if err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, viewID, groupID, previousID, ignoreFill); err != nil {
+			return err
+		}
+		fmt.Println("ok")
+		return nil
+	},
+}
+
+var databaseItemRemoveCmd = &cobra.Command{
+	Use:   "remove --av <avID> --ids <id1,id2,...>",
+	Short: "Remove rows from database",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		idsStr, _ := cmd.Flags().GetString("ids")
+		if avID == "" || idsStr == "" {
+			return fmt.Errorf("--av and --ids are required")
+		}
+		ids := strings.Split(idsStr, ",")
+		for i := range ids {
+			ids[i] = strings.TrimSpace(ids[i])
+		}
+		if err := model.RemoveAttributeViewBlock(ids, avID); err != nil {
+			return err
+		}
+		fmt.Println("ok")
+		return nil
+	},
+}
+
+var databaseItemUpdateCmd = &cobra.Command{
+	Use:   "update --av <avID> --key <keyID> --item <itemID> --value <json>",
+	Short: "Update a cell value",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		keyID, _ := cmd.Flags().GetString("key")
+		itemID, _ := cmd.Flags().GetString("item")
+		valueStr, _ := cmd.Flags().GetString("value")
+		if avID == "" || keyID == "" || itemID == "" || valueStr == "" {
+			return fmt.Errorf("--av, --key, --item and --value are required")
+		}
+		var valueData map[string]any
+		if err := json.Unmarshal([]byte(valueStr), &valueData); err != nil {
+			return fmt.Errorf("invalid JSON: %s", err)
+		}
+		if _, err := model.UpdateAttributeViewCell(nil, avID, keyID, itemID, valueData); err != nil {
+			return err
+		}
+		fmt.Println("ok")
+		return nil
+	},
+}
+
 func printUnusedItems(items []*model.UnusedItem) {
 	if len(items) == 0 {
 		fmt.Println("No unused databases found.")
@@ -380,6 +467,23 @@ func init() {
 
 	databaseCleanCmd.Flags().String("av", "", "single database ID to clean (default: clean all)")
 
+	databaseItemAddCmd.Flags().String("av", "", "attribute view ID (required)")
+	databaseItemAddCmd.Flags().String("content", "", "block column text content")
+	databaseItemAddCmd.Flags().String("block", "", "block ID to bind (default: auto-generate)")
+	databaseItemAddCmd.Flags().String("view", "", "view ID")
+	databaseItemAddCmd.Flags().String("group", "", "group ID for positioning")
+	databaseItemAddCmd.Flags().String("previous", "", "previous item ID for positioning")
+	databaseItemAddCmd.Flags().Bool("detached", false, "create detached row (not bound to a block)")
+	databaseItemAddCmd.Flags().Bool("ignore-default-fill", false, "skip filling default values")
+
+	databaseItemRemoveCmd.Flags().String("av", "", "attribute view ID (required)")
+	databaseItemRemoveCmd.Flags().String("ids", "", "comma-separated item IDs to remove")
+
+	databaseItemUpdateCmd.Flags().String("av", "", "attribute view ID (required)")
+	databaseItemUpdateCmd.Flags().String("key", "", "key ID (required)")
+	databaseItemUpdateCmd.Flags().String("item", "", "item ID (required)")
+	databaseItemUpdateCmd.Flags().String("value", "", "JSON value for the cell (required)")
+
 	rootCmd.AddCommand(databaseCmd)
 	databaseCmd.AddCommand(databaseSearchCmd)
 	databaseCmd.AddCommand(databaseGetCmd)
@@ -390,4 +494,8 @@ func init() {
 	databaseKeyCmd.AddCommand(databaseKeyRemoveCmd)
 	databaseCmd.AddCommand(databaseUnusedCmd)
 	databaseCmd.AddCommand(databaseCleanCmd)
+	databaseCmd.AddCommand(databaseItemCmd)
+	databaseItemCmd.AddCommand(databaseItemAddCmd)
+	databaseItemCmd.AddCommand(databaseItemRemoveCmd)
+	databaseItemCmd.AddCommand(databaseItemUpdateCmd)
 }

@@ -184,6 +184,52 @@ var databaseKeyRemoveCmd = &cobra.Command{
 	},
 }
 
+var databaseUnusedCmd = &cobra.Command{
+	Use:   "unused",
+	Short: "List unused databases",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		items := model.UnusedAttributeViews(true)
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(items, "", "  ")
+			fmt.Println(string(data))
+		default:
+			printUnusedItems(items)
+		}
+		return nil
+	},
+}
+
+var databaseCleanCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "Clean unused databases",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		if avID != "" {
+			model.RemoveUnusedAttributeView(avID)
+			fmt.Println(avID)
+			return nil
+		}
+		removed := model.RemoveUnusedAttributeViews()
+		fmt.Printf("%d database(s) cleaned\n", len(removed))
+		return nil
+	},
+}
+
+func printUnusedItems(items []*model.UnusedItem) {
+	if len(items) == 0 {
+		fmt.Println("No unused databases found.")
+		return
+	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "ITEM\tNAME")
+	for _, item := range items {
+		fmt.Fprintf(w, "%s\t%s\n", item.Item, item.Name)
+	}
+	w.Flush()
+	fmt.Printf("\n%d unused database(s)\n", len(items))
+}
+
 func printKeyTable(attrView *av.AttributeView) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tNAME\tTYPE\tICON")
@@ -332,6 +378,8 @@ func init() {
 	databaseKeyRemoveCmd.Flags().String("key", "", "key ID to remove (required)")
 	databaseKeyRemoveCmd.Flags().Bool("remove-relation-dest", false, "also remove related data in linked databases")
 
+	databaseCleanCmd.Flags().String("av", "", "single database ID to clean (default: clean all)")
+
 	rootCmd.AddCommand(databaseCmd)
 	databaseCmd.AddCommand(databaseSearchCmd)
 	databaseCmd.AddCommand(databaseGetCmd)
@@ -340,4 +388,6 @@ func init() {
 	databaseCmd.AddCommand(databaseKeyCmd)
 	databaseKeyCmd.AddCommand(databaseKeyAddCmd)
 	databaseKeyCmd.AddCommand(databaseKeyRemoveCmd)
+	databaseCmd.AddCommand(databaseUnusedCmd)
+	databaseCmd.AddCommand(databaseCleanCmd)
 }

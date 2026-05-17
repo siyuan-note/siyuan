@@ -63,6 +63,7 @@ var notebookCreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println(id)
 		return nil
 	},
@@ -79,6 +80,7 @@ var notebookRemoveCmd = &cobra.Command{
 		if err := model.RemoveBox(id); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println(id)
 		return nil
 	},
@@ -99,6 +101,7 @@ var notebookRenameCmd = &cobra.Command{
 		if err := model.RenameBox(id, name); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		return nil
 	},
 }

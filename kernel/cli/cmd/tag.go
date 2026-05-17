@@ -61,6 +61,7 @@ var tagRemoveCmd = &cobra.Command{
 		if err := model.RemoveTag(label); err != nil {
 			return err
 		}
+		model.AppendPushReloadTagEntry()
 		return nil
 	},
 }
@@ -80,6 +81,7 @@ var tagRenameCmd = &cobra.Command{
 		if err := model.RenameTag(oldLabel, newLabel); err != nil {
 			return err
 		}
+		model.AppendPushReloadTagEntry()
 		return nil
 	},
 }

@@ -203,6 +203,7 @@ var documentMoveCmd = &cobra.Command{
 		if err := model.MoveDocs([]string{tree.Path}, toNotebook, resolvePath(toNotebook, toPath, hpath), nil); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")
 		return nil
 	},
@@ -221,6 +222,7 @@ var documentDuplicateCmd = &cobra.Command{
 			return err
 		}
 		model.DuplicateDoc(tree)
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")
 		return nil
 	},

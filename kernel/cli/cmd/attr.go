@@ -82,6 +82,7 @@ var attrSetCmd = &cobra.Command{
 		if err := model.SetBlockAttrs(id, nameValues); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")
 		return nil
 	},

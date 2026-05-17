@@ -80,6 +80,7 @@ var bookmarkRemoveCmd = &cobra.Command{
 		if err := model.RemoveBookmark(label); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		return nil
 	},
 }
@@ -99,6 +100,7 @@ var bookmarkRenameCmd = &cobra.Command{
 		if err := model.RenameBookmark(oldLabel, newLabel); err != nil {
 			return err
 		}
+		model.AppendPushReloadFiletreeEntry()
 		return nil
 	},
 }

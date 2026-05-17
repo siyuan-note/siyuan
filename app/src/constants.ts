@@ -185,7 +185,7 @@ export abstract class Constants {
     public static readonly DIALOG_GLOBALSEARCH = "dialog-globalsearch";
     public static readonly DIALOG_HISTORYCOMPARE = "dialog-historycompare";
 
-    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 访问鉴权码
+    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 锁屏密码
     public static readonly DIALOG_AICUSTOMACTION = "dialog-aicustomaction"; // AI 自定义操作
     public static readonly DIALOG_AIUPDATECUSTOMACTION = "dialog-aiupdatecustomaction"; // 更新 AI 自定义操作
     public static readonly DIALOG_BACKGROUNDLINK = "dialog-backgroundlink"; // 题头图-随机

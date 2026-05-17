@@ -305,7 +305,7 @@ func Unzip(zipFilePath, destination string) {
 	}
 }
 
-// GetExportFilePath 解析导出文件绝对路径，绕过 HTTP 层以避免访问授权码拦截。
+// GetExportFilePath 解析导出文件绝对路径，绕过 HTTP 层以避免锁屏密码拦截。
 // exportPath 格式为 "/export/xxx.zip" 或 "assets/xxx"。
 // 返回文件在磁盘上的绝对路径，以便原生端分块拷贝，避免大文件内存溢出。
 // 解析失败返回空字符串。

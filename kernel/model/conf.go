@@ -65,7 +65,7 @@ type AppConf struct {
 	Account        *conf.Account    `json:"account"`        // 帐号配置
 	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
 	ServerAddrs    []string         `json:"serverAddrs"`    // 本地服务器地址列表
-	AccessAuthCode string           `json:"accessAuthCode"` // 访问授权码
+	AccessAuthCode string           `json:"accessAuthCode"` // 锁屏密码
 	System         *conf.System     `json:"system"`         // 系统配置
 	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
 	Sync           *conf.Sync       `json:"sync"`           // 同步配置

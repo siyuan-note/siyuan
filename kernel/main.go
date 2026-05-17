@@ -28,7 +28,12 @@ import (
 func main() {
 	// Auto-detect: --flag style args → kernel serve mode
 	if len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "-") {
-		os.Args = append([]string{os.Args[0], "serve"}, os.Args[1:]...)
+		switch os.Args[1] {
+		case "--help", "-h", "--version", "-v":
+			// let cobra handle these
+		default:
+			os.Args = append([]string{os.Args[0], "serve"}, os.Args[1:]...)
+		}
 	}
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)

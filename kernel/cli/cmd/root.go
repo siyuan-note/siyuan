@@ -36,9 +36,10 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "siyuan",
-	Short: "SiYuan Note CLI",
-	Long:  `A command-line interface for SiYuan.`,
+	Use:     "SiYuan-Kernel",
+	Short:   "SiYuan CLI",
+	Version: util.Ver,
+	Long:    `A command-line interface for SiYuan.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// 确定工作目录
 		if exePath, err := os.Executable(); err == nil {

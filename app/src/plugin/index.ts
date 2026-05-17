@@ -38,7 +38,7 @@ export class Plugin {
             icon: string,
             action: ("edit" | "more")[],
             genCursor: boolean,
-            render: (options: { app: App, element: Element, content: string }) => void,
+            render: (options: { app: App, element: Element, content: string, setContent: (newContent: string) => void }) => void,
         }
     } = {};
     public topBarIcons: Element[] = [];

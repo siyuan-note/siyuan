@@ -365,10 +365,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         });
         for (const cbKey of Object.keys(plugin.customBlockRenders)) {
             const config = plugin.customBlockRenders[cbKey];
+            const info = `${plugin.name}/${cbKey}`;
             allList.push({
                 filter: [cbKey],
-                id: "customBlock_" + cbKey,
-                value: `customBlock${Constants.ZWSP}${cbKey}`,
+                id: "customBlock_" + info,
+                value: `customBlock${Constants.ZWSP}${info}`,
                 html: `<div class="b3-list-item__first">${config.icon || '<svg class="b3-list-item__graphic"><use xlink:href="#iconPlugin"></use></svg>'}<span class="b3-list-item__text">${cbKey}</span></div>`,
             });
             hasPlugin = true;

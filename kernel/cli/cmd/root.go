@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -37,9 +38,7 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:     "SiYuan-Kernel",
-	Short:   "SiYuan CLI",
 	Version: util.Ver,
-	Long:    `A command-line interface for SiYuan.`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// 确定工作目录
 		if exePath, err := os.Executable(); err == nil {
@@ -61,7 +60,10 @@ var rootCmd = &cobra.Command{
 		}
 
 		if _, err := os.Stat(workspacePath); os.IsNotExist(err) {
-			return fmt.Errorf("workspace not found: %s", workspacePath)
+			return fmt.Errorf("directory not found: %s", workspacePath)
+		}
+		if !util.IsWorkspaceDir(workspacePath) {
+			return fmt.Errorf("not a valid workspace: %s", workspacePath)
 		}
 
 		util.Mode = "prod"
@@ -105,6 +107,10 @@ func findAppDir() string {
 }
 
 func init() {
+	rootCmd.Use = strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe")
+	rootCmd.Short = "SiYuan Kernel v" + util.Ver
+	rootCmd.Long = "SiYuan Kernel v" + util.Ver + ". Manage workspace data directly or start the HTTP server."
+
 	rootCmd.PersistentFlags().StringVarP(&workspacePath, "workspace", "w", "", "workspace path")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "format", "f", "table", "output format: table | json")
 }

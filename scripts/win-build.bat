@@ -105,6 +105,7 @@ if defined BUILD_AMD64 (
     if errorlevel 1 (
         exit /b %errorlevel%
     )
+    mklink /H "%PROJECT_ROOT%\app\kernel\siyuan.exe" "%PROJECT_ROOT%\app\kernel\SiYuan-Kernel.exe"
 )
 if defined BUILD_ARM64 (
     echo.
@@ -116,6 +117,7 @@ if defined BUILD_ARM64 (
     if errorlevel 1 (
         exit /b %errorlevel%
     )
+    mklink /H "%PROJECT_ROOT%\app\kernel-arm64\siyuan.exe" "%PROJECT_ROOT%\app\kernel-arm64\SiYuan-Kernel.exe"
 )
 
 if defined BUILD_AMD64 goto electron

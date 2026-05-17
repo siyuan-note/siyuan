@@ -184,6 +184,10 @@ func getStageIndex(ctx context.Context, pkgType string) (ret *StageIndex, err er
 		return
 	}
 
+	for _, repo := range ret.Repos {
+		unescapePackageDisplayStrings(repo.Package)
+	}
+
 	bazaarMemMu.Lock()
 	stageIndexCache[pkgType] = ret
 	bazaarMemMu.Unlock()

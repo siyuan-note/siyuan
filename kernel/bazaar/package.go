@@ -125,36 +125,34 @@ func ParsePackageJSON(filePath string) (ret *Package, err error) {
 		return
 	}
 
-	// 仅对本地集市包做 HTML 转义，在线 stage 由 bazaar 工作流处理
-	sanitizePackageDisplayStrings(ret)
 	ret.URL = strings.TrimSuffix(ret.URL, "/")
 	return
 }
 
-// sanitizePackageDisplayStrings 对集市包可能直接显示的信息做 HTML 转义，避免 XSS。
-func sanitizePackageDisplayStrings(pkg *Package) {
+// unescapePackageDisplayStrings 将在线 stage 中已 HTML 转义的展示字段还原为原文，与本地 JSON 一致。
+func unescapePackageDisplayStrings(pkg *Package) {
 	if pkg == nil {
 		return
 	}
-	pkg.Name = html.EscapeString(pkg.Name)
-	pkg.Author = html.EscapeString(pkg.Author)
-	pkg.Version = html.EscapeString(pkg.Version)
+	pkg.Name = html.UnescapeString(pkg.Name)
+	pkg.Author = html.UnescapeString(pkg.Author)
+	pkg.Version = html.UnescapeString(pkg.Version)
 	for k, v := range pkg.DisplayName {
-		pkg.DisplayName[k] = html.EscapeString(v)
+		pkg.DisplayName[k] = html.UnescapeString(v)
 	}
 	for k, v := range pkg.Description {
-		pkg.Description[k] = html.EscapeString(v)
+		pkg.Description[k] = html.UnescapeString(v)
 	}
 	if pkg.Funding != nil {
-		pkg.Funding.OpenCollective = html.EscapeString(pkg.Funding.OpenCollective)
-		pkg.Funding.Patreon = html.EscapeString(pkg.Funding.Patreon)
-		pkg.Funding.GitHub = html.EscapeString(pkg.Funding.GitHub)
+		pkg.Funding.OpenCollective = html.UnescapeString(pkg.Funding.OpenCollective)
+		pkg.Funding.Patreon = html.UnescapeString(pkg.Funding.Patreon)
+		pkg.Funding.GitHub = html.UnescapeString(pkg.Funding.GitHub)
 		for i, v := range pkg.Funding.Custom {
-			pkg.Funding.Custom[i] = html.EscapeString(v)
+			pkg.Funding.Custom[i] = html.UnescapeString(v)
 		}
 	}
 	for i, kw := range pkg.Keywords {
-		pkg.Keywords[i] = html.EscapeString(kw)
+		pkg.Keywords[i] = html.UnescapeString(kw)
 	}
 }
 

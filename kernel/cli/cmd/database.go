@@ -23,6 +23,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
 
@@ -110,6 +111,86 @@ var databaseRenderCmd = &cobra.Command{
 		}
 		return nil
 	},
+}
+
+var databaseKeysCmd = &cobra.Command{
+	Use:   "keys --av <avID>",
+	Short: "List database keys (fields)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		if avID == "" {
+			return fmt.Errorf("--av is required")
+		}
+		attrView := model.GetAttributeView(avID)
+		if attrView == nil {
+			return fmt.Errorf("database not found: %s", avID)
+		}
+		switch outputFormat {
+		case "json":
+			var keys []*av.Key
+			for _, kv := range attrView.KeyValues {
+				keys = append(keys, kv.Key)
+			}
+			data, _ := json.MarshalIndent(keys, "", "  ")
+			fmt.Println(string(data))
+		default:
+			printKeyTable(attrView)
+		}
+		return nil
+	},
+}
+
+var databaseKeyCmd = &cobra.Command{
+	Use:   "key",
+	Short: "Manage database keys (fields)",
+}
+
+var databaseKeyAddCmd = &cobra.Command{
+	Use:   "add --av <avID> --name <name> --type <type>",
+	Short: "Add a key (field) to database",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		name, _ := cmd.Flags().GetString("name")
+		keyType, _ := cmd.Flags().GetString("type")
+		icon, _ := cmd.Flags().GetString("icon")
+		prev, _ := cmd.Flags().GetString("prev")
+		if avID == "" || name == "" || keyType == "" {
+			return fmt.Errorf("--av, --name and --type are required")
+		}
+		keyID := ast.NewNodeID()
+		if err := model.AddAttributeViewKey(avID, keyID, name, keyType, icon, prev); err != nil {
+			return err
+		}
+		fmt.Println(keyID)
+		return nil
+	},
+}
+
+var databaseKeyRemoveCmd = &cobra.Command{
+	Use:   "remove --av <avID> --key <keyID>",
+	Short: "Remove a key (field) from database",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		avID, _ := cmd.Flags().GetString("av")
+		keyID, _ := cmd.Flags().GetString("key")
+		removeRelation, _ := cmd.Flags().GetBool("remove-relation-dest")
+		if avID == "" || keyID == "" {
+			return fmt.Errorf("--av and --key are required")
+		}
+		if err := model.RemoveAttributeViewKey(avID, keyID, removeRelation); err != nil {
+			return err
+		}
+		fmt.Println("ok")
+		return nil
+	},
+}
+
+func printKeyTable(attrView *av.AttributeView) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "ID\tNAME\tTYPE\tICON")
+	for _, kv := range attrView.KeyValues {
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", kv.Key.ID, kv.Key.Name, kv.Key.Type, kv.Key.Icon)
+	}
+	w.Flush()
 }
 
 func printAvSearchResults(results []*model.AvSearchResult) {
@@ -239,8 +320,24 @@ func init() {
 	databaseRenderCmd.Flags().IntP("page", "p", 1, "page number")
 	databaseRenderCmd.Flags().IntP("size", "s", 50, "page size")
 
+	databaseKeysCmd.Flags().String("av", "", "attribute view ID (required)")
+
+	databaseKeyAddCmd.Flags().String("av", "", "attribute view ID (required)")
+	databaseKeyAddCmd.Flags().String("name", "", "key name (required)")
+	databaseKeyAddCmd.Flags().String("type", "", "key type (required): block/text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
+	databaseKeyAddCmd.Flags().String("icon", "", "key icon (optional)")
+	databaseKeyAddCmd.Flags().String("prev", "", "previous key ID for ordering (optional)")
+
+	databaseKeyRemoveCmd.Flags().String("av", "", "attribute view ID (required)")
+	databaseKeyRemoveCmd.Flags().String("key", "", "key ID to remove (required)")
+	databaseKeyRemoveCmd.Flags().Bool("remove-relation-dest", false, "also remove related data in linked databases")
+
 	rootCmd.AddCommand(databaseCmd)
 	databaseCmd.AddCommand(databaseSearchCmd)
 	databaseCmd.AddCommand(databaseGetCmd)
 	databaseCmd.AddCommand(databaseRenderCmd)
+	databaseCmd.AddCommand(databaseKeysCmd)
+	databaseCmd.AddCommand(databaseKeyCmd)
+	databaseKeyCmd.AddCommand(databaseKeyAddCmd)
+	databaseKeyCmd.AddCommand(databaseKeyRemoveCmd)
 }

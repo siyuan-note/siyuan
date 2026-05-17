@@ -55,6 +55,7 @@ Caption "${PRODUCT_NAME} ${VERSION}"
     ${EndIf}
 
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
+    nsExec::ExecToLog 'powershell -NoProfile -Command "$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");$p=($p.Split(\";\") | ?{$_ -ne \"$INSTDIR\resources\kernel\"}) -join \";\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")"'
 !macroend
 
 # https://nsis.sourceforge.io/FindIt:_Simple_search_for_file_/_directory

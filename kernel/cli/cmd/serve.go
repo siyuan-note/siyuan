@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
@@ -51,6 +52,11 @@ var serveCmd = &cobra.Command{
 		}
 		os.Args = newArgs
 		defer func() { os.Args = saved }()
+
+		// 设置工作目录为可执行文件所在目录
+		if exePath, err := os.Executable(); err == nil {
+			util.WorkingDir = filepath.Dir(exePath)
+		}
 
 		util.Boot()
 

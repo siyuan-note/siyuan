@@ -51,6 +51,11 @@ var rootCmd = &cobra.Command{
 			util.WorkingDir = appDir
 		}
 
+		langsDir := filepath.Join(util.WorkingDir, "appearance", "langs")
+		if _, err := os.Stat(langsDir); os.IsNotExist(err) {
+			return fmt.Errorf("appearance files not found at [%s]", langsDir)
+		}
+
 		// 设置工作空间路径
 		if workspacePath == "" {
 			workspacePath = os.Getenv("SIYUAN_WORKSPACE_PATH")
@@ -86,6 +91,7 @@ func findAppDir() string {
 	if exePath, err := os.Executable(); err == nil {
 		exeDir := filepath.Dir(exePath)
 		candidates := []string{
+			filepath.Join(exeDir, ".."),              // resources/kernel/ → resources/ (production)
 			filepath.Join(exeDir, "..", "app"),       // kernel/cli/ → kernel/ → app/
 			filepath.Join(exeDir, "app"),             // kernel/ → app/
 			filepath.Join(exeDir, "..", "..", "app"), // kernel/cli/cmd/... → .../app/

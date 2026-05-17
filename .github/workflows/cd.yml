@@ -103,7 +103,7 @@ jobs:
           - os: windows-latest
             name: windows build win.exe
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
-            build_args_prefix: "-s -w -H=windowsgui -X"
+            build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist"
             goos: "windows"

@@ -162,10 +162,6 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
         return 0;
     });
 
-    if (elementsToFold.length === 0) {
-        return;
-    }
-
     elementsToFold.forEach(element => {
         const hasFold = element.getAttribute("fold") === "1";
         if (isFoldAll && hasFold) {
@@ -184,7 +180,7 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, undoOperations);
         preventScroll(protyle);
-        scrollCenter(protyle, elementsToFold[0]);
+        scrollCenter(protyle, isFoldAll ? elementsToFold[elementsToFold.length - 1] : elementsToFold[0]);
     }
 };
 

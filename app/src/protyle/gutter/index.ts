@@ -7,7 +7,8 @@ import {
     isInEmbedBlock
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
-import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
+import {enterBack, iframeMenu, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
+import {foldBlocksRecursively, setFold} from "../util/blockFold";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
@@ -75,10 +76,12 @@ export class Gutter {
         if (isMac()) {
             this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"))
                 .replace("⌘↑", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom, "/"))
+                .replace("⌥⌘↑", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.foldRecursive.custom, "/"))
                 .replace("⌥⌘A", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.attr.custom, "/"));
         } else {
             this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyAfterTip(window.siyuan.config.keymap.general.enter.custom, "/"))
                 .replace("⌘↑", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom, "/"))
+                .replace("⌥⌘↑", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.foldRecursive.custom, "/"))
                 .replace("⌥⌘A", updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.attr.custom, "/"))
                 .replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
         }
@@ -417,6 +420,17 @@ export class Gutter {
                     }
                 }
                 foldElement.classList.remove("protyle-wysiwyg--hl");
+            } else if (event.ctrlKey) {
+                let foldElement: Element;
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
+                    if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
+                        foldElement = item;
+                        return true;
+                    }
+                });
+                if (foldElement) {
+                    foldBlocksRecursively(protyle, [foldElement]);
+                }
             } else if (event.shiftKey && !protyle.disabled) {
                 // 不使用 window.siyuan.shiftIsPressed ，否则窗口未激活时按 Shift 点击块标无法打开属性面板 https://github.com/siyuan-note/siyuan/issues/15075
                 openAttr(protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`), "bookmark", protyle);
@@ -2044,6 +2058,18 @@ export class Gutter {
                     focusBlock(nodeElement);
                 }
             }).element);
+            if (type === "NodeHeading" || ((type === "NodeListItem" || type === "NodeBlockquote" || type === "NodeSuperBlock") && nodeElement.childElementCount > 3)) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "foldRecursive",
+                    icon: "iconFoldUnFold",
+                    label: window.siyuan.languages.foldRecursive || "Fold/Expand recursively",
+                    accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
+                    click() {
+                        foldBlocksRecursively(protyle, [nodeElement]);
+                        focusBlock(nodeElement);
+                    }
+                }).element);
+            }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "attr",

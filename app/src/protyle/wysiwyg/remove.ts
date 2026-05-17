@@ -509,6 +509,12 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         undoOperations.splice(0, 1);
     } else {
         const previousLastEditElement = getContenteditableElement(previousLastElement);
+        if (!previousLastEditElement) {
+            removeElement.remove();
+            transaction(protyle, doOperations, undoOperations.reverse());
+            focusBlock(previousLastElement, undefined, false);
+            return;
+        }
         if (editableElement && (editableElement.textContent !== "" || editableElement.querySelector(".emoji"))) {
             // 非空块
             range.setEndAfter(editableElement.lastChild);

@@ -9,6 +9,7 @@ import {
     getSelectionPosition,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
+import {customBlockRender} from "../../plugin/customBlockRender";
 import {getSavePath, newFile} from "../../util/newFile";
 import {isAbnormalItem, upDownHint} from "../../util/upDownHint";
 import {setPosition} from "../../util/setPosition";
@@ -745,6 +746,14 @@ ${genHintItemHTML(item)}
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 return;
+            } else if (value.startsWith("customBlock")) {
+                const key = value.split(Constants.ZWSP)[1];
+                range.deleteContents();
+                this.fixImageCursor(range);
+                insertHTML(protyle.lute.SpinBlockDOM(`;;;${key}\n\n;;;`), protyle, true);
+                customBlockRender(protyle.app, protyle.wysiwyg.element);
+                hideElements(["util"], protyle);
+                return;
             } else if (value.startsWith("plugin")) {
                 protyle.app.plugins.find((plugin) => {
                     const ids = value.split(Constants.ZWSP);
@@ -862,7 +871,7 @@ ${genHintItemHTML(item)}
                 }
                 if (value === "<div>" || value === "$$" || (value.indexOf("```") > -1 && (value.length > 3 || nodeElement.classList.contains("render-node")))) {
                     protyle.toolbar.showRender(protyle, nodeElement);
-                    processRender(nodeElement);
+                    processRender(nodeElement, protyle.app);
                 } else if (value.startsWith("```")) {
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {

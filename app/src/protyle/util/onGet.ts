@@ -229,7 +229,7 @@ const setHTML = (options: {
     if (options.action.includes(Constants.CB_GET_BACKLINK)) {
         foldPassiveType(options.expand, protyle.wysiwyg.element);
     }
-    processRender(protyle.wysiwyg.element);
+    processRender(protyle.wysiwyg.element, protyle.app);
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);

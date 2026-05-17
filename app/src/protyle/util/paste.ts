@@ -493,7 +493,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
-        processRender(protyle.wysiwyg.element);
+        processRender(protyle.wysiwyg.element, protyle.app);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
     } else if (code) {
@@ -595,7 +595,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 });
                 blockRender(protyle, protyle.wysiwyg.element);
-                processRender(protyle.wysiwyg.element);
+                processRender(protyle.wysiwyg.element, protyle.app);
                 highlightRender(protyle.wysiwyg.element);
                 avRender(protyle.wysiwyg.element, protyle);
                 scrollCenter(protyle, undefined, "nearest", "smooth");
@@ -664,7 +664,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             insertHTML(textPlainDom, protyle, false, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
-        processRender(protyle.wysiwyg.element);
+        processRender(protyle.wysiwyg.element, protyle.app);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
     }

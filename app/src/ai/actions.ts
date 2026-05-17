@@ -22,7 +22,7 @@ export const fillContent = (protyle: IProtyle, data: string, elements: Element[]
     protyle.toolbar.range.collapse(true);
     insertHTML(protyle.lute.SpinBlockDOM(data), protyle, true, true);
     blockRender(protyle, protyle.wysiwyg.element);
-    processRender(protyle.wysiwyg.element);
+    processRender(protyle.wysiwyg.element, protyle.app);
     highlightRender(protyle.wysiwyg.element);
 };
 

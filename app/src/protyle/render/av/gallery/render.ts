@@ -154,7 +154,7 @@ const renderGroupGallery = (options: ITableOptions) => {
 export const afterRenderGallery = (options: ITableOptions) => {
     const view = options.data.view as IAVGallery;
     if (view.coverFrom === 1 || view.coverFrom === 3) {
-        processRender(options.blockElement);
+        processRender(options.blockElement, options.protyle.app);
     }
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;

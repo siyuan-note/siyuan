@@ -112,7 +112,7 @@ const promiseTransaction = () => {
                             }
                         }
                     });
-                    processRender(protyle.wysiwyg.element);
+                    processRender(protyle.wysiwyg.element, protyle.app);
                     highlightRender(protyle.wysiwyg.element);
                     avRender(protyle.wysiwyg.element, protyle);
                     blockRender(protyle, protyle.wysiwyg.element);
@@ -232,7 +232,7 @@ const promiseTransaction = () => {
                         }
                     });
                     cursorElements.forEach(item => {
-                        processRender(item);
+                        processRender(item, protyle.app);
                         highlightRender(item);
                         avRender(item, protyle);
                         blockRender(protyle, item);
@@ -312,7 +312,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         }
     });
     if (updatedEmbed) {
-        processRender(protyle.wysiwyg.element);
+        processRender(protyle.wysiwyg.element, protyle.app);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
     }
@@ -372,7 +372,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
     } else if (wbrElement) {
         wbrElement.remove();
     }
-    processRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
+    processRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element, protyle.app);
     highlightRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
     avRender(updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element, protyle);
     blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
@@ -426,7 +426,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             if (protyle.disabled) {
                 disabledProtyle(protyle);
             }
-            processRender(protyle.wysiwyg.element);
+            processRender(protyle.wysiwyg.element, protyle.app);
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);
@@ -885,7 +885,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     item.removeAttribute(attr);
                 }
             });
-            processRender(item);
+            processRender(item, protyle.app);
             highlightRender(item);
             avRender(item, protyle);
             blockRender(protyle, item);
@@ -1252,7 +1252,7 @@ export const turnsIntoTransaction = (options: {
         }
     });
     transaction(options.protyle, doOperations, undoOperations);
-    processRender(options.protyle.wysiwyg.element);
+    processRender(options.protyle.wysiwyg.element, options.protyle.app);
     highlightRender(options.protyle.wysiwyg.element);
     avRender(options.protyle.wysiwyg.element, options.protyle);
     blockRender(options.protyle, options.protyle.wysiwyg.element);
@@ -1356,7 +1356,7 @@ export const turnsOneInto = async (options: {
         }
     });
     blockRender(options.protyle, options.protyle.wysiwyg.element);
-    processRender(options.protyle.wysiwyg.element);
+    processRender(options.protyle.wysiwyg.element, options.protyle.app);
     highlightRender(options.protyle.wysiwyg.element);
     avRender(options.protyle.wysiwyg.element, options.protyle);
 };
@@ -1491,7 +1491,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             if (protyle.disabled) {
                 disabledProtyle(protyle);
             }
-            processRender(protyle.wysiwyg.element);
+            processRender(protyle.wysiwyg.element, protyle.app);
             highlightRender(protyle.wysiwyg.element);
             avRender(protyle.wysiwyg.element, protyle);
             blockRender(protyle, protyle.wysiwyg.element);

@@ -363,6 +363,16 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
             });
             hasPlugin = true;
         });
+        for (const cbKey of Object.keys(plugin.customBlockRenders)) {
+            const config = plugin.customBlockRenders[cbKey];
+            allList.push({
+                filter: [cbKey],
+                id: "customBlock_" + cbKey,
+                value: `customBlock${Constants.ZWSP}${cbKey}`,
+                html: `<div class="b3-list-item__first">${config.icon || '<svg class="b3-list-item__graphic"><use xlink:href="#iconPlugin"></use></svg>'}<span class="b3-list-item__text">${cbKey}</span></div>`,
+            });
+            hasPlugin = true;
+        }
     });
     if (!hasPlugin) {
         allList.pop();
@@ -556,7 +566,7 @@ export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement
             item.remove();
         });
         blockRender(protyle, protyle.wysiwyg.element);
-        processRender(protyle.wysiwyg.element);
+        processRender(protyle.wysiwyg.element, protyle.app);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
         hideElements(["util"], protyle);

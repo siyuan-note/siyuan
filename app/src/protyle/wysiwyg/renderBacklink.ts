@@ -21,7 +21,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: {
     });
     protyle.wysiwyg.element.innerHTML = html;
     improveBreadcrumbAppearance(protyle.wysiwyg.element);
-    processRender(protyle.wysiwyg.element);
+    processRender(protyle.wysiwyg.element, protyle.app);
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);
     blockRender(protyle, protyle.wysiwyg.element);
@@ -76,7 +76,7 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
             tempElement.remove();
         }
         element.parentElement.insertAdjacentHTML("afterend", setBacklinkFold(getResponse.data.content, true));
-        processRender(element.parentElement.parentElement);
+        processRender(element.parentElement.parentElement, protyle.app);
         avRender(element.parentElement.parentElement, protyle);
         blockRender(protyle, element.parentElement.parentElement);
         if (getResponse.data.isSyncing) {

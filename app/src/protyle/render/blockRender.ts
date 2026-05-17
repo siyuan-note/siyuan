@@ -117,7 +117,7 @@ const renderEmbed = (blocks: {
         item.firstElementChild.insertAdjacentHTML("afterend", `<div class="protyle-wysiwyg__embed ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${errorTip || window.siyuan.languages.refExpired}</div>`);
     }
 
-    processRender(item);
+    processRender(item, protyle.app);
     highlightRender(item);
     avRender(item, protyle);
     if (top) {

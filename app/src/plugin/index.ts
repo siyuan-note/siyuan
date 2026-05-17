@@ -33,13 +33,12 @@ export class Plugin {
         id: string,
         callback: (protyle: import("../protyle").Protyle, nodeElement: HTMLElement) => void
     }[] = [];
-    // TODO
     public customBlockRenders: {
         [key: string]: {
             icon: string,
-            action: "edit" | "more"[],
+            action: ("edit" | "more")[],
             genCursor: boolean,
-            render: (options: { app: App, element: Element }) => void
+            render: (options: { app: App, element: Element, content: string }) => void,
         }
     } = {};
     public topBarIcons: Element[] = [];

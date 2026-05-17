@@ -26,7 +26,7 @@ import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import * as dayjs from "dayjs";
-import {setFold, zoomOut} from "../../menus/protyle";
+import {zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
@@ -38,6 +38,7 @@ import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
+import {setFold} from "./blockFold";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,

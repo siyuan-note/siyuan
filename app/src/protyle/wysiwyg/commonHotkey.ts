@@ -15,8 +15,7 @@ import {processClonePHElement} from "../render/util";
 import {copyTextByType} from "../toolbar/util";
 import {hasClosestByTag, hasTopClosestByClassName} from "../util/hasClosest";
 import {removeEmbed} from "./removeEmbed";
-import {clearBlockElement, clearSelect} from "../util/clear";
-import {foldBlocksRecursively} from "../util/blockFold";
+import {clearBlockElement} from "../util/clear";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
@@ -93,10 +92,6 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         }
         event.preventDefault();
         event.stopPropagation();
-        return true;
-    }
-
-    if (foldRecursiveHotkey(protyle, event, nodeElement)) {
         return true;
     }
 
@@ -466,30 +461,3 @@ export const alignImgLeft = (protyle: IProtyle, nodeElement: Element, assetEleme
     });
     updateTransaction(protyle, id, nodeElement.outerHTML, html);
 };
-
-export const foldRecursiveHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement: HTMLElement) => {
-    if (window.siyuan.config.keymap.editor.general.foldRecursive && matchHotKey(window.siyuan.config.keymap.editor.general.foldRecursive.custom, event) && !event.repeat) {
-        const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-        if (selectElements.length > 0) {
-            foldBlocksRecursively(protyle, selectElements);
-        } else if (nodeElement) {
-            const nodeType = nodeElement.getAttribute("data-type");
-            if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                if (nodeElement.parentElement.childElementCount > 3) {
-                    foldBlocksRecursively(protyle, [nodeElement.parentElement]);
-                } else {
-                    foldBlocksRecursively(protyle, [nodeElement]);
-                }
-            } else if (nodeType === "NodeHeading") {
-                foldBlocksRecursively(protyle, [nodeElement]);
-            } else {
-                foldBlocksRecursively(protyle, [getTopAloneElement(nodeElement)]);
-            }
-        }
-        event.stopPropagation();
-        event.preventDefault();
-        return true;
-    }
-    return false;
-};
-

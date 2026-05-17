@@ -28,7 +28,6 @@ import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
 import {copyPlainText, readClipboard, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
-import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
 import {paste, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
@@ -38,8 +37,6 @@ import {openGlobalSearch} from "../search/util";
 import {openNewWindowById} from "../window/openNewWindow";
 /// #endif
 import {getSearch, isMobile} from "../util/functions";
-import {removeFoldHeading} from "../protyle/util/heading";
-import {lineNumberRender} from "../protyle/render/highlightRender";
 import * as dayjs from "dayjs";
 import {blockRender} from "../protyle/render/blockRender";
 import {renameAsset} from "../editor/rename";
@@ -62,10 +59,10 @@ import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
-import {clearSelect} from "../protyle/util/clear";
 import {scrollCenter} from "../util/highlightById";
 import {base64ToURL} from "../util/image";
 import {setPosition} from "../util/setPosition";
+import {setFold} from "../protyle/util/blockFold";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -2566,5 +2563,3 @@ export const setFoldById = (data: {
         }
     });
 };
-
-export {foldBlocksRecursively, setFold} from "../protyle/util/blockFold";

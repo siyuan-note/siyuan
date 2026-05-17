@@ -29,7 +29,6 @@ import {
     inlineMathMenu,
     linkMenu,
     refMenu,
-    setFold,
     tagMenu,
     zoomOut
 } from "../../menus/protyle";
@@ -104,6 +103,7 @@ import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
 import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
+import {setFold} from "../util/blockFold";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};

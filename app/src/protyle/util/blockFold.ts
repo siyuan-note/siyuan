@@ -6,6 +6,7 @@ import {focusBlock} from "./selection";
 import {scrollCenter} from "../../util/highlightById";
 import {clearSelect} from "./clear";
 import {removeFoldHeading} from "./heading";
+import {getTopAloneElement} from "../wysiwyg/getBlock";
 
 export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolean,
                         isRemove?: boolean, addLoading = true, getOperations = false) => {
@@ -24,37 +25,33 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
             return {fold: -1};
         }
         nodeElement.removeAttribute("fold");
-        if (!getOperations) {
-            // https://github.com/siyuan-note/siyuan/issues/4411
-            nodeElement.querySelectorAll(".protyle-linenumber__rows").forEach((item: HTMLElement) => {
-                lineNumberRender(item.parentElement);
-            });
-        }
+        // https://github.com/siyuan-note/siyuan/issues/4411
+        nodeElement.querySelectorAll(".protyle-linenumber__rows").forEach((item: HTMLElement) => {
+            lineNumberRender(item.parentElement);
+        });
     } else {
         if (typeof isOpen === "boolean" && isOpen) {
             return {fold: -1};
         }
         nodeElement.setAttribute("fold", "1");
-        if (!getOperations) {
-            // 光标在子列表中，再次 focus 段尾的时候不会变 https://ld246.com/article/1647099132461
-            if (getSelection().rangeCount > 0) {
-                const range = getSelection().getRangeAt(0);
-                const blockElement = hasClosestBlock(range.startContainer);
-                if (blockElement && blockElement.getBoundingClientRect().width === 0) {
-                    // https://github.com/siyuan-note/siyuan/issues/5833
-                    focusBlock(nodeElement, undefined, false);
-                }
+        // 光标在子列表中，再次 focus 段尾的时候不会变 https://ld246.com/article/1647099132461
+        if (getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            const blockElement = hasClosestBlock(range.startContainer);
+            if (blockElement && blockElement.getBoundingClientRect().width === 0) {
+                // https://github.com/siyuan-note/siyuan/issues/5833
+                focusBlock(nodeElement, undefined, false);
             }
-            clearSelect(["img", "av"], nodeElement);
-            scrollCenter(protyle, nodeElement);
         }
+        clearSelect(["img", "av"], nodeElement);
+        scrollCenter(protyle, nodeElement);
     }
     const id = nodeElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {
         if (hasFold) {
-            if (addLoading && !getOperations) {
+            if (addLoading) {
                 nodeElement.insertAdjacentHTML("beforeend", '<div spin="1" style="text-align: center"><img width="24px" height="24px" src="/stage/loading-pure.svg"></div>');
             }
             doOperations.push({
@@ -189,4 +186,25 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
         preventScroll(protyle);
         scrollCenter(protyle, elementsToFold[0]);
     }
+};
+
+export const foldRecursiveHotkey = (protyle: IProtyle, nodeElement: HTMLElement) => {
+    const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+    if (selectElements.length > 0) {
+        foldBlocksRecursively(protyle, selectElements);
+    } else if (nodeElement) {
+        const nodeType = nodeElement.getAttribute("data-type");
+        if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
+            if (nodeElement.parentElement.childElementCount > 3) {
+                foldBlocksRecursively(protyle, [nodeElement.parentElement]);
+            } else {
+                foldBlocksRecursively(protyle, [nodeElement]);
+            }
+        } else if (nodeType === "NodeHeading") {
+            foldBlocksRecursively(protyle, [nodeElement]);
+        } else {
+            foldBlocksRecursively(protyle, [getTopAloneElement(nodeElement)]);
+        }
+    }
+    return true;
 };

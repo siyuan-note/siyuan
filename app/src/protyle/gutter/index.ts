@@ -2058,18 +2058,16 @@ export class Gutter {
                     focusBlock(nodeElement);
                 }
             }).element);
-            if (type === "NodeHeading" || ((type === "NodeListItem" || type === "NodeBlockquote" || type === "NodeSuperBlock") && nodeElement.childElementCount > 3)) {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "foldRecursive",
-                    icon: "iconFoldUnFold",
-                    label: window.siyuan.languages.foldRecursive || "Fold/Expand recursively",
-                    accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
-                    click() {
-                        foldBlocksRecursively(protyle, [nodeElement]);
-                        focusBlock(nodeElement);
-                    }
-                }).element);
-            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "foldRecursive",
+                icon: "iconFoldUnFold",
+                label: window.siyuan.languages.foldRecursive || "Fold/Expand recursively",
+                accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
+                click() {
+                    foldBlocksRecursively(protyle, [nodeElement]);
+                    focusBlock(nodeElement);
+                }
+            }).element);
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "attr",

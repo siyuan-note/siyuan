@@ -38,9 +38,8 @@ import {unicode2Emoji} from "../../emoji";
 import {deleteFiles} from "../../editor/deleteFile";
 import {escapeHtml} from "../../util/escape";
 import {syncGuide} from "../../sync/syncGuide";
-import {duplicateBlock, foldRecursiveHotkey, getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
-import {getNextFileLi, getPreviousFileLi, getTopAloneElement} from "../../protyle/wysiwyg/getBlock";
-import {foldBlocksRecursively} from "../../protyle/util/blockFold";
+import {duplicateBlock, getStartEndElement, goEnd, goHome} from "../../protyle/wysiwyg/commonHotkey";
+import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
 import {setZoom} from "../../layout/topBar";
@@ -350,10 +349,6 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             }
         }
         duplicateBlock(selectsElement, protyle);
-        return true;
-    }
-
-    if (!isFileFocus && !event.repeat && !protyle.disabled && foldRecursiveHotkey(protyle, event, hasClosestBlock(range.startContainer))) {
         return true;
     }
 

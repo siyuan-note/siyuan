@@ -6,7 +6,7 @@ import {blockRender} from "../render/blockRender";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
-import {setFold, zoomOut} from "../../menus/protyle";
+import {zoomOut} from "../../menus/protyle";
 import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
@@ -21,6 +21,7 @@ import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 import {processClonePHElement} from "../render/util";
 import {scrollCenter} from "../../util/highlightById";
+import {setFold} from "../util/blockFold";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除

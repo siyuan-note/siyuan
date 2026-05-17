@@ -203,7 +203,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "Access authentication"
+					"Data": "Lock screen password"
 				}
 			]
 		},
@@ -235,7 +235,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", you can configure the browser access authentication password. Leaving it blank means that authentication is not enabled. This is more useful in open networks (such as office spaces and public networks), and only after authentication can you enter the work space."
+					"Data": ", you can configure the browser lock screen password. Leaving it blank means that it is not enabled. This is more useful in open networks (such as office spaces and public networks), and only after password verification can you enter the work space."
 				}
 			]
 		},

@@ -372,6 +372,8 @@ func containsMultipleStatements(stmt string) bool {
 
 	inSingleQuote := false
 	inDoubleQuote := false
+	inBacktickQuote := false
+	inBracketQuote := false
 	inLineComment := false
 	inBlockComment := false
 	runes := []rune(stmt)
@@ -407,12 +409,28 @@ func containsMultipleStatements(stmt string) bool {
 			}
 			continue
 		}
+		if inBacktickQuote {
+			if '`' == ch {
+				inBacktickQuote = false
+			}
+			continue
+		}
+		if inBracketQuote {
+			if ']' == ch {
+				inBracketQuote = false
+			}
+			continue
+		}
 
 		switch {
 		case '\'' == ch:
 			inSingleQuote = true
 		case '"' == ch:
 			inDoubleQuote = true
+		case '`' == ch:
+			inBacktickQuote = true
+		case '[' == ch:
+			inBracketQuote = true
 		case '-' == ch && next == '-':
 			inLineComment = true
 			i++
@@ -427,8 +445,8 @@ func containsMultipleStatements(stmt string) bool {
 	return false
 }
 
-func Query(stmt string, limit int) (ret []map[string]any, err error) {
-	if containsMultipleStatements(stmt) {
+func Query(stmt string, limit int, checkSingleStatement bool) (ret []map[string]any, err error) {
+	if checkSingleStatement && containsMultipleStatements(stmt) {
 		return nil, errors.New("only one SQL statement is allowed, multiple statements separated by semicolons are not supported")
 	}
 

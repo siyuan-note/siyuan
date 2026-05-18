@@ -45,10 +45,14 @@ func SQL(c *gin.Context) {
 	}
 
 	var stmt string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("stmt", &stmt, true, true)) {
+	var skipSingleStatementCheck bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("stmt", &stmt, true, true),
+		util.BindJsonArg("skipSingleStatementCheck", &skipSingleStatementCheck, false, false),
+	) {
 		return
 	}
-	result, err := sql.Query(stmt, model.Conf.Search.Limit)
+	result, err := sql.Query(stmt, model.Conf.Search.Limit, !skipSingleStatementCheck)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()

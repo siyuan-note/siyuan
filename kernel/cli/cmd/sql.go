@@ -39,7 +39,7 @@ var sqlCmd = &cobra.Command{
 			limit = 100
 		}
 
-		rows, err := sql.Query(stmt, limit)
+		rows, err := sql.Query(stmt, limit, true)
 		if err != nil {
 			return err
 		}

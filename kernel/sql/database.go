@@ -1624,7 +1624,7 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		return
 	}
 	(*templateFuncMap)["querySQL"] = func(stmt string) (ret []map[string]any) {
-		ret, _ = Query(stmt, 1024)
+		ret, _ = Query(stmt, 1024, true)
 		return
 	}
 }

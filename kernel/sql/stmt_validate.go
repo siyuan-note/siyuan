@@ -21,9 +21,47 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/mattn/go-sqlite3"
 )
+
+// tailIsOnlyWhitespaceOrSQLComments 判断分号之后的片段是否仅由空白、行注释（-- 至换行或 EOF）、
+// 块注释（/* … */，含未闭合则吞至 EOF）构成。与 SQLite 解析对齐：分号后若只有这些内容，不会被视为另一条可执行的 SQL 语句。
+func tailIsOnlyWhitespaceOrSQLComments(s string) bool {
+	runes := []rune(s)
+	for i := 0; i < len(runes); {
+		if unicode.IsSpace(runes[i]) {
+			i++
+			continue
+		}
+		ch := runes[i]
+		var next rune
+		if i+1 < len(runes) {
+			next = runes[i+1]
+		}
+		if '-' == ch && '-' == next {
+			i += 2
+			for i < len(runes) && '\n' != runes[i] {
+				i++
+			}
+			continue
+		}
+		if '/' == ch && '*' == next {
+			i += 2
+			for i < len(runes) {
+				if '*' == runes[i] && i+1 < len(runes) && '/' == runes[i+1] {
+					i += 2
+					break
+				}
+				i++
+			}
+			continue
+		}
+		return false
+	}
+	return true
+}
 
 func containsMultipleStatements(stmt string) bool {
 	stmt = strings.TrimSpace(stmt)
@@ -100,8 +138,12 @@ func containsMultipleStatements(stmt string) bool {
 			inBlockComment = true
 			i++
 		case ';' == ch:
-			remaining := strings.TrimSpace(string(runes[i+1:]))
-			return 0 < len(remaining)
+			tail := string(runes[i+1:])
+			if tailIsOnlyWhitespaceOrSQLComments(tail) {
+				// 分号后仅有空白与 SQL 注释时，SQLite 仍视为同一条语句末尾，不应判为多语句。
+				continue
+			}
+			return true
 		}
 	}
 	return false

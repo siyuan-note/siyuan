@@ -49,4 +49,9 @@ export class Search extends Model {
         inputElement.select();
         inputElement.dispatchEvent(new CustomEvent("input"));
     }
+
+    public destroy() {
+        this.editors.edit.destroy();
+        this.editors.unRefEdit.destroy();
+    }
 }

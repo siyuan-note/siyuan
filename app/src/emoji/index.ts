@@ -51,7 +51,7 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
     return emoji;
 };
 
-export const lazyLoadEmoji = (element: HTMLElement) => {
+export const lazyLoadEmoji = (element: HTMLElement): (() => void) => {
     const emojiIntersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
             const index = entrie.target.getAttribute("data-index");
@@ -70,9 +70,10 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     element.querySelectorAll(".emojis__content").forEach((panelElement) => {
         emojiIntersectionObserver.observe(panelElement);
     });
+    return () => emojiIntersectionObserver.disconnect();
 };
 
-export const lazyLoadEmojiImg = (element: Element) => {
+export const lazyLoadEmojiImg = (element: Element): (() => void) => {
     const emojiIntersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach((entrie: IntersectionObserverEntry & { target: HTMLImageElement }) => {
             const src = entrie.target.getAttribute("data-src");
@@ -85,6 +86,7 @@ export const lazyLoadEmojiImg = (element: Element) => {
     element.querySelectorAll("img").forEach((panelElement) => {
         emojiIntersectionObserver.observe(panelElement);
     });
+    return () => emojiIntersectionObserver.disconnect();
 };
 
 export const filterEmoji = (key = "", max?: number, hideCustom = false) => {
@@ -272,12 +274,16 @@ export const openEmojiPanel = (
         dynamicCurrentObj.content = dynamicCurrentUrl.get("content") || "SiYuan";
     }
 
+    const emojiObserverCleanups: (() => void)[] = [];
     const dialog = new Dialog({
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
         width: isMobile() ? "80vw" : "368px",
         height: "50vh",
+        destroyCallback: () => {
+            emojiObserverCleanups.forEach(fn => fn());
+        },
         content: `<div class="emojis">
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
@@ -410,10 +416,12 @@ export const openEmojiPanel = (
         }
         emojisContentElement.scrollTop = 0;
         dialog.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        emojiObserverCleanups.forEach(fn => fn());
+        emojiObserverCleanups.length = 0;
         if (emojiSearchInputElement.value === "") {
-            lazyLoadEmoji(dialog.element);
+            emojiObserverCleanups.push(lazyLoadEmoji(dialog.element));
         }
-        lazyLoadEmojiImg(dialog.element);
+        emojiObserverCleanups.push(lazyLoadEmojiImg(dialog.element));
     });
     emojiSearchInputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
@@ -427,10 +435,12 @@ export const openEmojiPanel = (
         }
         emojisContentElement.scrollTop = 0;
         dialog.element.querySelector(".emojis__item")?.classList.add("emojis__item--current");
+        emojiObserverCleanups.forEach(fn => fn());
+        emojiObserverCleanups.length = 0;
         if (emojiSearchInputElement.value === "") {
-            lazyLoadEmoji(dialog.element);
+            emojiObserverCleanups.push(lazyLoadEmoji(dialog.element));
         }
-        lazyLoadEmojiImg(dialog.element);
+        emojiObserverCleanups.push(lazyLoadEmojiImg(dialog.element));
     });
     emojiSearchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
@@ -546,8 +556,8 @@ export const openEmojiPanel = (
     if (!isMobile() && currentTab === "emoji") {
         emojiSearchInputElement.focus();
     }
-    lazyLoadEmoji(dialog.element);
-    lazyLoadEmojiImg(dialog.element);
+    emojiObserverCleanups.push(lazyLoadEmoji(dialog.element));
+    emojiObserverCleanups.push(lazyLoadEmojiImg(dialog.element));
     // 不能使用 getEventName 否则 https://github.com/siyuan-note/siyuan/issues/5472
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;

@@ -1,5 +1,6 @@
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
+import {removeDestroyListeners} from "../ui/initUI";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
@@ -14,6 +15,8 @@ export const destroy = (protyle: IProtyle) => {
     }
     protyle.observer?.disconnect();
     protyle.observerLoad?.disconnect();
+    removeDestroyListeners(protyle);
+    protyle.hint?.disconnectEmojiObservers();
     protyle.element.classList.remove("protyle");
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {

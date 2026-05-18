@@ -32,7 +32,11 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 
 !macro customInstall
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
-    nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if(($p.Split(\";\") | ?{$_ -eq $k}).Count -eq 0){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}else{Write-Host \"already in PATH\"}"'
+    ${If} $installMode == "all"
+        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if(($p.Split(\";\") | ?{\$_ -eq $k}).Count -eq 0){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}else{Write-Host \"already in PATH\"}"'
+    ${Else}
+        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if(($p.Split(\";\") | ?{\$_ -eq $k}).Count -eq 0){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}else{Write-Host \"already in PATH\"}"'
+    ${EndIf}
 !macroend
 
 !macro customUnInstall
@@ -59,7 +63,11 @@ Caption "${PRODUCT_NAME} ${VERSION}"
     ${EndIf}
 
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
-    nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");$p=($p.Split(\";\") | ?{$_ -ne $k}) -join \";\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")"'
+    ${If} $installMode == "all"
+        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");$a=$p.Split(\";\") | ?{ \$_ -and (\$_ -ne $k) };$p=[string]::Join(\";\", $a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")"'
+    ${Else}
+        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");$a=$p.Split(\";\") | ?{ \$_ -and (\$_ -ne $k) };$p=[string]::Join(\";\", $a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")"'
+    ${EndIf}
 !macroend
 
 # https://nsis.sourceforge.io/FindIt:_Simple_search_for_file_/_directory

@@ -363,75 +363,7 @@ func QueryNoLimit(stmt string) (ret []map[string]any, err error) {
 	return queryRawStmt(stmt, math.MaxInt)
 }
 
-func containsMultipleStatements(stmt string) bool {
-	stmt = strings.TrimSpace(stmt)
-	for strings.HasSuffix(stmt, ";") {
-		stmt = strings.TrimRight(stmt, ";")
-		stmt = strings.TrimSpace(stmt)
-	}
-
-	inSingleQuote := false
-	inDoubleQuote := false
-	inLineComment := false
-	inBlockComment := false
-	runes := []rune(stmt)
-	for i := 0; i < len(runes); i++ {
-		ch := runes[i]
-		var next rune
-		if i+1 < len(runes) {
-			next = runes[i+1]
-		}
-
-		if inLineComment {
-			if '\n' == ch {
-				inLineComment = false
-			}
-			continue
-		}
-		if inBlockComment {
-			if '*' == ch && '/' == next {
-				inBlockComment = false
-				i++
-			}
-			continue
-		}
-		if inSingleQuote {
-			if '\'' == ch {
-				inSingleQuote = false
-			}
-			continue
-		}
-		if inDoubleQuote {
-			if '"' == ch {
-				inDoubleQuote = false
-			}
-			continue
-		}
-
-		switch {
-		case '\'' == ch:
-			inSingleQuote = true
-		case '"' == ch:
-			inDoubleQuote = true
-		case '-' == ch && next == '-':
-			inLineComment = true
-			i++
-		case '/' == ch && next == '*':
-			inBlockComment = true
-			i++
-		case ';' == ch:
-			remaining := strings.TrimSpace(string(runes[i+1:]))
-			return 0 < len(remaining)
-		}
-	}
-	return false
-}
-
 func Query(stmt string, limit int) (ret []map[string]any, err error) {
-	if containsMultipleStatements(stmt) {
-		return nil, errors.New("only one SQL statement is allowed, multiple statements separated by semicolons are not supported")
-	}
-
 	originalStmt := stmt
 	// Kernel API `/api/query/sql` support `||` operator https://github.com/siyuan-note/siyuan/issues/9662
 	// 这里为了支持 || 操作符，使用了另一个 sql 解析器，但是这个解析器无法处理 UNION https://github.com/siyuan-note/siyuan/issues/8226

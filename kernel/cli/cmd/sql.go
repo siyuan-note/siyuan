@@ -39,6 +39,9 @@ var sqlCmd = &cobra.Command{
 			limit = 100
 		}
 
+		if err := sql.CheckSingleStatement(stmt); err != nil {
+			return err
+		}
 		rows, err := sql.Query(stmt, limit)
 		if err != nil {
 			return err

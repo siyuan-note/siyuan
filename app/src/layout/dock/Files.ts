@@ -585,22 +585,17 @@ export class Files extends Model {
                     ) {
                         const nodeRect = liElement.getBoundingClientRect();
                         const dragHeight = nodeRect.height * .2;
+                        liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
                         if (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot) {
                             if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                                liElement.classList.remove("dragover");
                                 liElement.classList.add("dragover__bottom");
                             } else {
-                                liElement.classList.remove("dragover");
                                 liElement.classList.add("dragover__top");
                             }
                         } else if (event.clientY > nodeRect.bottom - dragHeight) {
-                            liElement.classList.remove("dragover");
                             liElement.classList.add("dragover__bottom");
                         } else if (event.clientY < nodeRect.top + dragHeight) {
-                            liElement.classList.remove("dragover");
                             liElement.classList.add("dragover__top");
-                        } else {
-                            liElement.classList.remove("dragover__top", "dragover__bottom");
                         }
                     }
                     if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||

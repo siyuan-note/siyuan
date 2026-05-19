@@ -151,7 +151,7 @@ func containsMultipleStatements(stmt string) bool {
 
 func CheckSingleStatement(stmt string) error {
 	if containsMultipleStatements(stmt) {
-		return errors.New("statement contains multiple SQL statements")
+		return errors.New("SQL statement is not single")
 	}
 	return nil
 }
@@ -163,7 +163,7 @@ func CheckSingleStatement(stmt string) error {
 // 不会拒绝多语句。与 CheckSingleStatement 组合即可得到「单条 + 只读」策略。
 func CheckReadonlyStatement(stmt string) error {
 	if strings.TrimSpace(stmt) == "" {
-		return errors.New("statement is empty")
+		return errors.New("SQL statement is empty")
 	}
 	ctx := context.Background()
 	conn, err := db.Conn(ctx)
@@ -175,7 +175,7 @@ func CheckReadonlyStatement(stmt string) error {
 	return conn.Raw(func(dc any) error {
 		sqliteConn, ok := dc.(*sqlite3.SQLiteConn)
 		if !ok {
-			return fmt.Errorf("unexpected SQL driver connection type %T", dc)
+			return fmt.Errorf("SQL driver connection type is unexpected: %T", dc)
 		}
 		ds, err := sqliteConn.Prepare(stmt)
 		if err != nil {
@@ -185,10 +185,10 @@ func CheckReadonlyStatement(stmt string) error {
 
 		sst, ok := ds.(*sqlite3.SQLiteStmt)
 		if !ok {
-			return fmt.Errorf("unexpected SQL driver statement type %T", ds)
+			return fmt.Errorf("SQL driver statement type is unexpected: %T", ds)
 		}
 		if !sst.Readonly() {
-			return errors.New("statement is not read-only")
+			return errors.New("SQL statement is not read-only")
 		}
 		return nil
 	})

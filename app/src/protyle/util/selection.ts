@@ -115,7 +115,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
         return true;
     }
     hideElements(["select"], protyle);
-    const ids: string [] = [];
+    const ids: string[] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
         const nodeId = item.getAttribute("data-node-id");
         if (nodeId) {

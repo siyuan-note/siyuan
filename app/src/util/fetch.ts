@@ -10,9 +10,11 @@ export const fetchPost = (
     data?: any,
     cb?: (response: IWebSocketData) => void,
     headers?: IObject,
-    failCallback?: (response: IWebSocketData) => void) => {
+    failCallback?: (response: IWebSocketData) => void,
+    abortSignal?: AbortSignal) => {
     const init: RequestInit = {
         method: "POST",
+        signal: abortSignal,
     };
     if (data) {
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph",
@@ -93,6 +95,9 @@ export const fetchPost = (
             cb(response);
         }
     }).catch((e) => {
+        if (e?.name === "AbortError") {
+            return;
+        }
         if (failCallback && url === "/api/file/getFile") {
             failCallback({
                 data: null,

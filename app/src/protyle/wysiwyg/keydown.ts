@@ -1515,6 +1515,37 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
+        // multi-block INLINE_TYPE (框选时 Ctrl+B/U/T/S 格式化)
+        const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+        if (selectElements.length > 0 && !nodeElement.classList.contains("code-block") && !event.repeat && !isInEmbedBlock(nodeElement)) {
+            let matchedInlineType: string | undefined;
+            protyle.options.toolbar.find((menuItem: IMenuItem) => {
+                if (menuItem.hotkey && matchHotKey(menuItem.hotkey, event) && Constants.INLINE_TYPE.includes(menuItem.name) && !["block-ref", "inline-math", "inline-memo", "a", "text"].includes(menuItem.name)) {
+                    matchedInlineType = menuItem.name;
+                    return true;
+                }
+            });
+            if (matchedInlineType) {
+                protyle.toolbar.range = range;
+                selectElements.forEach((block: Element) => {
+                    const editElement = getContenteditableElement(block);
+                    if (!editElement || editElement.tagName === "TABLE" || block.classList.contains("code-block")) {
+                        return;
+                    }
+                    const blockRange = document.createRange();
+                    blockRange.selectNodeContents(editElement);
+                    protyle.toolbar.range = blockRange;
+                    protyle.toolbar.setInlineMark(protyle, matchedInlineType, "range");
+                });
+                protyle.toolbar.range = range;
+                focusByRange(range);
+                event.preventDefault();
+                event.stopPropagation();
+                protyle.wysiwyg.preventKeyup = true;
+                return true;
+            }
+        }
+
         // toolbar action
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;

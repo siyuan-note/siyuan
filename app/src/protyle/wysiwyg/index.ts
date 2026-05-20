@@ -479,7 +479,7 @@ export class WYSIWYG {
                             if (item.nodeType === 3) {
                                 textPlain += item.textContent;
                             } else if (item.nodeType === 1 &&
-                                (item.classList.contains("img") || item.getAttribute("data-type") === "inline-math")) {
+                                (item.classList.contains("img") || item.getAttribute("data-type").includes("inline-math"))) {
                                 textPlain += protyle.lute.BlockDOM2StdMd(item.outerHTML).trimEnd();
                             } else {
                                 textPlain += item.textContent;

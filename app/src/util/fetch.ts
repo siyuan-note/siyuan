@@ -11,10 +11,9 @@ export const fetchPost = (
     cb?: (response: IWebSocketData) => void,
     headers?: IObject,
     failCallback?: (response: IWebSocketData) => void,
-    abortSignal?: AbortSignal) => {
+    signal?: AbortSignal) => {
     const init: RequestInit = {
         method: "POST",
-        signal: abortSignal,
     };
     if (data) {
         if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph",
@@ -38,6 +37,9 @@ export const fetchPost = (
     }
     if (headers) {
         init.headers = headers;
+    }
+    if (signal) {
+        init.signal = signal;
     }
     let isGetFile202 = false;
     fetch(url, init).then((response) => {

@@ -188,6 +188,10 @@ const renderPDF = async (id: string) => {
           border-left: 1px solid var(--b3-body-background);
         }
         
+        .b3-switch {
+            margin-left: 14px;
+        }
+        
         #preview {
           max-width: 800px;
           margin: 24px auto;
@@ -200,16 +204,17 @@ const renderPDF = async (id: string) => {
           box-shadow: var(--b3-dialog-shadow);
         }
         
-        #preview.exporting {
+        .exporting #preview {
           position: inherit;
           max-width: none;
+          box-shadow: none;
         }
         
-        .b3-switch {
-            margin-left: 14px;
+        .exporting {
+            background-color: var(--b3-theme-background);
         }
         
-        .exporting::-webkit-scrollbar {
+        .exporting #preview::-webkit-scrollbar {
           width: 0;
           height: 0;
         }
@@ -667,7 +672,7 @@ ${getIconScript(servePath)}
             } else {
                 ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig());
             }
-            previewElement.classList.add("exporting");
+            document.body.classList.add("exporting");
             previewElement.style.zoom = "";
             previewElement.style.paddingTop = "6px";
             previewElement.style.paddingBottom = "0";

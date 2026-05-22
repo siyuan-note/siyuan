@@ -7332,7 +7332,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "遞歸摺疊/展開"
+									"Data": "逐層摺疊/展開"
 								}
 							]
 						},

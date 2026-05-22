@@ -1034,7 +1034,7 @@
   "memo": "Memo",
   "name": "Nama",
   "fold": "Lipat/Perluas",
-  "foldRecursive": "Lipat/Perluas secara rekursif",
+  "foldRecursive": "Lipat/Perluas per tingkat",
   "zoom": "Perbesar",
   "invalid": "Tidak valid",
   "conflict": "Konflik",

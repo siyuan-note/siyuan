@@ -1034,7 +1034,7 @@
   "memo": "Notatka",
   "name": "Nazwa",
   "fold": "Zwiń/Rozwiń",
-  "foldRecursive": "Zwiń/Rozwiń rekurencyjnie",
+  "foldRecursive": "Zwiń/Rozwiń poziomami",
   "zoom": "Przybliż",
   "invalid": "Nieprawidłowy",
   "conflict": "Konflikt",

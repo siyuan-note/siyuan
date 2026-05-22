@@ -7315,7 +7315,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "递归折叠/展开"
+									"Data": "逐层折叠/展开"
 								}
 							]
 						},

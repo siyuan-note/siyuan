@@ -1034,7 +1034,7 @@
   "memo": "מזכרת",
   "name": "שם",
   "fold": "קפל/הרחב",
-  "foldRecursive": "קיפול/הרחבה רקורסיבי",
+  "foldRecursive": "קפל/הרחב לפי רמה",
   "zoom": "זום",
   "invalid": "לא תקף",
   "conflict": "סכסוך",

@@ -2048,7 +2048,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "foldRecursive",
                 icon: "iconFoldUnFold",
-                label: window.siyuan.languages.foldRecursive || "Fold/Expand recursively",
+                label: window.siyuan.languages.foldRecursive,
                 accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
                 click() {
                     foldBlocksRecursively(protyle, [nodeElement]);

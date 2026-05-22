@@ -1034,7 +1034,7 @@
   "memo": "备注",
   "name": "命名",
   "fold": "折叠/展开",
-  "foldRecursive": "递归折叠/展开",
+  "foldRecursive": "逐层折叠/展开",
   "zoom": "缩放",
   "invalid": "无效",
   "conflict": "冲突",

@@ -1034,7 +1034,7 @@
   "memo": "メモ",
   "name": "名前",
   "fold": "折りたたみ/展開",
-  "foldRecursive": "再帰的に折りたたみ/展開",
+  "foldRecursive": "レベルごとに折りたたみ/展開",
   "zoom": "ズーム",
   "invalid": "無効です",
   "conflict": "競合しています",

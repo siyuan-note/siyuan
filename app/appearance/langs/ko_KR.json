@@ -1034,7 +1034,7 @@
   "memo": "메모",
   "name": "이름",
   "fold": "접기/펼치기",
-  "foldRecursive": "재귀적으로 접기/펼치기",
+  "foldRecursive": "단계별 접기/펼치기",
   "zoom": "줌",
   "invalid": "유효하지 않음",
   "conflict": "충돌",

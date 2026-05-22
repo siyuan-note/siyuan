@@ -1034,7 +1034,7 @@
   "memo": "Poznámka",
   "name": "Názov",
   "fold": "Zbaliť/Rozbaliť",
-  "foldRecursive": "Rekurzívne zbaliť/rozbaliť",
+  "foldRecursive": "Zbaliť/Rozbaliť po úrovniach",
   "zoom": "Priblíženie",
   "invalid": "Neplatné",
   "conflict": "Konflikt",

@@ -1034,7 +1034,7 @@
   "memo": "Notiz",
   "name": "Name",
   "fold": "Falten/Erweitern",
-  "foldRecursive": "Rekursiv falten/erweitern",
+  "foldRecursive": "Stufenweise falten/erweitern",
   "zoom": "Zoom",
   "invalid": "Ungültig",
   "conflict": "Konflikt",

@@ -1034,7 +1034,7 @@
   "memo": "Not",
   "name": "Ad",
   "fold": "Daralt/Genişlet",
-  "foldRecursive": "Özyinelemeli daralt/genişlet",
+  "foldRecursive": "Seviye seviye daralt/genişlet",
   "zoom": "Yakınlaştır",
   "invalid": "Geçersiz",
   "conflict": "Çakışma",

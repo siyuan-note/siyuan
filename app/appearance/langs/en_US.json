@@ -1034,7 +1034,7 @@
   "memo": "Memo",
   "name": "Name",
   "fold": "Fold/Expand",
-  "foldRecursive": "Fold/Expand recursively",
+  "foldRecursive": "Fold/Expand by Level",
   "zoom": "Zoom",
   "invalid": "Invalid",
   "conflict": "Conflict",

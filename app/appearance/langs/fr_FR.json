@@ -1034,7 +1034,7 @@
   "memo": "Remarques",
   "name": "Nom",
   "fold": "Pliage/Élargir",
-  "foldRecursive": "Plier/Développer récursivement",
+  "foldRecursive": "Plier/Développer par niveau",
   "zoom": "Zoom",
   "invalid": "Invalide",
   "conflict": "Conflit",

@@ -674,8 +674,7 @@ ${getIconScript(servePath)}
             }
             document.body.classList.add("exporting");
             previewElement.style.zoom = "";
-            previewElement.style.paddingTop = "6px";
-            previewElement.style.paddingBottom = "0";
+            previewElement.style.padding = "6px 0 0 0";
             fixBlockWidth();
             actionElement.remove();
         });

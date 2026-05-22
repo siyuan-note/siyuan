@@ -318,7 +318,7 @@ const setHTML = (options: {
     }
     // 动态滚动条拖拽到最后几个块时需多加载一点块 https://github.com/siyuan-note/siyuan/issues/16906
     if (options.action.includes(Constants.CB_GET_FOCUSFIRST) &&
-        protyle.contentElement.scrollHeight <= protyle.contentElement.clientHeight) {
+        protyle.wysiwyg.element.getBoundingClientRect().top > protyle.breadcrumb.element.getBoundingClientRect().bottom) {
         fetchPost("/api/filetree/getDoc", {
             id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
             mode: 1,

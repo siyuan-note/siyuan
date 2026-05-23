@@ -2045,16 +2045,18 @@ export class Gutter {
                     focusBlock(nodeElement);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "foldRecursive",
-                icon: "iconFoldUnFold",
-                label: window.siyuan.languages.foldRecursive,
-                accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
-                click() {
-                    foldBlocksRecursively(protyle, [nodeElement]);
-                    focusBlock(nodeElement);
-                }
-            }).element);
+            if (["NodeHeading", "NodeListItem", "NodeBlockquote", "NodeCallout", "NodeSuperBlock"].includes(type)) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "foldRecursive",
+                    icon: "iconListTree",
+                    label: window.siyuan.languages.foldRecursive,
+                    accelerator: window.siyuan.config.keymap.editor.general.foldRecursive?.custom,
+                    click() {
+                        foldBlocksRecursively(protyle, [nodeElement]);
+                        focusBlock(nodeElement);
+                    }
+                }).element);
+            }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "attr",

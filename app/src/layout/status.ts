@@ -178,7 +178,7 @@ export const countSelectWord = (range: Range, rootID: string) => {
     /// #endif
 };
 
-export const countBlockWord = (ids: (string | null)[], rootID: string) => {
+export const countBlockWord = (ids: string[], rootID: string) => {
     /// #if !MOBILE
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;

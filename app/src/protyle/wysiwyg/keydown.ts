@@ -502,7 +502,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.classList.remove("protyle-wysiwyg--select");
                 });
                 topElement.classList.add("protyle-wysiwyg--select");
-                const ids: (string | null)[] = [];
+                const ids: string[] = [];
                 ids.push(topElement.getAttribute("data-node-id"));
                 let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
                 while (nextElement) {

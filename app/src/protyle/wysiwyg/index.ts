@@ -642,7 +642,7 @@ export class WYSIWYG {
                         !selectElements[0].classList.contains("sb")) {
                         // 单个 p 不选中
                     } else {
-                        const ids: (string | null)[] = [];
+                        const ids: string[] = [];
                         if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&
                             (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 || endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
                             showMessage(window.siyuan.languages.crossKeepLazyLoad);
@@ -702,7 +702,7 @@ export class WYSIWYG {
                         ctrlParentElement.removeAttribute("select-start");
                         ctrlParentElement.removeAttribute("select-end");
                     }
-                    const ids: (string | null)[] = [];
+                    const ids: string[] = [];
                     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                         ids.push(item.getAttribute("data-node-id"));
                     });
@@ -1734,7 +1734,7 @@ export class WYSIWYG {
                     }
                 }
 
-                const ids: (string | null)[] = [];
+                const ids: string[] = [];
                 const selectElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));

@@ -81,7 +81,7 @@ const promiseTransaction = () => {
         }]
     }, (response) => {
         if (window.siyuan.transactions.length === 0) {
-            const ids: (string | null)[] = [];
+            const ids: string[] = [];
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 ids.push(item.getAttribute("data-node-id"));
             });

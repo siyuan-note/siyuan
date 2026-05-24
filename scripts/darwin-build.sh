@@ -78,7 +78,7 @@ if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo 'Building Kernel arm64'
     export GOARCH=arm64
     go build -tags fts5 -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
-    ln -f "../app/kernel-darwin-arm64/SiYuan-Kernel" "../app/kernel-darwin-arm64/siyuan" 
+    ln -f "../app/kernel-darwin-arm64/SiYuan-Kernel" "../app/kernel-darwin-arm64/siyuan"
 fi
 
 echo

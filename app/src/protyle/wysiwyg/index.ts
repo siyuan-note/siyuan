@@ -281,7 +281,7 @@ export class WYSIWYG {
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")], protyle.block.rootID);
+                countBlockWord([nodeElement.getAttribute("data-node-id")]);
                 selectElements = [nodeElement];
             }
             let html = "";
@@ -657,7 +657,7 @@ export class WYSIWYG {
                                 });
                             }
                         });
-                        countBlockWord(ids, protyle.block.rootID);
+                        countBlockWord(ids);
                         if (toDown) {
                             focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
                         } else {
@@ -706,7 +706,7 @@ export class WYSIWYG {
                     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                         ids.push(item.getAttribute("data-node-id"));
                     });
-                    countBlockWord(ids, protyle.block.rootID);
+                    countBlockWord(ids);
                 }
                 return;
             }
@@ -1739,7 +1739,7 @@ export class WYSIWYG {
                 selectElement.forEach(item => {
                     ids.push(item.getAttribute("data-node-id"));
                 });
-                countBlockWord(ids, protyle.block.rootID);
+                countBlockWord(ids);
                 // 划选后不能存在跨块的 range https://github.com/siyuan-note/siyuan/issues/4473
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
@@ -2584,7 +2584,7 @@ export class WYSIWYG {
             if ((event.shiftKey || isOnlyMeta(event)) && !event.isComposing && range.toString() !== "") {
                 // 工具栏
                 protyle.toolbar.render(protyle, range, event);
-                countSelectWord(range, protyle.block.rootID);
+                countSelectWord(range);
             }
 
             if (event.eventPhase !== 3 && !event.shiftKey && (event.key.indexOf("Arrow") > -1 || event.key === "Home" || event.key === "End" || event.key === "PageUp" || event.key === "PageDown") && !event.isComposing) {

@@ -85,7 +85,7 @@ const promiseTransaction = () => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                 ids.push(item.getAttribute("data-node-id"));
             });
-            countBlockWord(ids, protyle.block.rootID);
+            countBlockWord(ids, protyle.block.rootID, true);
         } else {
             promiseTransaction();
         }

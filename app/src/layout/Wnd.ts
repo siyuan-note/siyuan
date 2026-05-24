@@ -772,9 +772,6 @@ export class Wnd {
             if (item.id !== id) {
                 return;
             }
-            if (item.model instanceof Editor) {
-                clearCounter(item.model.editor.protyle.block.rootID);
-            }
             if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > Constants.SIZE_UNDO) {
                 window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
             }
@@ -871,6 +868,7 @@ export class Wnd {
                 const wnd = new Wnd(this.app);
                 window.siyuan.layout.centerLayout.addWnd(wnd);
                 wnd.addTab(newCenterEmptyTab(this.app), false, false);
+                clearCounter();
                 setTitle("", true);
             }
         }

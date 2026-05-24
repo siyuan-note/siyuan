@@ -240,7 +240,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
 
                     nextElement.classList.add("protyle-wysiwyg--select");
-                    countBlockWord([nextElement.getAttribute("data-node-id")], protyle.block.rootID);
+                    countBlockWord([nextElement.getAttribute("data-node-id")]);
                     const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
                     if (bottom > 0) {
                         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
@@ -281,7 +281,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     if (previousElement) {
                         previousElement.classList.add("protyle-wysiwyg--select");
-                        countBlockWord([previousElement.getAttribute("data-node-id")], protyle.block.rootID);
+                        countBlockWord([previousElement.getAttribute("data-node-id")]);
                         const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
                         if (top < 0) {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
@@ -510,7 +510,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ids.push(nextElement.getAttribute("data-node-id"));
                     nextElement = event.key === "Home" ? nextElement.previousElementSibling : nextElement.nextElementSibling;
                 }
-                countBlockWord(ids, protyle.block.rootID);
+                countBlockWord(ids);
                 if (event.key === "Home") {
                     protyle.wysiwyg.element.firstElementChild.scrollIntoView();
                 } else {

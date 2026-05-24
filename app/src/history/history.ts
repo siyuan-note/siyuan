@@ -276,6 +276,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     response.data.files.forEach((item: {
         fileID: string,
         title: string,
+        hPath: string,
         path: string,
         hSize: string,
         updated: number
@@ -308,7 +309,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     <div class="fn__flex-1">
         <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
         <div class="b3-list-item__meta">
-            ${escapeHtml(item.path)}
+            ${escapeHtml(item.hPath)}
             <span class="fn__space"></span>
             ${item.hSize}
             <span class="fn__space"></span>

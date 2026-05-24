@@ -18,7 +18,10 @@ package plugin
 
 import (
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/dop251/goja"
 	"github.com/gin-gonic/gin"
@@ -144,6 +147,7 @@ type ResponseBody struct {
 	String   *ResponseString         `json:"string"`   // if the response is a formatted string, String will be non-nil.
 	Raw      *ResponseRawData        `json:"raw"`      // if the response is raw data, Raw will be non-nil.
 	Redirect *ResponseRedirect       `json:"redirect"` // if the response is a redirect, Redirect will be non-nil.
+	Proxy    *ResponseProxy          `json:"proxy"`    // if the response is a streaming proxy, Proxy will be non-nil.
 }
 
 type ResponseSerializedData struct {
@@ -170,9 +174,85 @@ type ResponseRedirect struct {
 	Location string `json:"location"` // the URL to redirect to
 }
 
+type ResponseProxy struct {
+	URL     string              `json:"url"`     // target http/https URL
+	Method  string              `json:"method"`  // optional, defaults to the incoming request method, only GET/HEAD are supported
+	Headers map[string][]string `json:"headers"` // request headers forwarded to the target
+}
+
 // isSseRequest checks if the incoming HTTP request is a Server-Sent Events (SSE) request by inspecting the "Accept" header for the "text/event-stream" value.
 func isSseRequest(c *gin.Context) bool {
 	return c.GetHeader(SseHeaderAcceptName) == SseHeaderAcceptValue
+}
+
+func isHopByHopHeader(header string) bool {
+	switch strings.ToLower(header) {
+	case "connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "te", "trailer", "transfer-encoding", "upgrade":
+		return true
+	default:
+		return false
+	}
+}
+
+func writeProxyResponse(c *gin.Context, proxy *ResponseProxy) error {
+	if proxy.URL == "" {
+		c.String(http.StatusBadRequest, "missing proxy url")
+		return nil
+	}
+	targetURL, err := url.ParseRequestURI(proxy.URL)
+	if err != nil {
+		c.String(http.StatusBadRequest, "parse proxy url failed: %s", err.Error())
+		return nil
+	}
+	if targetURL.Scheme != "http" && targetURL.Scheme != "https" {
+		c.String(http.StatusBadRequest, "only http/https proxy url is allowed")
+		return nil
+	}
+
+	method := proxy.Method
+	if method == "" {
+		method = c.Request.Method
+	}
+	method = strings.ToUpper(method)
+	if method != http.MethodGet && method != http.MethodHead {
+		c.String(http.StatusBadRequest, "only GET/HEAD proxy method is allowed")
+		return nil
+	}
+	req, err := http.NewRequestWithContext(c.Request.Context(), method, targetURL.String(), nil)
+	if err != nil {
+		c.String(http.StatusBadRequest, "create proxy request failed: %s", err.Error())
+		return nil
+	}
+	for key, values := range proxy.Headers {
+		for _, value := range values {
+			req.Header.Add(key, value)
+		}
+	}
+
+	client := &http.Client{Timeout: 0}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.String(http.StatusBadGateway, "proxy request failed: %s", err.Error())
+		return nil
+	}
+	defer resp.Body.Close()
+
+	for key, values := range resp.Header {
+		if isHopByHopHeader(key) {
+			continue
+		}
+		for _, value := range values {
+			c.Writer.Header().Add(key, value)
+		}
+	}
+	c.Writer.WriteHeader(resp.StatusCode)
+	if method == http.MethodHead {
+		return nil
+	}
+	if _, err = io.Copy(c.Writer, resp.Body); err != nil {
+		logging.LogWarnf("plugin proxy copy response failed: %s", err.Error())
+	}
+	return nil
 }
 
 func parseRequest(c *gin.Context) (request *Request, err error) {
@@ -410,6 +490,12 @@ func HandleHttpRequest(c *gin.Context, scope AccessScope) {
 		} else if response.Body.Redirect != nil {
 			// Redirect
 			c.Redirect(response.StatusCode, response.Body.Redirect.Location)
+			return
+		} else if response.Body.Proxy != nil {
+			// Streaming proxy
+			if proxyErr := writeProxyResponse(c, response.Body.Proxy); proxyErr != nil {
+				c.String(http.StatusInternalServerError, "[plugin:%s] Error occurred while proxying HTTP response: %s", name, proxyErr.Error())
+			}
 			return
 		} else {
 			// No body

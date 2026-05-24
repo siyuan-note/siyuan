@@ -22,6 +22,16 @@ const getLastChildBlock = (element: Element): Element | null => {
     return null;
 };
 
+const unfoldFoldedAncestors = (protyle: IProtyle, element: Element) => {
+    let current = element.parentElement;
+    while (current && !current.classList.contains("protyle-wysiwyg")) {
+        if (current.getAttribute("fold") === "1") {
+            setFold(protyle, current, true);
+        }
+        current = current.parentElement;
+    }
+};
+
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {
         return;
@@ -101,6 +111,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
         const newListItemElement = genListItemElement(liElement, 0, true, 1);
         const newListHTML = `<div data-subtype="${subType}" data-node-id="${id}" data-type="NodeList" class="list" updated="${dayjs().format("YYYYMMDDHHmmss")}">${newListItemElement.outerHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
         lastChildBlock.insertAdjacentHTML("afterend", newListHTML);
+        unfoldFoldedAncestors(protyle, lastChildBlock.nextElementSibling);
         transaction(protyle, [{
             action: "insert",
             id,
@@ -120,16 +131,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
         const newListElement = genListItemElement(lastSubItem, 0, true);
         const id = newListElement.getAttribute("data-node-id");
         lastSubItem.after(newListElement);
-        if (lastSubItem.parentElement.getAttribute("fold") === "1") {
-            setFold(protyle, lastSubItem.parentElement, true);
-        }
-        if (liElement.getAttribute("fold") === "1") {
-            setFold(protyle, liElement, true);
-        }
-        const parentListElement = hasClosestByClassName(liElement, "list");
-        if (parentListElement && parentListElement.getAttribute("fold") === "1") {
-            setFold(protyle, parentListElement, true);
-        }
+        unfoldFoldedAncestors(protyle, newListElement);
         transaction(protyle, [{
             action: "insert",
             id,

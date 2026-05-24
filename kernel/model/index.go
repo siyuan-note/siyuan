@@ -377,6 +377,9 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
@@ -388,6 +391,9 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
@@ -399,6 +405,9 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(234), current, total, blockCount, hash)
@@ -411,6 +420,9 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(191), current, total)
@@ -423,6 +435,9 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(217), current, total)

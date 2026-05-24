@@ -106,7 +106,7 @@ if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     export GOARCH=amd64
     setup_cc amd64
     go build -buildmode=pie -tags fts5 -o "../app/kernel-linux/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
-    ln -f "../app/kernel-linux/siyuan" "../app/kernel-linux/SiYuan-Kernel"
+    ln -f "../app/kernel-linux/SiYuan-Kernel" "../app/kernel-linux/siyuan"
 fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
@@ -114,7 +114,7 @@ if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     export GOARCH=arm64
     setup_cc arm64
     go build -buildmode=pie -tags fts5 -o "../app/kernel-linux-arm64/SiYuan-Kernel" -ldflags "-s -w -extldflags -static-pie" .
-    ln -f "../app/kernel-linux-arm64/siyuan" "../app/kernel-linux-arm64/SiYuan-Kernel"
+    ln -f "../app/kernel-linux-arm64/SiYuan-Kernel" "../app/kernel-linux-arm64/siyuan"
 fi
 
 echo

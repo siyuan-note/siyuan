@@ -291,7 +291,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
         </div>
         <div class="fn__flex" style="height: 26px">
             <span class="fn__flex-1"></span>
-            <span class="b3-list-item__action" data-type="saveAs">
+            <span class="b3-list-item__action${item.path.endsWith(".sy")?" fn__none":""}" data-type="saveAs">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
             </span>
@@ -318,7 +318,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w${item.path.endsWith(".sy") ? " fn__none" : ""}" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
 </li>`;
@@ -484,7 +484,7 @@ export const openHistory = (app: App) => {
                     <div class="fn__flex-1"></div>
                     <div class="b3-form__icon">
                         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}">
+                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.search}">
                     </div>
                     <span class="fn__space"></span>
                     <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">

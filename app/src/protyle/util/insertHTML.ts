@@ -21,7 +21,7 @@ import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
 import {getFieldIdByCellElement} from "../render/av/row";
 import {processClonePHElement} from "../render/util";
-import {setFold} from "../../menus/protyle";
+import {setFold} from "./blockFold";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");

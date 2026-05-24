@@ -26,7 +26,7 @@ import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import * as dayjs from "dayjs";
-import {setFold, zoomOut} from "../../menus/protyle";
+import {zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
@@ -38,6 +38,7 @@ import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clear";
 import {dragoverTab} from "../render/av/view";
+import {setFold} from "./blockFold";
 
 // position: afterbegin 为拖拽成超级块; "afterend", "beforebegin" 一般拖拽
 const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElement: Element,
@@ -581,9 +582,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
                 event.dataTransfer.setDragImage(ghostElement, 0, 0);
-                setTimeout(() => {
-                    ghostElement.remove();
-                });
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
 
                 window.siyuan.dragElement = protyle.wysiwyg.element;
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
@@ -651,9 +656,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ghostElement.setAttribute("style", "left: 1px;top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
-                    setTimeout(() => {
-                        ghostElement.remove();
-                    });
+                    if (window.siyuan.touchDragActive) {
+                        window.siyuan.touchDragGhost = ghostElement;
+                    } else {
+                        setTimeout(() => {
+                            ghostElement.remove();
+                        });
+                    }
                     window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
@@ -1168,12 +1177,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.dataTransfer.types.includes("Files") && !isBrowser()) {
                     const files: ILocalFiles[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        files.push({
-                            path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                            size: event.dataTransfer.files[i].size
-                        });
+                        const filePath = webUtils.getPathForFile(event.dataTransfer.files[i]);
+                        if (filePath) {
+                            files.push({
+                                path: filePath,
+                                size: event.dataTransfer.files[i].size
+                            });
+                        } else {
+                            paste(protyle, event);
+                            break;
+                        }
                     }
-                    uploadLocalFiles(files, protyle, !event.altKey);
+                    if (files.length > 0) {
+                        uploadLocalFiles(files, protyle, !event.altKey);
+                    }
                 } else {
                     paste(protyle, event);
                 }

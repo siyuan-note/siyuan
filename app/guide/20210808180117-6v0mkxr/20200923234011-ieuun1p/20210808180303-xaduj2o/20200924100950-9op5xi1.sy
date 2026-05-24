@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20251024173332"
+		"updated": "20260517211244"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133532-44ubczo",
-				"updated": "20251024173332"
+				"updated": "20260504121841"
 			},
 			"Children": [
 				{
@@ -40,7 +40,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20251024173332"
+				"updated": "20260504121841"
 			},
 			"Children": [
 				{
@@ -629,7 +629,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ "
+									"Data": "​"
 								}
 							]
 						},
@@ -1741,7 +1741,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Doc tree panel"
+									"Data": "Documents panel"
 								}
 							]
 						},
@@ -2368,7 +2368,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Page reset"
+									"Data": "Interface reset"
 								}
 							]
 						},
@@ -2425,7 +2425,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Page zoom in"
+									"Data": "Interface zoom in"
 								}
 							]
 						},
@@ -2482,7 +2482,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Page zoom out"
+									"Data": "Interface zoom out"
 								}
 							]
 						},
@@ -2912,12 +2912,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20250115160409"
+				"updated": "20260426175817"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Doc tree"
+					"Data": "Document"
 				}
 			]
 		},
@@ -3745,7 +3745,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20250529110920"
+				"updated": "20260517211235"
 			},
 			"Children": [
 				{
@@ -3764,7 +3764,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20250529110920"
+				"updated": "20260517211235"
 			},
 			"Children": [
 				{
@@ -3784,7 +3784,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20250529110920"
+				"updated": "20260517211235"
 			},
 			"Children": [
 				{
@@ -7225,7 +7225,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/Expand"
+									"Data": "Fold/Expand"
 								}
 							]
 						},
@@ -7259,6 +7259,72 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘↑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Fold/Expand Recursively"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "↑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥⌘↑"
 								},
 								{
 									"Type": "NodeText",
@@ -13827,7 +13893,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220619002116-wyh4u48",
-				"updated": "20250115161021"
+				"updated": "20260517211244"
 			},
 			"Children": [
 				{
@@ -13842,7 +13908,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210528103541-wdfi8b5",
-				"updated": "20250115161021"
+				"updated": "20260517211244"
 			},
 			"Children": [
 				{
@@ -13861,7 +13927,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20210601185420-1s8e9uy",
-				"updated": "20250115161021"
+				"updated": "20260517211244"
 			},
 			"Children": [
 				{
@@ -13998,7 +14064,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/Expand"
+									"Data": "Fold/Expand"
 								}
 							]
 						},
@@ -14300,7 +14366,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221105230824-p1mp4c2",
-				"updated": "20251021230901"
+				"updated": "20260517211202"
 			},
 			"Children": [
 				{
@@ -14320,7 +14386,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20221105230832-4q1qwpt",
-				"updated": "20251021230901"
+				"updated": "20260517211202"
 			},
 			"Children": [
 				{
@@ -14532,7 +14598,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/expand all siblings"
+									"Data": "Fold/expand all siblings"
 								},
 								{
 									"Type": "NodeBr",
@@ -14666,7 +14732,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/expand current level"
+									"Data": "Fold/expand current level"
 								}
 							]
 						},
@@ -14711,7 +14777,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Collapse/expand all sub-levels"
+									"Data": "Fold/expand all sub-levels"
 								}
 							]
 						},
@@ -15126,12 +15192,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20250929214205"
+				"updated": "20260426175814"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Doc Tree panel"
+					"Data": "Document panel"
 				}
 			]
 		},

@@ -48,5 +48,5 @@ chown -R "${PUID}:${PGID}" /home/siyuan/
 chown -R "${PUID}:${PGID}" "${WORKSPACE_DIR}"
 
 # Switch to the newly created user and start the main process with all arguments
-echo "Starting Siyuan with UID:${PUID} and GID:${PGID} in workspace ${WORKSPACE_DIR}"
+echo "Starting SiYuan with UID:${PUID} and GID:${PGID} in workspace ${WORKSPACE_DIR}"
 exec su-exec "${PUID}:${PGID}" /opt/siyuan/kernel --workspace="${WORKSPACE_DIR}" ${ARGS}

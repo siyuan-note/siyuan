@@ -12,7 +12,7 @@ import {setStorageVal, writeText} from "../protyle/util/compatibility";
 import {hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {Plugin} from "../plugin";
 import {App} from "../index";
-import {escapeAttr} from "../util/escape";
+import {escapeAttr, escapeHtml} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
 import {useShell} from "../util/pathName";
@@ -235,7 +235,10 @@ export const bazaar = {
             return "";
         }
         try {
-            new URL(funding);
+            const url = new URL(funding);
+            if (!["http:", "https:", "mailto:"].includes(url.protocol)) {
+                throw new Error("not an allowed URL protocol");
+            }
             return `<span class="fn__space--small"></span><a target="_blank" href="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></a>`;
         } catch (e) {
             return `<span class="fn__space--small"></span><span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
@@ -272,9 +275,9 @@ export const bazaar = {
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
-            ${item.preferredName}
-            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">
-                ${item.preferredDesc || ""}
+            ${escapeHtml(item.preferredName)}
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc)}">
+                ${escapeHtml(item.preferredDesc)}
             </div>
         </div>
         <div class="b3-card__actions">
@@ -287,7 +290,7 @@ export const bazaar = {
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconAccount"></use></svg>
                 <span class="fn__space--small"></span>
-                ${item.author}
+                ${escapeHtml(item.author)}
             </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
             <span class="fn__space--small"></span>
@@ -312,14 +315,15 @@ export const bazaar = {
             name: item.name,
             repoURL: item.repoURL,
             repoHash: item.repoHash,
-            downloaded: true
+            downloaded: true,
+            isUpdateItem: true
         };
         return `<div class="b3-card" data-obj='${JSON.stringify(dataObj)}'>
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            ${item.preferredName}
-            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
+            ${escapeHtml(item.preferredName)}
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc)}">${escapeHtml(item.preferredDesc)}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -427,8 +431,8 @@ export const bazaar = {
     <div class="b3-card__img"><img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
-            ${item.preferredName}
-            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc) || ""}">${item.preferredDesc || ""}</div>
+            ${escapeHtml(item.preferredName)}
+            <div class="b3-card__desc" title="${escapeAttr(item.preferredDesc)}">${escapeHtml(item.preferredDesc)}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -487,7 +491,7 @@ type="checkbox">
             plugins: [] as IBazaarItem[],
         }
     },
-    _renderReadme(bazaarType: TBazaarType, data: IBazaarItem, downloaded: boolean) {
+    _renderReadme(bazaarType: TBazaarType, data: IBazaarItem, downloaded: boolean, isUpdateItem = false) {
         const readmeElement = bazaar.element.querySelector("#configBazaarReadme") as HTMLElement;
         const urls = data.repoURL.split("/");
         urls.pop();
@@ -507,7 +511,8 @@ type="checkbox">
             name: data.name,
             repoURL: data.repoURL,
             repoHash: data.repoHash,
-            downloaded
+            downloaded,
+            isUpdateItem
         };
         readmeElement.innerHTML = ` <div class="item__side" data-obj='${JSON.stringify(dataObj1)}'>
     <div class="fn__flex">
@@ -519,11 +524,11 @@ type="checkbox">
     </div>
     <img class="item__img" src="${data.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
     <div>
-        <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${data.preferredName}</a>
+        <a href="${data.repoURL}" target="_blank" class="item__title" title="GitHub Repo">${escapeHtml(data.preferredName)}</a>
     </div>
     <div class="fn__hr"></div>
     <div>
-        <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${data.name}</a>
+        <a href="${data.repoURL}" target="_blank" class="ft__on-surface ft__smaller" title="GitHub Repo">${escapeHtml(data.name)}</a>
     </div>
     <div class="block__icons">
         <span class="fn__flex-1"></span>
@@ -532,12 +537,12 @@ type="checkbox">
             '<span class="block__icon block__icon--show block__icon--text" style="cursor: default"><svg><use xlink:href="#iconAccount"></use></svg></span>'
         }
         <span class="fn__space"></span>
-        <a href="${urls.join("/")}" target="_blank" title="Creator">${data.author}</a>
+        <a href="${urls.join("/")}" target="_blank" title="Creator">${escapeHtml(data.author)}</a>
         <span class="fn__flex-1"></span>
     </div>
     <div class="fn__hr--b"></div>
     <div class="fn__hr--b"></div>
-    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${data.version}</div>
+    <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${window.siyuan.languages.currentVer}<br>v${escapeHtml(data.version)}</div>
     <div class="fn__hr"></div>
     <div class="ft__on-surface ft__smaller" style="line-height: 20px;">${downloaded ? window.siyuan.languages.installDate : window.siyuan.languages.releaseDate}<br>${downloaded ? data.hInstallDate : data.hUpdated}</div>
     <div class="fn__hr${downloaded ? " fn__none" : ""}"></div>
@@ -587,7 +592,7 @@ type="checkbox">
     <div class="b3-typography${data.preferredDesc ? "" : " fn__none"}">
         <blockquote>
             <p>
-                ${data.preferredDesc || ""}
+                ${escapeHtml(data.preferredDesc)}
             </p>
          </blockquote>
     </div>
@@ -595,7 +600,7 @@ type="checkbox">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
-        if (downloaded) {
+        if (downloaded && !isUpdateItem) {
             const mdElement = readmeElement.querySelector(".item__readme");
             mdElement.innerHTML = data.preferredReadme || "";
             highlightRender(mdElement);
@@ -914,7 +919,7 @@ type="checkbox">
                         } else {
                             data = (dataObj.downloaded ? bazaar._data.downloaded : bazaar._data[bazaarType]).find((item: IBazaarItem) => item.repoURL === dataObj.repoURL);
                         }
-                        bazaar._renderReadme(bazaarType, data, dataObj.downloaded);
+                        bazaar._renderReadme(bazaarType, data, dataObj.downloaded, !!dataObj.isUpdateItem);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -1103,9 +1108,12 @@ type="checkbox">
         }
         if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
             const dataObj = JSON.parse(bazaar.element.querySelector("#configBazaarReadme > .item__side").getAttribute("data-obj"));
-            bazaar._renderReadme((dataObj.bazaarType) as TBazaarType,
+            bazaar._renderReadme(
+                (dataObj.bazaarType) as TBazaarType,
                 response.data.packages.find((item: IBazaarItem) => item.repoURL === dataObj.repoURL),
-                dataObj.downloaded);
+                dataObj.downloaded,
+                !!dataObj.isUpdateItem
+            );
         }
         let html = "";
         response.data.packages.forEach((item: IBazaarItem) => {

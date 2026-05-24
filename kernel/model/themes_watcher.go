@@ -32,7 +32,7 @@ import (
 var themesWatcher *fsnotify.Watcher
 
 func WatchThemes() {
-	if !isFileWatcherAvailable() {
+	if util.IsMobileContainer() {
 		return
 	}
 

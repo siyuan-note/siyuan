@@ -129,7 +129,7 @@
       }
 
       &__label {
-        font-size: 17px;
+        font-size: 18px;
         white-space: break-spaces;
         line-height: 26px;
         margin: 8px 0;
@@ -138,8 +138,8 @@
       }
 
       &__icon {
-        height: 17px;
-        width: 17px;
+        height: 22px;
+        width: 22px;
         margin: 0 16px 0 8px;
 
         &--arrow {
@@ -178,7 +178,7 @@
     border-radius: var(--b3-border-radius);
     user-select: none;
     display: flex;
-    line-height: 30px;
+    line-height: 28px;
     cursor: pointer;
     white-space: nowrap;
     border: 0;
@@ -312,16 +312,15 @@
 
   &__icon {
     align-self: center;
-    height: 14px;
-    width: 14px;
-    line-height: 14px;
+    height: 16px;
+    width: 16px;
+    line-height: 16px;
     margin-right: 8px;
     color: var(--b3-theme-on-surface);
     flex-shrink: 0;
 
     &--small {
       margin: 0 0 0 8px;
-      height: 10px;
     }
   }
 

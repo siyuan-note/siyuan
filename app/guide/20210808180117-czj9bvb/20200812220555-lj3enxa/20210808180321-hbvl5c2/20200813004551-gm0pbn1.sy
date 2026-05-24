@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20251024172333"
+		"updated": "20260517165333"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20251024172313"
+				"updated": "20260504121430"
 			},
 			"Children": [
 				{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20251024172313"
+				"updated": "20260504121430"
 			},
 			"Children": [
 				{
@@ -1739,7 +1739,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文档树面板"
+									"Data": "文档面板"
 								}
 							]
 						},
@@ -2366,7 +2366,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "页面重置"
+									"Data": "界面重置"
 								}
 							]
 						},
@@ -2423,7 +2423,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "页面放大"
+									"Data": "界面放大"
 								}
 							]
 						},
@@ -2480,7 +2480,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "页面缩小"
+									"Data": "界面缩小"
 								}
 							]
 						},
@@ -2910,12 +2910,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183308-g4ck02v",
-				"updated": "20250115154137"
+				"updated": "20260426175427"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文档树"
+					"Data": "文档"
 				}
 			]
 		},
@@ -3743,7 +3743,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20250529110805"
+				"updated": "20260517165333"
 			},
 			"Children": [
 				{
@@ -3758,7 +3758,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20250529110805"
+				"updated": "20260517165333"
 			},
 			"Children": [
 				{
@@ -3782,7 +3782,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20250529110805"
+				"updated": "20260517165333"
 			},
 			"Children": [
 				{
@@ -7292,6 +7292,72 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘↓"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "逐层折叠/展开"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "↑"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌥⌘↑"
 								},
 								{
 									"Type": "NodeText",
@@ -15079,12 +15145,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20250929213838"
+				"updated": "20260426175408"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文档树面板"
+					"Data": "文档面板"
 				}
 			]
 		},

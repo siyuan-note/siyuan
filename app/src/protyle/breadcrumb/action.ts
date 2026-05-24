@@ -35,21 +35,24 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         element.classList.add("fullscreen");
         document.getElementById("drag")?.classList.add("fn__hidden");
     }
-    if (isWindow()) {
-        // 编辑器全屏
-        /// #if !MOBILE
-        const wndsTemp: Wnd[] = [];
+    /// #if !MOBILE
+    const isWindowMode = isWindow();
+    const wndsTemp: Wnd[] = [];
+    if (isWindowMode) {
         getAllWnds(window.siyuan.layout.layout, wndsTemp);
-        wndsTemp.find(async item => {
-            const headerElement = item.headersElement.parentElement;
-            if (headerElement.getBoundingClientRect().top <= 0) {
-                // @ts-ignore
-                (headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement).style.WebkitAppRegion = isFullscreen ? "drag" : "";
-                return true;
-            }
-        });
-        /// #endif
+    } else if (window.siyuan.config.appearance.hideToolbar) {
+        getAllWnds(window.siyuan.layout.centerLayout, wndsTemp);
     }
+    wndsTemp.find(item => {
+        const headerElement = item.headersElement.parentElement;
+        if (headerElement.getBoundingClientRect().top <= 0) {
+            ((headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement).style as CSSStyleDeclarationElectron).WebkitAppRegion =
+                isFullscreen ? "drag" : "";
+            return true;
+        }
+    });
+    /// #endif
+
     /// #if !MOBILE
     if ("darwin" !== window.siyuan.config.system.os && !isWindow()) {
         const windowControlsElement = document.getElementById("windowControls");

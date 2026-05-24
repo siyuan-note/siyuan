@@ -185,22 +185,17 @@ func rollbackDocHistory(c *gin.Context) {
 		return
 	}
 
-	var notebook, historyPath string
+	var historyPath string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("notebook", &notebook, true, true),
 		util.BindJsonArg("historyPath", &historyPath, true, true),
 	) {
 		return
 	}
-	err := model.RollbackDocHistory(notebook, historyPath)
+	err := model.RollbackDocHistory(historyPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
-	}
-
-	ret.Data = map[string]any{
-		"box": notebook,
 	}
 }
 

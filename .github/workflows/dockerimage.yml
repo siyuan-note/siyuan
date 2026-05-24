@@ -34,10 +34,9 @@ jobs:
           submodules: recursive
 
       - name: Extract version from package.json
-        uses: sergeysova/jq-action@v2
         id: version
-        with:
-          cmd: "jq .version ${{ env.package_json }} -r"
+        run: |
+          echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main

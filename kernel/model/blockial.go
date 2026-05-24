@@ -270,47 +270,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	return
 }
 
-func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
-	if util.ReadOnly {
-		return
-	}
-
-	FlushTxQueue()
-
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return err
-	}
-
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		return fmt.Errorf(Conf.Language(15), id)
-	}
-
-	oldAttrs := parse.IAL2Map(node.KramdownIAL)
-	node.ClearIALAttrs()
-
-	_, err = setNodeAttrs0(node, nameValues)
-	if err != nil {
-		return
-	}
-
-	if err = indexWriteTreeUpsertQueue(tree); err != nil {
-		return
-	}
-
-	IncSync()
-	cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-
-	pushBlockAttrs(oldAttrs, node)
-
-	go func() {
-		sql.FlushQueue()
-		refreshDynamicRefText(node, tree)
-	}()
-	return
-}
-
 // isValidAttrName 验证属性名是否合法
 func isValidAttrName(name string) bool {
 	n := len(name)

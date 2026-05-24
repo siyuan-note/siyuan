@@ -19,42 +19,23 @@
 package main
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/job"
-	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/server"
-	"github.com/siyuan-note/siyuan/kernel/sql"
-	"github.com/siyuan-note/siyuan/kernel/util"
+	"os"
+	"strings"
+
+	"github.com/siyuan-note/siyuan/kernel/cli/cmd"
 )
 
 func main() {
-	util.Boot()
-
-	model.InitConf()
-	go server.Serve(false, model.Conf.CookieKey)
-	model.InitAppearance()
-	sql.InitDatabase(false)
-	sql.InitHistoryDatabase(false)
-	sql.InitAssetContentDatabase(false)
-	sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
-	sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
-
-	model.BootSyncData()
-	model.InitBoxes()
-	model.LoadFlashcards()
-	util.LoadAssetsTexts()
-
-	util.SetBooted()
-	util.PushClearAllMsg()
-
-	job.StartCron()
-
-	go model.AutoGenerateFileHistory()
-	go cache.LoadAssets()
-	go util.CheckFileSysStatus()
-
-	model.WatchAssets()
-	model.WatchEmojis()
-	model.WatchThemes()
-	model.HandleSignal()
+	// Auto-detect: --flag style args → kernel serve mode
+	if len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "-") {
+		switch os.Args[1] {
+		case "--help", "-h", "--version", "-v":
+			// let cobra handle these
+		default:
+			os.Args = append([]string{os.Args[0], "serve"}, os.Args[1:]...)
+		}
+	}
+	if err := cmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

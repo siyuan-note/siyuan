@@ -34,6 +34,7 @@ linux:
     - target: "tar.gz"
     - target: "AppImage"
     - target: "deb"
+    - target: "rpm"
 
 extraResources:
   - from: "changelogs"

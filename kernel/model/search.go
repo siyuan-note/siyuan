@@ -478,7 +478,7 @@ func prependNotebookNameInHPath(blocks []*Block) {
 	}
 }
 
-func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
+func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types, subTypes map[string]bool, method, orderBy, groupBy int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
 	if 2 == method {
 		err = errors.New(Conf.Language(132))
@@ -520,7 +520,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	if 1 > len(ids) {
 		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
-		blocks, _, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1, math.MaxInt)
+		blocks, _, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, subTypes, method, orderBy, groupBy, 1, math.MaxInt)
 		for _, block := range blocks {
 			ids = append(ids, block.ID)
 		}
@@ -1158,7 +1158,7 @@ func mergeSamePreNext(n *ast.Node) {
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
+func FullTextSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
@@ -1181,7 +1181,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	orderByClause := buildOrderBy(query, method, orderBy)
 	switch method {
 	case 1: // 查询语法
-		typeFilter := buildTypeFilter(types)
+		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
@@ -1192,12 +1192,12 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	case 2: // SQL
 		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen, page, pageSize)
 	case 3: // 正则表达式
-		typeFilter := buildTypeFilter(types)
+		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
 		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexp(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 	default: // 关键字
-		typeFilter := buildTypeFilter(types)
+		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
@@ -1397,7 +1397,17 @@ func buildOrderBy(query string, method, orderBy int) string {
 	}
 }
 
-func buildTypeFilter(types map[string]bool) string {
+// buildTypeFilter returns a complete SQL predicate (including outer parens)
+// suitable for appending after "AND". When subTypes is empty, the result is
+// equivalent to the previous "type IN (...)" behavior. When subTypes contains
+// at least one heading-level (h1..h6) or list (o/u/t) flag, the predicate is
+// extended so that the corresponding parent type (heading or list/listItem)
+// is restricted to the selected subtypes via "subtype IN (...)".
+//
+// Example output:
+//
+//	(type IN ('p','c') OR (type = 'h' AND subtype IN ('h1','h2')))
+func buildTypeFilter(types, subTypes map[string]bool) string {
 	s := conf.NewSearch()
 	if err := copier.Copy(s, Conf.Search); err != nil {
 		logging.LogErrorf("copy search conf failed: %s", err)
@@ -1441,7 +1451,86 @@ func buildTypeFilter(types map[string]bool) string {
 		s.WidgetBlock = Conf.Search.WidgetBlock
 		s.Callout = Conf.Search.Callout
 	}
-	return s.TypeFilter()
+
+	var headingSubs, listSubs []string
+	for _, h := range []string{"h1", "h2", "h3", "h4", "h5", "h6"} {
+		if subTypes[h] {
+			headingSubs = append(headingSubs, h)
+		}
+	}
+	for _, l := range []string{"o", "u", "t"} {
+		if subTypes[l] {
+			listSubs = append(listSubs, l)
+		}
+	}
+
+	var simpleTypes []string
+	addSimple := func(enabled bool, abbr string) {
+		if enabled {
+			simpleTypes = append(simpleTypes, abbr)
+		}
+	}
+	addSimple(s.Document, treenode.TypeAbbr(ast.NodeDocument.String()))
+	addSimple(s.CodeBlock, treenode.TypeAbbr(ast.NodeCodeBlock.String()))
+	addSimple(s.MathBlock, treenode.TypeAbbr(ast.NodeMathBlock.String()))
+	addSimple(s.Table, treenode.TypeAbbr(ast.NodeTable.String()))
+	addSimple(s.Blockquote, treenode.TypeAbbr(ast.NodeBlockquote.String()))
+	addSimple(s.SuperBlock, treenode.TypeAbbr(ast.NodeSuperBlock.String()))
+	addSimple(s.Paragraph, treenode.TypeAbbr(ast.NodeParagraph.String()))
+	addSimple(s.HTMLBlock, treenode.TypeAbbr(ast.NodeHTMLBlock.String()))
+	addSimple(s.EmbedBlock, treenode.TypeAbbr(ast.NodeBlockQueryEmbed.String()))
+	addSimple(s.DatabaseBlock, treenode.TypeAbbr(ast.NodeAttributeView.String()))
+	addSimple(s.AudioBlock, treenode.TypeAbbr(ast.NodeAudio.String()))
+	addSimple(s.VideoBlock, treenode.TypeAbbr(ast.NodeVideo.String()))
+	addSimple(s.IFrameBlock, treenode.TypeAbbr(ast.NodeIFrame.String()))
+	addSimple(s.WidgetBlock, treenode.TypeAbbr(ast.NodeWidget.String()))
+	addSimple(s.Callout, treenode.TypeAbbr(ast.NodeCallout.String()))
+
+	var clauses []string
+
+	if s.Heading {
+		headingAbbr := treenode.TypeAbbr(ast.NodeHeading.String())
+		if 0 == len(headingSubs) {
+			simpleTypes = append(simpleTypes, headingAbbr)
+		} else {
+			clauses = append(clauses, fmt.Sprintf("(type = '%s' AND subtype IN (%s))",
+				headingAbbr, sqlQuoteJoin(headingSubs)))
+		}
+	}
+
+	var listTypes []string
+	if s.List {
+		listTypes = append(listTypes, treenode.TypeAbbr(ast.NodeList.String()))
+	}
+	if s.ListItem {
+		listTypes = append(listTypes, treenode.TypeAbbr(ast.NodeListItem.String()))
+	}
+	if 0 < len(listTypes) {
+		if 0 == len(listSubs) {
+			simpleTypes = append(simpleTypes, listTypes...)
+		} else {
+			clauses = append(clauses, fmt.Sprintf("(type IN (%s) AND subtype IN (%s))",
+				sqlQuoteJoin(listTypes), sqlQuoteJoin(listSubs)))
+		}
+	}
+
+	if 0 < len(simpleTypes) {
+		clauses = append([]string{"type IN (" + sqlQuoteJoin(simpleTypes) + ")"}, clauses...)
+	}
+
+	if 0 == len(clauses) {
+		// Match nothing without producing invalid SQL when concatenated after AND.
+		return "(1 = 0)"
+	}
+	return "(" + strings.Join(clauses, " OR ") + ")"
+}
+
+func sqlQuoteJoin(items []string) string {
+	quoted := make([]string, len(items))
+	for i, item := range items {
+		quoted[i] = "'" + item + "'"
+	}
+	return strings.Join(quoted, ",")
 }
 
 func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -1585,7 +1674,7 @@ func extractID(content string) (ret string) {
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
 	regex, err := regexp.Compile(exp)
 	if nil != err {
@@ -1605,7 +1694,7 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter
 
 func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter + ignoreFilter
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter + ignoreFilter
 	stmt += boxFilter + pathFilter
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
@@ -1631,7 +1720,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
-	stmt += ") AND type IN " + typeFilter
+	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
@@ -1651,7 +1740,7 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 	}
 
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
-	stmt += ") AND type IN " + typeFilter
+	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
@@ -1678,7 +1767,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 	}
 	orderByLike += ")"
 	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
-		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
@@ -1687,7 +1776,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 		"(" + contentField + ") AS concatContent, " +
 		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
 		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
-		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" FROM blocks WHERE " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
 		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
 	if strings.Contains(orderBy, "ORDER BY rank DESC") {
@@ -1736,7 +1825,7 @@ func highlightByFTS(query, typeFilter, id string) (ret []string) {
 		"highlight(" + table + ", 17, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS ial, " +
 		"sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
-	stmt += ") AND type IN " + typeFilter
+	stmt += ") AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
 	stmt += " LIMIT " + strconv.Itoa(limit)
 	sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, limit)
@@ -1776,7 +1865,7 @@ func highlightByFTS(query, typeFilter, id string) (ret []string) {
 
 func highlightByRegexp(query, typeFilter, id string) (ret []string) {
 	fieldFilter := fieldRegexp(query)
-	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
 	regex, _ := regexp.Compile(query)
 	if nil == regex {

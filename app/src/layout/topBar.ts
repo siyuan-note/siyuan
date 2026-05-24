@@ -28,7 +28,7 @@ import {openTopBarMenu} from "../plugin/openTopBarMenu";
 export const initBar = (app: App) => {
     const toolbarElement = document.getElementById("toolbar");
     toolbarElement.innerHTML = `
-<div id="barWorkspace" class="ariaLabel toolbar__item toolbar__item--active" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}">
+<div id="barWorkspace" class="ariaLabel toolbar__item" aria-label="${window.siyuan.languages.mainMenu} ${updateHotkeyTip(window.siyuan.config.keymap.general.mainMenu.custom)}">
     <span class="toolbar__text">${getWorkspaceName()}</span>
     <svg class="toolbar__svg"><use xlink:href="#iconDown"></use></svg>
 </div>
@@ -174,7 +174,7 @@ export const initBar = (app: App) => {
             } else if (targetId === "toolbarVIP") {
                 if (!window.siyuan.config.readonly) {
                     const dialogSetting = openSetting(app);
-                    dialogSetting.element.querySelector('.b3-tab-bar [data-name="account"]').dispatchEvent(new CustomEvent("click"));
+                    dialogSetting.element.querySelector('.config__side [data-name="account"]').dispatchEvent(new CustomEvent("click"));
                 }
                 event.stopPropagation();
                 break;
@@ -265,6 +265,9 @@ export const initBar = (app: App) => {
         });
     });
     barSyncElement.setAttribute("aria-label", window.siyuan.config.sync.stat || (window.siyuan.languages.syncNow + " " + updateHotkeyTip(window.siyuan.config.keymap.general.syncNow.custom)));
+    if (window.siyuan.config.appearance.hideToolbar) {
+        document.body.classList.add("body--toolbar-hide");
+    }
 };
 
 export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
@@ -287,10 +290,14 @@ export const setZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
     }
 
     webFrame.setZoomFactor(zoom);
+    const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
+    if (window.siyuan.config.appearance.hideToolbar) {
+        position.y += 5;
+    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",
         zoom,
-        position: Constants.SIZE_ZOOM.find((item) => item.zoom === zoom).position
+        position
     });
     window.siyuan.storage[Constants.LOCAL_ZOOM] = zoom;
     setStorageVal(Constants.LOCAL_ZOOM, zoom);

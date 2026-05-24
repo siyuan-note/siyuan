@@ -419,3 +419,25 @@ func ReloadAttrView(avID string) {
 func pushReloadAttrView(avID string) {
 	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]any{"id": avID})
 }
+
+func PushCreate(box *Box, p string, arg map[string]any) {
+	evt := util.NewCmdResult("create", 0, util.PushModeBroadcast)
+	listDocTree := false
+	if nil == arg {
+		arg = map[string]any{
+			"listDocTree": true,
+		}
+	}
+
+	listDocTreeArg := arg["listDocTree"]
+	if nil != listDocTreeArg {
+		listDocTree = listDocTreeArg.(bool)
+	}
+
+	evt.Data = map[string]any{
+		"box":         box,
+		"path":        p,
+		"listDocTree": listDocTree,
+	}
+	util.PushEvent(evt)
+}

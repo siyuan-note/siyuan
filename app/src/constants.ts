@@ -185,7 +185,7 @@ export abstract class Constants {
     public static readonly DIALOG_GLOBALSEARCH = "dialog-globalsearch";
     public static readonly DIALOG_HISTORYCOMPARE = "dialog-historycompare";
 
-    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 访问鉴权码
+    public static readonly DIALOG_ACCESSAUTHCODE = "dialog-accessauthcode"; // 锁屏密码
     public static readonly DIALOG_AICUSTOMACTION = "dialog-aicustomaction"; // AI 自定义操作
     public static readonly DIALOG_AIUPDATECUSTOMACTION = "dialog-aiupdatecustomaction"; // 更新 AI 自定义操作
     public static readonly DIALOG_BACKGROUNDLINK = "dialog-backgroundlink"; // 题头图-随机
@@ -301,6 +301,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_RESIZE = 200;
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
+    public static readonly TIMEOUT_LONGPRESS = 400;
     public static readonly TIMEOUT_TRANSITION = 300;
     public static readonly TIMEOUT_COUNT = 1000;
 
@@ -312,14 +313,19 @@ export abstract class Constants {
         es_ES: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
         he_IL: "20210808180117-6v0mkxr",
+        hi_IN: "20210808180117-6v0mkxr",
+        id_ID: "20210808180117-6v0mkxr",
         it_IT: "20210808180117-6v0mkxr",
         ja_JP: "20240530133126-axarxgx",
         ko_KR: "20210808180117-6v0mkxr",
         pl_PL: "20210808180117-6v0mkxr",
         pt_BR: "20210808180117-6v0mkxr",
         ru_RU: "20210808180117-6v0mkxr",
+        th_TH: "20210808180117-6v0mkxr",
+        nl_NL: "20210808180117-6v0mkxr",
         sk_SK: "20210808180117-6v0mkxr",
         tr_TR: "20210808180117-6v0mkxr",
+        uk_UA: "20210808180117-6v0mkxr",
         zh_CHT: "20211226090932-5lcq56f",
         zh_CN: "20210808180117-czj9bvb",
     };
@@ -491,6 +497,7 @@ export abstract class Constants {
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
+                foldRecursive: {default: "⌥⌘↑", custom: "⌥⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
                 refTab: {default: "⇧⌘.", custom: "⇧⌘."},
                 openBy: {default: "⌥,", custom: "⌥,"},
@@ -687,7 +694,7 @@ export abstract class Constants {
                     type: "outline",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconAlignCenter",
+                    icon: "iconOutline",
                     hotkeyLangId: "outline",
                 }, {
                     type: "inbox",
@@ -705,7 +712,7 @@ export abstract class Constants {
                     type: "tag",
                     size: {width: 232, height: 0},
                     show: false,
-                    icon: "iconTags",
+                    icon: "iconTag",
                     hotkeyLangId: "tag",
                 }]
             ]

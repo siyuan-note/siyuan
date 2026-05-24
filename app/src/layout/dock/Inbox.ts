@@ -39,7 +39,6 @@ export class Inbox extends Model {
         <span class="fn__space"></span>
         <span class="inboxSelectCount ft__smaller ft__on-surface"></span>
     </div>
-    <span class="fn__flex-1"></span>
     <span class="fn__space"></span>
     <svg data-type="selectall" class="toolbar__icon"><use xlink:href="#iconUncheck"></use></svg>
     <svg data-type="previous" disabled="disabled" class="toolbar__icon"><use xlink:href='#iconLeft'></use></svg>
@@ -55,7 +54,7 @@ export class Inbox extends Model {
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox", "dockPanel");
         this.element.innerHTML = `<div class="block__icons">
     <div class="block__logo fn__flex-1">
-        <svg class="block__logoicon"><use xlink:href="#iconInbox"></use></svg>${window.siyuan.languages.inbox}&nbsp;
+        ${window.siyuan.languages.inbox}&nbsp;
         <span class="inboxSelectCount"></span>
     </div>
     <span data-type="selectall" class="block__icon"><svg><use xlink:href="#iconUncheck"></use></svg></span>

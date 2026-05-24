@@ -20,12 +20,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"path"
 	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
@@ -38,7 +40,6 @@ var (
 	operationQueue []*dbQueueOperation
 	dbQueueLock    = sync.Mutex{}
 	dbQueueCond    = sync.NewCond(&dbQueueLock)
-	txLock         = sync.Mutex{}
 )
 
 type dbQueueOperation struct {
@@ -95,6 +96,7 @@ func ClearQueue() {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 	operationQueue = nil
+	clearIndexQueueEntries()
 }
 
 var flushingTx = atomic.Bool{}
@@ -103,17 +105,16 @@ func FlushQueue() {
 	initDatabaseLock.Lock()
 	defer initDatabaseLock.Unlock()
 
-	ops := getOperations()
+	ops, indexSnapshot := getOperations()
 	total := len(ops)
 	if 1 > total && !flushingTx.Load() {
+		processDiskQueue()
 		return
 	}
 
-	txLock.Lock()
 	flushingTx.Store(true)
 	defer func() {
 		flushingTx.Store(false)
-		txLock.Unlock()
 		// 通知等待的协程队列已刷新完成
 		dbQueueCond.Broadcast()
 	}()
@@ -121,6 +122,30 @@ func FlushQueue() {
 	start := time.Now()
 
 	// logging.LogInfof("flushing database queue, total operations [%d]", total)
+
+	// 如果有重命名树的操作，则统计各路径前缀的块树数量，数量较大的话阻塞整个队列，以便尽可能合并重命名树的操作 RenameTreeQueue(tree)
+	var renameTreeOp *dbQueueOperation
+	for _, op := range ops {
+		if "rename" == op.action {
+			renameTreeOp = op
+			break
+		}
+	}
+	if nil != renameTreeOp {
+		childCount := treenode.CountBlockTreesByPathPrefix(path.Dir(renameTreeOp.indexTree.Path))
+		if 512 < childCount {
+			scale := math.Log(float64(childCount)/512.0+1.0) / math.Log(2.0)
+			secs := 1.0 * scale
+			if secs < 1.0 {
+				secs = 1.0
+			}
+			if secs > 12.0 {
+				secs = 12.0
+			}
+			logging.LogInfof("rename tree [%s] with large child count [%d], sleep [%.2fs] to wait for more operations", renameTreeOp.indexTree.Path, childCount, secs)
+			time.Sleep(time.Duration(secs * float64(time.Second)))
+		}
+	}
 
 	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	if 512 < len(ops) {
@@ -177,6 +202,9 @@ func FlushQueue() {
 	util.BroadcastByType("main", "databaseIndexCommit", 0, "", nil)
 
 	eventbus.Publish(eventbus.EvtSQLIndexFlushed)
+
+	clearIndexQueue(indexSnapshot)
+	processDiskQueue()
 }
 
 func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error) {
@@ -422,16 +450,52 @@ func RemoveTreePathQueue(treeBox, treePathPrefix string) {
 	appendOperation(newOp)
 }
 
-func getOperations() (ops []*dbQueueOperation) {
+func getOperations() (ops []*dbQueueOperation, indexSnapshot int64) {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 
 	ops = operationQueue
 	operationQueue = nil
+	indexSnapshot = indexQueueSize.Load()
 	return
 }
 
 func appendOperation(op *dbQueueOperation) {
 	operationQueue = append(operationQueue, op)
+	appendToIndexQueue(op)
 	eventbus.Publish(eventbus.EvtSQLIndexChanged)
+}
+
+func processDiskQueue() {
+	entries := loadIndexQueue()
+	if 1 > len(entries) {
+		return
+	}
+
+	logging.LogInfof("flushing [%d] disk index queue operations", len(entries))
+
+	luteEngine := lute.New()
+	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	for _, e := range entries {
+		op := indexEntryToOp(e, luteEngine, "flush disk queue")
+		if nil == op {
+			continue
+		}
+		tx, err := beginTx()
+		if err != nil {
+			return
+		}
+		if err = execOp(op, tx, context); err != nil {
+			tx.Rollback()
+			closeTxPreparedStmts(tx)
+			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
+			continue
+		}
+		if err = commitTx(tx); err != nil {
+			logging.LogErrorf("commit tx failed: %s", err)
+			continue
+		}
+	}
+
+	clearIndexQueueEntries()
 }

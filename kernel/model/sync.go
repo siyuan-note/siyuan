@@ -68,6 +68,9 @@ func SyncDataDownload() {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+	if 1 == code {
+		consumeShorthands()
+	}
 }
 
 func SyncDataUpload() {
@@ -205,6 +208,10 @@ func syncData(exit, byHand bool) {
 		code = 2
 	}
 	util.BroadcastByType("main", "syncing", code, Conf.Sync.Stat, nil)
+
+	if !exit && 1 == code {
+		consumeShorthands()
+	}
 
 	if nil == webSocketConn && Conf.Sync.Perception {
 		// 如果 websocket 连接已经断开，则重新连接

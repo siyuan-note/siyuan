@@ -72,7 +72,7 @@ export class Protyle {
         this.protyle = {
             getInstance: () => this,
             app,
-            transactionTime: new Date().getTime(),
+            transactionTime: Date.now(),
             id: genUUID(),
             disabled: false,
             updated: false,

@@ -70,13 +70,15 @@ if [[ "$TARGET" == 'amd64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel amd64'
     export GOARCH=amd64
-    go build -tags fts5 -v -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
+    go build -tags fts5 -o "../app/kernel-darwin/SiYuan-Kernel" -ldflags "-s -w" .
+    ln -f "../app/kernel-darwin/siyuan" "../app/kernel-darwin/SiYuan-Kernel"
 fi
 if [[ "$TARGET" == 'arm64' || "$TARGET" == 'all' ]]; then
     echo
     echo 'Building Kernel arm64'
     export GOARCH=arm64
-    go build -tags fts5 -v -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
+    go build -tags fts5 -o "../app/kernel-darwin-arm64/SiYuan-Kernel" -ldflags "-s -w" .
+    ln -f "../app/kernel-darwin-arm64/siyuan" "../app/kernel-darwin-arm64/SiYuan-Kernel"
 fi
 
 echo

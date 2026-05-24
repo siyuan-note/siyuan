@@ -1284,7 +1284,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "material"
+													"TextMarkTextContent": "litheness"
 												},
 												{
 													"Type": "NodeText",
@@ -1320,7 +1320,7 @@
 												{
 													"ID": "20220307091943-01zwait",
 													"Type": "NodeCodeBlockCode",
-													"Data": "\u003cscript src=\"material/icon.js\"\u003e\u003c/script\u003e\n",
+													"Data": "\u003cscript src=\"litheness/icon.js\"\u003e\u003c/script\u003e\n",
 													"Properties": {
 														"id": "20220307091943-01zwait"
 													}

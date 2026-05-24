@@ -8,7 +8,7 @@ import {openModel} from "./model";
 import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix} from "../../util/pathName";
 import {getKeyByLiElement, initCriteriaMenu, moreMenu} from "../../search/menu";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import {escapeGreat, escapeHtml} from "../../util/escape";
+import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
 import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
@@ -25,7 +25,7 @@ import {
 } from "../../search/assets";
 import {addClearButton} from "../../util/addClearButton";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {getDefaultType} from "../../search/getDefault";
+import {getDefaultSubType, getDefaultType} from "../../search/getDefault";
 import {
     saveAssetKeyList,
     saveKeyList,
@@ -59,6 +59,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
         r: replaceInputElement.value,
         ids: isAll ? [] : [currentId],
         types: config.types,
+        subTypes: config.subTypes,
         method: config.method,
         replaceTypes: config.replaceTypes,
         paths: config.idPath || [],
@@ -111,7 +112,7 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     const searchPathElement = element.querySelector("#searchPath");
     if (newConfig.hPath) {
         searchPathElement.classList.remove("fn__none");
-        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(newConfig.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+        searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(newConfig.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
     } else {
         searchPathElement.classList.add("fn__none");
     }
@@ -172,7 +173,7 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
-<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeGreat(title)}</span>
+<span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeHtml(title)}</span>
 </div><div>`;
             item.children.forEach((childItem) => {
                 if (focusId) {
@@ -208,7 +209,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
     </div>
     <div class="fn__flex">
         ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.replace(/#/g, "")}</span><span class="fn__space"></span>` : ""}
-        <span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+        <span class="b3-list-item__text b3-list-item__meta">${escapeHtml(title)}</span>
     </div>
 </div>`;
         }
@@ -288,6 +289,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 query: config.query,
                 method: config.method,
                 types: config.types,
+                subTypes: config.subTypes,
                 paths: config.idPath || [],
                 groupBy: config.group,
                 orderBy: config.sort,
@@ -416,6 +418,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
                 }
@@ -465,7 +468,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                     config.hPath = response.data[0];
                     const searchPathElement = element.querySelector("#searchPath");
                     searchPathElement.classList.remove("fn__none");
-                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                    searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
 
                     const includeElement = element.querySelector('[data-type="include"]');
                     includeElement.classList.remove("toolbar__icon--active");
@@ -499,7 +502,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
 
                             const searchPathElement = element.querySelector("#searchPath");
                             searchPathElement.classList.remove("fn__none");
-                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+                            searchPathElement.innerHTML = `<div class="b3-chip b3-chip--middle">${escapeHtml(config.hPath)}<svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg></div>`;
 
                             const includeElement = element.querySelector('[data-type="include"]');
                             includeElement.classList.add("toolbar__icon--active");
@@ -562,6 +565,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         r: "",
                         page: 1,
                         types: getDefaultType(),
+                        subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
                     }, config);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
@@ -756,7 +760,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
     <div id="searchPath" class="b3-chips${config.hPath ? "" : " fn__none"}" style="background-color: var(--b3-theme-background);">
         <div class="b3-chip b3-chip--middle">
             ${escapeHtml(config.hPath)}
-            <svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconCloseRound"></use></svg>
+            <svg data-type="remove-path" class="b3-chip__close"><use xlink:href="#iconClose"></use></svg>
         </div>
     </div>
     <div class="toolbar">
@@ -894,14 +898,14 @@ const getUnRefListMobile = (element: Element, page = 1) => {
         }
         let resultHTML = "";
         response.data.blocks.forEach((item: IBlock, index: number) => {
-            const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
+            const title = escapeHtml(getNotebookName(item.box)) + getDisplayName(item.hPath, false);
             resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
 <div class="b3-list-item__first">
     <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
     ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${item.content}</span>
 </div>
-<span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+<span class="b3-list-item__text b3-list-item__meta">${title}</span>
 </div>`;
         });
         element.querySelector("#searchUnRefResult").innerHTML = `<span class="fn__flex-center">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>

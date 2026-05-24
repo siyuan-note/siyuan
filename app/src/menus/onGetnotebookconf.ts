@@ -20,17 +20,28 @@ declare interface INotebookConf {
     }
 }
 
-export const genNotebookOption = (id: string, notebookId?: string) => {
-    let html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
+export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: boolean) => {
+    let html = "";
+    if (!noCurrent) {
+        html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
+    }
     const helpIds: string[] = [];
     Object.keys(Constants.HELP_PATH).forEach((key: "zh_CN") => {
         helpIds.push(Constants.HELP_PATH[key]);
     });
+    let firstNotebookId = "";
     window.siyuan.notebooks.forEach((item) => {
         if (helpIds.includes(item.id) || item.id === notebookId) {
             return;
         }
-        html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`;
+        if ("" === firstNotebookId) {
+            firstNotebookId = item.id;
+        }
+        let selected = id === item.id;
+        if (noCurrent && "" === id && item.id === firstNotebookId) {
+            selected = true;
+        }
+        html += `<option value="${item.id}" ${selected ? "selected" : ""}>${escapeHtml(item.name)}</option>`;
     });
     return html;
 };

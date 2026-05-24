@@ -283,14 +283,19 @@
             <option value="es_ES">Español</option>
             <option value="fr_FR">Français</option>
             <option value="he_IL">עברית</option>
+            <option value="hi_IN">हिन्दी</option>
+            <option value="id_ID">Bahasa Indonesia</option>
             <option value="it_IT">Italiano</option>
             <option value="ja_JP">日本語</option>
             <option value="ko_KR">한국어</option>
+            <option value="nl_NL">Nederlands</option>
             <option value="pl_PL">Polski</option>
             <option value="pt_BR">Português (Brasil)</option>
             <option value="ru_RU">Русский</option>
             <option value="sk_SK">Slovenčina</option>
+            <option value="th_TH">ไทย</option>
             <option value="tr_TR">Türkçe</option>
+            <option value="uk_UA">Українська</option>
             <option value="zh_CHT">繁體中文</option>
             <option value="zh_CN">简体中文</option>
         </select>
@@ -335,14 +340,19 @@
             <option value="es_ES">Español</option>
             <option value="fr_FR">Français</option>
             <option value="he_IL">עברית</option>
+            <option value="hi_IN">हिन्दी</option>
+            <option value="id_ID">Bahasa Indonesia</option>
             <option value="it_IT">Italiano</option>
             <option value="ja_JP">日本語</option>
             <option value="ko_KR">한국어</option>
+            <option value="nl_NL">Nederlands</option>
             <option value="pl_PL">Polski</option>
             <option value="pt_BR">Português (Brasil)</option>
             <option value="ru_RU">Русский</option>
             <option value="sk_SK">Slovenčina</option>
+            <option value="th_TH">ไทย</option>
             <option value="tr_TR">Türkçe</option>
+            <option value="uk_UA">Українська</option>
             <option value="zh_CHT">繁體中文</option>
             <option value="zh_CN">简体中文</option>
         </select>
@@ -496,9 +506,9 @@
             }
 
             if (isCloudDrivePath(initPath)) {
-                let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud and 坚果云, please change another path'
+                let msg = '⚠️ The folder path can not contain onedrive, dropbox, google drive, pcloud, nutstore, baidunetdisk, weiyun,坚果云,百度网盘 and 腾讯微云, etc., please change another path'
                 if (isChinese(currentLang)) {
-                    msg = '⚠️ 文件夹路径不能包含 onedrive、dropbox、google drive、pcloud 和 坚果云，请更换其他路径'
+                    msg = '⚠️ 文件夹路径不能包含 onedrive、dropbox、google drive、pcloud、nutstore、baidunetdisk、weiyun、坚果云、百度网盘和腾讯微云等字样，请更换其他路径'
                 }
                 alert(msg)
                 return
@@ -554,7 +564,9 @@
         const absPathLower = absPath.toLowerCase()
         return -1 < absPathLower.indexOf("onedrive") || -1 < absPathLower.indexOf("dropbox") ||
             -1 < absPathLower.indexOf("google drive") || -1 < absPathLower.indexOf("pcloud") ||
-            -1 < absPathLower.indexOf("坚果云")
+            -1 < absPathLower.indexOf("坚果云") || -1 < absPathLower.indexOf("nutstore") ||
+            -1 < absPathLower.indexOf("百度网盘") || -1 < absPathLower.indexOf("baidunetdisk") ||
+            -1 < absPathLower.indexOf("腾讯微云") || -1 < absPathLower.indexOf("weiyun");
     }
 
     const isICloudPath = (absPath) => {

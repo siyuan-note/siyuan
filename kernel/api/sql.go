@@ -44,10 +44,43 @@ func SQL(c *gin.Context) {
 		return
 	}
 
-	var stmt string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("stmt", &stmt, true, true)) {
+	var stmt, mode string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("stmt", &stmt, true, true),
+		util.BindJsonArg("mode", &mode, false, false),
+	) {
 		return
 	}
+
+	switch mode {
+	case "":
+		// 默认模式，允许单条语句
+		if err := sql.CheckSingleStatement(stmt); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	case "readonly":
+		// 只读模式，允许单条语句
+		if err := sql.CheckSingleStatement(stmt); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if err := sql.CheckReadonlyStatement(stmt); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	case "multiple":
+		// 多语句模式，不做校验
+	default:
+		// 未知模式
+		ret.Code = -1
+		ret.Msg = "unknown [mode]"
+		return
+	}
+
 	result, err := sql.Query(stmt, model.Conf.Search.Limit)
 	if err != nil {
 		ret.Code = 1

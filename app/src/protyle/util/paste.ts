@@ -355,7 +355,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     }
 
-    const nodeElement = hasClosestBlock(event.target);
+
+    let nodeElement = hasClosestBlock(event.target);
+    const range = getEditorRange(protyle.wysiwyg.element);
+    if (!nodeElement) {
+        nodeElement = hasClosestBlock(range.startContainer);
+    }
     if (!nodeElement) {
         if (files && files.length > 0) {
             uploadFiles(protyle, files);
@@ -368,16 +373,48 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         item.classList.remove("protyle-wysiwyg--hl");
     });
     const code = processPasteCode(textHTML, textPlain, originalTextHTML, protyle);
-    const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
         insertHTML(removeZWJ(textPlain).replace(/```/g, "\u200D```"), protyle);
         return;
     } else if (siyuanHTML) {
+        async function streamInsert(container: HTMLElement, bigHtmlString: string) {
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            const doc = iframe.contentWindow.document;
+            doc.open();
+
+            const chunkSize = 102400;
+            let offset = 0;
+            while (offset < bigHtmlString.length) {
+                const chunk = bigHtmlString.substring(offset, offset + chunkSize);
+                doc.write(chunk);
+                offset += chunkSize;
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+
+            doc.close();
+
+            const fragment = document.createDocumentFragment();
+            while (doc.body.firstChild) {
+                fragment.appendChild(doc.body.firstChild);
+            }
+
+            container.appendChild(fragment);
+
+            document.body.removeChild(iframe);
+        }
+
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
-        tempElement.innerHTML = siyuanHTML;
+        if (1024 * 512 < siyuanHTML.length) {
+            await streamInsert(tempElement, siyuanHTML);
+        } else {
+            tempElement.innerHTML = siyuanHTML;
+        }
         if (range.toString()) {
             let types: string[] = [];
             let linkElement: HTMLElement;

@@ -10,7 +10,7 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
-import {isIPhone, isSafari, openByMobile, setStorageVal} from "../util/compatibility";
+import {isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
 
 export const afterExport = (exportPath: string, msgId: string) => {
@@ -102,7 +102,7 @@ export const exportImage = (id: string) => {
                 formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
                 formData.append("type", "image/png");
                 fetchPost("/api/export/exportAsFile", formData, (response) => {
-                    openByMobile(response.data.file);
+                    saveExportFile(response.data.file);
                 });
                 hideMessage(msgId);
                 exportDialog.destroy();

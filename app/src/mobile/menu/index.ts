@@ -18,20 +18,19 @@ import {initAbout} from "../settings/about";
 import {getRecentDocs} from "./getRecentDocs";
 import {initEditor} from "../settings/editor";
 import {App} from "../../index";
-import {
-    isDisabledFeature,
-    isHuawei,
-    isInMobileApp,
-    isIPhone
-} from "../../protyle/util/compatibility";
+import {isDisabledFeature, isHuawei, isInMobileApp, isIPhone} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
 import {afterLoadPlugin} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../../plugin/openTopBarMenu";
 import {initFileTree} from "../settings/fileTree";
 import {initExport} from "../settings/export";
+import {getCurrentEditor} from "../editor";
 
 export const popMenu = () => {
+    if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
+        return;
+    }
     activeBlur();
     document.getElementById("menu").style.transform = "translateX(0px)";
 };
@@ -81,7 +80,7 @@ export const initRightMenu = (app: App) => {
         <svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newFile}</span>
     </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewNotebook">
-        <svg class="b3-menu__icon"><use xlink:href="#iconFilesRoot"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newNotebook}</span>
+        <svg class="b3-menu__icon"><use xlink:href="#iconNewNoteBook"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newNotebook}</span>
     </div>
     <div class="b3-menu__separator"></div>
     <div id="menuNewDaily" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
@@ -124,7 +123,7 @@ export const initRightMenu = (app: App) => {
         <svg class="b3-menu__icon"><use xlink:href="#iconCloud"></use></svg><span class="b3-menu__label">${window.siyuan.languages.cloud}</span>
     </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuPublish">
-        <svg class="b3-menu__icon"><use xlink:href="#iconLanguage"></use></svg><span class="b3-menu__label">${window.siyuan.languages.publish}</span>
+        <svg class="b3-menu__icon"><use xlink:href="#iconPublish"></use></svg><span class="b3-menu__label">${window.siyuan.languages.publish}</span>
     </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAbout">
         <svg class="b3-menu__icon"><use xlink:href="#iconInfo"></use></svg><span class="b3-menu__label">${window.siyuan.languages.about}</span>
@@ -273,7 +272,7 @@ export const initRightMenu = (app: App) => {
             } else if (target.id === "menuPublish") {
                 openModel({
                     title: window.siyuan.languages.publish,
-                    icon: "iconLanguage",
+                    icon: "iconPublish",
                     html: publish.genHTML(),
                     bindEvent(modelMainElement: HTMLElement) {
                         publish.element = modelMainElement;

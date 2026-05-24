@@ -54,7 +54,8 @@ import {isLocalPath} from "../../util/pathName";
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
 import {alignImgCenter, alignImgLeft, commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
-import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
+import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {foldBlocksRecursively, getFoldBlock, setFold} from "../util/blockFold";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
@@ -309,44 +310,27 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         const nodeType = nodeElement.getAttribute("data-type");
         if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) && !event.repeat) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                setFold(protyle, selectElements[0]);
-            } else {
-                if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                    if (nodeElement.parentElement.childElementCount > 3) {
-                        setFold(protyle, nodeElement.parentElement);
-                    } else {
-                        setFold(protyle, nodeElement);
-                    }
-                } else if (nodeType === "NodeHeading") {
-                    setFold(protyle, nodeElement);
-                } else {
-                    setFold(protyle, getTopAloneElement(nodeElement));
-                }
-            }
+            getFoldBlock(protyle, nodeElement, (elements) => {
+                setFold(protyle, elements[0]);
+            });
             event.stopPropagation();
             event.preventDefault();
             return false;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.general.expand.custom, event) && !event.repeat) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                setFold(protyle, selectElements[0], true);
-            } else {
-                if (nodeElement.parentElement.getAttribute("data-type") === "NodeListItem") {
-                    if (nodeElement.parentElement.childElementCount > 3) {
-                        setFold(protyle, nodeElement.parentElement, true);
-                    } else {
-                        setFold(protyle, nodeElement, true);
-                    }
-                } else if (nodeType === "NodeHeading") {
-                    setFold(protyle, nodeElement, true);
-                } else {
-                    setFold(protyle, getTopAloneElement(nodeElement), true);
-                }
-            }
+            getFoldBlock(protyle, nodeElement, (elements) => {
+                setFold(protyle, elements[0], true);
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.foldRecursive.custom, event) && !event.repeat) {
+            getFoldBlock(protyle, nodeElement, (elements) => {
+                foldBlocksRecursively(protyle, elements);
+            });
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -518,11 +502,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     item.classList.remove("protyle-wysiwyg--select");
                 });
                 topElement.classList.add("protyle-wysiwyg--select");
+                const ids: string[] = [];
+                ids.push(topElement.getAttribute("data-node-id"));
                 let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
                 while (nextElement) {
                     nextElement.classList.add("protyle-wysiwyg--select");
+                    ids.push(nextElement.getAttribute("data-node-id"));
                     nextElement = event.key === "Home" ? nextElement.previousElementSibling : nextElement.nextElementSibling;
                 }
+                countBlockWord(ids);
                 if (event.key === "Home") {
                     protyle.wysiwyg.element.firstElementChild.scrollIntoView();
                 } else {
@@ -658,7 +646,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement === protyle.wysiwyg.element.firstElementChild)) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20 || nodeElement.classList.contains("av")) {
+                    // 空行 getSelectionPosition 计算有问题导致 https://github.com/siyuan-note/siyuan/issues/17602
+                    const diff = getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top;
+                    if ((diff < 20 && diff !== 0) || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
@@ -716,7 +706,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 末尾按向下/右箭头丢失焦点 https://ld246.com/article/1629954026096
                 const lastEditElement = getContenteditableElement(nodeElement);
                 // 代码块需替换最后一个 /n  https://github.com/siyuan-note/siyuan/issues/3221
-                if (lastEditElement && !lastEditElement.querySelector(".emoji") &&
+                if (lastEditElement && !nodeElement.classList.contains("table") &&
+                    !lastEditElement.querySelector(".emoji") &&
                     lastEditElement.textContent.replace(/\n$/, "").length <= getSelectionOffset(lastEditElement, undefined, range).end) {
                     event.stopPropagation();
                     event.preventDefault();
@@ -725,7 +716,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (selectText === "" && event.key === "ArrowLeft" && nodeElement === getFirstBlock(protyle.wysiwyg.element.firstElementChild)) {
                 // 页面向左箭头丢失焦点 https://github.com/siyuan-note/siyuan/issues/2768
                 const firstEditElement = getContenteditableElement(nodeElement);
-                if (firstEditElement && getSelectionOffset(firstEditElement, undefined, range).start === 0) {
+                if (firstEditElement && !nodeElement.classList.contains("table") &&
+                    getSelectionOffset(firstEditElement, undefined, range).start === 0) {
                     event.stopPropagation();
                     event.preventDefault();
                     focusByRange(range);

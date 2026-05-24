@@ -6,6 +6,8 @@ on:
 
 jobs:
   check-branch:
+    # https://docs.github.com/en/webhooks/webhook-events-and-payloads?actionType=edited#pull_request
+    if: ${{ github.repository_owner == 'siyuan-note' && (github.event.action == 'opened' || github.event.changes.base) }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

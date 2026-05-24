@@ -1,5 +1,5 @@
 import {adjustLayout, exportLayout, JSONToLayout, resetLayout, resizeTopBar} from "../layout/util";
-import {resizeTabs} from "../layout/tabUtil";
+import {resizeTabs, setTabPosition} from "../layout/tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 /// #if !BROWSER
 import {ipcRenderer, webFrame} from "electron";
@@ -20,7 +20,6 @@ import {isWindow} from "../util/functions";
 import {initStatus} from "../layout/status";
 import {showMessage} from "../dialog/message";
 import {replaceLocalPath} from "../editor/rename";
-import {setTabPosition} from "../window/setHeader";
 import {initBar} from "../layout/topBar";
 import {openChangelog} from "./openChangelog";
 import {App} from "../index";
@@ -41,10 +40,14 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         port: location.port
     });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+    const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
+    if (window.siyuan.config.appearance.hideToolbar) {
+        position.y += 5;
+    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",
         zoom: window.siyuan.storage[Constants.LOCAL_ZOOM],
-        position: Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position
+        position
     });
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {
@@ -88,6 +91,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             adjustLayout();
             resizeTabs();
             resizeTopBar();
+            setTabPosition(true);
             window.siyuan.menus.menu.resetPosition();
             firstResize = true;
             if (getSelection().rangeCount > 0) {
@@ -143,18 +147,10 @@ export const initWindow = async (app: App) => {
             document.body.classList.add("body--blur");
         } else if (cmd === "enter-full-screen") {
             document.body.classList.add("body--fullscreen");
-            if ("darwin" === window.siyuan.config.system.os) {
-                if (isWindow()) {
-                    setTabPosition();
-                }
-            }
+            setTabPosition();
         } else if (cmd === "leave-full-screen") {
             document.body.classList.remove("body--fullscreen");
-            if ("darwin" === window.siyuan.config.system.os) {
-                if (isWindow()) {
-                    setTabPosition();
-                }
-            }
+            setTabPosition();
         } else if (cmd === "maximize") {
             document.body.classList.add("body--maximize");
         } else if (cmd === "unmaximize") {

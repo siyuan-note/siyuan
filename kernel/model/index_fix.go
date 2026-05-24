@@ -49,7 +49,7 @@ var (
 // Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
 func checkIndex() {
 	checkIndexOnce.Do(func() {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if util.IsMobileContainer() {
 			// 移动端不执行校验 https://ld246.com/article/1734939896061
 			return
 		}

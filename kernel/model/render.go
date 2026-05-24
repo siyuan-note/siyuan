@@ -243,7 +243,7 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 	for _, child := range children {
 		var unlinks []*ast.Node
 
-		parentHeadingLevel := 0
+		parentHeadingLevel := 1
 		for prev := child; nil != prev; prev = prev.Previous {
 			if ast.NodeHeading == prev.Type {
 				parentHeadingLevel = prev.HeadingLevel
@@ -283,19 +283,25 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 				if "d" == sqlBlock.Type {
 					if 0 == blockEmbedMode {
 						// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
-						// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233 https://github.com/siyuan-note/siyuan/issues/12741
+						// Improve export of heading levels in embedded blocks
+						// https://github.com/siyuan-note/siyuan/issues/12233
+						// https://github.com/siyuan-note/siyuan/issues/12741
+						// https://github.com/siyuan-note/siyuan/issues/17629
 						embedTopLevel := 0
+						embedFirstHeading := subTree.Root.ChildByType(ast.NodeHeading)
+						if nil != embedFirstHeading {
+							embedTopLevel = embedFirstHeading.HeadingLevel
+						}
 						ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 							if !entering || ast.NodeHeading != n.Type {
 								return ast.WalkContinue
 							}
 
-							embedTopLevel = n.HeadingLevel
-							if parentHeadingLevel >= embedTopLevel {
-								n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-								if 6 < n.HeadingLevel {
-									n.HeadingLevel = 6
-								}
+							n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+							if 2 > n.HeadingLevel {
+								n.HeadingLevel = 2
+							} else if 6 < n.HeadingLevel {
+								n.HeadingLevel = 6
 							}
 							return ast.WalkContinue
 						})
@@ -344,13 +350,14 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 								break
 							}
 						}
-						if parentHeadingLevel >= embedTopLevel {
-							for _, hChild := range hChildren {
-								if ast.NodeHeading == hChild.Type {
-									hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
-									if 6 < hChild.HeadingLevel {
-										hChild.HeadingLevel = 6
-									}
+
+						for _, hChild := range hChildren {
+							if ast.NodeHeading == hChild.Type {
+								hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+								if 2 > hChild.HeadingLevel {
+									hChild.HeadingLevel = 2
+								} else if 6 < hChild.HeadingLevel {
+									hChild.HeadingLevel = 6
 								}
 							}
 						}

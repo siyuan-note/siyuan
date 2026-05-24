@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -247,6 +248,11 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			return
 		}
 
+		// 清除所有缓存，确保重开用户指南时数据是最新的
+		cache.ClearTreeCache()
+		cache.ClearDocsIAL()
+		cache.ClearBlocksIAL()
+
 		avDirPath := filepath.Join(util.WorkingDir, "guide", boxID, "storage", "av")
 		if filelock.IsExist(avDirPath) {
 			if err = filelock.Copy(avDirPath, filepath.Join(util.DataDir, "storage", "av")); err != nil {
@@ -266,7 +272,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			Conf.Save()
 		}
 
-		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushErrMsg, Conf.Language(52), 7000)
+		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushErrMsg, Conf.Language(244), 7000)
 		go func() {
 			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057
 			time.Sleep(time.Second * 10)

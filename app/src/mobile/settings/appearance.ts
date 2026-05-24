@@ -58,9 +58,25 @@ export const initAppearance = () => {
        <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}
     </button>
     <div class="b3-label__text">${window.siyuan.languages.appearance18}</div>
+</div>
+<div class="b3-label">
+    <label class="fn__flex">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.desktopMode}
+            <div class="b3-label__text">${window.siyuan.languages.desktopModeTip}</div>
+        </div>
+        <div class="fn__space"></div>
+        <input class="b3-switch fn__flex-center" id="desktopMode" type="checkbox">
+    </label>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
             setStatusBar(modelMainElement.querySelector('[data-action="hideStatusBarSetting"]'));
+            const desktopModeElement = modelMainElement.querySelector("#desktopMode") as HTMLInputElement;
+            desktopModeElement.addEventListener("change", (event) => {
+                event.stopImmediatePropagation();
+                document.cookie = "siyuan-desktop-mode=" + (desktopModeElement.checked ? "true" : "false") + ";path=/;max-age=31536000";
+                window.location.href = "/";
+            });
             modelMainElement.querySelectorAll("select, .b3-switch").forEach(item => {
                 item.addEventListener("change", () => {
                     const modeElementValue = parseInt((modelMainElement.querySelector("#mode") as HTMLSelectElement).value);

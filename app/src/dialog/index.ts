@@ -1,7 +1,5 @@
 import {genUUID} from "../util/genID";
-/// #if !MOBILE
 import {moveResize} from "./moveResize";
-/// #endif
 import {isMobile} from "../util/functions";
 import {isNotCtrl} from "../protyle/util/compatibility";
 import {Protyle} from "../protyle";
@@ -82,9 +80,7 @@ left:${left || "auto"};top:${top || "auto"}">
                 this.element.classList.add("b3-dialog--open");
             }, Constants.TIMEOUT_OPENDIALOG);
         }
-        /// #if !MOBILE
         moveResize(this.element.querySelector(".b3-dialog__container"), options.resizeCallback);
-        /// #endif
     }
 
     public resize() {

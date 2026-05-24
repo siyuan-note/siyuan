@@ -12,7 +12,7 @@ import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../u
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
-import {setFold} from "../../menus/protyle";
+import {setFold} from "../util/blockFold";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true, event?: InputEvent) => {
     if (!blockElement.parentElement) {

@@ -828,7 +828,7 @@ func RemoveUnusedAssets() (ret []string) {
 				}
 			}
 
-			if !isFileWatcherAvailable() {
+			if util.IsMobileContainer() {
 				HandleAssetsRemoveEvent(absPath)
 			}
 
@@ -875,7 +875,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 		cache.RemoveAssetHash(hash)
 	}
 
-	if !isFileWatcherAvailable() {
+	if util.IsMobileContainer() {
 		HandleAssetsRemoveEvent(absPath)
 	}
 
@@ -1759,8 +1759,4 @@ func copyAssetsToDataAssets(rootPath string) {
 			logging.LogErrorf("copy tree assets from [%s] to [%s] failed: %s", assetsDirPaths, dataAssetsPath, err)
 		}
 	}
-}
-
-func isFileWatcherAvailable() bool {
-	return util.ContainerAndroid != util.Container && util.ContainerIOS != util.Container && util.ContainerHarmony != util.Container
 }

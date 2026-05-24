@@ -580,10 +580,67 @@ export const openMenuPanel = (options: {
                 window.siyuan.dragElement = undefined;
             }
         });
+        // 多选排序
         avPanelElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
             if (event.button === 1 && !hasClosestByClassName(event.target, "b3-menu")) {
                 document.querySelector(".av__panel").dispatchEvent(new CustomEvent("click", {detail: "close"}));
             }
+            if (event.button !== 0 || options.type !== "select") return;
+            const selectedElement = event.target.closest(".b3-chip--middle") as HTMLElement;
+            if (!selectedElement) {
+                return;
+            }
+            event.preventDefault();
+            document.body.style.cursor = "grabbing";
+            const documentSelf = document;
+            documentSelf.ondragstart = () => false;
+            let ghostElement: HTMLElement;
+            const diffPosition = {x: 0, y: 0};
+            documentSelf.onmousemove = (moveEvent: MouseEvent & { target: HTMLElement }) => {
+                moveEvent.preventDefault();
+                moveEvent.stopPropagation();
+                if (!ghostElement) {
+                    ghostElement = selectedElement.cloneNode(true) as HTMLElement;
+                    document.body.append(ghostElement);
+                    ghostElement.setAttribute("id", "dragGhost");
+                    ghostElement.style.pointerEvents = "none";
+                    ghostElement.style.position = "fixed";
+                    ghostElement.style.zIndex = (window.siyuan.zIndex++).toString();
+                    selectedElement.style.opacity = ".38";
+                    const selectedRect = selectedElement.getBoundingClientRect();
+                    diffPosition.x = moveEvent.clientX - selectedRect.left;
+                    diffPosition.y = moveEvent.clientY - selectedRect.top;
+                }
+                ghostElement.style.top = (moveEvent.clientY - diffPosition.x) + "px";
+                ghostElement.style.left = (moveEvent.clientX - diffPosition.y) + "px";
+                const targetElement = moveEvent.target.closest(".b3-chip--middle") as HTMLElement;
+                if (targetElement && targetElement !== selectedElement) {
+                    const nodeRect = targetElement.getBoundingClientRect();
+                    if (moveEvent.clientX > nodeRect.left + nodeRect.width / 2 &&
+                        moveEvent.clientX < nodeRect.right + 8) {
+                        targetElement.after(selectedElement);
+                    } else if (moveEvent.clientX <= nodeRect.left + nodeRect.width / 2 &&
+                        moveEvent.clientX > nodeRect.left - 8) {
+                        targetElement.before(selectedElement);
+                    }
+                }
+            };
+
+            documentSelf.onmouseup = () => {
+                documentSelf.onmousemove = null;
+                documentSelf.onmouseup = null;
+                documentSelf.ondragstart = null;
+                documentSelf.onselectstart = null;
+                documentSelf.onselect = null;
+                ghostElement?.remove();
+                selectedElement.style.opacity = "";
+                document.body.style.cursor = "";
+                const newValue: IAVCellSelectValue[] = [];
+                selectedElement.parentElement.querySelectorAll(".b3-chip--middle").forEach((item: HTMLElement) => {
+                    newValue.push({content: item.dataset.content, color: item.style.color.match(/color(\d+)/)[1]});
+                });
+                updateCellsValue(options.protyle, options.blockElement as HTMLElement, newValue, options.cellElements);
+            };
         });
         avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;

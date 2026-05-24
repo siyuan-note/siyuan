@@ -127,7 +127,7 @@ func getWorkspaceDriveType() string {
 		return ghw.DriveTypeSSD.String()
 	}
 
-	if ContainerAndroid == Container || ContainerIOS == Container || ContainerHarmony == Container {
+	if IsMobileContainer() {
 		return ghw.DriveTypeSSD.String()
 	}
 

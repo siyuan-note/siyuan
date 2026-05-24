@@ -2,7 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
 import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
-import {escapeGreat, escapeHtml} from "../../../util/escape";
+import {escapeLessThans, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
 import {updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
@@ -43,7 +43,7 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
         <div class="b3-list-item__first">
             <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages._kernel[267])}</span>
         </div>
-        <div class="b3-list-item__meta b3-list-item__showall">${escapeGreat(item.hPath)}</div>
+        <div class="b3-list-item__meta b3-list-item__showall">${escapeLessThans(item.hPath)}</div>
     </div>
     <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
 </div>`;

@@ -18,7 +18,7 @@ import {
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
-import {setFold, zoomOut} from "../../menus/protyle";
+import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
 import {Constants} from "../../constants";
@@ -31,6 +31,7 @@ import {Tab} from "../../layout/Tab";
 import {Backlink} from "../../layout/dock/Backlink";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
+import {setFold} from "../util/blockFold";
 
 export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
     protyle.observerLoad?.disconnect();
@@ -305,7 +306,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 action: "move",
                 id: blockElement.getAttribute("data-node-id"),
                 previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: blockParentElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: getParentBlock(blockParentElement).getAttribute("data-node-id") || protyle.block.parentID
             }, {
                 action: "delete",
                 id: blockParentElement.getAttribute("data-node-id")
@@ -314,7 +315,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 id: blockParentElement.getAttribute("data-node-id"),
                 data: blockParentElement.outerHTML,
                 previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: blockParentElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: getParentBlock(blockElement).getAttribute("data-node-id") || protyle.block.parentID
             }, {
                 action: "move",
                 id: blockElement.getAttribute("data-node-id"),
@@ -326,7 +327,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 action: "move",
                 id: blockElement.getAttribute("data-node-id"),
                 previousID: blockElement.previousElementSibling?.getAttribute("data-node-id"),
-                parentID: blockParentElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+                parentID: getParentBlock(blockParentElement).getAttribute("data-node-id") || protyle.block.parentID
             }], [{
                 action: "move",
                 id: blockElement.getAttribute("data-node-id"),

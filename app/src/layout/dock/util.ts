@@ -2,8 +2,8 @@ import {getAllModels} from "../getAll";
 import {Tab} from "../Tab";
 import {Graph} from "./Graph";
 import {Outline} from "./Outline";
-import {fixWndFlex1, getInstanceById, getWndByLayout, saveLayout} from "../util";
-import {getDockByType, resizeTabs} from "../tabUtil";
+import {fixWndFlex1, getInstanceById, getWndByLayout} from "../util";
+import {getDockByType, resizeTabs, setTabPosition} from "../tabUtil";
 import {Backlink} from "./Backlink";
 import {App} from "../../index";
 import {Wnd} from "../Wnd";
@@ -151,8 +151,11 @@ export const openOutline = async (options: {
         const response = await fetchSyncPost("api/block/getDocInfo", {id: options.rootId});
         options.title = response.data.name || window.siyuan.languages.untitled;
     }
+    newWnd.element.style.width = "200px";
+    newWnd.element.classList.remove("fn__flex-1");
+    fixWndFlex1(newWnd.parent);
     newWnd.addTab(new Tab({
-        icon: "iconAlignCenter",
+        icon: "iconOutline",
         title: options.title,
         callback(tab: Tab) {
             tab.addModel(new Outline({
@@ -163,11 +166,7 @@ export const openOutline = async (options: {
                 isPreview: options.isPreview,
             }));
         }
-    }), false, false);
-    newWnd.element.style.width = "200px";
-    newWnd.element.classList.remove("fn__flex-1");
-    fixWndFlex1(newWnd.parent);
-    saveLayout();
+    }), false, true);
 };
 
 export const resetFloatDockSize = () => {
@@ -199,6 +198,8 @@ export const toggleDockBar = (useElement: Element) => {
     });
     resizeTabs();
     resetFloatDockSize();
+    adjustDockPadding();
+    setTabPosition();
 };
 
 export const clearOBG = () => {
@@ -257,4 +258,23 @@ export const selectOpenTab = async () => {
         }
     }
     dockFile.toggleModel("file", true);
+};
+
+export const adjustDockPadding = () => {
+    const layoutElement = window.siyuan.layout.layout.children[0].element;
+    if (window.siyuan.layout.leftDock.elements[0].parentElement.classList.contains("fn__none")) {
+        layoutElement.style.marginLeft = "var(--b3-layout-space)";
+    } else {
+        layoutElement.style.marginLeft = "";
+    }
+    if (window.siyuan.layout.rightDock.elements[0].parentElement.classList.contains("fn__none")) {
+        layoutElement.style.marginRight = "var(--b3-layout-space)";
+    } else {
+        layoutElement.style.marginRight = "";
+    }
+    if (window.siyuan.config.appearance.hideStatusBar) {
+        layoutElement.style.marginBottom = "var(--b3-layout-space)";
+    } else {
+        layoutElement.style.marginBottom = "";
+    }
 };

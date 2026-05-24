@@ -5,8 +5,8 @@ import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
 import {moveToPrevious, removeBlock} from "./remove";
 import {hasClosestByClassName} from "../util/hasClosest";
-import {setFold} from "../../menus/protyle";
 import {getParentBlock} from "./getBlock";
+import {setFold} from "../util/blockFold";
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {

@@ -19,11 +19,20 @@ import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 import {setStorageVal} from "../../protyle/util/compatibility";
+import {showMessage} from "../../dialog/message";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
     private actionsElement: HTMLElement;
     private closeElement: HTMLElement;
+    private touchDragState: {
+        selectedElement: HTMLElement;
+        startX: number;
+        startY: number;
+        isDragging: boolean;
+        ghostElement: HTMLElement;
+        startTime: number;
+    };
 
     constructor(app: App) {
         super({
@@ -93,8 +102,8 @@ export class MobileFiles extends Model {
         filesElement.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">${window.siyuan.languages.fileTree}</div>
-    <div class="fn__flex-1 fn__space"></div>
-    <svg data-type="newNotebook" class="toolbar__icon"><use xlink:href="#iconFilesRoot"></use></svg>
+    <div class="fn__space"></div>
+    <svg data-type="newNotebook" class="toolbar__icon"><use xlink:href="#iconNewNoteBook"></use></svg>
     <svg data-type="refresh" class="toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
     <svg data-type="focus" class="toolbar__icon"><use xlink:href="#iconFocus"></use></svg>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
@@ -241,13 +250,6 @@ export class MobileFiles extends Model {
                             } else if (type === "more-root") {
                                 initNavigationMenu(app, target.parentElement);
                                 window.siyuan.menus.menu.fullscreen("bottom");
-                            } else if (type === "addLocal") {
-                                fetchPost("/api/filetree/moveLocalShorthands", {
-                                    "notebook": notebookId
-                                });
-                                this.element.querySelectorAll('[data-type="addLocal"]').forEach(item => {
-                                    item.remove();
-                                });
                             }
                         }
                         if (type === "more-file") {
@@ -275,11 +277,264 @@ export class MobileFiles extends Model {
                 target = target.parentElement;
             }
         });
+        filesElement.addEventListener("touchstart", (event: TouchEvent) => {
+            if (window.siyuan.config.readonly) return;
+            if (event.touches.length !== 1) return;
+
+            const touch = event.touches[0];
+            const target = touch.target as HTMLElement;
+            const liElement = target.closest(".b3-list-item") as HTMLElement;
+            if (!liElement) return;
+
+            const dataType = liElement.getAttribute("data-type");
+            if (dataType !== "navigation-file" && dataType !== "navigation-root") return;
+
+            if (dataType === "navigation-root") {
+                if (window.siyuan.config.fileTree.sort !== 6) return;
+            } else {
+                const ulElement = liElement.closest("ul[data-sortmode]") as HTMLElement;
+                const sortMode = ulElement?.getAttribute("data-sortmode");
+                if (sortMode !== "6" && !(window.siyuan.config.fileTree.sort === 6 && sortMode === "15")) return;
+            }
+            this.touchDragState = {
+                isDragging: false,
+                selectedElement: liElement,
+                startX: touch.clientX,
+                startY: touch.clientY,
+                ghostElement: null,
+                startTime: Date.now(),
+            };
+        }, {passive: false});
+
+        filesElement.addEventListener("touchmove", (event: TouchEvent) => {
+            const state = this.touchDragState;
+            if (!state) return;
+            const touch = event.touches[0];
+            if (!state.isDragging) {
+                if (Date.now() - state.startTime < Constants.TIMEOUT_LONGPRESS &&
+                    (Math.abs(touch.clientX - state.startX) > 5 || Math.abs(touch.clientY - state.startY) > 5)) {
+                    this.touchDragState = null;
+                    return;
+                }
+                if (Math.abs(touch.clientX - state.startX) < 5 && Math.abs(touch.clientY - state.startY) < 5) return;
+                state.isDragging = true;
+
+                const ghostElement = document.createElement("ul");
+                ghostElement.id = "dragGhost";
+                ghostElement.append(state.selectedElement.cloneNode(true));
+                ghostElement.setAttribute("style", `background-color: var(--b3-theme-surface);width: 100%;touch-action: none;margin-left: -50%;margin-top:20px;z-index:${window.siyuan.zIndex};position: fixed;top:${touch.clientX}px;left:${touch.clientY}px`);
+                ghostElement.setAttribute("class", "b3-list b3-list--background");
+                document.body.append(ghostElement);
+
+                state.ghostElement = ghostElement;
+                state.selectedElement.style.opacity = "0.38";
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            if (state.isDragging) {
+                state.ghostElement.style.left = `${touch.clientX}px`;
+                state.ghostElement.style.top = `${touch.clientY}px`;
+
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                const liElement = target?.closest(".b3-list-item") as HTMLElement;
+                if (!liElement) return;
+
+                this.clearDragIndicators();
+                const targetDataType = liElement.getAttribute("data-type");
+                const selectedDataType = state.selectedElement.getAttribute("data-type");
+                if (targetDataType === "navigation-file" && selectedDataType === "navigation-root") {
+                    return;
+                }
+                if (selectedDataType === "navigation-file" && targetDataType === "navigation-root") {
+                    liElement.classList.add("dragover");
+                    return;
+                }
+                const liRect = liElement.getBoundingClientRect();
+                if (selectedDataType === "navigation-root" && targetDataType === "navigation-root") {
+                    if (touch.clientY > liRect.top + liRect.height / 2) {
+                        liElement.classList.add("dragover__bottom");
+                    } else {
+                        liElement.classList.add("dragover__top");
+                    }
+                    return;
+                }
+                const dragHeight = liRect.height * .2;
+                if (touch.clientY > liRect.bottom - dragHeight) {
+                    liElement.classList.add("dragover__bottom");
+                } else if (touch.clientY < liRect.top + dragHeight) {
+                    liElement.classList.add("dragover__top");
+                }
+
+                if (!liElement.classList.contains("dragover__top") && !liElement.classList.contains("dragover__bottom") &&
+                    !(selectedDataType === "navigation-root" && targetDataType === "navigation-root")) {
+                    liElement.classList.add("dragover");
+                }
+            }
+        }, {passive: false});
+
+        filesElement.addEventListener("touchend", async () => {
+            const state = this.touchDragState;
+            if (!state) return;
+            state.selectedElement.style.opacity = "";
+            if (state.isDragging) {
+                if (state.ghostElement) {
+                    state.ghostElement.remove();
+                }
+                const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
+                if (!newElement) {
+                    return;
+                }
+                const newUlElement = hasTopClosestByTag(newElement, "UL");
+                if (!newUlElement) {
+                    return;
+                }
+                const oldScrollTop = this.element.scrollTop;
+                const toURL = newUlElement.getAttribute("data-url");
+                const toPath = newElement.getAttribute("data-path");
+
+                const selectRootElements: HTMLElement[] = [];
+                const selectFileElements: HTMLElement[] = [];
+                const fromPaths: string[] = [];
+                if (state.selectedElement.getAttribute("data-type") === "navigation-root") {
+                    selectRootElements.push(state.selectedElement);
+                } else {
+                    const dataPath = state.selectedElement.getAttribute("data-path");
+                    // 禁止父节点移动到子节点 https://github.com/siyuan-note/siyuan/issues/12539
+                    if (newElement.getAttribute("data-path").startsWith(dataPath.replace(".sy", ""))) {
+                        this.clearDragIndicators();
+                        this.touchDragState = null;
+                        return;
+                    }
+                    fromPaths.push(dataPath);
+                    selectFileElements.push(state.selectedElement);
+                }
+
+                if (newElement.classList.contains("dragover")) {
+                    fetchPost("/api/filetree/moveDocs", {
+                        toNotebook: toURL,
+                        fromPaths,
+                        toPath,
+                    });
+                    this.clearDragIndicators();
+                    this.touchDragState = null;
+                    return;
+                }
+                if (newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) {
+                    const ulSort = newUlElement.getAttribute("data-sortmode");
+                    if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
+                        newElement.getAttribute("data-path") === "/") {
+                        if (newElement.classList.contains("dragover__top")) {
+                            selectRootElements.forEach(item => {
+                                newElement.parentElement.before(item.parentElement);
+                            });
+                        } else {
+                            selectRootElements.reverse().forEach(item => {
+                                newElement.parentElement.after(item.parentElement);
+                            });
+                        }
+                        const notebooks: string[] = [];
+                        Array.from(this.element.children).forEach(item => {
+                            notebooks.push(item.getAttribute("data-url"));
+                        });
+                        fetchPost("/api/notebook/changeSortNotebook", {
+                            notebooks,
+                        });
+                    } else if ((ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15")) && selectFileElements.length > 0) {
+                        let hasMove = false;
+                        const toDir = pathPosix().dirname(toPath);
+                        if (fromPaths.length > 0) {
+                            await fetchSyncPost("/api/filetree/moveDocs", {
+                                toNotebook: toURL,
+                                fromPaths,
+                                toPath: toDir === "/" ? "/" : toDir + ".sy",
+                                callback: Constants.CB_MOVE_NOLIST,
+                            });
+                            selectFileElements.forEach(item => {
+                                item.setAttribute("data-path", pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy"));
+                            });
+                            hasMove = true;
+                        }
+                        if (newElement.classList.contains("dragover__top")) {
+                            selectFileElements.forEach(item => {
+                                let nextULElement;
+                                if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
+                                    nextULElement = item.nextElementSibling;
+                                }
+                                newElement.before(item);
+                                if (nextULElement) {
+                                    item.after(nextULElement);
+                                }
+                            });
+                        } else if (newElement.classList.contains("dragover__bottom")) {
+                            selectFileElements.reverse().forEach(item => {
+                                let nextULElement;
+                                if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
+                                    nextULElement = item.nextElementSibling;
+                                }
+                                if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
+                                    newElement.nextElementSibling.after(item);
+                                } else {
+                                    newElement.after(item);
+                                }
+                                if (nextULElement) {
+                                    item.after(nextULElement);
+                                }
+                            });
+                        }
+                        const paths: string[] = [];
+                        Array.from(newElement.parentElement.children).forEach(item => {
+                            if (item.tagName === "LI") {
+                                paths.push(item.getAttribute("data-path"));
+                            }
+                        });
+                        fetchPost("/api/filetree/changeSort", {
+                            paths,
+                            notebook: toURL
+                        }, () => {
+                            if (hasMove) {
+                                fetchPost("/api/filetree/listDocsByPath", {
+                                    notebook: toURL,
+                                    path: toDir === "/" ? "/" : toDir + ".sy",
+                                    app: Constants.SIYUAN_APPID,
+                                }, response => {
+                                    if (response.data.path === "/" && response.data.files.length === 0) {
+                                        showMessage(window.siyuan.languages.emptyContent);
+                                        return;
+                                    }
+                                    this.onLsHTML(response.data, oldScrollTop);
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+            this.clearDragIndicators();
+            this.touchDragState = null;
+        });
+
+        filesElement.addEventListener("touchcancel", () => {
+            if (this.touchDragState?.ghostElement) {
+                this.touchDragState.ghostElement.remove();
+            }
+            if (this.touchDragState?.selectedElement) {
+                this.touchDragState.selectedElement.style.opacity = "";
+            }
+            this.clearDragIndicators();
+            this.touchDragState = null;
+        });
         this.init();
         if (window.siyuan.config.openHelp) {
             mountHelp();
         }
     }
+
+    private clearDragIndicators = () => {
+        if (!this.touchDragState) return;
+        this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach(el => {
+            el.classList.remove("dragover__top", "dragover__bottom", "dragover");
+        });
+    };
 
     private genSort() {
         window.siyuan.menus.menu.remove();
@@ -353,7 +608,7 @@ export class MobileFiles extends Model {
 </li>`;
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sortmode="${item.sortMode}">
-<li class="b3-list-item" data-type="navigation-root" data-path="/">
+<li class="b3-list-item" data-type="navigation-root" data-path="/" style="--file-toggle-width:24px">
     <span class="b3-list-item__toggle${item.closed ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -374,6 +629,7 @@ export class MobileFiles extends Model {
         let html = "";
         let closeHtml = "";
         let closeCounter = 0;
+        const scrollTop = this.element.scrollTop;
         window.siyuan.notebooks.forEach((item) => {
             if (item.closed) {
                 closeCounter++;
@@ -391,10 +647,11 @@ export class MobileFiles extends Model {
         } else {
             this.closeElement.classList.add("fn__none");
         }
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: IFilesPath) => {
-            item.openPaths.forEach((openPath) => {
-                this.selectItem(item.notebookId, openPath, undefined, false, false);
-            });
+        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach(async (item: IFilesPath) => {
+            for (const openPath of item.openPaths) {
+                await this.selectItem(item.notebookId, openPath, undefined, false, false);
+            }
+            this.element.scrollTop = scrollTop;
         });
         this.refreshPublishAccessSwitch();
         if (!init) {
@@ -573,7 +830,7 @@ export class MobileFiles extends Model {
 
     }
 
-    private onLsHTML(data: { files: IFile[], box: string, path: string }) {
+    private onLsHTML(data: { files: IFile[], box: string, path: string }, scrollTop?: number) {
         if (data.files.length === 0) {
             return;
         }
@@ -600,6 +857,9 @@ export class MobileFiles extends Model {
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;
+            if (typeof scrollTop === "number") {
+                this.element.scroll({top: scrollTop, behavior: "smooth"});
+            }
             this.refreshPublishAccessSwitch();
             return;
         }
@@ -613,6 +873,9 @@ export class MobileFiles extends Model {
                     item.classList.remove("file-tree__sliderDown");
                     item.removeAttribute("style");
                 });
+                if (typeof scrollTop === "number") {
+                    this.element.scroll({top: scrollTop, behavior: "smooth"});
+                }
             }, 120);
         }, 2);
         this.refreshPublishAccessSwitch();
@@ -794,10 +1057,11 @@ export class MobileFiles extends Model {
         if (item.count && item.count > 0) {
             countHTML = `<span class="counter">${item.count}</span>`;
         }
+        const paddingLeft = (item.path.split("/").length - 1) * 20;
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-type="navigation-file" 
-class="b3-list-item" data-path="${item.path}">
-    <span style="padding-left: ${(item.path.split("/").length - 1) * 20}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
+class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddingLeft + 20}px" >
+    <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     <span class="b3-list-item__icon"${editingPublishAccess ? " fn__none" : ""}>${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>

@@ -33,15 +33,14 @@ import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
-/// #if BROWSER
-import {setLocalShorthandCount} from "./util/noRelyPCFunction";
-/// #else
+/// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
 import {getDockByType} from "./layout/tabUtil";
 import {Tag} from "./layout/dock/Tag";
 import {updateAppearance} from "./config/util/updateAppearance";
 import {renderSnippet} from "./config/util/snippets";
+import {setBodyHighlight} from "./util/assets";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -94,11 +93,6 @@ export class App {
                                     (getDockByType("tag").data.tag as Tag).update();
                                 }
                                 break;
-                            /// #if BROWSER
-                            case "setLocalShorthandCount":
-                                setLocalShorthandCount();
-                                break;
-                            /// #endif
                             case "setRefDynamicText":
                                 setRefDynamicText(data.data);
                                 break;
@@ -137,7 +131,22 @@ export class App {
                                 progressLoading(data);
                                 break;
                             case "setLocalStorageVal":
-                                window.siyuan.storage[data.data.key] = data.data.val;
+                                if (window.siyuan.storage) {
+                                    window.siyuan.storage[data.data.key] = data.data.val;
+                                }
+                                break;
+                            case "setLocalStorageVals":
+                                Object.keys(data.data.keyVals).forEach((k) => {
+                                    window.siyuan.storage[k] = data.data.keyVals[k];
+                                });
+                                break;
+                            case "removeLocalStorageVal":
+                                delete window.siyuan.storage[data.data.key];
+                                break;
+                            case "removeLocalStorageVals":
+                                data.data.keys.forEach((k: string) => {
+                                    delete window.siyuan.storage[k];
+                                });
                                 break;
                             case "rename":
                                 getAllTabs().forEach((tab) => {
@@ -219,6 +228,7 @@ export class App {
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
             window.siyuan.isPublish = response.data.isPublish;
+            setBodyHighlight();
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {

@@ -171,7 +171,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20240530101000-xf6aq6t",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "アクセス認証パスワード"
+					"TextMarkTextContent": "画面ロックパスワード"
 				},
 				{
 					"Type": "NodeText",
@@ -392,6 +392,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "tr_TR"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "uk_UA"
 				},
 				{
 					"Type": "NodeText",

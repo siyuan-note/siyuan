@@ -53,7 +53,7 @@ type AttrView struct {
 	Name string `json:"name"`
 }
 
-func GetDocInfo(blockID string) (ret *BlockInfo) {
+func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
 	FlushTxQueue()
 
 	tree, err := LoadTreeByBlockID(blockID)

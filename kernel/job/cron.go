@@ -39,6 +39,7 @@ func StartCron() {
 	go every(util.SQLFlushInterval, sql.FlushTxJob)
 	go every(util.SQLFlushInterval, sql.FlushHistoryTxJob)
 	go every(util.SQLFlushInterval, sql.FlushAssetContentTxJob)
+	go every(50*time.Microsecond, model.PollPushQueue)
 	go every(10*time.Minute, model.IndexEmbedBlockJob)
 	go every(10*time.Minute, model.CacheVirtualBlockRefJob)
 	go every(30*time.Second, model.OCRAssetsJob)
@@ -47,9 +48,9 @@ func StartCron() {
 	go every(24*time.Hour, model.AutoPurgeRepoJob)
 	go every(30*time.Minute, model.AutoCheckMicrosoftDefenderJob)
 	go every(24*time.Hour, model.ClearOutdatedHistoryDirJob)
-
-	// TODO: 移除旧方案 https://github.com/siyuan-note/siyuan/issues/14414 实现新的刷新机制
-	//go every(3*time.Second, model.WatchLocalShorthands)
+	if util.IsMobileContainer() {
+		go every(7*time.Second, model.AutoConsumeShorthandsJob)
+	}
 }
 
 func every(interval time.Duration, f func(), name ...string) {

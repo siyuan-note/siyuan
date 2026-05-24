@@ -8,7 +8,7 @@
 		"id": "20240530101000-ynpmvl7",
 		"title": "フラッシュカード",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260427075639"
 	},
 	"Children": [
 		{
@@ -288,7 +288,7 @@
 			"Properties": {
 				"ID": "20240530101000-qeaswsv",
 				"id": "20240530101000-qe3shsu",
-				"updated": "20240530101000"
+				"updated": "20260427075639"
 			},
 			"Children": [
 				{
@@ -319,7 +319,7 @@
 			"Properties": {
 				"ID": "20240530101000-913r332",
 				"id": "20240530101000-zwoiq6q",
-				"updated": "20240530101000"
+				"updated": "20260427075639"
 			},
 			"Children": [
 				{
@@ -371,21 +371,20 @@
 					"Properties": {
 						"ID": "20240530101000-vcruzq3",
 						"id": "20240530101000-im99nvd",
-						"updated": "20240530101000"
+						"updated": "20260427075639"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-c29kp9t",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-lwgtryv",
 								"id": "20240530101000-c29kp9t",
-								"updated": "20240530101000"
+								"updated": "20260427075639"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "メインメニューまたはドキュメントツリーパネルの右クリックメニューから "
+									"Data": "メインメニューまたはドキュメントパネルの右クリックメニューから "
 								},
 								{
 									"Type": "NodeTextMark",

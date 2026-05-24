@@ -1,4 +1,4 @@
-import {escapeAriaLabel, escapeGreat, escapeHtml} from "../../util/escape";
+import {escapeAriaLabel, escapeHtml, escapeLessThans} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {setPanelFocus} from "../util";
@@ -25,7 +25,6 @@ import {
     hasClosestByTag,
     hasTopClosestByTag
 } from "../../protyle/util/hasClosest";
-import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 /// #if !BROWSER
@@ -118,9 +117,7 @@ export class Files extends Model {
         });
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__file", "dockPanel");
         options.tab.panelElement.innerHTML = `<div class="block__icons">
-    <div class="block__logo fn__flex-1">
-        <svg class="block__logoicon"><use xlink:href="#iconFiles"></use></svg>${window.siyuan.languages.fileTree}
-    </div>
+    <div class="block__logo fn__flex-1">${window.siyuan.languages.fileTree}</div>
     <span data-type="focus" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.selectOpen1}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.selectOpen1.custom)}"><svg><use xlink:href='#iconFocus'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="collapse" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.collapse}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
@@ -205,6 +202,7 @@ export class Files extends Model {
         });
         this.actionsElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;
+            let isFocus = true;
             while (target && !target.isEqualNode(this.actionsElement)) {
                 const type = target.getAttribute("data-type");
                 if (type === "min") {
@@ -212,6 +210,7 @@ export class Files extends Model {
                     event.preventDefault();
                     event.stopPropagation();
                     window.siyuan.menus.menu.remove();
+                    isFocus = false;
                     break;
                 } else if (type === "focus") {
                     selectOpenTab();
@@ -225,7 +224,9 @@ export class Files extends Model {
                 }
                 target = target.parentElement;
             }
-            setPanelFocus(this.element.parentElement);
+            if (isFocus) {
+                setPanelFocus(this.element.parentElement);
+            }
         });
         this.element.addEventListener("mousedown", (event) => {
             // 点击鼠标滚轮关闭
@@ -321,13 +322,6 @@ export class Files extends Model {
                                 initNavigationMenu(options.app, target.parentElement).popup({
                                     x: event.clientX,
                                     y: event.clientY
-                                });
-                            } else if (type === "addLocal") {
-                                fetchPost("/api/filetree/moveLocalShorthands", {
-                                    "notebook": notebookId
-                                });
-                                this.element.querySelectorAll('[data-type="addLocal"]').forEach(item => {
-                                    item.remove();
                                 });
                             }
                         }
@@ -444,11 +438,7 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
-            if (isTouchDevice()) {
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
+            if (window.siyuan.config.readonly) return;
             window.getSelection().removeAllRanges();
             hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
@@ -484,12 +474,37 @@ export class Files extends Model {
                 event.dataTransfer.dropEffect = "move";
                 window.siyuan.dragElement = document.createElement("div");
                 window.siyuan.dragElement.innerText = ids;
-                setTimeout(() => {
-                    ghostElement.remove();
-                });
+                if (window.siyuan.touchDragActive) {
+                    window.siyuan.touchDragGhost = ghostElement;
+                } else {
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                }
             }
         });
+        const dragOverLastObj: {
+            element: HTMLElement,
+            positionY: number,
+            rafId: number,
+            sourceOnlyRoot: boolean,
+        } = {
+            element: null,
+            positionY: null,
+            rafId: null,
+            sourceOnlyRoot: null
+        };
         this.element.addEventListener("dragend", (event) => {
+            if (dragOverLastObj.rafId) {
+                cancelAnimationFrame(dragOverLastObj.rafId);
+                dragOverLastObj.rafId = null;
+            }
+            dragOverLastObj.element = null;
+            dragOverLastObj.positionY = null;
+            dragOverLastObj.sourceOnlyRoot = null;
+            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+            });
             this.parent.panelElement.classList.remove("sy__file--disablehover");
             this.element.querySelectorAll('.b3-list-item[style*="opacity: 0.38;"]').forEach((item: HTMLElement, index) => {
                 item.style.opacity = "";
@@ -510,17 +525,6 @@ export class Files extends Model {
             });
             /// #endif
         });
-        const dragOverLastObj: {
-            element: HTMLElement,
-            positionY: number,
-            rafId: number,
-            sourceOnlyRoot: boolean,
-        } = {
-            element: null,
-            positionY: null,
-            rafId: null,
-            sourceOnlyRoot: null
-        };
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || !window.siyuan.dragElement || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 event.preventDefault();
@@ -591,22 +595,17 @@ export class Files extends Model {
                     ) {
                         const nodeRect = liElement.getBoundingClientRect();
                         const dragHeight = nodeRect.height * .2;
+                        liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
                         if (targetType === "navigation-root" && dragOverLastObj.sourceOnlyRoot) {
                             if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                                liElement.classList.remove("dragover");
                                 liElement.classList.add("dragover__bottom");
                             } else {
-                                liElement.classList.remove("dragover");
                                 liElement.classList.add("dragover__top");
                             }
                         } else if (event.clientY > nodeRect.bottom - dragHeight) {
-                            liElement.classList.remove("dragover");
                             liElement.classList.add("dragover__bottom");
                         } else if (event.clientY < nodeRect.top + dragHeight) {
-                            liElement.classList.remove("dragover");
                             liElement.classList.add("dragover__top");
-                        } else {
-                            liElement.classList.remove("dragover__top", "dragover__bottom");
                         }
                     }
                     if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
@@ -832,7 +831,7 @@ export class Files extends Model {
         const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
-            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
+            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeLessThans));
             if (data.data.subFileCount === 0) {
                 liElement.querySelector(".b3-list-item__toggle")?.classList.add("fn__hidden");
             } else {
@@ -1372,7 +1371,7 @@ aria-label="${ariaLabel}">${getDisplayName(Lute.EscapeHTMLStr(item.name), true, 
         window.siyuan.menus.menu.remove();
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconFilesRoot",
+                icon: "iconNewNoteBook",
                 label: window.siyuan.languages.newNotebook,
                 click: () => {
                     newNotebook();

@@ -28,6 +28,7 @@ import (
 	mathRand "math/rand"
 	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -555,6 +556,84 @@ func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, t
 	return
 }
 
+func SearchRepoFile(keyword string, page int) (ret []*DiffFile, pageCount, totalCount int, err error) {
+	ret = []*DiffFile{}
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+
+	files, totalCount, pageCount, err := repo.SearchFile(keyword, page, 32)
+	if err != nil {
+		logging.LogErrorf("search repo file failed: %s", err)
+		return
+	}
+
+	if 1 > len(files) {
+		return
+	}
+
+	luteEngine := NewLute()
+	for _, file := range files {
+		title, parseErr := parseTitleInSnapshot(file.ID, repo, luteEngine)
+		if "" == title || nil != parseErr {
+			title = path.Base(file.Path)
+		}
+
+		ret = append(ret, &DiffFile{
+			FileID:  file.ID,
+			Title:   title,
+			Path:    file.Path,
+			HSize:   humanize.BytesCustomCeil(uint64(file.Size), 2),
+			Updated: file.Updated,
+		})
+	}
+	return
+}
+
+func ExportRepoFile(id string) (exportPath string, err error) {
+	if 1 > len(Conf.Repo.Key) {
+		err = errors.New(Conf.Language(26))
+		return
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+
+	file, err := repo.GetFile(id)
+	if err != nil {
+		return
+	}
+
+	data, err := repo.OpenFile(file)
+	if err != nil {
+		return
+	}
+
+	name := path.Base(file.Path)
+	exportDir := filepath.Join(util.TempDir, "export", "repo")
+	if err = os.MkdirAll(exportDir, 0755); err != nil {
+		logging.LogErrorf("mkdir [%s] failed: %s", exportDir, err)
+		return
+	}
+
+	exportFilePath := filepath.Join(exportDir, name)
+	if err = os.WriteFile(exportFilePath, data, 0644); err != nil {
+		logging.LogErrorf("write file [%s] failed: %s", exportFilePath, err)
+		return
+	}
+
+	exportPath = path.Join("/export/repo", url.PathEscape(name))
+	return
+}
+
 type Snapshot struct {
 	*dejavu.Log
 	TypesCount []*TypeCount `json:"typesCount"`
@@ -836,6 +915,10 @@ func CheckoutRepo(id string) {
 	task.AppendTask(task.RepoCheckout, checkoutRepo, id)
 }
 
+func CheckoutRepoDirect(id string) {
+	checkoutRepo(id)
+}
+
 func checkoutRepo(id string) {
 	var err error
 	if 1 > len(Conf.Repo.Key) {
@@ -887,7 +970,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	FullReindex(true)
+	FullReindexDirect()
 
 	if syncEnabled {
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
@@ -1740,7 +1823,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			upsertTrees++
 		}
 
-		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+		if util.IsMobileContainer() && strings.HasPrefix(file.Path, "/assets/") {
 			absPath := filepath.Join(util.DataDir, file.Path)
 			HandleAssetsChangeEvent(absPath)
 		}
@@ -1790,7 +1873,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			}
 		}
 
-		if !isFileWatcherAvailable() && strings.HasPrefix(file.Path, "/assets/") {
+		if util.IsMobileContainer() && strings.HasPrefix(file.Path, "/assets/") {
 			absPath := filepath.Join(util.DataDir, file.Path)
 			HandleAssetsRemoveEvent(absPath)
 		}
@@ -1946,7 +2029,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	FlushTxQueue()
 
 	checkChunks := true
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+	if util.IsMobileContainer() {
 		// 因为移动端私有数据空间不会存在外部操作导致分块损坏的情况，所以不需要检查分块以提升性能 https://github.com/siyuan-note/siyuan/issues/13216
 		checkChunks = false
 	}

@@ -457,7 +457,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	return
 }
 
-func GetDoc(startID, endID, id string, index int, query string, queryTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
+func GetDoc(startID, endID, id string, index int, query string, queryTypes, querySubTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool, originalRefBlockIDs map[string]string, highlight bool) (
 	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
@@ -653,7 +653,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	query = filterQueryInvisibleChars(query)
 	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
-		typeFilter := buildTypeFilter(queryTypes)
+		typeFilter := buildTypeFilter(queryTypes, querySubTypes)
 		switch queryMethod {
 		case 0:
 			query = stringQuery(query)
@@ -1005,7 +1005,11 @@ func DuplicateDoc(tree *parse.Tree) {
 	if nil != box {
 		box.addSort(previousPath, tree.ID)
 	}
+
 	FlushTxQueue()
+	arg := map[string]any{}
+	arg["listDocTree"] = true
+	PushCreate(box, tree.Path, arg)
 }
 
 func createTreeTx(tree *parse.Tree) {
@@ -1015,7 +1019,7 @@ func createTreeTx(tree *parse.Tree) {
 
 var createDocLock = sync.Mutex{}
 
-func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree, err error) {
+func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]any) (tree *parse.Tree, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1038,10 +1042,13 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	} else {
 		box.setSortByConf(path.Dir(tree.Path), tree.ID)
 	}
+
+	FlushTxQueue()
+	PushCreate(box, p, arg)
 	return
 }
 
-func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool, clippingHref string) (retID string, err error) {
+func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool, clippingHref string, arg map[string]any) (retID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1084,6 +1091,9 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		return
 	}
 	box.setSortByConf(path.Dir(bt.Path), retID)
+
+	FlushTxQueue()
+	PushCreate(box, bt.Path, arg)
 	return
 }
 
@@ -1212,12 +1222,12 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		return
 	}
 
-	luteEngine := util.NewLute()
-	tree, err := filesys.LoadTree(boxID, p, luteEngine)
-	if err != nil {
+	bt := treenode.GetBlockTreeByBoxPath(boxID, p)
+	if nil == bt {
+		err = ErrBlockNotFound
 		return
 	}
-	hPath = tree.HPath
+	hPath = bt.HPath
 	return
 }
 
@@ -1229,14 +1239,13 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		bt := treenode.GetBlockTreeByPath(p)
+		bt := treenode.GetBlockTreeByBoxPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
 			continue
 		}
 
-		hpath := html.UnescapeString(bt.HPath)
-		hPaths = append(hPaths, box.Name+hpath)
+		hPaths = append(hPaths, box.Name+bt.HPath)
 	}
 	return
 }

@@ -32,7 +32,7 @@ import (
 var emojisWatcher *watcher.Watcher
 
 func WatchEmojis() {
-	if !isFileWatcherAvailable() {
+	if util.IsMobileContainer() {
 		return
 	}
 

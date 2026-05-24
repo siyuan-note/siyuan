@@ -213,6 +213,7 @@ docker run -d \
   -v workspace_dir_host:workspace_dir_container \
   -p 6806:6806 \
   -e PUID=1001 -e PGID=1002 \
+  -e SIYUAN_LANG=tr_TR \
   b3log/siyuan \
   --workspace=workspace_dir_container \
   --accessAuthCode=xxx
@@ -226,6 +227,8 @@ docker run -d \
 - `accessAuthCode`: Ekran kilidi şifresi (**kesinlikle değiştir**, aksi halde herkes verilerine erişebilir)  
   - Alternatif olarak, ekran kilidi şifresi `SIYUAN_ACCESS_AUTH_CODE` ortam değişkeniyle de ayarlanabilir. Yine, hem komut satırı hem ortam değişkeni kullanılırsa, **komut satırı önceliklidir**.  
   - Ekran kilidi şifresini devre dışı bırakmak için şu ortam değişkenini ayarla: `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`  
+- `SIYUAN_LANG`: Arayüz dili (isteğe bağlı, Docker'da ayarlanmazsa varsayılan `en_US`). Aşağıdaki örnekler, bu belgeyle uyumlu olması için `tr_TR` kullanır. **Ayarlar**'da seçtiğin dilin yeniden başlatmadan sonra da geçerli kalmasını istiyorsan, dağıtımda bu değişkeni ekleme; ayarlanırsa her başlatmada uygulanır ve kaydedilmiş dil ayarının üzerine yazar
+  - Alternatif olarak `--lang` komut satırı parametresiyle de ayarlanabilir. Her ikisi de ayarlanırsa **komut satırı önceliklidir**
 
 Kurulumu basitleştirmek için, host ve konteyner üzerindeki çalışma alanı yollarını aynı şekilde ayarlaman önerilir. Örneğin her ikisini de `/siyuan/workspace` olarak tanımlayabilirsin. Buna karşılık gelen başlatma komutu şu şekildedir:
 
@@ -234,6 +237,7 @@ docker run -d \
   -v /siyuan/workspace:/siyuan/workspace \
   -p 6806:6806 \
   -e PUID=1001 -e PGID=1002 \
+  -e SIYUAN_LANG=tr_TR \
   b3log/siyuan \
   --workspace=/siyuan/workspace/ \
   --accessAuthCode=xxx
@@ -255,10 +259,10 @@ services:
       - /siyuan/workspace:/siyuan/workspace
     restart: unless-stopped
     environment:
-      # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - TZ=${YOUR_TIME_ZONE}
+      - TZ=${YOUR_TIME_ZONE}    # Saat dilimi tanımlayıcılarının listesi için bkz. https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
       - PUID=${YOUR_USER_PUID}  # Customize user ID
       - PGID=${YOUR_USER_PGID}  # Customize group ID
+      - SIYUAN_LANG=tr_TR       # Arayüz dili (bu belgeyle uyumlu)
 ```
 
 Bu yapılandırmada:
@@ -314,6 +318,7 @@ Container Path: /home/siyuan
 Host path: /mnt/user/appdata/siyuan
 PUID: 1000
 PGID: 1000
+SIYUAN_LANG: tr_TR
 Publish parameters: --accessAuthCode=******(Lock screen password)
 ```
 
@@ -348,9 +353,10 @@ services:
       - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Veri kümesi yolunuza göre ayarlayın
     restart: unless-stopped
     environment:
-      - TZ=America/Los_Angeles  # Gerekirse kendi saat diliminizle değiştirin
+      - TZ=Europe/Istanbul  # Gerekirse kendi saat diliminizle değiştirin
       - PUID=1001
       - PGID=1002
+      - SIYUAN_LANG=tr_TR
 ```
 
 </details>

@@ -378,6 +378,7 @@ func subscribeSQLEvents() {
 		}
 
 		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertBlocksFTS handler missing key [current] or [total] in context")
 			return
 		}
 		current := context["current"].(int)
@@ -392,6 +393,7 @@ func subscribeSQLEvents() {
 		}
 
 		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLDeleteBlocks handler missing key [current] or [total] in context")
 			return
 		}
 		current := context["current"].(int)
@@ -406,6 +408,7 @@ func subscribeSQLEvents() {
 		}
 
 		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLUpdateBlocksHPaths handler missing key [current] or [total] in context")
 			return
 		}
 		current := context["current"].(int)
@@ -421,6 +424,7 @@ func subscribeSQLEvents() {
 		}
 
 		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertHistory handler missing key [current] or [total] in context")
 			return
 		}
 		current := context["current"].(int)
@@ -436,6 +440,7 @@ func subscribeSQLEvents() {
 		}
 
 		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertAssetContent handler missing key [current] or [total] in context")
 			return
 		}
 		current := context["current"].(int)

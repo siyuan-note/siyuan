@@ -1851,6 +1851,7 @@
     "291": "Arquivo não encontrado ou vazio",
     "292": "Não foi possível criar o arquivo",
     "293": "Não foi possível gravar o arquivo",
-    "294": "O código de ativação não pode estar vazio"
+    "294": "O código de ativação não pode estar vazio",
+    "295": "Este recurso requer a compra de [Assinatura Anual] (se já comprou, por favor atualize ou faça login novamente em Configurações - Conta)"
   }
 }

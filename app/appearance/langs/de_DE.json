@@ -1851,6 +1851,7 @@
     "291": "Datei nicht gefunden oder leer",
     "292": "Datei kann nicht erstellt werden",
     "293": "Datei kann nicht geschrieben werden",
-    "294": "Aktivierungscode darf nicht leer sein"
+    "294": "Aktivierungscode darf nicht leer sein",
+    "295": "Diese Funktion erfordert den Kauf eines [Jahresabonnements] (wenn Sie bereits gekauft haben, aktualisieren oder erneut anmelden in Einstellungen - Konto)"
   }
 }

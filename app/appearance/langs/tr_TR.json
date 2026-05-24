@@ -1851,6 +1851,7 @@
     "291": "Dosya bulunamadı veya boş",
     "292": "Dosya oluşturulamadı",
     "293": "Dosyaya yazılamadı",
-    "294": "Etkinleştirme kodu boş olamaz"
+    "294": "Etkinleştirme kodu boş olamaz",
+    "295": "Bu özellik için [Yıllık Abonelik] gereklidir (zaten satın aldıysan Ayarlar - Hesap kısmından yenile veya tekrar giriş yap)"
   }
 }

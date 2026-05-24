@@ -1851,6 +1851,7 @@
     "291": "File non trovato o vuoto",
     "292": "Impossibile creare il file",
     "293": "Impossibile scrivere il file",
-    "294": "Il codice di attivazione non può essere vuoto"
+    "294": "Il codice di attivazione non può essere vuoto",
+    "295": "Questa funzione è disponibile solo con l'acquisto di [abbonamento annuale] (se hai già acquistato, aggiorna o accedi nuovamente in Impostazioni - Account)"
   }
 }

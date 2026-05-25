@@ -2598,9 +2598,6 @@ export class Gutter {
                                 return;
                             }
                         } else {
-                            // https://github.com/siyuan-note/siyuan/issues/17751 第一点
-                            this.element.classList.add("fn__none");
-                            this.element.innerHTML = "";
                             return;
                         }
                     }

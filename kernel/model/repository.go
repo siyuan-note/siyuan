@@ -217,6 +217,18 @@ func RollbackRepoSnapshotFile(fileID string) (err error) {
 		return
 	}
 
+	// 回滚快照时默认为当前数据创建一个快照
+	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
+	FlushTxQueue()
+	_, err = repo.Index("Backup before checkout", false, map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	if err != nil {
+		logging.LogErrorf("index repository failed: %s", err)
+		util.PushClearProgress()
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), err), 0)
+		return
+	}
+	util.PushClearProgress()
+
 	from := filepath.Join(tempRepoDiffDir, f)
 	if err = os.WriteFile(from, data, 0644); nil != err {
 		logging.LogErrorf("write file [%s] failed: %v", filepath.Join(tempRepoDiffDir, file.Path), err)

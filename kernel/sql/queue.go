@@ -476,6 +476,7 @@ func processDiskQueue() {
 
 	luteEngine := lute.New()
 	context := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+	groupOpsCurrent := map[string]int{}
 	for _, e := range entries {
 		op := indexEntryToOp(e, luteEngine, "flush disk queue")
 		if nil == op {
@@ -485,6 +486,9 @@ func processDiskQueue() {
 		if err != nil {
 			return
 		}
+		groupOpsCurrent[op.action]++
+		context["current"] = groupOpsCurrent[op.action]
+		context["total"] = len(entries)
 		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			closeTxPreparedStmts(tx)

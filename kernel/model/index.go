@@ -377,6 +377,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertBlocksFTS handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
@@ -388,6 +392,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLDeleteBlocks handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(93), current, total, rootID)
@@ -399,6 +407,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLUpdateBlocksHPaths handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(234), current, total, blockCount, hash)
@@ -411,6 +423,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertHistory handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(191), current, total)
@@ -423,6 +439,10 @@ func subscribeSQLEvents() {
 			return
 		}
 
+		if nil == context["current"] || nil == context["total"] {
+			logging.LogWarnf("EvtSQLInsertAssetContent handler missing key [current] or [total] in context")
+			return
+		}
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(217), current, total)

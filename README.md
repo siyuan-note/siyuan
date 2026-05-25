@@ -226,6 +226,8 @@ docker run -d \
 - `accessAuthCode`: Lock screen password (please **be sure to modify**, otherwise anyone can access your data)
   - Alternatively, it's possible to set the lock screen password via the `SIYUAN_ACCESS_AUTH_CODE` env variable. The commandline will always have the priority, if both are set
   - To disable the lock screen password set the env variable `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true`
+- `SIYUAN_LANG`: Interface language (optional, defaults to `en_US` if unset in Docker). Omit it if you want the language chosen in **Settings** to persist across restarts; if set, it is applied on every startup and overrides the saved setting
+  - Alternatively, use the `--lang` command-line parameter. If both are set, the command-line takes priority
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
 
@@ -255,8 +257,7 @@ services:
       - /siyuan/workspace:/siyuan/workspace
     restart: unless-stopped
     environment:
-      # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - TZ=${YOUR_TIME_ZONE}
+      - TZ=${YOUR_TIME_ZONE}    # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
       - PUID=${YOUR_USER_PUID}  # Customize user ID
       - PGID=${YOUR_USER_PGID}  # Customize group ID
 ```
@@ -348,7 +349,7 @@ services:
       - /mnt/Pool_1/Apps_Data/siyuan:/siyuan/workspace  # Adjust to your dataset path 
     restart: unless-stopped
     environment:
-      - TZ=America/Los_Angeles  # Replace with your timezone if needed
+      - TZ=America/New_York  # Replace with your timezone if needed
       - PUID=1001
       - PGID=1002
 ```

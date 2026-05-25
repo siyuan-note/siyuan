@@ -292,7 +292,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
         </div>
         <div class="fn__flex" style="height: 26px">
             <span class="fn__flex-1"></span>
-            <span class="b3-list-item__action${item.path.endsWith(".sy")?" fn__none":""}" data-type="saveAs">
+            <span class="b3-list-item__action" data-type="saveAs">
                 <svg><use xlink:href="#iconDownload"></use></svg>
                 <span class="fn__space"></span>${window.siyuan.languages.saveAs}
             </span>
@@ -319,7 +319,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w${item.path.endsWith(".sy") ? " fn__none" : ""}" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
+    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
         <svg><use xlink:href="#iconDownload"></use></svg>
     </span>
 </li>`;

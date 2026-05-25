@@ -640,6 +640,22 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 
 	name := path.Base(file.Path)
 	exportDir := filepath.Join(util.TempDir, "export", "repo")
+
+	// 如果是 .sy 文件需要打包为 .sy.zip 以便导入
+	var docTitle string
+	if strings.HasSuffix(file.Path, ".sy") {
+		var tree *parse.Tree
+		luteEngine := NewLute()
+		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		if err != nil {
+			logging.LogErrorf("parse file [%s] failed: %s", id, err)
+			return
+		}
+
+		docTitle = tree.Root.IALAttr("title")
+		exportDir = filepath.Join(exportDir, docTitle)
+	}
+
 	if err = os.MkdirAll(exportDir, 0755); err != nil {
 		logging.LogErrorf("mkdir [%s] failed: %s", exportDir, err)
 		return
@@ -648,6 +664,28 @@ func ExportRepoFile(id string) (exportPath string, err error) {
 	exportFilePath := filepath.Join(exportDir, name)
 	if err = os.WriteFile(exportFilePath, data, 0644); err != nil {
 		logging.LogErrorf("write file [%s] failed: %s", exportFilePath, err)
+		return
+	}
+
+	if strings.HasSuffix(file.Path, ".sy") {
+		zipPath := filepath.Join(util.TempDir, "export", "repo", docTitle+".sy.zip")
+		zip, zipErr := gulu.Zip.Create(zipPath)
+		if zipErr != nil {
+			logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, zipErr)
+			return
+		}
+
+		if err = zip.AddDirectory(docTitle, exportDir); err != nil {
+			logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportDir, err)
+			return
+		}
+
+		if err = zip.Close(); err != nil {
+			logging.LogErrorf("close export .sy.zip failed: %s", err)
+			return
+		}
+
+		exportPath = path.Join("/export/repo", url.PathEscape(filepath.Base(zipPath)))
 		return
 	}
 

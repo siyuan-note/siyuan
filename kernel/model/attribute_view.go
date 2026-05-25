@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -4651,6 +4652,16 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
+				isPrimaryKey := av.KeyTypeBlock == keyValues.Key.Type
+				if isPrimaryKey != (av.KeyTypeBlock == colType) {
+					if isPrimaryKey {
+						err = errors.New("cannot change type of primary key field")
+					} else {
+						err = errors.New("cannot change field type to primary key")
+					}
+					return
+				}
+
 				keyValues.Key.Name = strings.TrimSpace(operation.Name)
 
 				changeType = keyValues.Key.Type != colType
@@ -4716,6 +4727,16 @@ func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr)
 func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
+		return
+	}
+
+	key, keyErr := attrView.GetKey(keyID)
+	if nil != keyErr {
+		err = keyErr
+		return
+	}
+	if av.KeyTypeBlock == key.Type {
+		err = errors.New("cannot remove primary key field")
 		return
 	}
 

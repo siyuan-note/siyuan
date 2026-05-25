@@ -151,7 +151,10 @@ export const foldBlocksRecursively = (protyle: IProtyle, nodeElements: Element[]
     }
 
     // Determine target state: if any block is unfolded, we fold all. Otherwise we expand all.
-    const isFoldAll = elementsToFold.some(element => element.getAttribute("fold") !== "1");
+    let isFoldAll = elementsToFold.some(item => item.getAttribute("fold") !== "1");
+    if (isFoldAll && nodeElements.length === 1 && nodeElements[0].getAttribute("fold") === "1") {
+        isFoldAll = false;
+    }
     elementsToFold.sort((a, b) => {
         const position = a.compareDocumentPosition(b);
         if (position & Node.DOCUMENT_POSITION_FOLLOWING) {

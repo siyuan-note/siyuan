@@ -146,7 +146,6 @@ func getUpdatedPackages(pkgType, frontend string) (updatedPackages []*bazaar.Pac
 			continue
 		}
 		updatedPackages = append(updatedPackages, pkg)
-		pkg.PreferredReadme = "" // 清空这个字段，前端会请求在线的 README
 	}
 	return
 }

@@ -2598,11 +2598,19 @@ export class Gutter {
                                 return;
                             }
                         } else {
+                            // https://github.com/siyuan-note/siyuan/issues/17751 第一点
+                            this.element.classList.add("fn__none");
+                            this.element.innerHTML = "";
                             return;
                         }
                     }
 
                     let topElement = getTopAloneElement(nodeElement);
+                    // https://github.com/siyuan-note/siyuan/issues/17751 第二点
+                    if (topElement === nodeElement.parentElement && nodeElement.childElementCount > 3 &&
+                        nodeElement.classList.contains("li")) {
+                        topElement = nodeElement;
+                    }
                     // 提示下方仅有单个列表
                     if (topElement.classList.contains("callout") && !nodeElement.classList.contains("callout") &&
                         getParentBlock(nodeElement) !== topElement) {

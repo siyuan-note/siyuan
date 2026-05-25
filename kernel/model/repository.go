@@ -409,6 +409,7 @@ type DiffFile struct {
 	FileID  string `json:"fileID"`
 	Title   string `json:"title"`
 	Path    string `json:"path"`
+	HPath   string `json:"hPath,omitempty"`
 	HSize   string `json:"hSize"`
 	Updated int64  `json:"updated"`
 }
@@ -446,7 +447,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 	luteEngine := NewLute()
 	for _, removeRight := range diff.RemovesRight {
-		title, parseErr := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
+		title, _, parseErr := parseTitleInSnapshot(removeRight.ID, repo, luteEngine)
 		if "" == title || nil != parseErr {
 			continue
 		}
@@ -464,7 +465,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	for _, addLeft := range diff.AddsLeft {
-		title, parseErr := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)
+		title, _, parseErr := parseTitleInSnapshot(addLeft.ID, repo, luteEngine)
 		if "" == title || nil != parseErr {
 			continue
 		}
@@ -482,7 +483,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	for _, updateLeft := range diff.UpdatesLeft {
-		title, parseErr := parseTitleInSnapshot(updateLeft.ID, repo, luteEngine)
+		title, _, parseErr := parseTitleInSnapshot(updateLeft.ID, repo, luteEngine)
 		if "" == title || nil != parseErr {
 			continue
 		}
@@ -500,7 +501,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	for _, updateRight := range diff.UpdatesRight {
-		title, parseErr := parseTitleInSnapshot(updateRight.ID, repo, luteEngine)
+		title, _, parseErr := parseTitleInSnapshot(updateRight.ID, repo, luteEngine)
 		if "" == title || nil != parseErr {
 			continue
 		}
@@ -519,7 +520,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	return
 }
 
-func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (title string, err error) {
+func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (title, rootID string, err error) {
 	file, err := repo.GetFile(fileID)
 	if err != nil {
 		logging.LogErrorf("get file [%s] failed: %s", fileID, err)
@@ -543,6 +544,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		title = tree.Root.IALAttr("title")
+		rootID = tree.Root.ID
 	}
 	return
 }
@@ -580,15 +582,22 @@ func SearchRepoFile(keyword string, page int) (ret []*DiffFile, pageCount, total
 
 	luteEngine := NewLute()
 	for _, file := range files {
-		title, parseErr := parseTitleInSnapshot(file.ID, repo, luteEngine)
+		title, rootID, parseErr := parseTitleInSnapshot(file.ID, repo, luteEngine)
 		if "" == title || nil != parseErr {
 			title = path.Base(file.Path)
 		}
 
+		var hpath string
+		if "" != rootID && treenode.ExistBlockTree(rootID) {
+			hpath, _ = GetHPathByID(rootID)
+		} else {
+			hpath = file.Path
+		}
 		ret = append(ret, &DiffFile{
 			FileID:  file.ID,
 			Title:   title,
 			Path:    file.Path,
+			HPath:   hpath,
 			HSize:   humanize.BytesCustomCeil(uint64(file.Size), 2),
 			Updated: file.Updated,
 		})

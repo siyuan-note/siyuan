@@ -4655,9 +4655,9 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 				isPrimaryKey := av.KeyTypeBlock == keyValues.Key.Type
 				if isPrimaryKey != (av.KeyTypeBlock == colType) {
 					if isPrimaryKey {
-						err = errors.New("cannot change type of primary key column")
+						err = errors.New("cannot change type of primary key field")
 					} else {
-						err = errors.New("cannot change column type to primary key")
+						err = errors.New("cannot change field type to primary key")
 					}
 					return
 				}
@@ -4736,7 +4736,7 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		return
 	}
 	if av.KeyTypeBlock == key.Type {
-		err = errors.New("cannot remove primary key column")
+		err = errors.New("cannot remove primary key field")
 		return
 	}
 

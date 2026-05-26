@@ -42,6 +42,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		// 确定工作目录
 		if exePath, err := os.Executable(); err == nil {
+			exePath, _ = filepath.EvalSymlinks(exePath)
 			util.WorkingDir = filepath.Dir(exePath)
 		}
 

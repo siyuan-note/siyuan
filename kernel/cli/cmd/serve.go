@@ -55,6 +55,7 @@ var serveCmd = &cobra.Command{
 
 		// 设置工作目录为可执行文件所在目录
 		if exePath, err := os.Executable(); err == nil {
+			exePath, _ = filepath.EvalSymlinks(exePath)
 			util.WorkingDir = filepath.Dir(exePath)
 		}
 

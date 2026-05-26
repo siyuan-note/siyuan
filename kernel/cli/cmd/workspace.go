@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -68,21 +69,36 @@ var workspaceInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "Show current workspace info",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		dir := workspacePath
+		if dir == "" {
+			dir = resolveDefaultWorkspace()
+		}
 		switch outputFormat {
 		case "json":
 			data, _ := json.MarshalIndent(map[string]any{
-				"path":    util.WorkspaceDir,
+				"path":    dir,
 				"version": util.Ver,
-				"valid":   util.IsWorkspaceDir(util.WorkspaceDir),
+				"valid":   util.IsWorkspaceDir(dir),
 			}, "", "  ")
 			fmt.Println(string(data))
 		default:
-			fmt.Printf("Path:       %s\n", util.WorkspaceDir)
+			fmt.Printf("Path:       %s\n", dir)
 			fmt.Printf("Version:    %s\n", util.Ver)
-			fmt.Printf("IsValid:    %v\n", util.IsWorkspaceDir(util.WorkspaceDir))
+			fmt.Printf("IsValid:    %v\n", util.IsWorkspaceDir(dir))
 		}
 		return nil
 	},
+}
+
+func resolveDefaultWorkspace() string {
+	if p := os.Getenv("SIYUAN_WORKSPACE_PATH"); p != "" {
+		return p
+	}
+	paths, _ := util.ReadWorkspacePaths()
+	if len(paths) > 0 {
+		return paths[len(paths)-1]
+	}
+	return filepath.Join(util.HomeDir, "SiYuan")
 }
 
 func init() {

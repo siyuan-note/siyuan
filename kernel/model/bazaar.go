@@ -69,21 +69,20 @@ type batchInstallItem struct {
 }
 
 // updatePackages 更新一组集市包；同类型批量更新时，安装后处理只执行一次
-func updatePackages(packages []*bazaar.Package, pkgType string, count *int, total int) bool {
+func updatePackages(packages []*bazaar.Package, pkgType string, successCount *int, planned int) {
 	items := make([]batchInstallItem, 0, len(packages))
 	for _, pkg := range packages {
 		meta, err := installBazaarPackage(pkgType, pkg.RepoURL, pkg.RepoHash, pkg.Name)
 		if err != nil {
 			logging.LogErrorf("update %s [%s] failed: %s", pkgType, pkg.Name, err)
 			util.PushErrMsg(fmt.Sprintf(Conf.language(238), pkg.Name), 5000)
-			return false
+			continue
 		}
 		items = append(items, batchInstallItem{name: pkg.Name, meta: meta})
-		*count++
-		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *count, total, pkg.Name))
+		*successCount++
+		util.PushEndlessProgress(fmt.Sprintf(Conf.language(236), *successCount, planned, pkg.Name))
 	}
 	finishInstall(pkgType, items, 0)
-	return true
 }
 
 // filterUpdatableBazaarPackages 过滤出允许更新的集市包
@@ -106,32 +105,22 @@ func BatchUpdatePackages(frontend string) {
 	themes = filterUpdatableBazaarPackages(themes)
 	templates = filterUpdatableBazaarPackages(templates)
 
-	total := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
-	if 1 > total {
+	planned := len(plugins) + len(widgets) + len(icons) + len(themes) + len(templates)
+	if 1 > planned {
 		return
 	}
 
-	util.PushEndlessProgress(fmt.Sprintf(Conf.language(235), 1, total))
 	defer util.PushClearProgress()
-	count := 1
+	successCount := 0
+	updatePackages(plugins, "plugins", &successCount, planned)
+	updatePackages(themes, "themes", &successCount, planned)
+	updatePackages(icons, "icons", &successCount, planned)
+	updatePackages(templates, "templates", &successCount, planned)
+	updatePackages(widgets, "widgets", &successCount, planned)
 
-	if !updatePackages(plugins, "plugins", &count, total) {
-		return
+	if 0 < successCount {
+		util.PushMsg(fmt.Sprintf(Conf.language(237), successCount), 5000)
 	}
-	if !updatePackages(themes, "themes", &count, total) {
-		return
-	}
-	if !updatePackages(icons, "icons", &count, total) {
-		return
-	}
-	if !updatePackages(templates, "templates", &count, total) {
-		return
-	}
-	if !updatePackages(widgets, "widgets", &count, total) {
-		return
-	}
-
-	util.PushMsg(fmt.Sprintf(Conf.language(237), total), 5000)
 }
 
 // GetUpdatedPackages 获取所有类型集市包的更新列表
@@ -374,7 +363,12 @@ func finishInstall(pkgType string, items []batchInstallItem, themeMode int) {
 			}
 			petal := GetPetalByName(item.name)
 			if nil != petal && petal.Enabled {
-				SetPetalEnabled(petal.Name, petal.Enabled) // 重新加载插件内容
+				_, err := SetPetalEnabled(petal.Name, petal.Enabled) // 重新加载插件内容
+				if err != nil {
+					logging.LogErrorf("reload plugin [%s] after update failed: %s", item.name, err)
+					util.PushErrMsg(err.Error(), 5000)
+					continue
+				}
 				reloadPluginSet.Add(item.name)
 			}
 		}

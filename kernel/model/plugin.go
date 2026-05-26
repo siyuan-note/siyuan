@@ -66,7 +66,8 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 
 	found, version, displayName, incompatible, disabledInPublish, disallowInstall, kernelIncompatible := bazaar.ParseInstalledPlugin(name, "")
 	if !found {
-		logging.LogErrorf("plugin [%s] not found", name)
+		err = fmt.Errorf("plugin [%s] not found", name)
+		logging.LogErrorf("%s", err)
 		return
 	}
 
@@ -89,7 +90,7 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 
 	if enabled && disallowInstall {
 		err = fmt.Errorf("require upgrade SiYuan to use this plugin [%s]", name)
-		logging.LogInfof("require upgrade SiYuan to use this plugin [%s]", name)
+		logging.LogInfof("%s", err)
 		return
 	}
 

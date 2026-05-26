@@ -1,5 +1,7 @@
 import {fetchSyncPost} from "../util/fetch";
 
+import type {EventBus} from "./EventBus";
+
 export class Kernel implements IKernelPlugin {
     public state: IKernelPluginState;
     public rpc: IKernelPluginRpc;
@@ -15,6 +17,11 @@ export class Kernel implements IKernelPlugin {
     #name: string;
 
     /**
+     * 客户端插件的事件总线
+     */
+    #eventBus: EventBus;
+
+    /**
      * JSON RPC WebSocket 连接，用于接收内核插件通知类型的 RPC 调用
      *
      * 普通的 RPC 调用使用 POST 请求
@@ -28,12 +35,15 @@ export class Kernel implements IKernelPlugin {
 
     #rpcCallUrl: string;
 
-    constructor(
-        appId: string,
-        name: string,
-    ) {
-        this.#appId = appId;
-        this.#name = name;
+    constructor(options: {
+        appId: string;
+        name: string;
+        eventBus: EventBus;
+    }) {
+        this.#appId = options.appId;
+        this.#name = options.name;
+        this.#eventBus = options.eventBus;
+
         this.#handlers = new Map();
         this.#rpcWs = null;
         this.#rpcCallUrl = this.#createJsonRpcCallUrl();
@@ -44,7 +54,7 @@ export class Kernel implements IKernelPlugin {
 
     #createState(): IKernelPluginState {
         return new KernelState((state) => {
-            switch (state) {
+            switch (state.code) {
                 case 3: // running
                     if (this.#rpcWs == null) {
                         this.#rpcWs = this.#createJsonRpcWebSocket();
@@ -64,6 +74,7 @@ export class Kernel implements IKernelPlugin {
                     }
                     break;
             }
+            this.#eventBus.emit("kernel-plugin-state-change", state);
         });
     }
 
@@ -215,19 +226,17 @@ export class Kernel implements IKernelPlugin {
 }
 
 export class KernelState implements IKernelPluginState {
-    #state: TKernelPluginState = -1;
+    #code: TKernelPluginState = -1;
     #description: string = "inactive";
 
-    #onchange: ((state: TKernelPluginState) => void);
+    #onchange: ((state: IKernelPluginState) => void);
 
-    public onchange: ((state: TKernelPluginState) => void) | null = null;
-
-    constructor(onchange: ((state: TKernelPluginState) => void)) {
+    constructor(onchange: ((state: IKernelPluginState) => void)) {
         this.#onchange = onchange;
     }
 
     set code(state: TKernelPluginState) {
-        this.#state = state;
+        this.#code = state;
         this.#description = (() => {
             switch (state) {
                 case -1:
@@ -251,17 +260,14 @@ export class KernelState implements IKernelPluginState {
             }
         })();
 
-        this.#onchange(state);
-
-        try {
-            this.onchange?.(state);
-        } catch (error) {
-            console.error("Error in kernel plugin state onchange handler:", error);
-        }
+        this.#onchange({
+            code: this.#code,
+            description: this.#description,
+        });
     }
 
     get code() {
-        return this.#state;
+        return this.#code;
     }
 
     get description() {

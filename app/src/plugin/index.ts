@@ -24,8 +24,8 @@ import {Kernel} from "./kernel";
 export class Plugin {
     private app: App;
     public i18n: IObject;
-    public kernel: InstanceType<typeof Kernel>;
     public eventBus: EventBus;
+    public kernel: Kernel;
     public data: any = {};
     public displayName: string;
     public readonly name: string;
@@ -73,9 +73,13 @@ export class Plugin {
     }) {
         this.app = options.app;
         this.i18n = options.i18n;
-        this.kernel = new Kernel(options.app.appId, options.name);
         this.displayName = options.displayName;
         this.eventBus = new EventBus(options.name);
+        this.kernel = new Kernel({
+            appId: options.app.appId,
+            name: options.name,
+            eventBus: this.eventBus,
+        });
 
         // https://github.com/siyuan-note/siyuan/issues/9943
         Object.defineProperty(this, "name", {

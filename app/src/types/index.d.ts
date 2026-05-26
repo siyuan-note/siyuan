@@ -91,7 +91,8 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "destroy-protyle" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide" |
-    "code-language-update" | "code-language-change"
+    "code-language-update" | "code-language-change" |
+    "kernel-plugin-state-change"
 type TAVView = "table" | "gallery" | "kanban"
 type TAVCol =
     "text"
@@ -656,7 +657,6 @@ interface IOperationSrcs {
     isDetached: boolean
 }
 
-
 interface IObject {
     [key: string]: string;
 }
@@ -1209,11 +1209,6 @@ interface IKernelPluginState {
      * 内核插件状态的描述信息
      */
     description: string;
-
-    /**
-     * 当内核插件的状态发生变化时触发的事件处理函数，插件开发者可以通过 `onchange` 来监听状态变化
-     */
-    onchange: ((state: TKernelPluginState) => void) | null;
 }
 
 interface IKernelPluginRpcCall {

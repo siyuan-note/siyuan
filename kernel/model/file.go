@@ -169,7 +169,7 @@ func SearchDocs(keyword string, flashcard bool, excludeIDs []string) (ret []map[
 		keywords := strings.Fields(keyword)
 		if 0 < len(keywords) {
 			for _, box := range boxes {
-				if gulu.Str.Contains(box.Name, keywords) {
+				if util.ContainsSubStr(box.Name, keywords) {
 					if flashcard {
 						newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 						if 0 < flashcardCount {

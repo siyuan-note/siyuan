@@ -19,10 +19,12 @@ import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
+import {Kernel} from "./kernel";
 
 export class Plugin {
     private app: App;
     public i18n: IObject;
+    public kernel: InstanceType<typeof Kernel>;
     public eventBus: EventBus;
     public data: any = {};
     public displayName: string;
@@ -71,6 +73,7 @@ export class Plugin {
     }) {
         this.app = options.app;
         this.i18n = options.i18n;
+        this.kernel = new Kernel(options.app.appId, options.name);
         this.displayName = options.displayName;
         this.eventBus = new EventBus(options.name);
 

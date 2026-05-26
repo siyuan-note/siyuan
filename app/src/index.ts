@@ -217,6 +217,15 @@ export class App {
                                 if (isBrowser() && !isInMobileApp()) {
                                     window.location.href = "about:blank";
                                 }
+                                break;
+                            case "updateKernelPluginState": {
+                                const {name, state} = data.data as {name: string, state: TKernelPluginState};
+                                const plugin = this.plugins.find(p => p.name === name);
+                                if (plugin) {
+                                    plugin.kernel.state.code = state;
+                                }
+                                break;
+                            }
                         }
                     }
                 }

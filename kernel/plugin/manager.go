@@ -51,9 +51,10 @@ type PluginManager struct {
 }
 
 type PluginInfo struct {
-	Name    string           `json:"name"`
-	State   string           `json:"state"`
-	Methods []*RpcMethodInfo `json:"methods"`
+	Name      string           `json:"name"`
+	State     string           `json:"state"`
+	StateCode int              `json:"stateCode"`
+	Methods   []*RpcMethodInfo `json:"methods"`
 }
 
 var (
@@ -312,9 +313,10 @@ func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found 
 	p := m.GetPlugin(name)
 	if p != nil {
 		return &PluginInfo{
-			Name:    p.Name,
-			State:   p.State().String(),
-			Methods: p.GetRpcMethodsInfo(),
+			Name:      p.Name,
+			State:     p.State().String(),
+			StateCode: int(p.State()),
+			Methods:   p.GetRpcMethodsInfo(),
 		}, true
 	}
 	return nil, false
@@ -325,9 +327,10 @@ func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 	m.plugins.Range(func(key, value any) bool {
 		p := value.(*KernelPlugin)
 		plugins = append(plugins, &PluginInfo{
-			Name:    p.Name,
-			State:   p.State().String(),
-			Methods: p.GetRpcMethodsInfo(),
+			Name:      p.Name,
+			State:     p.State().String(),
+			StateCode: int(p.State()),
+			Methods:   p.GetRpcMethodsInfo(),
 		})
 		return true
 	})

@@ -17,6 +17,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             } catch (e) {
                 console.error(`plugin ${plugin.name} onunload error:`, e);
             }
+            plugin.kernel.destroy();
             if (!isReload) {
                 try {
                     plugin.uninstall();

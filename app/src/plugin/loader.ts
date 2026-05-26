@@ -69,6 +69,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
         i18n: item.i18n
     }) as Plugin;
     app.plugins.push(plugin);
+    await plugin.kernel.init();
     try {
         await plugin.onload();
     } catch (e) {

@@ -461,7 +461,7 @@ func IsSensitivePath(p string) bool {
 
 	// 工作空间/temp/ 目录（小写比较）
 	workspaceTempPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "temp"))
-	if !strings.HasSuffix(p, ".zip") && strings.HasPrefix(toCheckPathLower, workspaceTempPrefix) {
+	if !strings.HasSuffix(p, ".zip") /* 系统日志导出 */ && strings.HasPrefix(toCheckPathLower, workspaceTempPrefix) {
 		return true
 	}
 

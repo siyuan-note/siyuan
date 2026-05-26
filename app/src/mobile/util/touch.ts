@@ -78,7 +78,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
         }
     }
 
-    if (typeof yDiff === "undefined" && window.siyuan.mobile.editor.protyle.options.render.gutter) {
+    if (typeof yDiff === "undefined" && window.siyuan.mobile.editor?.protyle.options.render.gutter) {
         const nodeElement = hasClosestBlock(target);
         if (nodeElement) {
             if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {

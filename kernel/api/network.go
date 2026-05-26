@@ -23,12 +23,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/textproto"
 	"net/url"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/88250/gulu"
@@ -188,6 +186,9 @@ func forwardProxy(c *gin.Context) {
 	}
 
 	client := getSafeClient(time.Duration(timeout) * time.Millisecond)
+	if redirectArg, ok := arg["redirect"].(bool); ok && !redirectArg {
+		client.SetRedirectPolicy(req.NoRedirectPolicy())
+	}
 	request := client.R()
 	if headers, ok := arg["headers"].([]any); ok {
 		for _, pair := range headers {
@@ -327,31 +328,9 @@ func forwardProxy(c *gin.Context) {
 	//	elapsed.Seconds(), len(bodyData), data["url"], headers, contentType, arg["payload"], data["status"], shortBody)
 }
 
-// ssrfSafeDialer returns a net.Dialer whose Control hook blocks private IPs.
-func ssrfSafeDialer(timeout time.Duration) *net.Dialer {
-	return &net.Dialer{
-		Timeout: timeout,
-		Control: func(network, address string, _ syscall.RawConn) error {
-			host, _, err := net.SplitHostPort(address)
-			if err != nil {
-				return err
-			}
-			if ip := net.ParseIP(host); ip != nil && isPrivateIP(ip) {
-				return fmt.Errorf("ip address [%s] is prohibited", host)
-			}
-			return nil
-		},
-	}
-}
-
-// 校验 IP 是否为私有内网地址
-func isPrivateIP(ip net.IP) bool {
-	return ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsPrivate() || ip.IsUnspecified()
-}
-
 // 创建安全的 HTTP Client，防止 SSRF 和 DNS 重绑定
 func getSafeClient(timeout time.Duration) *req.Client {
-	dialer := ssrfSafeDialer(timeout)
+	dialer := util.SSRFSafeDialer(timeout)
 
 	client := req.C()
 	client.SetTimeout(timeout)
@@ -436,7 +415,7 @@ func httpProxy(c *gin.Context) {
 	}
 
 	transport := &http.Transport{
-		DialContext: ssrfSafeDialer(30 * time.Second).DialContext,
+		DialContext: util.SSRFSafeDialer(30 * time.Second).DialContext,
 	}
 	httpClient := &http.Client{Transport: transport}
 
@@ -491,7 +470,7 @@ func wsProxy(c *gin.Context) {
 	}
 
 	wsDialer := &websocket.Dialer{
-		NetDialContext:   ssrfSafeDialer(30 * time.Second).DialContext,
+		NetDialContext:   util.SSRFSafeDialer(30 * time.Second).DialContext,
 		HandshakeTimeout: 30 * time.Second,
 	}
 
@@ -584,7 +563,7 @@ func esProxy(c *gin.Context) {
 	}
 
 	transport := &http.Transport{
-		DialContext: ssrfSafeDialer(30 * time.Second).DialContext,
+		DialContext: util.SSRFSafeDialer(30 * time.Second).DialContext,
 	}
 	httpClient := &http.Client{Transport: transport}
 

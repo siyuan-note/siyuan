@@ -152,7 +152,7 @@ func removeWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
+	workspacePaths = util.RemoveWorkspacePath(workspacePaths, path)
 
 	if err = util.WriteWorkspacePaths(workspacePaths); err != nil {
 		ret.Code = -1
@@ -318,8 +318,8 @@ func setWorkspaceDir(c *gin.Context) {
 	}
 
 	workspacePaths = append(workspacePaths, path)
-	workspacePaths = gulu.Str.RemoveDuplicatedElem(workspacePaths)
-	workspacePaths = gulu.Str.RemoveElem(workspacePaths, path)
+	workspacePaths = util.DeduplicateWorkspacePaths(workspacePaths)
+	workspacePaths = util.RemoveWorkspacePath(workspacePaths, path)
 	workspacePaths = append(workspacePaths, path) // 切换的工作空间固定放在最后一个
 
 	if err = util.WriteWorkspacePaths(workspacePaths); err != nil {

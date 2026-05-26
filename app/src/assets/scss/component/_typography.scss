@@ -625,7 +625,7 @@
 
   ul,
   ol {
-    padding-left: 2em;
+    padding: revert-layer;
     margin: 4px 0;
   }
 

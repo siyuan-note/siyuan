@@ -164,13 +164,13 @@ func forwardProxy(c *gin.Context) {
 	}
 	u, e := url.ParseRequestURI(destURL)
 	if nil != e {
-		ret.Code = -1
+		ret.Code = 1
 		ret.Msg = "invalid [url]"
 		return
 	}
 
 	if u.Scheme != "http" && u.Scheme != "https" {
-		ret.Code = -1
+		ret.Code = 2
 		ret.Msg = "only http/https is allowed"
 		return
 	}
@@ -215,7 +215,7 @@ func forwardProxy(c *gin.Context) {
 		fallthrough
 	case "base64-std":
 		if payload, err := base64.StdEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = -2
+			ret.Code = 3
 			ret.Msg = "decode base64-std payload failed: " + err.Error()
 			return
 		} else {
@@ -223,7 +223,7 @@ func forwardProxy(c *gin.Context) {
 		}
 	case "base64-url":
 		if payload, err := base64.URLEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = -2
+			ret.Code = 4
 			ret.Msg = "decode base64-url payload failed: " + err.Error()
 			return
 		} else {
@@ -233,7 +233,7 @@ func forwardProxy(c *gin.Context) {
 		fallthrough
 	case "base32-std":
 		if payload, err := base32.StdEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = -2
+			ret.Code = 5
 			ret.Msg = "decode base32-std payload failed: " + err.Error()
 			return
 		} else {
@@ -241,7 +241,7 @@ func forwardProxy(c *gin.Context) {
 		}
 	case "base32-hex":
 		if payload, err := base32.HexEncoding.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = -2
+			ret.Code = 6
 			ret.Msg = "decode base32-hex payload failed: " + err.Error()
 			return
 		} else {
@@ -249,7 +249,7 @@ func forwardProxy(c *gin.Context) {
 		}
 	case "hex":
 		if payload, err := hex.DecodeString(arg["payload"].(string)); err != nil {
-			ret.Code = -2
+			ret.Code = 7
 			ret.Msg = "decode hex payload failed: " + err.Error()
 			return
 		} else {
@@ -263,14 +263,14 @@ func forwardProxy(c *gin.Context) {
 	started := time.Now()
 	resp, err := request.Send(method, destURL)
 	if err != nil {
-		ret.Code = -1
+		ret.Code = 8
 		ret.Msg = "forward request failed: " + err.Error()
 		return
 	}
 
 	bodyData, err := io.ReadAll(resp.Body)
 	if err != nil {
-		ret.Code = -1
+		ret.Code = 9
 		ret.Msg = "read response body failed: " + err.Error()
 		return
 	}

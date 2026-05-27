@@ -248,14 +248,14 @@ func GetRequestStringParam(c *gin.Context, key string, result *gulu.Result) stri
 		return ""
 	}
 	if arg[key] == nil {
-		result.Code = -2
+		result.Code = 1
 		result.Msg = fmt.Sprintf("Request body prop [%s] does not exist", key)
 		return ""
 	}
 
 	value, ok := arg[key].(string)
 	if !ok {
-		result.Code = -3
+		result.Code = 2
 		result.Msg = fmt.Sprintf("Request body prop [%s] is not a string", key)
 		return ""
 	}

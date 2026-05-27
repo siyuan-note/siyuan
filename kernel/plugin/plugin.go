@@ -63,7 +63,6 @@ const (
 const (
 	PluginStateReady PluginState = iota
 	PluginStateLoading
-	PluginStateLoaded
 	PluginStateRunning
 	PluginStateStopping
 	PluginStateStopped
@@ -76,8 +75,6 @@ func (s PluginState) String() string {
 		return "ready"
 	case PluginStateLoading:
 		return "loading"
-	case PluginStateLoaded:
-		return "loaded"
 	case PluginStateRunning:
 		return "running"
 	case PluginStateStopping:
@@ -264,8 +261,6 @@ func (p *KernelPlugin) start() (err error) {
 	go p.startStorageWatch()
 
 	p.onLoad()
-	p.updateState(PluginStateLoaded)
-	p.onLoaded()
 	p.updateState(PluginStateRunning)
 	p.onRunning()
 
@@ -321,13 +316,6 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 func (p *KernelPlugin) onLoad() {
 	if p.State() == PluginStateLoading {
 		p.invokeHook("onload")
-	}
-}
-
-// onLoaded is called after plugin loaded.
-func (p *KernelPlugin) onLoaded() {
-	if p.State() == PluginStateLoaded {
-		p.invokeHook("onloaded")
 	}
 }
 

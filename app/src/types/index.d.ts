@@ -138,13 +138,12 @@ type TPublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forb
  * - `-1`: inactive 内核插件未安装或不可用
  * - `0`: ready 内核插件已安装但未启动
  * - `1`: loading 内核插件正在启动
- * - `2`: loaded 内核插件已启动
- * - `3`: running 内核插件正在运行, 可正常使用
- * - `4`: stopping 内核插件正在停止
- * - `5`: stopped 内核插件已停止
- * - `6`: error 内核插件出现不可恢复的错误
+ * - `2`: running 内核插件正在运行, 可正常使用
+ * - `3`: stopping 内核插件正在停止
+ * - `4`: stopped 内核插件已停止
+ * - `5`: error 内核插件出现不可恢复的错误
  */
-type TKernelPluginState = -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6
+type TKernelPluginState = -1 | 0 | 1 | 2 | 3 | 4 | 5
 
 type TJsonRpcId = string | number;
 type TJsonRpcMethod = string;

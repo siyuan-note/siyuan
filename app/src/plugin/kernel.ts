@@ -246,14 +246,12 @@ export class KernelState implements IKernelPluginState {
                 case 1:
                     return "loading";
                 case 2:
-                    return "loaded";
-                case 3:
                     return "running";
-                case 4:
+                case 3:
                     return "stopping";
-                case 5:
+                case 4:
                     return "stopped";
-                case 6:
+                case 5:
                     return "error";
                 default:
                     return "unknown";

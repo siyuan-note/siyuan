@@ -209,7 +209,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         if (blockElement.classList.contains("table")) {
             scrollLeft = blockElement.firstElementChild.scrollLeft;
         }
-        if (/<span data-type="backslash">.+<\/span><wbr>/.test(html)) {
+        if (/<span data-type="backslash">.{1,8}<\/span><wbr>/.test(html)) {
             // 转义不需要添加 zwsp
             blockElement.outerHTML = html;
         } else {

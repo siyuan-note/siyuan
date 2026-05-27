@@ -74,6 +74,7 @@ const loadPluginJS = async (app: App, item: IPluginData) => {
     } catch (e) {
         console.error(`plugin ${item.name} onload error:`, e);
     }
+    await plugin.kernel.init();
     return plugin;
 };
 

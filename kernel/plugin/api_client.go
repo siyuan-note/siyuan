@@ -48,25 +48,22 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(client.Set("fetch", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-			var path string
-			if goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
-				return
-			}
+		var argErr error
+		var path string
+		method := "GET"
+		headers := map[string]string{}
+		var bodyString *string
+		var bodyBytes *[]byte
 
-			if !strings.HasPrefix(path, "/") {
-				err = fmt.Errorf("path must start with /")
-				return
-			}
-
-			method := "GET"
-			headers := map[string]string{}
-			var bodyString string
-			var bodyBytes []byte
-
+		if goja.IsString(call.Argument(0)) {
+			path = call.Argument(0).String()
+		} else {
+			argErr = fmt.Errorf("path required")
+		}
+		if argErr == nil && !strings.HasPrefix(path, "/") {
+			argErr = fmt.Errorf("path must start with /")
+		}
+		if argErr == nil {
 			if init := call.Argument(1); isJsValueNotNull(init) {
 				if initObj := init.ToObject(rt); initObj != nil {
 					if m := initObj.Get("method"); goja.IsString(m) {
@@ -75,25 +72,31 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 					if h := initObj.Get("headers"); isJsValueNotNull(h) {
 						if exportErr := rt.ExportTo(h, &headers); exportErr != nil {
-							err = fmt.Errorf("failed to export headers: %w", exportErr)
-							return
+							argErr = fmt.Errorf("failed to export headers: %w", exportErr)
 						}
 					}
 
-					if b := initObj.Get("body"); isJsValueNotNull(b) {
-
-						if goja.IsString(b) {
-							bodyString = b.String()
-						} else {
-							body := b.Export()
-							if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
-								src := arrayBuffer.Bytes()
-								bodyBytes = make([]byte, len(src))
-								copy(bodyBytes, src)
+					if argErr == nil {
+						if b := initObj.Get("body"); isJsValueNotNull(b) {
+							if goja.IsString(b) {
+								bodyString = lo.ToPtr(b.String())
+							} else {
+								body := b.Export()
+								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
+									src := arrayBuffer.Bytes()
+									bodyBytes = lo.ToPtr(src)
+								}
 							}
 						}
 					}
 				}
+			}
+		}
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+			if argErr != nil {
+				err = argErr
+				return
 			}
 
 			go func() {
@@ -120,10 +123,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				}
 				r.SetHeader(model.XAuthTokenKey, p.token)
 
-				if bodyString != "" {
-					r.SetBody(bodyString)
-				} else if len(bodyBytes) > 0 {
-					r.SetBody(bodyBytes)
+				if bodyString != nil {
+					r.SetBody(*bodyString)
+				} else if bodyBytes != nil {
+					r.SetBody(*bodyBytes)
 				}
 
 				resp, sendErr := r.Send(method, targetURL)
@@ -192,21 +195,19 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(client.Set("socket", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			var path string
-			if goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
-				return
-			}
+		var argErr error
+		var path string
+		var protocols []string
 
-			if !strings.HasPrefix(path, "/") {
-				err = fmt.Errorf("path must start with /")
-				return
-			}
-
-			var protocols []string
+		if goja.IsString(call.Argument(0)) {
+			path = call.Argument(0).String()
+		} else {
+			argErr = fmt.Errorf("path required")
+		}
+		if argErr == nil && !strings.HasPrefix(path, "/") {
+			argErr = fmt.Errorf("path must start with /")
+		}
+		if argErr == nil {
 			if proto := call.Argument(1); isJsValueNotNull(proto) {
 				if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
 					if arr, ok := proto.Export().([]interface{}); ok {
@@ -217,6 +218,13 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 				} else {
 					protocols = []string{proto.String()}
 				}
+			}
+		}
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if argErr != nil {
+				err = argErr
+				return
 			}
 
 			var gwsConn atomic.Pointer[gws.Conn]
@@ -355,21 +363,21 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_send := rt.ToValue(func(sendCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				sendPromise, sendResolve, sendReject := rt.NewPromise()
 
-				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
-					var messageData []byte
-					var opcode gws.Opcode
-					if data := sendCall.Argument(0); isJsValueNotNull(data) {
-						if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
-							opcode = gws.OpcodeBinary
-							b := arrayBuffer.Bytes()
-							messageData = make([]byte, len(b))
-							copy(messageData, b) // ArrayBuffer.Bytes() points into JS engine memory; copy before async send
-						} else {
-							opcode = gws.OpcodeText
-							messageData = []byte(data.String())
-						}
+				var messageData []byte
+				var opcode gws.Opcode
+				if data := sendCall.Argument(0); isJsValueNotNull(data) {
+					if arrayBuffer, ok := data.Export().(goja.ArrayBuffer); ok {
+						opcode = gws.OpcodeBinary
+						b := arrayBuffer.Bytes()
+						messageData = make([]byte, len(b))
+						copy(messageData, b) // ArrayBuffer.Bytes() points into JS engine memory; copy before async send
+					} else {
+						opcode = gws.OpcodeText
+						messageData = []byte(data.String())
 					}
+				}
 
+				sendRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
 					state := WebSocketState(readyState.Load())
 					if state == WebSocketReadyStateClosing || state == WebSocketReadyStateClosed {
 						err = fmt.Errorf("WebSocket is not open (state: %d)", state)
@@ -421,11 +429,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_ping := rt.ToValue(func(pingCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				pingPromise, pingResolve, pingReject := rt.NewPromise()
 
+				var pingData string
+				if isJsValueNotNull(pingCall.Argument(0)) {
+					pingData = pingCall.Argument(0).String()
+				}
+
 				pingRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					var pingData string
-					if isJsValueNotNull(pingCall.Argument(0)) {
-						pingData = pingCall.Argument(0).String()
-					}
 					if c := gwsConn.Load(); c != nil {
 						err = c.WritePing([]byte(pingData))
 					} else {
@@ -453,11 +462,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_pong := rt.ToValue(func(pongCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				pongPromise, pongResolve, pongReject := rt.NewPromise()
 
+				var pongData string
+				if isJsValueNotNull(pongCall.Argument(0)) {
+					pongData = pongCall.Argument(0).String()
+				}
+
 				pongRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					var pongData string
-					if isJsValueNotNull(pongCall.Argument(0)) {
-						pongData = pongCall.Argument(0).String()
-					}
 					if c := gwsConn.Load(); c != nil {
 						err = c.WritePong([]byte(pongData))
 					} else {
@@ -485,15 +495,16 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_close := rt.ToValue(func(closeCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				closePromise, closeResolve, closeReject := rt.NewPromise()
 
+				code := uint16(1000)
+				var reason []byte
+				if isJsValueNotNull(closeCall.Argument(0)) {
+					code = uint16(closeCall.Argument(0).ToInteger())
+				}
+				if isJsValueNotNull(closeCall.Argument(1)) {
+					reason = []byte(closeCall.Argument(1).String())
+				}
+
 				closeRunErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-					code := uint16(1000)
-					var reason []byte
-					if isJsValueNotNull(closeCall.Argument(0)) {
-						code = uint16(closeCall.Argument(0).ToInteger())
-					}
-					if isJsValueNotNull(closeCall.Argument(1)) {
-						reason = []byte(closeCall.Argument(1).String())
-					}
 					if c := gwsConn.Load(); c != nil {
 						setReadyState(rt, WebSocketReadyStateClosing)
 						err = c.WriteClose(code, reason)
@@ -562,17 +573,20 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 	lo.Must0(client.Set("event", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			var path string
-			if goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
-				return
-			}
+		var argErr error
+		var path string
+		if goja.IsString(call.Argument(0)) {
+			path = call.Argument(0).String()
+		} else {
+			argErr = fmt.Errorf("path required")
+		}
+		if argErr == nil && !strings.HasPrefix(path, "/") {
+			argErr = fmt.Errorf("path must start with /")
+		}
 
-			if !strings.HasPrefix(path, "/") {
-				err = fmt.Errorf("path must start with /")
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if argErr != nil {
+				err = argErr
 				return
 			}
 

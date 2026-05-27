@@ -39,21 +39,26 @@ func injectEvent(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err er
 	lo.Must0(event.Set("emit", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
-		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			if len(call.Arguments) < 2 {
-				err = fmt.Errorf("topic and event required")
-				return
-			}
-
-			topic := call.Argument(0).String()
+		var argErr error
+		var topic string
+		var eventData any
+		if len(call.Arguments) < 2 {
+			argErr = fmt.Errorf("topic and event required")
+		} else {
+			topic = call.Argument(0).String()
 			if topic == "" {
-				err = fmt.Errorf("topic required")
+				argErr = fmt.Errorf("topic required")
+			} else {
+				eventData = call.Argument(1).Export()
+			}
+		}
+
+		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if argErr != nil {
+				err = argErr
 				return
 			}
-
-			event := call.Argument(1).Export()
-
-			p.bus.Publish(topic, event)
+			p.bus.Publish(topic, eventData)
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {

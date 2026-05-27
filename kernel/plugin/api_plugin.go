@@ -34,7 +34,6 @@ func injectPlugin(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 
 	lifecycle := rt.NewObject()
 	lo.Must0(lifecycle.Set("onload", goja.Null()))
-	lo.Must0(lifecycle.Set("onloaded", goja.Null()))
 	lo.Must0(lifecycle.Set("onrunning", goja.Null()))
 	lo.Must0(lifecycle.Set("onunload", goja.Null()))
 	lo.Must0(ObjectSeal(rt, lifecycle))

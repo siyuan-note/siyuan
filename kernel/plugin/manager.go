@@ -51,9 +51,10 @@ type PluginManager struct {
 }
 
 type PluginInfo struct {
-	Name    string           `json:"name"`
-	State   string           `json:"state"`
-	Methods []*RpcMethodInfo `json:"methods"`
+	Name      string           `json:"name"`
+	State     string           `json:"state"`
+	StateCode int              `json:"stateCode"`
+	Methods   []*RpcMethodInfo `json:"methods"`
 }
 
 var (
@@ -312,9 +313,10 @@ func (m *PluginManager) GetLoadedPlugin(name string) (plugin *PluginInfo, found 
 	p := m.GetPlugin(name)
 	if p != nil {
 		return &PluginInfo{
-			Name:    p.Name,
-			State:   p.State().String(),
-			Methods: p.GetRpcMethodsInfo(),
+			Name:      p.Name,
+			State:     p.State().String(),
+			StateCode: int(p.State()),
+			Methods:   p.GetRpcMethodsInfo(),
 		}, true
 	}
 	return nil, false
@@ -325,9 +327,10 @@ func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 	m.plugins.Range(func(key, value any) bool {
 		p := value.(*KernelPlugin)
 		plugins = append(plugins, &PluginInfo{
-			Name:    p.Name,
-			State:   p.State().String(),
-			Methods: p.GetRpcMethodsInfo(),
+			Name:      p.Name,
+			State:     p.State().String(),
+			StateCode: int(p.State()),
+			Methods:   p.GetRpcMethodsInfo(),
 		})
 		return true
 	})
@@ -346,12 +349,11 @@ func (m *PluginManager) addPluginSourceWatch(name string) {
 }
 
 // removePluginSourceWatch removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
-func (m *PluginManager) removePluginSourceWatch(name string) {
+func (m *PluginManager) removePluginSourceWatch(name string) (err error) {
 	if m.watcher == nil {
 		return
 	}
 	path := filepath.Join(m.pluginsDir, name)
-	if err := m.watcher.Remove(path); err != nil {
-		logging.LogErrorf("failed to remove kernel plugin source path [%s] from watcher: %s", path, err)
-	}
+	err = m.watcher.Remove(path)
+	return
 }

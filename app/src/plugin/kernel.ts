@@ -55,7 +55,7 @@ export class Kernel implements IKernelPlugin {
     #createState(): IKernelPluginState {
         return new KernelState((state) => {
             switch (state.code) {
-                case 3: // running
+                case 2: // running
                     if (this.#rpcWs == null) {
                         this.#rpcWs = this.#createJsonRpcWebSocket();
                         break;

@@ -349,12 +349,11 @@ func (m *PluginManager) addPluginSourceWatch(name string) {
 }
 
 // removePluginSourceWatch removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
-func (m *PluginManager) removePluginSourceWatch(name string) {
+func (m *PluginManager) removePluginSourceWatch(name string) (err error) {
 	if m.watcher == nil {
 		return
 	}
 	path := filepath.Join(m.pluginsDir, name)
-	if err := m.watcher.Remove(path); err != nil {
-		logging.LogErrorf("failed to remove kernel plugin source path [%s] from watcher: %s", path, err)
-	}
+	err = m.watcher.Remove(path)
+	return
 }

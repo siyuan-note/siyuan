@@ -459,9 +459,10 @@ func IsSensitivePath(p string) bool {
 		return true
 	}
 
-	// 只允许导出工作空间/temp/export 目录（小写比较）
+	// 只允许导出工作空间/temp/export 目录，不允许导出工作空间/temp 目录（小写比较）
 	workspaceTempExportPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "temp", "export"))
-	if !strings.HasPrefix(toCheckPathLower, workspaceTempExportPrefix) {
+	workspaceTempPrefix := strings.ToLower(filepath.Join(WorkspaceDir, "temp"))
+	if strings.HasPrefix(toCheckPathLower, workspaceTempPrefix) && !strings.HasPrefix(toCheckPathLower, workspaceTempExportPrefix) {
 		return true
 	}
 

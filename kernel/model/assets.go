@@ -922,16 +922,22 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 	newAbsPath := filepath.Join(filepath.Dir(oldAbsPath), newName)
-	if err = filelock.Copy(oldAbsPath, newAbsPath); err != nil {
-		logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
-		return
+	if err = filelock.Rename(oldAbsPath, newAbsPath); err != nil {
+		if err = filelock.Copy(oldAbsPath, newAbsPath); err != nil {
+			logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
+			return
+		}
 	}
 
 	if filelock.IsExist(filepath.Join(util.DataDir, oldPath+".sya")) {
 		// Rename the .sya annotation file when renaming a PDF asset https://github.com/siyuan-note/siyuan/issues/9390
-		if err = filelock.Copy(filepath.Join(util.DataDir, oldPath+".sya"), filepath.Join(util.DataDir, newPath+".sya")); err != nil {
-			logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
-			return
+		oldSya := filepath.Join(util.DataDir, oldPath+".sya")
+		newSya := filepath.Join(util.DataDir, newPath+".sya")
+		if err = filelock.Rename(oldSya, newSya); err != nil {
+			if err = filelock.Copy(oldSya, newSya); err != nil {
+				logging.LogErrorf("copy PDF annotation [%s] failed: %s", oldPath+".sya", err)
+				return
+			}
 		}
 	}
 

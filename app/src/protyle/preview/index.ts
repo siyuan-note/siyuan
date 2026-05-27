@@ -228,7 +228,10 @@ export class Preview {
                 item.setAttribute("width", (parseInt(item.getAttribute("width")) * 8) + "px");
             });
             // 列表嵌套 https://github.com/siyuan-note/siyuan/issues/11276
-            copyElement.querySelectorAll("ul, ol").forEach(listItem => {
+            copyElement.querySelectorAll("ul, ol").forEach((listItem: HTMLOListElement) => {
+                if (typeof listItem.start === "number") {
+                    listItem.style.paddingLeft = listItem.start.toString().length + 0.2 + "em";
+                }
                 Array.from(listItem.children).forEach(liItem => {
                     const nestedList = liItem.querySelector("ul, ol");
                     if (nestedList) {

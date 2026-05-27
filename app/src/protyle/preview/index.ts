@@ -230,7 +230,8 @@ export class Preview {
             // 列表嵌套 https://github.com/siyuan-note/siyuan/issues/11276
             copyElement.querySelectorAll("ul, ol").forEach((listItem: HTMLOListElement) => {
                 if (typeof listItem.start === "number") {
-                    listItem.style.paddingLeft = listItem.start.toString().length + 0.2 + "em";
+                    listItem.classList.add("list-paddingleft-" + Math.min(listItem.start.toString().length, 3));
+                    listItem.style.listStyleType = "decimal";
                 }
                 Array.from(listItem.children).forEach(liItem => {
                     const nestedList = liItem.querySelector("ul, ol");

@@ -75,55 +75,26 @@ func injectLogger(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 // Logging is synchronous (in-process, no I/O), so resolve is called inline without worker.Run.
 func loggerWrapper(p *KernelPlugin, logf func(format string, args ...any)) func(goja.FunctionCall, *goja.Runtime) goja.Value {
 	return func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
-		promise, resolve, reject := rt.NewPromise()
-
-		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			parts := make([]string, 0, len(call.Arguments))
-			for _, arg := range call.Arguments {
-				if goja.IsString(arg) {
-					parts = append(parts, arg.String())
-					continue
-				}
-
-				if arg == nil {
-					parts = append(parts, "null")
-					continue
-				}
-
-				if goja.IsUndefined(arg) || goja.IsNull(arg) {
-					parts = append(parts, arg.String())
-					continue
-				}
-
-				argObj := arg.ToObject(rt)
-				if argObj != nil {
-					if argJson, marshalErr := argObj.MarshalJSON(); marshalErr == nil {
-						parts = append(parts, string(argJson))
-						continue
-					}
-				}
-
+		parts := make([]string, 0, len(call.Arguments))
+		for _, arg := range call.Arguments {
+			if goja.IsString(arg) {
 				parts = append(parts, arg.String())
+				continue
 			}
-			msg := strings.Join(parts, " ")
-
-			go print(p.Name, msg, logf)
-			return
-		}, func(rt *goja.Runtime, result any, err error) {
-			if lo.IsNil(err) {
-				if resolveErr := resolve(result); resolveErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.logger resolve: %v", p.Name, resolveErr)
-				}
-			} else {
-				if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
-					logging.LogErrorf("[plugin:%s] siyuan.logger reject: %v", p.Name, rejectErr)
+			if arg == nil || goja.IsUndefined(arg) || goja.IsNull(arg) {
+				parts = append(parts, arg.String())
+				continue
+			}
+			argObj := arg.ToObject(rt)
+			if argObj != nil {
+				if argJson, marshalErr := argObj.MarshalJSON(); marshalErr == nil {
+					parts = append(parts, string(argJson))
+					continue
 				}
 			}
-		})
-		if runErr != nil {
-			logging.LogErrorf("[plugin:%s] siyuan.logger worker run: %v", p.Name, runErr)
+			parts = append(parts, arg.String())
 		}
-
-		return rt.ToValue(promise)
+		go print(p.Name, strings.Join(parts, " "), logf)
+		return goja.Undefined()
 	}
 }

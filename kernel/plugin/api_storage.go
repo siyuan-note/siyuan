@@ -51,27 +51,27 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	lo.Must0(watcher.Set("add", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
+		var argErr error
+		var path string
+		if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
+			path = call.Argument(0).String()
+		} else {
+			argErr = fmt.Errorf("path required")
+		}
+
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			var path string
-			if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
+			if argErr != nil {
+				err = argErr
 				return
 			}
-
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
 				err = resolveErr
 				return
 			}
-
-			addErr := p.addStorageWatch(abs)
-			if addErr != nil {
+			if addErr := p.addStorageWatch(abs); addErr != nil {
 				err = fmt.Errorf("failed to add storage path to watcher: %v", addErr)
-				return
 			}
-
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -95,27 +95,27 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	lo.Must0(watcher.Set("remove", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
+		var argErr error
+		var path string
+		if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
+			path = call.Argument(0).String()
+		} else {
+			argErr = fmt.Errorf("path required")
+		}
+
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			var path string
-			if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
+			if argErr != nil {
+				err = argErr
 				return
 			}
-
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
 				err = resolveErr
 				return
 			}
-
-			addErr := p.removeStorageWatch(abs)
-			if addErr != nil {
-				err = fmt.Errorf("failed to remove storage path from watcher: %v", addErr)
-				return
+			if removeErr := p.removeStorageWatch(abs); removeErr != nil {
+				err = fmt.Errorf("failed to remove storage path from watcher: %v", removeErr)
 			}
-
 			return
 		}, func(rt *goja.Runtime, result any, err error) {
 			if lo.IsNil(err) {
@@ -143,15 +143,19 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	lo.Must0(storage.Set("get", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
+		var argErr error
+		var path string
+		if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
+			path = call.Argument(0).String()
+		} else {
+			argErr = fmt.Errorf("path required")
+		}
+
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			var path string
-			if len(call.Arguments) >= 1 && goja.IsString(call.Argument(0)) {
-				path = call.Argument(0).String()
-			} else {
-				err = fmt.Errorf("path required")
+			if argErr != nil {
+				err = argErr
 				return
 			}
-
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
 				err = resolveErr
@@ -216,18 +220,25 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	lo.Must0(storage.Set("put", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
+		var argErr error
+		var path, content string
+		if len(call.Arguments) < 2 {
+			argErr = fmt.Errorf("path and content required")
+		} else {
+			path = call.Argument(0).String()
+			content = call.Argument(1).String()
+		}
+
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if argErr != nil {
+				err = argErr
+				return
+			}
 			if util.ReadOnly {
 				err = fmt.Errorf("The current kernel is in read-only mode, storage.put is not allowed")
 				return
 			}
 
-			if len(call.Arguments) < 2 {
-				err = fmt.Errorf("path and content required")
-				return
-			}
-			path := call.Argument(0).String()
-			content := call.Argument(1).String()
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
 				err = resolveErr
@@ -284,17 +295,24 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	lo.Must0(storage.Set("remove", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
+		var argErr error
+		var path string
+		if len(call.Arguments) < 1 {
+			argErr = fmt.Errorf("path required")
+		} else {
+			path = call.Argument(0).String()
+		}
+
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
+			if argErr != nil {
+				err = argErr
+				return
+			}
 			if util.ReadOnly {
 				err = fmt.Errorf("The current kernel is in read-only mode, storage.remove is not allowed")
 				return
 			}
 
-			if len(call.Arguments) < 1 {
-				err = fmt.Errorf("path required")
-				return
-			}
-			path := call.Argument(0).String()
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
 				err = resolveErr
@@ -351,12 +369,19 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 	lo.Must0(storage.Set("list", rt.ToValue(func(call goja.FunctionCall, rt *goja.Runtime) goja.Value {
 		promise, resolve, reject := rt.NewPromise()
 
+		var argErr error
+		var path string
+		if len(call.Arguments) < 1 {
+			argErr = fmt.Errorf("path required")
+		} else {
+			path = call.Argument(0).String()
+		}
+
 		runErr := p.worker.Run(func(rt *goja.Runtime) (result any, err error) {
-			if len(call.Arguments) < 1 {
-				err = fmt.Errorf("path required")
+			if argErr != nil {
+				err = argErr
 				return
 			}
-			path := call.Argument(0).String()
 			abs, resolveErr := resolvePath(path)
 			if resolveErr != nil {
 				err = resolveErr

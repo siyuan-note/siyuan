@@ -334,6 +334,38 @@ func initWorkspaceDir(workspaceArg string) {
 	ShortcutsPath = filepath.Join(userHomeConfDir, "shortcuts")
 }
 
+func DeduplicateWorkspacePaths(paths []string) []string {
+	if !gulu.OS.IsWindows() {
+		return gulu.Str.RemoveDuplicatedElem(paths)
+	}
+	seen := map[string]bool{}
+	var result []string
+	for _, p := range paths {
+		key := strings.ToLower(p)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		result = append(result, p)
+	}
+	return result
+}
+
+func RemoveWorkspacePath(paths []string, target string) []string {
+	if !gulu.OS.IsWindows() {
+		return gulu.Str.RemoveElem(paths, target)
+	}
+	targetLower := strings.ToLower(target)
+	var result []string
+	for _, p := range paths {
+		if strings.ToLower(p) == targetLower {
+			continue
+		}
+		result = append(result, p)
+	}
+	return result
+}
+
 func ReadWorkspacePaths() (ret []string, err error) {
 	ret = []string{}
 	workspaceConf := filepath.Join(HomeDir, ".config", "siyuan", "workspace.json")
@@ -369,12 +401,12 @@ func ReadWorkspacePaths() (ret []string, err error) {
 		}
 	}
 	ret = tmp
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	ret = DeduplicateWorkspacePaths(ret)
 	return
 }
 
 func WriteWorkspacePaths(workspacePaths []string) (err error) {
-	workspacePaths = gulu.Str.RemoveDuplicatedElem(workspacePaths)
+	workspacePaths = DeduplicateWorkspacePaths(workspacePaths)
 	workspaceConf := filepath.Join(HomeDir, ".config", "siyuan", "workspace.json")
 	data, err := gulu.JSON.MarshalJSON(workspacePaths)
 	if err != nil {

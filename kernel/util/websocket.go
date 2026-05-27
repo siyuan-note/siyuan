@@ -367,6 +367,10 @@ func PushReloadEmojiConf() {
 	BroadcastByType("main", "reloadEmojiConf", 0, "", nil)
 }
 
+func PushKernelPluginState(name string, state int) {
+	BroadcastByType("main", "updateKernelPluginState", 0, "", map[string]any{"name": name, "state": state})
+}
+
 func PushDownloadProgress(id string, percent float32) {
 	evt := NewCmdResult("downloadProgress", 0, PushModeBroadcast)
 	evt.Data = map[string]any{

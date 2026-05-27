@@ -40,8 +40,14 @@ var rootCmd = &cobra.Command{
 	Use:     "SiYuan-Kernel",
 	Version: util.Ver,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// workspace 子命令不需要工作空间校验
+		if cmd.Parent() != nil && cmd.Parent().Name() == "workspace" {
+			return nil
+		}
+
 		// 确定工作目录
 		if exePath, err := os.Executable(); err == nil {
+			exePath, _ = filepath.EvalSymlinks(exePath)
 			util.WorkingDir = filepath.Dir(exePath)
 		}
 

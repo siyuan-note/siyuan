@@ -799,7 +799,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		if err != nil {
 			logging.LogErrorf("read workspace paths failed: %s", err)
 		} else {
-			workspacePaths = gulu.Str.RemoveElem(workspacePaths, util.WorkspaceDir)
+			workspacePaths = util.RemoveWorkspacePath(workspacePaths, util.WorkspaceDir)
 			workspacePaths = append(workspacePaths, util.WorkspaceDir)
 			util.WriteWorkspacePaths(workspacePaths)
 		}

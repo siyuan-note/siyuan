@@ -63,7 +63,6 @@ const (
 const (
 	PluginStateReady PluginState = iota
 	PluginStateLoading
-	PluginStateLoaded
 	PluginStateRunning
 	PluginStateStopping
 	PluginStateStopped
@@ -76,8 +75,6 @@ func (s PluginState) String() string {
 		return "ready"
 	case PluginStateLoading:
 		return "loading"
-	case PluginStateLoaded:
-		return "loaded"
 	case PluginStateRunning:
 		return "running"
 	case PluginStateStopping:
@@ -148,7 +145,7 @@ func NewKernelPlugin(ctx context.Context, petal *model.Petal) *KernelPlugin {
 		sockets: make(map[*gws.Conn]bool),
 	}
 
-	plugin.state.Store(int64(PluginStateReady))
+	plugin.updateState(PluginStateReady)
 	return plugin
 }
 
@@ -164,6 +161,12 @@ func createEventMessage(eventType string, detail any) R {
 // State returns the current plugin state (safe for concurrent reads).
 func (p *KernelPlugin) State() PluginState {
 	return PluginState(p.state.Load())
+}
+
+// updateState updates the plugin state atomically and pushes the new state to the frontend via util.PushKernelPluginState.
+func (p *KernelPlugin) updateState(state PluginState) {
+	p.state.Store(int64(state))
+	util.PushKernelPluginState(p.Name, int(state))
 }
 
 // InitRuntime initializes the goja runtime and evaluates kernel.js.
@@ -226,7 +229,7 @@ func (p *KernelPlugin) error() {
 		logging.LogErrorf("[plugin:%s] failed to close runtime during error handling: %v", p.Name, err)
 	}
 
-	p.state.Store(int64(PluginStateError))
+	p.updateState(PluginStateError)
 }
 
 // start creates the goja runtime, injects sandbox globals, and evaluates kernel.js.
@@ -238,7 +241,7 @@ func (p *KernelPlugin) start() (err error) {
 		}
 	}()
 
-	p.state.Store(int64(PluginStateLoading))
+	p.updateState(PluginStateLoading)
 
 	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
 	if err := os.MkdirAll(baseDir, 0755); err != nil {
@@ -258,9 +261,7 @@ func (p *KernelPlugin) start() (err error) {
 	go p.startStorageWatch()
 
 	p.onLoad()
-	p.state.Store(int64(PluginStateLoaded))
-	p.onLoaded()
-	p.state.Store(int64(PluginStateRunning))
+	p.updateState(PluginStateRunning)
 	p.onRunning()
 
 	p.bus.Publish(EventBusTopicRuntime, createEventMessage("start", nil))
@@ -286,7 +287,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 
 	p.bus.Publish(EventBusTopicRuntime, createEventMessage("stop", nil))
 
-	p.state.Store(int64(PluginStateStopping))
+	p.updateState(PluginStateStopping)
 
 	p.onUnload()
 
@@ -303,7 +304,7 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 	p.unsubscribeEventHandlers()
 
 	p.close()
-	p.state.Store(int64(PluginStateStopped))
+	p.updateState(PluginStateStopped)
 
 	logging.LogDebugf("[plugin:%s] stopped", p.Name)
 
@@ -315,13 +316,6 @@ func (p *KernelPlugin) stop() (ok bool, err error) {
 func (p *KernelPlugin) onLoad() {
 	if p.State() == PluginStateLoading {
 		p.invokeHook("onload")
-	}
-}
-
-// onLoaded is called after plugin loaded.
-func (p *KernelPlugin) onLoaded() {
-	if p.State() == PluginStateLoaded {
-		p.invokeHook("onloaded")
 	}
 }
 

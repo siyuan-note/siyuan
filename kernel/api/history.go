@@ -261,3 +261,27 @@ func rollbackAttributeViewHistory(c *gin.Context) {
 		return
 	}
 }
+
+func createDocHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, true, true),
+	) {
+		return
+	}
+
+	err := model.CreateDocHistory(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}

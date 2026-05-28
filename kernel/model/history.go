@@ -842,6 +842,15 @@ func generateOpTypeHistory(tree *parse.Tree, opType string) {
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 }
 
+func CreateDocHistory(id string) (err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+	generateOpTypeHistory(tree, HistoryOpUpdate)
+	return
+}
+
 func generateTreeHistory(tree *parse.Tree, historyDir string) {
 	historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
 	var err error

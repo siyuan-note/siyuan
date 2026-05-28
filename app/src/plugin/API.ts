@@ -299,7 +299,7 @@ export const expandDocTree = async (options: {
     if (isNotebook) {
         liElement = file.element.querySelector(`.b3-list[data-url="${options.id}"]`)?.firstElementChild as HTMLElement;
     } else {
-        const response = await fetchSyncPost("api/block/getBlockInfo", {id: options.id});
+        const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
         if (response.code === -1) {
             return;
         }

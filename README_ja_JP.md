@@ -396,11 +396,16 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 ### セットアップ
 
-```
-<インストール先>/resources/kernel/SiYuan-Kernel (エイリアス: siyuan)
-Windows: インストーラーが自動で PATH に追加します
-macOS/Linux: 手動でシンボリックリンクを作成してください。例 macOS:
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+CLI バイナリは `<インストール先>/resources/kernel/SiYuan-Kernel` です。
+Windows インストーラーが自動で PATH に追加します。
+macOS/Linux では手動でシンボリックリンクを作成してください。
+
+```bash
+# macOS
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+
+# Linux
+ln -s /インストール先/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 ```
 
 ## 🏘️ コミュニティ

@@ -397,11 +397,16 @@ Run `siyuan --help` for the full command tree. Use `-f json` for script-friendly
 
 ### Setup
 
-The binary is at `<install>/resources/kernel/SiYuan-Kernel` (alias: `siyuan`).  
-Windows installer adds it to PATH automatically. On macOS/Linux, create a symlink manually, e.g. on macOS:
+The CLI binary is `SiYuan-Kernel` under `<install>/resources/kernel`.
+Windows installer adds it to PATH automatically.
+On macOS/Linux, create a symlink manually:
 
 ```bash
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+# macOS
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+
+# Linux
+ln -s /path/to/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 ```
 
 ## 🏘️ Community

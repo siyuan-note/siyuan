@@ -498,11 +498,16 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 ### 设置
 
-二进制文件位于 `<安装目录>/resources/kernel/SiYuan-Kernel`（别名 `siyuan`）。  
-Windows 安装程序自动将内核目录添加到 PATH。macOS/Linux 下需要手动创建软链接，比如 macOS 上：
+CLI 二进制为 `<安装目录>/resources/kernel/SiYuan-Kernel`。
+Windows 安装程序自动将内核目录添加到 PATH。
+macOS/Linux 下需要手动创建软链接：
 
 ```bash
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+# macOS
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+
+# Linux
+ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 ```
 
 ## 🏘️ 社区

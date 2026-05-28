@@ -390,8 +390,9 @@ func labelTags() (ret map[string]Tags) {
 func appendTagChildren(tags *Tags, labels map[string]Tags, sortVal int) {
 	for _, tag := range *tags {
 		tag.Label = tag.Name
-		if _, ok := labels[tag.Label]; ok {
-			tag.Count = len(labels[tag.Label]) + 1
+		unescapedLabel := util.UnescapeHTML(tag.Label)
+		if _, ok := labels[unescapedLabel]; ok {
+			tag.Count = len(labels[unescapedLabel]) + 1
 		}
 		appendChildren0(tag, labels, sortVal)
 		sortTags(tag.Children, sortVal)
@@ -402,8 +403,9 @@ func appendChildren0(tag *Tag, labels map[string]Tags, sortVal int) {
 	sortTags(tag.tags, sortVal)
 	for _, t := range tag.tags {
 		t.Label = tag.Label + "/" + t.Name
-		if _, ok := labels[t.Label]; ok {
-			t.Count = len(labels[t.Label]) + 1
+		unescapedLabel := util.UnescapeHTML(t.Label)
+		if _, ok := labels[unescapedLabel]; ok {
+			t.Count = len(labels[unescapedLabel]) + 1
 		}
 		tag.Children = append(tag.Children, t)
 	}
@@ -419,7 +421,7 @@ func buildTags(root Tags, labels []string, depth int) Tags {
 
 	i := 0
 	for ; i < len(root); i++ {
-		if (root)[i].Name == labels[0] {
+		if (root)[i].Name == util.EscapeHTML(labels[0]) {
 			break
 		}
 	}

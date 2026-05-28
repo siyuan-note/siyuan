@@ -48,6 +48,7 @@
   - [Unraid ホスティング](#unraid-ホスティング)
   - [TrueNAS ホスティング](#truenas-ホスティング)
   - [インサイダープレビュー](#インサイダープレビュー)
+- [⌨️ コマンドラインインターフェース](#-コマンドラインインターフェース)
 - [🏘️ コミュニティ](#️-コミュニティ)
 - [🛠️ 開発ガイド](#️-開発ガイド)
 - [❓ FAQ](#-faq)
@@ -363,6 +364,44 @@ services:
 ### インサイダープレビュー
 
 主要な更新前にインサイダープレビューをリリースします。詳細は[https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider)をご覧ください。
+
+## ⌨️ コマンドラインインターフェース
+
+組み込み CLI で、サーバー起動なしにワークスペースデータへ直接アクセスできます。
+
+### クイックスタート
+
+```bash
+siyuan notebook list -w ~/SiYuan
+siyuan search "keyword" -w ~/SiYuan -f json
+siyuan export md --id <block-id> -w ~/SiYuan
+```
+
+### 利用可能なコマンド
+
+| カテゴリ | コマンド |
+|----------|----------|
+| ノートと文書 | `notebook`, `document` — CRUD |
+| コンテンツ | `block`, `attr` — 読み書き、カスタム属性 |
+| メタデータ | `tag`, `bookmark` |
+| クエリ | `search`, `sql` — 全文検索と SQL |
+| 参照 | `ref` — バックリンクと言及 |
+| インポート/エクスポート | `export`, `import` — Markdown, HTML, PDF, Word, .sy.zip |
+| データ管理 | `repo`, `history`, `sync` — スナップショット、履歴、クラウド同期 |
+| ユーティリティ | `asset`, `file` — リソースとファイルシステム |
+| データベース | `database` — 属性ビュー管理 |
+| ワークスペース | `workspace` — 一覧と確認 |
+
+詳細は `siyuan --help` を実行してください。スクリプト向け出力には `-f json` を使用します。
+
+### セットアップ
+
+```
+<インストール先>/resources/kernel/SiYuan-Kernel (エイリアス: siyuan)
+Windows: インストーラーが自動で PATH に追加します
+macOS/Linux: 手動でシンボリックリンクを作成してください。例 macOS:
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+```
 
 ## 🏘️ コミュニティ
 

@@ -48,6 +48,7 @@
   - [Unraid Hosting](#unraid-hosting)
   - [TrueNAS Hosting](#TrueNAS-hosting)
   - [Insider Preview](#insider-preview)
+- [⌨️ Command-line Interface](#-command-line-interface)
 - [🏘️ Community](#️-community)
 - [🛠️ Development Guide](#️-development-guide)
 - [❓ FAQ](#-faq)
@@ -359,6 +360,49 @@ services:
 ### Insider Preview
 
 We release insider preview before major updates, please visit [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider).
+
+## ⌨️ Command-line Interface
+
+The built-in CLI provides direct access to workspace data — no running server required.
+
+### Quick Start
+
+```bash
+# List all notebooks
+siyuan notebook list -w ~/SiYuan
+
+# Full-text search with JSON output
+siyuan search "keyword" -w ~/SiYuan -f json
+
+# Export a document as Markdown
+siyuan export md --id <block-id> -w ~/SiYuan
+```
+
+### Available Commands
+
+| Category | Commands |
+|----------|----------|
+| Notebooks & Documents | `notebook`, `document` — CRUD |
+| Content | `block`, `attr` — read/write, custom attributes |
+| Metadata | `tag`, `bookmark` |
+| Queries | `search`, `sql` — full-text and SQL queries |
+| References | `ref` — backlinks and mentions |
+| Import/Export | `export`, `import` — Markdown, HTML, PDF, Word, .sy.zip |
+| Data Management | `repo`, `history`, `sync` — snapshots, versions, cloud sync |
+| Utilities | `asset`, `file` — resources and file system |
+| Database | `database` — attribute view management |
+| Workspace | `workspace` — list and inspect |
+
+Run `siyuan --help` for the full command tree. Use `-f json` for script-friendly output.
+
+### Setup
+
+The binary is at `<install>/resources/kernel/SiYuan-Kernel` (alias: `siyuan`).  
+Windows installer adds it to PATH automatically. On macOS/Linux, create a symlink manually, e.g. on macOS:
+
+```bash
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+```
 
 ## 🏘️ Community
 

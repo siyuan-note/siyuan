@@ -48,6 +48,7 @@
   - [Unraid Barındırma](#unraid-barındırma)
   - [TrueNAS Barındırma](#truenas-barındırma)
   - [Erken Önizleme (Insider Preview)](#erken-önizleme-insider-preview)
+- [⌨️ Komut Satırı Arayüzü](#-komut-satırı-arayüzü)
 - [🏘️ Topluluk](#️-topluluk)
 - [🛠️ Geliştirme Rehberi](#️-geliştirme-rehberi)
 - [❓ SSS (Sıkça Sorulan Sorular)](#-sss-sıkça-sorulan-sorular)
@@ -364,6 +365,44 @@ services:
 ### Erken Önizleme (Insider Preview)
 
 Büyük güncellemelerden önce erken erişim (Insider Preview) sürümlerini yayınlıyoruz. Lütfen [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider) adresini ziyaret edin.
+
+## ⌨️ Komut Satırı Arayüzü
+
+Yerleşik CLI ile sunucu başlatmadan çalışma alanı verilerine doğrudan erişin.
+
+### Hızlı Başlangıç
+
+```bash
+siyuan notebook list -w ~/SiYuan
+siyuan search "keyword" -w ~/SiYuan -f json
+siyuan export md --id <block-id> -w ~/SiYuan
+```
+
+### Kullanılabilir Komutlar
+
+| Kategori | Komutlar |
+|----------|----------|
+| Defterler ve Belgeler | `notebook`, `document` — CRUD |
+| İçerik | `block`, `attr` — okuma/yazma, özel nitelikler |
+| Meta Veri | `tag`, `bookmark` |
+| Sorgular | `search`, `sql` — tam metin ve SQL sorguları |
+| Referanslar | `ref` — geri bağlantılar ve bahsetmeler |
+| İçe/Dışa Aktarma | `export`, `import` — Markdown, HTML, PDF, Word, .sy.zip |
+| Veri Yönetimi | `repo`, `history`, `sync` — anlık görüntüler, sürümler, bulut senkronizasyonu |
+| Araçlar | `asset`, `file` — kaynaklar ve dosya sistemi |
+| Veritabanı | `database` — öznitelik görünümü yönetimi |
+| Çalışma Alanı | `workspace` — listeleme ve inceleme |
+
+Ayrıntılar için `siyuan --help` komutunu çalıştırın. Betik dostu çıktı için `-f json` kullanın.
+
+### Kurulum
+
+```
+<kurulum>/resources/kernel/SiYuan-Kernel (takma ad: siyuan)
+Windows: yükleyici otomatik olarak PATH'e ekler
+macOS/Linux: manuel olarak sembolik bağlantı oluşturun, örn. macOS:
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+```
 
 ## 🏘️ Topluluk
 

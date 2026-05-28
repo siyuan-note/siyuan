@@ -51,6 +51,7 @@
   - [小皮面板部署](#小皮面板部署)
   - [1Panel 面板部署](#1Panel-面板部署)
   - [内部预览版](#内部预览版)
+- [⌨️ 命令行接口](#-命令行接口)
 - [🏘️ 社区](#️-社区)
 - [🛠️ 开发指南](#️-开发指南)
 - [❓ 常见问题和解答](#-常见问题和解答)
@@ -460,6 +461,49 @@ services:
 ### 内部预览版
 
 我们会在有重大更新前发布内部预览版，请访问 [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider)。
+
+## ⌨️ 命令行接口
+
+内置 CLI，直接访问工作空间数据，无需启动内核服务。
+
+### 快速开始
+
+```bash
+# 列出所有笔记本
+siyuan notebook list -w ~/SiYuan
+
+# 全文搜索（JSON 输出）
+siyuan search "关键词" -w ~/SiYuan -f json
+
+# 导出文档为 Markdown
+siyuan export md --id <block-id> -w ~/SiYuan
+```
+
+### 可用命令
+
+| 分类 | 命令 |
+|------|------|
+| 笔记本与文档 | `notebook`、`document` — 增删改查 |
+| 内容 | `block`、`attr` — 块读写、自定义属性 |
+| 元数据 | `tag`、`bookmark` |
+| 查询 | `search`、`sql` — 全文和 SQL 查询 |
+| 引用 | `ref` — 反向链接和提及 |
+| 导入导出 | `export`、`import` — Markdown、HTML、PDF、Word、.sy.zip |
+| 数据管理 | `repo`、`history`、`sync` — 快照、历史、云端同步 |
+| 工具 | `asset`、`file` — 资源与文件系统 |
+| 数据库 | `database` — 属性视图管理 |
+| 工作空间 | `workspace` — 列出和查看 |
+
+运行 `siyuan --help` 查看完整命令树。使用 `-f json` 获得适合脚本处理的输出。
+
+### 设置
+
+二进制文件位于 `<安装目录>/resources/kernel/SiYuan-Kernel`（别名 `siyuan`）。  
+Windows 安装程序自动将内核目录添加到 PATH。macOS/Linux 下需要手动创建软链接，比如 macOS 上：
+
+```bash
+ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan
+```
 
 ## 🏘️ 社区
 

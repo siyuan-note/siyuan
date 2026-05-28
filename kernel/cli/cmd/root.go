@@ -47,7 +47,9 @@ var rootCmd = &cobra.Command{
 
 		// 确定工作目录
 		if exePath, err := os.Executable(); err == nil {
-			exePath, _ = filepath.EvalSymlinks(exePath)
+			if resolved, err2 := filepath.EvalSymlinks(exePath); err2 == nil {
+				exePath = resolved
+			}
 			util.WorkingDir = filepath.Dir(exePath)
 		}
 

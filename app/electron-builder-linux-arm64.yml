@@ -16,7 +16,7 @@ extraFiles:
     to: "LICENSE"
 
 linux:
-  icon: "src/assets/icon-linux/"
+  icon: "src/assets/icon"
   category: "Utility"
   executableName: "siyuan"
   desktop: {

@@ -419,6 +419,7 @@ type LeftRightDiff struct {
 
 type DiffFile struct {
 	FileID  string `json:"fileID"`
+	IndexID string `json:"indexID"`
 	Title   string `json:"title"`
 	Path    string `json:"path"`
 	HPath   string `json:"hPath,omitempty"`
@@ -582,7 +583,7 @@ func SearchRepoFile(keyword string, page int) (ret []*DiffFile, pageCount, total
 		return
 	}
 
-	files, totalCount, pageCount, err := repo.SearchFile(keyword, page, 32)
+	files, fileIndexIDs, totalCount, pageCount, err := repo.SearchFile(keyword, page, 32)
 	if err != nil {
 		logging.LogErrorf("search repo file failed: %s", err)
 		return
@@ -607,6 +608,7 @@ func SearchRepoFile(keyword string, page int) (ret []*DiffFile, pageCount, total
 		}
 		ret = append(ret, &DiffFile{
 			FileID:  file.ID,
+			IndexID: fileIndexIDs[file.ID],
 			Title:   title,
 			Path:    file.Path,
 			HPath:   hpath,

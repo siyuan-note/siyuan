@@ -276,6 +276,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     let html = "";
     response.data.files.forEach((item: {
         fileID: string,
+        indexID: string,
         title: string,
         hPath: string,
         path: string,
@@ -283,7 +284,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
         updated: number
     }) => {
         /// #if MOBILE
-        html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-created="${item.updated}">
+        html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
     <div class="fn__flex-1">
         <div style="padding-top:8px" class="b3-list-item__text">${escapeHtml(item.title)}</div>
         <div class="b3-list-item__meta">
@@ -311,7 +312,7 @@ const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
     </div>
 </li>`;
         /// #else
-        html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-created="${item.updated}">
+        html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
     <div class="fn__flex-1">
         <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
         <div class="b3-list-item__meta">
@@ -744,6 +745,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 break;
             } else if (type === "view") {
                 const liElement = target.closest(".b3-list-item");
+                const snapshotId = liElement.getAttribute("data-snapshot") || "";
                 const dialog = new Dialog({
                     title: liElement.querySelector(".b3-list-item__text").textContent.trim(),
                     content: '<div class="b3-dialog__content"><div style="border-radius: var(--b3-border-radius-b);"></div></div>',
@@ -763,7 +765,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             blockId: "",
                             action: [Constants.CB_GET_HISTORY],
                             history: {
-                                snapshot: ""
+                                snapshot: snapshotId
                             },
                             render: {
                                 background: false,
@@ -774,7 +776,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             typewriterMode: false
                         });
                         disabledProtyle(viewEditor.protyle);
-                        viewEditor.protyle.options.history.snapshot = ""; // TODO: 88250;
                         onGet({
                             data: response,
                             protyle: viewEditor.protyle,

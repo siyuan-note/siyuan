@@ -753,6 +753,7 @@ export class Files extends Model {
                 } else if ((ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15")) && selectFileElements.length > 0) {
                     let hasMove = false;
                     const toDir = pathPosix().dirname(toPath);
+                    const newElementClassList = newElement.getAttribute("class");
                     if (fromPaths.length > 0) {
                         await fetchSyncPost("/api/filetree/moveDocs", {
                             toNotebook: toURL,
@@ -765,7 +766,7 @@ export class Files extends Model {
                         });
                         hasMove = true;
                     }
-                    if (newElement.classList.contains("dragover__top")) {
+                    if (newElementClassList.includes("dragover__top")) {
                         selectFileElements.forEach(item => {
                             let nextULElement;
                             if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
@@ -776,7 +777,7 @@ export class Files extends Model {
                                 item.after(nextULElement);
                             }
                         });
-                    } else if (newElement.classList.contains("dragover__bottom")) {
+                    } else if (newElementClassList.includes("dragover__bottom")) {
                         selectFileElements.reverse().forEach(item => {
                             let nextULElement;
                             if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {

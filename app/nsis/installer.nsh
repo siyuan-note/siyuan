@@ -32,6 +32,7 @@ Caption "${PRODUCT_NAME} ${VERSION}"
 
 !macro customInstall
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
+    nsExec::ExecToLog 'cmd /c mklink /H "$INSTDIR\resources\kernel\siyuan.exe" "$INSTDIR\resources\kernel\SiYuan-Kernel.exe" 2>nul || ver>nul'
     ${If} $installMode == "all"
         nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if(($p.Split(\";\") | ?{\$_ -eq $k}).Count -eq 0){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}else{Write-Host \"already in PATH\"}"'
     ${Else}

@@ -4,7 +4,6 @@ const path = require("path");
 module.exports = async function afterPack(context) {
   const { appOutDir, electronPlatformName, packager } = context;
   await removeLanguagePacks(appOutDir, packager, electronPlatformName);
-  createKernelAlias(appOutDir, packager, electronPlatformName);
 };
 
 async function removeLanguagePacks(appOutDir, packager, platform) {
@@ -118,39 +117,5 @@ function formatBytes(bytes) {
   const formattedSize = size % 1 === 0 ? size.toString() : size.toFixed(1);
 
   return `${formattedSize} ${sizes[i]}`;
-}
-
-function createKernelAlias(appOutDir, packager, platform) {
-  try {
-    const kernelName = platform === "win32" ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";
-    const aliasName = platform === "win32" ? "siyuan.exe" : "siyuan";
-
-    let kernelDir;
-    if (platform === "darwin") {
-      const appName = packager.appInfo.productFilename;
-      kernelDir = path.join(appOutDir, `${appName}.app`, "Contents", "Resources", "kernel");
-    } else {
-      kernelDir = path.join(appOutDir, "resources", "kernel");
-    }
-
-    const src = path.join(kernelDir, kernelName);
-    const dst = path.join(kernelDir, aliasName);
-    if (!require("fs").existsSync(src)) {
-      console.warn(`Kernel binary not found at ${src}, skipping alias creation`);
-      return;
-    }
-
-    // Remove existing alias if any
-    try { require("fs").unlinkSync(dst); } catch (_) {}
-
-    if (platform === "win32") {
-      require("child_process").execSync(`mklink /H "${dst}" "${src}"`, { stdio: "ignore" });
-    } else {
-      require("fs").linkSync(src, dst);
-    }
-    console.log(`Created kernel alias: ${aliasName}`);
-  } catch (error) {
-    console.error("Failed to create kernel alias:", error.message);
-  }
 }
 

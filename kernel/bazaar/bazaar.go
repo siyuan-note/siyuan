@@ -44,6 +44,18 @@ func GetBazaarPackages(pkgType string, frontend string) (packages []*Package) {
 	return
 }
 
+// GetBazaarPackagesMap 返回按包名索引的在线集市包映射（plugins 类型需要传递 frontend 参数）。
+func GetBazaarPackagesMap(pkgType, frontend string) map[string]*Package {
+	packages := GetBazaarPackages(pkgType, frontend)
+	packagesMap := make(map[string]*Package, len(packages))
+	for _, pkg := range packages {
+		if "" != pkg.Name {
+			packagesMap[pkg.Name] = pkg
+		}
+	}
+	return packagesMap
+}
+
 // buildBazaarPackageWithMetadata 从 StageRepo 构建带有在线元数据的集市包。
 func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats, pkgType string, frontend string) *Package {
 	if nil == repo || nil == repo.Package {
@@ -67,13 +79,17 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
 	// 更新信息
-	disallow := isBelowRequiredAppVersion(&pkg)
-	pkg.DisallowInstall = disallow
-	pkg.DisallowUpdate = disallow
+	disallowVer := isBelowRequiredAppVersion(&pkg)
+	pkg.DisallowInstall = disallowVer
+	pkg.DisallowUpdate = disallowVer
 	pkg.UpdateRequiredMinAppVer = pkg.MinAppVersion
 	if "plugins" == pkgType {
-		incompatible := IsIncompatiblePlugin(&pkg, frontend)
-		pkg.Incompatible = &incompatible
+		bazaarIncompatible := IsIncompatiblePlugin(&pkg, frontend)
+		pkg.BazaarIncompatible = &bazaarIncompatible
+		if bazaarIncompatible {
+			pkg.DisallowInstall = true
+			pkg.DisallowUpdate = true
+		}
 	}
 
 	// 统计信息

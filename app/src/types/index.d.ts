@@ -934,10 +934,11 @@ interface IBazaarItem {
     hUpdated: string;
     preferredFunding: string;
     disallowUpdate: boolean;
-    updateRequiredMinAppVer: string;
-    incompatible?: boolean;  // 仅 plugin
-    enabled?: boolean;       // 仅 plugin
-    modes?: string[];        // 仅 theme
+    updateRequiredMinAppVer?: string;
+    installedIncompatible?: boolean; // 仅 plugin
+    bazaarIncompatible?: boolean; // 仅 plugin
+    enabled?: boolean; // 仅 plugin
+    modes?: string[]; // 仅 theme
 }
 
 interface IAV {

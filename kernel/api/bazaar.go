@@ -37,7 +37,17 @@ func batchUpdatePackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	model.BatchUpdatePackages()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var frontend string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("frontend", &frontend, true, true)) {
+		return
+	}
+
+	model.BatchUpdatePackages(frontend)
 }
 
 func getUpdatedPackage(c *gin.Context) {

@@ -64,14 +64,14 @@ func ParseInstalledPlugin(name, frontend string) (found bool, version, displayNa
 
 // IsIncompatiblePlugin 判断插件是否与当前环境不兼容
 func IsIncompatiblePlugin(plugin *Package, frontend string) bool {
-	// frontend 为空时不检查兼容性（视为兼容）
-	if "" == frontend {
-		return false
-	}
-
 	backend := GetCurrentBackend()
 	if !IsTargetSupported(plugin.Backends, backend) {
 		return true
+	}
+
+	// frontend 为空时不检查兼容性（视为兼容）
+	if "" == frontend {
+		return false
 	}
 
 	if !IsTargetSupported(plugin.Frontends, frontend) {

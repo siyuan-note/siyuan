@@ -254,14 +254,7 @@ export const getDockByType = (type: TDock | string) => {
 export const newCenterEmptyTab = (app: App) => {
     return new Tab({
         panel: `<div class="layout__empty">
-        <div class="${!window.siyuan.config.readonly ? " fn__none" : ""}">
-            <div class="config-about__logo">
-                <img src="/stage/icon.png">
-                ${window.siyuan.languages.siyuanNote}
-            </div>
-            <div class="b3-label__text">${window.siyuan.languages.slogan}</div>
-        </div>
-        <div class="fn__hr"></div>
+    <img class="${!window.siyuan.config.readonly ? "fn__none" : ""}" src="/stage/icon.png" style="width: 368px;margin-top: -88px;">
     <div class="b3-list" style="margin: 0 auto">
         <div class="b3-list-item" id="editorEmptySearch">
             <svg class="b3-list-item__graphic"><use xlink:href="#iconSearch"></use></svg>

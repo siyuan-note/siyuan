@@ -97,6 +97,9 @@ var rootCmd = &cobra.Command{
 
 func findAppDir() string {
 	if exePath, err := os.Executable(); err == nil {
+		if resolved, err2 := filepath.EvalSymlinks(exePath); err2 == nil {
+			exePath = resolved
+		}
 		exeDir := filepath.Dir(exePath)
 		candidates := []string{
 			filepath.Join(exeDir, ".."),              // resources/kernel/ → resources/ (production)

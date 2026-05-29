@@ -717,6 +717,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 页面向左箭头丢失焦点 https://github.com/siyuan-note/siyuan/issues/2768
                 const firstEditElement = getContenteditableElement(nodeElement);
                 if (firstEditElement && !nodeElement.classList.contains("table") &&
+                    range.startOffset === 0 && range.collapsed &&
                     getSelectionOffset(firstEditElement, undefined, range).start === 0) {
                     event.stopPropagation();
                     event.preventDefault();
@@ -2035,7 +2036,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const nodeEditableElement = getContenteditableElement(nodeElement);
                 const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
-                if (position.start === 0 && event.key === "ArrowLeft" && !isIncludesHotKey("⌥⇧←")) {
+                if (position.start === 0 &&  range.startOffset === 0 && event.key === "ArrowLeft" && !isIncludesHotKey("⌥⇧←")) {
                     event.preventDefault();
                     event.stopPropagation();
                     return;

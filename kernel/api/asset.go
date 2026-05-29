@@ -269,7 +269,13 @@ func setFileAnnotation(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if err := filelock.WriteFile(writePath, []byte(data)); err != nil {
+	if "{}" == data {
+		if err = filelock.Remove(writePath); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	} else if err = filelock.WriteFile(writePath, []byte(data)); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

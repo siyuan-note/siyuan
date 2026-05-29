@@ -15,7 +15,7 @@ import {
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
-import {transaction, updateTransaction} from "../wysiwyg/transaction";
+import {transaction, updateBatchTransaction, updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
 import {copyPlainText, openByMobile, readClipboard, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
@@ -240,7 +240,248 @@ export class Toolbar {
         return types;
     }
 
+    public renderSelectedBlocks(protyle: IProtyle) {
+        const selectedElements = this.getSelectedInlineStyleBlocks(protyle);
+        const targetElements = this.getInlineStyleTargetBlocks(selectedElements);
+        if (isMobile() || protyle.disabled || selectedElements.length === 0 || targetElements.length === 0 || this.hasUnsupportedInlineStyleContent(targetElements)) {
+            this.element.classList.add("fn__none");
+            return;
+        }
+        this.element.classList.remove("fn__none");
+        this.toolbarHeight = this.element.clientHeight;
+        const firstRect = selectedElements[0].getBoundingClientRect();
+        const lastRect = selectedElements[selectedElements.length - 1].getBoundingClientRect();
+        const top = Math.max(firstRect.top - this.toolbarHeight - 4, protyle.element.getBoundingClientRect().top + 30);
+        const left = Math.min(Math.max(lastRect.left, protyle.element.getBoundingClientRect().left), protyle.element.getBoundingClientRect().right - this.element.clientWidth);
+        this.element.setAttribute("data-inity", top + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
+        setPosition(this.element, left, top);
+        this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
+            item.classList.remove("protyle-toolbar__item--current");
+        });
+        this.getCommonInlineTypesInBlocks(targetElements).forEach(item => {
+            const itemElement = this.element.querySelector(`[data-type="${item}"]`);
+            if (itemElement) {
+                itemElement.classList.add("protyle-toolbar__item--current");
+            }
+        });
+    }
+
+    private supportBlockInlineType(type: string) {
+        return ["strong", "em", "u", "s", "mark", "sup", "sub", "code", "kbd", "clear"].includes(type);
+    }
+
+    private supportBlockType(nodeElement: HTMLElement) {
+        return ["NodeParagraph", "NodeHeading", "NodeListItem", "NodeList"].includes(nodeElement.getAttribute("data-type"));
+    }
+
+    private supportInlineStyleTargetType(nodeElement: HTMLElement) {
+        return ["NodeParagraph", "NodeHeading", "NodeListItem"].includes(nodeElement.getAttribute("data-type"));
+    }
+
+    private getSelectedInlineStyleBlocks(protyle: IProtyle) {
+        const selectedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
+        if (selectedElements.find(item => !this.supportBlockType(item))) {
+            return [];
+        }
+        return selectedElements;
+    }
+
+    private getInlineStyleTargetBlocks(nodeElements: HTMLElement[]) {
+        const targetElements: HTMLElement[] = [];
+        nodeElements.forEach(nodeElement => {
+            if (this.supportInlineStyleTargetType(nodeElement) && !nodeElements.find(item => item !== nodeElement && item.contains(nodeElement))) {
+                targetElements.push(nodeElement);
+                return;
+            }
+            nodeElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
+                if (this.supportInlineStyleTargetType(item) && !nodeElements.find(selectedElement => selectedElement !== nodeElement && selectedElement.contains(item))) {
+                    targetElements.push(item);
+                }
+            });
+        });
+        return [...new Set(targetElements)];
+    }
+
+    private hasUnsupportedInlineStyleContent(nodeElements: HTMLElement[]) {
+        return nodeElements.some(nodeElement => {
+            const editElement = getContenteditableElement(nodeElement);
+            if (!editElement) {
+                return true;
+            }
+            return !!editElement.querySelector(".img, img, video, audio, iframe, .render-node");
+        });
+    }
+
+    private getCommonInlineTypesInBlocks(nodeElements: HTMLElement[]) {
+        return ["strong", "em", "u", "s", "mark", "sup", "sub", "code", "kbd"].filter(type => {
+            return nodeElements.every(nodeElement => this.blockHasInlineType(nodeElement, type));
+        });
+    }
+
+    private blockHasInlineType(nodeElement: HTMLElement, type: string) {
+        const editElement = getContenteditableElement(nodeElement);
+        if (!editElement) {
+            return false;
+        }
+        let hasText = false;
+        let hasAllType = true;
+        const walker = document.createTreeWalker(editElement, NodeFilter.SHOW_TEXT, {
+            acceptNode: (node: Text) => {
+                if (node.textContent.replace(Constants.ZWSP, "").trim() === "") {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                const parentElement = node.parentElement;
+                if (!parentElement || hasClosestByClassName(parentElement, "render-node") || parentElement.closest("[contenteditable='false']")) {
+                    return NodeFilter.FILTER_REJECT;
+                }
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        });
+        let node = walker.nextNode();
+        while (node) {
+            hasText = true;
+            let inlineElement = node.parentElement;
+            let hasType = false;
+            while (inlineElement && inlineElement !== editElement) {
+                if ((inlineElement.getAttribute("data-type") || "").split(" ").includes(type)) {
+                    hasType = true;
+                    break;
+                }
+                inlineElement = inlineElement.parentElement;
+            }
+            if (!hasType) {
+                hasAllType = false;
+                break;
+            }
+            node = walker.nextNode();
+        }
+        return hasText && hasAllType;
+    }
+
+    private setInlineMarkForSelectedBlocks(protyle: IProtyle, selectedElements: HTMLElement[], type: string, textObj?: ITextOption) {
+        const targetElements = this.getInlineStyleTargetBlocks(selectedElements);
+        if (targetElements.length === 0 || this.hasUnsupportedInlineStyleContent(targetElements)) {
+            return;
+        }
+        const shouldRemove = type === "clear" || targetElements.every(nodeElement => this.blockHasInlineType(nodeElement, type));
+        updateBatchTransaction(targetElements, protyle, (nodeElement: HTMLElement) => {
+            if (shouldRemove) {
+                this.removeInlineTypeInBlock(nodeElement, type, textObj);
+            } else {
+                this.addInlineTypeInBlock(nodeElement, type, textObj);
+            }
+            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+        });
+        selectedElements.forEach(nodeElement => {
+            nodeElement.classList.add("protyle-wysiwyg--select");
+        });
+        this.renderSelectedBlocks(protyle);
+    }
+
+    private addInlineTypeInBlock(nodeElement: HTMLElement, type: string, textObj?: ITextOption) {
+        const editElement = getContenteditableElement(nodeElement);
+        if (!editElement) {
+            return;
+        }
+        this.addInlineTypeInNode(editElement, type, textObj, editElement);
+        this.mergeInlineStyleElements(editElement);
+    }
+
+    private addInlineTypeInNode(node: Node, type: string, textObj: ITextOption, rootElement: Element) {
+        Array.from(node.childNodes).forEach(item => {
+            if (item.nodeType === 3) {
+                if (item.textContent.replace(Constants.ZWSP, "").trim() === "") {
+                    return;
+                }
+                const inlineElement = document.createElement("span");
+                inlineElement.setAttribute("data-type", type);
+                inlineElement.textContent = item.textContent;
+                setFontStyle(inlineElement, textObj);
+                item.replaceWith(inlineElement);
+                return;
+            }
+            const element = item as HTMLElement;
+            if (element.nodeType !== 1 || element.tagName === "BR" || element.tagName === "IMG" || element.classList.contains("img") || element.classList.contains("render-node") || element.getAttribute("contenteditable") === "false") {
+                return;
+            }
+            const types = (element.getAttribute("data-type") || "").split(" ").filter(Boolean);
+            if (element.tagName === "SPAN") {
+                if (["backslash", "virtual-block-ref", "search-mark", "inline-math", "inline-memo"].find(itemType => types.includes(itemType))) {
+                    return;
+                }
+                if (!types.includes(type)) {
+                    types.push(type);
+                }
+                element.setAttribute("data-type", [...new Set(types)].join(" "));
+                setFontStyle(element, textObj);
+            } else if (element !== rootElement) {
+                this.addInlineTypeInNode(element, type, textObj, rootElement);
+            } else {
+                this.addInlineTypeInNode(element, type, textObj, rootElement);
+            }
+        });
+    }
+
+    private removeInlineTypeInBlock(nodeElement: HTMLElement, type: string, textObj?: ITextOption) {
+        const editElement = getContenteditableElement(nodeElement);
+        if (!editElement) {
+            return;
+        }
+        editElement.querySelectorAll("span[data-type]").forEach((item: HTMLElement) => {
+            if (["backslash", "virtual-block-ref", "search-mark", "inline-math", "inline-memo"].find(itemType => (item.getAttribute("data-type") || "").split(" ").includes(itemType))) {
+                return;
+            }
+            let types = (item.getAttribute("data-type") || "").split(" ").filter(Boolean);
+            if (type === "clear") {
+                types = types.filter(itemType => !["strong", "em", "u", "s", "mark", "sup", "sub", "code", "kbd", "text"].includes(itemType));
+                if (!textObj || textObj.type === "text") {
+                    item.style.color = "";
+                    item.style.webkitTextFillColor = "";
+                    item.style.webkitTextStroke = "";
+                    item.style.textShadow = "";
+                    item.style.backgroundColor = "";
+                    item.style.fontSize = "";
+                }
+            } else {
+                types = types.filter(itemType => itemType !== type);
+            }
+            this.updateOrUnwrapInlineElement(item, types);
+        });
+        this.mergeInlineStyleElements(editElement);
+    }
+
+    private updateOrUnwrapInlineElement(element: HTMLElement, types: string[]) {
+        if (types.length === 0) {
+            element.replaceWith(...Array.from(element.childNodes));
+        } else {
+            element.setAttribute("data-type", types.join(" "));
+            if (!element.getAttribute("style")) {
+                element.removeAttribute("style");
+            }
+        }
+    }
+
+    private mergeInlineStyleElements(element: Element) {
+        Array.from(element.querySelectorAll("span[data-type]")).forEach((item: HTMLElement) => {
+            const previousElement = item.previousSibling as HTMLElement;
+            if (previousElement && previousElement.nodeType === 1 && previousElement.tagName === "SPAN" &&
+                isArrayEqual((item.getAttribute("data-type") || "").split(" "), (previousElement.getAttribute("data-type") || "").split(" ")) &&
+                hasSameTextStyle(item, previousElement)) {
+                item.textContent = previousElement.textContent + item.textContent;
+                previousElement.remove();
+            }
+        });
+    }
+
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
+        const selectedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) as HTMLElement[];
+        if (selectedElements.length > 0) {
+            const nodeElements = this.getSelectedInlineStyleBlocks(protyle);
+            if (nodeElements.length > 0 && this.supportBlockInlineType(type)) {
+                this.setInlineMarkForSelectedBlocks(protyle, nodeElements, type, textObj);
+            }
+            return;
+        }
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;

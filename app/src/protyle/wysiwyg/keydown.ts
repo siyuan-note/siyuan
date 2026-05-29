@@ -246,6 +246,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
                     }
                     focusBlock(nextElement);
+                    protyle.toolbar.renderSelectedBlocks(protyle);
                 } else if (event.key === "ArrowUp") {
                     let previousElement: HTMLElement = getPreviousBlock(selectElements[0]) as HTMLElement;
                     if (previousElement) {
@@ -287,6 +288,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
                         }
                         focusBlock(previousElement);
+                        protyle.toolbar.renderSelectedBlocks(protyle);
                     }
                 }
                 return;

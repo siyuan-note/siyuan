@@ -651,6 +651,7 @@ export class WYSIWYG {
                         } else {
                             focusBlock(selectElements[0], protyle.wysiwyg.element, false);
                         }
+                        protyle.toolbar.renderSelectedBlocks(protyle);
                     }
                     event.preventDefault();
                 }
@@ -695,6 +696,7 @@ export class WYSIWYG {
                         ids.push(item.getAttribute("data-node-id"));
                     });
                     countBlockWord(ids);
+                    protyle.toolbar.renderSelectedBlocks(protyle);
                 }
                 return;
             }
@@ -1758,6 +1760,7 @@ export class WYSIWYG {
                         if (endElement && document.activeElement.classList.contains("protyle-wysiwyg")) {
                             focusBlock(endElement);
                         }
+                        protyle.toolbar.renderSelectedBlocks(protyle);
                         return;
                     }
                     const startBlockElement = hasClosestBlock(range.startContainer);

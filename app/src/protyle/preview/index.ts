@@ -300,9 +300,8 @@ export class Preview {
         copyElement.querySelectorAll("code").forEach((item) => {
             item.style.backgroundImage = "none";
         });
+        copyElement.setAttribute("data-protyle-copy-target", "true");
         this.element.append(copyElement);
-        // 最后一个块是公式块时无法复制下来
-        copyElement.insertAdjacentHTML("beforeend", "<p>&zwj;</p>");
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();
@@ -310,8 +309,31 @@ export class Preview {
         const range = copyElement.ownerDocument.createRange();
         range.selectNodeContents(copyElement);
         focusByRange(range);
-        document.execCommand("copy");
+        const copySuccess = document.execCommand("copy");
         this.element.lastElementChild.remove();
+        if (copySuccess && navigator.clipboard?.read && navigator.clipboard?.write) {
+            try {
+                const clipboardItems = await navigator.clipboard.read();
+                const clipboardItem = clipboardItems[0];
+                if (clipboardItem?.types.includes("text/html")) {
+                    let textPlain = "";
+                    if (clipboardItem.types.includes("text/plain")) {
+                        textPlain = await (await clipboardItem.getType("text/plain")).text();
+                    }
+                    const rawHTML = await (await clipboardItem.getType("text/html")).text();
+                    const copyTarget = new DOMParser().parseFromString(rawHTML, "text/html").querySelector("[data-protyle-copy-target]");
+                    const extractedHTML = copyTarget?.innerHTML;
+                    if (extractedHTML) {
+                        await navigator.clipboard.write([new ClipboardItem({
+                            "text/plain": new Blob([textPlain], {type: "text/plain"}),
+                            "text/html": new Blob([extractedHTML], {type: "text/html"}),
+                        })]);
+                    }
+                }
+            } catch (_) {
+                // 保留 execCommand 原始结果
+            }
+        }
         focusByRange(cloneRange);
         if (type) {
             showMessage(`${type === "zhihu" ? window.siyuan.languages.pasteToZhihu : window.siyuan.languages.pasteToWechatMP}`);

@@ -259,7 +259,7 @@ export const copyTextByType = async (ids: string[],
             text += `siyuan://blocks/${id}`;
         } else if (type === "protocolMd") {
             const response = await fetchSyncPost("/api/block/getRefText", {id});
-            text += `[${response.data.replace("[", "\\[").replace("]", "\\]").replace("(", "\\(").replace(")", "\\)")}](siyuan://blocks/${id})`;
+            text += `[${response.data.replace("[", "\\[").replace("]", "\\]")}](siyuan://blocks/${id})`;
         } else if (type === "hPath") {
             const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
             text += response.data;

@@ -36,7 +36,7 @@ export const openBacklink = async (options: {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
     if (!options.rootId) {
-        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        const response = await fetchSyncPost("/api/block/getDocInfo", {id: options.blockId});
         if (response.code === -1) {
             return;
         }
@@ -44,7 +44,7 @@ export const openBacklink = async (options: {
         options.useBlockId = response.data.rootID !== response.data.id;
         options.title = response.data.name || window.siyuan.languages.untitled;
     } else if (!options.title) {
-        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        const response = await fetchSyncPost("/api/block/getDocInfo", {id: options.blockId});
         if (response.code === -1) {
             return;
         }
@@ -92,7 +92,7 @@ export const openGraph = async (options: {
         wnd = getWndByLayout(window.siyuan.layout.centerLayout);
     }
     if (!options.rootId) {
-        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        const response = await fetchSyncPost("/api/block/getDocInfo", {id: options.blockId});
         if (response.code === -1) {
             return;
         }
@@ -100,7 +100,7 @@ export const openGraph = async (options: {
         options.useBlockId = response.data.rootID !== response.data.id;
         options.title = response.data.name || window.siyuan.languages.untitled;
     } else if (!options.title) {
-        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.blockId});
+        const response = await fetchSyncPost("/api/block/getDocInfo", {id: options.blockId});
         if (response.code === -1) {
             return;
         }
@@ -148,7 +148,7 @@ export const openOutline = async (options: {
     const newWnd = wnd.split("lr", false);
 
     if (!options.title) {
-        const response = await fetchSyncPost("api/block/getDocInfo", {id: options.rootId});
+        const response = await fetchSyncPost("/api/block/getDocInfo", {id: options.rootId});
         options.title = response.data.name || window.siyuan.languages.untitled;
     }
     newWnd.element.style.width = "200px";

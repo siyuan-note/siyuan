@@ -287,7 +287,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         let keyID: string;
         let avData = panelData?.data;
         if (!avData) {
-            const avResponse = await fetchSyncPost("api/av/renderAttributeView", {id: avId});
+            const avResponse = await fetchSyncPost("/api/av/renderAttributeView", {id: avId});
             avData = avResponse.data;
         }
 
@@ -307,7 +307,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
                 }
             });
             if (relationAvId) {
-                const colResponse = await fetchSyncPost("api/av/getAttributeView", {id: relationAvId});
+                const colResponse = await fetchSyncPost("/api/av/getAttributeView", {id: relationAvId});
                 colResponse.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
                     if (item.key.id === keyID) {
                         rollupIsNumber = item.key.type === "number";

@@ -37,7 +37,7 @@ func getPluginName(c *gin.Context, ret *gulu.Result) (name string) {
 	name = util.GetRequestStringParam(c, "name", ret)
 	if name == "" {
 		if ret.Code == 0 {
-			ret.Code = -10
+			ret.Code = 3
 			ret.Msg = "Plugin name is required"
 		}
 	}
@@ -55,7 +55,7 @@ func getLoadedPlugin(c *gin.Context) {
 
 	pluginInfo, found := plugin.GetManager().GetLoadedPlugin(pluginName)
 	if !found {
-		ret.Code = -11
+		ret.Code = 4
 		ret.Msg = fmt.Sprintf("Plugin [%s] not loaded", pluginName)
 		return
 	}

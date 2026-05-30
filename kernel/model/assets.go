@@ -899,6 +899,10 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
+	if idx := strings.Index(oldPath, "?"); idx >= 0 {
+		oldPath = oldPath[:idx]
+	}
+
 	newName = strings.TrimSpace(newName)
 	newName = util.FilterUploadFileName(newName)
 	if path.Base(oldPath) == newName {

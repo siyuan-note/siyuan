@@ -751,6 +751,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     content: '<div class="b3-dialog__content"><div style="border-radius: var(--b3-border-radius-b);"></div></div>',
                     width: isMobile() ? "100vw" : "80vw",
                     height: isMobile() ? "100vh" : "70vh",
+                    disableAnimation: true,
                 });
                 const contentElement = dialog.element.querySelector(".b3-dialog__content");
                 fetchPost("/api/repo/openRepoSnapshotFile", {id: liElement.getAttribute("data-id")}, (response) => {

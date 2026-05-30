@@ -234,7 +234,12 @@ func getDocAssets(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	assets, err := model.DocAssets(id)
+	retainQueryStr := true
+	if nil != arg["retainQueryStr"] {
+		retainQueryStr = arg["retainQueryStr"].(bool)
+	}
+
+	assets, err := model.DocAssets(id, retainQueryStr)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

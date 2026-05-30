@@ -216,13 +216,20 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
-func DocAssets(rootID string) (ret []string, err error) {
+func DocAssets(rootID string, retainQueryStr bool) (ret []string, err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
 		return
 	}
 
 	ret = getAssetsLinkDests(tree.Root, false)
+	if !retainQueryStr {
+		for i, asset := range ret {
+			if idx := strings.Index(asset, "?"); idx >= 0 {
+				ret[i] = asset[:idx]
+			}
+		}
+	}
 	return
 }
 
@@ -898,6 +905,10 @@ func RemoveUnusedAsset(p string) (ret string) {
 func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
+
+	if idx := strings.Index(oldPath, "?"); idx >= 0 {
+		oldPath = oldPath[:idx]
+	}
 
 	newName = strings.TrimSpace(newName)
 	newName = util.FilterUploadFileName(newName)

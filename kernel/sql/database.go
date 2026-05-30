@@ -695,6 +695,10 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 		}
 
 		dest := gulu.Str.FromBytes(destNode.Tokens)
+		if idx := strings.Index(dest, "?"); idx > 0 {
+			dest = dest[:idx]
+		}
+
 		var title string
 		if titleNode := n.ChildByType(ast.NodeLinkTitle); nil != titleNode {
 			title = gulu.Str.FromBytes(titleNode.Tokens)

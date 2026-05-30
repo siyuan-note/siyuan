@@ -540,3 +540,27 @@ func parseSearchAssetContentArgs(arg map[string]any) (page, pageSize int, query 
 	}
 	return
 }
+
+func semanticSearchBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	page, pageSize, query, _, boxes, types, subTypes, _, _, _ := parseSearchBlockArgs(arg)
+
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, nil, types, subTypes, page, pageSize)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	}
+	ret.Data = map[string]any{
+		"blocks":            blocks,
+		"matchedBlockCount": matchedBlockCount,
+		"matchedRootCount":  matchedRootCount,
+		"pageCount":         pageCount,
+	}
+}

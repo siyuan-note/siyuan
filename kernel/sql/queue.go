@@ -184,6 +184,17 @@ func FlushQueue() {
 			continue
 		}
 
+		switch op.action {
+		case "index":
+			eventbus.Publish(eventbus.EvtEmbeddingDirty, op.indexTree.ID)
+		case "upsert":
+			eventbus.Publish(eventbus.EvtEmbeddingDirty, op.upsertTree.ID)
+		case "update_block_content":
+			eventbus.Publish(eventbus.EvtEmbeddingDirty, op.block.ID)
+		case "index_node":
+			eventbus.Publish(eventbus.EvtEmbeddingDirty, op.id)
+		}
+
 		if 16 < i && 0 == i%128 {
 			debug.FreeOSMemory()
 		}
@@ -215,10 +226,21 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		err = upsertTree(tx, op.upsertTree, context)
 	case "delete":
 		err = batchDeleteByPathPrefix(tx, op.removeTreeBox, op.removeTreePath)
+		if nil == err {
+			tx.Exec("DELETE FROM block_embeddings WHERE box = ? AND path LIKE ?", op.removeTreeBox, op.removeTreePath+"%")
+		}
 	case "delete_id":
 		err = deleteByRootID(tx, op.removeTreeID, context)
+		if nil == err {
+			tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", op.removeTreeID)
+		}
 	case "delete_ids":
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
+		if nil == err {
+			for _, rootID := range op.removeTreeIDs {
+				tx.Exec("DELETE FROM block_embeddings WHERE root_id = ?", rootID)
+			}
+		}
 	case "rename":
 		err = batchUpdateHPath(tx, op.indexTree, context)
 		if err != nil {
@@ -226,10 +248,19 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]any) (err error
 		}
 
 		err = updateRootContent(tx, path.Base(op.indexTree.HPath), op.indexTree.Root.IALAttr("updated"), treenode.IALStr(op.indexTree.Root), op.indexTree.ID)
+		if nil == err {
+			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+		}
 	case "move":
 		err = batchUpdatePath(tx, op.indexTree, context)
+		if nil == err {
+			tx.Exec("UPDATE block_embeddings SET box = ?, path = ? WHERE root_id = ?", op.indexTree.Box, op.indexTree.Path, op.indexTree.ID)
+		}
 	case "delete_box":
 		err = deleteByBoxTx(tx, op.box)
+		if nil == err {
+			tx.Exec("DELETE FROM block_embeddings WHERE box = ?", op.box)
+		}
 	case "delete_box_refs":
 		err = deleteRefsByBoxTx(tx, op.box)
 	case "update_refs":

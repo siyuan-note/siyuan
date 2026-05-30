@@ -201,6 +201,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/search/fullTextSearchAssetContent", model.CheckAuth, fullTextSearchAssetContent)
 	ginServer.Handle("POST", "/api/search/getAssetContent", model.CheckAuth, getAssetContent)
 	ginServer.Handle("POST", "/api/search/listInvalidBlockRefs", model.CheckAuth, listInvalidBlockRefs)
+	ginServer.Handle("POST", "/api/search/semanticSearchBlock", model.CheckAuth, semanticSearchBlock)
 
 	ginServer.Handle("POST", "/api/block/getBlockInfo", model.CheckAuth, getBlockInfo)
 	ginServer.Handle("POST", "/api/block/getBlockDOM", model.CheckAuth, model.CheckAdminRole, getBlockDOM)

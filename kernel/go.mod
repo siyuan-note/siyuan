@@ -69,7 +69,7 @@ require (
 	github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17
 	github.com/siyuan-note/dejavu v0.0.0-20260529092727-2b5e57a676af
 	github.com/siyuan-note/encryption v0.0.0-20251120032857-3ddc3c2cc49f
-	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
+	github.com/siyuan-note/eventbus v0.0.0-20260530125927-d77c74260dce
 	github.com/siyuan-note/filelock v0.0.0-20260411141728-bf44452627c0
 	github.com/siyuan-note/httpclient v0.0.0-20260529092300-aa977bebbd71
 	github.com/siyuan-note/logging v0.0.0-20260513050044-06b8e04d5490
@@ -227,3 +227,4 @@ replace github.com/pdfcpu/pdfcpu => github.com/88250/pdfcpu v0.3.14-0.2025042412
 //replace github.com/mattn/go-sqlite3 => D:\88250\go-sqlite3
 //replace github.com/88250/epub => D:\88250\epub
 //replace github.com/siyuan-note/logging => D:\88250\logging
+//replace github.com/siyuan-note/eventbus => D:\88250\eventbus

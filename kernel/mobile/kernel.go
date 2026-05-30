@@ -229,6 +229,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		job.StartCron()
 		go model.AutoGenerateFileHistory()
 		go cache.LoadAssets()
+		go model.StartEmbeddingIndexer()
 	}()
 }
 

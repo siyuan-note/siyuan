@@ -335,7 +335,6 @@ export class Title {
                 this.setTitle(fileName);
                 focusByOffset(this.editElement, offset.start, offset.end);
             }
-            setTitle(fileName);
         }, Constants.TIMEOUT_INPUT);
     }
 

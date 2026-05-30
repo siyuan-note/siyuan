@@ -13,6 +13,7 @@ import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";
 /// #endif
 import {layoutToJSON, saveLayout} from "./util";
+import {setTitle} from "../dialog/processSystem";
 
 export class Tab {
     public parent: Wnd;
@@ -148,6 +149,14 @@ export class Tab {
     public updateTitle(title: string) {
         this.title = title;
         this.headElement.querySelector(".item__text").innerHTML = escapeHtml(title);
+
+        if (document.querySelector(".layout__wnd--active .layout-tab-bar .item--focus")) {
+            if (this.headElement.closest(".layout__wnd--active")) {
+                setTitle(title);
+            }
+        } else if (this.headElement.classList.contains("item--focus")) {
+            setTitle(title);
+        }
     }
 
     public addModel(model: Model) {

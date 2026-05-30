@@ -30,17 +30,20 @@ type AI struct {
 }
 
 type OpenAI struct {
-	APIKey         string  `json:"apiKey"`
-	APITimeout     int     `json:"apiTimeout"`
-	APIProxy       string  `json:"apiProxy"`
-	APIModel       string  `json:"apiModel"`
-	APIMaxTokens   int     `json:"apiMaxTokens"`
-	APITemperature float64 `json:"apiTemperature"`
-	APIMaxContexts int     `json:"apiMaxContexts"`
-	APIBaseURL     string  `json:"apiBaseURL"`
-	APIUserAgent   string  `json:"apiUserAgent"`
-	APIProvider    string  `json:"apiProvider"` // OpenAI, Azure
-	APIVersion     string  `json:"apiVersion"`  // Azure API version
+	APIKey           string  `json:"apiKey"`
+	APITimeout       int     `json:"apiTimeout"`
+	APIProxy         string  `json:"apiProxy"`
+	APIModel         string  `json:"apiModel"`
+	APIMaxTokens     int     `json:"apiMaxTokens"`
+	APITemperature   float64 `json:"apiTemperature"`
+	APIMaxContexts   int     `json:"apiMaxContexts"`
+	APIBaseURL       string  `json:"apiBaseURL"`
+	APIUserAgent     string  `json:"apiUserAgent"`
+	APIProvider      string  `json:"apiProvider"` // OpenAI, Azure
+	APIVersion       string  `json:"apiVersion"`  // Azure API version
+	EmbeddingModel   string  `json:"embeddingModel"`
+	EmbeddingBaseURL string  `json:"embeddingBaseURL"`
+	EmbeddingAPIKey  string  `json:"embeddingAPIKey"`
 }
 
 func NewAI() *AI {
@@ -94,6 +97,12 @@ func NewAI() *AI {
 
 	if userAgent := os.Getenv("SIYUAN_OPENAI_API_USER_AGENT"); "" != userAgent {
 		openAI.APIUserAgent = userAgent
+	}
+	if embeddingBaseURL := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != embeddingBaseURL {
+		openAI.EmbeddingBaseURL = embeddingBaseURL
+	}
+	if embeddingAPIKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != embeddingAPIKey {
+		openAI.EmbeddingAPIKey = embeddingAPIKey
 	}
 	return &AI{OpenAI: openAI}
 }

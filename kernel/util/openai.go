@@ -122,3 +122,37 @@ func (adt *AddHeaderTransport) RoundTrip(req *http.Request) (*http.Response, err
 func newAddHeaderTransport(transport *http.Transport, userAgent string) *AddHeaderTransport {
 	return &AddHeaderTransport{RoundTripper: transport, UserAgent: userAgent}
 }
+
+func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout int) (ret [][]float32, err error) {
+	if 1 > len(texts) {
+		return
+	}
+
+	config := openai.DefaultConfig(apiKey)
+	config.BaseURL = baseURL
+	config.HTTPClient = &http.Client{
+		Timeout: time.Duration(timeout) * time.Second,
+		Transport: &AddHeaderTransport{
+			RoundTripper: &http.Transport{},
+			UserAgent:    UserAgent,
+		},
+	}
+	client := openai.NewClientWithConfig(config)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	defer cancel()
+
+	resp, err := client.CreateEmbeddings(ctx, openai.EmbeddingRequestStrings{
+		Input: texts,
+		Model: openai.EmbeddingModel(model),
+	})
+	if err != nil {
+		logging.LogErrorf("create embeddings failed: %s", err)
+		return
+	}
+
+	for _, data := range resp.Data {
+		ret = append(ret, data.Embedding)
+	}
+	return
+}

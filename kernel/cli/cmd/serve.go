@@ -87,6 +87,7 @@ var serveCmd = &cobra.Command{
 		go cache.LoadAssets()
 		go util.CheckFileSysStatus()
 		go plugin.InitManager()
+		go model.StartEmbeddingIndexer()
 
 		model.WatchAssets()
 		model.WatchEmojis()

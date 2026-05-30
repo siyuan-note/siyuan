@@ -224,6 +224,19 @@ func initDBTables() {
 	if err != nil {
 		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [refs] failed: %s", err)
 	}
+
+	_, err = db.Exec("DROP TABLE IF EXISTS block_embeddings")
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "drop table [block_embeddings] failed: %s", err)
+	}
+	_, err = db.Exec("CREATE TABLE block_embeddings (id TEXT PRIMARY KEY, root_id TEXT, box TEXT, path TEXT, embedding BLOB, model TEXT, content_len INTEGER, updated TEXT)")
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create table [block_embeddings] failed: %s", err)
+	}
+	_, err = db.Exec("CREATE INDEX idx_block_embeddings_root_id ON block_embeddings(root_id)")
+	if err != nil {
+		logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "create index [idx_block_embeddings_root_id] failed: %s", err)
+	}
 }
 
 func initFTSBlocks() (err error) {
@@ -1065,6 +1078,11 @@ func deleteBlocksByIDs(tx *sql.Tx, ids []string) (err error) {
 			return
 		}
 	}
+
+	stmt = "DELETE FROM block_embeddings WHERE id IN (" + strings.Join(ftsIDs, ",") + ")"
+	if err = execStmtTx(tx, stmt); err != nil {
+		return
+	}
 	return
 }
 
@@ -1418,6 +1436,19 @@ func query(query string, args ...any) (*sql.Rows, error) {
 		return nil, errors.New("database is nil")
 	}
 	return db.Query(query, args...)
+}
+
+func Exec(stmt string) error {
+	stmt = strings.TrimSpace(stmt)
+	if "" == stmt {
+		return errors.New("statement is empty")
+	}
+
+	if nil == db {
+		return errors.New("database is nil")
+	}
+	_, err := db.Exec(stmt)
+	return err
 }
 
 func beginTx() (tx *sql.Tx, err error) {

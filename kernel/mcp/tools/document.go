@@ -25,16 +25,17 @@ import (
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, title, path (e.g. /folder/doc). Optional: markdown.\n- list: List documents in a notebook path. Requires: notebook. Optional: path (default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.",
+	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (e.g. /folder/doc), title. Optional: markdown.\n- list: List documents in a notebook path. Requires: notebook. Optional: path (default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/path. Requires: id, notebook, path.\n- search_docs: Search documents by keyword. Requires: keyword.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename"}},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename", "move", "search_docs"}},
 			"id":       {Type: "string", Description: "Document block ID"},
-			"notebook": {Type: "string", Description: "Notebook ID (required for create, list)"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
-			"path":     {Type: "string", Description: "Document path like /folder/doc (for create, list)"},
+			"path":     {Type: "string", Description: "Document path like /folder/doc (for create, list, move)"},
 			"markdown": {Type: "string", Description: "Initial markdown content (for create)"},
+			"keyword":  {Type: "string", Description: "Search keyword (for search_docs)"},
+			"notebook": {Type: "string", Description: "Notebook ID (required for create, list, move)"},
 		},
 		Required: []string{"action"},
 	},
@@ -58,6 +59,10 @@ func documentHandler(args map[string]interface{}) (CallToolResult, error) {
 		return documentDelete(args)
 	case "rename":
 		return documentRename(args)
+	case "move":
+		return documentMove(args)
+	case "search_docs":
+		return documentSearchDocs(args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
@@ -169,4 +174,43 @@ func documentRename(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document renamed: %s -> %s", id, title)}}}, nil
+}
+
+func documentMove(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	notebook, _ := args["notebook"].(string)
+	path, _ := args["path"].(string)
+	if id == "" || notebook == "" || path == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id, notebook and path are required"}}, IsError: true}, nil
+	}
+
+	tree, err := model.LoadTreeByBlockID(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("load doc failed: %s", err)}}, IsError: true}, nil
+	}
+
+	if err := model.MoveDocs([]string{tree.Path}, notebook, path, nil); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("move doc failed: %s", err)}}, IsError: true}, nil
+	}
+
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document moved: %s -> %s%s", id, notebook, path)}}}, nil
+}
+
+func documentSearchDocs(args map[string]interface{}) (CallToolResult, error) {
+	keyword, _ := args["keyword"].(string)
+	if keyword == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "keyword is required"}}, IsError: true}, nil
+	}
+
+	docs := model.SearchDocs(keyword, false, nil)
+	if len(docs) == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no documents found"}}}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Documents matching '%s' (%d):\n\n", keyword, len(docs)))
+	for _, d := range docs {
+		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", d["name"], d["id"], d["hPath"]))
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

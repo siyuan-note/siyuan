@@ -26,11 +26,11 @@ import (
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations for SiYuan notes.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.",
+	Description: "Block operations for SiYuan notes.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "insert", "append", "prepend", "update", "delete"}},
+			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "insert", "append", "prepend", "update", "delete", "move", "breadcrumb"}},
 			"id":         {Type: "string", Description: "Block ID"},
 			"data":       {Type: "string", Description: "Content (markdown or dom)"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
@@ -66,6 +66,10 @@ func blockHandler(args map[string]interface{}) (CallToolResult, error) {
 		return blockUpdate(args)
 	case "delete":
 		return blockDelete(args)
+	case "move":
+		return blockMove(args)
+	case "breadcrumb":
+		return blockBreadcrumb(args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
@@ -300,4 +304,47 @@ func markdownToBlockDOM(md string) (string, error) {
 		return "", fmt.Errorf("empty result")
 	}
 	return result, nil
+}
+
+func blockMove(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	parentID, _ := args["parentID"].(string)
+	if parentID == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
+	}
+	previousID, _ := args["previousID"].(string)
+
+	transactions := []*model.Transaction{{
+		DoOperations: []*model.Operation{{
+			Action:     "move",
+			ID:         id,
+			ParentID:   parentID,
+			PreviousID: previousID,
+		}},
+	}}
+
+	model.PerformTransactions(&transactions)
+	model.FlushTxQueue()
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
+}
+
+func blockBreadcrumb(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+
+	paths, err := model.BuildBlockBreadcrumb(id, nil)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "breadcrumb failed: " + err.Error()}}, IsError: true}, nil
+	}
+
+	var sb strings.Builder
+	for _, p := range paths {
+		sb.WriteString(fmt.Sprintf("%s/%s (%s)\n", p.Type, p.Name, p.ID))
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

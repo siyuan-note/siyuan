@@ -62,7 +62,7 @@ func refBacklinks(args map[string]interface{}) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyword, _ := args["keyword"].(string)
 
-	_, backlinks, _, _, _ := model.GetBacklink2(id, keyword, "", 0, 0, false)
+	_, backlinks, _, _, _ := model.GetBacklink2(id, keyword, "", 0, 0, model.Conf.Editor.BacklinkContainChildren)
 	if len(backlinks) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no backlinks found"}}}, nil
 	}
@@ -79,7 +79,7 @@ func refMentions(args map[string]interface{}) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	keyword, _ := args["keyword"].(string)
 
-	_, _, mentions, _, _ := model.GetBacklink2(id, "", keyword, 0, 0, false)
+	_, _, mentions, _, _ := model.GetBacklink2(id, "", keyword, 0, 0, model.Conf.Editor.BacklinkContainChildren)
 	if len(mentions) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no mentions found"}}}, nil
 	}

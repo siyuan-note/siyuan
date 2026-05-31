@@ -19,13 +19,12 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"os"
 	"path"
 	"strings"
 	"text/tabwriter"
-	"time"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 
@@ -80,7 +79,7 @@ var documentCreateCmd = &cobra.Command{
 			dir = "/"
 		}
 
-		id := generateDocID()
+		id := ast.NewNodeID()
 		docPath := path.Join(dir, id+".sy")
 		_, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 		if err != nil {
@@ -181,6 +180,7 @@ var documentRenameCmd = &cobra.Command{
 			return err
 		}
 		model.AppendPushRenameEntry(tree.Box, tree.Path, title)
+		fmt.Println(id)
 		return nil
 	},
 }
@@ -204,7 +204,7 @@ var documentMoveCmd = &cobra.Command{
 			return err
 		}
 		model.AppendPushReloadFiletreeEntry()
-		fmt.Println("ok")
+		fmt.Println(id)
 		return nil
 	},
 }
@@ -223,7 +223,7 @@ var documentDuplicateCmd = &cobra.Command{
 		}
 		model.DuplicateDoc(tree)
 		model.AppendPushReloadFiletreeEntry()
-		fmt.Println("ok")
+		fmt.Println(tree.ID)
 		return nil
 	},
 }
@@ -281,12 +281,4 @@ func init() {
 	documentCmd.AddCommand(documentDuplicateCmd)
 }
 
-func generateDocID() string {
-	ts := time.Now().Format("20060102150405")
-	r := make([]byte, 7)
-	chars := "abcdefghijklmnopqrstuvwxyz0123456789"
-	for i := range r {
-		r[i] = chars[rand.Intn(len(chars))]
-	}
-	return ts + "-" + string(r)
-}
+

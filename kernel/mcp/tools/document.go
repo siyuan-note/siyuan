@@ -18,8 +18,10 @@ package tools
 
 import (
 	"fmt"
+	"path"
 	"strings"
 
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
@@ -97,26 +99,28 @@ func documentCreate(args map[string]interface{}) (CallToolResult, error) {
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
 	}
-	path, _ := args["path"].(string)
-	if path == "" {
+	p, _ := args["path"].(string)
+	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
 	}
 	markdown, _ := args["markdown"].(string)
 	title, _ := args["title"].(string)
 	if title == "" {
-		title = path
+		title = p
 		if strings.Contains(title, "/") {
 			parts := strings.Split(strings.TrimRight(title, "/"), "/")
 			title = parts[len(parts)-1]
 		}
 	}
 
-	tree, err := model.CreateDocByMd(notebook, path, title, markdown, nil, nil)
+	id := ast.NewNodeID()
+	docPath := path.Join(path.Dir(p), id+".sy")
+	tree, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("create doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document created: %s (path: %s)", tree.Root.ID, path)}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document created: %s (path: %s)", tree.Root.ID, p)}}}, nil
 }
 
 func documentList(args map[string]interface{}) (CallToolResult, error) {

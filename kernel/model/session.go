@@ -477,7 +477,8 @@ func ControlConcurrency(c *gin.Context) {
 		strings.HasPrefix(reqPath, "/api/search/") ||
 		strings.HasPrefix(reqPath, "/api/network/") ||
 		strings.HasPrefix(reqPath, "/api/broadcast/") ||
-		strings.HasPrefix(reqPath, "/es/") {
+		strings.HasPrefix(reqPath, "/es/") ||
+		strings.HasPrefix(reqPath, "/mcp") {
 		c.Next()
 		return
 	}

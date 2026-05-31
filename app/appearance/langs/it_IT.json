@@ -594,6 +594,7 @@
   "keyword": "Parola chiave",
   "searchMethod": "Metodo di ricerca",
   "regex": "Regex",
+  "semanticSearch": "Ricerca fuzzy",
   "keywordsLimit": "Limite di parole chiave",
   "exportAsImage": "Esporta come immagine",
   "proFeature": "Questa funzione richiede un pagamento (gli abbonati non devono pagare separatamente), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">un pagamento una tantum può essere utilizzato per tutta la vita</a>",

@@ -594,6 +594,7 @@
   "keyword": "מילת מפתח",
   "searchMethod": "שיטת חיפוש",
   "regex": "רג'קס",
+  "semanticSearch": "חיפוש מעורפל",
   "keywordsLimit": "מגבלת מילות מפתח",
   "exportAsImage": "ייצוא כתמונה",
   "proFeature": "תכונה זו דורשת תשלום (חברי מנוי אינם צריכים לשלם בנפרד), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">תשלום חד פעמי ניתן לשימוש לכל החיים</a>",

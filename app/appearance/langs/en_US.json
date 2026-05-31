@@ -594,6 +594,7 @@
   "keyword": "Keyword",
   "searchMethod": "Search Method",
   "regex": "Regex",
+  "semanticSearch": "Fuzzy Search",
   "keywordsLimit": "Keywords Limit",
   "exportAsImage": "Export as image",
   "proFeature": "This feature requires payment (subscribing members do not need to pay separately), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">one-time payment can be used for lifetime</a>",

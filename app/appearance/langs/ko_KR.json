@@ -594,6 +594,7 @@
   "keyword": "키워드",
   "searchMethod": "검색 방법",
   "regex": "정규식",
+  "semanticSearch": "퍼지 검색",
   "keywordsLimit": "키워드 제한",
   "exportAsImage": "이미지로 내보내기",
   "proFeature": "이 기능은 결제가 필요합니다(구독 회원은 별도로 결제할 필요 없음). <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">일회성 결제로 평생 사용할 수 있습니다</a>",

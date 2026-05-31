@@ -594,6 +594,7 @@
   "keyword": "Kata kunci",
   "searchMethod": "Metode Pencarian",
   "regex": "Regex",
+  "semanticSearch": "Pencarian fuzzy",
   "keywordsLimit": "Batas Kata Kunci",
   "exportAsImage": "Ekspor sebagai gambar",
   "proFeature": "Fitur ini memerlukan pembayaran (anggota yang berlangganan tidak perlu membayar terpisah), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">pembayaran satu kali dapat digunakan seumur hidup</a>",

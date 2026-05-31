@@ -375,6 +375,17 @@ export const queryMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => voi
             cb();
         }
     }).element);
+    if (window.siyuan.config.ai.openAI.embeddingAPIKey) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconSparkles",
+            label: window.siyuan.languages.semanticSearch,
+            current: config.method === 4,
+            click() {
+                config.method = 4;
+                cb();
+            }
+        }).element);
+    }
 };
 
 const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,

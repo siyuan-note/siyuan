@@ -66,7 +66,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
             k: text,
             r: "",
             hasReplace: false,
-            method: searchData ? searchData.method : localData.method,
+            method: searchData ? searchData.method : (localData.method === 4 && !window.siyuan.config.ai.openAI.embeddingAPIKey ? 0 : localData.method),
             hPath: "",
             idPath: [],
             group: localData.group,
@@ -997,6 +997,10 @@ export const genQueryHTML = (method: number, id: string) => {
             methodTip = window.siyuan.languages.regex;
             methodIcon = "Regex";
             break;
+        case 4:
+            methodTip = window.siyuan.languages.semanticSearch;
+            methodIcon = "Sparkles";
+            break;
     }
     return `<span id="${id}" aria-label="${window.siyuan.languages.searchMethod} ${methodTip}" class="block__icon ariaLabel" data-position="9south">
     <svg><use xlink:href="#icon${methodIcon}"></use></svg>
@@ -1231,7 +1235,7 @@ export const getArticle = (options: {
 };
 
 export const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle, isAll: boolean) => {
-    if (config.method === 2) {
+    if (config.method === 2 || config.method === 4) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
     }
@@ -1342,7 +1346,8 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            fetchPost("/api/search/fullTextSearchBlock", {
+            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            fetchPost(endpoint, {
                 query: config.query,
                 method: config.method,
                 types: config.types,

@@ -41,13 +41,13 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     });
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
-    if (window.siyuan.config.appearance.hideToolbar) {
-        position.y += 5;
-    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",
         zoom: window.siyuan.storage[Constants.LOCAL_ZOOM],
-        position
+        position: {
+            x: position.x,
+            y: (window.siyuan.config.appearance.hideToolbar ? 5 * window.siyuan.storage[Constants.LOCAL_ZOOM] : 0) + position.y
+        },
     });
     /// #endif
     if (!window.siyuan.config.uiLayout || (window.siyuan.config.uiLayout && !window.siyuan.config.uiLayout.left)) {

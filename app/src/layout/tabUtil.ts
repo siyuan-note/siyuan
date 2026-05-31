@@ -64,7 +64,7 @@ export const setTabPosition = (onlyPadding = false) => {
             // header padding
             if (isWindowMode) {
                 if (headerRect.left === 0) {
-                    headerElement.style.paddingLeft = getComputedStyle(document.body).getPropertyValue("--b3-toolbar-left-mac");
+                    headerElement.style.paddingLeft = (parseInt(getComputedStyle(document.body).getPropertyValue("--b3-toolbar-left-mac")) - 5) + "px";
                 }
             } else {
                 if (headerRect.left > toolbarDragRect.left && headerRect.left === centerRect.left) {

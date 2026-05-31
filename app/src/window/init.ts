@@ -22,9 +22,6 @@ import {getAllEditor} from "../layout/getAll";
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
     const position = Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position;
-    if (window.siyuan.config.appearance.hideToolbar) {
-        position.y += 5;
-    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "setTrafficLightPosition",
         zoom: window.siyuan.storage[Constants.LOCAL_ZOOM],

@@ -99,8 +99,8 @@ body {
     }
   }
 
-  &.body--fullscreen:not(.body--win32):not(.body--window) .toolbar {
-    padding-left: 5px;
+  &.body--fullscreen {
+    --b3-toolbar-left-mac: 5px;
   }
 
   &.body--maximize,

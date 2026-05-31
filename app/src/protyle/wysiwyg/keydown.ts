@@ -106,7 +106,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        if (protyle.disabled || !protyle.selectElement.classList.contains("fn__none")) {
+        if (protyle.disabled ||
+            (!protyle.selectElement.classList.contains("fn__none") && protyle.selectElement.style.backgroundColor === "")) {
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -2036,7 +2037,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const nodeEditableElement = getContenteditableElement(nodeElement);
                 const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
-                if (position.start === 0 &&  range.startOffset === 0 && event.key === "ArrowLeft" && !isIncludesHotKey("⌥⇧←")) {
+                if (position.start === 0 && range.startOffset === 0 && event.key === "ArrowLeft" && !isIncludesHotKey("⌥⇧←")) {
                     event.preventDefault();
                     event.stopPropagation();
                     return;

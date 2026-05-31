@@ -594,6 +594,7 @@
   "keyword": "الكلمة المفتاحية",
   "searchMethod": "طريقة البحث",
   "regex": "التعبير النمطي",
+  "semanticSearch": "بحث ضبابي",
   "keywordsLimit": "حد عدد الكلمات المفتاحية",
   "exportAsImage": "تصدير كصورة",
   "proFeature": "‫هذه الميزة تتطلب الدفع (الأعضاء المشتركين لا يحتاجون إلى الدفع بشكل منفصل)، <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">دفعة واحدة للاستخدام مدى الحياة\n</a>‬",

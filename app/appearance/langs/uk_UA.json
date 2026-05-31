@@ -594,6 +594,7 @@
   "keyword": "Ключове слово",
   "searchMethod": "Метод пошуку",
   "regex": "Регулярний вираз",
+  "semanticSearch": "Нечіткий пошук",
   "keywordsLimit": "Ліміт ключових слів",
   "exportAsImage": "Експортувати як зображення",
   "proFeature": "Ця функція потребує оплати (для підписників окремо платити не потрібно), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">одноразова оплата дає довічне використання</a>",

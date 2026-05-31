@@ -594,6 +594,7 @@
   "keyword": "Palabra clave",
   "searchMethod": "método de búsqueda",
   "regex": "Regex",
+  "semanticSearch": "Búsqueda difusa",
   "keywordsLimit": "Límite de palabras clave",
   "exportAsImage": "Exportar como imagen",
   "proFeature": "Esta característica requiere pago (los miembros suscritos no necesitan pagar por separado), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">el pago único se puede usar de por vida</a>",

@@ -594,6 +594,7 @@
   "keyword": "キーワード",
   "searchMethod": "検索方法",
   "regex": "正規表現",
+  "semanticSearch": "ファジー検索",
   "keywordsLimit": "キーワード制限",
   "exportAsImage": "画像としてエクスポート",
   "proFeature": "この機能を利用するには支払いが必要です (サブスクリプションメンバーは別途支払う必要はありません)、<a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">一度の支払いで生涯使用できます</a>",

@@ -594,6 +594,7 @@
   "keyword": "Anahtar kelime",
   "searchMethod": "Arama yöntemi",
   "regex": "Düzenli ifade",
+  "semanticSearch": "Bulanık arama",
   "keywordsLimit": "Anahtar kelime sınırı",
   "exportAsImage": "Görsel olarak dışa aktar",
   "proFeature": "Bu özellik ücretlidir (aboneler ayrıca ödeme yapmaz). <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">Tek seferlik ödeme ömür boyu kullanım sağlar</a>",

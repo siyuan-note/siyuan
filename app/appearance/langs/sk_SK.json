@@ -594,6 +594,7 @@
   "keyword": "Kľúčové slovo",
   "searchMethod": "Metóda vyhľadávania",
   "regex": "Regex",
+  "semanticSearch": "Fuzzy vyhľadávanie",
   "keywordsLimit": "Limit kľúčových slov",
   "exportAsImage": "Exportovať ako obrázok",
   "proFeature": "Táto funkcia vyžaduje platbu (členovia s predplatným neplatia zvlášť), <a href=\"https://b3log.org/siyuan/en/pricing.html\" target=\"_blank\">jednorazová platba pre doživotné používanie</a>",

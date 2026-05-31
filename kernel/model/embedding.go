@@ -17,15 +17,20 @@
 package model
 
 import (
-	"encoding/json"
+	"container/heap"
+	"encoding/binary"
+	"fmt"
 	"math"
 	"os"
-	"sort"
-	"strconv"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
+	"github.com/88250/gulu"
+	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -33,15 +38,20 @@ import (
 )
 
 const (
-	embeddingBatchSize    = 10
-	embeddingFetchSize    = 30
-	embeddingMinTextLen   = 7
-	embeddingMaxContentLen = 12000
+	embeddingBatchSize      = 10
+	embeddingMaxConcurrency = 8
+	embeddingMinTextLen     = 7
+	embeddingMaxContentLen  = 12000
+	embeddingVectorDim      = 4 // float32 = 4 bytes
 )
 
 var (
 	embeddingDirtyCh = make(chan string, 1024)
 	embeddingTableOk bool
+
+	embeddingIgnoreLoaded  bool
+	embeddingIgnoreMatcher *ignore.GitIgnore
+	embeddingIgnoreLock    sync.Mutex
 )
 
 func checkEmbeddingTable() bool {
@@ -79,68 +89,96 @@ func StartEmbeddingIndexer() {
 	}
 }
 
+type embeddingJob struct {
+	texts  []string
+	blocks []map[string]any
+}
+
 func processPendingEmbeddings() {
 	if !isEmbeddingEnabled() {
 		return
 	}
 
-	for {
-		results, err := sql.QueryNoLimit(stmtPendingBlocks)
-		if err != nil {
-			logging.LogErrorf("query pending embedding blocks failed: %s", err)
-			return
-		}
+	workCh := make(chan embeddingJob, embeddingMaxConcurrency*2)
 
-		if 1 > len(results) {
-			return
-		}
-
-		var batches [][]map[string]any
-		var batch []map[string]any
-		for _, row := range results {
-			id, _ := row["id"].(string)
-			rootID, _ := row["root_id"].(string)
-			box, _ := row["box"].(string)
-			path, _ := row["path"].(string)
-			updated, _ := row["updated"].(string)
-			content, _ := row["content"].(string)
-			if len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
-				sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES ('" +
-					id + "','" + rootID + "','" + box + "','" + path + "','','" + Conf.AI.OpenAI.EmbeddingModel + "',0,'" + updated + "')")
-				continue
+	var workersWg sync.WaitGroup
+	for i := 0; i < embeddingMaxConcurrency; i++ {
+		workersWg.Add(1)
+		go func() {
+			defer workersWg.Done()
+			for job := range workCh {
+				doEmbedAndStore(job.texts, job.blocks)
 			}
-			row["plain_text"] = content
-			batch = append(batch, row)
-
-			if len(batch) >= embeddingBatchSize {
-				batches = append(batches, batch)
-				batch = nil
-			}
-		}
-		if len(batch) > 0 {
-			batches = append(batches, batch)
-		}
-
-		var wg sync.WaitGroup
-		for _, bt := range batches {
-			wg.Add(1)
-			go func(blocks []map[string]any) {
-				defer wg.Done()
-				var texts []string
-				for _, row := range blocks {
-					texts = append(texts, row["plain_text"].(string))
-				}
-				doEmbedAndStore(texts, blocks)
-			}(bt)
-		}
-		wg.Wait()
+		}()
 	}
+
+	go func() {
+		defer close(workCh)
+		for {
+			results, err := sql.QueryNoLimit(stmtPendingBlocks)
+			if err != nil {
+				logging.LogErrorf("query pending embedding blocks failed: %s", err)
+				return
+			}
+
+			if 1 > len(results) {
+				return
+			}
+
+			var texts []string
+			var blocks []map[string]any
+			for _, row := range results {
+				id, _ := row["id"].(string)
+				rootID, _ := row["root_id"].(string)
+				box, _ := row["box"].(string)
+				path, _ := row["path"].(string)
+				updated, _ := row["updated"].(string)
+				content, _ := row["content"].(string)
+				matcher := getEmbeddingIgnoreMatcher()
+				if (nil != matcher && matcher.MatchesPath("/"+box+path)) ||
+					len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
+					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+						id, rootID, box, path, []byte{}, Conf.AI.OpenAI.EmbeddingModel, 0, updated)
+					continue
+				}
+				row["plain_text"] = content
+				texts = append(texts, content)
+				blocks = append(blocks, row)
+
+				if len(texts) >= embeddingBatchSize {
+					workCh <- embeddingJob{texts: texts, blocks: blocks}
+					texts = nil
+					blocks = nil
+				}
+			}
+			if len(texts) > 0 {
+				workCh <- embeddingJob{texts: texts, blocks: blocks}
+			}
+		}
+	}()
+
+	workersWg.Wait()
 }
 
 const stmtPendingBlocks = "SELECT b.id, b.root_id, b.box, b.path, b.content, b.updated FROM blocks b " +
 	"LEFT JOIN block_embeddings e ON b.id = e.id " +
 	"WHERE e.id IS NULL " +
-	"ORDER BY b.updated DESC LIMIT 30"
+	"ORDER BY b.updated DESC LIMIT 100"
+
+func encodeVector(vec []float32) []byte {
+	buf := make([]byte, len(vec)*embeddingVectorDim)
+	for i, v := range vec {
+		binary.LittleEndian.PutUint32(buf[i*embeddingVectorDim:], math.Float32bits(v))
+	}
+	return buf
+}
+
+func decodeVector(b []byte) []float32 {
+	if len(b) == 0 {
+		return nil
+	}
+	return unsafe.Slice((*float32)(unsafe.Pointer(&b[0])), len(b)/embeddingVectorDim)
+}
 
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
 	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), Conf.AI.OpenAI.EmbeddingModel, Conf.AI.OpenAI.APITimeout)
@@ -156,24 +194,46 @@ func doEmbedAndStore(texts []string, blocks []map[string]any) {
 		updated, _ := row["updated"].(string)
 		plainText, _ := row["plain_text"].(string)
 
-		embeddingJSON, err := json.Marshal(vectors[i])
-		if err != nil {
-			logging.LogErrorf("marshal embedding failed for block [%s]: %s", id, err)
-			continue
-		}
+		buf := encodeVector(vectors[i])
 
-		escaped := func(s string) string { return strings.ReplaceAll(s, "'", "''") }
-
-		stmt := "INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES ('" +
-			escaped(id) + "', '" + escaped(rootID) + "', '" + escaped(box) + "', '" + escaped(path) + "', '" +
-			escaped(string(embeddingJSON)) + "', '" + escaped(Conf.AI.OpenAI.EmbeddingModel) + "', " +
-			strconv.Itoa(len(plainText)) + ", '" + escaped(updated) + "')"
-
-		err = sql.Exec(stmt)
+		err = sql.Exec("INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+			id, rootID, box, path, buf, Conf.AI.OpenAI.EmbeddingModel, len(plainText), updated)
 		if err != nil {
 			logging.LogErrorf("store embedding failed for block [%s]: %s", id, err)
 		}
 	}
+}
+
+func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
+	if embeddingIgnoreLoaded {
+		return embeddingIgnoreMatcher
+	}
+
+	embeddingIgnoreLock.Lock()
+	defer embeddingIgnoreLock.Unlock()
+
+	if embeddingIgnoreLoaded {
+		return embeddingIgnoreMatcher
+	}
+
+	embeddingIgnoreLoaded = true
+	embeddingIgnorePath := filepath.Join(util.DataDir, ".siyuan", "embeddingignore")
+	if !gulu.File.IsExist(embeddingIgnorePath) {
+		return nil
+	}
+
+	data, err := os.ReadFile(embeddingIgnorePath)
+	if err != nil {
+		logging.LogErrorf("read embeddingignore [%s] failed: %s", embeddingIgnorePath, err)
+		return nil
+	}
+
+	dataStr := string(data)
+	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
+	lines := strings.Split(dataStr, "\n")
+
+	embeddingIgnoreMatcher = ignore.CompileIgnoreLines(lines...)
+	return embeddingIgnoreMatcher
 }
 
 func cosineSimilarity(a, b []float32) float32 {
@@ -195,6 +255,27 @@ func cosineSimilarity(a, b []float32) float32 {
 	return float32(dotProduct / (math.Sqrt(normA) * math.Sqrt(normB)))
 }
 
+type scoredBlock struct {
+	id    string
+	score float32
+}
+
+type scoredHeap []scoredBlock
+
+func (h scoredHeap) Len() int           { return len(h) }
+func (h scoredHeap) Less(i, j int) bool { return h[i].score < h[j].score } // min-heap
+func (h scoredHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h *scoredHeap) Push(x any) {
+	*h = append(*h, x.(scoredBlock))
+}
+func (h *scoredHeap) Pop() any {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[:n-1]
+	return x
+}
+
 func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, page, pageSize int) (blocks []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
 	blocks = []*Block{}
 
@@ -209,56 +290,108 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	}
 	queryVec := vectors[0]
 
-	results, err := sql.QueryNoLimit("SELECT id, embedding FROM block_embeddings")
-	if err != nil {
-		logging.LogErrorf("query embeddings for search failed: %s", err)
+	numWorkers := runtime.GOMAXPROCS(0)
+	if numWorkers < 1 {
+		numWorkers = 1
+	}
+
+	topK := page * pageSize
+	h := &scoredHeap{}
+	heap.Init(h)
+
+	scanSize := 4096
+	cursor := int64(0)
+
+	for {
+		q := fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
+		rows, qErr := sql.QueryNoLimit(q)
+		if qErr != nil {
+			logging.LogErrorf("query embeddings for search failed: %s", qErr)
+			break
+		}
+		if 1 > len(rows) {
+			break
+		}
+
+		rawCursor, _ := rows[len(rows)-1]["rowid"].(int64)
+		if rawCursor > cursor {
+			cursor = rawCursor
+		}
+
+		chunkSize := (len(rows) + numWorkers - 1) / numWorkers
+		scoredCh := make(chan []scoredBlock, numWorkers)
+		var wg sync.WaitGroup
+
+		for w := 0; w < numWorkers; w++ {
+			start := w * chunkSize
+			end := start + chunkSize
+			if end > len(rows) {
+				end = len(rows)
+			}
+			if start >= end {
+				continue
+			}
+
+			wg.Add(1)
+			go func(chunk []map[string]any) {
+				defer wg.Done()
+				local := make([]scoredBlock, 0, len(chunk))
+				for _, row := range chunk {
+					embRaw := row["embedding"].([]byte)
+					if len(embRaw) == 0 {
+						continue
+					}
+					buf := make([]byte, len(embRaw))
+					copy(buf, embRaw)
+					vec := decodeVector(buf)
+					score := cosineSimilarity(queryVec, vec)
+					id, _ := row["id"].(string)
+					local = append(local, scoredBlock{id: id, score: score})
+				}
+				scoredCh <- local
+			}(rows[start:end])
+		}
+
+		wg.Wait()
+		close(scoredCh)
+
+		for ch := range scoredCh {
+			for _, s := range ch {
+				if h.Len() < topK {
+					heap.Push(h, s)
+				} else if s.score > (*h)[0].score {
+					heap.Pop(h)
+					heap.Push(h, s)
+				}
+			}
+		}
+	}
+
+	matchedBlockCount = h.Len()
+	if 1 > matchedBlockCount {
+		pageCount = 0
 		return
 	}
 
-	type scoredBlock struct {
-		id    string
-		score float32
+	result := make([]scoredBlock, h.Len())
+	for i := len(result) - 1; i >= 0; i-- {
+		result[i] = heap.Pop(h).(scoredBlock)
 	}
-	var scored []scoredBlock
-
-	for _, row := range results {
-		embStr, _ := row["embedding"].([]byte)
-		if embStr == nil {
-			if s, ok := row["embedding"].(string); ok {
-				embStr = []byte(s)
-			} else {
-				continue
-			}
-		}
-		var vec []float32
-		if err := json.Unmarshal(embStr, &vec); err != nil {
-			continue
-		}
-		score := cosineSimilarity(queryVec, vec)
-		id, _ := row["id"].(string)
-		scored = append(scored, scoredBlock{id: id, score: score})
-	}
-
-	sort.Slice(scored, func(i, j int) bool {
-		return scored[i].score > scored[j].score
-	})
-
-	matchedBlockCount = len(scored)
 
 	offset := (page - 1) * pageSize
-	if offset >= len(scored) {
+	if offset >= len(result) {
 		pageCount = (matchedBlockCount + pageSize - 1) / pageSize
 		return
 	}
 
 	end := offset + pageSize
-	if end > len(scored) {
-		end = len(scored)
+	if end > len(result) {
+		end = len(result)
 	}
 
 	var topIDs []string
 	for i := offset; i < end; i++ {
-		topIDs = append(topIDs, scored[i].id)
+		topIDs = append(topIDs, result[i].id)
 	}
 
 	sqlBlocks := sql.GetBlocks(topIDs)

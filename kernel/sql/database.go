@@ -1438,7 +1438,7 @@ func query(query string, args ...any) (*sql.Rows, error) {
 	return db.Query(query, args...)
 }
 
-func Exec(stmt string) error {
+func Exec(stmt string, args ...any) error {
 	stmt = strings.TrimSpace(stmt)
 	if "" == stmt {
 		return errors.New("statement is empty")
@@ -1447,7 +1447,7 @@ func Exec(stmt string) error {
 	if nil == db {
 		return errors.New("database is nil")
 	}
-	_, err := db.Exec(stmt)
+	_, err := db.Exec(stmt, args...)
 	return err
 }
 

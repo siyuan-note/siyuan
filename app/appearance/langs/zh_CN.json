@@ -594,6 +594,7 @@
   "keyword": "关键字",
   "searchMethod": "搜索方式",
   "regex": "正则表达式",
+  "semanticSearch": "模糊搜索",
   "keywordsLimit": "关键字数量限制",
   "exportAsImage": "导出为图片",
   "proFeature": "该特性需要付费（订阅会员不用再单独付费），<a href=\"https://b3log.org/siyuan/pricing.html\" target=\"_blank\">一次性付费后终身可用</a>",

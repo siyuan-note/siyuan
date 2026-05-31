@@ -166,6 +166,18 @@ declare namespace Config {
          * API version number
          */
         apiVersion: string;
+        /**
+         * Embedding API key (empty if not configured)
+         */
+        embeddingAPIKey: string;
+        /**
+         * Embedding API base URL
+         */
+        embeddingBaseURL: string;
+        /**
+         * Embedding model name
+         */
+        embeddingModel: string;
     }
 
     /**
@@ -2196,6 +2208,7 @@ declare namespace Config {
          * - `1`: Query syntax
          * - `2`: SQL
          * - `3`: Regular expression
+         * - `4`: Fuzzy search
          * @default 0
          */
         method?: number;

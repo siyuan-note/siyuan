@@ -1357,8 +1357,11 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 orderBy: config.sort,
                 page: config.page || 1,
             }, (response) => {
-                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && window.siyuan.reqIds["/api/search/fullTextSearchBlock"] &&
-                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] > window.siyuan.reqIds["/api/search/fullTextSearchBlock"]) {
+                const searchReqId = config.method === 4
+                    ? window.siyuan.reqIds["/api/search/semanticSearchBlock"]
+                    : window.siyuan.reqIds["/api/search/fullTextSearchBlock"];
+                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && searchReqId &&
+                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] > searchReqId) {
                     return;
                 }
                 if (!config.page) {

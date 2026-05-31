@@ -22,11 +22,15 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 	"time"
 	"unsafe"
 
+	"github.com/88250/gulu"
+	ignore "github.com/sabhiram/go-gitignore"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -35,7 +39,6 @@ import (
 
 const (
 	embeddingBatchSize      = 10
-	embeddingFetchSize      = 100
 	embeddingMaxConcurrency = 8
 	embeddingMinTextLen     = 7
 	embeddingMaxContentLen  = 12000
@@ -45,6 +48,10 @@ const (
 var (
 	embeddingDirtyCh = make(chan string, 1024)
 	embeddingTableOk bool
+
+	embeddingIgnoreLoaded  bool
+	embeddingIgnoreMatcher *ignore.GitIgnore
+	embeddingIgnoreLock    sync.Mutex
 )
 
 func checkEmbeddingTable() bool {
@@ -127,7 +134,9 @@ func processPendingEmbeddings() {
 				path, _ := row["path"].(string)
 				updated, _ := row["updated"].(string)
 				content, _ := row["content"].(string)
-				if len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
+				matcher := getEmbeddingIgnoreMatcher()
+				if (nil != matcher && matcher.MatchesPath("/"+box+path)) ||
+					len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
 					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 						id, rootID, box, path, []byte{}, Conf.AI.OpenAI.EmbeddingModel, 0, updated)
 					continue
@@ -193,6 +202,38 @@ func doEmbedAndStore(texts []string, blocks []map[string]any) {
 			logging.LogErrorf("store embedding failed for block [%s]: %s", id, err)
 		}
 	}
+}
+
+func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
+	if embeddingIgnoreLoaded {
+		return embeddingIgnoreMatcher
+	}
+
+	embeddingIgnoreLock.Lock()
+	defer embeddingIgnoreLock.Unlock()
+
+	if embeddingIgnoreLoaded {
+		return embeddingIgnoreMatcher
+	}
+
+	embeddingIgnoreLoaded = true
+	embeddingIgnorePath := filepath.Join(util.DataDir, ".siyuan", "embeddingignore")
+	if !gulu.File.IsExist(embeddingIgnorePath) {
+		return nil
+	}
+
+	data, err := os.ReadFile(embeddingIgnorePath)
+	if err != nil {
+		logging.LogErrorf("read embeddingignore [%s] failed: %s", embeddingIgnorePath, err)
+		return nil
+	}
+
+	dataStr := string(data)
+	dataStr = strings.ReplaceAll(dataStr, "\r\n", "\n")
+	lines := strings.Split(dataStr, "\n")
+
+	embeddingIgnoreMatcher = ignore.CompileIgnoreLines(lines...)
+	return embeddingIgnoreMatcher
 }
 
 func cosineSimilarity(a, b []float32) float32 {

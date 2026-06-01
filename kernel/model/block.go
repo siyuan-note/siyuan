@@ -211,9 +211,17 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 			parent = parentBlock.ID
 			if nil != parentBlock.Previous {
 				previous = parentBlock.Previous.ID
+			} else {
+				if nil != current.Previous {
+					previous = current.Previous.ID
+				}
 			}
 			if nil != parentBlock.Next {
 				next = parentBlock.Next.ID
+			} else {
+				if nil != current.Next {
+					next = current.Next.ID
+				}
 			}
 		}
 		return

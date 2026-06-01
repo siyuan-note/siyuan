@@ -309,6 +309,27 @@ func setBlockReminder(c *gin.Context) {
 	}
 }
 
+func setCloudReminder(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	timed := arg["timed"].(string) // yyyyMMddHHmmss
+	content := arg["content"].(string)
+	err := model.SetCloudReminder(id, content, timed)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 7000}
+		return
+	}
+}
+
 func getUnfoldedParentID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

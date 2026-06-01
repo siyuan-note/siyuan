@@ -102,6 +102,7 @@ var notebookRenameCmd = &cobra.Command{
 			return err
 		}
 		model.AppendPushReloadFiletreeEntry()
+		fmt.Println(id)
 		return nil
 	},
 }

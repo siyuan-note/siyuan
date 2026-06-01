@@ -130,10 +130,6 @@
     align-content: center;
     z-index: 3; // 需大于 database table view
     align-items: center;
-
-    &--top {
-      top: 48px;
-    }
   }
 
   &__code {

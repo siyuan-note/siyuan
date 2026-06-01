@@ -100,7 +100,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
 };
 
 const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig,
-                         clear = false) => {
+                      clear = false) => {
     if (config.hasReplace !== newConfig.hasReplace) {
         if (newConfig.hasReplace) {
             element.querySelector('[data-type="toggle-replace"]').classList.add("toolbar__icon--active");
@@ -266,8 +266,9 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
         if (rmCurrentCriteria) {
             element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         }
-        const loadingElement = element.querySelector(".fn__loading--top");
+        const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
         loadingElement.classList.remove("fn__none");
+        loadingElement.style.top = element.querySelector(".b3-list--background").getBoundingClientRect().top + "px";
         const previousElement = element.querySelector('[data-type="previous"]');
         const nextElement = element.querySelector('[data-type="next"]');
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
@@ -823,7 +824,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
             <span class="fn__flex-1"></span>
          </div>
     </div>
-     <div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>
+     <div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>
 </div>`,
         bindEvent(element) {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
@@ -895,7 +896,7 @@ const getUnRefListMobile = (element: Element, page = 1) => {
     fetchPost("/api/search/listInvalidBlockRefs", {
         page,
     }, (response) => {
-        element.parentElement.querySelector(".fn__loading--top").classList.add("fn__none");
+        element.parentElement.querySelector(".fn__loading").classList.add("fn__none");
         const nextElement = element.querySelector('[data-type="unRefNext"]');
         if (page < response.data.pageCount) {
             nextElement.removeAttribute("disabled");

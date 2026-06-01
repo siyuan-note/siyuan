@@ -231,7 +231,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
-<div class="fn__loading fn__loading--top"><img width="120px" src="/stage/loading-pure.svg"></div>`;
+<div class="fn__loading"><img width="120px" src="/stage/loading-pure.svg"></div>`;
 
     const criteriaData: Config.IUILayoutTabSearchConfig[] = [];
     initCriteriaMenu(element.querySelector("#criteria"), criteriaData, config);
@@ -1313,11 +1313,13 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         if (rmCurrentCriteria) {
             element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         }
-        const loadingElement = element.querySelector(".fn__loading--top");
+        const listElement =  element.querySelector("#searchList") as HTMLElement;
+        const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
         loadingElement.classList.remove("fn__none");
+        loadingElement.style.top = listElement.offsetTop + "px";
         const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
         config.query = searchInputElement.value;
-        element.querySelector("#searchList").scrollTo(0, 0);
+        listElement.scrollTo(0, 0);
         const previousElement = element.querySelector('[data-type="previous"]');
         const nextElement = element.querySelector('[data-type="next"]');
         edit.protyle?.app.plugins.forEach(item => {

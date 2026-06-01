@@ -17,7 +17,9 @@ export const openSearchUnRef = (element: HTMLElement, editor: Protyle) => {
     if (element.querySelector("#searchUnRefResult").innerHTML) {
         return;
     }
-    element.parentElement.querySelector(".fn__loading--top").classList.remove("fn__none");
+    const loadingElement =  element.parentElement.querySelector(".fn__loading") as HTMLElement;
+    loadingElement.classList.remove("fn__none");
+    loadingElement.style.top = "42px";
     if (element.querySelector("#searchUnRefList").innerHTML !== "") {
         return;
     }
@@ -95,7 +97,7 @@ export const getUnRefList = (element: Element, edit: Protyle, page = 1) => {
     fetchPost("/api/search/listInvalidBlockRefs", {
         page,
     }, (response) => {
-        element.parentElement.querySelector(".fn__loading--top").classList.add("fn__none");
+        element.parentElement.querySelector(".fn__loading").classList.add("fn__none");
         const nextElement = element.querySelector('[data-type="unRefNext"]');
         if (page < response.data.pageCount) {
             nextElement.removeAttribute("disabled");
@@ -184,7 +186,9 @@ export const unRefMoreMenu = (target: Element, element: Element, edit: Protyle) 
         icon: "iconRefresh",
         label: window.siyuan.languages.refresh,
         click() {
-            element.parentElement.querySelector(".fn__loading--top").classList.remove("fn__none");
+            const loadingElement =  element.parentElement.querySelector(".fn__loading") as HTMLElement;
+            loadingElement.classList.remove("fn__none");
+            loadingElement.style.top = "42px";
             getUnRefList(element, edit);
         },
     });

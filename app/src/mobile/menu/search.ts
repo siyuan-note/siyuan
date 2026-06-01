@@ -99,7 +99,8 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     });
 };
 
-const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig) => {
+const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig,
+                         clear = false) => {
     if (config.hasReplace !== newConfig.hasReplace) {
         if (newConfig.hasReplace) {
             element.querySelector('[data-type="toggle-replace"]').classList.add("toolbar__icon--active");
@@ -146,7 +147,9 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     } else {
         searchIncludeElement.setAttribute("disabled", "disabled");
     }
-    (document.querySelector("#toolbarSearch") as HTMLInputElement).value = newConfig.k;
+    if (newConfig.k || clear) {
+        (document.querySelector("#toolbarSearch") as HTMLInputElement).value = newConfig.k;
+    }
     (element.querySelector("#toolbarReplace") as HTMLInputElement).value = newConfig.r;
     config = JSON.parse(JSON.stringify(newConfig));
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
@@ -420,7 +423,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         types: getDefaultType(),
                         subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config);
+                    }, config, true);
                 }
                 if (target.parentElement.parentElement.childElementCount === 1) {
                     target.parentElement.parentElement.classList.add("fn__none");
@@ -567,7 +570,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         types: getDefaultType(),
                         subTypes: getDefaultSubType(),
                         replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
-                    }, config);
+                    }, config, true);
                     element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
                 });
                 window.siyuan.menus.menu.fullscreen();

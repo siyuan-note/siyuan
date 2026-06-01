@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"text/tabwriter"
 
@@ -181,14 +182,18 @@ var blockInfoCmd = &cobra.Command{
 // ─── Write ─────────────────────────────────────────────────────────────────────
 
 var blockInsertCmd = &cobra.Command{
-	Use:   "insert --parent <id> --data <markdown>",
+	Use:   "insert --parent <id> [--data <markdown> | --file <path>]",
 	Short: "Insert block",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parentID, _ := cmd.Flags().GetString("parent")
-		data, _ := cmd.Flags().GetString("data")
 		previousID, _ := cmd.Flags().GetString("previous")
-		if parentID == "" || data == "" {
-			return fmt.Errorf("--parent and --data are required")
+		if parentID == "" {
+			return fmt.Errorf("--parent is required")
+		}
+
+		data, err := resolveData(cmd)
+		if err != nil {
+			return err
 		}
 
 		dom := markdownToBlockDOM(data)
@@ -209,13 +214,17 @@ var blockInsertCmd = &cobra.Command{
 }
 
 var blockAppendCmd = &cobra.Command{
-	Use:   "append --parent <id> --data <markdown>",
+	Use:   "append --parent <id> [--data <markdown> | --file <path>]",
 	Short: "Append block",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parentID, _ := cmd.Flags().GetString("parent")
-		data, _ := cmd.Flags().GetString("data")
-		if parentID == "" || data == "" {
-			return fmt.Errorf("--parent and --data are required")
+		if parentID == "" {
+			return fmt.Errorf("--parent is required")
+		}
+
+		data, err := resolveData(cmd)
+		if err != nil {
+			return err
 		}
 
 		dom := markdownToBlockDOM(data)
@@ -235,13 +244,17 @@ var blockAppendCmd = &cobra.Command{
 }
 
 var blockPrependCmd = &cobra.Command{
-	Use:   "prepend --parent <id> --data <markdown>",
+	Use:   "prepend --parent <id> [--data <markdown> | --file <path>]",
 	Short: "Prepend block",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		parentID, _ := cmd.Flags().GetString("parent")
-		data, _ := cmd.Flags().GetString("data")
-		if parentID == "" || data == "" {
-			return fmt.Errorf("--parent and --data are required")
+		if parentID == "" {
+			return fmt.Errorf("--parent is required")
+		}
+
+		data, err := resolveData(cmd)
+		if err != nil {
+			return err
 		}
 
 		dom := markdownToBlockDOM(data)
@@ -261,13 +274,17 @@ var blockPrependCmd = &cobra.Command{
 }
 
 var blockUpdateCmd = &cobra.Command{
-	Use:   "update --id <id> --data <markdown>",
+	Use:   "update --id <id> [--data <markdown> | --file <path>]",
 	Short: "Update block",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		id, _ := cmd.Flags().GetString("id")
-		data, _ := cmd.Flags().GetString("data")
-		if id == "" || data == "" {
-			return fmt.Errorf("--id and --data are required")
+		if id == "" {
+			return fmt.Errorf("--id is required")
+		}
+
+		data, err := resolveData(cmd)
+		if err != nil {
+			return err
 		}
 
 		dom := markdownToBlockDOM(data)
@@ -336,6 +353,35 @@ var blockMoveCmd = &cobra.Command{
 	},
 }
 
+func resolveData(cmd *cobra.Command) (string, error) {
+	data, _ := cmd.Flags().GetString("data")
+	if data != "" {
+		return data, nil
+	}
+
+	filePath, _ := cmd.Flags().GetString("file")
+	if filePath == "-" {
+		stdinData, err := io.ReadAll(os.Stdin)
+		if err != nil {
+			return "", err
+		}
+		return string(stdinData), nil
+	}
+	if filePath != "" {
+		fileData, err := os.ReadFile(filePath)
+		if err != nil {
+			return "", err
+		}
+		return string(fileData), nil
+	}
+
+	stdinData, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		return "", err
+	}
+	return string(stdinData), nil
+}
+
 func markdownToBlockDOM(md string) string {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
@@ -357,16 +403,20 @@ func init() {
 
 	blockInsertCmd.Flags().String("parent", "", "parent block ID")
 	blockInsertCmd.Flags().String("data", "", "markdown content")
+	blockInsertCmd.Flags().String("file", "", "read content from file path (- for stdin)")
 	blockInsertCmd.Flags().String("previous", "", "previous sibling block ID")
 
 	blockAppendCmd.Flags().String("parent", "", "parent block ID")
 	blockAppendCmd.Flags().String("data", "", "markdown content")
+	blockAppendCmd.Flags().String("file", "", "read content from file path (- for stdin)")
 
 	blockPrependCmd.Flags().String("parent", "", "parent block ID")
 	blockPrependCmd.Flags().String("data", "", "markdown content")
+	blockPrependCmd.Flags().String("file", "", "read content from file path (- for stdin)")
 
 	blockUpdateCmd.Flags().String("id", "", "block ID")
 	blockUpdateCmd.Flags().String("data", "", "markdown content")
+	blockUpdateCmd.Flags().String("file", "", "read content from file path (- for stdin)")
 
 	blockDeleteCmd.Flags().String("id", "", "block ID")
 

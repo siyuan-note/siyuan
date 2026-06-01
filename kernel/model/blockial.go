@@ -35,7 +35,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SetBlockReminder(id, customContent, timed string) (err error) {
+func SetCloudReminder(id, content, timed string) (err error) {
+	if !IsSubscriber() {
+		if "ios" == util.Container {
+			return errors.New(Conf.Language(122))
+		}
+		return errors.New(Conf.Language(29))
+	}
+
+	var timedMills int64
+	if "0" != timed {
+		t, e := dateparse.ParseIn(timed, time.Now().Location())
+		if nil != e {
+			return e
+		}
+		timedMills = t.UnixMilli()
+	}
+
+	content = strings.TrimSpace(content)
+	err = SetCloudBlockReminder(id, content, timedMills)
+	if err != nil {
+		return
+	}
+
+	if "0" == timed {
+		util.PushMsg(fmt.Sprintf(Conf.Language(109), content), 3000)
+	} else {
+		util.PushMsg(fmt.Sprintf(Conf.Language(101), time.UnixMilli(timedMills).Format("2006-01-02 15:04")), 5000)
+	}
+
+	IncSync()
+	return
+}
+
+func SetBlockReminder(id, timed string) (err error) {
 	if !IsSubscriber() {
 		if "ios" == util.Container {
 			return errors.New(Conf.Language(122))
@@ -69,15 +102,9 @@ func SetBlockReminder(id, customContent, timed string) (err error) {
 		node = treenode.FirstLeafBlock(node)
 	}
 
-	var content string
-	customContent = strings.TrimSpace(customContent)
-	if "" == customContent {
-		content = sql.NodeStaticContent(node, nil, false, false, false)
-		content = gulu.Str.SubStr(content, 128)
-		content = strings.ReplaceAll(content, editor.Zwsp, "")
-	} else {
-		content = customContent
-	}
+	content := sql.NodeStaticContent(node, nil, false, false, false)
+	content = gulu.Str.SubStr(content, 128)
+	content = strings.ReplaceAll(content, editor.Zwsp, "")
 	err = SetCloudBlockReminder(id, content, timedMills)
 	if err != nil {
 		return

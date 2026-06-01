@@ -300,7 +300,11 @@ func setBlockReminder(c *gin.Context) {
 
 	id := arg["id"].(string)
 	timed := arg["timed"].(string) // yyyyMMddHHmmss
-	err := model.SetBlockReminder(id, timed)
+	var content string
+	if nil != arg["content"] {
+		content = arg["content"].(string)
+	}
+	err := model.SetBlockReminder(id, content, timed)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

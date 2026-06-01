@@ -35,7 +35,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func SetBlockReminder(id string, timed string) (err error) {
+func SetBlockReminder(id, customContent, timed string) (err error) {
 	if !IsSubscriber() {
 		if "ios" == util.Container {
 			return errors.New(Conf.Language(122))
@@ -68,9 +68,16 @@ func SetBlockReminder(id string, timed string) (err error) {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
-	content := sql.NodeStaticContent(node, nil, false, false, false)
-	content = gulu.Str.SubStr(content, 128)
-	content = strings.ReplaceAll(content, editor.Zwsp, "")
+
+	var content string
+	customContent = strings.TrimSpace(customContent)
+	if "" == customContent {
+		content = sql.NodeStaticContent(node, nil, false, false, false)
+		content = gulu.Str.SubStr(content, 128)
+		content = strings.ReplaceAll(content, editor.Zwsp, "")
+	} else {
+		content = customContent
+	}
 	err = SetCloudBlockReminder(id, content, timedMills)
 	if err != nil {
 		return

@@ -1,4 +1,11 @@
 {
+  "agentChat": "AI Agent",
+  "agentNewSession": "Nieuwe sessie",
+  "agentInputPlaceholder": "Typ een bericht, Enter om te verzenden...",
+  "agentSend": "Verzenden",
+  "agentStop": "Stoppen",
+  "agentToolCall": "Tool aanroep",
+  "agentToolResult": "Tool resultaat",
   "switchToFloatingLayout": "Schakel naar zwevende indeling",
   "switchToFixedLayout": "Schakel naar vaste indeling",
   "hyperlink": "Hyperlink",

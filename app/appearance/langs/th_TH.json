@@ -1,4 +1,11 @@
 {
+  "agentChat": "AI Agent",
+  "agentNewSession": "เซสชันใหม่",
+  "agentInputPlaceholder": "พิมพ์ข้อความ กด Enter เพื่อส่ง...",
+  "agentSend": "ส่ง",
+  "agentStop": "หยุด",
+  "agentToolCall": "เรียกใช้เครื่องมือ",
+  "agentToolResult": "ผลลัพธ์เครื่องมือ",
   "switchToFloatingLayout": "สลับเป็นเค้าโครงแบบลอย",
   "switchToFixedLayout": "สลับเป็นเค้าโครงแบบคงที่",
   "hyperlink": "ไฮเปอร์ลิงก์",

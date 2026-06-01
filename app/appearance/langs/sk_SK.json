@@ -1,4 +1,11 @@
 {
+  "agentChat": "AI Agent",
+  "agentNewSession": "Nová relácia",
+  "agentInputPlaceholder": "Napíšte správu, Enter na odoslanie...",
+  "agentSend": "Odoslať",
+  "agentStop": "Zastaviť",
+  "agentToolCall": "Volanie nástroja",
+  "agentToolResult": "Výsledok nástroja",
   "switchToFloatingLayout": "Prepnúť na plávajúce rozloženie",
   "switchToFixedLayout": "Prepnúť na pevné rozloženie",
   "hyperlink": "Hypertextový odkaz",

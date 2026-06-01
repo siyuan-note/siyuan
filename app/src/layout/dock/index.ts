@@ -14,6 +14,7 @@ import {getDockByType, resizeTabs, setTabPosition} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
+import {AgentChat} from "../../ai/AgentChat";
 import {adjustDockPadding, resetFloatDockSize} from "./util";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {App} from "../../index";
@@ -22,7 +23,7 @@ import {Custom} from "./Custom";
 import {clearBeforeResizeTop, recordBeforeResizeTop} from "../../protyle/util/resize";
 import {Constants} from "../../constants";
 
-const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink"];
+const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 
 export class Dock {
     public elements: HTMLElement[];
@@ -586,6 +587,13 @@ export class Dock {
                         tab = new Tab({
                             callback: (tab: Tab) => {
                                 tab.addModel(new Inbox(this.app, tab));
+                            }
+                        });
+                        break;
+                    case "agentChat":
+                        tab = new Tab({
+                            callback: (tab: Tab) => {
+                                tab.addModel(new AgentChat(this.app, tab));
                             }
                         });
                         break;

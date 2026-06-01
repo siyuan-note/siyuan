@@ -721,6 +721,12 @@ export abstract class Constants {
             pin: true,
             data: [
                 [{
+                    type: "agentChat",
+                    size: {width: 340, height: 0},
+                    show: false,
+                    icon: "iconSparkles",
+                    title: "AI Agent",
+                }, {
                     type: "graph",
                     size: {width: 320, height: 0},
                     show: false,

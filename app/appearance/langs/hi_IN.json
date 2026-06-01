@@ -1,4 +1,11 @@
 {
+  "agentChat": "AI Agent",
+  "agentNewSession": "नया सत्र",
+  "agentInputPlaceholder": "संदेश लिखें, Enter भेजने के लिए...",
+  "agentSend": "भेजें",
+  "agentStop": "रोकें",
+  "agentToolCall": "टूल कॉल",
+  "agentToolResult": "टूल परिणाम",
   "switchToFloatingLayout": "फ़्लोटिंग लेआउट पर स्विच करें",
   "switchToFixedLayout": "स्थिर लेआउट पर स्विच करें",
   "hyperlink": "हाइपरलिंक",

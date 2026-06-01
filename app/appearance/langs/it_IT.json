@@ -1192,6 +1192,8 @@
   "refreshUser": "Informazioni utente aggiornate",
   "insertBottom": "Apri Sotto la Scheda",
   "insertRight": "Apri a Destra della Scheda",
+  "accountUnpaid": "Non pagato",
+  "accountSubscriptionExpired": "Abbonamento scaduto",
   "account1": "Diventa membro a pagamento",
   "account4": "Aggiorna a membro in abbonamento",
   "account2": "Sincronizzazione e backup dei dati crittografati end-to-end",

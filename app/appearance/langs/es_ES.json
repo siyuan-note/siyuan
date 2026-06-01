@@ -1192,6 +1192,8 @@
   "refreshUser": "Información del usuario actualizada",
   "insertBottom": "Abrir debajo",
   "insertRight": "Abrir a la derecha",
+  "accountUnpaid": "Sin pagar",
+  "accountSubscriptionExpired": "Suscripción caducada",
   "account1": "Conviértete en miembro pago",
   "account4": "Actualizar a miembro suscrito",
   "account2": "Copia de seguridad y sincronización de datos cifrados de extremo a extremo",

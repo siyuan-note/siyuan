@@ -1192,6 +1192,8 @@
   "refreshUser": "ユーザー情報が更新されました",
   "insertBottom": "下のタブで開く",
   "insertRight": "右のタブで開く",
+  "accountUnpaid": "未払い",
+  "accountSubscriptionExpired": "サブスクリプション期限切れ",
   "account1": "有料会員になる",
   "account4": "サブスクリプション会員にアップグレード",
   "account2": "エンドツーエンドで暗号化されたデータ同期とバックアップ",

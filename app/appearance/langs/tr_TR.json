@@ -1192,6 +1192,8 @@
   "refreshUser": "Kullanıcı bilgileri yenilendi",
   "insertBottom": "Sekmenin altına aç",
   "insertRight": "Sekmenin sağına aç",
+  "accountUnpaid": "Ödenmemiş",
+  "accountSubscriptionExpired": "Abonelik süresi doldu",
   "account1": "Ücretli üye ol",
   "account4": "Abonelik üyesine yükselt",
   "account2": "Uçtan uca şifreli veri senkronizasyonu ve yedekleme",

@@ -1192,6 +1192,8 @@
   "refreshUser": "Gebruiker vernieuwd",
   "insertBottom": "Onder tab",
   "insertRight": "Rechts van tab",
+  "accountUnpaid": "Niet betaald",
+  "accountSubscriptionExpired": "Abonnement verlopen",
   "account1": "Betaald lid",
   "account4": "Upgraden abonnee",
   "account2": "End-to-end sync en back-up",

@@ -1192,6 +1192,8 @@
   "refreshUser": "Benutzerinformationen aktualisiert",
   "insertBottom": "Unter dem Tab öffnen",
   "insertRight": "Rechts vom Tab öffnen",
+  "accountUnpaid": "Nicht bezahlt",
+  "accountSubscriptionExpired": "Abonnement abgelaufen",
   "account1": "Werden Sie ein zahlendes Mitglied",
   "account4": "Upgrade auf ein Abonnementmitglied",
   "account2": "Ende-zu-Ende-verschlüsselte Datensynchronisation und Backup",

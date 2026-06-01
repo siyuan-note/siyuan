@@ -1192,6 +1192,8 @@
   "refreshUser": "Les informations sur l'utilisateur ont été actualisées",
   "insertBottom": "Ouvrir en bas de l'onglet",
   "insertRight": "Ouvrir à droite de l'onglet",
+  "accountUnpaid": "Non payé",
+  "accountSubscriptionExpired": "Abonnement expiré",
   "account1": "Devenez membre payant",
   "account4": "Mise à niveau vers un Membre abonné",
   "account2": "Synchronisation et sauvegarde des données cryptées de bout en bout",

@@ -1192,6 +1192,8 @@
   "refreshUser": "사용자 정보가 새로 고쳐졌습니다",
   "insertBottom": "탭 아래 열기",
   "insertRight": "탭 오른쪽 열기",
+  "accountUnpaid": "미결제",
+  "accountSubscriptionExpired": "구독 만료됨",
   "account1": "유료 회원 되기",
   "account4": "구독 회원으로 업그레이드",
   "account2": "종단 간 암호화 데이터 동기화 및 백업",

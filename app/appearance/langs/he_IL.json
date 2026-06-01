@@ -1192,6 +1192,8 @@
   "refreshUser": "פרטי המשתמש רעננו",
   "insertBottom": "פתח מתחת לטאב",
   "insertRight": "פתח ימינה לטאב",
+  "accountUnpaid": "לא שולם",
+  "accountSubscriptionExpired": "המנוי פג",
   "account1": "הפוך לחבר בתשלום",
   "account4": "שדרג למנוי",
   "account2": "סנכרון וגיבוי נתונים מוצפן מקצה לקצה",

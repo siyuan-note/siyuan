@@ -1192,6 +1192,8 @@
   "refreshUser": "Informácie o používateľovi obnovené",
   "insertBottom": "Otvoriť pod kartou",
   "insertRight": "Otvoriť vpravo od karty",
+  "accountUnpaid": "Nezaplatené",
+  "accountSubscriptionExpired": "Predplatné vypršalo",
   "account1": "Stať sa platiacim členom",
   "account4": "Prejsť na predplatné",
   "account2": "End-to-end šifrovaná synchronizácia a záloha",

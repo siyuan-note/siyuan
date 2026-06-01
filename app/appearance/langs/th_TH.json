@@ -1192,6 +1192,8 @@
   "refreshUser": "รีเฟรชแล้ว",
   "insertBottom": "เปิดล่างแท็บ",
   "insertRight": "เปิดขวาแท็บ",
+  "accountUnpaid": "ยังไม่ได้ชำระ",
+  "accountSubscriptionExpired": "การสมัครสมาชิกหมดอายุ",
   "account1": "สมาชิกชำระ",
   "account4": "อัปเกรดสมัคร",
   "account2": "ซิงค์เข้ารหัส",

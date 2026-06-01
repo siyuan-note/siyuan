@@ -1192,6 +1192,8 @@
   "refreshUser": "Informacje o użytkowniku odświeżone",
   "insertBottom": "Otwórz poniżej zakładki",
   "insertRight": "Otwórz po prawej stronie zakładki",
+  "accountUnpaid": "Nieopłacone",
+  "accountSubscriptionExpired": "Subskrypcja wygasła",
   "account1": "Zostań płatnym członkiem",
   "account4": "Ulepsz do członka subskrypcyjnego",
   "account2": "Szyfrowane od końca do końca synchronizowanie danych i kopie zapasowe",

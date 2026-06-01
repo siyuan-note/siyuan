@@ -1192,6 +1192,8 @@
   "refreshUser": "Informasi pengguna disegarkan",
   "insertBottom": "Buka di Bawah Tab",
   "insertRight": "Buka di Sebelah Kanan Tab",
+  "accountUnpaid": "Belum dibayar",
+  "accountSubscriptionExpired": "Langganan kedaluwarsa",
   "account1": "Jadi anggota berbayar",
   "account4": "Tingkatkan ke anggota langganan",
   "account2": "Sinkronisasi dan pencadangan data terenkripsi ujung-ke-ujung",

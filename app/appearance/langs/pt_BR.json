@@ -1192,6 +1192,8 @@
   "refreshUser": "Informações do usuário atualizadas",
   "insertBottom": "Abrir Abaixo da Aba",
   "insertRight": "Abrir à Direita da Aba",
+  "accountUnpaid": "Não pago",
+  "accountSubscriptionExpired": "Assinatura expirada",
   "account1": "Torne-se um membro pago",
   "account4": "Atualizar para assinatura",
   "account2": "Sincronização e backup de dados criptografados de ponta a ponta",

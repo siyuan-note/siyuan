@@ -20,17 +20,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations for SiYuan notes.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.",
+	Description: "Block operations for SiYuan.\n- get: Get block info by ID. Requires: id.\n- get_kramdown: Get block kramdown by ID. Requires: id.\n- get_children: Get child blocks by parent ID. Requires: id.\n- tree_stat: Get tree statistics (word count, character count, block count, etc.) by document ID. Requires: id.\n- dom: Get block DOM by ID. Requires: id.\n- insert: Insert a new block. Requires: data, dataType (markdown or dom). Optional: parentID, nextID, previousID.\n- append: Append a child block. Requires: data, dataType, parentID.\n- prepend: Prepend a child block. Requires: data, dataType, parentID.\n- update: Update a block. Requires: id, data, dataType.\n- delete: Delete a block. Requires: id.\n- move: Move a block. Requires: id, parentID. Optional: previousID.\n- breadcrumb: Get block breadcrumb path. Requires: id.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "insert", "append", "prepend", "update", "delete", "move", "breadcrumb"}},
+			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "tree_stat", "dom", "insert", "append", "prepend", "update", "delete", "move", "breadcrumb"}},
 			"id":         {Type: "string", Description: "Block ID"},
 			"data":       {Type: "string", Description: "Content (markdown or dom)"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
@@ -56,6 +57,10 @@ func blockHandler(args map[string]interface{}) (CallToolResult, error) {
 		return blockGetKramdown(args)
 	case "get_children":
 		return blockGetChildren(args)
+	case "tree_stat":
+		return blockTreeStat(args)
+	case "dom":
+		return blockDom(args)
 	case "insert":
 		return blockInsert(args)
 	case "append":
@@ -347,4 +352,30 @@ func blockBreadcrumb(args map[string]interface{}) (CallToolResult, error) {
 		sb.WriteString(fmt.Sprintf("%s/%s (%s)\n", p.Type, p.Name, p.ID))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func blockTreeStat(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	stat := filesys.StatTree(id)
+	if stat == nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document not found or empty"}}, IsError: true}, nil
+	}
+	text := fmt.Sprintf("Document statistics:\n- Characters: %d\n- Words: %d\n- Blocks: %d\n- Links: %d\n- Images: %d\n- Refs: %d",
+		stat.RuneCount, stat.WordCount, stat.BlockCount, stat.LinkCount, stat.ImageCount, stat.RefCount)
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: text}}}, nil
+}
+
+func blockDom(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	dom := model.GetBlockDOM(id)
+	if dom == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block not found or empty: " + id}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
 }

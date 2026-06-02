@@ -21,21 +21,23 @@ import (
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var HistoryTool = &Tool{
 	Name:        "history",
-	Description: "Document history operations for SiYuan.\n- list: Search document history. Optional: query, notebook, op (delete/update/create), type (0=name,1=content,2=asset,3=docID,4=database), page.\n- get: Get historical content of a document by history path. Requires: path.",
+	Description: "Document history operations for SiYuan.\n- list: Search document history. Optional: query, notebook, op (delete/update/create), type (0=name,1=content,2=asset,3=docID,4=database), page.\n- search: Search document history by keyword. Requires: query. Optional: notebook, op, type, page.\n- get: Get historical content of a document by history path. Requires: path.\n- rollback: Rollback a document to a historical version. Requires: path.\n- clear: Clear all history.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation", Enum: []string{"list", "get"}},
-			"query":    {Type: "string", Description: "Search query (for list)"},
-			"notebook": {Type: "string", Description: "Notebook ID filter (for list)"},
-			"op":       {Type: "string", Description: "Operation filter: delete/update/create (for list)"},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"list", "search", "get", "rollback", "clear"}},
+			"query":    {Type: "string", Description: "Search query (for list, search)"},
+			"notebook": {Type: "string", Description: "Notebook ID filter (for list, search)"},
+			"op":       {Type: "string", Description: "Operation filter: delete/update/create (for list, search)"},
 			"type":     {Type: "number", Description: "Search type: 0=name,1=content,2=asset,3=docID,4=database (default 1)"},
 			"page":     {Type: "number", Description: "Page number (default 1)"},
-			"path":     {Type: "string", Description: "History path (for get)"},
+			"path":     {Type: "string", Description: "History path (for get, rollback)"},
 		},
 		Required: []string{"action"},
 	},
@@ -51,8 +53,14 @@ func historyHandler(args map[string]interface{}) (CallToolResult, error) {
 	switch action {
 	case "list":
 		return historyList(args)
+	case "search":
+		return historySearch(args)
 	case "get":
 		return historyGet(args)
+	case "rollback":
+		return historyRollback(args)
+	case "clear":
+		return historyClear(args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
@@ -105,4 +113,60 @@ func historyGet(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: content}}}, nil
+}
+
+func historySearch(args map[string]interface{}) (CallToolResult, error) {
+	query, _ := args["query"].(string)
+	if query == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "query is required"}}, IsError: true}, nil
+	}
+	box, _ := args["notebook"].(string)
+	op, _ := args["op"].(string)
+	typ := 1
+	if v, ok := args["type"].(float64); ok {
+		typ = int(v)
+	}
+	page := 1
+	if v, ok := args["page"].(float64); ok {
+		page = int(v)
+	}
+
+	timestamps, pageCount, totalCount := model.FullTextSearchHistory(query, box, op, typ, page)
+	if len(timestamps) == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("no history found for '%s'", query)}}}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Search '%s' (%d total, page %d/%d):\n\n", query, totalCount, page, pageCount))
+	for _, ts := range timestamps {
+		items := model.FullTextSearchHistoryItems(ts, query, box, op, typ)
+		sb.WriteString(fmt.Sprintf("--- %s (%d items) ---\n", ts, len(items)))
+		for _, item := range items {
+			sb.WriteString(fmt.Sprintf("  - [%s] %s (path: %s)\n", item.Op, item.Title, item.Path))
+		}
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func historyRollback(args map[string]interface{}) (CallToolResult, error) {
+	path, _ := args["path"].(string)
+	if path == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
+	}
+	if err := model.RollbackDocHistory(path); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "rollback failed: " + err.Error()}}, IsError: true}, nil
+	}
+	docID := util.GetTreeID(path)
+	if bt := treenode.GetBlockTree(docID); bt != nil {
+		model.AppendPushReloadProtyleEntry(bt.RootID)
+	}
+	model.AppendPushReloadFiletreeEntry()
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "history rolled back: " + path}}}, nil
+}
+
+func historyClear(args map[string]interface{}) (CallToolResult, error) {
+	if err := model.ClearWorkspaceHistory(); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "clear history failed: " + err.Error()}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "all history cleared"}}}, nil
 }

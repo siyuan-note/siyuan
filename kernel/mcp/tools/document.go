@@ -27,11 +27,11 @@ import (
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (e.g. /folder/doc), title. Optional: markdown.\n- list: List documents in a notebook path. Requires: notebook. Optional: path (default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/path. Requires: id, notebook, path.\n- search_docs: Search documents by keyword. Requires: keyword.",
+	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (e.g. /folder/doc), title. Optional: markdown.\n- list: List documents in a notebook path. Requires: notebook. Optional: path (default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/path. Requires: id, notebook, path.\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename", "move", "search_docs"}},
+			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename", "move", "duplicate", "search_docs"}},
 			"id":       {Type: "string", Description: "Document block ID"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
 			"path":     {Type: "string", Description: "Document path like /folder/doc (for create, list, move)"},
@@ -63,6 +63,8 @@ func documentHandler(args map[string]interface{}) (CallToolResult, error) {
 		return documentRename(args)
 	case "move":
 		return documentMove(args)
+	case "duplicate":
+		return documentDuplicate(args)
 	case "search_docs":
 		return documentSearchDocs(args)
 	}
@@ -198,6 +200,22 @@ func documentMove(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document moved: %s -> %s%s", id, notebook, path)}}}, nil
+}
+
+func documentDuplicate(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+
+	tree, err := model.LoadTreeByBlockID(id)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("load doc failed: %s", err)}}, IsError: true}, nil
+	}
+
+	model.DuplicateDoc(tree)
+	model.AppendPushReloadFiletreeEntry()
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document duplicated: " + id}}}, nil
 }
 
 func documentSearchDocs(args map[string]interface{}) (CallToolResult, error) {

@@ -124,7 +124,9 @@ export class Preview {
                     if (actionCustom) {
                         actionCustom.click(type);
                     } else if ((type === "mp-wechat" || type === "zhihu" || type === "yuque")) {
-                        this.copyToX(this.element.lastElementChild.cloneNode(true) as HTMLElement, protyle, type);
+                        const tempElement = document.createElement("div");
+                        tempElement.appendChild(this.element.lastElementChild.cloneNode(true));
+                        this.copyToX(tempElement, protyle, type);
                     } else if (type === "desktop") {
                         previewElement.style.width = "";
                         previewElement.style.padding = protyle.wysiwyg.element.style.padding;
@@ -300,40 +302,34 @@ export class Preview {
         copyElement.querySelectorAll("code").forEach((item) => {
             item.style.backgroundImage = "none";
         });
-        copyElement.setAttribute("data-protyle-copy-target", "true");
+        const copyEditElement = copyElement.querySelector(".b3-typography") as HTMLElement;
+        if (copyEditElement.firstElementChild.tagName === "DIV") {
+            // 最后/第一个块是公式块时无法复制下来
+            copyElement.insertAdjacentHTML("afterbegin", "<p>&zwj;</p>");
+        }
+        if (copyEditElement.lastElementChild.tagName === "DIV") {
+            copyElement.insertAdjacentHTML("beforeend", "<p>&zwj;</p>");
+
+        }
         this.element.append(copyElement);
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();
         }
         const range = copyElement.ownerDocument.createRange();
-        range.selectNodeContents(copyElement);
-        focusByRange(range);
-        const copySuccess = document.execCommand("copy");
-        this.element.lastElementChild.remove();
-        if (copySuccess && navigator.clipboard?.read && navigator.clipboard?.write) {
-            try {
-                const clipboardItems = await navigator.clipboard.read();
-                const clipboardItem = clipboardItems[0];
-                if (clipboardItem?.types.includes("text/html")) {
-                    let textPlain = "";
-                    if (clipboardItem.types.includes("text/plain")) {
-                        textPlain = await (await clipboardItem.getType("text/plain")).text();
-                    }
-                    const rawHTML = await (await clipboardItem.getType("text/html")).text();
-                    const copyTarget = new DOMParser().parseFromString(rawHTML, "text/html").querySelector("[data-protyle-copy-target]");
-                    const extractedHTML = copyTarget?.innerHTML;
-                    if (extractedHTML) {
-                        await navigator.clipboard.write([new ClipboardItem({
-                            "text/plain": new Blob([textPlain], {type: "text/plain"}),
-                            "text/html": new Blob([extractedHTML], {type: "text/html"}),
-                        })]);
-                    }
-                }
-            } catch (_) {
-                // 保留 execCommand 原始结果
-            }
+        if (copyEditElement.firstElementChild.tagName === "DIV") {
+            range.setStart(copyElement.firstElementChild, 0);
+        } else {
+            range.setStartBefore(copyElement.firstElementChild);
         }
+        if (copyEditElement.lastElementChild.tagName === "DIV") {
+            range.setEndBefore(copyElement.lastElementChild);
+        } else {
+            range.setEndAfter(copyElement.lastElementChild);
+        }
+        focusByRange(range);
+        document.execCommand("copy");
+        this.element.lastElementChild.remove();
         focusByRange(cloneRange);
         if (type) {
             showMessage(`${type === "zhihu" ? window.siyuan.languages.pasteToZhihu : window.siyuan.languages.pasteToWechatMP}`);

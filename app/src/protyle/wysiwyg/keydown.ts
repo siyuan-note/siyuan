@@ -1094,44 +1094,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectElements.push(nodeElement);
             }
 
-            const codeBlockElements = selectElements.filter(item => {
-                return item.classList.contains("code-block");
-            });
-            if (codeBlockElements.length > 0) {
-                const languageElements: HTMLElement[] = [];
-                codeBlockElements.forEach(item => {
-                    languageElements.push(item.querySelector(".protyle-action__language"));
-                });
-                protyle.toolbar.showCodeLanguage(protyle, languageElements);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-
-            const liBlockElement = hasClosestByClassName(nodeElement, "li");
-            if (liBlockElement) {
-                selectElements.forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--select");
-                });
-                addSubList(protyle, nodeElement, range);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-
+            const languageElements: HTMLElement[] = [];
             const calloutElements: HTMLElement[] = [];
             selectElements.forEach(item => {
-                const calloutElement = hasClosestByClassName(item, "callout");
-                if (calloutElement) {
-                    calloutElements.push(calloutElement);
+                if (item.classList.contains("code-block")) {
+                    languageElements.push(item.querySelector(".protyle-action__language"));
+                } else {
+                    const calloutElement = hasClosestByClassName(item, "callout");
+                    const liElement = hasClosestByClassName(item, "li");
+                    if ((calloutElement && !liElement) || (calloutElement && liElement && liElement.contains(calloutElement))) {
+                        calloutElements.push(calloutElement);
+                    }
                 }
             });
-            if (calloutElements.length > 0) {
+            if (languageElements.length > 0) {
+                protyle.toolbar.showCodeLanguage(protyle, languageElements);
+            } else if (calloutElements.length > 0) {
                 updateCalloutType(calloutElements, protyle);
-                event.stopPropagation();
-                event.preventDefault();
-                return;
+            } else {
+                addSubList(protyle, nodeElement, range);
             }
+            event.stopPropagation();
+            event.preventDefault();
+            return;
         }
 
         // 回车

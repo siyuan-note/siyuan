@@ -23,6 +23,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
@@ -174,6 +175,34 @@ var blockInfoCmd = &cobra.Command{
 			fmt.Printf("Name:         %s\n", info.Name)
 			fmt.Printf("RefCount:     %d\n", info.RefCount)
 			fmt.Printf("SubFileCount: %d\n", info.SubFileCount)
+		}
+		return nil
+	},
+}
+
+var blockStatCmd = &cobra.Command{
+	Use:   "stat --id <id>",
+	Short: "Get block content statistics",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, _ := cmd.Flags().GetString("id")
+		if id == "" {
+			return fmt.Errorf("--id is required")
+		}
+		stat := filesys.StatTree(id)
+		if stat == nil {
+			return fmt.Errorf("document not found or empty")
+		}
+		switch outputFormat {
+		case "json":
+			data, _ := json.MarshalIndent(stat, "", "  ")
+			fmt.Println(string(data))
+		default:
+			fmt.Printf("Characters: %d\n", stat.RuneCount)
+			fmt.Printf("Words:      %d\n", stat.WordCount)
+			fmt.Printf("Blocks:     %d\n", stat.BlockCount)
+			fmt.Printf("Links:      %d\n", stat.LinkCount)
+			fmt.Printf("Images:     %d\n", stat.ImageCount)
+			fmt.Printf("Refs:       %d\n", stat.RefCount)
 		}
 		return nil
 	},
@@ -400,6 +429,7 @@ func init() {
 	blockKramdownCmd.Flags().String("id", "", "block ID")
 	blockKramdownCmd.Flags().String("mode", "md", "export mode: md | textmark")
 	blockInfoCmd.Flags().String("id", "", "document block ID")
+	blockStatCmd.Flags().String("id", "", "block ID")
 
 	blockInsertCmd.Flags().String("parent", "", "parent block ID")
 	blockInsertCmd.Flags().String("data", "", "markdown content")
@@ -431,6 +461,7 @@ func init() {
 	blockCmd.AddCommand(blockDomCmd)
 	blockCmd.AddCommand(blockKramdownCmd)
 	blockCmd.AddCommand(blockInfoCmd)
+	blockCmd.AddCommand(blockStatCmd)
 	blockCmd.AddCommand(blockInsertCmd)
 	blockCmd.AddCommand(blockAppendCmd)
 	blockCmd.AddCommand(blockPrependCmd)

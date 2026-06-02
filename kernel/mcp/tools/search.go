@@ -25,7 +25,7 @@ import (
 
 var SearchTool = &Tool{
 	Name:        "search",
-	Description: "Full-text search in SiYuan notes.\n- fulltext: Search blocks by keywords. Required: query. Optional: page (default 1), pageSize (default 20).",
+	Description: "Full-text search in SiYuan.\n- fulltext: Search blocks by keywords. Required: query. Optional: page (default 1), pageSize (default 20).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

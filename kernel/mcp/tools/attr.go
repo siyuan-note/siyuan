@@ -26,12 +26,13 @@ import (
 
 var AttrTool = &Tool{
 	Name:        "attr",
-	Description: "Block attribute operations for SiYuan.\n- get: Get all custom attributes of a block. Requires: id.\n- set: Set custom attributes on a block. Requires: id, attrs (object like {\"key\":\"value\"}).",
+	Description: "Block attribute operations for SiYuan.\n- get: Get all custom attributes of a block. Requires: id.\n- set: Set custom attributes on a block. Requires: id, attrs (object like {\"key\":\"value\"}).\n- batch-get: Batch get attributes for multiple blocks. Requires: ids (comma-separated block IDs).",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"get", "set"}},
+			"action": {Type: "string", Description: "Operation", Enum: []string{"get", "set", "batch-get"}},
 			"id":     {Type: "string", Description: "Block ID"},
+			"ids":    {Type: "string", Description: "Comma-separated block IDs (for batch-get)"},
 			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set)"},
 		},
 		Required: []string{"action"},
@@ -50,6 +51,8 @@ func attrHandler(args map[string]interface{}) (CallToolResult, error) {
 		return attrGet(args)
 	case "set":
 		return attrSet(args)
+	case "batch-get":
+		return attrBatchGet(args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
@@ -97,4 +100,30 @@ func attrSet(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attributes set for: " + id}}}, nil
+}
+
+func attrBatchGet(args map[string]interface{}) (CallToolResult, error) {
+	idsStr, _ := args["ids"].(string)
+	if idsStr == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids (comma-separated) is required"}}, IsError: true}, nil
+	}
+	idList := strings.Split(idsStr, ",")
+	for i := range idList {
+		idList[i] = strings.TrimSpace(idList[i])
+	}
+
+	attrs := sql.BatchGetBlockAttrs(idList)
+	if len(attrs) == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no attributes found"}}}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Batch attributes (%d blocks):\n\n", len(attrs)))
+	for id, kv := range attrs {
+		sb.WriteString(fmt.Sprintf("--- %s ---\n", id))
+		for k, v := range kv {
+			sb.WriteString(fmt.Sprintf("- %s: %s\n", k, v))
+		}
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

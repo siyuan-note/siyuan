@@ -24,14 +24,15 @@ import (
 
 var ExportTool = &Tool{
 	Name:        "export",
-	Description: "Export operations for SiYuan.\n- md: Export a document as Markdown. Requires: id.",
+	Description: "Export operations for SiYuan.\n- md: Export a document as Markdown. Requires: id.\n- html: Export a document as HTML. Requires: id.\n- preview: Export a document as preview HTML. Requires: id.\n- docx: Export a document as Word (.docx). Requires: id, output (output file path).\n- sy: Export a document as .sy.zip. Requires: id.\n- md-zip: Export a document as Markdown zip. Requires: id.\n- data: Export full workspace data backup.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action": {Type: "string", Description: "Operation", Enum: []string{"md"}},
-			"id":     {Type: "string", Description: "Document block ID"},
+			"action": {Type: "string", Description: "Operation", Enum: []string{"md", "html", "preview", "docx", "sy", "md-zip", "data"}},
+			"id":     {Type: "string", Description: "Document block ID (for md, html, preview, docx, sy, md-zip)"},
+			"output": {Type: "string", Description: "Output file path (required for docx, optional for others)"},
 		},
-		Required: []string{"action", "id"},
+		Required: []string{"action"},
 	},
 	Handler: exportHandler,
 }
@@ -45,6 +46,18 @@ func exportHandler(args map[string]interface{}) (CallToolResult, error) {
 	switch action {
 	case "md":
 		return exportMd(args)
+	case "html":
+		return exportHtml(args)
+	case "preview":
+		return exportPreview(args)
+	case "docx":
+		return exportDocx(args)
+	case "sy":
+		return exportSy(args)
+	case "md-zip":
+		return exportMdZip(args)
+	case "data":
+		return exportData(args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
@@ -64,4 +77,76 @@ func exportMd(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("# %s\n\n%s", hPath, content)}}}, nil
+}
+
+func exportHtml(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	_, dom, _ := model.ExportHTML(id, "", false, false, false)
+	if dom == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export failed or empty"}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
+}
+
+func exportPreview(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	html := model.ExportPreview(id, false)
+	if html == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export preview failed or empty"}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: html}}}, nil
+}
+
+func exportDocx(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	output, _ := args["output"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	if output == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "output file path is required for docx"}}, IsError: true}, nil
+	}
+	fullPath, err := model.ExportDocx(id, output, false, false)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export docx failed: " + err.Error()}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported docx to: %s", fullPath)}}}, nil
+}
+
+func exportSy(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".sy")
+	if zipPath == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export sy failed"}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported sy.zip to: %s", zipPath)}}}, nil
+}
+
+func exportMdZip(args map[string]interface{}) (CallToolResult, error) {
+	id, _ := args["id"].(string)
+	if id == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
+	}
+	_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
+	if zipPath == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export md-zip failed"}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported md zip to: %s", zipPath)}}}, nil
+}
+
+func exportData(args map[string]interface{}) (CallToolResult, error) {
+	zipPath, err := model.ExportData()
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "export data failed: " + err.Error()}}, IsError: true}, nil
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("exported data backup to: %s", zipPath)}}}, nil
 }

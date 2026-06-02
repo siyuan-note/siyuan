@@ -51,6 +51,5 @@ export const setLute = (options: ILuteOptions) => {
     lute.SetDataTask(true);
     lute.SetExportNormalizeTaskListMarker(true);
     lute.SetArbitraryTaskListItemMarker(true);
-
     return lute;
 };

@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "הפעולה {action} תבוצע על: {name}",
+  "agentConfirmApprove": "אשר",
+  "agentConfirmReject": "דחה",
+  "agentThinkingAnalyzing": "מנתח את הבקשה שלך...",
+  "agentThinkingProcessing": "מעבד תוצאות...",
   "agentChat": "AI Agent",
   "agentNewSession": "הפעלה חדשה",
   "agentInputPlaceholder": "הקלד הודעה, Enter לשליחה...",

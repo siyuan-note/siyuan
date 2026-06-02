@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "Подтвердить {action} для: {name}?",
+  "agentConfirmApprove": "Одобрить",
+  "agentConfirmReject": "Отклонить",
+  "agentThinkingAnalyzing": "Анализ запроса...",
+  "agentThinkingProcessing": "Обработка результатов...",
   "agentChat": "AI Agent",
   "agentNewSession": "Новая сессия",
   "agentInputPlaceholder": "Введите сообщение, Enter для отправки...",

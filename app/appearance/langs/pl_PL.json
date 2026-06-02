@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "Potwierdź {action} na: {name}?",
+  "agentConfirmApprove": "Zatwierdź",
+  "agentConfirmReject": "Odrzuć",
+  "agentThinkingAnalyzing": "Analizowanie żądania...",
+  "agentThinkingProcessing": "Przetwarzanie wyników...",
   "agentChat": "AI Agent",
   "agentNewSession": "Nowa sesja",
   "agentInputPlaceholder": "Wpisz wiadomość, Enter aby wysłać...",

@@ -31,7 +31,7 @@
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "When you close SiYuan Notes, the User Guide will be automatically deleted. You can click "
+							"Data": "When you close SiYuan, the User Guide will be automatically deleted. You can click "
 						},
 						{
 							"Type": "NodeTextMark",

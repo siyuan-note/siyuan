@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "Diese Aktion wird {action}: {name}",
+  "agentConfirmApprove": "Genehmigen",
+  "agentConfirmReject": "Ablehnen",
+  "agentThinkingAnalyzing": "Anfrage wird analysiert...",
+  "agentThinkingProcessing": "Ergebnisse werden verarbeitet...",
   "agentChat": "AI Agent",
   "agentNewSession": "Neue Sitzung",
   "agentInputPlaceholder": "Nachricht eingeben, Enter zum Senden...",

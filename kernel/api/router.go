@@ -525,6 +525,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckAdminRole, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckAdminRole, chatGPTWithAction)
 	ginServer.Handle("POST", "/api/ai/agent/chat", model.CheckAuth, model.CheckAdminRole, agentChat)
+	ginServer.Handle("POST", "/api/ai/agent/confirm", model.CheckAuth, model.CheckAdminRole, agentChatConfirm)
+	ginServer.Handle("POST", "/api/ai/agent/title", model.CheckAuth, model.CheckAdminRole, agentChatTitle)
 
 	ginServer.Handle("POST", "/api/petal/loadPetals", model.CheckAuth, loadPetals)
 	ginServer.Handle("POST", "/api/petal/setPetalEnabled", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setPetalEnabled)

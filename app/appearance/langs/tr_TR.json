@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "{name} üzerinde {action} onaylansın mı?",
+  "agentConfirmApprove": "Onayla",
+  "agentConfirmReject": "Reddet",
+  "agentThinkingAnalyzing": "İsteğiniz analiz ediliyor...",
+  "agentThinkingProcessing": "Sonuçlar işleniyor...",
   "agentChat": "AI Agent",
   "agentNewSession": "Yeni oturum",
   "agentInputPlaceholder": "Mesaj yazın, Enter ile gönderin...",

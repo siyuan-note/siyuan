@@ -17,6 +17,9 @@
 package api
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -28,7 +31,9 @@ import (
 )
 
 type agentChatReq struct {
-	Messages []agent.UserMessage `json:"messages"`
+	Messages   []agent.UserMessage `json:"messages"`
+	Language   string              `json:"language"`
+	References []agent.Reference   `json:"references"`
 }
 
 func agentChat(c *gin.Context) {
@@ -58,13 +63,17 @@ func agentChat(c *gin.Context) {
 		model.Conf.AI.OpenAI.APIProvider,
 	)
 
-	timeout := model.Conf.AI.OpenAI.APITimeout
-	if timeout <= 0 {
-		timeout = 30
-	}
-	ctx := c.Request.Context()
+	var eventCh <-chan agent.AgentEvent
+	ctx, cancel := context.WithCancel(context.Background())
+	defer func() {
+		cancel()
+		go func() {
+			for range eventCh {
+			}
+		}()
+	}()
 
-	eventCh := agent.AgentChat(ctx, client, model.Conf.AI.OpenAI.APIModel, req.Messages)
+	eventCh = agent.AgentChat(ctx, client, model.Conf.AI.OpenAI.APIModel, req.Messages, req.Language, req.References)
 
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -75,43 +84,126 @@ func agentChat(c *gin.Context) {
 		return
 	}
 
+	timeout := model.Conf.AI.OpenAI.APITimeout
+	if timeout <= 0 {
+		timeout = 30
+	}
 	totalTimeout := time.Duration(timeout) * time.Second * 10
 	if totalTimeout > 300*time.Second {
 		totalTimeout = 300 * time.Second
 	}
 	deadline := time.After(totalTimeout)
+
 	for {
 		select {
 		case event, ok := <-eventCh:
 			if !ok {
 				return
 			}
-			switch event.Type {
-			case "content":
-				c.SSEvent("content", map[string]string{"token": event.Token})
-			case "tool_call":
-				c.SSEvent("tool_call", map[string]interface{}{
-					"name":      event.Name,
-					"arguments": event.Arguments,
-				})
-			case "tool_result":
-				c.SSEvent("tool_result", map[string]string{
-					"name":   event.Name,
-					"result": event.Result,
-				})
-			case "error":
-				c.SSEvent("error", map[string]string{"message": event.Error})
-			case "done":
-				c.SSEvent("done", map[string]interface{}{})
+			if err := writeSSE(c, event); err != nil {
 				return
 			}
 			flusher.Flush()
 		case <-deadline:
-			c.SSEvent("error", map[string]string{"message": "request timeout"})
+			writeSSEError(c, "request timeout")
 			flusher.Flush()
-			return
-		case <-ctx.Done():
 			return
 		}
 	}
+}
+
+type agentConfirmReq struct {
+	ConfirmID string `json:"confirmID"`
+	Approved  bool   `json:"approved"`
+}
+
+func agentChatConfirm(c *gin.Context) {
+	req := &agentConfirmReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	agent.ConfirmSession(req.ConfirmID, req.Approved)
+	ret := gulu.Ret.NewResult()
+	c.JSON(http.StatusOK, ret)
+}
+
+type agentTitleReq struct {
+	Message string `json:"message"`
+}
+
+func agentChatTitle(c *gin.Context) {
+	req := &agentTitleReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	client := util.NewOpenAIClient(
+		model.Conf.AI.OpenAI.APIKey,
+		model.Conf.AI.OpenAI.APIProxy,
+		model.Conf.AI.OpenAI.APIBaseURL,
+		model.Conf.AI.OpenAI.APIUserAgent,
+		model.Conf.AI.OpenAI.APIVersion,
+		model.Conf.AI.OpenAI.APIProvider,
+	)
+
+	title := agent.GenerateTitle(client, model.Conf.AI.OpenAI.APIModel, req.Message)
+	ret := gulu.Ret.NewResult()
+	ret.Data = title
+	c.JSON(http.StatusOK, ret)
+}
+
+func writeSSE(c *gin.Context, event agent.AgentEvent) error {
+	switch event.Type {
+	case "content":
+		return writeSSEEvent(c, "content", map[string]string{"token": event.Token})
+	case "thinking":
+		return writeSSEEvent(c, "thinking", map[string]string{"reasoning": event.Reasoning})
+	case "confirm":
+		return writeSSEEvent(c, "confirm", map[string]interface{}{
+			"name":      event.Name,
+			"arguments": event.Arguments,
+			"confirmID": event.ConfirmID,
+		})
+	case "tool_call":
+		return writeSSEEvent(c, "tool_call", map[string]interface{}{
+			"name":      event.Name,
+			"arguments": event.Arguments,
+		})
+	case "tool_result":
+		return writeSSEEvent(c, "tool_result", map[string]string{
+			"name":   event.Name,
+			"result": event.Result,
+		})
+	case "error":
+		return writeSSEEvent(c, "error", map[string]string{"message": event.Error})
+	case "usage":
+		return writeSSEEvent(c, "usage", map[string]interface{}{
+			"promptTokens":     event.PromptTokens,
+			"completionTokens": event.CompletionTokens,
+		})
+	case "done":
+		return writeSSEEvent(c, "done", map[string]interface{}{})
+	}
+	return nil
+}
+
+func writeSSEEvent(c *gin.Context, eventType string, data interface{}) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(c.Writer, "event:%s\ndata:%s\n\n", eventType, string(b))
+	return err
+}
+
+func writeSSEError(c *gin.Context, message string) error {
+	return writeSSEEvent(c, "error", map[string]string{"message": message})
 }

@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "Підтвердити {action} для: {name}?",
+  "agentConfirmApprove": "Підтвердити",
+  "agentConfirmReject": "Відхилити",
+  "agentThinkingAnalyzing": "Аналіз запиту...",
+  "agentThinkingProcessing": "Обробка результатів...",
   "agentChat": "AI Agent",
   "agentNewSession": "Нова сесія",
   "agentInputPlaceholder": "Введіть повідомлення, Enter для надсилання...",

@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "{name} に {action} を実行しますか？",
+  "agentConfirmApprove": "承認",
+  "agentConfirmReject": "拒否",
+  "agentThinkingAnalyzing": "リクエストを分析中...",
+  "agentThinkingProcessing": "結果を処理中...",
   "agentChat": "AI Agent",
   "agentNewSession": "新しいセッション",
   "agentInputPlaceholder": "メッセージを入力、Enterで送信...",

@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "سيتم تنفيذ العملية {action} على: {name}",
+  "agentConfirmApprove": "موافقة",
+  "agentConfirmReject": "رفض",
+  "agentThinkingAnalyzing": "جاري تحليل طلبك...",
+  "agentThinkingProcessing": "جاري معالجة النتائج...",
   "agentChat": "AI Agent",
   "agentNewSession": "جلسة جديدة",
   "agentInputPlaceholder": "اكتب رسالة، Enter للإرسال...",

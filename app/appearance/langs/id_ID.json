@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "Konfirmasi {action} pada: {name}?",
+  "agentConfirmApprove": "Setujui",
+  "agentConfirmReject": "Tolak",
+  "agentThinkingAnalyzing": "Menganalisis permintaan Anda...",
+  "agentThinkingProcessing": "Memproses hasil...",
   "agentChat": "AI Agent",
   "agentNewSession": "Sesi baru",
   "agentInputPlaceholder": "Ketik pesan, Enter untuk mengirim...",

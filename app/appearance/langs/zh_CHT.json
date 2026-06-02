@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "確認對 {name} 執行 {action}？",
+  "agentConfirmApprove": "確認執行",
+  "agentConfirmReject": "拒絕",
+  "agentThinkingAnalyzing": "正在分析你的請求...",
+  "agentThinkingProcessing": "正在處理結果...",
   "agentChat": "AI Agent",
   "agentNewSession": "新對話",
   "agentInputPlaceholder": "輸入訊息，Enter 送出...",

@@ -2,9 +2,17 @@ export type ISSEResult = {
     type: "content";
     token: string;
 } | {
+    type: "thinking";
+    reasoning: string;
+} | {
     type: "tool_call";
     name: string;
     arguments: Record<string, unknown>;
+} | {
+    type: "confirm";
+    name: string;
+    arguments: Record<string, unknown>;
+    confirmID: string;
 } | {
     type: "tool_result";
     name: string;
@@ -14,10 +22,16 @@ export type ISSEResult = {
     message: string;
 } | {
     type: "done";
+} | {
+    type: "usage";
+    promptTokens: number;
+    completionTokens: number;
 };
 
 export async function fetchAgentSSE(
     messages: Array<{role: string; content: string}>,
+    language: string,
+    references: Array<{id: string; title: string}>,
     onEvent: (event: ISSEResult) => void,
     onError: (err: Error) => void,
     signal?: AbortSignal,
@@ -26,7 +40,7 @@ export async function fetchAgentSSE(
         var response = await fetch("/api/ai/agent/chat", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({messages: messages}),
+            body: JSON.stringify({messages: messages, language: language, references: references}),
             signal: signal,
         });
 
@@ -58,10 +72,10 @@ export async function fetchAgentSSE(
 
             for (var i = 0; i < lines.length; i++) {
                 var line = lines[i];
-                if (line.indexOf("event: ") === 0) {
-                    currentEvent = line.slice(7).trim();
-                } else if (line.indexOf("data: ") === 0) {
-                    var dataStr = line.slice(6).trim();
+                if (line.indexOf("event:") === 0) {
+                    currentEvent = line.slice(6).trim();
+                } else if (line.indexOf("data:") === 0) {
+                    var dataStr = line.slice(5).trim();
                     if (currentEvent && dataStr) {
                         try {
                             var data = JSON.parse(dataStr);
@@ -69,7 +83,7 @@ export async function fetchAgentSSE(
                             if (result) {
                                 onEvent(result);
                             }
-                        } catch (e) {
+                         } catch (e) {
                             // skip malformed data
                         }
                     }
@@ -89,11 +103,20 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
     switch (event) {
         case "content":
             return {type: "content", token: data.token as string};
+        case "thinking":
+            return {type: "thinking", reasoning: data.reasoning as string};
         case "tool_call":
             return {
                 type: "tool_call",
                 name: data.name as string,
                 arguments: (data.arguments || {}) as Record<string, unknown>,
+            };
+        case "confirm":
+            return {
+                type: "confirm",
+                name: data.name as string,
+                arguments: (data.arguments || {}) as Record<string, unknown>,
+                confirmID: data.confirmID as string,
             };
         case "tool_result":
             return {
@@ -105,6 +128,12 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             return {type: "error", message: data.message as string};
         case "done":
             return {type: "done"};
+        case "usage":
+            return {
+                type: "usage",
+                promptTokens: (data.promptTokens as number) || 0,
+                completionTokens: (data.completionTokens as number) || 0,
+            };
         default:
             return null;
     }

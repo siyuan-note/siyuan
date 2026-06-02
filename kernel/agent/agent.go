@@ -24,22 +24,35 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-const systemPrompt = `你是思源笔记AI助手，可以搜索、读取、创建和修改用户的笔记内容。
-规则：
-1. 操作前先确认理解用户意图
-2. 搜索结果较多时，总结要点而非逐条列出
-3. 涉及删除操作时，先向用户确认
-4. 使用中文回复`
+const systemPrompt = `You are a SiYuan AI assistant. You can search, read, create, and modify the user's notes.
+
+Rules:
+1. Confirm the user's intent before taking action
+2. Summarize key points instead of listing everything when there are many search results
+3. Ask for confirmation before deleting anything`
 
 const maxToolCallRounds = 5
 
+var confirmChannels = make(map[string]chan bool)
+
+func ConfirmSession(id string, approved bool) {
+	ch, ok := confirmChannels[id]
+	if ok {
+		ch <- approved
+	}
+}
+
 type AgentEvent struct {
-	Type      string
-	Token     string
-	Name      string
-	Arguments map[string]interface{}
-	Result    string
-	Error     string
+	Type             string
+	Token            string
+	Name             string
+	Arguments        map[string]interface{}
+	Result           string
+	Reasoning        string
+	ConfirmID        string
+	Error            string
+	PromptTokens     int
+	CompletionTokens int
 }
 
 type UserMessage struct {
@@ -47,14 +60,20 @@ type UserMessage struct {
 	Content string `json:"content"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, history []UserMessage) <-chan AgentEvent {
+type Reference struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+func AgentChat(ctx context.Context, client *openai.Client, model string, history []UserMessage, language string, references []Reference) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
 		defer close(ch)
 
 		tools := convertMCPToolsToOpenAI()
-		messages := buildMessages(history)
+		messages := buildMessages(history, language, references)
+		var totalPrompt, totalCompletion int
 
 		for round := 0; round < maxToolCallRounds; round++ {
 			select {
@@ -63,11 +82,18 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 			default:
 			}
 
+			if round == 0 {
+				ch <- AgentEvent{Type: "thinking", Reasoning: "analyzing"}
+			} else {
+				ch <- AgentEvent{Type: "thinking", Reasoning: "processing"}
+			}
+
 			req := openai.ChatCompletionRequest{
 				Model:               model,
 				Messages:            messages,
 				Tools:               tools,
 				Stream:              true,
+				StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
 				Temperature:         1.0,
 				MaxCompletionTokens: 4096,
 			}
@@ -121,26 +147,54 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 						aggregatedToolCalls[idx].Function.Arguments += tcd.Function.Arguments
 					}
 				}
+
+				if resp.Usage != nil {
+					totalPrompt += resp.Usage.PromptTokens
+					totalCompletion += resp.Usage.CompletionTokens
+				}
 			}
 
 			if len(aggregatedToolCalls) > 0 {
-				if contentBuilder.Len() > 0 {
-					messages = append(messages, openai.ChatCompletionMessage{
-						Role:    openai.ChatMessageRoleAssistant,
-						Content: contentBuilder.String(),
-					})
-				}
 				messages = append(messages, openai.ChatCompletionMessage{
 					Role:      openai.ChatMessageRoleAssistant,
+					Content:   contentBuilder.String(),
 					ToolCalls: aggregatedToolCalls,
 				})
 
 				for _, tc := range aggregatedToolCalls {
 					args := parseToolArgs(tc.Function.Arguments)
+					action := ""
+					if a, ok := args["action"]; ok {
+						action, _ = a.(string)
+					}
+
 					ch <- AgentEvent{
 						Type:      "tool_call",
 						Name:      tc.Function.Name,
 						Arguments: args,
+					}
+
+					if needsConfirm(tc.Function.Name, action) {
+						confirmID := tc.ID
+						ch <- AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID}
+						ch2 := make(chan bool, 1)
+						confirmChannels[confirmID] = ch2
+						select {
+						case approved := <-ch2:
+							delete(confirmChannels, confirmID)
+							if !approved {
+								ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: "User rejected this operation"}
+								messages = append(messages, openai.ChatCompletionMessage{
+									Role:       openai.ChatMessageRoleTool,
+									Content:    "User rejected this operation",
+									ToolCallID: tc.ID,
+								})
+								continue
+							}
+						case <-ctx.Done():
+							delete(confirmChannels, confirmID)
+							return
+						}
 					}
 
 					result := executeTool(tc)
@@ -165,19 +219,78 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 				Content: contentBuilder.String(),
 			})
 
+			ch <- AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion}
 			ch <- AgentEvent{Type: "done"}
 			return
 		}
 
+		ch <- AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion}
 		ch <- AgentEvent{Type: "done"}
 	}()
 
 	return ch
 }
 
-func buildMessages(history []UserMessage) []openai.ChatCompletionMessage {
+func GenerateTitle(client *openai.Client, model string, msg string) string {
+	if len(msg) > 500 {
+		msg = msg[:500]
+	}
+	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
+		Model: model,
+		Messages: []openai.ChatCompletionMessage{
+			{Role: openai.ChatMessageRoleSystem, Content: "Generate a short conversation title (max 10 words) based on the user's first message. Return ONLY the title, no quotes, no punctuation at the end."},
+			{Role: openai.ChatMessageRoleUser, Content: msg},
+		},
+		MaxTokens: 30,
+	})
+	if err != nil || len(resp.Choices) == 0 {
+		if len(msg) > 30 {
+			return msg[:30] + "..."
+		}
+		return msg
+	}
+	title := strings.TrimSpace(resp.Choices[0].Message.Content)
+	if title == "" {
+		if len(msg) > 30 {
+			return msg[:30] + "..."
+		}
+		return msg
+	}
+	return title
+}
+
+var safeActions = map[string]bool{
+	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
+	"tree_stat": true,
+	"list": true, "search_docs": true, "fulltext": true, "backlinks": true,
+	"mentions": true, "labels": true, "status": true, "version": true,
+	"current_time": true, "workspace": true, "md": true, "query": true,
+}
+
+func needsConfirm(toolName string, action string) bool {
+	if action == "" {
+		return false
+	}
+	if safeActions[action] {
+		return false
+	}
+	if toolName == "sync" && action == "status" {
+		return false
+	}
+	return true
+}
+
+func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
+	var prompt = systemPrompt + "\n\nReply in " + langName(language) + "."
+	if len(references) > 0 {
+		prompt += "\n\nThe user has referenced the following content blocks:\n"
+		for _, ref := range references {
+			prompt += "- " + ref.Title + " (id: " + ref.ID + ")\n"
+		}
+		prompt += "Use the block tools to fetch their actual content before responding."
+	}
 	messages := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: systemPrompt},
+		{Role: openai.ChatMessageRoleSystem, Content: prompt},
 	}
 	for _, msg := range history {
 		messages = append(messages, openai.ChatCompletionMessage{
@@ -186,4 +299,51 @@ func buildMessages(history []UserMessage) []openai.ChatCompletionMessage {
 		})
 	}
 	return messages
+}
+
+func langName(lang string) string {
+	switch lang {
+	case "zh_CN":
+		return "Chinese (简体中文)"
+	case "zh_CHT":
+		return "Traditional Chinese (繁體中文)"
+	case "ja_JP":
+		return "Japanese"
+	case "ko_KR":
+		return "Korean"
+	case "fr_FR":
+		return "French"
+	case "de_DE":
+		return "German"
+	case "es_ES":
+		return "Spanish"
+	case "it_IT":
+		return "Italian"
+	case "pt_BR":
+		return "Portuguese"
+	case "ru_RU":
+		return "Russian"
+	case "ar_SA":
+		return "Arabic"
+	case "he_IL":
+		return "Hebrew"
+	case "hi_IN":
+		return "Hindi"
+	case "id_ID":
+		return "Indonesian"
+	case "nl_NL":
+		return "Dutch"
+	case "pl_PL":
+		return "Polish"
+	case "th_TH":
+		return "Thai"
+	case "tr_TR":
+		return "Turkish"
+	case "uk_UA":
+		return "Ukrainian"
+	case "sk_SK":
+		return "Slovak"
+	default:
+		return "English"
+	}
 }

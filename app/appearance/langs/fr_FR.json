@@ -1,4 +1,9 @@
 {
+  "agentConfirmDesc": "Confirmer {action} sur: {name} ?",
+  "agentConfirmApprove": "Approuver",
+  "agentConfirmReject": "Rejeter",
+  "agentThinkingAnalyzing": "Analyse de votre demande...",
+  "agentThinkingProcessing": "Traitement des résultats...",
   "agentChat": "AI Agent",
   "agentNewSession": "Nouvelle session",
   "agentInputPlaceholder": "Tapez un message, Entrée pour envoyer...",

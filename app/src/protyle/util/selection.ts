@@ -298,7 +298,9 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range, useDir
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
         if (range.toString()) {
             if (useDirect) {
-                const selection = window.getSelection();
+                const selection = window.getSelection() as Selection & {
+                    direction: "forward" | "backward" | "none"
+                };
                 // 判断选择方向
                 const isBackward = (selection && "direction" in selection && selection.direction !== "none") ?
                     selection.direction === "backward"

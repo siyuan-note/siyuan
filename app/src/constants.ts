@@ -725,7 +725,7 @@ export abstract class Constants {
                     size: {width: 320, height: 0},
                     show: false,
                     icon: "iconSparkles",
-                    title: "AI Agent",
+                    hotkeyLangId: "agentChat",
                 }, {
                     type: "graph",
                     size: {width: 320, height: 0},

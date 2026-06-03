@@ -4,7 +4,7 @@
   "agentConfirmReject": "거부",
   "agentThinkingAnalyzing": "요청 분석 중...",
   "agentThinkingProcessing": "결과 처리 중...",
-  "agentChat": "AI Agent",
+  "agentChat": "에이전트",
   "agentNewSession": "새 세션",
   "agentInputPlaceholder": "메시지를 입력하고 Enter로 전송...",
   "agentSend": "보내기",

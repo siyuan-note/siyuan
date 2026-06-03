@@ -6,6 +6,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
     padding: 8px 12px;
     border-bottom: 1px solid var(--b3-border-color);
     min-height: 36px;
@@ -323,4 +324,101 @@
     justify-content: flex-end;
     gap: 8px;
     margin-top: 6px;
+}
+
+.agent-chat__session-menu {
+    font-size: 14px;
+    padding: 2px 6px;
+    line-height: 1;
+}
+
+.agent-session-popup {
+    position: absolute;
+    top: 40px;
+    right: 8px;
+    z-index: 100;
+    width: 280px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: var(--b3-theme-background);
+    border: 1px solid var(--b3-border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.agent-session-popup__list {
+    padding: 4px 0;
+}
+
+.agent-session-popup__item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--b3-border-color);
+}
+
+.agent-session-popup__item:last-child {
+    border-bottom: none;
+}
+
+.agent-session-popup__item:hover {
+    background: var(--b3-theme-surface-light);
+}
+
+.agent-session-popup__item--active {
+    background: var(--b3-theme-primary-lightest);
+}
+
+.agent-session-popup__title {
+    flex: 1;
+    font-size: 13px;
+    color: var(--b3-theme-on-background);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-session-popup__actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.agent-session-popup__rename,
+.agent-session-popup__delete {
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: var(--b3-theme-on-surface-light);
+}
+
+.agent-session-popup__rename:hover,
+.agent-session-popup__delete:hover {
+    background: var(--b3-theme-surface-light);
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-session-popup__delete:hover {
+    color: var(--b3-theme-error);
+}
+
+.agent-session-popup__rename-input {
+    flex: 1;
+    font-size: 13px;
+    padding: 2px 4px;
+    border: 1px solid var(--b3-theme-primary);
+    border-radius: 4px;
+    outline: none;
+    background: var(--b3-theme-background);
+    color: var(--b3-theme-on-background);
+}
+
+.agent-session-popup__empty {
+    padding: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--b3-theme-on-surface-light);
 }

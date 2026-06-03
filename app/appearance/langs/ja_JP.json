@@ -4,7 +4,7 @@
   "agentConfirmReject": "拒否",
   "agentThinkingAnalyzing": "リクエストを分析中...",
   "agentThinkingProcessing": "結果を処理中...",
-  "agentChat": "AI Agent",
+  "agentChat": "エージェント",
   "agentNewSession": "新しいセッション",
   "agentInputPlaceholder": "メッセージを入力、Enterで送信...",
   "agentSend": "送信",

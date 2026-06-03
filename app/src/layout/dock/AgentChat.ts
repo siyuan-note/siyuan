@@ -1,8 +1,9 @@
-import {Tab} from "../layout/Tab";
-import {Model} from "../layout/Model";
-import {App} from "../index";
-import {fetchAgentSSE, ISSEResult} from "../util/agentSSE";
+import {Tab} from "../Tab";
+import {Model} from "../Model";
+import {App} from "../../index";
+import {fetchAgentSSE, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
+import {AgentSession, SessionStore} from "./SessionStore";
 
 interface IAgentMessage {
     role: "user" | "assistant";
@@ -17,6 +18,10 @@ export class AgentChat extends Model {
     private stopBtn: HTMLElement;
     private newSessionBtn: HTMLElement;
     private titleElement: HTMLElement;
+    private sessionMenuBtn: HTMLElement;
+    private sessionPopup: HTMLElement | null = null;
+    private sessionId = "";
+    private sessionTitle = "AI Agent";
     private messages: IAgentMessage[] = [];
     private hasTitled = false;
     private isStreaming = false;
@@ -41,6 +46,7 @@ export class AgentChat extends Model {
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
     '<div class="agent-chat__header">' +
         '<span class="agent-chat__title">' + (L.agentChat || "AI Agent") + '</span>' +
+        '<button class="agent-chat__session-menu b3-button b3-button--small b3-button--text">&#9776;</button>' +
         '<button class="agent-chat__new-session b3-button b3-button--small b3-button--outline">' + (L.agentNewSession || "New Session") + '</button>' +
     '</div>' +
     '<div class="agent-chat__messages fn__flex-1"></div>' +
@@ -59,20 +65,241 @@ export class AgentChat extends Model {
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
         this.newSessionBtn = panel.querySelector(".agent-chat__new-session") as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
+        this.sessionMenuBtn = panel.querySelector(".agent-chat__session-menu") as HTMLElement;
 
         var self = this;
         this.composer = mountComposer(this.composerHost, function () { self.sendMessage(); });
+        this.initSessions();
     }
 
     private bindEvents() {
         var self = this;
         this.sendBtn.addEventListener("click", function () { self.sendMessage(); });
         this.stopBtn.addEventListener("click", function () { self.stopGeneration(); });
-        this.newSessionBtn.addEventListener("click", function () { self.clearSession(); });
+        this.newSessionBtn.addEventListener("click", function () { self.createSession(); });
+        this.sessionMenuBtn.addEventListener("click", function (e: MouseEvent) {
+            e.stopPropagation();
+            self.toggleSessionMenu();
+        });
 
         this.parent.panelElement.addEventListener("click", function () {
             self.composer?.focus();
         });
+    }
+
+    private async initSessions() {
+        await SessionStore.init();
+        var list = await SessionStore.list();
+        if (list.length > 0) {
+            list.sort(function (a, b) { return b.updatedAt - a.updatedAt; });
+            var last = list[0];
+            var session = await SessionStore.load(last.id);
+            if (session) {
+                this.sessionId = session.id;
+                this.sessionTitle = session.title;
+                this.messages = session.messages;
+                this.hasTitled = true;
+                this.titleElement.textContent = session.title;
+                for (var i = 0; i < session.messages.length; i++) {
+                    var msg = session.messages[i];
+                    if (msg.role === "user") {
+                        this.appendUserMessage(msg.content);
+                    } else if (msg.role === "assistant") {
+                        this.appendPersistedAssistant(msg.content);
+                    }
+                }
+                this.scrollToBottom();
+                return;
+            }
+        }
+        this.sessionId = SessionStore.newSessionId();
+        this.sessionTitle = "AI Agent";
+        this.messages = [];
+    }
+
+    private toggleSessionMenu() {
+        if (this.sessionPopup) {
+            this.closeSessionMenu();
+            return;
+        }
+        var self = this;
+        this.renderSessionList();
+    }
+
+    private closeSessionMenu() {
+        if (this.sessionPopup) {
+            this.sessionPopup.remove();
+            this.sessionPopup = null;
+        }
+    }
+
+    private async renderSessionList() {
+        var self = this;
+        this.closeSessionMenu();
+        var list = await SessionStore.list();
+        list.sort(function (a, b) { return b.updatedAt - a.updatedAt; });
+
+        this.sessionPopup = document.createElement("div");
+        this.sessionPopup.className = "agent-session-popup";
+
+        var html = '<div class="agent-session-popup__list">';
+        if (list.length === 0) {
+            html += '<div class="agent-session-popup__empty">' + (window.siyuan.languages.emptyContent || "No sessions") + '</div>';
+        } else {
+            for (var i = 0; i < list.length; i++) {
+                var s = list[i];
+            var isActive = s.id === this.sessionId;
+            html += '<div class="agent-session-popup__item' + (isActive ? ' agent-session-popup__item--active' : '') + '" data-id="' + s.id + '">' +
+                '<span class="agent-session-popup__title">' + this.escapeHtml(s.title || "AI Agent") + '</span>' +
+                '<span class="agent-session-popup__actions">' +
+                    '<span class="agent-session-popup__rename" data-id="' + s.id + '">&#9998;</span>' +
+                    '<span class="agent-session-popup__delete" data-id="' + s.id + '">&#10005;</span>' +
+                    '</span>' +
+                '</div>';
+            }
+        }
+        html += '</div>';
+
+        this.sessionPopup.innerHTML = html;
+
+        this.sessionPopup.querySelectorAll(".agent-session-popup__item").forEach(function (item) {
+            item.addEventListener("click", function (e) {
+                var id = item.getAttribute("data-id") || "";
+                if (id && id !== self.sessionId) {
+                    self.switchSession(id);
+                    self.closeSessionMenu();
+                }
+            });
+        });
+        this.sessionPopup.querySelectorAll(".agent-session-popup__delete").forEach(function (btn) {
+            btn.addEventListener("click", function (e: MouseEvent) {
+                e.stopPropagation();
+                var id = btn.getAttribute("data-id") || "";
+                if (id) { self.deleteSession(id); }
+            });
+        });
+        this.sessionPopup.querySelectorAll(".agent-session-popup__rename").forEach(function (btn) {
+            btn.addEventListener("click", function (e: MouseEvent) {
+                e.stopPropagation();
+                var id = btn.getAttribute("data-id") || "";
+                if (id) {
+                    var parent = btn.parentElement;
+                    var row = parent ? parent.parentElement as HTMLElement : null;
+                    if (row) { self.startRename(id, row); }
+                }
+            });
+        });
+
+        this.parent.panelElement.appendChild(this.sessionPopup);
+
+        var self2 = this;
+        this.sessionPopup.addEventListener("click", function (e: MouseEvent) {
+            e.stopPropagation();
+        });
+        setTimeout(function () {
+            document.addEventListener("click", function closeOut() {
+                self2.closeSessionMenu();
+                document.removeEventListener("click", closeOut);
+            });
+        }, 10);
+    }
+
+    private startRename(id: string, rowEl: HTMLElement) {
+        var self = this;
+        var titleEl = rowEl.querySelector(".agent-session-popup__title") as HTMLElement;
+        var oldTitle = titleEl.textContent || "";
+        var input = document.createElement("input");
+        input.type = "text";
+        input.value = oldTitle;
+        input.className = "agent-session-popup__rename-input";
+        titleEl.replaceWith(input);
+        input.focus();
+        input.select();
+        input.addEventListener("blur", function () { self.finishRename(id, input.value, input, titleEl); });
+        input.addEventListener("keydown", function (e: KeyboardEvent) {
+            if (e.key === "Enter") { input.blur(); }
+            if (e.key === "Escape") { input.value = oldTitle; input.blur(); }
+        });
+    }
+
+    private async finishRename(id: string, newTitle: string, input: HTMLInputElement, titleEl: HTMLElement) {
+        var title = newTitle.trim() || "AI Agent";
+        input.replaceWith(titleEl);
+        titleEl.textContent = title;
+        await SessionStore.rename(id, title);
+        if (id === this.sessionId) {
+            this.sessionTitle = title;
+            this.titleElement.textContent = title;
+        }
+    }
+
+    private async saveSession() {
+        if (this.messages.length === 0) { return; }
+        var session: AgentSession = {
+            id: this.sessionId,
+            title: this.sessionTitle,
+            messages: this.messages.slice(),
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+        };
+        await SessionStore.save(session);
+    }
+
+    private async switchSession(id: string) {
+        await this.saveSession();
+        var session = await SessionStore.load(id);
+        if (!session) { return; }
+        this.sessionId = session.id;
+        this.sessionTitle = session.title;
+        this.messages = session.messages;
+        this.hasTitled = true;
+        this.currentAIElement = null;
+        this.currentContent = "";
+        this.messagesContainer.innerHTML = "";
+        this.titleElement.textContent = session.title;
+        for (var i = 0; i < session.messages.length; i++) {
+            var msg = session.messages[i];
+            if (msg.role === "user") {
+                this.appendUserMessage(msg.content);
+            } else if (msg.role === "assistant") {
+                this.appendPersistedAssistant(msg.content);
+            }
+        }
+        this.scrollToBottom();
+    }
+
+    private appendPersistedAssistant(content: string) {
+        var el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--ai";
+        el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + '</div>';
+        this.messagesContainer.appendChild(el);
+    }
+
+    private async createSession() {
+        await this.saveSession();
+        this.sessionId = SessionStore.newSessionId();
+        this.sessionTitle = "AI Agent";
+        this.messages = [];
+        this.hasTitled = false;
+        this.currentAIElement = null;
+        this.currentContent = "";
+        this.messagesContainer.innerHTML = "";
+        this.titleElement.textContent = "AI Agent";
+        if (this.composer) { this.composer.clear(); }
+        this.composer?.focus();
+    }
+
+    private async deleteSession(id: string) {
+        this.closeSessionMenu();
+        await SessionStore.remove(id);
+        if (id === this.sessionId) {
+            var list = await SessionStore.list();
+            if (list.length > 0) {
+                await this.switchSession(list[0].id);
+            } else {
+                await this.createSession();
+            }
+        }
     }
 
     private sendMessage() {
@@ -290,6 +517,7 @@ export class AgentChat extends Model {
             this.hasTitled = true;
             this.generateTitle();
         }
+        this.saveSession();
     }
 
     private generateTitle() {
@@ -300,8 +528,10 @@ export class AgentChat extends Model {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({message: firstMsg}),
         }).then(function (resp) { return resp.json(); }).then(function (data) {
-            if (data.code === 0 && data.data) {
+            if (data.code === 0 && data.data && data.data !== self.sessionTitle) {
+                self.sessionTitle = data.data;
                 self.titleElement.textContent = data.data;
+                self.saveSession();
             }
         });
     }
@@ -320,6 +550,7 @@ export class AgentChat extends Model {
         }
         this.currentAIElement = null;
         this.scrollToBottom();
+        this.saveSession();
     }
 
     private stopGeneration() {
@@ -411,17 +642,6 @@ export class AgentChat extends Model {
         for (var i = 0; i < items.length; i++) {
             items[i].remove();
         }
-    }
-
-    private clearSession() {
-        this.messages = [];
-        this.currentAIElement = null;
-        this.currentContent = "";
-        this.hasTitled = false;
-        this.messagesContainer.innerHTML = "";
-        this.titleElement.textContent = "AI Agent";
-        if (this.composer) { this.composer.clear(); }
-        this.composer?.focus();
     }
 
     private setStreaming(streaming: boolean) {

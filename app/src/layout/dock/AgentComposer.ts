@@ -6,10 +6,13 @@ import HardBreak from "@tiptap/extension-hard-break";
 import Mention from "@tiptap/extension-mention";
 import {Placeholder} from "@tiptap/extension-placeholder";
 import {History} from "@tiptap/extension-history";
+import {getIconByType} from "../../editor/getIcon";
 
 interface BlockHit {
     id: string;
     label: string;
+    icon: string;
+    hPath: string;
 }
 
 interface ComposerHandle {
@@ -20,7 +23,14 @@ interface ComposerHandle {
 }
 
 export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHandle {
-    const L = window.siyuan.languages;
+    var L = window.siyuan.languages;
+
+    var escapeHtmlHelper = function (text: string): string {
+        var div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
     let suggestionMenu: HTMLElement | null = null;
     let selectedIndex = 0;
     let suggestionCommand: ((item: BlockHit) => void) | null = null;
@@ -55,7 +65,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
             var row = document.createElement("div");
             row.className = "agent-mention-menu__item";
             row.setAttribute("data-index", i.toString());
-            row.textContent = item.label;
+            var iconSvg = item.icon ? '<svg class="agent-mention-menu__icon"><use xlink:href="#' + item.icon + '"></use></svg>' : '';
+            var hPathText = item.hPath ? '<div class="agent-mention-menu__hpath">' + escapeHtmlHelper(item.hPath) + '</div>' : '';
+            row.innerHTML = '<div class="agent-mention-menu__first">' + iconSvg + '<span class="agent-mention-menu__text">' + escapeHtmlHelper(item.label) + '</span></div>' + hPathText;
             row.addEventListener("mousedown", function (hit: BlockHit) {
                 return function (e: MouseEvent) { e.preventDefault(); command(hit); };
             }(item));
@@ -101,17 +113,24 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                     char: "@",
                     items: async function ({query}): Promise<BlockHit[]> {
                         try {
-                            var resp = await fetch("/api/filetree/searchDocs", {
+                            var resp = await fetch("/api/search/searchRefBlock", {
                                 method: "POST",
                                 headers: {"Content-Type": "application/json"},
-                                body: JSON.stringify({k: query}),
+                                body: JSON.stringify({k: query, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true}),
                             });
                             var data = await resp.json();
-                            var items = data?.data || [];
-                            return items.slice(0, 10).map(function (b: Record<string, unknown>) {
+                            var blocks = data?.data?.blocks || [];
+                            return blocks.slice(0, 10).map(function (b: Record<string, unknown>) {
+                                var id = String(b.id || "");
+                                var raw = String(b.content || b.refText || b.name || id);
+                                var plain = raw.replace(/<[^>]+>/g, "").trim() || id;
+                                var type = String(b.type || "NodeParagraph");
+                                var sub = b.subType ? String(b.subType) : "";
                                 return {
-                                    id: String(b.path || ""),
-                                    label: String(b.hPath || b.path || ""),
+                                    id: id,
+                                    label: plain.slice(0, 80),
+                                    icon: getIconByType(type, sub),
+                                    hPath: String(b.hPath || ""),
                                 };
                             });
                         } catch (e) {

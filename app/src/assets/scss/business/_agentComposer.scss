@@ -51,9 +51,37 @@
     font-size: 13px;
     color: var(--b3-theme-on-background);
     cursor: pointer;
-    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.agent-mention-menu__first {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+}
+
+.agent-mention-menu__icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: var(--b3-theme-on-surface-light);
+}
+
+.agent-mention-menu__text {
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agent-mention-menu__hpath {
+    font-size: 11px;
+    color: var(--b3-theme-on-surface-light);
+    margin-top: 2px;
+    margin-left: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .agent-mention-menu__item:hover,

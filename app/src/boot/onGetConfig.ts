@@ -65,7 +65,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
                     if (section[i] && section[i].type === "agentChat") { found = true; break; }
                 }
                 if (!found) {
-                    section.unshift({type: "agentChat", size: {width: 340, height: 0}, show: false, icon: "iconSparkles", title: "AI Agent"});
+                    section.unshift({type: "agentChat", size: {width: 340, height: 0}, show: false, icon: "iconSparkles", hotkeyLangId: "agentChat"});
                 }
             }
         }

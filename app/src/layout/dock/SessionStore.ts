@@ -22,24 +22,15 @@ function newSessionId(): string {
     return (window as any).Lute ? (window as any).Lute.NewNodeID() : Date.now().toString(36);
 }
 
-async function readTextFile(path: string): Promise<string | null> {
+async function readJsonFile(path: string): Promise<any | null> {
     try {
         var r = await fetchSyncPost("/api/file/getFile", {path: path}) as any;
-        console.log("[SS] getFile full response:", JSON.stringify(r));
-        if (!r || r.code !== 0 || !r.data || r.data === null) {
-            return null;
-        }
-        return r.data;
+        // getFile 返回的是文件内容本身，不是 {code, data} 包装
+        if (!r) { return null; }
+        return r;
     } catch (e) {
-        console.log("[SS] readText error:", path, e);
         return null;
     }
-}
-
-async function readJsonFile(path: string): Promise<any | null> {
-    var text = await readTextFile(path);
-    if (!text) { console.log("[SS] readJson null, path:", path); return null; }
-    try { return JSON.parse(text); } catch (e) { console.log("[SS] readJson parse err:", path, e); return null; }
 }
 
 async function writeJsonFile(path: string, data: any): Promise<void> {

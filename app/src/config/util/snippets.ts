@@ -8,7 +8,7 @@ export const renderSnippet = () => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         response.data.snippets.forEach((item: ISnippet) => {
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
-            let exitElement = document.getElementById(id) as HTMLScriptElement;
+            let exitElement = document.getElementById(id) as HTMLElement;
             if ((!window.siyuan.config.snippet.enabledCSS && item.type === "css") ||
                 (!window.siyuan.config.snippet.enabledJS && item.type === "js")) {
                 if (exitElement) {
@@ -23,13 +23,16 @@ export const renderSnippet = () => {
                 return;
             }
             if (exitElement) {
-                if (exitElement.innerHTML === item.content) {
+                if (exitElement.textContent === item.content) {
                     return;
                 }
                 exitElement.remove();
             }
             if (item.type === "css") {
-                document.head.insertAdjacentHTML("beforeend", `<style id="${id}">${item.content}</style>`);
+                const styleEl = document.createElement("style");
+                styleEl.id = id;
+                styleEl.textContent = item.content;
+                document.head.appendChild(styleEl);
             } else if (item.type === "js") {
                 exitElement = document.createElement("script");
                 exitElement.type = "text/javascript";

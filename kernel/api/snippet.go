@@ -123,6 +123,13 @@ func setSnippet(c *gin.Context) {
 		if "" == snippet.ID {
 			snippet.ID = ast.NewNodeID()
 		}
+		if "css" == snippet.Type {
+			if strings.Contains(strings.ToLower(snippet.Content), "</style") || strings.Contains(strings.ToLower(snippet.Content), "<script") {
+				ret.Code = -1
+				ret.Msg = "invalid css snippet content"
+				return
+			}
+		}
 		snippets = append(snippets, snippet)
 	}
 

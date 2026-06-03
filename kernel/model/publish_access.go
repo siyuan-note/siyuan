@@ -285,7 +285,7 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			return false
 		}
 	}
-	return true
+	return false
 }
 
 func FilterViewByPublishAccess(c *gin.Context, publishAccess PublishAccess, viewable av.Viewable) (ret av.Viewable) {

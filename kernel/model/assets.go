@@ -551,21 +551,8 @@ func GetAssetAbsPath(relativePath string) (string, error) {
 		return absPath, nil
 	}
 
-	// supports URL-encoded local file names
-	unescaped, secondErr := url.PathUnescape(relativePath)
-	if secondErr == nil && unescaped != relativePath {
-		absPathUnescaped, secondErr := getAssetAbsPath(unescaped)
-		if secondErr == nil && absPathUnescaped != "" {
-			return absPathUnescaped, nil
-		}
-	}
-
-	// 优先返回原始路径错误，其次返回反转义路径错误
 	if err != nil {
 		return "", err
-	}
-	if secondErr != nil {
-		return "", secondErr
 	}
 	return "", fmt.Errorf(Conf.Language(12), relativePath)
 }

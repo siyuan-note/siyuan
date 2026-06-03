@@ -28,6 +28,7 @@ import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
 import {focusBlock, focusByWbr} from "../../protyle/util/selection";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
+import {getDocDisplayName} from "../../util/pathName";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -66,7 +67,8 @@ export class Outline extends Model {
                             break;
                         case "rename":
                             if (this.type === "local" && this.blockId === data.data.id) {
-                                this.parent.updateTitle(data.data.title);
+                                this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
+                                this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                             } else {
                                 this.updateDocTitle({
                                     title: data.data.title,
@@ -491,8 +493,9 @@ export class Outline extends Model {
                 if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }
-                docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(ial.title)}</span>${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
-                docTitleElement.setAttribute("title", ial.title);
+                const title = getDocDisplayName(ial.title, ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+                docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(title)}</span>${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
+                docTitleElement.setAttribute("title", title);
                 docTitleElement.classList.remove("fn__none");
             }
             // count 为 -1 时，不对数量进行更新

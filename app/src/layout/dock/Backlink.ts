@@ -11,6 +11,7 @@ import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
 import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkRender";
+import {getDocDisplayName} from "../../util/pathName";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -59,7 +60,7 @@ export class Backlink extends Model {
                     switch (data.cmd) {
                         case "rename":
                             if (this.rootId === data.data.id) {
-                                this.parent.updateTitle(data.data.title);
+                                this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                             }
                             break;
                         case "closeBox":

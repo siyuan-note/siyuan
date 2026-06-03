@@ -13,6 +13,7 @@ import {openGlobalSearch} from "../../search/util";
 import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
+import {getDocDisplayName} from "../../util/pathName";
 
 declare const vis: any;
 
@@ -63,7 +64,7 @@ export class Graph extends Model {
                             if (this.graphData && data.data.box === this.graphData.box && this.rootId === data.data.id) {
                                 this.searchGraph(false);
                                 if (this.type === "local") {
-                                    this.parent.updateTitle(data.data.title);
+                                    this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                 }
                             }
                             if (this.type === "global") {

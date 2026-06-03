@@ -641,18 +641,8 @@ func serveAssets(ginServer *gin.Engine) {
 		relativePath := path.Join("assets", requestPath)
 		p, err := model.GetAssetAbsPath(relativePath)
 		if err != nil {
-			if strings.Contains(strings.TrimPrefix(requestPath, "/"), "/") {
-				// 再使用编码过的路径解析一次 https://github.com/siyuan-note/siyuan/issues/11823
-				dest := url.PathEscape(strings.TrimPrefix(requestPath, "/"))
-				dest = strings.ReplaceAll(dest, ":", "%3A")
-				relativePath = path.Join("assets", dest)
-				p, err = model.GetAssetAbsPath(relativePath)
-			}
-
-			if err != nil {
-				context.Status(http.StatusNotFound)
-				return
-			}
+			context.Status(http.StatusNotFound)
+			return
 		}
 
 		if !model.IsAdminRoleContext(context) {
@@ -661,6 +651,12 @@ func serveAssets(ginServer *gin.Engine) {
 				context.Status(http.StatusForbidden)
 				return
 			}
+		}
+
+		if util.IsSensitivePath(p) {
+			logging.LogErrorf("refuse to serve sensitive file [%s]", context.Request.URL.Path)
+			context.Status(http.StatusForbidden)
+			return
 		}
 
 		if serveThumbnail(context, p, requestPath) || serveSVG(context, p) {

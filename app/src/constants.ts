@@ -722,7 +722,7 @@ export abstract class Constants {
             data: [
                 [{
                     type: "agentChat",
-                    size: {width: 340, height: 0},
+                    size: {width: 320, height: 0},
                     show: false,
                     icon: "iconSparkles",
                     title: "AI Agent",

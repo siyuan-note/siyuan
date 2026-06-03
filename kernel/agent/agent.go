@@ -214,9 +214,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 				continue
 			}
 
+			content := contentBuilder.String()
+			if content == "" {
+				content = " "
+			}
 			messages = append(messages, openai.ChatCompletionMessage{
 				Role:    openai.ChatMessageRoleAssistant,
-				Content: contentBuilder.String(),
+				Content: content,
 			})
 
 			ch <- AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion}

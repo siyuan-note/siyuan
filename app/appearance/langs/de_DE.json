@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Hallo, ich bin der SiYuan Agent",
+  "agentWelcomeDesc": "Ich kann deine Notizen durchsuchen, lesen, erstellen und bearbeiten",
+  "agentExample1": "Durchsuche meine letzten Besprechungsnotizen",
+  "agentExample2": "Erstelle ein neues Tagebuch",
+  "agentExample3": "Finde Notizen zum Projekt",
   "agentConfirmDesc": "Diese Aktion wird {action}: {name}",
   "agentConfirmApprove": "Genehmigen",
   "agentConfirmReject": "Ablehnen",

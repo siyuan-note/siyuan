@@ -104,5 +104,8 @@ func NewAI() *AI {
 	if embeddingAPIKey := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != embeddingAPIKey {
 		openAI.EmbeddingAPIKey = embeddingAPIKey
 	}
+	if embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != embeddingModel {
+		openAI.EmbeddingModel = embeddingModel
+	}
 	return &AI{OpenAI: openAI}
 }

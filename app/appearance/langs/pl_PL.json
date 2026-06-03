@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Cześć, jestem agentem SiYuan",
+  "agentWelcomeDesc": "Mogę wyszukiwać, czytać, tworzyć i edytować Twoje notatki",
+  "agentExample1": "Wyszukaj moje ostatnie notatki ze spotkań",
+  "agentExample2": "Utwórz nowy dziennik",
+  "agentExample3": "Znajdź notatki związane z projektem",
   "agentConfirmDesc": "Potwierdź {action} na: {name}?",
   "agentConfirmApprove": "Zatwierdź",
   "agentConfirmReject": "Odrzuć",

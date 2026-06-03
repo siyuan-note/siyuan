@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "नमस्ते, मैं SiYuan एजेंट हूं",
+  "agentWelcomeDesc": "मैं आपके नोट्स खोज, पढ़, बना और संशोधित कर सकता हूं",
+  "agentExample1": "मेरी हाल की बैठक के नोट्स खोजें",
+  "agentExample2": "एक नई डायरी बनाएं",
+  "agentExample3": "परियोजना से संबंधित नोट्स खोजें",
   "agentConfirmDesc": "{action} किया जाएगा: {name}",
   "agentConfirmApprove": "स्वीकृत करें",
   "agentConfirmReject": "अस्वीकृत करें",

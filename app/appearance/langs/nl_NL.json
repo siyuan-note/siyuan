@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Hallo, ik ben SiYuan Agent",
+  "agentWelcomeDesc": "Ik kan je notities doorzoeken, lezen, maken en bewerken",
+  "agentExample1": "Doorzoek mijn recente vergadernotities",
+  "agentExample2": "Maak een nieuw dagboek",
+  "agentExample3": "Vind notities over het project",
   "agentConfirmDesc": "Bevestig {action} op: {name}?",
   "agentConfirmApprove": "Goedkeuren",
   "agentConfirmReject": "Afwijzen",

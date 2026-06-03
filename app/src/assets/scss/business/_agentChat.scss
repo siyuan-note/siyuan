@@ -1,22 +1,9 @@
 .agent-chat {
-    background: var(--b3-theme-surface);
-}
-
-.agent-chat__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--b3-border-color);
-    min-height: 36px;
-    flex-shrink: 0;
 }
 
 .agent-chat__title {
-    font-weight: 600;
     font-size: 14px;
-    color: var(--b3-theme-on-surface);
+    color: var(--b3-theme-on-background);
 }
 
 .agent-chat__messages {
@@ -26,12 +13,75 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    user-select: text;
+}
+
+.agent-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px 20px;
+    gap: 12px;
+    margin: auto;
+}
+
+.agent-welcome__icon {
+    font-size: 48px;
+    line-height: 1;
+}
+
+.agent-welcome__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-welcome__greeting {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--b3-theme-on-surface);
+    margin-bottom: 4px;
+}
+
+.agent-welcome__desc {
+    font-size: 14px;
+    color: var(--b3-theme-on-surface-light);
+    max-width: 280px;
+    line-height: 1.5;
+}
+
+.agent-welcome__examples {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 300px;
+    margin-top: 8px;
+}
+
+.agent-welcome__example {
+    padding: 10px 14px;
+    background: var(--b3-theme-surface);
+    border: 1px solid var(--b3-border-color);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.agent-welcome__example:hover {
+    background: var(--b3-theme-surface-light);
+    border-color: var(--b3-theme-primary);
 }
 
 .agent-chat__msg {
     display: flex;
     flex-direction: column;
     max-width: 100%;
+    user-select: text;
 }
 
 .agent-chat__msg--user {
@@ -65,6 +115,10 @@
 
 .agent-chat__bubble--streaming {
     min-height: 20px;
+}
+
+.agent-chat__bubble {
+    user-select: text;
 }
 
 .agent-chat__cursor {
@@ -285,6 +339,7 @@
     max-height: 200px;
     overflow-y: auto;
     border-top: 1px solid var(--b3-border-color);
+    user-select: text;
 }
 
 .agent-chat__input-area {
@@ -324,12 +379,6 @@
     justify-content: flex-end;
     gap: 8px;
     margin-top: 6px;
-}
-
-.agent-chat__session-menu {
-    font-size: 14px;
-    padding: 2px 6px;
-    line-height: 1;
 }
 
 .agent-session-popup {

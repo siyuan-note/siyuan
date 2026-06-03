@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Привет, я SiYuan агент",
+  "agentWelcomeDesc": "Я могу искать, читать, создавать и изменять ваши заметки",
+  "agentExample1": "Найти мои недавние заметки о встречах",
+  "agentExample2": "Создать новый дневник",
+  "agentExample3": "Найти заметки по проекту",
   "agentConfirmDesc": "Подтвердить {action} для: {name}?",
   "agentConfirmApprove": "Одобрить",
   "agentConfirmReject": "Отклонить",

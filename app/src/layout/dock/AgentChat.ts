@@ -21,33 +21,45 @@ export class AgentChat extends Model {
     private sessionMenuBtn: HTMLElement;
     private sessionPopup: HTMLElement | null = null;
     private sessionId = "";
-    private sessionTitle = "AI Agent";
+    private sessionTitle = "";
     private messages: IAgentMessage[] = [];
     private hasTitled = false;
     private isStreaming = false;
     private currentAIElement: HTMLElement | null = null;
     private lute: Lute;
     private currentContent = "";
+    private defaultTitle = "";
 
     constructor(app: App, tab: Tab) {
         super({app: app, id: tab.id});
         this.parent = tab;
         this.lute = Lute.New();
+        this.defaultTitle = window.siyuan.languages.agentChat || "Agent";
+        this.sessionTitle = this.defaultTitle;
         this.initUI();
         this.bindEvents();
     }
 
     private initUI() {
         var panel = this.parent.panelElement;
-        panel.classList.add("fn__flex-column", "dockPanel");
+        panel.classList.add("fn__flex-column", "file-tree", "dockPanel");
 
         var L = window.siyuan.languages;
 
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
-    '<div class="agent-chat__header">' +
-        '<span class="agent-chat__title">' + (L.agentChat || "AI Agent") + '</span>' +
-        '<button class="agent-chat__session-menu b3-button b3-button--small b3-button--text">&#9776;</button>' +
-        '<button class="agent-chat__new-session b3-button b3-button--small b3-button--outline">' + (L.agentNewSession || "New Session") + '</button>' +
+    '<div class="block__icons">' +
+        '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + '</div>' +
+        '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
+            '<svg><use xlink:href="#iconAdd"></use></svg>' +
+        '</span>' +
+        '<span class="fn__space"></span>' +
+        '<span data-type="session-menu" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.more || "More") + '">' +
+            '<svg><use xlink:href="#iconMore"></use></svg>' +
+        '</span>' +
+        '<span class="fn__space"></span>' +
+        '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + (window.siyuan.languages.min || "Minimize") + '">' +
+            '<svg><use xlink:href="#iconMin"></use></svg>' +
+        '</span>' +
     '</div>' +
     '<div class="agent-chat__messages fn__flex-1"></div>' +
     '<div class="agent-chat__input-area">' +
@@ -63,13 +75,49 @@ export class AgentChat extends Model {
         this.composerHost = panel.querySelector(".agent-chat__composer-host") as HTMLElement;
         this.sendBtn = panel.querySelector(".agent-chat__send") as HTMLElement;
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
-        this.newSessionBtn = panel.querySelector(".agent-chat__new-session") as HTMLElement;
+        this.newSessionBtn = panel.querySelector('.block__icon[data-type="new-session"]') as HTMLElement;
+        this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
-        this.sessionMenuBtn = panel.querySelector(".agent-chat__session-menu") as HTMLElement;
 
         var self = this;
         this.composer = mountComposer(this.composerHost, function () { self.sendMessage(); });
         this.initSessions();
+    }
+
+    private showWelcome() {
+        var L = window.siyuan.languages;
+        var html = '<div class="agent-welcome">' +
+            '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + '</div>' +
+            '<div class="agent-welcome__desc">' + (L.agentWelcomeDesc || "I can search, read, create, and modify your notes") + '</div>' +
+            '<div class="agent-welcome__examples">' +
+                '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + '</div>' +
+                '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + '</div>' +
+                '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + '</div>' +
+            '</div>' +
+        '</div>';
+        this.messagesContainer.innerHTML = html;
+        var self = this;
+        var examples = this.messagesContainer.querySelectorAll(".agent-welcome__example");
+        for (var i = 0; i < examples.length; i++) {
+            examples[i].addEventListener("click", function (ex: HTMLElement) {
+                return function () {
+                    var text = ex.getAttribute("data-text") || "";
+                    if (text && self.composer) {
+                        // 不支持 setSendText，直接用 sendMessage 发送
+                        self.messages.push({role: "user", content: text});
+                        self.appendUserMessage(text);
+                        self.currentAIElement = self.createAIMessagePlaceholder();
+                        self.setStreaming(true);
+                        var apiMessages = self.messages.map(function (m) { return {role: m.role, content: m.content}; });
+                        self.abortController = new AbortController();
+                        fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
+                            function (event: ISSEResult) { self.handleSSEEvent(event); },
+                            function (err: Error) { self.handleError(err); },
+                            self.abortController.signal);
+                    }
+                };
+            }(examples[i] as HTMLElement));
+        }
     }
 
     private bindEvents() {
@@ -82,8 +130,13 @@ export class AgentChat extends Model {
             self.toggleSessionMenu();
         });
 
-        this.parent.panelElement.addEventListener("click", function () {
-            self.composer?.focus();
+        this.parent.panelElement.addEventListener("click", function (e: MouseEvent) {
+            var t = e.target as HTMLElement;
+            if (t.closest(".agent-chat__msg")) { return; }
+            if (t.closest(".agent-chat__header")) { return; }
+            if (t.closest(".agent-chat__input-area")) { return; }
+            if (t.closest(".agent-session-popup")) { return; }
+            if (self.composer) { self.composer.focus(); }
         });
     }
 
@@ -113,8 +166,9 @@ export class AgentChat extends Model {
             }
         }
         this.sessionId = SessionStore.newSessionId();
-        this.sessionTitle = "AI Agent";
+        this.sessionTitle = this.defaultTitle;
         this.messages = [];
+        this.showWelcome();
     }
 
     private toggleSessionMenu() {
@@ -150,7 +204,7 @@ export class AgentChat extends Model {
                 var s = list[i];
             var isActive = s.id === this.sessionId;
             html += '<div class="agent-session-popup__item' + (isActive ? ' agent-session-popup__item--active' : '') + '" data-id="' + s.id + '">' +
-                '<span class="agent-session-popup__title">' + this.escapeHtml(s.title || "AI Agent") + '</span>' +
+                '<span class="agent-session-popup__title">' + this.escapeHtml(s.title || this.defaultTitle) + '</span>' +
                 '<span class="agent-session-popup__actions">' +
                     '<span class="agent-session-popup__rename" data-id="' + s.id + '">&#9998;</span>' +
                     '<span class="agent-session-popup__delete" data-id="' + s.id + '">&#10005;</span>' +
@@ -223,7 +277,7 @@ export class AgentChat extends Model {
     }
 
     private async finishRename(id: string, newTitle: string, input: HTMLInputElement, titleEl: HTMLElement) {
-        var title = newTitle.trim() || "AI Agent";
+        var title = newTitle.trim() || this.defaultTitle;
         input.replaceWith(titleEl);
         titleEl.textContent = title;
         await SessionStore.rename(id, title);
@@ -278,15 +332,16 @@ export class AgentChat extends Model {
     private async createSession() {
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
-        this.sessionTitle = "AI Agent";
+        this.sessionTitle = this.defaultTitle;
         this.messages = [];
         this.hasTitled = false;
         this.currentAIElement = null;
         this.currentContent = "";
         this.messagesContainer.innerHTML = "";
-        this.titleElement.textContent = "AI Agent";
+        this.titleElement.textContent = this.defaultTitle;
         if (this.composer) { this.composer.clear(); }
-        this.composer?.focus();
+        if (this.composer) { this.composer.focus(); }
+        this.showWelcome();
     }
 
     private async deleteSession(id: string) {
@@ -343,7 +398,8 @@ export class AgentChat extends Model {
                 this.appendThinking(event.reasoning);
                 break;
             case "tool_call":
-                this.appendToolCall(event.name, event.arguments);
+                break;
+            case "tool_result":
                 break;
             case "confirm":
                 this.appendConfirm(event.name, event.arguments, event.confirmID);

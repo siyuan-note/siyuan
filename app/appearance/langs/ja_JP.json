@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "こんにちは、私は SiYuan エージェントです",
+  "agentWelcomeDesc": "ノートの検索、読み取り、作成、編集ができます",
+  "agentExample1": "最近の会議メモを検索",
+  "agentExample2": "新しい日記を作成",
+  "agentExample3": "プロジェクト関連のノートを検索",
   "agentConfirmDesc": "{name} に {action} を実行しますか？",
   "agentConfirmApprove": "承認",
   "agentConfirmReject": "拒否",

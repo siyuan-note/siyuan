@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Привіт, я SiYuan агент",
+  "agentWelcomeDesc": "Я можу шукати, читати, створювати та змінювати ваші нотатки",
+  "agentExample1": "Знайти мої нещодавні нотатки про зустрічі",
+  "agentExample2": "Створити новий щоденник",
+  "agentExample3": "Знайти нотатки про проєкт",
   "agentConfirmDesc": "Підтвердити {action} для: {name}?",
   "agentConfirmApprove": "Підтвердити",
   "agentConfirmReject": "Відхилити",

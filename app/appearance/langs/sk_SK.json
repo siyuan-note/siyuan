@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Ahoj, som SiYuan agent",
+  "agentWelcomeDesc": "Môžem vyhľadávať, čítať, vytvárať a upravovať vaše poznámky",
+  "agentExample1": "Vyhľadať moje nedávne poznámky zo stretnutí",
+  "agentExample2": "Vytvoriť nový denník",
+  "agentExample3": "Nájsť poznámky k projektu",
   "agentConfirmDesc": "Potvrdiť {action} na: {name}?",
   "agentConfirmApprove": "Schváliť",
   "agentConfirmReject": "Odmietnuť",

@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "你好，我是思源智能體",
+  "agentWelcomeDesc": "我可以搜尋、讀取、建立和修改筆記內容",
+  "agentExample1": "搜尋最近的會議記錄",
+  "agentExample2": "幫我寫一篇日記",
+  "agentExample3": "查專案相關的筆記",
   "agentConfirmDesc": "確認對 {name} 執行 {action}？",
   "agentConfirmApprove": "確認執行",
   "agentConfirmReject": "拒絕",

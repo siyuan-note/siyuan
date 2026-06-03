@@ -119,7 +119,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                                 body: JSON.stringify({k: query, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true}),
                             });
                             var data = await resp.json();
-                            var blocks = data?.data?.blocks || [];
+                            var blocks = (data && data.data && data.data.blocks) ? data.data.blocks : [];
                             return blocks.slice(0, 10).map(function (b: Record<string, unknown>) {
                                 var id = String(b.id || "");
                                 var raw = String(b.content || b.refText || b.name || id);

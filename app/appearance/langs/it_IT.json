@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Ciao, sono SiYuan Agent",
+  "agentWelcomeDesc": "Posso cercare, leggere, creare e modificare i tuoi appunti",
+  "agentExample1": "Cerca i miei appunti delle riunioni recenti",
+  "agentExample2": "Crea un nuovo diario",
+  "agentExample3": "Trova appunti sul progetto",
   "agentConfirmDesc": "Confermare {action} su: {name}?",
   "agentConfirmApprove": "Approva",
   "agentConfirmReject": "Rifiuta",

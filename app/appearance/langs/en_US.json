@@ -1,4 +1,9 @@
 {
+  "agentWelcomeGreeting": "Hello, I am SiYuan Agent",
+  "agentWelcomeDesc": "I can search, read, create, and modify your notes",
+  "agentExample1": "Search my recent meeting notes",
+  "agentExample2": "Create a new daily journal",
+  "agentExample3": "Find notes related to the project",
   "agentConfirmDesc": "Confirm {action} on: {name}?",
   "agentConfirmApprove": "Approve",
   "agentConfirmReject": "Reject",

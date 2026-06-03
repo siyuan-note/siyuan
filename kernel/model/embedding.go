@@ -138,7 +138,7 @@ func processPendingEmbeddings() {
 				if (nil != matcher && matcher.MatchesPath("/"+box+path)) ||
 					len(content) < embeddingMinTextLen || len(content) > embeddingMaxContentLen {
 					sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-						id, rootID, box, path, []byte{}, Conf.AI.OpenAI.EmbeddingModel, 0, updated)
+						id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
 					continue
 				}
 				row["plain_text"] = content
@@ -181,7 +181,7 @@ func decodeVector(b []byte) []float32 {
 }
 
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
-	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), Conf.AI.OpenAI.EmbeddingModel, Conf.AI.OpenAI.APITimeout)
+	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
 	if err != nil {
 		return
 	}
@@ -197,7 +197,7 @@ func doEmbedAndStore(texts []string, blocks []map[string]any) {
 		buf := encodeVector(vectors[i])
 
 		err = sql.Exec("INSERT OR REPLACE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-			id, rootID, box, path, buf, Conf.AI.OpenAI.EmbeddingModel, len(plainText), updated)
+			id, rootID, box, path, buf, embeddingModel(), len(plainText), updated)
 		if err != nil {
 			logging.LogErrorf("store embedding failed for block [%s]: %s", id, err)
 		}
@@ -283,7 +283,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), Conf.AI.OpenAI.EmbeddingModel, Conf.AI.OpenAI.APITimeout)
+	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
 	if err != nil || 1 > len(vectors) {
 		logging.LogErrorf("get query embedding failed")
 		return
@@ -414,7 +414,11 @@ func embeddingKey() string {
 	if "" != Conf.AI.OpenAI.EmbeddingAPIKey {
 		return Conf.AI.OpenAI.EmbeddingAPIKey
 	}
-	return os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY")
+	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_API_KEY"); "" != v {
+		Conf.AI.OpenAI.EmbeddingAPIKey = v
+		return v
+	}
+	return ""
 }
 
 func embeddingBaseURL() string {
@@ -422,7 +426,19 @@ func embeddingBaseURL() string {
 		return Conf.AI.OpenAI.EmbeddingBaseURL
 	}
 	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_BASE_URL"); "" != v {
+		Conf.AI.OpenAI.EmbeddingBaseURL = v
 		return v
 	}
 	return Conf.AI.OpenAI.EmbeddingBaseURL
+}
+
+func embeddingModel() string {
+	if "" != Conf.AI.OpenAI.EmbeddingModel {
+		return Conf.AI.OpenAI.EmbeddingModel
+	}
+	if v := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != v {
+		Conf.AI.OpenAI.EmbeddingModel = v
+		return v
+	}
+	return Conf.AI.OpenAI.EmbeddingModel
 }

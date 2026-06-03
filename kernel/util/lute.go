@@ -17,6 +17,7 @@
 package util
 
 import (
+	"html"
 	"strings"
 
 	"github.com/88250/lute"
@@ -112,6 +113,25 @@ func NewStdLute() (ret *lute.Lute) {
 	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
 	ret.SetGFMStrikethrough1(false)
 	return
+}
+
+func ConvertIframeToLink(htmlStr string) string {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlStr))
+	if err != nil {
+		logging.LogErrorf("parse HTML for iframe conversion failed: %s", err)
+		return htmlStr
+	}
+
+	doc.Find("iframe").Each(func(i int, s *goquery.Selection) {
+		if src, exists := s.Attr("src"); exists && strings.TrimSpace(src) != "" {
+			escapedSrc := html.EscapeString(src)
+			s.AfterHtml(`<a href="` + escapedSrc + `" target="_blank">` + escapedSrc + `</a>`)
+		}
+		s.Remove()
+	})
+
+	ret, _ := doc.Find("body").Html()
+	return ret
 }
 
 func LinkTarget(htmlStr, linkBase string) (ret string) {

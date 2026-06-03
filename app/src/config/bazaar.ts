@@ -638,7 +638,7 @@ type="checkbox">
 </div>`;
         if (downloaded && !isUpdateItem) {
             const mdElement = readmeElement.querySelector(".item__readme");
-            mdElement.innerHTML = window.DOMPurify.sanitize(data.preferredReadme || "");
+            mdElement.innerHTML = window.DOMPurify.sanitize(data.preferredReadme || "", {FORBID_TAGS: ["iframe", "frame", "frameset"]});
             highlightRender(mdElement);
         } else {
             fetchPost("/api/bazaar/getBazaarPackageREADME", {
@@ -647,7 +647,7 @@ type="checkbox">
                 packageType: bazaarType
             }, response => {
                 const mdElement = readmeElement.querySelector(".item__readme");
-                mdElement.innerHTML = window.DOMPurify.sanitize(response.data.html);
+                mdElement.innerHTML = window.DOMPurify.sanitize(response.data.html, {FORBID_TAGS: ["iframe", "frame", "frameset"]});
                 highlightRender(mdElement);
             });
         }

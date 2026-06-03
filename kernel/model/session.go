@@ -274,7 +274,7 @@ func CheckAuth(c *gin.Context) {
 		if !localhost ||
 			("" != clientIP && !util.IsLocalHostname(clientIP)) ||
 			("" != host && !util.IsLocalHost(host)) ||
-			("" != origin && !util.IsLocalOrigin(origin) && !strings.HasPrefix(origin, "chrome-extension://")) ||
+			("" != origin && !util.IsLocalOrigin(origin)) ||
 			("" != forwardedHost && !util.IsLocalHost(forwardedHost)) {
 			c.JSON(http.StatusUnauthorized, map[string]any{"code": -1, "msg": "Auth failed: for security reasons, please set [Lock screen password] when using non-127.0.0.1 access\n\n为安全起见，使用非 127.0.0.1 访问时请设置 [锁屏密码]"})
 			c.Abort()

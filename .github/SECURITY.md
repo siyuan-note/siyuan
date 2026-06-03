@@ -11,5 +11,6 @@ Some areas we don't consider security vulnerabilities:
 * SQL injection
 * Pandoc Argument Injection: Allowing the setting of `--lua-filter` is a common user need
 * SSRF `netImg2LocalAssets` / `netAssets2LocalAssets`
+* `/public/` unauthenticated access: The `/public/` route serves files without authentication because it is designed for public sharing (https://github.com/siyuan-note/siyuan/issues/8593), and users are responsible for the security of files they place in the `data/public/` directory
 
 Thank you very much!

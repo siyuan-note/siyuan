@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "正在處理結果...",
   "agentChat": "智能體",
   "agentNewSession": "新會話",
-  "agentInputPlaceholder": "輸入訊息，Enter 送出...",
+  "agentInputPlaceholder": "輸入訊息，@ 引用，Enter 送出...",
   "agentSend": "送出",
   "agentStop": "停止",
   "agentToolCall": "工具呼叫",

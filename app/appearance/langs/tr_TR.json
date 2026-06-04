@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Sonuçlar işleniyor...",
   "agentChat": "Ajan",
   "agentNewSession": "Yeni oturum",
-  "agentInputPlaceholder": "Mesaj yazın, Enter ile gönderin...",
+  "agentInputPlaceholder": "Mesaj yazın, @ ile referans, Enter ile gönderin...",
   "agentSend": "Gönder",
   "agentStop": "Durdur",
   "agentToolCall": "Araç çağrısı",

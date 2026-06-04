@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "結果を処理中...",
   "agentChat": "エージェント",
   "agentNewSession": "新しいセッション",
-  "agentInputPlaceholder": "メッセージを入力、Enterで送信...",
+  "agentInputPlaceholder": "メッセージを入力、@で引用、Enterで送信...",
   "agentSend": "送信",
   "agentStop": "停止",
   "agentToolCall": "ツール呼び出し",

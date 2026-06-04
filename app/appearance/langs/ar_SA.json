@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "جاري معالجة النتائج...",
   "agentChat": "وكيل",
   "agentNewSession": "جلسة جديدة",
-  "agentInputPlaceholder": "اكتب رسالة، Enter للإرسال...",
+  "agentInputPlaceholder": "اكتب رسالة، @ للإشارة، Enter للإرسال...",
   "agentSend": "إرسال",
   "agentStop": "إيقاف",
   "agentToolCall": "استدعاء الأداة",

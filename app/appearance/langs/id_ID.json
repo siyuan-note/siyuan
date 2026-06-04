@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Memproses hasil...",
   "agentChat": "Agen",
   "agentNewSession": "Sesi baru",
-  "agentInputPlaceholder": "Ketik pesan, Enter untuk mengirim...",
+  "agentInputPlaceholder": "Ketik pesan, @ untuk referensi, Enter untuk mengirim...",
   "agentSend": "Kirim",
   "agentStop": "Berhenti",
   "agentToolCall": "Panggilan alat",

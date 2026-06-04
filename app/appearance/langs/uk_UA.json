@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Обробка результатів...",
   "agentChat": "Агент",
   "agentNewSession": "Нова сесія",
-  "agentInputPlaceholder": "Введіть повідомлення, Enter для надсилання...",
+  "agentInputPlaceholder": "Введіть повідомлення, @ для посилання, Enter для надсилання...",
   "agentSend": "Надіслати",
   "agentStop": "Зупинити",
   "agentToolCall": "Виклик інструменту",

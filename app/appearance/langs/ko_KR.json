@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "결과 처리 중...",
   "agentChat": "에이전트",
   "agentNewSession": "새 세션",
-  "agentInputPlaceholder": "메시지를 입력하고 Enter로 전송...",
+  "agentInputPlaceholder": "메시지를 입력하고 @로 참조, Enter로 전송...",
   "agentSend": "보내기",
   "agentStop": "중지",
   "agentToolCall": "도구 호출",

@@ -104,8 +104,13 @@ func initDatabase(forceRebuild bool) {
 
 	// 不存在库或者版本不一致都会走到这里
 
+	closeDatabase()
+	treenode.CloseDatabase()
+	util.RemoveDatabaseFile(util.DBPath)
+	initDBConnection()
 	initDBTables()
-	vacuum()
+	util.RemoveDatabaseFile(util.BlockTreeDBPath)
+	treenode.InitBlockTree(true)
 
 	logging.LogInfof("reinitialized database [%s]", util.DBPath)
 }

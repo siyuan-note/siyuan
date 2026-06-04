@@ -31,7 +31,7 @@ Rules:
 2. Summarize key points instead of listing everything when there are many search results
 3. Ask for confirmation before deleting anything`
 
-const maxToolCallRounds = 5
+const maxToolCallRounds = 30
 
 var confirmChannels = make(map[string]chan bool)
 
@@ -266,7 +266,7 @@ func GenerateTitle(client *openai.Client, model string, msg string) string {
 var safeActions = map[string]bool{
 	"get": true, "get_kramdown": true, "get_children": true, "breadcrumb": true,
 	"tree_stat": true,
-	"list": true, "search_docs": true, "fulltext": true, "backlinks": true,
+	"list":      true, "search_docs": true, "fulltext": true, "backlinks": true,
 	"mentions": true, "labels": true, "status": true, "version": true,
 	"current_time": true, "workspace": true, "md": true, "query": true,
 }
@@ -297,9 +297,13 @@ func buildMessages(history []UserMessage, language string, references []Referenc
 		{Role: openai.ChatMessageRoleSystem, Content: prompt},
 	}
 	for _, msg := range history {
+		content := msg.Content
+		if content == "" {
+			content = " "
+		}
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    msg.Role,
-			Content: msg.Content,
+			Content: content,
 		})
 	}
 	return messages

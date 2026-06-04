@@ -28,6 +28,10 @@ export class AgentChat extends Model {
     private currentAIElement: HTMLElement | null = null;
     private lute: Lute;
     private currentContent = "";
+    private fullContent = "";
+    private sessionPromptTokens = 0;
+    private sessionCompletionTokens = 0;
+    private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
 
     constructor(app: App, tab: Tab) {
@@ -49,6 +53,7 @@ export class AgentChat extends Model {
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
     '<div class="block__icons">' +
         '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + '</div>' +
+        '<span class="agent-chat__tokens fn__none"></span>' +
         '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
         '</span>' +
@@ -78,6 +83,7 @@ export class AgentChat extends Model {
         this.newSessionBtn = panel.querySelector('.block__icon[data-type="new-session"]') as HTMLElement;
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
+        this.tokenDisplayEl = panel.querySelector(".agent-chat__tokens") as HTMLElement;
 
         var self = this;
         this.composer = mountComposer(this.composerHost, function () { self.sendMessage(); });
@@ -134,7 +140,6 @@ export class AgentChat extends Model {
             var t = e.target as HTMLElement;
             if (t.closest(".agent-chat__msg")) { return; }
             if (t.closest(".agent-chat__header")) { return; }
-            if (t.closest(".agent-chat__input-area")) { return; }
             if (t.closest(".agent-session-popup")) { return; }
             if (self.composer) { self.composer.focus(); }
         });
@@ -309,6 +314,12 @@ export class AgentChat extends Model {
         this.hasTitled = true;
         this.currentAIElement = null;
         this.currentContent = "";
+        this.fullContent = "";
+        this.sessionPromptTokens = 0;
+        this.sessionCompletionTokens = 0;
+        if (this.tokenDisplayEl) {
+            this.tokenDisplayEl.classList.add("fn__none");
+        }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = session.title;
         for (var i = 0; i < session.messages.length; i++) {
@@ -337,6 +348,12 @@ export class AgentChat extends Model {
         this.hasTitled = false;
         this.currentAIElement = null;
         this.currentContent = "";
+        this.fullContent = "";
+        this.sessionPromptTokens = 0;
+        this.sessionCompletionTokens = 0;
+        if (this.tokenDisplayEl) {
+            this.tokenDisplayEl.classList.add("fn__none");
+        }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = this.defaultTitle;
         if (this.composer) { this.composer.clear(); }
@@ -398,8 +415,7 @@ export class AgentChat extends Model {
                 this.appendThinking(event.reasoning);
                 break;
             case "tool_call":
-                break;
-            case "tool_result":
+                this.appendToolCall(event.name, event.arguments);
                 break;
             case "confirm":
                 this.appendConfirm(event.name, event.arguments, event.confirmID);
@@ -452,6 +468,7 @@ export class AgentChat extends Model {
             return;
         }
         this.currentContent += token;
+        this.fullContent += token;
         this.clearThinking();
         bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) + '<span class="agent-chat__cursor"></span>';
         this.scrollToBottom();
@@ -539,6 +556,12 @@ export class AgentChat extends Model {
     '</div>' +
     bodyHTML +
 '</div>';
+
+        if (reasoning === "processing" && this.currentAIElement && this.currentContent) {
+            this.finalizeCurrentRound();
+            this.currentAIElement = this.createAIMessagePlaceholder();
+        }
+
         var header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
         var body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
         var arrow = el.querySelector(".agent-chat__thinking-arrow") as HTMLElement;
@@ -549,6 +572,22 @@ export class AgentChat extends Model {
         });
         this.insertBeforeAI(el);
         this.scrollToBottom();
+    }
+
+    private finalizeCurrentRound() {
+        if (!this.currentAIElement) {
+            return;
+        }
+        var bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
+        if (bubble) {
+            var cursor = bubble.querySelector(".agent-chat__cursor");
+            if (cursor) {
+                cursor.remove();
+            }
+            bubble.classList.remove("agent-chat__bubble--streaming");
+        }
+        this.currentAIElement = null;
+        this.currentContent = "";
     }
 
     private finishResponse() {
@@ -564,9 +603,10 @@ export class AgentChat extends Model {
             }
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
-        this.messages.push({role: "assistant", content: this.currentContent});
+        this.messages.push({role: "assistant", content: this.fullContent || " "});
         this.currentAIElement = null;
         this.currentContent = "";
+        this.fullContent = "";
         this.setStreaming(false);
 
         if (!this.hasTitled && this.messages.length >= 2) {
@@ -623,11 +663,12 @@ export class AgentChat extends Model {
                 }
                 bubble.classList.remove("agent-chat__bubble--streaming");
             }
-            if (this.currentContent) {
-                this.messages.push({role: "assistant", content: this.currentContent});
+            if (this.fullContent) {
+                this.messages.push({role: "assistant", content: this.fullContent || " "});
             }
             this.currentAIElement = null;
             this.currentContent = "";
+            this.fullContent = "";
         }
         this.setStreaming(false);
     }
@@ -683,14 +724,13 @@ export class AgentChat extends Model {
     }
 
     private appendUsage(promptTokens: number, completionTokens: number) {
-        var el = document.createElement("div");
-        el.className = "agent-chat__msg agent-chat__msg--usage";
-        var total = promptTokens + completionTokens;
-        el.innerHTML = '<div class="agent-chat__usage">' +
-    '<span>📊 ' + promptTokens + ' prompt + ' + completionTokens + ' completion = ' + total + ' tokens</span>' +
-'</div>';
-        this.messagesContainer.appendChild(el);
-        this.scrollToBottom();
+        this.sessionPromptTokens += promptTokens;
+        this.sessionCompletionTokens += completionTokens;
+        var total = this.sessionPromptTokens + this.sessionCompletionTokens;
+        if (this.tokenDisplayEl) {
+            this.tokenDisplayEl.textContent = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString();
+            this.tokenDisplayEl.classList.remove("fn__none");
+        }
     }
 
     private clearThinking() {

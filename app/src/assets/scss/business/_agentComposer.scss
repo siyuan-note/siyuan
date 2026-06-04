@@ -26,7 +26,7 @@
     margin: 0 2px;
     background: var(--b3-theme-primary-lightest);
     color: var(--b3-theme-primary);
-    border-radius: 4px;
+    border-radius: var(--b3-border-radius);
     font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
@@ -42,8 +42,8 @@
     overflow-y: auto;
     background: var(--b3-theme-background);
     border: 1px solid var(--b3-border-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: var(--b3-border-radius-b);
+    box-shadow: var(--b3-dialog-shadow);
 }
 
 .agent-mention-menu__item {
@@ -57,7 +57,7 @@
 .agent-mention-menu__first {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     overflow: hidden;
 }
 
@@ -75,7 +75,7 @@
 }
 
 .agent-mention-menu__hpath {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--b3-theme-on-surface-light);
     margin-top: 2px;
     margin-left: 20px;

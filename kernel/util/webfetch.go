@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/88250/lute"
 	"github.com/siyuan-note/httpclient"
 )
 
@@ -79,20 +80,48 @@ func WebFetch(rawURL, format string) (string, error) {
 		return truncateRunes(htmlStr, maxWebFetchChars), nil
 	}
 
+	if htmlStr == "" {
+		return "", nil
+	}
+
 	engine := NewLute()
 	var result string
 	switch format {
 	case "text":
-		result = engine.HTML2Text(htmlStr)
+		result, _ = safeHTML2Text(engine, htmlStr)
 	default: // markdown
-		md, mdErr := engine.HTML2Markdown(htmlStr)
+		md, mdErr := safeHTML2Markdown(engine, htmlStr)
 		if mdErr != nil {
 			return "", errors.New("HTML to Markdown conversion failed: " + mdErr.Error())
 		}
 		result = md
 	}
 
+	if result == "" {
+		return htmlStr, nil
+	}
+
 	return truncateRunes(result, maxWebFetchChars), nil
+}
+
+func safeHTML2Markdown(engine *lute.Lute, htmlStr string) (result string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("HTML to Markdown panicked: %v", r)
+		}
+	}()
+	result, err = engine.HTML2Markdown(htmlStr)
+	return
+}
+
+func safeHTML2Text(engine *lute.Lute, htmlStr string) (result string, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("HTML to text panicked: %v", r)
+		}
+	}()
+	result = engine.HTML2Text(htmlStr)
+	return
 }
 
 func truncateRunes(s string, maxChars int) string {

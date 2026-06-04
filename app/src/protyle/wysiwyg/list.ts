@@ -432,7 +432,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
 };
 
 /**
- * 缩进列表
+ * 反向缩进列表
  * @param protyle
  * @param liItemElements
  * @param range
@@ -459,6 +459,10 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     }
     const parentLiItemElement = getParentBlock(liElement);
     const parentParentElement = parentLiItemElement.parentElement;
+    if (parentLiItemElement.classList.contains("protyle-wysiwyg__embed") ||
+        parentParentElement.classList.contains("protyle-wysiwyg__embed")) {
+        return;
+    }
     if (liElement.previousElementSibling?.classList.contains("protyle-action") && !parentParentElement.getAttribute("data-node-id")) {
         // https://ld246.com/article/1691981936960 情况下 zoom in 列表项
         return;

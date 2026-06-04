@@ -25,11 +25,11 @@ import (
 
 var SearchTool = &Tool{
 	Name:        "search",
-	Description: "Full-text search in SiYuan.\n- fulltext: Search blocks by keywords. Required: query. Optional: page (default 1), pageSize (default 20).",
+	Description: "Search in SiYuan.\n- fulltext: Full-text keyword search. Required: query. Optional: page (default 1), pageSize (default 20).\n- semantic: Semantic (vector) search using AI embedding. Required: query. Optional: page (default 1), pageSize (default 20). Note: needs AI embedding configured in SiYuan settings.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation: fulltext", Enum: []string{"fulltext"}},
+			"action":   {Type: "string", Description: "Operation: fulltext or semantic", Enum: []string{"fulltext", "semantic"}},
 			"query":    {Type: "string", Description: "Search keywords"},
 			"page":     {Type: "number", Description: "Page number (default 1)"},
 			"pageSize": {Type: "number", Description: "Results per page (default 20)"},
@@ -48,6 +48,8 @@ func searchHandler(args map[string]interface{}) (CallToolResult, error) {
 	switch action {
 	case "fulltext":
 		return fulltextSearch(args)
+	case "semantic":
+		return semanticSearch(args)
 	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
@@ -78,6 +80,52 @@ func fulltextSearch(args map[string]interface{}) (CallToolResult, error) {
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Found %d results (page %d/%d):\n\n", matchedCount, page, pageCount))
+	for _, b := range blocks {
+		hPath := b.HPath
+		if hPath == "" {
+			hPath = "/"
+		}
+		content := b.Markdown
+		if content == "" {
+			content = b.Content
+		}
+		if len(content) > 200 {
+			content = content[:200] + "..."
+		}
+		sb.WriteString(fmt.Sprintf("- [%s] %s\n  %s\n  id: %s\n\n", hPath, b.Type, content, b.ID))
+	}
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: sb.String()}},
+	}, nil
+}
+
+func semanticSearch(args map[string]interface{}) (CallToolResult, error) {
+	query, _ := args["query"].(string)
+	page := 1
+	if v, ok := args["page"].(float64); ok {
+		page = int(v)
+	}
+	pageSize := 20
+	if v, ok := args["pageSize"].(float64); ok {
+		pageSize = int(v)
+	}
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+
+	blocks, matchedCount, _, pageCount := model.SemanticSearchBlock(
+		query, nil, nil, nil, nil, page, pageSize,
+	)
+
+	if matchedCount == 0 {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "No semantic search results. Make sure AI embedding is configured in SiYuan settings."}}}, nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Found %d semantic results (page %d/%d):\n\n", matchedCount, page, pageCount))
 	for _, b := range blocks {
 		hPath := b.HPath
 		if hPath == "" {

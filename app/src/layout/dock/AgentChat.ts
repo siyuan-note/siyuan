@@ -396,18 +396,22 @@ export class AgentChat extends Model {
             if (tc.result) {
                 const rel = document.createElement("div");
                 rel.className = "agent-chat__msg agent-chat__msg--tool";
-                rel.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + tc.name + '">' +
+                if (tc.name === "todo_write") {
+                    rel.innerHTML = this.renderTodoList(tc.result);
+                } else {
+                    rel.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + tc.name + '">' +
     '<div class="agent-chat__tool-header">' +
         '<span class="agent-chat__tool-icon">&#128196;</span>' +
         '<span class="agent-chat__tool-title">' + (L.agentToolResult || "Tool result") + ": " + tc.name + "</span>" +
     "</div>" +
     '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(tc.result) + "</pre>" +
 "</div>";
-                const rheader = rel.querySelector(".agent-chat__tool-header") as HTMLElement;
-                var rbody = rel.querySelector(".agent-chat__tool-body") as HTMLElement;
-                rheader.addEventListener("click", function () {
-                    rbody.classList.toggle("fn__none");
-                });
+                    const rheader = rel.querySelector(".agent-chat__tool-header") as HTMLElement;
+                    var rbody = rel.querySelector(".agent-chat__tool-body") as HTMLElement;
+                    rheader.addEventListener("click", function () {
+                        rbody.classList.toggle("fn__none");
+                    });
+                }
                 this.messagesContainer.appendChild(rel);
             }
         }
@@ -585,20 +589,49 @@ export class AgentChat extends Model {
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--tool";
         const L = window.siyuan.languages;
-        el.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + name + '">' +
+
+        if (name === "todo_write") {
+            el.innerHTML = this.renderTodoList(result);
+        } else {
+            el.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + name + '">' +
     '<div class="agent-chat__tool-header">' +
         '<span class="agent-chat__tool-icon">&#128196;</span>' +
         '<span class="agent-chat__tool-title">' + (L.agentToolResult || "Tool result") + ": " + name + "</span>" +
     "</div>" +
     '<pre class="agent-chat__tool-body">' + this.escapeHtml(result) + "</pre>" +
 "</div>";
-        const header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
-        const body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
-        header.addEventListener("click", function () {
-            body.classList.toggle("fn__none");
-        });
+            const header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
+            const body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
+            header.addEventListener("click", function () {
+                body.classList.toggle("fn__none");
+            });
+        }
         this.insertBeforeAI(el);
         this.scrollToBottom();
+    }
+
+    private renderTodoList(result: string): string {
+        const lines = result.split("\n");
+        let html = '<div class="agent-chat__tool-card agent-chat__tool-card--todo">' +
+    '<div class="agent-chat__todo-header">' +
+        '<span class="agent-chat__tool-icon">&#128203;</span>' +
+        '<span class="agent-chat__tool-title">' + (window.siyuan.languages.agentTodoList || "Todo List") + "</span>" +
+    "</div>" +
+    '<div class="agent-chat__todo-items">';
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.startsWith("✅")) {
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--completed"><span class="agent-chat__todo-status">✅</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
+            } else if (line.startsWith("🔄")) {
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><span class="agent-chat__todo-status">🔄</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
+            } else if (line.startsWith("❌")) {
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--cancelled"><span class="agent-chat__todo-status">❌</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
+            } else if (line.startsWith("○")) {
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--pending"><span class="agent-chat__todo-status">○</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
+            }
+        }
+        html += "</div></div>";
+        return html;
     }
 
     private appendThinking(reasoning: string) {

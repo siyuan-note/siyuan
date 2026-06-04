@@ -613,3 +613,60 @@
     font-size: 13px;
     color: var(--b3-theme-on-surface-light);
 }
+
+// Todo list styles
+.agent-chat__tool-card--todo {
+    background: var(--b3-card-background);
+    border: 1px solid var(--b3-border-color);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.agent-chat__todo-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--b3-theme-on-surface);
+    border-bottom: 1px solid var(--b3-border-color);
+    background: var(--b3-list-background);
+}
+
+.agent-chat__todo-items {
+    padding: 4px 0;
+}
+
+.agent-chat__todo-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-chat__todo-item--completed {
+    color: var(--b3-font-color2, #999);
+    text-decoration: line-through;
+}
+
+.agent-chat__todo-item--in-progress {
+    color: var(--b3-theme-primary, #3575f0);
+}
+
+.agent-chat__todo-item--pending {
+    color: var(--b3-theme-on-surface);
+}
+
+.agent-chat__todo-item--cancelled {
+    color: var(--b3-font-color2, #999);
+    text-decoration: line-through;
+}
+
+.agent-chat__todo-status {
+    flex-shrink: 0;
+    font-size: 14px;
+}

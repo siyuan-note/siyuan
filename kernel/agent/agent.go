@@ -52,6 +52,14 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Be concise: summarize key findings rather than repeating large amounts of content.
 - Use markdown formatting for readability: bullet points, headings, code blocks for technical content.
 
+## Todo Tracking
+- For multi-step tasks (3+ distinct steps), use the todo_write tool to create a structured task list before starting work. This helps the user see your progress.
+- Each call replaces the entire list. Include all tasks, marking each with the correct status.
+- Status values: pending (not started), in_progress (currently working on), completed (done), cancelled (no longer needed).
+- Mark a task as in_progress before starting work on it, and completed immediately after finishing.
+- Update the todo list whenever status changes — call todo_write with the updated list.
+- Skip todo_write for simple single-step requests. Only use it when there is meaningful multi-step work to track.
+
 ## Safety
 - Confirm before deleting documents, blocks, or data.
 - Confirm before moving or renaming important items.
@@ -284,7 +292,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						}
 					}
 
-					result := executeTool(tc)
+					setCurrentTodoSession(sessionID)
+				result := executeTool(tc)
 
 					ch <- AgentEvent{
 						Type:   "tool_result",

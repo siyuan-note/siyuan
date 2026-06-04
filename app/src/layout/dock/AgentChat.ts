@@ -623,7 +623,7 @@ export class AgentChat extends Model {
             if (line.startsWith("✅")) {
                 html += '<div class="agent-chat__todo-item agent-chat__todo-item--completed"><span class="agent-chat__todo-status">✅</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
             } else if (line.startsWith("🔄")) {
-                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><span class="agent-chat__todo-status">🔄</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><span class="agent-chat__todo-status">🔄</span>' + this.escapeHtml(line.slice(2).trim()) + "</div>";
             } else if (line.startsWith("❌")) {
                 html += '<div class="agent-chat__todo-item agent-chat__todo-item--cancelled"><span class="agent-chat__todo-status">❌</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
             } else if (line.startsWith("○")) {
@@ -847,6 +847,7 @@ export class AgentChat extends Model {
     '<div class="agent-chat__confirm-actions">' +
         '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
         '<button class="b3-button b3-button--text agent-chat__confirm-approve">' + (L.agentConfirmApprove || "Approve") + "</button>" +
+        '<button class="b3-button b3-button--text agent-chat__confirm-always">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
     "</div>" +
 "</div>";
         const approveBtn = el.querySelector(".agent-chat__confirm-approve");
@@ -863,15 +864,26 @@ export class AgentChat extends Model {
             if (btns) { btns.innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentConfirmReject || "Rejected") + "</span>"; }
             self.postConfirm(confirmID, false);
         }); }
+        const alwaysBtn = el.querySelector(".agent-chat__confirm-always");
+        if (alwaysBtn) { alwaysBtn.addEventListener("click", function () {
+            el.classList.add("agent-chat__msg--confirmed");
+            const btns = el.querySelector(".agent-chat__confirm-actions") as HTMLElement;
+            if (btns) { btns.innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentConfirmAlways || "Session Allow") + "</span>"; }
+            self.postConfirm(confirmID, true, true);
+        }); }
         this.insertBeforeAI(el);
         this.scrollToBottom();
     }
 
-    private postConfirm(confirmID: string, approved: boolean) {
+    private postConfirm(confirmID: string, approved: boolean, always?: boolean) {
+        const body: Record<string, unknown> = {confirmID: confirmID, approved: approved};
+        if (always) {
+            body.always = true;
+        }
         fetch("/api/ai/agent/confirm", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({confirmID: confirmID, approved: approved}),
+            body: JSON.stringify(body),
         });
     }
 

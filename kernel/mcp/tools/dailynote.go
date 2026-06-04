@@ -54,7 +54,7 @@ func dailynoteHandler(args map[string]interface{}) (CallToolResult, error) {
 		return dailynotePrepend(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [create, append, prepend]"}},
 		IsError: true,
 	}, nil
 }

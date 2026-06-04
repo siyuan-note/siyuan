@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "מעבד תוצאות...",
   "agentChat": "סוכן",
   "agentNewSession": "הפעלה חדשה",
-  "agentInputPlaceholder": "הקלד הודעה, Enter לשליחה...",
+  "agentInputPlaceholder": "הקלד הודעה, @ להפניה, Enter לשליחה...",
   "agentSend": "שלח",
   "agentStop": "עצור",
   "agentToolCall": "קריאת כלי",

@@ -159,6 +159,18 @@ declare namespace Config {
          */
         apiTimeout: number;
         /**
+         * Agent total session timeout (unit: seconds, 0 = no limit)
+         */
+        agentTimeout?: number;
+        /**
+         * Agent confirmation timeout (unit: seconds), auto-rejects on timeout
+         */
+        agentConfirmTimeout?: number;
+        /**
+         * Agent API maximum retry attempts on failure
+         */
+        agentMaxRetries?: number;
+        /**
          * API request additional user agent field
          */
         apiUserAgent: string;

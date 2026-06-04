@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "परिणाम संसाधित कर रहा है...",
   "agentChat": "एजेंट",
   "agentNewSession": "नया सत्र",
-  "agentInputPlaceholder": "संदेश लिखें, Enter भेजने के लिए...",
+  "agentInputPlaceholder": "संदेश लिखें, @ संदर्भ के लिए, Enter भेजने के लिए...",
   "agentSend": "भेजें",
   "agentStop": "रोकें",
   "agentToolCall": "टूल कॉल",

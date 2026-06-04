@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Spracovanie výsledkov...",
   "agentChat": "Agent",
   "agentNewSession": "Nová relácia",
-  "agentInputPlaceholder": "Napíšte správu, Enter na odoslanie...",
+  "agentInputPlaceholder": "Napíšte správu, @ na odkaz, Enter na odoslanie...",
   "agentSend": "Odoslať",
   "agentStop": "Zastaviť",
   "agentToolCall": "Volanie nástroja",

@@ -69,7 +69,7 @@ func documentHandler(args map[string]interface{}) (CallToolResult, error) {
 		return documentSearchDocs(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, create, list, delete, rename, move, duplicate, search_docs]"}},
 		IsError: true,
 	}, nil
 }

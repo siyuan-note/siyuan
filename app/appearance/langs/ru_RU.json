@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Обработка результатов...",
   "agentChat": "Агент",
   "agentNewSession": "Новая сессия",
-  "agentInputPlaceholder": "Введите сообщение, Enter для отправки...",
+  "agentInputPlaceholder": "Введите сообщение, @ для ссылки, Enter для отправки...",
   "agentSend": "Отправить",
   "agentStop": "Остановить",
   "agentToolCall": "Вызов инструмента",

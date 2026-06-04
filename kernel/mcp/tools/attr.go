@@ -55,7 +55,7 @@ func attrHandler(args map[string]interface{}) (CallToolResult, error) {
 		return attrBatchGet(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, set, batch-get]"}},
 		IsError: true,
 	}, nil
 }

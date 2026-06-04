@@ -43,14 +43,16 @@ func init() {
 
 func sqlHandler(args map[string]interface{}) (CallToolResult, error) {
 	action, _ := args["action"].(string)
-	switch action {
-	case "query":
-		return sqlQuery(args)
+	if action != "query" {
+		if stmt, ok := args["stmt"].(string); ok && stmt != "" {
+			return sqlQuery(args)
+		}
+		return CallToolResult{
+			Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected 'query'"}},
+			IsError: true,
+		}, nil
 	}
-	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
-		IsError: true,
-	}, nil
+	return sqlQuery(args)
 }
 
 func sqlQuery(args map[string]interface{}) (CallToolResult, error) {

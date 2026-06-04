@@ -91,7 +91,7 @@ func databaseHandler(args map[string]interface{}) (CallToolResult, error) {
 		return databaseClean(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [search, get, render, keys, key_add, key_remove, item_add, item_remove, item_update, unused, clean]"}},
 		IsError: true,
 	}, nil
 }

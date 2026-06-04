@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "กำลังประมวลผล...",
   "agentChat": "เอเจนต์",
   "agentNewSession": "เซสชันใหม่",
-  "agentInputPlaceholder": "พิมพ์ข้อความ กด Enter เพื่อส่ง...",
+  "agentInputPlaceholder": "พิมพ์ข้อความ, @ เพื่ออ้างอิง, Enter เพื่อส่ง...",
   "agentSend": "ส่ง",
   "agentStop": "หยุด",
   "agentToolCall": "เรียกใช้เครื่องมือ",

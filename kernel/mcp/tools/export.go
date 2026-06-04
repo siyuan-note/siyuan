@@ -60,7 +60,7 @@ func exportHandler(args map[string]interface{}) (CallToolResult, error) {
 		return exportData(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [md, html, preview, docx, sy, md-zip, data]"}},
 		IsError: true,
 	}, nil
 }

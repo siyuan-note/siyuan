@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Processing results...",
   "agentChat": "Agent",
   "agentNewSession": "New Session",
-  "agentInputPlaceholder": "Type a message, Enter to send...",
+  "agentInputPlaceholder": "Type a message, @ to reference, Enter to send...",
   "agentSend": "Send",
   "agentStop": "Stop",
   "agentToolCall": "Tool call",

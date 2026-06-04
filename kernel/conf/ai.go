@@ -30,31 +30,37 @@ type AI struct {
 }
 
 type OpenAI struct {
-	APIKey           string  `json:"apiKey"`
-	APITimeout       int     `json:"apiTimeout"`
-	APIProxy         string  `json:"apiProxy"`
-	APIModel         string  `json:"apiModel"`
-	APIMaxTokens     int     `json:"apiMaxTokens"`
-	APITemperature   float64 `json:"apiTemperature"`
-	APIMaxContexts   int     `json:"apiMaxContexts"`
-	APIBaseURL       string  `json:"apiBaseURL"`
-	APIUserAgent     string  `json:"apiUserAgent"`
-	APIProvider      string  `json:"apiProvider"` // OpenAI, Azure
-	APIVersion       string  `json:"apiVersion"`  // Azure API version
-	EmbeddingModel   string  `json:"embeddingModel"`
-	EmbeddingBaseURL string  `json:"embeddingBaseURL"`
-	EmbeddingAPIKey  string  `json:"embeddingAPIKey"`
+	APIKey              string  `json:"apiKey"`
+	APITimeout          int     `json:"apiTimeout"`
+	APIProxy            string  `json:"apiProxy"`
+	APIModel            string  `json:"apiModel"`
+	APIMaxTokens        int     `json:"apiMaxTokens"`
+	APITemperature      float64 `json:"apiTemperature"`
+	APIMaxContexts      int     `json:"apiMaxContexts"`
+	APIBaseURL          string  `json:"apiBaseURL"`
+	APIUserAgent        string  `json:"apiUserAgent"`
+	APIProvider         string  `json:"apiProvider"` // OpenAI, Azure
+	APIVersion          string  `json:"apiVersion"`  // Azure API version
+	EmbeddingModel      string  `json:"embeddingModel"`
+	EmbeddingBaseURL    string  `json:"embeddingBaseURL"`
+	EmbeddingAPIKey     string  `json:"embeddingAPIKey"`
+	AgentTimeout        int     `json:"agentTimeout"`        // total session timeout, seconds, 0 = no limit
+	AgentConfirmTimeout int     `json:"agentConfirmTimeout"` // confirmation timeout, seconds
+	AgentMaxRetries     int     `json:"agentMaxRetries"`     // max API retry attempts on failure
 }
 
 func NewAI() *AI {
 	openAI := &OpenAI{
-		APITemperature: 1.0,
-		APIMaxContexts: 7,
-		APITimeout:     30,
-		APIModel:       openai.GPT3Dot5Turbo,
-		APIBaseURL:     "https://api.openai.com/v1",
-		APIUserAgent:   util.UserAgent,
-		APIProvider:    "OpenAI",
+		APITemperature:      1.0,
+		APIMaxContexts:      7,
+		APITimeout:          30,
+		APIModel:            openai.GPT3Dot5Turbo,
+		APIBaseURL:          "https://api.openai.com/v1",
+		APIUserAgent:        util.UserAgent,
+		APIProvider:         "OpenAI",
+		AgentTimeout:        600,
+		AgentConfirmTimeout: 120,
+		AgentMaxRetries:     3,
 	}
 
 	openAI.APIKey = os.Getenv("SIYUAN_OPENAI_API_KEY")
@@ -106,6 +112,21 @@ func NewAI() *AI {
 	}
 	if embeddingModel := os.Getenv("SIYUAN_OPENAI_EMBEDDING_MODEL"); "" != embeddingModel {
 		openAI.EmbeddingModel = embeddingModel
+	}
+	if agentTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_TIMEOUT"); "" != agentTimeout {
+		if v, err := strconv.Atoi(agentTimeout); err == nil {
+			openAI.AgentTimeout = v
+		}
+	}
+	if agentConfirmTimeout := os.Getenv("SIYUAN_OPENAI_AGENT_CONFIRM_TIMEOUT"); "" != agentConfirmTimeout {
+		if v, err := strconv.Atoi(agentConfirmTimeout); err == nil {
+			openAI.AgentConfirmTimeout = v
+		}
+	}
+	if agentMaxRetries := os.Getenv("SIYUAN_OPENAI_AGENT_MAX_RETRIES"); "" != agentMaxRetries {
+		if v, err := strconv.Atoi(agentMaxRetries); err == nil {
+			openAI.AgentMaxRetries = v
+		}
 	}
 	return &AI{OpenAI: openAI}
 }

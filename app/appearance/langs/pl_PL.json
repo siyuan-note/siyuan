@@ -11,7 +11,7 @@
   "agentThinkingProcessing": "Przetwarzanie wyników...",
   "agentChat": "Agent",
   "agentNewSession": "Nowa sesja",
-  "agentInputPlaceholder": "Wpisz wiadomość, Enter aby wysłać...",
+  "agentInputPlaceholder": "Wpisz wiadomość, @ aby odwołać, Enter aby wysłać...",
   "agentSend": "Wyślij",
   "agentStop": "Zatrzymaj",
   "agentToolCall": "Wywołanie narzędzia",

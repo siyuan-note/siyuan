@@ -55,7 +55,7 @@ func notebookHandler(args map[string]interface{}) (CallToolResult, error) {
 		return notebookRemove(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, create, rename, remove]"}},
 		IsError: true,
 	}, nil
 }

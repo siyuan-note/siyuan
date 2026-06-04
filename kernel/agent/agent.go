@@ -18,20 +18,46 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const systemPrompt = `You are a SiYuan AI assistant. You can search, read, create, and modify the user's notes.
+const systemPrompt = `You are a SiYuan AI assistant. You help users manage their notes, documents, and knowledge base through the tools provided.
 
-Rules:
-1. Confirm the user's intent before taking action
-2. Summarize key points instead of listing everything when there are many search results
-3. Ask for confirmation before deleting anything`
+## Domain Concepts
+- Block: the fundamental unit. Everything in SiYuan is a block with a unique ID, including documents themselves. A document block (type: NodeDocument) is the root block of a document. All content blocks (headings, paragraphs, lists, code, tables, etc.) live as children under a document block, forming a tree. Use block.get to read any block by its ID, block.get_children to browse sub-blocks, block.update to modify, block.append/insert to add content, block.delete to remove.
+- Notebook: a top-level container holding documents. Use notebook.list to see all notebooks. Specify notebook ID when creating documents.
+- hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document tools (document.create, document.move, document.list) refers to hPath, not the internal ID-based filesystem path. When a document is renamed, its hPath changes but its ID stays the same.
 
-const maxToolCallRounds = 30
+## Tool Usage Patterns
+- Finding information: search.fulltext (keyword) → block.get (by ID) to read full content. For semantic search use search.semantic.
+- Exploring structure: document.list (see child documents under an hPath) → document.get (read document metadata and content) → block.get_children (list blocks inside a document) → block.get (read a specific block). Use breadcrumb to trace a block's location path.
+- Creating content: document.create specifies the target notebook and hPath to create a document → block.append/prepend/insert to add blocks into the document. Use dataType "markdown" for text content.
+- Modifying content: block.update with a block's ID and new markdown content.
+- Organizing: document.move (change a document's hPath), document.rename (change a document's title), block.move (reposition a block within a document).
+- Attributes/properties: use attr.get/set to read/write custom attributes on any block. Use database tools for spreadsheets/attribute views.
+
+## Response Guidelines
+- Reply in the language indicated by the user.
+- Provide context: when mentioning documents or blocks, include their titles and IDs so the user can reference them.
+- Be concise: summarize key findings rather than repeating large amounts of content.
+- Use markdown formatting for readability: bullet points, headings, code blocks for technical content.
+
+## Safety
+- Confirm before deleting documents, blocks, or data.
+- Confirm before moving or renaming important items.
+- Read operations (get, list, search, query) are always safe and do not need confirmation.
+- Do not expose or log API keys, passwords, or sensitive configuration.`
+
+const maxToolCallRounds = 64
 
 var confirmChannels = make(map[string]chan bool)
 
@@ -53,6 +79,8 @@ type AgentEvent struct {
 	Error            string
 	PromptTokens     int
 	CompletionTokens int
+	RetryAttempt     int
+	RetryMax         int
 }
 
 type UserMessage struct {
@@ -60,12 +88,35 @@ type UserMessage struct {
 	Content string `json:"content"`
 }
 
+type AgentMessage struct {
+	Role      string          `json:"role"`
+	Content   string          `json:"content"`
+	ToolCalls []AgentToolCall `json:"toolCalls,omitempty"`
+}
+
+type AgentToolCall struct {
+	Name      string                 `json:"name"`
+	Arguments map[string]interface{} `json:"arguments"`
+	Result    string                 `json:"result,omitempty"`
+}
+
 type Reference struct {
 	ID    string `json:"id"`
 	Title string `json:"title"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model string, history []UserMessage, language string, references []Reference) <-chan AgentEvent {
+type agentCheckpoint struct {
+	ID               string         `json:"id"`
+	Title            string         `json:"title"`
+	Messages         []AgentMessage `json:"messages"`
+	PromptTokens     int            `json:"promptTokens"`
+	CompletionTokens int            `json:"completionTokens"`
+	TotalDuration    int64          `json:"totalDuration"`
+	CreatedAt        int64          `json:"createdAt"`
+	UpdatedAt        int64          `json:"updatedAt"`
+}
+
+func AgentChat(ctx context.Context, client *openai.Client, model string, sessionID string, history []UserMessage, language string, references []Reference, confirmTimeout time.Duration, maxRetries int) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 100)
 
 	go func() {
@@ -74,6 +125,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 		tools := convertMCPToolsToOpenAI()
 		messages := buildMessages(history, language, references)
 		var totalPrompt, totalCompletion int
+		startTime := time.Now().UnixMilli()
+
+		checkpointMsgs := make([]AgentMessage, 0, len(history))
+		for _, h := range history {
+			checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: h.Role, Content: h.Content})
+		}
 
 		for round := 0; round < maxToolCallRounds; round++ {
 			select {
@@ -98,9 +155,10 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 				MaxCompletionTokens: 4096,
 			}
 
-			stream, err := client.CreateChatCompletionStream(ctx, req)
-			if err != nil {
-				ch <- AgentEvent{Type: "error", Error: "API request failed: " + err.Error()}
+			stream, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, ch)
+			if streamErr != nil {
+				ch <- AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()}
+				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 				return
 			}
 
@@ -161,7 +219,20 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 					ToolCalls: aggregatedToolCalls,
 				})
 
+				checkpointMsg := AgentMessage{
+					Role:    "assistant",
+					Content: contentBuilder.String(),
+				}
 				for _, tc := range aggregatedToolCalls {
+					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{
+						Name:      tc.Function.Name,
+						Arguments: parseToolArgs(tc.Function.Arguments),
+					})
+				}
+				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
+				assistantIdx := len(checkpointMsgs) - 1
+
+				for i, tc := range aggregatedToolCalls {
 					args := parseToolArgs(tc.Function.Arguments)
 					action := ""
 					if a, ok := args["action"]; ok {
@@ -179,21 +250,36 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 						ch <- AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID}
 						ch2 := make(chan bool, 1)
 						confirmChannels[confirmID] = ch2
+						var confirmResult string
+						var approved bool
+						timedOut := false
+
 						select {
-						case approved := <-ch2:
+						case approved = <-ch2:
 							delete(confirmChannels, confirmID)
-							if !approved {
-								ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: "User rejected this operation"}
-								messages = append(messages, openai.ChatCompletionMessage{
-									Role:       openai.ChatMessageRoleTool,
-									Content:    "User rejected this operation",
-									ToolCallID: tc.ID,
-								})
-								continue
-							}
 						case <-ctx.Done():
 							delete(confirmChannels, confirmID)
 							return
+						case <-time.After(confirmTimeout):
+							delete(confirmChannels, confirmID)
+							timedOut = true
+							confirmResult = "Confirmation timed out, operation skipped automatically"
+							ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: confirmResult}
+						}
+
+						if timedOut || !approved {
+							if confirmResult == "" {
+								confirmResult = "User rejected this operation"
+								ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: confirmResult}
+							}
+							messages = append(messages, openai.ChatCompletionMessage{
+								Role:       openai.ChatMessageRoleTool,
+								Content:    confirmResult,
+								ToolCallID: tc.ID,
+							})
+							checkpointMsgs[assistantIdx].ToolCalls[i].Result = confirmResult
+							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
+							continue
 						}
 					}
 
@@ -210,11 +296,15 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 						Content:    result,
 						ToolCallID: tc.ID,
 					})
+					checkpointMsgs[assistantIdx].ToolCalls[i].Result = result
 				}
+				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 				continue
 			}
 
 			content := contentBuilder.String()
+			checkpointMsgs = append(checkpointMsgs, AgentMessage{Role: "assistant", Content: content})
+			saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 			if content == "" {
 				content = " "
 			}
@@ -229,6 +319,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, history
 		}
 
 		ch <- AgentEvent{Type: "usage", PromptTokens: totalPrompt, CompletionTokens: totalCompletion}
+		saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 		ch <- AgentEvent{Type: "done"}
 	}()
 
@@ -354,4 +445,98 @@ func langName(lang string) string {
 	default:
 		return "English"
 	}
+}
+
+func saveCheckpoint(sessionID string, messages []AgentMessage, promptTokens int, completionTokens int, startTime int64) {
+	if sessionID == "" {
+		return
+	}
+
+	cp := agentCheckpoint{
+		ID:               sessionID,
+		Title:            "AI Agent",
+		Messages:         messages,
+		PromptTokens:     promptTokens,
+		CompletionTokens: completionTokens,
+		TotalDuration:    time.Now().UnixMilli() - startTime,
+		CreatedAt:        startTime,
+		UpdatedAt:        time.Now().UnixMilli(),
+	}
+
+	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions")
+	_ = os.MkdirAll(dir, 0755)
+
+	path := filepath.Join(dir, sessionID+".json")
+	existing, err := os.ReadFile(path)
+	if err == nil {
+		var old agentCheckpoint
+		if json.Unmarshal(existing, &old) == nil && old.Title != "" && old.Title != "AI Agent" {
+			cp.Title = old.Title
+		}
+		if old.CreatedAt > 0 {
+			cp.CreatedAt = old.CreatedAt
+		}
+	}
+
+	data, err := json.MarshalIndent(cp, "", "  ")
+	if err != nil {
+		return
+	}
+	_ = filelock.WriteFile(path, data)
+}
+
+func createStreamWithRetry(ctx context.Context, client *openai.Client, req openai.ChatCompletionRequest, maxRetries int, ch chan<- AgentEvent) (*openai.ChatCompletionStream, error) {
+	if maxRetries <= 0 {
+		maxRetries = 1
+	}
+
+	var lastErr error
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		if attempt > 0 {
+			backoff := time.Duration(1<<uint(attempt-1)) * time.Second
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			case <-time.After(backoff):
+			}
+			ch <- AgentEvent{Type: "retry", RetryAttempt: attempt + 1, RetryMax: maxRetries}
+		}
+
+		stream, err := client.CreateChatCompletionStream(ctx, req)
+		if err == nil {
+			return stream, nil
+		}
+
+		lastErr = err
+		if !isRetryableError(err) {
+			return nil, err
+		}
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+	}
+	return nil, lastErr
+}
+
+func isRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	if strings.Contains(msg, "401") || strings.Contains(msg, "Unauthorized") {
+		return false
+	}
+	if strings.Contains(msg, "402") || strings.Contains(msg, "Payment Required") {
+		return false
+	}
+	if strings.Contains(msg, "403") || strings.Contains(msg, "Forbidden") {
+		return false
+	}
+	if strings.Contains(msg, "400") || strings.Contains(msg, "Bad Request") {
+		return false
+	}
+	if strings.Contains(msg, "context canceled") || strings.Contains(msg, "context deadline exceeded") {
+		return false
+	}
+	return true
 }

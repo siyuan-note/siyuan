@@ -56,7 +56,7 @@ func bookmarkHandler(args map[string]interface{}) (CallToolResult, error) {
 		return bookmarkRename(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, labels, remove, rename]"}},
 		IsError: true,
 	}, nil
 }

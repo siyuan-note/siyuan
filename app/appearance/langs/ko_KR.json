@@ -7,6 +7,8 @@
   "agentConfirmDesc": "{name}에 {action}을(를) 실행하시겠습니까?",
   "agentConfirmApprove": "승인",
   "agentConfirmReject": "거부",
+  "agentConfirmAlways": "세션 허용",
+  "agentConfirmAlwaysDesc": "이 세션에서 다시 묻지 않음",
   "agentThinkingAnalyzing": "요청 분석 중...",
   "agentThinkingProcessing": "결과 처리 중...",
   "agentChat": "에이전트",

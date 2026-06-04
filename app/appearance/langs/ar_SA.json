@@ -7,6 +7,8 @@
   "agentConfirmDesc": "سيتم تنفيذ العملية {action} على: {name}",
   "agentConfirmApprove": "موافقة",
   "agentConfirmReject": "رفض",
+  "agentConfirmAlways": "السماح بالجلسة",
+  "agentConfirmAlwaysDesc": "لا تسأل مرة أخرى في هذه الجلسة",
   "agentThinkingAnalyzing": "جاري تحليل طلبك...",
   "agentThinkingProcessing": "جاري معالجة النتائج...",
   "agentChat": "وكيل",

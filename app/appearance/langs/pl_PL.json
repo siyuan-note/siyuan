@@ -7,6 +7,8 @@
   "agentConfirmDesc": "Potwierdź {action} na: {name}?",
   "agentConfirmApprove": "Zatwierdź",
   "agentConfirmReject": "Odrzuć",
+  "agentConfirmAlways": "Zezwól sesję",
+  "agentConfirmAlwaysDesc": "Nie pytaj ponownie w tej sesji",
   "agentThinkingAnalyzing": "Analizowanie żądania...",
   "agentThinkingProcessing": "Przetwarzanie wyników...",
   "agentChat": "Agent",

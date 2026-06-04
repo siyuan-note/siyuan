@@ -7,6 +7,8 @@
   "agentConfirmDesc": "ยืนยัน {action} บน: {name}?",
   "agentConfirmApprove": "อนุมัติ",
   "agentConfirmReject": "ปฏิเสธ",
+  "agentConfirmAlways": "อนุญาตเซสชัน",
+  "agentConfirmAlwaysDesc": "ไม่ต้องถามอีกในเซสชันนี้",
   "agentThinkingAnalyzing": "กำลังวิเคราะห์คำขอ...",
   "agentThinkingProcessing": "กำลังประมวลผล...",
   "agentChat": "เอเจนต์",

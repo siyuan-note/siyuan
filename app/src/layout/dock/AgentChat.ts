@@ -55,7 +55,7 @@ export class AgentChat extends Model {
 
     private initUI() {
         const panel = this.parent.panelElement;
-        panel.classList.add("fn__flex-column", "file-tree", "dockPanel");
+        panel.classList.add("fn__flex-column", "file-tree", "sy__agentChat", "dockPanel");
 
         const L = window.siyuan.languages;
 

@@ -37,7 +37,7 @@ var HistoryTool = &Tool{
 			"op":       {Type: "string", Description: "Operation filter: delete/update/create (for list, search)"},
 			"type":     {Type: "number", Description: "Search type: 0=name,1=content,2=asset,3=docID,4=database (default 1)"},
 			"page":     {Type: "number", Description: "Page number (default 1)"},
-			"path":     {Type: "string", Description: "History path (for get, rollback)"},
+			"path":     {Type: "string", Description: "History path relative to workspace directory (for get, rollback). Obtained from list/search output, e.g. history/2024-03-15-.../docid/..."},
 		},
 		Required: []string{"action"},
 	},

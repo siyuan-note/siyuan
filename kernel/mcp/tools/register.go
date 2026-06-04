@@ -17,6 +17,15 @@
 package tools
 
 var Registry = map[string]*Tool{}
+var currentTodoSessionID string
+
+func SetCurrentTodoSessionID(sessionID string) {
+	currentTodoSessionID = sessionID
+}
+
+func CurrentTodoSessionID() string {
+	return currentTodoSessionID
+}
 
 func register(t *Tool) {
 	Registry[t.Name] = t

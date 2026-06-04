@@ -42,10 +42,10 @@ export async function fetchAgentSSE(
     sessionID?: string,
 ): Promise<void> {
     try {
-        var body: Record<string, unknown> = {messages: messages, language: language, references: references};
+        const body: Record<string, unknown> = {messages: messages, language: language, references: references};
         if (sessionID) { body.sessionID = sessionID; }
 
-        var response = await fetch("/api/ai/agent/chat", {
+        const response = await fetch("/api/ai/agent/chat", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body),
@@ -53,32 +53,32 @@ export async function fetchAgentSSE(
         });
 
         if (!response.ok) {
-            var text = await response.text();
+            const text = await response.text();
             onError(new Error("HTTP " + response.status + ": " + (text || response.statusText)));
             return;
         }
 
-        var reader = response.body ? response.body.getReader() : null;
+        const reader = response.body ? response.body.getReader() : null;
         if (!reader) {
             onError(new Error("Response body is not readable"));
             return;
         }
 
-        var decoder = new TextDecoder();
-        var buffer = "";
-        var currentEvent = "";
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let currentEvent = "";
 
         while (true) {
-            var readResult = await reader.read();
+            const readResult = await reader.read();
             if (readResult.done) {
                 break;
             }
 
             buffer += decoder.decode(readResult.value, {stream: true});
-            var lines = buffer.split("\n");
+            const lines = buffer.split("\n");
             buffer = lines.pop() || "";
 
-            for (var i = 0; i < lines.length; i++) {
+            for (let i = 0; i < lines.length; i++) {
                 var line = lines[i];
                 if (line.indexOf("event:") === 0) {
                     currentEvent = line.slice(6).trim();
@@ -91,7 +91,7 @@ export async function fetchAgentSSE(
                             if (result) {
                                 onEvent(result);
                             }
-                         } catch (e) {
+                        } catch (e) {
                             // skip malformed data
                         }
                     }
@@ -99,8 +99,27 @@ export async function fetchAgentSSE(
                 }
             }
         }
+
+        buffer += decoder.decode();
+        if (buffer) {
+            var line = buffer.trim();
+            if (line.indexOf("data:") === 0 && currentEvent) {
+                var dataStr = line.slice(5).trim();
+                if (dataStr) {
+                    try {
+                        var data = JSON.parse(dataStr);
+                        var result = buildSSEResult(currentEvent, data);
+                        if (result) {
+                            onEvent(result);
+                        }
+                    } catch (e) {
+                        // skip malformed data
+                    }
+                }
+            }
+        }
     } catch (err) {
-        var e = err as Error;
+        const e = err as Error;
         if (e.name !== "AbortError") {
             onError(e);
         }

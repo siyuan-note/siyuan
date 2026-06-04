@@ -39,23 +39,14 @@ func convertMCPToolsToOpenAI() []openai.Tool {
 	return result
 }
 
+func setCurrentTodoSession(sessionID string) {
+	tools.SetCurrentTodoSessionID(sessionID)
+}
+
 func convertSchema(schema tools.ToolSchema) any {
 	props := make(map[string]any)
 	for name, prop := range schema.Properties {
-		p := map[string]any{
-			"type": prop.Type,
-		}
-		if prop.Description != "" {
-			p["description"] = prop.Description
-		}
-		if len(prop.Enum) > 0 {
-			enumVals := make([]any, len(prop.Enum))
-			for i, v := range prop.Enum {
-				enumVals[i] = v
-			}
-			p["enum"] = enumVals
-		}
-		props[name] = p
+		props[name] = convertProperty(prop)
 	}
 
 	schemaMap := map[string]any{
@@ -70,6 +61,40 @@ func convertSchema(schema tools.ToolSchema) any {
 		schemaMap["required"] = reqVals
 	}
 	return schemaMap
+}
+
+func convertProperty(prop tools.Property) map[string]any {
+	p := map[string]any{
+		"type": prop.Type,
+	}
+	if prop.Description != "" {
+		p["description"] = prop.Description
+	}
+	if len(prop.Enum) > 0 {
+		enumVals := make([]any, len(prop.Enum))
+		for i, v := range prop.Enum {
+			enumVals[i] = v
+		}
+		p["enum"] = enumVals
+	}
+	if prop.Items != nil {
+		p["items"] = convertProperty(*prop.Items)
+	}
+	if len(prop.Properties) > 0 {
+		nested := make(map[string]any)
+		for k, v := range prop.Properties {
+			nested[k] = convertProperty(v)
+		}
+		p["properties"] = nested
+	}
+	if len(prop.Required) > 0 {
+		reqVals := make([]any, len(prop.Required))
+		for i, v := range prop.Required {
+			reqVals[i] = v
+		}
+		p["required"] = reqVals
+	}
+	return p
 }
 
 func executeTool(toolCall openai.ToolCall) string {

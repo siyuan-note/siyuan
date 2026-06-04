@@ -36,13 +36,14 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Block: the fundamental unit. Everything in SiYuan is a block with a unique ID, including documents themselves. A document block (type: NodeDocument) is the root block of a document. All content blocks (headings, paragraphs, lists, code, tables, etc.) live as children under a document block, forming a tree. Use block.get to read any block by its ID, block.get_children to browse sub-blocks, block.update to modify, block.append/insert to add content, block.delete to remove.
 - Notebook: a top-level container holding documents. Use notebook.list to see all notebooks. Specify notebook ID when creating documents.
 - hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document tools (document.create, document.move, document.list) refers to hPath, not the internal ID-based filesystem path. When a document is renamed, its hPath changes but its ID stays the same.
+- Document vs block move: document.move performs full document relocation — it moves a document (and its children) to a new parent hPath in a notebook. Requires: id, notebook, path. The notebook ID can be found via document.get (field: Box). block.move repositions a single block under a new parent block — use this for moving content blocks, not entire documents.
 
 ## Tool Usage Patterns
 - Finding information: search.fulltext (keyword) → block.get (by ID) to read full content. For semantic search use search.semantic.
 - Exploring structure: document.list (see child documents under an hPath) → document.get (read document metadata and content) → block.get_children (list blocks inside a document) → block.get (read a specific block). Use breadcrumb to trace a block's location path.
 - Creating content: document.create specifies the target notebook and hPath to create a document → block.append/prepend/insert to add blocks into the document. Use dataType "markdown" for text content.
 - Modifying content: block.update with a block's ID and new markdown content.
-- Organizing: document.move (change a document's hPath), document.rename (change a document's title), block.move (reposition a block within a document).
+- Organizing: document.move (full document relocation to a new hPath, needs notebook ID from document.get). document.rename changes a document's title (hPath follows). block.move repositions a single block under a new parent — for content blocks, not entire documents. document.delete removes a document by ID.
 - Attributes/properties: use attr.get/set to read/write custom attributes on any block. Use database tools for spreadsheets/attribute views.
 
 ## Response Guidelines
@@ -50,6 +51,14 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Provide context: when mentioning documents or blocks, include their titles and IDs so the user can reference them.
 - Be concise: summarize key findings rather than repeating large amounts of content.
 - Use markdown formatting for readability: bullet points, headings, code blocks for technical content.
+
+## Todo Tracking
+- For multi-step tasks (3+ distinct steps), use the todo_write tool to create a structured task list before starting work. This helps the user see your progress.
+- Each call replaces the entire list. Include all tasks, marking each with the correct status.
+- Status values: pending (not started), in_progress (currently working on), completed (done), cancelled (no longer needed).
+- Mark a task as in_progress before starting work on it, and completed immediately after finishing.
+- Update the todo list whenever status changes — call todo_write with the updated list.
+- Skip todo_write for simple single-step requests. Only use it when there is meaningful multi-step work to track.
 
 ## Safety
 - Confirm before deleting documents, blocks, or data.
@@ -283,7 +292,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						}
 					}
 
-					result := executeTool(tc)
+					setCurrentTodoSession(sessionID)
+				result := executeTool(tc)
 
 					ch <- AgentEvent{
 						Type:   "tool_result",
@@ -327,8 +337,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 }
 
 func GenerateTitle(client *openai.Client, model string, msg string) string {
-	if len(msg) > 500 {
-		msg = msg[:500]
+	runes := []rune(msg)
+	if len(runes) > 500 {
+		msg = string(runes[:500])
 	}
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 		Model: model,
@@ -339,15 +350,17 @@ func GenerateTitle(client *openai.Client, model string, msg string) string {
 		MaxTokens: 30,
 	})
 	if err != nil || len(resp.Choices) == 0 {
-		if len(msg) > 30 {
-			return msg[:30] + "..."
+		runes = []rune(msg)
+		if len(runes) > 30 {
+			return string(runes[:30]) + "..."
 		}
 		return msg
 	}
 	title := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if title == "" {
-		if len(msg) > 30 {
-			return msg[:30] + "..."
+		runes = []rune(msg)
+		if len(runes) > 30 {
+			return string(runes[:30]) + "..."
 		}
 		return msg
 	}
@@ -376,7 +389,7 @@ func needsConfirm(toolName string, action string) bool {
 }
 
 func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
-	var prompt = systemPrompt + "\n\nReply in " + langName(language) + "."
+	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>\n\nReply in " + langName(language) + "."
 	if len(references) > 0 {
 		prompt += "\n\nThe user has referenced the following content blocks:\n"
 		for _, ref := range references {

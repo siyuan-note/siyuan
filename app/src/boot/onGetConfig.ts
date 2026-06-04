@@ -58,10 +58,10 @@ export const onGetConfig = (isStart: boolean, app: App) => {
         // 为已有用户添加 agent chat 停靠按钮
         if (window.siyuan.config.uiLayout && window.siyuan.config.uiLayout.right &&
             window.siyuan.config.uiLayout.right.data && window.siyuan.config.uiLayout.right.data.length > 0) {
-            var section = window.siyuan.config.uiLayout.right.data[0];
+            const section = window.siyuan.config.uiLayout.right.data[0];
             if (section) {
-                var found = false;
-                for (var i = 0; i < section.length; i++) {
+                let found = false;
+                for (let i = 0; i < section.length; i++) {
                     if (section[i] && section[i].type === "agentChat") { found = true; break; }
                 }
                 if (!found) {

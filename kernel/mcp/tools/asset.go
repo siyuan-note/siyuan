@@ -33,7 +33,7 @@ var AssetTool = &Tool{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"upload", "unused", "clean"}},
 			"id":     {Type: "string", Description: "Document block ID (for upload)"},
 			"files":  {Type: "string", Description: "Comma-separated absolute file paths (for upload)"},
-			"path":   {Type: "string", Description: "Single unused asset path to remove (for clean, optional)"},
+			"path":   {Type: "string", Description: "Single unused asset path to remove, relative to data directory (for clean, optional). Use as returned by the unused action, e.g. assets/image/xxx.png."},
 		},
 		Required: []string{"action"},
 	},

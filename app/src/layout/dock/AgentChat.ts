@@ -548,7 +548,7 @@ export class AgentChat extends Model {
         this.currentContent += token;
         this.fullContent += token;
         this.clearThinking();
-        bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent);
+        bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
         this.scrollToBottom();
     }
 
@@ -635,9 +635,14 @@ export class AgentChat extends Model {
     bodyHTML +
 "</div>";
 
-        if (reasoning === "processing" && this.currentAIElement && this.currentContent) {
-            this.finalizeCurrentRound();
-            this.currentAIElement = this.createAIMessagePlaceholder();
+        if (reasoning === "processing" && this.currentAIElement) {
+            if (this.currentContent) {
+                this.finalizeCurrentRound();
+                this.currentAIElement = this.createAIMessagePlaceholder();
+            } else {
+                this.currentAIElement.remove();
+                this.currentAIElement = null;
+            }
         }
 
         const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
@@ -669,6 +674,24 @@ export class AgentChat extends Model {
             return;
         }
         this.clearThinking();
+        if (!this.currentContent) {
+            this.currentAIElement.remove();
+            this.currentAIElement = null;
+            this.currentContent = "";
+            this.fullContent = "";
+            this.currentToolCalls = [];
+            if (this.requestStartTime) {
+                this.sessionTotalDuration += Date.now() - this.requestStartTime;
+                this.requestStartTime = 0;
+            }
+            this.setStreaming(false);
+            if (!this.hasTitled && this.messages.length >= 2) {
+                this.hasTitled = true;
+                this.generateTitle();
+            }
+            this.saveSession();
+            return;
+        }
         const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
@@ -709,11 +732,14 @@ export class AgentChat extends Model {
 
     private appendError(message: string) {
         this.clearThinking();
+        if (this.currentAIElement && !this.currentContent) {
+            this.currentAIElement.remove();
+        }
+        this.currentAIElement = null;
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--error";
         el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--error">' + this.escapeHtml(message) + "</div>";
-        this.insertBeforeAI(el);
-        this.currentAIElement = null;
+        this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         this.saveSession();
     }
@@ -744,12 +770,13 @@ export class AgentChat extends Model {
             }
             if (this.fullContent) {
                 this.messages.push({role: "assistant", content: this.fullContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
+            } else {
+                this.currentAIElement.remove();
             }
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
         this.currentToolCalls = [];
-            this.currentToolCalls = [];
         }
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;

@@ -31,7 +31,7 @@ var ImportTool = &Tool{
 			"action":     {Type: "string", Description: "Operation", Enum: []string{"md", "sy", "data"}},
 			"notebook":   {Type: "string", Description: "Notebook ID (for md, sy)"},
 			"path":       {Type: "string", Description: "Absolute local file path"},
-			"targetPath": {Type: "string", Description: "Target internal path (for md, sy; default /)"},
+			"targetPath": {Type: "string", Description: "Target internal filesystem path (for md, sy; default /). This is the ID-based path like /2022...ws.sy, not hPath."},
 		},
 		Required: []string{"action"},
 	},

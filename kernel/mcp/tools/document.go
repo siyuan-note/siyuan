@@ -18,23 +18,23 @@ package tools
 
 import (
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
 var DocumentTool = &Tool{
 	Name:        "document",
-	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (e.g. /folder/doc), title. Optional: markdown.\n- list: List documents in a notebook path. Requires: notebook. Optional: path (default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/path. Requires: id, notebook, path.\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.",
+	Description: "Document operations for SiYuan notebooks.\n- get: Get document content by ID. Requires: id.\n- create: Create a new document. Requires: notebook, path (hPath, e.g. /folder/doc), title. Optional: markdown.\n- list: List documents at an hPath. Requires: notebook. Optional: path (hPath, default /).\n- delete: Delete a document by ID. Requires: id.\n- rename: Rename a document by ID. Requires: id, title.\n- move: Move a document to a different notebook/hPath. Requires: id, notebook, path (target hPath, e.g. /folder or / for root).\n- duplicate: Duplicate a document by ID. Requires: id.\n- search_docs: Search documents by keyword. Requires: keyword.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"action":   {Type: "string", Description: "Operation", Enum: []string{"get", "create", "list", "delete", "rename", "move", "duplicate", "search_docs"}},
 			"id":       {Type: "string", Description: "Document block ID"},
 			"title":    {Type: "string", Description: "Document title (for create, rename)"},
-			"path":     {Type: "string", Description: "Document path like /folder/doc (for create, list, move)"},
+			"path":     {Type: "string", Description: "Document hPath, the human-readable path shown in the document tree (e.g. /folder/doc). Used for create, list, move."},
 			"markdown": {Type: "string", Description: "Initial markdown content (for create)"},
 			"keyword":  {Type: "string", Description: "Search keyword (for search_docs)"},
 			"notebook": {Type: "string", Description: "Notebook ID (required for create, list, move)"},
@@ -101,28 +101,46 @@ func documentCreate(args map[string]interface{}) (CallToolResult, error) {
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
 	}
-	p, _ := args["path"].(string)
-	if p == "" {
+	hPath, _ := args["path"].(string)
+	if hPath == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
 	}
 	markdown, _ := args["markdown"].(string)
 	title, _ := args["title"].(string)
 	if title == "" {
-		title = p
+		title = hPath
 		if strings.Contains(title, "/") {
 			parts := strings.Split(strings.TrimRight(title, "/"), "/")
 			title = parts[len(parts)-1]
 		}
 	}
 
+	parentPath := "/"
+	parentDir := parentDir(hPath)
+	if parentDir != "/" {
+		bt := treenode.GetBlockTreeRootByHPath(notebook, parentDir)
+		if bt == nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parent path not found: " + parentDir}}, IsError: true}, nil
+		}
+		parentPath = strings.TrimSuffix(bt.Path, ".sy")
+	}
+
 	id := ast.NewNodeID()
-	docPath := path.Join(path.Dir(p), id+".sy")
+	docPath := parentPath + "/" + id + ".sy"
 	tree, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("create doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document created: %s (path: %s)", tree.Root.ID, p)}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document created: %s (hPath: %s)", tree.Root.ID, hPath)}}}, nil
+}
+
+func parentDir(p string) string {
+	i := strings.LastIndex(p, "/")
+	if i <= 0 {
+		return "/"
+	}
+	return p[:i]
 }
 
 func documentList(args map[string]interface{}) (CallToolResult, error) {
@@ -130,20 +148,29 @@ func documentList(args map[string]interface{}) (CallToolResult, error) {
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
 	}
-	path, _ := args["path"].(string)
-	if path == "" {
-		path = "/"
+	hPath, _ := args["path"].(string)
+	if hPath == "" {
+		hPath = "/"
 	}
 
-	files, _, err := model.ListDocTree(notebook, path, 0, false, false, 128)
+	fsPath := hPath
+	if hPath != "/" {
+		bt := treenode.GetBlockTreeRootByHPath(notebook, hPath)
+		if bt == nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "target path not found: " + hPath}}, IsError: true}, nil
+		}
+		fsPath = bt.Path
+	}
+
+	files, _, err := model.ListDocTree(notebook, fsPath, 0, false, false, 128)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("list docs failed: %s", err)}}, IsError: true}, nil
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Documents in %s%s:\n\n", notebook, path))
+	sb.WriteString(fmt.Sprintf("Documents in %s (hPath: %s):\n\n", notebook, hPath))
 	for _, f := range files {
-		sb.WriteString(fmt.Sprintf("- %s (id: %s, path: %s)\n", f.Name, f.ID, f.Path))
+		sb.WriteString(fmt.Sprintf("- %s (id: %s, hPath: %s)\n", f.Name, f.ID, hPath+"/"+f.Name))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
@@ -185,8 +212,8 @@ func documentRename(args map[string]interface{}) (CallToolResult, error) {
 func documentMove(args map[string]interface{}) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	notebook, _ := args["notebook"].(string)
-	path, _ := args["path"].(string)
-	if id == "" || notebook == "" || path == "" {
+	hPath, _ := args["path"].(string)
+	if id == "" || notebook == "" || hPath == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id, notebook and path are required"}}, IsError: true}, nil
 	}
 
@@ -195,11 +222,20 @@ func documentMove(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("load doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	if err := model.MoveDocs([]string{tree.Path}, notebook, path, nil); err != nil {
+	fsPath := hPath
+	if hPath != "/" {
+		bt := treenode.GetBlockTreeRootByHPath(notebook, hPath)
+		if bt == nil {
+			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "target path not found: " + hPath}}, IsError: true}, nil
+		}
+		fsPath = bt.Path
+	}
+
+	if err := model.MoveDocs([]string{tree.Path}, notebook, fsPath, nil); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("move doc failed: %s", err)}}, IsError: true}, nil
 	}
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document moved: %s -> %s%s", id, notebook, path)}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("document moved: %s -> %s (hPath: %s)", id, notebook, hPath)}}}, nil
 }
 
 func documentDuplicate(args map[string]interface{}) (CallToolResult, error) {

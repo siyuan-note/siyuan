@@ -5,6 +5,7 @@ import {fetchAgentSSE, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {getDockByType} from "../tabUtil";
+import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 
 interface IAgentMessage {
     role: "user" | "assistant";
@@ -70,7 +71,7 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconMore"></use></svg>' +
         "</span>" +
         '<span class="fn__space"></span>' +
-        '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + (window.siyuan.languages.min || "Minimize") + '">' +
+        '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.min + updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom) + '">' +
             '<svg><use xlink:href="#iconMin"></use></svg>' +
         "</span>" +
     "</div>" +

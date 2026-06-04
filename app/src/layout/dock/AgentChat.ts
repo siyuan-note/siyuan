@@ -59,7 +59,7 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
 
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
-    '<div class="block__icons">' +
+    '<div class="block__icons fn__hidescrollbar">' +
         '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + "</div>" +
         '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
@@ -77,7 +77,7 @@ export class AgentChat extends Model {
     '<div class="agent-chat__input-area">' +
         '<div class="agent-chat__composer-host"></div>' +
         '<div class="agent-chat__buttons">' +
-            '<span class="agent-chat__tokens" style="display:none"></span>' +
+            '<span class="agent-chat__tokens fn__none"></span>' +
             '<button class="agent-chat__send b3-button b3-button--text">' + (L.agentSend || "Send") + "</button>" +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none">' + (L.agentStop || "Stop") + "</button>" +
         "</div>" +
@@ -422,7 +422,7 @@ export class AgentChat extends Model {
         this.sessionTotalDuration = 0;
         this.currentToolCalls = [];
         if (this.tokenDisplayEl) {
-            this.tokenDisplayEl.style.display = "none";
+            this.tokenDisplayEl.classList.add("fn__none");
         }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = this.defaultTitle;
@@ -851,7 +851,7 @@ export class AgentChat extends Model {
             text += " \u00B7 " + (minutes > 0 ? minutes + "m" : "") + seconds + "s";
         }
         this.tokenDisplayEl.textContent = text;
-        this.tokenDisplayEl.style.display = "";
+        this.tokenDisplayEl.classList.remove("fn__none");
     }
 
     private appendUsage(promptTokens: number, completionTokens: number) {
@@ -872,8 +872,7 @@ export class AgentChat extends Model {
         this.sendBtn.classList.toggle("fn__none", streaming);
         this.stopBtn.classList.toggle("fn__none", !streaming);
         if (this.composerHost) {
-            this.composerHost.style.pointerEvents = streaming ? "none" : "";
-            this.composerHost.style.opacity = streaming ? "0.5" : "";
+            this.composerHost.classList.toggle("agent-chat__composer-host--disabled", streaming);
         }
     }
 

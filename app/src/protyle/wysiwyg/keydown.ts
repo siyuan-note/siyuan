@@ -166,11 +166,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // https://github.com/siyuan-note/siyuan/issues/2261
         if (!["⌘", "⇧", "⌥", "⌃"].includes(Constants.KEYCODELIST[event.keyCode])) {
-            if (Constants.KEYCODELIST[event.keyCode] === "/" ||
-                // 德语
-                event.key === "/" ||
-                // windows 中文
-                (event.code === "Slash" && event.key === "Process" && event.keyCode === 229)) {
+            if ((Constants.KEYCODELIST[event.keyCode] === "/" ||
+                    // 德语
+                    event.key === "/" ||
+                    // windows 中文
+                    (event.code === "Slash" && event.key === "Process" && event.keyCode === 229)) &&
+                !isInEmbedBlock(nodeElement)) {
                 protyle.hint.enableSlash = true;
             } else if (Constants.KEYCODELIST[event.keyCode] === "\\" ||
                 // 德语
@@ -554,7 +555,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !protyle.hint.element.classList.contains("fn__none") && protyle.hint.select(event, protyle)) {
             return;
         }
-        if (matchHotKey("⌘/", event)) {
+        if (matchHotKey("⌘/", event) && !isInEmbedBlock(nodeElement)) {
             event.stopPropagation();
             event.preventDefault();
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));

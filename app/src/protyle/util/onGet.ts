@@ -442,9 +442,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         }
     });
     protyle.wysiwyg.element.querySelectorAll('[contenteditable="false"][spellcheck]').forEach(item => {
-        if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
-            item.setAttribute("contenteditable", "true");
-        }
+        item.setAttribute("contenteditable", "true");
     });
     protyle.wysiwyg.element.querySelectorAll('.protyle-action[draggable="false"]').forEach(item => {
         item.setAttribute("draggable", "true");

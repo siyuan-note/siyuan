@@ -64,7 +64,6 @@ import {openGlobalSearch} from "../../search/util";
 /// #else
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
-import {BlockPanel} from "../../block/Panel";
 import {copyPlainText, encodeBase64, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -1848,10 +1847,12 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/11793
+            // https://github.com/siyuan-note/siyuan/issues/17800 不能删除
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
-                nodeElement = embedElement;
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
             event.stopPropagation();
             event.preventDefault();
@@ -2921,51 +2922,46 @@ export class WYSIWYG {
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
             if (embedItemElement) {
-                const embedId = embedItemElement.getAttribute("data-id");
-                checkFold(embedId, (zoomIn, action) => {
-                    /// #if MOBILE
-                    mobileBlur = true;
-                    activeBlur();
-                    openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-                    /// #else
-                    if (event.shiftKey) {
-                        openFileById({
-                            app: protyle.app,
-                            id: embedId,
-                            position: "bottom",
-                            action,
-                            zoomIn
-                        });
-                    } else if (event.altKey) {
-                        openFileById({
-                            app: protyle.app,
-                            id: embedId,
-                            position: "right",
-                            action,
-                            zoomIn
-                        });
-                    } else if (ctrlIsPressed) {
-                        openFileById({
-                            app: protyle.app,
-                            id: embedId,
-                            action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
-                            zoomIn,
-                            keepCursor: true,
-                        });
-                    } else if (!protyle.disabled) {
-                        window.siyuan.blockPanels.push(new BlockPanel({
-                            app: protyle.app,
-                            targetElement: embedItemElement,
-                            isBacklink: false,
-                            refDefs: [{refID: embedId}]
-                        }));
+                if (event.shiftKey || event.altKey || ctrlIsPressed) {
+                    const embedId = embedItemElement.getAttribute("data-id");
+                    checkFold(embedId, (zoomIn, action) => {
+                        /// #if MOBILE
+                        mobileBlur = true;
+                        activeBlur();
+                        openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        /// #else
+                        if (event.shiftKey) {
+                            openFileById({
+                                app: protyle.app,
+                                id: embedId,
+                                position: "bottom",
+                                action,
+                                zoomIn
+                            });
+                        } else if (event.altKey) {
+                            openFileById({
+                                app: protyle.app,
+                                id: embedId,
+                                position: "right",
+                                action,
+                                zoomIn
+                            });
+                        } else if (ctrlIsPressed) {
+                            openFileById({
+                                app: protyle.app,
+                                id: embedId,
+                                action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT],
+                                zoomIn,
+                                keepCursor: true,
+                            });
+                        }
+                        /// #endif
+                    });
+                    // https://github.com/siyuan-note/siyuan/issues/12585
+                    if (!ctrlIsPressed) {
+                        event.stopPropagation();
+                        return;
                     }
-                    /// #endif
-                });
-                // https://github.com/siyuan-note/siyuan/issues/12585
-                if (!ctrlIsPressed) {
-                    event.stopPropagation();
-                    return;
                 }
             }
 

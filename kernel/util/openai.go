@@ -123,6 +123,26 @@ func newAddHeaderTransport(transport *http.Transport, userAgent string) *AddHead
 	return &AddHeaderTransport{RoundTripper: transport, UserAgent: userAgent}
 }
 
+func IsNetworkError(err error) bool {
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "actively refused") ||
+		strings.Contains(msg, "connection refused") ||
+		strings.Contains(msg, "no such host") ||
+		strings.Contains(msg, "connection failed") ||
+		strings.Contains(msg, "hostname resolution") ||
+		strings.Contains(msg, "no address associated with hostname") ||
+		strings.Contains(msg, "request canceled while waiting for connection") ||
+		strings.Contains(msg, "exceeded while awaiting") ||
+		strings.Contains(msg, "context deadline exceeded") ||
+		strings.Contains(msg, "timeout") ||
+		strings.Contains(msg, "connection") ||
+		strings.Contains(msg, "refused") ||
+		strings.Contains(msg, "socket") ||
+		strings.Contains(msg, "eof") ||
+		strings.Contains(msg, "closed") ||
+		strings.Contains(msg, "network")
+}
+
 func BatchGetEmbeddings(texts []string, apiKey, baseURL, model string, timeout int) (ret [][]float32, err error) {
 	if 1 > len(texts) {
 		return

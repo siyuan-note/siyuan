@@ -23,10 +23,10 @@ interface ComposerHandle {
 }
 
 export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHandle {
-    var L = window.siyuan.languages;
+    const L = window.siyuan.languages;
 
-    var escapeHtmlHelper = function (text: string): string {
-        var div = document.createElement("div");
+    const escapeHtmlHelper = function (text: string): string {
+        const div = document.createElement("div");
         div.textContent = text;
         return div.innerHTML;
     };
@@ -48,8 +48,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
 
     const updateHighlight = () => {
         if (!suggestionMenu) { return; }
-        var items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
-        for (var i = 0; i < items.length; i++) {
+        const items = suggestionMenu.querySelectorAll(".agent-mention-menu__item");
+        for (let i = 0; i < items.length; i++) {
             items[i].classList.toggle("agent-mention-menu__item--active", i === selectedIndex);
         }
     };
@@ -60,14 +60,14 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
 
         suggestionMenu = document.createElement("div");
         suggestionMenu.className = "agent-mention-menu";
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var row = document.createElement("div");
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const row = document.createElement("div");
             row.className = "agent-mention-menu__item";
             row.setAttribute("data-index", i.toString());
-            var iconSvg = item.icon ? '<svg class="agent-mention-menu__icon"><use xlink:href="#' + item.icon + '"></use></svg>' : '';
-            var hPathText = item.hPath ? '<div class="agent-mention-menu__hpath">' + escapeHtmlHelper(item.hPath) + '</div>' : '';
-            row.innerHTML = '<div class="agent-mention-menu__first">' + iconSvg + '<span class="agent-mention-menu__text">' + escapeHtmlHelper(item.label) + '</span></div>' + hPathText;
+            const iconSvg = item.icon ? '<svg class="agent-mention-menu__icon"><use xlink:href="#' + item.icon + '"></use></svg>' : "";
+            const hPathText = item.hPath ? '<div class="agent-mention-menu__hpath">' + escapeHtmlHelper(item.hPath) + "</div>" : "";
+            row.innerHTML = '<div class="agent-mention-menu__first">' + iconSvg + '<span class="agent-mention-menu__text">' + escapeHtmlHelper(item.label) + "</span></div>" + hPathText;
             row.addEventListener("mousedown", function (hit: BlockHit) {
                 return function (e: MouseEvent) { e.preventDefault(); command(hit); };
             }(item));
@@ -80,10 +80,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
         selectedIndex = 0;
         updateHighlight();
         if (clientRect) {
-            var rect = clientRect();
-            var top = rect.top + rect.height + 4;
-            var left = rect.left;
-            var menuHeight = suggestionMenu.offsetHeight;
+            const rect = clientRect();
+            let top = rect.top + rect.height + 4;
+            const left = rect.left;
+            const menuHeight = suggestionMenu.offsetHeight;
             if (top + menuHeight > window.innerHeight && rect.top > menuHeight + 4) {
                 top = rect.top - menuHeight - 4;
             }
@@ -106,26 +106,26 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
             Mention.configure({
                 HTMLAttributes: {class: "agent-mention-chip"},
                 renderText: ({node}) => {
-                    var label = node.attrs.label || node.attrs.id || "";
+                    const label = node.attrs.label || node.attrs.id || "";
                     return "@" + label;
                 },
                 suggestion: {
                     char: "@",
                     items: async function ({query}): Promise<BlockHit[]> {
                         try {
-                            var resp = await fetch("/api/search/searchRefBlock", {
+                            const resp = await fetch("/api/search/searchRefBlock", {
                                 method: "POST",
                                 headers: {"Content-Type": "application/json"},
                                 body: JSON.stringify({k: query, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true}),
                             });
-                            var data = await resp.json();
-                            var blocks = (data && data.data && data.data.blocks) ? data.data.blocks : [];
+                            const data = await resp.json();
+                            const blocks = (data && data.data && data.data.blocks) ? data.data.blocks : [];
                             return blocks.slice(0, 10).map(function (b: Record<string, unknown>) {
-                                var id = String(b.id || "");
-                                var raw = String(b.content || b.refText || b.name || id);
-                                var plain = raw.replace(/<[^>]+>/g, "").trim() || id;
-                                var type = String(b.type || "NodeParagraph");
-                                var sub = b.subType ? String(b.subType) : "";
+                                const id = String(b.id || "");
+                                const raw = String(b.content || b.refText || b.name || id);
+                                const plain = raw.replace(/<[^>]+>/g, "").trim() || id;
+                                const type = String(b.type || "NodeParagraph");
+                                const sub = b.subType ? String(b.subType) : "";
                                 return {
                                     id: id,
                                     label: plain.slice(0, 80),
@@ -138,7 +138,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                         }
                     },
                     command: function ({editor: ed, range, props}) {
-                        var hit = props as BlockHit;
+                        const hit = props as BlockHit;
                         ed.chain().focus().insertContentAt(range, [
                             {type: "mention", attrs: {id: hit.id, label: hit.label}},
                             {type: "text", text: " "},
@@ -178,7 +178,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                                 if (props.event.key === "Enter") {
                                     props.event.preventDefault();
                                     if (suggestionItems.length > 0 && suggestionCommand) {
-                                        var idx = selectedIndex;
+                                        const idx = selectedIndex;
                                         if (idx >= 0 && idx < suggestionItems.length) {
                                             suggestionCommand(suggestionItems[idx]);
                                         }
@@ -213,8 +213,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
         focus: function () { editor.commands.focus(); },
         destroy: function () { closeMenu(); editor.destroy(); },
         getSendData: function () {
-            var refs: {id: string; title: string}[] = [];
-            var textParts: string[] = [];
+            const refs: {id: string; title: string}[] = [];
+            const textParts: string[] = [];
             editor.state.doc.descendants(function (node) {
                 if (node.type.name === "mention") {
                     refs.push({id: node.attrs.id, title: node.attrs.label});

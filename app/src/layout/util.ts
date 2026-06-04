@@ -232,7 +232,7 @@ const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
         }
         if (existSubItem.hotkeyLangId) {
             existSubItem.title = window.siyuan.languages[existSubItem.hotkeyLangId];
-            var km = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId];
+            const km = window.siyuan.config.keymap.general[existSubItem.hotkeyLangId];
             existSubItem.hotkey = km ? km.custom : "";
         }
     });

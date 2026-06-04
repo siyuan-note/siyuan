@@ -36,13 +36,14 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Block: the fundamental unit. Everything in SiYuan is a block with a unique ID, including documents themselves. A document block (type: NodeDocument) is the root block of a document. All content blocks (headings, paragraphs, lists, code, tables, etc.) live as children under a document block, forming a tree. Use block.get to read any block by its ID, block.get_children to browse sub-blocks, block.update to modify, block.append/insert to add content, block.delete to remove.
 - Notebook: a top-level container holding documents. Use notebook.list to see all notebooks. Specify notebook ID when creating documents.
 - hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document tools (document.create, document.move, document.list) refers to hPath, not the internal ID-based filesystem path. When a document is renamed, its hPath changes but its ID stays the same.
+- Reorganizing: use document.move to change a document's parent and hPath, document.rename to change a document's title (hPath follows). use block.move(id, parentID, previousID) to move any block to any new parent, even across documents. Moving a document block via block.move has the same effect as document.move.
 
 ## Tool Usage Patterns
 - Finding information: search.fulltext (keyword) → block.get (by ID) to read full content. For semantic search use search.semantic.
 - Exploring structure: document.list (see child documents under an hPath) → document.get (read document metadata and content) → block.get_children (list blocks inside a document) → block.get (read a specific block). Use breadcrumb to trace a block's location path.
 - Creating content: document.create specifies the target notebook and hPath to create a document → block.append/prepend/insert to add blocks into the document. Use dataType "markdown" for text content.
 - Modifying content: block.update with a block's ID and new markdown content.
-- Organizing: document.move (change a document's hPath), document.rename (change a document's title), block.move (reposition a block within a document).
+- Organizing: document.move changes which parent document a doc belongs to, altering its hPath. document.rename changes a document's title (hPath follows). block.move repositions a block under a new parent — the parent can be in the same document or a different one.
 - Attributes/properties: use attr.get/set to read/write custom attributes on any block. Use database tools for spreadsheets/attribute views.
 
 ## Response Guidelines
@@ -327,8 +328,9 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 }
 
 func GenerateTitle(client *openai.Client, model string, msg string) string {
-	if len(msg) > 500 {
-		msg = msg[:500]
+	runes := []rune(msg)
+	if len(runes) > 500 {
+		msg = string(runes[:500])
 	}
 	resp, err := client.CreateChatCompletion(context.Background(), openai.ChatCompletionRequest{
 		Model: model,
@@ -339,15 +341,17 @@ func GenerateTitle(client *openai.Client, model string, msg string) string {
 		MaxTokens: 30,
 	})
 	if err != nil || len(resp.Choices) == 0 {
-		if len(msg) > 30 {
-			return msg[:30] + "..."
+		runes = []rune(msg)
+		if len(runes) > 30 {
+			return string(runes[:30]) + "..."
 		}
 		return msg
 	}
 	title := strings.TrimSpace(resp.Choices[0].Message.Content)
 	if title == "" {
-		if len(msg) > 30 {
-			return msg[:30] + "..."
+		runes = []rune(msg)
+		if len(runes) > 30 {
+			return string(runes[:30]) + "..."
 		}
 		return msg
 	}

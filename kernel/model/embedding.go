@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 	"unsafe"
 
@@ -52,6 +53,8 @@ var (
 	embeddingIgnoreLoaded  bool
 	embeddingIgnoreMatcher *ignore.GitIgnore
 	embeddingIgnoreLock    sync.Mutex
+
+	embeddingStop atomic.Bool
 )
 
 func checkEmbeddingTable() bool {
@@ -99,6 +102,8 @@ func processPendingEmbeddings() {
 		return
 	}
 
+	embeddingStop.Store(false)
+
 	workCh := make(chan embeddingJob, embeddingMaxConcurrency*2)
 
 	var workersWg sync.WaitGroup
@@ -107,6 +112,9 @@ func processPendingEmbeddings() {
 		go func() {
 			defer workersWg.Done()
 			for job := range workCh {
+				if embeddingStop.Load() {
+					continue
+				}
 				doEmbedAndStore(job.texts, job.blocks)
 			}
 		}()
@@ -115,6 +123,10 @@ func processPendingEmbeddings() {
 	go func() {
 		defer close(workCh)
 		for {
+			if embeddingStop.Load() {
+				return
+			}
+
 			results, err := sql.QueryNoLimit(stmtPendingBlocks)
 			if err != nil {
 				logging.LogErrorf("query pending embedding blocks failed: %s", err)
@@ -183,6 +195,9 @@ func decodeVector(b []byte) []float32 {
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
 	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), Conf.AI.OpenAI.APITimeout)
 	if err != nil {
+		if util.IsNetworkError(err) {
+			embeddingStop.Store(true)
+		}
 		return
 	}
 

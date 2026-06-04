@@ -534,7 +534,7 @@ ${genHintItemHTML(item)}
             }
             return;
         }
-        this.enableExtend = false;
+        this.enableExtend = value === "emoji";
         let id = "";
         if (nodeElement) {
             id = nodeElement.getAttribute("data-node-id");
@@ -1065,7 +1065,8 @@ ${genHintItemHTML(item)}
             return undefined;
         }
         // 上一次提示没有结束时不能被其余提示干扰 https://github.com/siyuan-note/siyuan/issues/14324
-        if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar) {
+        if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar &&
+            !(["/", "、"].includes(prevSplit) && this.splitChar === ":")) {
             this.splitChar = prevSplit;
             this.lastIndex = prevLastIndex;
         }

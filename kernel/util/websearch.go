@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/siyuan-note/httpclient"
+	"github.com/siyuan-note/logging"
 )
 
 const (
@@ -77,7 +78,7 @@ func WebSearch(query, exaApiKey string) (string, error) {
 		},
 	}
 
-	resp, err := httpclient.NewBrowserRequest().SetBody(reqBody).Post(exaURL)
+	resp, err := httpclient.NewBrowserRequest().SetHeader("Accept", "application/json, text/event-stream").SetBody(reqBody).Post(exaURL)
 	if err != nil {
 		return "", errors.New("web search failed: " + err.Error())
 	}
@@ -88,6 +89,13 @@ func WebSearch(query, exaApiKey string) (string, error) {
 		return "", errors.New("web search read response failed: " + err.Error())
 	}
 	body := string(bodyBytes)
+
+	preview := body
+	if len(preview) > 500 {
+		preview = body[:500]
+	}
+	logging.LogInfof("websearch response: status=%d, len=%d, preview=%s", resp.StatusCode, len(body), preview)
+
 	text := parseMcpResponse(body)
 	if text == "" {
 		return "No search results found. Please try a different query.", nil

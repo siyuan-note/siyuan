@@ -4,6 +4,7 @@ import {App} from "../../index";
 import {fetchAgentSSE, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
 import {AgentSession, SessionStore} from "./SessionStore";
+import {getDockByType} from "../tabUtil";
 
 interface IAgentMessage {
     role: "user" | "assistant";
@@ -149,6 +150,10 @@ export class AgentChat extends Model {
             if (t.closest(".agent-chat__msg")) { return; }
             if (t.closest(".agent-chat__header")) { return; }
             if (t.closest(".agent-session-popup")) { return; }
+            if (t.closest('[data-type="min"]')) {
+                getDockByType("agentChat").toggleModel("agentChat", false, true);
+                return;
+            }
             if (self.composer) { self.composer.focus(); }
         });
     }
@@ -432,13 +437,16 @@ export class AgentChat extends Model {
     }
 
     private async deleteSession(id: string) {
-        this.closeSessionMenu();
         await SessionStore.remove(id);
+        this.closeSessionMenu();
         if (id === this.sessionId) {
             const list = await SessionStore.list();
+            this.messages = [];
             if (list.length > 0) {
+                this.sessionId = list[0].id;
                 await this.switchSession(list[0].id);
             } else {
+                this.sessionId = SessionStore.newSessionId();
                 await this.createSession();
             }
         }

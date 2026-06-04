@@ -380,7 +380,7 @@ func needsConfirm(toolName string, action string) bool {
 }
 
 func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
-	var prompt = systemPrompt + "\n\nReply in " + langName(language) + "."
+	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>\n\nReply in " + langName(language) + "."
 	if len(references) > 0 {
 		prompt += "\n\nThe user has referenced the following content blocks:\n"
 		for _, ref := range references {

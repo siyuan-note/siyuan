@@ -19,6 +19,8 @@ package util
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"net/url"
 	"strings"
 
 	"github.com/siyuan-note/httpclient"
@@ -55,9 +57,9 @@ type mcpContent struct {
 }
 
 func WebSearch(query, exaApiKey string) (string, error) {
-	url := defaultExaURL
+	exaURL := defaultExaURL
 	if exaApiKey != "" {
-		url += "?exaApiKey=" + exaApiKey
+		exaURL += "?exaApiKey=" + url.QueryEscape(exaApiKey)
 	}
 
 	reqBody := mcpRequest{
@@ -75,13 +77,17 @@ func WebSearch(query, exaApiKey string) (string, error) {
 		},
 	}
 
-	resp, err := httpclient.NewBrowserRequest().SetBody(reqBody).Post(url)
+	resp, err := httpclient.NewBrowserRequest().SetBody(reqBody).Post(exaURL)
 	if err != nil {
 		return "", errors.New("web search failed: " + err.Error())
 	}
 	defer resp.Body.Close()
 
-	body := resp.String()
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", errors.New("web search read response failed: " + err.Error())
+	}
+	body := string(bodyBytes)
 	text := parseMcpResponse(body)
 	if text == "" {
 		return "No search results found. Please try a different query.", nil

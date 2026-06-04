@@ -31,7 +31,7 @@ Rules:
 2. Summarize key points instead of listing everything when there are many search results
 3. Ask for confirmation before deleting anything`
 
-const maxToolCallRounds = 30
+const maxToolCallRounds = 64
 
 var confirmChannels = make(map[string]chan bool)
 

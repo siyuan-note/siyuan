@@ -9,12 +9,8 @@
 .agent-chat__tokens {
     font-size: 11px;
     color: var(--b3-theme-on-surface-light);
-    background: var(--b3-theme-surface-light);
-    border-radius: 10px;
-    padding: 1px 8px;
     flex-shrink: 0;
-    margin-right: 4px;
-    line-height: 18px;
+    align-self: center;
 }
 
 .agent-chat__messages {

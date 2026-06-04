@@ -14,6 +14,9 @@ export interface AgentSession {
     id: string;
     title: string;
     messages: Array<{role: string; content: string}>;
+    promptTokens?: number;
+    completionTokens?: number;
+    totalDuration?: number;
     createdAt: number;
     updatedAt: number;
 }

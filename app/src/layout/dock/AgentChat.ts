@@ -31,6 +31,8 @@ export class AgentChat extends Model {
     private fullContent = "";
     private sessionPromptTokens = 0;
     private sessionCompletionTokens = 0;
+    private sessionTotalDuration = 0;
+    private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
 
@@ -53,7 +55,6 @@ export class AgentChat extends Model {
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
     '<div class="block__icons">' +
         '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + '</div>' +
-        '<span class="agent-chat__tokens fn__none"></span>' +
         '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
             '<svg><use xlink:href="#iconAdd"></use></svg>' +
         '</span>' +
@@ -70,6 +71,7 @@ export class AgentChat extends Model {
     '<div class="agent-chat__input-area">' +
         '<div class="agent-chat__composer-host"></div>' +
         '<div class="agent-chat__buttons">' +
+            '<span class="agent-chat__tokens" style="display:none"></span>' +
             '<button class="agent-chat__send b3-button b3-button--text">' + (L.agentSend || "Send") + '</button>' +
             '<button class="agent-chat__stop b3-button b3-button--cancel fn__none">' + (L.agentStop || "Stop") + '</button>' +
         '</div>' +
@@ -157,7 +159,11 @@ export class AgentChat extends Model {
                 this.sessionTitle = session.title;
                 this.messages = session.messages;
                 this.hasTitled = true;
+                this.sessionPromptTokens = session.promptTokens || 0;
+                this.sessionCompletionTokens = session.completionTokens || 0;
+                this.sessionTotalDuration = session.totalDuration || 0;
                 this.titleElement.textContent = session.title;
+                this.updateTokenDisplay();
                 for (var i = 0; i < session.messages.length; i++) {
                     var msg = session.messages[i];
                     if (msg.role === "user") {
@@ -298,6 +304,9 @@ export class AgentChat extends Model {
             id: this.sessionId,
             title: this.sessionTitle,
             messages: this.messages.slice(),
+            promptTokens: this.sessionPromptTokens,
+            completionTokens: this.sessionCompletionTokens,
+            totalDuration: this.sessionTotalDuration,
             createdAt: Date.now(),
             updatedAt: Date.now(),
         };
@@ -315,10 +324,11 @@ export class AgentChat extends Model {
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
-        this.sessionPromptTokens = 0;
-        this.sessionCompletionTokens = 0;
+        this.sessionPromptTokens = session.promptTokens || 0;
+        this.sessionCompletionTokens = session.completionTokens || 0;
+        this.sessionTotalDuration = session.totalDuration || 0;
         if (this.tokenDisplayEl) {
-            this.tokenDisplayEl.classList.add("fn__none");
+            this.updateTokenDisplay();
         }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = session.title;
@@ -351,8 +361,9 @@ export class AgentChat extends Model {
         this.fullContent = "";
         this.sessionPromptTokens = 0;
         this.sessionCompletionTokens = 0;
+        this.sessionTotalDuration = 0;
         if (this.tokenDisplayEl) {
-            this.tokenDisplayEl.classList.add("fn__none");
+            this.tokenDisplayEl.style.display = "none";
         }
         this.messagesContainer.innerHTML = "";
         this.titleElement.textContent = this.defaultTitle;
@@ -389,6 +400,7 @@ export class AgentChat extends Model {
         this.messages.push({role: "user", content: text});
         this.appendUserMessage(text);
 
+        this.requestStartTime = Date.now();
         this.currentAIElement = this.createAIMessagePlaceholder();
 
         var apiMessages = this.messages.map(function (m) { return {role: m.role, content: m.content}; });
@@ -453,7 +465,7 @@ export class AgentChat extends Model {
         this.currentContent = "";
         var el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--ai";
-        el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--streaming"><span class="agent-chat__cursor"></span></div>';
+        el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--streaming"></div>';
         this.messagesContainer.appendChild(el);
         this.scrollToBottom();
         return el;
@@ -470,7 +482,7 @@ export class AgentChat extends Model {
         this.currentContent += token;
         this.fullContent += token;
         this.clearThinking();
-        bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) + '<span class="agent-chat__cursor"></span>';
+        bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent);
         this.scrollToBottom();
     }
 
@@ -580,10 +592,6 @@ export class AgentChat extends Model {
         }
         var bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (bubble) {
-            var cursor = bubble.querySelector(".agent-chat__cursor");
-            if (cursor) {
-                cursor.remove();
-            }
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
         this.currentAIElement = null;
@@ -597,16 +605,16 @@ export class AgentChat extends Model {
         this.clearThinking();
         var bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (bubble) {
-            var cursor = bubble.querySelector(".agent-chat__cursor");
-            if (cursor) {
-                cursor.remove();
-            }
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
         this.messages.push({role: "assistant", content: this.fullContent || " "});
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
+        if (this.requestStartTime) {
+            this.sessionTotalDuration += Date.now() - this.requestStartTime;
+            this.requestStartTime = 0;
+        }
         this.setStreaming(false);
 
         if (!this.hasTitled && this.messages.length >= 2) {
@@ -638,12 +646,6 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--error";
         el.innerHTML = '<div class="agent-chat__bubble agent-chat__bubble--error">' + this.escapeHtml(message) + '</div>';
         this.insertBeforeAI(el);
-        if (this.currentAIElement) {
-            var cursor = this.currentAIElement.querySelector(".agent-chat__cursor");
-            if (cursor) {
-                cursor.remove();
-            }
-        }
         this.currentAIElement = null;
         this.scrollToBottom();
         this.saveSession();
@@ -657,10 +659,6 @@ export class AgentChat extends Model {
         if (this.currentAIElement) {
             var bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
             if (bubble) {
-                var cursor = bubble.querySelector(".agent-chat__cursor");
-                if (cursor) {
-                    cursor.remove();
-                }
                 bubble.classList.remove("agent-chat__bubble--streaming");
             }
             if (this.fullContent) {
@@ -669,6 +667,10 @@ export class AgentChat extends Model {
             this.currentAIElement = null;
             this.currentContent = "";
             this.fullContent = "";
+        }
+        if (this.requestStartTime) {
+            this.sessionTotalDuration += Date.now() - this.requestStartTime;
+            this.requestStartTime = 0;
         }
         this.setStreaming(false);
     }
@@ -723,14 +725,29 @@ export class AgentChat extends Model {
         });
     }
 
+    private updateTokenDisplay() {
+        if (!this.tokenDisplayEl) {
+            return;
+        }
+        var total = this.sessionPromptTokens + this.sessionCompletionTokens;
+        if (total === 0 && this.sessionTotalDuration === 0) {
+            return;
+        }
+        var text = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString();
+        if (this.sessionTotalDuration > 0) {
+            var seconds = Math.floor(this.sessionTotalDuration / 1000);
+            var minutes = Math.floor(seconds / 60);
+            seconds = seconds % 60;
+            text += " \u00B7 " + (minutes > 0 ? minutes + "m" : "") + seconds + "s";
+        }
+        this.tokenDisplayEl.textContent = text;
+        this.tokenDisplayEl.style.display = "";
+    }
+
     private appendUsage(promptTokens: number, completionTokens: number) {
         this.sessionPromptTokens += promptTokens;
         this.sessionCompletionTokens += completionTokens;
-        var total = this.sessionPromptTokens + this.sessionCompletionTokens;
-        if (this.tokenDisplayEl) {
-            this.tokenDisplayEl.textContent = total >= 1000 ? (total / 1000).toFixed(1) + "k" : total.toString();
-            this.tokenDisplayEl.classList.remove("fn__none");
-        }
+        this.updateTokenDisplay();
     }
 
     private clearThinking() {

@@ -646,7 +646,6 @@ export class AgentChat extends Model {
         if (reasoning === "processing" && this.currentAIElement) {
             if (this.currentContent) {
                 this.finalizeCurrentRound();
-                this.currentAIElement = this.createAIMessagePlaceholder();
             } else {
                 this.currentAIElement.remove();
                 this.currentAIElement = null;

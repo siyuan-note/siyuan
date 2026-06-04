@@ -1,5 +1,11 @@
 import {Constants} from "../../constants";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByTag,
+    isInEmbedBlock
+} from "../util/hasClosest";
 import {
     focusBlock,
     focusByRange,
@@ -190,7 +196,8 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         // https://github.com/siyuan-note/siyuan/issues/5083
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
-            if (this.enableSlash && !isMobile()) {
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
                 this.genHTML(hintSlash(key, protyle), protyle, false, "hint");
             }
             return;

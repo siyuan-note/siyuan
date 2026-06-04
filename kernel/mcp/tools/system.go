@@ -51,7 +51,7 @@ func systemHandler(args map[string]interface{}) (CallToolResult, error) {
 		return systemWorkspace(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [version, current_time, workspace]"}},
 		IsError: true,
 	}, nil
 }

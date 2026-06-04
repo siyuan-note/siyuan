@@ -55,7 +55,7 @@ func assetHandler(args map[string]interface{}) (CallToolResult, error) {
 		return assetClean(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [upload, unused, clean]"}},
 		IsError: true,
 	}, nil
 }

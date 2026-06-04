@@ -67,7 +67,7 @@ func fileHandler(args map[string]interface{}) (CallToolResult, error) {
 		return fileCopy(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, read, write, delete, rename, copy]"}},
 		IsError: true,
 	}, nil
 }

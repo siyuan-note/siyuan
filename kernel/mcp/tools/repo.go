@@ -78,7 +78,7 @@ func repoHandler(args map[string]interface{}) (CallToolResult, error) {
 		return repoFileExport(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [list, create, tag, untag, checkout, diff, search, purge, file_get, file_rollback, file_open, file_export]"}},
 		IsError: true,
 	}, nil
 }

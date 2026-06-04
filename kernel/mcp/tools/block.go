@@ -77,7 +77,7 @@ func blockHandler(args map[string]interface{}) (CallToolResult, error) {
 		return blockBreadcrumb(args)
 	}
 	return CallToolResult{
-		Content: []ContentItem{{Type: "text", Text: "unknown action: " + action}},
+		Content: []ContentItem{{Type: "text", Text: "unknown action '" + action + "', expected one of: [get, get_kramdown, get_children, tree_stat, dom, insert, append, prepend, update, delete, move, breadcrumb]"}},
 		IsError: true,
 	}, nil
 }

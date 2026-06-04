@@ -1,6 +1,7 @@
 import {fetchSyncPost} from "../util/fetch";
 import {App} from "../index";
 import {Plugin} from "./index";
+import {rerenderCustomBlocksByPlugin} from "./customBlockRender";
 /// #if !MOBILE
 import {resizeTopBar, saveLayout} from "../layout/util";
 /// #endif
@@ -107,6 +108,7 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     getAllEditor().forEach(editor => {
         editor.protyle.toolbar.update(editor.protyle);
     });
+    rerenderCustomBlocksByPlugin(app, item.name);
     return plugin;
 };
 
@@ -263,6 +265,9 @@ export const reloadPlugin = async (app: App, data: {
                     editor.protyle.toolbar.update(editor.protyle);
                 });
             }
+        });
+        reloadPlugins.forEach(pluginName => {
+            rerenderCustomBlocksByPlugin(app, pluginName);
         });
     });
     app.plugins.forEach(item => {

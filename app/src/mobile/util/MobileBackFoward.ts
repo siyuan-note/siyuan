@@ -89,7 +89,7 @@ const focusStack = (backStack: IBackStack) => {
         protyle.block.action = backStack.callback;
         protyle.wysiwyg.element.setAttribute("data-doc-type", getResponse.data.type);
         protyle.wysiwyg.element.innerHTML = getResponse.data.content;
-        processRender(protyle.wysiwyg.element);
+        processRender(protyle.wysiwyg.element, protyle.app);
         highlightRender(protyle.wysiwyg.element);
         avRender(protyle.wysiwyg.element, protyle);
         blockRender(protyle, protyle.wysiwyg.element, backStack.scrollTop);

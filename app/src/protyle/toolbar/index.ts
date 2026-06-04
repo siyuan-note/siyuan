@@ -1079,7 +1079,7 @@ export class Toolbar {
                 renderElement.removeAttribute("data-render");
             }
             if (!types.includes("NodeBlockQueryEmbed") || !types.includes("NodeHTMLBlock") || !isInlineMemo) {
-                processRender(renderElement);
+                processRender(renderElement, protyle.app);
             }
             event.stopPropagation();
         });
@@ -1161,7 +1161,7 @@ export class Toolbar {
                 if (textElement.value) {
                     renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
                     renderElement.removeAttribute("data-render");
-                    processRender(renderElement);
+                    processRender(renderElement, protyle.app);
                 } else {
                     inlineLastNode = renderElement;
                     // esc 后需要 focus range，但点击空白处不能 focus range，否则光标无法留在点击位置
@@ -1174,7 +1174,7 @@ export class Toolbar {
                     blockRender(protyle, renderElement);
                     (renderElement as HTMLElement).style.height = "";
                 } else {
-                    processRender(renderElement);
+                    processRender(renderElement, protyle.app);
                 }
             }
             // 光标定位
@@ -1890,7 +1890,7 @@ export class Toolbar {
                     nodeElement.dataset.subtype = currentLang;
                     nodeElement.className = "render-node";
                     nodeElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
-                    processRender(nodeElement);
+                    processRender(nodeElement, protyle.app);
                 } else {
                     (editElement as HTMLElement).textContent = editElement.textContent;
                     editElement.parentElement.removeAttribute("data-render");

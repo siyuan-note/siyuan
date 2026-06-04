@@ -192,7 +192,7 @@ export class Preview {
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
-                processRender(protyle.preview.previewElement);
+                processRender(protyle.preview.previewElement, protyle.app);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement, protyle);
                 speechRender(protyle.preview.previewElement, window.siyuan.config.appearance.lang);

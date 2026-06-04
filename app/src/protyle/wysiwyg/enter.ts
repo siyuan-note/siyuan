@@ -90,13 +90,13 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                     blockElement.className = "render-node";
                     blockElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
                     protyle.toolbar.showRender(protyle, blockElement);
-                    processRender(blockElement);
+                    processRender(blockElement, protyle.app);
                 } else {
                     highlightRender(blockElement);
                 }
             } else {
                 protyle.toolbar.showRender(protyle, blockElement);
-                processRender(blockElement);
+                processRender(blockElement, protyle.app);
             }
             updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
             return true;
@@ -480,7 +480,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             listItemElement.insertAdjacentElement("afterend", newElement);
             blockRender(protyle, newElement);
             mathRender(newElement);
-            processRender(newElement);
+            processRender(newElement, protyle.app);
             if (listItemElement.getAttribute("data-subtype") === "o") {
                 updateListOrder(listItemElement.parentElement);
             }
@@ -561,14 +561,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     listItemElement.insertAdjacentElement("afterend", newElement);
     blockRender(protyle, newElement);
     mathRender(newElement);
-    processRender(newElement);
+    processRender(newElement, protyle.app);
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
     // img 后有文字，在 img 后换行
     editableElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
     blockRender(protyle, listItemElement);
     mathRender(listItemElement);
-    processRender(listItemElement);
+    processRender(listItemElement, protyle.app);
     if (listItemElement.getAttribute("data-subtype") === "o") {
         updateListOrder(listItemElement.parentElement);
     }

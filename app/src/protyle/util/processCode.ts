@@ -7,8 +7,10 @@ import {mindmapRender} from "../render/mindmapRender";
 import {flowchartRender} from "../render/flowchartRender";
 import {plantumlRender} from "../render/plantumlRender";
 import {htmlRender} from "../render/htmlRender";
+import {customBlockRender} from "../../plugin/customBlockRender";
 import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
+import {App} from "../../index";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -56,7 +58,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
     math: mathRender,
 };
 
-export const processRender = (previewPanel: Element) => {
+export const processRender = (previewPanel: Element, app?: App) => {
     const language = previewPanel.getAttribute("data-subtype");
     if (RENDER_MAP[language]) {
         RENDER_MAP[language](previewPanel);
@@ -70,4 +72,7 @@ export const processRender = (previewPanel: Element) => {
         render(previewPanel);
     }
     htmlRender(previewPanel);
+    if (app) {
+        customBlockRender(app, previewPanel);
+    }
 };

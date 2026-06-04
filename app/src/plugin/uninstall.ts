@@ -1,5 +1,6 @@
 import {App} from "../index";
 import {Plugin} from "./index";
+import {rerenderCustomBlocksByPlugin} from "./customBlockRender";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
@@ -77,6 +78,8 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            // re-render custom blocks belonging to this plugin (will fallback since plugin removed)
+            rerenderCustomBlocksByPlugin(app, plugin.name);
             // rm icons
             document.querySelector(`svg[data-name="${plugin.name}"]`)?.remove();
             // rm protyle toolbar

@@ -58,7 +58,7 @@ func GetBazaarPackageREADME(ctx context.Context, repoURL, repoHash, pkgType stri
 	var loadErr error
 	var errMsgs []string
 	for _, name := range candidates {
-		data, loadErr = downloadBazaarFile(repoURLHash+"/"+name, false)
+		data, loadErr = downloadBazaarFile(repoURLHash+"/"+name, false, "")
 		if loadErr == nil {
 			break
 		}

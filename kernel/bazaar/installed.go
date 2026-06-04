@@ -76,6 +76,13 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 				disallowUpdate = disallowUpdate || IsIncompatiblePlugin(bazaarPkg, frontend)
 			}
 			pkg.DisallowUpdate = disallowUpdate
+			pkg.Updated = bazaarPkg.Updated
+			pkg.HUpdated = bazaarPkg.HUpdated
+			pkg.Size = bazaarPkg.Size
+			pkg.HSize = bazaarPkg.HSize
+			pkg.Stars = bazaarPkg.Stars
+			pkg.OpenIssues = bazaarPkg.OpenIssues
+			pkg.Downloads = bazaarPkg.Downloads
 		}
 	} else {
 		pkg.RepoURL = pkg.URL

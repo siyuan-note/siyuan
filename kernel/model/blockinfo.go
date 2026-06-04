@@ -67,6 +67,11 @@ func GetDocInfo(blockID string) (ret *BlockInfo, err error) {
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 	scrollData := ret.IAL["scroll"]
 	if 0 < len(scrollData) {
+		// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），
+		// 虽然 parse.IAL2Map() 中会调用 html.UnescapeAttrVal() 进行反转义，
+		// 但部分历史数据或某些路径下可能出现反转义不完整的情况，导致 JSON 解析失败，
+		// 这里做一次防御性反转义，确保 JSON 解析不会因为残留的 HTML 实体而报错
+		scrollData = util.UnescapeHTML(scrollData)
 		scroll := map[string]any{}
 		if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
 			logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
@@ -150,6 +155,11 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
 		scrollData := ret.IAL["scroll"]
 		if 0 < len(scrollData) {
+			// scroll 属性值在持久化时会被 html.EscapeAttrVal() 进行 HTML 转义（如 " 变为 &quot;），
+			// 虽然 parse.IAL2Map() 中会调用 html.UnescapeAttrVal() 进行反转义，
+			// 但部分历史数据或某些路径下可能出现反转义不完整的情况，导致 JSON 解析失败，
+			// 这里做一次防御性反转义，确保 JSON 解析不会因为残留的 HTML 实体而报错
+			scrollData = util.UnescapeHTML(scrollData)
 			scroll := map[string]any{}
 			if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
 				logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)

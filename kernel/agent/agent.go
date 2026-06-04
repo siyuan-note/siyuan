@@ -19,10 +19,12 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
@@ -73,10 +75,13 @@ type confirmResult struct {
 	always   bool
 }
 
+var confirmChannelsMu sync.Mutex
 var confirmChannels = make(map[string]chan confirmResult)
 
 func ConfirmSession(id string, approved bool, always bool) {
+	confirmChannelsMu.Lock()
 	ch, ok := confirmChannels[id]
+	confirmChannelsMu.Unlock()
 	if ok {
 		ch <- confirmResult{approved: approved, always: always}
 	}
@@ -135,6 +140,11 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 	go func() {
 		defer close(ch)
+		defer func() {
+			if r := recover(); r != nil {
+				ch <- AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)}
+			}
+		}()
 
 		tools := convertMCPToolsToOpenAI()
 		messages := buildMessages(history, language, references)
@@ -264,19 +274,27 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						confirmID := tc.ID
 						ch <- AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID}
 						ch2 := make(chan confirmResult, 1)
+						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = ch2
+						confirmChannelsMu.Unlock()
 						var rejectionMsg string
 						var result confirmResult
 						timedOut := false
 
 						select {
 						case result = <-ch2:
+							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
+							confirmChannelsMu.Unlock()
 						case <-ctx.Done():
+							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
+							confirmChannelsMu.Unlock()
 							return
 						case <-time.After(confirmTimeout):
+							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
+							confirmChannelsMu.Unlock()
 							timedOut = true
 							rejectionMsg = "Confirmation timed out, operation skipped automatically"
 							ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg}

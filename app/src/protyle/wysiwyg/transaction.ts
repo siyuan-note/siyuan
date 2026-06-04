@@ -303,47 +303,6 @@ const promiseTransaction = () => {
     });
 };
 
-const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
-    let updatedEmbed = false;
-
-    const updateHTML = (item: Element, html: string) => {
-        const tempElement = document.createElement("template");
-        tempElement.innerHTML = protyle.lute.SpinBlockDOM(html);
-        tempElement.content.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
-            selectItem.classList.remove("protyle-wysiwyg--select");
-        });
-        const wbrElement = tempElement.content.querySelector("wbr");
-        if (wbrElement) {
-            wbrElement.remove();
-        }
-        item.outerHTML = tempElement.innerHTML;
-        updatedEmbed = true;
-    };
-
-    const allTempElement = document.createElement("template");
-    allTempElement.innerHTML = operation.data;
-    protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-        const matchElement = item.querySelectorAll(`[data-node-id="${operation.id}"]`);
-        if (matchElement.length > 0) {
-            matchElement.forEach(embedItem => {
-                updateHTML(embedItem, operation.data);
-            });
-        } else {
-            item.querySelectorAll(".protyle-wysiwyg__embed").forEach(embedBlockItem => {
-                const newTempElement = allTempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`);
-                if (newTempElement && !isInEmbedBlock(newTempElement)) {
-                    updateHTML(embedBlockItem.querySelector("[data-node-id]"), newTempElement.outerHTML);
-                }
-            });
-        }
-    });
-    if (updatedEmbed) {
-        processRender(protyle.wysiwyg.element);
-        highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element, protyle);
-    }
-};
-
 const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, isUndo: boolean) => {
     if (isUndo && updateElements[0]) {
         focusSideBlock(updateElements[0]);
@@ -494,7 +453,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "delete") {
-        // TODO
         if (updateElements.length > 0 || !isUndo) {
             deleteBlock(updateElements, operation.id, protyle, isUndo);
         } else if (isUndo) {
@@ -681,7 +639,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "move") {
-        // TODO
         if (operation.context?.ignoreProcess === "true") {
             return;
         }

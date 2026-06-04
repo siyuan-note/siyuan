@@ -13,7 +13,15 @@ interface SessionIndexItem {
 export interface AgentSession {
     id: string;
     title: string;
-    messages: Array<{role: string; content: string}>;
+    messages: Array<{
+        role: string;
+        content: string;
+        toolCalls?: Array<{
+            name: string;
+            arguments: Record<string, unknown>;
+            result?: string;
+        }>;
+    }>;
     promptTokens?: number;
     completionTokens?: number;
     totalDuration?: number;

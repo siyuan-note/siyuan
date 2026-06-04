@@ -8,6 +8,11 @@ import {AgentSession, SessionStore} from "./SessionStore";
 interface IAgentMessage {
     role: "user" | "assistant";
     content: string;
+    toolCalls?: Array<{
+        name: string;
+        arguments: Record<string, unknown>;
+        result?: string;
+    }>;
 }
 
 export class AgentChat extends Model {
@@ -35,6 +40,7 @@ export class AgentChat extends Model {
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
+    private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
 
     constructor(app: App, tab: Tab) {
         super({app: app, id: tab.id});
@@ -114,14 +120,14 @@ export class AgentChat extends Model {
                         // 不支持 setSendText，直接用 sendMessage 发送
                         self.messages.push({role: "user", content: text});
                         self.appendUserMessage(text);
-                        self.currentAIElement = self.createAIMessagePlaceholder();
                         self.setStreaming(true);
                         var apiMessages = self.messages.map(function (m) { return {role: m.role, content: m.content}; });
                         self.abortController = new AbortController();
                         fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
                             function (event: ISSEResult) { self.handleSSEEvent(event); },
                             function (err: Error) { self.handleError(err); },
-                            self.abortController.signal);
+                            self.abortController.signal,
+                            self.sessionId);
                     }
                 };
             }(examples[i] as HTMLElement));
@@ -169,7 +175,11 @@ export class AgentChat extends Model {
                     if (msg.role === "user") {
                         this.appendUserMessage(msg.content);
                     } else if (msg.role === "assistant") {
-                        this.appendPersistedAssistant(msg.content);
+                        if (msg.toolCalls && msg.toolCalls.length > 0) {
+                            this.appendPersistedToolCalls(msg.content, msg.toolCalls);
+                        } else {
+                            this.appendPersistedAssistant(msg.content);
+                        }
                     }
                 }
                 this.scrollToBottom();
@@ -337,7 +347,11 @@ export class AgentChat extends Model {
             if (msg.role === "user") {
                 this.appendUserMessage(msg.content);
             } else if (msg.role === "assistant") {
-                this.appendPersistedAssistant(msg.content);
+                if (msg.toolCalls && msg.toolCalls.length > 0) {
+                    this.appendPersistedToolCalls(msg.content, msg.toolCalls);
+                } else {
+                    this.appendPersistedAssistant(msg.content);
+                }
             }
         }
         this.scrollToBottom();
@@ -348,6 +362,50 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--ai";
         el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + '</div>';
         this.messagesContainer.appendChild(el);
+    }
+
+    private appendPersistedToolCalls(content: string, toolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}>) {
+        if (content) {
+            this.appendPersistedAssistant(content);
+        }
+        var L = window.siyuan.languages;
+        for (var i = 0; i < toolCalls.length; i++) {
+            var tc = toolCalls[i];
+            var argsStr = JSON.stringify(tc.arguments, null, 2);
+            var el = document.createElement("div");
+            el.className = "agent-chat__msg agent-chat__msg--tool";
+            el.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--call" data-tool="' + tc.name + '">' +
+    '<div class="agent-chat__tool-header">' +
+        '<span class="agent-chat__tool-icon">&#128736;</span>' +
+        '<span class="agent-chat__tool-title">' + (L.agentToolCall || "Calling tool") + ': ' + tc.name + '</span>' +
+    '</div>' +
+    '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(argsStr) + '</pre>' +
+'</div>';
+            var header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
+            var body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
+            header.addEventListener("click", function () {
+                body.classList.toggle("fn__none");
+            });
+            this.messagesContainer.appendChild(el);
+
+            if (tc.result) {
+                var rel = document.createElement("div");
+                rel.className = "agent-chat__msg agent-chat__msg--tool";
+                rel.innerHTML = '<div class="agent-chat__tool-card agent-chat__tool-card--result" data-tool="' + tc.name + '">' +
+    '<div class="agent-chat__tool-header">' +
+        '<span class="agent-chat__tool-icon">&#128196;</span>' +
+        '<span class="agent-chat__tool-title">' + (L.agentToolResult || "Tool result") + ': ' + tc.name + '</span>' +
+    '</div>' +
+    '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(tc.result) + '</pre>' +
+'</div>';
+                var rheader = rel.querySelector(".agent-chat__tool-header") as HTMLElement;
+                var rbody = rel.querySelector(".agent-chat__tool-body") as HTMLElement;
+                rheader.addEventListener("click", function () {
+                    rbody.classList.toggle("fn__none");
+                });
+                this.messagesContainer.appendChild(rel);
+            }
+        }
     }
 
     private async createSession() {
@@ -362,6 +420,7 @@ export class AgentChat extends Model {
         this.sessionPromptTokens = 0;
         this.sessionCompletionTokens = 0;
         this.sessionTotalDuration = 0;
+        this.currentToolCalls = [];
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.style.display = "none";
         }
@@ -401,7 +460,6 @@ export class AgentChat extends Model {
         this.appendUserMessage(text);
 
         this.requestStartTime = Date.now();
-        this.currentAIElement = this.createAIMessagePlaceholder();
 
         var apiMessages = this.messages.map(function (m) { return {role: m.role, content: m.content}; });
         var self = this;
@@ -415,6 +473,7 @@ export class AgentChat extends Model {
             function (event: ISSEResult) { self.handleSSEEvent(event); },
             function (err: Error) { self.handleError(err); },
             this.abortController.signal,
+            this.sessionId,
         );
     }
 
@@ -427,12 +486,16 @@ export class AgentChat extends Model {
                 this.appendThinking(event.reasoning);
                 break;
             case "tool_call":
+                this.currentToolCalls.push({name: event.name, arguments: event.arguments});
                 this.appendToolCall(event.name, event.arguments);
                 break;
             case "confirm":
                 this.appendConfirm(event.name, event.arguments, event.confirmID);
                 break;
             case "tool_result":
+                if (this.currentToolCalls.length > 0) {
+                    this.currentToolCalls[this.currentToolCalls.length - 1].result = event.result;
+                }
                 this.appendToolResult(event.name, event.result);
                 break;
             case "done":
@@ -444,6 +507,9 @@ export class AgentChat extends Model {
             case "error":
                 this.appendError(event.message);
                 this.setStreaming(false);
+                break;
+            case "retry":
+                this.appendRetry(event.attempt, event.maxRetries);
                 break;
         }
     }
@@ -473,7 +539,7 @@ export class AgentChat extends Model {
 
     private appendToken(token: string) {
         if (!this.currentAIElement) {
-            return;
+            this.currentAIElement = this.createAIMessagePlaceholder();
         }
         var bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (!bubble) {
@@ -607,10 +673,11 @@ export class AgentChat extends Model {
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
-        this.messages.push({role: "assistant", content: this.fullContent || " "});
+        this.messages.push({role: "assistant", content: this.fullContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
         this.currentAIElement = null;
         this.currentContent = "";
         this.fullContent = "";
+        this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
             this.requestStartTime = 0;
@@ -651,6 +718,20 @@ export class AgentChat extends Model {
         this.saveSession();
     }
 
+    private appendRetry(attempt: number, maxRetries: number) {
+        this.clearThinking();
+        var el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--thinking";
+        el.innerHTML = '<div class="agent-chat__thinking-card">' +
+    '<div class="agent-chat__thinking-header">' +
+        '<span class="agent-chat__thinking-dot"></span>' +
+        '<span class="agent-chat__thinking-text">' + this.escapeHtml("Retrying (" + attempt + "/" + maxRetries + ")...") + '</span>' +
+    '</div>' +
+'</div>';
+        this.insertBeforeAI(el);
+        this.scrollToBottom();
+    }
+
     private stopGeneration() {
         if (this.abortController) {
             this.abortController.abort();
@@ -662,11 +743,13 @@ export class AgentChat extends Model {
                 bubble.classList.remove("agent-chat__bubble--streaming");
             }
             if (this.fullContent) {
-                this.messages.push({role: "assistant", content: this.fullContent || " "});
+                this.messages.push({role: "assistant", content: this.fullContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
             }
-            this.currentAIElement = null;
-            this.currentContent = "";
-            this.fullContent = "";
+        this.currentAIElement = null;
+        this.currentContent = "";
+        this.fullContent = "";
+        this.currentToolCalls = [];
+            this.currentToolCalls = [];
         }
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;

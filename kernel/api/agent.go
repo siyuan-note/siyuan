@@ -31,6 +31,7 @@ import (
 )
 
 type agentChatReq struct {
+	SessionID  string              `json:"sessionID"`
 	Messages   []agent.UserMessage `json:"messages"`
 	Language   string              `json:"language"`
 	References []agent.Reference   `json:"references"`
@@ -63,6 +64,15 @@ func agentChat(c *gin.Context) {
 		model.Conf.AI.OpenAI.APIProvider,
 	)
 
+	confirmTimeout := time.Duration(model.Conf.AI.OpenAI.AgentConfirmTimeout) * time.Second
+	if confirmTimeout <= 0 {
+		confirmTimeout = 120 * time.Second
+	}
+	maxRetries := model.Conf.AI.OpenAI.AgentMaxRetries
+	if maxRetries <= 0 {
+		maxRetries = 3
+	}
+
 	var eventCh <-chan agent.AgentEvent
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
@@ -73,7 +83,7 @@ func agentChat(c *gin.Context) {
 		}()
 	}()
 
-	eventCh = agent.AgentChat(ctx, client, model.Conf.AI.OpenAI.APIModel, req.Messages, req.Language, req.References)
+	eventCh = agent.AgentChat(ctx, client, model.Conf.AI.OpenAI.APIModel, req.SessionID, req.Messages, req.Language, req.References, confirmTimeout, maxRetries)
 
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -88,9 +98,12 @@ func agentChat(c *gin.Context) {
 	if timeout <= 0 {
 		timeout = 30
 	}
-	totalTimeout := time.Duration(timeout) * time.Second * 10
-	if totalTimeout > 300*time.Second {
-		totalTimeout = 300 * time.Second
+	totalTimeout := time.Duration(model.Conf.AI.OpenAI.AgentTimeout) * time.Second
+	if totalTimeout <= 0 {
+		totalTimeout = time.Duration(timeout) * time.Second * 10
+	}
+	if totalTimeout > 3600*time.Second {
+		totalTimeout = 3600 * time.Second
 	}
 	deadline := time.After(totalTimeout)
 
@@ -191,6 +204,11 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 		})
 	case "done":
 		return writeSSEEvent(c, "done", map[string]interface{}{})
+	case "retry":
+		return writeSSEEvent(c, "retry", map[string]interface{}{
+			"attempt":   event.RetryAttempt,
+			"maxRetries": event.RetryMax,
+		})
 	}
 	return nil
 }

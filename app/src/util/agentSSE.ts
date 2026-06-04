@@ -26,6 +26,10 @@ export type ISSEResult = {
     type: "usage";
     promptTokens: number;
     completionTokens: number;
+} | {
+    type: "retry";
+    attempt: number;
+    maxRetries: number;
 };
 
 export async function fetchAgentSSE(
@@ -35,12 +39,16 @@ export async function fetchAgentSSE(
     onEvent: (event: ISSEResult) => void,
     onError: (err: Error) => void,
     signal?: AbortSignal,
+    sessionID?: string,
 ): Promise<void> {
     try {
+        var body: Record<string, unknown> = {messages: messages, language: language, references: references};
+        if (sessionID) { body.sessionID = sessionID; }
+
         var response = await fetch("/api/ai/agent/chat", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({messages: messages, language: language, references: references}),
+            body: JSON.stringify(body),
             signal: signal,
         });
 
@@ -133,6 +141,12 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 type: "usage",
                 promptTokens: (data.promptTokens as number) || 0,
                 completionTokens: (data.completionTokens as number) || 0,
+            };
+        case "retry":
+            return {
+                type: "retry",
+                attempt: (data.attempt as number) || 1,
+                maxRetries: (data.maxRetries as number) || 1,
             };
         default:
             return null;

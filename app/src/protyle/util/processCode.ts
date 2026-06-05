@@ -25,13 +25,15 @@ export const processPasteCode = (html: string, text: string, originalTextHTML: s
         tempElement.querySelector(".line-number") && tempElement.querySelector(".line-content")) {
         // 网页源码
         isCode = true;
-    } else if (originalTextHTML.indexOf('<meta name="Generator" content="Cocoa HTML Writer">') > -1 &&
+    }
+    /* Mac 上不好识别，先统一移除代码标识 https://github.com/siyuan-note/siyuan/issues/17818
+    else if (originalTextHTML.indexOf('<meta name="Generator" content="Cocoa HTML Writer">') > -1 &&
         html.indexOf('\n<p class="p1">') === 0 &&
         //  ChatGPT app 目前没有此标识
         originalTextHTML.indexOf('<style type="text/css">\np.p1') > -1) {
         // Xcode
         isCode = true;
-    }
+    }*/
 
     if (isCode) {
         const code = text || html;

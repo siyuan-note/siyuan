@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "ว่าไง คิดอะไรอยู่? จัดการให้เอง",
   "agentExample1": "ค้นหาบันทึกการประชุมล่าสุดของฉัน",
   "agentExample2": "สร้างบันทึกประจำวันใหม่",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "ค้นหาบันทึกที่เกี่ยวข้องกับโครงการ",
   "agentConfirmDesc": "ยืนยัน {action} บน: {name}?",
   "agentConfirmApprove": "อนุมัติ",
   "agentConfirmReject": "ปฏิเสธ",

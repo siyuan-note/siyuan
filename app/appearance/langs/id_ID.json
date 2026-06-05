@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "Hei, ada rencana apa? Serahkan padaku",
   "agentExample1": "Cari catatan rapat terbaru saya",
   "agentExample2": "Buat jurnal harian baru",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "Temukan catatan terkait proyek",
   "agentConfirmDesc": "Konfirmasi {action} pada: {name}?",
   "agentConfirmApprove": "Setujui",
   "agentConfirmReject": "Tolak",

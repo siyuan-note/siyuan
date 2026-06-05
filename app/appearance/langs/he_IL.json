@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "היי, מה בראש? אני אטפל בזה",
   "agentExample1": "חפש את הערות הפגישות האחרונות שלי",
   "agentExample2": "צור יומן חדש",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "מצא הערות הקשורות לפרויקט",
   "agentConfirmDesc": "הפעולה {action} תבוצע על: {name}",
   "agentConfirmApprove": "אשר",
   "agentConfirmReject": "דחה",

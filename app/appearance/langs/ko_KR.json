@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "뭐든 말해 봐, 내가 해결할게",
   "agentExample1": "최근 회의록 검색",
   "agentExample2": "새 일기 작성",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "프로젝트 관련 노트 찾기",
   "agentConfirmDesc": "{name}에 {action}을(를) 실행하시겠습니까?",
   "agentConfirmApprove": "승인",
   "agentConfirmReject": "거부",

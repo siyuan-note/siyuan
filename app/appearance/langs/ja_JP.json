@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "ねえ、何か考えてる？任せて",
   "agentExample1": "最近の会議メモを検索",
   "agentExample2": "新しい日記を作成",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "プロジェクト関連のノートを検索",
   "agentConfirmDesc": "{name} に {action} を実行しますか？",
   "agentConfirmApprove": "承認",
   "agentConfirmReject": "拒否",

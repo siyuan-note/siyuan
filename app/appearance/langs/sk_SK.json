@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "Hej, čo máš na mysli? Postarám sa o to",
   "agentExample1": "Vyhľadať moje nedávne poznámky zo stretnutí",
   "agentExample2": "Vytvoriť nový denník",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "Nájsť poznámky k projektu",
   "agentConfirmDesc": "Potvrdiť {action} na: {name}?",
   "agentConfirmApprove": "Schváliť",
   "agentConfirmReject": "Odmietnuť",

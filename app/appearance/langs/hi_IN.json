@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "अरे, क्या सोच रहे हो? मैं संभाल लूंगा",
   "agentExample1": "मेरी हाल की बैठक के नोट्स खोजें",
   "agentExample2": "एक नई डायरी बनाएं",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "परियोजना से संबंधित नोट्स खोजें",
   "agentConfirmDesc": "{action} किया जाएगा: {name}",
   "agentConfirmApprove": "स्वीकृत करें",
   "agentConfirmReject": "अस्वीकृत करें",

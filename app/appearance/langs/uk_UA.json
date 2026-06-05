@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "Привіт, що на думці? Я все влаштую",
   "agentExample1": "Знайти мої нещодавні нотатки про зустрічі",
   "agentExample2": "Створити новий щоденник",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "Знайти нотатки про проєкт",
   "agentConfirmDesc": "Підтвердити {action} для: {name}?",
   "agentConfirmApprove": "Підтвердити",
   "agentConfirmReject": "Відхилити",

@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "Hey, what do you have in mind? I've got you covered",
   "agentExample1": "Search my recent meeting notes",
   "agentExample2": "Create a new daily journal",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "Find notes related to the project",
   "agentConfirmDesc": "Confirm {action} on: {name}?",
   "agentConfirmApprove": "Approve",
   "agentConfirmReject": "Reject",

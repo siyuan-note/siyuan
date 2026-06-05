@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "مرحبًا، ما الذي يدور في ذهنك؟ سأتولى الأمر",
   "agentExample1": "البحث عن ملاحظات الاجتماعات الأخيرة",
   "agentExample2": "إنشاء مذكرة يومية جديدة",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "البحث عن ملاحظات متعلقة بالمشروع",
   "agentConfirmDesc": "سيتم تنفيذ العملية {action} على: {name}",
   "agentConfirmApprove": "موافقة",
   "agentConfirmReject": "رفض",

@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "Hé, wat heb je in gedachten? Ik regel het",
   "agentExample1": "Doorzoek mijn recente vergadernotities",
   "agentExample2": "Maak een nieuw dagboek",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "Vind notities over het project",
   "agentConfirmDesc": "Bevestig {action} op: {name}?",
   "agentConfirmApprove": "Goedkeuren",
   "agentConfirmReject": "Afwijzen",

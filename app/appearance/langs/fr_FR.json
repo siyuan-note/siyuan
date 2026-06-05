@@ -2,7 +2,7 @@
   "agentWelcomeGreeting": "Dis-moi tout, je m'en occupe",
   "agentExample1": "Rechercher mes notes de réunion récentes",
   "agentExample2": "Créer un nouveau journal",
-  "agentExample3": "整理一下项目相关的笔记",
+  "agentExample3": "Rechercher des notes sur le projet",
   "agentConfirmDesc": "Confirmer {action} sur: {name} ?",
   "agentConfirmApprove": "Approuver",
   "agentConfirmReject": "Rejeter",

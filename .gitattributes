@@ -1,1 +1,7 @@
 app/stage/protyle/** linguist-vendored
+
+* text=auto
+*.json text eol=lf
+*.scss text eol=lf
+*.ts   text eol=lf
+*.go   text eol=lf

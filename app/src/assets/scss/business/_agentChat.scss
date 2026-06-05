@@ -121,6 +121,25 @@
     align-items: flex-start;
 }
 
+.agent-chat__copy-btn {
+    align-self: flex-end;
+    opacity: 0;
+    transition: opacity 0.2s;
+    padding: 2px 4px;
+    font-size: 12px;
+    gap: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.agent-chat__copy-icon {
+    font-size: 14px;
+}
+
+.agent-chat__msg--ai:hover .agent-chat__copy-btn {
+    opacity: 1;
+}
+
 .agent-chat__msg--ai .agent-chat__bubble {
     @extend .agent-chat__bubble-content;
     background: var(--b3-theme-surface-light);
@@ -485,8 +504,8 @@
     background: var(--b3-theme-background);
     border: 1px solid var(--b3-border-color);
     border-radius: var(--b3-border-radius-b);
-    margin: 0 0 12px;
-    padding: 12px;
+    margin: 0 12px 12px;
+    padding: 8px;
     flex-shrink: 0;
 }
 
@@ -525,7 +544,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    margin-top: 6px;
+    margin-top: 8px;
 }
 
 .agent-session-popup {

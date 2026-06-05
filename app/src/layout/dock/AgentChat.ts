@@ -369,6 +369,7 @@ export class AgentChat extends Model {
         el.className = "agent-chat__msg agent-chat__msg--ai";
         el.innerHTML = '<div class="agent-chat__bubble">' + (this.lute.MarkdownStr("", content) || this.escapeHtml(content)) + "</div>";
         this.messagesContainer.appendChild(el);
+        this.addCopyButton(el);
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}>) {
@@ -742,9 +743,25 @@ export class AgentChat extends Model {
         const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
+            this.addCopyButton(this.currentAIElement);
         }
         this.currentAIElement = null;
         this.currentContent = "";
+    }
+
+    private addCopyButton(el: HTMLElement) {
+        const content = this.fullContent || el.querySelector(".agent-chat__bubble")?.textContent || "";
+        const btn = document.createElement("button");
+        btn.className = "agent-chat__copy-btn b3-button b3-button--text";
+        const L = window.siyuan.languages;
+        btn.setAttribute("aria-label", L.copy || "Copy");
+        btn.title = L.copy || "Copy";
+        btn.innerHTML = '<span class="agent-chat__copy-icon">' + String.fromCodePoint(0x1F4CB) + "</span><span>" + (L.copy || "Copy") + "</span>";
+        btn.addEventListener("click", function (e: Event) {
+            e.stopPropagation();
+            navigator.clipboard.writeText(content).catch(function () {});
+        });
+        el.appendChild(btn);
     }
 
     private finishResponse() {

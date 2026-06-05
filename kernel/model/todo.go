@@ -35,16 +35,12 @@ type AgentTodoList struct {
 	Todos     []AgentTodoItem `json:"todos"`
 }
 
-func agentTodosDir() string {
-	return filepath.Join(util.DataDir, "storage", "ai", "agent", "todos")
-}
-
 func agentTodosPath(sessionID string) string {
-	return filepath.Join(agentTodosDir(), sessionID+".json")
+	return filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID, "todos.json")
 }
 
 func SaveAgentTodos(sessionID string, todos []AgentTodoItem) error {
-	dir := agentTodosDir()
+	dir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", sessionID)
 	if err := os.MkdirAll(dir, 0755); err != nil {
 		return err
 	}

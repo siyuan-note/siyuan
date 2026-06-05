@@ -19,8 +19,10 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,6 +57,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Provide context: when mentioning documents or blocks, include their titles and IDs so the user can reference them.
 - Be concise: summarize key findings rather than repeating large amounts of content.
 - Use markdown formatting for readability: bullet points, headings, code blocks for technical content.
+- Do not fabricate information. If you don't know something or can't find it in the user's notes, say so honestly instead of making up an answer. Search and verify before claiming facts.
 
 ## Todo Tracking
 - For multi-step tasks (3+ distinct steps), use the todo_write tool to create a structured task list before starting work. This helps the user see your progress.
@@ -183,6 +186,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
+		var compactCount int
 
 		checkpointMsgs := make([]AgentMessage, 0, len(history))
 		for _, h := range history {
@@ -214,6 +218,16 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 			stream, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, ch)
 			if streamErr != nil {
+				if compactCount < 3 && isContextOverflow(streamErr) {
+					keepTurns := 3 - compactCount
+					if keepTurns < 1 {
+						keepTurns = 1
+					}
+					messages = compactMessages(messages, keepTurns)
+					compactCount++
+					ch <- AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)}
+					continue
+				}
 				ch <- AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()}
 				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 				return
@@ -360,6 +374,8 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					} else {
 						resultStr = executeTool(tc)
 					}
+
+					resultStr = util.TruncateToolOutput(resultStr, sessionID)
 
 					ch <- AgentEvent{
 						Type:   "tool_result",
@@ -517,7 +533,22 @@ func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration
 }
 
 func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
-	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>\n\nReply in " + langName(language) + "."
+	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>"
+
+	skills := util.DiscoverSkills()
+	if len(skills) > 0 {
+		prompt += "\n\n<available_skills>\n"
+		for _, s := range skills {
+			prompt += "  <skill>\n"
+			prompt += "    <name>" + s.Name + "</name>\n"
+			prompt += "    <description>" + s.Description + "</description>\n"
+			prompt += "  </skill>\n"
+		}
+		prompt += "</available_skills>\n\n"
+		prompt += "Use the skill tool to load a skill when a task matches its description."
+	}
+
+	prompt += "\n\nReply in " + langName(language) + "."
 	if len(references) > 0 {
 		prompt += "\n\nThe user has referenced the following content blocks:\n"
 		for _, ref := range references {
@@ -634,11 +665,12 @@ func createStreamWithRetry(ctx context.Context, client *openai.Client, req opena
 	var lastErr error
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		if attempt > 0 {
-			backoff := time.Duration(1<<uint(attempt-1)) * time.Second
+			category := classifyRetry(lastErr)
+			delay := delayForCategory(category, attempt)
 			select {
 			case <-ctx.Done():
 				return nil, ctx.Err()
-			case <-time.After(backoff):
+			case <-time.After(delay):
 			}
 			ch <- AgentEvent{Type: "retry", RetryAttempt: attempt + 1, RetryMax: maxRetries}
 		}
@@ -649,7 +681,8 @@ func createStreamWithRetry(ctx context.Context, client *openai.Client, req opena
 		}
 
 		lastErr = err
-		if !isRetryableError(err) {
+		category := classifyRetry(err)
+		if category == "fatal" {
 			return nil, err
 		}
 		if ctx.Err() != nil {
@@ -659,25 +692,59 @@ func createStreamWithRetry(ctx context.Context, client *openai.Client, req opena
 	return nil, lastErr
 }
 
-func isRetryableError(err error) bool {
-	if err == nil {
-		return false
+func classifyRetry(err error) string {
+	var apiErr *openai.APIError
+	if errors.As(err, &apiErr) {
+		switch apiErr.HTTPStatusCode {
+		case 429:
+			return "rate_limit"
+		case 408:
+			return "timeout"
+		case 500, 502, 503, 504:
+			return "server_error"
+		default:
+			if apiErr.HTTPStatusCode >= 400 {
+				return "fatal" // 400, 401, 403, etc.
+			}
+		}
 	}
+
 	msg := err.Error()
-	if strings.Contains(msg, "401") || strings.Contains(msg, "Unauthorized") {
-		return false
+	if strings.Contains(msg, "Unauthorized") {
+		return "fatal"
 	}
-	if strings.Contains(msg, "402") || strings.Contains(msg, "Payment Required") {
-		return false
+	if strings.Contains(msg, "Payment Required") {
+		return "fatal"
 	}
-	if strings.Contains(msg, "403") || strings.Contains(msg, "Forbidden") {
-		return false
+	if strings.Contains(msg, "Forbidden") {
+		return "fatal"
 	}
-	if strings.Contains(msg, "400") || strings.Contains(msg, "Bad Request") {
-		return false
+	if strings.Contains(msg, "Bad Request") {
+		return "fatal"
 	}
 	if strings.Contains(msg, "context canceled") || strings.Contains(msg, "context deadline exceeded") {
-		return false
+		return "fatal"
 	}
-	return true
+	return "network"
+}
+
+func delayForCategory(category string, attempt int) time.Duration {
+	switch category {
+	case "rate_limit", "server_error", "timeout":
+		return backoffDuration(attempt)
+	default:
+		return 3 * time.Second
+	}
+}
+
+func backoffDuration(attempt int) time.Duration {
+	base := time.Duration(1<<uint(attempt)) * time.Second
+	if base > 64*time.Second {
+		base = 64 * time.Second
+	}
+	if base <= 1*time.Second {
+		return base
+	}
+	jitter := time.Duration(rand.Int64N(int64(base) * 40 / 100)) - time.Duration(base*20/100)
+	return base + jitter
 }

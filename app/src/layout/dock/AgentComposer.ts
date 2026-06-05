@@ -20,6 +20,7 @@ interface ComposerHandle {
     destroy: () => void;
     getSendData: () => {text: string; references: {id: string; title: string}[]};
     clear: () => void;
+    pushHistory: (text: string) => void;
 }
 
 export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHandle {
@@ -45,6 +46,9 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
         suggestionCommand = null;
         suggestionItems = [];
     };
+
+    const history: string[] = [];
+    let historyIdx = -1;
 
     const updateHighlight = () => {
         if (!suggestionMenu) { return; }
@@ -204,6 +208,29 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
                     onSend();
                     return true;
                 }
+                if (event.key === "ArrowUp" && !suggestionMenu) {
+                    const isEmpty = _view.state.doc.textContent.trim() === "";
+                    if (isEmpty && history.length > 0) {
+                        event.preventDefault();
+                        if (historyIdx === -1) { historyIdx = history.length - 1; }
+                        else if (historyIdx > 0) { historyIdx--; }
+                        if (historyIdx >= 0) {
+                            editor.commands.setContent(history[historyIdx]);
+                        }
+                        return true;
+                    }
+                }
+                if (event.key === "ArrowDown" && !suggestionMenu && historyIdx >= 0) {
+                    event.preventDefault();
+                    historyIdx++;
+                    if (historyIdx >= history.length) {
+                        historyIdx = -1;
+                        editor.commands.clearContent();
+                    } else {
+                        editor.commands.setContent(history[historyIdx]);
+                    }
+                    return true;
+                }
                 return false;
             },
         },
@@ -226,5 +253,11 @@ export function mountComposer(host: HTMLElement, onSend: () => void): ComposerHa
             return {text: textParts.join("").trim(), references: refs};
         },
         clear: function () { editor.commands.clearContent(); },
+        pushHistory: function (text: string) {
+            if (!text || history[history.length - 1] === text) { return; }
+            history.push(text);
+            if (history.length > 50) { history.shift(); }
+            historyIdx = -1;
+        },
     };
 }

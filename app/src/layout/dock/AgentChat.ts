@@ -39,6 +39,7 @@ export class AgentChat extends Model {
     private sessionPromptTokens = 0;
     private sessionCompletionTokens = 0;
     private sessionTotalDuration = 0;
+    private sessionCreatedAt = 0;
     private requestStartTime = 0;
     private tokenDisplayEl: HTMLElement;
     private defaultTitle = "";
@@ -168,6 +169,7 @@ export class AgentChat extends Model {
             const session = await SessionStore.load(last.id);
             if (session) {
                 this.sessionId = session.id;
+                this.sessionCreatedAt = session.createdAt || Date.now();
                 this.sessionTitle = session.title;
                 this.messages = session.messages as IAgentMessage[];
                 this.hasTitled = true;
@@ -193,6 +195,7 @@ export class AgentChat extends Model {
             }
         }
         this.sessionId = SessionStore.newSessionId();
+        this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
         this.messages = [];
         this.showWelcome();
@@ -221,17 +224,17 @@ export class AgentChat extends Model {
         list.sort(function (a, b) { return b.updatedAt - a.updatedAt; });
 
         this.sessionPopup = document.createElement("div");
-        this.sessionPopup.className = "agent-session-popup";
+        this.sessionPopup.className = "agent-session-popup b3-menu";
 
-        let html = '<div class="agent-session-popup__list">';
+        let html = '<div class="b3-menu__items">';
         if (list.length === 0) {
-            html += '<div class="agent-session-popup__empty">' + (window.siyuan.languages.emptyContent || "No sessions") + "</div>";
+            html += '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
         } else {
             for (let i = 0; i < list.length; i++) {
                 const s = list[i];
             const isActive = s.id === this.sessionId;
-            html += '<div class="agent-session-popup__item' + (isActive ? " agent-session-popup__item--active" : "") + '" data-id="' + s.id + '">' +
-                '<span class="agent-session-popup__title">' + this.escapeHtml(s.title || this.defaultTitle) + "</span>" +
+            html += '<div class="b3-menu__item' + (isActive ? " b3-menu__item--current" : "") + '" data-id="' + s.id + '">' +
+                '<span class="b3-menu__label ariaLabel" data-position="east" aria-label="' + this.escapeHtml(s.title || this.defaultTitle) + '">' + this.escapeHtml(s.title || this.defaultTitle) + "</span>" +
                 '<span class="agent-session-popup__actions">' +
                     '<span class="agent-session-popup__rename" data-id="' + s.id + '">&#9998;</span>' +
                     '<span class="agent-session-popup__delete" data-id="' + s.id + '">&#10005;</span>' +
@@ -243,7 +246,7 @@ export class AgentChat extends Model {
 
         this.sessionPopup.innerHTML = html;
 
-        this.sessionPopup.querySelectorAll(".agent-session-popup__item").forEach(function (item) {
+        this.sessionPopup.querySelectorAll(".b3-menu__item").forEach(function (item) {
             item.addEventListener("click", function (e) {
                 const id = item.getAttribute("data-id") || "";
                 if (id && id !== self.sessionId) {
@@ -287,7 +290,7 @@ export class AgentChat extends Model {
 
     private startRename(id: string, rowEl: HTMLElement) {
         const self = this;
-        const titleEl = rowEl.querySelector(".agent-session-popup__title") as HTMLElement;
+        const titleEl = rowEl.querySelector(".b3-menu__label") as HTMLElement;
         const oldTitle = titleEl.textContent || "";
         const input = document.createElement("input");
         input.type = "text";
@@ -323,7 +326,7 @@ export class AgentChat extends Model {
             promptTokens: this.sessionPromptTokens,
             completionTokens: this.sessionCompletionTokens,
             totalDuration: this.sessionTotalDuration,
-            createdAt: Date.now(),
+            createdAt: this.sessionCreatedAt,
             updatedAt: Date.now(),
         };
         await SessionStore.save(session);
@@ -334,6 +337,7 @@ export class AgentChat extends Model {
         const session = await SessionStore.load(id);
         if (!session) { return; }
         this.sessionId = session.id;
+        this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
         this.messages = session.messages as IAgentMessage[];
         this.hasTitled = true;
@@ -427,6 +431,7 @@ export class AgentChat extends Model {
         this.setStreaming(false);
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
+        this.sessionCreatedAt = Date.now();
         this.sessionTitle = this.defaultTitle;
         this.messages = [];
         this.hasTitled = false;
@@ -449,8 +454,8 @@ export class AgentChat extends Model {
 
     private async deleteSession(id: string) {
         await SessionStore.remove(id);
-        this.closeSessionMenu();
-        if (id === this.sessionId) {
+        const wasCurrent = id === this.sessionId;
+        if (wasCurrent) {
             const list = await SessionStore.list();
             this.messages = [];
             if (list.length > 0) {
@@ -460,6 +465,32 @@ export class AgentChat extends Model {
                 this.sessionId = SessionStore.newSessionId();
                 await this.createSession();
             }
+        }
+
+        // Remove the deleted row from popup DOM directly (no re-render flash)
+        const row = this.sessionPopup?.querySelector('.b3-menu__item[data-id="' + id + '"]');
+        if (row) {
+            row.remove();
+        }
+        const items = this.sessionPopup?.querySelectorAll(".b3-menu__item");
+        if (items && items.length === 0) {
+            const listEl = this.sessionPopup?.querySelector(".b3-menu__items");
+            if (listEl) {
+                listEl.innerHTML = '<div class="b3-menu__item"><span class="b3-menu__label" style="text-align:center;color:var(--b3-theme-on-surface-light)">' + (window.siyuan.languages.emptyContent || "No sessions") + "</span></div>";
+            }
+        }
+        if (wasCurrent && this.sessionPopup) {
+            this.highlightCurrentSession();
+        }
+    }
+
+    private highlightCurrentSession() {
+        const items = this.sessionPopup?.querySelectorAll(".b3-menu__item");
+        if (!items) { return; }
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i] as HTMLElement;
+            const sid = item.getAttribute("data-id");
+            item.classList.toggle("b3-menu__item--current", sid === this.sessionId);
         }
     }
 
@@ -477,6 +508,7 @@ export class AgentChat extends Model {
 
         this.messages.push({role: "user", content: text});
         this.appendUserMessage(text);
+        if (this.composer) { this.composer.pushHistory(text); }
 
         this.requestStartTime = Date.now();
 

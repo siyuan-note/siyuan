@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "กำลังประมวลผล...",
   "agentChat": "เอเจนต์",  "agentQuestionSubmit": "ส่ง",
   "agentQuestionCustom": "พิมพ์คำตอบของคุณ...",
+  "agentRegenerate": "สร้างใหม่",
   "agentQuestionSubmitted": "ส่งแล้ว",
   "agentNewSession": "เซสชันใหม่",
   "agentInputPlaceholder": "พิมพ์ข้อความ, @ เพื่ออ้างอิง, Enter เพื่อส่ง...",

@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Ergebnisse werden verarbeitet...",
   "agentChat": "Agent",  "agentQuestionSubmit": "Senden",
   "agentQuestionCustom": "Eigene Antwort eingeben...",
+  "agentRegenerate": "Neue Antwort",
   "agentQuestionSubmitted": "Gesendet",
   "agentNewSession": "Neue Sitzung",
   "agentInputPlaceholder": "Nachricht eingeben, @ zum Referenzieren, Enter zum Senden...",

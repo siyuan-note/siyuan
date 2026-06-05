@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Przetwarzanie wyników...",
   "agentChat": "Agent",  "agentQuestionSubmit": "Wyślij",
   "agentQuestionCustom": "Wpisz odpowiedź...",
+  "agentRegenerate": "Wygeneruj ponownie",
   "agentQuestionSubmitted": "Wysłano",
   "agentNewSession": "Nowa sesja",
   "agentInputPlaceholder": "Wpisz wiadomość, @ aby odwołać, Enter aby wysłać...",

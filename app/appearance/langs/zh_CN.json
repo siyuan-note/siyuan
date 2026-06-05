@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "正在处理结果...",
   "agentChat": "智能体",  "agentQuestionSubmit": "提交",
   "agentQuestionCustom": "输入自定义答案...",
+  "agentRegenerate": "重新回答",
   "agentQuestionSubmitted": "已提交",
   "agentNewSession": "新会话",
   "agentInputPlaceholder": "输入消息，@ 引用，回车发送...",

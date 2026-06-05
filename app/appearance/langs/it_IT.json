@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Elaborazione risultati...",
   "agentChat": "Agente",  "agentQuestionSubmit": "Invia",
   "agentQuestionCustom": "Scrivi la tua risposta...",
+  "agentRegenerate": "Rigenera",
   "agentQuestionSubmitted": "Inviato",
   "agentNewSession": "Nuova sessione",
   "agentInputPlaceholder": "Digita un messaggio, @ per riferimento, Invio per inviare...",

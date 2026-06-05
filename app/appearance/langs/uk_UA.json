@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Обробка результатів...",
   "agentChat": "Агент",  "agentQuestionSubmit": "Надіслати",
   "agentQuestionCustom": "Введіть свою відповідь...",
+  "agentRegenerate": "Перегенерувати",
   "agentQuestionSubmitted": "Надіслано",
   "agentNewSession": "Нова сесія",
   "agentInputPlaceholder": "Введіть повідомлення, @ для посилання, Enter для надсилання...",

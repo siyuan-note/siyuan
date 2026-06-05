@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Resultaten verwerken...",
   "agentChat": "Agent",  "agentQuestionSubmit": "Verzenden",
   "agentQuestionCustom": "Typ je antwoord...",
+  "agentRegenerate": "Opnieuw",
   "agentQuestionSubmitted": "Verzonden",
   "agentNewSession": "Nieuwe sessie",
   "agentInputPlaceholder": "Typ een bericht, @ om te verwijzen, Enter om te verzenden...",

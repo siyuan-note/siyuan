@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "Sonuçlar işleniyor...",
   "agentChat": "Ajan",  "agentQuestionSubmit": "Gönder",
   "agentQuestionCustom": "Cevabınızı yazın...",
+  "agentRegenerate": "Yenile",
   "agentQuestionSubmitted": "Gönderildi",
   "agentNewSession": "Yeni oturum",
   "agentInputPlaceholder": "Mesaj yazın, @ ile referans, Enter ile gönderin...",

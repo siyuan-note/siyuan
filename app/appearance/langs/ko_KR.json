@@ -13,6 +13,7 @@
   "agentThinkingProcessing": "결과 처리 중...",
   "agentChat": "에이전트",  "agentQuestionSubmit": "제출",
   "agentQuestionCustom": "직접 입력...",
+  "agentRegenerate": "재생성",
   "agentQuestionSubmitted": "제출됨",
   "agentNewSession": "새 세션",
   "agentInputPlaceholder": "메시지를 입력하고 @로 참조, Enter로 전송...",

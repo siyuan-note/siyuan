@@ -8,7 +8,7 @@ export const renderSnippet = () => {
     fetchPost("/api/snippet/getSnippet", {type: "all", enabled: 2}, (response) => {
         response.data.snippets.forEach((item: ISnippet) => {
             const id = `snippet${item.type === "css" ? "CSS" : "JS"}${item.id}`;
-            let exitElement = document.getElementById(id) as HTMLElement;
+            let exitElement = document.getElementById(id) as HTMLScriptElement | HTMLStyleElement;
             if ((!window.siyuan.config.snippet.enabledCSS && item.type === "css") ||
                 (!window.siyuan.config.snippet.enabledJS && item.type === "js")) {
                 if (exitElement) {

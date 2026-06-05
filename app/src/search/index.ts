@@ -14,7 +14,6 @@ export class Search extends Model {
     constructor(options: { tab: Tab, config: Config.IUILayoutTabSearchConfig, app: App }) {
         super({
             app: options.app,
-            id: options.tab.id,
         });
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             options.tab.headElement?.classList.add("item--unupdate");

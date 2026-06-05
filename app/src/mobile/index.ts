@@ -51,6 +51,19 @@ class App {
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
         this.appId = Constants.SIYUAN_APPID;
+
+        const mainWs = new Model({app: this});
+        mainWs.connect({
+            id: genUUID(),
+            type: "main",
+            msgCallback: (data) => {
+                this.plugins.forEach((plugin) => {
+                    plugin.eventBus.emit("ws-main", data);
+                });
+                onMessage(this, data);
+            }
+        });
+
         window.siyuan = {
             zIndex: 10,
             notebooks: [],
@@ -70,17 +83,7 @@ class App {
                     inbox: null,
                 }
             },
-            ws: new Model({
-                app: this,
-                id: genUUID(),
-                type: "main",
-                msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
-                    onMessage(this, data);
-                }
-            })
+            ws: mainWs
         };
         // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞
         window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {

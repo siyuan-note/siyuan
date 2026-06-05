@@ -18,37 +18,11 @@ export class Bookmark extends Model {
     private element: Element;
 
     constructor(app: App, tab: Tab) {
-        super({
-            app,
+        super({app});
+        this.connect({
             id: tab.id,
             type: "bookmark",
-            msgCallback(data) {
-                if (data) {
-                    switch (data.cmd) {
-                        case "transactions":
-                            data.data[0].doOperations.forEach((item: IOperation) => {
-                                let needReload = false;
-                                if ((item.action === "update" || item.action === "insert") && item.data.indexOf('class="protyle-attr--bookmark"') > -1) {
-                                    needReload = true;
-                                } else if (item.action === "delete") {
-                                    needReload = true;
-                                }
-                                if (needReload) {
-                                    (this as Bookmark).update();
-                                }
-                            });
-                            break;
-                        case "closeBox":
-                        case "removeBox":
-                        case "removeDoc":
-                        case "mount":
-                            if (data.cmd !== "mount" || data.code !== 1) {
-                                (this as Bookmark).update();
-                            }
-                            break;
-                    }
-                }
-            }
+            msgCallback: this.handleMsgCallback.bind(this)
         });
         this.element = tab.panelElement;
         this.element.classList.add("fn__flex-column", "file-tree", "sy__bookmark", "dockPanel");
@@ -157,6 +131,34 @@ export class Bookmark extends Model {
         });
 
         this.update();
+    }
+
+    private handleMsgCallback(data: IWebSocketData) {
+        if (data) {
+            switch (data.cmd) {
+                case "transactions":
+                    data.data[0].doOperations.forEach((item: IOperation) => {
+                        let needReload = false;
+                        if ((item.action === "update" || item.action === "insert") && item.data.indexOf('class="protyle-attr--bookmark"') > -1) {
+                            needReload = true;
+                        } else if (item.action === "delete") {
+                            needReload = true;
+                        }
+                        if (needReload) {
+                            this.update();
+                        }
+                    });
+                    break;
+                case "closeBox":
+                case "removeBox":
+                case "removeDoc":
+                case "mount":
+                    if (data.cmd !== "mount" || data.code !== 1) {
+                        this.update();
+                    }
+                    break;
+            }
+        }
     }
 
     public update() {

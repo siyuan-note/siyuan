@@ -25,7 +25,7 @@ export class Inbox extends Model {
     private data: { [key: string]: IInbox } = {};
 
     constructor(app: App, tab: Tab | Element) {
-        super({app, id: tab.id});
+        super({app});
         if (tab instanceof Element) {
             this.element = tab;
         } else {

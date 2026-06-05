@@ -37,22 +37,12 @@ class App {
     constructor() {
         addBaseURL();
         this.appId = Constants.SIYUAN_APPID;
-        window.siyuan = {
-            zIndex: 10,
-            transactions: [],
-            reqIds: {},
-            backStack: [],
-            layout: {},
-            dialogs: [],
-            blockPanels: [],
-            closedTabs: [],
-            ctrlIsPressed: false,
-            altIsPressed: false,
-            ws: new Model({
-                app: this,
-                id: genUUID(),
-                type: "main",
-                msgCallback: (data) => {
+
+        const mainWs = new Model({app: this});
+        mainWs.connect({
+            id: genUUID(),
+            type: "main",
+            msgCallback: (data) => {
                     this.plugins.forEach((plugin) => {
                         plugin.eventBus.emit("ws-main", data);
                     });
@@ -179,7 +169,20 @@ class App {
                         }
                     }
                 }
-            }),
+        });
+
+        window.siyuan = {
+            zIndex: 10,
+            transactions: [],
+            reqIds: {},
+            backStack: [],
+            layout: {},
+            dialogs: [],
+            blockPanels: [],
+            closedTabs: [],
+            ctrlIsPressed: false,
+            altIsPressed: false,
+            ws: mainWs,
         };
         fetchPost("/api/system/getConf", {}, async (response) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");

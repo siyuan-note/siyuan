@@ -42,42 +42,15 @@ export class Backlink extends Model {
         rootId?: string,
         type: "pin" | "local"
     }) {
-        super({
-            app: options.app,
+        super({app: options.app});
+
+        this.connect({
             id: options.tab.id,
             type: "backlink",
-            callback() {
-                if (this.type === "local") {
-                    fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
-                        if (!existResponse.data) {
-                            this.parent.parent.removeTab(this.parent.id);
-                        }
-                    });
-                }
-            },
-            msgCallback(data) {
-                if (data && this.type === "local") {
-                    switch (data.cmd) {
-                        case "rename":
-                            if (this.rootId === data.data.id) {
-                                this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
-                            }
-                            break;
-                        case "closeBox":
-                        case "removeBox":
-                            if (this.notebookId === data.data.box && this.type === "local") {
-                                this.parent.parent.removeTab(this.parent.id);
-                            }
-                            break;
-                        case "removeDoc":
-                            if (data.data.ids.includes(this.rootId) && this.type === "local") {
-                                this.parent.parent.removeTab(this.parent.id);
-                            }
-                            break;
-                    }
-                }
-            }
+            callback: this.handelCallback.bind(this),
+            msgCallback: this.handleMsgCallback.bind(this),
         });
+
         this.blockId = options.blockId;
         this.rootId = options.rootId;
         this.type = options.type;
@@ -324,6 +297,39 @@ export class Backlink extends Model {
         });
 
         this.searchBacklinks(true);
+    }
+
+    private handelCallback() {
+        if (this.type === "local") {
+            fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
+                if (!existResponse.data) {
+                    this.parent.parent.removeTab(this.parent.id);
+                }
+            });
+        }
+    }
+
+    private handleMsgCallback(data: IWebSocketData) {
+        if (data && this.type === "local") {
+            switch (data.cmd) {
+                case "rename":
+                    if (this.rootId === data.data.id) {
+                        this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
+                    }
+                    break;
+                case "closeBox":
+                case "removeBox":
+                    if (this.notebookId === data.data.box && this.type === "local") {
+                        this.parent.parent.removeTab(this.parent.id);
+                    }
+                    break;
+                case "removeDoc":
+                    if (data.data.ids.includes(this.rootId) && this.type === "local") {
+                        this.parent.parent.removeTab(this.parent.id);
+                    }
+                    break;
+            }
+        }
     }
 
     private setLayout(element: HTMLElement) {

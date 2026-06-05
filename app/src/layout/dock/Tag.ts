@@ -18,37 +18,11 @@ export class Tag extends Model {
     private element: Element;
 
     constructor(app: App, tab: Tab) {
-        super({
-            app,
+        super({app});
+        this.connect({
             id: tab.id,
             type: "tag",
-            msgCallback(data) {
-                if (data) {
-                    switch (data.cmd) {
-                        case "transactions":
-                            data.data[0].doOperations.forEach((item: IOperation) => {
-                                let needReload = false;
-                                if ((item.action === "update" || item.action === "insert") && item.data.indexOf('data-type="tag"') > -1) {
-                                    needReload = true;
-                                } else if (item.action === "delete") {
-                                    needReload = true;
-                                }
-                                if (needReload) {
-                                    this.update();
-                                }
-                            });
-                            break;
-                        case "closeBox":
-                        case "removeBox":
-                        case "removeDoc":
-                        case "mount":
-                            if (data.cmd !== "mount" || data.code !== 1) {
-                                this.update();
-                            }
-                            break;
-                    }
-                }
-            }
+            msgCallback: this.handleMsgCallback.bind(this)
         });
 
         this.element = tab.panelElement;
@@ -174,6 +148,34 @@ export class Tag extends Model {
             }
         });
         this.update(false);
+    }
+
+    private handleMsgCallback(data: IWebSocketData) {
+        if (data) {
+            switch (data.cmd) {
+                case "transactions":
+                    data.data[0].doOperations.forEach((item: IOperation) => {
+                        let needReload = false;
+                        if ((item.action === "update" || item.action === "insert") && item.data.indexOf('data-type="tag"') > -1) {
+                            needReload = true;
+                        } else if (item.action === "delete") {
+                            needReload = true;
+                        }
+                        if (needReload) {
+                            this.update();
+                        }
+                    });
+                    break;
+                case "closeBox":
+                case "removeBox":
+                case "removeDoc":
+                case "mount":
+                    if (data.cmd !== "mount" || data.code !== 1) {
+                        this.update();
+                    }
+                    break;
+            }
+        }
     }
 
     public update(ignoreMaxListHint = true) {

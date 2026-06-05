@@ -46,7 +46,7 @@ export class AgentChat extends Model {
     private abortController: AbortController | null = null;
 
     constructor(app: App, tab: Tab) {
-        super({app: app, id: tab.id});
+        super({app: app});
         this.parent = tab;
         this.lute = Lute.New();
         this.defaultTitle = window.siyuan.languages.agentChat || "Agent";

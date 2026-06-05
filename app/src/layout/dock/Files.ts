@@ -41,79 +41,11 @@ export class Files extends Model {
     private actionsElement: HTMLElement;
 
     constructor(options: { tab: Tab, app: App }) {
-        super({
-            app: options.app,
+        super({app: options.app});
+        this.connect({
             type: "filetree",
             id: options.tab.id,
-            msgCallback(data) {
-                if (data) {
-                    switch (data.cmd) {
-                        case "reloadDocInfo":
-                            this.updateDocInfo(data);
-                            break;
-                        case "moveDoc":
-                            this.onMove(data);
-                            break;
-                        case "reloadFiletree":
-                            setNoteBook(() => {
-                                this.init(false);
-                            });
-                            break;
-                        case "mount":
-                            this.onMount(data);
-                            options.app.plugins.forEach((item) => {
-                                item.eventBus.emit("opened-notebook", data);
-                            });
-                            break;
-                        case "createnotebook":
-                            setNoteBook((notebooks) => {
-                                let previousId: string;
-                                notebooks.find(item => {
-                                    if (!item.closed) {
-                                        if (item.id === data.data.box.id) {
-                                            if (previousId) {
-                                                this.element.querySelector(`.b3-list[data-url="${previousId}"]`).insertAdjacentHTML("afterend", this.genNotebook(data.data.box));
-                                            } else {
-                                                this.element.insertAdjacentHTML("afterbegin", this.genNotebook(data.data.box));
-                                            }
-                                            return true;
-                                        }
-                                        previousId = item.id;
-                                    }
-                                });
-                            });
-                            break;
-                        case "closeBox":
-                        case "removeBox":
-                            this.onRemove(data);
-                            options.app.plugins.forEach((item) => {
-                                item.eventBus.emit("closed-notebook", data);
-                            });
-                            break;
-                        case "removeDoc":
-                            this.onRemove(data);
-                            break;
-                        case "create":
-                            if (data.data.listDocTree) {
-                                this.selectItem(data.data.box.id, data.data.path);
-                            } else {
-                                this.updateItemArrow(data.data.box.id, data.data.path);
-                            }
-                            break;
-                        case "createdailynote":
-                        case "heading2doc":
-                        case "li2doc":
-                            this.selectItem(data.data.box.id, data.data.path);
-                            break;
-                        case "renamenotebook":
-                            this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
-                            break;
-                        case "rename":
-                            this.onRename(data.data);
-                            break;
-                    }
-                }
-            },
+            msgCallback: this.handleMsgCallback.bind(this)
         });
         options.tab.panelElement.classList.add("fn__flex-column", "file-tree", "sy__file", "dockPanel");
         options.tab.panelElement.innerHTML = `<div class="block__icons">
@@ -828,6 +760,76 @@ export class Files extends Model {
         }
     }
 
+    private handleMsgCallback(data: IWebSocketData) {
+        if (data) {
+            switch (data.cmd) {
+                case "reloadDocInfo":
+                    this.updateDocInfo(data);
+                    break;
+                case "moveDoc":
+                    this.onMove(data);
+                    break;
+                case "reloadFiletree":
+                    setNoteBook(() => {
+                        this.init(false);
+                    });
+                    break;
+                case "mount":
+                    this.onMount(data);
+                    this.app.plugins.forEach((item) => {
+                        item.eventBus.emit("opened-notebook", data);
+                    });
+                    break;
+                case "createnotebook":
+                    setNoteBook((notebooks) => {
+                        let previousId: string;
+                        notebooks.find(item => {
+                            if (!item.closed) {
+                                if (item.id === data.data.box.id) {
+                                    if (previousId) {
+                                        this.element.querySelector(`.b3-list[data-url="${previousId}"]`).insertAdjacentHTML("afterend", this.genNotebook(data.data.box));
+                                    } else {
+                                        this.element.insertAdjacentHTML("afterbegin", this.genNotebook(data.data.box));
+                                    }
+                                    return true;
+                                }
+                                previousId = item.id;
+                            }
+                        });
+                    });
+                    break;
+                case "closeBox":
+                case "removeBox":
+                    this.onRemove(data);
+                    this.app.plugins.forEach((item) => {
+                        item.eventBus.emit("closed-notebook", data);
+                    });
+                    break;
+                case "removeDoc":
+                    this.onRemove(data);
+                    break;
+                case "create":
+                    if (data.data.listDocTree) {
+                        this.selectItem(data.data.box.id, data.data.path);
+                    } else {
+                        this.updateItemArrow(data.data.box.id, data.data.path);
+                    }
+                    break;
+                case "createdailynote":
+                case "heading2doc":
+                case "li2doc":
+                    this.selectItem(data.data.box.id, data.data.path);
+                    break;
+                case "renamenotebook":
+                    this.element.querySelector(`[data-url="${data.data.box}"] .b3-list-item__text`).innerHTML = escapeHtml(data.data.name);
+                    break;
+                case "rename":
+                    this.onRename(data.data);
+                    break;
+            }
+        }
+    }
+
     private updateDocInfo(data: IWebSocketData) {
         const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
         if (liElement) {
@@ -1016,7 +1018,7 @@ data-type="navigation-root" data-path="/">
         });
     }
 
-    private onMount(data: { data: { box: INotebook, existed?: boolean }, callback?: string }) {
+    private onMount(data: IWebSocketData) {
         if (data.data.existed) {
             return;
         }

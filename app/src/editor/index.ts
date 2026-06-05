@@ -27,7 +27,6 @@ export class Editor extends Model {
     }) {
         super({
             app: options.app,
-            id: options.tab.id,
         });
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             options.tab.headElement.classList.add("item--unupdate");

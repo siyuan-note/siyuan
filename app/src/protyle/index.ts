@@ -125,8 +125,8 @@ export class Protyle {
 
         this.init();
         if (!mergedOptions.action.includes(Constants.CB_GET_HISTORY)) {
-            this.protyle.ws = new Model({
-                app,
+            this.protyle.ws = new Model({app});
+            this.protyle.ws.connect({
                 id: this.protyle.id,
                 type: "protyle",
                 msgCallback: (data) => {

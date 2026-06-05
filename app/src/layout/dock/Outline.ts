@@ -37,6 +37,7 @@ export class Outline extends Model {
     public type: "pin" | "local";
     public blockId: string;
     public isPreview: boolean;
+    public protyle: IProtyle;
     private preFilterExpandIds: string[] | null = null;
 
     constructor(options: {
@@ -46,54 +47,12 @@ export class Outline extends Model {
         type: "pin" | "local",
         isPreview: boolean
     }) {
-        super({
-            app: options.app,
+        super({app: options.app});
+        this.connect({
             id: options.tab.id,
             type: "outline",
-            callback() {
-                if (this.type === "local") {
-                    fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
-                        if (!existResponse.data) {
-                            this.parent.parent.removeTab(this.parent.id);
-                        }
-                    });
-                }
-            },
-            msgCallback(data) {
-                if (data) {
-                    switch (data.cmd) {
-                        case "savedoc":
-                            this.onTransaction(data);
-                            break;
-                        case "rename":
-                            if (this.type === "local" && this.blockId === data.data.id) {
-                                this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
-                                this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
-                            } else {
-                                this.updateDocTitle({
-                                    title: data.data.title,
-                                    icon: Constants.ZWSP
-                                }, -1);
-                            }
-                            break;
-                        case "closeBox":
-                        case "removeBox":
-                            if (this.type === "local") {
-                                fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
-                                    if (!existResponse.data) {
-                                        this.parent.parent.removeTab(this.parent.id);
-                                    }
-                                });
-                            }
-                            break;
-                        case "removeDoc":
-                            if (data.data.ids.includes(this.blockId) && this.type === "local") {
-                                this.parent.parent.removeTab(this.parent.id);
-                            }
-                            break;
-                    }
-                }
-            }
+            callback: this.handleCallback.bind(this),
+            msgCallback: this.handleMsgCallback.bind(this)
         });
         this.isPreview = options.isPreview;
         this.blockId = options.blockId;
@@ -338,6 +297,52 @@ export class Outline extends Model {
                 this.updateDocTitle((options.tab.model as Editor)?.editor?.protyle?.background?.ial, response.data?.length || 0);
             }
         });
+    }
+
+    private handleCallback() {
+        if (this.type === "local") {
+            fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
+                if (!existResponse.data) {
+                    this.parent.parent.removeTab(this.parent.id);
+                }
+            });
+        }
+    }
+
+    private handleMsgCallback(data: IWebSocketData) {
+        if (data) {
+            switch (data.cmd) {
+                case "savedoc":
+                    this.onTransaction(data);
+                    break;
+                case "rename":
+                    if (this.type === "local" && this.blockId === data.data.id) {
+                        this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
+                        this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
+                    } else {
+                        this.updateDocTitle({
+                            title: data.data.title,
+                            icon: Constants.ZWSP
+                        }, -1);
+                    }
+                    break;
+                case "closeBox":
+                case "removeBox":
+                    if (this.type === "local") {
+                        fetchPost("/api/block/checkBlockExist", {id: this.blockId}, existResponse => {
+                            if (!existResponse.data) {
+                                this.parent.parent.removeTab(this.parent.id);
+                            }
+                        });
+                    }
+                    break;
+                case "removeDoc":
+                    if (data.data.ids.includes(this.blockId) && this.type === "local") {
+                        this.parent.parent.removeTab(this.parent.id);
+                    }
+                    break;
+            }
+        }
     }
 
     private bindSort() {

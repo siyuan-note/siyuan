@@ -54,6 +54,173 @@ export class App {
         addBaseURL();
 
         this.appId = Constants.SIYUAN_APPID;
+
+        const mainWs = new Model({app: this});
+        mainWs.connect({
+            id: genUUID(),
+            type: "main",
+            msgCallback: (data) => {
+                this.plugins.forEach((plugin) => {
+                    plugin.eventBus.emit("ws-main", data);
+                });
+                if (data) {
+                    switch (data.cmd) {
+                        case "logoutAuth":
+                            redirectToCheckAuth();
+                            break;
+                        case "setAppearance":
+                            updateAppearance(data.data);
+                            break;
+                        case "setSnippet":
+                            window.siyuan.config.snippet = data.data;
+                            renderSnippet();
+                            break;
+                        case "setDefRefCount":
+                            setDefRefCount(data.data);
+                            break;
+                        case "reloadTag":
+                            if (getDockByType("tag")?.data.tag instanceof Tag) {
+                                (getDockByType("tag").data.tag as Tag).update();
+                            }
+                            break;
+                        case "setRefDynamicText":
+                            setRefDynamicText(data.data);
+                            break;
+                        case "reloadPlugin":
+                            reloadPlugin(this, data.data);
+                            break;
+                        case "reloadEmojiConf":
+                            reloadEmoji();
+                            break;
+                        case "syncMergeResult":
+                            reloadSync(this, data.data);
+                            break;
+                        case "reloaddoc":
+                            reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false, true);
+                            break;
+                        case "readonly":
+                            window.siyuan.config.editor.readOnly = data.data;
+                            hideAllElements(["util"]);
+                            break;
+                        case "setConf":
+                            window.siyuan.config = data.data;
+                            break;
+                        case "setPublish":
+                            window.siyuan.config.publish = data.data;
+                            if (!window.siyuan.config.publish.enable) {
+                                getAllModels().files.forEach(item => {
+                                    item.element.classList.remove("file-tree__publish-access--active");
+                                    item.element.querySelectorAll(".b3-list-item__icon").forEach(iconItem => {
+                                        iconItem.classList.remove("fn__none");
+                                        iconItem.nextElementSibling.classList.add("fn__none");
+                                    });
+                                });
+                            }
+                            break;
+                        case "progress":
+                            progressLoading(data);
+                            break;
+                        case "setLocalStorageVal":
+                            if (window.siyuan.storage) {
+                                window.siyuan.storage[data.data.key] = data.data.val;
+                            }
+                            break;
+                        case "setLocalStorageVals":
+                            Object.keys(data.data.keyVals).forEach((k) => {
+                                window.siyuan.storage[k] = data.data.keyVals[k];
+                            });
+                            break;
+                        case "removeLocalStorageVal":
+                            delete window.siyuan.storage[data.data.key];
+                            break;
+                        case "removeLocalStorageVals":
+                            data.data.keys.forEach((k: string) => {
+                                delete window.siyuan.storage[k];
+                            });
+                            break;
+                        case "rename":
+                            getAllTabs().forEach((tab) => {
+                                if (tab.headElement) {
+                                    const initTab = tab.headElement.getAttribute("data-initdata");
+                                    if (initTab) {
+                                        const initTabData = JSON.parse(initTab);
+                                        if (initTabData.instance === "Editor" && initTabData.rootId === data.data.id) {
+                                            tab.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
+                                        }
+                                    }
+                                }
+                            });
+                            break;
+                        case "closeBox":
+                        case "removeBox":
+                            getAllTabs().forEach((tab) => {
+                                if (tab.headElement) {
+                                    const initTab = tab.headElement.getAttribute("data-initdata");
+                                    if (initTab) {
+                                        const initTabData = JSON.parse(initTab);
+                                        if (initTabData.instance === "Editor" && data.data.box === initTabData.notebookId) {
+                                            tab.parent.removeTab(tab.id);
+                                        }
+                                    }
+                                }
+                            });
+                            break;
+                        case "removeDoc":
+                            getAllTabs().forEach((tab) => {
+                                if (tab.headElement) {
+                                    const initTab = tab.headElement.getAttribute("data-initdata");
+                                    if (initTab) {
+                                        const initTabData = JSON.parse(initTab);
+                                        if (initTabData.instance === "Editor" && data.data.ids.includes(initTabData.rootId)) {
+                                            tab.parent.removeTab(tab.id);
+                                        }
+                                    }
+                                }
+                            });
+                            break;
+                        case "statusbar":
+                            progressStatus(data);
+                            break;
+                        case "downloadProgress":
+                            downloadProgress(data.data);
+                            break;
+                        case "txerr":
+                            transactionError(data.msg);
+                            break;
+                        case "syncing":
+                            processSync(data, this.plugins);
+                            break;
+                        case "backgroundtask":
+                            progressBackgroundTask(data.data.tasks);
+                            break;
+                        case "refreshtheme":
+                            if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
+                                (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
+                            } else {
+                                (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
+                            }
+                            break;
+                        case "openFileById":
+                            openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
+                            break;
+                        case "exit":
+                            if (isBrowser() && !isInMobileApp()) {
+                                window.location.href = "about:blank";
+                            }
+                            break;
+                        case "updateKernelPluginState": {
+                            const {name, state} = data.data as {name: string, state: TKernelPluginState};
+                            const plugin = this.plugins.find(p => p.name === name);
+                            if (plugin) {
+                                plugin.kernel.state.code = state;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+
         window.siyuan = {
             zIndex: 10,
             transactions: [],
@@ -65,171 +232,7 @@ export class App {
             closedTabs: [],
             ctrlIsPressed: false,
             altIsPressed: false,
-            ws: new Model({
-                app: this,
-                id: genUUID(),
-                type: "main",
-                msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
-                    if (data) {
-                        switch (data.cmd) {
-                            case "logoutAuth":
-                                redirectToCheckAuth();
-                                break;
-                            case "setAppearance":
-                                updateAppearance(data.data);
-                                break;
-                            case "setSnippet":
-                                window.siyuan.config.snippet = data.data;
-                                renderSnippet();
-                                break;
-                            case "setDefRefCount":
-                                setDefRefCount(data.data);
-                                break;
-                            case "reloadTag":
-                                if (getDockByType("tag")?.data.tag instanceof Tag) {
-                                    (getDockByType("tag").data.tag as Tag).update();
-                                }
-                                break;
-                            case "setRefDynamicText":
-                                setRefDynamicText(data.data);
-                                break;
-                            case "reloadPlugin":
-                                reloadPlugin(this, data.data);
-                                break;
-                            case "reloadEmojiConf":
-                                reloadEmoji();
-                                break;
-                            case "syncMergeResult":
-                                reloadSync(this, data.data);
-                                break;
-                            case "reloaddoc":
-                                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false, true);
-                                break;
-                            case "readonly":
-                                window.siyuan.config.editor.readOnly = data.data;
-                                hideAllElements(["util"]);
-                                break;
-                            case "setConf":
-                                window.siyuan.config = data.data;
-                                break;
-                            case "setPublish":
-                                window.siyuan.config.publish = data.data;
-                                if (!window.siyuan.config.publish.enable) {
-                                    getAllModels().files.forEach(item => {
-                                        item.element.classList.remove("file-tree__publish-access--active");
-                                        item.element.querySelectorAll(".b3-list-item__icon").forEach(iconItem => {
-                                            iconItem.classList.remove("fn__none");
-                                            iconItem.nextElementSibling.classList.add("fn__none");
-                                        });
-                                    });
-                                }
-                                break;
-                            case "progress":
-                                progressLoading(data);
-                                break;
-                            case "setLocalStorageVal":
-                                if (window.siyuan.storage) {
-                                    window.siyuan.storage[data.data.key] = data.data.val;
-                                }
-                                break;
-                            case "setLocalStorageVals":
-                                Object.keys(data.data.keyVals).forEach((k) => {
-                                    window.siyuan.storage[k] = data.data.keyVals[k];
-                                });
-                                break;
-                            case "removeLocalStorageVal":
-                                delete window.siyuan.storage[data.data.key];
-                                break;
-                            case "removeLocalStorageVals":
-                                data.data.keys.forEach((k: string) => {
-                                    delete window.siyuan.storage[k];
-                                });
-                                break;
-                            case "rename":
-                                getAllTabs().forEach((tab) => {
-                                    if (tab.headElement) {
-                                        const initTab = tab.headElement.getAttribute("data-initdata");
-                                        if (initTab) {
-                                            const initTabData = JSON.parse(initTab);
-                                            if (initTabData.instance === "Editor" && initTabData.rootId === data.data.id) {
-                                                tab.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
-                                            }
-                                        }
-                                    }
-                                });
-                                break;
-                            case "closeBox":
-                            case "removeBox":
-                                getAllTabs().forEach((tab) => {
-                                    if (tab.headElement) {
-                                        const initTab = tab.headElement.getAttribute("data-initdata");
-                                        if (initTab) {
-                                            const initTabData = JSON.parse(initTab);
-                                            if (initTabData.instance === "Editor" && data.data.box === initTabData.notebookId) {
-                                                tab.parent.removeTab(tab.id);
-                                            }
-                                        }
-                                    }
-                                });
-                                break;
-                            case "removeDoc":
-                                getAllTabs().forEach((tab) => {
-                                    if (tab.headElement) {
-                                        const initTab = tab.headElement.getAttribute("data-initdata");
-                                        if (initTab) {
-                                            const initTabData = JSON.parse(initTab);
-                                            if (initTabData.instance === "Editor" && data.data.ids.includes(initTabData.rootId)) {
-                                                tab.parent.removeTab(tab.id);
-                                            }
-                                        }
-                                    }
-                                });
-                                break;
-                            case "statusbar":
-                                progressStatus(data);
-                                break;
-                            case "downloadProgress":
-                                downloadProgress(data.data);
-                                break;
-                            case "txerr":
-                                transactionError(data.msg);
-                                break;
-                            case "syncing":
-                                processSync(data, this.plugins);
-                                break;
-                            case "backgroundtask":
-                                progressBackgroundTask(data.data.tasks);
-                                break;
-                            case "refreshtheme":
-                                if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
-                                    (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
-                                } else {
-                                    (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
-                                }
-                                break;
-                            case "openFileById":
-                                openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
-                                break;
-                            case "exit":
-                                if (isBrowser() && !isInMobileApp()) {
-                                    window.location.href = "about:blank";
-                                }
-                                break;
-                            case "updateKernelPluginState": {
-                                const {name, state} = data.data as {name: string, state: TKernelPluginState};
-                                const plugin = this.plugins.find(p => p.name === name);
-                                if (plugin) {
-                                    plugin.kernel.state.code = state;
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-            }),
+            ws: mainWs,
         };
 
         fetchPost("/api/system/getConf", {}, async (response) => {

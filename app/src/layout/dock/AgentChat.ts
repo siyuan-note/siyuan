@@ -45,6 +45,8 @@ export class AgentChat extends Model {
     private defaultTitle = "";
     private currentToolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}> = [];
     private abortController: AbortController | null = null;
+    private isRenderingSessionList = false;
+    private messageHistory: Record<string, string[]> = {};
 
     constructor(app: App, tab: Tab) {
         super({app: app});
@@ -126,9 +128,16 @@ export class AgentChat extends Model {
                         self.setStreaming(true);
                         const apiMessages = self.messages.map(function (m) { return {role: m.role as "user" | "assistant", content: m.content}; });
                         self.abortController = new AbortController();
+                        const requestSessionId = self.sessionId;
                         fetchAgentSSE(apiMessages, window.siyuan.config.appearance.lang, [],
-                            function (event: ISSEResult) { self.handleSSEEvent(event); },
-                            function (err: Error) { self.handleError(err); },
+                            function (event: ISSEResult) {
+                                if (self.sessionId !== requestSessionId) { return; }
+                                self.handleSSEEvent(event);
+                            },
+                            function (err: Error) {
+                                if (self.sessionId !== requestSessionId) { return; }
+                                self.handleError(err);
+                            },
                             self.abortController.signal,
                             self.sessionId);
                     }
@@ -139,9 +148,9 @@ export class AgentChat extends Model {
 
     private bindEvents() {
         const self = this;
-        this.sendBtn.addEventListener("click", function () { self.sendMessage(); });
-        this.stopBtn.addEventListener("click", function () { self.stopGeneration(); });
-        this.newSessionBtn.addEventListener("click", function () { self.createSession(); });
+        this.sendBtn.addEventListener("click", function (e: MouseEvent) { e.stopPropagation(); self.sendMessage(); });
+        this.stopBtn.addEventListener("click", function (e: MouseEvent) { e.stopPropagation(); self.stopGeneration(); });
+        this.newSessionBtn.addEventListener("click", function (e: MouseEvent) { e.stopPropagation(); self.createSession(); });
         this.sessionMenuBtn.addEventListener("click", function (e: MouseEvent) {
             e.stopPropagation();
             self.toggleSessionMenu();
@@ -149,6 +158,7 @@ export class AgentChat extends Model {
 
         this.parent.panelElement.addEventListener("click", function (e: MouseEvent) {
             const t = e.target as HTMLElement;
+            if (t.closest(".block__icons")) { return; }
             if (t.closest(".agent-chat__msg")) { return; }
             if (t.closest(".agent-chat__header")) { return; }
             if (t.closest(".agent-session-popup")) { return; }
@@ -202,6 +212,7 @@ export class AgentChat extends Model {
     }
 
     private toggleSessionMenu() {
+        if (this.isRenderingSessionList) { return; }
         if (this.sessionPopup) {
             this.closeSessionMenu();
             return;
@@ -211,16 +222,16 @@ export class AgentChat extends Model {
     }
 
     private closeSessionMenu() {
-        if (this.sessionPopup) {
-            this.sessionPopup.remove();
-            this.sessionPopup = null;
-        }
+        document.querySelectorAll(".agent-session-popup").forEach(function (el) { el.remove(); });
+        this.sessionPopup = null;
     }
 
     private async renderSessionList() {
         const self = this;
+        this.isRenderingSessionList = true;
         this.closeSessionMenu();
-        const list = await SessionStore.list();
+        try {
+            const list = await SessionStore.list();
         list.sort(function (a, b) { return b.updatedAt - a.updatedAt; });
 
         this.sessionPopup = document.createElement("div");
@@ -250,8 +261,8 @@ export class AgentChat extends Model {
             item.addEventListener("click", function (e) {
                 const id = item.getAttribute("data-id") || "";
                 if (id && id !== self.sessionId) {
-                    self.switchSession(id);
                     self.closeSessionMenu();
+                    self.switchSession(id);
                 }
             });
         });
@@ -286,6 +297,9 @@ export class AgentChat extends Model {
                 document.removeEventListener("click", closeOut);
             });
         }, 10);
+        } finally {
+            this.isRenderingSessionList = false;
+        }
     }
 
     private startRename(id: string, rowEl: HTMLElement) {
@@ -333,10 +347,18 @@ export class AgentChat extends Model {
     }
 
     private async switchSession(id: string) {
+        this.setStreaming(false);
+        if (this.composer) {
+            this.messageHistory[this.sessionId] = this.composer.getHistory();
+        }
         await this.saveSession();
         const session = await SessionStore.load(id);
         if (!session) { return; }
         this.sessionId = session.id;
+        if (this.composer) {
+            this.composer.clearHistory();
+            this.composer.restoreHistory(this.messageHistory[id] || []);
+        }
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
         this.messages = session.messages as IAgentMessage[];
@@ -516,13 +538,20 @@ export class AgentChat extends Model {
         const self = this;
 
         this.abortController = new AbortController();
+        const requestSessionId = this.sessionId;
 
         fetchAgentSSE(
             apiMessages,
             window.siyuan.config.appearance.lang,
             refs,
-            function (event: ISSEResult) { self.handleSSEEvent(event); },
-            function (err: Error) { self.handleError(err); },
+            function (event: ISSEResult) {
+                if (self.sessionId !== requestSessionId) { return; }
+                self.handleSSEEvent(event);
+            },
+            function (err: Error) {
+                if (self.sessionId !== requestSessionId) { return; }
+                self.handleError(err);
+            },
             this.abortController.signal,
             this.sessionId,
         );
@@ -838,12 +867,19 @@ export class AgentChat extends Model {
         const apiMessages = this.messages.map(function (m) { return {role: m.role, content: m.content}; });
         const self = this;
         this.abortController = new AbortController();
+        const requestSessionId = this.sessionId;
         fetchAgentSSE(
             apiMessages,
             window.siyuan.config.appearance.lang,
             [],
-            function (event: ISSEResult) { self.handleSSEEvent(event); },
-            function (err: Error) { self.handleError(err); },
+            function (event: ISSEResult) {
+                if (self.sessionId !== requestSessionId) { return; }
+                self.handleSSEEvent(event);
+            },
+            function (err: Error) {
+                if (self.sessionId !== requestSessionId) { return; }
+                self.handleError(err);
+            },
             this.abortController.signal,
             this.sessionId,
         );

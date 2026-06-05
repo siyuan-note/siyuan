@@ -16,17 +16,33 @@
 
 package tools
 
-var Registry = map[string]*Tool{}
-var currentTodoSessionID string
+import "sync"
 
-func SetCurrentTodoSessionID(sessionID string) {
-	currentTodoSessionID = sessionID
+var registryMu sync.RWMutex
+var Registry = map[string]*Tool{}
+
+func GetTool(name string) *Tool {
+	registryMu.RLock()
+	defer registryMu.RUnlock()
+	return Registry[name]
 }
 
-func CurrentTodoSessionID() string {
-	return currentTodoSessionID
+func GetAllTools() []*Tool {
+	registryMu.RLock()
+	defer registryMu.RUnlock()
+	result := make([]*Tool, 0, len(Registry))
+	for _, t := range Registry {
+		result = append(result, t)
+	}
+	return result
+}
+
+func SetTool(name string, t *Tool) {
+	registryMu.Lock()
+	defer registryMu.Unlock()
+	Registry[name] = t
 }
 
 func register(t *Tool) {
-	Registry[t.Name] = t
+	SetTool(t.Name, t)
 }

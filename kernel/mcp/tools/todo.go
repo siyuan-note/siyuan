@@ -85,7 +85,7 @@ func todoWriteHandler(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	// Save todos for this session
-	if err := model.SaveAgentTodos(currentTodoSessionID, todos); err != nil {
+	if err := model.SaveAgentTodos(args["_sessionID"].(string), todos); err != nil {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: "todo_write error: " + err.Error()}},
 			IsError: true,

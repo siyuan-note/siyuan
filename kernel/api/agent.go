@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -36,6 +37,13 @@ type agentChatReq struct {
 	Language   string              `json:"language"`
 	References []agent.Reference   `json:"references"`
 }
+
+type runningSession struct {
+	eventCh <-chan agent.AgentEvent
+}
+
+var sessionsMu sync.Mutex
+var runningSessions = map[string]*runningSession{}
 
 func agentChat(c *gin.Context) {
 	if "" == model.Conf.AI.OpenAI.APIKey {
@@ -74,16 +82,11 @@ func agentChat(c *gin.Context) {
 	}
 
 	var eventCh <-chan agent.AgentEvent
-	ctx, cancel := context.WithCancel(context.Background())
-	defer func() {
-		cancel()
-		go func() {
-			for range eventCh {
-			}
-		}()
-	}()
 
-	eventCh = agent.AgentChat(ctx, client, model.Conf.AI.OpenAI.APIModel, req.SessionID, req.Messages, req.Language, req.References, confirmTimeout, maxRetries)
+	eventCh = agent.AgentChat(context.Background(), client, model.Conf.AI.OpenAI.APIModel, req.SessionID, req.Messages, req.Language, req.References, confirmTimeout, maxRetries)
+	sessionsMu.Lock()
+	runningSessions[req.SessionID] = &runningSession{eventCh: eventCh}
+	sessionsMu.Unlock()
 
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -111,6 +114,9 @@ func agentChat(c *gin.Context) {
 		select {
 		case event, ok := <-eventCh:
 			if !ok {
+				sessionsMu.Lock()
+				delete(runningSessions, req.SessionID)
+				sessionsMu.Unlock()
 				return
 			}
 			if err := writeSSE(c, event); err != nil {

@@ -981,6 +981,18 @@ app.whenReady().then(() => {
                     globalShortcut.unregister(hotKey2Electron(data.accelerator));
                 }
                 break;
+            case "registerGlobalShortcut":
+                if (data.accelerator) {
+                    globalShortcut.unregister(hotKey2Electron(data.accelerator));
+                    globalShortcut.register(hotKey2Electron(data.accelerator), () => {
+                        BrowserWindow.getAllWindows().forEach(itemB => {
+                            itemB.webContents.send("siyuan-hotkey", {
+                                hotkey: data.accelerator
+                            });
+                        });
+                    });
+                }
+                break;
             case "setTrafficLightPosition":
                 if (!currentWindow || !currentWindow.setWindowButtonPosition) {
                     return;

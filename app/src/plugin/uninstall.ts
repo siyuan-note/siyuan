@@ -5,6 +5,9 @@ import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
 import {setTabPosition} from "../layout/tabUtil";
 /// #endif
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
@@ -85,6 +88,16 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             });
             // rm style
             document.getElementById("pluginsStyle" + name)?.remove();
+            /// #if !BROWSER
+            plugin.commands.forEach(command => {
+                if (command.globalCallback && command.customHotkey) {
+                    ipcRenderer.send(Constants.SIYUAN_CMD, {
+                        cmd: "unregisterGlobalShortcut",
+                        accelerator: command.customHotkey
+                    });
+                }
+            });
+            /// #endif
             return true;
         }
     });

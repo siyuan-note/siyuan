@@ -11,6 +11,9 @@ import {getDockByType, setTabPosition} from "../layout/tabUtil";
 ///#else
 import {MobileCustom} from "../mobile/dock/MobileCustom";
 /// #endif
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
@@ -186,6 +189,14 @@ export class Plugin {
             console.error(`${this.name} - commands data is error and has been removed.`);
         } else {
             this.commands.push(command);
+            /// #if !BROWSER
+            if (command.globalCallback) {
+                ipcRenderer.send(Constants.SIYUAN_CMD, {
+                    cmd: "registerGlobalShortcut",
+                    accelerator: command.customHotkey
+                });
+            }
+            /// #endif
         }
     }
 

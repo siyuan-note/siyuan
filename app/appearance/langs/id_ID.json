@@ -1,6 +1,5 @@
 {
-  "agentWelcomeGreeting": "Halo, saya Agen SiYuan",
-  "agentWelcomeDesc": "Saya dapat mencari, membaca, membuat, dan mengubah catatan Anda",
+  "agentWelcomeGreeting": "Hei, ada rencana apa? Serahkan padaku",
   "agentExample1": "Cari catatan rapat terbaru saya",
   "agentExample2": "Buat jurnal harian baru",
   "agentExample3": "Temukan catatan terkait proyek",

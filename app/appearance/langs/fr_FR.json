@@ -1,6 +1,5 @@
 {
-  "agentWelcomeGreeting": "Bonjour, je suis SiYuan Agent",
-  "agentWelcomeDesc": "Je peux rechercher, lire, créer et modifier vos notes",
+  "agentWelcomeGreeting": "Dis-moi tout, je m'en occupe",
   "agentExample1": "Rechercher mes notes de réunion récentes",
   "agentExample2": "Créer un nouveau journal",
   "agentExample3": "Rechercher des notes sur le projet",

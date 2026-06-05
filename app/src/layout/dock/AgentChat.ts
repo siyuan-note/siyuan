@@ -105,7 +105,6 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
         const html = '<div class="agent-welcome">' +
             '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
-            '<div class="agent-welcome__desc">' + (L.agentWelcomeDesc || "I can search, read, create, and modify your notes") + "</div>" +
             '<div class="agent-welcome__examples">' +
                 '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
                 '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
@@ -743,7 +742,6 @@ export class AgentChat extends Model {
         const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
-            this.addCopyButton(this.currentAIElement);
         }
         this.currentAIElement = null;
         this.currentContent = "";
@@ -849,6 +847,7 @@ export class AgentChat extends Model {
         if (bubble) {
             bubble.classList.remove("agent-chat__bubble--streaming");
         }
+        this.addCopyButton(this.currentAIElement);
         this.messages.push({role: "assistant", content: this.fullContent || " ", toolCalls: this.currentToolCalls.length > 0 ? this.currentToolCalls.slice() : undefined});
         this.currentAIElement = null;
         this.currentContent = "";

@@ -1,9 +1,8 @@
 {
-  "agentWelcomeGreeting": "Merhaba, ben SiYuan Ajanı",
-  "agentWelcomeDesc": "Notlarınızı arayabilir, okuyabilir, oluşturabilir ve düzenleyebilirim",
+  "agentWelcomeGreeting": "Selam, aklında ne var? Hallederim",
   "agentExample1": "Son toplantı notlarımı ara",
   "agentExample2": "Yeni bir günlük oluştur",
-  "agentExample3": "Projeyle ilgili notları bul",
+  "agentExample3": "整理一下项目相关的笔记",
   "agentConfirmDesc": "{name} üzerinde {action} onaylansın mı?",
   "agentConfirmApprove": "Onayla",
   "agentConfirmReject": "Reddet",

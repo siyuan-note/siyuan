@@ -1,9 +1,8 @@
 {
-  "agentWelcomeGreeting": "مرحبًا، أنا مساعد SiYuan الذكي",
-  "agentWelcomeDesc": "يمكنني البحث في ملاحظاتك وقراءتها وإنشاؤها وتعديلها",
+  "agentWelcomeGreeting": "مرحبًا، ما الذي يدور في ذهنك؟ سأتولى الأمر",
   "agentExample1": "البحث عن ملاحظات الاجتماعات الأخيرة",
   "agentExample2": "إنشاء مذكرة يومية جديدة",
-  "agentExample3": "البحث عن ملاحظات متعلقة بالمشروع",
+  "agentExample3": "整理一下项目相关的笔记",
   "agentConfirmDesc": "سيتم تنفيذ العملية {action} على: {name}",
   "agentConfirmApprove": "موافقة",
   "agentConfirmReject": "رفض",

@@ -105,7 +105,6 @@ export class AgentChat extends Model {
         const L = window.siyuan.languages;
         const html = '<div class="agent-welcome">' +
             '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
-            '<div class="agent-welcome__desc">' + (L.agentWelcomeDesc || "I can search, read, create, and modify your notes") + "</div>" +
             '<div class="agent-welcome__examples">' +
                 '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
                 '<div class="agent-welcome__example" data-text="' + this.escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +

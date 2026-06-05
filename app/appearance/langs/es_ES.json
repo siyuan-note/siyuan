@@ -1,9 +1,8 @@
 {
-  "agentWelcomeGreeting": "Hola, soy el Agente SiYuan",
-  "agentWelcomeDesc": "Puedo buscar, leer, crear y modificar tus notas",
+  "agentWelcomeGreeting": "Oye, ¿qué tienes en mente? Yo me encargo",
   "agentExample1": "Buscar mis notas de reuniones recientes",
   "agentExample2": "Crear un nuevo diario",
-  "agentExample3": "Buscar notas del proyecto",
+  "agentExample3": "整理一下项目相关的笔记",
   "agentConfirmDesc": "Se ejecutará {action} en: {name}",
   "agentConfirmApprove": "Aprobar",
   "agentConfirmReject": "Rechazar",

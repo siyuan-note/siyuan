@@ -1,9 +1,8 @@
 {
-  "agentWelcomeGreeting": "שלום, אני סוכן SiYuan",
-  "agentWelcomeDesc": "אני יכול לחפש, לקרוא, ליצור ולערוך את ההערות שלך",
+  "agentWelcomeGreeting": "היי, מה בראש? אני אטפל בזה",
   "agentExample1": "חפש את הערות הפגישות האחרונות שלי",
   "agentExample2": "צור יומן חדש",
-  "agentExample3": "מצא הערות הקשורות לפרויקט",
+  "agentExample3": "整理一下项目相关的笔记",
   "agentConfirmDesc": "הפעולה {action} תבוצע על: {name}",
   "agentConfirmApprove": "אשר",
   "agentConfirmReject": "דחה",

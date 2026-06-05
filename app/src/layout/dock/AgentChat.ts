@@ -508,6 +508,7 @@ export class AgentChat extends Model {
 
         this.messages.push({role: "user", content: text});
         this.appendUserMessage(text);
+        if (this.composer) { this.composer.pushHistory(text); }
 
         this.requestStartTime = Date.now();
 

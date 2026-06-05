@@ -62,19 +62,13 @@ func sqlQuery(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	stmt = strings.TrimSpace(stmt)
-	upperStmt := strings.ToUpper(stmt)
-
-	if !strings.HasPrefix(upperStmt, "SELECT") {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "only SELECT statements are allowed"}}, IsError: true}, nil
-	}
-
-	if strings.Contains(upperStmt, "DROP") || strings.Contains(upperStmt, "CREATE") ||
-		strings.Contains(upperStmt, "ALTER") || strings.Contains(upperStmt, "TRUNCATE") {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "DDL statements are not allowed"}}, IsError: true}, nil
-	}
 
 	if err := sql.CheckSingleStatement(stmt); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "invalid SQL: " + err.Error()}}, IsError: true}, nil
+	}
+
+	if err := sql.CheckReadonlyStatement(stmt); err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "readonly SQL required: " + err.Error()}}, IsError: true}, nil
 	}
 
 	rows, err := sql.Query(stmt, 100)

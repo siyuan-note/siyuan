@@ -178,6 +178,7 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(parentID)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block inserted"}}}, nil
 }
 
@@ -209,6 +210,7 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(parentID)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block appended"}}}, nil
 }
 
@@ -240,6 +242,7 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(parentID)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block prepended"}}}, nil
 }
 
@@ -271,6 +274,7 @@ func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
 }
 
@@ -289,6 +293,7 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block deleted: " + id}}}, nil
 }
 
@@ -333,6 +338,7 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 
 	model.PerformTransactions(&transactions)
 	model.FlushTxQueue()
+	model.AppendPushReloadProtyleEntry(id)
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
 }
 

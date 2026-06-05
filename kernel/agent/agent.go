@@ -355,7 +355,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					setCurrentTodoSession(sessionID)
 					var resultStr string
 					if tc.Function.Name == "question" {
-						resultStr = handleQuestion(tc.Function.Arguments, ch, confirmTimeout)
+						resultStr = handleQuestion(tc.Function.Arguments, ch, 5*time.Minute)
 						doomLoop = doomLoopTracker{}
 					} else {
 						resultStr = executeTool(tc)

@@ -754,7 +754,9 @@ export class AgentChat extends Model {
                 this.sessionTotalDuration += Date.now() - this.requestStartTime;
                 this.requestStartTime = 0;
             }
+            this.updateTokenDisplay();
             this.setStreaming(false);
+            // line 754 area
             if (!this.hasTitled && this.messages.length >= 2) {
                 this.hasTitled = true;
                 this.generateTitle();
@@ -773,9 +775,10 @@ export class AgentChat extends Model {
         this.currentToolCalls = [];
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
-            this.requestStartTime = 0;
-        }
-        this.setStreaming(false);
+                this.requestStartTime = 0;
+            }
+            this.updateTokenDisplay();
+            this.setStreaming(false);
 
         if (!this.hasTitled && this.messages.length >= 2) {
             this.hasTitled = true;
@@ -851,9 +854,10 @@ export class AgentChat extends Model {
         }
         if (this.requestStartTime) {
             this.sessionTotalDuration += Date.now() - this.requestStartTime;
-            this.requestStartTime = 0;
-        }
-        this.setStreaming(false);
+                this.requestStartTime = 0;
+            }
+            this.updateTokenDisplay();
+            this.setStreaming(false);
     }
 
     private insertBeforeAI(el: HTMLElement) {
@@ -878,7 +882,7 @@ export class AgentChat extends Model {
     '<div class="agent-chat__confirm-actions">' +
         '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
         '<button class="b3-button b3-button--text agent-chat__confirm-approve">' + (L.agentConfirmApprove || "Approve") + "</button>" +
-        '<button class="b3-button b3-button--text agent-chat__confirm-always">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
+        '<button class="b3-button b3-button--text agent-chat__confirm-always ariaLabel" data-position="n" aria-label="' + (L.agentConfirmAlwaysDesc || "Session Allow") + '">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
     "</div>" +
 "</div>";
         const approveBtn = el.querySelector(".agent-chat__confirm-approve");

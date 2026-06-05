@@ -7,6 +7,8 @@
   "agentConfirmDesc": "Potvrdiť {action} na: {name}?",
   "agentConfirmApprove": "Schváliť",
   "agentConfirmReject": "Odmietnuť",
+  "agentConfirmAlways": "Povoliť reláciu",
+  "agentConfirmAlwaysDesc": "V tejto relácii sa už nepýtať",
   "agentThinkingAnalyzing": "Analyzovanie požiadavky...",
   "agentThinkingProcessing": "Spracovanie výsledkov...",
   "agentChat": "Agent",

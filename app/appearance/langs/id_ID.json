@@ -7,6 +7,8 @@
   "agentConfirmDesc": "Konfirmasi {action} pada: {name}?",
   "agentConfirmApprove": "Setujui",
   "agentConfirmReject": "Tolak",
+  "agentConfirmAlways": "Izinkan sesi",
+  "agentConfirmAlwaysDesc": "Jangan tanya lagi di sesi ini",
   "agentThinkingAnalyzing": "Menganalisis permintaan Anda...",
   "agentThinkingProcessing": "Memproses hasil...",
   "agentChat": "Agen",

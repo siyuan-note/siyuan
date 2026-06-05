@@ -7,6 +7,8 @@
   "agentConfirmDesc": "{name} üzerinde {action} onaylansın mı?",
   "agentConfirmApprove": "Onayla",
   "agentConfirmReject": "Reddet",
+  "agentConfirmAlways": "Oturuma izin ver",
+  "agentConfirmAlwaysDesc": "Bu oturumda tekrar sorma",
   "agentThinkingAnalyzing": "İsteğiniz analiz ediliyor...",
   "agentThinkingProcessing": "Sonuçlar işleniyor...",
   "agentChat": "Ajan",

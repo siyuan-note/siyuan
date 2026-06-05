@@ -128,6 +128,7 @@ func agentChat(c *gin.Context) {
 type agentConfirmReq struct {
 	ConfirmID string `json:"confirmID"`
 	Approved  bool   `json:"approved"`
+	Always    bool   `json:"always"`
 }
 
 func agentChatConfirm(c *gin.Context) {
@@ -139,7 +140,7 @@ func agentChatConfirm(c *gin.Context) {
 		c.JSON(http.StatusOK, ret)
 		return
 	}
-	agent.ConfirmSession(req.ConfirmID, req.Approved)
+	agent.ConfirmSession(req.ConfirmID, req.Approved, req.Always)
 	ret := gulu.Ret.NewResult()
 	c.JSON(http.StatusOK, ret)
 }

@@ -7,6 +7,8 @@
   "agentConfirmDesc": "確認對 {name} 執行 {action}？",
   "agentConfirmApprove": "確認執行",
   "agentConfirmReject": "拒絕",
+  "agentConfirmAlways": "會話允許",
+  "agentConfirmAlwaysDesc": "本次會話中後續不再詢問此操作",
   "agentThinkingAnalyzing": "正在分析你的請求...",
   "agentThinkingProcessing": "正在處理結果...",
   "agentChat": "智能體",

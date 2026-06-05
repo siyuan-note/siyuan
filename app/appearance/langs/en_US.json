@@ -7,6 +7,8 @@
   "agentConfirmDesc": "Confirm {action} on: {name}?",
   "agentConfirmApprove": "Approve",
   "agentConfirmReject": "Reject",
+  "agentConfirmAlways": "Session Allow",
+  "agentConfirmAlwaysDesc": "Don't ask again in this session",
   "agentThinkingAnalyzing": "Analyzing your request...",
   "agentThinkingProcessing": "Processing results...",
   "agentChat": "Agent",

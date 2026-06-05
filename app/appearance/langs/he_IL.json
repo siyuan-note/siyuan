@@ -7,6 +7,8 @@
   "agentConfirmDesc": "הפעולה {action} תבוצע על: {name}",
   "agentConfirmApprove": "אשר",
   "agentConfirmReject": "דחה",
+  "agentConfirmAlways": "אפשר הפעלה",
+  "agentConfirmAlwaysDesc": "אל תשאל שוב בהפעלה זו",
   "agentThinkingAnalyzing": "מנתח את הבקשה שלך...",
   "agentThinkingProcessing": "מעבד תוצאות...",
   "agentChat": "סוכן",

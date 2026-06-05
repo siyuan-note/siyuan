@@ -19,10 +19,12 @@ package agent
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/sashabaranov/go-openai"
@@ -68,12 +70,20 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 const maxToolCallRounds = 64
 
-var confirmChannels = make(map[string]chan bool)
+type confirmResult struct {
+	approved bool
+	always   bool
+}
 
-func ConfirmSession(id string, approved bool) {
+var confirmChannelsMu sync.Mutex
+var confirmChannels = make(map[string]chan confirmResult)
+
+func ConfirmSession(id string, approved bool, always bool) {
+	confirmChannelsMu.Lock()
 	ch, ok := confirmChannels[id]
+	confirmChannelsMu.Unlock()
 	if ok {
-		ch <- approved
+		ch <- confirmResult{approved: approved, always: always}
 	}
 }
 
@@ -130,11 +140,17 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 	go func() {
 		defer close(ch)
+		defer func() {
+			if r := recover(); r != nil {
+				ch <- AgentEvent{Type: "error", Error: fmt.Sprintf("internal error: %v", r)}
+			}
+		}()
 
 		tools := convertMCPToolsToOpenAI()
 		messages := buildMessages(history, language, references)
 		var totalPrompt, totalCompletion int
 		startTime := time.Now().UnixMilli()
+		alwaysAllow := map[string]bool{}
 
 		checkpointMsgs := make([]AgentMessage, 0, len(history))
 		for _, h := range history {
@@ -254,41 +270,53 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 						Arguments: args,
 					}
 
-					if needsConfirm(tc.Function.Name, action) {
+					if needsConfirm(tc.Function.Name, action, alwaysAllow) {
 						confirmID := tc.ID
 						ch <- AgentEvent{Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID}
-						ch2 := make(chan bool, 1)
+						ch2 := make(chan confirmResult, 1)
+						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = ch2
-						var confirmResult string
-						var approved bool
+						confirmChannelsMu.Unlock()
+						var rejectionMsg string
+						var result confirmResult
 						timedOut := false
 
 						select {
-						case approved = <-ch2:
+						case result = <-ch2:
+							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
+							confirmChannelsMu.Unlock()
 						case <-ctx.Done():
+							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
+							confirmChannelsMu.Unlock()
 							return
 						case <-time.After(confirmTimeout):
+							confirmChannelsMu.Lock()
 							delete(confirmChannels, confirmID)
+							confirmChannelsMu.Unlock()
 							timedOut = true
-							confirmResult = "Confirmation timed out, operation skipped automatically"
-							ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: confirmResult}
+							rejectionMsg = "Confirmation timed out, operation skipped automatically"
+							ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg}
 						}
 
-						if timedOut || !approved {
-							if confirmResult == "" {
-								confirmResult = "User rejected this operation"
-								ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: confirmResult}
+						if timedOut || !result.approved {
+							if rejectionMsg == "" {
+								rejectionMsg = "User rejected this operation"
+								ch <- AgentEvent{Type: "tool_result", Name: tc.Function.Name, Result: rejectionMsg}
 							}
 							messages = append(messages, openai.ChatCompletionMessage{
 								Role:       openai.ChatMessageRoleTool,
-								Content:    confirmResult,
+								Content:    rejectionMsg,
 								ToolCallID: tc.ID,
 							})
-							checkpointMsgs[assistantIdx].ToolCalls[i].Result = confirmResult
+							checkpointMsgs[assistantIdx].ToolCalls[i].Result = rejectionMsg
 							saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 							continue
+						}
+
+						if result.always {
+							alwaysAllow[tc.Function.Name+"::"+action] = true
 						}
 					}
 
@@ -296,12 +324,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 				result := executeTool(tc)
 
 					ch <- AgentEvent{
-						Type:   "tool_result",
-						Name:   tc.Function.Name,
-						Result: result,
-					}
+					Type:   "tool_result",
+					Name:   tc.Function.Name,
+					Result: result,
+				}
 
-					messages = append(messages, openai.ChatCompletionMessage{
+				messages = append(messages, openai.ChatCompletionMessage{
 						Role:       openai.ChatMessageRoleTool,
 						Content:    result,
 						ToolCallID: tc.ID,
@@ -375,8 +403,11 @@ var safeActions = map[string]bool{
 	"current_time": true, "workspace": true, "md": true, "query": true,
 }
 
-func needsConfirm(toolName string, action string) bool {
+func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
 	if action == "" {
+		return false
+	}
+	if alwaysAllow[toolName+"::"+action] {
 		return false
 	}
 	if safeActions[action] {

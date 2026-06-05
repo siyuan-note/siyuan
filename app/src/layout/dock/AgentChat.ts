@@ -5,6 +5,7 @@ import {fetchAgentSSE, ISSEResult} from "../../util/agentSSE";
 import {mountComposer} from "./AgentComposer";
 import {AgentSession, SessionStore} from "./SessionStore";
 import {getDockByType} from "../tabUtil";
+import {updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 
 interface IAgentMessage {
     role: "user" | "assistant";
@@ -70,7 +71,7 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconMore"></use></svg>' +
         "</span>" +
         '<span class="fn__space"></span>' +
-        '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + (window.siyuan.languages.min || "Minimize") + '">' +
+        '<span data-type="min" class="block__icon ariaLabel" data-position="north" aria-label="' + window.siyuan.languages.min + updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom) + '">' +
             '<svg><use xlink:href="#iconMin"></use></svg>' +
         "</span>" +
     "</div>" +
@@ -490,43 +491,50 @@ export class AgentChat extends Model {
     }
 
     private handleSSEEvent(event: ISSEResult) {
-        switch (event.type) {
-            case "content":
-                this.appendToken(event.token);
-                break;
-            case "thinking":
-                this.appendThinking(event.reasoning);
-                break;
-            case "tool_call":
-                this.currentToolCalls.push({name: event.name, arguments: event.arguments});
-                this.appendToolCall(event.name, event.arguments);
-                break;
-            case "confirm":
-                this.appendConfirm(event.name, event.arguments, event.confirmID);
-                break;
-            case "tool_result":
-                if (this.currentToolCalls.length > 0) {
-                    this.currentToolCalls[this.currentToolCalls.length - 1].result = event.result;
-                }
-                this.appendToolResult(event.name, event.result);
-                break;
-            case "done":
-                this.finishResponse();
-                break;
-            case "usage":
-                this.appendUsage(event.promptTokens, event.completionTokens);
-                break;
-            case "error":
-                this.appendError(event.message);
-                this.setStreaming(false);
-                break;
-            case "retry":
-                this.appendRetry(event.attempt, event.maxRetries);
-                break;
+        try {
+            switch (event.type) {
+                case "content":
+                    this.appendToken(event.token);
+                    break;
+                case "thinking":
+                    this.appendThinking(event.reasoning);
+                    break;
+                case "tool_call":
+                    this.currentToolCalls.push({name: event.name, arguments: event.arguments});
+                    this.appendToolCall(event.name, event.arguments);
+                    break;
+                case "confirm":
+                    this.appendConfirm(event.name, event.arguments, event.confirmID);
+                    break;
+                case "tool_result":
+                    if (this.currentToolCalls.length > 0) {
+                        this.currentToolCalls[this.currentToolCalls.length - 1].result = event.result;
+                    }
+                    this.appendToolResult(event.name, event.result);
+                    break;
+                case "done":
+                    this.flushTokenUpdate();
+                    this.finishResponse();
+                    break;
+                case "usage":
+                    this.appendUsage(event.promptTokens, event.completionTokens);
+                    break;
+                case "error":
+                    this.appendError(event.message);
+                    this.setStreaming(false);
+                    break;
+                case "retry":
+                    this.appendRetry(event.attempt, event.maxRetries);
+                    break;
+            }
+        } catch (e) {
+            console.error("agent SSE event handler error:", e, event);
+            this.setStreaming(false);
         }
     }
 
     private handleError(err: Error) {
+        this.flushTokenUpdate();
         this.appendError(err.message);
         this.setStreaming(false);
     }
@@ -549,19 +557,40 @@ export class AgentChat extends Model {
         return el;
     }
 
+    private pendingTokenUpdate = false;
+    private rafId = 0;
+
     private appendToken(token: string) {
         if (!this.currentAIElement) {
+            this.clearThinking();
             this.currentAIElement = this.createAIMessagePlaceholder();
-        }
-        const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
-        if (!bubble) {
-            return;
         }
         this.currentContent += token;
         this.fullContent += token;
-        this.clearThinking();
-        bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
         this.scrollToBottom();
+
+        if (!this.pendingTokenUpdate) {
+            this.pendingTokenUpdate = true;
+            const self = this;
+            this.rafId = requestAnimationFrame(function () {
+                self.pendingTokenUpdate = false;
+                const bubble = self.currentAIElement?.querySelector(".agent-chat__bubble") as HTMLElement;
+                if (bubble) {
+                    bubble.innerHTML = self.lute.MarkdownStr("", self.currentContent) || self.escapeHtml(self.currentContent);
+                }
+            });
+        }
+    }
+
+    private flushTokenUpdate() {
+        if (this.pendingTokenUpdate) {
+            this.pendingTokenUpdate = false;
+            cancelAnimationFrame(this.rafId);
+            const bubble = this.currentAIElement?.querySelector(".agent-chat__bubble") as HTMLElement;
+            if (bubble) {
+                bubble.innerHTML = this.lute.MarkdownStr("", this.currentContent) || this.escapeHtml(this.currentContent);
+            }
+        }
     }
 
     private appendToolCall(name: string, args: Record<string, unknown>) {
@@ -623,7 +652,7 @@ export class AgentChat extends Model {
             if (line.startsWith("✅")) {
                 html += '<div class="agent-chat__todo-item agent-chat__todo-item--completed"><span class="agent-chat__todo-status">✅</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
             } else if (line.startsWith("🔄")) {
-                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><span class="agent-chat__todo-status">🔄</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
+                html += '<div class="agent-chat__todo-item agent-chat__todo-item--in-progress"><span class="agent-chat__todo-status">🔄</span>' + this.escapeHtml(line.slice(2).trim()) + "</div>";
             } else if (line.startsWith("❌")) {
                 html += '<div class="agent-chat__todo-item agent-chat__todo-item--cancelled"><span class="agent-chat__todo-status">❌</span>' + this.escapeHtml(line.substring(1).trim()) + "</div>";
             } else if (line.startsWith("○")) {
@@ -713,6 +742,7 @@ export class AgentChat extends Model {
         if (!this.currentAIElement) {
             return;
         }
+        this.flushTokenUpdate();
         this.clearThinking();
         if (!this.currentContent) {
             this.currentAIElement.remove();
@@ -803,6 +833,7 @@ export class AgentChat extends Model {
             this.abortController.abort();
             this.abortController = null;
         }
+        this.flushTokenUpdate();
         if (this.currentAIElement) {
             const bubble = this.currentAIElement.querySelector(".agent-chat__bubble") as HTMLElement;
             if (bubble) {
@@ -847,32 +878,54 @@ export class AgentChat extends Model {
     '<div class="agent-chat__confirm-actions">' +
         '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
         '<button class="b3-button b3-button--text agent-chat__confirm-approve">' + (L.agentConfirmApprove || "Approve") + "</button>" +
+        '<button class="b3-button b3-button--text agent-chat__confirm-always">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
     "</div>" +
 "</div>";
         const approveBtn = el.querySelector(".agent-chat__confirm-approve");
-        if (approveBtn) { approveBtn.addEventListener("click", function () {
+        if (approveBtn) { approveBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
             el.classList.add("agent-chat__msg--confirmed");
             const btns = el.querySelector(".agent-chat__confirm-actions") as HTMLElement;
             if (btns) { btns.innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentConfirmApprove || "Approved") + "</span>"; }
             self.postConfirm(confirmID, true);
         }); }
         const rejectBtn = el.querySelector(".agent-chat__confirm-reject");
-        if (rejectBtn) { rejectBtn.addEventListener("click", function () {
+        if (rejectBtn) { rejectBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
             el.classList.add("agent-chat__msg--confirmed");
             const btns = el.querySelector(".agent-chat__confirm-actions") as HTMLElement;
             if (btns) { btns.innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentConfirmReject || "Rejected") + "</span>"; }
             self.postConfirm(confirmID, false);
         }); }
+        const alwaysBtn = el.querySelector(".agent-chat__confirm-always");
+        if (alwaysBtn) { alwaysBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            el.classList.add("agent-chat__msg--confirmed");
+            const btns = el.querySelector(".agent-chat__confirm-actions") as HTMLElement;
+            if (btns) { btns.innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentConfirmAlways || "Session Allow") + "</span>"; }
+            self.postConfirm(confirmID, true, true);
+        }); }
         this.insertBeforeAI(el);
         this.scrollToBottom();
     }
 
-    private postConfirm(confirmID: string, approved: boolean) {
-        fetch("/api/ai/agent/confirm", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({confirmID: confirmID, approved: approved}),
-        });
+    private async postConfirm(confirmID: string, approved: boolean, always?: boolean) {
+        const body: Record<string, unknown> = {confirmID: confirmID, approved: approved};
+        if (always) {
+            body.always = true;
+        }
+        try {
+            const resp = await fetch("/api/ai/agent/confirm", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(body),
+            });
+            if (!resp.ok) {
+                console.error("agent confirm request failed:", resp.status);
+            }
+        } catch (e) {
+            console.error("agent confirm request error:", e);
+        }
     }
 
     private updateTokenDisplay() {

@@ -7,6 +7,8 @@
   "agentConfirmDesc": "Bevestig {action} op: {name}?",
   "agentConfirmApprove": "Goedkeuren",
   "agentConfirmReject": "Afwijzen",
+  "agentConfirmAlways": "Sessie toestaan",
+  "agentConfirmAlwaysDesc": "Niet opnieuw vragen deze sessie",
   "agentThinkingAnalyzing": "Verzoek analyseren...",
   "agentThinkingProcessing": "Resultaten verwerken...",
   "agentChat": "Agent",

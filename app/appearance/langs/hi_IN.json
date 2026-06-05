@@ -7,6 +7,8 @@
   "agentConfirmDesc": "{action} किया जाएगा: {name}",
   "agentConfirmApprove": "स्वीकृत करें",
   "agentConfirmReject": "अस्वीकृत करें",
+  "agentConfirmAlways": "सत्र अनुमति दें",
+  "agentConfirmAlwaysDesc": "इस सत्र में दोबारा न पूछें",
   "agentThinkingAnalyzing": "आपके अनुरोध का विश्लेषण...",
   "agentThinkingProcessing": "परिणाम संसाधित कर रहा है...",
   "agentChat": "एजेंट",

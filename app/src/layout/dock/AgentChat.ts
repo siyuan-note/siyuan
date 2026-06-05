@@ -420,6 +420,11 @@ export class AgentChat extends Model {
     }
 
     private async createSession() {
+        if (this.abortController) {
+            this.abortController.abort();
+            this.abortController = null;
+        }
+        this.setStreaming(false);
         await this.saveSession();
         this.sessionId = SessionStore.newSessionId();
         this.sessionTitle = this.defaultTitle;

@@ -372,9 +372,6 @@ export class AgentChat extends Model {
     }
 
     private appendPersistedToolCalls(content: string, toolCalls: Array<{name: string; arguments: Record<string, unknown>; result?: string}>) {
-        if (content) {
-            this.appendPersistedAssistant(content);
-        }
         const L = window.siyuan.languages;
         for (let i = 0; i < toolCalls.length; i++) {
             const tc = toolCalls[i];
@@ -389,7 +386,7 @@ export class AgentChat extends Model {
     '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(argsStr) + "</pre>" +
 "</div>";
             const header = el.querySelector(".agent-chat__tool-header") as HTMLElement;
-            var body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
+            const body = el.querySelector(".agent-chat__tool-body") as HTMLElement;
             header.addEventListener("click", function () {
                 body.classList.toggle("fn__none");
             });
@@ -409,13 +406,16 @@ export class AgentChat extends Model {
     '<pre class="agent-chat__tool-body fn__none">' + this.escapeHtml(tc.result) + "</pre>" +
 "</div>";
                     const rheader = rel.querySelector(".agent-chat__tool-header") as HTMLElement;
-                    var rbody = rel.querySelector(".agent-chat__tool-body") as HTMLElement;
+                    const rbody = rel.querySelector(".agent-chat__tool-body") as HTMLElement;
                     rheader.addEventListener("click", function () {
                         rbody.classList.toggle("fn__none");
                     });
                 }
                 this.messagesContainer.appendChild(rel);
             }
+        }
+        if (content) {
+            this.appendPersistedAssistant(content);
         }
     }
 

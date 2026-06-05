@@ -30,6 +30,10 @@ export type ISSEResult = {
     type: "retry";
     attempt: number;
     maxRetries: number;
+} | {
+    type: "question";
+    questionID: string;
+    arguments: Record<string, unknown>;
 };
 
 export async function fetchAgentSSE(
@@ -166,6 +170,12 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 type: "retry",
                 attempt: (data.attempt as number) || 1,
                 maxRetries: (data.maxRetries as number) || 1,
+            };
+        case "question":
+            return {
+                type: "question",
+                questionID: data.questionID as string,
+                arguments: (data.arguments || {}) as Record<string, unknown>,
             };
         default:
             return null;

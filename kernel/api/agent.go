@@ -145,6 +145,25 @@ func agentChatConfirm(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
+type agentQuestionReq struct {
+	QuestionID string   `json:"questionID"`
+	Answers    []string `json:"answers"`
+}
+
+func agentChatQuestion(c *gin.Context) {
+	req := &agentQuestionReq{}
+	if err := c.ShouldBindJSON(req); err != nil {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	agent.AnswerQuestion(req.QuestionID, req.Answers)
+	ret := gulu.Ret.NewResult()
+	c.JSON(http.StatusOK, ret)
+}
+
 type agentTitleReq struct {
 	Message string `json:"message"`
 }
@@ -209,6 +228,11 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 		return writeSSEEvent(c, "retry", map[string]interface{}{
 			"attempt":   event.RetryAttempt,
 			"maxRetries": event.RetryMax,
+		})
+	case "question":
+		return writeSSEEvent(c, "question", map[string]interface{}{
+			"questionID": event.QuestionID,
+			"arguments":  event.Arguments,
 		})
 	}
 	return nil

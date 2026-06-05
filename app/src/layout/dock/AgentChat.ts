@@ -527,6 +527,9 @@ export class AgentChat extends Model {
                 case "retry":
                     this.appendRetry(event.attempt, event.maxRetries);
                     break;
+                case "question":
+                    this.appendQuestion(event.questionID, event.arguments);
+                    break;
             }
         } catch (e) {
             console.error("agent SSE event handler error:", e, event);
@@ -930,6 +933,104 @@ export class AgentChat extends Model {
             }
         } catch (e) {
             console.error("agent confirm request error:", e);
+        }
+    }
+
+    private appendQuestion(questionID: string, args: Record<string, unknown>) {
+        const self = this;
+        const L = window.siyuan.languages;
+        const rawQuestions = args.questions as Array<Record<string, unknown>>;
+        if (!rawQuestions || rawQuestions.length === 0) { return; }
+
+        const el = document.createElement("div");
+        el.className = "agent-chat__msg agent-chat__msg--question";
+        el.setAttribute("data-question-id", questionID);
+
+        let html = '<div class="agent-chat__question-card">';
+        for (let qi = 0; qi < rawQuestions.length; qi++) {
+            const q = rawQuestions[qi];
+            const header = (q.header as string) || "";
+            const question = (q.question as string) || "";
+            const options = q.options as Array<Record<string, unknown>> || [];
+            const multiple = q.multiple as boolean || false;
+            const custom = q.custom as boolean !== false;
+
+            html += '<div class="agent-chat__question-item">';
+            if (header) {
+                html += '<div class="agent-chat__question-header">' + self.escapeHtml(header) + "</div>";
+            }
+            if (question) {
+                html += '<div class="agent-chat__question-text">' + self.escapeHtml(question) + "</div>";
+            }
+            html += '<div class="agent-chat__question-options" data-qi="' + qi + '">';
+            const inputType = multiple ? "checkbox" : "radio";
+            const inputName = "q_" + questionID + "_" + qi;
+            for (let oi = 0; oi < options.length; oi++) {
+                const opt = options[oi];
+                const label = (opt.label as string) || "";
+                const desc = (opt.description as string) || "";
+                html += '<label class="agent-chat__question-option">' +
+                    '<input type="' + inputType + '" name="' + inputName + '" value="' + self.escapeHtml(label) + '">' +
+                    '<span class="agent-chat__question-option-label">' + self.escapeHtml(label) + "</span>";
+                if (desc) {
+                    html += '<span class="agent-chat__question-option-desc">' + self.escapeHtml(desc) + "</span>";
+                }
+                html += "</label>";
+            }
+            if (custom) {
+                html += '<input class="agent-chat__question-custom" placeholder="' + (L.agentQuestionCustom || "Type your own answer...") + '" data-qi="' + qi + '">';
+            }
+            html += "</div></div>";
+        }
+        html += '<div class="agent-chat__question-submit">' +
+            '<button class="b3-button b3-button--text agent-chat__question-submit-btn">' +
+            (L.agentQuestionSubmit || "Submit") + "</button>" +
+        "</div></div>";
+
+        el.innerHTML = html;
+
+        const submitBtn = el.querySelector(".agent-chat__question-submit-btn");
+        if (submitBtn) {
+            submitBtn.addEventListener("click", function () {
+                const answers: string[] = [];
+                for (let qi = 0; qi < rawQuestions.length; qi++) {
+                    const optEl = el.querySelector('.agent-chat__question-options[data-qi="' + qi + '"]');
+                    if (optEl) {
+                        const selected = optEl.querySelectorAll("input:checked") as NodeListOf<HTMLInputElement>;
+                        for (let si = 0; si < selected.length; si++) {
+                            answers.push(selected[si].value);
+                        }
+                    }
+                    const customInput = el.querySelector('.agent-chat__question-custom[data-qi="' + qi + '"]') as HTMLInputElement;
+                    if (customInput && customInput.value.trim()) {
+                        answers.push(customInput.value.trim());
+                    }
+                }
+                el.classList.add("agent-chat__msg--confirmed");
+                const actions = el.querySelector(".agent-chat__question-submit");
+                if (actions) {
+                    (actions as HTMLElement).innerHTML = '<span class="agent-chat__confirm-done">' + (L.agentQuestionSubmitted || "Submitted") + "</span>";
+                }
+                self.postQuestionAnswer(questionID, answers);
+            });
+        }
+
+        this.insertBeforeAI(el);
+        this.scrollToBottom();
+    }
+
+    private async postQuestionAnswer(questionID: string, answers: string[]) {
+        try {
+            const resp = await fetch("/api/ai/agent/question", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({questionID: questionID, answers: answers}),
+            });
+            if (!resp.ok) {
+                console.error("agent question request failed:", resp.status);
+            }
+        } catch (e) {
+            console.error("agent question request error:", e);
         }
     }
 

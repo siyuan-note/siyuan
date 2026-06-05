@@ -95,6 +95,22 @@ func ConfirmSession(id string, approved bool, always bool) {
 	}
 }
 
+type QuestionAnswer struct {
+	Answers []string
+}
+
+var questionChannelsMu sync.Mutex
+var questionChannels = make(map[string]chan QuestionAnswer)
+
+func AnswerQuestion(id string, answers []string) {
+	questionChannelsMu.Lock()
+	ch, ok := questionChannels[id]
+	questionChannelsMu.Unlock()
+	if ok {
+		ch <- QuestionAnswer{Answers: answers}
+	}
+}
+
 type AgentEvent struct {
 	Type             string
 	Token            string
@@ -103,6 +119,7 @@ type AgentEvent struct {
 	Result           string
 	Reasoning        string
 	ConfirmID        string
+	QuestionID       string
 	Error            string
 	PromptTokens     int
 	CompletionTokens int
@@ -336,28 +353,36 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 					}
 
 					setCurrentTodoSession(sessionID)
-					result := executeTool(tc)
+					var resultStr string
+					if tc.Function.Name == "question" {
+						resultStr = handleQuestion(tc.Function.Arguments, ch, confirmTimeout)
+						doomLoop = doomLoopTracker{}
+					} else {
+						resultStr = executeTool(tc)
+					}
 
 					ch <- AgentEvent{
 						Type:   "tool_result",
 						Name:   tc.Function.Name,
-						Result: result,
+						Result: resultStr,
 					}
 
 					messages = append(messages, openai.ChatCompletionMessage{
 						Role:       openai.ChatMessageRoleTool,
-						Content:    result,
+						Content:    resultStr,
 						ToolCallID: tc.ID,
 					})
-					checkpointMsgs[assistantIdx].ToolCalls[i].Result = result
+					checkpointMsgs[assistantIdx].ToolCalls[i].Result = resultStr
 
-					sig := tc.Function.Name + "::" + tc.Function.Arguments
-					if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
-						doomLoop.count++
-					} else {
-						doomLoop.prevSig = sig
-						doomLoop.prevName = tc.Function.Name
-						doomLoop.count = 1
+					if tc.Function.Name != "question" {
+						sig := tc.Function.Name + "::" + tc.Function.Arguments
+						if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
+							doomLoop.count++
+						} else {
+							doomLoop.prevSig = sig
+							doomLoop.prevName = tc.Function.Name
+							doomLoop.count = 1
+						}
 					}
 				}
 
@@ -450,6 +475,45 @@ func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) b
 		return false
 	}
 	return true
+}
+
+func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration) string {
+	args := parseToolArgs(argsJSON)
+	questionID := fmt.Sprintf("%d", time.Now().UnixNano())
+	if len(questionID) > 10 {
+		questionID = questionID[:10]
+	}
+
+	ch <- AgentEvent{
+		Type:       "question",
+		QuestionID: questionID,
+		Arguments:  args,
+	}
+
+	ch2 := make(chan QuestionAnswer, 1)
+	questionChannelsMu.Lock()
+	questionChannels[questionID] = ch2
+	questionChannelsMu.Unlock()
+
+	var answer QuestionAnswer
+	select {
+	case answer = <-ch2:
+	case <-time.After(timeout):
+		questionChannelsMu.Lock()
+		delete(questionChannels, questionID)
+		questionChannelsMu.Unlock()
+		return "No answer received (timed out)."
+	}
+
+	questionChannelsMu.Lock()
+	delete(questionChannels, questionID)
+	questionChannelsMu.Unlock()
+
+	if len(answer.Answers) == 0 {
+		return "User provided no answer."
+	}
+
+	return strings.Join(answer.Answers, ", ")
 }
 
 func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {

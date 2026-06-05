@@ -33,7 +33,7 @@ var AttrTool = &Tool{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"get", "set", "batch-get"}},
 			"id":     {Type: "string", Description: "Block ID"},
 			"ids":    {Type: "string", Description: "Comma-separated block IDs (for batch-get)"},
-			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set)"},
+			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set). Note: title-img value must use CSS format like 'background-image:url(\"assets/example.jpg\")', not just the asset path"},
 		},
 		Required: []string{"action"},
 	},

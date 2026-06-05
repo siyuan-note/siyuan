@@ -183,6 +183,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 		startTime := time.Now().UnixMilli()
 		alwaysAllow := map[string]bool{}
 		var doomLoop doomLoopTracker
+		var compactCount int
 
 		checkpointMsgs := make([]AgentMessage, 0, len(history))
 		for _, h := range history {
@@ -214,6 +215,16 @@ func AgentChat(ctx context.Context, client *openai.Client, model string, session
 
 			stream, streamErr := createStreamWithRetry(ctx, client, req, maxRetries, ch)
 			if streamErr != nil {
+				if compactCount < 3 && isContextOverflow(streamErr) {
+					keepTurns := 3 - compactCount
+					if keepTurns < 1 {
+						keepTurns = 1
+					}
+					messages = compactMessages(messages, keepTurns)
+					compactCount++
+					ch <- AgentEvent{Type: "thinking", Reasoning: fmt.Sprintf("context limit reached, compacting to last %d turns...", keepTurns)}
+					continue
+				}
 				ch <- AgentEvent{Type: "error", Error: "API request failed: " + streamErr.Error()}
 				saveCheckpoint(sessionID, checkpointMsgs, totalPrompt, totalCompletion, startTime)
 				return

@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/render"
@@ -45,6 +46,7 @@ var (
 	pushMu        sync.Mutex
 	pushFlock     *flock.Flock
 	pushQueuePath string
+	pushNotifyCh  = make(chan struct{}, 1)
 )
 
 func ensurePushQueue() {
@@ -103,7 +105,13 @@ func appendPushEntry(entry pushEntry) {
 	data = append(data, '\n')
 
 	_ = pushFlock.Lock()
-	defer func() { _ = pushFlock.Unlock() }()
+	defer func() {
+		_ = pushFlock.Unlock()
+		select {
+		case pushNotifyCh <- struct{}{}:
+		default:
+		}
+	}()
 
 	pushMu.Lock()
 	defer pushMu.Unlock()
@@ -186,6 +194,20 @@ func PollPushQueue() {
 	}
 
 	clearPushQueue()
+}
+
+func StartPushQueueConsumer() {
+	go func() {
+		ticker := time.NewTicker(3 * time.Second)
+		defer ticker.Stop()
+		for {
+			PollPushQueue()
+			select {
+			case <-pushNotifyCh:
+			case <-ticker.C:
+			}
+		}
+	}()
 }
 
 func loadPushQueue() (entries []pushEntry) {

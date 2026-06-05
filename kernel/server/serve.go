@@ -49,6 +49,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/soheilhy/cmux"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"golang.org/x/net/webdav"
 )
 
@@ -243,7 +245,7 @@ func Serve(fastMode bool, cookieKey string) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
-	httpHandler := ginServer.Handler()
+	httpHandler := h2c.NewHandler(ginServer.Handler(), &http2.Server{})
 	util.HttpServer = &http.Server{
 		Handler: httpHandler,
 	}

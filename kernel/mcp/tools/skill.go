@@ -18,13 +18,14 @@ package tools
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var SkillTool = &Tool{
 	Name:        "skill",
-	Description: "Load a specialized skill when the task at hand matches one of the skills listed in the available skills. The skill name must match one of the skills listed in the system prompt.\n- name: The skill name to load.",
+	Description: "Load a specialized skill. Available skills are listed below.\n\n" + skillListDesc() + "\n\nThe skill tool loads the full instructions and resources for a skill when invoked. The skill name must match one of the listed skills.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -48,7 +49,7 @@ func skillHandler(args map[string]interface{}) (CallToolResult, error) {
 		}, nil
 	}
 
-	content := model.LoadAgentSkillContent(name)
+	content := util.LoadSkillContent(name)
 	if content == "" {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("skill not found: %s", name)}},
@@ -60,4 +61,17 @@ func skillHandler(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: result}},
 	}, nil
+}
+
+func skillListDesc() string {
+	skills := util.DiscoverSkills()
+	if len(skills) == 0 {
+		return "No skills are currently available."
+	}
+	var sb strings.Builder
+	sb.WriteString("Available skills:\n")
+	for _, s := range skills {
+		sb.WriteString("- **" + s.Name + "**: " + s.Description + "\n")
+	}
+	return sb.String()
 }

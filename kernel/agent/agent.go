@@ -535,7 +535,7 @@ func handleQuestion(argsJSON string, ch chan<- AgentEvent, timeout time.Duration
 func buildMessages(history []UserMessage, language string, references []Reference) []openai.ChatCompletionMessage {
 	var prompt = systemPrompt + "\n\n<env>\nWorkspace: " + util.WorkspaceDir + "\nVersion: " + util.Ver + "\nToday's date: " + time.Now().Format("2006-01-02 Mon") + "\nContainer: " + util.Container + "\n</env>"
 
-	skills := kernelModel.DiscoverAgentSkills()
+	skills := util.DiscoverSkills()
 	if len(skills) > 0 {
 		prompt += "\n\n<available_skills>\n"
 		for _, s := range skills {

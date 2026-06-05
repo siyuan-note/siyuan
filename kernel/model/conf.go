@@ -1213,6 +1213,7 @@ func clearWorkspaceTemp() {
 	// v3.7.0-dev 开发版数据索引队列，后面改成 index.queue 了
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal"))
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal.lock"))
+	os.RemoveAll(filepath.Join(util.DataDir, "storage", "ai", "agent", "todos"))
 
 	logging.LogInfof("cleared workspace temp")
 }
